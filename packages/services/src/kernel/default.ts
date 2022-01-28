@@ -611,7 +611,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
-   * Send a `complete_request` message.
+   * Send a `complete_request` message on the shell channel.
    *
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
@@ -631,6 +631,29 @@ export class KernelConnection implements Kernel.IKernelConnection {
     });
     return Private.handleShellMessage(this, msg) as Promise<
       KernelMessage.ICompleteReplyMsg
+    >;
+  }
+  /**
+   * Send a `complete_request` message on the control channel.
+   *
+   * #### Notes
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
+   *
+   * Fulfills with the `complete_reply` content when the control reply is
+   * received and validated.
+   */
+   requestCompleteControl(
+    content: KernelMessage.ICompleteRequestControlMsg['content']
+  ): Promise<KernelMessage.ICompleteReplyControlMsg> {
+    const msg = KernelMessage.createMessage({
+      msgType: 'complete_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return Private.handleControlMessage(this, msg) as Promise<
+      KernelMessage.ICompleteReplyControlMsg
     >;
   }
 
@@ -1635,7 +1658,7 @@ namespace Private {
   }
 
   /**
-   * Send a kernel message to the kernel and resolve the reply message.
+   * Send a kernel message to the kernel on the shell channel and resolve the reply message.
    */
   export async function handleShellMessage<
     T extends KernelMessage.ShellMessageType
@@ -1648,6 +1671,19 @@ namespace Private {
   }
 
   /**
+   * Send a kernel message to the kernel on the control channel and resolve the reply message.
+   */
+   export async function handleControlMessage<
+   T extends KernelMessage.ControlMessageType
+ >(
+   kernel: Kernel.IKernelConnection,
+   msg: KernelMessage.IControlMessage<T>
+ ): Promise<KernelMessage.IControlMessage<KernelMessage.ControlMessageType>> {
+   const future = kernel.sendControlMessage(msg, true);
+   return future.done;
+ }
+
+ /**
    * Try to load an object from a module or a registry.
    *
    * Try to load an object from a module asynchronously if a module

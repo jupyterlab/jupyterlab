@@ -48,6 +48,12 @@ export function createMessage<T extends ICompleteReplyMsg>(
 export function createMessage<T extends ICompleteRequestMsg>(
   options: IOptions<T>
 ): T;
+export function createMessage<T extends ICompleteReplyControlMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends ICompleteRequestControlMsg>(
+  options: IOptions<T>
+): T;
 export function createMessage<T extends IDisplayDataMsg>(
   options: IOptions<T>
 ): T;
@@ -183,7 +189,11 @@ export type ShellMessageType =
  * kernel message specification. As such, debug message types are *NOT*
  * considered part of the public API, and may change without notice.
  */
-export type ControlMessageType = 'debug_request' | 'debug_reply';
+export type ControlMessageType =
+  | 'debug_request'
+  | 'debug_reply'
+  | 'complete_reply'
+  | 'complete_request';
 
 /**
  * IOPub message types.
@@ -364,6 +374,8 @@ export type Message =
   | ICommOpenMsg<'shell'>
   | ICompleteReplyMsg
   | ICompleteRequestMsg
+  | ICompleteReplyControlMsg
+  | ICompleteRequestControlMsg
   | IDisplayDataMsg
   | IErrorMsg
   | IExecuteInputMsg
@@ -821,6 +833,33 @@ interface ICompleteReply extends IReplyOkContent {
  * **See also:** [[ICompleteRequest]], [[IKernel.complete]]
  */
 export interface ICompleteReplyMsg extends IShellMessage<'complete_reply'> {
+  parent_header: IHeader<'complete_request'>;
+  content: ReplyContent<ICompleteReply>;
+}
+
+
+/**
+ * A  `'complete_request'` message on the `'control'` channel.
+ *
+ * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
+ *
+ * **See also:** [[ICompleteReplyControlMsg]], [[IKernel.complete]]
+ */
+ export interface ICompleteRequestControlMsg extends IControlMessage<'complete_request'> {
+  content: {
+    code: string;
+    cursor_pos: number;
+  };
+}
+
+/**
+ * A `'complete_reply'` message on the `'control'` channel.
+ *
+ * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
+ *
+ * **See also:** [[ICompleteRequestControl]], [[IKernel.complete]]
+ */
+export interface ICompleteReplyControlMsg extends IControlMessage<'complete_reply'> {
   parent_header: IHeader<'complete_request'>;
   content: ReplyContent<ICompleteReply>;
 }

@@ -221,7 +221,7 @@ export interface IKernelConnection extends IObservableDisposable {
   requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg | undefined>;
 
   /**
-   * Send a `complete_request` message.
+   * Send a `complete_request` message on the shell channel.
    *
    * @param content - The content of the request.
    *
@@ -236,6 +236,23 @@ export interface IKernelConnection extends IObservableDisposable {
   requestComplete(
     content: KernelMessage.ICompleteRequestMsg['content']
   ): Promise<KernelMessage.ICompleteReplyMsg>;
+
+  /**
+   * Send a `complete_request` message on the control channel.
+   *
+   * @param content - The content of the request.
+   *
+   * @returns A promise that resolves with the response message.
+   *
+   * #### Notes
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
+   *
+   * Fulfills with the `complete_reply` content when the control reply is
+   * received and validated.
+   */
+   requestCompleteControl(
+    content: KernelMessage.ICompleteRequestControlMsg['content']
+  ): Promise<KernelMessage.ICompleteReplyControlMsg>;
 
   /**
    * Send an `inspect_request` message.
