@@ -9,6 +9,8 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { DebugProtocol } from '@vscode/debugprotocol';
+
 import { IDebugger } from './tokens';
 
 /**
@@ -80,10 +82,37 @@ export class DebuggerSession implements IDebugger.ISession {
   }
 
   /**
-   * Whether the debug session is started
+   * Whether the debug session is started.
    */
   get isStarted(): boolean {
     return this._isStarted;
+  }
+
+  /**
+   * Whether to pause on exceptions
+   */
+  get pausingOnExceptions(): string[] {
+    return this._pausingOnExceptions;
+  }
+
+  set pausingOnExceptions(updatedPausingOnExceptions: string[]) {
+    this._pausingOnExceptions = updatedPausingOnExceptions;
+  }
+
+  /**
+   * Exception paths defined by the debugger
+   */
+  get exceptionPaths(): string[] {
+    return this._exceptionPaths;
+  }
+
+  /**
+   * Exception breakpoint filters defined by the debugger
+   */
+  get exceptionBreakpointFilters():
+    | DebugProtocol.ExceptionBreakpointsFilter[]
+    | undefined {
+    return this._exceptionBreakpointFilters;
   }
 
   /**
@@ -125,9 +154,8 @@ export class DebuggerSession implements IDebugger.ISession {
     if (!reply.success) {
       throw new Error(`Could not start the debugger: ${reply.message}`);
     }
-
     this._isStarted = true;
-
+    this._exceptionBreakpointFilters = reply.body?.exceptionBreakpointFilters;
     await this.sendRequest('attach', {});
   }
 
@@ -148,6 +176,7 @@ export class DebuggerSession implements IDebugger.ISession {
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
     const message = await this.sendRequest('debugInfo', {});
     this._isStarted = message.body.isStarted;
+    this._exceptionPaths = message.body?.exceptionPaths;
     return message;
   }
 
@@ -218,6 +247,11 @@ export class DebuggerSession implements IDebugger.ISession {
   private _connection: Session.ISessionConnection | null;
   private _isDisposed = false;
   private _isStarted = false;
+  private _pausingOnExceptions: string[] = [];
+  private _exceptionPaths: string[] = [];
+  private _exceptionBreakpointFilters:
+    | DebugProtocol.ExceptionBreakpointsFilter[]
+    | undefined = [];
   private _disposed = new Signal<this, void>(this);
   private _eventMessage = new Signal<
     IDebugger.ISession,

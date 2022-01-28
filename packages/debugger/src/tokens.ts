@@ -32,6 +32,11 @@ export interface IDebugger {
   readonly isStarted: boolean;
 
   /**
+   * Whether the session is pausing for exceptions.
+   */
+  readonly isPausingOnExceptions: boolean;
+
+  /**
    * The debugger service's model.
    */
   readonly model: IDebugger.Model.IService;
@@ -50,6 +55,16 @@ export interface IDebugger {
    * Removes all the breakpoints from the current notebook or console
    */
   clearBreakpoints(): Promise<void>;
+
+  /**
+   * Used to determine if kernel has pause on exception capabilities
+   */
+  pauseOnExceptionsIsValid(): boolean;
+
+  /**
+   * Handles enabling and disabling of Pause on Exception
+   */
+  pauseOnExceptions(enable: boolean): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -292,9 +307,26 @@ export namespace IDebugger {
     connection: Session.ISessionConnection | null;
 
     /**
-     * Whether the debug session is started
+     * Whether the debug session is started.
      */
     readonly isStarted: boolean;
+
+    /**
+     * Whether the debug session is pausing on exceptions.
+     */
+    pausingOnExceptions: string[];
+
+    /**
+     * Whether the debug session is pausing on exceptions.
+     */
+    exceptionPaths: string[];
+
+    /**
+     * Get exception filters and default values.
+     */
+    exceptionBreakpointFilters:
+      | DebugProtocol.ExceptionBreakpointsFilter[]
+      | undefined;
 
     /**
      * Signal emitted for debug event messages.
@@ -541,9 +573,10 @@ export namespace IDebugger {
          * Whether the kernel supports variable rich rendering or not.
          */
         richRendering?: boolean;
-        stoppedThreads: number[];
         tmpFilePrefix: string;
         tmpFileSuffix: string;
+        stoppedThreads: number[];
+        exceptionPaths: string[];
       };
     }
 
