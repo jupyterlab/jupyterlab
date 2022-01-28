@@ -125,7 +125,9 @@
     "prettier": "~2.1.1",
     "shell-quote": "^1.7.2",
     "stylelint": "^14.3.0",
+    "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-standard": "~24.0.0",
+    "stylelint-prettier": "^2.0.0",
     "typedoc": "~0.22.10",
     "yarn": "1.22.17"
   }

@@ -1,6 +1,8 @@
 $schema: https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/stylelintrc.json
 
-extends: stylelint-config-standard
+extends:
+  - stylelint-config-standard
+  - stylelint-prettier/recommended
 
 rules:
   # TODO: fix all of these rules violated in stylelint-config-recommended
