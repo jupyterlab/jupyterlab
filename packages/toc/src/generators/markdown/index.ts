@@ -11,7 +11,10 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { TableOfContents } from '../../toc';
-import { INumberedHeading } from '../../tokens';
+import {
+  INumberedHeading,
+  ITableOfContentsRegistry as Registry
+} from '../../tokens';
 import { isMarkdown } from '../../utils/is_markdown';
 import { getHeadings } from './get_headings';
 import { getRenderedHeadings } from './get_rendered_headings';
@@ -221,4 +224,3 @@ function createRenderedMarkdownGenerator(
  */
 export { createMarkdownGenerator };
 export { createRenderedMarkdownGenerator };
-

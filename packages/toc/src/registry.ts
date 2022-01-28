@@ -3,10 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import {
-  ITableOfContentsRegistry,
-  TableOfContentsRegistry as ToCNamespace
-} from './tokens';
+import { ITableOfContentsRegistry } from './tokens';
 
 /**
  * Class for registering widgets for which we can generate a table of contents.
@@ -22,7 +19,7 @@ export class TableOfContentsRegistry implements ITableOfContentsRegistry {
    * @param widget - widget
    * @returns table of contents generator
    */
-  find(widget: Widget): ToCNamespace.IGenerator | undefined {
+  find(widget: Widget): ITableOfContentsRegistry.IGenerator | undefined {
     for (let i = 0; i < this._generators.length; i++) {
       const gen = this._generators[i];
       if (gen.tracker.has(widget)) {
@@ -39,13 +36,13 @@ export class TableOfContentsRegistry implements ITableOfContentsRegistry {
    *
    * @param generator - table of contents generator
    */
-  add(generator: ToCNamespace.IGenerator): void {
+  add(generator: ITableOfContentsRegistry.IGenerator): void {
     if (generator.collapseChanged) {
       // If there is a collapseChanged for a given generator, propagate the arguments through the registry's signal
       generator.collapseChanged.connect(
         (
-          sender: ToCNamespace.IGenerator<Widget>,
-          args: ToCNamespace.ICollapseChangedArgs
+          sender: ITableOfContentsRegistry.IGenerator<Widget>,
+          args: ITableOfContentsRegistry.ICollapseChangedArgs
         ) => {
           this._collapseChanged.emit(args);
         }
@@ -54,13 +51,16 @@ export class TableOfContentsRegistry implements ITableOfContentsRegistry {
     this._generators.push(generator);
   }
 
-  get collapseChanged(): ISignal<this, ToCNamespace.ICollapseChangedArgs> {
+  get collapseChanged(): ISignal<
+    this,
+    ITableOfContentsRegistry.ICollapseChangedArgs
+  > {
     return this._collapseChanged;
   }
 
   private _collapseChanged: Signal<
     this,
-    ToCNamespace.ICollapseChangedArgs
-  > = new Signal<this, ToCNamespace.ICollapseChangedArgs>(this);
-  private _generators: ToCNamespace.IGenerator[] = [];
+    ITableOfContentsRegistry.ICollapseChangedArgs
+  > = new Signal<this, ITableOfContentsRegistry.ICollapseChangedArgs>(this);
+  private _generators: ITableOfContentsRegistry.IGenerator[] = [];
 }

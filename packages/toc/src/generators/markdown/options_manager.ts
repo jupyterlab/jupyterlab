@@ -4,7 +4,7 @@
 import { ISanitizer } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { TableOfContents } from '../../toc';
-import { TableOfContentsRegistry as Registry } from '../../tokens';
+import { ITableOfContentsRegistry as Registry } from '../../tokens';
 
 /**
  * Interface describing constructor options.

@@ -7,8 +7,8 @@ import {
   CodeCell,
   CodeCellModel,
   ICellModel,
-  MarkdownCell,
-  MARKDOWN_HEADING_COLLAPSED
+  MARKDOWN_HEADING_COLLAPSED,
+  MarkdownCell
 } from '@jupyterlab/cells';
 import {
   INotebookTracker,
@@ -21,8 +21,8 @@ import { ISignal } from '@lumino/signaling';
 import { TableOfContents } from '../../toc';
 import {
   INotebookHeading,
-  RunningStatus,
-  TableOfContentsRegistry
+  ITableOfContentsRegistry,
+  RunningStatus
 } from '../../tokens';
 import { isDOM } from '../../utils/is_dom';
 import { isMarkdown } from '../../utils/is_markdown';
@@ -52,7 +52,7 @@ export function createNotebookGenerator(
   sanitizer: ISanitizer,
   translator?: ITranslator,
   settings?: ISettingRegistry.ISettings
-): TableOfContentsRegistry.IGenerator<NotebookPanel> {
+): ITableOfContentsRegistry.IGenerator<NotebookPanel> {
   return new NotebookGenerator(
     tracker,
     widget,
@@ -63,7 +63,7 @@ export function createNotebookGenerator(
 }
 
 class NotebookGenerator
-  implements TableOfContentsRegistry.IGenerator<NotebookPanel> {
+  implements ITableOfContentsRegistry.IGenerator<NotebookPanel> {
   /**
    * Notebook Table of Content Generator constructor
    *
@@ -133,8 +133,8 @@ class NotebookGenerator
    * within the ToC.
    */
   get collapseChanged(): ISignal<
-    TableOfContentsRegistry.IOptionsManager,
-    TableOfContentsRegistry.ICollapseChangedArgs
+    ITableOfContentsRegistry.IOptionsManager,
+    ITableOfContentsRegistry.ICollapseChangedArgs
   > {
     return this.options.collapseChanged;
   }

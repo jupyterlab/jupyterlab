@@ -18,21 +18,21 @@ export interface ITableOfContentsRegistry {
    * @param widget - widget
    * @returns table of contents generator
    */
-  find(widget: Widget): TableOfContentsRegistry.IGenerator | undefined;
+  find(widget: Widget): ITableOfContentsRegistry.IGenerator | undefined;
 
   /**
    * Adds a table of contents generator to the registry.
    *
    * @param generator - table of contents generator
    */
-  add(generator: TableOfContentsRegistry.IGenerator): void;
+  add(generator: ITableOfContentsRegistry.IGenerator): void;
 
   /**
    * Signal emitted when a table of content section collapse state changes.
    */
   readonly collapseChanged: ISignal<
     this,
-    TableOfContentsRegistry.ICollapseChangedArgs
+    ITableOfContentsRegistry.ICollapseChangedArgs
   >;
 }
 
@@ -143,7 +143,7 @@ export interface INotebookHeading extends INumberedHeading {
 /**
  * Namespace for table of contents interface
  */
-export namespace TableOfContentsRegistry {
+export namespace ITableOfContentsRegistry {
   /**
    * Interface for managing options affecting how a table of contents is generated for a particular widget type.
    */

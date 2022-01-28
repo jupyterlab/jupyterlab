@@ -6,7 +6,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ISignal, Signal } from '@lumino/signaling';
 import { TableOfContents } from '../../toc';
-import { TableOfContentsRegistry as Registry } from '../../tokens';
+import { ITableOfContentsRegistry as Registry } from '../../tokens';
 import { TagsToolComponent } from './tagstool';
 
 /**
