@@ -8,8 +8,6 @@ extends:
 rules:
   # TODO: fix all of these rules violated in stylelint-config-recommended
   no-descending-specificity: null
-  # TODO: https://github.com/jupyterlab/jupyterlab/pull/11944#issuecomment-1023630962
-  no-invalid-position-at-import-rule: null
   # TODO: evaluate these rules violated in stylelint-config-standard
   alpha-value-notation: null
   at-rule-empty-line-before: null
