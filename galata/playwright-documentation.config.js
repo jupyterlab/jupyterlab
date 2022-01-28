@@ -5,6 +5,7 @@ var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
 module.exports = {
   ...baseConfig,
+  timeout: 90000,
   projects: [
     {
       name: 'documentation',
