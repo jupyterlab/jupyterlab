@@ -37,12 +37,10 @@ import * as React from 'react';
  */
 const LAUNCHER_CLASS = 'jp-Launcher';
 
-/* tslint:disable */
 /**
  * The launcher token.
  */
 export const ILauncher = new Token<ILauncher>('@jupyterlab/launcher:ILauncher');
-/* tslint:enable */
 
 /**
  * The launcher interface.

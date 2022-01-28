@@ -6,14 +6,12 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { JupyterFrontEnd } from './frontend';
 
-/* tslint:disable */
 /**
  * The application status token.
  */
 export const ILabStatus = new Token<ILabStatus>(
   '@jupyterlab/application:ILabStatus'
 );
-/* tslint:enable */
 
 /**
  * An interface for JupyterLab-like application status functionality.

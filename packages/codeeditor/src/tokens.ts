@@ -7,14 +7,12 @@ import { CodeEditor } from './editor';
 import { IEditorFactoryService } from './factory';
 import { IEditorMimeTypeService } from './mimetype';
 
-/* tslint:disable */
 /**
  * Code editor services token.
  */
 export const IEditorServices = new Token<IEditorServices>(
   '@jupyterlab/codeeditor:IEditorServices'
 );
-/* tslint:enable */
 
 /**
  * Code editor services.

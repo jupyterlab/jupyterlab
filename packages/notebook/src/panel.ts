@@ -317,12 +317,10 @@ export namespace NotebookPanel {
    */
   export const defaultContentFactory: ContentFactory = new ContentFactory();
 
-  /* tslint:disable */
   /**
    * The notebook renderer token.
    */
   export const IContentFactory = new Token<IContentFactory>(
     '@jupyterlab/notebook:IContentFactory'
   );
-  /* tslint:enable */
 }

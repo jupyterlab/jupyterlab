@@ -14,14 +14,12 @@ import { IHeading, INotebookHeading } from './utils/headings';
  */
 export interface ITableOfContentsRegistry extends TableOfContentsRegistry {}
 
-/* tslint:disable */
 /**
  * Table of contents registry token.
  */
 export const ITableOfContentsRegistry = new Token<TableOfContentsRegistry>(
   '@jupyterlab/toc:ITableOfContentsRegistry'
 );
-/* tslint:enable */
 
 /**
  * Class for registering widgets for which we can generate a table of contents.
