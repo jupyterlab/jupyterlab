@@ -104,14 +104,19 @@ are using to fetch pictures).
 
 ::
 
+    Select kind:
+    1 - frontend
+    2 - server
+    3 - theme
+    Choose from 1, 2, 3 [1]: 1
     author_name []: Your Name
     author_email []: your@name.org
-    python_name [myextension]: jupyterlab_apod
     labextension_name [myextension]: jupyterlab_apod
+    python_name [myextension]: jupyterlab_apod
     project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
-    has_server_extension [n]: n
+    has_settings [n]: n
     has_binder [n]: y
-    repository [https://github.com/my_name/myextension]: https://github.com/my_name/jupyterlab_apod
+    repository [https://github.com/github_username/myextension]: https://github.com/github_username/jupyterlab_apod
 
 Note: if not using a repository, leave the repository field blank. You can come
 back and edit the repository field in the ``package.json`` file later.
@@ -127,8 +132,8 @@ You should see a list like the following.
 
 ::
 
-    LICENSE          README.md        jupyterlab_apod/ pyproject.toml   src/             tsconfig.json
-    MANIFEST.in      install.json     package.json     setup.py         style/
+    binder          CHANGELOG.md  install.json  jupyterlab_apod  LICENSE   MANIFEST.in   package.json
+    pyproject.toml  README.md     RELEASE.md    setup.py         src       style         tsconfig.json
 
 Commit what you have to git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
+import { INumberedHeading } from '../../tokens';
 import { generateNumbering } from '../../utils/generate_numbering';
-import { INumberedHeading } from '../../utils/headings';
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 

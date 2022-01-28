@@ -4,7 +4,7 @@
 import { ISanitizer } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
 import { generateNumbering } from '../../utils/generate_numbering';
-import { INotebookHeading, RunningStatus } from '../../utils/headings';
+import { INotebookHeading, RunningStatus } from '../../tokens';
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 

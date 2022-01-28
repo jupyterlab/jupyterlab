@@ -75,14 +75,12 @@ const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
  */
 const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
 
-/* tslint:disable */
 /**
  * The running sessions token.
  */
 export const IRunningSessionManagers = new Token<IRunningSessionManagers>(
   '@jupyterlab/running:IRunningSessionManagers'
 );
-/* tslint:enable */
 
 /**
  * The running interface.

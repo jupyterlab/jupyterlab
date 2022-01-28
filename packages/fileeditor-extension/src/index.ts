@@ -17,7 +17,11 @@ import {
   IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
@@ -33,7 +37,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
-import { Menu } from '@lumino/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 import { Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
@@ -139,9 +143,33 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extensions:cursor-position',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IEditorTracker,
+    positionModel: IPositionModel
+  ) => {
+    positionModel.addEditorProvider((widget: Widget | null) =>
+      widget && tracker.has(widget)
+        ? (widget as IDocumentWidget<FileEditor>).content.editor
+        : null
+    );
+  },
+  requires: [IEditorTracker, IPositionModel],
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [plugin, tabSpaceStatus];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  plugin,
+  lineColStatus,
+  tabSpaceStatus
+];
 export default plugins;
 
 /**

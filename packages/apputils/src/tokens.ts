@@ -9,14 +9,12 @@ import { ISignal } from '@lumino/signaling';
 import { CommandPalette, Widget } from '@lumino/widgets';
 import { ISessionContext } from './sessioncontext';
 
-/* tslint:disable */
 /**
  * The command palette token.
  */
 export const ICommandPalette = new Token<ICommandPalette>(
   '@jupyterlab/apputils:ICommandPalette'
 );
-/* tslint:enable */
 
 /**
  * The options for creating a command palette item.
@@ -47,28 +45,43 @@ export interface ICommandPalette {
   addItem(options: IPaletteItem): IDisposable;
 }
 
+export const IKernelStatusModel = new Token<IKernelStatusModel>(
+  '@jupyterlab/apputils:IKernelStatusModel'
+);
+
+/**
+ * Kernel status indicator model.
+ */
+export interface IKernelStatusModel {
+  /**
+   * Add a session context provider.
+   *
+   * A provider will receive the currently active widget and must return the
+   * associated session context if it can or null otherwise.
+   */
+  addSessionProvider: (
+    provider: (widget: Widget | null) => ISessionContext | null
+  ) => void;
+}
+
 /**
  * An interface for the session context dialogs.
  */
 export interface ISessionContextDialogs extends ISessionContext.IDialogs {}
 
-/* tslint:disable */
 /**
  * The session context dialogs token.
  */
 export const ISessionContextDialogs = new Token<ISessionContext.IDialogs>(
   '@jupyterlab/apputils:ISessionContextDialogs'
 );
-/* tslint:enable */
 
-/* tslint:disable */
 /**
  * The theme manager token.
  */
 export const IThemeManager = new Token<IThemeManager>(
   '@jupyterlab/apputils:IThemeManager'
 );
-/* tslint:enable */
 
 /**
  * An interface for a theme manager.
@@ -219,14 +232,12 @@ export namespace ISanitizer {
   }
 }
 
-/* tslint:disable */
 /**
  * The main menu token.
  */
 export const ISplashScreen = new Token<ISplashScreen>(
   '@jupyterlab/apputils:ISplashScreen'
 );
-/* tslint:enable */
 
 /**
  * The interface for an application splash screen.
@@ -242,14 +253,12 @@ export interface ISplashScreen {
   show(light?: boolean): IDisposable;
 }
 
-/* tslint:disable */
 /**
  * The default window resolver token.
  */
 export const IWindowResolver = new Token<IWindowResolver>(
   '@jupyterlab/apputils:IWindowResolver'
 );
-/* tslint:enable */
 
 /**
  * The description of a window name resolver.

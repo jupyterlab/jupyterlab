@@ -4,9 +4,7 @@ A JupyterLab extension for rendering VirtualDOM using React
 
 ![demo](http://g.recordit.co/EIwAIBsGBh.gif)
 
-## Prerequisites
-
-- JupyterLab ^0.27.0
+This extension is in the official JupyterLab distribution.
 
 ## Usage
 

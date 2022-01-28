@@ -7,7 +7,7 @@ import { classes, ellipsesIcon } from '@jupyterlab/ui-components';
 import { ElementExt } from '@lumino/domutils';
 import * as React from 'react';
 import { TableOfContents } from '../..';
-import { INotebookHeading, RunningStatus } from '../../utils/headings';
+import { INotebookHeading, RunningStatus } from '../../tokens';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';

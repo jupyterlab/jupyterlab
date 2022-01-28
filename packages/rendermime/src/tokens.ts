@@ -9,7 +9,6 @@ import { ITranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 import { MimeModel } from './mimemodel';
 
-/* tslint:disable */
 /**
  * The rendermime token.
  */
@@ -176,9 +175,6 @@ export namespace IRenderMimeRegistry {
   }
 }
 
-/* tslint:enable */
-
-/* tslint:disable */
 /**
  * The latex typesetter token.
  */
@@ -187,4 +183,3 @@ export const ILatexTypesetter = new Token<IRenderMime.ILatexTypesetter>(
 );
 
 export interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
-/* tslint:enable */

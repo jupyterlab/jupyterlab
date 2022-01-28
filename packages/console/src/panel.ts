@@ -276,14 +276,12 @@ export namespace ConsolePanel {
    */
   export const defaultContentFactory: IContentFactory = new ContentFactory();
 
-  /* tslint:disable */
   /**
    * The console renderer token.
    */
   export const IContentFactory = new Token<IContentFactory>(
     '@jupyterlab/console:IContentFactory'
   );
-  /* tslint:enable */
 }
 
 /**

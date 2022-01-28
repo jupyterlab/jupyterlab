@@ -7,6 +7,7 @@
 
 export * from './components';
 export * from './icon';
+export * from './hoverbox';
 export * from './tokens';
 export * from './utils';
 export * from './FormComponentRegistry';
