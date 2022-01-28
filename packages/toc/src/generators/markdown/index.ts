@@ -8,17 +8,19 @@ import {
   IMarkdownViewerTracker,
   MarkdownDocument
 } from '@jupyterlab/markdownviewer';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
-import { INumberedHeading } from '../../utils/headings';
+import {
+  INumberedHeading,
+  ITableOfContentsRegistry as Registry
+} from '../../tokens';
 import { isMarkdown } from '../../utils/is_markdown';
+import { getHeadings } from './get_headings';
+import { getRenderedHeadings } from './get_rendered_headings';
 import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
-import { getHeadings } from './get_headings';
-import { getRenderedHeadings } from './get_rendered_headings';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * Returns a boolean indicating whether this ToC generator is enabled.

@@ -6,14 +6,12 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
 
-/* tslint:disable */
 /**
  * The search provider registry token.
  */
 export const ISearchProviderRegistry = new Token<ISearchProviderRegistry>(
   '@jupyterlab/documentsearch:ISearchProviderRegistry'
 );
-/* tslint:enable */
 
 export interface ISearchProviderRegistry {
   /**

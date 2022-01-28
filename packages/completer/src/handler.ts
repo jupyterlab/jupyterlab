@@ -688,11 +688,9 @@ export namespace CompletionHandler {
    * A namespace for completion handler messages.
    */
   export namespace Msg {
-    /* tslint:disable */
     /**
      * A singleton `'invoke-request'` message.
      */
     export const InvokeRequest = new Message('invoke-request');
-    /* tslint:enable */
   }
 }

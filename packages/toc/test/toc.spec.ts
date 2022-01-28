@@ -112,7 +112,7 @@ describe('@jupyterlab/toc', () => {
 
     describe('Notebook Generator: IGenerator<NotebookPanel>', () => {
       let notebookTracker: NotebookTracker;
-      let notebookGenerator: ToC.TableOfContentsRegistry.IGenerator<NotebookPanel>;
+      let notebookGenerator: ToC.ITableOfContentsRegistry.IGenerator<NotebookPanel>;
       let notebookWidget: NotebookPanel;
 
       it('should create a notebook generator', () => {
@@ -155,7 +155,7 @@ describe('@jupyterlab/toc', () => {
 
     describe('Markdown Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let markdownTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+      let markdownGenerator: ToC.ITableOfContentsRegistry.IGenerator<IDocumentWidget<
         FileEditor
       >>;
       let markdownWidget: IDocumentWidget<FileEditor>;
@@ -200,7 +200,7 @@ describe('@jupyterlab/toc', () => {
 
     describe('Rendered Markdown Generator: IGenerator<MarkdownDocument>', () => {
       let markdownTracker: WidgetTracker<MarkdownDocument>;
-      let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<MarkdownDocument>;
+      let markdownGenerator: ToC.ITableOfContentsRegistry.IGenerator<MarkdownDocument>;
       let markdownWidget: MarkdownDocument;
 
       it('should create a markdown generator', () => {
@@ -243,7 +243,7 @@ describe('@jupyterlab/toc', () => {
 
     describe('Latex Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let latexTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let latexGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+      let latexGenerator: ToC.ITableOfContentsRegistry.IGenerator<IDocumentWidget<
         FileEditor
       >>;
       let latexWidget: IDocumentWidget<FileEditor>;
@@ -284,7 +284,7 @@ describe('@jupyterlab/toc', () => {
 
     describe('Python Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let pythonTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let pythonGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+      let pythonGenerator: ToC.ITableOfContentsRegistry.IGenerator<IDocumentWidget<
         FileEditor
       >>;
       let pythonWidget: IDocumentWidget<FileEditor>;
