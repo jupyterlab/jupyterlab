@@ -1262,17 +1262,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     let alreadyCalledOnclose = false;
 
-    const earlyClose = async (evt: Event) => {
-      // If the websocket was closed early, that could mean
-      // that the kernel is actually dead. Try getting
-      // information about the kernel from the API call --
-      // if that fails, then assume the kernel is dead,
-      // otherwise just follow the typical websocket closed
-      // protocol.
-      if (alreadyCalledOnclose) {
+    const getKernelModel = async (evt: Event) => {
+      if (this._isDisposed) {
         return;
       }
-      alreadyCalledOnclose = true;
       this._reason = '';
       this._model = undefined;
       try {
@@ -1283,10 +1276,39 @@ export class KernelConnection implements Kernel.IKernelConnection {
         } else {
           this._onWSClose(evt);
         }
-      } catch (e) {
-        this._reason = 'Kernel died unexpectedly';
-        this._updateStatus('dead');
+      } catch (err) {
+        // Try again, if there is a network failure
+        // Handle network errors, as well as cases where we are on a
+        // JupyterHub and the server is not running. JupyterHub returns a
+        // 503 (<2.0) or 424 (>2.0) in that case.
+        if (
+          err instanceof ServerConnection.NetworkError ||
+          err.response?.status === 503 ||
+          err.response?.status === 424
+        ) {
+          const timeout = Private.getRandomIntInclusive(10, 30) * 1e3;
+          setTimeout(getKernelModel, timeout, evt);
+        } else {
+          this._reason = 'Kernel died unexpectedly';
+          this._updateStatus('dead');
+        }
       }
+      return;
+    };
+
+    const earlyClose = async (evt: Event) => {
+      // If the websocket was closed early, that could mean
+      // that the kernel is actually dead. Try getting
+      // information about the kernel from the API call,
+      // if that fails, then assume the kernel is dead,
+      // otherwise just follow the typical websocket closed
+      // protocol.
+      if (alreadyCalledOnclose) {
+        return;
+      }
+      alreadyCalledOnclose = true;
+      await getKernelModel(evt);
+
       return;
     };
 
