@@ -8,14 +8,12 @@ import { Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 
-/* tslint:disable */
 /**
  * The completion manager token.
  */
 export const ICompletionManager = new Token<ICompletionManager>(
   '@jupyterlab/completer:ICompletionManager'
 );
-/* tslint:enable */
 
 /**
  * A manager to register completers with parent widgets.

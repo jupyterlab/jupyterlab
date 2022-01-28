@@ -3,7 +3,7 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { INotebookHeading } from '../../utils/headings';
+import { INotebookHeading } from '../../tokens';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 /**

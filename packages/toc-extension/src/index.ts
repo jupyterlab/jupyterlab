@@ -11,6 +11,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
@@ -23,14 +24,13 @@ import {
   createNotebookGenerator,
   createPythonGenerator,
   createRenderedMarkdownGenerator,
+  INotebookHeading,
   ITableOfContentsRegistry,
-  TableOfContentsRegistry as Registry,
-  TableOfContents
+  TableOfContents,
+  TableOfContentsRegistry
 } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
-import { INotebookHeading } from '@jupyterlab/toc';
-import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -78,7 +78,7 @@ async function activateTOC(
   });
 
   // Create the ToC registry:
-  const registry = new Registry();
+  const registry = new TableOfContentsRegistry();
 
   // Add the ToC to the left area:
   toc.title.icon = tocIcon;

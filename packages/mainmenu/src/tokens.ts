@@ -13,12 +13,10 @@ import { ISettingsMenu } from './settings';
 import { ITabsMenu } from './tabs';
 import { IViewMenu } from './view';
 
-/* tslint:disable */
 /**
  * The main menu token.
  */
 export const IMainMenu = new Token<IMainMenu>('@jupyterlab/mainmenu:IMainMenu');
-/* tslint:enable */
 
 /**
  * The main menu interface.

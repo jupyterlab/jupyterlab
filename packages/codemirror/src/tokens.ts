@@ -4,14 +4,12 @@
 import { Token } from '@lumino/coreutils';
 import CodeMirror from 'codemirror';
 
-/* tslint:disable */
 /**
  * The CodeMirror token.
  */
 export const ICodeMirror = new Token<ICodeMirror>(
   '@jupyterlab/codemirror:ICodeMirror'
 );
-/* tslint:enable */
 
 /** The CodeMirror interface. */
 export interface ICodeMirror {

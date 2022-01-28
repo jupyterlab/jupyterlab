@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { IHeading } from '../../utils/headings';
+import { IHeading } from '../../tokens';
 
 /**
  * Renders a Python table of contents item.

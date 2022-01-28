@@ -15,10 +15,15 @@ import {
   NotebookActions,
   NotebookPanel
 } from '@jupyterlab/notebook';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { TableOfContentsRegistry as Registry } from '../../registry';
+import { ISignal } from '@lumino/signaling';
 import { TableOfContents } from '../../toc';
-import { INotebookHeading } from '../../utils/headings';
+import {
+  INotebookHeading,
+  ITableOfContentsRegistry,
+  RunningStatus
+} from '../../tokens';
 import { isDOM } from '../../utils/is_dom';
 import { isMarkdown } from '../../utils/is_markdown';
 import { appendHeading } from './append_heading';
@@ -30,10 +35,6 @@ import { getRenderedHTMLHeadings } from './get_rendered_html_heading';
 import { OptionsManager } from './options_manager';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ISignal } from '@lumino/signaling';
-import { RunningStatus } from '../../utils/headings';
-import { TableOfContentsRegistry } from '../../registry';
 
 /**
  * Returns a ToC generator for notebooks.
@@ -51,7 +52,7 @@ export function createNotebookGenerator(
   sanitizer: ISanitizer,
   translator?: ITranslator,
   settings?: ISettingRegistry.ISettings
-): Registry.IGenerator<NotebookPanel> {
+): ITableOfContentsRegistry.IGenerator<NotebookPanel> {
   return new NotebookGenerator(
     tracker,
     widget,
@@ -61,7 +62,8 @@ export function createNotebookGenerator(
   );
 }
 
-class NotebookGenerator implements Registry.IGenerator<NotebookPanel> {
+class NotebookGenerator
+  implements ITableOfContentsRegistry.IGenerator<NotebookPanel> {
   /**
    * Notebook Table of Content Generator constructor
    *
@@ -131,8 +133,8 @@ class NotebookGenerator implements Registry.IGenerator<NotebookPanel> {
    * within the ToC.
    */
   get collapseChanged(): ISignal<
-    TableOfContentsRegistry.IOptionsManager,
-    TableOfContentsRegistry.ICollapseChangedArgs
+    ITableOfContentsRegistry.IOptionsManager,
+    ITableOfContentsRegistry.ICollapseChangedArgs
   > {
     return this.options.collapseChanged;
   }

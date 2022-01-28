@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { INotebookHeading } from '../../utils/headings';
+import { INotebookHeading } from '../../tokens';
 import { isHeadingFiltered } from './is_heading_filtered';
 
 /**

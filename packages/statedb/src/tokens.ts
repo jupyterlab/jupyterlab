@@ -4,12 +4,10 @@
 import { ReadonlyPartialJSONValue, Token } from '@lumino/coreutils';
 import { IDataConnector } from './interfaces';
 
-/* tslint:disable */
 /**
  * The default state database token.
  */
 export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
-/* tslint:enable */
 
 /**
  * The description of a state database.

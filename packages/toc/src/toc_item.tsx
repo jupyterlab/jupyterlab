@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
-import { IHeading } from './utils/headings';
 import { Signal } from '@lumino/signaling';
+import * as React from 'react';
 import { TableOfContents } from './toc';
+import { IHeading } from './tokens';
 
 /**
  * Interface describing component properties.

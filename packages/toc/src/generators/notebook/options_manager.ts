@@ -5,8 +5,8 @@ import { ISanitizer } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ISignal, Signal } from '@lumino/signaling';
-import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
+import { ITableOfContentsRegistry as Registry } from '../../tokens';
 import { TagsToolComponent } from './tagstool';
 
 /**
