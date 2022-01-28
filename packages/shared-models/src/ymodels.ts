@@ -520,6 +520,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     const ysource = ymodel.get('source');
     this._prevSourceLength = ysource ? ysource.length : 0;
     this.ymodel.observeDeep(this._modelObserver);
+    this._awareness = null;
   }
 
   get ysource(): Y.Text {
@@ -527,7 +528,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   }
 
   get awareness(): Awareness | null {
-    return this.notebook?.awareness || null;
+    return this._awareness ?? this.notebook?.awareness ?? null;
   }
 
   /**
@@ -636,7 +637,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   public static createStandalone(id?: string): YBaseCell<any> {
     const cell = this.create(id);
     cell.isStandalone = true;
-    new Y.Doc().getArray().insert(0, [cell.ymodel]);
+    const doc = new Y.Doc();
+    doc.getArray().insert(0, [cell.ymodel]);
+    cell._awareness = new Awareness(doc);
     cell._undoManager = new Y.UndoManager([cell.ymodel], {
       trackedOrigins: new Set([cell])
     });
@@ -848,6 +851,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   private _undoManager: Y.UndoManager | null = null;
   private _changed = new Signal<this, models.CellChange<Metadata>>(this);
   private _prevSourceLength: number;
+  private _awareness: Awareness | null;
 }
 
 export class YCodeCell
