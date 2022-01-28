@@ -15,14 +15,12 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { ISchemaValidator } from './settingregistry';
 
-/* tslint:disable */
 /**
  * The setting registry token.
  */
 export const ISettingRegistry = new Token<ISettingRegistry>(
   '@jupyterlab/coreutils:ISettingRegistry'
 );
-/* tslint:enable */
 
 /**
  * The settings registry interface.

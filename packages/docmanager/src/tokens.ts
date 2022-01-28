@@ -8,14 +8,12 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-/* tslint:disable */
 /**
  * The document registry token.
  */
 export const IDocumentManager = new Token<IDocumentManager>(
   '@jupyterlab/docmanager:IDocumentManager'
 );
-/* tslint:enable */
 
 /**
  * The interface for a document manager.

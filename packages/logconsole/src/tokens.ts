@@ -9,7 +9,6 @@ import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 
-/* tslint:disable */
 /**
  * The Logger Registry token.
  */

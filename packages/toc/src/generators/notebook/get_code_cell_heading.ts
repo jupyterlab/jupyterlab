@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Cell } from '@jupyterlab/cells';
-import { INotebookHeading, RunningStatus } from '../../utils/headings';
+import { INotebookHeading, RunningStatus } from '../../tokens';
 
 /**
  * Returns a "click" handler.
