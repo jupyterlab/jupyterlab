@@ -167,7 +167,7 @@ test.describe('Debugger', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 58px; left: 998px; width: 280px; height: 158px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 58px; left: 998px; width: 280px; height: 138px;"></div>'
       );
     });
 
@@ -200,7 +200,7 @@ test.describe('Debugger', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 216px; left: 998px; width: 280px; height: 158px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 196px; left: 998px; width: 280px; height: 138px;"></div>'
       );
     });
 
@@ -242,7 +242,7 @@ test.describe('Debugger', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 374px; left: 998px; width: 280px; height: 158px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 334px; left: 998px; width: 280px; height: 138px;"></div>'
       );
     });
 
@@ -280,7 +280,7 @@ test.describe('Debugger', () => {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 538px; left: 998px; width: 280px; height: 158px;"></div>'
+        '<div id="capture-screenshot" style="position: absolute; top: 478px; left: 998px; width: 280px; height: 138px;"></div>'
       );
     });
 
