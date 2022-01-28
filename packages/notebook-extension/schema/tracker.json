@@ -682,6 +682,16 @@
       },
       "additionalProperties": false,
       "type": "object"
+    },
+    "kernelStatusConfig": {
+      "showOnStatusBar": {
+        "type": "boolean",
+        "title": "Show kernel status on toolbar or status bar."
+      },
+      "showProgress": {
+        "type": "boolean",
+        "title": "Show execution progress."
+      }
     }
   },
   "properties": {
@@ -838,6 +848,15 @@
       "description": "Should an editor be shown for read-only markdown",
       "type": "boolean",
       "default": true
+    },
+    "kernelStatus": {
+      "title": "Kernel status icon configuration",
+      "description": "Defines the position and components of execution progress indicator.",
+      "$ref": "#/definitions/kernelStatusConfig",
+      "default": {
+        "showOnStatusBar": false,
+        "showProgress": true
+      }
     },
     "experimentalDisableDocumentWideUndoRedo": {
       "title": "Experimental settings to enable the undo/redo on the notebook document level.",

@@ -28,3 +28,4 @@ export * from './toolbar';
 export * from './vdom';
 export * from './widgettracker';
 export * from './windowresolver';
+export * from './kernelstatuses';
