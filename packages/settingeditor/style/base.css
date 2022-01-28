@@ -340,27 +340,26 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   font-size: var(--jp-content-font-size3);
   color: var(--jp-ui-font-color0);
   font-weight: 300;
-  margin: 20px;
+  margin: 1em;
 }
 
 .jp-SettingsPanel .jp-SettingsHeader h3 {
   font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color1);
   font-weight: 200;
-  margin: 20px;
+  margin: 1em;
 }
 
 .jp-SettingsPanel p {
   font-size: var(--jp-content-font-size2);
-  margin-bottom: 5px;
-  margin-left: 5px;
+  margin: 0.5em;
 }
 
 .jp-SettingsPanel legend {
   font-size: var(--jp-content-font-size3);
   color: var(--jp-ui-font-color0);
   flex-basis: 100%;
-  padding: 10px;
+  padding: 0.5em;
   font-weight: var(--jp-content-header-font-weight);
   border-bottom: 1px solid var(--jp-border-color2);
 }
@@ -368,6 +367,11 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 .jp-SettingsPanel .jp-SettingsTitle {
   display: flex;
   align-items: center;
+  padding-left: 1em;
+}
+
+.jp-SettingsPanel .jp-SettingsTitle span {
+  width: 2em;
 }
 
 .jp-SettingsForm {

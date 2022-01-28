@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { showErrorMessage } from '@jupyterlab/apputils';
+import { caretRightIcon, caretDownIcon } from '@jupyterlab/ui-components';
 import { Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
@@ -329,6 +330,7 @@ export class SettingsFormEditor extends React.Component<
         };
       }
     }
+    const icon = this.state.hidden ? caretRightIcon : caretDownIcon;
 
     return (
       <div>
@@ -340,6 +342,7 @@ export class SettingsFormEditor extends React.Component<
           }}
         >
           <div className="jp-SettingsTitle">
+            <icon.react tag="span" elementPosition="center" />
             <h2> {this.props.settings.schema.title} </h2>
             <h3> {this.props.settings.schema.description} </h3>
           </div>
