@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import { caretRightIcon, caretDownIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
 import { Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
