@@ -31,6 +31,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
+import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
@@ -66,6 +67,8 @@ namespace CommandIDs {
   export const runAllEnabled = 'apputils:run-all-enabled';
 
   export const toggleHeader = 'apputils:toggle-header';
+
+  export const displayShortcuts = 'apputils:display-shortcuts';
 }
 
 /**
@@ -612,6 +615,25 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    commands.addCommand(CommandIDs.displayShortcuts, {
+      label: trans.__('Display Keyboard Shortcuts'),
+      caption: trans.__('Display relevant keyboard shortcuts for the current active element'),
+      execute: args => {
+        const {commands} = app;
+        const elt = document.activeElement;
+
+        // Find any binding whose selector matches the current element, taking into
+        // account the data-lm-suppress-shortcuts convention
+        let bindings = commands.keyBindings.filter(binding => {
+          let closest = elt?.closest(binding.selector + ',[data-lm-suppress-shortcuts],[data-p-suppress-shortcuts]')
+          return closest && !closest.matches('[data-lm-suppress-shortcuts],[data-p-suppress-shortcuts]');
+        });
+
+        console.log('Keys, Label, Caption, Command name');
+        bindings.forEach(b => console.log(`${b.keys.map(CommandRegistry.formatKeystroke).join(', ')} ,  ${commands.label(b.command, b.args)}, ${commands.caption(b.command, b.args)}, ${b.command}`))
+      }
+    })
   }
 };
 
