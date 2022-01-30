@@ -1076,7 +1076,7 @@ namespace Private {
     // Shows hot keys in tooltips
     const binding = commands.keyBindings.find(b => b.command === id);
     if (binding) {
-      const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
+      const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ')
       tooltip = `${tooltip} (${ks})`;
     }
     const onClick = () => {

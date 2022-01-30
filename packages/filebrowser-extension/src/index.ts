@@ -191,14 +191,25 @@ const browser: JupyterFrontEndPlugin<void> = {
       await browser.model.cd(preferredPath);
     }
 
-    addCommands(
-      app,
-      browser,
-      factory,
-      translator,
-      settingRegistry,
-      commandPalette
-    );
+    addCommands(app, factory, translator, settingRegistry, commandPalette);
+
+    // Show the current file browser shortcut in its title.
+    const updateBrowserTitle = () => {
+      const binding = find(
+        app.commands.keyBindings,
+        b => b.command === CommandIDs.toggleBrowser
+      );
+      if (binding) {
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ')
+        browser.title.caption = trans.__('File Browser (%1)', ks);
+      } else {
+        browser.title.caption = trans.__('File Browser');
+      }
+    };
+    updateBrowserTitle();
+    app.commands.keyBindingChanged.connect(() => {
+      updateBrowserTitle();
+    });
 
     return void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
