@@ -34,6 +34,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
+import { Selector } from '@lumino/domutils';
 import { Debouncer, Throttler } from '@lumino/polling';
 import { announcements } from './announcements';
 import { notificationPlugin } from './notificationplugin';
@@ -618,22 +619,111 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.displayShortcuts, {
       label: trans.__('Display Keyboard Shortcuts'),
-      caption: trans.__('Display relevant keyboard shortcuts for the current active element'),
+      caption: trans.__(
+        'Display relevant keyboard shortcuts for the current active element'
+      ),
       execute: args => {
-        const {commands} = app;
+        const { commands } = app;
         const elt = document.activeElement;
 
-        // Find any binding whose selector matches the current element, taking into
-        // account the data-lm-suppress-shortcuts convention
-        let bindings = commands.keyBindings.filter(binding => {
-          let closest = elt?.closest(binding.selector + ',[data-lm-suppress-shortcuts],[data-p-suppress-shortcuts]')
-          return closest && !closest.matches('[data-lm-suppress-shortcuts],[data-p-suppress-shortcuts]');
-        });
+        /**
+         * Find the distance from the target node to the first matching node.
+         *
+         * Based on Lumino private function commands.Private.targetDistance
+         * This traverses the DOM path from `elt` to the root
+         * computes the distance from `elt` to the first node which matches
+         * the CSS selector. If no match is found, `-1` is returned.
+         *
+         * It also stops traversal if the `data-lm-suppress-shortcuts` or
+         * `data-p-suppress-shortcuts` attributes are found.
+         */
+        function matchDistance(selector: string, elt: Element | null): number {
+          let targ = elt;
+          for (
+            let dist = 0;
+            targ !== null && targ !== targ.parentElement;
+            targ = targ.parentElement, ++dist
+          ) {
+            if (targ.hasAttribute('data-lm-suppress-shortcuts')) {
+              return -1;
+            }
+            /* <DEPRECATED> */
+            if (targ.hasAttribute('data-p-suppress-shortcuts')) {
+              return -1;
+            }
+            /* </DEPRECATED> */
+            if (targ.matches(selector)) {
+              return dist;
+            }
+          }
+          return -1;
+        }
 
-        console.log('Keys, Label, Caption, Command name');
-        bindings.forEach(b => console.log(`${b.keys.map(CommandRegistry.formatKeystroke).join(', ')} ,  ${commands.label(b.command, b.args)}, ${commands.caption(b.command, b.args)}, ${b.command}`))
+        function formatKeybinding(keys: readonly string[]): string {
+          return keys.map(CommandRegistry.formatKeystroke).join(', ');
+        }
+
+        // Find active keybindings for target element
+        const activeBindings = new Map<
+          string,
+          [number, CommandRegistry.IKeyBinding]
+        >();
+        for (let i = 0; i < commands.keyBindings.length; i++) {
+          const kb = commands.keyBindings[i];
+          let distance = matchDistance(kb.selector, elt);
+          if (distance < 0) {
+            continue;
+          }
+          let formatted = formatKeybinding(kb.keys);
+          if (activeBindings.has(formatted)) {
+            let oldBinding = activeBindings.get(formatted)!;
+            // if the existing binding takes precedence, ignore this binding by continuing
+            if (
+              oldBinding[0] < distance ||
+              (oldBinding[0] === distance &&
+                Selector.calculateSpecificity(oldBinding[1].selector) >
+                  Selector.calculateSpecificity(kb.selector))
+            ) {
+              continue;
+            }
+          }
+          activeBindings.set(formatted, [distance, kb]);
+        }
+
+        // Group shortcuts by distance
+        let maxDistance = -1;
+        const groupedBindings = new Map<
+          number,
+          CommandRegistry.IKeyBinding[]
+        >();
+        for (let [distance, binding] of activeBindings.values()) {
+          maxDistance = distance > maxDistance ? distance : maxDistance;
+          if (!groupedBindings.has(distance)) {
+            groupedBindings.set(distance, []);
+          }
+          groupedBindings.get(distance)!.push(binding);
+        }
+
+        // Display shortcuts by group
+        for (let d = 0; d <= maxDistance; d++) {
+          if (groupedBindings.has(d)) {
+            console.log(`Binding level ${d}:`);
+            groupedBindings
+              .get(d)!
+              .forEach(b =>
+                console.log(
+                  `${b.keys
+                    .map(CommandRegistry.formatKeystroke)
+                    .join(', ')} ,  ${commands.label(
+                    b.command,
+                    b.args
+                  )}, ${commands.caption(b.command, b.args)}, ${b.command}`
+                )
+              );
+          }
+        }
       }
-    })
+    });
   }
 };
 

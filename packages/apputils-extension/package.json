@@ -59,7 +59,8 @@
     "@lumino/widgets": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-toastify": "^9.0.8"
+    "react-toastify": "^9.0.8",
+    "es6-promise": "~4.2.8"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
