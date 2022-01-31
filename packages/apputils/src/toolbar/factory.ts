@@ -272,9 +272,7 @@ export function createToolbarFactory(
           );
           break;
         case 'remove':
-          change.oldValues.forEach(() =>
-            toolbar.remove(change.oldIndex)
-          );
+          change.oldValues.forEach(() => toolbar.remove(change.oldIndex));
           break;
         case 'set':
           change.newValues.forEach(item =>
