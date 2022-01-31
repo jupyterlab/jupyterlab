@@ -107,6 +107,12 @@
           "__spec__"
         ]
       }
+    },
+    "defaultKernelSourcesFilter": {
+      "title": "Default kernel sources regexp filter",
+      "description": "A regular expression filter to apply by default when showing the kernel sources",
+      "type": "string",
+      "default": ""
     }
   },
   "additionalProperties": false,

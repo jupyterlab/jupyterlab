@@ -541,6 +541,9 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
         if (kernel && filters[kernel]) {
           sidebar.variables.filter = new Set<string>(filters[kernel]);
         }
+        const kernelSourcesFilter = setting.get('defaultKernelSourcesFilter')
+          .composite as string;
+        sidebar.kernelSources.filter = kernelSourcesFilter;
       };
       updateSettings();
       setting.changed.connect(updateSettings);
@@ -795,6 +798,16 @@ const main: JupyterFrontEndPlugin<void> = {
             });
           });
       };
+      const onKernelSourceOpened = (
+        _: IDebugger.Model.IKernelSources | null,
+        source: IDebugger.Source,
+        breakpoint?: IDebugger.IBreakpoint
+      ): void => {
+        if (!source) {
+          return;
+        }
+        onCurrentSourceOpened(null, source, breakpoint);
+      };
 
       const onCurrentSourceOpened = (
         _: IDebugger.Model.ISources | null,
@@ -856,6 +869,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
       model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
       model.sources.currentSourceOpened.connect(onCurrentSourceOpened);
+      model.kernelSources.kernelSourceOpened.connect(onKernelSourceOpened);
       model.breakpoints.clicked.connect(async (_, breakpoint) => {
         const path = breakpoint.source?.path;
         const source = await service.getSource({

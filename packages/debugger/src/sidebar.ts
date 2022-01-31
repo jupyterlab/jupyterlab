@@ -17,6 +17,8 @@ import { Callstack as CallstackPanel } from './panels/callstack';
 
 import { Sources as SourcesPanel } from './panels/sources';
 
+import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
+
 import { Variables as VariablesPanel } from './panels/variables';
 
 import { IDebugger } from './tokens';
@@ -74,6 +76,12 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
       translator
     });
 
+    this.kernelSources = new KernelSourcesPanel({
+      model: model.kernelSources,
+      service,
+      translator
+    });
+
     const header = new DebuggerSidebar.Header();
 
     this.addWidget(header);
@@ -90,6 +98,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
     this.addItem(this.callstack);
     this.addItem(this.breakpoints);
     this.addItem(this.sources);
+    this.addItem(this.kernelSources);
   }
 
   /**
@@ -161,6 +170,11 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
    * The sources widget.
    */
   readonly sources: SourcesPanel;
+
+  /**
+   * The kernel sources widget.
+   */
+  readonly kernelSources: KernelSourcesPanel;
 
   /**
    * Container for debugger panels.

@@ -10,6 +10,7 @@ import stepOverSvgStr from '../style/icons/step-over.svg';
 import variableSvgStr from '../style/icons/variable.svg';
 import pauseSvgStr from '../style/icons/pause.svg';
 import viewBreakpointSvgStr from '../style/icons/view-breakpoint.svg';
+import openKernelSourceSvgStr from '../style/icons/open-kernel-source.svg';
 
 export {
   runIcon as continueIcon,
@@ -49,4 +50,9 @@ export const variableIcon = new LabIcon({
 export const viewBreakpointIcon = new LabIcon({
   name: 'debugger:view-breakpoint',
   svgstr: viewBreakpointSvgStr
+});
+
+export const openKernelSourceIcon = new LabIcon({
+  name: 'debugger:open-kernel-source',
+  svgstr: openKernelSourceSvgStr
 });
