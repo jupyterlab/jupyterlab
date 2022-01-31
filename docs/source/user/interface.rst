@@ -15,7 +15,7 @@ containing tabs of documents and activities, a collapsible :ref:`left sidebar
 terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook
 cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 
-.. image:: images/interface_jupyterlab.png
+.. image:: ../images/interface-jupyterlab.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot of the JupyterLab interface. The main work area is in the middle section of the interface. There is also a left sidebar and a top menu bar.
@@ -66,7 +66,7 @@ The left sidebar contains a number of commonly-used tabs including:
 - the :ref:`table of contents <toc>`,
 - the :ref:`extension manager <extension_manager>`.
 
-.. image:: images/interface_left.png
+.. image:: ../images/interface-left.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot of the primary JupyterLab sidebar showing a variety of files in the file browser.
@@ -78,7 +78,7 @@ The right sidebar contains:
 - the property inspector (active in notebooks),
 - the :ref:`debugger <debugger>`.
 
-.. image:: images/interface_right.png
+.. image:: ../images/interface-right.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot of the secondary JupyterLab sidebar showing the property inspector.
@@ -130,14 +130,14 @@ Tabs and Simple Interface Mode
 The Tabs panel in the left sidebar lists the open documents or
 activities in the main work area:
 
-.. image:: images/interface_tabs.png
+.. image:: ../images/interface-tabs.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot of the tabs panel in JupyterLab that lists some sample documents.
 
 The same information is also available in the Tabs menu:
 
-.. image:: images/interface_tabs_menu.png
+.. image:: ../images/interface-tabs-menu.png
    :align: center
    :class: jp-screenshot
    :alt: A screenshot of the tabs menu in JupyterLab with a list of sample documents.

@@ -7,7 +7,7 @@ The Running panel in the left sidebar shows a list of all the kernels and
 terminals currently running across all notebooks, code consoles, and
 directories:
 
-.. image:: images/running_layout.png
+.. image:: ../images/running-layout.png
    :align: center
    :class: jp-screenshot
 
