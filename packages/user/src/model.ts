@@ -203,13 +203,13 @@ namespace Private {
    * Predefined colors for users
    */
   const userColors = [
-    'var(--jp-collaborator-1)',
-    'var(--jp-collaborator-2)',
-    'var(--jp-collaborator-3)',
-    'var(--jp-collaborator-4)',
-    'var(--jp-collaborator-5)',
-    'var(--jp-collaborator-6)',
-    'var(--jp-collaborator-7)'
+    'var(--jp-collaborator-color1)',
+    'var(--jp-collaborator-color2)',
+    'var(--jp-collaborator-color3)',
+    'var(--jp-collaborator-color4)',
+    'var(--jp-collaborator-color5)',
+    'var(--jp-collaborator-color6)',
+    'var(--jp-collaborator-color7)'
   ];
 
   /**

@@ -372,13 +372,13 @@ all of MD as it is not optimized for dense, information rich UIs.
     and the icon of the user.
   */
 
-  --jp-collaborator-1: #ffad8e;
-  --jp-collaborator-2: #dac83d;
-  --jp-collaborator-3: #72dd76;
-  --jp-collaborator-4: #00e4d0;
-  --jp-collaborator-5: #45d4ff;
-  --jp-collaborator-6: #e2b1ff;
-  --jp-collaborator-7: #ff9de6;
+  --jp-collaborator-color1: #ffad8e;
+  --jp-collaborator-color2: #dac83d;
+  --jp-collaborator-color3: #72dd76;
+  --jp-collaborator-color4: #00e4d0;
+  --jp-collaborator-color5: #45d4ff;
+  --jp-collaborator-color6: #e2b1ff;
+  --jp-collaborator-color7: #ff9de6;
 
   /* Vega extension styles */
 
