@@ -1,7 +1,7 @@
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { findIndex, toArray } from '@lumino/algorithm';
+import { toArray } from '@lumino/algorithm';
 import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from '../dialog';
@@ -38,8 +38,9 @@ async function displayInformation(trans: TranslationBundle): Promise<void> {
 }
 
 /**
- * Accumulate the toolbar definition from all settings and set the default value from it.
+ * Set the toolbar definition by accumulating all settings definition.
  *
+ * @param toolbarItems Observable list to populate
  * @param registry Application settings registry
  * @param factoryName Widget factory name that needs a toolbar
  * @param pluginId Settings plugin id
@@ -47,13 +48,14 @@ async function displayInformation(trans: TranslationBundle): Promise<void> {
  * @param propertyId Property holding the toolbar definition in the settings; default 'toolbar'
  * @returns List of toolbar items
  */
-async function getToolbarItems(
+async function setToolbarItems(
+  toolbarItems: IObservableList<ISettingRegistry.IToolbarItem>,
   registry: ISettingRegistry,
   factoryName: string,
   pluginId: string,
   translator: ITranslator,
   propertyId: string = 'toolbar'
-): Promise<IObservableList<ISettingRegistry.IToolbarItem>> {
+): Promise<void> {
   const trans = translator.load('jupyterlab');
   let canonical: ISettingRegistry.ISchema | null;
   let loaded: { [name: string]: ISettingRegistry.IToolbarItem[] } = {};
@@ -93,13 +95,11 @@ async function getToolbarItems(
       pluginDefaults,
       schema.properties![propertyId].default as any[],
       true
-    )!
-      // flatten one level
-      .sort(
-        (a, b) =>
-          (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
-          (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
-      );
+    )!.sort(
+      (a, b) =>
+        (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
+        (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
+    );
   }
 
   // Transform the plugin object to return different schema than the default.
@@ -119,12 +119,17 @@ async function getToolbarItems(
       // Overrides the value with using the aggregated default for the toolbar property
       user[propertyId] =
         (plugin.data.user[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
-      composite[propertyId] =
+      composite[propertyId] = (
         SettingRegistry.reconcileToolbarItems(
           defaults as ISettingRegistry.IToolbarItem[],
           user[propertyId] as ISettingRegistry.IToolbarItem[],
           false
-        ) ?? [];
+        ) ?? []
+      ).sort(
+        (a, b) =>
+          (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
+          (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
+      );
 
       plugin.data = { composite, user };
 
@@ -153,21 +158,12 @@ async function getToolbarItems(
 
   const settings = await registry.load(pluginId);
 
-  const toolbarItems: IObservableList<ISettingRegistry.IToolbarItem> = new ObservableList(
-    {
-      values: JSONExt.deepCopy(settings.composite[propertyId] as any) ?? [],
-      itemCmp: (a, b) => JSONExt.deepEqual(a, b)
-    }
-  );
-
   // React to customization by the user
   settings.changed.connect(() => {
-    // As extension may change the toolbar through API,
-    // prompt the user to reload if the toolbar definition has been updated.
-    const newItems = (settings.composite[propertyId] as any) ?? [];
-    if (!JSONExt.deepEqual(toArray(toolbarItems.iter()), newItems)) {
-      void displayInformation(trans);
-    }
+    const newItems: ISettingRegistry.IToolbarItem[] =
+      (settings.composite[propertyId] as any) ?? [];
+
+    transferSettings(newItems);
   });
 
   // React to plugin changes
@@ -190,31 +186,33 @@ async function getToolbarItems(
         } else {
           // The plugin was not yet loaded => update the toolbar items list
           loaded[plugin] = JSONExt.deepCopy(newItems);
-          const newList =
+          const newList = (
             SettingRegistry.reconcileToolbarItems(
               toArray(toolbarItems),
               newItems,
               false
-            ) ?? [];
-
-          // Existing items cannot be removed.
-          newList?.forEach(item => {
-            const index = findIndex(
-              toolbarItems,
-              value => item.name === value.name
-            );
-            if (index < 0) {
-              toolbarItems.push(item);
-            } else {
-              toolbarItems.set(index, item);
-            }
-          });
+            ) ?? []
+          ).sort(
+            (a, b) =>
+              (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
+              (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
+          );
+          transferSettings(newList);
         }
       }
     }
   });
 
-  return toolbarItems;
+  const transferSettings = (newItems: ISettingRegistry.IToolbarItem[]) => {
+    // This is not optimal but safer because a toolbar item with the same
+    // name cannot be inserted (it will be a no-op). But that could happen
+    // if the settings are changing the items order.
+    toolbarItems.clear();
+    toolbarItems.pushAll(newItems);
+  };
+
+  // Initialize the toolbar
+  transferSettings((settings.composite[propertyId] as any) ?? []);
 }
 
 /**
@@ -236,66 +234,73 @@ export function createToolbarFactory(
   pluginId: string,
   translator: ITranslator,
   propertyId: string = 'toolbar'
-): (widget: Widget) => ToolbarRegistry.IToolbarItem[] {
-  const items: ToolbarRegistry.IWidget[] = [];
-  let rawItems: IObservableList<ToolbarRegistry.IWidget>;
-
-  const transfer = (
-    list: IObservableList<ToolbarRegistry.IWidget>,
-    change: IObservableList.IChangedArgs<ToolbarRegistry.IWidget>
-  ) => {
-    switch (change.type) {
-      case 'move':
-        break;
-      case 'add':
-      case 'remove':
-      case 'set':
-        items.length = 0;
-        items.push(
-          ...toArray(list)
-            .filter(item => !item.disabled)
-            .sort(
-              (a, b) =>
-                (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
-                (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
-            )
-        );
-        break;
-    }
-  };
+): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
+  const items = new ObservableList<ISettingRegistry.IToolbarItem>({
+    itemCmp: (a, b) => JSONExt.deepEqual(a as any, b as any)
+  });
 
   // Get toolbar definition from the settings
-  getToolbarItems(
+  setToolbarItems(
+    items,
     settingsRegistry,
     factoryName,
     pluginId,
     translator,
     propertyId
-  )
-    .then(candidates => {
-      rawItems = candidates;
-      rawItems.changed.connect(transfer);
-      // Force initialization of items
-      transfer(rawItems, {
-        type: 'add',
-        newIndex: 0,
-        newValues: [],
-        oldIndex: 0,
-        oldValues: []
-      });
-    })
-    .catch(reason => {
-      console.error(
-        `Failed to load toolbar items for factory ${factoryName} from ${pluginId}`,
-        reason
-      );
+  ).catch(reason => {
+    console.error(
+      `Failed to load toolbar items for factory ${factoryName} from ${pluginId}`,
+      reason
+    );
+  });
+
+  return (widget: Widget) => {
+    const updateToolbar = (
+      list: IObservableList<ToolbarRegistry.IWidget>,
+      change: IObservableList.IChangedArgs<ToolbarRegistry.IWidget>
+    ) => {
+      switch (change.type) {
+        case 'move':
+          toolbar.move(change.oldIndex, change.newIndex);
+          break;
+        case 'add':
+          change.newValues.forEach(item =>
+            toolbar.push({
+              name: item.name,
+              widget: toolbarRegistry.createWidget(factoryName, widget, item)
+            })
+          );
+          break;
+        case 'remove':
+          change.oldValues.forEach(() =>
+            toolbar.remove(change.oldIndex)
+          );
+          break;
+        case 'set':
+          change.newValues.forEach(item =>
+            toolbar.set(change.newIndex, {
+              name: item.name,
+              widget: toolbarRegistry.createWidget(factoryName, widget, item)
+            })
+          );
+          break;
+      }
+    };
+
+    const toolbar = new ObservableList<ToolbarRegistry.IToolbarItem>({
+      values: toArray(items).map(item => {
+        return {
+          name: item.name,
+          widget: toolbarRegistry.createWidget(factoryName, widget, item)
+        };
+      })
     });
 
-  return (widget: Widget) =>
-    items.map(item => {
-      return {
-        name: item.name,
-        widget: toolbarRegistry.createWidget(factoryName, widget, item)
-      };
+    items.changed.connect(updateToolbar);
+    widget.disposed.connect(() => {
+      items.changed.disconnect(updateToolbar);
     });
+
+    return toolbar;
+  };
 }

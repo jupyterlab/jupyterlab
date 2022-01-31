@@ -33,6 +33,7 @@ import {
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
@@ -193,7 +194,9 @@ function activate(
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
   let toolbarFactory:
-    | ((widget: IDocumentWidget<FileEditor>) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: IDocumentWidget<FileEditor>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
 
   if (toolbarRegistry) {
