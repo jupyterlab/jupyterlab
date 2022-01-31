@@ -2,25 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { DataConnector } from '@jupyterlab/statedb';
-import { CompletionHandler } from '../handler';
 
+import { ICompletionProvider } from '..';
+import { CompletionHandler } from '../handler';
+import { ICompletionContext } from '../tokens';
+
+export const CONTEXT_PROVIDER_ID = 'CompletionProvider:context';
 /**
  * A context connector for completion handlers.
  */
-export class ContextConnector extends DataConnector<
-CompletionHandler.ICompletionItemsReply,
-  void,
-  CompletionHandler.IRequest
-> {
+export class ContextCompleterProvider implements ICompletionProvider {
   /**
-   * Create a new context connector for completion requests.
-   *
-   * @param options - The instantiation options for the context connector.
+   * The context completion provider is applicable on all cases.
+   * @param context - additional information about context of completion request
    */
-  constructor(options: ContextConnector.IOptions) {
-    super();
-    this._editor = options.editor;
+  async isApplicable(context: ICompletionContext): Promise<boolean> {
+    return true;
   }
 
   /**
@@ -29,32 +26,20 @@ CompletionHandler.ICompletionItemsReply,
    * @param request - The completion request text and details.
    */
   fetch(
-    request: CompletionHandler.IRequest
+    request: CompletionHandler.IRequest,
+    context: ICompletionContext
   ): Promise<CompletionHandler.ICompletionItemsReply> {
-    if (!this._editor) {
+    const editor = context.editor;
+    if (!editor) {
       return Promise.reject('No editor');
     }
     return new Promise<CompletionHandler.ICompletionItemsReply>(resolve => {
-      resolve(Private.contextHint(this._editor!));
+      resolve(Private.contextHint(editor!));
     });
   }
 
-  private _editor: CodeEditor.IEditor | null;
-}
-
-/**
- * A namespace for context connector statics.
- */
-export namespace ContextConnector {
-  /**
-   * The instantiation options for cell completion handlers.
-   */
-  export interface IOptions {
-    /**
-     * The session used by the context connector.
-     */
-    editor: CodeEditor.IEditor | null;
-  }
+  readonly identifier = CONTEXT_PROVIDER_ID;
+  readonly renderer = null;
 }
 
 /**

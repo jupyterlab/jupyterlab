@@ -1,39 +1,37 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelMessage, Session } from '@jupyterlab/services';
-import { DataConnector } from '@jupyterlab/statedb';
+import { KernelMessage } from '@jupyterlab/services';
+import { ICompletionContext, ICompletionProvider } from '../tokens';
 import { CompletionHandler } from '../handler';
 import { JSONObject } from '@lumino/coreutils';
 
+export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
 /**
  * A kernel connector for completion handlers.
  */
-export class KernelConnector extends DataConnector<
-  CompletionHandler.ICompletionItemsReply,
-  void,
-  CompletionHandler.IRequest
-> {
+export class KernelCompleterProvider implements ICompletionProvider {
   /**
-   * Create a new kernel connector for completion requests.
-   *
-   * @param options - The instantiation options for the kernel connector.
+   * The kernel completion provider is applicable only if the kernel is available.
+   * @param context - additional information about context of completion request
    */
-  constructor(options: KernelConnector.IOptions) {
-    super();
-    this._session = options.session;
+  async isApplicable(context: ICompletionContext): Promise<boolean> {
+    const hasKernel = context.session?.kernel;
+    if (!hasKernel) {
+      return false;
+    }
+    return true;
   }
-
   /**
    * Fetch completion requests.
    *
    * @param request - The completion request text and details.
    */
   async fetch(
-    request: CompletionHandler.IRequest
+    request: CompletionHandler.IRequest,
+    context: ICompletionContext
   ): Promise<CompletionHandler.ICompletionItemsReply> {
-    const kernel = this._session?.kernel;
-
+    const kernel = context.session?.kernel;
     if (!kernel) {
       throw new Error('No kernel for completion request.');
     }
@@ -73,20 +71,6 @@ export class KernelConnector extends DataConnector<
     };
   }
 
-  private _session: Session.ISessionConnection | null;
-}
-
-/**
- * A namespace for kernel connector statics.
- */
-export namespace KernelConnector {
-  /**
-   * The instantiation options for cell completion handlers.
-   */
-  export interface IOptions {
-    /**
-     * The session used by the kernel connector.
-     */
-    session: Session.ISessionConnection | null;
-  }
+  readonly identifier = KERNEL_PROVIDER_ID;
+  readonly renderer = null;
 }

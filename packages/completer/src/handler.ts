@@ -5,7 +5,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
-import {ReadonlyJSONObject } from '@lumino/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
@@ -48,10 +48,10 @@ export class CompletionHandler implements IDisposable {
   /**
    * The editor used by the completion handler.
    */
-  get editor(): CodeEditor.IEditor | null {
+  get editor(): CodeEditor.IEditor | null | undefined {
     return this._editor;
   }
-  set editor(newValue: CodeEditor.IEditor | null) {
+  set editor(newValue: CodeEditor.IEditor | null | undefined) {
     if (newValue === this._editor) {
       return;
     }
@@ -74,7 +74,7 @@ export class CompletionHandler implements IDisposable {
 
     // Update the editor and signal connections.
     editor = this._editor = newValue;
-    
+
     if (editor) {
       const model = editor.model;
       this._enabled = false;
@@ -210,7 +210,6 @@ export class CompletionHandler implements IDisposable {
    *    even though the completer is not available.
    */
   protected onSelectionsChanged(): void {
-    
     const model = this.completer.model;
     const editor = this._editor;
 
@@ -265,7 +264,6 @@ export class CompletionHandler implements IDisposable {
       this._enabled = true;
       host.classList.add(COMPLETER_ENABLED_CLASS);
     }
-
     // Dispatch the cursor change.
     model.handleCursorChange(this.getState(editor, editor.getCursorPosition()));
   }
@@ -329,24 +327,28 @@ export class CompletionHandler implements IDisposable {
     return this._connector.fetch(request).then(replies => {
       let start = 0;
       let end = 0;
-      let items: Array<any> = []
+      let skip = false;
+      let items: CompletionHandler.ICompletionItem[] = [];
       for (const data of replies) {
-        //TODO: Send provider name to model to render a splitter between different providers
-        const dataValue = Object.values(data)[0]
-        items = items.concat(dataValue.items)
-        start = dataValue.start
-        end = dataValue.end
-      }     
-      let reply: CompletionHandler.ICompletionItemsReply = {start, end, items };
-      const model = this._updateModel(state, reply.start, reply.end);
+        if (data) {
+          items = items.concat(data.items);
+          if (!skip) {
+            start = data.start;
+            end = data.end;
+            skip = true;
+          }
+        }
+      }
+
+      const model = this._updateModel(state, start, end);
       if (!model) {
         return;
       }
-      
-      if(model.setCompletionItems){
-        model.setCompletionItems(reply.items);
+
+      if (model.setCompletionItems) {
+        model.setCompletionItems(items);
       }
-    })
+    });
   }
 
   /**
@@ -374,10 +376,8 @@ export class CompletionHandler implements IDisposable {
     return model;
   }
 
-
-
   private _connector: IConnectorProxy;
-  private _editor: CodeEditor.IEditor | null = null;
+  private _editor: CodeEditor.IEditor | null | undefined = null;
   private _enabled = false;
   private _isDisposed = false;
 }
@@ -457,18 +457,25 @@ export namespace CompletionHandler {
      * Indicates if the item is deprecated.
      */
     deprecated?: boolean;
+
+    /**
+     * Provider id will be added automatically.
+     */
+    provider?: string;
   }
 
   export type ICompletionItemsConnector = IDataConnector<
     CompletionHandler.ICompletionItemsReply,
     void,
     CompletionHandler.IRequest
-  >
+  >;
 
   /**
    * A reply to a completion items fetch request.
    */
-  export interface ICompletionItemsReply {
+  export interface ICompletionItemsReply<
+    T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+  > {
     /**
      * The starting index for the substring being replaced by completion.
      */
@@ -478,9 +485,9 @@ export namespace CompletionHandler {
      */
     end: number;
     /**
-     * A list of completion items.
+     * A list of completion items. default to CompletionHandler.ICompletionItems
      */
-    items: CompletionHandler.ICompletionItems;
+    items: Array<T>;
   }
 
   export interface ICompleterConnecterResponseType {

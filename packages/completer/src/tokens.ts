@@ -6,38 +6,87 @@ import { Token } from '@lumino/coreutils';
 import { CompletionHandler } from './handler';
 import { Session } from '@jupyterlab/services';
 import { Completer } from './widget';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { CodeConsole } from '@jupyterlab/console';
 
+/**
+ * The context which will be passed to the `fetch` function
+ * of a provider.
+ */
+export interface ICompletionContext {
+  /**
+   * The widget (notebook, console, code editor) which invoked
+   * the completer
+   */
+  widget?: IDocumentWidget | CodeConsole;
 
-export interface ICompletionProvider {
+  /**
+   * The current editor.
+   */
+  editor?: CodeEditor.IEditor | null;
+
+  /**
+   * The session extracted from widget for convenience.
+   */
+  session?: Session.ISessionConnection | null;
+}
+
+/**
+ * The interface to implement a completer provider.
+ */
+export interface ICompletionProvider<
+  T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+> {
   /**
    * Unique identifier of the provider
    */
-  identifier: string;
+  readonly identifier: string;
 
-  connectorFactory: (options: {
-    session: Session.ISessionConnection | null;
-    editor: CodeEditor.IEditor | null;
-  }) => CompletionHandler.ICompletionItemsConnector;
+  /**
+   * Is completion provider applicable to specified context?
+   * @param context - additional information about context of completion request
+   */
+  isApplicable(context: ICompletionContext): Promise<boolean>;
 
-  renderer: Completer.IRenderer | null | undefined;
+  /**
+   * Fetch completion requests.
+   *
+   * @param request - the completion request text and details
+   * @param context - additional information about context of completion request
+   */
+  fetch(
+    request: CompletionHandler.IRequest,
+    context: ICompletionContext
+  ): Promise<CompletionHandler.ICompletionItemsReply<T>>;
+
+  /**
+   * Renderer for provider's completions (optional).
+   */
+  readonly renderer: Completer.IRenderer | null | undefined;
+
+  /**
+   * Given an incomplete (unresolved) completion item, resolve it by adding all missing details,
+   * such as lazy-fetched documentation.
+   *
+   * @param completion - the completion item to resolve
+   */
+  resolve?(completion: T, context: ICompletionContext): Promise<T>;
 }
 
+/**
+ * The exported token used to register new provider.
+ */
 export const ICompletionProviderManager = new Token<ICompletionProviderManager>(
   '@jupyterlab/completer:ICompletionProviderManager'
 );
 
 export interface ICompletionProviderManager {
   registerProvider(provider: ICompletionProvider): void;
-}
-
-export namespace ICompletionProviderManager {
-  export interface IRegisteredService {
-    provider: ICompletionProvider;
-  }
+  setTimeout(timeout: number): void;
 }
 
 export interface IConnectorProxy {
   fetch(
     request: CompletionHandler.IRequest
-  ): Promise<Array<{ [id: string]: CompletionHandler.ICompletionItemsReply }>>;
+  ): Promise<Array<CompletionHandler.ICompletionItemsReply | null>>;
 }

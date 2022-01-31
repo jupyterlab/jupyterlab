@@ -15,6 +15,7 @@ async function openNotebook(page: IJupyterLabPageFixture, tmpPath, fileName) {
 test.describe('Debugger Tests', () => {
   test.afterEach(async ({ page }) => {
     await page.debugger.switchOff();
+    await page.waitForTimeout(500);
     await page.notebook.close();
   });
 
