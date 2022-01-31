@@ -566,7 +566,7 @@ export namespace ExecutionIndicator {
       showOnToolBar = !(configValues.showOnStatusBar as boolean);
       showProgress = configValues.showProgress as boolean;
     }
-    
+
     return { showOnToolBar, showProgress };
   }
 }

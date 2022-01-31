@@ -2,23 +2,28 @@
   "title": "Code Completion",
   "description": "Code Completion settings.",
   "jupyter.lab.setting-icon-label": "Code Completion settings",
+  "jupyter.lab.transform": true,
   "properties": {
     "availableProviders": {
       "title": "Installed completion providers",
-      "description": "List of installed completion providers, this list is generated automatically, users should not modify this list.",
-      "type": "array",
-      "items": {
-        "type": "string"
+      "description": "Configuration for installed completion providers, the keys of this dictionary are the identifiers of providers, the corresponding value is the priority rank of the provider. Providers with higher rank will be shown before the ones with lower rank, providers with negative rank are disabled.",
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "integer"
+        }
       },
-      "default": [
-       
-      ]
+      "additionalProperties": false,
+      "default": {
+        "CompletionProvider:context": 100,
+        "CompletionProvider:kernel": 200
+      }
     },
-    "selectedProviders": {
-      "title": "Selected provider for completion",
-      "description": "Select a provider from the list above, if the provider does not exist in this list, the default provider will be used.",
-      "type": ["string", "array"],
-      "default": ""
+    "providerTimeout": {
+      "title": "Default timeout for a provider",
+      "description": "If a provider can not return the response for a completer request before timeout, the result of this provider will be ignored. Value is in millisecond",
+      "type": "number",
+      "default": 1000
     }
   },
   "additionalProperties": false,
