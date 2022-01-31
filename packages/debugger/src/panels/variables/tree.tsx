@@ -7,7 +7,7 @@ import { caretDownEmptyIcon, searchIcon } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import React, { useEffect, useState } from 'react';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { convertType } from '.';
 import { Debugger } from '../../debugger';
 import { IDebugger } from '../../tokens';
