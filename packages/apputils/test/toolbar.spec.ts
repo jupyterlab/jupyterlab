@@ -307,7 +307,7 @@ describe('@jupyterlab/apputils', () => {
       // factory in `createToolbarFactory`
       await Promise.resolve();
 
-      const items = factory(null as any);
+      const items = factory(new Widget());
       expect(items).toHaveLength(3);
     });
 
@@ -407,7 +407,7 @@ describe('@jupyterlab/apputils', () => {
       await Promise.resolve();
       await settingRegistry.load(foo.id);
 
-      const items = factory(null as any);
+      const items = factory(new Widget());
       expect(items).toHaveLength(2);
     });
   });
