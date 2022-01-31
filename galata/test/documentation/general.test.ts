@@ -51,7 +51,7 @@ test.describe('General', () => {
     );
     await cell.click();
     await page.keyboard.press('ContextMenu');
-    await page.click('text=Create New View for Output');
+    await page.click('text=Create New View for Cell Output');
 
     // Emulate drag and drop
     const viewerHandle = await page.$('div[role="main"] >> text=lorenz.py');
