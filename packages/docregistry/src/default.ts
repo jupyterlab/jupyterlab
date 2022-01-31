@@ -432,7 +432,7 @@ export abstract class ABCWidgetFactory<
     const items:
       | DocumentRegistry.IToolbarItem[]
       | IObservableList<DocumentRegistry.IToolbarItem> = (
-      this._toolbarFactory ?? this.defaultToolbarFactory
+      this._toolbarFactory?.bind(this) ?? this.defaultToolbarFactory.bind(this)
     )(widget);
 
     if (Array.isArray(items)) {
