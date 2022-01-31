@@ -39,6 +39,8 @@
     "test": "playwright test",
     "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
     "test:debug": "PWDEBUG=1 playwright test",
+    "test:doc": "jlpm run test -c playwright-documentation.config.js",
+    "test:doc:update": "jlpm run test:update -c playwright-documentation.config.js",
     "test:report": "http-server ./playwright-report -a localhost -o",
     "test:update": "playwright test --update-snapshots"
   },

@@ -28,8 +28,8 @@ ignore = ["binder/**", "builder/**", "buildutils/**", "design/**", "dev_mode/**"
 skip = ["check-links"]
 
 [tool.jupyter-releaser.options]
-ignore-glob = ["packages/ui-components/docs/source/ui_components.rst"]
-ignore-links = ["../api/*.*"]
+ignore-glob = ["packages/ui-components/docs/source/ui_components.rst", "images"]
+ignore-links = ["../api/*.*", ".*/images/[\\w-]+.png"]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 npm-cmd = "npm publish --tag next"

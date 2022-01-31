@@ -875,15 +875,11 @@ Writing Documentation
 Documentation is written in Markdown and reStructuredText. In
 particular, the documentation on our Read the Docs page is written in
 reStructuredText. To ensure that the Read the Docs page builds, you'll
-need to install the documentation dependencies with ``conda``:
+need to install the documentation dependencies with ``pip``:
 
 .. code:: bash
 
-   conda env create -f docs/environment.yml
-
-.. code:: bash
-
-   conda activate jupyterlab_documentation
+   pip install -e .[docs]
 
 
 To test the docs run:
@@ -1140,6 +1136,9 @@ preparing them:
 -  Make sure the screenshot does not contain copyrighted material
    (preferable), or the license is allowed in our documentation and
    clearly stated.
+-  For screenshots, you should prefer creating visual tests. This allows
+   to update them dynamically. Those tests are defined in ``galata/test/documentation``
+   folder.
 -  If taking a png screenshot, use the Firefox or Chrome developer tools
    to do the following:
 

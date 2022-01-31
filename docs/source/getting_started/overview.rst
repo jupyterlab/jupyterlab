@@ -5,7 +5,7 @@ Get Started
 
 JupyterLab is a next-generation web-based user interface for Project Jupyter.
 
-.. image:: ../user/images/interface_jupyterlab.png
+.. image:: ../images/interface-jupyterlab.png
    :align: center
    :class: jp-screenshot
 
