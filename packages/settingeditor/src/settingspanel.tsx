@@ -7,7 +7,7 @@ import { Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
 
@@ -65,6 +65,8 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   updateDirtyState,
   translator
 }: ISettingsPanelProps): JSX.Element => {
+  const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
+
   // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
     [pluginId: string]: React.RefObject<HTMLDivElement>;
@@ -77,10 +79,18 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [id: string]: boolean;
   }> = React.useRef({});
 
-  // Scroll to the plugin when a selection is made in the left panel.
-  handleSelectSignal?.connect?.((list, pluginId) =>
-    editorRefs[pluginId].current?.scrollIntoView(true)
-  );
+  useEffect(() => {
+    const onSelectChange = (list: PluginList, pluginId: string) => {
+      setExpandedPlugin(expandedPlugin !== pluginId ? pluginId : null);
+      // Scroll to the plugin when a selection is made in the left panel.
+      editorRefs[pluginId].current?.scrollIntoView(true);
+    };
+    handleSelectSignal?.connect?.(onSelectChange);
+
+    return () => {
+      handleSelectSignal?.disconnect?.(onSelectChange);
+    };
+  }, []);
 
   const updateDirtyStates = (id: string, dirty: boolean) => {
     if (editorDirtyStates.current) {
@@ -94,6 +104,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     }
     updateDirtyState(false);
   };
+
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
       {settings.map(pluginSettings => {
@@ -104,9 +115,16 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
             key={`${pluginSettings.id}SettingsEditor`}
           >
             <SettingsFormEditor
+              isCollapsed={pluginSettings.id !== expandedPlugin}
+              onCollapseChange={(willCollapse: boolean) => {
+                if (!willCollapse) {
+                  setExpandedPlugin(pluginSettings.id);
+                } else if (pluginSettings.id === expandedPlugin) {
+                  setExpandedPlugin(null);
+                }
+              }}
               settings={pluginSettings}
               renderers={editorRegistry.renderers}
-              handleSelectSignal={handleSelectSignal}
               hasError={(error: boolean) => {
                 hasError(pluginSettings.id, error);
               }}

@@ -10,7 +10,6 @@ import { ITranslator } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
 import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
 import Form, {
   ArrayFieldTemplateProps,
   Field,
@@ -42,9 +41,14 @@ export namespace SettingsFormEditor {
     renderers: { [id: string]: Field };
 
     /**
-     * Signal used to expand the plugin settings when selected.
+     * Whether the form is collapsed or not.
      */
-    handleSelectSignal: ISignal<PluginList, string>;
+    isCollapsed: boolean;
+
+    /**
+     * Callback with the collapse state value.
+     */
+    onCollapseChange: (v: boolean) => void;
 
     /**
      * Translator object
@@ -79,11 +83,6 @@ export namespace SettingsFormEditor {
      * the "Restore to Default" button when there are no changes.
      */
     isModified: boolean;
-
-    /**
-     * Indicates whether the editor is collapsed / hidden or not.
-     */
-    hidden: boolean;
   }
 }
 
@@ -238,39 +237,10 @@ export class SettingsFormEditor extends React.Component<
     const { settings } = props;
     this.state = {
       formData: settings.composite,
-      isModified: settings.isModified,
-      hidden: true
+      isModified: settings.isModified
     };
     this.handleChange = this.handleChange.bind(this);
     this._debouncer = new Debouncer(this.handleChange);
-  }
-
-  /**
-   * Called immediately after a component is mounted. Setting state here will trigger re-rendering.
-   */
-  componentDidMount(): void {
-    /**
-     * Automatically expand the settings if this plugin was selected in the
-     * plugin list on the right
-     */
-    this.props.handleSelectSignal.connect(this.onSelect);
-  }
-
-  /**
-   * Called immediately after updating occurs. Not called for the initial render.
-   */
-  componentDidUpdate(prevProps: Readonly<SettingsFormEditor.IProps>): void {
-    if (prevProps.handleSelectSignal !== this.props.handleSelectSignal) {
-      prevProps.handleSelectSignal.disconnect(this.onSelect);
-    }
-  }
-
-  /**
-   * Called immediately before a component is destroyed. Perform any necessary cleanup in this method, such as
-   * cancelled network requests, or cleaning up any DOM elements created in `componentDidMount`.
-   */
-  componentWillUnmount(): void {
-    Signal.clearData(this);
   }
 
   /**
@@ -330,14 +300,14 @@ export class SettingsFormEditor extends React.Component<
         };
       }
     }
-    const icon = this.state.hidden ? caretRightIcon : caretDownIcon;
+    const icon = this.props.isCollapsed ? caretRightIcon : caretDownIcon;
 
     return (
       <div>
         <div
           className="jp-SettingsHeader"
           onClick={() => {
-            this.setState({ hidden: !this.state.hidden });
+            this.props.onCollapseChange(!this.props.isCollapsed);
             this.props.onSelect(this.props.settings.id);
           }}
         >
@@ -352,7 +322,7 @@ export class SettingsFormEditor extends React.Component<
             </button>
           )}
         </div>
-        {!this.state.hidden && (
+        {!this.props.isCollapsed && (
           <Form
             schema={this.props.settings.schema as JSONSchema7}
             formData={this.state.formData}
@@ -382,7 +352,7 @@ export class SettingsFormEditor extends React.Component<
 
   protected onSelect = (list: PluginList, id: string): void => {
     if (id === this.props.settings.id) {
-      this.setState({ hidden: false });
+      this.props.onCollapseChange(false);
     }
   };
 
