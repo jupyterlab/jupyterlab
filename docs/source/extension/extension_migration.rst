@@ -152,6 +152,8 @@ Extension Development Changes
 - The ``webpack`` dependency in ``@jupyterlab/builder`` has been updated to ``5.72`` (or newer). Base rules have been updated to use the
   `Asset Modules <https://webpack.js.org/guides/asset-modules>`_ instead of the previous ``file-loader``, ``raw-loader`` and ``url-loader``.
   This might affect third-party extensions if they were relying on specific behaviors from these loaders.
+- In JupyterLab 3.x, the CSS for a _disabled_ prebuilt extensions would still be loaded on the page.
+  This is no longer the case in JupyterLab 4.0.
 
 JupyterLab 3.0 to 3.1
 ---------------------
