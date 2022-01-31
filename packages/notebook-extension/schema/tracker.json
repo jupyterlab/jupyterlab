@@ -843,6 +843,12 @@
       "type": "number",
       "default": 50
     },
+    "showEditorForReadOnlyMarkdown": {
+      "title": "Show editor for read-only Markdown cells",
+      "description": "Should an editor be shown for read-only markdown",
+      "type": "boolean",
+      "default": true
+    },
     "kernelStatus": {
       "title": "Kernel status icon configuration",
       "description": "Defines the position and components of execution progress indicator.",

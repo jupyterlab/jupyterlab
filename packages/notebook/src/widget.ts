@@ -653,7 +653,9 @@ export class StaticNotebook extends Widget {
       rendermime,
       contentFactory,
       updateEditorOnShow: false,
-      placeholder: false
+      placeholder: false,
+      showEditorForReadOnlyMarkdown: this._notebookConfig
+        .showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
@@ -797,6 +799,19 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
+
+    // Control editor visibility for read-only Markdown cells
+    const showEditorForReadOnlyMarkdown = this._notebookConfig
+      .showEditorForReadOnlyMarkdown;
+    // 'this._cellsArray' check is here as '_updateNotebookConfig()'
+    // can be called before 'this._cellsArray' is defined
+    if (showEditorForReadOnlyMarkdown !== undefined && this._cellsArray) {
+      for (const cell of this._cellsArray) {
+        if (cell.model.type === 'markdown') {
+          (cell as MarkdownCell).showEditorForReadOnly = showEditorForReadOnlyMarkdown;
+        }
+      }
+    }
   }
 
   private _incrementRenderedCount() {
@@ -985,6 +1000,11 @@ export namespace StaticNotebook {
     maxNumberOutputs: number;
 
     /**
+     * Should an editor be shown for read-only markdown
+     */
+    showEditorForReadOnlyMarkdown?: boolean;
+
+    /**
      * Defines if the document can be undo/redo.
      */
     disableDocumentWideUndoRedo: boolean;
@@ -1017,6 +1037,7 @@ export namespace StaticNotebook {
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
     maxNumberOutputs: 50,
+    showEditorForReadOnlyMarkdown: true,
     disableDocumentWideUndoRedo: false,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',

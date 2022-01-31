@@ -1348,6 +1348,9 @@ function activateNotebookHandler(
       observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string,
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
+      showEditorForReadOnlyMarkdown: settings.get(
+        'showEditorForReadOnlyMarkdown'
+      ).composite as boolean,
       disableDocumentWideUndoRedo: settings.get(
         'experimentalDisableDocumentWideUndoRedo'
       ).composite as boolean,
