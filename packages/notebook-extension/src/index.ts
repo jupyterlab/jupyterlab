@@ -1003,7 +1003,7 @@ function activateClonedOutputs(
   };
 
   commands.addCommand(CommandIDs.createOutputView, {
-    label: trans.__('Create New View for Output'),
+    label: trans.__('Create New View for Cell Output'),
     execute: async args => {
       let cell: CodeCell | undefined;
       let current: NotebookPanel | undefined | null;
@@ -1816,7 +1816,8 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.restartClear, {
-    label: trans.__('Restart Kernel and Clear All Outputs…'),
+    label: trans.__('Restart Kernel and Clear Outputs of All Cells…'),
+    caption: trans.__('Restart the kernel and clear all outputs of all cells'),
     execute: async () => {
       const restarted: boolean = await commands.execute(CommandIDs.restart, {
         activate: false
@@ -1858,7 +1859,8 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
-    label: trans.__('Clear All Outputs'),
+    label: trans.__('Clear Outputs of All Cells'),
+    caption: trans.__('Clear all outputs of all cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1869,7 +1871,7 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.clearOutputs, {
-    label: trans.__('Clear Outputs'),
+    label: trans.__('Clear Cell Output'),
     caption: trans.__('Clear outputs for the selected cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
