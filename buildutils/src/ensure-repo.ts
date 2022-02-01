@@ -201,6 +201,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/mainmenu-extension',
     '@jupyterlab/markdownviewer',
     '@jupyterlab/markdownviewer-extension',
+    '@jupyterlab/markedparser-extension',
     '@jupyterlab/mathjax2',
     '@jupyterlab/mathjax2-extension',
     '@jupyterlab/nbconvert-css',
