@@ -18,14 +18,6 @@ export interface IFilterBoxProps {
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  /**
-   * Handler for search input changes.
-  const handleChange = (e: React.FormEvent<HTMLElement>) => {
-    const target = e.target as HTMLInputElement;
-    setFilter(target.value);
-    props.model.filter = target.value;
-  };
-  */
   return (
     <InputGroup
       type="text"
