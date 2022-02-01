@@ -358,8 +358,8 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._model.kernelSources.kernelSources = modules.body.modules.map(
       module => {
         return {
-          name: module.id as string,
-          path: module.name
+          name: module.name as string,
+          path: module.path as string
         };
       }
     );
