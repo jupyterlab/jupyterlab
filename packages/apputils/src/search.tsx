@@ -1,20 +1,33 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget } from '@jupyterlab/apputils';
-import { Contents } from '@jupyterlab/services';
 import { InputGroup } from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
 import React, { useEffect, useState } from 'react';
-import { DirListing } from './listing';
+import { ReactWidget } from './vdom';
 
 /**
  * The class name added to the filebrowser crumbs node.
  */
 export interface IFilterBoxProps {
-  listing: DirListing;
+  /**
+   * A function to callback when filter is updated.
+   */
+  updateFilter: (filterFn: (item: string) => boolean) => void;
+
+  /**
+   * Whether to use the fuzzy filter.
+   */
   useFuzzyFilter: boolean;
+
+  /**
+   * Optional placeholder for the search box.
+   */
   placeholder?: string;
+
+  /**
+   * Whether to force a refresh.
+   */
   forceRefresh?: boolean;
 }
 
@@ -83,12 +96,12 @@ function fuzzySearch(source: string, query: string): IScore | null {
   };
 }
 
-const FilterBox = (props: IFilterBoxProps) => {
+export const FilterBox = (props: IFilterBoxProps) => {
   const [filter, setFilter] = useState('');
 
   if (props.forceRefresh) {
     useEffect(() => {
-      props.listing.model.setFilter((item: Contents.IModel) => {
+      props.updateFilter((item: string) => {
         return true;
       });
     }, []);
@@ -100,26 +113,21 @@ const FilterBox = (props: IFilterBoxProps) => {
   const handleChange = (e: React.FormEvent<HTMLElement>) => {
     const target = e.target as HTMLInputElement;
     setFilter(target.value);
-    props.listing.model.setFilter((item: Contents.IModel) => {
+    props.updateFilter((item: string) => {
       if (props.useFuzzyFilter) {
         // Run the fuzzy search for the item and query.
-        const name = item.name.toLowerCase();
         const query = target.value.toLowerCase();
-        let score = fuzzySearch(name, query);
+        let score = fuzzySearch(item, query);
         // Ignore the item if it is not a match.
         if (!score) {
-          item.indices = [];
           return false;
         }
-        item.indices = score.indices;
         return true;
       }
-      const i = item.name.indexOf(target.value);
+      const i = item.indexOf(target.value);
       if (i === -1) {
-        item.indices = [];
         return false;
       }
-      item.indices = [...Array(target.value.length).keys()].map(x => x + i);
       return true;
     });
   };
@@ -130,6 +138,7 @@ const FilterBox = (props: IFilterBoxProps) => {
       rightIcon="ui-components:search"
       placeholder={props.placeholder}
       onChange={handleChange}
+      className="jp-FilterBox"
       value={filter}
     />
   );
@@ -141,7 +150,7 @@ const FilterBox = (props: IFilterBoxProps) => {
 export const FilenameSearcher = (props: IFilterBoxProps) => {
   return ReactWidget.create(
     <FilterBox
-      listing={props.listing}
+      updateFilter={props.updateFilter}
       useFuzzyFilter={props.useFuzzyFilter}
       placeholder={props.placeholder}
       forceRefresh={props.forceRefresh}

@@ -18,6 +18,7 @@ export * from './mainareawidget';
 export * from './menufactory';
 export * from './printing';
 export * from './sanitizer';
+export * from './search';
 export * from './sessioncontext';
 export * from './spinner';
 export * from './splash';
