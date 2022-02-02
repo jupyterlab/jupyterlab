@@ -56,7 +56,8 @@
     "@lumino/domutils": "^1.8.1",
     "@lumino/polling": "^1.10.0",
     "@lumino/widgets": "^1.31.1",
-    "es6-promise": "~4.2.8"
+    "es6-promise": "~4.2.8",
+    "react": "^17.0.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
