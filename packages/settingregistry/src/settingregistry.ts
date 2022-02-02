@@ -7,6 +7,7 @@ import {
   JSONExt,
   JSONObject,
   JSONValue,
+  PartialJSONArray,
   PartialJSONObject,
   PartialJSONValue,
   ReadonlyJSONObject,
@@ -719,6 +720,34 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * Checks if any fields are different from the default value.
+   */
+  isDefault(user: ReadonlyPartialJSONObject): boolean {
+    for (const key in this.schema.properties) {
+      const value = user[key];
+      const defaultValue = this.default(key);
+      if (
+        value === undefined ||
+        value === null ||
+        defaultValue === undefined ||
+        defaultValue === null ||
+        JSONExt.deepEqual(value, JSONExt.emptyObject) ||
+        JSONExt.deepEqual(value, JSONExt.emptyArray)
+      ) {
+        continue;
+      }
+      if (!JSONExt.deepEqual(value, defaultValue)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  get isModified(): boolean {
+    return !this.isDefault(this.user);
+  }
+
+  /**
    * The user settings.
    */
   get user(): ReadonlyPartialJSONObject {
@@ -746,7 +775,7 @@ export class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A calculated default JSON value for a specific setting.
    */
-  default(key: string): PartialJSONValue | undefined {
+  default(key?: string): PartialJSONValue | undefined {
     return Private.reifyDefault(this.schema, key);
   }
 
@@ -1364,23 +1393,50 @@ namespace Private {
     schema: ISettingRegistry.IProperty,
     root?: string
   ): PartialJSONValue | undefined {
+    const definitions = schema.definitions as PartialJSONObject;
     // If the property is at the root level, traverse its schema.
     schema = (root ? schema.properties?.[root] : schema) || {};
 
-    // If the property has no default or is a primitive, return.
-    if (!('default' in schema) || schema.type !== 'object') {
+    if (schema.type === 'object') {
+      // Make a copy of the default value to populate.
+      const result = JSONExt.deepCopy(schema.default as PartialJSONObject);
+
+      // Iterate through and populate each child property.
+      const props = schema.properties || {};
+      for (const property in props) {
+        result[property] = reifyDefault(props[property]);
+      }
+
+      return result;
+    } else if (schema.type === 'array') {
+      // Make a copy of the default value to populate.
+      const result = JSONExt.deepCopy(schema.default as PartialJSONArray);
+
+      // Items defines the properties of each item in the array
+      let props = (schema.items as PartialJSONObject) || {};
+      // Use referenced definition if one exists
+      if (props['$ref'] && definitions) {
+        const ref: string = (props['$ref'] as string).replace(
+          '#/definitions/',
+          ''
+        );
+        props = (definitions[ref] as PartialJSONObject) ?? {};
+      }
+      // Iterate through the items in the array and fill in defaults
+      for (const item in result) {
+        // Use the values that are hard-coded in the default array over the defaults for each field.
+        const reified = (reifyDefault(props) as PartialJSONObject) || {};
+        for (const prop in reified) {
+          if ((result[item] as PartialJSONObject)?.[prop]) {
+            reified[prop] = (result[item] as PartialJSONObject)[prop];
+          }
+        }
+        result[item] = reified;
+      }
+
+      return result;
+    } else {
       return schema.default;
     }
-
-    // Make a copy of the default value to populate.
-    const result = JSONExt.deepCopy(schema.default as PartialJSONObject);
-
-    // Iterate through and populate each child property.
-    const props = schema.properties || {};
-    for (const property in props) {
-      result[property] = reifyDefault(props[property]);
-    }
-
-    return result;
   }
 }
