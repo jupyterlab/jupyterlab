@@ -99,7 +99,8 @@ export function displayShortcuts(
               style={{
                 whiteSpace: 'nowrap',
                 verticalAlign: 'top',
-                padding: '0px 10px'
+                padding: '0px 10px',
+                fontFamily: 'monospace'
               }}
             >
               {b.keys.map(CommandRegistry.formatKeystroke).join(', ')}
@@ -118,15 +119,14 @@ export function displayShortcuts(
     }
   }
 
-
   const body = (
     <table>
       <thead>
         <tr>
-          <th style={{textAlign: 'left'}} >Shortcut</th>
-          <th style={{textAlign: 'left'}} >Label</th>
-          <th style={{textAlign: 'left'}} >Description</th>
-          <th style={{textAlign: 'left'}} >Command</th>
+          <th style={{ textAlign: 'left' }}>Shortcut</th>
+          <th style={{ textAlign: 'left' }}>Label</th>
+          <th style={{ textAlign: 'left' }}>Description</th>
+          <th style={{ textAlign: 'left' }}>Command</th>
         </tr>
       </thead>
       <tbody>{bindingTable}</tbody>
