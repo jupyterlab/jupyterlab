@@ -270,7 +270,7 @@ function activateJSON(
   });
   if (palette) {
     palette.addItem({
-      category: trans.__('Settings Editor'),
+      category: trans.__('Settings'),
       command: CommandIDs.openJSON
     });
   }
