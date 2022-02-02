@@ -22,7 +22,7 @@ Moreover, you can see the cursors from other users with an anonymous
 username, a username that will disappear in a few seconds to make room
 for what is essential, the document's content.
 
-.. image:: images/shared_cursors.png
+.. image:: images/rtc_shared_cursors.png
    :align: center
    :class: jp-screenshot
 
@@ -38,6 +38,6 @@ a warning message indicating that the document's content changed. For more
 information, you can read the section of
 `Documents <https://jupyterlab.readthedocs.io/en/latest/extension/documents.html#documents>`_.
 
-.. image:: images/sync_editors.png
+.. image:: images/rtc_sync_editors.png
    :align: center
    :class: jp-screenshot

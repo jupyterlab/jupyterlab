@@ -17,7 +17,7 @@ into other file formats such as:
 
 To access these options, while a notebook is open, browse the File menu:
 
-.. image:: images/exporting_menu.png
+.. image:: ../images/exporting-menu.png
    :align: center
    :class: jp-screenshot
 
@@ -38,7 +38,7 @@ slides, follow these steps:
 2. Select Property inspector in the :ref:`right sidebar <right-sidebar>`.
 3. Select the slide type (Slide, Subslide, Fragment, Skip, Notes).
 
-.. image:: images/exporting_slide_type.png
+.. image:: ../images/exporting-slide-type.png
    :align: center
    :class: jp-screenshot
 

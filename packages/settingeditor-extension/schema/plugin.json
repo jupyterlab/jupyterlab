@@ -4,11 +4,19 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "settingeditor:open",
+      "args": {},
       "keys": ["Accel ,"],
       "selector": "body"
     },
     {
+      "command": "settingeditor:open-json",
+      "args": {},
+      "keys": ["Shift Accel ,"],
+      "selector": "body"
+    },
+    {
       "command": "settingeditor:save",
+      "args": {},
       "keys": ["Accel S"],
       "selector": ".jp-SettingEditor"
     }

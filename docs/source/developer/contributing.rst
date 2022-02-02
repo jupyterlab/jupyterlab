@@ -875,15 +875,11 @@ Writing Documentation
 Documentation is written in Markdown and reStructuredText. In
 particular, the documentation on our Read the Docs page is written in
 reStructuredText. To ensure that the Read the Docs page builds, you'll
-need to install the documentation dependencies with ``conda``:
+need to install the documentation dependencies with ``pip``:
 
 .. code:: bash
 
-   conda env create -f docs/environment.yml
-
-.. code:: bash
-
-   conda activate jupyterlab_documentation
+   pip install -e .[docs]
 
 
 To test the docs run:
@@ -908,17 +904,17 @@ Or with ``jlpm``:
 Writing Style
 ^^^^^^^^^^^^^
 
--  The documentation should be written in the second person, referring
-   to the reader as "you" and not using the first person plural "we."
+-  Write documentation in the second person, referring
+   to the reader as "you". Do not use the first person plural "we."
    The author of the documentation is not sitting next to the user, so
    using "we" can lead to frustration when things don't work as
    expected.
 -  Avoid words that trivialize using JupyterLab such as "simply" or
    "just." Tasks that developers find simple or easy may not be for
    users.
--  Write in the active tense, so "drag the notebook cells..." rather
-   than "notebook cells can be dragged..."
--  The beginning of each section should begin with a short (1-2
+-  Write in the active tense. For example, "drag the notebook cells…" rather
+   than "notebook cells can be dragged…".
+-  The beginning of each section should begin with a short (1–2
    sentence) high-level description of the topic, feature or component.
 -  Use "enable" rather than "allow" to indicate what JupyterLab makes
    possible for users. Using "allow" connotes that we are giving them
@@ -930,36 +926,56 @@ User Interface Naming Conventions
 Documents, Files, and Activities
 """"""""""""""""""""""""""""""""
 
-Files are referred to as either files or documents, depending on the
-context.
+Refer to files as either files or documents, depending on the context.
 
-Documents are more human centered. If human viewing, interpretation,
-interaction is an important part of the experience, it is a document in
-that context. For example, notebooks and markdown files will often be
-referring to as documents unless referring to the file-ness aspect of it
+*Documents* are more human centered. If human viewing, interpretation,
+or interaction is an important part of the experience, use the term 
+"document". For example, notebooks and Markdown files will often be
+referred to as documents except in the context of a file system 
 (e.g., the notebook filename).
 
-Files are used in a less human-focused context. For example, we refer to
-files in relation to a file system or file name.
+Use the term *files* in a less human-focused context. For example,
+refer to files in relation to a file system or file name.
 
-Activities can be either a document or another UI panel that is not file
-backed, such as terminals, consoles or the inspector. An open document
-or file is an activity in that it is represented by a panel that you can
-interact with.
+*Activities* are either an opened document or another UI panel that is 
+not related to a file, such as terminals, consoles or the inspector.
+
+Notebook Cells
+""""""""""""""
+
+A notebook contains *cells*, each of which have *input* and one or more 
+*outputs*. When the user runs a cell, the kernel reads and executes the
+input and generates outputs. The notebook then displays the cell's output.
+The term *output* describes one of possibly multiple results of running a
+cell. *Cell output* describes the collective output of one cell. Use 
+*outputs of all cells* to describe all outputs from all cells.
+
+Command Names
+"""""""""""""
+
+Command names appear in menus, in the Command Palette, and in toolbar buttons 
+(where the name typically appears on hover).
+
+-  Keep command names short, concise, and unambiguous.
+-  Add an ellipsis (…) after any command name that requires more options. This 
+   tells the user that they should expect a pop-up window to appear before they
+   execute the command.
+-  Commands should use verbs in the imperative case. Do not use articles with nouns.
+   For example, write "Clear Cell", not "Clear the Cell" or "Clearing Cell".
 
 Element Names
 """""""""""""
 
--  The generic content area of a tabbed UI is a panel, but prefer to
-   refer to the more specific name, such as “File browser.” Tab bars
-   have tabs which toggle panels.
--  The menu bar contains menu items, which have their own submenus.
--  The main work area can be referred to as the work area when the name
+-  The generic content area of a tabbed UI is a *panel*. Refer to a panel
+   by its most specific name, such as “File browser.” *Tab bars*
+   have *tabs* that let a user view different panels.
+-  The *menu bar* contains *menu items* that have their own *submenus*.
+-  Refer to the *main work area* as the work area when the name
    is unambiguous.
--  When describing elements in the UI, colloquial names are preferred
-   (e.g., “File browser” instead of “Files panel”).
+-  When describing elements in the UI, prefer colloquial names over 
+   technical names. For example, use “File browser” instead of “Files panel”.
 
-The majority of names are written in lower case. These names include:
+Write most element names in lowercase. These names include:
 
 -  tab
 -  panel
@@ -975,8 +991,8 @@ The majority of names are written in lower case. These names include:
 -  cell inspector
 -  code console
 
-The following sections of the user interface should be in title case,
-directly quoting a word in the UI:
+Write the following sections of the user interface with one or more 
+initial capitals, mirroring their use in the UI:
 
 -  Activity Bar
 -  File menu
@@ -984,10 +1000,6 @@ directly quoting a word in the UI:
 -  Running panel
 -  Tabs panel
 -  Simple Interface mode
-
-The capitalized words match the label of the UI element the user is
-clicking on because there does not exist a good colloquial name for the
-tool, such as “file browser” or “command palette”.
 
 See :ref:`interface` for descriptions of elements in the UI.
 
@@ -1124,6 +1136,9 @@ preparing them:
 -  Make sure the screenshot does not contain copyrighted material
    (preferable), or the license is allowed in our documentation and
    clearly stated.
+-  For screenshots, you should prefer creating visual tests. This allows
+   to update them dynamically. Those tests are defined in ``galata/test/documentation``
+   folder.
 -  If taking a png screenshot, use the Firefox or Chrome developer tools
    to do the following:
 
