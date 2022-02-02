@@ -12,6 +12,7 @@ import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
+import { renderText } from '@jupyterlab/rendermime';
 
 /**
  * The class name added to completer menu items.
@@ -60,6 +61,7 @@ export class Completer extends Widget {
   constructor(options: Completer.IOptions) {
     super({ node: document.createElement('div') });
     this._renderer = options.renderer || Completer.defaultRenderer;
+
     this.model = options.model || null;
     this.editor = options.editor || null;
     this.addClass('jp-Completer');
@@ -124,6 +126,10 @@ export class Completer extends Widget {
     if (this._model) {
       this._model.stateChanged.connect(this.onModelStateChanged, this);
     }
+  }
+
+  set showDocsPanel(showDoc: boolean) {
+    this._showDoc = showDoc ?? true;
   }
 
   /**
@@ -249,10 +255,13 @@ export class Completer extends Widget {
     active.classList.add(ACTIVE_CLASS);
 
     // Add the documentation panel
-    let docPanel = document.createElement('div');
-    docPanel.className = 'jp-Completer-docpanel';
-    node.appendChild(docPanel);
-    this._updateDocPanel();
+    if (this._showDoc) {
+      let docPanel = document.createElement('div');
+      docPanel.className = 'jp-Completer-docpanel';
+      node.appendChild(docPanel);
+    }
+    const resolvedItem = this.model?.resolveItem(this._activeIndex);
+    this._updateDocPanel(resolvedItem);
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
@@ -402,7 +411,9 @@ export class Completer extends Widget {
     ) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);
-    this._updateDocPanel();
+
+    const resolvedItem = this.model?.resolveItem(this._activeIndex);
+    this._updateDocPanel(resolvedItem);
   }
 
   /**
@@ -599,39 +610,52 @@ export class Completer extends Widget {
   }
 
   /**
+   * Create a loading bar element for document panel.
+   */
+  private _createLoadingBar(): HTMLElement {
+    const loadingContainer = document.createElement('div');
+    loadingContainer.classList.add('jp-Completer-loading-bar-container');
+    const loadingBar = document.createElement('div');
+    loadingBar.classList.add('jp-Completer-loading-bar');
+    loadingContainer.append(loadingBar);
+    return loadingContainer;
+  }
+  /**
    * Update the display-state and contents of the documentation panel
    */
-  private _updateDocPanel(): void {
+  private _updateDocPanel(
+    resolvedItem: Promise<CompletionHandler.ICompletionItem | null> | undefined
+  ): void {
     let docPanel = this.node.querySelector('.jp-Completer-docpanel');
     if (!docPanel) {
       return;
     }
-    if (!this.model?.completionItems) {
-      return;
-    }
-    let items = this.model?.completionItems();
-    if (!items) {
-      docPanel.setAttribute('style', 'display:none');
-      return;
-    }
-    let activeItem = items[this._activeIndex];
-    if (!activeItem) {
+
+    if (!resolvedItem) {
       docPanel.setAttribute('style', 'display:none');
       return;
     }
     docPanel.textContent = '';
-    if (activeItem.documentation) {
-      let node: HTMLElement;
-      if (!this._renderer.createDocumentationNode) {
-        node = Completer.defaultRenderer.createDocumentationNode(activeItem);
-      } else {
-        node = this._renderer.createDocumentationNode(activeItem);
-      }
-      docPanel.appendChild(node);
-      docPanel.setAttribute('style', '');
-    } else {
-      docPanel.setAttribute('style', 'display:none');
-    }
+    docPanel.appendChild(this._createLoadingBar());
+    resolvedItem
+      .then(activeItem => {
+        if (!activeItem) {
+          return;
+        }
+        if (activeItem.documentation) {
+          let node: HTMLElement;
+          const nodeRenderer =
+            this._renderer.createDocumentationNode ??
+            Completer.defaultRenderer.createDocumentationNode;
+          node = nodeRenderer(activeItem);
+          docPanel!.textContent = '';
+          docPanel!.appendChild(node);
+          docPanel!.setAttribute('style', '');
+        } else {
+          docPanel!.setAttribute('style', 'display:none');
+        }
+      })
+      .catch(e => console.error(e));
   }
 
   private _activeIndex = 0;
@@ -643,6 +667,7 @@ export class Completer extends Widget {
   private _visibilityChanged = new Signal<this, void>(this);
   private _indexChanged = new Signal<this, number>(this);
   private _lastSubsetMatch: string = '';
+  private _showDoc: boolean;
 }
 
 export namespace Completer {
@@ -669,6 +694,11 @@ export namespace Completer {
      * The renderer for the completer widget nodes.
      */
     renderer?: IRenderer;
+
+    /**
+     * Flag to show or hide the document panel.
+     */
+    showDoc?: boolean;
   }
 
   /**
@@ -749,6 +779,17 @@ export namespace Completer {
      * Get the of visible items in the completer menu.
      */
     items(): IIterator<IItem>;
+
+    /**
+     * Lazy load missing data of item at `activeIndex`.
+     * @param {number} activeIndex - index of item
+     * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
+     *  Return a promise of `null` of another `resolveItem` is called. Otherwise return the
+     * promise of resolved completion item.
+     */
+    resolveItem(
+      activeIndex: number
+    ): Promise<CompletionHandler.ICompletionItem | null> | undefined;
 
     /**
      * Get the unfiltered options in a completer menu.
@@ -926,9 +967,13 @@ export namespace Completer {
     createDocumentationNode(
       activeItem: CompletionHandler.ICompletionItem
     ): HTMLElement {
-      let pre = document.createElement('pre');
-      pre.textContent = activeItem.documentation || '';
-      return pre;
+      const host = document.createElement('div');
+      host.classList.add('jp-RenderedText');
+      const sanitizer = { sanitize: (dirty: string) => dirty };
+      const source = activeItem.documentation || '';
+
+      renderText({ host, sanitizer, source });
+      return host;
     }
 
     /**

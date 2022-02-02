@@ -37,6 +37,10 @@ import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
+import {
+  CompleterCommandIDs,
+  ICompletionProviderManager
+} from '@jupyterlab/completer';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 import { Commands, FACTORY, IFileTypeData } from './commands';
@@ -163,13 +167,22 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+const completerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extensions:completer',
+  requires: [IEditorTracker],
+  optional: [ICompletionProviderManager],
+  activate: activateFileEditorCompleterService,
+  autoStart: true
+};
+
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   plugin,
   lineColStatus,
-  tabSpaceStatus
+  tabSpaceStatus,
+  completerPlugin
 ];
 export default plugins;
 
@@ -375,4 +388,40 @@ function activate(
     });
 
   return tracker;
+}
+
+/**
+ * Activate the completer service for file editor.
+ */
+function activateFileEditorCompleterService(
+  app: JupyterFrontEnd,
+  editorTracker: IEditorTracker,
+  manager?: ICompletionProviderManager
+): void {
+  if (!manager) {
+    return;
+  }
+
+  app.commands.addCommand(CompleterCommandIDs.invokeFile, {
+    execute: () => {
+      const id = editorTracker.currentWidget && editorTracker.currentWidget.id;
+      if (id) {
+        return manager.invoke(id);
+      }
+    }
+  });
+
+  app.commands.addCommand(CompleterCommandIDs.selectFile, {
+    execute: () => {
+      const id = editorTracker.currentWidget && editorTracker.currentWidget.id;
+      if (id) {
+        return manager.select(id);
+      }
+    }
+  });
+
+  editorTracker.widgetAdded.connect(
+    async (_, widget) =>
+      await manager.attachEditor(widget, app.serviceManager.sessions)
+  );
 }

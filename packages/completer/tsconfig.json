@@ -28,6 +28,12 @@
       "path": "../notebook"
     },
     {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
       "path": "../services"
     },
     {

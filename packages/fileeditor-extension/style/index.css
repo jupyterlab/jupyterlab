@@ -15,5 +15,6 @@
 @import url('~@jupyterlab/filebrowser/style/index.css');
 @import url('~@jupyterlab/console/style/index.css');
 @import url('~@jupyterlab/fileeditor/style/index.css');
+@import url('~@jupyterlab/completer/style/index.css');
 @import url('~@jupyterlab/launcher/style/index.css');
 @import url('~@jupyterlab/mainmenu/style/index.css');

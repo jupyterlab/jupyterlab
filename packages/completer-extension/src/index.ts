@@ -10,36 +10,13 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  CompleterCommandIDs,
   CompletionProviderManager,
   ContextCompleterProvider,
   ICompletionProviderManager,
   KernelCompleterProvider
 } from '@jupyterlab/completer';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { IConsoleTracker } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-/**
- * The command IDs used by the completer plugin.
- */
-namespace CommandIDs {
-  export const invoke = 'completer:invoke';
-
-  export const invokeConsole = 'completer:invoke-console';
-
-  export const invokeNotebook = 'completer:invoke-notebook';
-
-  export const invokeFile = 'completer:invoke-file';
-
-  export const select = 'completer:select';
-
-  export const selectConsole = 'completer:select-console';
-
-  export const selectNotebook = 'completer:select-notebook';
-
-  export const selectFile = 'completer:select-file';
-}
 
 const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:tracker';
 
@@ -58,23 +35,17 @@ const defaultProvider: JupyterFrontEndPlugin<void> = {
 
 const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
   id: COMPLETION_MANAGER_PLUGIN,
-  requires: [
-    INotebookTracker,
-    IEditorTracker,
-    IConsoleTracker,
-    ISettingRegistry
-  ],
+  requires: [ISettingRegistry],
   provides: ICompletionProviderManager,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    notebooks: INotebookTracker,
-    editorTracker: IEditorTracker,
-    consoles: IConsoleTracker,
     settings: ISettingRegistry
   ): ICompletionProviderManager => {
     const AVAILABLE_PROVIDERS = 'availableProviders';
     const PROVIDER_TIMEOUT = 'providerTimeout';
+    const SHOW_DOCUMENT_PANEL = 'showDocumentPanel';
+    const CONTINUOUS_HINTING = 'continuousHinting';
     const manager = new CompletionProviderManager();
     const updateSetting = (
       settingValues: ISettingRegistry.ISettings,
@@ -82,7 +53,11 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
     ): void => {
       const providersData = settingValues.get(AVAILABLE_PROVIDERS);
       const timeout = settingValues.get(PROVIDER_TIMEOUT);
+      const showDoc = settingValues.get(SHOW_DOCUMENT_PANEL);
+      const continuousHinting = settingValues.get(CONTINUOUS_HINTING);
       manager.setTimeout(timeout.composite as number);
+      manager.setShowDocumentFlag(showDoc.composite as boolean);
+      manager.setContinuousHinting(continuousHinting.composite as boolean);
       const selectedProviders = providersData.user ?? providersData.composite;
       const sortedProviders = Object.entries(selectedProviders ?? {})
         .filter(val => val[1] >= 0 && availableProviders.includes(val[0]))
@@ -113,67 +88,6 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
       });
     });
 
-    app.commands.addCommand(CommandIDs.invokeNotebook, {
-      execute: args => {
-        const panel = notebooks.currentWidget;
-        if (panel && panel.content.activeCell?.model.type === 'code') {
-          manager.invoke(panel.id);
-        }
-      }
-    });
-
-    app.commands.addCommand(CommandIDs.selectNotebook, {
-      execute: () => {
-        const id = notebooks.currentWidget && notebooks.currentWidget.id;
-
-        if (id) {
-          return manager.select(id);
-        }
-      }
-    });
-
-    // Add console completer invoke command.
-    app.commands.addCommand(CommandIDs.invokeFile, {
-      execute: () => {
-        const id =
-          editorTracker.currentWidget && editorTracker.currentWidget.id;
-        if (id) {
-          return manager.invoke(id);
-        }
-      }
-    });
-
-    app.commands.addCommand(CommandIDs.selectFile, {
-      execute: () => {
-        const id =
-          editorTracker.currentWidget && editorTracker.currentWidget.id;
-
-        if (id) {
-          return manager.select(id);
-        }
-      }
-    });
-
-    app.commands.addCommand(CommandIDs.invokeConsole, {
-      execute: () => {
-        const id = consoles.currentWidget && consoles.currentWidget.id;
-
-        if (id) {
-          return manager.invoke(id);
-        }
-      }
-    });
-
-    app.commands.addCommand(CommandIDs.selectConsole, {
-      execute: () => {
-        const id = consoles.currentWidget && consoles.currentWidget.id;
-
-        if (id) {
-          return manager.select(id);
-        }
-      }
-    });
-
     const addKeyBinding = (command: string, selector: string): void => {
       app.commands.addKeyBinding({
         command,
@@ -182,28 +96,18 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
       });
     };
     addKeyBinding(
-      CommandIDs.selectNotebook,
+      CompleterCommandIDs.selectNotebook,
       `.jp-Notebook .jp-mod-completer-active`
     );
     addKeyBinding(
-      CommandIDs.selectFile,
+      CompleterCommandIDs.selectFile,
       `.jp-FileEditor .jp-mod-completer-active`
     );
     addKeyBinding(
-      CommandIDs.selectConsole,
+      CompleterCommandIDs.selectConsole,
       `.jp-ConsolePanel .jp-mod-completer-active`
     );
 
-    notebooks.widgetAdded.connect(
-      async (_, notebook) => await manager.attachPanel(notebook)
-    );
-    editorTracker.widgetAdded.connect(
-      async (_, widget) =>
-        await manager.attachEditor(widget, app.serviceManager.sessions)
-    );
-    consoles.widgetAdded.connect(
-      async (_, console) => await manager.attachConsole(console)
-    );
     return manager;
   }
 };

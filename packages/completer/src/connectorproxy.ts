@@ -1,4 +1,5 @@
-import { ICompletionContext, ICompletionProvider } from '.';
+import { IObservableString } from '@jupyterlab/observables';
+import { Completer, ICompletionContext, ICompletionProvider } from '.';
 import { CompletionHandler } from './handler';
 import { IConnectorProxy } from './tokens';
 
@@ -30,13 +31,17 @@ export class ConnectorProxy implements IConnectorProxy {
   public async fetch(
     request: CompletionHandler.IRequest
   ): Promise<Array<CompletionHandler.ICompletionItemsReply | null>> {
+    const current = ++this._fetching;
     let promises: Promise<CompletionHandler.ICompletionItemsReply | null>[] = [];
     for (const provider of this._providers) {
       let promise: Promise<CompletionHandler.ICompletionItemsReply | null>;
       promise = provider.fetch(request, this._context).then(reply => {
+        if (current !== this._fetching) {
+          return Promise.reject(void 0);
+        }
         const items = reply.items.map(el => ({
           ...el,
-          provider: provider.identifier
+          resolve: this._resolveFactory(provider, el)
         }));
         return { ...reply, items };
       });
@@ -47,15 +52,49 @@ export class ConnectorProxy implements IConnectorProxy {
         }
       );
       promise = Promise.race([promise, timeoutPromise]);
-      promises.push(promise.catch(p => p));
+      promises.push(promise);
     }
     const combinedPromise = Promise.all(promises);
     return combinedPromise;
   }
 
+  public shouldShowContinuousHint(
+    completerIsVisible: boolean,
+    changed: IObservableString.IChangedArgs
+  ): boolean {
+    if (this._providers[0].shouldShowContinuousHint) {
+      return this._providers[0].shouldShowContinuousHint(
+        completerIsVisible,
+        changed
+      );
+    }
+    return this._defaultShouldShowContinuousHint(completerIsVisible, changed);
+  }
+
+  private _defaultShouldShowContinuousHint(
+    completerIsVisible: boolean,
+    changed: IObservableString.IChangedArgs
+  ): boolean {
+    return (
+      !completerIsVisible &&
+      changed.type !== 'remove' &&
+      changed.value.replace(/\s+/g, '').length > 0
+    );
+  }
+
+  private _resolveFactory = (
+    provider: ICompletionProvider,
+    el: CompletionHandler.ICompletionItem
+  ) =>
+    provider.resolve
+      ? (patch?: Completer.IPatch) =>
+          provider.resolve!(el, this._context, patch)
+      : undefined;
+
   private _providers: Array<ICompletionProvider>;
   private _context: ICompletionContext;
   private _timeout: number;
+  private _fetching = 0;
 }
 
 export namespace ConnectorProxy {

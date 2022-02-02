@@ -143,11 +143,11 @@ describe('completer/manager', () => {
       });
     });
 
-    describe('#attachPanel()', () => {
+    describe('#attachNotebookPanel()', () => {
       it('should attach a handler to the notebook panel', async () => {
         const context = contextFactory();
         const panel = NBTestUtils.createNotebookPanel(context);
-        await manager.attachPanel(panel);
+        await manager.attachNotebookPanel(panel);
         expect(manager['_panelHandlers'].has(panel.id)).toBe(true);
       });
     });

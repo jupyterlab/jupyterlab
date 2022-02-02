@@ -5,7 +5,7 @@
   "jupyter.lab.transform": true,
   "properties": {
     "availableProviders": {
-      "title": "Installed completion providers",
+      "title": "Installed completion providers.",
       "description": "Configuration for installed completion providers, the keys of this dictionary are the identifiers of providers, the corresponding value is the priority rank of the provider. Providers with higher rank will be shown before the ones with lower rank, providers with negative rank are disabled.",
       "type": "object",
       "patternProperties": {
@@ -20,10 +20,22 @@
       }
     },
     "providerTimeout": {
-      "title": "Default timeout for a provider",
+      "title": "Default timeout for a provider.",
       "description": "If a provider can not return the response for a completer request before timeout, the result of this provider will be ignored. Value is in millisecond",
       "type": "number",
       "default": 1000
+    },
+    "showDocumentPanel": {
+      "title": "Show or hide the document panel.",
+      "description": "Flag to show or hide the document panel of completer widget, this configuration is applied to all providers. If a provider does not provide the documentation response, the panel will be hidden for this provider.",
+      "type": "boolean",
+      "default": true
+    },
+    "continuousHinting": {
+      "title": "Continuous hinting.",
+      "description": "Flag to enable or disable continuous hinting.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

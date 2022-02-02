@@ -27,12 +27,30 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Set provider timeout
+   * Set provider timeout.
    *
    * @param {number} timeout - value of timeout in millisecond.
    */
   setTimeout(timeout: number): void {
     this._timeout = timeout;
+  }
+
+  /**
+   * Set the flag for showing document panel.
+   */
+  setShowDocumentFlag(showDoc: boolean): void {
+    this._panelHandlers.forEach(
+      handler => (handler.completer.showDocsPanel = showDoc)
+    );
+    this._showDoc = showDoc;
+  }
+
+  /**
+   * Set the flag for showing document panel.
+   */
+  setContinuousHinting(value: boolean): void {
+    this._panelHandlers.forEach(handler => (handler.continuousHinting = value));
+    this._continuousHinting = value;
   }
 
   /**
@@ -95,7 +113,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const updateConnector = async () => {
       const editor = anchor.promptCell?.editor ?? null;
       const session = anchor.sessionContext.session;
-
+      handler.completer.showDocsPanel = this._showDoc;
+      handler.continuousHinting = this._continuousHinting;
       handler.editor = editor;
       const completerContext: ICompletionContext = {
         editor,
@@ -104,18 +123,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       };
       handler.connector = await this.generateConnectorProxy(completerContext);
     };
-    anchor.promptCellCreated.connect(async (_, cell) => {
-      const editor = cell.editor;
-      const session = anchor.sessionContext.session;
-      const completerContext: ICompletionContext = {
-        editor,
-        widget: anchor,
-        session
-      };
-      handler.editor = editor;
-
-      handler.connector = await this.generateConnectorProxy(completerContext);
-    });
+    anchor.promptCellCreated.connect(updateConnector);
     anchor.sessionContext.sessionChanged.connect(updateConnector);
 
     this._panelHandlers.set(consolePanel.id, handler);
@@ -134,6 +142,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const editor = widget.content.editor;
     const completerContext: ICompletionContext = { editor, widget };
     const handler = await this.generateHandler(completerContext);
+    handler.completer.showDocsPanel = this._showDoc;
+    handler.continuousHinting = this._continuousHinting;
     const onRunningChanged = async (
       sender: Session.IManager,
       models: Session.IModel[]
@@ -160,6 +170,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
           session
         };
         handler.connector = await this.generateConnectorProxy(completerContext);
+        handler.completer.showDocsPanel = this._showDoc;
+        handler.continuousHinting = this._continuousHinting;
         this._activeSessions[widget.id] = session;
       } else {
         // If we didn't find a match, make sure
@@ -191,7 +203,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Activate completer providers for a notebook.
    */
-  async attachPanel(panel: NotebookPanel): Promise<void> {
+  async attachNotebookPanel(panel: NotebookPanel): Promise<void> {
     const editor = panel.content.activeCell?.editor ?? null;
     const session = panel.sessionContext.session;
     const completerContext: ICompletionContext = {
@@ -204,7 +216,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const updateConnector = async () => {
       const editor = panel.content.activeCell?.editor ?? null;
       const session = panel.sessionContext.session;
-
+      handler.completer.showDocsPanel = this._showDoc;
+      handler.continuousHinting = this._continuousHinting;
       if (editor) {
         handler.editor = editor;
         const completerContext: ICompletionContext = {
@@ -293,6 +306,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     if (!renderer) {
       renderer = Completer.defaultRenderer;
     }
+
     const model = new CompleterModel();
     const completer = new Completer({ model, renderer });
     completer.hide();
@@ -335,4 +349,14 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    * Timeout value for the completer provider.
    */
   private _timeout: number;
+
+  /**
+   * Flag to show or hide the document panel.
+   */
+  private _showDoc: boolean;
+
+  /**
+   * Flag to enable/disable continuous hinting.
+   */
+  private _continuousHinting: boolean;
 }

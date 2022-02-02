@@ -7,6 +7,7 @@
 @import url('~@lumino/widgets/style/index.css');
 @import url('~@jupyterlab/ui-components/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');
+@import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');
 @import url('~@jupyterlab/console/style/index.css');
 @import url('~@jupyterlab/fileeditor/style/index.css');

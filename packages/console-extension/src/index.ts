@@ -34,6 +34,10 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { consoleIcon } from '@jupyterlab/ui-components';
+import {
+  CompleterCommandIDs,
+  ICompletionProviderManager
+} from '@jupyterlab/completer';
 import { find } from '@lumino/algorithm';
 import {
   JSONExt,
@@ -192,6 +196,14 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+const completerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extensions:completer',
+  requires: [IConsoleTracker],
+  optional: [ICompletionProviderManager],
+  activate: activateConsoleCompleterService,
+  autoStart: true
+};
+
 /**
  * Export the plugins as the default.
  */
@@ -200,7 +212,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tracker,
   foreign,
   kernelStatus,
-  lineColStatus
+  lineColStatus,
+  completerPlugin
 ];
 export default plugins;
 
@@ -846,4 +859,40 @@ async function activateConsole(
   });
 
   return tracker;
+}
+
+/**
+ * Activate the completer service for console.
+ */
+function activateConsoleCompleterService(
+  app: JupyterFrontEnd,
+  consoles: IConsoleTracker,
+  manager?: ICompletionProviderManager
+): void {
+  if (!manager) {
+    return;
+  }
+  app.commands.addCommand(CompleterCommandIDs.invokeConsole, {
+    execute: () => {
+      const id = consoles.currentWidget && consoles.currentWidget.id;
+
+      if (id) {
+        return manager.invoke(id);
+      }
+    }
+  });
+
+  app.commands.addCommand(CompleterCommandIDs.selectConsole, {
+    execute: () => {
+      const id = consoles.currentWidget && consoles.currentWidget.id;
+
+      if (id) {
+        return manager.select(id);
+      }
+    }
+  });
+
+  consoles.widgetAdded.connect(
+    async (_, console) => await manager.attachConsole(console)
+  );
 }

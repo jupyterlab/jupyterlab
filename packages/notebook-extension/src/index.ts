@@ -76,6 +76,10 @@ import {
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
+import {
+  CompleterCommandIDs,
+  ICompletionProviderManager
+} from '@jupyterlab/completer';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
@@ -750,6 +754,13 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+const completerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extensions:completer',
+  requires: [INotebookTracker],
+  optional: [ICompletionProviderManager],
+  activate: activateNotebookCompleterService,
+  autoStart: true
+};
 /**
  * Export the plugins as default.
  */
@@ -767,7 +778,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   codeConsolePlugin,
   copyOutputPlugin,
   kernelStatus,
-  lineColStatus
+  lineColStatus,
+  completerPlugin
 ];
 export default plugins;
 
@@ -1574,6 +1586,41 @@ function activateNotebookHandler(
   }
 
   return tracker;
+}
+
+/**
+ * Activate the completer service for notebook.
+ */
+function activateNotebookCompleterService(
+  app: JupyterFrontEnd,
+  notebooks: INotebookTracker,
+  manager?: ICompletionProviderManager
+): void {
+  if (!manager) {
+    return;
+  }
+  app.commands.addCommand(CompleterCommandIDs.invokeNotebook, {
+    execute: args => {
+      const panel = notebooks.currentWidget;
+      if (panel && panel.content.activeCell?.model.type === 'code') {
+        manager.invoke(panel.id);
+      }
+    }
+  });
+
+  app.commands.addCommand(CompleterCommandIDs.selectNotebook, {
+    execute: () => {
+      const id = notebooks.currentWidget && notebooks.currentWidget.id;
+
+      if (id) {
+        return manager.select(id);
+      }
+    }
+  });
+
+  notebooks.widgetAdded.connect(
+    async (_, notebook) => await manager.attachNotebookPanel(notebook)
+  );
 }
 
 // Get the current widget and activate unless the args specify otherwise.

@@ -51,6 +51,8 @@
     "@jupyterlab/docregistry": "^4.0.0-alpha.4",
     "@jupyterlab/fileeditor": "^4.0.0-alpha.4",
     "@jupyterlab/notebook": "^4.0.0-alpha.4",
+    "@jupyterlab/observables": "^5.0.0-alpha.4",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.4",
     "@jupyterlab/services": "^7.0.0-alpha.4",
     "@jupyterlab/statedb": "^4.0.0-alpha.4",
     "@jupyterlab/ui-components": "^4.0.0-alpha.19",
