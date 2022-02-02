@@ -164,17 +164,6 @@
   stroke: var(--jp-icon-contrast-color3);
 }
 
-/* CSS for icons in selected items in the settings editor */
-#setting-editor .jp-PluginList .jp-mod-selected .jp-icon-selectable[fill] {
-  fill: #fff;
-}
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-icon-selectable-inverse[fill] {
-  fill: var(--jp-brand-color1);
-}
-
 /* CSS for icons in selected filebrowser listing items */
 .jp-DirListing-item.jp-mod-selected .jp-icon-selectable[fill] {
   fill: #fff;

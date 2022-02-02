@@ -400,6 +400,13 @@ export class ThemeManager implements IThemeManager {
     });
     links.length = 0;
 
+    const themeProps = this._settings.schema.properties?.theme;
+    if (themeProps) {
+      themeProps.enum = Object.keys(themes).map(
+        value => themes[value].displayName ?? value
+      );
+    }
+
     // Unload the previously loaded theme.
     const old = current ? themes[current].unload() : Promise.resolve();
 
