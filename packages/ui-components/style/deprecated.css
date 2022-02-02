@@ -53,6 +53,7 @@
   --jp-icon-jupyterlab-wordmark: url('icons/jupyter/jupyterlab-wordmark.svg');
   --jp-icon-kernel: url('icons/statusbar/kernel.svg');
   --jp-icon-keyboard: url('icons/filetype/keyboard.svg');
+  --jp-icon-launch: url('icons/toolbar/launch.svg');
   --jp-icon-launcher: url('icons/filetype/launcher.svg');
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
   --jp-icon-link: url('icons/toolbar/link.svg');
@@ -219,6 +220,9 @@
 }
 .jp-KeyboardIcon {
   background-image: var(--jp-icon-keyboard);
+}
+.jp-LaunchIcon {
+  background-image: var(--jp-icon-launch);
 }
 .jp-LauncherIcon {
   background-image: var(--jp-icon-launcher);

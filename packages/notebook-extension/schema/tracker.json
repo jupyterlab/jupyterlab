@@ -744,14 +744,6 @@
       "title": "Code Cell Configuration",
       "description": "The configuration for all code cells.",
       "$ref": "#/definitions/editorConfig",
-      "properties": {
-        "lineWarp": {
-          "default": "off"
-        },
-        "matchBrackets": {
-          "default": true
-        }
-      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
@@ -788,14 +780,6 @@
       "title": "Markdown Cell Configuration",
       "description": "The configuration for all markdown cells.",
       "$ref": "#/definitions/editorConfig",
-      "properties": {
-        "lineWarp": {
-          "default": "on"
-        },
-        "matchBrackets": {
-          "default": false
-        }
-      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,
@@ -819,14 +803,6 @@
       "title": "Raw Cell Configuration",
       "description": "The configuration for all raw cells.",
       "$ref": "#/definitions/editorConfig",
-      "properties": {
-        "lineWarp": {
-          "default": "on"
-        },
-        "matchBrackets": {
-          "default": false
-        }
-      },
       "default": {
         "autoClosingBrackets": false,
         "cursorBlinkRate": 530,

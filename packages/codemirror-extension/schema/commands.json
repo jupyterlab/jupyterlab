@@ -191,7 +191,21 @@
       "default": true
     },
     "styleActiveLine": {
-      "type": ["boolean", "object"],
+      "oneOf": [
+        {
+          "type": "boolean",
+          "title": "Boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "nonEmpty": {
+              "type": "boolean"
+            }
+          },
+          "title": "Object"
+        }
+      ],
       "title": "Style Active Line",
       "description": "Value is boolean, or { nonEmpty: boolean }",
       "default": false
@@ -203,7 +217,7 @@
       "default": true
     },
     "selectionPointer": {
-      "type": ["boolean", "string"],
+      "oneOf": [{ "type": "boolean" }, { "type": "string" }],
       "title": "Selection Pointer",
       "description": "Value is boolean or string, e.g. 'pointer'",
       "default": false
