@@ -784,7 +784,7 @@ export namespace Completer {
      * Lazy load missing data of item at `activeIndex`.
      * @param {number} activeIndex - index of item
      * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
-     *  Return a promise of `null` of another `resolveItem` is called. Otherwise return the
+     *  Return a promise of `null` if another `resolveItem` is called. Otherwise return the
      * promise of resolved completion item.
      */
     resolveItem(

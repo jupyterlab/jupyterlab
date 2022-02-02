@@ -26,14 +26,14 @@
       "default": 1000
     },
     "showDocumentPanel": {
-      "title": "Show or hide the document panel.",
-      "description": "Flag to show or hide the document panel of completer widget, this configuration is applied to all providers. If a provider does not provide the documentation response, the panel will be hidden for this provider.",
+      "title": "Show the document panel.",
+      "description": "Show or hide the document panel of completer widget, this configuration is applied to all providers. If a provider does not provide the document content, the panel will be hidden for this provider.",
       "type": "boolean",
       "default": true
     },
     "continuousHinting": {
-      "title": "Continuous hinting.",
-      "description": "Flag to enable or disable continuous hinting.",
+      "title": "Enable continuous hinting.",
+      "description": "Continuous hinting setting.",
       "type": "boolean",
       "default": false
     }

@@ -36,7 +36,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Set the flag for showing document panel.
+   * Enable/disable the document panel.
    */
   setShowDocumentFlag(showDoc: boolean): void {
     this._panelHandlers.forEach(
@@ -46,7 +46,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Set the flag for showing document panel.
+   * Enable/disable continuous hinting mode.
    */
   setContinuousHinting(value: boolean): void {
     this._panelHandlers.forEach(handler => (handler.continuousHinting = value));

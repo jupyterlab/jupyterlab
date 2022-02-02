@@ -58,6 +58,14 @@ export class ConnectorProxy implements IConnectorProxy {
     return combinedPromise;
   }
 
+  /**
+   * Check if completer should make request to fetch completion responses
+   * on user typing. If the provider with highest rank does not have
+   * `shouldShowContinuousHint` method, a default one will be used.
+   *
+   * @param completerIsVisible - The visible status of completer widget.
+   * @param changed - CodeMirror changed argument.
+   */
   public shouldShowContinuousHint(
     completerIsVisible: boolean,
     changed: IObservableString.IChangedArgs
@@ -91,9 +99,24 @@ export class ConnectorProxy implements IConnectorProxy {
           provider.resolve!(el, this._context, patch)
       : undefined;
 
+  /**
+   * List of available providers.
+   */
   private _providers: Array<ICompletionProvider>;
+
+  /**
+   * Current completer context.
+   */
   private _context: ICompletionContext;
+
+  /**
+   * Timeout for provider fetch request.
+   */
   private _timeout: number;
+
+  /**
+   * Counter to reject current provider response if a new fetch request is created.
+   */
   private _fetching = 0;
 }
 

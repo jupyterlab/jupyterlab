@@ -481,7 +481,6 @@ export namespace CompletionHandler {
     deprecated?: boolean;
 
     resolve?: (
-      // el: CompletionHandler.ICompletionItem,
       patch?: Completer.IPatch
     ) => Promise<CompletionHandler.ICompletionItem>;
   }

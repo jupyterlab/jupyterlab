@@ -14,6 +14,9 @@
     },
     {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

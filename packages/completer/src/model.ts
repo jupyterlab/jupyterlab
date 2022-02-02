@@ -461,8 +461,8 @@ export class CompleterModel implements Completer.IModel {
   /**
    * Lazy load missing data of item at `activeIndex`.
    * @param {number} activeIndex - index of item
-   * @return Return `null` if the completion item with `activeIndex` index can not be found.
-   *  Return a promise of `null` of another `resolveItem` is called. Otherwise return the
+   * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
+   * Return a promise of `null` if another `resolveItem` is called. Otherwise return the
    * promise of resolved completion item.
    */
   resolveItem(
@@ -500,7 +500,7 @@ export class CompleterModel implements Completer.IModel {
       .catch(e => {
         console.error(e);
         // Failed to resolve missing data, return the original item.
-        return completionItem;
+        return Promise.resolve(completionItem);
       });
   }
 
