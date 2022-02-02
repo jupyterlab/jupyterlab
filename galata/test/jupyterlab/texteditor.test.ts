@@ -23,7 +23,7 @@ test.describe('Text Editor Tests', () => {
 
     await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
 
-    await page.menu.clickMenuItem('Settings>Settings Editor');
+    await page.menu.clickMenuItem('Settings>Advanced Settings Editor');
 
     await page.click('text=Text Editor');
 
