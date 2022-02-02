@@ -66,7 +66,7 @@ async function getToolbarItems(
    */
   function populate(schema: ISettingRegistry.ISchema) {
     loaded = {};
-    schema.properties![propertyId].default = Object.keys(registry.plugins)
+    const pluginDefaults = Object.keys(registry.plugins)
       .map(plugin => {
         const items =
           (registry.plugins[plugin]!.schema['jupyter.lab.toolbars'] ?? {})[
@@ -75,17 +75,26 @@ async function getToolbarItems(
         loaded[plugin] = items;
         return items;
       })
-      .concat([
-        (schema['jupyter.lab.toolbars'] ?? {})[factoryName] ?? [],
-        schema.properties![propertyId].default as any[]
-      ])
+      .concat([(schema['jupyter.lab.toolbars'] ?? {})[factoryName] ?? []])
       .reduceRight(
         (
           acc: ISettingRegistry.IToolbarItem[],
           val: ISettingRegistry.IToolbarItem[]
         ) => SettingRegistry.reconcileToolbarItems(acc, val, true),
         []
-      )! // flatten one level
+      )!;
+
+    // Apply default value as last step to take into account overrides.json
+    // The standard default being [] as the plugin must use `jupyter.lab.toolbars.<factory>`
+    // to define their default value.
+    schema.properties![
+      propertyId
+    ].default = SettingRegistry.reconcileToolbarItems(
+      pluginDefaults,
+      schema.properties![propertyId].default as any[],
+      true
+    )!
+      // flatten one level
       .sort(
         (a, b) =>
           (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -

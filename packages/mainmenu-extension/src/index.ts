@@ -969,21 +969,28 @@ namespace Private {
      */
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
-      schema.properties!.menus.default = Object.keys(registry.plugins)
+      const pluginDefaults = Object.keys(registry.plugins)
         .map(plugin => {
           const menus =
             registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
           loaded[plugin] = menus;
           return menus;
         })
-        .concat([
-          schema['jupyter.lab.menus']?.main ?? [],
-          schema.properties!.menus.default as any[]
-        ])
+        .concat([schema['jupyter.lab.menus']?.main ?? []])
         .reduceRight(
           (acc, val) => SettingRegistry.reconcileMenus(acc, val, true),
-          []
-        ) // flatten one level
+          schema.properties!.menus.default as any[]
+        );
+
+      // Apply default value as last step to take into account overrides.json
+      // The standard default being [] as the plugin must use `jupyter.lab.menus.main`
+      // to define their default value.
+      schema.properties!.menus.default = SettingRegistry.reconcileMenus(
+        pluginDefaults,
+        schema.properties!.menus.default as any[],
+        true
+      )
+        // flatten one level
         .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
     }
 
