@@ -108,6 +108,7 @@
   margin: 10px;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  color: var(--jp-content-font-color1);
 }
 
 .jp-PluginList .jp-SelectedIndicator {
