@@ -46,8 +46,8 @@
 }
 
 /* This rule is for styling cell run by another activity in this console */
-.jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
-}
+/* .jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
+} */
 
 .jp-CodeConsole-content .jp-InputArea-editor.jp-InputArea-editor {
   background: transparent;

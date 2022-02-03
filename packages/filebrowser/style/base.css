@@ -30,8 +30,10 @@
 .jp-FileBrowser-toolbar.jp-Toolbar {
   border-bottom: none;
   height: auto;
-  margin: var(--jp-toolbar-header-margin);
+  margin: 8px 12px 0px 12px;
   box-shadow: none;
+  padding: 0px;
+  justify-content: flex-start;
 }
 
 .jp-BreadCrumbs {
@@ -62,15 +64,6 @@
 /*-----------------------------------------------------------------------------
 | Buttons
 |----------------------------------------------------------------------------*/
-
-.jp-FileBrowser-toolbar.jp-Toolbar {
-  padding: 0px;
-  margin: 8px 12px 0px 12px;
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar {
-  justify-content: flex-start;
-}
 
 .jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
   flex: 0 0 auto;
