@@ -24,6 +24,7 @@ pip install -q --upgrade pip --user
 pip --version
 # Show a verbose install if the install fails, for debugging
 pip install -e ".[test]" || pip install -v -e ".[test]"
+pip install "ipykernel<6.8.0"
 jlpm versions
 jlpm config current
 
