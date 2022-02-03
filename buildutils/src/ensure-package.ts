@@ -686,7 +686,7 @@ export async function ensureUiComponents(
 
   // sort the statements and then join them
   const iconCSSUrls = _iconCSSUrls.sort().join('\n');
-  const iconCSSDeclarations = _iconCSSDeclarations.sort().join('\n');
+  const iconCSSDeclarations = _iconCSSDeclarations.sort().join('\n\n');
 
   // generate the actual contents of the iconCSSClasses file
   const iconCSSClassesPath = path.join(iconCSSDir, 'deprecated.css');
