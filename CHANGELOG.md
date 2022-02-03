@@ -19,34 +19,34 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.3.x/CHANGELOG.md'
 ### Enhancements made
 
 - Fix for kernel reconnect [#11952](https://github.com/jupyterlab/jupyterlab/pull/11952) ([@3coins](https://github.com/3coins))
-- Backport PR #11079 on branch 3.3.x (Add settings UI) [#11977](https://github.com/jupyterlab/jupyterlab/pull/11977) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #11566 on branch 3.3.x (Show the kernel sources as a debugger tab and allow the user to break in kernel sources) [#11954](https://github.com/jupyterlab/jupyterlab/pull/11954) ([@echarles](https://github.com/echarles))
-- Backport PR #10956 on branch 3.3.x (Enable not showing editor for read-only Markdown cells) [#11950](https://github.com/jupyterlab/jupyterlab/pull/11950) ([@fcollonval](https://github.com/fcollonval))
+- Add settings UI [#11977](https://github.com/jupyterlab/jupyterlab/pull/11977) ([@fcollonval](https://github.com/fcollonval))
+- Show the kernel sources as a debugger tab and allow the user to break in kernel sources [#11954](https://github.com/jupyterlab/jupyterlab/pull/11954) ([@echarles](https://github.com/echarles))
+- Enable not showing editor for read-only Markdown cells [#11950](https://github.com/jupyterlab/jupyterlab/pull/11950) ([@fcollonval](https://github.com/fcollonval))
 - Add side-by-side margin override in the notebookConfig [#11880](https://github.com/jupyterlab/jupyterlab/pull/11880) ([@echarles](https://github.com/echarles))
 - Add additional `Accel Enter` keyboard shortcuts for the `notebook:run-cell` command [#11942](https://github.com/jupyterlab/jupyterlab/pull/11942) ([@jtpio](https://github.com/jtpio))
-- Backport PR #10730 on branch 3.3.x (Add execution progress indicator) [#11941](https://github.com/jupyterlab/jupyterlab/pull/11941) ([@trungleduc](https://github.com/trungleduc))
+- Add execution progress indicator [#11941](https://github.com/jupyterlab/jupyterlab/pull/11941) ([@trungleduc](https://github.com/trungleduc))
 - Allow to link factory to file type when adding it [#11540](https://github.com/jupyterlab/jupyterlab/pull/11540) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #11752: Pause on exception [#11923](https://github.com/jupyterlab/jupyterlab/pull/11923) ([@andrewfulton9](https://github.com/andrewfulton9))
-- Backport PR #11658 on branch 3.3.x (Increase color contrast in input boxes) [#11922](https://github.com/jupyterlab/jupyterlab/pull/11922) ([@fcollonval](https://github.com/fcollonval))
+- Pause on exception [#11923](https://github.com/jupyterlab/jupyterlab/pull/11923) ([@andrewfulton9](https://github.com/andrewfulton9))
+- Increase color contrast in input boxes [#11922](https://github.com/jupyterlab/jupyterlab/pull/11922) ([@fcollonval](https://github.com/fcollonval))
 
 ### Bugs fixed
 
-- overrides.json definition takes precedence [#11610](https://github.com/jupyterlab/jupyterlab/pull/11610) ([@fcollonval](https://github.com/fcollonval))
+- Overrides.json definition takes precedence [#11610](https://github.com/jupyterlab/jupyterlab/pull/11610) ([@fcollonval](https://github.com/fcollonval))
 - Adjust z-index of execution progress tooltip [#11973](https://github.com/jupyterlab/jupyterlab/pull/11973) ([@Sync271](https://github.com/Sync271))
-- [Backport to 3.3.x] Fix the debug modules model #11967 [#11968](https://github.com/jupyterlab/jupyterlab/pull/11968) ([@echarles](https://github.com/echarles))
+- Fix the debug modules model #11967 [#11968](https://github.com/jupyterlab/jupyterlab/pull/11968) ([@echarles](https://github.com/echarles))
 - Fix autocomplete in console [#11949](https://github.com/jupyterlab/jupyterlab/pull/11949) ([@fcollonval](https://github.com/fcollonval))
-- fix(docprovider): fix issue with empty notebook [#11901](https://github.com/jupyterlab/jupyterlab/pull/11901) ([@entropitor](https://github.com/entropitor))
-- ensure a single modal is opened in case of time conflict savings [#11883](https://github.com/jupyterlab/jupyterlab/pull/11883) ([@echarles](https://github.com/echarles))
+- Fix issue with empty notebook [#11901](https://github.com/jupyterlab/jupyterlab/pull/11901) ([@entropitor](https://github.com/entropitor))
+- Ensure a single modal is opened in case of time conflict savings [#11883](https://github.com/jupyterlab/jupyterlab/pull/11883) ([@echarles](https://github.com/echarles))
 - Restore line number state when stopping debugger [#11768](https://github.com/jupyterlab/jupyterlab/pull/11768) ([@fcollonval](https://github.com/fcollonval))
 
 ### Maintenance and upkeep improvements
 
 - Update vscode-debugprotocol to @vscode/debugprotocol [#11953](https://github.com/jupyterlab/jupyterlab/pull/11953) ([@fcollonval](https://github.com/fcollonval))
-- Partly backport PR #11388 on branch 3.3.x (Add update galata snapshot step) [#11927](https://github.com/jupyterlab/jupyterlab/pull/11927) ([@fcollonval](https://github.com/fcollonval))
+- Add update galata snapshot step [#11927](https://github.com/jupyterlab/jupyterlab/pull/11927) ([@fcollonval](https://github.com/fcollonval))
 
 ### Documentation improvements
 
-- Backport PR #11499 on branch 3.3.x (Update screenshots and text for user interface docs) [#11982](https://github.com/jupyterlab/jupyterlab/pull/11982) ([@fcollonval](https://github.com/fcollonval))
+- Update screenshots and text for user interface docs [#11982](https://github.com/jupyterlab/jupyterlab/pull/11982) ([@fcollonval](https://github.com/fcollonval))
 - Update several extensions readme files to delete old content. [#11947](https://github.com/jupyterlab/jupyterlab/pull/11947) ([@jasongrout](https://github.com/jasongrout))
 - Remove theme cookiecutter from the docs [#11928](https://github.com/jupyterlab/jupyterlab/pull/11928) ([@jtpio](https://github.com/jtpio))
 
