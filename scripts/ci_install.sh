@@ -20,6 +20,7 @@ git config --global user.name foo
 git config --global user.email foo@bar.com
 
 # Install and enable the server extension
+pip install -q --upgrade "setuptools>=60.0.0"
 pip install -q --upgrade pip --user
 pip --version
 # Show a verbose install if the install fails, for debugging
