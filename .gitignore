@@ -1,6 +1,7 @@
 # project files
 coverage/
 .eslintcache
+.stylelintcache
 
 dev_mode/listings
 dev_mode/schemas

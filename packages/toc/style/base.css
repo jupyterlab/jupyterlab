@@ -96,7 +96,6 @@
   background-position: center;
   height: 24px;
   width: 24px;
-  margin: 4px;
   border-radius: 2px;
 }
 
@@ -164,6 +163,7 @@
 }
 
 .toc-Collapser-child {
+  background: transparent;
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -190,10 +190,6 @@
 .toc-active-cell:hover .toc-Collapser-child {
   background: var(--jp-brand-color0);
   opacity: 1;
-}
-
-.toc-Collapser-child {
-  background: transparent;
 }
 
 .toc-Collapser-child:hover {
@@ -253,11 +249,6 @@
 
 .toc-tag-dropdown-button {
   margin-left: auto;
-}
-
-.toc-tags-container {
-  padding: 4px;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 .toc-clear-button {
@@ -323,6 +314,8 @@
 
 .toc-tags-container {
   width: 100%;
+  padding: 4px;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 .jp-TableOfContents-content code {
@@ -420,7 +413,7 @@
   background-color: var(--jp-inverse-layout-color3);
 }
 
-/* 
+/*
  * Indentation levels
  */
 

@@ -4,22 +4,24 @@
 |----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
-| Private CSS variables
-|----------------------------------------------------------------------------*/
-
-:root {
-  --jp-private-notebook-dragImage-width: 304px;
-  --jp-private-notebook-dragImage-height: 36px;
-  --jp-private-notebook-selected-color: var(--md-blue-400);
-  --jp-private-notebook-active-color: var(--md-green-400);
-}
-
-/*-----------------------------------------------------------------------------
 | Imports
 |----------------------------------------------------------------------------*/
 
 @import './toolbar.css';
 @import './executionindicator.css';
+
+/*-----------------------------------------------------------------------------
+| CSS variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-side-by-side-output-size: 1fr;
+  --jp-side-by-side-resized-cell: var(--jp-side-by-side-output-size);
+  --jp-private-notebook-dragImage-width: 304px;
+  --jp-private-notebook-dragImage-height: 36px;
+  --jp-private-notebook-selected-color: var(--md-blue-400);
+  --jp-private-notebook-active-color: var(--md-green-400);
+}
 
 /*-----------------------------------------------------------------------------
 | Notebook
@@ -297,11 +299,6 @@
 /*-----------------------------------------------------------------------------
 | Side-by-side Mode (.jp-mod-sideBySide)
 |----------------------------------------------------------------------------*/
-:root {
-  --jp-side-by-side-output-size: 1fr;
-  --jp-side-by-side-resized-cell: var(--jp-side-by-side-output-size);
-}
-
 .jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
   margin-top: 3em;
   margin-bottom: 3em;
@@ -413,10 +410,6 @@
   background-repeat: no-repeat;
   background-size: 800px 104px;
   height: 104px;
-  position: relative;
-}
-
-.jp-Cell-Placeholder-wrapper-body div {
   position: absolute;
   right: 15px;
   left: 15px;

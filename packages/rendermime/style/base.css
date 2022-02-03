@@ -383,6 +383,7 @@
   font-size: 12px;
   table-layout: fixed;
   margin-left: auto;
+  margin-bottom: 1em;
   margin-right: auto;
 }
 
@@ -429,16 +430,9 @@
   background: var(--jp-rendermime-table-row-hover-background);
 }
 
-.jp-RenderedHTMLCommon table {
-  margin-bottom: 1em;
-}
-
 .jp-RenderedHTMLCommon p {
   text-align: left;
   margin: 0px;
-}
-
-.jp-RenderedHTMLCommon p {
   margin-bottom: 1em;
 }
 
@@ -460,11 +454,6 @@
 }
 [data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-dark-background {
   background-color: var(--jp-inverse-layout-color1);
-}
-/* ...or leave it untouched if they don't */
-[data-jp-theme-light='false'] .jp-RenderedImage img.jp-needs-dark-background {
-}
-[data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-light-background {
 }
 
 .jp-RenderedHTMLCommon img,

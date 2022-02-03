@@ -1,0 +1,50 @@
+$schema: https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/stylelintrc.json
+
+extends:
+  - stylelint-config-recommended
+  - stylelint-config-standard
+  - stylelint-prettier/recommended
+
+rules:
+  # TODO: fix all of these rules violated in stylelint-config-recommended
+  no-descending-specificity: null
+  # TODO: evaluate these rules violated in stylelint-config-standard
+  alpha-value-notation: null
+  at-rule-empty-line-before: null
+  at-rule-no-vendor-prefix: null
+  block-closing-brace-space-before: null
+  block-opening-brace-space-after: null
+  color-function-notation: null
+  color-hex-length: null
+  comment-empty-line-before: null
+  comment-whitespace-inside: null
+  custom-property-empty-line-before: null
+  custom-property-pattern: null
+  declaration-block-no-redundant-longhand-properties: null
+  declaration-block-semicolon-newline-after: null
+  declaration-block-single-line-max-declarations: null
+  declaration-block-trailing-semicolon: null
+  declaration-colon-newline-after: null
+  declaration-empty-line-before: null
+  function-url-quotes: null
+  indentation: null
+  keyframes-name-pattern: null
+  length-zero-no-unit: null
+  max-empty-lines: null
+  max-line-length: null
+  number-leading-zero: null
+  number-max-precision: null
+  property-no-vendor-prefix: null
+  rule-empty-line-before: null
+  selector-class-pattern: null
+  selector-combinator-space-before: null
+  selector-descendant-combinator-no-non-space: null
+  selector-id-pattern: null
+  selector-list-comma-newline-after: null
+  selector-no-vendor-prefix: null
+  selector-pseudo-element-colon-notation: null
+  shorthand-property-no-redundant-values: null
+  string-quotes: null
+  value-keyword-case: null
+  value-list-comma-newline-after: null
+  value-no-vendor-prefix: null

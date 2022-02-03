@@ -140,7 +140,7 @@
   display: flex;
 }
 
-/* showHiddenCellsButton (only show if jp-mod-showHiddenCellsButton is set, which 
+/* showHiddenCellsButton (only show if jp-mod-showHiddenCellsButton is set, which
 is a consequence of the showHiddenCellsButton option in Notebook Settings)*/
 .jp-Notebook.jp-mod-showHiddenCellsButton .jp-showHiddenCellsButton {
   margin-left: calc(var(--jp-cell-prompt-width) + 2 * var(--jp-code-padding));
