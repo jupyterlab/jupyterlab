@@ -179,10 +179,6 @@
   fill: var(--jp-layout-color0);
 }
 
-.lm-CommandPalette-item.lm-mod-active .lm-CommandPalette-itemLabel > mark {
-  color: var(--jp-ui-inverse-font-color0);
-}
-
 .lm-CommandPalette-item.lm-mod-active:hover:not(.lm-mod-disabled) {
   color: var(--jp-ui-inverse-font-color1);
   background: var(--jp-brand-color1);

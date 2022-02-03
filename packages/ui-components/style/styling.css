@@ -65,7 +65,6 @@ input.jp-mod-styled:focus {
 }
 
 select.jp-mod-styled:hover {
-  background-color: var(--jp-layout-color1);
   cursor: pointer;
   color: var(--jp-ui-font-color0);
   background-color: var(--jp-input-hover-background);
