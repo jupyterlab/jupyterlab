@@ -53,7 +53,6 @@ export class KernelSourcesBody extends Widget {
 
     this._model.changed.connect((_, kernelSources) => {
       this._clear();
-      console.log('---', kernelSources);
       if (kernelSources) {
         kernelSources.forEach(module => {
           const name = module.name;
