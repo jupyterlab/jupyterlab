@@ -20,7 +20,7 @@
   background: var(--jp-toolbar-background);
   min-height: var(--jp-toolbar-micro-height);
   padding: 2px;
-  z-index: 1;
+  z-index: 8;
   overflow-x: hidden;
 }
 
