@@ -17,6 +17,11 @@ API breaking changes
 Here is a list of JupyterLab npm packages that encountered API changes and therefore have
 bumped their major version (following semver convention):
 
+- ``@jupyterlab/completer`` from 3.x to 4.x
+   Major version bumped following the removal of ``ICompletionManager`` token and the replacement
+   of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
+   for JupyterLab, users need to implement the interface ``ICompletionProvider`` and then register
+   this provider with ``ICompletionProviderManager`` token.
 - ``@jupyterlab/ui-components`` from 3.x to 4.x
    Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
    components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly

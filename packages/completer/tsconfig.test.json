@@ -9,7 +9,19 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../console"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../notebook"
     },
     {
       "path": "../services"

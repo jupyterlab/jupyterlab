@@ -287,7 +287,7 @@ export namespace NotebookTools {
     /**
      * The tool to add to the notebook tools area.
      */
-    tool: Tool;
+    tool: INotebookTools.ITool;
 
     /**
      * The section to which the tool should be added.

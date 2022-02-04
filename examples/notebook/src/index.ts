@@ -32,7 +32,8 @@ import {
   Completer,
   CompleterModel,
   CompletionHandler,
-  KernelConnector
+  ConnectorProxy,
+  KernelCompleterProvider
 } from '@jupyterlab/completer';
 
 import { editorServices } from '@jupyterlab/codemirror';
@@ -116,15 +117,24 @@ function createApp(manager: ServiceManager.IManager): void {
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
   const sessionContext = nbWidget.context.sessionContext;
-  const connector = new KernelConnector({
-    session: sessionContext.session
-  });
+  const timeout = 1000;
+  const provider = new KernelCompleterProvider();
+  const connector = new ConnectorProxy(
+    { widget: nbWidget, editor, session: sessionContext.session },
+    [provider],
+    timeout
+  );
   const handler = new CompletionHandler({ completer, connector });
 
   void sessionContext.ready.then(() => {
-    handler.connector = new KernelConnector({
-      session: sessionContext.session
-    });
+    const provider = new KernelCompleterProvider();
+    const connector = new ConnectorProxy(
+      { widget: nbWidget, editor, session: sessionContext.session },
+      [provider],
+      timeout
+    );
+
+    handler.connector = connector;
   });
 
   // Set the handler's editor.
