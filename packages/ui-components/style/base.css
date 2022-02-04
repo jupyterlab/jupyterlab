@@ -32,6 +32,7 @@ html {
 body {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
+
   /* Blueprint reset rules */
   font-weight: 400;
   letter-spacing: 0;
@@ -85,8 +86,9 @@ a:hover {
 .jp-Button {
   color: var(--jp-ui-font-color2);
   border-radius: var(--jp-border-radius);
-  padding: 0px 12px;
+  padding: 0 12px;
   font-size: var(--jp-ui-font-size1);
+
   /* Copy from blueprint 3 */
   display: inline-flex;
   flex-direction: row;
@@ -136,24 +138,19 @@ a:hover {
   background-color: transparent;
   color: var(--jp-ui-font-color0);
   box-shadow: inset 0 0 0 var(--jp-border-width) var(--jp-input-border-color);
-
-  padding-bottom: 0px;
-  padding-top: 0px;
+  padding-bottom: 0;
+  padding-top: 0;
   padding-left: 10px;
   padding-right: 28px;
   position: relative;
   width: 100%;
-
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-
   font-size: 14px;
   font-weight: 400;
-
   height: 30px;
   line-height: 30px;
-
   outline: none;
   vertical-align: middle;
 }
@@ -221,6 +218,7 @@ input::placeholder {
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color0);
 }
+
 select {
   box-sizing: border-box;
 }
