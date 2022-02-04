@@ -18,7 +18,7 @@
 }
 
 #jp-debugger .jp-switch-label {
-  margin-right: 0px;
+  margin-right: 0;
 }
 
 .jp-DebuggerBugButton[aria-pressed='true'] path {

@@ -12,7 +12,7 @@ button.jp-mod-styled {
   text-align: center;
   line-height: 32px;
   height: 32px;
-  padding: 0px 12px;
+  padding: 0 12px;
   letter-spacing: 0.8px;
   outline: none;
   appearance: none;
@@ -68,7 +68,7 @@ select.jp-mod-styled:hover {
   cursor: pointer;
   color: var(--jp-ui-font-color0);
   background-color: var(--jp-input-hover-background);
-  box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.5);
 }
 
 select.jp-mod-styled {
@@ -80,7 +80,7 @@ select.jp-mod-styled {
   color: var(--jp-ui-font-color0);
   padding: 0 25px 0 8px;
   border: var(--jp-border-width) solid var(--jp-input-border-color);
-  border-radius: 0px;
+  border-radius: 0;
   outline: none;
   appearance: none;
   -webkit-appearance: none;
