@@ -28,7 +28,7 @@ Here is an example of how to install ``ipykernel`` and ``xeus-python`` in a new 
 
 .. code:: bash
 
-   conda create -n jupyterlab-debugger -c conda-forge jupyterlab=3 ipykernel>=6 xeus-python
+   conda create -n jupyterlab-debugger -c conda-forge jupyterlab=3 "ipykernel>=6" xeus-python
    conda activate jupyterlab-debugger
 
 Usage
