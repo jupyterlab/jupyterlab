@@ -75,10 +75,10 @@ export class Completer extends Widget {
   /**
    * The editor used by the completion widget.
    */
-  get editor(): CodeEditor.IEditor | null {
+  get editor(): CodeEditor.IEditor | null | undefined {
     return this._editor;
   }
-  set editor(newValue: CodeEditor.IEditor | null) {
+  set editor(newValue: CodeEditor.IEditor | null | undefined) {
     this._editor = newValue;
   }
 
@@ -221,7 +221,6 @@ export class Completer extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     const model = this._model;
-
     if (!model) {
       return;
     }
@@ -636,7 +635,7 @@ export class Completer extends Widget {
   }
 
   private _activeIndex = 0;
-  private _editor: CodeEditor.IEditor | null = null;
+  private _editor: CodeEditor.IEditor | null | undefined = null;
   private _model: Completer.IModel | null = null;
   private _renderer: Completer.IRenderer;
   private _resetFlag = false;

@@ -26,6 +26,9 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
+    "lib/default/*.d.ts",
+    "lib/default/*.js.map",
+    "lib/default/*.js",
     "style/*.css",
     "style/index.js"
   ],
@@ -43,7 +46,11 @@
   "dependencies": {
     "@jupyterlab/apputils": "^4.0.0-alpha.4",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.4",
+    "@jupyterlab/console": "^4.0.0-alpha.4",
     "@jupyterlab/coreutils": "^6.0.0-alpha.4",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.4",
+    "@jupyterlab/fileeditor": "^4.0.0-alpha.4",
+    "@jupyterlab/notebook": "^4.0.0-alpha.4",
     "@jupyterlab/services": "^7.0.0-alpha.4",
     "@jupyterlab/statedb": "^4.0.0-alpha.4",
     "@jupyterlab/ui-components": "^4.0.0-alpha.19",

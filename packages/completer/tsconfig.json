@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/*", "src/default/*"],
   "references": [
     {
       "path": "../apputils"
@@ -13,7 +13,19 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../console"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../notebook"
     },
     {
       "path": "../services"
