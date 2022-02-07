@@ -2,34 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { Token } from '@lumino/coreutils';
-import { CompletionHandler } from './handler';
-import { Session } from '@jupyterlab/services';
-import { Completer } from './widget';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { CodeConsole } from '@jupyterlab/console';
 import { IObservableString } from '@jupyterlab/observables';
-import { ConsolePanel } from '@jupyterlab/console';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { FileEditor } from '@jupyterlab/fileeditor';
-
-export namespace CompleterCommandIDs {
-  export const invoke = 'completer:invoke';
-
-  export const invokeConsole = 'completer:invoke-console';
-
-  export const invokeNotebook = 'completer:invoke-notebook';
-
-  export const invokeFile = 'completer:invoke-file';
-
-  export const select = 'completer:select';
-
-  export const selectConsole = 'completer:select-console';
-
-  export const selectNotebook = 'completer:select-notebook';
-
-  export const selectFile = 'completer:select-file';
-}
+import { Session } from '@jupyterlab/services';
+import { Token } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
+import { CompletionHandler } from './handler';
+import { Completer } from './widget';
 
 /**
  * The context which will be passed to the `fetch` function
@@ -40,7 +18,7 @@ export interface ICompletionContext {
    * The widget (notebook, console, code editor) which invoked
    * the completer
    */
-  widget?: IDocumentWidget | CodeConsole;
+  widget: Widget;
 
   /**
    * The current editor.
@@ -93,7 +71,7 @@ export interface ICompletionProvider<
    *
    * @param completion - the completion item to resolve
    * @param context - The context of the completer
-   * @param path - The text which will be injected if the completion item is
+   * @param patch - The text which will be injected if the completion item is
    * selected.
    */
   resolve?(
@@ -133,24 +111,6 @@ export interface ICompletionProviderManager {
   registerProvider(provider: ICompletionProvider): void;
 
   /**
-   * Activate completer providers for a notebook.
-   */
-  attachNotebookPanel(panel: NotebookPanel): Promise<void>;
-
-  /**
-   * Activate completer providers for a code editor.
-   */
-  attachEditor(
-    widget: IDocumentWidget<FileEditor>,
-    sessionManager: Session.IManager
-  ): Promise<void>;
-
-  /**
-   * Activate completer providers for a console panel.
-   */
-  attachConsole(consolePanel: ConsolePanel): Promise<void>;
-
-  /**
    * Invoke the completer in the widget with provided id.
    *
    * @param {string} id - the id of notebook panel, console panel or code editor.
@@ -163,6 +123,13 @@ export interface ICompletionProviderManager {
    * @param {string} id - the id of notebook panel, console panel or code editor.
    */
   select(id: string): void;
+
+  /**
+   * Update completer handler of a widget with new context.
+   *
+   * @param newCompleterContext - The completion context.
+   */
+  updateCompleter(newCompleterContext: ICompletionContext): Promise<void>;
 }
 
 export interface IConnectorProxy {

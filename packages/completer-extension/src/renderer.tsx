@@ -1,7 +1,8 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import React, { useState } from 'react';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { FieldProps } from '@rjsf/core';
+import React, { useState } from 'react';
+
 const AVAILABLE_PROVIDERS = 'availableProviders';
 
 /**

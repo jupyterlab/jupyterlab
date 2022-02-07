@@ -1,18 +1,18 @@
-import { ICompletionProvider, ICompletionProviderManager } from './tokens';
-import { ConnectorProxy } from './connectorproxy';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { Completer } from './widget';
-import { CompleterModel } from './model';
-import { Session } from '@jupyterlab/services';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Widget } from '@lumino/widgets';
-import { CompletionHandler } from './handler';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { FileEditor } from '@jupyterlab/fileeditor';
-import { find, toArray } from '@lumino/algorithm';
-import { ConsolePanel } from '@jupyterlab/console';
-import { ICompletionContext } from '.';
+import { ConnectorProxy } from './connectorproxy';
 import { CONTEXT_PROVIDER_ID } from './default/contextprovider';
 import { KERNEL_PROVIDER_ID } from './default/kernelprovider';
+import { CompletionHandler } from './handler';
+import { CompleterModel } from './model';
+import {
+  ICompletionContext,
+  ICompletionProvider,
+  ICompletionProviderManager
+} from './tokens';
+import { Completer } from './widget';
 
 /**
  * A manager for completer provider.
@@ -97,150 +97,40 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Activate completer providers for a console panel.
+   * Create or update completer handler of a widget with new context.
+   *
+   * @param newCompleterContext - The completion context.
    */
-  async attachConsole(consolePanel: ConsolePanel): Promise<void> {
-    const anchor = consolePanel.console;
-    const editor = anchor.promptCell?.editor ?? null;
-    const session = anchor.sessionContext.session;
-    const completerContext: ICompletionContext = {
-      editor,
-      widget: anchor,
-      session
-    };
-    const handler = await this.generateHandler(completerContext);
-
-    const updateConnector = async () => {
-      const editor = anchor.promptCell?.editor ?? null;
-      const session = anchor.sessionContext.session;
-      handler.completer.showDocsPanel = this._showDoc;
-      handler.continuousHinting = this._continuousHinting;
-      handler.editor = editor;
-      const completerContext: ICompletionContext = {
-        editor,
-        widget: anchor,
-        session
-      };
-      handler.connector = await this.generateConnectorProxy(completerContext);
-    };
-    anchor.promptCellCreated.connect(updateConnector);
-    anchor.sessionContext.sessionChanged.connect(updateConnector);
-
-    this._panelHandlers.set(consolePanel.id, handler);
-    consolePanel.disposed.connect(old => {
-      this.disposeHandler(old.id, handler);
-    });
-  }
-
-  /**
-   * Activate completer providers for a code editor.
-   */
-  async attachEditor(
-    widget: IDocumentWidget<FileEditor>,
-    sessionManager: Session.IManager
+  async updateCompleter(
+    newCompleterContext: ICompletionContext
   ): Promise<void> {
-    const editor = widget.content.editor;
-    const completerContext: ICompletionContext = { editor, widget };
-    const handler = await this.generateHandler(completerContext);
-    handler.completer.showDocsPanel = this._showDoc;
-    handler.continuousHinting = this._continuousHinting;
-    const onRunningChanged = async (
-      sender: Session.IManager,
-      models: Session.IModel[]
-    ) => {
-      const oldSession = this._activeSessions[widget.id];
-      // Search for a matching path.
-      const model = find(models, m => m.path === widget.context.path);
-      if (model) {
-        // If there is a matching path, but it is the same
-        // session as we previously had, do nothing.
-        if (oldSession && oldSession.id === model.id) {
-          return;
-        }
-        // Otherwise, dispose of the old session and reset to
-        // a new CompletionConnector.
-        if (oldSession) {
-          delete this._activeSessions[widget.id];
-          oldSession.dispose();
-        }
-        const session = sessionManager.connectTo({ model });
-        const completerContext: ICompletionContext = {
-          editor,
-          widget,
-          session
-        };
-        handler.connector = await this.generateConnectorProxy(completerContext);
-        handler.completer.showDocsPanel = this._showDoc;
-        handler.continuousHinting = this._continuousHinting;
-        this._activeSessions[widget.id] = session;
-      } else {
-        // If we didn't find a match, make sure
-        // the connector is the contextConnector and
-        // dispose of any previous connection.
-        if (oldSession) {
-          delete this._activeSessions[widget.id];
-          oldSession.dispose();
-        }
-      }
-    };
-
-    await onRunningChanged(sessionManager, toArray(sessionManager.running()));
-    sessionManager.runningChanged.connect(onRunningChanged);
-
-    widget.disposed.connect(() => {
-      sessionManager.runningChanged.disconnect(onRunningChanged);
-      const session = this._activeSessions[widget.id];
-      if (session) {
-        delete this._activeSessions[widget.id];
-        session.dispose();
-      }
-      this.disposeHandler(widget.id, handler);
-    });
-
-    this._panelHandlers.set(widget.id, handler);
-  }
-
-  /**
-   * Activate completer providers for a notebook.
-   */
-  async attachNotebookPanel(panel: NotebookPanel): Promise<void> {
-    const editor = panel.content.activeCell?.editor ?? null;
-    const session = panel.sessionContext.session;
-    const completerContext: ICompletionContext = {
-      editor,
-      widget: panel,
-      session
-    };
-    const handler = await this.generateHandler(completerContext);
-
-    const updateConnector = async () => {
-      const editor = panel.content.activeCell?.editor ?? null;
-      const session = panel.sessionContext.session;
+    const { widget, editor } = newCompleterContext;
+    const id = widget.id;
+    const handler = this._panelHandlers.get(id);
+    if (!handler) {
+      // Create a new handler.
+      const handler = await this.generateHandler(newCompleterContext);
+      this._panelHandlers.set(widget.id, handler);
+      widget.disposed.connect(old => {
+        this.disposeHandler(old.id, handler);
+      });
+    } else {
+      // Update existing handler.
       handler.completer.showDocsPanel = this._showDoc;
       handler.continuousHinting = this._continuousHinting;
       if (editor) {
         handler.editor = editor;
-        const completerContext: ICompletionContext = {
-          editor,
-          widget: panel,
-          session
-        };
-        handler.connector = await this.generateConnectorProxy(completerContext);
+        handler.connector = await this.generateConnectorProxy(
+          newCompleterContext
+        );
       }
-    };
-
-    panel.content.activeCellChanged.connect(updateConnector);
-    panel.sessionContext.sessionChanged.connect(updateConnector);
-    this._panelHandlers.set(panel.id, handler);
-    panel.disposed.connect(old => {
-      this.disposeHandler(old.id, handler);
-    });
+    }
   }
 
   /**
    * Invoke the completer in the widget with provided id.
    *
-   * @param {string} id - the id of notebook panel, console panel or code editor.
+   * @param id - the id of notebook panel, console panel or code editor.
    */
   invoke(id: string): void {
     const handler = this._panelHandlers.get(id);
@@ -331,14 +221,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    * values are the completer handler attached to this widget.
    */
   private _panelHandlers: Map<string, CompletionHandler>;
-
-  /**
-   * A cache of `Session.ISessionConnection`, it is used to set the
-   * session for file editor.
-   */
-  private _activeSessions: {
-    [id: string]: Session.ISessionConnection;
-  } = {};
 
   /**
    * The set of activated provider

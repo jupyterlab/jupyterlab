@@ -10,15 +10,15 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  CompleterCommandIDs,
   CompletionProviderManager,
   ContextCompleterProvider,
   ICompletionProviderManager,
   KernelCompleterProvider
 } from '@jupyterlab/completer';
-import { FieldProps } from '@rjsf/core';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
+import { FieldProps } from '@rjsf/core';
+
 import { renderAvailableProviders } from './renderer';
 
 const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:tracker';
@@ -98,26 +98,6 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
         return renderAvailableProviders(props);
       });
     }
-
-    const addKeyBinding = (command: string, selector: string): void => {
-      app.commands.addKeyBinding({
-        command,
-        keys: ['Enter'],
-        selector
-      });
-    };
-    addKeyBinding(
-      CompleterCommandIDs.selectNotebook,
-      `.jp-Notebook .jp-mod-completer-active`
-    );
-    addKeyBinding(
-      CompleterCommandIDs.selectFile,
-      `.jp-FileEditor .jp-mod-completer-active`
-    );
-    addKeyBinding(
-      CompleterCommandIDs.selectConsole,
-      `.jp-ConsolePanel .jp-mod-completer-active`
-    );
 
     return manager;
   }

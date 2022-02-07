@@ -3,15 +3,16 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
+import { IObservableString } from '@jupyterlab/observables';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
-import { Completer } from './widget';
+
 import { IConnectorProxy } from './tokens';
-import { IObservableString } from '@jupyterlab/observables';
+import { Completer } from './widget';
 
 /**
  * A class added to editors that can host a completer.
@@ -93,8 +94,15 @@ export class CompletionHandler implements IDisposable {
     return this._isDisposed;
   }
 
+  /**
+   * Enable/disable continuous hinting mode.
+   */
   set continuousHinting(value: boolean) {
     this._continuousHinting = value;
+  }
+
+  get continuousHinting(): boolean {
+    return this._continuousHinting;
   }
 
   /**

@@ -10,11 +10,12 @@ import {
 } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-import { FileEditor } from '@jupyterlab/fileeditor';
+import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -94,6 +95,10 @@ export namespace CommandIDs {
   export const paste = 'fileeditor:paste';
 
   export const selectAll = 'fileeditor:select-all';
+
+  export const invokeCompleter = 'completer:invoke-file';
+
+  export const selectCompleter = 'completer:select-file';
 }
 
 export interface IFileTypeData extends ReadonlyJSONObject {
@@ -856,6 +861,38 @@ export namespace Commands {
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       label: trans.__('Select All')
+    });
+  }
+
+  export function addCompleterCommands(
+    commands: CommandRegistry,
+    editorTracker: IEditorTracker,
+    manager: ICompletionProviderManager
+  ): void {
+    commands.addCommand(CommandIDs.invokeCompleter, {
+      execute: () => {
+        const id =
+          editorTracker.currentWidget && editorTracker.currentWidget.id;
+        if (id) {
+          return manager.invoke(id);
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.selectCompleter, {
+      execute: () => {
+        const id =
+          editorTracker.currentWidget && editorTracker.currentWidget.id;
+        if (id) {
+          return manager.select(id);
+        }
+      }
+    });
+
+    commands.addKeyBinding({
+      command: CommandIDs.selectCompleter,
+      keys: ['Enter'],
+      selector: '.jp-FileEditor .jp-mod-completer-active'
     });
   }
 

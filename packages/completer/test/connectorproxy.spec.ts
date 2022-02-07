@@ -4,7 +4,31 @@ import {
   ICompletionContext,
   ICompletionProvider
 } from '@jupyterlab/completer';
+import { Context } from '@jupyterlab/docregistry';
+import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 import { IObservableString } from '@jupyterlab/observables';
+import { ServiceManager } from '@jupyterlab/services';
+import { NBTestUtils } from '@jupyterlab/testutils';
+
+function contextFactory(): Context<INotebookModel> {
+  const serviceManager = new ServiceManager({ standby: 'never' });
+  const factory = new NotebookModelFactory({
+    disableDocumentWideUndoRedo: false
+  });
+  const context = new Context({
+    manager: serviceManager,
+    factory,
+    path: 'foo.ipynb',
+    kernelPreference: {
+      shouldStart: false,
+      canStart: false,
+      shutdownOnDispose: true,
+      name: 'default'
+    }
+  });
+  return context;
+}
+const widget = NBTestUtils.createNotebookPanel(contextFactory());
 
 const SAMPLE_PROVIDER_ID = 'CompletionProvider:sample';
 const DEFAULT_REPLY = {
@@ -40,7 +64,7 @@ describe('completer/connectorproxy', () => {
   describe('ConnectorProxy', () => {
     describe('#constructor()', () => {
       it('should create a connector proxy', () => {
-        const connector = new ConnectorProxy({}, [], 0);
+        const connector = new ConnectorProxy({ widget }, [], 0);
         expect(connector).toBeInstanceOf(ConnectorProxy);
       });
     });
@@ -53,7 +77,7 @@ describe('completer/connectorproxy', () => {
         const fooProvider2 = new FooCompletionProvider();
         fooProvider2.fetch = mock;
         const connector = new ConnectorProxy(
-          {},
+          { widget },
           [fooProvider1, fooProvider2],
           1000
         );
@@ -63,7 +87,7 @@ describe('completer/connectorproxy', () => {
       });
       it('should include `resolve` to reply items', async () => {
         const fooProvider1 = new FooCompletionProvider();
-        const connector = new ConnectorProxy({}, [fooProvider1], 1000);
+        const connector = new ConnectorProxy({ widget }, [fooProvider1], 1000);
         const res = await connector.fetch({ offset: 0, text: '' });
         expect(res).toHaveLength(1);
         expect(res[0]!['items']).toEqual([
@@ -73,7 +97,7 @@ describe('completer/connectorproxy', () => {
       });
       it('should reject slow fetch request', async () => {
         const fooProvider1 = new FooCompletionProvider();
-        const connector = new ConnectorProxy({}, [fooProvider1], 200);
+        const connector = new ConnectorProxy({ widget }, [fooProvider1], 200);
         const res = await connector.fetch({ offset: 0, text: '' });
         expect(res).toEqual([null]);
       });
@@ -83,7 +107,7 @@ describe('completer/connectorproxy', () => {
         const fooProvider2 = new FooCompletionProvider();
         fooProvider2.shouldShowContinuousHint = jest.fn();
         const connector = new ConnectorProxy(
-          {},
+          { widget },
           [fooProvider1, fooProvider1],
           200
         );

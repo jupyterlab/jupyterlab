@@ -1,7 +1,11 @@
 import { IObservableString } from '@jupyterlab/observables';
-import { Completer, ICompletionContext, ICompletionProvider } from '.';
 import { CompletionHandler } from './handler';
-import { IConnectorProxy } from './tokens';
+import {
+  ICompletionContext,
+  ICompletionProvider,
+  IConnectorProxy
+} from './tokens';
+import { Completer } from './widget';
 
 /**
  * The connector which is used to fetch responses from multiple providers.
@@ -86,7 +90,7 @@ export class ConnectorProxy implements IConnectorProxy {
     return (
       !completerIsVisible &&
       changed.type !== 'remove' &&
-      changed.value.replace(/\s+/g, '').length > 0
+      changed.value.trim().length > 0
     );
   }
 

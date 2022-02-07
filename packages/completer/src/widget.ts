@@ -3,6 +3,7 @@
 
 import { defaultSanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { renderText } from '@jupyterlab/rendermime';
 import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
@@ -11,8 +12,8 @@ import { ElementExt } from '@lumino/domutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+
 import { CompletionHandler } from './handler';
-import { renderText } from '@jupyterlab/rendermime';
 
 /**
  * The class name added to completer menu items.
@@ -128,8 +129,15 @@ export class Completer extends Widget {
     }
   }
 
-  set showDocsPanel(showDoc: boolean) {
+  /**
+   * Enable/disable the document panel.
+   */
+  set showDocsPanel(showDoc: boolean | null) {
     this._showDoc = showDoc ?? true;
+  }
+
+  get showDocsPanel(): boolean {
+    return this._showDoc;
   }
 
   /**
@@ -891,15 +899,14 @@ export namespace Completer {
   /**
    * A renderer for completer widget nodes.
    */
-  export interface IRenderer {
+  export interface IRenderer<
+    T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+  > {
     /**
      * Create an item node (an `li` element)  from a ICompletionItem
      * for a text completer menu.
      */
-    createCompletionItemNode?(
-      item: CompletionHandler.ICompletionItem,
-      orderedTypes: string[]
-    ): HTMLLIElement;
+    createCompletionItemNode?(item: T, orderedTypes: string[]): HTMLLIElement;
 
     /**
      * Create an item node (an `li` element) for a text completer menu.
@@ -914,9 +921,7 @@ export namespace Completer {
      * Create a documentation node (a `pre` element by default) for
      * documentation panel.
      */
-    createDocumentationNode?(
-      activeItem: CompletionHandler.ICompletionItem
-    ): HTMLElement;
+    createDocumentationNode?(activeItem: T): HTMLElement;
   }
 
   /**

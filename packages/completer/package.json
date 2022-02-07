@@ -46,11 +46,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^4.0.0-alpha.4",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.4",
-    "@jupyterlab/console": "^4.0.0-alpha.4",
     "@jupyterlab/coreutils": "^6.0.0-alpha.4",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.4",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.4",
-    "@jupyterlab/notebook": "^4.0.0-alpha.4",
     "@jupyterlab/observables": "^5.0.0-alpha.4",
     "@jupyterlab/rendermime": "^4.0.0-alpha.4",
     "@jupyterlab/services": "^7.0.0-alpha.4",

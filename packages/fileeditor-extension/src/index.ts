@@ -37,13 +37,12 @@ import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
-import {
-  CompleterCommandIDs,
-  ICompletionProviderManager
-} from '@jupyterlab/completer';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
+import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 import { Commands, FACTORY, IFileTypeData } from './commands';
+import { Session } from '@jupyterlab/services';
 
 export { Commands } from './commands';
 
@@ -402,26 +401,64 @@ function activateFileEditorCompleterService(
     return;
   }
 
-  app.commands.addCommand(CompleterCommandIDs.invokeFile, {
-    execute: () => {
-      const id = editorTracker.currentWidget && editorTracker.currentWidget.id;
-      if (id) {
-        return manager.invoke(id);
-      }
-    }
-  });
+  Commands.addCompleterCommands(app.commands, editorTracker, manager);
 
-  app.commands.addCommand(CompleterCommandIDs.selectFile, {
-    execute: () => {
-      const id = editorTracker.currentWidget && editorTracker.currentWidget.id;
-      if (id) {
-        return manager.select(id);
+  const _activeSessions = new Map<string, Session.ISessionConnection>();
+  editorTracker.widgetAdded.connect(async (_, widget) => {
+    const completerContext = {
+      editor: widget.content.editor,
+      widget
+    };
+    const sessionManager = app.serviceManager.sessions;
+    await manager.updateCompleter(completerContext);
+    const onRunningChanged = async (
+      _: Session.IManager,
+      models: Session.IModel[]
+    ) => {
+      const oldSession = _activeSessions.get(widget.id);
+      // Search for a matching path.
+      const model = find(models, m => m.path === widget.context.path);
+      if (model) {
+        // If there is a matching path, but it is the same
+        // session as we previously had, do nothing.
+        if (oldSession && oldSession.id === model.id) {
+          return;
+        }
+        // Otherwise, dispose of the old session and reset to
+        // a new CompletionConnector.
+        if (oldSession) {
+          _activeSessions.delete(widget.id);
+          oldSession.dispose();
+        }
+        const session = sessionManager.connectTo({ model });
+        const newCompleterContext = {
+          editor: widget.content.editor,
+          widget,
+          session
+        };
+        manager.updateCompleter(newCompleterContext);
+        _activeSessions.set(widget.id, session);
+      } else {
+        // If we didn't find a match, make sure
+        // the connector is the contextConnector and
+        // dispose of any previous connection.
+        if (oldSession) {
+          _activeSessions.delete(widget.id);
+          oldSession.dispose();
+        }
       }
-    }
-  });
+    };
 
-  editorTracker.widgetAdded.connect(
-    async (_, widget) =>
-      await manager.attachEditor(widget, app.serviceManager.sessions)
-  );
+    await onRunningChanged(sessionManager, toArray(sessionManager.running()));
+    sessionManager.runningChanged.connect(onRunningChanged);
+
+    widget.disposed.connect(() => {
+      sessionManager.runningChanged.disconnect(onRunningChanged);
+      const session = _activeSessions.get(widget.id);
+      if (session) {
+        _activeSessions.delete(widget.id);
+        session.dispose();
+      }
+    });
+  });
 }

@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelMessage } from '@jupyterlab/services';
-import { ICompletionContext, ICompletionProvider } from '../tokens';
-import { CompletionHandler } from '../handler';
-import { JSONObject } from '@lumino/coreutils';
 import { Text } from '@jupyterlab/coreutils';
-import { Completer } from '../widget';
 import { IObservableString } from '@jupyterlab/observables';
+import { KernelMessage } from '@jupyterlab/services';
+import { JSONObject } from '@lumino/coreutils';
+import { CompletionHandler } from '../handler';
+import { ICompletionContext, ICompletionProvider } from '../tokens';
+import { Completer } from '../widget';
 
 export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
 /**
@@ -129,7 +129,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
       return true;
     }
 
-    return !visible && changed.value.replace(/\s+/g, '').length > 0;
+    return !visible && changed.value.trim().length > 0;
   }
 
   readonly identifier = KERNEL_PROVIDER_ID;

@@ -490,7 +490,13 @@ export class CompleterModel implements Completer.IModel {
     }
     return resolvedItem
       .then(activeItem => {
-        Object.assign(completionItem, activeItem);
+        (Object.keys(activeItem) as Array<
+          keyof CompletionHandler.ICompletionItem
+        >).forEach(
+          <Key extends keyof CompletionHandler.ICompletionItem>(key: Key) => {
+            completionItem[key] = activeItem[key];
+          }
+        );
         completionItem.resolve = undefined;
         if (current !== this._resolvingItem) {
           return Promise.resolve(null);

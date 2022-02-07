@@ -26,6 +26,7 @@ import {
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
@@ -34,10 +35,6 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { consoleIcon } from '@jupyterlab/ui-components';
-import {
-  CompleterCommandIDs,
-  ICompletionProviderManager
-} from '@jupyterlab/completer';
 import { find } from '@lumino/algorithm';
 import {
   JSONExt,
@@ -89,6 +86,10 @@ namespace CommandIDs {
   export const replaceSelection = 'console:replace-selection';
 
   export const shutdown = 'console:shutdown';
+
+  export const invokeCompleter = 'completer:invoke-console';
+
+  export const selectCompleter = 'completer:select-console';
 }
 
 /**
@@ -872,7 +873,8 @@ function activateConsoleCompleterService(
   if (!manager) {
     return;
   }
-  app.commands.addCommand(CompleterCommandIDs.invokeConsole, {
+
+  app.commands.addCommand(CommandIDs.invokeCompleter, {
     execute: () => {
       const id = consoles.currentWidget && consoles.currentWidget.id;
 
@@ -882,7 +884,7 @@ function activateConsoleCompleterService(
     }
   });
 
-  app.commands.addCommand(CompleterCommandIDs.selectConsole, {
+  app.commands.addCommand(CommandIDs.selectCompleter, {
     execute: () => {
       const id = consoles.currentWidget && consoles.currentWidget.id;
 
@@ -892,7 +894,34 @@ function activateConsoleCompleterService(
     }
   });
 
-  consoles.widgetAdded.connect(
-    async (_, console) => await manager.attachConsole(console)
-  );
+  app.commands.addKeyBinding({
+    command: CommandIDs.selectCompleter,
+    keys: ['Enter'],
+    selector: '.jp-ConsolePanel .jp-mod-completer-active'
+  });
+
+  consoles.widgetAdded.connect(async (_, consolePanel) => {
+    const completerContext = {
+      editor: consolePanel.console.promptCell?.editor ?? null,
+      session: consolePanel.console.sessionContext.session,
+      widget: consolePanel
+    };
+    await manager.updateCompleter(completerContext);
+    consolePanel.console.promptCellCreated.connect((console, cell) => {
+      const newContext = {
+        editor: cell.editor,
+        session: console.sessionContext.session,
+        widget: consolePanel
+      };
+      manager.updateCompleter(newContext);
+    });
+    consolePanel.console.sessionContext.sessionChanged.connect(() => {
+      const newContext = {
+        editor: consolePanel.console.promptCell?.editor ?? null,
+        session: consolePanel.console.sessionContext.session,
+        widget: consolePanel
+      };
+      manager.updateCompleter(newContext);
+    });
+  });
 }
