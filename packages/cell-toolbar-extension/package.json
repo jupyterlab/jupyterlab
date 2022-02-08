@@ -48,6 +48,6 @@
     "access": "public"
   },
   "jupyterlab": {
-    "coreDependency": true
+    "extension": true
   }
 }
