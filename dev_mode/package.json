@@ -131,7 +131,6 @@
     "@jupyterlab/application": "~4.0.0-alpha.4",
     "@jupyterlab/application-extension": "~4.0.0-alpha.4",
     "@jupyterlab/apputils-extension": "~4.0.0-alpha.4",
-    "@jupyterlab/cell-toolbar": "~4.0.0-alpha.4",
     "@jupyterlab/cell-toolbar-extension": "~4.0.0-alpha.4",
     "@jupyterlab/celltags-extension": "~4.0.0-alpha.4",
     "@jupyterlab/codemirror-extension": "~4.0.0-alpha.4",
@@ -215,6 +214,7 @@
     "extensions": {
       "@jupyterlab/application-extension": "",
       "@jupyterlab/apputils-extension": "",
+      "@jupyterlab/cell-toolbar-extension": "",
       "@jupyterlab/celltags-extension": "",
       "@jupyterlab/codemirror-extension": "",
       "@jupyterlab/completer-extension": "",
