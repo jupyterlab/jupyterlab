@@ -36,6 +36,7 @@
     "@jupyterlab/apputils": "^4.0.0-alpha.4",
     "@jupyterlab/apputils-extension": "^4.0.0-alpha.4",
     "@jupyterlab/attachments": "^4.0.0-alpha.4",
+    "@jupyterlab/cell-toolbar": "^4.0.0-alpha.4",
     "@jupyterlab/cells": "^4.0.0-alpha.4",
     "@jupyterlab/celltags": "^4.0.0-alpha.4",
     "@jupyterlab/celltags-extension": "^4.0.0-alpha.4",

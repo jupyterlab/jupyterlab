@@ -278,6 +278,9 @@
     },
     {
       "path": "../vega5-extension"
+    },
+    {
+      "path": "../cell-toolbar"
     }
   ]
 }
