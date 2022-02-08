@@ -111,7 +111,11 @@ async function activateTOC(
         let level = activeCell.headingInfo.level;
         for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
           const cell = cells[i];
-          if (cell instanceof MarkdownCell && cell.headingInfo.level <= level) {
+          if (
+            cell instanceof MarkdownCell &&
+            cell.headingInfo.level <= level &&
+            cell.headingInfo.level > -1
+          ) {
             break;
           }
 
