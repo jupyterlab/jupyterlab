@@ -25,6 +25,9 @@
       "path": "../cell-toolbar"
     },
     {
+      "path": "../cell-toolbar-extension"
+    },
+    {
       "path": "../cells"
     },
     {
@@ -281,9 +284,6 @@
     },
     {
       "path": "../vega5-extension"
-    },
-    {
-      "path": "../cell-toolbar-extension"
     }
   ]
 }
