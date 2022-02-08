@@ -6,3 +6,21 @@
  * @packageDocumentation
  * @module cell-toolbar-extension
  */
+
+const cellToolbar: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/cell-toolbar-extension:plugin',
+  requires: [ITranslator],
+  optional: [ILabShell, ISettingRegistry, ICommandPalette],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null,
+    palette: ICommandPalette | null
+  ) => {
+    console.log('cell toolbar extension works...');
+  }
+};
+
+export default cellToolbar;
