@@ -7,6 +7,15 @@
  * @module cell-toolbar-extension
  */
 
+import {
+  ILabShell,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { ICommandPalette } from '@jupyterlab/apputils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITranslator } from '@jupyterlab/translation';
+
 const cellToolbar: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/cell-toolbar-extension:plugin',
   requires: [ITranslator],

@@ -5,5 +5,18 @@
     "rootDir": "src"
   },
   "include": ["src/*"],
-  "references": []
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../translation"
+    }
+  ]
 }
