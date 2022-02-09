@@ -163,6 +163,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/outputarea',
     '@jupyterlab/cells',
     '@jupyterlab/notebook',
+    '@jupyterlab/cell-toolbar',
+    '@jupyterlab/cell-toolbar-extension',
     '@jupyterlab/celltags',
     '@jupyterlab/celltags-extension',
     '@jupyterlab/fileeditor',
