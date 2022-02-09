@@ -3,6 +3,8 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { Debouncer } from '@lumino/polling';
+
 import { IDebugger } from '../../tokens';
 
 const compare = (a: IDebugger.KernelSource, b: IDebugger.KernelSource) => {
@@ -19,6 +21,11 @@ const compare = (a: IDebugger.KernelSource, b: IDebugger.KernelSource) => {
  * The model to keep track of the current source being displayed.
  */
 export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
+  constructor() {
+    this.refresh = this.refresh.bind(this);
+    this._debouncer = new Debouncer(this.refresh, 1000);
+  }
+
   /**
    * Get the filter.
    */
@@ -31,7 +38,8 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
    */
   set filter(filter: string) {
     this._filter = filter;
-    this.refresh();
+    this._filterChanged.emit(filter);
+    this._debouncer.invoke();
   }
 
   /**
@@ -54,6 +62,13 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
    */
   get changed(): ISignal<this, IDebugger.KernelSource[] | null> {
     return this._changed;
+  }
+
+  /**
+   * Signal emitted when the current source changes.
+   */
+  get filterChanged(): ISignal<this, string> {
+    return this._filterChanged;
   }
 
   /**
@@ -91,7 +106,9 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   private _kernelSources: IDebugger.KernelSource[] | null = null;
   private _filteredKernelSources: IDebugger.KernelSource[] | null = null;
   private _filter = '';
+  private _debouncer: Debouncer;
   private _changed = new Signal<this, IDebugger.KernelSource[] | null>(this);
+  private _filterChanged = new Signal<this, string>(this);
   private _kernelSourceOpened = new Signal<this, IDebugger.Source | null>(this);
 }
 

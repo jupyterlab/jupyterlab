@@ -3,7 +3,7 @@
 
 import { InputGroup, ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { IDebugger } from '../../tokens';
 
@@ -12,24 +12,24 @@ import { IDebugger } from '../../tokens';
  */
 export interface IFilterBoxProps {
   model: IDebugger.Model.IKernelSources;
-  onFilterChange?: (e: any) => void;
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  /**
-   * Handler for search input changes.
-  const handleChange = (e: React.FormEvent<HTMLElement>) => {
-    const target = e.target as HTMLInputElement;
-    setFilter(target.value);
-    props.model.filter = target.value;
+  const [filter, setFilter] = useState('');
+  props.model.filterChanged.connect((_, filter) => {
+    setFilter(filter);
+  });
+  const onFilterChange = (e: any) => {
+    const filter = (e.target as HTMLInputElement).value;
+    props.model.filter = filter;
+    setFilter(filter);
   };
-  */
   return (
     <InputGroup
       type="text"
-      onChange={props.onFilterChange}
+      onChange={onFilterChange}
       placeholder="Filter the kernel sources"
-      value={props.model.filter}
+      value={filter}
     />
   );
 };
@@ -43,14 +43,7 @@ export const KernelSourcesFilter = (props: IFilterBoxProps): ReactWidget => {
       signal={props.model.changed}
       initialArgs={props.model.kernelSources}
     >
-      {model => (
-        <FilterBox
-          model={props.model}
-          onFilterChange={(e: any) => {
-            props.model.filter = (e.target as HTMLInputElement).value;
-          }}
-        />
-      )}
+      {model => <FilterBox model={props.model} />}
     </UseSignal>
   );
 };
