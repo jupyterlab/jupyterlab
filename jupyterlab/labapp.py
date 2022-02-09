@@ -550,11 +550,11 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     def initialize_templates(self):
         # Determine which model to run JupyterLab
-        if self.core_mode or HERE == os.path.commonpath([self.app_dir, HERE]):
+        if self.core_mode or self.app_dir.startswith(HERE + os.sep):
             self.core_mode = True
             self.log.info('Running JupyterLab in core mode')
 
-        if self.dev_mode or DEV_DIR == os.path.commonpath([self.app_dir, DEV_DIR]):
+        if self.dev_mode or self.app_dir.startswith(DEV_DIR + os.sep):
             self.dev_mode = True
             self.log.info('Running JupyterLab in dev mode')
 
