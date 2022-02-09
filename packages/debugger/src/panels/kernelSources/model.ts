@@ -23,7 +23,7 @@ const compare = (a: IDebugger.KernelSource, b: IDebugger.KernelSource) => {
 export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   constructor() {
     this.refresh = this.refresh.bind(this);
-    this._debouncer = new Debouncer(this.refresh, 1000);
+    this._debouncer = new Debouncer(this.refresh, 500);
   }
 
   /**
