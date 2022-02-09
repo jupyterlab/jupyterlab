@@ -39,7 +39,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   set filter(filter: string) {
     this._filter = filter;
     this._filterChanged.emit(filter);
-    this._debouncer.invoke();
+    void this._debouncer.invoke();
   }
 
   /**
