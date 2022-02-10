@@ -18,6 +18,9 @@
       "path": "../cells"
     },
     {
+      "path": "../celltags"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -31,9 +34,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../celltags"
     }
   ]
 }
