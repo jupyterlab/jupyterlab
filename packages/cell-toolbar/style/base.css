@@ -1,0 +1,135 @@
+/* Patch default to reduce vertical blank space */
+.jp-Notebook .jp-Cell {
+  padding: 21px var(--jp-cell-padding) 2px var(--jp-cell-padding);
+}
+
+.lm-Widget.jp-enh-cell-button {
+  background: none;
+  border: none;
+  display: none;
+  margin: 0;
+  padding: 0;
+  width: 16px;
+  position: absolute;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.jp-enh-cell-button .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color4);
+}
+
+.jp-enh-cell-button:hover .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color2);
+}
+
+.jp-mod-active .jp-enh-cell-button {
+  display: block;
+}
+
+.jp-enh-cell-run-cell-and-select-next {
+  left: 46px;
+  top: 46px;
+}
+
+.jp-enh-cell-move-cell-up {
+  top: 20px;
+  left: -10px;
+}
+
+.jp-enh-cell-move-cell-down {
+  top: 36px;
+  left: -10px;
+}
+
+.jp-enh-cell-insert-cell-below {
+  bottom: -19px;
+  left: calc(
+    var(--jp-cell-collapser-width) + var(--jp-cell-prompt-width) - 10px
+  );
+}
+
+.jp-enh-cell-toolbar {
+  display: flex;
+  flex-direction: row;
+  margin-left: calc(
+    var(--jp-cell-collapser-width) + var(--jp-cell-prompt-width)
+  );
+  padding: 2px 0px;
+  min-height: 22px;
+  z-index: 10;
+}
+
+.jp-enh-cell-toolbar.jp-overlap {
+  background-color: var(--jp-layout-color2);
+  /* Use shadow instead of border so empty toolbar does not collapse as thin vertical line */
+  box-shadow: var(--jp-elevation-z1);
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-enh-cell-menu {
+  display: none;
+  flex-direction: row;
+}
+
+.jp-mod-active .jp-enh-cell-menu {
+  display: flex;
+}
+
+.jp-enh-cell-menu button.jp-ToolbarButtonComponent {
+  height: 16px;
+  cursor: pointer;
+}
+
+.jp-enh-cell-menu .jp-ToolbarButton button {
+  display: none;
+}
+
+.jp-enh-cell-menu .jp-ToolbarButton .jp-enh-cell-all,
+.jp-CodeCell .jp-ToolbarButton .jp-enh-cell-code,
+.jp-MarkdownCell .jp-ToolbarButton .jp-enh-cell-markdown,
+.jp-RawCell .jp-ToolbarButton .jp-enh-cell-raw {
+  display: block;
+}
+
+.jp-enh-cell-toolbar .jp-Toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.jp-enh-cell-tags {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.jp-enh-cell-tags .tag {
+  font-size: 0.85em;
+  height: 18px;
+  margin: 0px 2px;
+  padding: 0px 2px;
+  border-radius: 4px;
+  /* Needed to ensure correct display */
+  max-width: unset;
+}
+
+.jp-enh-cell-mod-click {
+  cursor: pointer;
+}
+
+.jp-enh-cell-tags .tag input.add-tag {
+  font-size: 1em;
+}
+
+.jp-mod-active .jp-enh-cell-tags .tag.unapplied-tag {
+  display: flex;
+}
+
+.jp-enh-cell-tags .tag.unapplied-tag {
+  display: none;
+}
+
+.jp-enh-cell-tags .unapplied-tag,
+.jp-enh-cell-tags .add-tag {
+  /* Needed to ensure correct display on selected cells */
+  background-color: unset;
+}
