@@ -9,7 +9,7 @@ import React from 'react';
 /**
  * Toggle button properties
  */
-export interface IToggleButtonprops {
+export interface IToggleButtonProps {
   /**
    * Button class name
    */
@@ -51,7 +51,7 @@ export class ToggleButton extends ReactWidget {
    *
    * @param props props for underlying `ToolbarButton` component
    */
-  constructor(protected props: IToggleButtonprops = {}) {
+  constructor(protected props: IToggleButtonProps = {}) {
     super();
     addToolbarButtonClass(this);
   }
