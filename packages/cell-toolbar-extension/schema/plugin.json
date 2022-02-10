@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Cell Toolbar",
+  "description": "Cell Toolbar Settings.",
+  "properties": {
+    "defaultTags": {
+      "title": "List of Default Tags",
+      "description": "List of tags to always display for quick selection.",
+      "default": ["parameters"],
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[\\w-]+$"
+      }
+    },
+    "floatPosition": {
+      "title": "Floating cell toolbar position",
+      "description": "Place the cell toolbar above the cell. If set, `leftSpace` is ignored.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/definitions/position"
+        }
+      ],
+      "default": null
+    },
+    "helperButtons": {
+      "title": "Helper buttons",
+      "description": "Set the list of visible helper buttons.",
+      "default": [
+        "insert-cell-below",
+        "move-cell-down",
+        "move-cell-up",
+        "run-cell-and-select-next"
+      ],
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "insert-cell-below",
+              "move-cell-down",
+              "move-cell-up",
+              "run-cell-and-select-next"
+            ]
+          },
+          "uniqueItems": true
+        }
+      ]
+    },
+    "leftMenu": {
+      "title": "List of left menu items",
+      "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/menuItem"
+          }
+        }
+      ],
+      "default": [
+        {
+          "cellType": "markdown",
+          "command": "notebook:change-cell-to-code",
+          "icon": "@jlab-enhanced/cell-toolbar:code"
+        },
+        {
+          "cellType": "code",
+          "command": "notebook:change-cell-to-markdown",
+          "icon": "ui-components:markdown"
+        },
+        {
+          "cellType": "code",
+          "command": "jupyterlab_code_formatter:format",
+          "icon": "@jlab-enhanced/cell-toolbar:format",
+          "tooltip": "Format Cell"
+        },
+        {
+          "command": "notebook:delete-cell",
+          "icon": "@jlab-enhanced/cell-toolbar:delete"
+        }
+      ]
+    },
+    "leftSpace": {
+      "title": "Cell toolbar empty left space size",
+      "description": "Size of the empty space left of the cell toolbar in px. Ignored if `floatPosition` is not null.",
+      "type": "number",
+      "minimum": 0,
+      "default": 0
+    },
+    "rightMenu": {
+      "title": "List of left menu items",
+      "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/menuItem"
+          }
+        }
+      ],
+      "default": null
+    },
+    "showTags": {
+      "title": "Tags editor visibility",
+      "description": "Whether to show the tags editor widget (default) or not.",
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "definitions": {
+    "menuItem": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "title": "Command ID to be executed",
+          "type": "string"
+        },
+        "icon": {
+          "title": "Item icon ID",
+          "type": "string"
+        },
+        "tooltip": {
+          "title": "Item tooltip",
+          "type": "string"
+        },
+        "cellType": {
+          "title": "Cell type on which to display the item",
+          "description": "Left empty to define on all cells",
+          "type": "string",
+          "enum": ["code", "markdown", "raw"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["command", "icon"]
+    },
+    "position": {
+      "properties": {
+        "right": {
+          "title": "Right distance in pixels",
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        },
+        "top": {
+          "title": "Top distance in pixels",
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}
