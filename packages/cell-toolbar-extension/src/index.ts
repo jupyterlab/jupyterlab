@@ -12,7 +12,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import CellBarExtension from '@jupyterlab/cell-toolbar';
+import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 
 const cellToolbar: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/cell-toolbar-extension:plugin',
