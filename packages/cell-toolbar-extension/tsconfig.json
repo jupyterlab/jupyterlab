@@ -12,16 +12,10 @@
       "path": "../application"
     },
     {
-      "path": "../apputils"
-    },
-    {
       "path": "../cell-toolbar"
     },
     {
       "path": "../settingregistry"
-    },
-    {
-      "path": "../translation"
     }
   ]
 }
