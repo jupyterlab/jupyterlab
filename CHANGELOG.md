@@ -26,7 +26,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.3.x/CHANGELOG.md'
 
 ### Documentation improvements
 
-- docs: fix shell command with unquoted '>' [#12002](https://github.com/jupyterlab/jupyterlab/pull/12002) ([@ErikBjare](https://github.com/ErikBjare))
+- Fix shell command with unquoted '>' in documentation [#12002](https://github.com/jupyterlab/jupyterlab/pull/12002) ([@ErikBjare](https://github.com/ErikBjare))
 
 ### Other merged PRs
 
