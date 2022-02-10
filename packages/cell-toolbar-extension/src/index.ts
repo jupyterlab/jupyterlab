@@ -8,28 +8,27 @@
  */
 
 import {
-  ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ICommandPalette } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import CellBarExtension from '@jupyterlab/cell-toolbar';
 
 const cellToolbar: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/cell-toolbar-extension:plugin',
-  requires: [ITranslator],
-  optional: [ILabShell, ISettingRegistry, ICommandPalette],
   autoStart: true,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
-    translator: ITranslator,
-    labShell: ILabShell | null,
-    settingRegistry: ISettingRegistry | null,
-    palette: ICommandPalette | null
+    settingRegistry: ISettingRegistry | null
   ) => {
-    console.log('cell toolbar extension works...');
-  }
+    const settings =
+      (await settingRegistry?.load(`@jupyterlab/cell-toolbar:plugin`)) ?? null;
+    app.docRegistry.addWidgetExtension(
+      'Notebook',
+      new CellBarExtension(app.commands, settings)
+    );
+  },
+  optional: [ISettingRegistry]
 };
 
 export default cellToolbar;
