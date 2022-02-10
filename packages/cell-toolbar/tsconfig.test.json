@@ -6,9 +6,6 @@
   ],
   "references": [
     {
-      "path": "../application"
-    },
-    {
       "path": "../apputils"
     },
     {
