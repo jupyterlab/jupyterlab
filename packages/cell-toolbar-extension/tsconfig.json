@@ -4,13 +4,18 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../application"
     },
     {
       "path": "../apputils"
+    },
+    {
+      "path": "../cell-toolbar"
     },
     {
       "path": "../settingregistry"
