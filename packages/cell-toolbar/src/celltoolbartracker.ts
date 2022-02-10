@@ -8,12 +8,8 @@ import {
 } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  addIcon,
-  caretDownEmptyThinIcon,
-  caretUpEmptyThinIcon,
   LabIcon,
   markdownIcon,
-  runIcon
 } from '@jupyterlab/ui-components';
 import { each, find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -59,23 +55,6 @@ const DEFAULT_LEFT_MENU: ICellMenuItem[] = [
 ];
 
 const DEFAULT_HELPER_BUTTONS: ICellMenuItem[] = [
-  // Originate from @jupyterlab/notebook-extension
-  {
-    command: 'notebook:run-cell-and-select-next',
-    icon: runIcon
-  },
-  {
-    command: 'notebook:move-cell-up',
-    icon: caretUpEmptyThinIcon
-  },
-  {
-    command: 'notebook:move-cell-down',
-    icon: caretDownEmptyThinIcon
-  },
-  {
-    command: 'notebook:insert-cell-below',
-    icon: addIcon
-  }
 ];
 
 /**
