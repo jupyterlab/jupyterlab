@@ -23,6 +23,9 @@ export class CellToolbarWidget extends Widget {
     this.layout = new PanelLayout();
     this.addClass('jp-enh-cell-toolbar');
 
+    // Add a spacer at the beginning
+    (this.layout as PanelLayout).addWidget(Toolbar.createSpacerItem());
+
     (this.layout as PanelLayout).addWidget(
       new CellMenu(commands, leftMenuItems)
     );
