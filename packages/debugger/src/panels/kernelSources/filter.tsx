@@ -3,7 +3,7 @@
 
 import { InputGroup, ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { IDebugger } from '../../tokens';
 
@@ -15,21 +15,16 @@ export interface IFilterBoxProps {
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  const [filter, setFilter] = useState('');
-  props.model.filterChanged.connect((_, filter) => {
-    setFilter(filter);
-  });
   const onFilterChange = (e: any) => {
     const filter = (e.target as HTMLInputElement).value;
     props.model.filter = filter;
-    setFilter(filter);
   };
   return (
     <InputGroup
       type="text"
       onChange={onFilterChange}
       placeholder="Filter the kernel sources"
-      value={filter}
+      value={props.model.filter}
     />
   );
 };
@@ -40,8 +35,8 @@ const FilterBox = (props: IFilterBoxProps) => {
 export const KernelSourcesFilter = (props: IFilterBoxProps): ReactWidget => {
   return ReactWidget.create(
     <UseSignal
-      signal={props.model.changed}
-      initialArgs={props.model.kernelSources}
+      signal={props.model.filterChanged}
+      initialArgs={props.model.filter}
     >
       {model => <FilterBox model={props.model} />}
     </UseSignal>
