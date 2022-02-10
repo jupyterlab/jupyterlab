@@ -11,7 +11,7 @@ export function serialize(
   protocol: string = ''
 ): string | ArrayBuffer {
   switch (protocol) {
-    case 'v1.kernel.websocket.jupyter.org':
+    case KernelMessage.supportedKernelWebSocketProtocols[0]: // v1
       return Private.serializeV1KernelWebsocketJupyterOrg(msg);
     default:
       return Private.serializeDefault(msg);
@@ -26,7 +26,7 @@ export function deserialize(
   protocol: string = ''
 ): KernelMessage.IMessage {
   switch (protocol) {
-    case 'v1.kernel.websocket.jupyter.org':
+    case KernelMessage.supportedKernelWebSocketProtocols[0]: // v1
       return Private.deserializeV1KernelWebsocketJupyterOrg(data);
     default:
       return Private.deserializeDefault(data);
@@ -36,7 +36,7 @@ export function deserialize(
 namespace Private {
   /**
    * Deserialize and return the unpacked message.
-   * Protocol v1.kernel.websocket.jupyter.org
+   * Protocol `v1.kernel.websocket.jupyter.org`
    */
   export function deserializeV1KernelWebsocketJupyterOrg(
     binMsg: ArrayBuffer
@@ -91,7 +91,7 @@ namespace Private {
 
   /**
    * Serialize a kernel message for transport.
-   * Protocol v1.kernel.websocket.jupyter.org
+   * Protocol `v1.kernel.websocket.jupyter.org`
    */
   export function serializeV1KernelWebsocketJupyterOrg(
     msg: KernelMessage.IMessage

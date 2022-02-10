@@ -1224,7 +1224,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Create the kernel websocket connection and add socket status handlers.
    */
-  private _createSocket = (use_protocols = true) => {
+  private _createSocket = (useProtocols = true) => {
     this._errorIfDisposed();
 
     // Make sure the socket is clear
@@ -1256,11 +1256,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     // Try opening the websocket with our list of subprotocols.
-    // If the server doesn't handle subprotocols, the accepted protocol will be ''.
+    // If the server doesn't handle subprotocols,
+    // the accepted protocol will be ''.
     // But we cannot send '' as a subprotocol, so if connection fails,
     // reconnect without subprotocols.
-    const supported_protocols = use_protocols ? this._supported_protocols : [];
-    this._ws = new settings.WebSocket(url, supported_protocols);
+    const supportedProtocols = useProtocols ? this._supportedProtocols : [];
+    this._ws = new settings.WebSocket(url, supportedProtocols);
 
     // Ensure incoming binary messages are not Blobs
     this._ws.binaryType = 'arraybuffer';
@@ -1532,14 +1533,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _onWSOpen = (evt: Event) => {
     if (
       this._ws!.protocol !== '' &&
-      !this._supported_protocols.includes(this._ws!.protocol)
+      !this._supportedProtocols.includes(this._ws!.protocol)
     ) {
       console.log(
         'Server selected unknown kernel wire protocol:',
         this._ws!.protocol
       );
       this._updateStatus('dead');
-      throw new Error('Unkown kernel wire protocol: ' + this._ws!.protocol);
+      throw new Error(`Unknown kernel wire protocol:  ${this._ws!.protocol}`);
     }
     this._ws!.onclose = this._onWSClose;
     this._ws!.onerror = this._onWSClose;
@@ -1613,12 +1614,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Websocket to communicate with kernel.
    */
   private _ws: WebSocket | null = null;
-  private _supported_protocols: string[] =
-    KernelMessage.supported_kernel_websocket_protocols;
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _reconnectTimeout: any = null;
+  private _supportedProtocols = KernelMessage.supportedKernelWebSocketProtocols;
 
   private _futures = new Map<
     string,
