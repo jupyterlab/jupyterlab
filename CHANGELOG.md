@@ -814,6 +814,30 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.3
 
+## 3.3.0b0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.0a3...878dd5d9b03878b5e57e61c4089cc4d9873fa236))
+
+### Enhancements made
+
+- Fix contrast in dark theme of settings editor [#12004](https://github.com/jupyterlab/jupyterlab/pull/12004) ([@krassowski](https://github.com/krassowski))
+
+### Bugs fixed
+
+- Fix misaligned icon and checkbox of setting editor [#11976](https://github.com/jupyterlab/jupyterlab/pull/11976) ([@trungleduc](https://github.com/trungleduc))
+
+### Documentation improvements
+
+- Fix shell command with unquoted '>' in documentation [#12002](https://github.com/jupyterlab/jupyterlab/pull/12002) ([@ErikBjare](https://github.com/ErikBjare))
+
+### Other merged PRs
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-02-03&to=2022-02-10&type=c))
+
+[@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2022-02-03..2022-02-10&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-02-03..2022-02-10&type=Issues) | [@ErikBjare](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AErikBjare+updated%3A2022-02-03..2022-02-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-02-03..2022-02-10&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-02-03..2022-02-10&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2022-02-03..2022-02-10&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-02-03..2022-02-10&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-02-03..2022-02-10&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-02-03..2022-02-10&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-02-03..2022-02-10&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2022-02-03..2022-02-10&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-02-03..2022-02-10&type=Issues)
+
 ## 3.3.0a3
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.0a2...843120368a8a6d98db23373a716e3575ce5b5d5e))
