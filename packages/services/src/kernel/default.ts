@@ -1531,14 +1531,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   private _onWSOpen = (evt: Event) => {
     if (
-      this._ws!.protocol != '' &&
+      this._ws!.protocol !== '' &&
       !this._supported_protocols.includes(this._ws!.protocol)
     ) {
       console.log(
-        'Server selected unkown kernel wire protocol:',
+        'Server selected unknown kernel wire protocol:',
         this._ws!.protocol
       );
-      console.log('Supported protocols are:', this._supported_protocols);
       this._updateStatus('dead');
       throw new Error('Unkown kernel wire protocol: ' + this._ws!.protocol);
     }
@@ -1614,7 +1613,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Websocket to communicate with kernel.
    */
   private _ws: WebSocket | null = null;
-  private _supported_protocols: string[] = ['v1.kernel.websocket.jupyter.org'];
+  private _supported_protocols: string[] =
+    KernelMessage.supported_kernel_websocket_protocols;
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
