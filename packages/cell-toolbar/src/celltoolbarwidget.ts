@@ -1,4 +1,4 @@
-import { Toolbar } from '@jupyterlab/apputils';
+import { Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { CellMenu } from './cellmenu';
