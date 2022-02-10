@@ -6,5 +6,4 @@
  * @packageDocumentation
  * @module cell-toolbar
  */
- export * from './celltoolbartracker';
- export * from './tokens';
+ export { CellBarExtension } from './celltoolbartracker';
