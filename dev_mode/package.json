@@ -264,6 +264,7 @@
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",
+      "@jupyterlab/cell-toolbar",
       "@jupyterlab/codeeditor",
       "@jupyterlab/codemirror",
       "@jupyterlab/completer",
