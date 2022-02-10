@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager-extension",
-  "version": "3.3.0-alpha.18",
+  "version": "3.3.0-beta.0",
   "description": "JupyterLab - Extension Manager Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,12 +38,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.3.0-alpha.18",
-    "@jupyterlab/apputils": "^3.3.0-alpha.18",
-    "@jupyterlab/extensionmanager": "^3.3.0-alpha.18",
-    "@jupyterlab/settingregistry": "^3.3.0-alpha.18",
-    "@jupyterlab/translation": "^3.3.0-alpha.18",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.17"
+    "@jupyterlab/application": "^3.3.0-beta.0",
+    "@jupyterlab/apputils": "^3.3.0-beta.0",
+    "@jupyterlab/extensionmanager": "^3.3.0-beta.0",
+    "@jupyterlab/settingregistry": "^3.3.0-beta.0",
+    "@jupyterlab/translation": "^3.3.0-beta.0",
+    "@jupyterlab/ui-components": "^3.3.0-beta.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
