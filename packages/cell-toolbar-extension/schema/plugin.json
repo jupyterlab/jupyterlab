@@ -66,24 +66,24 @@
       ],
       "default": [
         {
-          "cellType": "markdown",
-          "command": "notebook:change-cell-to-code",
-          "icon": "@jupyterlab/cell-toolbar:code"
-        },
-        {
-          "cellType": "code",
-          "command": "notebook:change-cell-to-markdown",
-          "icon": "ui-components:markdown"
-        },
-        {
-          "cellType": "code",
-          "command": "jupyterlab_code_formatter:format",
+          "command": "notebook:copy-cell",
           "icon": "@jupyterlab/cell-toolbar:format",
-          "tooltip": "Format Cell"
+          "tooltip": "Duplicate Cell"
+        },
+        {
+          "command": "notebook:move-cell-up",
+          "icon": "@jupyterlab/cell-toolbar:move-up",
+          "tooltip": "Move Cell Up"
+        },
+        {
+          "command": "notebook:move-cell-down",
+          "icon": "@jupyterlab/cell-toolbar:move-down",
+          "tooltip": "Move Cell Down"
         },
         {
           "command": "notebook:delete-cell",
-          "icon": "@jupyterlab/cell-toolbar:delete"
+          "icon": "@jupyterlab/cell-toolbar:delete",
+          "tooltip": "Delete Cell"
         }
       ]
     },

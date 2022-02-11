@@ -16,10 +16,7 @@ import { IDisposable } from '@lumino/disposable';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { CellToolbarWidget } from './celltoolbarwidget';
 import {
-  deleteIcon,
   lockedTagsIcon,
-  moveDownIcon,
-  moveUpIcon,
   unlockedTagsIcon
 } from './icon';
 import { PositionedButton } from './positionedbutton';
@@ -28,23 +25,6 @@ import { ICellMenuItem } from './tokens';
 import { ToggleButton } from './toolbarbutton';
 
 const DEFAULT_LEFT_MENU: ICellMenuItem[] = [
-  // "Duplicate cell"
-  // "Move up"
-  {
-    command: 'notebook:move-cell-up',
-    icon: moveUpIcon,
-  },
-  // "Move down"
-  {
-    command: 'notebook:move-cell-down',
-    icon: moveDownIcon,
-  },
-  // "Comemnt"
-  // Originate from @jupyterlab/notebook-extension
-  {
-    command: 'notebook:delete-cell',
-    icon: deleteIcon
-  }
 ];
 
 const DEFAULT_HELPER_BUTTONS: ICellMenuItem[] = [
