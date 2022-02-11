@@ -66,9 +66,9 @@
       ],
       "default": [
         {
-          "command": "notebook:duplicate-cell-below",
+          "command": "notebook:copy-cell",
           "icon": "ui-components:copy",
-          "tooltip": "Duplicate Cell"
+          "tooltip": "Copy Cell"
         },
         {
           "command": "notebook:move-cell-up",

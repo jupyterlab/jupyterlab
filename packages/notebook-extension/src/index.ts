@@ -153,8 +153,6 @@ namespace CommandIDs {
 
   export const copy = 'notebook:copy-cell';
 
-  export const duplicateBelow = 'notebook:duplicate-cell-below';
-
   export const pasteAbove = 'notebook:paste-cell-above';
 
   export const pasteBelow = 'notebook:paste-cell-below';
@@ -1957,21 +1955,6 @@ function addCommands(
         return NotebookActions.copy(current.content);
       }
     },
-    icon: args => (args.toolbar ? copyIcon : ''),
-    isEnabled
-  });
-  commands.addCommand(CommandIDs.duplicateBelow, {
-    label: trans.__('Duplicate Cells Below'),
-    caption: trans.__('Copy the selected cells and paste them below'),
-    execute: args => {
-      const current = getCurrent(tracker, shell, args);
-
-      if (current) {
-        NotebookActions.copy(current.content);
-        return NotebookActions.paste(current.content, 'below');
-      }
-    },
-    // TODO: have a separate icon for "duplicate"
     icon: args => (args.toolbar ? copyIcon : ''),
     isEnabled
   });
