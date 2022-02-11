@@ -11,7 +11,7 @@ permissions:
 jobs:
   update-galata-snapshots:
     name: Update Galata References
-    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'update galata snapshots') || contains(github.event.comment.body, 'update snapshots')) }}
+    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update galata snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
     timeout-minutes: 80
     runs-on: ubuntu-20.04
 
@@ -46,7 +46,7 @@ jobs:
 
   update-documentation-snapshots:
     name: Update Documentation Snapshots
-    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'update documentation snapshots') || contains(github.event.comment.body, 'update snapshots')) }}
+    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update documentation snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
     timeout-minutes: 80
     runs-on: ubuntu-20.04
 
