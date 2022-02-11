@@ -43,7 +43,7 @@ export class CellToolbarWidget extends Widget {
       }
     } else {
       this.node.style.left = `${leftSpace}px`;
-      this.node.style.top = '0px';
+      this.node.style.top = '5px';
       this.node.style.width = `calc( 100% - ${leftSpace}px - ${getCSSVar(
         '--jp-cell-collapser-width'
       )} - ${getCSSVar('--jp-cell-prompt-width')} - ${getCSSVar(
