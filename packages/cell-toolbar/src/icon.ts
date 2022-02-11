@@ -5,6 +5,8 @@ import { EXTENSION_ID } from './tokens';
 import codeSvg from '../style/icons/code.svg';
 import deleteSvg from '../style/icons/delete.svg';
 import formatSvg from '../style/icons/format.svg';
+import moveDownSvg from '../style/icons/movedown.svg';
+import moveUpSvg from '../style/icons/moveup.svg';
 import lockedTagsSvg from '../style/icons/lockedtags.svg';
 import unlockedTagsSvg from '../style/icons/unlockedtags.svg';
 
@@ -19,6 +21,14 @@ export const deleteIcon = new LabIcon({
 export const formatIcon = new LabIcon({
   name: `${EXTENSION_ID}:format`,
   svgstr: formatSvg
+});
+export const moveDownIcon = new LabIcon({
+  name: `${EXTENSION_ID}:moveDown`,
+  svgstr: moveDownSvg
+});
+export const moveUpIcon = new LabIcon({
+  name: `${EXTENSION_ID}:moveUp`,
+  svgstr: moveUpSvg
 });
 export const lockedTagsIcon = new LabIcon({
   name: `${EXTENSION_ID}:lockedtags`,

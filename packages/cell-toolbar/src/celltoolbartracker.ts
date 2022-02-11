@@ -9,7 +9,6 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   LabIcon,
-  markdownIcon,
 } from '@jupyterlab/ui-components';
 import { each, find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -17,10 +16,10 @@ import { IDisposable } from '@lumino/disposable';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { CellToolbarWidget } from './celltoolbarwidget';
 import {
-  codeIcon,
   deleteIcon,
-  formatIcon,
   lockedTagsIcon,
+  moveDownIcon,
+  moveUpIcon,
   unlockedTagsIcon
 } from './icon';
 import { PositionedButton } from './positionedbutton';
@@ -29,24 +28,18 @@ import { ICellMenuItem } from './tokens';
 import { ToggleButton } from './toolbarbutton';
 
 const DEFAULT_LEFT_MENU: ICellMenuItem[] = [
-  // Originate from @jupyterlab/notebook-extension
+  // "Duplicate cell"
+  // "Move up"
   {
-    cellType: 'markdown',
-    command: 'notebook:change-cell-to-code',
-    icon: codeIcon
+    command: 'notebook:move-cell-up',
+    icon: moveUpIcon,
   },
+  // "Move down"
   {
-    cellType: 'code',
-    command: 'notebook:change-cell-to-markdown',
-    icon: markdownIcon
+    command: 'notebook:move-cell-down',
+    icon: moveDownIcon,
   },
-  // Originate from @ryantam626/jupyterlab_code_formatter
-  {
-    cellType: 'code',
-    command: 'jupyterlab_code_formatter:format',
-    icon: formatIcon,
-    tooltip: 'Format Cell'
-  },
+  // "Comemnt"
   // Originate from @jupyterlab/notebook-extension
   {
     command: 'notebook:delete-cell',
