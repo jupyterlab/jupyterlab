@@ -198,7 +198,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 };
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/console-extensions:completer',
+  id: '@jupyterlab/console-extension:completer',
   requires: [IConsoleTracker],
   optional: [ICompletionProviderManager],
   activate: activateConsoleCompleterService,

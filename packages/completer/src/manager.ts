@@ -49,8 +49,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    * Enable/disable continuous hinting mode.
    */
   setContinuousHinting(value: boolean): void {
-    this._panelHandlers.forEach(handler => (handler.continuousHinting = value));
-    this._continuousHinting = value;
+    this._panelHandlers.forEach(handler => (handler.autoCompletion = value));
+    this._autoCompletion = value;
   }
 
   /**
@@ -117,7 +117,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     } else {
       // Update existing handler.
       handler.completer.showDocsPanel = this._showDoc;
-      handler.continuousHinting = this._continuousHinting;
+      handler.autoCompletion = this._autoCompletion;
       if (editor) {
         handler.editor = editor;
         handler.connector = await this.generateConnectorProxy(
@@ -240,5 +240,5 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Flag to enable/disable continuous hinting.
    */
-  private _continuousHinting: boolean;
+  private _autoCompletion: boolean;
 }

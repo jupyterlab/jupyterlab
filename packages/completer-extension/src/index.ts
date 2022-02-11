@@ -49,8 +49,8 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
   ): ICompletionProviderManager => {
     const AVAILABLE_PROVIDERS = 'availableProviders';
     const PROVIDER_TIMEOUT = 'providerTimeout';
-    const SHOW_DOCUMENT_PANEL = 'showDocumentPanel';
-    const CONTINUOUS_HINTING = 'continuousHinting';
+    const SHOW_DOCUMENT_PANEL = 'showDocumentationPanel';
+    const CONTINUOUS_HINTING = 'autoCompletion';
     const manager = new CompletionProviderManager();
     const updateSetting = (
       settingValues: ISettingRegistry.ISettings,

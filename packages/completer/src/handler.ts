@@ -97,12 +97,12 @@ export class CompletionHandler implements IDisposable {
   /**
    * Enable/disable continuous hinting mode.
    */
-  set continuousHinting(value: boolean) {
-    this._continuousHinting = value;
+  set autoCompletion(value: boolean) {
+    this._autoCompletion = value;
   }
 
-  get continuousHinting(): boolean {
-    return this._continuousHinting;
+  get autoCompletion(): boolean {
+    return this._autoCompletion;
   }
 
   /**
@@ -298,7 +298,7 @@ export class CompletionHandler implements IDisposable {
       return;
     }
     if (
-      this._continuousHinting &&
+      this._autoCompletion &&
       this._connector.shouldShowContinuousHint(
         this.completer.isVisible,
         changed
@@ -409,7 +409,7 @@ export class CompletionHandler implements IDisposable {
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _enabled = false;
   private _isDisposed = false;
-  private _continuousHinting = false;
+  private _autoCompletion = false;
 }
 
 /**

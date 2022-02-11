@@ -5,8 +5,8 @@
   "jupyter.lab.transform": true,
   "properties": {
     "availableProviders": {
-      "title": "Installed completion providers.",
-      "description": "Configuration for installed completion providers, the keys of this dictionary are the identifiers of providers, the corresponding value is the priority rank of the provider. Providers with higher rank will be shown before the ones with lower rank, providers with negative rank are disabled.",
+      "title": "Completion providers rank setting.",
+      "description": "Providers with higher rank will be shown before the ones with lower rank, providers with negative rank are disabled.",
       "type": "object",
       "patternProperties": {
         "^.*$": {
@@ -25,15 +25,15 @@
       "type": "number",
       "default": 1000
     },
-    "showDocumentPanel": {
-      "title": "Show the document panel.",
-      "description": "Show or hide the document panel of completer widget, this configuration is applied to all providers. If a provider does not provide the document content, the panel will be hidden for this provider.",
+    "showDocumentationPanel": {
+      "title": "Show the documentation panel.",
+      "description": "Documentation panel setting.",
       "type": "boolean",
-      "default": true
+      "default": false
     },
-    "continuousHinting": {
-      "title": "Enable continuous hinting.",
-      "description": "Continuous hinting setting.",
+    "autoCompletion": {
+      "title": "Enable autocompletion.",
+      "description": "Autocompletion  setting.",
       "type": "boolean",
       "default": false
     }

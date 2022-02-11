@@ -167,7 +167,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 };
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/fileeditor-extensions:completer',
+  id: '@jupyterlab/fileeditor-extension:completer',
   requires: [IEditorTracker],
   optional: [ICompletionProviderManager],
   activate: activateFileEditorCompleterService,

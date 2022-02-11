@@ -756,7 +756,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 };
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extensions:completer',
+  id: '@jupyterlab/notebook-extension:completer',
   requires: [INotebookTracker],
   optional: [ICompletionProviderManager],
   activate: activateNotebookCompleterService,

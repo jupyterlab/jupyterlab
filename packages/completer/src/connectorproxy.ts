@@ -114,7 +114,7 @@ export class ConnectorProxy implements IConnectorProxy {
   private _context: ICompletionContext;
 
   /**
-   * Timeout for provider fetch request.
+   * Timeout for the fetch request.
    */
   private _timeout: number;
 
