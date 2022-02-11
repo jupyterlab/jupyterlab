@@ -56,8 +56,10 @@ export class CellToolbarWidget extends Widget {
     if (model) {
       (this.layout as PanelLayout).addWidget(new TagTool(model));
     }
-    (this.layout as PanelLayout).addWidget(
-      new CellMenu(commands, rightMenuItems)
-    );
+    if (rightMenuItems.length > 0) {
+      (this.layout as PanelLayout).addWidget(
+        new CellMenu(commands, rightMenuItems)
+      );
+    }
   }
 }
