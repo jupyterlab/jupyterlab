@@ -1,8 +1,3 @@
-/* Patch default to reduce vertical blank space */
-.jp-Notebook .jp-Cell {
-  padding: 21px var(--jp-cell-padding) 2px var(--jp-cell-padding);
-}
-
 .lm-Widget.jp-enh-cell-button {
   background: none;
   border: none;
@@ -56,7 +51,7 @@
     var(--jp-cell-collapser-width) + var(--jp-cell-prompt-width)
   );
   padding: 2px 0px;
-  min-height: 22px;
+  min-height: 25px;
   z-index: 10;
 }
 
