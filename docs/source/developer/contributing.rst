@@ -690,12 +690,13 @@ Main reasons for UI test failures are:
 
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) for the failing tests. In order
-   to do that, go to GitHub Actions page for the failed test and download test
-   artifacts ``galata-test-assets``. It will contain test captures. You can
-   copy the capture for the failed test suffixed with *actual* and paste it into reference
-   screenshots directory in JupyterLab source code, replacing the failing test's reference
-   capture. Reference captures are located in directories named as the test files with the
-   suffix ``-snapshots`` in JupyterLab source code.
+   to do that, you can post a comment on your PR with the following content:
+
+   - ``update galata snapshots``: A bot will push a new commit to your PR updating galata
+     test snaphsots.
+   - ``update documentation snapshots``: A bot will push a new commit to your PR updating 
+     documentation test snapshots.
+   - ``update snapshots``: Combine the two previous comments effects.
 
 For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/master/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.

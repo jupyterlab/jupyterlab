@@ -35,6 +35,7 @@
     "build:inpage": "webpack --mode=production",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "start": "jupyter lab --config ./jupyter_server_test_config.py",
+    "start:doc": "jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
     "start:detached": "(jlpm run start&)",
     "test": "playwright test",
     "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
