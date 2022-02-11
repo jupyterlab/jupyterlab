@@ -23,11 +23,11 @@ export const formatIcon = new LabIcon({
   svgstr: formatSvg
 });
 export const moveDownIcon = new LabIcon({
-  name: `${EXTENSION_ID}:moveDown`,
+  name: `${EXTENSION_ID}:move-down`,
   svgstr: moveDownSvg
 });
 export const moveUpIcon = new LabIcon({
-  name: `${EXTENSION_ID}:moveUp`,
+  name: `${EXTENSION_ID}:move-up`,
   svgstr: moveUpSvg
 });
 export const lockedTagsIcon = new LabIcon({
