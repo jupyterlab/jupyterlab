@@ -133,3 +133,12 @@
   /* Needed to ensure correct display on selected cells */
   background-color: unset;
 }
+
+/* Custom styling */
+
+.jp-mod-active .jp-enh-cell-menu {
+  border: var(--jp-border-width) var(--jp-border-color1) solid;
+  padding: 0px;
+  border-radius: var(--jp-border-radius);
+  box-shadow: var(--jp-elevation-z1);
+}
