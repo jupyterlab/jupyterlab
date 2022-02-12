@@ -21,6 +21,16 @@ test.describe('Internationalization', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_settings.png');
@@ -41,6 +51,16 @@ test.describe('Internationalization', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_change.png');
@@ -73,6 +93,16 @@ test.describe('Internationalization', () => {
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
 });

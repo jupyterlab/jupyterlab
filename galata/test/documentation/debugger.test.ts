@@ -21,6 +21,16 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 62, left: 1050, width: 190, height: 28 })]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_kernel.png');
@@ -42,6 +52,16 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 62, left: 800, width: 190, height: 28 })]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_activate.png');
@@ -65,6 +85,16 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_breakpoint.png');
@@ -86,6 +116,16 @@ test.describe('Debugger', () => {
       ]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_run.png');
@@ -115,6 +155,16 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_stop_on_breakpoint.png');
@@ -140,6 +190,16 @@ test.describe('Debugger', () => {
       ]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_sidebar.png');
@@ -169,6 +229,16 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 58, left: 998, width: 280, height: 138 })]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_variables.png');

@@ -26,6 +26,16 @@ test.describe('Export Notebook', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_menu.png');
@@ -54,6 +64,16 @@ test.describe('Export Notebook', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_slide_type.png');

@@ -20,6 +20,16 @@ test.describe('Extension Manager', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_default.png');
@@ -38,6 +48,16 @@ test.describe('Extension Manager', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_disabled.png');
@@ -56,6 +76,16 @@ test.describe('Extension Manager', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_enabled.png');
@@ -84,6 +114,16 @@ test.describe('Extension Manager', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_search.png');
@@ -120,6 +160,16 @@ test.describe('Extension Manager', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_simultaneous_block_allow.png');
@@ -156,6 +206,16 @@ test.describe('Extension Manager', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_blocked_list.png');
@@ -192,6 +252,16 @@ test.describe('Extension Manager', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_allowed_list.png');

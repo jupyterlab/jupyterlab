@@ -66,6 +66,16 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -73,6 +83,16 @@ test.describe('General', () => {
     await galata.Mock.freezeContentLastModified(page);
     await openOverview(page);
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
   });
 
@@ -95,6 +115,16 @@ test.describe('General', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_left.png');
@@ -119,6 +149,16 @@ test.describe('General', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_right.png');
@@ -137,6 +177,16 @@ test.describe('General', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_tabs.png');
@@ -155,6 +205,16 @@ test.describe('General', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_tabs_menu.png');
@@ -183,6 +243,16 @@ test.describe('General', () => {
       [generateArrow({ x: 50, y: 55 }, -30)]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_menu_left.png');
@@ -215,6 +285,16 @@ test.describe('General', () => {
       [positionMouse({ x: 35, y: 35 })]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_menu_top.png');
@@ -247,6 +327,16 @@ test.describe('General', () => {
       [positionMouse({ x: 260, y: 350 })]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_shareable_link.png');
@@ -280,6 +370,16 @@ test.describe('General', () => {
       [positionMouse({ x: 500, y: 110 })]
     );
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_create_text_file.png');
@@ -302,6 +402,16 @@ test.describe('General', () => {
     // Hide file browser
     await page.click('[title^="File Browser"]');
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('file_editor_overview.png');
   });
 
@@ -330,6 +440,16 @@ test.describe('General', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('file_editor_settings.png');
@@ -362,6 +482,16 @@ test.describe('General', () => {
     );
     await page.notebook.run();
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
       threshold: 0.3
@@ -398,6 +528,16 @@ test.describe('General', () => {
     // Wait for command answer
     await page.waitForTimeout(200);
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
   });
 
@@ -430,6 +570,16 @@ test.describe('General', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('running_layout.png');
@@ -440,6 +590,16 @@ test.describe('General', () => {
 
     await page.keyboard.press('Control+Shift+C');
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#modal-command-palette')).screenshot()
     ).toMatchSnapshot('command_palette.png');
@@ -467,6 +627,16 @@ test.describe('General', () => {
       );
     });
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('file_formats_open_with.png');
@@ -501,6 +671,16 @@ test.describe('General', () => {
     );
     await page.keyboard.press('Shift+Enter');
 
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_html_display.png'
     );
@@ -528,6 +708,16 @@ test.describe('General', () => {
 
     // Need to wait for altair to update the canvas
     await page.waitForSelector('summary');
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png');
   });
 
@@ -550,6 +740,16 @@ test.describe('General', () => {
     );
 
     await page.notebook.run();
+
+    let toResolve;
+    const awaitTimeout = new Promise(resolve => {
+      toResolve = resolve;
+    });
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(toResolve);
+    });
+    await awaitTimeout;
 
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_nteract_vdom.png'
