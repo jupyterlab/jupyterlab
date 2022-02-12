@@ -72,8 +72,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
@@ -89,8 +89,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
@@ -121,8 +121,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -155,8 +155,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -183,8 +183,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -211,8 +211,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -249,8 +249,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -291,8 +291,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -333,8 +333,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -376,8 +376,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -408,8 +408,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('file_editor_overview.png');
@@ -446,8 +446,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -488,8 +488,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     // Relax threshold as displayed map may change a bit (in particular text positioning)
@@ -534,8 +534,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
@@ -576,8 +576,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -596,8 +596,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -633,8 +633,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -677,8 +677,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot(
@@ -714,8 +714,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png');
@@ -746,8 +746,8 @@ test.describe('General', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
 

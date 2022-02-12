@@ -32,8 +32,8 @@ test.describe('Export Notebook', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -70,8 +70,8 @@ test.describe('Export Notebook', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(

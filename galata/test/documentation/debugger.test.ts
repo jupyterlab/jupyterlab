@@ -27,8 +27,8 @@ test.describe('Debugger', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -58,8 +58,8 @@ test.describe('Debugger', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -91,8 +91,8 @@ test.describe('Debugger', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -122,8 +122,8 @@ test.describe('Debugger', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -161,8 +161,8 @@ test.describe('Debugger', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -196,8 +196,8 @@ test.describe('Debugger', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -235,8 +235,8 @@ test.describe('Debugger', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(

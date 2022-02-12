@@ -27,8 +27,8 @@ test.describe('Internationalization', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -57,8 +57,8 @@ test.describe('Internationalization', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(
@@ -99,8 +99,8 @@ test.describe('Internationalization', () => {
       toResolve = resolve;
     });
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(toResolve);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(toResolve);
     });
     await awaitTimeout;
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
