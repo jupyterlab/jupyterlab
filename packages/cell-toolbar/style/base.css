@@ -47,19 +47,9 @@
 .jp-enh-cell-toolbar {
   display: flex;
   flex-direction: row;
-  margin-left: calc(
-    var(--jp-cell-collapser-width) + var(--jp-cell-prompt-width)
-  );
   padding: 2px 0px;
   min-height: 25px;
   z-index: 10;
-}
-
-.jp-enh-cell-toolbar.jp-overlap {
-  background-color: var(--jp-layout-color2);
-  /* Use shadow instead of border so empty toolbar does not collapse as thin vertical line */
-  box-shadow: var(--jp-elevation-z1);
-  border-radius: var(--jp-border-radius);
 }
 
 .jp-enh-cell-menu {
@@ -69,6 +59,10 @@
 
 .jp-mod-active .jp-enh-cell-menu {
   display: flex;
+  background-color: var(--jp-layout-color2);
+  /* Use shadow instead of border so empty toolbar does not collapse as thin vertical line */
+  box-shadow: var(--jp-elevation-z1);
+  border-radius: var(--jp-border-radius);
 }
 
 .jp-enh-cell-menu button.jp-ToolbarButtonComponent {
