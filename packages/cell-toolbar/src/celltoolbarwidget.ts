@@ -42,13 +42,12 @@ export class CellToolbarWidget extends Widget {
         this.addClass('jp-overlap');
       }
     } else {
-      this.node.style.left = `${leftSpace}px`;
-      this.node.style.top = '5px';
-      this.node.style.width = `calc( 100% - ${leftSpace}px - ${getCSSVar(
+      this.node.style.top = '-8px';
+      this.node.style.left = `calc(( 100% - ${leftSpace}px - ${getCSSVar(
         '--jp-cell-collapser-width'
       )} - ${getCSSVar('--jp-cell-prompt-width')} - ${getCSSVar(
         '--jp-cell-padding'
-      )} )`;
+      )} ) / 2)`;
 
       (this.layout as PanelLayout).addWidget(Toolbar.createSpacerItem());
     }
