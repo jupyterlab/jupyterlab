@@ -198,11 +198,18 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     !schema.properties &&
     schema.type !== 'array' &&
     !JSONExt.deepEqual(formData, defaultValue);
+  const isRoot = schemaId === '';
+
+  const needsDescription =
+    !isRoot &&
+    schema.type != 'object' &&
+    id !=
+      'jp-SettingsEditor-@jupyterlab/shortcuts-extension:shortcuts_shortcuts';
 
   return (
     <div
       className={`form-group ${
-        (displayLabel || schema.type === 'boolean') && 'small-field'
+        displayLabel || schema.type === 'boolean' ? 'small-field' : ''
       }`}
     >
       {
@@ -213,11 +220,24 @@ const CustomTemplate = (props: FieldTemplateProps) => {
         // Shows a red indicator for fields that have validation errors
         rawErrors && <div className="jp-modifiedIndicator jp-errorIndicator" />
       }
-      <div>
-        {displayLabel && schemaId !== '' && <h3> {label} </h3>}
-        <div className={`${schemaId === '' ? 'root' : 'inputFieldWrapper'}`}>
+      <div className="jp-FormGroup-content">
+        {displayLabel && !isRoot && label && (
+          <h3 className="jp-FormGroup-fieldLabel">{label}</h3>
+        )}
+        <div
+          className={`${
+            isRoot
+              ? 'root'
+              : schema.type === 'object'
+              ? 'objectFieldWrapper'
+              : 'inputFieldWrapper'
+          }`}
+        >
           {children}
         </div>
+        {schema.description && needsDescription && (
+          <div className="jp-FormGroup-description">{schema.description}</div>
+        )}
         <div className="validationErrors">{errors}</div>
       </div>
     </div>
