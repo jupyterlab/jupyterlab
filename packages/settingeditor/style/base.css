@@ -362,12 +362,12 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 }
 
 .jp-SettingsPanel p {
-  font-size: var(--jp-content-font-size2);
+  font-size: var(--jp-content-font-size1);
   margin: 0.5em;
 }
 
 .jp-SettingsPanel legend {
-  font-size: var(--jp-content-font-size3);
+  font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color0);
   flex-basis: 100%;
   padding: 0.5em;
