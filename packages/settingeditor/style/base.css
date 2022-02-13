@@ -353,7 +353,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   margin: 1em;
 }
 
-.jp-SettingsPanel .jp-SettingsHeader h3 {
+.jp-SettingsPanel .jp-SettingsHeader-description {
   font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color1);
   font-weight: 200;
@@ -381,7 +381,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   padding-left: 1em;
 }
 
-.jp-SettingsPanel .jp-SettingsTitle span {
+.jp-SettingsPanel .jp-SettingsTitle-caret {
   width: 2em;
 }
 

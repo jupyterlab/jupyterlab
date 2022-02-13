@@ -311,11 +311,17 @@ export class SettingsFormEditor extends React.Component<
             this.props.onSelect(this.props.settings.id);
           }}
         >
-          <div className="jp-SettingsTitle">
-            <icon.react tag="span" elementPosition="center" />
-            <h2> {this.props.settings.schema.title} </h2>
-            <h3> {this.props.settings.schema.description} </h3>
-          </div>
+          <header className="jp-SettingsTitle">
+            <icon.react
+              tag="span"
+              elementPosition="center"
+              className="jp-SettingsTitle-caret"
+            />
+            <h2>{this.props.settings.schema.title}</h2>
+            <div className="jp-SettingsHeader-description">
+              {this.props.settings.schema.description}
+            </div>
+          </header>
           {this.state.isModified && (
             <button className="jp-RestoreButton" onClick={this.reset}>
               {trans.__('Restore to Defaults')}
