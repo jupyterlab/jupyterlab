@@ -15,7 +15,9 @@ import Form, {
   Field,
   FieldTemplateProps,
   IChangeEvent,
-  UiSchema
+  ObjectFieldTemplateProps,
+  UiSchema,
+  utils
 } from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
 import React from 'react';
@@ -87,7 +89,7 @@ export namespace SettingsFormEditor {
 }
 
 /**
- * Template to allow for custom buttons to re-order / removal of entries in an array.
+ * Template to allow for custom buttons to re-order/remove entries in an array.
  * Necessary to create accessible buttons.
  */
 const CustomArrayTemplateFactory = (
@@ -104,7 +106,7 @@ const CustomArrayTemplateFactory = (
           id={`${props.idSchema.$id}-title`}
         />
         <props.DescriptionField
-          id={`${props.idSchema.$id}-title`}
+          id={`${props.idSchema.$id}-description`}
           description={props.schema.description ?? ''}
         />
         {props.items.map(item => {
@@ -113,18 +115,21 @@ const CustomArrayTemplateFactory = (
               {item.children}
               <div className="jp-ArrayOperations">
                 <button
+                  className="jp-mod-styled jp-mod-reject"
                   onClick={item.onReorderClick(item.index, item.index - 1)}
                   disabled={!item.hasMoveUp}
                 >
                   {trans.__('Move Up')}
                 </button>
                 <button
+                  className="jp-mod-styled jp-mod-reject"
                   onClick={item.onReorderClick(item.index, item.index + 1)}
                   disabled={!item.hasMoveDown}
                 >
                   {trans.__('Move Down')}
                 </button>
                 <button
+                  className="jp-mod-styled jp-mod-warn"
                   onClick={item.onDropIndexClick(item.index)}
                   disabled={!item.hasRemove}
                 >
@@ -136,10 +141,8 @@ const CustomArrayTemplateFactory = (
         })}
         {props.canAdd && (
           <button
-            className="array-item-add"
-            onClick={() => {
-              props.onAddClick();
-            }}
+            className="jp-mod-styled jp-mod-reject"
+            onClick={props.onAddClick}
           >
             {trans.__('Add')}
           </button>
@@ -148,6 +151,48 @@ const CustomArrayTemplateFactory = (
     );
   };
   factory.displayName = 'CustomArrayTemplate';
+  return factory;
+};
+
+/**
+ * Template with custom add button, necessary for accessiblity and internationalization.
+ */
+const CustomObjectTemplateFactory = (
+  translator: ITranslator
+): React.FC<ObjectFieldTemplateProps> => {
+  const trans = translator.load('jupyterlab');
+
+  const factory = (props: ObjectFieldTemplateProps) => {
+    const { TitleField, DescriptionField } = props;
+    return (
+      <fieldset id={props.idSchema.$id}>
+        {(props.uiSchema['ui:title'] || props.title) && (
+          <TitleField
+            id={`${props.idSchema.$id}__title`}
+            title={props.title || props.uiSchema['ui:title']}
+            required={props.required}
+          />
+        )}
+        {props.description && (
+          <DescriptionField
+            id={`${props.idSchema.$id}__description`}
+            description={props.description}
+          />
+        )}
+        {props.properties.map(property => property.content)}
+        {utils.canExpand(props.schema, props.uiSchema, props.formData) && (
+          <button
+            className="jp-mod-styled jp-mod-reject"
+            onClick={props.onAddClick(props.schema)}
+            disabled={props.disabled || props.readonly}
+          >
+            {trans.__('Add')}
+          </button>
+        )}
+      </fieldset>
+    );
+  };
+  factory.displayName = 'CustomObjectTemplate';
   return factory;
 };
 
@@ -164,7 +209,9 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     formContext,
     errors,
     rawErrors,
-    children
+    children,
+    onKeyChange,
+    onDropPropertyClick
   } = props;
   /**
    * Determine if the field has been modified
@@ -206,6 +253,11 @@ const CustomTemplate = (props: FieldTemplateProps) => {
     id !=
       'jp-SettingsEditor-@jupyterlab/shortcuts-extension:shortcuts_shortcuts';
 
+  // While we can implement "remove" button for array items in array template,
+  // object templates do not provide a way to do this; instead we need to add
+  // buttons here (and first check if the field can be removed = is additional).
+  const isAdditional = schema.hasOwnProperty(utils.ADDITIONAL_PROPERTY_FLAG);
+
   return (
     <div
       className={`form-group ${
@@ -221,20 +273,38 @@ const CustomTemplate = (props: FieldTemplateProps) => {
         rawErrors && <div className="jp-modifiedIndicator jp-errorIndicator" />
       }
       <div className="jp-FormGroup-content">
-        {displayLabel && !isRoot && label && (
-          <h3 className="jp-FormGroup-fieldLabel">{label}</h3>
+        {displayLabel && !isRoot && label && !isAdditional && (
+          <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
+            {label}
+          </h3>
+        )}
+        {isAdditional && (
+          <input
+            className="jp-FormGroup-contentItem jp-mod-styled"
+            type="text"
+            onBlur={event => onKeyChange(event.target.value)}
+            defaultValue={label}
+          />
         )}
         <div
           className={`${
             isRoot
-              ? 'root'
+              ? 'jp-root'
               : schema.type === 'object'
-              ? 'objectFieldWrapper'
-              : 'inputFieldWrapper'
+              ? 'jp-objectFieldWrapper'
+              : 'jp-inputFieldWrapper jp-FormGroup-contentItem'
           }`}
         >
           {children}
         </div>
+        {isAdditional && (
+          <button
+            className="jp-FormGroup-contentItem jp-mod-styled jp-mod-warn jp-FormGroup-removeButton"
+            onClick={onDropPropertyClick(label)}
+          >
+            {'Remove'}
+          </button>
+        )}
         {schema.description && needsDescription && (
           <div className="jp-FormGroup-description">{schema.description}</div>
         )}
@@ -354,6 +424,9 @@ export class SettingsFormEditor extends React.Component<
             formData={this.state.formData}
             FieldTemplate={CustomTemplate}
             ArrayFieldTemplate={CustomArrayTemplateFactory(
+              this.props.translator
+            )}
+            ObjectFieldTemplate={CustomObjectTemplateFactory(
               this.props.translator
             )}
             uiSchema={uiSchema}
