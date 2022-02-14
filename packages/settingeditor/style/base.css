@@ -20,6 +20,7 @@
   margin-top: -1px;
   outline: none;
   color: var(--jp-content-font-color1) !important;
+
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
@@ -236,6 +237,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 .jp-SettingsPanel .checkbox label {
   cursor: pointer;
 }
+
 .jp-SettingsPanel .checkbox label:not(:first-child) {
   margin: 0.5em;
 }
@@ -287,6 +289,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 .jp-SettingsPanel .form-group.small-field:hover {
   background: var(--jp-border-color3);
 }
+
 .jp-SettingsPanel .array-item button {
   color: var(--jp-brand-color2);
   background-color: var(--jp-layout-color2);
@@ -295,6 +298,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   padding: 5px;
   border: none;
 }
+
 .jp-SettingsPanel .array-item button:disabled {
   color: var(--jp-brand-color3);
   background-color: var(--jp-layout-color1);
@@ -342,6 +346,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 .jp-SettingsPanel .root > fieldset > legend {
   display: none;
 }
+
 .jp-SettingsPanel .root > fieldset > p {
   display: none;
 }
@@ -398,7 +403,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 }
 
 .jp-PluginList .jp-FilterBox {
-  margin: 8px 12px 0px 12px;
+  margin: 8px 12px 0;
 }
 
 .jp-PluginList-entry {

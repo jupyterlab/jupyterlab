@@ -15,7 +15,7 @@
 
 .jp-baseLineForm {
   border: none;
-  border-radius: 0px;
+  border-radius: 0;
   position: absolute;
   background-size: 16px;
   background-repeat: no-repeat;
@@ -27,13 +27,13 @@
   top: 4px;
   right: 8px;
   height: 24px;
-  padding: 0px 12px;
+  padding: 0 12px;
   width: 12px;
 }
 
 .jp-lineFormButtonIcon {
-  top: 0px;
-  right: 0px;
+  top: 0;
+  right: 0;
   background-color: var(--jp-brand-color1);
   height: 100%;
   width: 100%;
@@ -42,8 +42,8 @@
 }
 
 .jp-lineFormButton {
-  top: 0px;
-  right: 0px;
+  top: 0;
+  right: 0;
   background-color: transparent;
   height: 100%;
   width: 100%;
@@ -52,7 +52,7 @@
 
 .jp-lineFormWrapper {
   overflow: hidden;
-  padding: 0px 8px;
+  padding: 0 8px;
   border: 1px solid var(--jp-border-color0);
   background-color: var(--jp-input-active-background);
   height: 22px;

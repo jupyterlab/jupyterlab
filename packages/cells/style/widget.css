@@ -17,7 +17,7 @@
 
 .jp-Cell {
   padding: var(--jp-cell-padding);
-  margin: 0px;
+  margin: 0;
   border: none;
   outline: none;
   background: transparent;
@@ -31,8 +31,9 @@
 .jp-Cell-outputWrapper {
   display: flex;
   flex-direction: row;
-  padding: 0px;
-  margin: 0px;
+  padding: 0;
+  margin: 0;
+
   /* Added to reveal the box-shadow on the input and output collapsers. */
   overflow: visible;
 }

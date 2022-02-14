@@ -69,6 +69,7 @@ body {
     var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
   );
   border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+
   /* Adjust min-height so open menus show up in the right place */
   min-height: calc(
     var(--jp-private-menu-panel-height) + var(--jp-border-width)
@@ -81,7 +82,7 @@ body {
 }
 
 #jp-single-document-mode {
-  margin: 0px 8px;
+  margin: 0 8px;
   display: flex;
   align-items: center;
 }
