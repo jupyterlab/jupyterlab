@@ -763,6 +763,9 @@ export class SessionContext implements ISessionContext {
    */
   private async _shutdownSession(): Promise<void> {
     const session = this._session;
+    // Capture starting values in case an error is raised.
+    const isTerminating = this._isTerminating;
+    const isReady = this._isReady;
     this._isTerminating = true;
     this._isReady = false;
     this._statusChanged.emit('terminating');
@@ -784,17 +787,17 @@ export class SessionContext implements ISessionContext {
         newValue: null
       });
     } catch (err) {
-      this._isTerminating = false;
-      this._isReady = true;
+      this._isTerminating = isTerminating;
+      this._isReady = isReady;
       const status = session?.kernel?.status;
       if (status === undefined) {
-        this._statusChanged.emit('unknown')
+        this._statusChanged.emit('unknown');
       } else {
         this._statusChanged.emit(status);
       }
       throw err;
     }
-    return
+    return;
   }
 
   /**
@@ -1403,8 +1406,9 @@ namespace Private {
 
     const body = document.createElement('div');
     const text = document.createElement('label');
-    text.textContent = `${trans.__('Select kernel for:')} "${sessionContext.name
-      }"`;
+    text.textContent = `${trans.__('Select kernel for:')} "${
+      sessionContext.name
+    }"`;
     body.appendChild(text);
 
     const options = getKernelSearch(sessionContext);
@@ -1469,12 +1473,12 @@ namespace Private {
       const specName = matches[0];
       console.warn(
         'No exact match found for ' +
-        specName +
-        ', using kernel ' +
-        specName +
-        ' that matches ' +
-        'language=' +
-        language
+          specName +
+          ', using kernel ' +
+          specName +
+          ' that matches ' +
+          'language=' +
+          language
       );
       return specName;
     }
