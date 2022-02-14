@@ -20,6 +20,7 @@
   height: 24px;
   align-self: normal;
 }
+
 .jp-Statusbar-ProgressCircle path {
   fill: var(--jp-inverse-layout-color3);
 }
@@ -32,6 +33,7 @@
   overflow: hidden;
   align-self: center;
 }
+
 .jp-Statusbar-ProgressBar-progress-bar > div {
   background-color: var(--jp-brand-color2);
   background-image: linear-gradient(
@@ -50,7 +52,7 @@
   height: 100%;
   font-size: 12px;
   line-height: 14px;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
   animation: jp-Statusbar-ExecutionTime-progress-bar 2s linear infinite;
 }
@@ -67,6 +69,7 @@
   0% {
     background-position: 0 0;
   }
+
   100% {
     background-position: 40px 40px;
   }
