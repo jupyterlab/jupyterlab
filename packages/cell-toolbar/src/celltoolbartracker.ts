@@ -33,7 +33,12 @@ const DEFAULT_HELPER_BUTTONS: ICellMenuItem[] = [
  */
 const CELL_BAR_CLASS = 'jp-enh-cell-bar';
 
-// Icons for use in toolbar
+/**
+ * Icons for use in toolbar.
+ * 
+ * These are copied from icon.ts, which is not part of the webpack bundle
+ * because nothing is imported from it.
+ */
 export const addAboveIcon = new LabIcon({
   name: `${EXTENSION_ID}:add-above`,
   svgstr: addAboveSvg
