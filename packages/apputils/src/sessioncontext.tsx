@@ -766,22 +766,35 @@ export class SessionContext implements ISessionContext {
     this._isTerminating = true;
     this._isReady = false;
     this._statusChanged.emit('terminating');
-    await session?.shutdown();
-    this._isTerminating = false;
-    session?.dispose();
-    this._session = null;
-    const kernel = session?.kernel || null;
-    this._statusChanged.emit('unknown');
-    this._kernelChanged.emit({
-      name: 'kernel',
-      oldValue: kernel,
-      newValue: null
-    });
-    this._sessionChanged.emit({
-      name: 'session',
-      oldValue: session,
-      newValue: null
-    });
+    try {
+      await session?.shutdown();
+      this._isTerminating = false;
+      session?.dispose();
+      this._session = null;
+      const kernel = session?.kernel || null;
+      this._statusChanged.emit('unknown');
+      this._kernelChanged.emit({
+        name: 'kernel',
+        oldValue: kernel,
+        newValue: null
+      });
+      this._sessionChanged.emit({
+        name: 'session',
+        oldValue: session,
+        newValue: null
+      });
+    } catch (err) {
+      this._isTerminating = false;
+      this._isReady = true;
+      const status = session?.kernel?.status;
+      if (status === undefined) {
+        this._statusChanged.emit('unknown')
+      } else {
+        this._statusChanged.emit(status);
+      }
+      throw err;
+    }
+    return
   }
 
   /**
@@ -1390,9 +1403,8 @@ namespace Private {
 
     const body = document.createElement('div');
     const text = document.createElement('label');
-    text.textContent = `${trans.__('Select kernel for:')} "${
-      sessionContext.name
-    }"`;
+    text.textContent = `${trans.__('Select kernel for:')} "${sessionContext.name
+      }"`;
     body.appendChild(text);
 
     const options = getKernelSearch(sessionContext);
@@ -1457,12 +1469,12 @@ namespace Private {
       const specName = matches[0];
       console.warn(
         'No exact match found for ' +
-          specName +
-          ', using kernel ' +
-          specName +
-          ' that matches ' +
-          'language=' +
-          language
+        specName +
+        ', using kernel ' +
+        specName +
+        ' that matches ' +
+        'language=' +
+        language
       );
       return specName;
     }
