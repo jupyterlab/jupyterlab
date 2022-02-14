@@ -51,8 +51,8 @@
   min-height: var(--jp-toolbar-micro-height);
   padding: var(--jp-notebook-toolbar-padding);
   z-index: 1;
-  right: 0px;
-  top: 0px;
+  right: 0;
+  top: 0;
 }
 
 .jp-Toolbar > .jp-Toolbar-responsive-opener {

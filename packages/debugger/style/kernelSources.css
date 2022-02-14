@@ -32,9 +32,9 @@
 }
 
 .jp-DebuggerKernelSource-filterBox {
-  padding: 0px;
+  padding: 0;
   flex: 0 0 auto;
-  margin: 0px 0px 0px 0px;
+  margin: 0;
 }
 
 .jp-DebuggerKernelSource-filterBox-hidden {

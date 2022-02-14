@@ -11,8 +11,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   margin: 0;
   padding: 0;
   width: 100%;
@@ -26,7 +26,7 @@
   margin-left: auto;
   margin-right: auto;
   background: var(--jp-layout-color1);
-  padding: 24px 24px 12px 24px;
+  padding: 24px 24px 12px;
   min-width: 300px;
   min-height: 150px;
   max-width: 1000px;
@@ -35,6 +35,7 @@
   box-shadow: var(--jp-elevation-z20);
   word-wrap: break-word;
   border-radius: var(--jp-border-radius);
+
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
@@ -53,7 +54,7 @@
 button.jp-Dialog-button:focus {
   outline: 1px solid var(--jp-brand-color1);
   outline-offset: 4px;
-  -moz-outline-radius: 0px;
+  -moz-outline-radius: 0;
 }
 
 button.jp-Dialog-button:focus::-moz-focus-inner {
@@ -64,7 +65,7 @@ button.jp-Dialog-button.jp-mod-styled.jp-mod-accept:focus,
 button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus,
 button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
   outline-offset: 4px;
-  -moz-outline-radius: 0px;
+  -moz-outline-radius: 0;
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-accept:focus {
@@ -126,7 +127,7 @@ button.jp-Dialog-close-button {
 }
 
 .jp-Dialog-body > button {
-  padding: 0px 16px;
+  padding: 0 16px;
 }
 
 .jp-Dialog-body > label {

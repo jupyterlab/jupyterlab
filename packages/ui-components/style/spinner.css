@@ -35,18 +35,18 @@
   animation: load3 1s infinite linear, fadeIn 1s;
 }
 
-.jp-SpinnerContent:before {
+.jp-SpinnerContent::before {
   width: 50%;
   height: 50%;
   background: #f37626;
-  border-radius: 100% 0 0 0;
+  border-radius: 100% 0 0;
   position: absolute;
   top: 0;
   left: 0;
   content: '';
 }
 
-.jp-SpinnerContent:after {
+.jp-SpinnerContent::after {
   background: var(--jp-layout-color0);
   width: 75%;
   height: 75%;
@@ -64,6 +64,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -73,6 +74,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
