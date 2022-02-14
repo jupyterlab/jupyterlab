@@ -4,23 +4,14 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import {
   IObservableList,
   IObservableUndoableList,
-  ObservableList
 } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  LabIcon,
-} from '@jupyterlab/ui-components';
 import { each, find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { CellToolbarWidget } from './celltoolbarwidget';
-import {
-  lockedTagsIcon,
-  unlockedTagsIcon
-} from './icon';
 import { PositionedButton } from './positionedbutton';
-import { TagsModel } from './tagsmodel';
 import { ICellMenuItem } from './tokens';
 import { ToggleButton } from './toolbarbutton';
 
@@ -47,24 +38,6 @@ export class CellToolbarTracker implements IDisposable {
     this._commands = commands;
     this._panel = panel;
     this._settings = settings;
-
-    // Add lock tag button
-    this._unlockTagsButton = new ToggleButton({
-      className: (): string => 'jp-enh-cell-nb-button',
-      enabled: (): boolean =>
-        (!this._panel?.context.model.readOnly &&
-          this._panel?.context.contentsModel?.writable) ??
-        false,
-      icon: (state: boolean): LabIcon =>
-        state ? lockedTagsIcon : unlockedTagsIcon,
-      tooltip: (state: boolean): string =>
-        state ? 'Lock tags' : 'Unlock tags',
-      onClick: (state: boolean): void => {
-        for (const id in this._tagsModels) {
-          this._tagsModels[id].unlockedTags = state;
-        }
-      }
-    });
 
     let insertionPoint = -1;
     find(panel.toolbar.children(), (tbb, index) => {
@@ -134,10 +107,6 @@ export class CellToolbarTracker implements IDisposable {
       const {
         helperButtons,
         leftMenu,
-        rightMenu,
-        leftSpace,
-        floatPosition,
-        showTags
       } = (this._settings?.composite as any) ?? {};
 
       const helperButtons_ =
@@ -146,25 +115,10 @@ export class CellToolbarTracker implements IDisposable {
           : helperButtons ??
             DEFAULT_HELPER_BUTTONS.map(entry => entry.command.split(':')[1]);
       const leftMenu_ = leftMenu === null ? [] : leftMenu ?? DEFAULT_LEFT_MENU;
-      const rightMenu_ = rightMenu ?? [];
-      const leftSpace_ = leftSpace ?? 0;
-      const showTags_ = showTags ?? true;
-
-      const tagsModel = showTags_
-        ? (this._tagsModels[model.id] = new TagsModel(
-            model,
-            this._allTags,
-            this._unlockTagsButton.toggled
-          ))
-        : null;
 
       const toolbar = new CellToolbarWidget(
         this._commands,
-        tagsModel,
         leftMenu_,
-        rightMenu_,
-        leftSpace_,
-        floatPosition
       );
       toolbar.addClass(CELL_BAR_CLASS);
       (cell.layout as PanelLayout).insertWidget(0, toolbar);
@@ -206,10 +160,6 @@ export class CellToolbarTracker implements IDisposable {
     const cell = this._getCell(model);
     if (cell) {
       this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
-      if (this._tagsModels[model.id]) {
-        this._tagsModels[model.id].dispose();
-        delete this._tagsModels[model.id];
-      }
     }
   }
 
@@ -237,30 +187,12 @@ export class CellToolbarTracker implements IDisposable {
         this._addToolbar(model);
       });
     }
-
-    // Update tags
-    const newDefaultTags =
-      (this._settings?.composite['defaultTags'] as string[]) ?? [];
-    // Update default tag in shared tag list
-    const toAdd = newDefaultTags.filter(
-      tag => !this._previousDefaultTags.includes(tag)
-    );
-    if (toAdd.length > 0) {
-      this._allTags.pushAll(toAdd);
-    }
-    this._previousDefaultTags
-      .filter(tag => !newDefaultTags.includes(tag))
-      .forEach(tag => this._allTags.removeValue(tag));
-    this._previousDefaultTags = newDefaultTags;
   }
 
-  private _allTags: ObservableList<string> = new ObservableList<string>();
   private _commands: CommandRegistry;
   private _isDisposed = false;
-  private _previousDefaultTags = new Array<string>();
   private _panel: NotebookPanel | null;
   private _settings: ISettingRegistry.ISettings | null;
-  private _tagsModels: { [id: string]: TagsModel } = {};
   private _unlockTagsButton: ToggleButton;
 }
 
