@@ -6,14 +6,21 @@ import {
   IObservableUndoableList,
 } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { each, find } from '@lumino/algorithm';
+import { LabIcon } from '@jupyterlab/ui-components';
+import { each } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { CellToolbarWidget } from './celltoolbarwidget';
 import { PositionedButton } from './positionedbutton';
-import { ICellMenuItem } from './tokens';
-import { ToggleButton } from './toolbarbutton';
+import { EXTENSION_ID, ICellMenuItem } from './tokens';
+
+// icon svg import statements
+import addAboveSvg from '../style/icons/addabove.svg';
+import addBelowSvg from '../style/icons/addbelow.svg';
+import deleteSvg from '../style/icons/delete.svg';
+import moveDownSvg from '../style/icons/movedown.svg';
+import moveUpSvg from '../style/icons/moveup.svg';
 
 const DEFAULT_LEFT_MENU: ICellMenuItem[] = [
 ];
@@ -25,6 +32,28 @@ const DEFAULT_HELPER_BUTTONS: ICellMenuItem[] = [
  * Widget cell toolbar class
  */
 const CELL_BAR_CLASS = 'jp-enh-cell-bar';
+
+// Icons for use in toolbar
+export const addAboveIcon = new LabIcon({
+  name: `${EXTENSION_ID}:add-above`,
+  svgstr: addAboveSvg
+});
+export const addBelowIcon = new LabIcon({
+  name: `${EXTENSION_ID}:add-below`,
+  svgstr: addBelowSvg
+});
+export const deleteIcon = new LabIcon({
+  name: `${EXTENSION_ID}:delete`,
+  svgstr: deleteSvg
+});
+export const moveDownIcon = new LabIcon({
+  name: `${EXTENSION_ID}:move-down`,
+  svgstr: moveDownSvg
+});
+export const moveUpIcon = new LabIcon({
+  name: `${EXTENSION_ID}:move-up`,
+  svgstr: moveUpSvg
+});
 
 /**
  * Watch a notebook, and each time a cell is created add a CellTagsWidget to it.
@@ -39,17 +68,6 @@ export class CellToolbarTracker implements IDisposable {
     this._panel = panel;
     this._settings = settings;
 
-    let insertionPoint = -1;
-    find(panel.toolbar.children(), (tbb, index) => {
-      insertionPoint = index; // It will be the last index or the cell type input
-      return tbb.hasClass('jp-Notebook-toolbarCellType');
-    });
-    panel.toolbar.insertItem(
-      insertionPoint + 1,
-      'edit-tags',
-      this._unlockTagsButton
-    );
-
     if (this._settings) {
       this._onSettingsChanged();
       this._settings.changed.connect(this._onSettingsChanged, this);
@@ -57,8 +75,6 @@ export class CellToolbarTracker implements IDisposable {
 
     const cells = this._panel.context.model.cells;
     cells.changed.connect(this.updateConnectedCells, this);
-
-    panel.context.fileChanged.connect(this._onFileChanged, this);
   }
 
   get isDisposed(): boolean {
@@ -80,8 +96,6 @@ export class CellToolbarTracker implements IDisposable {
       cells.changed.disconnect(this.updateConnectedCells, this);
       each(cells.iter(), model => this._removeToolbar(model));
     }
-
-    this._panel?.context.fileChanged.disconnect(this._onFileChanged);
 
     this._panel = null;
   }
@@ -114,7 +128,7 @@ export class CellToolbarTracker implements IDisposable {
           ? []
           : helperButtons ??
             DEFAULT_HELPER_BUTTONS.map(entry => entry.command.split(':')[1]);
-      const leftMenu_ = leftMenu === null ? [] : leftMenu ?? DEFAULT_LEFT_MENU;
+            const leftMenu_ = leftMenu === null ? [] : leftMenu ?? DEFAULT_LEFT_MENU;
 
       const toolbar = new CellToolbarWidget(
         this._commands,
@@ -164,22 +178,9 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   /**
-   * Callback on file changed
-   */
-  private _onFileChanged(): void {
-    this._unlockTagsButton.update();
-  }
-
-  /**
    * Call back on settings changes
    */
   private _onSettingsChanged(): void {
-    if (this._settings?.composite['showTags'] ?? true) {
-      this._unlockTagsButton.show();
-    } else {
-      this._unlockTagsButton.hide();
-    }
-
     // Reset toolbar when settings changes
     if (this._panel?.context.model.cells) {
       each(this._panel?.context.model.cells.iter(), model => {
@@ -193,7 +194,6 @@ export class CellToolbarTracker implements IDisposable {
   private _isDisposed = false;
   private _panel: NotebookPanel | null;
   private _settings: ISettingRegistry.ISettings | null;
-  private _unlockTagsButton: ToggleButton;
 }
 
 /**

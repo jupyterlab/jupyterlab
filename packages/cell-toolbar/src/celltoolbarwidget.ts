@@ -11,7 +11,7 @@ import { getCSSVar } from './utils';
 export class CellToolbarWidget extends Widget {
   constructor(
     commands: CommandRegistry,
-    leftMenuItems: ICellMenuItem[],
+    menuItems: ICellMenuItem[],
   ) {
     super();
     this.layout = new PanelLayout();
@@ -21,7 +21,7 @@ export class CellToolbarWidget extends Widget {
     (this.layout as PanelLayout).addWidget(Toolbar.createSpacerItem());
 
     (this.layout as PanelLayout).addWidget(
-      new CellMenu(commands, leftMenuItems)
+      new CellMenu(commands, menuItems)
     );
 
     // Set style
