@@ -81,6 +81,16 @@
           "tooltip": "Move Cell Down"
         },
         {
+          "command": "notebook:insert-cell-above",
+          "icon": "@jupyterlab/cell-toolbar:add-above",
+          "tooltip": "Insert Cell Above"
+        },
+        {
+          "command": "notebook:insert-cell-below",
+          "icon": "@jupyterlab/cell-toolbar:add-below",
+          "tooltip": "Insert Cell Below"
+        },
+        {
           "command": "notebook:delete-cell",
           "icon": "@jupyterlab/cell-toolbar:delete",
           "tooltip": "Delete Cell"

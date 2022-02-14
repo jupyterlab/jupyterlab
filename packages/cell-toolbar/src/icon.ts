@@ -2,6 +2,8 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import { EXTENSION_ID } from './tokens';
 
 // icon svg import statements
+import addAboveSvg from '../style/icons/addabove.svg';
+import addBelowSvg from '../style/icons/addbelow.svg';
 import codeSvg from '../style/icons/code.svg';
 import deleteSvg from '../style/icons/delete.svg';
 import formatSvg from '../style/icons/format.svg';
@@ -10,6 +12,14 @@ import moveUpSvg from '../style/icons/moveup.svg';
 import lockedTagsSvg from '../style/icons/lockedtags.svg';
 import unlockedTagsSvg from '../style/icons/unlockedtags.svg';
 
+export const addAboveIcon = new LabIcon({
+  name: `${EXTENSION_ID}:add-above`,
+  svgstr: addAboveSvg
+});
+export const addBelowIcon = new LabIcon({
+  name: `${EXTENSION_ID}:add-below`,
+  svgstr: addBelowSvg
+});
 export const codeIcon = new LabIcon({
   name: `${EXTENSION_ID}:code`,
   svgstr: codeSvg
