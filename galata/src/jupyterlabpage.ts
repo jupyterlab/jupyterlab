@@ -202,6 +202,8 @@ export interface IJupyterLabPage {
     timeout?: number
   ): Promise<void>;
 
+  waitForFrame(n: number): Promise<void>;
+
   /**
    * Wait for an element to emit 'transitionend' event.
    *
@@ -563,6 +565,21 @@ export class JupyterLabPage implements IJupyterLabPage {
     timeout?: number
   ): Promise<void> {
     return Utils.waitForCondition(condition, timeout);
+  }
+
+  async waitForFrame(n: number): Promise<void> {
+    await this.page.evaluate(async (n: number) => {
+      for (let i = 0; i < n; i++) {
+        let resolveFrame: (value?: unknown) => void;
+        const waitForFrame = new Promise(resolve => {
+          resolveFrame = resolve;
+        });
+        requestAnimationFrame(() => {
+          resolveFrame();
+        });
+        await waitForFrame;
+      }
+    }, n);
   }
 
   /**

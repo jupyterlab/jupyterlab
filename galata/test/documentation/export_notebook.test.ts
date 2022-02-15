@@ -27,15 +27,7 @@ test.describe('Export Notebook', () => {
     });
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_menu.png');
@@ -65,15 +57,7 @@ test.describe('Export Notebook', () => {
     });
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_slide_type.png');

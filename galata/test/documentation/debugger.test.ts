@@ -22,15 +22,7 @@ test.describe('Debugger', () => {
     );
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_kernel.png');
@@ -53,15 +45,7 @@ test.describe('Debugger', () => {
     );
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_activate.png');
@@ -86,15 +70,7 @@ test.describe('Debugger', () => {
     );
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_breakpoint.png');
@@ -117,15 +93,7 @@ test.describe('Debugger', () => {
     );
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_run.png');
@@ -156,15 +124,7 @@ test.describe('Debugger', () => {
     );
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_stop_on_breakpoint.png');
@@ -191,15 +151,7 @@ test.describe('Debugger', () => {
     );
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_sidebar.png');
@@ -230,15 +182,7 @@ test.describe('Debugger', () => {
     );
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_variables.png');

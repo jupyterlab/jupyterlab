@@ -22,15 +22,7 @@ test.describe('Internationalization', () => {
     });
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_settings.png');
@@ -52,15 +44,7 @@ test.describe('Internationalization', () => {
     });
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_change.png');
@@ -94,15 +78,7 @@ test.describe('Internationalization', () => {
     await page.waitForSelector('text=README.md');
 
 
-    let toResolve;
-    const awaitTimeout = new Promise(resolve => {
-      toResolve = resolve;
-    });
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(toResolve);
-    });
-    await awaitTimeout;
+    await page.waitForFrame(2);
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
 });
