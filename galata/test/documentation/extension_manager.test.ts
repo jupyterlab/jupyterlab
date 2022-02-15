@@ -21,7 +21,7 @@ test.describe('Extension Manager', () => {
     });
 
 
-    await page.waitForFrame(2);
+    await page.waitForFrame(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_default.png');
@@ -41,7 +41,7 @@ test.describe('Extension Manager', () => {
     });
 
 
-    await page.waitForFrame(2);
+    await page.waitForFrame(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_disabled.png');
@@ -61,7 +61,7 @@ test.describe('Extension Manager', () => {
     });
 
 
-    await page.waitForFrame(2);
+    await page.waitForFrame(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_enabled.png');
@@ -91,7 +91,7 @@ test.describe('Extension Manager', () => {
     });
 
 
-    await page.waitForFrame(2);
+    await page.waitForFrame(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_search.png');
@@ -129,7 +129,7 @@ test.describe('Extension Manager', () => {
     });
 
 
-    await page.waitForFrame(2);
+    await page.waitForFrame(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_simultaneous_block_allow.png');
@@ -167,7 +167,7 @@ test.describe('Extension Manager', () => {
     });
 
 
-    await page.waitForFrame(2);
+    await page.waitForFrame(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_blocked_list.png');
@@ -205,7 +205,7 @@ test.describe('Extension Manager', () => {
     });
 
 
-    await page.waitForFrame(2);
+    await page.waitForFrame(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_allowed_list.png');
