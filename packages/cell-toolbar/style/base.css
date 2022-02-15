@@ -123,11 +123,21 @@
   background-color: unset;
 }
 
-/* Custom styling */
+/* Custom styling for cell toolbar*/
 
 .jp-mod-active .jp-enh-cell-menu {
   border: var(--jp-border-width) var(--jp-border-color1) solid;
   padding: 0px;
   border-radius: var(--jp-border-radius);
   box-shadow: var(--jp-elevation-z1);
+}
+
+/* Custom styling for rendered markdown cells so that cell toolbar is visible */
+.jp-MarkdownOutput {
+  border-width: var(--jp-border-width);
+  border-color: transparent;
+  border-style: solid;
+}
+.jp-mod-active .jp-MarkdownOutput {
+  border-color: var(--jp-cell-editor-border-color);
 }
