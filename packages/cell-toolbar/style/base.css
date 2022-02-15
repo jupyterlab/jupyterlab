@@ -59,14 +59,10 @@
 
 .jp-mod-active .jp-enh-cell-menu {
   display: flex;
-  background-color: var(--jp-layout-color2);
   /* Use shadow instead of border so empty toolbar does not collapse as thin vertical line */
-  box-shadow: var(--jp-elevation-z1);
-  border-radius: var(--jp-border-radius);
 }
 
 .jp-enh-cell-menu button.jp-ToolbarButtonComponent {
-  height: 16px;
   cursor: pointer;
 }
 
@@ -121,15 +117,6 @@
 .jp-enh-cell-tags .add-tag {
   /* Needed to ensure correct display on selected cells */
   background-color: unset;
-}
-
-/* Custom styling for cell toolbar*/
-
-.jp-mod-active .jp-enh-cell-menu {
-  border: var(--jp-border-width) var(--jp-border-color1) solid;
-  padding: 0px;
-  border-radius: var(--jp-border-radius);
-  box-shadow: var(--jp-elevation-z1);
 }
 
 /* Custom styling for rendered markdown cells so that cell toolbar is visible */
