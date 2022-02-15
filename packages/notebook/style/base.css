@@ -103,7 +103,8 @@
 .jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt {
   color: var(--jp-warn-color1);
 }
-.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt:before {
+
+.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt::before {
   color: var(--jp-warn-color1);
   content: '•';
 }
@@ -171,7 +172,7 @@
 }
 
 .jp-dragImage-singlePrompt {
-  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.12);
+  box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.12);
 }
 
 .jp-dragImage .jp-dragImage-content {
@@ -185,7 +186,7 @@
   background: var(--jp-cell-editor-background-color);
   color: var(--jp-content-font-color3);
   text-align: left;
-  margin: 4px 4px 4px 0px;
+  margin: 4px 4px 4px 0;
 }
 
 .jp-dragImage .jp-dragImage-prompt {
@@ -210,7 +211,7 @@
   left: 8px;
   background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-input-border-color);
-  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.12);
+  box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.12);
 }
 
 /*-----------------------------------------------------------------------------
@@ -222,6 +223,7 @@
   min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
+
   /* This is needed so that all font sizing of children done in ems is
     * relative to this base size */
   font-size: var(--jp-ui-font-size1);
@@ -229,7 +231,7 @@
 }
 
 .jp-NotebookTools-tool {
-  padding: 0px 12px 0 12px;
+  padding: 0 12px;
 }
 
 .jp-ActiveCellTool {
@@ -240,7 +242,7 @@
 
 .jp-ActiveCellTool .jp-InputArea-prompt {
   flex: 0 0 auto;
-  padding-left: 0px;
+  padding-left: 0;
 }
 
 .jp-ActiveCellTool .jp-InputArea-editor {
@@ -255,7 +257,7 @@
 
 .jp-MetadataEditorTool {
   flex-direction: column;
-  padding: 12px 0px 12px 0px;
+  padding: 12px 0;
 }
 
 .jp-RankedPanel > :not(:first-child) {
@@ -275,7 +277,7 @@
 
 .jp-NotebookTools .jp-select-wrapper {
   margin-top: 4px;
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 .jp-NotebookTools .jp-Collapse {

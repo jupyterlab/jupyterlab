@@ -15,7 +15,7 @@
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
   letter-spacing: 1px;
-  margin: 0px;
+  margin: 0;
   padding: 2px;
   text-transform: uppercase;
 }
@@ -36,7 +36,7 @@
 .lm-AccordionPanel .jp-AccordionPanel-title {
   box-sizing: border-box;
   line-height: 25px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   align-items: center;
   background: var(--jp-toolbar-background);
@@ -65,7 +65,7 @@
 
 .jp-AccordionPanel-title .lm-AccordionPanel-titleCollapser {
   transform: rotate(-90deg);
-  margin: auto 0px;
+  margin: auto 0;
   height: 16px;
 }
 

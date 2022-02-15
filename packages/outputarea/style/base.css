@@ -31,11 +31,13 @@
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
   opacity: var(--jp-cell-prompt-opacity);
+
   /* Right align prompt text, don't wrap to handle large prompt numbers */
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
   /* Disable text selection */
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -72,7 +74,7 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated {
   position: relative;
 }
 
-body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
+body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   content: '';
   position: absolute;
   top: 0;
@@ -86,8 +88,8 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 
 .jp-OutputArea-output pre {
   border: none;
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   overflow-x: auto;
   overflow-y: auto;
   word-break: break-all;
@@ -146,7 +148,7 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 |----------------------------------------------------------------------------*/
 
 .jp-OutputArea-output.jp-OutputArea-executeResult {
-  margin-left: 0px;
+  margin-left: 0;
   width: 100%;
 }
 
@@ -182,11 +184,13 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   background-color: inherit;
   width: 42%;
   min-width: 200px;
+
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
+
   /* padding + margin = 0.5em between prompt and cursor */
-  padding: 0em 0.25em;
-  margin: 0em 0.25em;
+  padding: 0 0.25em;
+  margin: 0 0.25em;
   flex: 0 0 70%;
 }
 
@@ -225,6 +229,7 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
     display: table-row;
     text-align: left;
   }
+
   .jp-OutputArea-child .jp-OutputArea-output {
     display: table-row;
     margin-left: var(--jp-notebook-padding);
