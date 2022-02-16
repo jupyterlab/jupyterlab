@@ -21,7 +21,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 62, left: 1050, width: 190, height: 28 })]
     );
 
-
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -43,7 +42,6 @@ test.describe('Debugger', () => {
       },
       [generateCaptureArea({ top: 62, left: 800, width: 190, height: 28 })]
     );
-
 
     await page.waitForFrames(3);
     expect(
@@ -69,7 +67,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
     );
 
-
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -91,7 +88,6 @@ test.describe('Debugger', () => {
         generateCaptureArea({ top: 62, left: 400, width: 190, height: 80 })
       ]
     );
-
 
     await page.waitForFrames(3);
     expect(
@@ -123,7 +119,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
     );
 
-
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -149,7 +144,6 @@ test.describe('Debugger', () => {
         generateCaptureArea({ top: 22, left: 1200, width: 85, height: 160 })
       ]
     );
-
 
     await page.waitForFrames(3);
     expect(
@@ -180,7 +174,6 @@ test.describe('Debugger', () => {
       },
       [generateCaptureArea({ top: 58, left: 998, width: 280, height: 138 })]
     );
-
 
     await page.waitForFrames(3);
     expect(

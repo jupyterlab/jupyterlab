@@ -20,7 +20,6 @@ test.describe('Extension Manager', () => {
       );
     });
 
-
     await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -40,7 +39,6 @@ test.describe('Extension Manager', () => {
       );
     });
 
-
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -59,7 +57,6 @@ test.describe('Extension Manager', () => {
         '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
       );
     });
-
 
     await page.waitForFrames(3);
     expect(
@@ -89,7 +86,6 @@ test.describe('Extension Manager', () => {
         '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 600px;"></div>'
       );
     });
-
 
     await page.waitForFrames(3);
     expect(
@@ -128,7 +124,6 @@ test.describe('Extension Manager', () => {
       );
     });
 
-
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -166,7 +161,6 @@ test.describe('Extension Manager', () => {
       );
     });
 
-
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -203,7 +197,6 @@ test.describe('Extension Manager', () => {
         '<div id="capture-screenshot" style="position: absolute; top: 110px; left: 33px; width: 250px; height: 280px;"></div>'
       );
     });
-
 
     await page.waitForFrames(3);
     expect(

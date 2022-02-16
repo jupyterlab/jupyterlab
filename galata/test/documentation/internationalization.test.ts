@@ -21,7 +21,6 @@ test.describe('Internationalization', () => {
       );
     });
 
-
     await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -42,7 +41,6 @@ test.describe('Internationalization', () => {
         '<div id="capture-screenshot" style="position: absolute; top: 200px; left: 350px; width: 600px; height: 300px;"></div>'
       );
     });
-
 
     await page.waitForFrames(3);
     expect(
@@ -76,7 +74,6 @@ test.describe('Internationalization', () => {
 
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
-
 
     await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
