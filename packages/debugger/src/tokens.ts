@@ -949,6 +949,11 @@ export namespace IDebugger {
       >;
 
       /**
+       * Signal emitted when the kernel sources filter has changed.
+       */
+      readonly filterChanged: ISignal<IDebugger.Model.IKernelSources, string>;
+
+      /**
        * Signal emitted when a kernel source has be opened in the main area.
        */
       readonly kernelSourceOpened: ISignal<
