@@ -7,7 +7,8 @@ module.exports = {
     'jest/globals': true
   },
   globals: {
-    JSX: 'readonly'
+    JSX: 'readonly',
+    NodeJS: 'readonly'
   },
   root: true,
   extends: [
