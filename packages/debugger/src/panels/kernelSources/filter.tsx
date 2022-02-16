@@ -14,14 +14,17 @@ import { IDebugger } from '../../tokens';
  */
 export interface IFilterBoxProps {
   model: IDebugger.Model.IKernelSources;
-  onFilterChange?: (e: any) => void;
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
+  const onFilterChange = (e: any) => {
+    const filter = (e.target as HTMLInputElement).value;
+    props.model.filter = filter;
+  };
   return (
     <InputGroup
       type="text"
-      onChange={props.onFilterChange}
+      onChange={onFilterChange}
       placeholder="Filter the kernel sources"
       value={props.model.filter}
     />
@@ -34,17 +37,10 @@ const FilterBox = (props: IFilterBoxProps) => {
 export const KernelSourcesFilter = (props: IFilterBoxProps): ReactWidget => {
   return ReactWidget.create(
     <UseSignal
-      signal={props.model.changed}
-      initialArgs={props.model.kernelSources}
+      signal={props.model.filterChanged}
+      initialArgs={props.model.filter}
     >
-      {model => (
-        <FilterBox
-          model={props.model}
-          onFilterChange={(e: any) => {
-            props.model.filter = (e.target as HTMLInputElement).value;
-          }}
-        />
-      )}
+      {model => <FilterBox model={props.model} />}
     </UseSignal>
   );
 };
