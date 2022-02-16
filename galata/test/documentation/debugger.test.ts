@@ -22,7 +22,7 @@ test.describe('Debugger', () => {
     );
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_kernel.png');
@@ -45,7 +45,7 @@ test.describe('Debugger', () => {
     );
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_activate.png');
@@ -70,7 +70,7 @@ test.describe('Debugger', () => {
     );
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_breakpoint.png');
@@ -93,7 +93,7 @@ test.describe('Debugger', () => {
     );
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_run.png');
@@ -124,7 +124,7 @@ test.describe('Debugger', () => {
     );
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_stop_on_breakpoint.png');
@@ -151,7 +151,7 @@ test.describe('Debugger', () => {
     );
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_sidebar.png');
@@ -182,7 +182,7 @@ test.describe('Debugger', () => {
     );
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_variables.png');

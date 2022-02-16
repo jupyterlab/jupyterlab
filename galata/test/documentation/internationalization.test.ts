@@ -22,7 +22,7 @@ test.describe('Internationalization', () => {
     });
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_settings.png');
@@ -44,7 +44,7 @@ test.describe('Internationalization', () => {
     });
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_change.png');
@@ -78,7 +78,7 @@ test.describe('Internationalization', () => {
     await page.waitForSelector('text=README.md');
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
 });

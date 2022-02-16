@@ -27,7 +27,7 @@ test.describe('Export Notebook', () => {
     });
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_menu.png');
@@ -57,7 +57,7 @@ test.describe('Export Notebook', () => {
     });
 
 
-    await page.waitForFrame(3);
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_slide_type.png');
