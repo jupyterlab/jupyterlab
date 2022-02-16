@@ -5,7 +5,11 @@ import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import { generateArrow, positionMouse } from './utils';
 
-test.use({ autoGoto: false, viewport: { height: 720, width: 1280 } });
+test.use({
+  autoGoto: false,
+  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  viewport: { height: 720, width: 1280 }
+});
 
 test.describe('General', () => {
   test('Welcome', async ({ page }) => {
