@@ -22,7 +22,7 @@ test.describe('Internationalization', () => {
     });
 
 
-    await page.waitForFrames(3);
+    await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_settings.png');

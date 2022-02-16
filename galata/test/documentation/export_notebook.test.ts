@@ -15,6 +15,8 @@ test.describe('Export Notebook', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
 
+    await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+
     await page.click('text=File');
     await page.click('ul[role="menu"] >> text=Save and Export Notebook As');
 
@@ -26,6 +28,8 @@ test.describe('Export Notebook', () => {
       );
     });
 
+    // Wait for Latex renderer
+    await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
     await page.waitForFrames(3);
     expect(
@@ -40,6 +44,8 @@ test.describe('Export Notebook', () => {
       '[aria-label="File Browser Section"] >> text=notebooks'
     );
     await page.dblclick('text=Lorenz.ipynb');
+
+    await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
 
     await page.click('[title="Property Inspector"]');
     await page.pause();
@@ -56,6 +62,8 @@ test.describe('Export Notebook', () => {
       );
     });
 
+    // Wait for Latex renderer
+    await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
     await page.waitForFrames(3);
     expect(
