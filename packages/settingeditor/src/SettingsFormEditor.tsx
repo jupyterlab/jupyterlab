@@ -24,6 +24,11 @@ import React from 'react';
 import { PluginList } from './pluginlist';
 
 /**
+ * Indentation to use when saving the settings as JSON document.
+ */
+const JSON_INDENTATION = 4;
+
+/**
  * Namespace for a React component that prepares the settings for a
  * given plugin to be rendered in the FormEditor.
  */
@@ -347,7 +352,7 @@ export class SettingsFormEditor extends React.Component<
       return;
     }
     this.props.settings
-      .save(JSON.stringify(this.state.formData))
+      .save(JSON.stringify(this.state.formData, undefined, JSON_INDENTATION))
       .then(() => {
         this.props.updateDirtyState(false);
         this.setState({ isModified: this.props.settings.isModified });
