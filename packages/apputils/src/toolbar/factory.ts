@@ -40,6 +40,8 @@ async function displayInformation(trans: TranslationBundle): Promise<void> {
 /**
  * Set the toolbar definition by accumulating all settings definition.
  *
+ * The list will be populated only with the enabled items.
+ *
  * @param toolbarItems Observable list to populate
  * @param registry Application settings registry
  * @param factoryName Widget factory name that needs a toolbar
@@ -208,7 +210,7 @@ async function setToolbarItems(
     // name cannot be inserted (it will be a no-op). But that could happen
     // if the settings are changing the items order.
     toolbarItems.clear();
-    toolbarItems.pushAll(newItems);
+    toolbarItems.pushAll(newItems.filter(item => !item.disabled));
   };
 
   // Initialize the toolbar
