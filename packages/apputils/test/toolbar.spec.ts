@@ -252,7 +252,13 @@ describe('@jupyterlab/apputils', () => {
                 rank: 20
               },
               { name: 'spacer', type: 'spacer', rank: 100 },
-              { name: 'cut', command: 'notebook:cut-cell', rank: 21 }
+              { name: 'cut', command: 'notebook:cut-cell', rank: 21 },
+              {
+                name: 'clear-all',
+                command: 'notebook:clear-all-cell-outputs',
+                rank: 60,
+                disabled: true
+              }
             ]
           },
           'jupyter.lab.transform': true,
@@ -309,6 +315,9 @@ describe('@jupyterlab/apputils', () => {
 
       const items = factory(new Widget());
       expect(items).toHaveLength(3);
+      expect(items.get(0).name).toEqual('insert');
+      expect(items.get(1).name).toEqual('cut');
+      expect(items.get(2).name).toEqual('spacer');
     });
 
     it('should update the toolbar items with late settings load', async () => {
@@ -328,7 +337,12 @@ describe('@jupyterlab/apputils', () => {
         schema: {
           'jupyter.lab.toolbars': {
             dummyFactory: [
-              { name: 'cut', command: 'notebook:cut-cell', rank: 21 }
+              { name: 'cut', command: 'notebook:cut-cell', rank: 21 },
+              { name: 'insert', rank: 40 },
+              {
+                name: 'clear-all',
+                disabled: true
+              }
             ]
           },
           type: 'object'
@@ -349,6 +363,11 @@ describe('@jupyterlab/apputils', () => {
                 name: 'insert',
                 command: 'notebook:insert-cell-below',
                 rank: 20
+              },
+              {
+                name: 'clear-all',
+                command: 'notebook:clear-all-cell-outputs',
+                rank: 60
               }
             ]
           },
@@ -409,6 +428,8 @@ describe('@jupyterlab/apputils', () => {
 
       const items = factory(new Widget());
       expect(items).toHaveLength(2);
+      expect(items.get(0).name).toEqual('cut');
+      expect(items.get(1).name).toEqual('insert');
     });
   });
 });
