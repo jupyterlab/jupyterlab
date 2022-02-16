@@ -47,8 +47,7 @@
     "@lumino/coreutils": "^1.11.1",
     "@lumino/signaling": "^1.10.1",
     "@lumino/virtualdom": "^1.14.1",
-    "@lumino/widgets": "^1.30.0",
-    "lib0": "^0.2.42"
+    "@lumino/widgets": "^1.31.1"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.5.0-beta.0",
