@@ -10,6 +10,7 @@
   --jp-private-settingeditor-row-height: 16px;
   --jp-private-settingeditor-toolbar-height: 28px;
   --jp-private-settingeditor-type-width: 75px;
+  --jp-private-settingeditor-modifier-indent: 5px;
 }
 
 .jp-SettingsPanel,
@@ -227,19 +228,31 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   padding: 6px 8px;
   background: none;
   color: var(--jp-content-font-color0);
+  height: inherit;
 }
 
 .jp-SettingsPanel fieldset input[type='checkbox'] {
   position: relative;
   top: 2px;
+  margin-left: 0;
+}
+
+/** copy of `input.jp-mod-styled:focus` style */
+.jp-SettingsPanel fieldset input:focus {
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
 .jp-SettingsPanel .checkbox label {
   cursor: pointer;
 }
 
-.jp-SettingsPanel .checkbox label:not(:first-child) {
-  margin: 0.5em;
+.jp-SettingsPanel .checkbox .field-description {
+  /* Disable default description field for checkbox:
+   because other widgets do not have description fields,
+   we add descriptions to each widget on the field level.
+  */
+  display: none;
 }
 
 .jp-SettingsPanel button[type='submit'] {
@@ -247,22 +260,46 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 }
 
 .jp-SettingsPanel .form-group {
-  padding: 0 16px 16px 5px;
   display: flex;
+  padding: 4px 8px 4px var(--jp-private-settingeditor-modifier-indent);
   margin-top: 5px;
+}
+
+.jp-SettingsPanel .jp-objectFieldWrapper .form-group {
+  padding: 2px 8px 2px var(--jp-private-settingeditor-modifier-indent);
+  margin-top: 2px;
+}
+
+.jp-ArrayOperations {
+  margin-left: 8px;
+}
+
+.jp-SettingsPanel .jp-FormGroup-content {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.jp-SettingsPanel .jp-FormGroup-contentItem {
+  margin-left: 7px;
+}
+
+.jp-SettingsPanel .jp-FormGroup-description {
+  flex-basis: 100%;
+  padding: 4px 7px;
 }
 
 .jp-SettingsPanel #root__description {
   display: none;
 }
 
-.jp-SettingsPanel .checkbox {
-  padding-top: 20px;
-}
-
 .jp-SettingsPanel fieldset {
   border: none;
   padding: 0;
+}
+
+.jp-SettingsPanel fieldset:not(:first-child) {
+  margin-left: 7px;
 }
 
 .jp-SettingsPanel .jp-SaveSettingsBanner {
@@ -290,26 +327,17 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   background: var(--jp-border-color3);
 }
 
-.jp-SettingsPanel .array-item button {
-  color: var(--jp-brand-color2);
-  background-color: var(--jp-layout-color2);
+.jp-SettingsPanel button.jp-mod-styled {
   cursor: pointer;
-  margin: 2px;
-  padding: 5px;
-  border: none;
 }
 
-.jp-SettingsPanel .array-item button:disabled {
-  color: var(--jp-brand-color3);
-  background-color: var(--jp-layout-color1);
+.jp-SettingsPanel button.jp-mod-styled:disabled {
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
-.jp-SettingsPanel .array-item button,
-.jp-SettingsPanel button.array-item-add {
-  box-shadow: none;
-  border: none;
-  padding: 10px;
+.jp-SettingsPanel .array-item button {
+  margin: 2px;
 }
 
 .jp-openJSONSettingsEditor {
@@ -343,11 +371,20 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   margin: 4px;
 }
 
-.jp-SettingsPanel .root > fieldset > legend {
+.jp-SettingsPanel .field-array-of-string .array-item {
+  /* Display `jp-ArrayOperations` buttons side-by-side with content except
+    for small screens where flex-wrap will place them one below the other.
+  */
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.jp-SettingsPanel .jp-root > fieldset > legend {
   display: none;
 }
 
-.jp-SettingsPanel .root > fieldset > p {
+.jp-SettingsPanel .jp-root > fieldset > p {
   display: none;
 }
 
@@ -358,7 +395,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   margin: 1em;
 }
 
-.jp-SettingsPanel .jp-SettingsHeader h3 {
+.jp-SettingsPanel .jp-SettingsHeader-description {
   font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color1);
   font-weight: 200;
@@ -366,18 +403,18 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   line-height: var(--jp-content-font-size3);
 }
 
-.jp-SettingsPanel p {
-  font-size: var(--jp-content-font-size2);
-  margin: 0.5em;
-}
-
 .jp-SettingsPanel legend {
-  font-size: var(--jp-content-font-size3);
+  font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color0);
   flex-basis: 100%;
-  padding: 0.5em;
+  padding: 4px 0;
   font-weight: var(--jp-content-header-font-weight);
   border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-SettingsPanel .field-description {
+  padding: 4px 0;
+  white-space: pre-wrap;
 }
 
 .jp-SettingsPanel .jp-SettingsTitle {
@@ -386,8 +423,9 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   padding-left: 1em;
 }
 
-.jp-SettingsPanel .jp-SettingsTitle span {
+.jp-SettingsPanel .jp-SettingsTitle-caret {
   width: 2em;
+  flex-shrink: 0;
 }
 
 .jp-SettingsForm {
@@ -427,19 +465,14 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   width: 5px;
   background-color: var(--jp-brand-color2);
   margin-top: 0;
-  margin-bottom: -16px;
-  margin-left: -5px;
+  margin-left: calc(var(--jp-private-settingeditor-modifier-indent) * -1);
+  flex-shrink: 0;
 }
 
-.jp-SettingsPanel .form-group h3,
-.jp-SettingsPanel .form-group p#field-description {
+.jp-SettingsPanel .jp-FormGroup-fieldLabel {
   font-size: var(--jp-content-font-size1);
-  font-weight: 500;
-  margin-left: 7px;
-}
-
-.jp-SettingsPanel .inputFieldWrapper {
-  margin-left: 7px;
+  font-weight: normal;
+  min-width: 120px;
 }
 
 .jp-SettingsPanel .jp-modifiedIndicator.jp-errorIndicator {

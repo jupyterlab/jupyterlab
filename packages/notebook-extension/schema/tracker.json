@@ -649,73 +649,89 @@
       "properties": {
         "autoClosingBrackets": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "title": "Auto Closing Brackets"
         },
         "cursorBlinkRate": {
           "type": "number",
-          "title": "Cursor blinking rate",
+          "title": "Cursor Blinking Rate",
           "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely.",
           "default": 530
         },
         "fontFamily": {
           "type": ["string", "null"],
-          "default": null
+          "default": null,
+          "title": "Font Family"
         },
         "fontSize": {
           "type": ["integer", "null"],
           "minimum": 1,
           "maximum": 100,
-          "default": null
+          "default": null,
+          "title": "Font Size"
         },
         "lineHeight": {
           "type": ["number", "null"],
-          "default": null
+          "default": null,
+          "title": "Line Height"
         },
         "lineNumbers": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "title": "Show Line Numbers"
         },
         "lineWrap": {
           "type": "string",
-          "enum": ["off", "on", "wordWrapColumn", "bounded"]
+          "enum": ["off", "on", "wordWrapColumn", "bounded"],
+          "title": "Line Wrap"
         },
         "matchBrackets": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "Match Brackets"
         },
         "readOnly": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "title": "Read Only"
         },
         "insertSpaces": {
           "type": "boolean",
-          "default": true
+          "default": true,
+          "title": "Insert Spaces"
         },
         "tabSize": {
           "type": "number",
-          "default": 4
+          "default": 4,
+          "title": "Tab Size"
         },
         "wordWrapColumn": {
           "type": "integer",
-          "default": 80
+          "default": 80,
+          "title": "Word Wrap Column"
         },
         "rulers": {
           "type": "array",
           "items": {
             "type": "number"
           },
+          "title": "Rulers",
           "default": []
         },
         "codeFolding": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "title": "Code Folding"
         },
         "lineWiseCopyCut": {
           "type": "boolean",
-          "default": true
+          "default": true,
+          "title": "Line-wise Ctrl-C",
+          "description": "When enabled, which is the default, doing copy or cut when there is no selection will copy or cut the whole lines that have cursors on them."
         },
         "showTrailingSpace": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "title": "Show Trailing Space"
         }
       },
       "additionalProperties": false,
@@ -859,8 +875,8 @@
       "default": "1000px"
     },
     "maxNumberOutputs": {
-      "title": "The maximum number of output cells to be rendered in the output area. Set to 0 to have the complete display.",
-      "description": "Defines the maximum number of output cells to be rendered in the output area for cells with many outputs. The output area will have a head and the remaining outputs will be trimmed and not displayed unless the user clicks on the information message.",
+      "title": "The maximum number of output cells to be rendered in the output area.",
+      "description": "Defines the maximum number of output cells to be rendered in the output area for cells with many outputs. The output area will have a head and the remaining outputs will be trimmed and not displayed unless the user clicks on the information message. Set to 0 to have the complete display.",
       "type": "number",
       "default": 50
     },
