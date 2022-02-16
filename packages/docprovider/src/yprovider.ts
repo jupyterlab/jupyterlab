@@ -42,7 +42,8 @@ export class WebSocketProviderWithLocks
     this._contentType = options.contentType;
     this._serverUrl = options.url;
     const searchParams = new URL(options.url).searchParams;
-    const color = '#' + searchParams.get('usercolor') ?? getRandomColor().slice(1);
+    const color =
+      '#' + searchParams.get('usercolor') ?? getRandomColor().slice(1);
     const name = searchParams.get('username') ?? getAnonymousUserName();
     const awareness = options.ymodel.awareness;
     const currState = awareness.getLocalState();
