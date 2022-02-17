@@ -3,7 +3,7 @@
 
 import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
-import { generateArrow, positionMouse } from './utils';
+import { generateArrow, generateCaptureArea, positionMouse } from './utils';
 
 test.use({
   autoGoto: false,
@@ -98,12 +98,12 @@ test.describe('General', () => {
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -125,12 +125,12 @@ test.describe('General', () => {
     await page.click('[title="Property Inspector"]');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 32px; left: 997px; width: 283px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 32, left: 997, width: 283, height: 400 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -146,12 +146,12 @@ test.describe('General', () => {
     await page.click('[title="Running Terminals and Kernels"]');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 27px; left: 0px; width: 283px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -167,12 +167,12 @@ test.describe('General', () => {
     await page.click('text="Tabs"');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 210px; width: 700px; height: 350px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 0, left: 210, width: 700, height: 350 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -195,14 +195,13 @@ test.describe('General', () => {
 
     // Inject arrow and capture zone
     await page.evaluate(
-      ([arrow]) => {
-        document.body.insertAdjacentHTML('beforeend', arrow);
-        document.body.insertAdjacentHTML(
-          'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 27px; left: 0px; width: 283px; height: 400px;"></div>'
-        );
+      ([arrow, zone]) => {
+        document.body.insertAdjacentHTML('beforeend', arrow + zone);
       },
-      [generateArrow({ x: 50, y: 55 }, -30)]
+      [
+        generateArrow({ x: 50, y: 55 }, -30),
+        generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })
+      ]
     );
 
     await page.sidebar.close('left');
@@ -230,14 +229,13 @@ test.describe('General', () => {
 
     // Inject mouse and capture zone
     await page.evaluate(
-      ([mouse]) => {
-        document.body.insertAdjacentHTML('beforeend', mouse);
-        document.body.insertAdjacentHTML(
-          'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 0px; width: 620px; height: 400px;"></div>'
-        );
+      ([mouse, zone]) => {
+        document.body.insertAdjacentHTML('beforeend', mouse + zone);
       },
-      [positionMouse({ x: 35, y: 35 })]
+      [
+        positionMouse({ x: 35, y: 35 }),
+        generateCaptureArea({ top: 0, left: 0, width: 620, height: 400 })
+      ]
     );
 
     await page.sidebar.close('left');
@@ -265,14 +263,13 @@ test.describe('General', () => {
 
     // Inject mouse and capture zone
     await page.evaluate(
-      ([mouse]) => {
-        document.body.insertAdjacentHTML('beforeend', mouse);
-        document.body.insertAdjacentHTML(
-          'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 0px; width: 500px; height: 500px;"></div>'
-        );
+      ([mouse, zone]) => {
+        document.body.insertAdjacentHTML('beforeend', mouse + zone);
       },
-      [positionMouse({ x: 260, y: 350 })]
+      [
+        positionMouse({ x: 260, y: 350 }),
+        generateCaptureArea({ top: 0, left: 0, width: 500, height: 500 })
+      ]
     );
 
     await page.sidebar.close('left');
@@ -301,14 +298,13 @@ test.describe('General', () => {
 
     // Inject mouse and capture zone
     await page.evaluate(
-      ([mouse]) => {
-        document.body.insertAdjacentHTML('beforeend', mouse);
-        document.body.insertAdjacentHTML(
-          'beforeend',
-          '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 0px; width: 620px; height: 400px;"></div>'
-        );
+      ([mouse, zone]) => {
+        document.body.insertAdjacentHTML('beforeend', mouse + zone);
       },
-      [positionMouse({ x: 500, y: 110 })]
+      [
+        positionMouse({ x: 500, y: 110 }),
+        generateCaptureArea({ top: 0, left: 0, width: 620, height: 400 })
+      ]
     );
 
     await page.sidebar.close('left');
@@ -360,12 +356,12 @@ test.describe('General', () => {
     await page.click('ul[role="menu"] >> text=Text Editor Key Map');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 260px; width: 600px; height: 450px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 0, left: 260, width: 600, height: 450 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -469,12 +465,12 @@ test.describe('General', () => {
     await page.click('[title="Running Terminals and Kernels"]');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 27px; left: 0px; width: 283px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -512,12 +508,12 @@ test.describe('General', () => {
     await page.hover('text=Markdown Preview');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 0px; left: 0px; width: 700px; height: 500px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 0, left: 0, width: 700, height: 500 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');

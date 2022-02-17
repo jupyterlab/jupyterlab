@@ -3,6 +3,7 @@
 
 import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
+import { generateCaptureArea } from './utils';
 
 test.use({
   autoGoto: false,
@@ -25,12 +26,12 @@ test.describe('Export Notebook', () => {
     await page.click('ul[role="menu"] >> text=Save and Export Notebook As');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 0px; width: 700px; height: 700px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 5, left: 0, width: 700, height: 700 })]
+    );
 
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
@@ -61,12 +62,12 @@ test.describe('Export Notebook', () => {
     );
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 283px; width: 997px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 5, left: 283, width: 997, height: 400 })]
+    );
 
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');

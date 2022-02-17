@@ -3,6 +3,7 @@
 
 import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
+import { generateCaptureArea } from './utils';
 
 test.use({
   autoGoto: false,
@@ -17,12 +18,12 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 303px; height: 600px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 600 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -38,12 +39,12 @@ test.describe('Extension Manager', () => {
     await page.click('[title="Extension Manager"]');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 303px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 400 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -59,12 +60,12 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 303px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 400 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -90,12 +91,12 @@ test.describe('Extension Manager', () => {
     await page.waitForSelector('text=No entries');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 303px; height: 600px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 600 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -129,12 +130,12 @@ test.describe('Extension Manager', () => {
     await page.click('[title="Extension Manager"]');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 303px; height: 160px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 160 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -168,12 +169,12 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 110px; left: 33px; width: 250px; height: 280px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -207,12 +208,12 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 110px; left: 33px; width: 250px; height: 280px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');

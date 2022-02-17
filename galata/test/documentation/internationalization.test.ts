@@ -3,6 +3,7 @@
 
 import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
+import { generateCaptureArea } from './utils';
 
 test.use({
   autoGoto: false,
@@ -18,12 +19,12 @@ test.describe('Internationalization', () => {
     await page.click('ul[role="menu"] >> text=Language');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 250px; width: 800px; height: 600px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 5, left: 250, width: 800, height: 600 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
@@ -41,12 +42,12 @@ test.describe('Internationalization', () => {
     await page.click('#jp-mainmenu-settings-language >> text=Chinese');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 200px; left: 350px; width: 600px; height: 300px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 200, left: 350, width: 600, height: 300 })]
+    );
 
     await page.sidebar.close('left');
     await page.sidebar.open('left');
