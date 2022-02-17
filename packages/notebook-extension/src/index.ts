@@ -818,7 +818,11 @@ function activateWidgetFactory(
 ): NotebookWidgetFactory.IFactory {
   const { commands } = app;
   let toolbarFactory:
-    | ((widget: NotebookPanel) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: NotebookPanel
+      ) =>
+        | DocumentRegistry.IToolbarItem[]
+        | IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
 
   // Register notebook toolbar widgets

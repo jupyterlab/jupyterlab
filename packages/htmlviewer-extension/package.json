@@ -38,6 +38,7 @@
     "@jupyterlab/apputils": "^3.3.0-beta.0",
     "@jupyterlab/docregistry": "^3.3.0-beta.0",
     "@jupyterlab/htmlviewer": "^3.3.0-beta.0",
+    "@jupyterlab/observables": "^4.3.0-beta.0",
     "@jupyterlab/settingregistry": "^3.3.0-beta.0",
     "@jupyterlab/translation": "^3.3.0-beta.0",
     "@jupyterlab/ui-components": "^3.3.0-beta.0"

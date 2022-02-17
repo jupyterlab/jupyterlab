@@ -27,6 +27,7 @@ import {
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
+import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { DataGrid } from '@lumino/datagrid';
@@ -113,7 +114,9 @@ function activateCsv(
   toolbarRegistry: IToolbarWidgetRegistry | null
 ): void {
   let toolbarFactory:
-    | ((widget: IDocumentWidget<CSVViewer>) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: IDocumentWidget<CSVViewer>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
 
   if (toolbarRegistry) {
@@ -224,7 +227,9 @@ function activateTsv(
   toolbarRegistry: IToolbarWidgetRegistry | null
 ): void {
   let toolbarFactory:
-    | ((widget: IDocumentWidget<CSVViewer>) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: IDocumentWidget<CSVViewer>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
 
   if (toolbarRegistry) {
