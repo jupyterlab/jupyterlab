@@ -42,7 +42,6 @@
 
 .jp-mod-active .jp-enh-cell-menu {
   display: flex;
-  /* Use shadow instead of border so empty toolbar does not collapse as thin vertical line */
 }
 
 .jp-enh-cell-menu button.jp-ToolbarButtonComponent {
@@ -64,42 +63,8 @@
   flex: 1 1 auto;
 }
 
-.jp-enh-cell-tags {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-
-.jp-enh-cell-tags .tag {
-  font-size: 0.85em;
-  height: 18px;
-  margin: 0px 2px;
-  padding: 0px 2px;
-  border-radius: 4px;
-  /* Needed to ensure correct display */
-  max-width: unset;
-}
-
 .jp-enh-cell-mod-click {
   cursor: pointer;
-}
-
-.jp-enh-cell-tags .tag input.add-tag {
-  font-size: 1em;
-}
-
-.jp-mod-active .jp-enh-cell-tags .tag.unapplied-tag {
-  display: flex;
-}
-
-.jp-enh-cell-tags .tag.unapplied-tag {
-  display: none;
-}
-
-.jp-enh-cell-tags .unapplied-tag,
-.jp-enh-cell-tags .add-tag {
-  /* Needed to ensure correct display on selected cells */
-  background-color: unset;
 }
 
 /* Custom styling for rendered markdown cells so that cell toolbar is visible */
