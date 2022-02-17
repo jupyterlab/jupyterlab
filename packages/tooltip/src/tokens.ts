@@ -25,7 +25,7 @@ export interface ITooltipManager {
 }
 
 /**
- * A namespace for `ICompletionManager` interface specifications.
+ * A namespace for `ITooltipManager` interface specifications.
  */
 export namespace ITooltipManager {
   /**

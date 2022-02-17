@@ -63,7 +63,7 @@ might want to use the services in your extensions.
 - ``@jupyterlab/codeeditor:IEditorServices``: A service for the text editor provider
   for the application. Use this to create new text editors and host them in your
   UI elements.
-- ``@jupyterlab/completer:ICompletionManager``: A service for the completion manager
+- ``@jupyterlab/completer:ICompletionProviderManager``: A service for the completion manager
   for the application. Use this to allow your extension to invoke a completer.
 - ``@jupyterlab/console:IConsoleTracker``: A widget tracker for code consoles.
   Use this if you want to be able to iterate over and interact with code consoles

@@ -2,25 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { DataConnector } from '@jupyterlab/statedb';
-import { CompletionHandler } from './handler';
 
+import { ICompletionProvider } from '..';
+import { CompletionHandler } from '../handler';
+import { ICompletionContext } from '../tokens';
+
+export const CONTEXT_PROVIDER_ID = 'CompletionProvider:context';
 /**
  * A context connector for completion handlers.
  */
-export class ContextConnector extends DataConnector<
-  CompletionHandler.IReply,
-  void,
-  CompletionHandler.IRequest
-> {
+export class ContextCompleterProvider implements ICompletionProvider {
   /**
-   * Create a new context connector for completion requests.
-   *
-   * @param options - The instantiation options for the context connector.
+   * The context completion provider is applicable on all cases.
+   * @param context - additional information about context of completion request
    */
-  constructor(options: ContextConnector.IOptions) {
-    super();
-    this._editor = options.editor;
+  async isApplicable(context: ICompletionContext): Promise<boolean> {
+    return true;
   }
 
   /**
@@ -29,32 +26,20 @@ export class ContextConnector extends DataConnector<
    * @param request - The completion request text and details.
    */
   fetch(
-    request: CompletionHandler.IRequest
-  ): Promise<CompletionHandler.IReply> {
-    if (!this._editor) {
+    request: CompletionHandler.IRequest,
+    context: ICompletionContext
+  ): Promise<CompletionHandler.ICompletionItemsReply> {
+    const editor = context.editor;
+    if (!editor) {
       return Promise.reject('No editor');
     }
-    return new Promise<CompletionHandler.IReply>(resolve => {
-      resolve(Private.contextHint(this._editor!));
+    return new Promise<CompletionHandler.ICompletionItemsReply>(resolve => {
+      resolve(Private.contextHint(editor!));
     });
   }
 
-  private _editor: CodeEditor.IEditor | null;
-}
-
-/**
- * A namespace for context connector statics.
- */
-export namespace ContextConnector {
-  /**
-   * The instantiation options for cell completion handlers.
-   */
-  export interface IOptions {
-    /**
-     * The session used by the context connector.
-     */
-    editor: CodeEditor.IEditor | null;
-  }
+  readonly identifier = CONTEXT_PROVIDER_ID;
+  readonly renderer = null;
 }
 
 /**
@@ -67,7 +52,7 @@ namespace Private {
    */
   export function contextHint(
     editor: CodeEditor.IEditor
-  ): CompletionHandler.IReply {
+  ): CompletionHandler.ICompletionItemsReply {
     // Find the token at the cursor
     const cursor = editor.getCursorPosition();
     const token = editor.getTokenForPosition(cursor);
@@ -79,13 +64,14 @@ namespace Private {
     // field, which are likely to be of interest.
     const completionList = tokenList.filter(t => t.type).map(t => t.value);
     // Remove duplicate completions from the list
-    const matches = Array.from(new Set<string>(completionList));
+    const matches = new Set<string>(completionList);
+    const items = new Array<CompletionHandler.ICompletionItem>();
+    matches.forEach(label => items.push({ label }));
 
     return {
       start: token.offset,
       end: token.offset + token.value.length,
-      matches,
-      metadata: {}
+      items
     };
   }
 

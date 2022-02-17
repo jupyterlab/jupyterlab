@@ -814,6 +814,74 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.3
 
+## 3.3.0b0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.0a3...878dd5d9b03878b5e57e61c4089cc4d9873fa236))
+
+### Enhancements made
+
+- Fix contrast in dark theme of settings editor [#12004](https://github.com/jupyterlab/jupyterlab/pull/12004) ([@krassowski](https://github.com/krassowski))
+
+### Bugs fixed
+
+- Fix misaligned icon and checkbox of setting editor [#11976](https://github.com/jupyterlab/jupyterlab/pull/11976) ([@trungleduc](https://github.com/trungleduc))
+
+### Documentation improvements
+
+- Fix shell command with unquoted '>' in documentation [#12002](https://github.com/jupyterlab/jupyterlab/pull/12002) ([@ErikBjare](https://github.com/ErikBjare))
+
+### Other merged PRs
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-02-03&to=2022-02-10&type=c))
+
+[@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2022-02-03..2022-02-10&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-02-03..2022-02-10&type=Issues) | [@ErikBjare](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AErikBjare+updated%3A2022-02-03..2022-02-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-02-03..2022-02-10&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-02-03..2022-02-10&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2022-02-03..2022-02-10&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-02-03..2022-02-10&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-02-03..2022-02-10&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-02-03..2022-02-10&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-02-03..2022-02-10&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2022-02-03..2022-02-10&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-02-03..2022-02-10&type=Issues)
+
+## 3.3.0a3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.0a2...843120368a8a6d98db23373a716e3575ce5b5d5e))
+
+### Enhancements made
+
+- Fix for kernel reconnect [#11952](https://github.com/jupyterlab/jupyterlab/pull/11952) ([@3coins](https://github.com/3coins))
+- Add settings UI [#11977](https://github.com/jupyterlab/jupyterlab/pull/11977) ([@fcollonval](https://github.com/fcollonval))
+- Show the kernel sources as a debugger tab and allow the user to break in kernel sources [#11954](https://github.com/jupyterlab/jupyterlab/pull/11954) ([@echarles](https://github.com/echarles))
+- Enable not showing editor for read-only Markdown cells [#11950](https://github.com/jupyterlab/jupyterlab/pull/11950) ([@fcollonval](https://github.com/fcollonval))
+- Add side-by-side margin override in the notebookConfig [#11880](https://github.com/jupyterlab/jupyterlab/pull/11880) ([@echarles](https://github.com/echarles))
+- Add additional `Accel Enter` keyboard shortcuts for the `notebook:run-cell` command [#11942](https://github.com/jupyterlab/jupyterlab/pull/11942) ([@jtpio](https://github.com/jtpio))
+- Add execution progress indicator [#11941](https://github.com/jupyterlab/jupyterlab/pull/11941) ([@trungleduc](https://github.com/trungleduc))
+- Allow to link factory to file type when adding it [#11540](https://github.com/jupyterlab/jupyterlab/pull/11540) ([@fcollonval](https://github.com/fcollonval))
+- Pause on exception [#11923](https://github.com/jupyterlab/jupyterlab/pull/11923) ([@andrewfulton9](https://github.com/andrewfulton9))
+- Increase color contrast in input boxes [#11922](https://github.com/jupyterlab/jupyterlab/pull/11922) ([@fcollonval](https://github.com/fcollonval))
+
+### Bugs fixed
+
+- Overrides.json definition takes precedence [#11610](https://github.com/jupyterlab/jupyterlab/pull/11610) ([@fcollonval](https://github.com/fcollonval))
+- Adjust `z-index` of execution progress tooltip [#11973](https://github.com/jupyterlab/jupyterlab/pull/11973) ([@Sync271](https://github.com/Sync271))
+- Fix the debug modules model #11967 [#11968](https://github.com/jupyterlab/jupyterlab/pull/11968) ([@echarles](https://github.com/echarles))
+- Fix autocomplete in console [#11949](https://github.com/jupyterlab/jupyterlab/pull/11949) ([@fcollonval](https://github.com/fcollonval))
+- Fix issue with empty notebook [#11901](https://github.com/jupyterlab/jupyterlab/pull/11901) ([@entropitor](https://github.com/entropitor))
+- Ensure a single modal is opened in case of time conflict savings [#11883](https://github.com/jupyterlab/jupyterlab/pull/11883) ([@echarles](https://github.com/echarles))
+- Restore line number state when stopping debugger [#11768](https://github.com/jupyterlab/jupyterlab/pull/11768) ([@fcollonval](https://github.com/fcollonval))
+
+### Maintenance and upkeep improvements
+
+- Update `vscode-debugprotocol` to `@vscode/debugprotocol` [#11953](https://github.com/jupyterlab/jupyterlab/pull/11953) ([@fcollonval](https://github.com/fcollonval))
+- Add update galata snapshot step [#11927](https://github.com/jupyterlab/jupyterlab/pull/11927) ([@fcollonval](https://github.com/fcollonval))
+
+### Documentation improvements
+
+- Update screenshots and text for user interface docs [#11982](https://github.com/jupyterlab/jupyterlab/pull/11982) ([@fcollonval](https://github.com/fcollonval))
+- Update several extensions readme files to delete old content. [#11947](https://github.com/jupyterlab/jupyterlab/pull/11947) ([@jasongrout](https://github.com/jasongrout))
+- Remove theme cookiecutter from the docs [#11928](https://github.com/jupyterlab/jupyterlab/pull/11928) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-01-24&to=2022-02-03&type=c))
+
+[@andrewfulton9](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrewfulton9+updated%3A2022-01-24..2022-02-03&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2022-01-24..2022-02-03&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2022-01-24..2022-02-03&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-01-24..2022-02-03&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-01-24..2022-02-03&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-01-24..2022-02-03&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2022-01-24..2022-02-03&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2022-01-24..2022-02-03&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2022-01-24..2022-02-03&type=Issues) | [@JohanMabille](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJohanMabille+updated%3A2022-01-24..2022-02-03&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-01-24..2022-02-03&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2022-01-24..2022-02-03&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-01-24..2022-02-03&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-01-24..2022-02-03&type=Issues) | [@marthacryan](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amarthacryan+updated%3A2022-01-24..2022-02-03&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2022-01-24..2022-02-03&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-01-24..2022-02-03&type=Issues) | [@mlucool](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amlucool+updated%3A2022-01-24..2022-02-03&type=Issues) | [@Sync271](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASync271+updated%3A2022-01-24..2022-02-03&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2022-01-24..2022-02-03&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-01-24..2022-02-03&type=Issues) | [@yuvipanda](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayuvipanda+updated%3A2022-01-24..2022-02-03&type=Issues)
+
 ## 3.3.0a2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.0a1...f6ac33636809f310c0fdbe0b84dd8b73be8a8820))
@@ -893,6 +961,31 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 [@agoose77](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aagoose77+updated%3A2021-12-10..2022-01-13&type=Issues) | [@andrewfulton9](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrewfulton9+updated%3A2021-12-10..2022-01-13&type=Issues) | [@baggiponte](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abaggiponte+updated%3A2021-12-10..2022-01-13&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2021-12-10..2022-01-13&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2021-12-10..2022-01-13&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2021-12-10..2022-01-13&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2021-12-10..2022-01-13&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2021-12-10..2022-01-13&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2021-12-10..2022-01-13&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2021-12-10..2022-01-13&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2021-12-10..2022-01-13&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2021-12-10..2022-01-13&type=Issues) | [@JohanMabille](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJohanMabille+updated%3A2021-12-10..2022-01-13&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2021-12-10..2022-01-13&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2021-12-10..2022-01-13&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2021-12-10..2022-01-13&type=Issues) | [@jweill-aws](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajweill-aws+updated%3A2021-12-10..2022-01-13&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2021-12-10..2022-01-13&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2021-12-10..2022-01-13&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2021-12-10..2022-01-13&type=Issues) | [@schmidi314](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aschmidi314+updated%3A2021-12-10..2022-01-13&type=Issues) | [@telamonian](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atelamonian+updated%3A2021-12-10..2022-01-13&type=Issues) | [@thesinepainter](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Athesinepainter+updated%3A2021-12-10..2022-01-13&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2021-12-10..2022-01-13&type=Issues)
 
 ## v3.2
+
+## 3.2.9
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.2.8...dbfc96a51c872288f16b7340398bf99a3df14b1f))
+
+### Bugs fixed
+
+- overrides.json definition takes precedence [#11980](https://github.com/jupyterlab/jupyterlab/pull/11980) ([@fcollonval](https://github.com/fcollonval))
+- Fix autocomplete in console [#11949](https://github.com/jupyterlab/jupyterlab/pull/11949) ([@fcollonval](https://github.com/fcollonval))
+- Add percent decoding to username [#11865](https://github.com/jupyterlab/jupyterlab/pull/11865) ([@fcollonval](https://github.com/fcollonval))
+
+### Maintenance and upkeep improvements
+
+- Use `maintainer-tools` base setup action [#11595](https://github.com/jupyterlab/jupyterlab/pull/11595) ([@jtpio](https://github.com/jtpio))
+- Drop testing Python 3.6, test on Python 3.10 [#11646](https://github.com/jupyterlab/jupyterlab/pull/11646) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Update screenshots and text for user interface docs [#11981](https://github.com/jupyterlab/jupyterlab/pull/11981) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-01-13&to=2022-02-04&type=c))
+
+[@andrewfulton9](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrewfulton9+updated%3A2022-01-13..2022-02-04&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2022-01-13..2022-02-04&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2022-01-13..2022-02-04&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-01-13..2022-02-04&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-01-13..2022-02-04&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-01-13..2022-02-04&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2022-01-13..2022-02-04&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2022-01-13..2022-02-04&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2022-01-13..2022-02-04&type=Issues) | [@JohanMabille](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJohanMabille+updated%3A2022-01-13..2022-02-04&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-01-13..2022-02-04&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2022-01-13..2022-02-04&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-01-13..2022-02-04&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-01-13..2022-02-04&type=Issues) | [@marthacryan](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amarthacryan+updated%3A2022-01-13..2022-02-04&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2022-01-13..2022-02-04&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-01-13..2022-02-04&type=Issues) | [@mlucool](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amlucool+updated%3A2022-01-13..2022-02-04&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-01-13..2022-02-04&type=Issues) | [@yuvipanda](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayuvipanda+updated%3A2022-01-13..2022-02-04&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AZsailer+updated%3A2022-01-13..2022-02-04&type=Issues)
 
 ## 3.2.8
 
@@ -4646,11 +4739,11 @@ closed.
 - [No longer in beta](#no-longer-in-beta)
 - [Workspaces](#workspaces)
 - [Menu items](#menu-items)
-- [Keyboard shortcuts](#keyboard-shorcuts)
+- [Keyboard shortcuts](#keyboard-shortcuts)
 - [Command palette items](#command-palette-items)
 - [Settings](#settings)
-- [Larger file uploads](#larger-size-uploads)
-- [Extension management and installation](#extension-manager)
+- [Larger file uploads](#larger-file-uploads)
+- [Extension management and installation](#extension-management-and-installation)
 - [Interface changes](#interface-changes)
 - [Renderers](#renderers)
 - [Changes for developers](#changes-for-developers)

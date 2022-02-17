@@ -29,7 +29,7 @@
 }
 
 .jp-DebuggerVariables-body ul li {
-  padding: 5px 0 0 0;
+  padding: 5px 0 0;
   cursor: pointer;
   color: var(--jp-content-font-color1);
   display: flex;
@@ -50,7 +50,7 @@
   background: none;
   cursor: pointer;
   display: none;
-  padding: 0px 8px;
+  padding: 0 8px;
 }
 
 .jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable:active {

@@ -6,7 +6,7 @@ import { InputGroup } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import * as React from 'react';
 import Highlight from 'react-highlighter';
-import JSONTree from 'react-json-tree';
+import { JSONTree } from 'react-json-tree';
 
 /**
  * The properties for the JSON tree component.

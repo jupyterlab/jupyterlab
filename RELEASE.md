@@ -111,7 +111,7 @@ Choose and run an appropriate command to bump version numbers for this release.
 | `jlpm bumpversion minor`   | x.y.z-> x.(y+1).0.a0  | All a.b.c -> a.(b+1).0-alpha.0     |
 | `jlpm bumpversion build`   | x.y.z.a0-> x.y.z.a1   | All a.b.c-alpha.0 -> a.b.c-alpha.1 |
 | `jlpm bumpversion release` | x.y.z.a1-> x.y.z.b0   | All a.b.c-alpha.1 -> a.b.c-beta.0  |
-| `jlpm bumpversion release` | x.y.z.a1-> x.y.z.rc0  | All a.b.c-alpha.1 -> a.b.c-rc.0    |
+| `jlpm bumpversion release` | x.y.z.b1-> x.y.z.rc0  | All a.b.c-beta.1 -> a.b.c-rc.0     |
 | `jlpm bumpversion release` | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
 | `jlpm bumpversion patch`   | x.y.z -> x.y.(z+1)    | Changed a.b.c -> a.b.(c+1)         |
 

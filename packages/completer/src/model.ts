@@ -327,7 +327,6 @@ export class CompleterModel implements Completer.IModel {
    */
   handleTextChange(change: Completer.ITextState): void {
     const original = this._original;
-
     // If there is no active completion, return.
     if (!original) {
       return;

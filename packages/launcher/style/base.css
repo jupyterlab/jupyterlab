@@ -25,6 +25,7 @@
   box-sizing: border-box;
   min-width: 120px;
   min-height: 120px;
+
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
@@ -43,7 +44,7 @@
   font-size: var(--jp-ui-font-size2);
   font-weight: normal;
   color: var(--jp-ui-font-color1);
-  margin: 1em 0px;
+  margin: 1em 0;
 }
 
 .jp-Launcher-content {
@@ -68,10 +69,11 @@
   flex-direction: row;
   align-items: center;
   box-sizing: border-box;
+
   /* This is custom tuned to get the section header to align with the cards */
   margin-left: 5px;
   border-bottom: 1px solid var(--jp-border-color2);
-  padding-bottom: 0px;
+  padding-bottom: 0;
   margin-bottom: 8px;
 }
 
@@ -100,7 +102,7 @@
   width: var(--jp-private-launcher-card-size);
   height: var(--jp-private-launcher-card-size);
   margin: 8px;
-  padding: 0px;
+  padding: 0;
   border: 1px solid var(--jp-border-color2);
   background: var(--jp-layout-color0);
   box-shadow: var(--jp-elevation-z2);
@@ -126,8 +128,8 @@
   width: 100%;
   height: var(--jp-private-launcher-card-icon-height);
   box-sizing: border-box;
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -151,7 +153,7 @@
 .jp-LauncherCard-label {
   width: 100%;
   height: var(--jp-private-launcher-card-label-height);
-  padding: 0 4px 4px 4px;
+  padding: 0 4px 4px;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -171,6 +173,6 @@
 .jp-Launcher-kernelIcon {
   width: var(--jp-private-launcher-large-icon-size);
   height: var(--jp-private-launcher-large-icon-size);
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
 }

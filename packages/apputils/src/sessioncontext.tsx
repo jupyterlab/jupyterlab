@@ -763,25 +763,41 @@ export class SessionContext implements ISessionContext {
    */
   private async _shutdownSession(): Promise<void> {
     const session = this._session;
+    // Capture starting values in case an error is raised.
+    const isTerminating = this._isTerminating;
+    const isReady = this._isReady;
     this._isTerminating = true;
     this._isReady = false;
     this._statusChanged.emit('terminating');
-    await session?.shutdown();
-    this._isTerminating = false;
-    session?.dispose();
-    this._session = null;
-    const kernel = session?.kernel || null;
-    this._statusChanged.emit('unknown');
-    this._kernelChanged.emit({
-      name: 'kernel',
-      oldValue: kernel,
-      newValue: null
-    });
-    this._sessionChanged.emit({
-      name: 'session',
-      oldValue: session,
-      newValue: null
-    });
+    try {
+      await session?.shutdown();
+      this._isTerminating = false;
+      session?.dispose();
+      this._session = null;
+      const kernel = session?.kernel || null;
+      this._statusChanged.emit('unknown');
+      this._kernelChanged.emit({
+        name: 'kernel',
+        oldValue: kernel,
+        newValue: null
+      });
+      this._sessionChanged.emit({
+        name: 'session',
+        oldValue: session,
+        newValue: null
+      });
+    } catch (err) {
+      this._isTerminating = isTerminating;
+      this._isReady = isReady;
+      const status = session?.kernel?.status;
+      if (status === undefined) {
+        this._statusChanged.emit('unknown');
+      } else {
+        this._statusChanged.emit(status);
+      }
+      throw err;
+    }
+    return;
   }
 
   /**

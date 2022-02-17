@@ -46,8 +46,9 @@
 }
 
 /* This rule is for styling cell run by another activity in this console */
-.jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
-}
+
+/* .jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
+} */
 
 .jp-CodeConsole-content .jp-InputArea-editor.jp-InputArea-editor {
   background: transparent;
@@ -75,9 +76,10 @@
   overflow: auto;
   border-top: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   padding: var(--jp-cell-padding) var(--jp-console-padding);
+
   /* This matches the box shadow on the notebook toolbar, eventually we should create
    * CSS variables for this */
-  box-shadow: 0px 0.4px 6px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.4px 6px 0 rgba(0, 0, 0, 0.1);
   background: var(--jp-layout-color1);
 }
 
