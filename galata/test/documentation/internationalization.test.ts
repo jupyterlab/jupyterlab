@@ -6,7 +6,7 @@ import { expect } from '@playwright/test';
 
 test.use({
   autoGoto: false,
-  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  // mockState: galata.DEFAULT_DOCUMENTATION_STATE,
   viewport: { height: 720, width: 1280 }
 });
 
@@ -25,6 +25,8 @@ test.describe('Internationalization', () => {
       );
     });
 
+    await page.sidebar.close('left');
+    await page.sidebar.open('left');
     await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -46,6 +48,8 @@ test.describe('Internationalization', () => {
       );
     });
 
+    await page.sidebar.close('left');
+    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -79,6 +83,8 @@ test.describe('Internationalization', () => {
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
 
+    await page.sidebar.close('left');
+    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });

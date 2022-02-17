@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, test } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 
 test.use({
   autoGoto: false,
-  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  // mockState: galata.DEFAULT_DOCUMENTATION_STATE,
   viewport: { height: 720, width: 1280 }
 });
 
@@ -35,6 +35,8 @@ test.describe('Export Notebook', () => {
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
+    await page.sidebar.close('left');
+    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -69,6 +71,8 @@ test.describe('Export Notebook', () => {
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
+    await page.sidebar.close('left');
+    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
