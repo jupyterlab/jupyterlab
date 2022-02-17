@@ -11,7 +11,7 @@ import {
   IChangedArgs as IChangedArgsGeneric,
   PathExt
 } from '@jupyterlab/coreutils';
-import { IModelDB } from '@jupyterlab/observables';
+import { IModelDB, IObservableList } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Kernel } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
@@ -1100,7 +1100,11 @@ export namespace DocumentRegistry {
     /**
      * A function producing toolbar widgets, overriding the default toolbar widgets.
      */
-    readonly toolbarFactory?: (widget: T) => DocumentRegistry.IToolbarItem[];
+    readonly toolbarFactory?: (
+      widget: T
+    ) =>
+      | DocumentRegistry.IToolbarItem[]
+      | IObservableList<DocumentRegistry.IToolbarItem>;
   }
 
   /**
