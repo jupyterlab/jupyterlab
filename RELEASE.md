@@ -4,7 +4,20 @@ This document guides a contributor through creating a release of JupyterLab.
 
 ## The JupyterLab Release Process
 
-JupyterLab follows semver for the versioning of the Python and JavaScript packages.
+JupyterLab follows [semver](https://semver.org/) for the versioning of the Python and JavaScript packages.
+
+### Release Timeline
+
+Although the commitments listed below are "best effort", the JupyterLab team tries to follow a couple of guidelines:
+
+- one major version per year, which usually includes API breaking changes
+- several minor versions per year that include new features but no API breaking changes
+- support and bug fixes on a couple of final releases (by backporting PRs and releasing from release branches)
+
+Release Plans are tracked in dedicated issues, and are closed when the final release. See the following two issues as an example:
+
+- [3.3 Release Plan](https://github.com/jupyterlab/jupyterlab/issues/11643)
+- [4.0 Release Plan](https://github.com/jupyterlab/jupyterlab/issues/9647)
 
 ### Alpha Releases
 
@@ -18,7 +31,7 @@ Beta releases usually try to not have breaking changes in the API, although brea
 
 The recommended time period for the Beta phase is a minimum of 1 week. 
 
-## Release Candidates
+### Release Candidates
 
 Release Candidates (RC) are a signal to the extension developer community that they should start migrating to the new version to test it. At that point we consider the software stable.
 
