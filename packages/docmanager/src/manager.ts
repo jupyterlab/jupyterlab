@@ -592,6 +592,7 @@ export class DocumentManager implements IDocumentManager {
 
     // If the initial opening of the context fails, dispose of the widget.
     ready.catch(err => {
+      console.error(err)
       widget.close();
     });
 
