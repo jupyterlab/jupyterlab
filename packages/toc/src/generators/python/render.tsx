@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { IHeading } from '../../utils/headings';
+import { IHeading } from '../../tokens';
 
 /**
  * Renders a Python table of contents item.
@@ -11,7 +11,7 @@ import { IHeading } from '../../utils/headings';
  * @param item - numbered heading
  * @returns rendered item
  */
-function render(item: IHeading) {
+function render(item: IHeading): JSX.Element {
   let fontSizeClass = 'toc-level-size-' + item.level;
 
   return (

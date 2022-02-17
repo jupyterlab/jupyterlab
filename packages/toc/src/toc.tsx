@@ -10,14 +10,13 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { Message } from '@lumino/messaging';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { IHeading } from './utils/headings';
-import { TableOfContentsRegistry as Registry } from './registry';
-import { TOCTree } from './toc_tree';
-import { Signal } from '@lumino/signaling';
 import { TOCItem } from './toc_item';
+import { TOCTree } from './toc_tree';
+import { IHeading, ITableOfContentsRegistry as Registry } from './tokens';
 
 /**
  * Timeout for throttling ToC rendering.
@@ -109,7 +108,7 @@ export class TableOfContents extends Widget {
    *
    * @returns table of contents generator
    */
-  get generator() {
+  get generator(): Registry.IGenerator<Widget> | null {
     if (this._current) {
       return this._current.generator;
     }

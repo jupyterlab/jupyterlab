@@ -2,10 +2,80 @@
 
 This document guides a contributor through creating a release of JupyterLab.
 
+## Automated Releases with the Jupyter Releaser
+
+The recommended way to make a release is to use [`jupyter_releaser`](https://github.com/jupyter-server/jupyter_releaser#checklist-for-adoption).
+
+### Workflow
+
+The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#making-your-first-release. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
+
+Here is a quick summary of the different steps.
+
+#### Draft Changelog
+
+The first step is to generate a new changelog entry for the upcoming release.
+
+We use the "Draft Changelog" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#draft-changelog
+
+The workflow takes a couple of input parameters. Here is an overview with example values:
+
+| Input        | Description                                             | Example Value           |
+| ------------ | ------------------------------------------------------- | ----------------------- |
+| Target       | The owner/repo GitHub target                            | `jupyterlab/jupyterlab` |
+| Branch       | The branch to target                                    | `master`                |
+| Version Spec | New Version Spec                                        | `next`                  |
+| Since        | Use PRs since activity since this date or git reference | `v4.0.0a15`             |
+
+The version spec follows the specification documented below in the [Bump Version](#bump-version) section.
+
+We can use `next` when making a `patch` release or a `build` pre-release.
+
+Click on "Run workflow", then wait for:
+
+1. the PR to be created on the repo. Example: https://github.com/jupyterlab/jupyterlab/pull/11422
+2. Tests to pass
+3. Merge the changelog PR
+
+### Full Release
+
+#### PyPI and npm tokens
+
+Before running the "Full Release" workflow, make sure you have been added to:
+
+- the `jupyterlab` project on PyPI: https://pypi.org/project/jupyterlab/
+- the `@jupyterlab` organization on npm: https://www.npmjs.com/settings/jupyterlab/packages
+
+Then create the PyPI and npm tokens. Check out the links in the [Jupyter Releaser Setup Documentation](https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#set-up) for more information.
+
+#### Running the workflow
+
+On the `jupyter_releaser` fork, select the "Full Release" workflow.
+
+Fill in the information as mentioned in the body of the changelog PR, for example:
+
+| Input        | Value                 |
+| ------------ | --------------------- |
+| Target       | jupyterlab/jupyterlab |
+| Branch       | master                |
+| Version Spec | next                  |
+| Since        | v4.0.0a15             |
+
+The "Full Release" workflow:
+
+- builds and uploads the `jupyterlab` Python package to PyPI
+- builds the `@jupyterlab/*` packages and uploads them to `npm`
+- creates a new GitHub Release with the new changelog entry as release notes
+- creates a PR to forward port the new changelog entry to the main branch (when releasing from a branch that is not the default)
+
+Then follow the [Post release candidate checklist](#post-release-candidate-checklist) if applicable.
+
+## Manual Release Process
+
 Review `CONTRIBUTING.md`. Make sure all the tools needed to generate the
 built JavaScript files are properly installed.
 
-## Creating a full release
+### Creating a full release
 
 We publish the npm packages, a Python source package, and a Python universal
 binary wheel. We also publish a conda package on conda-forge (see below). See
@@ -13,7 +83,7 @@ the Python docs on [package
 uploading](https://packaging.python.org/guides/tool-recommendations/) for twine
 setup instructions and for why twine is the recommended method.
 
-## Getting a clean environment
+### Getting a clean environment
 
 For convenience, here is a script for getting a completely clean repo. This
 makes sure that we don't have any extra tags or commits in our repo (especially
@@ -26,7 +96,7 @@ Make sure you are running an sh-compatible shell, and it is set up to be able to
 source scripts/release_prep.sh <branch_name>
 ```
 
-## Bump version
+### Bump version
 
 The next step is to bump the appropriate version numbers. We use
 [bump2version](https://github.com/c4urself/bump2version) to manage the Python
@@ -37,14 +107,15 @@ Choose and run an appropriate command to bump version numbers for this release.
 
 | Command                    | Python Version Change | NPM Version change                 |
 | -------------------------- | --------------------- | ---------------------------------- |
-| `jlpm bumpversion minor`   | x.y.z-> x.(y+1).0.a0  | All a.b.c -> a.(b+10).0-alpha.0    |
+| `jlpm bumpversion major`   | x.y.z-> (x+1).0.0.a0  | All a.b.c -> a.(b+10).0-alpha.0    |
+| `jlpm bumpversion minor`   | x.y.z-> x.(y+1).0.a0  | All a.b.c -> a.(b+1).0-alpha.0     |
 | `jlpm bumpversion build`   | x.y.z.a0-> x.y.z.a1   | All a.b.c-alpha.0 -> a.b.c-alpha.1 |
 | `jlpm bumpversion release` | x.y.z.a1-> x.y.z.b0   | All a.b.c-alpha.1 -> a.b.c-beta.0  |
-| `jlpm bumpversion release` | x.y.z.a1-> x.y.z.rc0  | All a.b.c-alpha.1 -> a.b.c-rc.0    |
+| `jlpm bumpversion release` | x.y.z.b1-> x.y.z.rc0  | All a.b.c-beta.1 -> a.b.c-rc.0     |
 | `jlpm bumpversion release` | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
 | `jlpm bumpversion patch`   | x.y.z -> x.y.(z+1)    | Changed a.b.c -> a.b.(c+1)         |
 
-Note: For a minor release, we bump the JS packages by 10 versions so that
+Note: For a major release, we bump the JS packages by 10 versions so that
 we are not competing amongst the minor releases for version numbers.
 We are essentially sub-dividing semver to allow us to bump minor versions
 of the JS packages as many times as we need to for minor releases of the
@@ -53,7 +124,7 @@ top level JupyterLab application.
 Other note: It's ok if `yarn-deduplicate` exits with a non zero code. This is
 expected!
 
-### JS major release(s)
+#### JS major release(s)
 
 In a major Python release, we can have one or more JavaScript packages also have
 a major bump. During the prerelease stage of a major release, if there is a
@@ -62,6 +133,8 @@ that JS package:
 
 `jlpm bump:js:major [...packages]`
 
+**NOTE** You should rebase before running `jlpm bump:js:major` to avoid a cascade of merge conflicts.
+
 Results:
 
 - Python package is not affected.
@@ -69,7 +142,7 @@ Results:
 - Packages that have already had a major bump in this prerelease cycle are not affected.
 - All affected packages changed to match the current release type of the Python package (`alpha`, `beta`, or `rc`).
 
-## Publishing Packages
+### Publishing Packages
 
 Now publish the JS packages
 
@@ -101,7 +174,7 @@ from ipywidgets import IntSlider
 IntSlider()
 ```
 
-## Finish
+### Finish
 
 Follow instructions printed at the end of the publish step above:
 
@@ -259,7 +332,7 @@ shasum -a 256 dist/*.tar.gz
 
 Run `source scripts/docs_push.sh` to update the `gh-pages` branch that backs http://jupyterlab.github.io/jupyterlab/.
 
-## Making a patch release
+## Making a manual patch release
 
 - Backport the change to the previous release branch
 - Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given, or no packages for a Python-only patch release):
@@ -280,3 +353,60 @@ https://github.com/jupyter/repo2docker/pull/169/files
 
 This needs to be done in both the conda and pip buildpacks in both the
 frozen and non-frozen version of the files.
+
+## Making a Minor Release
+
+### Planning
+
+- Create a pinned issue
+- Create a milestone
+- Decide on a scope for the release and set a target final release date
+
+## Alpha and Beta Phase
+
+- Create a new branch from the previous release branch
+- Use a ".x" in the branch name so we can continue to use it for patches
+- Update branch and RTD config in `ensure_repo.ts` and run `jlpm integrity` to update links - source should be the previous release branch
+- Update readthedocs branch config as appropriate
+- Automated Release using "minor" - edit changelog for new section
+- Move through alpha and beta phases as appropriate
+
+### RC Phase
+
+- Roll up the release notes using the "Use PRs with activity since the last stable git tag" option when running the workflows
+- Update the release issue with an updated date
+
+### Final Release
+
+- Roll up the release notes using the "Use PRs with activity since the last stable git tag" option when running the workflows
+- Close the release issue
+- Rename milestone to use ".x"
+- Make an announcement on Discourse
+
+## Making a Major Release
+
+### Planning
+
+- Create a pinned issue
+- Create a milestone
+- Decide on a scope for the release and set a target final release date
+
+### Alpha and Beta Phase
+
+- Update branch and RTD config in `ensure_repo.ts` and `jlpm integrity` to update links - source should be the previous branch
+- Update readthedocs branch config as appropriate
+- Automated Release using "major" - edit changelog for new section
+- Move through alpha and beta phases as appropriate
+
+### RC Phase
+
+- Roll up the release notes using the "Use PRs with activity since the last stable git tag" option when running the workflows
+- Create a new branch from the default branch with ".x" in the name so we can continue to use it for patches
+- Update the release issue with an updated date
+
+### Final Release
+
+- Roll up the release notes using the "Use PRs with activity since the last stable git tag" option when running the workflows
+- Close the release issue and rename milestone to use ".x"
+- Make an announcement on Discourse
+- Make a blog post

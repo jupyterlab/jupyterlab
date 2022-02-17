@@ -8,14 +8,12 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-/* tslint:disable */
 /**
  * The document registry token.
  */
 export const IDocumentManager = new Token<IDocumentManager>(
   '@jupyterlab/docmanager:IDocumentManager'
 );
-/* tslint:enable */
 
 /**
  * The interface for a document manager.
@@ -37,11 +35,6 @@ export interface IDocumentManager extends IDisposable {
   readonly activateRequested: ISignal<this, string>;
 
   /**
-   * A signal emitted when an option has changed.
-   */
-  readonly optionChanged: ISignal<this, any>;
-
-  /**
    * Whether to autosave documents.
    */
   autosave: boolean;
@@ -50,11 +43,6 @@ export interface IDocumentManager extends IDisposable {
    * Determines the time interval for autosave in seconds.
    */
   autosaveInterval: number;
-
-  /**
-   * Whether to prompt to name file on first save.
-   */
-  nameFileOnSave: boolean;
 
   /**
    * Clone a widget.

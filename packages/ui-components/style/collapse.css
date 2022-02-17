@@ -1,0 +1,30 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Collapse {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border-top: 1px solid var(--jp-border-color2);
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-Collapse-header {
+  padding: 1px 12px;
+  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size2);
+}
+
+.jp-Collapse-header:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-Collapse-contents {
+  padding: 0 12px;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  overflow: auto;
+}

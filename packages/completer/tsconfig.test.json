@@ -9,7 +9,19 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../console"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../notebook"
     },
     {
       "path": "../services"
@@ -25,24 +37,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statedb"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }

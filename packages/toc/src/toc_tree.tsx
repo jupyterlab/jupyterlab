@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
-import { Widget } from '@lumino/widgets';
-import { IHeading } from './utils/headings';
-import { TableOfContentsRegistry as Registry } from './registry';
-import { TOCItem } from './toc_item';
 import { Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import * as React from 'react';
 import { TableOfContents } from './toc';
+import { TOCItem } from './toc_item';
+import { IHeading, ITableOfContentsRegistry as Registry } from './tokens';
 
 /**
  * Interface describing component properties.
@@ -63,7 +62,7 @@ class TOCTree extends React.Component<IProperties, IState> {
   /**
    * Renders a table of contents tree.
    */
-  render() {
+  render(): JSX.Element {
     const Toolbar = this.props.toolbar;
 
     // Map the heading objects onto a list of JSX elements...

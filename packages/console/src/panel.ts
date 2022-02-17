@@ -8,7 +8,7 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { PathExt, Time } from '@jupyterlab/coreutils';
+import { PathExt, Time, URLExt } from '@jupyterlab/coreutils';
 import {
   IRenderMimeRegistry,
   RenderMimeRegistry
@@ -55,7 +55,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       options.contentFactory || ConsolePanel.defaultContentFactory);
     const count = Private.count++;
     if (!path) {
-      path = `${basePath || ''}/console-${count}-${UUID.uuid4()}`;
+      path = URLExt.join(basePath || '', `console-${count}-${UUID.uuid4()}`);
     }
 
     sessionContext = this._sessionContext =
@@ -276,14 +276,12 @@ export namespace ConsolePanel {
    */
   export const defaultContentFactory: IContentFactory = new ContentFactory();
 
-  /* tslint:disable */
   /**
    * The console renderer token.
    */
   export const IContentFactory = new Token<IContentFactory>(
     '@jupyterlab/console:IContentFactory'
   );
-  /* tslint:enable */
 }
 
 /**
@@ -303,7 +301,7 @@ namespace Private {
     connected: Date | null,
     executed: Date | null,
     translator?: ITranslator
-  ) {
+  ): void {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 

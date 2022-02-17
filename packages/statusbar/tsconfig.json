@@ -7,21 +7,6 @@
   "include": ["src/**/*"],
   "references": [
     {
-      "path": "../apputils"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../translation"
-    },
-    {
       "path": "../ui-components"
     }
   ]

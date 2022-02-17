@@ -325,7 +325,7 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export const noOp = () => {
+  export const noOp = (): void => {
     /* no-op */
   };
 

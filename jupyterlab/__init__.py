@@ -4,7 +4,6 @@
 # Distributed under the terms of the Modified BSD License.
 
 from ._version import __version__
-from .labapp import LabApp
 from .serverextension import load_jupyter_server_extension
 
 
@@ -17,6 +16,7 @@ def _jupyter_server_extension_paths():
 
 
 def _jupyter_server_extension_points():
+    from .labapp import LabApp
     return [
         {
             'module': 'jupyterlab',

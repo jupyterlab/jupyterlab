@@ -84,7 +84,13 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     });
   }
 
-  _onSave(
+  /**
+   * Handle a change to the document registry save state.
+   *
+   * @param sender The document registry context
+   * @param state The document registry save state
+   */
+  private _onSave(
     sender: DocumentRegistry.Context,
     state: DocumentRegistry.SaveState
   ): void {
@@ -136,7 +142,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Set URI fragment identifier.
    */
-  setFragment(fragment: string) {
+  setFragment(fragment: string): void {
     void this.context.ready.then(() => {
       this.content.setFragment(fragment);
     });
@@ -154,7 +160,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Prints the notebook by converting to HTML with nbconvert.
    */
   [Printing.symbol]() {
-    return async () => {
+    return async (): Promise<void> => {
       // Save before generating HTML
       if (this.context.model.dirty && !this.context.model.readOnly) {
         await this.context.save();
@@ -311,12 +317,10 @@ export namespace NotebookPanel {
    */
   export const defaultContentFactory: ContentFactory = new ContentFactory();
 
-  /* tslint:disable */
   /**
    * The notebook renderer token.
    */
   export const IContentFactory = new Token<IContentFactory>(
     '@jupyterlab/notebook:IContentFactory'
   );
-  /* tslint:enable */
 }

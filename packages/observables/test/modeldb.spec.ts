@@ -143,9 +143,9 @@ describe('@jupyterlab/observables', () => {
     });
 
     describe('#connected', () => {
-      it('should resolve immediately for an in-memory database', () => {
+      it('should resolve immediately for an in-memory database', async () => {
         const db = new ModelDB();
-        return db.connected;
+        await expect(db.connected).resolves.not.toThrow();
       });
     });
 

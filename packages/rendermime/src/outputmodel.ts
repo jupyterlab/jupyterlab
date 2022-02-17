@@ -234,7 +234,7 @@ export namespace OutputModel {
   /**
    * Get the data for an output.
    *
-   * @params output - A kernel output message payload.
+   * @param output - A kernel output message payload.
    *
    * @returns - The data for the payload.
    */
@@ -245,7 +245,7 @@ export namespace OutputModel {
   /**
    * Get the metadata from an output message.
    *
-   * @params output - A kernel output message payload.
+   * @param output - A kernel output message payload.
    *
    * @returns - The metadata for the payload.
    */

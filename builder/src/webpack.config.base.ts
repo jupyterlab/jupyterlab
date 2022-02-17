@@ -3,6 +3,12 @@
 
 import * as path from 'path';
 import * as webpack from 'webpack';
+import crypto from 'crypto';
+
+// Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
+const cryptoOrigCreateHash = crypto.createHash;
+crypto.createHash = (algorithm: string) =>
+  cryptoOrigCreateHash(algorithm == 'md4' ? 'sha256' : algorithm);
 
 const rules = [
   { test: /\.css$/, use: ['style-loader', 'css-loader'] },
@@ -106,6 +112,9 @@ module.exports = {
   watchOptions: {
     poll: 500,
     aggregateTimeout: 1000
+  },
+  output: {
+    hashFunction: 'sha256'
   },
   plugins: [
     new webpack.ProvidePlugin({

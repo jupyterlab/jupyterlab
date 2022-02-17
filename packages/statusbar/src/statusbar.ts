@@ -116,7 +116,7 @@ export class StatusBar extends Widget implements IStatusBar {
   /**
    * Dispose of the status bar.
    */
-  dispose() {
+  dispose(): void {
     this._leftRankItems.length = 0;
     this._rightRankItems.length = 0;
     this._disposables.dispose();
@@ -126,7 +126,7 @@ export class StatusBar extends Widget implements IStatusBar {
   /**
    * Handle an 'update-request' message to the status bar.
    */
-  protected onUpdateRequest(msg: Message) {
+  protected onUpdateRequest(msg: Message): void {
     this._refreshAll();
     super.onUpdateRequest(msg);
   }

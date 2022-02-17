@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { INotebookHeading } from '../../utils/headings';
+import { INotebookHeading } from '../../tokens';
 import { isHeadingFiltered } from './is_heading_filtered';
 
 /**
@@ -15,7 +15,7 @@ import { isHeadingFiltered } from './is_heading_filtered';
  * @param tags - filter tags
  * @returns result tuple
  */
-function appendHeading(
+export function appendHeading(
   headings: INotebookHeading[],
   heading: INotebookHeading,
   prev: INotebookHeading | null,
@@ -39,8 +39,3 @@ function appendHeading(
   }
   return [headings, prev];
 }
-
-/**
- * Exports.
- */
-export { appendHeading };

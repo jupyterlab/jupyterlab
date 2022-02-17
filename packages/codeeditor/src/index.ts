@@ -6,8 +6,9 @@
  */
 
 export * from './editor';
-export * from './jsoneditor';
-export * from './widget';
 export * from './factory';
+export * from './jsoneditor';
+export * from './lineCol';
 export * from './mimetype';
 export * from './tokens';
+export * from './widget';

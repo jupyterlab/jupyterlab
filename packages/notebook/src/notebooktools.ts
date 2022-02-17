@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Collapse, Styling } from '@jupyterlab/apputils';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import {
   CodeEditor,
@@ -15,6 +14,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { Collapser, Styling } from '@jupyterlab/ui-components';
 import { ArrayExt, chain, each } from '@lumino/algorithm';
 import {
   ReadonlyPartialJSONObject,
@@ -79,7 +79,7 @@ export class NotebookTools extends Widget implements INotebookTools {
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(this._commonTools);
-    layout.addWidget(new Collapse({ widget: this._advancedTools }));
+    layout.addWidget(new Collapser({ widget: this._advancedTools }));
 
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
@@ -287,7 +287,7 @@ export namespace NotebookTools {
     /**
      * The tool to add to the notebook tools area.
      */
-    tool: Tool;
+    tool: INotebookTools.ITool;
 
     /**
      * The section to which the tool should be added.
@@ -326,7 +326,7 @@ export namespace NotebookTools {
      */
     notebookTools: INotebookTools;
 
-    dispose() {
+    dispose(): void {
       super.dispose();
       if (this.notebookTools) {
         this.notebookTools = null!;
@@ -435,7 +435,7 @@ export namespace NotebookTools {
     /**
      * Dispose of the resources used by the tool.
      */
-    dispose() {
+    dispose(): void {
       if (this._model === null) {
         return;
       }
@@ -464,7 +464,6 @@ export namespace NotebookTools {
       if (!activeCell) {
         const cell = new Widget();
         cell.addClass('jp-InputArea-editor');
-        cell.addClass('jp-InputArea-editor');
         layout.addWidget(cell);
         this._cellModel = null;
         return;
@@ -483,7 +482,6 @@ export namespace NotebookTools {
 
       const model = this._model;
       const editorWidget = new CodeEditorWrapper({ model, factory });
-      editorWidget.addClass('jp-InputArea-editor');
       editorWidget.addClass('jp-InputArea-editor');
       editorWidget.editor.setOption('readOnly', true);
       layout.addWidget(prompt);
@@ -726,7 +724,9 @@ export namespace NotebookTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onActiveCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
+    protected onActiveCellMetadataChanged(
+      msg: ObservableJSON.ChangeMessage
+    ): void {
       if (this._changeGuard) {
         return;
       }
@@ -920,6 +920,23 @@ export namespace NotebookTools {
       validCellTypes: ['raw']
     });
   }
+
+  /**
+   * Create read-only toggle.
+   */
+  export function createEditableToggle(translator?: ITranslator): KeySelector {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return new KeySelector({
+      key: 'editable',
+      title: trans.__('Editable'),
+      optionValueArray: [
+        [trans.__('Editable'), true],
+        [trans.__('Read-Only'), false]
+      ],
+      default: true
+    });
+  }
 }
 
 /**
@@ -962,7 +979,11 @@ namespace Private {
     each(options.optionValueArray, item => {
       option = item[0];
       value = JSON.stringify(item[1]);
-      optionNodes.push(h.option({ value }, option));
+      const attrs =
+        options.default == item[1]
+          ? { value, selected: 'selected' }
+          : { value };
+      optionNodes.push(h.option(attrs, option));
     });
     const node = VirtualDOM.realize(
       h.div({}, h.label(title, h.select({}, optionNodes)))

@@ -43,6 +43,9 @@
       "path": "../shared-models"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     }
   ]

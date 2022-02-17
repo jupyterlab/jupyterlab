@@ -1547,7 +1547,7 @@ describe('completer/widget', () => {
           lineHeight: 0,
           charWidth: 0,
           line: 0,
-          coords: coords as CodeEditor.ICoordinate,
+          coords,
           text: 'f'
         };
 
@@ -1592,7 +1592,7 @@ describe('completer/widget', () => {
           lineHeight: 0,
           charWidth: 0,
           line: 0,
-          coords: coords as CodeEditor.ICoordinate,
+          coords,
           text: 'f'
         };
 
@@ -1624,7 +1624,7 @@ describe('completer/widget', () => {
           lineHeight: 0,
           charWidth: 0,
           line: 0,
-          coords: coords as CodeEditor.ICoordinate,
+          coords,
           text: 'f'
         };
 

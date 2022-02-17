@@ -6,13 +6,13 @@
       "path": "../shared-models"
     },
     {
+      "path": "../user"
+    },
+    {
       "path": "."
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../shared-models"
     }
   ]
 }

@@ -114,8 +114,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
             ? NodeFilter.FILTER_ACCEPT
             : NodeFilter.FILTER_REJECT;
         }
-      },
-      false
+      }
     );
     const nodes: (Node | null)[] = [];
     const originalNodes: Node[] = [];
@@ -218,7 +217,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     return this._matches;
   }
 
-  refreshOverlay() {
+  refreshOverlay(): void {
     // We don't have an overlay, we are directly changing the DOM
   }
 
@@ -327,7 +326,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: Widget) {
+  static canSearchOn(domain: Widget): boolean {
     return domain instanceof Widget;
   }
 

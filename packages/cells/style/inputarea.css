@@ -9,33 +9,27 @@
 
 /* All input areas */
 .jp-InputArea {
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-}
-
-body[data-format='mobile'] .jp-InputArea {
-  flex-direction: column;
-}
-
-.jp-InputArea-editor {
-  flex: 1 1 auto;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
   overflow: hidden;
 }
 
 .jp-InputArea-editor {
+  display: table-cell;
+  overflow: hidden;
+  vertical-align: top;
+
   /* This is the non-active, default styling */
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
-  border-radius: 0px;
+  border-radius: 0;
   background: var(--jp-cell-editor-background);
 }
 
-body[data-format='mobile'] .jp-InputArea-editor {
-  margin-left: var(--jp-notebook-padding);
-}
-
 .jp-InputPrompt {
-  flex: 0 0 var(--jp-cell-prompt-width);
+  display: table-cell;
+  vertical-align: top;
+  width: var(--jp-cell-prompt-width);
   color: var(--jp-cell-inprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
@@ -44,12 +38,13 @@ body[data-format='mobile'] .jp-InputArea-editor {
   line-height: var(--jp-code-line-height);
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
-  opacity: var(--jp-cell-prompt-opacity);
+
   /* Right align prompt text, don't wrap to handle large prompt numbers */
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
   /* Disable text selection */
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -57,7 +52,17 @@ body[data-format='mobile'] .jp-InputArea-editor {
   user-select: none;
 }
 
-body[data-format='mobile'] .jp-InputPrompt {
-  flex: 0 0 auto;
-  text-align: left;
+/*-----------------------------------------------------------------------------
+| Mobile
+|----------------------------------------------------------------------------*/
+@media only screen and (max-width: 760px) {
+  .jp-InputArea-editor {
+    display: table-row;
+    margin-left: var(--jp-notebook-padding);
+  }
+
+  .jp-InputPrompt {
+    display: table-row;
+    text-align: left;
+  }
 }

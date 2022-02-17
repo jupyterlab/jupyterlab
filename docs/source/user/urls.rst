@@ -185,7 +185,7 @@ attribute that maps.
 
 For example, if your workspace looks like this:
 
-.. code-block:: bash
+.. code-block:: json
 
   {
     "data": {

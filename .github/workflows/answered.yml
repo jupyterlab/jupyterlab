@@ -14,13 +14,11 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v3
+      - uses: actions/stale@v4
         with:
           days-before-pr-stale: -1
           days-before-pr-close: -1
-          skip-stale-issue-message: true
-          days-before-issue-stale: 30
-          days-before-issue-close: 7
+          days-before-issue-stale: 7
+          days-before-issue-close: 5
           stale-issue-label: 'status:Closing as Answered'
-          stale-issue-message: '.'
           only-issue-labels: 'status:Answered'

@@ -171,7 +171,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   /**
    * Attempt a connection if we have not exhausted connection attempts.
    */
-  _reconnect() {
+  _reconnect(): void {
     this._errorIfDisposed();
 
     // Clear any existing reconnection attempt
@@ -402,7 +402,7 @@ namespace Private {
    * that, but doing so would cause your random numbers to follow a non-uniform
    * distribution, which may not be acceptable for your needs.
    */
-  export function getRandomIntInclusive(min: number, max: number) {
+  export function getRandomIntInclusive(min: number, max: number): number {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;

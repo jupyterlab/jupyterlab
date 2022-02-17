@@ -3,7 +3,8 @@
 
 import { Cell } from '@jupyterlab/cells';
 import { generateNumbering } from '../../utils/generate_numbering';
-import { INotebookHeading } from '../../utils/headings';
+import { INotebookHeading, RunningStatus } from '../../tokens';
+import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { parseHeading } from '../../utils/parse_heading';
 
 /**
@@ -30,10 +31,11 @@ type onClickFactory = (line: number) => () => void;
 function getMarkdownHeadings(
   text: string,
   onClick: onClickFactory,
-  dict: any,
+  dict: INumberingDictionary,
   lastLevel: number,
   cellRef: Cell,
-  index: number = -1
+  index: number = -1,
+  isRunning = RunningStatus.Idle
 ): INotebookHeading[] {
   const callback = onClick(0);
   let headings: INotebookHeading[] = [];
@@ -53,6 +55,7 @@ function getMarkdownHeadings(
         type: 'header',
         cellRef: cellRef,
         hasChild: false,
+        isRunning,
         index
       });
     } else {
@@ -63,6 +66,7 @@ function getMarkdownHeadings(
         type: 'markdown',
         cellRef: cellRef,
         hasChild: false,
+        isRunning,
         index
       });
     }

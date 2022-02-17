@@ -11,6 +11,7 @@ import 'codemirror/mode/clike/clike';
 import 'codemirror/mode/css/css';
 // Bundle other common modes
 import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/jsx/jsx';
 import 'codemirror/mode/julia/julia';
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/meta';
@@ -116,7 +117,7 @@ export namespace Mode {
     return null;
   }
 
-  export function addSpecLoader(loader: ISpecLoader, rank: number) {
+  export function addSpecLoader(loader: ISpecLoader, rank: number): void {
     const item = { loader, rank };
     const index = ArrayExt.upperBound(specLoaders, item, Private.itemCmp);
     ArrayExt.insert(specLoaders, index, item);

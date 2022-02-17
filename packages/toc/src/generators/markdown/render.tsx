@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { INumberedHeading } from '../../utils/headings';
+import { INumberedHeading } from '../../tokens';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { OptionsManager } from './options_manager';
 
@@ -14,7 +14,7 @@ import { OptionsManager } from './options_manager';
  * @param item - numbered heading
  * @returns rendered item
  */
-function render(options: OptionsManager, item: INumberedHeading) {
+function render(options: OptionsManager, item: INumberedHeading): JSX.Element {
   let fontSizeClass = 'toc-level-size-' + item.level;
 
   // Render item numbering:

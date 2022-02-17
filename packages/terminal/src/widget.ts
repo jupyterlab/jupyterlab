@@ -58,6 +58,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     this.addClass(TERMINAL_CLASS);
 
+    this._setThemeAttribute(theme);
+
     // Create the xterm.
     this._term = new Xterm(xtermOptions);
     this._fitAddon = new FitAddon();
@@ -69,13 +71,28 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this.title.label = this._trans.__('Terminal');
 
     session.messageReceived.connect(this._onMessage, this);
-    session.disposed.connect(this.dispose, this);
+    session.disposed.connect(() => {
+      if (this.getOption('closeOnExit')) {
+        this.dispose();
+      }
+    }, this);
 
     if (session.connectionStatus === 'connected') {
       this._initialConnection();
     } else {
       session.connectionStatusChanged.connect(this._initialConnection, this);
     }
+  }
+
+  private _setThemeAttribute(theme: string | null | undefined) {
+    if (this.isDisposed) {
+      return;
+    }
+
+    this.node.setAttribute(
+      'data-term-theme',
+      theme ? theme.toLowerCase() : 'inherit'
+    );
   }
 
   private _initialConnection() {
@@ -135,12 +152,14 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     switch (option) {
       case 'shutdownOnClose': // Do not transmit to XTerm
+      case 'closeOnExit': // Do not transmit to XTerm
         break;
       case 'theme':
         this._term.setOption(
           'theme',
           Private.getXTermTheme(value as ITerminal.Theme)
         );
+        this._setThemeAttribute(value as ITerminal.Theme);
         break;
       default:
         this._term.setOption(option, value);

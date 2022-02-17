@@ -1,10 +1,12 @@
 Design System CSS:
   - '**/*.css'
   - '*.css'
-  
+
 documentation:
   - docs/**/*
   - docs/*
+  - '*.md'
+  - '**/*.md'
 
 tag:CSS:
   - '**/*.css'
@@ -21,8 +23,8 @@ tag:Examples:
 tag:Testing:
   - tests/**/*
   - tests/*
-  - ui-tests/**/*
-  - ui-tests/*
+  - galata/**/*
+  - galata/*
 
 ######################
 #   Package Labels   #
@@ -103,7 +105,7 @@ pkg:docprovider:
   - packages/docprovider/*
   - packages/docprovider-extension/**/*
   - packages/docprovider-extension/*
-  
+
 pkg:docregistry:
   - packages/docregistry/**/*
   - packages/docregistry/*
@@ -281,7 +283,7 @@ pkg:toc:
   - packages/toc/*
   - packages/toc-extension/**/*
   - packages/toc-extension/*
-  
+
 pkg:tooltip:
   - packages/tooltip/**/*
   - packages/tooltip/*

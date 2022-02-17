@@ -22,6 +22,9 @@
       "path": "../rendermime"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     },
     {

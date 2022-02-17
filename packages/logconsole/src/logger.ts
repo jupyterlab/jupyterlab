@@ -209,7 +209,7 @@ export class Logger implements ILogger {
    * Oldest entries will be trimmed to ensure the length is at most
    * `.maxLength`.
    */
-  get maxLength() {
+  get maxLength(): number {
     return this.outputAreaModel.maxLength;
   }
   set maxLength(value: number) {
@@ -301,7 +301,7 @@ export class Logger implements ILogger {
    *
    * @param log - The output to be logged.
    */
-  log(log: ILogPayload) {
+  log(log: ILogPayload): void {
     // Filter by our current log level
     if (
       Private.LogLevel[log.level as keyof typeof Private.LogLevel] <
@@ -345,7 +345,7 @@ export class Logger implements ILogger {
   /**
    * Clear all outputs logged.
    */
-  clear() {
+  clear(): void {
     this.outputAreaModel.clear(false);
     this._contentChanged.emit('clear');
   }
@@ -353,7 +353,7 @@ export class Logger implements ILogger {
   /**
    * Add a checkpoint to the log.
    */
-  checkpoint() {
+  checkpoint(): void {
     this._log({
       output: {
         output_type: 'display_data',
@@ -368,14 +368,14 @@ export class Logger implements ILogger {
   /**
    * Whether the logger is disposed.
    */
-  get isDisposed() {
+  get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
    * Dispose the logger.
    */
-  dispose() {
+  dispose(): void {
     if (this.isDisposed) {
       return;
     }

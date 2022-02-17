@@ -112,22 +112,26 @@ describe('@jupyterlab/toc', () => {
 
     describe('Notebook Generator: IGenerator<NotebookPanel>', () => {
       let notebookTracker: NotebookTracker;
-      let notebookGenerator: ToC.TableOfContentsRegistry.IGenerator<NotebookPanel>;
+      let notebookGenerator: ToC.ITableOfContentsRegistry.IGenerator<NotebookPanel>;
       let notebookWidget: NotebookPanel;
 
       it('should create a notebook generator', () => {
         notebookTracker = new NotebookTracker({
           namespace: 'notebook'
         });
-        notebookGenerator = ToC.createNotebookGenerator(
-          notebookTracker,
-          tocWidget,
-          NBTestUtils.defaultRenderMime().sanitizer
-        );
+        expect(() => {
+          notebookGenerator = ToC.createNotebookGenerator(
+            notebookTracker,
+            tocWidget,
+            NBTestUtils.defaultRenderMime().sanitizer
+          );
+        }).not.toThrow();
       });
 
       it('should add a notebook generator to the registry', () => {
-        registry.add(notebookGenerator);
+        expect(() => {
+          registry.add(notebookGenerator);
+        }).not.toThrow();
       });
 
       it('should find the notebook generator', async () => {
@@ -151,7 +155,7 @@ describe('@jupyterlab/toc', () => {
 
     describe('Markdown Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let markdownTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+      let markdownGenerator: ToC.ITableOfContentsRegistry.IGenerator<IDocumentWidget<
         FileEditor
       >>;
       let markdownWidget: IDocumentWidget<FileEditor>;
@@ -160,15 +164,19 @@ describe('@jupyterlab/toc', () => {
         markdownTracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
           namespace: 'markdown'
         });
-        markdownGenerator = ToC.createMarkdownGenerator(
-          markdownTracker,
-          tocWidget,
-          NBTestUtils.defaultRenderMime().sanitizer
-        );
+        expect(() => {
+          markdownGenerator = ToC.createMarkdownGenerator(
+            markdownTracker,
+            tocWidget,
+            NBTestUtils.defaultRenderMime().sanitizer
+          );
+        }).not.toThrow();
       });
 
       it('should add a markdown generator to the registry', () => {
-        registry.add(markdownGenerator);
+        expect(() => {
+          registry.add(markdownGenerator);
+        }).not.toThrow();
       });
 
       it('should find the markdown generator', async () => {
@@ -192,22 +200,26 @@ describe('@jupyterlab/toc', () => {
 
     describe('Rendered Markdown Generator: IGenerator<MarkdownDocument>', () => {
       let markdownTracker: WidgetTracker<MarkdownDocument>;
-      let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<MarkdownDocument>;
+      let markdownGenerator: ToC.ITableOfContentsRegistry.IGenerator<MarkdownDocument>;
       let markdownWidget: MarkdownDocument;
 
       it('should create a markdown generator', () => {
         markdownTracker = new WidgetTracker<MarkdownDocument>({
           namespace: 'markdownviewer-widget'
         });
-        markdownGenerator = ToC.createRenderedMarkdownGenerator(
-          markdownTracker,
-          tocWidget,
-          NBTestUtils.defaultRenderMime().sanitizer
-        );
+        expect(() => {
+          markdownGenerator = ToC.createRenderedMarkdownGenerator(
+            markdownTracker,
+            tocWidget,
+            NBTestUtils.defaultRenderMime().sanitizer
+          );
+        }).not.toThrow();
       });
 
       it('should add a markdown generator to the registry', () => {
-        registry.add(markdownGenerator);
+        expect(() => {
+          registry.add(markdownGenerator);
+        }).not.toThrow();
       });
 
       it('should find the markdown generator', async () => {
@@ -231,7 +243,7 @@ describe('@jupyterlab/toc', () => {
 
     describe('Latex Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let latexTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let latexGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+      let latexGenerator: ToC.ITableOfContentsRegistry.IGenerator<IDocumentWidget<
         FileEditor
       >>;
       let latexWidget: IDocumentWidget<FileEditor>;
@@ -240,11 +252,15 @@ describe('@jupyterlab/toc', () => {
         latexTracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
           namespace: 'latex'
         });
-        latexGenerator = ToC.createLatexGenerator(latexTracker);
+        expect(() => {
+          latexGenerator = ToC.createLatexGenerator(latexTracker);
+        }).not.toThrow();
       });
 
       it('should add a latex generator to the registry', () => {
-        registry.add(latexGenerator);
+        expect(() => {
+          registry.add(latexGenerator);
+        }).not.toThrow();
       });
 
       it('should find the latex generator', async () => {
@@ -268,7 +284,7 @@ describe('@jupyterlab/toc', () => {
 
     describe('Python Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let pythonTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let pythonGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+      let pythonGenerator: ToC.ITableOfContentsRegistry.IGenerator<IDocumentWidget<
         FileEditor
       >>;
       let pythonWidget: IDocumentWidget<FileEditor>;
@@ -277,11 +293,15 @@ describe('@jupyterlab/toc', () => {
         pythonTracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
           namespace: 'python'
         });
-        pythonGenerator = ToC.createPythonGenerator(pythonTracker);
+        expect(() => {
+          pythonGenerator = ToC.createPythonGenerator(pythonTracker);
+        }).not.toThrow();
       });
 
       it('should add a python generator to the registry', () => {
-        registry.add(pythonGenerator);
+        expect(() => {
+          registry.add(pythonGenerator);
+        }).not.toThrow();
       });
 
       it('should find the python generator', async () => {

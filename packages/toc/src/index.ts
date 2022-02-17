@@ -5,9 +5,9 @@
  * @module toc
  */
 
-// Note: keep in alphabetical order...
 export * from './generators';
 export * from './registry';
 export * from './toc';
 export * from './toc_item';
+export * from './tokens';
 export * from './utils/headings';

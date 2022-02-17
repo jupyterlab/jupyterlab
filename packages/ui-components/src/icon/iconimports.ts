@@ -9,6 +9,7 @@ import { LabIcon } from './labicon';
 
 // icon svg import statements
 import addSvgstr from '../../style/icons/toolbar/add.svg';
+import bugDotSvgstr from '../../style/icons/toolbar/bug-dot.svg';
 import bugSvgstr from '../../style/icons/toolbar/bug.svg';
 import buildSvgstr from '../../style/icons/sidebar/build.svg';
 import caretDownEmptySvgstr from '../../style/icons/arrow/caret-down-empty.svg';
@@ -48,6 +49,7 @@ import jupyterSvgstr from '../../style/icons/jupyter/jupyter.svg';
 import jupyterlabWordmarkSvgstr from '../../style/icons/jupyter/jupyterlab-wordmark.svg';
 import kernelSvgstr from '../../style/icons/statusbar/kernel.svg';
 import keyboardSvgstr from '../../style/icons/filetype/keyboard.svg';
+import launchSvgstr from '../../style/icons/toolbar/launch.svg';
 import launcherSvgstr from '../../style/icons/filetype/launcher.svg';
 import lineFormSvgstr from '../../style/icons/statusbar/line-form.svg';
 import linkSvgstr from '../../style/icons/toolbar/link.svg';
@@ -73,6 +75,7 @@ import runningSvgstr from '../../style/icons/sidebar/running.svg';
 import saveSvgstr from '../../style/icons/toolbar/save.svg';
 import searchSvgstr from '../../style/icons/toolbar/search.svg';
 import settingsSvgstr from '../../style/icons/filetype/settings.svg';
+import shareSvgstr from '../../style/icons/sidebar/share.svg';
 import spreadsheetSvgstr from '../../style/icons/filetype/spreadsheet.svg';
 import stopSvgstr from '../../style/icons/toolbar/stop.svg';
 import tabSvgstr from '../../style/icons/sidebar/tab.svg';
@@ -84,11 +87,13 @@ import tocSvgstr from '../../style/icons/sidebar/toc.svg';
 import treeViewSvgstr from '../../style/icons/toolbar/tree-view.svg';
 import trustedSvgstr from '../../style/icons/statusbar/trusted.svg';
 import undoSvgstr from '../../style/icons/toolbar/undo.svg';
+import userSvgstr from '../../style/icons/sidebar/user.svg';
 import vegaSvgstr from '../../style/icons/filetype/vega.svg';
 import yamlSvgstr from '../../style/icons/filetype/yaml.svg';
 
 // LabIcon instance construction
 export const addIcon = new LabIcon({ name: 'ui-components:add', svgstr: addSvgstr });
+export const bugDotIcon = new LabIcon({ name: 'ui-components:bug-dot', svgstr: bugDotSvgstr });
 export const bugIcon = new LabIcon({ name: 'ui-components:bug', svgstr: bugSvgstr });
 export const buildIcon = new LabIcon({ name: 'ui-components:build', svgstr: buildSvgstr });
 export const caretDownEmptyIcon = new LabIcon({ name: 'ui-components:caret-down-empty', svgstr: caretDownEmptySvgstr });
@@ -128,6 +133,7 @@ export const jupyterIcon = new LabIcon({ name: 'ui-components:jupyter', svgstr: 
 export const jupyterlabWordmarkIcon = new LabIcon({ name: 'ui-components:jupyterlab-wordmark', svgstr: jupyterlabWordmarkSvgstr });
 export const kernelIcon = new LabIcon({ name: 'ui-components:kernel', svgstr: kernelSvgstr });
 export const keyboardIcon = new LabIcon({ name: 'ui-components:keyboard', svgstr: keyboardSvgstr });
+export const launchIcon = new LabIcon({ name: 'ui-components:launch', svgstr: launchSvgstr });
 export const launcherIcon = new LabIcon({ name: 'ui-components:launcher', svgstr: launcherSvgstr });
 export const lineFormIcon = new LabIcon({ name: 'ui-components:line-form', svgstr: lineFormSvgstr });
 export const linkIcon = new LabIcon({ name: 'ui-components:link', svgstr: linkSvgstr });
@@ -153,6 +159,7 @@ export const runningIcon = new LabIcon({ name: 'ui-components:running', svgstr: 
 export const saveIcon = new LabIcon({ name: 'ui-components:save', svgstr: saveSvgstr });
 export const searchIcon = new LabIcon({ name: 'ui-components:search', svgstr: searchSvgstr });
 export const settingsIcon = new LabIcon({ name: 'ui-components:settings', svgstr: settingsSvgstr });
+export const shareIcon = new LabIcon({ name: 'ui-components:share', svgstr: shareSvgstr });
 export const spreadsheetIcon = new LabIcon({ name: 'ui-components:spreadsheet', svgstr: spreadsheetSvgstr });
 export const stopIcon = new LabIcon({ name: 'ui-components:stop', svgstr: stopSvgstr });
 export const tabIcon = new LabIcon({ name: 'ui-components:tab', svgstr: tabSvgstr });
@@ -164,5 +171,6 @@ export const tocIcon = new LabIcon({ name: 'ui-components:toc', svgstr: tocSvgst
 export const treeViewIcon = new LabIcon({ name: 'ui-components:tree-view', svgstr: treeViewSvgstr });
 export const trustedIcon = new LabIcon({ name: 'ui-components:trusted', svgstr: trustedSvgstr });
 export const undoIcon = new LabIcon({ name: 'ui-components:undo', svgstr: undoSvgstr });
+export const userIcon = new LabIcon({ name: 'ui-components:user', svgstr: userSvgstr });
 export const vegaIcon = new LabIcon({ name: 'ui-components:vega', svgstr: vegaSvgstr });
 export const yamlIcon = new LabIcon({ name: 'ui-components:yaml', svgstr: yamlSvgstr });

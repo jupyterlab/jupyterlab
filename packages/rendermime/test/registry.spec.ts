@@ -293,7 +293,9 @@ describe('rendermime/registry', () => {
       });
 
       it('should be a no-op if the mimeType is not registered', () => {
-        r.removeMimeType('text/foo');
+        expect(() => {
+          r.removeMimeType('text/foo');
+        }).not.toThrow();
       });
     });
 
@@ -477,6 +479,12 @@ describe('rendermime/registry', () => {
 
         it('should return true for a normal filesystem-like path`', () => {
           expect(resolverPath.isLocal('path/to/file')).toBe(true);
+        });
+
+        it('should return false for malformed URLs', () => {
+          expect(resolverPath.isLocal('http://www.example.com%bad')).toBe(
+            false
+          );
         });
       });
     });

@@ -320,7 +320,7 @@ namespace Private {
     breadcrumbs: ReadonlyArray<HTMLElement>,
     separators: ReadonlyArray<HTMLElement>,
     path: string
-  ) {
+  ): void {
     const node = breadcrumbs[0].parentNode as HTMLElement;
 
     // Remove all but the home node.

@@ -11,16 +11,20 @@
     "dev_mode/*",
     "docs/**/*",
     ".eslintrc.js",
+    ".eslintrc.typecheck.js",
     "examples/**/*",
+    "galata/.eslintrc.js",
+    "galata/*.config.js",
+    "galata/src/**/*",
+    "galata/test/**/*",
+    "galata/style/**/*",
     "*",
     "packages/services/examples/**/*",
     "packages/**/*.config.js",
     "packages/metapackage/build-doc-index.js",
-    "packages/**/stories/*",
     "scripts/*",
     "jupyterlab/*",
     "jupyterlab/staging/*",
-    "testutils/**/*",
-    "ui-tests/**/*"
+    "testutils/**/*"
   ]
 }

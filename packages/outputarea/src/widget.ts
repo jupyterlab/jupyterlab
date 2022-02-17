@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
+import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -17,7 +17,6 @@ import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import ResizeObserver from 'resize-observer-polyfill';
 import { IOutputAreaModel } from './model';
 
 /**
@@ -97,8 +96,7 @@ export class OutputArea extends Widget {
     this.layout = new PanelLayout();
     this.trimmedOutputModels = new Array<IOutputModel>();
     this.maxNumberOutputs = options.maxNumberOutputs || 0;
-    this.headTailNumberOutputs = Math.round(this.maxNumberOutputs / 2);
-    this.headEndIndex = this.headTailNumberOutputs;
+    this.headEndIndex = this.maxNumberOutputs;
     for (let i = 0; i < model.length; i++) {
       const output = model.get(i);
       this._insertOutput(i, output);
@@ -132,12 +130,6 @@ export class OutputArea extends Widget {
    * output area.
    */
   private maxNumberOutputs: number;
-
-  /*
-   * The maximum outputs to show in the trimmed
-   * output head and tail areas.
-   */
-  private headTailNumberOutputs: number;
 
   /*
    * The index for the end of the head in case of trim mode.
@@ -383,40 +375,6 @@ export class OutputArea extends Widget {
     const layout = this.layout as PanelLayout;
     layout.addWidget(panel);
 
-    const buttons = [
-      Dialog.cancelButton({ label: 'Cancel' }),
-      Dialog.okButton({ label: 'Select' })
-    ];
-
-    const modalInput = factory.createStdin({
-      prompt: stdinPrompt,
-      password,
-      future
-    });
-
-    const dialog = new Dialog<Promise<string>>({
-      title: 'Your input is requested',
-      body: modalInput,
-      buttons
-    });
-
-    void dialog.launch().then(result => {
-      if (result.button.accept) {
-        const value = result.value;
-        if (value) {
-          void value.then(v => {
-            // Use stdin as the stream so it does not get combined with stdout.
-            this.model.add({
-              output_type: 'stream',
-              name: 'stdin',
-              text: v + '\n'
-            });
-            panel.dispose();
-          });
-        }
-      }
-    });
-
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
      * and remove the stdin widget.
@@ -436,6 +394,10 @@ export class OutputArea extends Widget {
    * Update an output in the layout in place.
    */
   private _setOutput(index: number, model: IOutputModel): void {
+    if (index >= this.headEndIndex && this.maxNumberOutputs !== 0) {
+      this.trimmedOutputModels[index - this.headEndIndex] = model;
+      return;
+    }
     const layout = this.layout as PanelLayout;
     const panel = layout.widgets[index] as Panel;
     const renderer = (panel.widgets
@@ -449,7 +411,6 @@ export class OutputArea extends Widget {
       model.trusted ? 'any' : 'ensure'
     );
     if (
-      renderer.renderModel &&
       Private.currentPreferredMimetype.get(renderer) === mimeType &&
       OutputArea.isIsolated(mimeType, model.metadata) ===
         renderer instanceof Private.IsolatedRenderer
@@ -478,17 +439,16 @@ export class OutputArea extends Widget {
           output_type: 'display_data',
           data: {
             'text/html': `
-              <a style="margin: 10px; text-decoration: none;">
+              <a style="margin: 10px; text-decoration: none; cursor: pointer;">
                 <pre>Output of this cell has been trimmed on the initial display.</pre>
-                <pre>Displaying the first ${this.maxNumberOutputs} top and last bottom outputs.</pre>
+                <pre>Displaying the first ${this.maxNumberOutputs} top outputs.</pre>
                 <pre>Click on this message to get the complete output.</pre>
               </a>
               `
           }
         }
       });
-      const onClick = () =>
-        this._showTrimmedOutputs(this.headTailNumberOutputs);
+      const onClick = () => this._showTrimmedOutputs();
       const separator = this.createOutputItem(separatorModel);
       separator!.node.addEventListener('click', onClick);
       const layout = this.layout as PanelLayout;
@@ -498,11 +458,8 @@ export class OutputArea extends Widget {
     const layout = this.layout as PanelLayout;
     if (index < this.maxNumberOutputs || this.maxNumberOutputs === 0) {
       layout.insertWidget(index, output);
-    } else if (index >= this.maxNumberOutputs) {
-      layout.removeWidgetAt(this.headTailNumberOutputs + 1);
-      layout.insertWidget(index, output);
     }
-    if (index >= this.headTailNumberOutputs && this.maxNumberOutputs !== 0) {
+    if (index >= this.maxNumberOutputs && this.maxNumberOutputs !== 0) {
       this.trimmedOutputModels.push(model);
     }
     if (!this._outputTracker.has(output)) {
@@ -531,16 +488,12 @@ export class OutputArea extends Widget {
    * Remove the information message related to the trimmed output
    * and show all previously trimmed outputs.
    */
-  private _showTrimmedOutputs(headTailNumberOutputs: number) {
+  private _showTrimmedOutputs() {
     const layout = this.layout as PanelLayout;
-    layout.removeWidgetAt(headTailNumberOutputs);
-    for (
-      let i = 0;
-      i < this.trimmedOutputModels.length - this.headTailNumberOutputs;
-      i++
-    ) {
+    layout.removeWidgetAt(this.headEndIndex);
+    for (let i = 0; i < this.trimmedOutputModels.length; i++) {
       const output = this._createOutput(this.trimmedOutputModels[i]);
-      layout.insertWidget(headTailNumberOutputs + i, output);
+      layout.insertWidget(this.headEndIndex + i, output);
     }
   }
 
@@ -913,15 +866,6 @@ export class Stdin extends Widget implements IStdin {
   }
 
   /**
-   * Submit and get the value of the Stdin widget.
-   */
-  getValue(): Promise<string> {
-    console.log('WHAT THE FUCK!');
-    this.submit();
-    return this.value;
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -932,29 +876,22 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
+    const input = this._input;
     if (event.type === 'keydown') {
       if ((event as KeyboardEvent).keyCode === 13) {
         // Enter
-        this.submit();
+        this._future.sendInputReply({
+          status: 'ok',
+          value: input.value
+        });
+        if (input.type === 'password') {
+          this._value += Array(input.value.length + 1).join('·');
+        } else {
+          this._value += input.value;
+        }
+        this._promise.resolve(void 0);
       }
     }
-  }
-
-  /*
-   * Submit input value.
-   */
-  submit() {
-    const input = this._input;
-    this._future.sendInputReply({
-      status: 'ok',
-      value: input.value
-    });
-    if (input.type === 'password') {
-      this._value += Array(input.value.length + 1).join('·');
-    } else {
-      this._value += input.value;
-    }
-    this._promise.resolve(void 0);
   }
 
   /**

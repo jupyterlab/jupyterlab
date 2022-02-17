@@ -11,13 +11,19 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   ICommandPalette,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
@@ -27,11 +33,12 @@ import {
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
-import { Menu } from '@lumino/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 import { Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
@@ -54,7 +61,8 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILauncher,
     IMainMenu,
     ILayoutRestorer,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    IToolbarWidgetRegistry
   ],
   provides: IEditorTracker,
   autoStart: true
@@ -136,9 +144,33 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extensions:cursor-position',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IEditorTracker,
+    positionModel: IPositionModel
+  ) => {
+    positionModel.addEditorProvider((widget: Widget | null) =>
+      widget && tracker.has(widget)
+        ? (widget as IDocumentWidget<FileEditor>).content.editor
+        : null
+    );
+  },
+  requires: [IEditorTracker, IPositionModel],
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [plugin, tabSpaceStatus];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  plugin,
+  lineColStatus,
+  tabSpaceStatus
+];
 export default plugins;
 
 /**
@@ -155,17 +187,37 @@ function activate(
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
+  let toolbarFactory:
+    | ((
+        widget: IDocumentWidget<FileEditor>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
+    | undefined;
+
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      FACTORY,
+      id,
+      translator
+    );
+  }
+
   const factory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
       name: FACTORY,
+      label: trans.__('Editor'),
       fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
-      defaultFor: ['markdown', '*'] // it outranks the defaultRendered viewer.
+      defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
+      toolbarFactory,
+      translator
     }
   });
   const { commands, restored, shell } = app;
@@ -278,7 +330,9 @@ function activate(
     id,
     isEnabled,
     tracker,
-    browserFactory
+    browserFactory,
+    consoleTracker,
+    sessionDialogs
   );
 
   // Add a launcher item if the launcher is available.
@@ -291,14 +345,7 @@ function activate(
   }
 
   if (menu) {
-    Commands.addMenuItems(
-      menu,
-      commands,
-      tracker,
-      trans,
-      consoleTracker,
-      sessionDialogs
-    );
+    Commands.addMenuItems(menu, tracker, consoleTracker, isEnabled);
   }
 
   getAvailableKernelFileTypes()

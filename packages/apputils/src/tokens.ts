@@ -2,33 +2,86 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
+import { CommandPalette, Widget } from '@lumino/widgets';
 import { ISessionContext } from './sessioncontext';
+
+/**
+ * The command palette token.
+ */
+export const ICommandPalette = new Token<ICommandPalette>(
+  '@jupyterlab/apputils:ICommandPalette'
+);
+
+/**
+ * The options for creating a command palette item.
+ */
+export interface IPaletteItem extends CommandPalette.IItemOptions {}
+
+/**
+ * The interface for a Jupyter Lab command palette.
+ */
+export interface ICommandPalette {
+  /**
+   * The placeholder text of the command palette's search input.
+   */
+  placeholder: string;
+
+  /**
+   * Activate the command palette for user input.
+   */
+  activate(): void;
+
+  /**
+   * Add a command item to the command palette.
+   *
+   * @param options - The options for creating the command item.
+   *
+   * @returns A disposable that will remove the item from the palette.
+   */
+  addItem(options: IPaletteItem): IDisposable;
+}
+
+export const IKernelStatusModel = new Token<IKernelStatusModel>(
+  '@jupyterlab/apputils:IKernelStatusModel'
+);
+
+/**
+ * Kernel status indicator model.
+ */
+export interface IKernelStatusModel {
+  /**
+   * Add a session context provider.
+   *
+   * A provider will receive the currently active widget and must return the
+   * associated session context if it can or null otherwise.
+   */
+  addSessionProvider: (
+    provider: (widget: Widget | null) => ISessionContext | null
+  ) => void;
+}
 
 /**
  * An interface for the session context dialogs.
  */
 export interface ISessionContextDialogs extends ISessionContext.IDialogs {}
 
-/* tslint:disable */
 /**
  * The session context dialogs token.
  */
 export const ISessionContextDialogs = new Token<ISessionContext.IDialogs>(
   '@jupyterlab/apputils:ISessionContextDialogs'
 );
-/* tslint:enable */
 
-/* tslint:disable */
 /**
  * The theme manager token.
  */
 export const IThemeManager = new Token<IThemeManager>(
   '@jupyterlab/apputils:IThemeManager'
 );
-/* tslint:enable */
 
 /**
  * An interface for a theme manager.
@@ -178,3 +231,134 @@ export namespace ISanitizer {
     allowedStyles?: { [key: string]: { [key: string]: RegExp[] } };
   }
 }
+
+/**
+ * The main menu token.
+ */
+export const ISplashScreen = new Token<ISplashScreen>(
+  '@jupyterlab/apputils:ISplashScreen'
+);
+
+/**
+ * The interface for an application splash screen.
+ */
+export interface ISplashScreen {
+  /**
+   * Show the application splash screen.
+   *
+   * @param light - Whether to show the light splash screen or the dark one.
+   *
+   * @returns A disposable used to clear the splash screen.
+   */
+  show(light?: boolean): IDisposable;
+}
+
+/**
+ * The default window resolver token.
+ */
+export const IWindowResolver = new Token<IWindowResolver>(
+  '@jupyterlab/apputils:IWindowResolver'
+);
+
+/**
+ * The description of a window name resolver.
+ */
+export interface IWindowResolver {
+  /**
+   * A window name to use as a handle among shared resources.
+   */
+  readonly name: string;
+}
+
+/**
+ * The namespace for `IToolbarWidgetRegistry` related interfaces
+ */
+export namespace ToolbarRegistry {
+  /**
+   * Interface of item to be inserted in a toolbar
+   */
+  export interface IToolbarItem {
+    /**
+     * Unique item name
+     */
+    name: string;
+    /**
+     * Toolbar widget
+     */
+    widget: Widget;
+  }
+
+  /**
+   * Interface describing a toolbar item widget
+   */
+  export interface IWidget extends ISettingRegistry.IToolbarItem {}
+
+  /**
+   * Options to set up the toolbar widget registry
+   */
+  export interface IOptions {
+    /**
+     * Default toolbar widget factory
+     *
+     * The factory is receiving 3 arguments:
+     * @param widgetFactory The widget factory name that creates the toolbar
+     * @param widget The newly widget containing the toolbar
+     * @param toolbarItem The toolbar item definition
+     * @returns The widget to be inserted in the toolbar.
+     */
+    defaultFactory: (
+      widgetFactory: string,
+      widget: Widget,
+      toolbarItem: IWidget
+    ) => Widget;
+  }
+}
+
+/**
+ * Toolbar widget registry interface
+ */
+export interface IToolbarWidgetRegistry {
+  /**
+   * Default toolbar item factory
+   */
+  defaultFactory: (
+    widgetFactory: string,
+    widget: Widget,
+    toolbarItem: ToolbarRegistry.IWidget
+  ) => Widget;
+
+  /**
+   * Create a toolbar item widget
+   *
+   * @param widgetFactory The widget factory name that creates the toolbar
+   * @param widget The newly widget containing the toolbar
+   * @param toolbarItem The toolbar item definition
+   * @returns The widget to be inserted in the toolbar.
+   */
+  createWidget(
+    widgetFactory: string,
+    widget: Widget,
+    toolbarItem: ToolbarRegistry.IWidget
+  ): Widget;
+
+  /**
+   * Register a new toolbar item factory
+   *
+   * @param widgetFactory The widget factory name that creates the toolbar
+   * @param toolbarItemName The unique toolbar item
+   * @param factory The factory function that receives the widget containing the toolbar and returns the toolbar widget.
+   * @returns The previously defined factory
+   */
+  registerFactory<T extends Widget = Widget>(
+    widgetFactory: string,
+    toolbarItemName: string,
+    factory: (main: T) => Widget
+  ): ((main: T) => Widget) | undefined;
+}
+
+/**
+ * The toolbar registry token.
+ */
+export const IToolbarWidgetRegistry = new Token<IToolbarWidgetRegistry>(
+  '@jupyterlab/apputils:IToolbarWidgetRegistry'
+);

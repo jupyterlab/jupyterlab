@@ -3,8 +3,7 @@
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { TableOfContentsRegistry as Registry } from '../../registry';
-import { IHeading } from '../../utils/headings';
+import { IHeading, ITableOfContentsRegistry as Registry } from '../../tokens';
 
 /**
  * Maps LaTeX section headings to HTML header levels.

@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { defaultSanitizer, HoverBox } from '@jupyterlab/apputils';
+import { defaultSanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { LabIcon } from '@jupyterlab/ui-components';
+import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -75,10 +75,10 @@ export class Completer extends Widget {
   /**
    * The editor used by the completion widget.
    */
-  get editor(): CodeEditor.IEditor | null {
+  get editor(): CodeEditor.IEditor | null | undefined {
     return this._editor;
   }
-  set editor(newValue: CodeEditor.IEditor | null) {
+  set editor(newValue: CodeEditor.IEditor | null | undefined) {
     this._editor = newValue;
   }
 
@@ -129,7 +129,7 @@ export class Completer extends Widget {
   /**
    * Dispose of the resources held by the completer widget.
    */
-  dispose() {
+  dispose(): void {
     this._model = null;
     super.dispose();
   }
@@ -211,6 +211,7 @@ export class Completer extends Widget {
   protected onModelStateChanged(): void {
     if (this.isAttached) {
       this._activeIndex = 0;
+      this._indexChanged.emit(this._activeIndex);
       this.update();
     }
   }
@@ -220,7 +221,6 @@ export class Completer extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     const model = this._model;
-
     if (!model) {
       return;
     }
@@ -580,7 +580,7 @@ export class Completer extends Widget {
 
     const start = model.cursor.start;
     const position = editor.getPositionAt(start) as CodeEditor.IPosition;
-    const anchor = editor.getCoordinateForPosition(position) as ClientRect;
+    const anchor = editor.getCoordinateForPosition(position) as DOMRect;
     const style = window.getComputedStyle(node);
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
@@ -635,7 +635,7 @@ export class Completer extends Widget {
   }
 
   private _activeIndex = 0;
-  private _editor: CodeEditor.IEditor | null = null;
+  private _editor: CodeEditor.IEditor | null | undefined = null;
   private _model: Completer.IModel | null = null;
   private _renderer: Completer.IRenderer;
   private _resetFlag = false;

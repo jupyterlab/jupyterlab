@@ -251,7 +251,7 @@ export class CompleterModel implements Completer.IModel {
   setOptions(
     newValue: IterableOrArrayLike<string>,
     typeMap?: Completer.TypeMap
-  ) {
+  ): void {
     const values = toArray(newValue || []);
     const types = typeMap || {};
 
@@ -327,7 +327,6 @@ export class CompleterModel implements Completer.IModel {
    */
   handleTextChange(change: Completer.ITextState): void {
     const original = this._original;
-
     // If there is no active completion, return.
     if (!original) {
       return;
@@ -376,7 +375,7 @@ export class CompleterModel implements Completer.IModel {
    *
    * @param hard - Reset even if a subset match is in progress.
    */
-  reset(hard = false) {
+  reset(hard = false): void {
     // When the completer detects a common subset prefix for all options,
     // it updates the model and sets the model source to that value, triggering
     // a reset. Unless explicitly a hard reset, this should be ignored.

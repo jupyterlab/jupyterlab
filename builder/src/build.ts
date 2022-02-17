@@ -198,7 +198,8 @@ export namespace Build {
         output: {
           path: path.resolve(path.join(themeOutput, 'themes', name)),
           // we won't use these JS files, only the extracted CSS
-          filename: '[name].js'
+          filename: '[name].js',
+          hashFunction: 'sha256'
         },
         module: {
           rules: [

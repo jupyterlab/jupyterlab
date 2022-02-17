@@ -8,7 +8,7 @@ into other file formats such as:
 
 -  Asciidoc ``.asciidoc``
 -  HTML ``.html``
--  Latex ``.tex``
+-  LaTeX ``.tex``
 -  Markdown ``.md``
 -  PDF ``.pdf``
 -  ReStructured Text ``.rst``
@@ -17,7 +17,7 @@ into other file formats such as:
 
 To access these options, while a notebook is open, browse the File menu:
 
-.. image:: images/exporting_menu.png
+.. image:: ../images/exporting-menu.png
    :align: center
    :class: jp-screenshot
 
@@ -35,10 +35,10 @@ slides, follow these steps:
 
 1. Open a notebook by double clicking it in the
    :ref:`file browser <working-with-files>`.
-2. Select Cell tools in the :ref:`left sidebar <left-sidebar>`.
+2. Select Property inspector in the :ref:`right sidebar <right-sidebar>`.
 3. Select the slide type (Slide, Subslide, Fragment, Skip, Notes).
 
-.. image:: images/exporting_slide_type.png
+.. image:: ../images/exporting-slide-type.png
    :align: center
    :class: jp-screenshot
 

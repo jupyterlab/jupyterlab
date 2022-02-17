@@ -25,24 +25,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../nbformat"
-    },
-    {
-      "path": "../outputarea"
-    },
-    {
-      "path": "../rendermime"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../translation"
     }
   ]
 }

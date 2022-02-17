@@ -12,6 +12,9 @@
 
 .jp-Help > iframe {
   border: none;
+
+  /* Forcing white color to avoid contrast issues see issue #11320 */
+  background: white;
 }
 
 .jp-About-body {
@@ -27,6 +30,7 @@
 
 .jp-About-version-info {
   color: var(--jp-ui-font-color1);
+
   /* Dialog-header sets the font size to 3, we reset to 1 */
   font-size: var(--jp-ui-font-size1);
   width: 200px;
@@ -40,14 +44,11 @@
   .jp-Dialog-content
   .jp-Dialog-footer
   .jp-Dialog-button.jp-About-button {
-  margin-right: 0px;
+  margin-right: 0;
 }
 
 .jp-About-version {
   display: block;
-}
-
-.jp-About-version {
   padding-top: 8px;
 }
 

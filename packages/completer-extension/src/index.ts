@@ -10,19 +10,15 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  Completer,
-  CompleterModel,
-  CompletionConnector,
-  CompletionHandler,
-  ContextConnector,
-  ICompletionManager
+  CompletionProviderManager,
+  ContextCompleterProvider,
+  ICompletionProviderManager,
+  KernelCompleterProvider
 } from '@jupyterlab/completer';
-import { IConsoleTracker } from '@jupyterlab/console';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { Session } from '@jupyterlab/services';
-import { find, toArray } from '@lumino/algorithm';
-import { Widget } from '@lumino/widgets';
+import { IConsoleTracker } from '@jupyterlab/console';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The command IDs used by the completer plugin.
@@ -45,295 +41,95 @@ namespace CommandIDs {
   export const selectFile = 'completer:select-file';
 }
 
-/**
- * A plugin providing code completion for editors.
- */
-const manager: JupyterFrontEndPlugin<ICompletionManager> = {
-  id: '@jupyterlab/completer-extension:manager',
+const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:tracker';
+
+const defaultProvider: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/completer-extension:base-service',
+  requires: [ICompletionProviderManager],
   autoStart: true,
-  provides: ICompletionManager,
-  activate: (app: JupyterFrontEnd): ICompletionManager => {
-    const handlers: { [id: string]: CompletionHandler } = {};
+  activate: (
+    app: JupyterFrontEnd,
+    completionManager: ICompletionProviderManager
+  ): void => {
+    completionManager.registerProvider(new ContextCompleterProvider());
+    completionManager.registerProvider(new KernelCompleterProvider());
+  }
+};
 
-    app.commands.addCommand(CommandIDs.invoke, {
-      execute: args => {
-        const id = args && (args['id'] as string);
-        if (!id) {
-          return;
-        }
-
-        const handler = handlers[id];
-        if (handler) {
-          handler.invoke();
-        }
-      }
-    });
-
-    app.commands.addCommand(CommandIDs.select, {
-      execute: args => {
-        const id = args && (args['id'] as string);
-        if (!id) {
-          return;
-        }
-
-        const handler = handlers[id];
-        if (handler) {
-          handler.completer.selectActive();
-        }
-      }
-    });
-
-    return {
-      register: (
-        completable: ICompletionManager.ICompletable,
-        renderer: Completer.IRenderer = Completer.defaultRenderer
-      ): ICompletionManager.ICompletableAttributes => {
-        const { connector, editor, parent } = completable;
-        const model = new CompleterModel();
-        const completer = new Completer({ editor, model, renderer });
-        const handler = new CompletionHandler({
-          completer,
-          connector
-        });
-        const id = parent.id;
-
-        // Hide the widget when it first loads.
-        completer.hide();
-
-        // Associate the handler with the parent widget.
-        handlers[id] = handler;
-
-        // Set the handler's editor.
-        handler.editor = editor;
-
-        // Attach the completer widget.
-        Widget.attach(completer, document.body);
-
-        // Listen for parent disposal.
-        parent.disposed.connect(() => {
-          delete handlers[id];
-          model.dispose();
-          completer.dispose();
-          handler.dispose();
-        });
-
-        return handler;
-      }
+const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
+  id: COMPLETION_MANAGER_PLUGIN,
+  requires: [
+    INotebookTracker,
+    IEditorTracker,
+    IConsoleTracker,
+    ISettingRegistry
+  ],
+  provides: ICompletionProviderManager,
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    notebooks: INotebookTracker,
+    editorTracker: IEditorTracker,
+    consoles: IConsoleTracker,
+    settings: ISettingRegistry
+  ): ICompletionProviderManager => {
+    const AVAILABLE_PROVIDERS = 'availableProviders';
+    const PROVIDER_TIMEOUT = 'providerTimeout';
+    const manager = new CompletionProviderManager();
+    const updateSetting = (
+      settingValues: ISettingRegistry.ISettings,
+      availableProviders: string[]
+    ): void => {
+      const providersData = settingValues.get(AVAILABLE_PROVIDERS);
+      const timeout = settingValues.get(PROVIDER_TIMEOUT);
+      manager.setTimeout(timeout.composite as number);
+      const selectedProviders = providersData.user ?? providersData.composite;
+      const sortedProviders = Object.entries(selectedProviders ?? {})
+        .filter(val => val[1] >= 0 && availableProviders.includes(val[0]))
+        .sort(([, rank1], [, rank2]) => rank2 - rank1)
+        .map(item => item[0]);
+      manager.activateProvider(sortedProviders);
     };
-  }
-};
 
-/**
- * An extension that registers consoles for code completion.
- */
-const consoles: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/completer-extension:consoles',
-  requires: [ICompletionManager, IConsoleTracker],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    manager: ICompletionManager,
-    consoles: IConsoleTracker
-  ): void => {
-    // Create a handler for each console that is created.
-    consoles.widgetAdded.connect((sender, widget) => {
-      const anchor = widget.console;
-      const editor = anchor.promptCell?.editor ?? null;
-      const session = anchor.sessionContext.session;
-      // TODO: CompletionConnector assumes editor and session are not null
-      const connector = new CompletionConnector({ session, editor });
-      const handler = manager.register({ connector, editor, parent: widget });
-
-      const updateConnector = () => {
-        const editor = anchor.promptCell?.editor ?? null;
-        const session = anchor.sessionContext.session;
-
-        handler.editor = editor;
-        // TODO: CompletionConnector assumes editor and session are not null
-        handler.connector = new CompletionConnector({ session, editor });
-      };
-
-      // Update the handler whenever the prompt or session changes
-      anchor.promptCellCreated.connect(updateConnector);
-      anchor.sessionContext.sessionChanged.connect(updateConnector);
-    });
-
-    // Add console completer invoke command.
-    app.commands.addCommand(CommandIDs.invokeConsole, {
-      execute: () => {
-        const id = consoles.currentWidget && consoles.currentWidget.id;
-
-        if (id) {
-          return app.commands.execute(CommandIDs.invoke, { id });
+    app.restored.then(() => {
+      const availableProviders = [...manager.getProviders().keys()];
+      settings.transform(COMPLETION_MANAGER_PLUGIN, {
+        fetch: plugin => {
+          const schema = plugin.schema.properties!;
+          const defaultValue: { [key: string]: number } = {};
+          availableProviders.forEach((item, index) => {
+            defaultValue[item] = (index + 1) * 100;
+          });
+          schema[AVAILABLE_PROVIDERS]['default'] = defaultValue;
+          return plugin;
         }
-      }
+      });
+      const settingsPromise = settings.load(COMPLETION_MANAGER_PLUGIN);
+      settingsPromise.then(settingValues => {
+        updateSetting(settingValues, availableProviders);
+        settingValues.changed.connect(newSettings => {
+          updateSetting(newSettings, availableProviders);
+        });
+      });
     });
 
-    // Add console completer select command.
-    app.commands.addCommand(CommandIDs.selectConsole, {
-      execute: () => {
-        const id = consoles.currentWidget && consoles.currentWidget.id;
-
-        if (id) {
-          return app.commands.execute(CommandIDs.select, { id });
-        }
-      }
-    });
-
-    // Set enter key for console completer select command.
-    app.commands.addKeyBinding({
-      command: CommandIDs.selectConsole,
-      keys: ['Enter'],
-      selector: `.jp-ConsolePanel .jp-mod-completer-active`
-    });
-  }
-};
-
-/**
- * An extension that registers notebooks for code completion.
- */
-const notebooks: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/completer-extension:notebooks',
-  requires: [ICompletionManager, INotebookTracker],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    manager: ICompletionManager,
-    notebooks: INotebookTracker
-  ): void => {
-    // Create a handler for each notebook that is created.
-    notebooks.widgetAdded.connect((sender, panel) => {
-      const editor = panel.content.activeCell?.editor ?? null;
-      const session = panel.sessionContext.session;
-      // TODO: CompletionConnector assumes editor and session are not null
-      const connector = new CompletionConnector({ session, editor });
-      const handler = manager.register({ connector, editor, parent: panel });
-
-      const updateConnector = () => {
-        const editor = panel.content.activeCell?.editor ?? null;
-        const session = panel.sessionContext.session;
-
-        handler.editor = editor;
-        // TODO: CompletionConnector assumes editor and session are not null
-        handler.connector = new CompletionConnector({ session, editor });
-      };
-
-      // Update the handler whenever the prompt or session changes
-      panel.content.activeCellChanged.connect(updateConnector);
-      panel.sessionContext.sessionChanged.connect(updateConnector);
-    });
-
-    // Add notebook completer command.
     app.commands.addCommand(CommandIDs.invokeNotebook, {
-      execute: () => {
+      execute: args => {
         const panel = notebooks.currentWidget;
         if (panel && panel.content.activeCell?.model.type === 'code') {
-          return app.commands.execute(CommandIDs.invoke, { id: panel.id });
+          manager.invoke(panel.id);
         }
       }
     });
 
-    // Add notebook completer select command.
     app.commands.addCommand(CommandIDs.selectNotebook, {
       execute: () => {
         const id = notebooks.currentWidget && notebooks.currentWidget.id;
 
         if (id) {
-          return app.commands.execute(CommandIDs.select, { id });
+          return manager.select(id);
         }
       }
-    });
-
-    // Set enter key for notebook completer select command.
-    app.commands.addKeyBinding({
-      command: CommandIDs.selectNotebook,
-      keys: ['Enter'],
-      selector: `.jp-Notebook .jp-mod-completer-active`
-    });
-  }
-};
-
-/**
- * An extension that registers file editors for completion.
- */
-const files: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/completer-extension:files',
-  requires: [ICompletionManager, IEditorTracker],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    manager: ICompletionManager,
-    editorTracker: IEditorTracker
-  ): void => {
-    // Keep a list of active ISessions so that we can
-    // clean them up when they are no longer needed.
-    const activeSessions: {
-      [id: string]: Session.ISessionConnection;
-    } = {};
-
-    // When a new file editor is created, make the completer for it.
-    editorTracker.widgetAdded.connect((sender, widget) => {
-      const sessions = app.serviceManager.sessions;
-      const editor = widget.content.editor;
-      const contextConnector = new ContextConnector({ editor });
-
-      // Initially create the handler with the contextConnector.
-      // If a kernel session is found matching this file editor,
-      // it will be replaced in onRunningChanged().
-      const handler = manager.register({
-        connector: contextConnector,
-        editor,
-        parent: widget
-      });
-
-      // When the list of running sessions changes,
-      // check to see if there are any kernels with a
-      // matching path for this file editor.
-      const onRunningChanged = (
-        sender: Session.IManager,
-        models: Session.IModel[]
-      ) => {
-        const oldSession = activeSessions[widget.id];
-        // Search for a matching path.
-        const model = find(models, m => m.path === widget.context.path);
-        if (model) {
-          // If there is a matching path, but it is the same
-          // session as we previously had, do nothing.
-          if (oldSession && oldSession.id === model.id) {
-            return;
-          }
-          // Otherwise, dispose of the old session and reset to
-          // a new CompletionConnector.
-          if (oldSession) {
-            delete activeSessions[widget.id];
-            oldSession.dispose();
-          }
-          const session = sessions.connectTo({ model });
-          handler.connector = new CompletionConnector({ session, editor });
-          activeSessions[widget.id] = session;
-        } else {
-          // If we didn't find a match, make sure
-          // the connector is the contextConnector and
-          // dispose of any previous connection.
-          handler.connector = contextConnector;
-          if (oldSession) {
-            delete activeSessions[widget.id];
-            oldSession.dispose();
-          }
-        }
-      };
-      onRunningChanged(sessions, toArray(sessions.running()));
-      sessions.runningChanged.connect(onRunningChanged);
-
-      // When the widget is disposed, do some cleanup.
-      widget.disposed.connect(() => {
-        sessions.runningChanged.disconnect(onRunningChanged);
-        const session = activeSessions[widget.id];
-        if (session) {
-          delete activeSessions[widget.id];
-          session.dispose();
-        }
-      });
     });
 
     // Add console completer invoke command.
@@ -341,41 +137,79 @@ const files: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const id =
           editorTracker.currentWidget && editorTracker.currentWidget.id;
-
         if (id) {
-          return app.commands.execute(CommandIDs.invoke, { id });
+          return manager.invoke(id);
         }
       }
     });
 
-    // Add console completer select command.
     app.commands.addCommand(CommandIDs.selectFile, {
       execute: () => {
         const id =
           editorTracker.currentWidget && editorTracker.currentWidget.id;
 
         if (id) {
-          return app.commands.execute(CommandIDs.select, { id });
+          return manager.select(id);
         }
       }
     });
 
-    // Set enter key for console completer select command.
-    app.commands.addKeyBinding({
-      command: CommandIDs.selectFile,
-      keys: ['Enter'],
-      selector: `.jp-FileEditor .jp-mod-completer-active`
+    app.commands.addCommand(CommandIDs.invokeConsole, {
+      execute: () => {
+        const id = consoles.currentWidget && consoles.currentWidget.id;
+
+        if (id) {
+          return manager.invoke(id);
+        }
+      }
     });
+
+    app.commands.addCommand(CommandIDs.selectConsole, {
+      execute: () => {
+        const id = consoles.currentWidget && consoles.currentWidget.id;
+
+        if (id) {
+          return manager.select(id);
+        }
+      }
+    });
+
+    const addKeyBinding = (command: string, selector: string): void => {
+      app.commands.addKeyBinding({
+        command,
+        keys: ['Enter'],
+        selector
+      });
+    };
+    addKeyBinding(
+      CommandIDs.selectNotebook,
+      `.jp-Notebook .jp-mod-completer-active`
+    );
+    addKeyBinding(
+      CommandIDs.selectFile,
+      `.jp-FileEditor .jp-mod-completer-active`
+    );
+    addKeyBinding(
+      CommandIDs.selectConsole,
+      `.jp-ConsolePanel .jp-mod-completer-active`
+    );
+
+    notebooks.widgetAdded.connect(
+      async (_, notebook) => await manager.attachPanel(notebook)
+    );
+    editorTracker.widgetAdded.connect(
+      async (_, widget) =>
+        await manager.attachEditor(widget, app.serviceManager.sessions)
+    );
+    consoles.widgetAdded.connect(
+      async (_, console) => await manager.attachConsole(console)
+    );
+    return manager;
   }
 };
 
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
-  manager,
-  consoles,
-  notebooks,
-  files
-];
+const plugins: JupyterFrontEndPlugin<any>[] = [manager, defaultProvider];
 export default plugins;

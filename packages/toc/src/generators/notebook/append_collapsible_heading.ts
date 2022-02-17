@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { INotebookHeading } from '../../utils/headings';
+import { INotebookHeading } from '../../tokens';
 import { isHeadingFiltered } from './is_heading_filtered';
 
 /**
@@ -14,6 +14,7 @@ import { isHeadingFiltered } from './is_heading_filtered';
  * @param collapseLevel - collapse level
  * @param tags - filter tags
  * @param collapsed - boolean indicating whether a heading is collapsed
+ * @param cellCollapseMetadata - indicates which metadata string to use based on the cellSyncSetting
  * @returns result tuple
  */
 function appendCollapsibleHeading(
@@ -22,7 +23,8 @@ function appendCollapsibleHeading(
   prev: INotebookHeading | null,
   collapseLevel: number,
   tags: string[],
-  collapsed: boolean
+  collapsed: boolean,
+  cellCollapseMetadata: string
 ): [INotebookHeading[], INotebookHeading | null, number] {
   const len = headings.length;
   if (!isHeadingFiltered(heading, tags)) {
@@ -55,7 +57,7 @@ function appendCollapsibleHeading(
     // If there is no parent, reset collapsing...
     if (parent) {
       const isCollapsed = headings[k + 1].cellRef.model.metadata.get(
-        'toc-hr-collapsed'
+        cellCollapseMetadata
       ) as boolean;
       collapseLevel = isCollapsed ? headings[k + 1].level : -1;
     } else {
