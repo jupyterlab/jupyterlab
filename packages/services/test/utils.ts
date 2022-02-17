@@ -189,7 +189,12 @@ class SocketTester implements IService {
     for (let retry = 0; retry <= 5; retry++) {
       try {
         port = getRandomInt(9000, 20000);
-        this._server = new WebSocket.Server({ port });
+        this._server = new WebSocket.Server({
+          port,
+          handleProtocols: () => {
+            return KernelMessage.supportedKernelWebSocketProtocols[0];
+          }
+        });
       } catch (err) {
         if (retry === 5) {
           throw err;
@@ -473,10 +478,12 @@ export class KernelTester extends SocketTester {
   }
 
   /**
-   * Send a kernel message from the server to the client.
+   * Send a kernel message from the server to the client with newest protocol.
    */
   send(msg: KernelMessage.Message): void {
-    this.sendRaw(serialize(msg));
+    this.sendRaw(
+      serialize(msg, KernelMessage.supportedKernelWebSocketProtocols[0])
+    );
   }
 
   /**
@@ -531,6 +538,7 @@ export class KernelTester extends SocketTester {
 
   /**
    * Set up a new server websocket to pretend like it is a server kernel.
+   * Use the newest protocol.
    */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
@@ -539,7 +547,10 @@ export class KernelTester extends SocketTester {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
-      const data = deserialize(msg);
+      const data = deserialize(
+        msg,
+        KernelMessage.supportedKernelWebSocketProtocols[0]
+      );
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
         this.parentHeader = data.header;
@@ -648,10 +659,12 @@ export class SessionTester extends SocketTester {
   }
 
   /**
-   * Send a kernel message from the server to the client.
+   * Send a kernel message from the server to the client with newest protocol.
    */
   send(msg: KernelMessage.IMessage): void {
-    this.sendRaw(serialize(msg));
+    this.sendRaw(
+      serialize(msg, KernelMessage.supportedKernelWebSocketProtocols[0])
+    );
   }
 
   /**
@@ -663,6 +676,7 @@ export class SessionTester extends SocketTester {
 
   /**
    * Set up a new server websocket to pretend like it is a server kernel.
+   * Use the newest protocol.
    */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
@@ -670,7 +684,10 @@ export class SessionTester extends SocketTester {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
-      const data = deserialize(msg);
+      const data = deserialize(
+        msg,
+        KernelMessage.supportedKernelWebSocketProtocols[0]
+      );
       if (KernelMessage.isInfoRequestMsg(data)) {
         // First send status busy message.
         this.sendStatus('busy', data.header);
