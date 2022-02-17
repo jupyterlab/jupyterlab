@@ -27,23 +27,6 @@
   top: 46px;
 }
 
-.jp-enh-cell-move-cell-up {
-  top: 20px;
-  left: -10px;
-}
-
-.jp-enh-cell-move-cell-down {
-  top: 36px;
-  left: -10px;
-}
-
-.jp-enh-cell-insert-cell-below {
-  bottom: -19px;
-  left: calc(
-    var(--jp-cell-collapser-width) + var(--jp-cell-prompt-width) - 10px
-  );
-}
-
 .jp-enh-cell-toolbar {
   display: flex;
   flex-direction: row;
