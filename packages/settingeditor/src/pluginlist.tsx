@@ -350,10 +350,7 @@ export class PluginList extends ReactWidget {
         plugin.schema ?? {},
         plugin.schema.definitions
       );
-      if (
-        filter(plugin.schema.title?.toLowerCase() ?? '') &&
-        filtered.length === 0
-      ) {
+      if (filter(plugin.schema.title?.toLowerCase() ?? '')) {
         return true;
       }
       return filtered;
