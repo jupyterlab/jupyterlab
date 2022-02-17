@@ -48,6 +48,7 @@
     "@jupyterlab/fileeditor": "^4.0.0-alpha.4",
     "@jupyterlab/launcher": "^4.0.0-alpha.4",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.4",
+    "@jupyterlab/observables": "^5.0.0-alpha.4",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.4",
     "@jupyterlab/statusbar": "^4.0.0-alpha.4",
     "@jupyterlab/translation": "^4.0.0-alpha.4",
