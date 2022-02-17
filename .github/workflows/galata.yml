@@ -68,19 +68,6 @@ jobs:
           path: |
             galata/playwright-report
 
-      - name: Update snapshots
-        if: failure()
-        run: |
-          cd galata
-          jlpm run test:update
-
-      - name: Upload updated snapshots
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: jupyterlab-galata-updated-snapshots
-          path: galata/test/**/*-snapshots/*.*
-
       - name: Print JupyterLab logs
         if: always()
         run: |
