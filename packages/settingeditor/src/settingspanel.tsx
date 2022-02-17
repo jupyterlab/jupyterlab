@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Settings } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
@@ -50,6 +50,14 @@ export interface ISettingsPanelProps {
    * Sends the updated dirty state to the parent class.
    */
   updateDirtyState: (dirty: boolean) => void;
+
+  /**
+   * Signal that sends updated filter when search value changes.
+   */
+  updateFilterSignal: ISignal<
+    PluginList,
+    (plugin: ISettingRegistry.IPlugin) => string[] | boolean
+  >;
 }
 
 /**
@@ -63,9 +71,16 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   handleSelectSignal,
   hasError,
   updateDirtyState,
+  updateFilterSignal,
   translator
 }: ISettingsPanelProps): JSX.Element => {
   const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
+  const [shownPlugins, setShownPlugins] = useState<Settings[]>(settings);
+  const [filterPlugin, setFilter] = useState<
+    (plugin: ISettingRegistry.IPlugin) => string[] | boolean
+  >(() => (plugin: ISettingRegistry.IPlugin) => {
+    return false;
+  });
 
   // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
@@ -78,6 +93,25 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   const editorDirtyStates: React.RefObject<{
     [id: string]: boolean;
   }> = React.useRef({});
+
+  // When filter updates, only show plugins that match search.
+  updateFilterSignal.connect(
+    (
+      list: PluginList,
+      newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | boolean
+    ) => {
+      setShownPlugins(
+        settings.filter((pluginSettings: Settings): boolean => {
+          const filtered = filterPlugin(pluginSettings.plugin);
+          return (
+            // If filtered results are an array, only show if the array is non-empty.
+            typeof filtered === 'object' ? filtered.length > 0 : filtered
+          );
+        })
+      );
+      setFilter(() => newFilter);
+    }
+  );
 
   useEffect(() => {
     const onSelectChange = (list: PluginList, pluginId: string) => {
@@ -107,7 +141,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
 
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
-      {settings.map(pluginSettings => {
+      {shownPlugins.map(pluginSettings => {
+        // Pass filtered results to SettingsFormEditor to only display filtered fields.
+        const filtered = filterPlugin(pluginSettings.plugin);
         return (
           <div
             ref={editorRefs[pluginSettings.id]}
@@ -123,6 +159,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
                   setExpandedPlugin(null);
                 }
               }}
+              filteredValues={
+                typeof filtered === 'object' ? filtered : undefined
+              }
               settings={pluginSettings}
               renderers={editorRegistry.renderers}
               hasError={(error: boolean) => {

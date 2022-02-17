@@ -99,6 +99,12 @@
 }
 
 .jp-PluginList .jp-PluginList-header {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-PluginList .jp-PluginList-noResults,
+.jp-PluginList .jp-PluginList-header {
   flex: 0 0 auto;
   font-weight: 600;
   text-transform: uppercase;
@@ -106,8 +112,6 @@
   font-size: var(--jp-ui-font-size0);
   padding: 8px 8px 8px 12px;
   margin: 10px;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  border-top: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 .jp-PluginList .jp-SelectedIndicator {
@@ -228,6 +232,16 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 
 .jp-SettingsPanel .checkbox label {
   cursor: pointer;
+  font-size: var(--jp-content-font-size2);
+}
+
+.jp-SettingsPanel .checkbox p {
+  font-size: var(--jp-content-font-size1);
+}
+
+.jp-SettingsPanel .checkbox {
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .jp-SettingsPanel button[type='submit'] {
@@ -392,7 +406,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 
 .jp-PluginList-entry {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   border: 1px solid transparent;
   background: transparent;
   overflow: hidden;
@@ -400,6 +414,16 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: -webkit-fill-available;
+}
+
+.jp-PluginList-entry p {
+  margin-left: 27px;
+  margin-top: 5px;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-PluginList-entry > div {
+  display: flex;
 }
 
 .jp-SettingsPanel .jp-SettingsHeader-Name {
