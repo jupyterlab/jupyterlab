@@ -23,13 +23,13 @@ Release Plans are tracked in dedicated issues, and are closed when the final rel
 
 Alpha releases have a fairly low bar. Their purpose is to start putting the new JupyterLab version into the hands of users and extension authors.
 
-The requirements for an alpha release should be that JupyterLab can be installed and run. Bugs and breaking changes are accepted. 
+The requirements for an alpha release should be that JupyterLab can be installed and run. Bugs and breaking changes are accepted.
 
 ### Beta Releases
 
 Beta releases usually try to not have breaking changes in the API, although breaking changes can sometimes happen during that phase if they were missed during the alpha stage.
 
-The recommended time period for the Beta phase is a minimum of 1 week. 
+The recommended time period for the Beta phase is a minimum of 1 week.
 
 ### Release Candidates
 
