@@ -2,6 +2,30 @@
 
 This document guides a contributor through creating a release of JupyterLab.
 
+## The JupyterLab Release Process
+
+JupyterLab follows semver for the versioning of the Python and JavaScript packages.
+
+### Alpha Releases
+
+Alpha releases have a fairly low bar. Their purpose is to start putting the new JupyterLab version into the hands of users and extension authors.
+
+The requirements for an alpha release should be that JupyterLab can be installed and run. Bugs and breaking changes are accepted. 
+
+### Beta Releases
+
+Beta releases usually try to not have breaking changes in the API, although breaking changes can sometimes happen during that phase if they were missed during the alpha stage.
+
+The recommended time period for the Beta phase is a minimum of 1 week. 
+
+## Release Candidates
+
+Release Candidates (RC) are a signal to the extension developer community that they should start migrating to the new version to test it. At that point we consider the software stable.
+
+The RC stage is often a good time to address final release documentation changes or minor UX tweaks. During the RC phase, the JupyterLab developers and maintainers start updating third-party extensions over to the new version to test it. This work during the RC phase, and giving time for feedback from extension developers, can take up to a couple of weeks.
+
+The recommended time period for the Release Candidate phase is a minimum of 1 week for minor releases, and 2 weeks for major releases.
+
 ## Automated Releases with the Jupyter Releaser
 
 The recommended way to make a release is to use [`jupyter_releaser`](https://github.com/jupyter-server/jupyter_releaser#checklist-for-adoption).
