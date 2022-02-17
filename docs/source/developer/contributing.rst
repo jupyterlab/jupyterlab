@@ -692,11 +692,11 @@ Main reasons for UI test failures are:
    fail, then you will need to update reference image(s) for the failing tests. In order
    to do that, you can post a comment on your PR with the following content:
 
-   - ``update galata snapshots``: A bot will push a new commit to your PR updating galata
+   - ``please update galata snapshots``: A bot will push a new commit to your PR updating galata
      test snaphsots.
-   - ``update documentation snapshots``: A bot will push a new commit to your PR updating 
+   - ``please update documentation snapshots``: A bot will push a new commit to your PR updating 
      documentation test snapshots.
-   - ``update snapshots``: Combine the two previous comments effects.
+   - ``please update snapshots``: Combine the two previous comments effects.
 
 For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/master/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.
