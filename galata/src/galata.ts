@@ -63,7 +63,7 @@ export namespace galata {
           collapsed: true,
           widgets: ['jp-property-inspector', 'debugger-sidebar']
         },
-        relativeSizes: [0.2, 0.8, 0]
+        relativeSizes: [0.2222, 0.7778, 0]
       }
     }
   };
