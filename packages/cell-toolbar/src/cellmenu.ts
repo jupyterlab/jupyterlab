@@ -58,8 +58,9 @@ export class CellMenu extends Widget {
           new ToolbarButton({
             icon: LabIcon.resolve({ icon: entry.icon }),
             className: `jp-enh-cell-${entry.cellType ?? 'all'}`,
-            onClick: (): void => {
+            onClickWithEvent: (e: Event): void => {
               this._commands.execute(entry.command);
+              e.stopPropagation();
             },
             tooltip: entry.tooltip ?? this._commands.label(entry.command)
           })
