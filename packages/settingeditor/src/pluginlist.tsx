@@ -12,7 +12,6 @@ import {
   LabIcon,
   settingsIcon
 } from '@jupyterlab/ui-components';
-import { reduce } from '@lumino/algorithm';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -53,7 +52,7 @@ export class PluginList extends ReactWidget {
       this.update();
     }, this);
     this.mapPlugins = this.mapPlugins.bind(this);
-    this._filter = (item: ISettingRegistry.IPlugin) => true;
+    this._filter = (item: ISettingRegistry.IPlugin) => undefined;
     this.setFilter = this.setFilter.bind(this);
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
@@ -134,33 +133,9 @@ export class PluginList extends ReactWidget {
    */
   get updateFilterSignal(): ISignal<
     this,
-    (plugin: ISettingRegistry.IPlugin) => string[] | boolean
+    (plugin: ISettingRegistry.IPlugin) => string[] | undefined
   > {
     return this._updateFilterSignal;
-  }
-
-  protected async updateModifiedPlugins(): Promise<void> {
-    const modifiedPlugins = [];
-    for (const plugin of this._allPlugins) {
-      const settings: Settings = (await this.registry.load(
-        plugin.id
-      )) as Settings;
-      if (settings.isModified) {
-        modifiedPlugins.push(plugin);
-      }
-    }
-    if (this._modifiedPlugins.length !== modifiedPlugins.length) {
-      this._modifiedPlugins = modifiedPlugins;
-      this.update();
-      return;
-    }
-    for (const plugin of modifiedPlugins) {
-      if (!this._modifiedPlugins.find(p => p.id === plugin.id)) {
-        this._modifiedPlugins = modifiedPlugins;
-        this.update();
-        return;
-      }
-    }
   }
 
   get handleSelectSignal(): ISignal<this, string> {
@@ -171,7 +146,6 @@ export class PluginList extends ReactWidget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    void this.updateModifiedPlugins();
     const ul = this.node.querySelector('ul');
     if (ul && this._scrollTop !== undefined) {
       ul.scrollTop = this._scrollTop;
@@ -300,43 +274,39 @@ export class PluginList extends ReactWidget {
     }
 
     // Iterate through the properties and check for titles / descriptions that match search.
-    return reduce(
-      Object.keys(props),
-      (acc: string[], value: any) => {
-        // If this is the base case, check for matching title / description
-        const subProps = props[value] as PartialJSONObject;
-        if (
-          !subProps &&
-          (filter((props.title as string)?.toLocaleLowerCase() ?? '') ||
-            filter((props.description as string)?.toLocaleLowerCase() ?? '') ||
-            filter(value))
-        ) {
-          acc.push(props.title ?? value);
-          return acc;
-        }
-
-        // If there are properties in the object, check for title / description
-        if (
-          filter((subProps.title as string)?.toLocaleLowerCase() ?? '') ||
-          filter((subProps.description as string)?.toLocaleLowerCase() ?? '') ||
-          filter(value.toLocaleLowerCase())
-        ) {
-          acc.push(subProps.title ?? value);
-        }
-
-        // Finally, recurse on the properties left.
-        acc.concat(
-          this.getFilterString(
-            filter,
-            subProps as ISettingRegistry.IProperty,
-            definitions,
-            subProps['$ref'] as string
-          )
-        );
+    return Object.keys(props).reduce((acc: string[], value: any) => {
+      // If this is the base case, check for matching title / description
+      const subProps = props[value] as PartialJSONObject;
+      if (
+        !subProps &&
+        (filter((props.title as string)?.toLocaleLowerCase() ?? '') ||
+          filter((props.description as string)?.toLocaleLowerCase() ?? '') ||
+          filter(value))
+      ) {
+        acc.push(props.title ?? value);
         return acc;
-      },
-      []
-    );
+      }
+
+      // If there are properties in the object, check for title / description
+      if (
+        filter((subProps.title as string)?.toLocaleLowerCase() ?? '') ||
+        filter((subProps.description as string)?.toLocaleLowerCase() ?? '') ||
+        filter(value.toLocaleLowerCase())
+      ) {
+        acc.push(subProps.title ?? value);
+      }
+
+      // Finally, recurse on the properties left.
+      acc.concat(
+        this.getFilterString(
+          filter,
+          subProps as ISettingRegistry.IProperty,
+          definitions,
+          subProps['$ref'] as string
+        )
+      );
+      return acc;
+    }, []);
   }
 
   /**
@@ -344,14 +314,14 @@ export class PluginList extends ReactWidget {
    * @param filter Filter function passed by search bar based on search value.
    */
   setFilter(filter: (item: string) => boolean): void {
-    this._filter = (plugin: ISettingRegistry.IPlugin): string[] | boolean => {
+    this._filter = (plugin: ISettingRegistry.IPlugin): string[] | undefined => {
       const filtered = this.getFilterString(
         filter,
         plugin.schema ?? {},
         plugin.schema.definitions
       );
       if (filter(plugin.schema.title?.toLowerCase() ?? '')) {
-        return true;
+        return undefined;
       }
       return filtered;
     };
@@ -422,20 +392,19 @@ export class PluginList extends ReactWidget {
 
   render(): JSX.Element {
     const trans = this.translator.load('jupyterlab');
+    // Filter all plugins based on search value before displaying list.
+    const allPlugins = this._allPlugins.filter(plugin => {
+      const filtered = this._filter(plugin);
+      return filtered === undefined || filtered.length > 0;
+    });
 
-    const modifiedItems = this._modifiedPlugins
+    const modifiedPlugins = allPlugins.filter(plugin => {
+      return this._settings[plugin.id]?.isModified;
+    });
+    const modifiedItems = modifiedPlugins.map(this.mapPlugins);
+    const otherItems = allPlugins
       .filter(plugin => {
-        const filtered = this._filter(plugin);
-        return typeof filtered === 'boolean' ? filtered : filtered.length > 0;
-      })
-      .map(this.mapPlugins);
-    const otherItems = this._allPlugins
-      .filter(plugin => {
-        const filtered = this._filter(plugin);
-        return (
-          !this._modifiedPlugins.includes(plugin) &&
-          (typeof filtered === 'boolean' ? filtered : filtered.length > 0)
-        );
+        return !modifiedPlugins.includes(plugin);
       })
       .map(this.mapPlugins);
 
@@ -461,8 +430,7 @@ export class PluginList extends ReactWidget {
         )}
         {modifiedItems.length === 0 && otherItems.length === 0 && (
           <h1 className="jp-PluginList-noResults">
-            {' '}
-            No items match your search.{' '}
+            {trans.__('No items match your search.')}
           </h1>
         )}
       </div>
@@ -472,13 +440,12 @@ export class PluginList extends ReactWidget {
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
   private _errors: { [id: string]: boolean };
-  private _filter: (item: ISettingRegistry.IPlugin) => string[] | boolean;
+  private _filter: (item: ISettingRegistry.IPlugin) => string[] | undefined;
   private _handleSelectSignal = new Signal<this, string>(this);
   private _updateFilterSignal = new Signal<
     this,
-    (plugin: ISettingRegistry.IPlugin) => string[] | boolean
+    (plugin: ISettingRegistry.IPlugin) => string[] | undefined
   >(this);
-  private _modifiedPlugins: ISettingRegistry.IPlugin[] = [];
   private _allPlugins: ISettingRegistry.IPlugin[] = [];
   private _settings: { [id: string]: Settings } = {};
   private _confirm?: (id: string) => Promise<void>;

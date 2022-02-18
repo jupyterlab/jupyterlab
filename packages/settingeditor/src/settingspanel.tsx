@@ -56,7 +56,7 @@ export interface ISettingsPanelProps {
    */
   updateFilterSignal: ISignal<
     PluginList,
-    (plugin: ISettingRegistry.IPlugin) => string[] | boolean
+    (plugin: ISettingRegistry.IPlugin) => string[] | undefined
   >;
 }
 
@@ -75,11 +75,10 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   translator
 }: ISettingsPanelProps): JSX.Element => {
   const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
-  const [shownPlugins, setShownPlugins] = useState<Settings[]>(settings);
   const [filterPlugin, setFilter] = useState<
-    (plugin: ISettingRegistry.IPlugin) => string[] | boolean
+    (plugin: ISettingRegistry.IPlugin) => string[] | undefined
   >(() => (plugin: ISettingRegistry.IPlugin) => {
-    return false;
+    return undefined;
   });
 
   // Refs used to keep track of "selected" plugin based on scroll location
@@ -94,24 +93,17 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [id: string]: boolean;
   }> = React.useRef({});
 
-  // When filter updates, only show plugins that match search.
-  updateFilterSignal.connect(
-    (
-      list: PluginList,
-      newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | boolean
-    ) => {
-      setShownPlugins(
-        settings.filter((pluginSettings: Settings): boolean => {
-          const filtered = filterPlugin(pluginSettings.plugin);
-          return (
-            // If filtered results are an array, only show if the array is non-empty.
-            typeof filtered === 'object' ? filtered.length > 0 : filtered
-          );
-        })
-      );
-      setFilter(() => newFilter);
-    }
-  );
+  React.useEffect(() => {
+    // When filter updates, only show plugins that match search.
+    updateFilterSignal.connect(
+      (
+        list: PluginList,
+        newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | undefined
+      ) => {
+        setFilter(() => newFilter);
+      }
+    );
+  }, []);
 
   useEffect(() => {
     const onSelectChange = (list: PluginList, pluginId: string) => {
@@ -141,9 +133,13 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
 
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
-      {shownPlugins.map(pluginSettings => {
+      {settings.map(pluginSettings => {
         // Pass filtered results to SettingsFormEditor to only display filtered fields.
         const filtered = filterPlugin(pluginSettings.plugin);
+        // If filtered results are an array, only show if the array is non-empty.
+        if (filtered !== undefined && filtered.length === 0) {
+          return undefined;
+        }
         return (
           <div
             ref={editorRefs[pluginSettings.id]}
@@ -159,9 +155,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
                   setExpandedPlugin(null);
                 }
               }}
-              filteredValues={
-                typeof filtered === 'object' ? filtered : undefined
-              }
+              filteredValues={filtered}
               settings={pluginSettings}
               renderers={editorRegistry.renderers}
               hasError={(error: boolean) => {
