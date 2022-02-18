@@ -49,6 +49,13 @@ The full process is documented in https://jupyter-releaser.readthedocs.io/en/lat
 
 Here is a quick summary of the different steps.
 
+#### Communicate on Gitter
+
+It is good practice to let other maintainers and users know when starting a new release.
+
+For this we usually leave a small message in the `jupyterlab` room on Gitter: https://gitter.im/jupyterlab/jupyterlab.
+Once the release is done, we also post a message with a link to the release notes, which include the changelog.
+
 #### Draft Changelog
 
 The first step is to generate a new changelog entry for the upcoming release.
