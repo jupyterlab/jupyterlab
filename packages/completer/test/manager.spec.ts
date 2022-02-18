@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import { Cell, CellModel } from '@jupyterlab/cells';
 import {
   CompletionHandler,
   CompletionProviderManager,
@@ -143,12 +144,31 @@ describe('completer/manager', () => {
       });
     });
 
-    describe('#attachPanel()', () => {
-      it('should attach a handler to the notebook panel', async () => {
+    describe('#updateHandler()', () => {
+      it('should create a new handler for the notebook panel', async () => {
         const context = contextFactory();
-        const panel = NBTestUtils.createNotebookPanel(context);
-        await manager.attachPanel(panel);
-        expect(manager['_panelHandlers'].has(panel.id)).toBe(true);
+        const widget = NBTestUtils.createNotebookPanel(context);
+        const completerContext = { widget };
+
+        await manager.updateCompleter(completerContext);
+        expect(manager['_panelHandlers'].has(widget.id)).toBe(true);
+      });
+
+      it('should update the handler of a widget', async () => {
+        const context = contextFactory();
+        const widget = NBTestUtils.createNotebookPanel(context);
+        const completerContext = { widget };
+
+        await manager.updateCompleter(completerContext);
+        const cell = new Cell({ model: new CellModel({}) });
+        const newCompleterContext = {
+          editor: cell.editor,
+          session: widget.sessionContext.session,
+          widget
+        };
+        const handler = manager['_panelHandlers'].get(widget.id);
+        manager.updateCompleter(newCompleterContext);
+        expect(handler.editor).toBe(newCompleterContext.editor);
       });
     });
   });

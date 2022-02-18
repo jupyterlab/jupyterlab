@@ -3,14 +3,16 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
+import { IObservableString } from '@jupyterlab/observables';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
-import { Completer } from './widget';
+
 import { IConnectorProxy } from './tokens';
+import { Completer } from './widget';
 
 /**
  * A class added to editors that can host a completer.
@@ -93,6 +95,17 @@ export class CompletionHandler implements IDisposable {
   }
 
   /**
+   * Enable/disable continuous hinting mode.
+   */
+  set autoCompletion(value: boolean) {
+    this._autoCompletion = value;
+  }
+
+  get autoCompletion(): boolean {
+    return this._autoCompletion;
+  }
+
+  /**
    * Dispose of the resources used by the handler.
    */
   dispose(): void {
@@ -150,7 +163,6 @@ export class CompletionHandler implements IDisposable {
     }
 
     const patch = model.createPatch(val);
-
     if (!patch) {
       return;
     }
@@ -271,7 +283,10 @@ export class CompletionHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(): void {
+  protected onTextChanged(
+    str: IObservableString,
+    changed: IObservableString.IChangedArgs
+  ): void {
     const model = this.completer.model;
     if (!model || !this._enabled) {
       return;
@@ -281,6 +296,15 @@ export class CompletionHandler implements IDisposable {
     const editor = this.editor;
     if (!editor) {
       return;
+    }
+    if (
+      this._autoCompletion &&
+      this._connector.shouldShowContinuousHint(
+        this.completer.isVisible,
+        changed
+      )
+    ) {
+      void this._makeRequest(editor.getCursorPosition());
     }
     const { start, end } = editor.getSelection();
     if (start.column !== end.column || start.line !== end.line) {
@@ -324,31 +348,36 @@ export class CompletionHandler implements IDisposable {
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
-    return this._connector.fetch(request).then(replies => {
-      let start = 0;
-      let end = 0;
-      let skip = false;
-      let items: CompletionHandler.ICompletionItem[] = [];
-      for (const data of replies) {
-        if (data) {
-          items = items.concat(data.items);
-          if (!skip) {
-            start = data.start;
-            end = data.end;
-            skip = true;
+    return this._connector
+      .fetch(request)
+      .then(replies => {
+        let start = 0;
+        let end = 0;
+        let skip = false;
+        let items: CompletionHandler.ICompletionItem[] = [];
+        for (const data of replies) {
+          if (data) {
+            items = items.concat(data.items);
+            if (!skip) {
+              start = data.start;
+              end = data.end;
+              skip = true;
+            }
           }
         }
-      }
 
-      const model = this._updateModel(state, start, end);
-      if (!model) {
-        return;
-      }
+        const model = this._updateModel(state, start, end);
+        if (!model) {
+          return;
+        }
 
-      if (model.setCompletionItems) {
-        model.setCompletionItems(items);
-      }
-    });
+        if (model.setCompletionItems) {
+          model.setCompletionItems(items);
+        }
+      })
+      .catch(p => {
+        /* Fails silently. */
+      });
   }
 
   /**
@@ -380,6 +409,7 @@ export class CompletionHandler implements IDisposable {
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _enabled = false;
   private _isDisposed = false;
+  private _autoCompletion = false;
 }
 
 /**
@@ -458,10 +488,9 @@ export namespace CompletionHandler {
      */
     deprecated?: boolean;
 
-    /**
-     * Provider id will be added automatically.
-     */
-    provider?: string;
+    resolve?: (
+      patch?: Completer.IPatch
+    ) => Promise<CompletionHandler.ICompletionItem>;
   }
 
   export type ICompletionItemsConnector = IDataConnector<

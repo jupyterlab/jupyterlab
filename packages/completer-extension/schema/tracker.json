@@ -5,8 +5,8 @@
   "jupyter.lab.transform": true,
   "properties": {
     "availableProviders": {
-      "title": "Installed completion providers",
-      "description": "Configuration for installed completion providers, the keys of this dictionary are the identifiers of providers, the corresponding value is the priority rank of the provider. Providers with higher rank will be shown before the ones with lower rank, providers with negative rank are disabled.",
+      "title": "Completion providers rank setting.",
+      "description": "Providers with higher rank will be shown before the ones with lower rank, providers with negative rank are disabled.",
       "type": "object",
       "patternProperties": {
         "^.*$": {
@@ -20,10 +20,22 @@
       }
     },
     "providerTimeout": {
-      "title": "Default timeout for a provider",
+      "title": "Default timeout for a provider.",
       "description": "If a provider can not return the response for a completer request before timeout, the result of this provider will be ignored. Value is in millisecond",
       "type": "number",
       "default": 1000
+    },
+    "showDocumentationPanel": {
+      "title": "Show the documentation panel.",
+      "description": "Documentation panel setting.",
+      "type": "boolean",
+      "default": false
+    },
+    "autoCompletion": {
+      "title": "Enable autocompletion.",
+      "description": "Autocompletion  setting.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

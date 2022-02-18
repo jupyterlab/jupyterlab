@@ -26,6 +26,7 @@ import {
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
@@ -85,6 +86,10 @@ namespace CommandIDs {
   export const replaceSelection = 'console:replace-selection';
 
   export const shutdown = 'console:shutdown';
+
+  export const invokeCompleter = 'completer:invoke-console';
+
+  export const selectCompleter = 'completer:select-console';
 }
 
 /**
@@ -192,6 +197,14 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+const completerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extension:completer',
+  requires: [IConsoleTracker],
+  optional: [ICompletionProviderManager],
+  activate: activateConsoleCompleterService,
+  autoStart: true
+};
+
 /**
  * Export the plugins as the default.
  */
@@ -200,7 +213,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tracker,
   foreign,
   kernelStatus,
-  lineColStatus
+  lineColStatus,
+  completerPlugin
 ];
 export default plugins;
 
@@ -846,4 +860,68 @@ async function activateConsole(
   });
 
   return tracker;
+}
+
+/**
+ * Activate the completer service for console.
+ */
+function activateConsoleCompleterService(
+  app: JupyterFrontEnd,
+  consoles: IConsoleTracker,
+  manager?: ICompletionProviderManager
+): void {
+  if (!manager) {
+    return;
+  }
+
+  app.commands.addCommand(CommandIDs.invokeCompleter, {
+    execute: () => {
+      const id = consoles.currentWidget && consoles.currentWidget.id;
+
+      if (id) {
+        return manager.invoke(id);
+      }
+    }
+  });
+
+  app.commands.addCommand(CommandIDs.selectCompleter, {
+    execute: () => {
+      const id = consoles.currentWidget && consoles.currentWidget.id;
+
+      if (id) {
+        return manager.select(id);
+      }
+    }
+  });
+
+  app.commands.addKeyBinding({
+    command: CommandIDs.selectCompleter,
+    keys: ['Enter'],
+    selector: '.jp-ConsolePanel .jp-mod-completer-active'
+  });
+
+  consoles.widgetAdded.connect(async (_, consolePanel) => {
+    const completerContext = {
+      editor: consolePanel.console.promptCell?.editor ?? null,
+      session: consolePanel.console.sessionContext.session,
+      widget: consolePanel
+    };
+    await manager.updateCompleter(completerContext);
+    consolePanel.console.promptCellCreated.connect((console, cell) => {
+      const newContext = {
+        editor: cell.editor,
+        session: console.sessionContext.session,
+        widget: consolePanel
+      };
+      manager.updateCompleter(newContext);
+    });
+    consolePanel.console.sessionContext.sessionChanged.connect(() => {
+      const newContext = {
+        editor: consolePanel.console.promptCell?.editor ?? null,
+        session: consolePanel.console.sessionContext.session,
+        widget: consolePanel
+      };
+      manager.updateCompleter(newContext);
+    });
+  });
 }

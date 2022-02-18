@@ -3,9 +3,8 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { ICompletionProvider } from '..';
 import { CompletionHandler } from '../handler';
-import { ICompletionContext } from '../tokens';
+import { ICompletionContext, ICompletionProvider } from '../tokens';
 
 export const CONTEXT_PROVIDER_ID = 'CompletionProvider:context';
 /**
