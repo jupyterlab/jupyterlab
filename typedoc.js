@@ -17,6 +17,8 @@ const packages = [
   'codeeditor',
   'codemirror-extension',
   'codemirror',
+  'collaboration',
+  'collaboration-extension',
   'completer-extension',
   'completer',
   'console-extension',
@@ -95,8 +97,6 @@ const packages = [
   'translation',
   'ui-components-extension',
   'ui-components',
-  'user',
-  'user-extension',
   'vdom-extension',
   'vdom',
   'vega5-extension'

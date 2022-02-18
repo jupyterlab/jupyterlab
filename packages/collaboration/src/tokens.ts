@@ -1,14 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Menu } from '@lumino/widgets';
+import { AccordionPanel, Menu } from '@lumino/widgets';
 import { ISignal } from '@lumino/signaling';
 import { Token } from '@lumino/coreutils';
+import { Awareness } from 'y-protocols/awareness';
 
 /**
  * An ID to track the user on StateDB.
  */
-export const USER = '@jupyterlab/user:userDB';
+export const USER = '@jupyterlab/collaboration:userDB';
 
 /**
  * @experimental
@@ -20,7 +21,7 @@ export const USER = '@jupyterlab/user:userDB';
  * current connected user information.
  */
 export const ICurrentUser = new Token<ICurrentUser>(
-  '@jupyterlab/user:ICurrentUser'
+  '@jupyterlab/collaboration:ICurrentUser'
 );
 
 /**
@@ -29,7 +30,28 @@ export const ICurrentUser = new Token<ICurrentUser>(
  * NOTE: Require this token in your extension to access the user menu
  * (top-right menu in JupyterLab's interface).
  */
-export const IUserMenu = new Token<IUserMenu>('@jupyterlab/user:IUserMenu');
+export const IUserMenu = new Token<IUserMenu>(
+  '@jupyterlab/collaboration:IUserMenu'
+);
+
+/**
+ * The user panel token.
+ */
+export const IUserPanel = new Token<AccordionPanel>(
+  '@jupyterlab/collaboration:IUserPanel'
+);
+
+/**
+ * The global awareness token.
+ */
+export const IGlobalAwareness = new Token<IAwareness>(
+  '@jupyterlab/collaboration:IGlobalAwareness'
+);
+
+/**
+ * The awareness interface.
+ */
+export interface IAwareness extends Awareness {}
 
 /**
  * @experimental

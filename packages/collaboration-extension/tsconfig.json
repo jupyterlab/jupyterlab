@@ -13,10 +13,19 @@
       "path": "../apputils"
     },
     {
+      "path": "../collaboration"
+    },
+    {
       "path": "../coreutils"
     },
     {
-      "path": "../user"
+      "path": "../services"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

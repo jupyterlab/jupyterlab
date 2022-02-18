@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/user-extension",
+  "name": "@jupyterlab/collaboration-extension",
   "version": "4.0.0-alpha.11",
-  "description": "JupyterLab - User Extension",
+  "description": "JupyterLab - Collaboration Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -39,9 +39,15 @@
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.11",
     "@jupyterlab/apputils": "^4.0.0-alpha.11",
+    "@jupyterlab/collaboration": "^4.0.0-alpha.11",
     "@jupyterlab/coreutils": "^6.0.0-alpha.11",
-    "@jupyterlab/user": "^4.0.0-alpha.11",
-    "@lumino/widgets": "^1.33.0"
+    "@jupyterlab/services": "^7.0.0-alpha.11",
+    "@jupyterlab/statedb": "^4.0.0-alpha.11",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
+    "@lumino/widgets": "^1.33.0",
+    "y-protocols": "^1.0.5",
+    "y-websocket": "^1.3.15",
+    "yjs": "^13.5.34"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -53,7 +59,7 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemaDir": "schema"
+    "schemaDir": "./schema"
   },
   "styleModule": "style/index.js"
 }
