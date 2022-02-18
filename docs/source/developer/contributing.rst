@@ -79,6 +79,17 @@ and the issues it solves before a pull request is opened. A triager will
 ensure that your issue meets our definition of ready before we can merge
 any pull requests that relate to it.
 
+Pull requests must target the development branch (= ``master``) even if
+it aims at addressing an issue seen in a stable release. Once the pull
+request is merged on the development branch, it will be backported to
+the stable branch using a bot action (or manually if the bot action
+failed).
+
+.. note::
+
+   Don't hesitate to mention the targeted version in a PR description.
+   A maintainer will set the milestone accordingly.
+
 Issue Management
 ^^^^^^^^^^^^^^^^
 
