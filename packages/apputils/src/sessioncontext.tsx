@@ -562,7 +562,7 @@ export class SessionContext implements ISessionContext {
     }
 
     if (this._pendingKernelName === this.noKernelName) {
-      return 'idle';
+      return 'unknown';
     }
 
     if (!kernel && this._pendingKernelName) {
