@@ -178,4 +178,4 @@ jobs:
       - name: Print JupyterLab logs
         if: always()
         run: |
-          cat /tmp/jupyterlab_server.lo
+          cat /tmp/jupyterlab_server.log
