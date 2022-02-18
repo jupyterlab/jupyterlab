@@ -33,6 +33,7 @@ import { inspectorIcon } from '@jupyterlab/ui-components';
  */
 namespace CommandIDs {
   export const open = 'inspector:open';
+  export const toggle = 'inspector:toggle';
 }
 
 /**
@@ -53,8 +54,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
   ): IInspector => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
-    const command = CommandIDs.open;
-    const label = trans.__('Show Contextual Help');
+    const caption = trans.__('Live updating code documentation from the active kernel');
     const openedLabel = trans.__('Contextual Help');
     const namespace = 'inspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
@@ -64,7 +64,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     function isInspectorOpen() {
       return inspector && !inspector.isDisposed;
     }
-
+  
     let source: IInspector.IInspectable | null = null;
     let inspector: MainAreaWidget<InspectorPanel>;
     function openInspector(args: string): MainAreaWidget<InspectorPanel> {
@@ -87,17 +87,15 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       return inspector;
     }
 
-    // Add command to registry.
-    commands.addCommand(command, {
-      caption: trans.__(
-        'Live updating code documentation from the active kernel'
-      ),
-      isEnabled: () =>
+    // Add inspector:open command to registry.
+    commands.addCommand(CommandIDs.open, {
+      caption,
+      isEnabled: () => 
         !inspector ||
         inspector.isDisposed ||
         !inspector.isAttached ||
         !inspector.isVisible,
-      label,
+      label: () => trans.__('Show Contextual Help'),
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
       execute: args => {
         const text = args && (args.text as string);
@@ -109,17 +107,34 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       }
     });
 
-    // Add command to UI where possible.
-    if (palette) {
-      palette.addItem({ command, category: label });
-    }
+    // Add inspector:toggle command to registry.
+    const label = trans.__('Toggle Contextual Help');
+    commands.addCommand(CommandIDs.toggle, {
+      caption,
+      label,
+      execute: (args) => {
+        if (isInspectorOpen()) {
+          inspector.dispose()
+        } else {
+          const text = args && (args.text as string)
+          openInspector(text);
+        }
+      }
+    });
+
+    // Add open command to launcher if possible.
     if (launcher) {
-      launcher.add({ command, args: { isLauncher: true } });
+      launcher.add({ command: CommandIDs.open, args: { isLauncher: true } });
+    }
+
+    // Add toggle command to command palette is possible.
+    if (palette) {
+      palette.addItem({ command: CommandIDs.toggle, category: label });
     }
 
     // Handle state restoration.
     if (restorer) {
-      void restorer.restore(tracker, { command, name: () => 'inspector' });
+      void restorer.restore(tracker, { command: CommandIDs.toggle, name: () => 'inspector' });
     }
 
     // Create a proxy to pass the `source` to the current inspector.
