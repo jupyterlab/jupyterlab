@@ -31,7 +31,7 @@ const DEFAULT_HELPER_BUTTONS: ICellMenuItem[] = [
 /**
  * Widget cell toolbar class
  */
-const CELL_BAR_CLASS = 'jp-enh-cell-bar';
+const CELL_BAR_CLASS = 'jp-cell-bar';
 
 /**
  * Icons for use in toolbar.
@@ -153,11 +153,11 @@ export class CellToolbarTracker implements IDisposable {
             callback: (): void => {
               this._commands.execute(command);
             },
-            className: shortName && `jp-enh-cell-${shortName}`,
+            className: shortName && `jp-cell-${shortName}`,
             tooltip: tooltip || this._commands.label(entry.command)
           });
           button.addClass(CELL_BAR_CLASS);
-          button.addClass(`jp-enh-cell-${cellType || 'all'}`);
+          button.addClass(`jp-cell-${cellType || 'all'}`);
           (cell.layout as PanelLayout).addWidget(button);
         }
       });
