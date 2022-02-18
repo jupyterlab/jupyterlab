@@ -38,32 +38,7 @@ export namespace galata {
   export const DEFAULT_DOCUMENTATION_STATE: Record<string, any> = {
     data: {
       'layout-restorer:data': {
-        main: {
-          dock: {
-            type: 'tab-area',
-            currentIndex: 0,
-            widgets: []
-          }
-        },
-        down: {
-          size: 0,
-          widgets: []
-        },
-        left: {
-          collapsed: false,
-          current: 'filebrowser',
-          widgets: [
-            'filebrowser',
-            'running-sessions',
-            '@jupyterlab/toc:plugin',
-            'extensionmanager.main-view'
-          ]
-        },
-        right: {
-          collapsed: true,
-          widgets: ['jp-property-inspector', 'debugger-sidebar']
-        },
-        relativeSizes: [0.2222, 0.7778, 0]
+        relativeSizes: [0, 1, 0]
       }
     }
   };

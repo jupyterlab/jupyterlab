@@ -22,7 +22,7 @@ test.describe('Extension Manager', () => {
       ([zone]) => {
         document.body.insertAdjacentHTML('beforeend', zone);
       },
-      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 600 })]
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 600 })]
     );
 
     await page.waitForFrames(5);
@@ -41,7 +41,7 @@ test.describe('Extension Manager', () => {
       ([zone]) => {
         document.body.insertAdjacentHTML('beforeend', zone);
       },
-      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 400 })]
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
     );
 
     await page.waitForFrames(3);
@@ -60,7 +60,7 @@ test.describe('Extension Manager', () => {
       ([zone]) => {
         document.body.insertAdjacentHTML('beforeend', zone);
       },
-      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 400 })]
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
     );
 
     await page.waitForFrames(3);
@@ -89,7 +89,7 @@ test.describe('Extension Manager', () => {
       ([zone]) => {
         document.body.insertAdjacentHTML('beforeend', zone);
       },
-      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 600 })]
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 600 })]
     );
 
     await page.waitForFrames(3);
@@ -126,7 +126,7 @@ test.describe('Extension Manager', () => {
       ([zone]) => {
         document.body.insertAdjacentHTML('beforeend', zone);
       },
-      [generateCaptureArea({ top: 31, left: 0, width: 303, height: 160 })]
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 160 })]
     );
 
     await page.waitForFrames(3);
