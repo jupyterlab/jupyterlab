@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import { galata, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import { generateCaptureArea, positionMouse } from './utils';
 
 test.use({
   autoGoto: false,
-  // mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
   viewport: { height: 720, width: 1280 }
 });
 
@@ -25,8 +25,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 62, left: 1050, width: 190, height: 28 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -49,8 +47,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 62, left: 800, width: 190, height: 28 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -75,8 +71,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -99,8 +93,6 @@ test.describe('Debugger', () => {
       ]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -131,8 +123,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -159,8 +149,6 @@ test.describe('Debugger', () => {
       ]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -191,8 +179,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 58, left: 998, width: 280, height: 138 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()

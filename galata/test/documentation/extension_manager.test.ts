@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import { galata, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import { generateCaptureArea } from './utils';
 
 test.use({
   autoGoto: false,
-  // mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
   viewport: { height: 720, width: 1280 }
 });
 
@@ -25,8 +25,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 303, height: 600 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -46,8 +44,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 303, height: 400 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -67,8 +63,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 303, height: 400 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -98,8 +92,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 303, height: 600 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -137,8 +129,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 303, height: 160 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -176,8 +166,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -215,8 +203,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()

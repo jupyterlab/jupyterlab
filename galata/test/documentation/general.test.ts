@@ -7,7 +7,7 @@ import { generateArrow, generateCaptureArea, positionMouse } from './utils';
 
 test.use({
   autoGoto: false,
-  // mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
   viewport: { height: 720, width: 1280 }
 });
 
@@ -70,8 +70,6 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
@@ -80,8 +78,6 @@ test.describe('General', () => {
     await galata.Mock.freezeContentLastModified(page);
     await openOverview(page);
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
   });
@@ -105,8 +101,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -132,8 +126,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 32, left: 997, width: 283, height: 400 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -153,8 +145,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -174,8 +164,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 210, width: 700, height: 350 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -204,8 +192,6 @@ test.describe('General', () => {
       ]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -238,8 +224,6 @@ test.describe('General', () => {
       ]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -272,8 +256,6 @@ test.describe('General', () => {
       ]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -307,8 +289,6 @@ test.describe('General', () => {
       ]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -332,8 +312,6 @@ test.describe('General', () => {
     // Hide file browser
     await page.click('[title^="File Browser"]');
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('file_editor_overview.png');
   });
@@ -363,8 +341,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 260, width: 600, height: 450 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -398,8 +374,6 @@ test.describe('General', () => {
     );
     await page.notebook.run();
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
@@ -437,8 +411,6 @@ test.describe('General', () => {
     // Wait for command answer
     await page.waitForTimeout(200);
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
   });
@@ -472,8 +444,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -485,8 +455,6 @@ test.describe('General', () => {
 
     await page.keyboard.press('Control+Shift+C');
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#modal-command-palette')).screenshot()
@@ -515,8 +483,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 0, width: 700, height: 500 })]
     );
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
@@ -552,8 +518,6 @@ test.describe('General', () => {
     );
     await page.keyboard.press('Shift+Enter');
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_html_display.png'
@@ -583,8 +547,6 @@ test.describe('General', () => {
     // Need to wait for altair to update the canvas
     await page.waitForSelector('summary');
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
     // The menu button '...' color of Altair is flaky increase threshold tolerance
     expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png', {
@@ -612,8 +574,6 @@ test.describe('General', () => {
 
     await page.notebook.run();
 
-    await page.sidebar.close('left');
-    await page.sidebar.open('left');
     await page.waitForFrames(3);
 
     expect(await page.screenshot()).toMatchSnapshot(
