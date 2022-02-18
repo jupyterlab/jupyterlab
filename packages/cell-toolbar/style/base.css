@@ -1,4 +1,4 @@
-.lm-Widget.jp-enh-cell-button {
+.lm-Widget.jp-cell-button {
   background: none;
   border: none;
   display: none;
@@ -10,24 +10,24 @@
   cursor: pointer;
 }
 
-.jp-enh-cell-button .jp-icon3[fill] {
+.jp-cell-button .jp-icon3[fill] {
   fill: var(--jp-inverse-layout-color4);
 }
 
-.jp-enh-cell-button:hover .jp-icon3[fill] {
+.jp-cell-button:hover .jp-icon3[fill] {
   fill: var(--jp-inverse-layout-color2);
 }
 
-.jp-mod-active .jp-enh-cell-button {
+.jp-mod-active .jp-cell-button {
   display: block;
 }
 
-.jp-enh-cell-run-cell-and-select-next {
+.jp-cell-run-cell-and-select-next {
   left: 46px;
   top: 46px;
 }
 
-.jp-enh-cell-toolbar {
+.jp-cell-toolbar {
   display: flex;
   flex-direction: row;
   padding: 2px 0px;
@@ -35,35 +35,35 @@
   z-index: 10;
 }
 
-.jp-enh-cell-menu {
+.jp-cell-menu {
   display: none;
   flex-direction: row;
 }
 
-.jp-mod-active .jp-enh-cell-menu {
+.jp-mod-active .jp-cell-menu {
   display: flex;
 }
 
-.jp-enh-cell-menu button.jp-ToolbarButtonComponent {
+.jp-cell-menu button.jp-ToolbarButtonComponent {
   cursor: pointer;
 }
 
-.jp-enh-cell-menu .jp-ToolbarButton button {
+.jp-cell-menu .jp-ToolbarButton button {
   display: none;
 }
 
-.jp-enh-cell-menu .jp-ToolbarButton .jp-enh-cell-all,
-.jp-CodeCell .jp-ToolbarButton .jp-enh-cell-code,
-.jp-MarkdownCell .jp-ToolbarButton .jp-enh-cell-markdown,
-.jp-RawCell .jp-ToolbarButton .jp-enh-cell-raw {
+.jp-cell-menu .jp-ToolbarButton .jp-cell-all,
+.jp-CodeCell .jp-ToolbarButton .jp-cell-code,
+.jp-MarkdownCell .jp-ToolbarButton .jp-cell-markdown,
+.jp-RawCell .jp-ToolbarButton .jp-cell-raw {
   display: block;
 }
 
-.jp-enh-cell-toolbar .jp-Toolbar-spacer {
+.jp-cell-toolbar .jp-Toolbar-spacer {
   flex: 1 1 auto;
 }
 
-.jp-enh-cell-mod-click {
+.jp-cell-mod-click {
   cursor: pointer;
 }
 

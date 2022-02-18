@@ -23,7 +23,7 @@ export interface IPositionedButton extends Omit<ICellMenuItem, 'command'> {
 export class PositionedButton extends Widget {
   constructor(item: IPositionedButton) {
     super({ node: Private.createNode(item) });
-    this.addClass('jp-enh-cell-button');
+    this.addClass('jp-cell-button');
     this._callback = item.callback;
   }
 

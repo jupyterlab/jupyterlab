@@ -5,7 +5,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { ICellMenuItem } from './tokens';
 
-const CELL_MENU_CLASS = 'jp-enh-cell-menu';
+const CELL_MENU_CLASS = 'jp-cell-menu';
 
 /**
  * Toolbar icon menu container
@@ -57,7 +57,7 @@ export class CellMenu extends Widget {
         layout.addWidget(
           new ToolbarButton({
             icon: LabIcon.resolve({ icon: entry.icon }),
-            className: `jp-enh-cell-${entry.cellType ?? 'all'}`,
+            className: `jp-cell-${entry.cellType ?? 'all'}`,
             onClickWithEvent: (e: Event): void => {
               // Prevent propagation of this event in case the command causes the 
               // current cell to move. If the cell moves and the event propagates to the

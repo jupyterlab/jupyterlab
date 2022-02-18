@@ -13,7 +13,7 @@ export class CellToolbarWidget extends Widget {
   ) {
     super();
     this.layout = new PanelLayout();
-    this.addClass('jp-enh-cell-toolbar');
+    this.addClass('jp-cell-toolbar');
 
     (this.layout as PanelLayout).addWidget(
       new CellMenu(commands, menuItems)
