@@ -18,16 +18,16 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.3.x/CHANGELOG.md'
 
 ### Enhancements made
 
-- Backport PR #11963 on branch 3.3.x (Support dynamic toolbar definition) [#12078](https://github.com/jupyterlab/jupyterlab/pull/12078) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #12030 on branch 3.3.x (Debounce kernel sources filter) [#12068](https://github.com/jupyterlab/jupyterlab/pull/12068) ([@fcollonval](https://github.com/fcollonval))
+- Support dynamic toolbar definition [#12078](https://github.com/jupyterlab/jupyterlab/pull/12078) ([@fcollonval](https://github.com/fcollonval))
+- Debounce kernel sources filter [#12068](https://github.com/jupyterlab/jupyterlab/pull/12068) ([@fcollonval](https://github.com/fcollonval))
 - Settings UI gives an unreadable JSON dump [#12064](https://github.com/jupyterlab/jupyterlab/pull/12064) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #12045 on branch 3.3.x (Polish settings editor) [#12061](https://github.com/jupyterlab/jupyterlab/pull/12061) ([@fcollonval](https://github.com/fcollonval))
-- show pause on exception button when not available and change caption … [#12005](https://github.com/jupyterlab/jupyterlab/pull/12005) ([@andrewfulton9](https://github.com/andrewfulton9))
+- Polish settings editor [#12061](https://github.com/jupyterlab/jupyterlab/pull/12061) ([@fcollonval](https://github.com/fcollonval))
+- Show pause on exception button when not available [#12005](https://github.com/jupyterlab/jupyterlab/pull/12005) ([@andrewfulton9](https://github.com/andrewfulton9))
 
 ### Bugs fixed
 
 - Handle shutdown error [#12048](https://github.com/jupyterlab/jupyterlab/pull/12048) ([@Zsailer](https://github.com/Zsailer))
-- use path-like comparison in initialize_templates() [#12024](https://github.com/jupyterlab/jupyterlab/pull/12024) ([@kellyyke](https://github.com/kellyyke))
+- use path-like comparison in `initialize_templates()` [#12024](https://github.com/jupyterlab/jupyterlab/pull/12024) ([@kellyyke](https://github.com/kellyyke))
 
 ### Documentation improvements
 
