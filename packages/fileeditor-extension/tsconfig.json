@@ -19,6 +19,9 @@
       "path": "../codemirror"
     },
     {
+      "path": "../completer"
+    },
+    {
       "path": "../console"
     },
     {
@@ -38,6 +41,12 @@
     },
     {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../services"
     },
     {
       "path": "../settingregistry"

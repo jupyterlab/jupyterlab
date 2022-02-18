@@ -19,6 +19,9 @@
       "path": "../htmlviewer"
     },
     {
+      "path": "../observables"
+    },
+    {
       "path": "../settingregistry"
     },
     {

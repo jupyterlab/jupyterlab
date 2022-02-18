@@ -33,12 +33,16 @@ import {
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
+import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 import { Commands, FACTORY, IFileTypeData } from './commands';
+import { Session } from '@jupyterlab/services';
 
 export { Commands } from './commands';
 
@@ -162,13 +166,22 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+const completerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:completer',
+  requires: [IEditorTracker],
+  optional: [ICompletionProviderManager],
+  activate: activateFileEditorCompleterService,
+  autoStart: true
+};
+
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   plugin,
   lineColStatus,
-  tabSpaceStatus
+  tabSpaceStatus,
+  completerPlugin
 ];
 export default plugins;
 
@@ -193,7 +206,9 @@ function activate(
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
   let toolbarFactory:
-    | ((widget: IDocumentWidget<FileEditor>) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: IDocumentWidget<FileEditor>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
 
   if (toolbarRegistry) {
@@ -372,4 +387,78 @@ function activate(
     });
 
   return tracker;
+}
+
+/**
+ * Activate the completer service for file editor.
+ */
+function activateFileEditorCompleterService(
+  app: JupyterFrontEnd,
+  editorTracker: IEditorTracker,
+  manager?: ICompletionProviderManager
+): void {
+  if (!manager) {
+    return;
+  }
+
+  Commands.addCompleterCommands(app.commands, editorTracker, manager);
+
+  const _activeSessions = new Map<string, Session.ISessionConnection>();
+  editorTracker.widgetAdded.connect(async (_, widget) => {
+    const completerContext = {
+      editor: widget.content.editor,
+      widget
+    };
+    const sessionManager = app.serviceManager.sessions;
+    await manager.updateCompleter(completerContext);
+    const onRunningChanged = async (
+      _: Session.IManager,
+      models: Session.IModel[]
+    ) => {
+      const oldSession = _activeSessions.get(widget.id);
+      // Search for a matching path.
+      const model = find(models, m => m.path === widget.context.path);
+      if (model) {
+        // If there is a matching path, but it is the same
+        // session as we previously had, do nothing.
+        if (oldSession && oldSession.id === model.id) {
+          return;
+        }
+        // Otherwise, dispose of the old session and reset to
+        // a new CompletionConnector.
+        if (oldSession) {
+          _activeSessions.delete(widget.id);
+          oldSession.dispose();
+        }
+        const session = sessionManager.connectTo({ model });
+        const newCompleterContext = {
+          editor: widget.content.editor,
+          widget,
+          session
+        };
+        manager.updateCompleter(newCompleterContext);
+        _activeSessions.set(widget.id, session);
+      } else {
+        // If we didn't find a match, make sure
+        // the connector is the contextConnector and
+        // dispose of any previous connection.
+        if (oldSession) {
+          _activeSessions.delete(widget.id);
+          oldSession.dispose();
+        }
+      }
+    };
+
+    await onRunningChanged(sessionManager, toArray(sessionManager.running()));
+    sessionManager.runningChanged.connect(onRunningChanged);
+
+    widget.disposed.connect(() => {
+      sessionManager.runningChanged.disconnect(onRunningChanged);
+      const session = _activeSessions.get(widget.id);
+      if (session) {
+        _activeSessions.delete(widget.id);
+        session.dispose();
+      }
+    });
+  });
 }

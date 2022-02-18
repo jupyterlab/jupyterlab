@@ -68,19 +68,6 @@ jobs:
           path: |
             galata/playwright-report
 
-      - name: Update snapshots
-        if: failure()
-        run: |
-          cd galata
-          jlpm run test:update
-
-      - name: Upload updated snapshots
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: jupyterlab-galata-updated-snapshots
-          path: galata/test/**/*-snapshots/*.*
-
       - name: Print JupyterLab logs
         if: always()
         run: |
@@ -181,30 +168,14 @@ jobs:
           path: |
             core/galata/playwright-report
 
-      - name: Update snapshots
-        if: failure()
-        run: |
-          cd galata
-          jlpm run test:doc:update
-        working-directory: core
-
-      - name: Upload updated snapshots
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: jupyterlab-documentation-updated-snapshots
-          # Export test snapshots and documenation screenshots (not
-          # tested as their content changes at each run)
-          path: |
-            core/galata/test/**/*-snapshots/*.*
-            core/galata/test/**/screenshots/*.*
 
       - name: Stop JupyterLab
         if: always()
         run: |
           kill -s SIGTERM $(pgrep jupyter-lab)
 
+
       - name: Print JupyterLab logs
         if: always()
         run: |
-          cat /tmp/jupyterlab_server.log
+          cat /tmp/jupyterlab_server.lo
