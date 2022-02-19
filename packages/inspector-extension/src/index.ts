@@ -54,7 +54,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
   ): IInspector => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
-    const caption = trans.__('Live updating code documentation from the active kernel');
+    const caption = trans.__(
+      'Live updating code documentation from the active kernel'
+    );
     const openedLabel = trans.__('Contextual Help');
     const namespace = 'inspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
@@ -64,7 +66,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     function isInspectorOpen() {
       return inspector && !inspector.isDisposed;
     }
-  
+
     let source: IInspector.IInspectable | null = null;
     let inspector: MainAreaWidget<InspectorPanel>;
     function openInspector(args: string): MainAreaWidget<InspectorPanel> {
@@ -90,7 +92,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     // Add inspector:open command to registry.
     commands.addCommand(CommandIDs.open, {
       caption,
-      isEnabled: () => 
+      isEnabled: () =>
         !inspector ||
         inspector.isDisposed ||
         !inspector.isAttached ||
@@ -112,11 +114,11 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     commands.addCommand(CommandIDs.toggle, {
       caption,
       label,
-      execute: (args) => {
+      execute: args => {
         if (isInspectorOpen()) {
-          inspector.dispose()
+          inspector.dispose();
         } else {
-          const text = args && (args.text as string)
+          const text = args && (args.text as string);
           openInspector(text);
         }
       }
@@ -134,7 +136,10 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
 
     // Handle state restoration.
     if (restorer) {
-      void restorer.restore(tracker, { command: CommandIDs.toggle, name: () => 'inspector' });
+      void restorer.restore(tracker, {
+        command: CommandIDs.toggle,
+        name: () => 'inspector'
+      });
     }
 
     // Create a proxy to pass the `source` to the current inspector.
