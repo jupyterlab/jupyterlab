@@ -97,7 +97,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.isDisposed ||
         !inspector.isAttached ||
         !inspector.isVisible,
-      label: () => trans.__('Show Contextual Help'),
+      label: trans.__('Show Contextual Help'),
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
       execute: args => {
         const text = args && (args.text as string);
@@ -129,7 +129,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       launcher.add({ command: CommandIDs.open, args: { isLauncher: true } });
     }
 
-    // Add toggle command to command palette is possible.
+    // Add toggle command to command palette if possible.
     if (palette) {
       palette.addItem({ command: CommandIDs.toggle, category: label });
     }
