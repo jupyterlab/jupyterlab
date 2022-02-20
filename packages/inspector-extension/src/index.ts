@@ -33,6 +33,7 @@ import { inspectorIcon } from '@jupyterlab/ui-components';
  */
 namespace CommandIDs {
   export const open = 'inspector:open';
+  export const close = 'inspector:close';
   export const toggle = 'inspector:toggle';
 }
 
@@ -90,6 +91,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     }
 
     // Add inspector:open command to registry.
+    const showLabel = trans.__('Show Contextual Help');
     commands.addCommand(CommandIDs.open, {
       caption,
       isEnabled: () =>
@@ -97,7 +99,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.isDisposed ||
         !inspector.isAttached ||
         !inspector.isVisible,
-      label: trans.__('Show Contextual Help'),
+      label: showLabel,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
       execute: args => {
         const text = args && (args.text as string);
@@ -109,11 +111,22 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       }
     });
 
+    // Add inspector:close command to registry.
+    const closeLabel = trans.__('Hide Contextual Help');
+    commands.addCommand(CommandIDs.close, {
+      caption,
+      isEnabled: () => isInspectorOpen(),
+      label: closeLabel,
+      icon: args => (args.isLauncher ? inspectorIcon : undefined),
+      execute: () => inspector.dispose()
+    });
+
     // Add inspector:toggle command to registry.
-    const label = trans.__('Toggle Contextual Help');
+    const toggleLabel = trans.__('Show Contextual Help');
     commands.addCommand(CommandIDs.toggle, {
       caption,
-      label,
+      label: toggleLabel,
+      isToggled: () => isInspectorOpen(),
       execute: args => {
         if (isInspectorOpen()) {
           inspector.dispose();
@@ -131,7 +144,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
 
     // Add toggle command to command palette if possible.
     if (palette) {
-      palette.addItem({ command: CommandIDs.toggle, category: label });
+      palette.addItem({ command: CommandIDs.toggle, category: toggleLabel });
     }
 
     // Handle state restoration.

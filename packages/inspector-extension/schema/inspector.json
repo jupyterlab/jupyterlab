@@ -24,9 +24,14 @@
   },
   "jupyter.lab.shortcuts": [
     {
-      "command": "inspector:toggle",
+      "command": "inspector:open",
       "keys": ["Accel I"],
       "selector": "body"
+    },
+    {
+      "command": "inspector:close",
+      "keys": ["Accel I"],
+      "selector": ".jp-Inspector"
     }
   ],
   "properties": {},
