@@ -128,7 +128,7 @@ jobs:
         run: |
           set -ex
           cd galata
-          jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode 2>&1 > /tmp/jupyterlab_server.log &
+          (jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode > /tmp/jupyterlab_server.log 2>&1) &
         working-directory: core
 
       - name: Install browser
@@ -167,6 +167,13 @@ jobs:
           name: jupyterlab-documentation-report
           path: |
             core/galata/playwright-report
+
+
+      - name: Stop JupyterLab
+        if: always()
+        run: |
+          kill -s SIGTERM $(pgrep jupyter-lab)
+
 
       - name: Print JupyterLab logs
         if: always()

@@ -101,7 +101,7 @@ jobs:
         shell: bash
         run: |
           # Mount a volume to overwrite the server configuration
-          jlpm start 2>&1 > /tmp/jupyterlab_server_old.log &
+          (jlpm start > /tmp/jupyterlab_server_old.log 2>&1) &
         working-directory: galata
 
       - name: Install browser
@@ -149,7 +149,7 @@ jobs:
         working-directory: galata
         run: |
           # Mount a volume to overwrite the server configuration
-          jlpm start 2>&1 > /tmp/jupyterlab_server_new.log &
+          (jlpm start > /tmp/jupyterlab_server_new.log 2>&1) &
 
       - name: Install browser
         working-directory: galata
@@ -170,6 +170,11 @@ jobs:
         working-directory: galata
         run: |
           jlpm run test:benchmark
+
+      - name: Stop JupyterLab
+        if: always()
+        run: |
+          kill -s SIGTERM $(pgrep jupyter-lab)
 
       - name: Generate the report
         env:
