@@ -81,7 +81,7 @@ export namespace SettingsFormEditor {
     /**
      * List of strings that match search value.
      */
-    filteredValues?: string[];
+    filteredValues: string[] | null;
   }
 
   export interface IState {

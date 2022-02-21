@@ -52,7 +52,7 @@ export class PluginList extends ReactWidget {
       this.update();
     }, this);
     this.mapPlugins = this.mapPlugins.bind(this);
-    this._filter = (item: ISettingRegistry.IPlugin) => undefined;
+    this._filter = (item: ISettingRegistry.IPlugin) => null;
     this.setFilter = this.setFilter.bind(this);
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
@@ -133,7 +133,7 @@ export class PluginList extends ReactWidget {
    */
   get updateFilterSignal(): ISignal<
     this,
-    (plugin: ISettingRegistry.IPlugin) => string[] | undefined
+    (plugin: ISettingRegistry.IPlugin) => string[] | null
   > {
     return this._updateFilterSignal;
   }
@@ -314,14 +314,14 @@ export class PluginList extends ReactWidget {
    * @param filter Filter function passed by search bar based on search value.
    */
   setFilter(filter: (item: string) => boolean): void {
-    this._filter = (plugin: ISettingRegistry.IPlugin): string[] | undefined => {
+    this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
       const filtered = this.getFilterString(
         filter,
         plugin.schema ?? {},
         plugin.schema.definitions
       );
       if (filter(plugin.schema.title?.toLowerCase() ?? '')) {
-        return undefined;
+        return null;
       }
       return filtered;
     };
@@ -381,7 +381,7 @@ export class PluginList extends ReactWidget {
         {
           // Shows fields that match search results under each entry.
           typeof filteredProperties === 'object'
-            ? filteredProperties.map(fieldValue => {
+            ? filteredProperties?.map(fieldValue => {
                 return <p key={`${id}-${fieldValue}`}> {fieldValue} </p>;
               })
             : undefined
@@ -395,7 +395,7 @@ export class PluginList extends ReactWidget {
     // Filter all plugins based on search value before displaying list.
     const allPlugins = this._allPlugins.filter(plugin => {
       const filtered = this._filter(plugin);
-      return filtered === undefined || filtered.length > 0;
+      return filtered === null || filtered.length > 0;
     });
 
     const modifiedPlugins = allPlugins.filter(plugin => {
@@ -440,11 +440,11 @@ export class PluginList extends ReactWidget {
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
   private _errors: { [id: string]: boolean };
-  private _filter: (item: ISettingRegistry.IPlugin) => string[] | undefined;
+  private _filter: (item: ISettingRegistry.IPlugin) => string[] | null;
   private _handleSelectSignal = new Signal<this, string>(this);
   private _updateFilterSignal = new Signal<
     this,
-    (plugin: ISettingRegistry.IPlugin) => string[] | undefined
+    (plugin: ISettingRegistry.IPlugin) => string[] | null
   >(this);
   private _allPlugins: ISettingRegistry.IPlugin[] = [];
   private _settings: { [id: string]: Settings } = {};

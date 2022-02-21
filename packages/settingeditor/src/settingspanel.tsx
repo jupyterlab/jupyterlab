@@ -56,7 +56,7 @@ export interface ISettingsPanelProps {
    */
   updateFilterSignal: ISignal<
     PluginList,
-    (plugin: ISettingRegistry.IPlugin) => string[] | undefined
+    (plugin: ISettingRegistry.IPlugin) => string[] | null
   >;
 }
 
@@ -76,9 +76,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
 }: ISettingsPanelProps): JSX.Element => {
   const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
   const [filterPlugin, setFilter] = useState<
-    (plugin: ISettingRegistry.IPlugin) => string[] | undefined
+    (plugin: ISettingRegistry.IPlugin) => string[] | null
   >(() => (plugin: ISettingRegistry.IPlugin) => {
-    return undefined;
+    return null;
   });
 
   // Refs used to keep track of "selected" plugin based on scroll location
@@ -98,7 +98,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     updateFilterSignal.connect(
       (
         list: PluginList,
-        newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | undefined
+        newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | null
       ) => {
         setFilter(() => newFilter);
       }
@@ -137,7 +137,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
         // Pass filtered results to SettingsFormEditor to only display filtered fields.
         const filtered = filterPlugin(pluginSettings.plugin);
         // If filtered results are an array, only show if the array is non-empty.
-        if (filtered !== undefined && filtered.length === 0) {
+        if (filtered !== null && filtered.length === 0) {
           return undefined;
         }
         return (
