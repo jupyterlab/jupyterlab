@@ -3,8 +3,13 @@
 
 import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
+import { generateCaptureArea } from './utils';
 
-test.use({ autoGoto: false, viewport: { height: 720, width: 1280 } });
+test.use({
+  autoGoto: false,
+  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  viewport: { height: 720, width: 1280 }
+});
 
 test.describe('Internationalization', () => {
   test('Menu', async ({ page }) => {
@@ -14,13 +19,14 @@ test.describe('Internationalization', () => {
     await page.click('ul[role="menu"] >> text=Language');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 250px; width: 800px; height: 600px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 5, left: 250, width: 800, height: 600 })]
+    );
 
+    await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_settings.png');
@@ -34,13 +40,14 @@ test.describe('Internationalization', () => {
     await page.click('#jp-mainmenu-settings-language >> text=Chinese');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 200px; left: 350px; width: 600px; height: 300px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 200, left: 350, width: 600, height: 300 })]
+    );
 
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_change.png');
@@ -73,6 +80,7 @@ test.describe('Internationalization', () => {
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
 
+    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
 });

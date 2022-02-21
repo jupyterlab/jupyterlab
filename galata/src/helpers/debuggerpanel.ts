@@ -35,7 +35,7 @@ export class DebuggerHelper {
   /**
    * Enables the debugger toolbar item
    */
-  async switchOn() {
+  async switchOn(): Promise<void> {
     await waitForCondition(async () => {
       const item = await this.notebook.getToolbarItem(DEBUGGER_ITEM);
       if (item) {
@@ -54,7 +54,7 @@ export class DebuggerHelper {
   /**
    * Disables the debugger toolbar item
    */
-  async switchOff() {
+  async switchOff(): Promise<void> {
     if (await this.isOn()) {
       await this.notebook.clickToolbarItem(DEBUGGER_ITEM);
     }
@@ -77,7 +77,7 @@ export class DebuggerHelper {
   /**
    * Waits for variables to be populated in the variables panel
    */
-  async waitForVariables() {
+  async waitForVariables(): Promise<void> {
     await this.page.waitForSelector('.jp-DebuggerVariables-body ul');
   }
 
@@ -91,7 +91,7 @@ export class DebuggerHelper {
   /**
    * Waits for the callstack body to populate in the callstack panel
    */
-  async waitForCallStack() {
+  async waitForCallStack(): Promise<void> {
     await this.page.waitForSelector(
       '.jp-DebuggerCallstack-body >> .jp-DebuggerCallstackFrame'
     );
@@ -107,7 +107,7 @@ export class DebuggerHelper {
   /**
    * Waits for the breakpoints to appear in the breakpoints panel
    */
-  async waitForBreakPoints() {
+  async waitForBreakPoints(): Promise<void> {
     await this.page.waitForSelector(
       '.jp-DebuggerBreakpoints >> .jp-DebuggerBreakpoint'
     );
@@ -123,7 +123,7 @@ export class DebuggerHelper {
   /**
    * Waits for sources to be populated in the sources panel
    */
-  async waitForSources() {
+  async waitForSources(): Promise<void> {
     await this.page.waitForSelector('.jp-DebuggerSources-body >> .jp-Editor', {
       state: 'visible'
     });

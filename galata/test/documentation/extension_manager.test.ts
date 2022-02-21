@@ -1,10 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import { galata, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
+import { generateCaptureArea } from './utils';
 
-test.use({ autoGoto: false, viewport: { height: 720, width: 1280 } });
+test.use({
+  autoGoto: false,
+  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  viewport: { height: 720, width: 1280 }
+});
 
 test.describe('Extension Manager', () => {
   test('Sidebar', async ({ page }) => {
@@ -13,13 +18,14 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 600px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 600 })]
+    );
 
+    await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_default.png');
@@ -31,13 +37,14 @@ test.describe('Extension Manager', () => {
     await page.click('[title="Extension Manager"]');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
+    );
 
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_disabled.png');
@@ -49,13 +56,14 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 400px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
+    );
 
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_enabled.png');
@@ -77,13 +85,14 @@ test.describe('Extension Manager', () => {
     await page.waitForSelector('text=No entries');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 600px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 600 })]
+    );
 
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_search.png');
@@ -113,13 +122,14 @@ test.describe('Extension Manager', () => {
     await page.click('[title="Extension Manager"]');
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 31px; left: 0px; width: 283px; height: 160px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 160 })]
+    );
 
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_simultaneous_block_allow.png');
@@ -149,13 +159,14 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 110px; left: 33px; width: 250px; height: 280px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
+    );
 
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_blocked_list.png');
@@ -185,13 +196,14 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 110px; left: 33px; width: 250px; height: 280px;"></div>'
-      );
-    });
+    await page.evaluate(
+      ([zone]) => {
+        document.body.insertAdjacentHTML('beforeend', zone);
+      },
+      [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
+    );
 
+    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_allowed_list.png');

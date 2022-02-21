@@ -192,7 +192,7 @@ export interface IJupyterLabPage {
   setSimpleMode(simple: boolean): Promise<boolean>;
 
   /**
-   * Wait for a  condition to be fulfilled
+   * Wait for a condition to be fulfilled
    *
    * @param condition Condition to fulfill
    * @param timeout Maximal time to wait for the condition to be true
@@ -201,6 +201,15 @@ export interface IJupyterLabPage {
     condition: () => Promise<boolean> | boolean,
     timeout?: number
   ): Promise<void>;
+
+  /**
+   * Wait for `n` animation frames.
+   *
+   * By default wait for 1 animation frame.
+   *
+   * @param n Number of frames
+   */
+  waitForFrames(n?: number): Promise<void>;
 
   /**
    * Wait for an element to emit 'transitionend' event.
@@ -563,6 +572,28 @@ export class JupyterLabPage implements IJupyterLabPage {
     timeout?: number
   ): Promise<void> {
     return Utils.waitForCondition(condition, timeout);
+  }
+
+  /**
+   * Wait for `n` animation frames.
+   *
+   * By default wait for 1 animation frame.
+   *
+   * @param n Number of frames
+   */
+  async waitForFrames(n: number = 1): Promise<void> {
+    await this.page.evaluate(async (n: number) => {
+      for (let i = 0; i < n; i++) {
+        let resolveFrame: (value?: unknown) => void;
+        const waitForFrame = new Promise(resolve => {
+          resolveFrame = resolve;
+        });
+        requestAnimationFrame(() => {
+          resolveFrame();
+        });
+        await waitForFrame;
+      }
+    }, n);
   }
 
   /**

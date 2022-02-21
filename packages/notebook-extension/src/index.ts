@@ -76,6 +76,7 @@ import {
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
@@ -269,6 +270,10 @@ namespace CommandIDs {
   export const expandAllCmd = 'notebook:expand-all-headings';
 
   export const copyToClipboard = 'notebook:copy-to-clipboard';
+
+  export const invokeCompleter = 'completer:invoke-notebook';
+
+  export const selectCompleter = 'completer:select-notebook';
 }
 
 /**
@@ -750,6 +755,13 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+const completerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:completer',
+  requires: [INotebookTracker],
+  optional: [ICompletionProviderManager],
+  activate: activateNotebookCompleterService,
+  autoStart: true
+};
 /**
  * Export the plugins as default.
  */
@@ -767,7 +779,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   codeConsolePlugin,
   copyOutputPlugin,
   kernelStatus,
-  lineColStatus
+  lineColStatus,
+  completerPlugin
 ];
 export default plugins;
 
@@ -1574,6 +1587,68 @@ function activateNotebookHandler(
   }
 
   return tracker;
+}
+
+/**
+ * Activate the completer service for notebook.
+ */
+function activateNotebookCompleterService(
+  app: JupyterFrontEnd,
+  notebooks: INotebookTracker,
+  manager?: ICompletionProviderManager
+): void {
+  if (!manager) {
+    return;
+  }
+  app.commands.addCommand(CommandIDs.invokeCompleter, {
+    execute: args => {
+      const panel = notebooks.currentWidget;
+      if (panel && panel.content.activeCell?.model.type === 'code') {
+        manager.invoke(panel.id);
+      }
+    }
+  });
+
+  app.commands.addCommand(CommandIDs.selectCompleter, {
+    execute: () => {
+      const id = notebooks.currentWidget && notebooks.currentWidget.id;
+
+      if (id) {
+        return manager.select(id);
+      }
+    }
+  });
+
+  app.commands.addKeyBinding({
+    command: CommandIDs.selectCompleter,
+    keys: ['Enter'],
+    selector: '.jp-Notebook .jp-mod-completer-active'
+  });
+
+  notebooks.widgetAdded.connect(async (_, notebook) => {
+    const completerContext = {
+      editor: notebook.content.activeCell?.editor ?? null,
+      session: notebook.sessionContext.session,
+      widget: notebook
+    };
+    await manager.updateCompleter(completerContext);
+    notebook.content.activeCellChanged.connect((_, cell) => {
+      const newCompleterContext = {
+        editor: cell.editor,
+        session: notebook.sessionContext.session,
+        widget: notebook
+      };
+      manager.updateCompleter(newCompleterContext);
+    });
+    notebook.sessionContext.sessionChanged.connect(() => {
+      const newCompleterContext = {
+        editor: notebook.content.activeCell?.editor ?? null,
+        session: notebook.sessionContext.session,
+        widget: notebook
+      };
+      manager.updateCompleter(newCompleterContext);
+    });
+  });
 }
 
 // Get the current widget and activate unless the args specify otherwise.
