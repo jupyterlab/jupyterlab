@@ -365,7 +365,7 @@ export class PluginList extends ReactWidget {
         key={id}
         title={itemTitle}
       >
-        <div>
+        <div className="jp-pluginList-entry-label">
           <div className="jp-SelectedIndicator" />
           <LabIcon.resolveReact
             icon={icon || (iconClass ? undefined : settingsIcon)}
@@ -376,14 +376,16 @@ export class PluginList extends ReactWidget {
           />
           <span>{title}</span>
         </div>
-        {
-          // Shows fields that match search results under each entry.
-          typeof filteredProperties === 'object'
-            ? filteredProperties?.map(fieldValue => {
-                return <p key={`${id}-${fieldValue}`}> {fieldValue} </p>;
-              })
-            : undefined
-        }
+        <ul>
+          {
+            // Shows fields that match search results under each entry.
+            typeof filteredProperties === 'object'
+              ? filteredProperties?.map(fieldValue => {
+                  return <li key={`${id}-${fieldValue}`}> {fieldValue} </li>;
+                })
+              : undefined
+          }
+        </ul>
       </button>
     );
   }
