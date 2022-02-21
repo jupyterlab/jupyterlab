@@ -320,7 +320,7 @@ export class PluginList extends ReactWidget {
         plugin.schema ?? {},
         plugin.schema.definitions
       );
-      if (filter(plugin.schema.title?.toLowerCase() ?? '')) {
+      if (filter(plugin.schema.title?.toLocaleLowerCase() ?? '')) {
         return null;
       }
       return filtered;
@@ -366,9 +366,7 @@ export class PluginList extends ReactWidget {
         title={itemTitle}
       >
         <div>
-          {id === this.selection || this._errors[id] ? (
-            <div className="jp-SelectedIndicator" />
-          ) : null}
+          <div className="jp-SelectedIndicator" />
           <LabIcon.resolveReact
             icon={icon || (iconClass ? undefined : settingsIcon)}
             iconClass={classes(iconClass, 'jp-Icon')}

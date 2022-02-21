@@ -123,6 +123,11 @@
   width: 3px;
   background-color: var(--jp-brand-color1);
   height: var(--jp-cell-collapser-min-height);
+  visibility: hidden;
+}
+
+.jp-PluginList .jp-mod-selected .jp-SelectedIndicator {
+  visibility: inherit;
 }
 
 .jp-PluginList .jp-ErrorPlugin .jp-SelectedIndicator {
@@ -131,10 +136,6 @@
 
 .jp-PluginList button.jp-mod-selected.jp-ErrorPlugin span {
   color: var(--jp-error-color0);
-}
-
-.jp-PluginList button:not(.jp-mod-selected) {
-  margin-left: 3px;
 }
 
 .jp-PluginList button.jp-mod-selected span {
