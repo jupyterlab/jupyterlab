@@ -97,7 +97,8 @@ namespace Private {
     msg: KernelMessage.IMessage
   ): ArrayBuffer {
     const header = JSON.stringify(msg.header);
-    const parentHeader = JSON.stringify(msg.parent_header);
+    const parentHeader =
+      msg.parent_header == null ? '{}' : JSON.stringify(msg.parent_header);
     const metadata = JSON.stringify(msg.metadata);
     const content = JSON.stringify(msg.content);
     const buffers: (ArrayBuffer | ArrayBufferView)[] =
