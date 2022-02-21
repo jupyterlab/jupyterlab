@@ -158,7 +158,7 @@ export class PluginList extends ReactWidget {
    *
    * @param event - The DOM event sent to the widget
    */
-  private _evtMousedown(event: React.MouseEvent<HTMLButtonElement>): void {
+  private _evtMousedown(event: React.MouseEvent<HTMLDivElement>): void {
     const target = event.currentTarget;
     const id = target.getAttribute('data-id');
 
@@ -354,7 +354,7 @@ export class PluginList extends ReactWidget {
     const filteredProperties = this._filter(plugin);
 
     return (
-      <button
+      <div
         onClick={this._evtMousedown}
         className={`${
           id === this.selection
@@ -386,7 +386,7 @@ export class PluginList extends ReactWidget {
               : undefined
           }
         </ul>
-      </button>
+      </div>
     );
   }
 
