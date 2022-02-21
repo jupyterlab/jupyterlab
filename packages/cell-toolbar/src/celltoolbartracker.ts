@@ -1,6 +1,6 @@
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { NotebookPanel } from '@jupyterlab/notebook';
+import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import {
   IObservableList,
   IObservableUndoableList,
@@ -72,14 +72,39 @@ export class CellToolbarTracker implements IDisposable {
     this._commands = commands;
     this._panel = panel;
     this._settings = settings;
+    this._previousActiveCell = this._panel.content.activeCell;
 
     if (this._settings) {
       this._onSettingsChanged();
       this._settings.changed.connect(this._onSettingsChanged, this);
     }
 
-    const cells = this._panel.context.model.cells;
+    const notebookModel = this._panel.context.model;
+    const cells = notebookModel.cells;
     cells.changed.connect(this.updateConnectedCells, this);
+
+    this._onActiveCellChanged(this._panel.content);
+    panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
+  }
+
+  _onActiveCellChanged(notebook: Notebook): void {
+    const activeCell = notebook.activeCell;
+      if (!activeCell) {
+        return;
+      }
+
+      if (this._previousActiveCell !== null && this._previousActiveCell !== undefined) {
+        this._removeToolbar(this._previousActiveCell.model);
+      }
+      this._addToolbar(activeCell.model);
+      this._previousActiveCell = activeCell;
+
+      if (this.contentOverlapsToolbar(activeCell)) {
+        // Completely conceal the toolbar if the first line of the content overlaps with it at all
+        this._findToolbarWidgets(activeCell).forEach(element => {
+          element.hide();
+        });
+      }
   }
 
   get isDisposed(): boolean {
@@ -105,6 +130,24 @@ export class CellToolbarTracker implements IDisposable {
     this._panel = null;
   }
 
+  contentOverlapsToolbar(activeCell: Cell): boolean {
+    const lineRight = activeCell
+      .inputArea
+      .editorWidget.node
+      .getElementsByClassName('CodeMirror-line')[0].children[0] // First span under first pre
+      .getBoundingClientRect().right;
+
+    const activeCellToolbar = activeCell.node.querySelector('.jp-cell-bar');
+    
+    if (activeCellToolbar === null || activeCellToolbar === undefined) { 
+      return false;
+    }
+
+    const toolbarLeft = activeCellToolbar.getBoundingClientRect().left;
+
+    return lineRight > toolbarLeft;
+  }
+
   /**
    * Callback to react to cells list changes
    *
@@ -115,8 +158,17 @@ export class CellToolbarTracker implements IDisposable {
     cells: IObservableUndoableList<ICellModel>,
     changed: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    changed.oldValues.forEach(model => this._removeToolbar(model));
-    changed.newValues.forEach(model => this._addToolbar(model));
+    // changed.oldValues.forEach(model => this._removeToolbar(model));
+    // changed.newValues.forEach(model => this._addToolbar(model));
+    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content.activeCell;
+    if (activeCell === null || activeCell === undefined) {
+      return;
+    }
+
+    if (changed.oldValues.find((m) => m === activeCell.model)) {
+      this._removeToolbar(activeCell.model);
+      this._addToolbar(activeCell.model);
+    }
   }
 
   private _addToolbar(model: ICellModel): void {
@@ -187,17 +239,17 @@ export class CellToolbarTracker implements IDisposable {
    */
   private _onSettingsChanged(): void {
     // Reset toolbar when settings changes
-    if (this._panel?.context.model.cells) {
-      each(this._panel?.context.model.cells.iter(), model => {
-        this._removeToolbar(model);
-        this._addToolbar(model);
-      });
+    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content.activeCell;
+    if (activeCell) {
+        this._removeToolbar(activeCell.model);
+        this._addToolbar(activeCell.model);
     }
   }
 
   private _commands: CommandRegistry;
   private _isDisposed = false;
   private _panel: NotebookPanel | null;
+  private _previousActiveCell: Cell<ICellModel> | null;
   private _settings: ISettingRegistry.ISettings | null;
 }
 
