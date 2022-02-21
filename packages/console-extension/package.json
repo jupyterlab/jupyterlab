@@ -40,6 +40,7 @@
     "@jupyterlab/application": "^4.0.0-alpha.4",
     "@jupyterlab/apputils": "^4.0.0-alpha.4",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.4",
+    "@jupyterlab/completer": "^4.0.0-alpha.4",
     "@jupyterlab/console": "^4.0.0-alpha.4",
     "@jupyterlab/filebrowser": "^4.0.0-alpha.4",
     "@jupyterlab/launcher": "^4.0.0-alpha.4",

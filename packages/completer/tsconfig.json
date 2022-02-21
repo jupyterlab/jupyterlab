@@ -13,19 +13,13 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../console"
-    },
-    {
       "path": "../coreutils"
     },
     {
-      "path": "../docregistry"
+      "path": "../observables"
     },
     {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../notebook"
+      "path": "../rendermime"
     },
     {
       "path": "../services"

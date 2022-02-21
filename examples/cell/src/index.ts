@@ -94,7 +94,7 @@ function main(): void {
   const timeout = 1000;
   const provider = new KernelCompleterProvider();
   const connector = new ConnectorProxy(
-    { editor, session: sessionContext.session },
+    { widget: cellWidget, editor, session: sessionContext.session },
     [provider],
     timeout
   );
@@ -104,7 +104,7 @@ function main(): void {
   void sessionContext.ready.then(() => {
     const provider = new KernelCompleterProvider();
     handler.connector = new ConnectorProxy(
-      { editor, session: sessionContext.session },
+      { widget: cellWidget, editor, session: sessionContext.session },
       [provider],
       timeout
     );

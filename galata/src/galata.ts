@@ -35,6 +35,14 @@ export namespace galata {
     }
   };
 
+  export const DEFAULT_DOCUMENTATION_STATE: Record<string, any> = {
+    data: {
+      'layout-restorer:data': {
+        relativeSizes: [0, 1, 0]
+      }
+    }
+  };
+
   /**
    * Sidebar position
    */
