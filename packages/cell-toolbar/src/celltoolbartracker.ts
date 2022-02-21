@@ -89,22 +89,22 @@ export class CellToolbarTracker implements IDisposable {
 
   _onActiveCellChanged(notebook: Notebook): void {
     const activeCell = notebook.activeCell;
-      if (!activeCell) {
-        return;
-      }
+    if (!activeCell) {
+      return;
+    }
 
-      if (this._previousActiveCell !== null && this._previousActiveCell !== undefined) {
-        this._removeToolbar(this._previousActiveCell.model);
-      }
-      this._addToolbar(activeCell.model);
-      this._previousActiveCell = activeCell;
+    if (this._previousActiveCell !== null && this._previousActiveCell !== undefined) {
+      this._removeToolbar(this._previousActiveCell.model);
+    }
+    this._addToolbar(activeCell.model);
+    this._previousActiveCell = activeCell;
 
-      if (this.contentOverlapsToolbar(activeCell)) {
-        // Completely conceal the toolbar if the first line of the content overlaps with it at all
-        this._findToolbarWidgets(activeCell).forEach(element => {
-          element.hide();
-        });
-      }
+    if (this.contentOverlapsToolbar(activeCell)) {
+      // Completely conceal the toolbar if the first line of the content overlaps with it at all
+      this._findToolbarWidgets(activeCell).forEach(element => {
+        element.hide();
+      });
+    }
   }
 
   get isDisposed(): boolean {
