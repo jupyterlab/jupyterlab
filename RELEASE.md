@@ -29,7 +29,19 @@ The requirements for an alpha release should be that JupyterLab can be installed
 
 Beta releases usually try to not have breaking changes in the API, although breaking changes can sometimes happen during that phase if they were missed during the alpha stage.
 
-The recommended time period for the Beta phase is a minimum of 1 week.
+The recommended time period for the Beta phase is a minimum of 2 weeks.
+
+The draft changelog describing user-facing changes will be published with the first Beta release.
+
+The community of extension developers and active users will be invited to commence testing the new Beta release including the draft user-facing changelog, and an invitation to open issues for any major:
+- regressions,
+- usability problems
+- points needing clarification (or inclusion) in the changelog, and
+- points needing clarification in the extension porting guide.
+
+The start of the Beta-testing period will be announced on Jupyter mailing group and Jupyter Discourse for major releases, and only via a Discourse post for minor releases.
+
+All bug reports raised during the Beta-testing period should be triaged (but not necessarily addressed) before releasing the first release candidate.
 
 ### Release Candidates
 
