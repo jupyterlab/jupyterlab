@@ -18,10 +18,6 @@
   fill: var(--jp-inverse-layout-color2);
 }
 
-.jp-mod-active .jp-cell-button {
-  display: block;
-}
-
 .jp-cell-run-cell-and-select-next {
   left: 46px;
   top: 46px;
@@ -36,12 +32,8 @@
 }
 
 .jp-cell-menu {
-  display: none;
-  flex-direction: row;
-}
-
-.jp-mod-active .jp-cell-menu {
   display: flex;
+  flex-direction: row;
 }
 
 .jp-cell-menu button.jp-ToolbarButtonComponent {
