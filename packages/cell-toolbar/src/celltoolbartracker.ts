@@ -158,8 +158,6 @@ export class CellToolbarTracker implements IDisposable {
     cells: IObservableUndoableList<ICellModel>,
     changed: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    // changed.oldValues.forEach(model => this._removeToolbar(model));
-    // changed.newValues.forEach(model => this._addToolbar(model));
     const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content.activeCell;
     if (activeCell === null || activeCell === undefined) {
       return;
@@ -185,7 +183,7 @@ export class CellToolbarTracker implements IDisposable {
           ? []
           : helperButtons ??
             DEFAULT_HELPER_BUTTONS.map(entry => entry.command.split(':')[1]);
-            const leftMenu_ = leftMenu === null ? [] : leftMenu ?? DEFAULT_LEFT_MENU;
+      const leftMenu_ = leftMenu === null ? [] : leftMenu ?? DEFAULT_LEFT_MENU;
 
       const toolbar = new CellToolbarWidget(
         this._commands,
