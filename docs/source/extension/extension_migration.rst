@@ -39,6 +39,9 @@ bumped their major version (following semver convention):
    ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
    The namespace ``TableOfContentsRegistry`` has been renamed ``ITableOfContentsRegistry``.
+- ``@jupyterlab/documentsearch`` from 3.x to 4.x
+   ``@jupyterlab/documentsearch:plugin`` renamed ``@jupyterlab/documentsearch-extension:plugin``
+   This may impact application configuration (for instance if the plugin was disabled).
 - ``@jupyterlab/console`` from 3.x to 4.x
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
