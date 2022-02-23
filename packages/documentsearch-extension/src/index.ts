@@ -107,11 +107,8 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(extension.id);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-        const searchDebounceTimeSetting = settings.get('searchDebounceTime')
+        searchDebounceTime = settings.get('searchDebounceTime')
           .composite as number;
-        if (searchDebounceTime) {
-          searchDebounceTime = searchDebounceTimeSetting;
-        }
       };
 
       Promise.all([loadSettings, app.restored])
