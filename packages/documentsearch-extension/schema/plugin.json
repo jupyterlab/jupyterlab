@@ -52,7 +52,8 @@
       "title": "Search debounce time (ms)",
       "description": "The debounce time in milliseconds applied to the search input field",
       "type": "number",
-      "default": 500
+      "default": 500,
+      "exclusiveMinimum": 0
     }
   },
   "additionalProperties": false,
