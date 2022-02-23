@@ -919,10 +919,6 @@ describe('@jupyterlab/apputils', () => {
       );
 
       await settingRegistry.load(bar.id);
-      // Trick push this test after all other promise in the hope they get resolve
-      // before going further - in particular we are looking at the update of the items
-      // factory in `createToolbarFactory`
-      await Promise.resolve();
 
       const items = factory(new Widget());
       expect(items).toHaveLength(3);
