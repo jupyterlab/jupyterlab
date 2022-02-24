@@ -395,13 +395,19 @@ function activate(
 function activateFileEditorCompleterService(
   app: JupyterFrontEnd,
   editorTracker: IEditorTracker,
-  manager?: ICompletionProviderManager
+  manager: ICompletionProviderManager | null,
+  translator: ITranslator | null
 ): void {
   if (!manager) {
     return;
   }
 
-  Commands.addCompleterCommands(app.commands, editorTracker, manager);
+  Commands.addCompleterCommands(
+    app.commands,
+    editorTracker,
+    manager,
+    translator
+  );
   const sessionManager = app.serviceManager.sessions;
 
   const _activeSessions = new Map<string, Session.ISessionConnection>();

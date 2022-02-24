@@ -624,7 +624,9 @@ function addCommands(
         .then(() => docManager.openOrReveal(path, factory, kernel, options));
     },
     icon: args => (args['icon'] as string) || '',
-    label: args => (args['label'] || args['factory']) as string,
+    label: args =>
+      ((args['label'] || args['factory']) ??
+        trans.__('Open the provided `path`.')) as string,
     mnemonic: args => (args['mnemonic'] as number) || -1
   });
 

@@ -1,13 +1,5 @@
 [
   {
-    "id": "tooltip:dismiss",
-    "label": "",
-    "caption": "",
-    "shortcuts": [
-      "Escape"
-    ]
-  },
-  {
     "id": "apputils:activate-command-palette",
     "label": "Activate Command Palette",
     "caption": "",
@@ -17,7 +9,7 @@
   },
   {
     "id": "apputils:load-statedb",
-    "label": "",
+    "label": "Load state for the current workspace.",
     "caption": "",
     "shortcuts": []
   },
@@ -29,7 +21,7 @@
   },
   {
     "id": "apputils:reset-on-load",
-    "label": "",
+    "label": "Reset state when loading for the workspace.",
     "caption": "",
     "shortcuts": []
   },
@@ -52,6 +44,14 @@
     "label": "Run All Enabled Commands Passed as Args",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "tooltip:dismiss",
+    "label": "Dismiss the tooltip",
+    "caption": "",
+    "shortcuts": [
+      "Escape"
+    ]
   },
   {
     "id": "docmanager:clone",
@@ -91,6 +91,7 @@
   },
   {
     "id": "docmanager:open",
+    "label": "Open the provided `path`.",
     "caption": "",
     "shortcuts": []
   },
@@ -226,8 +227,8 @@
   },
   {
     "id": "application:set-mode",
-    "label": "",
-    "caption": "",
+    "label": "Set the layout `mode`.",
+    "caption": "The layout `mode` can be \"single-document\" or \"multiple-document\".",
     "shortcuts": []
   },
   {
@@ -529,13 +530,13 @@
   },
   {
     "id": "filebrowser:activate",
-    "label": "",
+    "label": "Open the file browser for the provided `path`.",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "filebrowser:hide-main",
-    "label": "",
+    "label": "Hide the file browser.",
     "caption": "",
     "shortcuts": []
   },
@@ -558,6 +559,150 @@
     "shortcuts": [
       "Ctrl ,"
     ]
+  },
+  {
+    "id": "filebrowser:delete",
+    "label": "Delete",
+    "caption": "",
+    "shortcuts": [
+      "Delete"
+    ]
+  },
+  {
+    "id": "filebrowser:copy",
+    "label": "Copy",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl C"
+    ]
+  },
+  {
+    "id": "filebrowser:cut",
+    "label": "Cut",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl X"
+    ]
+  },
+  {
+    "id": "filebrowser:duplicate",
+    "label": "Duplicate",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl D"
+    ]
+  },
+  {
+    "id": "filebrowser:go-to-path",
+    "label": "Update the file browser to display the provided `path`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:go-up",
+    "label": "go up",
+    "caption": "",
+    "shortcuts": [
+      "Backspace"
+    ]
+  },
+  {
+    "id": "filebrowser:open-path",
+    "label": "Open from Path…",
+    "caption": "Open from path",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:open",
+    "label": "Open",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:paste",
+    "label": "Paste",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl V"
+    ]
+  },
+  {
+    "id": "filebrowser:create-new-directory",
+    "label": "New Folder",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:create-new-file",
+    "label": "New File",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:create-new-markdown-file",
+    "label": "New Markdown File",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:rename",
+    "label": "Rename",
+    "caption": "",
+    "shortcuts": [
+      "F2"
+    ]
+  },
+  {
+    "id": "filebrowser:copy-path",
+    "label": "Copy Path",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:shutdown",
+    "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-main",
+    "label": "File Browser",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift F"
+    ]
+  },
+  {
+    "id": "filebrowser:create-main-launcher",
+    "label": "New Launcher",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift L"
+    ]
+  },
+  {
+    "id": "filebrowser:toggle-navigate-to-current-directory",
+    "label": "Show Active File in File Browser",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-last-modified",
+    "label": "Show Last Modified Column",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-hidden-files",
+    "label": "Show Hidden Files",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:search",
+    "label": "Search on File Names",
+    "caption": "",
+    "shortcuts": []
   },
   {
     "id": "editmenu:undo",
@@ -781,6 +926,7 @@
   },
   {
     "id": "help:open",
+    "label": "Open the provided `url` in a tab.",
     "caption": "",
     "shortcuts": []
   },
@@ -1385,7 +1531,7 @@
   },
   {
     "id": "terminal:open",
-    "label": "",
+    "label": "Open a terminal by its `name`.",
     "caption": "",
     "shortcuts": []
   },
@@ -1445,7 +1591,7 @@
   },
   {
     "id": "logconsole:set-level",
-    "label": "",
+    "label": "Set log level to `level`.",
     "caption": "",
     "shortcuts": []
   },
@@ -1480,7 +1626,7 @@
   },
   {
     "id": "completer:invoke-notebook",
-    "label": "",
+    "label": "Display the completion helper.",
     "caption": "",
     "shortcuts": [
       "Tab"
@@ -1488,7 +1634,7 @@
   },
   {
     "id": "completer:select-notebook",
-    "label": "",
+    "label": "Select the completion suggestion.",
     "caption": "",
     "shortcuts": [
       "Enter"
@@ -1496,7 +1642,7 @@
   },
   {
     "id": "tooltip:launch-notebook",
-    "label": "",
+    "label": "Open the tooltip",
     "caption": "",
     "shortcuts": [
       "Shift Tab"
@@ -1510,7 +1656,7 @@
   },
   {
     "id": "console:open",
-    "label": "",
+    "label": "Open a console for the provided `path`.",
     "caption": "",
     "shortcuts": []
   },
@@ -1582,7 +1728,7 @@
   },
   {
     "id": "console:inject",
-    "label": "",
+    "label": "Inject some code in a console.",
     "caption": "",
     "shortcuts": []
   },
@@ -1600,7 +1746,7 @@
   },
   {
     "id": "console:interaction-mode",
-    "label": "",
+    "label": "Set the console interaction mode.",
     "caption": "",
     "shortcuts": []
   },
@@ -1612,7 +1758,7 @@
   },
   {
     "id": "completer:invoke-console",
-    "label": "",
+    "label": "Display the completion helper.",
     "caption": "",
     "shortcuts": [
       "Tab"
@@ -1620,7 +1766,7 @@
   },
   {
     "id": "completer:select-console",
-    "label": "",
+    "label": "Select the completion suggestion.",
     "caption": "",
     "shortcuts": [
       "Enter"
@@ -1628,7 +1774,7 @@
   },
   {
     "id": "tooltip:launch-console",
-    "label": "",
+    "label": "Open the tooltip",
     "caption": "",
     "shortcuts": [
       "Shift Tab"
@@ -1804,12 +1950,13 @@
   },
   {
     "id": "codemirror:change-mode",
+    "label": "Change editor mode to the provided `name`.",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "completer:invoke-file",
-    "label": "",
+    "label": "Display the completion helper.",
     "caption": "",
     "shortcuts": [
       "Tab"
@@ -1817,7 +1964,7 @@
   },
   {
     "id": "completer:select-file",
-    "label": "",
+    "label": "Select the completion suggestion.",
     "caption": "",
     "shortcuts": [
       "Enter"
@@ -1825,7 +1972,7 @@
   },
   {
     "id": "tooltip:launch-file",
-    "label": "",
+    "label": "Open the tooltip",
     "caption": "",
     "shortcuts": [
       "Shift Tab"
@@ -1924,171 +2071,9 @@
     ]
   },
   {
-    "id": "filebrowser:delete",
-    "label": "Delete",
-    "caption": "",
-    "shortcuts": [
-      "Delete"
-    ]
-  },
-  {
-    "id": "filebrowser:copy",
-    "label": "Copy",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl C"
-    ]
-  },
-  {
-    "id": "filebrowser:cut",
-    "label": "Cut",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl X"
-    ]
-  },
-  {
-    "id": "filebrowser:duplicate",
-    "label": "Duplicate",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl D"
-    ]
-  },
-  {
-    "id": "filebrowser:go-to-path",
-    "label": "",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:go-up",
-    "label": "go up",
-    "caption": "",
-    "shortcuts": [
-      "Backspace"
-    ]
-  },
-  {
-    "id": "filebrowser:open-path",
-    "label": "Open from Path…",
-    "caption": "Open from path",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:open",
-    "label": "Open",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:paste",
-    "label": "Paste",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl V"
-    ]
-  },
-  {
-    "id": "filebrowser:create-new-directory",
-    "label": "New Folder",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:create-new-file",
-    "label": "New File",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:create-new-markdown-file",
-    "label": "New Markdown File",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:rename",
-    "label": "Rename",
-    "caption": "",
-    "shortcuts": [
-      "F2"
-    ]
-  },
-  {
-    "id": "filebrowser:copy-path",
-    "label": "Copy Path",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:shutdown",
-    "label": "Shut Down Kernel",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:toggle-main",
-    "label": "File Browser",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl Shift F"
-    ]
-  },
-  {
-    "id": "filebrowser:create-main-launcher",
-    "label": "New Launcher",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl Shift L"
-    ]
-  },
-  {
-    "id": "filebrowser:toggle-navigate-to-current-directory",
-    "label": "Show Active File in File Browser",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:toggle-last-modified",
-    "label": "Show Last Modified Column",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:toggle-hidden-files",
-    "label": "Show Hidden Files",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:search",
-    "label": "Search on File Names",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "English",
-    "shortcuts": []
-  },
-  {
-    "id": "jupyterlab-translation:pl_PL",
-    "label": "Polish (Poland) - Polski (Polska)",
-    "caption": "Polish (Poland) - Polski (Polska)",
-    "shortcuts": []
-  },
-  {
-    "id": "jupyterlab-translation:zh_CN",
-    "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
-    "caption": "Chinese (Simplified, China) - 中文 (简体, 中国)",
-    "shortcuts": []
-  },
-  {
-    "id": "jupyterlab-translation:fr_FR",
-    "label": "French (France) - Français (France)",
-    "caption": "French (France) - Français (France)",
     "shortcuts": []
   },
   {

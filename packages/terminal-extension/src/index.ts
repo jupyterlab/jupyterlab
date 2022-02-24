@@ -379,6 +379,7 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.open, {
+    label: trans.__('Open a terminal by its `name`.'),
     execute: args => {
       const name = args['name'] as string;
       // Check for a running terminal with the given name.
@@ -466,6 +467,9 @@ export function addCommands(
 
   commands.addCommand(CommandIDs.setTheme, {
     label: args => {
+      if(args.theme === undefined){
+        return trans.__('Set terminal theme to the provided `theme`.');
+      }
       const theme = args['theme'] as string;
       const displayName =
         theme in themeDisplayedName

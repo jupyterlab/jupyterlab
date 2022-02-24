@@ -5,7 +5,7 @@ import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as fs from 'fs-extra';
 
-test('List commands', async ({ page }, testInfo) => {
+test('All commands must have a default label', async ({ page }, testInfo) => {
   const commands = await page.evaluate(async () => {
     const registry = window.jupyterapp.commands;
     const shortcuts = registry.keyBindings;
@@ -17,28 +17,32 @@ test('List commands', async ({ page }, testInfo) => {
       label: string;
       caption: string;
       shortcuts?: string[];
-    }[] = commandIds.filter(id => !id.startsWith('_')).map(id => {
-      try {
-        return {
-          id,
-          label: registry.label(id),
-          caption: registry.caption(id),
-          shortcuts: [
-            ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ?? [])
-          ]
-        };
-      } catch (reason) {
-        console.error(reason);
-        return {
-          id,
-          label: '',
-          caption: '',
-          shortcuts: [
-            ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ?? [])
-          ]
-        };
-      }
-    });
+    }[] = commandIds
+      .filter(id => !id.startsWith('_'))
+      .map(id => {
+        try {
+          return {
+            id,
+            label: registry.label(id),
+            caption: registry.caption(id),
+            shortcuts: [
+              ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ??
+                [])
+            ]
+          };
+        } catch (reason) {
+          console.error(reason);
+          return {
+            id,
+            label: '',
+            caption: '',
+            shortcuts: [
+              ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ??
+                [])
+            ]
+          };
+        }
+      });
 
     return Promise.resolve(commands);
   });
