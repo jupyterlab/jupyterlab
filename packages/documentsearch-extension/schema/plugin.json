@@ -50,7 +50,7 @@
   "properties": {
     "searchDebounceTime": {
       "title": "Search debounce time (ms)",
-      "description": "The debounce time in milliseconds applied to the search input field. The already opened input fileds will not be updated if you change that value",
+      "description": "The debounce time in milliseconds applied to the search input field. The already opened input files will not be updated if you change that value",
       "type": "number",
       "default": 500,
       "minimum": 0
