@@ -98,7 +98,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 - Update Playwright snapshots from PR comments [#12040](https://github.com/jupyterlab/jupyterlab/pull/12040) ([@fcollonval](https://github.com/fcollonval))
 - Mehmet employer update [#12033](https://github.com/jupyterlab/jupyterlab/pull/12033) ([@mbektas](https://github.com/mbektas))
 - docs: fix shell command with unquoted '>' [#12002](https://github.com/jupyterlab/jupyterlab/pull/12002) ([@ErikBjare](https://github.com/ErikBjare))
-- Fix a  bumpversion example in release markdown [#12006](https://github.com/jupyterlab/jupyterlab/pull/12006) ([@echarles](https://github.com/echarles))
+- Fix a bumpversion example in release markdown [#12006](https://github.com/jupyterlab/jupyterlab/pull/12006) ([@echarles](https://github.com/echarles))
 - [squash] Apply most auto-fixable stylelint rules [#11993](https://github.com/jupyterlab/jupyterlab/pull/11993) ([@bollwyvl](https://github.com/bollwyvl))
 - Remove tslint comment and move `Token` to `tokens.ts` [#11955](https://github.com/jupyterlab/jupyterlab/pull/11955) ([@fcollonval](https://github.com/fcollonval))
 - Update several extensions readme files to delete old content. [#11947](https://github.com/jupyterlab/jupyterlab/pull/11947) ([@jasongrout](https://github.com/jasongrout))
