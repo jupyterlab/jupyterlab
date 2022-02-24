@@ -14,7 +14,7 @@ from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
 
 from jupyterlab_server import LabServerApp, LicensesApp, WorkspaceExportApp, WorkspaceImportApp, WorkspaceListApp
-from nbclassic.shim import NBClassicConfigShimMixin
+from notebook_shim.shim import NotebookConfigShimMixin
 from traitlets import Bool, Instance, Unicode, default
 
 from ._version import __version__
@@ -359,7 +359,7 @@ aliases.update({
 })
 
 
-class LabApp(NBClassicConfigShimMixin, LabServerApp):
+class LabApp(NotebookConfigShimMixin, LabServerApp):
     version = version
 
     name = "lab"
@@ -422,7 +422,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     )
     flags['expose-app-in-browser'] = (
         {'LabApp': {'expose_app_in_browser': True}},
-        """Expose the global app instance to browser via window.jupyterapp. 
+        """Expose the global app instance to browser via window.jupyterapp.
         It is also available via the deprecated window.jupyterlab name."""
     )
     flags['extensions-in-dev-mode'] = (
