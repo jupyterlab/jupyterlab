@@ -60,6 +60,37 @@ export const moveUpIcon = new LabIcon({
   svgstr: moveUpSvg
 });
 
+// This is declared outside the scope of the Notebook class so that the MutationObserver function can call
+// it without the class in scope
+function updateCellForToolbarOverlap(activeCellElement: HTMLElement) {
+  // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
+  activeCellElement.classList.remove('jp-toolbar-overlap');
+
+  // Check for overlap
+  if (contentOverlapsToolbar(activeCellElement)) {
+    // Add the "toolbar overlap" class to the cell, completely concealing the toolbar,
+    // if the first line of the content overlaps with it at all
+    activeCellElement.classList.add('jp-toolbar-overlap');
+  }
+}
+
+function contentOverlapsToolbar(activeCellElement: HTMLElement): boolean {
+  const lineRight = activeCellElement
+    .getElementsByClassName('jp-InputArea-editor')[0]
+    .getElementsByClassName('CodeMirror-line')[0].children[0] // First span under first pre
+    .getBoundingClientRect().right;
+
+  const activeCellToolbar = activeCellElement.querySelector('.jp-cell-bar');
+  
+  if (activeCellToolbar === null || activeCellToolbar === undefined) { 
+    return false;
+  }
+
+  const toolbarLeft = activeCellToolbar.getBoundingClientRect().left;
+
+  return lineRight > toolbarLeft;
+}
+
 /**
  * Watch a notebook, and each time a cell is created add a CellTagsWidget to it.
  */
@@ -73,6 +104,7 @@ export class CellToolbarTracker implements IDisposable {
     this._panel = panel;
     this._settings = settings;
     this._previousActiveCell = this._panel.content.activeCell;
+    this._observer = null;
 
     if (this._settings) {
       this._onSettingsChanged();
@@ -99,12 +131,7 @@ export class CellToolbarTracker implements IDisposable {
     this._addToolbar(activeCell.model);
     this._previousActiveCell = activeCell;
 
-    if (this.contentOverlapsToolbar(activeCell)) {
-      // Completely conceal the toolbar if the first line of the content overlaps with it at all
-      this._findToolbarWidgets(activeCell).forEach(element => {
-        element.hide();
-      });
-    }
+    updateCellForToolbarOverlap(activeCell.node);
   }
 
   get isDisposed(): boolean {
@@ -127,25 +154,12 @@ export class CellToolbarTracker implements IDisposable {
       each(cells.iter(), model => this._removeToolbar(model));
     }
 
-    this._panel = null;
-  }
-
-  contentOverlapsToolbar(activeCell: Cell): boolean {
-    const lineRight = activeCell
-      .inputArea
-      .editorWidget.node
-      .getElementsByClassName('CodeMirror-line')[0].children[0] // First span under first pre
-      .getBoundingClientRect().right;
-
-    const activeCellToolbar = activeCell.node.querySelector('.jp-cell-bar');
-    
-    if (activeCellToolbar === null || activeCellToolbar === undefined) { 
-      return false;
+    if (this._observer) {
+      // Should be taken care of by the _removeToolbar() calls above, but if not ...
+      this._observer.disconnect();
     }
 
-    const toolbarLeft = activeCellToolbar.getBoundingClientRect().left;
-
-    return lineRight > toolbarLeft;
+    this._panel = null;
   }
 
   /**
@@ -192,6 +206,13 @@ export class CellToolbarTracker implements IDisposable {
       toolbar.addClass(CELL_BAR_CLASS);
       (cell.layout as PanelLayout).insertWidget(0, toolbar);
 
+      // Add an observer.
+      this._observer = new MutationObserver(this._observerCallback);
+      this._observer.observe(cell.inputArea.editorWidget.node, {
+        subtree: true,
+        childList: true
+      });
+
       DEFAULT_HELPER_BUTTONS.filter(entry =>
         (helperButtons_ as string[]).includes(entry.command.split(':')[1])
       ).forEach(entry => {
@@ -230,6 +251,10 @@ export class CellToolbarTracker implements IDisposable {
     if (cell) {
       this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
     }
+
+    if (this._observer) {
+      this._observer.disconnect();
+    }
   }
 
   /**
@@ -244,11 +269,32 @@ export class CellToolbarTracker implements IDisposable {
     }
   }
 
+  private _observerCallback(mutations: MutationRecord[], observer: MutationObserver): void {
+    console.log("Got observer callback!");
+    if (mutations.length <= 0) {
+      return; // No mutations found
+    }
+
+    const mutationParentElement = mutations[0].target.parentElement;
+
+    if (mutationParentElement === null) {
+      return; // First mutation has no parent element
+    }
+
+    const parentCell = mutationParentElement.closest('div.jp-Notebook-cell');
+    if (parentCell === null) {
+      return; // Could not find parent notebook cell
+    }
+
+    updateCellForToolbarOverlap(parentCell as HTMLElement);
+  }
+
   private _commands: CommandRegistry;
   private _isDisposed = false;
   private _panel: NotebookPanel | null;
   private _previousActiveCell: Cell<ICellModel> | null;
   private _settings: ISettingRegistry.ISettings | null;
+  private _observer: MutationObserver | null;
 }
 
 /**

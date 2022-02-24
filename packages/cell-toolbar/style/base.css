@@ -23,6 +23,10 @@
   top: 46px;
 }
 
+.jp-toolbar-overlap .jp-cell-toolbar {
+  display: none;
+}
+
 .jp-cell-toolbar {
   display: flex;
   flex-direction: row;
