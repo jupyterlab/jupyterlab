@@ -18,3 +18,11 @@ The command palette can be accessed from the View menu or using the keyboard sho
 ``Command/Ctrl Shift C``.
 
 The command palette can be displayed in the sidebar by adding ``'modal': false`` to the Settings.
+
+Commands List
+=============
+
+The table below display the list of commands and the associated keyboard shortcuts.
+
+.. include:: commands_list.md
+   :parser: myst_parser.sphinx_
