@@ -88,7 +88,7 @@ export const SetupCommands = (
         return;
       }
       const provider = new NotebookSearchProvider();
-      searchInstance = new SearchInstance(nbWidget, provider);
+      searchInstance = new SearchInstance(nbWidget, 500, provider);
       searchInstance.disposed.connect(() => {
         searchInstance = undefined;
         // find next and previous are now not enabled
