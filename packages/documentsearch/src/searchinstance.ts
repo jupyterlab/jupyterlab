@@ -17,7 +17,8 @@ export class SearchInstance implements IDisposable {
   constructor(
     widget: Widget,
     searchProvider: ISearchProvider,
-    translator?: ITranslator
+    translator?: ITranslator,
+    searchDebounceTime = 500
   ) {
     this.translator = translator || nullTranslator;
     this._widget = widget;
@@ -39,6 +40,7 @@ export class SearchInstance implements IDisposable {
       onEndSearch: this.dispose.bind(this),
       isReadOnly: this._activeProvider.isReadOnly,
       hasOutputs: this._activeProvider.hasOutputs || false,
+      searchDebounceTime: searchDebounceTime,
       translator: this.translator
     });
 
