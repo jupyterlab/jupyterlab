@@ -558,16 +558,14 @@
     },
     {
       "command": "notebook:run-cell",
-      "linuxKeys": ["Ctrl Enter"],
-      "macKeys": ["Cmd Enter", "Ctrl Enter"],
-      "winKeys": ["Ctrl Enter"],
+      "keys": ["Ctrl Enter"],
+      "macKeys": ["Ctrl Enter", "Cmd Enter"],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:run-cell",
-      "linuxKeys": ["Ctrl Enter"],
-      "macKeys": ["Cmd Enter", "Ctrl Enter"],
-      "winKeys": ["Ctrl Enter"],
+      "keys": ["Ctrl Enter"],
+      "macKeys": ["Ctrl Enter", "Cmd Enter"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
