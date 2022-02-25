@@ -77,7 +77,7 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
-    // await page.waitForFrames(3);
+    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -203,7 +203,6 @@ test.describe('General', () => {
       ]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_menu_left.png');
@@ -235,7 +234,6 @@ test.describe('General', () => {
       ]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_menu_top.png');
@@ -302,7 +300,6 @@ test.describe('General', () => {
       ]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_create_text_file.png');
@@ -325,7 +322,6 @@ test.describe('General', () => {
     // Hide file browser
     await page.click('[title^="File Browser"]');
 
-    // await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('file_editor_overview.png');
   });
 
@@ -541,7 +537,6 @@ test.describe('General', () => {
     );
     await page.keyboard.press('Shift+Enter');
 
-    // await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_html_display.png'
     );
@@ -570,7 +565,6 @@ test.describe('General', () => {
     // Need to wait for altair to update the canvas
     await page.waitForSelector('summary');
 
-    // await page.waitForFrames(3);
     // The menu button '...' color of Altair is flaky increase threshold tolerance
     expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png', {
       threshold: 0.3
@@ -596,8 +590,6 @@ test.describe('General', () => {
     );
 
     await page.notebook.run();
-
-    // await page.waitForFrames(3);
 
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_nteract_vdom.png'
