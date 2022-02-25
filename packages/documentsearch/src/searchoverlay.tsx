@@ -361,6 +361,7 @@ interface ISearchOverlayProps {
   onReplaceAll: (t: string) => void;
   isReadOnly: boolean;
   hasOutputs: boolean;
+  searchDebounceTime: number;
   translator?: ITranslator;
 }
 
@@ -373,6 +374,9 @@ class SearchOverlay extends React.Component<
     this.translator = props.translator || nullTranslator;
     this.state = props.overlayState;
     this.replaceEntryRef = React.createRef();
+    this._debouncedStartSearch = new Debouncer(() => {
+      this._executeSearch(true, this.state.searchText);
+    }, props.searchDebounceTime);
     this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
     this._toggleSearchSelectedCells = this._toggleSearchSelectedCells.bind(
       this
@@ -636,9 +640,7 @@ class SearchOverlay extends React.Component<
   protected translator: ITranslator;
   private replaceEntryRef: React.RefObject<ReplaceEntry>;
 
-  private _debouncedStartSearch = new Debouncer(() => {
-    this._executeSearch(true, this.state.searchText);
-  }, 500);
+  private _debouncedStartSearch: Debouncer;
 }
 
 export function createSearchOverlay(
@@ -657,6 +659,7 @@ export function createSearchOverlay(
     onEndSearch,
     isReadOnly,
     hasOutputs,
+    searchDebounceTime,
     translator
   } = options;
   const widget = ReactWidget.create(
@@ -675,6 +678,7 @@ export function createSearchOverlay(
             overlayState={args!}
             isReadOnly={isReadOnly}
             hasOutputs={hasOutputs}
+            searchDebounceTime={searchDebounceTime}
             translator={translator}
           />
         );
@@ -699,6 +703,7 @@ namespace createSearchOverlay {
     onReplaceAll: (t: string) => void;
     isReadOnly: boolean;
     hasOutputs: boolean;
+    searchDebounceTime: number;
     translator?: ITranslator;
   }
 }
