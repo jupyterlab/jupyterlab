@@ -66,29 +66,68 @@ function updateCellForToolbarOverlap(activeCellElement: HTMLElement) {
   // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
   activeCellElement.classList.remove('jp-toolbar-overlap');
 
-  // Check for overlap
-  if (contentOverlapsToolbar(activeCellElement)) {
+  let cellContentOverlapsToolbar: boolean = false;
+
+  if (activeCellElement.classList.contains("jp-mod-rendered")) {
+    // Check for overlap in rendered markdown content
+    cellContentOverlapsToolbar = markdownOverlapsToolbar(activeCellElement);
+  }
+  else {
+  // Check for overlap in code content
+    cellContentOverlapsToolbar = codeOverlapsToolbar(activeCellElement);
+  }
+
+  if (cellContentOverlapsToolbar) {
     // Add the "toolbar overlap" class to the cell, completely concealing the toolbar,
     // if the first line of the content overlaps with it at all
     activeCellElement.classList.add('jp-toolbar-overlap');
   }
 }
 
-function contentOverlapsToolbar(activeCellElement: HTMLElement): boolean {
+function markdownOverlapsToolbar(activeCellElement: HTMLElement): boolean {
+  const markdownOutputElements = activeCellElement.getElementsByClassName("jp-MarkdownOutput");
+  if (markdownOutputElements.length < 1) {
+    return false;
+  }
+
+  const firstOutputElementChild = markdownOutputElements[0].firstElementChild as HTMLElement;
+  if (firstOutputElementChild === null) {
+    return false;
+  }
+
+  // Temporarily set the element's max width so that the bounding client rectangle only encompasses the content.
+  const oldMaxWidth = firstOutputElementChild.style.maxWidth;
+  firstOutputElementChild.style.maxWidth = 'max-content';
+
+  const lineRight = firstOutputElementChild.getBoundingClientRect().right;
+
+  // Reinstate the old max width.
+  firstOutputElementChild.style.maxWidth = oldMaxWidth;
+
+  const toolbarLeft = cellToolbarLeft(activeCellElement);
+
+  return toolbarLeft === null ? false : lineRight > toolbarLeft;
+}
+
+function codeOverlapsToolbar(activeCellElement: HTMLElement): boolean {
   const lineRight = activeCellElement
     .getElementsByClassName('jp-InputArea-editor')[0]
     .getElementsByClassName('CodeMirror-line')[0].children[0] // First span under first pre
     .getBoundingClientRect().right;
 
+  const toolbarLeft = cellToolbarLeft(activeCellElement);
+
+  return toolbarLeft === null ? false : lineRight > toolbarLeft;
+}
+
+function cellToolbarLeft(activeCellElement: HTMLElement): number | null {
   const activeCellToolbar = activeCellElement.querySelector('.jp-cell-bar');
   
   if (activeCellToolbar === null || activeCellToolbar === undefined) { 
-    return false;
+    return null;
   }
 
-  const toolbarLeft = activeCellToolbar.getBoundingClientRect().left;
-
-  return lineRight > toolbarLeft;
+  return activeCellToolbar.getBoundingClientRect().left;
 }
 
 /**
@@ -270,7 +309,6 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _observerCallback(mutations: MutationRecord[], observer: MutationObserver): void {
-    console.log("Got observer callback!");
     if (mutations.length <= 0) {
       return; // No mutations found
     }
