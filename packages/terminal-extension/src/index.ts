@@ -467,7 +467,7 @@ export function addCommands(
 
   commands.addCommand(CommandIDs.setTheme, {
     label: args => {
-      if(args.theme === undefined){
+      if (args.theme === undefined) {
         return trans.__('Set terminal theme to the provided `theme`.');
       }
       const theme = args['theme'] as string;

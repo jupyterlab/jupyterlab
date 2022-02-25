@@ -262,7 +262,9 @@ const resources: JupyterFrontEndPlugin<void> = {
     }
 
     commands.addCommand(CommandIDs.open, {
-      label: args => args['text'] as string ?? trans.__('Open the provided `url` in a tab.'),
+      label: args =>
+        (args['text'] as string) ??
+        trans.__('Open the provided `url` in a tab.'),
       execute: args => {
         const url = args['url'] as string;
         const text = args['text'] as string;
