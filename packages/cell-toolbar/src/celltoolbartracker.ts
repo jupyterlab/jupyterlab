@@ -130,6 +130,10 @@ function cellToolbarLeft(activeCellElement: HTMLElement): number | null {
   return activeCellToolbar.getBoundingClientRect().left;
 }
 
+function getNotebookCellElement(element: HTMLElement): HTMLElement | null {
+  return element.closest('div.jp-Notebook-cell');
+}
+
 /**
  * Watch a notebook, and each time a cell is created add a CellTagsWidget to it.
  */
@@ -245,12 +249,19 @@ export class CellToolbarTracker implements IDisposable {
       toolbar.addClass(CELL_BAR_CLASS);
       (cell.layout as PanelLayout).insertWidget(0, toolbar);
 
-      // Add an observer.
-      this._observer = new MutationObserver(this._observerCallback);
-      this._observer.observe(cell.inputArea.editorWidget.node, {
-        subtree: true,
-        childList: true
-      });
+      if (cell.model.type === 'markdown' && cell.node.getElementsByClassName("jp-MarkdownOutput").length > 0) {
+        // For rendered markdown, watch for resize events.
+        this._observer = new ResizeObserver(this._resizeObserverCallback);
+        this._observer.observe(cell.inputArea.node);
+      }
+      else {
+        // Add a mutation observer for when code cells or markdown editor cells change.
+        this._observer = new MutationObserver(this._mutationObserverCallback);
+        this._observer.observe(cell.inputArea.editorWidget.node, {
+          subtree: true,
+          childList: true
+        });
+      }
 
       DEFAULT_HELPER_BUTTONS.filter(entry =>
         (helperButtons_ as string[]).includes(entry.command.split(':')[1])
@@ -308,7 +319,7 @@ export class CellToolbarTracker implements IDisposable {
     }
   }
 
-  private _observerCallback(mutations: MutationRecord[], observer: MutationObserver): void {
+  private _mutationObserverCallback(mutations: MutationRecord[], observer: MutationObserver): void {
     if (mutations.length <= 0) {
       return; // No mutations found
     }
@@ -319,7 +330,26 @@ export class CellToolbarTracker implements IDisposable {
       return; // First mutation has no parent element
     }
 
-    const parentCell = mutationParentElement.closest('div.jp-Notebook-cell');
+    const parentCell = getNotebookCellElement(mutationParentElement);
+    if (parentCell === null) {
+      return; // Could not find parent notebook cell
+    }
+
+    updateCellForToolbarOverlap(parentCell as HTMLElement);
+  }
+
+  private _resizeObserverCallback(entries: ResizeObserverEntry[], observer: ResizeObserver): void {
+    if (entries.length <= 0) {
+      return; // No entries found
+    }
+
+    const parentElement = entries[0].target.parentElement;
+
+    if (parentElement === null) {
+      return; // First mutation has no parent element
+    }
+
+    const parentCell = getNotebookCellElement(parentElement);
     if (parentCell === null) {
       return; // Could not find parent notebook cell
     }
@@ -332,7 +362,7 @@ export class CellToolbarTracker implements IDisposable {
   private _panel: NotebookPanel | null;
   private _previousActiveCell: Cell<ICellModel> | null;
   private _settings: ISettingRegistry.ISettings | null;
-  private _observer: MutationObserver | null;
+  private _observer: MutationObserver | ResizeObserver | null;
 }
 
 /**
