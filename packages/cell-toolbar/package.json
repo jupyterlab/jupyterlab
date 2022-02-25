@@ -39,13 +39,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.4",
-    "@jupyterlab/cells": "^4.0.0-alpha.4",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.4",
-    "@jupyterlab/notebook": "^4.0.0-alpha.4",
-    "@jupyterlab/observables": "^5.0.0-alpha.4",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.4",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.19",
+    "@jupyterlab/apputils": "^4.0.0-alpha.5",
+    "@jupyterlab/cells": "^4.0.0-alpha.5",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.5",
+    "@jupyterlab/notebook": "^4.0.0-alpha.5",
+    "@jupyterlab/observables": "^5.0.0-alpha.5",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.5",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.20",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",
     "@lumino/disposable": "^1.10.1",
@@ -54,7 +54,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.4",
+    "@jupyterlab/testutils": "^4.0.0-alpha.5",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
