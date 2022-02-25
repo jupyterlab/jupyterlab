@@ -1162,13 +1162,15 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return user
-      .concat(defaults)
-      .filter(shortcut => !shortcut.disabled)
-      // Fix shortcuts comparison in rjsf Form to avoid polluting the user settings
-      .map(shortcut => {
-        return { args: {}, ...shortcut };
-      });
+    return (
+      user
+        .concat(defaults)
+        .filter(shortcut => !shortcut.disabled)
+        // Fix shortcuts comparison in rjsf Form to avoid polluting the user settings
+        .map(shortcut => {
+          return { args: {}, ...shortcut };
+        })
+    );
   }
 
   /**
