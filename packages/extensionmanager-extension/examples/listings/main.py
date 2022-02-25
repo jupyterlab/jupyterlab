@@ -8,9 +8,8 @@ HERE = os.path.dirname(__file__)
 os.environ['JUPYTERLAB_SETTINGS_DIR'] = str(os.path.join(HERE, 'settings'))
 
 from jupyterlab.labapp import LabApp
-from jupyterlab_server import LabServerApp, LabConfig
-from notebook.base.handlers import IPythonHandler, FileFindHandler
-from notebook.utils import url_path_join as ujoin
+from jupyter_server.base.handlers import FileFindHandler
+from jupyter_server.utils import url_path_join as ujoin
 import json
 from traitlets import Unicode
 

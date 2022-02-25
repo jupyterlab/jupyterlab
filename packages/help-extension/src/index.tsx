@@ -53,8 +53,6 @@ namespace CommandIDs {
 
   export const hide = 'help:hide';
 
-  export const launchClassic = 'help:launch-classic-notebook';
-
   export const jupyterForum = 'help:jupyter-forum';
 
   export const licenses = 'help:licenses';
@@ -162,36 +160,6 @@ const about: JupyterFrontEndPlugin<void> = {
 
     if (palette) {
       palette.addItem({ command: CommandIDs.about, category });
-    }
-  }
-};
-
-/**
- * A plugin to add a command to open the Classic Notebook interface.
- */
-const launchClassic: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:launch-classic',
-  autoStart: true,
-  requires: [ITranslator],
-  optional: [ICommandPalette],
-  activate: (
-    app: JupyterFrontEnd,
-    translator: ITranslator,
-    palette: ICommandPalette | null
-  ): void => {
-    const { commands } = app;
-    const trans = translator.load('jupyterlab');
-    const category = trans.__('Help');
-
-    commands.addCommand(CommandIDs.launchClassic, {
-      label: trans.__('Launch Classic Notebook'),
-      execute: () => {
-        window.open(PageConfig.getBaseUrl() + 'tree');
-      }
-    });
-
-    if (palette) {
-      palette.addItem({ command: CommandIDs.launchClassic, category });
     }
   }
 };
@@ -659,7 +627,6 @@ const licenses: JupyterFrontEndPlugin<void> = {
 
 const plugins: JupyterFrontEndPlugin<any>[] = [
   about,
-  launchClassic,
   jupyterForum,
   resources,
   licenses
