@@ -137,6 +137,8 @@ const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
  */
 const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:kernel-status',
+  autoStart: true,
+  requires: [IConsoleTracker, IKernelStatusModel],
   activate: (
     app: JupyterFrontEnd,
     tracker: IConsoleTracker,
@@ -153,9 +155,7 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
     };
 
     kernelStatus.addSessionProvider(provider);
-  },
-  requires: [IConsoleTracker, IKernelStatusModel],
-  autoStart: true
+  }
 };
 
 /**
@@ -163,6 +163,8 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:cursor-position',
+  autoStart: true,
+  requires: [IConsoleTracker, IPositionModel],
   activate: (
     app: JupyterFrontEnd,
     tracker: IConsoleTracker,
@@ -192,17 +194,15 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
     };
 
     positionModel.addEditorProvider(provider);
-  },
-  requires: [IConsoleTracker, IPositionModel],
-  autoStart: true
+  }
 };
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:completer',
+  autoStart: true,
   requires: [IConsoleTracker],
   optional: [ICompletionProviderManager],
-  activate: activateConsoleCompleterService,
-  autoStart: true
+  activate: activateConsoleCompleterService
 };
 
 /**
