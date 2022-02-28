@@ -150,7 +150,7 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
  * Cursor position.
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/fileeditor-extensions:cursor-position',
+  id: '@jupyterlab/fileeditor-extension:cursor-position',
   activate: (
     app: JupyterFrontEnd,
     tracker: IEditorTracker,
