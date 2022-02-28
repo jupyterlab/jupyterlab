@@ -136,7 +136,7 @@ const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
  * Kernel status indicator.
  */
 const kernelStatus: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/console-extensions:kernel-status',
+  id: '@jupyterlab/console-extension:kernel-status',
   activate: (
     app: JupyterFrontEnd,
     tracker: IConsoleTracker,
@@ -162,7 +162,7 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
  * Cursor position.
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/console-extensions:cursor-position',
+  id: '@jupyterlab/console-extension:cursor-position',
   activate: (
     app: JupyterFrontEnd,
     tracker: IConsoleTracker,
