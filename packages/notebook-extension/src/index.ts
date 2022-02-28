@@ -720,7 +720,7 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
  * Cursor position.
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extensions:cursor-position',
+  id: '@jupyterlab/notebook-extension:cursor-position',
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
