@@ -564,7 +564,7 @@ export class Context<
       // any kernel has started.
       void this.sessionContext.initialize().then(shouldSelect => {
         if (shouldSelect) {
-          void this._dialogs.selectKernel(this.sessionContext);
+          void this._dialogs.selectKernel(this.sessionContext, this.translator);
         }
       });
     });
