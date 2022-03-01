@@ -38,7 +38,6 @@ test.describe('Export Notebook', () => {
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_menu.png');
@@ -74,7 +73,6 @@ test.describe('Export Notebook', () => {
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_slide_type.png');

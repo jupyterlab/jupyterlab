@@ -25,7 +25,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 283, height: 600 })]
     );
 
-    // await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_default.png');
@@ -44,7 +43,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_disabled.png');
@@ -63,7 +61,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_enabled.png');
@@ -92,7 +89,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 283, height: 600 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_search.png');
@@ -129,7 +125,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 283, height: 160 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_simultaneous_block_allow.png');
@@ -166,7 +161,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_blocked_list.png');
@@ -203,7 +197,6 @@ test.describe('Extension Manager', () => {
       [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('extensions_allowed_list.png');

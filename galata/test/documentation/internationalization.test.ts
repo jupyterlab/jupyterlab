@@ -28,7 +28,6 @@ test.describe('Internationalization', () => {
       [generateCaptureArea({ top: 5, left: 250, width: 800, height: 600 })]
     );
 
-    // await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_settings.png');
@@ -51,7 +50,6 @@ test.describe('Internationalization', () => {
       [generateCaptureArea({ top: 200, left: 350, width: 600, height: 300 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_change.png');
@@ -86,7 +84,6 @@ test.describe('Internationalization', () => {
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
 
-    // await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
 });

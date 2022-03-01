@@ -77,7 +77,6 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
-    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -85,7 +84,6 @@ test.describe('General', () => {
     await galata.Mock.freezeContentLastModified(page);
     await openOverview(page);
 
-    // await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
   });
 
@@ -110,7 +108,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_left.png');
@@ -137,7 +134,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 32, left: 997, width: 283, height: 400 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_right.png');
@@ -156,7 +152,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_tabs.png');
@@ -175,7 +170,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 210, width: 700, height: 350 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_tabs_menu.png');
@@ -267,7 +261,6 @@ test.describe('General', () => {
       ]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_shareable_link.png');
@@ -352,7 +345,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 260, width: 600, height: 450 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('file_editor_settings.png');
@@ -387,7 +379,6 @@ test.describe('General', () => {
     );
     await page.notebook.run();
 
-    // await page.waitForFrames(3);
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
       threshold: 0.3
@@ -426,7 +417,6 @@ test.describe('General', () => {
     // Wait for command answer
     await page.waitForTimeout(200);
 
-    // await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
   });
 
@@ -461,7 +451,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('running_layout.png');
@@ -472,7 +461,6 @@ test.describe('General', () => {
 
     await page.keyboard.press('Control+Shift+C');
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#modal-command-palette')).screenshot()
     ).toMatchSnapshot('command_palette.png');
@@ -502,7 +490,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 0, width: 700, height: 500 })]
     );
 
-    // await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('file_formats_open_with.png');
