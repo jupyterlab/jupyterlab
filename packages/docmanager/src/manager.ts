@@ -490,7 +490,8 @@ export class DocumentManager implements IDocumentManager {
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
       docProviderFactory: this._docProviderFactory,
-      lastModifiedCheckMargin: this._lastModifiedCheckMargin
+      lastModifiedCheckMargin: this._lastModifiedCheckMargin,
+      translator: this.translator
     });
     const handler = new SaveHandler({
       context,
