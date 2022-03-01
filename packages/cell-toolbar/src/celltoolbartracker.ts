@@ -257,24 +257,38 @@ export class CellToolbarTracker implements IDisposable {
     // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
     const activeCellElement = activeCell.node;
     activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
-  
-    let cellContentOverlapsToolbar: boolean = false;
-    const cellType = activeCell.model.type;
 
-    if (cellType === 'markdown' && (activeCell as MarkdownCell).rendered) {
-      // Check for overlap in rendered markdown content
-      cellContentOverlapsToolbar = this._markdownOverlapsToolbar(activeCell as MarkdownCell);
-    }
-    else {
-    // Check for overlap in code content
-      cellContentOverlapsToolbar = this._codeOverlapsToolbar(activeCell);
-    }
-  
-    if (cellContentOverlapsToolbar) {
+    if (this._cellToolbarOverlapsContents(activeCell)) {
       // Add the "toolbar overlap" class to the cell, completely concealing the toolbar,
       // if the first line of the content overlaps with it at all
       activeCellElement.classList.add(TOOLBAR_OVERLAP_CLASS);
     }
+  }
+
+  private _cellToolbarOverlapsContents(activeCell: Cell<ICellModel>): boolean {
+    const cellType = activeCell.model.type;
+
+    // If the toolbar is too large for the current cell, hide it.
+    const cellLeft = this._cellEditorWidgetLeft(activeCell);
+    const cellRight = this._cellEditorWidgetRight(activeCell);
+    const toolbarLeft = this._cellToolbarLeft(activeCell);
+    
+    if (toolbarLeft === null) {
+      return false;
+    }
+
+    // The toolbar should not take up more than 50% of the cell.
+    if ((cellLeft + cellRight) / 2 > (toolbarLeft)) {
+      return true;
+    }
+
+    if (cellType === 'markdown' && (activeCell as MarkdownCell).rendered) {
+      // Check for overlap in rendered markdown content
+      return this._markdownOverlapsToolbar(activeCell as MarkdownCell);
+    }
+
+    // Check for overlap in code content
+    return this._codeOverlapsToolbar(activeCell);
   }
   
   /**
@@ -323,7 +337,15 @@ export class CellToolbarTracker implements IDisposable {
   
     return toolbarLeft === null ? false : lineRight > toolbarLeft;
   }
-  
+
+  private _cellEditorWidgetLeft(activeCell: Cell<ICellModel>): number {
+    return activeCell.editorWidget.node.getBoundingClientRect().left;
+  }
+
+  private _cellEditorWidgetRight(activeCell: Cell<ICellModel>): number {
+    return activeCell.editorWidget.node.getBoundingClientRect().right;
+  }
+
   private _cellToolbarLeft(activeCell: Cell<ICellModel>): number | null {
     const toolbarWidgets = this._findToolbarWidgets(activeCell);
     if (toolbarWidgets.length < 1) {
