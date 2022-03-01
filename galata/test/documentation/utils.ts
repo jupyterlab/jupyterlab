@@ -67,7 +67,7 @@ export async function setLeftSidebarWidth(
   const handleBBox = await splitHandle.boundingBox();
 
   await page.mouse.move(
-    handleBBox.x + 0.5 * handleBBox.x,
+    handleBBox.x + 0.5 * handleBBox.width,
     handleBBox.y + 0.5 * handleBBox.height
   );
   await page.mouse.down();
