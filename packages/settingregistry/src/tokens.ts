@@ -596,7 +596,7 @@ export namespace ISettingRegistry {
      *
      * ### Notes
      *
-     * If this is a list like `[Ctrl A, B]`, the user needs to press
+     * If this is a list like `['Ctrl A', 'B']`, the user needs to press
      * `Ctrl A` followed by `B` to trigger the shortcuts.
      */
     keys: string[];
