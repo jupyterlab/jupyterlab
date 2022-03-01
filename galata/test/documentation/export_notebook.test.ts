@@ -3,7 +3,7 @@
 
 import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
-import { generateCaptureArea } from './utils';
+import { generateCaptureArea, setLeftSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -14,6 +14,8 @@ test.use({
 test.describe('Export Notebook', () => {
   test('Export Menu', async ({ page }) => {
     await page.goto();
+
+    await setLeftSidebarWidth(page);
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -36,7 +38,6 @@ test.describe('Export Notebook', () => {
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_menu.png');
@@ -44,6 +45,8 @@ test.describe('Export Notebook', () => {
 
   test('Slides', async ({ page }) => {
     await page.goto();
+
+    await setLeftSidebarWidth(page);
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -70,7 +73,6 @@ test.describe('Export Notebook', () => {
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('exporting_slide_type.png');
