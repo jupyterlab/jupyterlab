@@ -284,7 +284,6 @@ export class CellToolbarTracker implements IDisposable {
    * @returns `true` if the first line of the output overlaps with the cell toolbar, `false` otherwise
    */
   private _markdownOverlapsToolbar(activeCell: MarkdownCell): boolean {
-    const activeCellElement = activeCell.node; 
     const markdownOutput = activeCell.inputArea; // Rendered markdown appears in the input area
 
     // Get the rendered markdown as a widget.
@@ -305,13 +304,12 @@ export class CellToolbarTracker implements IDisposable {
     // Reinstate the old max width.
     firstOutputElementChild.style.maxWidth = oldMaxWidth;
   
-    const toolbarLeft = this._cellToolbarLeft(activeCellElement);
+    const toolbarLeft = this._cellToolbarLeft(activeCell);
   
     return toolbarLeft === null ? false : lineRight > toolbarLeft;
   }
   
   private _codeOverlapsToolbar(activeCell: Cell<ICellModel>): boolean {
-    const activeCellElement = activeCell.node;
     const editorWidget = activeCell.editorWidget;
     const editor = activeCell.editor;
     if (editor.lineCount < 1) {
@@ -321,18 +319,18 @@ export class CellToolbarTracker implements IDisposable {
       .getElementsByClassName('CodeMirror-line')[0].children[0] // First span under first pre
       .getBoundingClientRect().right;
   
-    const toolbarLeft = this._cellToolbarLeft(activeCellElement);
+    const toolbarLeft = this._cellToolbarLeft(activeCell);
   
     return toolbarLeft === null ? false : lineRight > toolbarLeft;
   }
   
-  private _cellToolbarLeft(activeCellElement: HTMLElement): number | null {
-    const activeCellToolbar = activeCellElement.querySelector('.jp-cell-bar');
-    
-    if (activeCellToolbar === null || activeCellToolbar === undefined) { 
+  private _cellToolbarLeft(activeCell: Cell<ICellModel>): number | null {
+    const toolbarWidgets = this._findToolbarWidgets(activeCell);
+    if (toolbarWidgets.length < 1) {
       return null;
     }
-  
+    const activeCellToolbar = toolbarWidgets[0].node;
+    
     return activeCellToolbar.getBoundingClientRect().left;
   }  
 
