@@ -170,9 +170,9 @@ export class CellToolbarTracker implements IDisposable {
       (cell.layout as PanelLayout).insertWidget(0, toolbar);
 
       // For rendered markdown, watch for resize events.
-      cell.node.addEventListener('resize', this._resizeEventCallback);
+      cell.sizeChanged.connect(this._resizeEventCallback, this);
 
-      // Watch for changes in the code editor.
+      // Watch for changes in the cell's size.
       cell.model.contentChanged.connect(this._changedEventCallback, this);
 
       DEFAULT_HELPER_BUTTONS.filter(entry =>
@@ -213,7 +213,7 @@ export class CellToolbarTracker implements IDisposable {
     if (cell) {
       this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
       // Attempt to remove the resize and changed event handlers.
-      cell.node.removeEventListener('resize', this._resizeEventCallback);
+      cell.sizeChanged.disconnect(this._resizeEventCallback, this);
       cell.model.contentChanged.disconnect(this._changedEventCallback, this);
     }
   }
@@ -239,7 +239,7 @@ export class CellToolbarTracker implements IDisposable {
     this._updateCellForToolbarOverlap(activeCell.node);
   }
 
-  private _resizeEventCallback(event: UIEvent): void {
+  private _resizeEventCallback(): void {
     const activeCell = this._panel?.content.activeCell;
     if (activeCell === null || activeCell === undefined) {
       return;
