@@ -130,12 +130,8 @@ function cellToolbarLeft(activeCellElement: HTMLElement): number | null {
   return activeCellToolbar.getBoundingClientRect().left;
 }
 
-function getNotebookCellElement(element: HTMLElement): HTMLElement | null {
-  return element.closest('div.jp-Notebook-cell');
-}
-
 /**
- * Watch a notebook, and each time a cell is created add a CellTagsWidget to it.
+ * Watch a notebook so that a cell toolbar appears on the active cell
  */
 export class CellToolbarTracker implements IDisposable {
   constructor(
@@ -147,7 +143,6 @@ export class CellToolbarTracker implements IDisposable {
     this._panel = panel;
     this._settings = settings;
     this._previousActiveCell = this._panel.content.activeCell;
-    this._observer = null;
 
     if (this._settings) {
       this._onSettingsChanged();
@@ -197,11 +192,6 @@ export class CellToolbarTracker implements IDisposable {
       each(cells.iter(), model => this._removeToolbar(model));
     }
 
-    if (this._observer) {
-      // Should be taken care of by the _removeToolbar() calls above, but if not ...
-      this._observer.disconnect();
-    }
-
     this._panel = null;
   }
 
@@ -249,19 +239,11 @@ export class CellToolbarTracker implements IDisposable {
       toolbar.addClass(CELL_BAR_CLASS);
       (cell.layout as PanelLayout).insertWidget(0, toolbar);
 
-      if (cell.model.type === 'markdown' && cell.node.getElementsByClassName("jp-MarkdownOutput").length > 0) {
-        // For rendered markdown, watch for resize events.
-        this._observer = new ResizeObserver(this._resizeObserverCallback);
-        this._observer.observe(cell.inputArea.node);
-      }
-      else {
-        // Add a mutation observer for when code cells or markdown editor cells change.
-        this._observer = new MutationObserver(this._mutationObserverCallback);
-        this._observer.observe(cell.inputArea.editorWidget.node, {
-          subtree: true,
-          childList: true
-        });
-      }
+      // For rendered markdown, watch for resize events.
+      cell.node.addEventListener('resize', this._resizeEventCallback);
+
+      // Watch for changes in the code editor.
+      cell.model.contentChanged.connect(this._changedEventCallback, this);
 
       DEFAULT_HELPER_BUTTONS.filter(entry =>
         (helperButtons_ as string[]).includes(entry.command.split(':')[1])
@@ -300,10 +282,9 @@ export class CellToolbarTracker implements IDisposable {
     const cell = this._getCell(model);
     if (cell) {
       this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
-    }
-
-    if (this._observer) {
-      this._observer.disconnect();
+      // Attempt to remove the resize and changed event handlers.
+      cell.node.removeEventListener('resize', this._resizeEventCallback);
+      cell.model.contentChanged.disconnect(this._changedEventCallback, this);
     }
   }
 
@@ -319,42 +300,22 @@ export class CellToolbarTracker implements IDisposable {
     }
   }
 
-  private _mutationObserverCallback(mutations: MutationRecord[], observer: MutationObserver): void {
-    if (mutations.length <= 0) {
-      return; // No mutations found
+  private _changedEventCallback(): void {
+    const activeCell = this._panel?.content.activeCell;
+    if (activeCell === null || activeCell === undefined) {
+      return;
     }
 
-    const mutationParentElement = mutations[0].target.parentElement;
-
-    if (mutationParentElement === null) {
-      return; // First mutation has no parent element
-    }
-
-    const parentCell = getNotebookCellElement(mutationParentElement);
-    if (parentCell === null) {
-      return; // Could not find parent notebook cell
-    }
-
-    updateCellForToolbarOverlap(parentCell as HTMLElement);
+    updateCellForToolbarOverlap(activeCell.node);
   }
 
-  private _resizeObserverCallback(entries: ResizeObserverEntry[], observer: ResizeObserver): void {
-    if (entries.length <= 0) {
-      return; // No entries found
+  private _resizeEventCallback(event: UIEvent): void {
+    const activeCell = this._panel?.content.activeCell;
+    if (activeCell === null || activeCell === undefined) {
+      return;
     }
 
-    const parentElement = entries[0].target.parentElement;
-
-    if (parentElement === null) {
-      return; // First mutation has no parent element
-    }
-
-    const parentCell = getNotebookCellElement(parentElement);
-    if (parentCell === null) {
-      return; // Could not find parent notebook cell
-    }
-
-    updateCellForToolbarOverlap(parentCell as HTMLElement);
+    updateCellForToolbarOverlap(activeCell.node);
   }
 
   private _commands: CommandRegistry;
@@ -362,7 +323,6 @@ export class CellToolbarTracker implements IDisposable {
   private _panel: NotebookPanel | null;
   private _previousActiveCell: Cell<ICellModel> | null;
   private _settings: ISettingRegistry.ISettings | null;
-  private _observer: MutationObserver | ResizeObserver | null;
 }
 
 /**
