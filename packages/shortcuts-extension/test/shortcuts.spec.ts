@@ -81,9 +81,12 @@ describe('@jupyterlab/shortcut-extension', () => {
 
       await settingRegistry.load(bar.id);
 
-      plugin.default.activate({
-        commands: new CommandRegistry()
-      } as any, settingRegistry)
+      plugin.default.activate(
+        {
+          commands: new CommandRegistry()
+        } as any,
+        settingRegistry
+      );
 
       const settings = await settingRegistry.load(plugin.default.id);
       const shortcuts = (await settings.get('shortcuts')
@@ -146,9 +149,12 @@ describe('@jupyterlab/shortcut-extension', () => {
 
       await settingRegistry.load(bar.id);
 
-      plugin.default.activate({
-        commands: new CommandRegistry()
-      } as any, settingRegistry)
+      plugin.default.activate(
+        {
+          commands: new CommandRegistry()
+        } as any,
+        settingRegistry
+      );
 
       const settings = await settingRegistry.load(plugin.default.id);
       const shortcuts = (await settings.get('shortcuts')

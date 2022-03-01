@@ -3,6 +3,18 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
+      "path": "../application"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
+    },
+    {
       "path": "."
     },
     {
