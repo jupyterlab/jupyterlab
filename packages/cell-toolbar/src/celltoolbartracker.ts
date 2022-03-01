@@ -1,4 +1,4 @@
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import { Cell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import {
@@ -32,6 +32,11 @@ const DEFAULT_HELPER_BUTTONS: ICellMenuItem[] = [
  * Widget cell toolbar class
  */
 const CELL_BAR_CLASS = 'jp-cell-bar';
+
+/**
+ * Class for a cell whose contents overlap with the cell toolbar
+ */
+const TOOLBAR_OVERLAP_CLASS = 'jp-toolbar-overlap';
 
 /**
  * Icons for use in toolbar.
@@ -99,7 +104,7 @@ export class CellToolbarTracker implements IDisposable {
     this._addToolbar(activeCell.model);
     this._previousActiveCell = activeCell;
 
-    this._updateCellForToolbarOverlap(activeCell.node);
+    this._updateCellForToolbarOverlap(activeCell);
   }
 
   get isDisposed(): boolean {
@@ -236,7 +241,7 @@ export class CellToolbarTracker implements IDisposable {
       return;
     }
 
-    this._updateCellForToolbarOverlap(activeCell.node);
+    this._updateCellForToolbarOverlap(activeCell);
   }
 
   private _resizeEventCallback(): void {
@@ -245,38 +250,48 @@ export class CellToolbarTracker implements IDisposable {
       return;
     }
 
-    this._updateCellForToolbarOverlap(activeCell.node);
+    this._updateCellForToolbarOverlap(activeCell);
   }
 
-  private _updateCellForToolbarOverlap(activeCellElement: HTMLElement) {
+  private _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
     // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
-    activeCellElement.classList.remove('jp-toolbar-overlap');
+    const activeCellElement = activeCell.node;
+    activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
   
     let cellContentOverlapsToolbar: boolean = false;
-  
-    if (activeCellElement.classList.contains("jp-mod-rendered")) {
+    const cellType = activeCell.model.type;
+
+    if (cellType === 'markdown' && (activeCell as MarkdownCell).rendered) {
       // Check for overlap in rendered markdown content
-      cellContentOverlapsToolbar = this._markdownOverlapsToolbar(activeCellElement);
+      cellContentOverlapsToolbar = this._markdownOverlapsToolbar(activeCell as MarkdownCell);
     }
     else {
     // Check for overlap in code content
-      cellContentOverlapsToolbar = this._codeOverlapsToolbar(activeCellElement);
+      cellContentOverlapsToolbar = this._codeOverlapsToolbar(activeCell);
     }
   
     if (cellContentOverlapsToolbar) {
       // Add the "toolbar overlap" class to the cell, completely concealing the toolbar,
       // if the first line of the content overlaps with it at all
-      activeCellElement.classList.add('jp-toolbar-overlap');
+      activeCellElement.classList.add(TOOLBAR_OVERLAP_CLASS);
     }
   }
   
-  private _markdownOverlapsToolbar(activeCellElement: HTMLElement): boolean {
-    const markdownOutputElements = activeCellElement.getElementsByClassName("jp-MarkdownOutput");
-    if (markdownOutputElements.length < 1) {
-      return false;
-    }
+  /**
+   * 
+   * 
+   * @param activeCell A rendered MarkdownCell
+   * @returns `true` if the first line of the output overlaps with the cell toolbar, `false` otherwise
+   */
+  private _markdownOverlapsToolbar(activeCell: MarkdownCell): boolean {
+    const activeCellElement = activeCell.node; 
+    const markdownOutput = activeCell.inputArea; // Rendered markdown appears in the input area
+
+    // Get the rendered markdown as a widget.
+    const markdownOutputWidget = markdownOutput.renderedInput;
+    const markdownOutputElement = markdownOutputWidget.node;
   
-    const firstOutputElementChild = markdownOutputElements[0].firstElementChild as HTMLElement;
+    const firstOutputElementChild = markdownOutputElement.firstElementChild as HTMLElement;
     if (firstOutputElementChild === null) {
       return false;
     }
@@ -295,7 +310,8 @@ export class CellToolbarTracker implements IDisposable {
     return toolbarLeft === null ? false : lineRight > toolbarLeft;
   }
   
-  private _codeOverlapsToolbar(activeCellElement: HTMLElement): boolean {
+  private _codeOverlapsToolbar(activeCell: Cell<ICellModel>): boolean {
+    const activeCellElement = activeCell.node;
     const lineRight = activeCellElement
       .getElementsByClassName('jp-InputArea-editor')[0]
       .getElementsByClassName('CodeMirror-line')[0].children[0] // First span under first pre
