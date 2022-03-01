@@ -53,6 +53,8 @@ import { IDragEvent } from '@lumino/dragdrop';
 
 import { Message } from '@lumino/messaging';
 
+import { Debouncer } from '@lumino/polling';
+
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
@@ -522,7 +524,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Handle `resize` messages.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
-    this.sizeChanged.emit()
+    this._resizeDebouncer.invoke();
   }
 
   /**
@@ -572,6 +574,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _inputPlaceholder: InputPlaceholder;
   private _syncCollapse = false;
   private _syncEditable = false;
+  private _resizeDebouncer = new Debouncer(() => {
+    this.sizeChanged.emit();
+  }, 0);
 }
 
 /**
