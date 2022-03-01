@@ -3,7 +3,12 @@
 
 import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
-import { generateArrow, generateCaptureArea, positionMouse } from './utils';
+import {
+  generateArrow,
+  generateCaptureArea,
+  positionMouse,
+  setLeftSidebarWidth
+} from './utils';
 
 test.use({
   autoGoto: false,
@@ -20,6 +25,8 @@ test.describe('General', () => {
         border-top: none;
       }`
     });
+
+    await setLeftSidebarWidth(page);
 
     // README.md in preview
     await page.click('text=README.md', {
@@ -70,7 +77,6 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
-    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -78,7 +84,6 @@ test.describe('General', () => {
     await galata.Mock.freezeContentLastModified(page);
     await openOverview(page);
 
-    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
   });
 
@@ -91,6 +96,8 @@ test.describe('General', () => {
       }`
     });
 
+    await setLeftSidebarWidth(page);
+
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
     // Inject capture zone
@@ -101,7 +108,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_left.png');
@@ -115,6 +121,8 @@ test.describe('General', () => {
       }`
     });
 
+    await setLeftSidebarWidth(page);
+
     await page.notebook.createNew();
     await page.click('[title="Property Inspector"]');
 
@@ -126,7 +134,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 32, left: 997, width: 283, height: 400 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_right.png');
@@ -145,7 +152,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_tabs.png');
@@ -164,7 +170,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 210, width: 700, height: 350 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('interface_tabs_menu.png');
@@ -192,7 +197,6 @@ test.describe('General', () => {
       ]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_menu_left.png');
@@ -224,7 +228,6 @@ test.describe('General', () => {
       ]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_menu_top.png');
@@ -237,6 +240,8 @@ test.describe('General', () => {
         border-top: none;
       }`
     });
+
+    await setLeftSidebarWidth(page);
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -256,7 +261,6 @@ test.describe('General', () => {
       ]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_shareable_link.png');
@@ -289,7 +293,6 @@ test.describe('General', () => {
       ]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('files_create_text_file.png');
@@ -312,7 +315,6 @@ test.describe('General', () => {
     // Hide file browser
     await page.click('[title^="File Browser"]');
 
-    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('file_editor_overview.png');
   });
 
@@ -323,6 +325,8 @@ test.describe('General', () => {
         border-top: none;
       }`
     });
+
+    await setLeftSidebarWidth(page);
 
     // Open jupyterlab.md
     await page.dblclick(
@@ -341,7 +345,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 260, width: 600, height: 450 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('file_editor_settings.png');
@@ -355,6 +358,8 @@ test.describe('General', () => {
         border-top: none;
       }`
     });
+
+    await setLeftSidebarWidth(page);
 
     // Open Data.ipynb
     await page.dblclick(
@@ -374,7 +379,6 @@ test.describe('General', () => {
     );
     await page.notebook.run();
 
-    await page.waitForFrames(3);
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
       threshold: 0.3
@@ -389,6 +393,8 @@ test.describe('General', () => {
         border-top: none;
       }`
     });
+
+    await setLeftSidebarWidth(page);
 
     // Open Data.ipynb
     await page.dblclick(
@@ -411,7 +417,6 @@ test.describe('General', () => {
     // Wait for command answer
     await page.waitForTimeout(200);
 
-    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
   });
 
@@ -422,6 +427,8 @@ test.describe('General', () => {
         border-top: none;
       }`
     });
+
+    await setLeftSidebarWidth(page);
 
     // Open a terminal
     await page.click('text=File');
@@ -444,7 +451,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 27, left: 0, width: 283, height: 400 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('running_layout.png');
@@ -455,7 +461,6 @@ test.describe('General', () => {
 
     await page.keyboard.press('Control+Shift+C');
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#modal-command-palette')).screenshot()
     ).toMatchSnapshot('command_palette.png');
@@ -468,6 +473,8 @@ test.describe('General', () => {
         border-top: none;
       }`
     });
+
+    await setLeftSidebarWidth(page);
 
     await page.click('text=README.md', {
       button: 'right'
@@ -483,7 +490,6 @@ test.describe('General', () => {
       [generateCaptureArea({ top: 0, left: 0, width: 700, height: 500 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('file_formats_open_with.png');
@@ -518,7 +524,6 @@ test.describe('General', () => {
     );
     await page.keyboard.press('Shift+Enter');
 
-    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_html_display.png'
     );
@@ -547,7 +552,6 @@ test.describe('General', () => {
     // Need to wait for altair to update the canvas
     await page.waitForSelector('summary');
 
-    await page.waitForFrames(3);
     // The menu button '...' color of Altair is flaky increase threshold tolerance
     expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png', {
       threshold: 0.3
@@ -574,8 +578,6 @@ test.describe('General', () => {
 
     await page.notebook.run();
 
-    await page.waitForFrames(3);
-
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_nteract_vdom.png'
     );
@@ -589,6 +591,8 @@ async function openOverview(page) {
       border-top: none;
     }`
   });
+
+  await setLeftSidebarWidth(page);
 
   // Open Data.ipynb
   await page.dblclick('[aria-label="File Browser Section"] >> text=notebooks');
