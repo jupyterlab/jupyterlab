@@ -278,7 +278,7 @@ export class CellToolbarTracker implements IDisposable {
   }
   
   /**
-   * 
+   * Check for overlap between rendered Markdown and the cell toolbar
    * 
    * @param activeCell A rendered MarkdownCell
    * @returns `true` if the first line of the output overlaps with the cell toolbar, `false` otherwise
@@ -312,8 +312,12 @@ export class CellToolbarTracker implements IDisposable {
   
   private _codeOverlapsToolbar(activeCell: Cell<ICellModel>): boolean {
     const activeCellElement = activeCell.node;
-    const lineRight = activeCellElement
-      .getElementsByClassName('jp-InputArea-editor')[0]
+    const editorWidget = activeCell.editorWidget;
+    const editor = activeCell.editor;
+    if (editor.lineCount < 1) {
+      return false; // Nothing in the editor
+    }
+    const lineRight = editorWidget.node
       .getElementsByClassName('CodeMirror-line')[0].children[0] // First span under first pre
       .getBoundingClientRect().right;
   
