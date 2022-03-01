@@ -684,7 +684,7 @@ const codeConsolePlugin: JupyterFrontEndPlugin<void> = {
  * A plugin to copy CodeCell outputs.
  */
 const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extensions:copy-output',
+  id: '@jupyterlab/notebook-extension:copy-output',
   activate: activateCopyOutput,
   requires: [ITranslator, INotebookTracker],
   autoStart: true
@@ -694,7 +694,7 @@ const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
  * Kernel status indicator.
  */
 const kernelStatus: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extensions:kernel-status',
+  id: '@jupyterlab/notebook-extension:kernel-status',
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
@@ -720,7 +720,7 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
  * Cursor position.
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extensions:cursor-position',
+  id: '@jupyterlab/notebook-extension:cursor-position',
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
@@ -1474,7 +1474,7 @@ function activateNotebookHandler(
         'sideBySideRightMarginOverride'
       ).composite as string
     };
-    const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell { 
+    const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
       margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
     const sideBySideMarginTag = document.getElementById(SIDE_BY_SIDE_STYLE_ID);
