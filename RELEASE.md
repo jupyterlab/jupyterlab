@@ -34,6 +34,7 @@ The recommended time period for the Beta phase is a minimum of 2 weeks.
 The draft changelog describing user-facing changes will be published with the first Beta release.
 
 The community of extension developers and active users will be invited to commence testing the new Beta release including the draft user-facing changelog, and an invitation to open issues for any major:
+
 - regressions,
 - usability problems
 - points needing clarification (or inclusion) in the changelog, and
