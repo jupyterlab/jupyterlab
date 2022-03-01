@@ -197,16 +197,22 @@
     "shortcut": {
       "properties": {
         "args": {
+          "title": "The arguments for the command",
           "type": "object"
         },
         "command": {
+          "title": "The command id",
+          "description": "The command executed when the binding is matched.",
           "type": "string"
         },
         "disabled": {
+          "description": "Whether this shortcut is disabled or not.",
           "type": "boolean",
           "default": false
         },
         "keys": {
+          "title": "The key sequence for the binding",
+          "description": "The key shortcut like `Ctrl A` or the sequence of shortcuts to press like [`Ctrl A`, `B`]",
           "items": {
             "type": "string"
           },
@@ -214,6 +220,7 @@
           "type": "array"
         },
         "selector": {
+          "title": "CSS selector",
           "type": "string"
         }
       },
