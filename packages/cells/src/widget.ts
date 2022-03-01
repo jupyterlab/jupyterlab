@@ -263,6 +263,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   readonly contentFactory: Cell.IContentFactory;
 
   /**
+   * Signal to indicate that widget has changed in size
+   */
+  readonly sizeChanged = new Signal<this, void>(this);
+
+  /**
    * Get the prompt node used by the cell.
    */
   get promptNode(): HTMLElement {
@@ -511,6 +516,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   protected onFitRequest(msg: Message): void {
     // need this for for when a theme changes font size
     this.editor.refresh();
+  }
+
+  /**
+   * Handle `resize` messages.
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    this.sizeChanged.emit()
   }
 
   /**
@@ -1426,7 +1438,7 @@ export abstract class AttachmentsCell<
   }
 }
 
-/** ****************************************************************************
+/******************************************************************************
  * MarkdownCell
  ******************************************************************************/
 
