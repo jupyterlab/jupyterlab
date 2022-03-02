@@ -329,8 +329,13 @@ export class CellToolbarTracker implements IDisposable {
     if (editor.lineCount < 1) {
       return false; // Nothing in the editor
     }
-    const lineRight = editorWidget.node
-      .getElementsByClassName('CodeMirror-line')[0].children[0] // First span under first pre
+
+    const codeMirrorLines = editorWidget.node
+      .getElementsByClassName('CodeMirror-line');
+    if (codeMirrorLines.length < 1) {
+      return false; // No lines present
+    }
+    const lineRight = codeMirrorLines[0].children[0] // First span under first pre
       .getBoundingClientRect().right;
   
     const toolbarLeft = this._cellToolbarLeft(activeCell);
