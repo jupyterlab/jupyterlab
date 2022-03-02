@@ -35,6 +35,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:all": "npm run build && webpack",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
