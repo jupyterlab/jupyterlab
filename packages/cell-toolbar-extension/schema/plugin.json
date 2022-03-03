@@ -66,9 +66,9 @@
       ],
       "default": [
         {
-          "command": "notebook:copy-cell",
-          "icon": "ui-components:copy",
-          "tooltip": "Copy Cell"
+          "command": "notebook:duplicate-below",
+          "icon": "@jupyterlab/cell-toolbar:duplicate",
+          "tooltip": "Duplicate Cell"
         },
         {
           "command": "notebook:move-cell-up",

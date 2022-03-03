@@ -158,6 +158,8 @@ namespace CommandIDs {
 
   export const pasteBelow = 'notebook:paste-cell-below';
 
+  export const duplicateBelow = 'notebook:duplicate-below';
+
   export const pasteAndReplace = 'notebook:paste-and-replace-cell';
 
   export const moveUp = 'notebook:move-cell-up';
@@ -2059,6 +2061,21 @@ function addCommands(
         return NotebookActions.paste(current.content, 'above');
       }
     },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.duplicateBelow, {
+    label: trans.__('Duplicate Cells Below'),
+    caption: trans.__('Copy the selected cells and paste them below the selection'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        NotebookActions.copy(current.content);
+        NotebookActions.paste(current.content, 'below');
+      }
+    },
+    // A "duplicate" icon is available in the cell-toolbar package
+    icon: args => (args.toolbar ? copyIcon : ''),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {

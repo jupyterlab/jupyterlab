@@ -19,6 +19,7 @@ import { EXTENSION_ID, ICellMenuItem } from './tokens';
 import addAboveSvg from '../style/icons/addabove.svg';
 import addBelowSvg from '../style/icons/addbelow.svg';
 import deleteSvg from '../style/icons/delete.svg';
+import duplicateSvg from '../style/icons/duplicate.svg';
 import moveDownSvg from '../style/icons/movedown.svg';
 import moveUpSvg from '../style/icons/moveup.svg';
 
@@ -55,6 +56,10 @@ export const addBelowIcon = new LabIcon({
 export const deleteIcon = new LabIcon({
   name: `${EXTENSION_ID}:delete`,
   svgstr: deleteSvg
+});
+export const duplicateIcon = new LabIcon({
+  name: `${EXTENSION_ID}:duplicate`,
+  svgstr: duplicateSvg
 });
 export const moveDownIcon = new LabIcon({
   name: `${EXTENSION_ID}:move-down`,
