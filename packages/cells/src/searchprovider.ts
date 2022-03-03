@@ -7,18 +7,17 @@ import {
   CodeMirrorSearchHighlighter
 } from '@jupyterlab/codemirror';
 import {
+  GenericSearchProvider,
   IBaseSearchProvider,
   IFiltersType,
   ISearchMatch,
-  ISearchProviderRegistry,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { IObservableString } from '@jupyterlab/observables';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
-import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IOutputModel } from '@jupyterlab/rendermime';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-
 import { CodeCellModel, ICellModel } from './model';
 import { Cell, MarkdownCell } from './widget';
 
@@ -84,9 +83,9 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   /**
    * Clear currently highlighted match
    */
-  clearSelection(): void {
+  clearHighlight(): void {
     this.currentIndex = null;
-    this.cmHandler.clearSelection();
+    this.cmHandler.clearHighlight();
   }
 
   /**
@@ -346,21 +345,6 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
  */
 class CodeCellSearchProvider extends CellSearchProvider {
   /**
-   * Constructor
-   *
-   * @param cell Cell widget
-   * @param rendermime Notebook rendermime registry
-   * @param searchRegistry Application search provider registry
-   */
-  constructor(
-    cell: Cell<ICellModel>,
-    protected rendermime?: IRenderMimeRegistry,
-    protected searchRegistry?: ISearchProviderRegistry
-  ) {
-    super(cell);
-  }
-
-  /**
    * Number of matches in the cell.
    */
   get matchesSize(): number {
@@ -382,8 +366,8 @@ class CodeCellSearchProvider extends CellSearchProvider {
   /**
    * Clear currently highlighted match.
    */
-  clearSelection(): void {
-    super.clearSelection();
+  clearHighlight(): void {
+    super.clearHighlight();
     this._updateHighlightedOutput();
   }
 
@@ -579,12 +563,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
   }
 
   private async _updateOutput(output: IOutputModel): Promise<void> {
-    if (
-      !this.query ||
-      this.filters?.output === false ||
-      !this.rendermime ||
-      !this.searchRegistry
-    ) {
+    if (!this.query || this.filters?.output === false) {
       return Promise.resolve();
     }
 
@@ -620,25 +599,33 @@ class CodeCellSearchProvider extends CellSearchProvider {
  */
 class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
-   * Number of matches in the cell.
+   * Constructor
+   *
+   * @param cell Cell widget
    */
-  get matchesSize(): number {
-    // TODO
-    // const cell = this.cell as MarkdownCell;
-    // return this.isActive
-    //   ? cell.rendered
-    //     ? cell.highlights.length
-    //     : super.matchesSize
-    //   : 0;
-    return super.matchesSize;
+  constructor(cell: Cell<ICellModel>) {
+    super(cell);
+    this.renderedProvider = new GenericSearchProvider(
+      (cell as MarkdownCell).renderer
+    );
   }
-
   /**
    * Clear currently highlighted match
    */
-  clearSelection(): void {
-    super.clearSelection();
-    this.updateRenderedSelection();
+  clearHighlight(): void {
+    super.clearHighlight();
+    this.renderedProvider.clearHighlight();
+  }
+
+  /**
+   * Dispose the search provider
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+    this.renderedProvider.dispose();
   }
 
   /**
@@ -646,7 +633,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async endQuery(): Promise<void> {
     await super.endQuery();
-    // (this.cell as MarkdownCell).highlights = [];
+    await this.renderedProvider.endQuery();
   }
 
   /**
@@ -661,19 +648,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     const cell = this.cell as MarkdownCell;
-    if (cell.rendered) {
-      this.currentIndex =
-        this.currentIndex === null ? 0 : this.currentIndex + 1;
-      // if (this.currentIndex >= cell.highlights.length) {
-      //   this.currentIndex = null;
-      // } else {
-      //   match = cell.highlights[this.currentIndex] as ISearchMatch;
-      // }
-    } else {
-      match = await super.highlightNext();
+    if (cell.rendered && this.matchesSize > 0) {
+      // Unrender the cell if there are matches within the cell
+      this._unrenderedByHighligh = true;
+      cell.rendered = false;
     }
 
-    this.updateRenderedSelection();
+    match = await super.highlightNext();
 
     return match;
   }
@@ -686,39 +667,15 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
     const cell = this.cell as MarkdownCell;
-    if (cell.rendered) {
-      // TODO
-      // this.currentIndex =
-      //   this.currentIndex === null
-      //     ? cell.highlights.length - 1
-      //     : this.currentIndex - 1;
-      // if (this.currentIndex < 0) {
-      //   this.currentIndex = null;
-      // } else {
-      //   match = cell.highlights[this.currentIndex] as ISearchMatch;
-      // }
-    } else {
-      match = await super.highlightPrevious();
+    if (cell.rendered && this.matchesSize > 0) {
+      // Unrender the cell if there are matches within the cell
+      this._unrenderedByHighligh = true;
+      cell.rendered = false;
     }
 
-    this.updateRenderedSelection();
+    match = await super.highlightPrevious();
 
     return match;
-  }
-
-  /**
-   * Replace all matches in the cell source with the provided text
-   *
-   * @param newText The replacement text.
-   * @returns Whether a replace occurred.
-   */
-  async replaceAllMatches(newText: string): Promise<boolean> {
-    const occurred = await super.replaceAllMatches(newText);
-
-    // if (occurred) {
-    //   (this.cell as MarkdownCell).highlights = [];
-    // }
-    return occurred;
   }
 
   /**
@@ -733,32 +690,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     filters?: IFiltersType
   ): Promise<void> {
     await super.startQuery(query, filters);
-    await this.onInputChanged(this.cell.model.value);
-    (this.cell as MarkdownCell).renderedChanged.connect(
-      this.onRenderedChanged,
-      this
-    );
-  }
-
-  /**
-   * Callback on source change
-   *
-   * @param content Cell source
-   * @param changes Source change
-   */
-  protected async onInputChanged(
-    content: IObservableString,
-    changes?: IObservableString.IChangedArgs
-  ): Promise<void> {
-    await super.onInputChanged(content, changes);
-    // TODO
-    // if (this.query !== null && this.isActive) {
-    //   (this
-    //     .cell as MarkdownCell).highlights = await MarkdownSearchEngine.search(
-    //     this.query,
-    //     content.text
-    //   );
-    // }
+    const cell = this.cell as MarkdownCell;
+    if (cell.rendered) {
+      this.onRenderedChanged(cell, cell.rendered);
+    }
+    cell.renderedChanged.connect(this.onRenderedChanged, this);
   }
 
   /**
@@ -768,52 +704,33 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param rendered New rendered value
    */
   protected onRenderedChanged(cell: MarkdownCell, rendered: boolean): void {
-    this.currentIndex = null;
-    this.onInputChanged(this.cell.model.value).catch(reason => {
-      console.error(
-        `Fail to update markdown cell search highlight on rendered change:\n${reason}`
-      );
-    });
-  }
-
-  private updateRenderedSelection() {
-    const cell = this.cell as MarkdownCell;
-    const cellRenderer = cell.renderer;
-
-    if (cellRenderer) {
-      // TODO
-      // const oldHit = cellRenderer.node.querySelector(
-      //   `span.${HIGHLIGHT_CLASS_NAME}.${SELECTED_HIGHLIGHT_CLASS}`
-      // );
-      // if (oldHit) {
-      //   oldHit.classList.remove(SELECTED_HIGHLIGHT_CLASS);
-      // }
-      // if (cell.rendered && this.currentMatchIndex !== null) {
-      //   const newHit = cellRenderer.node.querySelectorAll(
-      //     `span.${HIGHLIGHT_CLASS_NAME}`
-      //   )[this.currentMatchIndex];
-      //   newHit?.classList.add(SELECTED_HIGHLIGHT_CLASS);
-      // }
+    if (!this._unrenderedByHighligh) {
+      this.currentIndex = null;
+    }
+    this._unrenderedByHighligh = false;
+    if (rendered) {
+      this.renderedProvider.startQuery(this.query);
+    } else {
+      this.renderedProvider.endQuery();
     }
   }
+
+  protected renderedProvider: GenericSearchProvider;
+  private _unrenderedByHighligh = false;
 }
 
 /**
  * Factory to create a cell search provider
  *
  * @param cell Cell widget
- * @param rendermime Notebook rendermime registry
- * @param searchRegistry Application search provider registry
  * @returns Cell search provider
  */
 export function createCellSearchProvider(
-  cell: Cell<ICellModel>,
-  rendermime?: IRenderMimeRegistry,
-  searchRegistry?: ISearchProviderRegistry
+  cell: Cell<ICellModel>
 ): CellSearchProvider {
   switch (cell.model.type) {
     case 'code':
-      return new CodeCellSearchProvider(cell, rendermime, searchRegistry);
+      return new CodeCellSearchProvider(cell);
     case 'markdown':
       return new MarkdownCellSearchProvider(cell);
     default:

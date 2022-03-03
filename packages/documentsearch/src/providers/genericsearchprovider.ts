@@ -197,6 +197,17 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   readonly isReadOnly = true;
 
   /**
+   * Clear currently highlighted match.
+   */
+  clearHighlight(): void {
+    if (this._currentMatchIndex !== null) {
+      const hit = this._markNodes[this._currentMatchIndex];
+      hit.classList.remove(...SELECTED_CLASSES);
+      this._currentMatchIndex = null;
+    }
+  }
+
+  /**
    * Move the current match indicator to the next match.
    *
    * @param loop Whether to loop within the matches list.
@@ -204,7 +215,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(loop?: boolean): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(false, loop);
+    return this._highlightNext(false, loop) ?? undefined;
   }
 
   /**
@@ -217,7 +228,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   async highlightPrevious(
     loop?: boolean
   ): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(true, loop);
+    return this._highlightNext(true, loop) ?? undefined;
   }
 
   /**
@@ -251,9 +262,13 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
    */
-  async startQuery(query: RegExp, filters = {}): Promise<void> {
+  async startQuery(query: RegExp | null, filters = {}): Promise<void> {
     await this.endQuery();
     this._query = query;
+
+    if (query === null) {
+      return Promise.resolve();
+    }
 
     const matches = await HTMLSearchEngine.search(query, this.widget.node);
 
@@ -273,14 +288,14 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
 
       subMatches.forEach(match => {
         // TODO: support tspan for svg when svg support is added
-        const spannedNode = document.createElement('span');
-        spannedNode.classList.add(...FOUND_CLASSES);
-        spannedNode.textContent = match.text;
+        const markedNode = document.createElement('mark');
+        markedNode.classList.add(...FOUND_CLASSES);
+        markedNode.textContent = match.text;
 
         const newNode = activeNode.splitText(match.position);
         newNode.textContent = newNode.textContent!.slice(match.text.length);
-        parent.insertBefore(spannedNode, newNode);
-        this._spanNodes.push(spannedNode);
+        parent.insertBefore(markedNode, newNode);
+        this._markNodes.push(markedNode);
       });
     }
 
@@ -307,12 +322,12 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    */
   async endQuery(): Promise<void> {
     this._mutationObserver.disconnect();
-    this._spanNodes.forEach(el => {
+    this._markNodes.forEach(el => {
       const parent = el.parentNode!;
       parent.replaceChild(document.createTextNode(el.textContent!), el);
       parent.normalize();
     });
-    this._spanNodes = [];
+    this._markNodes = [];
     this._matches = [];
     this._currentMatchIndex = null;
   }
@@ -320,14 +335,14 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   private _highlightNext(
     reverse: boolean,
     loop?: boolean
-  ): IHTMLSearchMatch | undefined {
+  ): IHTMLSearchMatch | null {
     if (this._matches.length === 0) {
-      return undefined;
+      return null;
     }
-    if (!this._currentMatchIndex) {
+    if (this._currentMatchIndex === null) {
       this._currentMatchIndex = reverse ? this.matches.length - 1 : 0;
     } else {
-      const hit = this._spanNodes[this._currentMatchIndex];
+      const hit = this._markNodes[this._currentMatchIndex];
       hit.classList.remove(...SELECTED_CLASSES);
 
       this._currentMatchIndex = reverse
@@ -344,8 +359,8 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
       }
     }
 
-    if (this._currentMatchIndex) {
-      const hit = this._spanNodes[this._currentMatchIndex];
+    if (this._currentMatchIndex !== null) {
+      const hit = this._markNodes[this._currentMatchIndex];
       hit.classList.add(...SELECTED_CLASSES);
       // If not in view, scroll just enough to see it
       if (!elementInViewport(hit)) {
@@ -355,7 +370,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
 
       return this._matches[this._currentMatchIndex];
     } else {
-      return undefined;
+      return null;
     }
   }
 
@@ -365,16 +380,16 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   ) {
     // This is typically cheap, but we do not control the rate of change or size of the output
     await this.startQuery(this._query);
-    this.changed.emit(undefined);
+    this.changed.emit();
   }
 
-  private _query: RegExp;
+  private _query: RegExp | null;
   private _currentMatchIndex: number | null;
   private _matches: IHTMLSearchMatch[] = [];
   private _mutationObserver: MutationObserver = new MutationObserver(
     this._onWidgetChanged.bind(this)
   );
-  private _spanNodes = new Array<HTMLSpanElement>();
+  private _markNodes = new Array<HTMLSpanElement>();
 }
 
 function elementInViewport(el: HTMLElement): boolean {

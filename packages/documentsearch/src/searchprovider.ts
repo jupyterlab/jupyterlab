@@ -113,6 +113,11 @@ export abstract class SearchProvider<T extends Widget = Widget>
   abstract endQuery(): Promise<void>;
 
   /**
+   * Clear currently highlighted match.
+   */
+  abstract clearHighlight(): void;
+
+  /**
    * Highlight the next match.
    *
    * @returns The next match if available

@@ -191,6 +191,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
+   * Clear currently highlighted match.
+   */
+  clearHighlight(): void {
+    if (this._currentProviderIndex !== null) {
+      this._searchProviders[this._currentProviderIndex].clearHighlight();
+      this._currentProviderIndex = null;
+    }
+  }
+
+  /**
    * Highlight the next match.
    *
    * @param loop Whether to loop within the matches list.
@@ -349,7 +359,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     changes: IObservableList.IChangedArgs<ICellModel>
   ): void {
     // It was removed in https://github.com/jupyterlab/jupyterlab/pull/7835
-    this._clearSelection();
+    this.clearHighlight();
 
     const addCellProvider = (index: number) => {
       const cell = this.widget.content.widgets[index];
@@ -489,14 +499,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     await this._onSelectionChanged();
 
     if (this.widget.content.activeCellIndex !== this._currentProviderIndex) {
-      this._clearSelection();
-    }
-  }
-
-  private _clearSelection() {
-    if (this._currentProviderIndex !== null) {
-      this._searchProviders[this._currentProviderIndex].clearSelection();
-      this._currentProviderIndex = null;
+      this.clearHighlight();
     }
   }
 

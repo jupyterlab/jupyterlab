@@ -142,6 +142,16 @@ export class CodeMirrorSearchProvider
   }
 
   /**
+   * Clear currently highlighted match.
+   */
+  clearHighlight(): void {
+    this._currentMatch = null;
+    const cursor = this.editor.getCursorPosition();
+    // Reset cursor position to remove any selection
+    this.editor.setCursorPosition(cursor);
+  }
+
+  /**
    * Move the current match indicator to the next match.
    *
    * @param loop Whether to loop within the matches list.
@@ -554,7 +564,7 @@ export class CodeMirrorSearchHighlighter {
   /**
    * Clear all highlighted matches
    */
-  clearSelection(): void {
+  clearHighlight(): void {
     this._currentIndex = null;
     this._highlightCurrentMatch();
   }
@@ -643,7 +653,8 @@ export class CodeMirrorSearchHighlighter {
       });
     } else {
       // Set cursor to remove any selection
-      this._cm.setCursorPosition({ line: 0, column: 0 });
+      const cursor = this._cm.getCursorPosition();
+      this._cm.setCursorPosition(cursor);
     }
   }
 

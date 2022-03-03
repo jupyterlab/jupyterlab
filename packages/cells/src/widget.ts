@@ -42,7 +42,6 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { addIcon } from '@jupyterlab/ui-components';
 
 import {
-  JSONExt,
   JSONObject,
   JSONValue,
   PartialJSONValue,
@@ -1478,6 +1477,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       })
     });
 
+    this._renderer = this._rendermime.createRenderer('text/markdown');
+    this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
+
     // Stop codemirror handling paste
     this.editor.setOption('handlePaste', false);
 
@@ -1500,8 +1502,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
-    this.renderCollapseButtons(this._renderer!);
-    this.renderInput(this._renderer!);
+    this.renderCollapseButtons(this._renderer);
+    this.renderInput(this._renderer);
     this._showEditorForReadOnlyMarkdown =
       options.showEditorForReadOnlyMarkdown ??
       MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
@@ -1556,7 +1558,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         collapseButton.classList.remove('jp-mod-collapsed');
       }
     }
-    this.renderCollapseButtons(this._renderer!);
+    this.renderCollapseButtons(this._renderer);
   }
 
   get numberChildNodes(): number {
@@ -1564,7 +1566,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
   set numberChildNodes(value: number) {
     this._numberChildNodes = value;
-    this.renderCollapseButtons(this._renderer!);
+    this.renderCollapseButtons(this._renderer);
   }
 
   get toggleCollapsedSignal(): Signal<this, boolean> {
@@ -1622,7 +1624,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   /**
    * Renderer
    */
-  get renderer(): IRenderMime.IRenderer | null {
+  get renderer(): IRenderMime.IRenderer {
     return this._renderer;
   }
 
@@ -1772,25 +1774,19 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
       void this._updateRenderedInput();
-      this.renderInput(this._renderer!);
+      this.renderInput(this._renderer);
     }
   }
 
   /**
    * Update the rendered input.
-   *
-   * @param force Force updating the rendered view
    */
-  private _updateRenderedInput(force = false): Promise<void> {
+  private _updateRenderedInput(): Promise<void> {
     const model = this.model;
     const text = (model && model.value.text) || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
-    if (text !== this._prevText || force) {
+    if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
-      if (!this._renderer) {
-        this._renderer = this._rendermime.createRenderer('text/markdown');
-        this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
-      }
       this._prevText = text;
       return this._renderer.renderModel(mimeModel);
     }
@@ -1815,7 +1811,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _numberChildNodes: number;
   private _headingCollapsed: boolean;
   private _toggleCollapsedSignal = new Signal<this, boolean>(this);
-  private _renderer: IRenderMime.IRenderer | null = null;
+  private _renderer: IRenderMime.IRenderer;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);

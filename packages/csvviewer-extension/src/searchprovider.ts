@@ -51,6 +51,13 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   readonly isReadOnly = true;
 
   /**
+   * Clear currently highlighted match.
+   */
+  clearHighlight(): void {
+    // no-op
+  }
+
+  /**
    * Move the current match indicator to the next match.
    *
    * @param loop Whether to loop within the matches list.

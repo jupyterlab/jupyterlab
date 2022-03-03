@@ -227,6 +227,11 @@ export interface IBaseSearchProvider {
   endQuery(): Promise<void>;
 
   /**
+   * Clear currently highlighted match.
+   */
+  clearHighlight(): void;
+
+  /**
    * Highlight the next match
    *
    * @param loop Whether to loop within the matches list.
