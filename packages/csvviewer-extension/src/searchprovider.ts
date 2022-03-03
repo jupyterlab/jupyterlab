@@ -3,7 +3,6 @@
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import {
-  ISearchMatch,
   ISearchProvider,
   ISearchProviderRegistry,
   SearchProvider
