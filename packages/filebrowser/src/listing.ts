@@ -909,7 +909,6 @@ export class DirListing extends Widget {
       if (this._editNode !== (event.target as HTMLElement)) {
         this._editNode.focus();
         this._editNode.blur();
-        clearTimeout(this._selectTimer);
       } else {
         return;
       }
@@ -922,10 +921,6 @@ export class DirListing extends Widget {
     }
 
     this.handleFileSelect(event);
-
-    if (event.button !== 0) {
-      clearTimeout(this._selectTimer);
-    }
 
     // Check for clearing a context menu.
     const newContext = (IS_MAC && event.ctrlKey) || event.button === 2;
@@ -1099,7 +1094,6 @@ export class DirListing extends Widget {
     event.preventDefault();
     event.stopPropagation();
 
-    clearTimeout(this._selectTimer);
     this._editNode.blur();
 
     // Find a valid double click target.
@@ -1199,7 +1193,6 @@ export class DirListing extends Widget {
   protected evtDrop(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    clearTimeout(this._selectTimer);
     if (event.proposedAction === 'none') {
       event.dropAction = 'none';
       return;
@@ -1354,10 +1347,8 @@ export class DirListing extends Widget {
     // Start the drag and remove the mousemove and mouseup listeners.
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
-    clearTimeout(this._selectTimer);
     void this._drag.start(clientX, clientY).then(action => {
       this._drag = null;
-      clearTimeout(this._selectTimer);
     });
   }
 
@@ -1368,8 +1359,6 @@ export class DirListing extends Widget {
     // Fetch common variables.
     const items = this._sortedItems;
     const index = Private.hitTestNodes(this._items, event);
-
-    clearTimeout(this._selectTimer);
 
     if (index === -1) {
       return;
@@ -1678,7 +1667,6 @@ export class DirListing extends Widget {
     pressY: number;
     index: number;
   } | null = null;
-  private _selectTimer = -1;
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
