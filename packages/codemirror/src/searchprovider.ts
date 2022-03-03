@@ -653,8 +653,7 @@ export class CodeMirrorSearchHighlighter {
       });
     } else {
       // Set cursor to remove any selection
-      const cursor = this._cm.getCursorPosition();
-      this._cm.setCursorPosition(cursor);
+      this._cm.setCursorPosition({ line: 0, column: 0 });
     }
   }
 

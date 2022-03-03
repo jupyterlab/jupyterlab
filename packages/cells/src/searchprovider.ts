@@ -649,7 +649,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
 
     const cell = this.cell as MarkdownCell;
     if (cell.rendered && this.matchesSize > 0) {
-      // Unrender the cell if there are matches within the cell
+      // Unrender the cell
       this._unrenderedByHighligh = true;
       cell.rendered = false;
     }
@@ -711,6 +711,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (rendered) {
       this.renderedProvider.startQuery(this.query);
     } else {
+      // Force cursor position to ensure reverse search is working as expected
+      cell.editor.setCursorPosition({ column: 0, line: 0 });
       this.renderedProvider.endQuery();
     }
   }
