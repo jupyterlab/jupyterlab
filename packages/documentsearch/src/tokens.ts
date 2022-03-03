@@ -160,16 +160,11 @@ export interface ISearchProviderConstructor<T extends Widget = Widget> {
    * this factory.
    *
    * @param widget The widget to search on
-   * @param registry The search provider registry
    * @param translator [optional] The translator object
    *
    * @returns The search provider on the widget
    */
-  createSearchProvider(
-    widget: T,
-    registry: ISearchProviderRegistry,
-    translator?: ITranslator
-  ): ISearchProvider<T>;
+  createSearchProvider(widget: T, translator?: ITranslator): ISearchProvider<T>;
 
   /**
    * Report whether or not this provider has the ability to search on the
@@ -197,25 +192,6 @@ export interface ISearchProviderRegistry {
   ): IDisposable;
 
   /**
-   * Add a search mime type provider to the registry.
-   *
-   * @param key - The mime type key.
-   * @returns A disposable delegate that, when disposed, deregisters the given search provider
-   */
-  registerMimeTypeSearchEngine(
-    key: string,
-    provider: IMimeTypeSearchEngine
-  ): IDisposable;
-
-  /**
-   * Returns a matching provider for the mimetype.
-   *
-   * @param key The mimetype to search over.
-   * @returns the search provider, or undefined if none exists.
-   */
-  getMimeTypeSearchEngine(key: string): IMimeTypeSearchEngine | undefined;
-
-  /**
    * Returns a matching provider for the widget.
    *
    * @param widget - The widget to search over.
@@ -228,21 +204,6 @@ export interface ISearchProviderRegistry {
    * or removed.
    */
   changed: ISignal<ISearchProviderRegistry, void>;
-}
-
-/**
- * Mime type search engine interface
- */
-export interface IMimeTypeSearchEngine {
-  /**
-   * Search for regular expression matches on data
-   *
-   * @param query Regular expression to test for
-   * @param data Data to test
-   *
-   * @returns The list of matches
-   */
-  search(query: RegExp, data: any): Promise<ISearchMatch[]>;
 }
 
 /**

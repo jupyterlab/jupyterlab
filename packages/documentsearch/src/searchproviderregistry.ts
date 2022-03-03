@@ -6,7 +6,6 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import {
-  IMimeTypeSearchEngine,
   ISearchProvider,
   ISearchProviderConstructor,
   ISearchProviderRegistry
@@ -42,24 +41,6 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
   }
 
   /**
-   * Add a search mime type provider to the registry.
-   *
-   * @param key - The mime type key.
-   * @returns A disposable delegate that, when disposed, deregisters the given search provider
-   */
-  registerMimeTypeSearchEngine(
-    key: string,
-    provider: IMimeTypeSearchEngine
-  ): IDisposable {
-    this._mimeEngineMap.set(key, provider);
-    this._changed.emit();
-    return new DisposableDelegate(() => {
-      this._mimeEngineMap.delete(key);
-      this._changed.emit();
-    });
-  }
-
-  /**
    * Returns a matching provider for the widget.
    *
    * @param widget - The widget to search over.
@@ -69,16 +50,6 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     widget: T
   ): ISearchProvider<T> | undefined {
     return this._findMatchingProvider(this._providerMap, widget);
-  }
-
-  /**
-   * Returns a matching provider for the mimetype.
-   *
-   * @param key The mimetype to search over.
-   * @returns the search provider, or undefined if none exists.
-   */
-  getMimeTypeSearchEngine(key: string): IMimeTypeSearchEngine | undefined {
-    return this._mimeEngineMap.get(key);
   }
 
   /**
@@ -97,7 +68,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     // widget.
     for (const P of providerMap.values()) {
       if (P.canSearchOn(widget)) {
-        return P.createSearchProvider(widget, this, this.translator);
+        return P.createSearchProvider(widget, this.translator);
       }
     }
     return undefined;
@@ -108,7 +79,6 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     string,
     ISearchProviderConstructor<Widget>
   >();
-  private _mimeEngineMap = new Map<string, IMimeTypeSearchEngine>();
 }
 
 namespace Private {

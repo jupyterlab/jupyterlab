@@ -15,17 +15,12 @@ import {
 } from '@jupyterlab/documentsearch';
 import { IObservableString } from '@jupyterlab/observables';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
-import {
-  HIGHLIGHT_CLASS_NAME,
-  IOutputModel,
-  IRenderMimeRegistry,
-  MarkdownSearchEngine
-} from '@jupyterlab/rendermime';
+import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 import { CodeCellModel, ICellModel } from './model';
-import { Cell, CodeCell, MarkdownCell } from './widget';
+import { Cell, MarkdownCell } from './widget';
 
 /**
  * Class applied on highlighted search matches
@@ -376,8 +371,9 @@ class CodeCellSearchProvider extends CellSearchProvider {
     let outputsSize = 0;
     const outputs = (this.cell.model as CodeCellModel).outputs;
     for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-      const output = outputs.get(outputIdx);
-      outputsSize += output.highlights?.length ?? 0;
+      // TODO
+      // const output = outputs.get(outputIdx);
+      // outputsSize += output.highlights?.length ?? 0;
     }
 
     return super.matchesSize + outputsSize;
@@ -478,10 +474,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
     await super.endQuery();
     const outputs = (this.cell.model as CodeCellModel).outputs;
     for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-      const output = outputs.get(outputIdx);
-      if ((output.highlights?.length ?? 0) > 0) {
-        output.highlights = [];
-      }
+      // TODO
+      // const output = outputs.get(outputIdx);
+      // if ((output.highlights?.length ?? 0) > 0) {
+      //   output.highlights = [];
+      // }
     }
   }
 
@@ -493,18 +490,19 @@ class CodeCellSearchProvider extends CellSearchProvider {
   protected getCurrentMatch(): ISearchMatch | undefined {
     let match = super.getCurrentMatch();
     if (!match && this.currentMatchIndex !== null) {
-      let index = this.currentMatchIndex - this.cmHandler.matches.length;
+      // let index = this.currentMatchIndex - this.cmHandler.matches.length;
       const outputs = (this.cell.model as CodeCellModel).outputs;
       for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-        const output = outputs.get(outputIdx);
-        if (index < (output.highlights?.length ?? 0)) {
-          match = {
-            ...output.highlights![index]
-          };
-          break;
-        } else {
-          index -= output.highlights?.length ?? 0;
-        }
+        // TODO
+        // const output = outputs.get(outputIdx);
+        // if (index < (output.highlights?.length ?? 0)) {
+        //   match = {
+        //     ...output.highlights![index]
+        //   };
+        //   break;
+        // } else {
+        //   index -= output.highlights?.length ?? 0;
+        // }
       }
     }
     return match;
@@ -532,7 +530,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
   private async _onOutputChanged(
     output: IOutputAreaModel,
-    changes?: [number, string]
+    index?: number
   ): Promise<void> {
     if (!this.isActive) {
       return Promise.resolve();
@@ -540,11 +538,8 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
     const model = this.cell.model as CodeCellModel;
 
-    if (changes) {
-      const [index, type] = changes;
-      if (type === 'data') {
-        await this._updateOutput(model.outputs.get(index));
-      }
+    if (index) {
+      await this._updateOutput(model.outputs.get(index));
     } else {
       if (this.query && this.filters?.output !== false) {
         const outputs = model.outputs;
@@ -562,25 +557,25 @@ class CodeCellSearchProvider extends CellSearchProvider {
   }
 
   private _updateHighlightedOutput() {
+    // TODO
     // Clear any output selection
-    const outputArea = (this.cell as CodeCell).outputArea;
-    const oldHit = outputArea.node.querySelector(
-      `span.${HIGHLIGHT_CLASS_NAME}.${SELECTED_HIGHLIGHT_CLASS}`
-    );
-    if (oldHit) {
-      oldHit.classList.remove(SELECTED_HIGHLIGHT_CLASS);
-    }
-
-    const outputIndex =
-      this.currentMatchIndex !== null
-        ? this.currentMatchIndex - this.cmHandler.matches.length
-        : -1;
-    if (outputIndex >= 0) {
-      const newHit = outputArea.node.querySelectorAll(
-        `span.${HIGHLIGHT_CLASS_NAME}`
-      )[outputIndex];
-      newHit.classList.add(SELECTED_HIGHLIGHT_CLASS);
-    }
+    // const outputArea = (this.cell as CodeCell).outputArea;
+    // const oldHit = outputArea.node.querySelector(
+    //   `span.${HIGHLIGHT_CLASS_NAME}.${SELECTED_HIGHLIGHT_CLASS}`
+    // );
+    // if (oldHit) {
+    //   oldHit.classList.remove(SELECTED_HIGHLIGHT_CLASS);
+    // }
+    // const outputIndex =
+    //   this.currentMatchIndex !== null
+    //     ? this.currentMatchIndex - this.cmHandler.matches.length
+    //     : -1;
+    // if (outputIndex >= 0) {
+    //   const newHit = outputArea.node.querySelectorAll(
+    //     `span.${HIGHLIGHT_CLASS_NAME}`
+    //   )[outputIndex];
+    //   newHit.classList.add(SELECTED_HIGHLIGHT_CLASS);
+    // }
   }
 
   private async _updateOutput(output: IOutputModel): Promise<void> {
@@ -593,27 +588,28 @@ class CodeCellSearchProvider extends CellSearchProvider {
       return Promise.resolve();
     }
 
+    // TODO
     // Search for the display mimetype as in packages/outputarea/src/widget.ts
-    const mimeType = this.rendermime.preferredMimeType(
-      output.data,
-      output.trusted ? 'any' : 'ensure'
-    );
-    if (mimeType) {
-      const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
-        mimeType
-      );
-      if (searchEngine && output.highlights) {
-        const hits = await searchEngine.search(
-          this.query!,
-          output.data[mimeType]
-        );
-        output.highlights = hits;
+    // const mimeType = this.rendermime.preferredMimeType(
+    //   output.data,
+    //   output.trusted ? 'any' : 'ensure'
+    // );
+    // if (mimeType) {
+    //   const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
+    //     mimeType
+    //   );
+    //   if (searchEngine && output.highlights) {
+    //     const hits = await searchEngine.search(
+    //       this.query!,
+    //       output.data[mimeType]
+    //     );
+    //     output.highlights = hits;
 
-        if (this.currentIndex !== null) {
-          this.currentIndex = null;
-        }
-      }
-    }
+    //     if (this.currentIndex !== null) {
+    //       this.currentIndex = null;
+    //     }
+    //   }
+    // }
 
     return Promise.resolve();
   }
@@ -627,12 +623,14 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * Number of matches in the cell.
    */
   get matchesSize(): number {
-    const cell = this.cell as MarkdownCell;
-    return this.isActive
-      ? cell.rendered
-        ? cell.highlights.length
-        : super.matchesSize
-      : 0;
+    // TODO
+    // const cell = this.cell as MarkdownCell;
+    // return this.isActive
+    //   ? cell.rendered
+    //     ? cell.highlights.length
+    //     : super.matchesSize
+    //   : 0;
+    return super.matchesSize;
   }
 
   /**
@@ -648,7 +646,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async endQuery(): Promise<void> {
     await super.endQuery();
-    (this.cell as MarkdownCell).highlights = [];
+    // (this.cell as MarkdownCell).highlights = [];
   }
 
   /**
@@ -666,11 +664,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (cell.rendered) {
       this.currentIndex =
         this.currentIndex === null ? 0 : this.currentIndex + 1;
-      if (this.currentIndex >= cell.highlights.length) {
-        this.currentIndex = null;
-      } else {
-        match = cell.highlights[this.currentIndex] as ISearchMatch;
-      }
+      // if (this.currentIndex >= cell.highlights.length) {
+      //   this.currentIndex = null;
+      // } else {
+      //   match = cell.highlights[this.currentIndex] as ISearchMatch;
+      // }
     } else {
       match = await super.highlightNext();
     }
@@ -689,15 +687,16 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     let match: ISearchMatch | undefined = undefined;
     const cell = this.cell as MarkdownCell;
     if (cell.rendered) {
-      this.currentIndex =
-        this.currentIndex === null
-          ? cell.highlights.length - 1
-          : this.currentIndex - 1;
-      if (this.currentIndex < 0) {
-        this.currentIndex = null;
-      } else {
-        match = cell.highlights[this.currentIndex] as ISearchMatch;
-      }
+      // TODO
+      // this.currentIndex =
+      //   this.currentIndex === null
+      //     ? cell.highlights.length - 1
+      //     : this.currentIndex - 1;
+      // if (this.currentIndex < 0) {
+      //   this.currentIndex = null;
+      // } else {
+      //   match = cell.highlights[this.currentIndex] as ISearchMatch;
+      // }
     } else {
       match = await super.highlightPrevious();
     }
@@ -716,9 +715,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   async replaceAllMatches(newText: string): Promise<boolean> {
     const occurred = await super.replaceAllMatches(newText);
 
-    if (occurred) {
-      (this.cell as MarkdownCell).highlights = [];
-    }
+    // if (occurred) {
+    //   (this.cell as MarkdownCell).highlights = [];
+    // }
     return occurred;
   }
 
@@ -752,13 +751,14 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     changes?: IObservableString.IChangedArgs
   ): Promise<void> {
     await super.onInputChanged(content, changes);
-    if (this.query !== null && this.isActive) {
-      (this
-        .cell as MarkdownCell).highlights = await MarkdownSearchEngine.search(
-        this.query,
-        content.text
-      );
-    }
+    // TODO
+    // if (this.query !== null && this.isActive) {
+    //   (this
+    //     .cell as MarkdownCell).highlights = await MarkdownSearchEngine.search(
+    //     this.query,
+    //     content.text
+    //   );
+    // }
   }
 
   /**
@@ -781,19 +781,19 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const cellRenderer = cell.renderer;
 
     if (cellRenderer) {
-      const oldHit = cellRenderer.node.querySelector(
-        `span.${HIGHLIGHT_CLASS_NAME}.${SELECTED_HIGHLIGHT_CLASS}`
-      );
-      if (oldHit) {
-        oldHit.classList.remove(SELECTED_HIGHLIGHT_CLASS);
-      }
-
-      if (cell.rendered && this.currentMatchIndex !== null) {
-        const newHit = cellRenderer.node.querySelectorAll(
-          `span.${HIGHLIGHT_CLASS_NAME}`
-        )[this.currentMatchIndex];
-        newHit?.classList.add(SELECTED_HIGHLIGHT_CLASS);
-      }
+      // TODO
+      // const oldHit = cellRenderer.node.querySelector(
+      //   `span.${HIGHLIGHT_CLASS_NAME}.${SELECTED_HIGHLIGHT_CLASS}`
+      // );
+      // if (oldHit) {
+      //   oldHit.classList.remove(SELECTED_HIGHLIGHT_CLASS);
+      // }
+      // if (cell.rendered && this.currentMatchIndex !== null) {
+      //   const newHit = cellRenderer.node.querySelectorAll(
+      //     `span.${HIGHLIGHT_CLASS_NAME}`
+      //   )[this.currentMatchIndex];
+      //   newHit?.classList.add(SELECTED_HIGHLIGHT_CLASS);
+      // }
     }
   }
 }

@@ -133,7 +133,7 @@ describe('outputarea/widget', () => {
         }
       );
 
-      test('should be displayed all widgets when clicked', () => {
+      test('should display all widgets when clicked', () => {
         const widget = new OutputArea({
           rendermime,
           model,

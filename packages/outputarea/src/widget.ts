@@ -193,7 +193,7 @@ export class OutputArea extends Widget {
    * The maximum number of output items to display on top and bottom of cell output.
    *
    * ### Notes
-   * It is set to Infinity if no trim is to be applied.
+   * It is set to Infinity if no trim is applied.
    */
   get maxNumberOutputs(): number {
     return this._maxNumberOutputs;
@@ -303,32 +303,15 @@ export class OutputArea extends Widget {
    */
   protected onStateChanged(
     sender: IOutputAreaModel,
-    change: [number, string] | void
+    change: number | void
   ): void {
     if (change) {
-      if (change[0] >= this._maxNumberOutputs) {
+      if (change >= this._maxNumberOutputs) {
         // Bail early
         return;
       }
-      if (change[1] == 'highlights') {
-        const layout = this.layout as PanelLayout;
-        const outputPanel = layout.widgets[change[0]] as Panel;
-        const renderer = outputPanel.widgets
-          ? outputPanel.widgets[1]
-          : new Widget();
-        const model = this.model.get(change[0]);
-        if (
-          (renderer as IRenderMime.IRenderer).renderHighlights &&
-          model.highlights
-        ) {
-          (renderer as IRenderMime.IRenderer).renderHighlights!(
-            model.highlights
-          );
-        }
-      } else {
-        this._setOutput(change[0], this.model.get(change[0]));
-        this.outputLengthChanged.emit(this.model.length);
-      }
+      this._setOutput(change, this.model.get(change));
+      this.outputLengthChanged.emit(this.model.length);
     } else {
       for (
         let i = 0;
@@ -582,7 +565,7 @@ export class OutputArea extends Widget {
       output = new Private.IsolatedRenderer(output);
     }
     Private.currentPreferredMimetype.set(output, mimeType);
-    output.renderModel(model, model.highlights).catch(error => {
+    output.renderModel(model).catch(error => {
       // Manually append error message to output
       const pre = document.createElement('pre');
       pre.textContent = `Javascript Error: ${error.message}`;

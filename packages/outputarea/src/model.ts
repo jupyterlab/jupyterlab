@@ -17,11 +17,8 @@ export interface IOutputAreaModel extends IDisposable {
    * A signal emitted when the output item changes.
    *
    * The number is the index of the output that changed.
-   * Possible values for the string parameter are:
-   * - 'highlights': Emitted when the output highlights are changed
-   * - 'data': Emitted when the output data and/or metadata are changed
    */
-  readonly stateChanged: ISignal<IOutputAreaModel, [number, string] | void>;
+  readonly stateChanged: ISignal<IOutputAreaModel, number | void>;
 
   /**
    * A signal emitted when the list of items changes.
@@ -152,10 +149,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   /**
    * A signal emitted when an item changes.
    */
-  get stateChanged(): ISignal<
-    IOutputAreaModel,
-    [number, 'data' | 'highlights']
-  > {
+  get stateChanged(): ISignal<IOutputAreaModel, number> {
     return this._stateChanged;
   }
 
@@ -420,10 +414,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   /**
    * Handle a change to an item.
    */
-  private _onGenericChange(
-    itemModel: IOutputModel,
-    itemChange: 'data' | 'highlights'
-  ): void {
+  private _onGenericChange(itemModel: IOutputModel): void {
     let idx: number;
     for (idx = 0; idx < this.list.length; idx++) {
       const item = this.list.get(idx);
@@ -431,17 +422,14 @@ export class OutputAreaModel implements IOutputAreaModel {
         break;
       }
     }
-    this._stateChanged.emit([idx, itemChange]);
+    this._stateChanged.emit(idx);
   }
 
   private _lastStream = '';
   private _lastName: 'stdout' | 'stderr';
   private _trusted = false;
   private _isDisposed = false;
-  private _stateChanged = new Signal<
-    OutputAreaModel,
-    [number, 'data' | 'highlights']
-  >(this);
+  private _stateChanged = new Signal<OutputAreaModel, number>(this);
   private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(
     this
   );

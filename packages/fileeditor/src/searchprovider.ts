@@ -6,10 +6,7 @@ import {
   CodeMirrorEditor,
   CodeMirrorSearchProvider
 } from '@jupyterlab/codemirror';
-import {
-  ISearchProvider,
-  ISearchProviderRegistry
-} from '@jupyterlab/documentsearch';
+import { ISearchProvider } from '@jupyterlab/documentsearch';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from './widget';
@@ -42,14 +39,12 @@ export class FileEditorSearchProvider
    * this factory.
    *
    * @param widget The widget to search on
-   * @param registry The search provider registry
    * @param translator [optional] The translator object
    *
    * @returns The search provider on the widget
    */
   static createSearchProvider(
     widget: FileEditorPanel,
-    registry: ISearchProviderRegistry,
     translator?: ITranslator
   ): ISearchProvider<FileEditorPanel> {
     return new FileEditorSearchProvider(widget);

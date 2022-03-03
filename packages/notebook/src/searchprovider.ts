@@ -14,7 +14,6 @@ import {
   IFiltersType,
   ISearchMatch,
   ISearchProvider,
-  ISearchProviderRegistry,
   SearchProvider
 } from '@jupyterlab/documentsearch';
 import {
@@ -34,12 +33,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * Constructor
    *
    * @param widget The widget to search in
-   * @param registry Application search provider registry
    * @param translator Application translator
    */
   constructor(
     widget: NotebookPanel,
-    protected registry: ISearchProviderRegistry,
     protected translator: ITranslator = nullTranslator
   ) {
     super(widget);
@@ -71,17 +68,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * this factory.
    *
    * @param widget The widget to search on
-   * @param registry The search provider registry
    * @param translator [optional] The translator object
    *
    * @returns The search provider on the notebook panel
    */
   static createSearchProvider(
     widget: NotebookPanel,
-    registry: ISearchProviderRegistry,
     translator?: ITranslator
   ): ISearchProvider<NotebookPanel> {
-    return new NotebookSearchProvider(widget, registry, translator);
+    return new NotebookSearchProvider(widget, translator);
   }
 
   /**
@@ -255,11 +250,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // For each cell, create a search provider
     this._searchProviders = await Promise.all(
       cells.map(async cell => {
-        const cellSearchProvider = createCellSearchProvider(
-          cell,
-          this.widget.content.rendermime,
-          this.registry
-        );
+        const cellSearchProvider = createCellSearchProvider(cell);
         cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
 
         await cellSearchProvider.setIsActive(
@@ -362,11 +353,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     const addCellProvider = (index: number) => {
       const cell = this.widget.content.widgets[index];
-      const cellSearchProvider = createCellSearchProvider(
-        cell,
-        this.widget.content.rendermime,
-        this.registry
-      );
+      const cellSearchProvider = createCellSearchProvider(cell);
       cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
 
       ArrayExt.insert(this._searchProviders, index, cellSearchProvider);

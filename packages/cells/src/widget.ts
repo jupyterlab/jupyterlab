@@ -1515,23 +1515,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
-   * Highlighted texts in rendered view
-   */
-  get highlights(): IRenderMime.IHighlight[] {
-    return this._highlights;
-  }
-  set highlights(v: IRenderMime.IHighlight[]) {
-    if (!JSONExt.deepEqual(this._highlights as any, v as any)) {
-      this._highlights = v;
-      if (this.rendered) {
-        this._updateRenderedInput(true).catch(reason => {
-          console.error('Failed to update rendered markdown cell', reason);
-        });
-      }
-    }
-  }
-
-  /**
    * Text that represents the heading if cell is a heading.
    * Returns empty string if not a heading.
    */
@@ -1809,7 +1792,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
       }
       this._prevText = text;
-      return this._renderer.renderModel(mimeModel, this._highlights);
+      return this._renderer.renderModel(mimeModel);
     }
     return Promise.resolve(void 0);
   }
@@ -1828,9 +1811,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
   }
 
-  private _highlights: IRenderMime.IHighlight[] = new Array<
-    IRenderMime.IHighlight
-  >();
   private _monitor: ActivityMonitor<ICellModel, void>;
   private _numberChildNodes: number;
   private _headingCollapsed: boolean;

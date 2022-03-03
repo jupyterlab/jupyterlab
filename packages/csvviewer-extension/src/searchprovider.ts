@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import {
-  ISearchProvider,
-  ISearchProviderRegistry,
-  SearchProvider
-} from '@jupyterlab/documentsearch';
+import { ISearchProvider, SearchProvider } from '@jupyterlab/documentsearch';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
@@ -25,14 +21,12 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * this factory.
    *
    * @param widget The widget to search on
-   * @param registry The search provider registry
    * @param translator [optional] The translator object
    *
    * @returns The search provider on the widget
    */
   static createSearchProvider(
     widget: CSVDocumentWidget,
-    registry: ISearchProviderRegistry,
     translator?: ITranslator
   ): ISearchProvider<CSVDocumentWidget> {
     return new CSVSearchProvider(widget);

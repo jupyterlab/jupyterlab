@@ -15,6 +15,5 @@ export * from './mimemodel';
 export * from './outputmodel';
 export * from './registry';
 export * from './renderers';
-export * from './searchproviders';
 export * from './tokens';
 export * from './widgets';
