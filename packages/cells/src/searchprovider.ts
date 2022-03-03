@@ -16,8 +16,10 @@ import {
 import { IObservableString } from '@jupyterlab/observables';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
 import { IOutputModel } from '@jupyterlab/rendermime';
+import { each } from '@lumino/algorithm';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
+import { CodeCell } from '.';
 import { CodeCellModel, ICellModel } from './model';
 import { Cell, MarkdownCell } from './widget';
 
@@ -345,6 +347,24 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
  */
 class CodeCellSearchProvider extends CellSearchProvider {
   /**
+   * Constructor
+   *
+   * @param cell Cell widget
+   */
+  constructor(cell: Cell<ICellModel>) {
+    super(cell);
+
+    each((cell as CodeCell).outputArea.children(), (output, index) => {
+      this.outputsProvider.push(new GenericSearchProvider(output));
+    });
+
+    // TODO
+    // const outputs = (this.cell.model as CodeCellModel).outputs;
+    // outputs.changed.connect(this._onOutputsChanged, this);
+    // outputs.stateChanged.connect(this._onOutputChanged, this);
+  }
+
+  /**
    * Number of matches in the cell.
    */
   get matchesSize(): number {
@@ -352,15 +372,13 @@ class CodeCellSearchProvider extends CellSearchProvider {
       return 0;
     }
 
-    let outputsSize = 0;
-    const outputs = (this.cell.model as CodeCellModel).outputs;
-    for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-      // TODO
-      // const output = outputs.get(outputIdx);
-      // outputsSize += output.highlights?.length ?? 0;
-    }
-
-    return super.matchesSize + outputsSize;
+    return (
+      super.matchesSize +
+      this.outputsProvider.reduce(
+        (sum, provider) => sum + (provider.matchesSize ?? 0),
+        0
+      )
+    );
   }
 
   /**
@@ -448,21 +466,19 @@ class CodeCellSearchProvider extends CellSearchProvider {
     await super.startQuery(query, filters);
 
     // Search outputs
-    const outputs = (this.cell.model as CodeCellModel).outputs;
-    await this._onOutputChanged(outputs);
-    outputs.changed.connect(this._onOutputsChanged, this);
-    outputs.stateChanged.connect(this._onOutputChanged, this);
+    if (filters?.output !== false) {
+      this.outputsProvider.forEach(provider => {
+        provider.startQuery(query);
+      });
+    }
   }
 
   async endQuery(): Promise<void> {
     await super.endQuery();
-    const outputs = (this.cell.model as CodeCellModel).outputs;
-    for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-      // TODO
-      // const output = outputs.get(outputIdx);
-      // if ((output.highlights?.length ?? 0) > 0) {
-      //   output.highlights = [];
-      // }
+    if (this.filters?.output !== false) {
+      this.outputsProvider.forEach(provider => {
+        provider.endQuery;
+      });
     }
   }
 
@@ -592,6 +608,8 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
     return Promise.resolve();
   }
+
+  protected outputsProvider: GenericSearchProvider[];
 }
 
 /**
@@ -609,6 +627,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       (cell as MarkdownCell).renderer
     );
   }
+
   /**
    * Clear currently highlighted match
    */

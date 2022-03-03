@@ -131,7 +131,7 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * A public signal used to indicate the number of outputs has changed.
+   * A public signal used to indicate the number of displayed outputs has changed.
    *
    * #### Notes
    * This is useful for parents who want to apply styling based on the number
@@ -172,7 +172,9 @@ export class OutputArea extends Widget {
     // Make sure there were no input widgets.
     if (this.widgets.length) {
       this._clear();
-      this.outputLengthChanged.emit(this.model.length);
+      this.outputLengthChanged.emit(
+        Math.min(this.model.length, this._maxNumberOutputs)
+      );
     }
 
     // Handle published messages.
@@ -233,7 +235,6 @@ export class OutputArea extends Widget {
     switch (args.type) {
       case 'add':
         this._insertOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
         break;
       case 'remove':
         if (this.widgets.length) {
@@ -260,16 +261,17 @@ export class OutputArea extends Widget {
             // prevent jitter caused by immediate height change
             this._preventHeightChangeJitter();
           }
-          this.outputLengthChanged.emit(this.model.length);
         }
         break;
       case 'set':
         this._setOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
         break;
       default:
         break;
     }
+    this.outputLengthChanged.emit(
+      Math.min(this.model.length, this._maxNumberOutputs)
+    );
   }
 
   /**
@@ -305,23 +307,19 @@ export class OutputArea extends Widget {
     sender: IOutputAreaModel,
     change: number | void
   ): void {
+    const outputLength = Math.min(this.model.length, this._maxNumberOutputs);
     if (change) {
       if (change >= this._maxNumberOutputs) {
         // Bail early
         return;
       }
       this._setOutput(change, this.model.get(change));
-      this.outputLengthChanged.emit(this.model.length);
     } else {
-      for (
-        let i = 0;
-        i < Math.min(this.model.length, this._maxNumberOutputs);
-        i++
-      ) {
+      for (let i = 0; i < outputLength; i++) {
         this._setOutput(i, this.model.get(i));
       }
     }
-    this.outputLengthChanged.emit(this.model.length);
+    this.outputLengthChanged.emit(outputLength);
   }
 
   /**
@@ -518,6 +516,10 @@ export class OutputArea extends Widget {
     for (let idx = lastShown; idx < this.model.length; idx++) {
       this._insertOutput(idx, this.model.get(idx));
     }
+
+    this.outputLengthChanged.emit(
+      Math.min(this.model.length, this._maxNumberOutputs)
+    );
   }
 
   /**
