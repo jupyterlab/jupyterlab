@@ -3,6 +3,11 @@
 Real Time Collaboration
 =======================
 
+.. warning::
+    
+    Real Time Collaboration is an experimental feature. Please back up any 
+    files that you edit with it.
+
 From JupyterLab 3.1, file documents and notebooks have collaborative
 editing using the `Yjs shared editing framework <https://github.com/yjs/yjs>`_.
 Editors are not collaborative by default; to activate it, start JupyterLab
