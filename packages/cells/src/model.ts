@@ -827,7 +827,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           const newValues = event.newValues.map(output => output.toJSON());
           codeCell.updateOutputs(
             event.oldIndex,
-            event.oldValues.length,
+            event.oldIndex + newValues.length,
             newValues
           );
           break;
