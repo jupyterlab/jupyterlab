@@ -603,15 +603,28 @@ export class StaticNotebook extends Widget {
       this.onCellInserted(index, widget);
     }
 
+    this._scheduleCellRenderOnIdle();
+  }
+
+  private _scheduleCellRenderOnIdle() {
     if (this._observer && this.notebookConfig.renderCellOnIdle) {
       const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
       (window as any).requestIdleCallback(renderPlaceholderCells, {
-        timeout: 1000
+        timeout: 60000
       });
     }
   }
 
   private _renderPlaceholderCells(deadline: any) {
+    const timeRemaining = deadline.timeRemaining();
+
+    // In case this got triggered because of timeout or when there are screen updates (https://w3c.github.io/requestidlecallback/#idle-periods),
+    // avoiding the render and rescheduling the place holder cell rendering.
+    if (deadline.didTimeout || timeRemaining < 50) {
+      this._scheduleCellRenderOnIdle();
+      return;
+    }
+
     if (
       this._renderedCellsCount < this._cellsArray.length &&
       this._renderedCellsCount >=
@@ -623,6 +636,11 @@ export class StaticNotebook extends Widget {
   }
 
   private _renderPlaceholderCell(cell: Cell, index: number) {
+    // We don't have cancel mechanism for scheduled requestIdleCallback(renderPlaceholderCells),
+    // adding defensive check for layout in case tab is closed.
+    if (!this.layout) {
+      return;
+    }
     const pl = this.layout as PanelLayout;
     pl.removeWidgetAt(index);
     pl.insertWidget(index, cell);
