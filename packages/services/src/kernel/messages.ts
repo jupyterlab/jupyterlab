@@ -1264,6 +1264,6 @@ export function isInputReplyMsg(msg: IMessage): msg is IInputReplyMsg {
 /**
  * The list of supported kernel wire protocols over websocket.
  */
-export const supportedKernelWebSocketProtocols: string[] = [
-  'v1.kernel.websocket.jupyter.org'
-];
+export enum supportedKernelWebSocketProtocols {
+  v1KernelWebsocketJupyterOrg = 'v1.kernel.websocket.jupyter.org'
+}

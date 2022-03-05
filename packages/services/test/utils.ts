@@ -192,7 +192,8 @@ class SocketTester implements IService {
         this._server = new WebSocket.Server({
           port,
           handleProtocols: () => {
-            return KernelMessage.supportedKernelWebSocketProtocols[0];
+            return KernelMessage.supportedKernelWebSocketProtocols
+              .v1KernelWebsocketJupyterOrg;
           }
         });
       } catch (err) {
@@ -482,7 +483,11 @@ export class KernelTester extends SocketTester {
    */
   send(msg: KernelMessage.Message): void {
     this.sendRaw(
-      serialize(msg, KernelMessage.supportedKernelWebSocketProtocols[0])
+      serialize(
+        msg,
+        KernelMessage.supportedKernelWebSocketProtocols
+          .v1KernelWebsocketJupyterOrg
+      )
     );
   }
 
@@ -549,7 +554,8 @@ export class KernelTester extends SocketTester {
       }
       const data = deserialize(
         msg,
-        KernelMessage.supportedKernelWebSocketProtocols[0]
+        KernelMessage.supportedKernelWebSocketProtocols
+          .v1KernelWebsocketJupyterOrg
       );
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
@@ -663,7 +669,11 @@ export class SessionTester extends SocketTester {
    */
   send(msg: KernelMessage.IMessage): void {
     this.sendRaw(
-      serialize(msg, KernelMessage.supportedKernelWebSocketProtocols[0])
+      serialize(
+        msg,
+        KernelMessage.supportedKernelWebSocketProtocols
+          .v1KernelWebsocketJupyterOrg
+      )
     );
   }
 
@@ -686,7 +696,8 @@ export class SessionTester extends SocketTester {
       }
       const data = deserialize(
         msg,
-        KernelMessage.supportedKernelWebSocketProtocols[0]
+        KernelMessage.supportedKernelWebSocketProtocols
+          .v1KernelWebsocketJupyterOrg
       );
       if (KernelMessage.isInfoRequestMsg(data)) {
         // First send status busy message.

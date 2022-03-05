@@ -1618,7 +1618,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _reconnectTimeout: any = null;
-  private _supportedProtocols = KernelMessage.supportedKernelWebSocketProtocols;
+  private _supportedProtocols: string[] = Object.values(
+    KernelMessage.supportedKernelWebSocketProtocols
+  );
 
   private _futures = new Map<
     string,
