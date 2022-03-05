@@ -431,7 +431,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     )
     flags['collaborative'] = (
         {'LabApp': {'collaborative': True}},
-        "Whether to enable collaborative mode."
+        "Whether to enable collaborative mode (experimental)."
     )
 
     subcommands = dict(
@@ -492,7 +492,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         help="Whether to expose the global app instance to browser via window.jupyterlab")
 
     collaborative = Bool(False, config=True,
-        help="Whether to enable collaborative mode.")
+        help="Whether to enable collaborative mode (experimental).")
 
     @default('app_dir')
     def _default_app_dir(self):
