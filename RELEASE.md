@@ -2,6 +2,56 @@
 
 This document guides a contributor through creating a release of JupyterLab.
 
+## The JupyterLab Release Process
+
+JupyterLab follows [semver](https://semver.org/) for the versioning of the Python and JavaScript packages.
+
+### Release Timeline
+
+Although the commitments listed below are "best effort", the JupyterLab team tries to follow a couple of guidelines:
+
+- one major version per year, which usually includes API breaking changes
+- several minor versions per year that include new features but no API breaking changes
+- support and bug fixes on a couple of final releases (by backporting PRs and releasing from release branches)
+
+Release Plans are tracked in dedicated issues, and are closed when the final release. See the following two issues as an example:
+
+- [3.3 Release Plan](https://github.com/jupyterlab/jupyterlab/issues/11643)
+- [4.0 Release Plan](https://github.com/jupyterlab/jupyterlab/issues/9647)
+
+### Alpha Releases
+
+Alpha releases have a fairly low bar. Their purpose is to start putting the new JupyterLab version into the hands of users and extension authors.
+
+The requirements for an alpha release should be that JupyterLab can be installed and run. Bugs and breaking changes are accepted.
+
+### Beta Releases
+
+Beta releases usually try to not have breaking changes in the API, although breaking changes can sometimes happen during that phase if they were missed during the alpha stage.
+
+The recommended time period for the Beta phase is a minimum of 2 weeks.
+
+The draft changelog describing user-facing changes will be published with the first Beta release.
+
+The community of extension developers and active users will be invited to commence testing the new Beta release including the draft user-facing changelog, and an invitation to open issues for any major:
+
+- regressions,
+- usability problems
+- points needing clarification (or inclusion) in the changelog, and
+- points needing clarification in the extension porting guide.
+
+The start of the Beta-testing period will be announced on Jupyter mailing group and Jupyter Discourse for major releases, and only via a Discourse post for minor releases.
+
+All bug reports raised during the Beta-testing period should be triaged (but not necessarily addressed) before releasing the first release candidate.
+
+### Release Candidates
+
+Release Candidates (RC) are a signal to the extension developer community that they should start migrating to the new version to test it. At that point we consider the software stable.
+
+The RC stage is often a good time to address final release documentation changes or minor UX tweaks. During the RC phase, the JupyterLab developers and maintainers start updating third-party extensions over to the new version to test it. This work during the RC phase, and giving time for feedback from extension developers, can take up to a couple of weeks.
+
+The recommended time period for the Release Candidate phase is a minimum of 1 week for minor releases, and 2 weeks for major releases.
+
 ## Automated Releases with the Jupyter Releaser
 
 The recommended way to make a release is to use [`jupyter_releaser`](https://github.com/jupyter-server/jupyter_releaser#checklist-for-adoption).
@@ -11,6 +61,13 @@ The recommended way to make a release is to use [`jupyter_releaser`](https://git
 The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#making-your-first-release. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
 
 Here is a quick summary of the different steps.
+
+#### Communicate on Gitter
+
+It is good practice to let other maintainers and users know when starting a new release.
+
+For this we usually leave a small message in the `jupyterlab` room on Gitter: https://gitter.im/jupyterlab/jupyterlab.
+Once the release is done, we also post a message with a link to the release notes, which include the changelog.
 
 #### Draft Changelog
 
