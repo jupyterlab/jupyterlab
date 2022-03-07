@@ -33,21 +33,21 @@ export class User implements ICurrentUser {
   }
 
   /**
-   * User's Username.
+   * User's unique identifier.
    */
   get username(): string {
     return this._username;
   }
 
   /**
-   * User's name.
+   * User's full name.
    */
   get name(): string {
     return this._name;
   }
 
   /**
-   * User's last name.
+   * Shorter version of the name for displaying it on the UI.
    */
   get displayName(): string {
     return this._displayName;
