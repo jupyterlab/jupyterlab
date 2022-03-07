@@ -24,7 +24,6 @@ export class CellMenu extends Widget {
       case 'mousedown':
       case 'click':
         // Ensure the mouse event is not propagated on the cell.
-        // As buttons are hidden except on the selected cell, this is fine.
         event.stopPropagation();
         break;
     }
