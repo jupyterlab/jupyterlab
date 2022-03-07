@@ -159,16 +159,14 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * The current index of the selected match.
    */
   get currentMatchIndex(): number | null {
-    return this._currentMatchIndex;
+    return this._currentMatchIndex >= 0 ? this._currentMatchIndex : null;
   }
 
   /**
    * The current match
    */
   get currentMatch(): IHTMLSearchMatch | null {
-    return this._currentMatchIndex === null
-      ? null
-      : this._matches[this._currentMatchIndex];
+    return this._matches[this._currentMatchIndex] ?? null;
   }
 
   /**
@@ -200,11 +198,11 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * Clear currently highlighted match.
    */
   clearHighlight(): void {
-    if (this._currentMatchIndex !== null) {
+    if (this._currentMatchIndex >= 0) {
       const hit = this._markNodes[this._currentMatchIndex];
       hit.classList.remove(...SELECTED_CLASSES);
-      this._currentMatchIndex = null;
     }
+    this._currentMatchIndex = -1;
   }
 
   /**
@@ -215,7 +213,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(loop?: boolean): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(false, loop) ?? undefined;
+    return this._highlightNext(false, loop ?? true) ?? undefined;
   }
 
   /**
@@ -228,7 +226,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   async highlightPrevious(
     loop?: boolean
   ): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(true, loop) ?? undefined;
+    return this._highlightNext(true, loop ?? true) ?? undefined;
   }
 
   /**
@@ -286,7 +284,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
         subMatches.unshift(matches[nodeIdx]);
       }
 
-      subMatches.forEach(match => {
+      const markedNodes = subMatches.map(match => {
         // TODO: support tspan for svg when svg support is added
         const markedNode = document.createElement('mark');
         markedNode.classList.add(...FOUND_CLASSES);
@@ -295,13 +293,16 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
         const newNode = activeNode.splitText(match.position);
         newNode.textContent = newNode.textContent!.slice(match.text.length);
         parent.insertBefore(markedNode, newNode);
-        this._markNodes.push(markedNode);
+        return markedNode;
       });
+
+      // Insert node in reverse order as we replace from last to first
+      // to maintain match position.
+      for (let i = markedNodes.length - 1; i >= 0; i--) {
+        this._markNodes.push(markedNodes[i]);
+      }
     }
 
-    if (matches.length > 0) {
-      this._currentMatchIndex = 0;
-    }
     // Watch for future changes:
     this._mutationObserver.observe(
       this.widget.node,
@@ -329,17 +330,17 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     });
     this._markNodes = [];
     this._matches = [];
-    this._currentMatchIndex = null;
+    this._currentMatchIndex = -1;
   }
 
   private _highlightNext(
     reverse: boolean,
-    loop?: boolean
+    loop: boolean
   ): IHTMLSearchMatch | null {
     if (this._matches.length === 0) {
       return null;
     }
-    if (this._currentMatchIndex === null) {
+    if (this._currentMatchIndex === -1) {
       this._currentMatchIndex = reverse ? this.matches.length - 1 : 0;
     } else {
       const hit = this._markNodes[this._currentMatchIndex];
@@ -349,8 +350,9 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
         ? this._currentMatchIndex - 1
         : this._currentMatchIndex + 1;
       if (
-        this._currentMatchIndex < 0 ||
-        this._currentMatchIndex >= this._matches.length
+        loop &&
+        (this._currentMatchIndex < 0 ||
+          this._currentMatchIndex >= this._matches.length)
       ) {
         // Cheap way to make this a circular buffer
         this._currentMatchIndex =
@@ -359,7 +361,10 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
       }
     }
 
-    if (this._currentMatchIndex !== null) {
+    if (
+      this._currentMatchIndex >= 0 &&
+      this._currentMatchIndex < this._matches.length
+    ) {
       const hit = this._markNodes[this._currentMatchIndex];
       hit.classList.add(...SELECTED_CLASSES);
       // If not in view, scroll just enough to see it
@@ -370,6 +375,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
 
       return this._matches[this._currentMatchIndex];
     } else {
+      this._currentMatchIndex = -1;
       return null;
     }
   }
@@ -378,13 +384,14 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     mutations: MutationRecord[],
     observer: MutationObserver
   ) {
+    this._currentMatchIndex = -1;
     // This is typically cheap, but we do not control the rate of change or size of the output
     await this.startQuery(this._query);
     this.changed.emit();
   }
 
   private _query: RegExp | null;
-  private _currentMatchIndex: number | null;
+  private _currentMatchIndex: number;
   private _matches: IHTMLSearchMatch[] = [];
   private _mutationObserver: MutationObserver = new MutationObserver(
     this._onWidgetChanged.bind(this)

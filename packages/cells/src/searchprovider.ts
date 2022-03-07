@@ -14,13 +14,11 @@ import {
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { IObservableString } from '@jupyterlab/observables';
-import { IOutputAreaModel } from '@jupyterlab/outputarea';
-import { IOutputModel } from '@jupyterlab/rendermime';
-import { each } from '@lumino/algorithm';
+import { toArray } from '@lumino/algorithm';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { CodeCell } from '.';
-import { CodeCellModel, ICellModel } from './model';
+import { ICellModel } from './model';
 import { Cell, MarkdownCell } from './widget';
 
 /**
@@ -354,9 +352,10 @@ class CodeCellSearchProvider extends CellSearchProvider {
   constructor(cell: Cell<ICellModel>) {
     super(cell);
 
-    each((cell as CodeCell).outputArea.children(), (output, index) => {
-      this.outputsProvider.push(new GenericSearchProvider(output));
-    });
+    this.currentProviderIndex = -1;
+    this.outputsProvider = toArray(
+      (this.cell as CodeCell).outputArea.children()
+    ).map(output => new GenericSearchProvider(output));
 
     // TODO
     // const outputs = (this.cell.model as CodeCellModel).outputs;
@@ -386,7 +385,23 @@ class CodeCellSearchProvider extends CellSearchProvider {
    */
   clearHighlight(): void {
     super.clearHighlight();
-    this._updateHighlightedOutput();
+    this.outputsProvider.forEach(provider => {
+      provider.clearHighlight();
+    });
+  }
+
+  /**
+   * Dispose the search provider
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+    this.outputsProvider.map(provider => {
+      provider.dispose();
+    });
+    this.outputsProvider.length = 0;
   }
 
   /**
@@ -398,26 +413,39 @@ class CodeCellSearchProvider extends CellSearchProvider {
     if (this.matchesSize === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
-      if (
-        this.currentIndex !== null &&
-        this.currentIndex >= this.cmHandler.matches.length
-      ) {
-        this.currentIndex! += 1;
-      } else {
+      if (this.currentProviderIndex === -1) {
         const match = await super.highlightNext();
-        if (!match) {
-          this.currentIndex = this.cmHandler.matches.length;
+        if (match) {
+          this.currentIndex = this.cmHandler.currentIndex;
+          return match;
+        } else {
+          this.currentProviderIndex = 0;
         }
       }
 
-      if (this.currentIndex !== null && this.currentIndex >= this.matchesSize) {
-        this.currentIndex = null;
+      while (this.currentProviderIndex < this.outputsProvider.length) {
+        const provider = this.outputsProvider[this.currentProviderIndex];
+        const match = await provider.highlightNext(false);
+        if (match) {
+          this.currentIndex =
+            super.matchesSize +
+            this.outputsProvider
+              .slice(0, this.currentProviderIndex)
+              .reduce(
+                (sum, provider) => (sum += provider.matchesSize ?? 0),
+                0
+              ) +
+            provider.currentMatchIndex!;
+          return match;
+        } else {
+          this.currentProviderIndex += 1;
+        }
       }
+
+      this.currentProviderIndex = -1;
+      this.currentIndex = null;
+      return undefined;
     }
-
-    this._updateHighlightedOutput();
-
-    return Promise.resolve(this.getCurrentMatch());
   }
 
   /**
@@ -430,26 +458,38 @@ class CodeCellSearchProvider extends CellSearchProvider {
       this.currentIndex = null;
     } else {
       if (this.currentIndex === null) {
-        this.currentIndex = this.matchesSize - 1;
-      } else {
-        this.currentIndex -= 1;
+        this.currentProviderIndex = this.outputsProvider.length - 1;
       }
 
-      if (this.currentIndex < this.cmHandler.matches.length) {
-        const match = await super.highlightPrevious();
-        if (!match) {
-          this.currentIndex = null;
+      while (this.currentProviderIndex >= 0) {
+        const provider = this.outputsProvider[this.currentProviderIndex];
+
+        const match = await provider.highlightPrevious(false);
+        if (match) {
+          this.currentIndex =
+            super.matchesSize +
+            this.outputsProvider
+              .slice(0, this.currentProviderIndex)
+              .reduce(
+                (sum, provider) => (sum += provider.matchesSize ?? 0),
+                0
+              ) +
+            provider.currentMatchIndex!;
+          return match;
+        } else {
+          this.currentProviderIndex -= 1;
         }
       }
 
-      if (this.currentIndex !== null && this.currentIndex < 0) {
+      const match = await super.highlightPrevious();
+      if (match) {
+        this.currentIndex = this.cmHandler.currentIndex;
+        return match;
+      } else {
         this.currentIndex = null;
+        return undefined;
       }
     }
-
-    this._updateHighlightedOutput();
-
-    return Promise.resolve(this.getCurrentMatch());
   }
 
   /**
@@ -467,149 +507,102 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
     // Search outputs
     if (filters?.output !== false) {
-      this.outputsProvider.forEach(provider => {
-        provider.startQuery(query);
-      });
+      await Promise.all(
+        this.outputsProvider.map(provider => provider.startQuery(query))
+      );
     }
   }
 
   async endQuery(): Promise<void> {
     await super.endQuery();
     if (this.filters?.output !== false) {
-      this.outputsProvider.forEach(provider => {
-        provider.endQuery;
-      });
+      await Promise.all(
+        this.outputsProvider.map(provider => provider.endQuery())
+      );
     }
   }
 
-  /**
-   * Get the current match if it exists.
-   *
-   * @returns The current match
-   */
-  protected getCurrentMatch(): ISearchMatch | undefined {
-    let match = super.getCurrentMatch();
-    if (!match && this.currentMatchIndex !== null) {
-      // let index = this.currentMatchIndex - this.cmHandler.matches.length;
-      const outputs = (this.cell.model as CodeCellModel).outputs;
-      for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-        // TODO
-        // const output = outputs.get(outputIdx);
-        // if (index < (output.highlights?.length ?? 0)) {
-        //   match = {
-        //     ...output.highlights![index]
-        //   };
-        //   break;
-        // } else {
-        //   index -= output.highlights?.length ?? 0;
-        // }
-      }
-    }
-    return match;
-  }
+  // private async _onOutputsChanged(
+  //   output: IOutputAreaModel,
+  //   changes: IOutputAreaModel.ChangedArgs
+  // ): Promise<void> {
+  //   switch (changes.type) {
+  //     case 'add':
+  //     case 'set':
+  //       await Promise.all(
+  //         changes.newValues.map(output => this._updateOutput(output))
+  //       );
+  //       break;
+  //     case 'move':
+  //     case 'remove':
+  //       // Nothing to do
+  //       break;
+  //   }
 
-  private async _onOutputsChanged(
-    output: IOutputAreaModel,
-    changes: IOutputAreaModel.ChangedArgs
-  ): Promise<void> {
-    switch (changes.type) {
-      case 'add':
-      case 'set':
-        await Promise.all(
-          changes.newValues.map(output => this._updateOutput(output))
-        );
-        break;
-      case 'move':
-      case 'remove':
-        // Nothing to do
-        break;
-    }
+  //   this.changed.emit();
+  // }
 
-    this.changed.emit();
-  }
+  // private async _onOutputChanged(
+  //   output: IOutputAreaModel,
+  //   index?: number
+  // ): Promise<void> {
+  //   if (!this.isActive) {
+  //     return Promise.resolve();
+  //   }
 
-  private async _onOutputChanged(
-    output: IOutputAreaModel,
-    index?: number
-  ): Promise<void> {
-    if (!this.isActive) {
-      return Promise.resolve();
-    }
+  //   const model = this.cell.model as CodeCellModel;
 
-    const model = this.cell.model as CodeCellModel;
+  //   if (index) {
+  //     await this._updateOutput(model.outputs.get(index));
+  //   } else {
+  //     if (this.query && this.filters?.output !== false) {
+  //       const outputs = model.outputs;
+  //       const searchOutputs = new Array<Promise<void>>();
+  //       for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
+  //         const output = outputs.get(outputIdx);
+  //         searchOutputs.push(this._updateOutput(output));
+  //       }
 
-    if (index) {
-      await this._updateOutput(model.outputs.get(index));
-    } else {
-      if (this.query && this.filters?.output !== false) {
-        const outputs = model.outputs;
-        const searchOutputs = new Array<Promise<void>>();
-        for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-          const output = outputs.get(outputIdx);
-          searchOutputs.push(this._updateOutput(output));
-        }
+  //       await Promise.all(searchOutputs);
+  //     }
+  //   }
 
-        await Promise.all(searchOutputs);
-      }
-    }
+  //   this.changed.emit();
+  // }
 
-    this.changed.emit();
-  }
+  // private async _updateOutput(output: IOutputModel): Promise<void> {
+  //   if (!this.query || this.filters?.output === false) {
+  //     return Promise.resolve();
+  //   }
 
-  private _updateHighlightedOutput() {
-    // TODO
-    // Clear any output selection
-    // const outputArea = (this.cell as CodeCell).outputArea;
-    // const oldHit = outputArea.node.querySelector(
-    //   `span.${HIGHLIGHT_CLASS_NAME}.${SELECTED_HIGHLIGHT_CLASS}`
-    // );
-    // if (oldHit) {
-    //   oldHit.classList.remove(SELECTED_HIGHLIGHT_CLASS);
-    // }
-    // const outputIndex =
-    //   this.currentMatchIndex !== null
-    //     ? this.currentMatchIndex - this.cmHandler.matches.length
-    //     : -1;
-    // if (outputIndex >= 0) {
-    //   const newHit = outputArea.node.querySelectorAll(
-    //     `span.${HIGHLIGHT_CLASS_NAME}`
-    //   )[outputIndex];
-    //   newHit.classList.add(SELECTED_HIGHLIGHT_CLASS);
-    // }
-  }
+  //   // TODO
+  //   // Search for the display mimetype as in packages/outputarea/src/widget.ts
+  //   // const mimeType = this.rendermime.preferredMimeType(
+  //   //   output.data,
+  //   //   output.trusted ? 'any' : 'ensure'
+  //   // );
+  //   // if (mimeType) {
+  //   //   const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
+  //   //     mimeType
+  //   //   );
+  //   //   if (searchEngine && output.highlights) {
+  //   //     const hits = await searchEngine.search(
+  //   //       this.query!,
+  //   //       output.data[mimeType]
+  //   //     );
+  //   //     output.highlights = hits;
 
-  private async _updateOutput(output: IOutputModel): Promise<void> {
-    if (!this.query || this.filters?.output === false) {
-      return Promise.resolve();
-    }
+  //   //     if (this.currentIndex !== null) {
+  //   //       this.currentIndex = null;
+  //   //     }
+  //   //   }
+  //   // }
 
-    // TODO
-    // Search for the display mimetype as in packages/outputarea/src/widget.ts
-    // const mimeType = this.rendermime.preferredMimeType(
-    //   output.data,
-    //   output.trusted ? 'any' : 'ensure'
-    // );
-    // if (mimeType) {
-    //   const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
-    //     mimeType
-    //   );
-    //   if (searchEngine && output.highlights) {
-    //     const hits = await searchEngine.search(
-    //       this.query!,
-    //       output.data[mimeType]
-    //     );
-    //     output.highlights = hits;
-
-    //     if (this.currentIndex !== null) {
-    //       this.currentIndex = null;
-    //     }
-    //   }
-    // }
-
-    return Promise.resolve();
-  }
+  //   return Promise.resolve();
+  // }
 
   protected outputsProvider: GenericSearchProvider[];
+  protected currentProviderIndex: number;
 }
 
 /**

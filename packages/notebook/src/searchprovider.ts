@@ -244,7 +244,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     this._query = query;
     this._filters = {
-      output: true,
+      output: false,
       selectedCells: false,
       ...(filters ?? {})
     };
