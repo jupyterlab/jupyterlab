@@ -92,6 +92,7 @@
     "@jupyterlab/outputarea": "^4.0.0-alpha.5",
     "@jupyterlab/pdf-extension": "^4.0.0-alpha.5",
     "@jupyterlab/property-inspector": "^4.0.0-alpha.5",
+    "@jupyterlab/pygments-extension": "^4.0.0-alpha.5",
     "@jupyterlab/rendermime": "^4.0.0-alpha.5",
     "@jupyterlab/rendermime-extension": "^4.0.0-alpha.5",
     "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.5",

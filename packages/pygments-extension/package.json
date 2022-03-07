@@ -1,0 +1,39 @@
+{
+  "name": "@jupyterlab/pygments-extension",
+  "version": "4.0.0-alpha.5",
+  "description": "Pygments highlighting using the JupyterLab CSS variables",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
+  "main": "style/index.js",
+  "style": "style/index.css",
+  "directories": {
+    "style": "style/"
+  },
+  "files": [
+    "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
+  "scripts": {
+    "build": "python generate_css.py",
+    "build:all": "npm run build",
+    "clean": "rimraf style/base.css"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jupyterlab": {
+    "extension": true
+  },
+  "styleModule": "style/index.js"
+}
