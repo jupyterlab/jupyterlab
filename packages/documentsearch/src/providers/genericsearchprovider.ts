@@ -206,6 +206,26 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   }
 
   /**
+   * Dispose of the resources held by the search provider.
+   *
+   * #### Notes
+   * If the object's `dispose` method is called more than once, all
+   * calls made after the first will be a no-op.
+   *
+   * #### Undefined Behavior
+   * It is undefined behavior to use any functionality of the object
+   * after it has been disposed unless otherwise explicitly noted.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    this.endQuery();
+    super.dispose();
+  }
+
+  /**
    * Move the current match indicator to the next match.
    *
    * @param loop Whether to loop within the matches list.

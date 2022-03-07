@@ -14,7 +14,7 @@ import {
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { IObservableString } from '@jupyterlab/observables';
-import { toArray } from '@lumino/algorithm';
+import { OutputArea } from '@jupyterlab/outputarea';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { CodeCell } from '.';
@@ -353,14 +353,14 @@ class CodeCellSearchProvider extends CellSearchProvider {
     super(cell);
 
     this.currentProviderIndex = -1;
-    this.outputsProvider = toArray(
-      (this.cell as CodeCell).outputArea.children()
-    ).map(output => new GenericSearchProvider(output));
+    this.outputsProvider = [];
 
-    // TODO
-    // const outputs = (this.cell.model as CodeCellModel).outputs;
-    // outputs.changed.connect(this._onOutputsChanged, this);
-    // outputs.stateChanged.connect(this._onOutputChanged, this);
+    const outputs = (this.cell as CodeCell).outputArea;
+    this._onOutputsChanged(outputs, outputs.widgets.length);
+    outputs.outputLengthChanged.connect(this._onOutputsChanged, this);
+    outputs.disposed.connect(() => {
+      outputs.outputLengthChanged.disconnect(this._onOutputsChanged);
+    }, this);
   }
 
   /**
@@ -522,84 +522,28 @@ class CodeCellSearchProvider extends CellSearchProvider {
     }
   }
 
-  // private async _onOutputsChanged(
-  //   output: IOutputAreaModel,
-  //   changes: IOutputAreaModel.ChangedArgs
-  // ): Promise<void> {
-  //   switch (changes.type) {
-  //     case 'add':
-  //     case 'set':
-  //       await Promise.all(
-  //         changes.newValues.map(output => this._updateOutput(output))
-  //       );
-  //       break;
-  //     case 'move':
-  //     case 'remove':
-  //       // Nothing to do
-  //       break;
-  //   }
+  private async _onOutputsChanged(
+    outputArea: OutputArea,
+    changes: number
+  ): Promise<void> {
+    this.outputsProvider.forEach(provider => {
+      provider.dispose();
+    });
+    this.outputsProvider.length = 0;
 
-  //   this.changed.emit();
-  // }
+    this.currentProviderIndex = -1;
+    this.outputsProvider = (this.cell as CodeCell).outputArea.widgets.map(
+      output => new GenericSearchProvider(output)
+    );
 
-  // private async _onOutputChanged(
-  //   output: IOutputAreaModel,
-  //   index?: number
-  // ): Promise<void> {
-  //   if (!this.isActive) {
-  //     return Promise.resolve();
-  //   }
+    if (this.isActive && this.query && this.filters?.output !== false) {
+      this.outputsProvider.forEach(provider => {
+        provider.startQuery(this.query);
+      });
+    }
 
-  //   const model = this.cell.model as CodeCellModel;
-
-  //   if (index) {
-  //     await this._updateOutput(model.outputs.get(index));
-  //   } else {
-  //     if (this.query && this.filters?.output !== false) {
-  //       const outputs = model.outputs;
-  //       const searchOutputs = new Array<Promise<void>>();
-  //       for (let outputIdx = 0; outputIdx < outputs.length; outputIdx++) {
-  //         const output = outputs.get(outputIdx);
-  //         searchOutputs.push(this._updateOutput(output));
-  //       }
-
-  //       await Promise.all(searchOutputs);
-  //     }
-  //   }
-
-  //   this.changed.emit();
-  // }
-
-  // private async _updateOutput(output: IOutputModel): Promise<void> {
-  //   if (!this.query || this.filters?.output === false) {
-  //     return Promise.resolve();
-  //   }
-
-  //   // TODO
-  //   // Search for the display mimetype as in packages/outputarea/src/widget.ts
-  //   // const mimeType = this.rendermime.preferredMimeType(
-  //   //   output.data,
-  //   //   output.trusted ? 'any' : 'ensure'
-  //   // );
-  //   // if (mimeType) {
-  //   //   const searchEngine = this.searchRegistry.getMimeTypeSearchEngine(
-  //   //     mimeType
-  //   //   );
-  //   //   if (searchEngine && output.highlights) {
-  //   //     const hits = await searchEngine.search(
-  //   //       this.query!,
-  //   //       output.data[mimeType]
-  //   //     );
-  //   //     output.highlights = hits;
-
-  //   //     if (this.currentIndex !== null) {
-  //   //       this.currentIndex = null;
-  //   //     }
-  //   //   }
-  //   // }
-
-  //   return Promise.resolve();
-  // }
+    this.changed.emit();
+  }
 
   protected outputsProvider: GenericSearchProvider[];
   protected currentProviderIndex: number;

@@ -28,14 +28,14 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
-  test('Search not in outputs', async ({ page }) => {
+  test('Search within outputs', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -44,6 +44,8 @@ test.describe('Notebook Search', () => {
     await page.click('button[title="Show Search Filters"]');
 
     await page.click('text=Search Cell Outputs');
+
+    await page.waitForSelector('text=1/29');
 
     const cell = await page.notebook.getCell(5);
     await cell.scrollIntoViewIfNeeded();
@@ -76,7 +78,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     // Click next button
     await page.click('button[title="Next Match"]');
@@ -94,7 +96,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     // Click next button
     await page.click('button[title="Next Match"]', {
@@ -112,7 +114,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     const cell = await page.notebook.getCell(5);
     await cell.click();
@@ -121,7 +123,7 @@ test.describe('Notebook Search', () => {
 
     // Click previous button
     await page.click('button[title="Previous Match"]');
-    await page.waitForSelector('text=26/28');
+    await page.waitForSelector('text=26/21');
 
     const hit = await page.notebook.getCell(4);
     expect(await hit.screenshot()).toMatchSnapshot(
@@ -135,7 +137,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     // Click next button
     await page.click('button[title="Next Match"]', {
@@ -169,6 +171,10 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
+    await page.click('button[title="Show Search Filters"]');
+
+    await page.click('text=Search Selected Cell(s)');
+
     await page.notebook.runCell(5);
 
     const cell = await page.notebook.getCell(5);
@@ -181,7 +187,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     const cell = await page.notebook.getCell(5);
     await cell.click();
@@ -201,7 +207,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     const cell = await page.notebook.getCell(5);
     await cell.click();

@@ -28,7 +28,7 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     await page.click('button[title="Toggle Replace"]');
 
@@ -49,7 +49,7 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     // Click next button
     await page.click('button[title="Next Match"]', {
@@ -81,7 +81,7 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/28');
+    await page.waitForSelector('text=1/21');
 
     await page.click('button[title="Toggle Replace"]');
 
