@@ -17,19 +17,17 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   IModelDB,
-  IObservableJSON,
   IObservableList,
-  IObservableMap,
   IObservableUndoableList,
   ModelDB
 } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import { ISharedDoc, ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
+import { JSONObject, JSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
@@ -60,7 +58,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The metadata associated with the notebook.
    */
-  readonly metadata: IObservableJSON;
+  readonly metadata: ISharedMap<JSONValue>;
 
   /**
    * The array of deleted cells since the notebook was last run.
@@ -71,7 +69,6 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * If the model is initialized or not.
    */
   isInitialized: boolean;
-  readonly sharedModel: models.ISharedNotebook;
 }
 
 /**
@@ -87,32 +84,41 @@ export class NotebookModel implements INotebookModel {
     } else {
       this.modelDB = new ModelDB();
     }
-    this.sharedModel = models.YNotebook.create(
-      options.disableDocumentWideUndoRedo || false
-    ) as models.ISharedNotebook;
+    if (options.sharedDoc) {
+      this.sharedDoc = options.sharedDoc;
+    } else {
+      this.sharedDoc = new SharedDoc();
+    }
     this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
-    this.contentFactory = factory.clone(this.modelDB.view('cells'));
+    this.contentFactory = factory.clone(
+      this.modelDB.view('cells'),
+      this.sharedDoc
+    );
     this._cells = new CellList(
       this.modelDB,
       this.contentFactory,
-      this.sharedModel
+      this.sharedDoc
     );
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
-    const metadata = this.modelDB.createMap('metadata');
-    if (!metadata.has('language_info')) {
+    this.metadata = this.sharedDoc.createMap<JSONObject>('metadata');
+    if (!this.metadata.has('language_info')) {
       const name = options.languagePreference || '';
-      metadata.set('language_info', { name });
+      this.metadata.set('language_info', { name });
     }
     this._ensureMetadata();
-    metadata.changed.connect(this._onMetadataChanged, this);
+    this.metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
 
-    this.sharedModel.changed.connect(this._onStateChanged, this);
+    // TODO: initialize only on first client
+    // use initialize?
+    this._state = this.sharedDoc.createMap<JSONValue>('state');
+    this._state.set('dirty', false);
+    this._state.changed.connect(this._onStateChanged, this);
   }
   /**
    * A signal emitted when the document content changes.
@@ -165,9 +171,7 @@ export class NotebookModel implements INotebookModel {
   /**
    * The metadata associated with the notebook.
    */
-  get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
-  }
+  readonly metadata: ISharedMap<JSONValue>;
 
   /**
    * Get the observable list of notebook cells.
@@ -235,6 +239,7 @@ export class NotebookModel implements INotebookModel {
     const cells = this.cells;
     this._cells = null!;
     cells.dispose();
+    this.sharedDoc.dispose();
     this._isDisposed = true;
     Signal.clearData(this);
   }
@@ -257,7 +262,7 @@ export class NotebookModel implements INotebookModel {
   }
 
   /**
-   * Serialize the model to JSON.
+   * Serialize the model to JSON.any
    */
   toJSON(): nbformat.INotebookContent {
     const cells: nbformat.ICell[] = [];
@@ -270,7 +275,7 @@ export class NotebookModel implements INotebookModel {
       cells.push(cell);
     }
     this._ensureMetadata();
-    const metadata = this.sharedModel.getMetadata();
+    const metadata: JSONObject = {};
     for (const key of this.metadata.keys()) {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
     }
@@ -292,8 +297,9 @@ export class NotebookModel implements INotebookModel {
     const cells: ICellModel[] = [];
     const factory = this.contentFactory;
     const useId = value.nbformat === 4 && value.nbformat_minor >= 5;
+    const sharedDoc = this.sharedDoc;
     for (const cell of value.cells) {
-      const options: CellModel.IOptions = { cell };
+      const options: CellModel.IOptions = { cell, sharedDoc };
       if (useId) {
         options.id = (cell as any).id;
       }
@@ -316,17 +322,15 @@ export class NotebookModel implements INotebookModel {
     this.cells.pushAll(cells);
     this.cells.endCompoundOperation();
 
-    (this.sharedModel as models.YNotebook).nbformat_minor =
-      nbformat.MINOR_VERSION;
-    (this.sharedModel as models.YNotebook).nbformat = nbformat.MAJOR_VERSION;
+    this._state.set('nbformat', nbformat.MAJOR_VERSION);
+    this._state.set('nbformat_minor', nbformat.MINOR_VERSION);
     const origNbformat = value.metadata.orig_nbformat;
 
     if (value.nbformat !== this._nbformat) {
-      (this.sharedModel as models.YNotebook).nbformat = value.nbformat;
+      this._state.set('nbformat', value.nbformat);
     }
     if (value.nbformat_minor > this._nbformatMinor) {
-      (this.sharedModel as models.YNotebook).nbformat_minor =
-        value.nbformat_minor;
+      this._state.set('nbformat_minor', value.nbformat_minor);
     }
 
     // Alert the user if the format changes.
@@ -370,7 +374,7 @@ close the notebook without saving it.`,
       if (key === 'orig_nbformat') {
         continue;
       }
-      this.metadata.set(key, metadata[key]);
+      this.metadata.set(key, metadata[key] as JSONValue);
     }
     this._ensureMetadata();
     this.dirty = true;
@@ -419,45 +423,23 @@ close the notebook without saving it.`,
   }
 
   private _onStateChanged(
-    sender: models.ISharedNotebook,
-    changes: models.NotebookChange
+    sender: ISharedMap<JSONValue>,
+    args: ISharedMap.IChangedArgs<JSONValue>
   ): void {
-    if (changes.stateChange) {
-      changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
-          this._dirty = value.newValue;
-          this.triggerStateChange(value);
-        }
-      });
+    if (args.key === 'dirty' && this._dirty !== value.newValue) {
+      this._dirty = value.newValue;
     }
-
-    if (changes.nbformatChanged) {
-      const change = changes.nbformatChanged;
-      if (change.key === 'nbformat' && change.newValue !== undefined) {
-        this._nbformat = change.newValue;
-      }
-      if (change.key === 'nbformat_minor' && change.newValue !== undefined) {
-        this._nbformatMinor = change.newValue;
-      }
-    }
-
-    if (changes.metadataChange) {
-      const metadata = changes.metadataChange.newValue as JSONObject;
-      this._modelDBMutex(() => {
-        Object.entries(metadata).forEach(([key, value]) => {
-          this.metadata.set(key, value);
-        });
-      });
-    }
+    this.triggerStateChange({
+      name: args.key,
+      oldValue: args.oldValue,
+      newValue: args.newValue
+    });
   }
 
   private _onMetadataChanged(
-    metadata: IObservableJSON,
-    change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
+    sender: ISharedMap<JSONValue>,
+    args: ISharedMap.IChangedArgs<JSONValue>
   ): void {
-    this._modelDBMutex(() => {
-      this.sharedModel.updateMetadata(metadata.toJSON());
-    });
     this.triggerContentChange();
   }
 
@@ -465,12 +447,11 @@ close the notebook without saving it.`,
    * Make sure we have the required metadata fields.
    */
   private _ensureMetadata(): void {
-    const metadata = this.metadata;
-    if (!metadata.has('language_info')) {
-      metadata.set('language_info', { name: '' });
+    if (!this.metadata.has('language_info')) {
+      this.metadata.set('language_info', { name: '' });
     }
-    if (!metadata.has('kernelspec')) {
-      metadata.set('kernelspec', { name: '', display_name: '' });
+    if (!this.metadata.has('kernelspec')) {
+      this.metadata.set('kernelspec', { name: '', display_name: '' });
     }
   }
 
@@ -502,23 +483,16 @@ close the notebook without saving it.`,
   readonly contentFactory: NotebookModel.IContentFactory;
 
   /**
-   * The shared notebook model.
-   */
-  readonly sharedModel: models.ISharedNotebook;
-
-  /**
-   * A mutex to update the shared model.
-   */
-  protected readonly _modelDBMutex = models.createMutex();
-
-  /**
    * The underlying `IModelDB` instance in which model
    * data is stored.
    */
   readonly modelDB: IModelDB;
 
+  readonly sharedDoc: ISharedDoc;
+
   private _dirty = false;
   private _readOnly = false;
+  private _state: ISharedMap<JSONValue>;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 
@@ -556,6 +530,8 @@ export namespace NotebookModel {
      */
     modelDB?: IModelDB;
 
+    sharedDoc?: ISharedDoc;
+
     /**
      * Language translator.
      */
@@ -585,6 +561,8 @@ export namespace NotebookModel {
      * The IModelDB in which to put data for the notebook model.
      */
     modelDB: IModelDB | undefined;
+
+    readonly sharedDoc: ISharedDoc | undefined;
 
     /**
      * Create a new cell by cell type.
@@ -635,7 +613,7 @@ export namespace NotebookModel {
     /**
      * Clone the content factory with a new IModelDB.
      */
-    clone(modelDB: IModelDB): IContentFactory;
+    clone(modelDB: IModelDB, sharedDoc: ISharedDoc): IContentFactory;
   }
 
   /**
@@ -649,6 +627,7 @@ export namespace NotebookModel {
       this.codeCellContentFactory =
         options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
       this.modelDB = options.modelDB;
+      this.sharedDoc = options.sharedDoc;
     }
 
     /**
@@ -660,6 +639,8 @@ export namespace NotebookModel {
      * The IModelDB in which to put the notebook data.
      */
     readonly modelDB: IModelDB | undefined;
+
+    readonly sharedDoc: ISharedDoc | undefined;
 
     /**
      * Create a new cell by cell type.
@@ -701,11 +682,14 @@ export namespace NotebookModel {
       if (options.contentFactory) {
         options.contentFactory = this.codeCellContentFactory;
       }
+      if (!options.id) {
+        options.id = UUID.uuid4();
+      }
       if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
         options.modelDB = this.modelDB.view(options.id);
+      }
+      if (this.sharedDoc) {
+        options.sharedDoc = this.sharedDoc;
       }
       return new CodeCellModel(options);
     }
@@ -719,11 +703,14 @@ export namespace NotebookModel {
      *   new cell will be initialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
+      if (!options.id) {
+        options.id = UUID.uuid4();
+      }
       if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
         options.modelDB = this.modelDB.view(options.id);
+      }
+      if (this.sharedDoc) {
+        options.sharedDoc = this.sharedDoc;
       }
       return new MarkdownCellModel(options);
     }
@@ -737,11 +724,14 @@ export namespace NotebookModel {
      *   new cell will be initialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
+      if (!options.id) {
+        options.id = UUID.uuid4();
+      }
       if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
         options.modelDB = this.modelDB.view(options.id);
+      }
+      if (this.sharedDoc) {
+        options.sharedDoc = this.sharedDoc;
       }
       return new RawCellModel(options);
     }
@@ -749,9 +739,10 @@ export namespace NotebookModel {
     /**
      * Clone the content factory with a new IModelDB.
      */
-    clone(modelDB: IModelDB): ContentFactory {
+    clone(modelDB: IModelDB, sharedDoc: ISharedDoc): ContentFactory {
       return new ContentFactory({
-        modelDB: modelDB,
+        modelDB,
+        sharedDoc,
         codeCellContentFactory: this.codeCellContentFactory
       });
     }
@@ -774,6 +765,8 @@ export namespace NotebookModel {
        * The modelDB in which to place new content.
        */
       modelDB?: IModelDB;
+
+      sharedDoc?: ISharedDoc;
     }
   }
 

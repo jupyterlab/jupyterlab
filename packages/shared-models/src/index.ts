@@ -7,10 +7,8 @@
  * @module shared-models
  */
 
-export * from './ymodels';
-export * from './utils';
-
 export * from './model';
 export * from './sharedString';
 export * from './sharedList';
 export * from './sharedMap';
+export * from './utils';

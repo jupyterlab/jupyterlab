@@ -9,7 +9,13 @@ import {
   IObservableUndoableList,
   ObservableMap
 } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import {
+  createMutex,
+  ISharedDoc,
+  ISharedList,
+  ISharedMap,
+  ISharedType
+} from '@jupyterlab/shared-models';
 import {
   ArrayExt,
   ArrayIterator,
@@ -21,6 +27,8 @@ import {
 import { ISignal, Signal } from '@lumino/signaling';
 import { NotebookModel } from './model';
 
+const globalMutex = createMutex();
+
 /**
  * A cell list object that supports undo/redo.
  */
@@ -31,89 +39,21 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   constructor(
     modelDB: IModelDB,
     factory: NotebookModel.IContentFactory,
-    model: models.ISharedNotebook
+    sharedDoc: ISharedDoc
   ) {
     this._factory = factory;
-    this._cellOrder = modelDB.createList<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
-    this._cellOrder.changed.connect(this._onOrderChanged, this);
-    this.nbmodel = model;
-    this.nbmodel.changed.connect(this.onSharedModelChanged, this);
-    this.changed.connect(this.onModelDBChanged, this);
+    this._sharedDoc = sharedDoc;
+    this._sharedList = this._sharedDoc.createList<string>('cellsOrder');
+    this._cells = this._sharedDoc.createMap<ISharedMap<ISharedType>>('cells');
+    this._sharedList.changed.connect(this._onOrderChanged, this);
   }
 
-  type: 'List';
-  nbmodel: models.ISharedNotebook;
+  readonly type: 'List';
 
-  /**
-   * Prevents that the modeldb event handler is executed when the shared-model event handler is executed and vice-versa.
-   */
-  private readonly _mutex = models.createMutex();
-
-  private onModelDBChanged(
-    self: CellList,
-    change: IObservableList.IChangedArgs<ICellModel>
-  ) {
-    this._mutex(() => {
-      const nbmodel = this.nbmodel;
-      nbmodel.transact(() => {
-        if (change.type === 'set' || change.type === 'remove') {
-          nbmodel.deleteCellRange(
-            change.oldIndex,
-            change.oldIndex + change.oldValues.length
-          );
-        }
-        if (
-          change.type === 'set' ||
-          change.type === 'add' ||
-          change.type === 'move'
-        ) {
-          const cells = change.newValues.map(cell => {
-            return cell.sharedModel.clone() as any;
-          });
-          let insertLocation = change.newIndex;
-          if (change.type === 'move' && insertLocation > change.oldIndex) {
-            insertLocation += change.oldValues.length;
-          }
-          nbmodel.insertCells(insertLocation, cells);
-          change.newValues.forEach((cell, index) => {
-            cell.switchSharedModel(cells[index], false);
-          });
-        }
-        if (change.type === 'move') {
-          let from = change.oldIndex;
-          if (from >= change.newIndex) {
-            from += change.oldValues.length;
-          }
-          nbmodel.deleteCellRange(from, from + change.oldValues.length);
-        }
-      });
-    });
-  }
-
-  private onSharedModelChanged(
-    self: models.ISharedNotebook,
-    change: models.NotebookChange
-  ) {
-    this._mutex(() => {
-      let currpos = 0;
-      change.cellsChange?.forEach(delta => {
-        if (delta.insert != null) {
-          const cells = delta.insert.map(nbcell => {
-            const cell = this._factory.createCell(nbcell.cell_type, {});
-            cell.switchSharedModel(nbcell as any, true);
-            return cell;
-          });
-          this.insertAll(currpos, cells);
-          currpos += delta.insert.length;
-        } else if (delta.delete != null) {
-          this.removeRange(currpos, currpos + delta.delete);
-        } else if (delta.retain != null) {
-          currpos += delta.retain;
-        }
-      });
-    });
+  get underlyingModel(): ISharedMap<ISharedMap<ISharedType>> {
+    return this._cells;
   }
 
   /**
@@ -145,7 +85,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * No changes.
    */
   get isEmpty(): boolean {
-    return this._cellOrder.length === 0;
+    return this._sharedList.length === 0;
   }
 
   /**
@@ -163,7 +103,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * No changes.
    */
   get length(): number {
-    return this._cellOrder.length;
+    return this._sharedList.length;
   }
 
   /**
@@ -179,7 +119,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    */
   iter(): IIterator<ICellModel> {
     const arr: ICellModel[] = [];
-    for (const id of toArray(this._cellOrder)) {
+    for (const id of toArray(this._sharedList)) {
       arr.push(this._cellMap.get(id)!);
     }
     return new ArrayIterator<ICellModel>(arr);
@@ -199,7 +139,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
       cell.dispose();
     }
     this._cellMap.dispose();
-    this._cellOrder.dispose();
+    this._cells.dispose();
+    this._sharedList.dispose();
   }
 
   /**
@@ -219,7 +160,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * An `index` which is non-integral or out of range.
    */
   get(index: number): ICellModel {
-    return this._cellMap.get(this._cellOrder.get(index))!;
+    return this._cellMap.get(this._sharedList.get(index))!;
   }
 
   /**
@@ -245,8 +186,24 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    */
   set(index: number, cell: ICellModel): void {
     // Set the internal data structures.
+    const id = this._sharedList.get(index);
+    const oldValues: ICellModel[] =
+      id !== undefined ? [this._cellMap.get(id)!] : [];
     this._cellMap.set(cell.id, cell);
-    this._cellOrder.set(index, cell.id);
+    if (!this._cells.has(id)) {
+      this._cells.set(cell.id, cell.sharedModel);
+    }
+    globalMutex(() => {
+      this._sharedList.set(index, cell.id);
+      cell.initialize();
+    });
+    this._changed.emit({
+      type: 'set',
+      oldIndex: index,
+      newIndex: index,
+      oldValues,
+      newValues: [cell]
+    });
   }
 
   /**
@@ -270,8 +227,19 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   push(cell: ICellModel): number {
     // Set the internal data structures.
     this._cellMap.set(cell.id, cell);
-    const num = this._cellOrder.push(cell.id);
-    return num;
+    this._cells.set(cell.id, cell.sharedModel);
+    globalMutex(() => {
+      this._sharedList.push(cell.id);
+      cell.initialize();
+    });
+    this._changed.emit({
+      type: 'add',
+      oldIndex: -1,
+      newIndex: this.length - 1,
+      oldValues: [],
+      newValues: [cell]
+    });
+    return this.length;
   }
 
   /**
@@ -302,8 +270,19 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    */
   insert(index: number, cell: ICellModel): void {
     // Set the internal data structures.
-    this._cellMap.set(cell.id, cell);
-    this._cellOrder.insert(index, cell.id);
+    globalMutex(() => {
+      this._cellMap.set(cell.id, cell);
+      this._cells.set(cell.id, cell.sharedModel);
+      this._sharedList.insert(index, cell.id);
+      cell.initialize();
+    });
+    this._changed.emit({
+      type: 'add',
+      oldIndex: -2,
+      newIndex: index,
+      oldValues: [],
+      newValues: [cell]
+    });
   }
 
   /**
@@ -320,12 +299,12 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * #### Iterator Validity
    * Iterators pointing at the removed cell and beyond are invalidated.
    */
-  removeValue(cell: ICellModel): number {
+  removeValue(cell: ICellModel, del: boolean = true): number {
     const index = ArrayExt.findFirstIndex(
-      toArray(this._cellOrder),
+      toArray(this._sharedList),
       id => this._cellMap.get(id) === cell
     );
-    this.remove(index);
+    this.remove(index, del);
     return index;
   }
 
@@ -346,10 +325,23 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * #### Undefined Behavior
    * An `index` which is non-integral.
    */
-  remove(index: number): ICellModel {
-    const id = this._cellOrder.get(index);
-    this._cellOrder.remove(index);
-    const cell = this._cellMap.get(id)!;
+  remove(index: number, del: boolean = true): ICellModel {
+    const key = this._sharedList.get(index)!;
+    const cell = this._cellMap.get(key)!;
+    this._cellMap.delete(key);
+    if (del) {
+      this._cells.delete(key);
+    }
+    globalMutex(() => {
+      this._sharedList.remove(index)!;
+    });
+    this._changed.emit({
+      type: 'remove',
+      oldIndex: index,
+      newIndex: -1,
+      oldValues: [cell],
+      newValues: []
+    });
     return cell;
   }
 
@@ -363,7 +355,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * All current iterators are invalidated.
    */
   clear(): void {
-    this._cellOrder.clear();
+    this._sharedList.clear();
   }
 
   /**
@@ -384,7 +376,18 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * A `fromIndex` or a `toIndex` which is non-integral.
    */
   move(fromIndex: number, toIndex: number): void {
-    this._cellOrder.move(fromIndex, toIndex);
+    const id = this._sharedList.get(fromIndex);
+    const value = this._cellMap.get(id)!;
+    globalMutex(() => {
+      this._sharedList.move(fromIndex, toIndex);
+    });
+    this._changed.emit({
+      type: 'move',
+      oldIndex: fromIndex,
+      newIndex: toIndex,
+      oldValues: [value],
+      newValues: [value]
+    });
   }
 
   /**
@@ -406,11 +409,22 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * not be called by other actors.
    */
   pushAll(cells: IterableOrArrayLike<ICellModel>): number {
-    const newValues = toArray(cells);
-    each(newValues, cell => {
-      // Set the internal data structures.
+    const order: string[] = [];
+    each(cells, cell => {
+      order.push(cell.id);
       this._cellMap.set(cell.id, cell);
-      this._cellOrder.push(cell.id);
+      this._cells.set(cell.id, cell.sharedModel);
+      cell.initialize();
+    });
+    globalMutex(() => {
+      this._sharedList.pushAll(order);
+    });
+    this._changed.emit({
+      type: 'add',
+      oldIndex: -1,
+      newIndex: this.length - 1,
+      oldValues: [],
+      newValues: toArray(cells)
     });
     return this.length;
   }
@@ -442,13 +456,22 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * not be called by other actors.
    */
   insertAll(index: number, cells: IterableOrArrayLike<ICellModel>): number {
-    const newValues = toArray(cells);
-    each(newValues, cell => {
+    const order: string[] = [];
+    each(cells, cell => {
+      order.push(cell.id);
       this._cellMap.set(cell.id, cell);
-      // @todo it looks like this compound operation shoult start before the `each` loop.
-      this._cellOrder.beginCompoundOperation();
-      this._cellOrder.insert(index++, cell.id);
-      this._cellOrder.endCompoundOperation();
+      this._cells.set(cell.id, cell.sharedModel);
+      cell.initialize();
+    });
+    globalMutex(() => {
+      this._sharedList.insertAll(index, order);
+    });
+    this._changed.emit({
+      type: 'add',
+      oldIndex: -2,
+      newIndex: index,
+      oldValues: [],
+      newValues: toArray(cells)
     });
     return this.length;
   }
@@ -471,8 +494,29 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * #### Undefined Behavior
    * A `startIndex` or `endIndex` which is non-integral.
    */
-  removeRange(startIndex: number, endIndex: number): number {
-    this._cellOrder.removeRange(startIndex, endIndex);
+  removeRange(
+    startIndex: number,
+    endIndex: number,
+    del: boolean = true
+  ): number {
+    const oldValues: ICellModel[] = [];
+    for (let i = startIndex; i < endIndex; i++) {
+      const id = this._sharedList.get(i);
+      oldValues.push(this._cellMap.delete(id)!);
+      if (del) {
+        this._cells.delete(id);
+      }
+    }
+    globalMutex(() => {
+      this._sharedList.removeRange(startIndex, endIndex);
+    });
+    this._changed.emit({
+      type: 'remove',
+      oldIndex: startIndex,
+      newIndex: -1,
+      oldValues,
+      newValues: []
+    });
     return this.length;
   }
 
@@ -480,14 +524,14 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Whether the object can redo changes.
    */
   get canRedo(): boolean {
-    return this.nbmodel.canRedo();
+    return this._sharedList.canRedo();
   }
 
   /**
    * Whether the object can undo changes.
    */
   get canUndo(): boolean {
-    return this.nbmodel.canUndo();
+    return this._sharedList.canUndo();
   }
 
   /**
@@ -497,102 +541,127 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    *   The default is `true`.
    */
   beginCompoundOperation(isUndoAble?: boolean): void {
-    this._cellOrder.beginCompoundOperation(isUndoAble);
+    //this._cellOrder.beginCompoundOperation(isUndoAble);
   }
 
   /**
    * End a compound operation.
    */
   endCompoundOperation(): void {
-    this._cellOrder.endCompoundOperation();
+    //this._cellOrder.endCompoundOperation();
   }
 
   /**
    * Undo an operation.
    */
   undo(): void {
-    this.nbmodel.undo();
+    this._sharedList.undo();
   }
 
   /**
    * Redo an operation.
    */
   redo(): void {
-    this.nbmodel.redo();
+    this._sharedList.redo();
   }
 
   /**
    * Clear the change stack.
    */
   clearUndo(): void {
-    this.nbmodel.clearUndoHistory();
+    //this._sharedList.clearUndoHistory();
   }
 
   private _onOrderChanged(
-    order: IObservableUndoableList<string>,
-    change: IObservableList.IChangedArgs<string>
+    sender: ISharedList<string>,
+    args: ISharedList.IChangedArgs<string>
   ): void {
-    if (change.type === 'add' || change.type === 'set') {
-      each(change.newValues, id => {
-        const existingCell = this._cellMap.get(id);
-        if (existingCell == null) {
-          const cellDB = this._factory.modelDB!;
-          const cellType = cellDB.createValue(id + '.type');
-          let cell: ICellModel;
-          switch (cellType.get()) {
-            case 'code':
-              cell = this._factory.createCodeCell({ id: id });
-              break;
-            case 'markdown':
-              cell = this._factory.createMarkdownCell({ id: id });
-              break;
-            default:
-              cell = this._factory.createRawCell({ id: id });
-              break;
-          }
-          this._cellMap.set(id, cell);
-        } else if (!existingCell.sharedModel.isStandalone) {
-          this._mutex(() => {
-            // it does already exist, probably because it was deleted previously and we introduced it
-            // copy it to a fresh codecell instance
-            const cell = existingCell.toJSON();
-            let freshCell = null;
-            switch (cell.cell_type) {
-              case 'code':
-                freshCell = this._factory.createCodeCell({ cell });
-                break;
-              case 'markdown':
-                freshCell = this._factory.createMarkdownCell({ cell });
-                break;
-              default:
-                freshCell = this._factory.createRawCell({ cell });
-                break;
-            }
-            this._cellMap.set(id, freshCell);
-          });
-        }
+    globalMutex(() => {
+      // Get the old values before removing them
+      const oldValues: ICellModel[] = [];
+      each(args.oldValues, id => {
+        oldValues.push(this._cellMap.get(id)!);
       });
-    }
-    const newValues: ICellModel[] = [];
-    const oldValues: ICellModel[] = [];
-    each(change.newValues, id => {
-      newValues.push(this._cellMap.get(id)!);
-    });
-    each(change.oldValues, id => {
-      oldValues.push(this._cellMap.get(id)!);
-    });
-    this._changed.emit({
-      type: change.type,
-      oldIndex: change.oldIndex,
-      newIndex: change.newIndex,
-      oldValues,
-      newValues
+
+      if (args.type === 'set') {
+        args.newValues.forEach(id => {
+          const cellType = this._cells.get(id)!;
+          const cell = this._createCellModel(id, cellType);
+          this._cellMap.set(id, cell);
+          cell.initialize();
+        });
+      } else if (args.type === 'add') {
+        args.newValues.forEach(id => {
+          const cellType = this._cells.get(id)!;
+          const cell = this._createCellModel(id, cellType);
+          this._cellMap.set(id, cell);
+          cell.initialize();
+        });
+      } else if (args.type === 'move') {
+        // Do nothing
+      } else if (args.type === 'remove') {
+        // TODO: remove cells from the cell map
+        // we need the oldValues
+        // check which ones are missing and remove them
+        args.oldValues.forEach(id => {
+          this._cells.delete(id);
+          this._cellMap.delete(id);
+        });
+      }
+
+      // Get new values after creating them
+      const newValues: ICellModel[] = [];
+      each(args.newValues, id => {
+        newValues.push(this._cellMap.get(id)!);
+      });
+
+      this._changed.emit({
+        type: args.type,
+        oldIndex: args.oldIndex,
+        newIndex: args.newIndex,
+        oldValues,
+        newValues
+      });
     });
   }
 
+  private _createCellModel(
+    id: string,
+    sharedModel: ISharedMap<ISharedType>
+  ): ICellModel {
+    const sharedDoc = this._sharedDoc;
+    let cell: ICellModel;
+    switch (sharedModel.get('type')) {
+      case 'code':
+        cell = this._factory.createCodeCell({
+          id,
+          sharedDoc,
+          sharedModel
+        });
+        break;
+      case 'markdown':
+        cell = this._factory.createMarkdownCell({
+          id,
+          sharedDoc,
+          sharedModel
+        });
+        break;
+      default:
+        cell = this._factory.createRawCell({
+          id,
+          sharedDoc,
+          sharedModel
+        });
+        break;
+    }
+    return cell;
+  }
+
   private _isDisposed: boolean = false;
-  private _cellOrder: IObservableUndoableList<string>;
   private _cellMap: IObservableMap<ICellModel>;
+  private _sharedDoc: ISharedDoc;
+  private _sharedList: ISharedList<string>;
+  private _cells: ISharedMap<ISharedMap<ISharedType>>;
   private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(
     this
   );

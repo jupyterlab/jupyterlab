@@ -7,9 +7,13 @@ import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IModelDB, IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import * as models from '@jupyterlab/shared-models';
+import {
+  ISharedDoc,
+  ISharedMap,
+  ISharedString
+} from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PartialJSONValue } from '@lumino/coreutils';
+import { JSONValue, PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
@@ -24,14 +28,21 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
-    super({ modelDB });
+  constructor(
+    languagePreference?: string,
+    modelDB?: IModelDB,
+    sharedDoc?: ISharedDoc
+  ) {
+    super({ modelDB, sharedDoc });
     this._defaultLang = languagePreference || '';
-    const filemodel = new models.YFile() as models.ISharedFile;
-    this.switchSharedModel(filemodel, true);
-    this.value.changed.connect(this.triggerContentChange, this);
 
-    this.sharedModel.changed.connect(this._onStateChanged, this);
+    this.value.changed.connect(this._onValueChanged, this);
+
+    // TODO: initialize only on first client
+    // use initialize?
+    this._state = this.sharedDoc.createMap<JSONValue>('state');
+    this._state.set('dirty', false);
+    this._state.changed.connect(this._onStateChanged, this);
   }
 
   /**
@@ -144,6 +155,17 @@ export class DocumentModel
   }
 
   /**
+   * Trigger a content changed signal.
+   */
+  protected _onValueChanged(
+    sender: ISharedString,
+    args: ISharedString.IChangedArgs
+  ): void {
+    super._onValueChanged(sender, args);
+    this.triggerContentChange();
+  }
+
+  /**
    * Trigger a state change signal.
    */
   protected triggerStateChange(args: IChangedArgs<any>): void {
@@ -158,27 +180,24 @@ export class DocumentModel
     this.dirty = true;
   }
 
-  private _onStateChanged(
-    sender: models.ISharedFile,
-    changes: models.NotebookChange
+  protected _onStateChanged(
+    sender: ISharedMap<any>,
+    args: ISharedMap.IChangedArgs<any>
   ): void {
-    if (changes.stateChange) {
-      changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
-          this._dirty = value.newValue;
-          this.triggerStateChange(value);
-        }
-      });
+    if (args.key === 'dirty' && this._dirty !== value.newValue) {
+      this._dirty = value.newValue;
     }
+    this.triggerStateChange({
+      name: args.key,
+      newValue: args.newValue,
+      oldValue: args.oldValue
+    });
   }
 
-  /**
-   * The shared notebook model.
-   */
-  readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
+  private _state: ISharedMap<JSONValue>;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 }
@@ -242,9 +261,10 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   createNew(
     languagePreference?: string,
     modelDB?: IModelDB,
+    sharedDoc?: ISharedDoc,
     isInitialized?: boolean
   ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB);
+    return new DocumentModel(languagePreference, modelDB, sharedDoc);
   }
 
   /**

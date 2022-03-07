@@ -24,7 +24,7 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import * as ymodels from '@jupyterlab/shared-models';
+import { ISharedDoc, ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -34,7 +34,6 @@ import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
 
 /**
@@ -62,25 +61,33 @@ export class Context<
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     const dbFactory = options.modelDBFactory;
+    this._sharedDoc = new SharedDoc({ path: localPath });
     if (dbFactory) {
       const localPath = manager.contents.localPath(this._path);
       this._modelDB = dbFactory.createNew(localPath);
-      this._model = this._factory.createNew(lang, this._modelDB, false);
+      this._model = this._factory.createNew(
+        lang,
+        this._modelDB,
+        this._sharedDoc,
+        false
+      );
     } else {
-      this._model = this._factory.createNew(lang, undefined, false);
+      this._model = this._factory.createNew(
+        lang,
+        undefined,
+        this._sharedDoc,
+        false
+      );
     }
 
-    const ymodel = this._model.sharedModel as ymodels.YDocument<any>; // translate to the concrete Yjs implementation
-    const ydoc = ymodel.ydoc;
-    this._ydoc = ydoc;
-    this._ycontext = ydoc.getMap('context');
+    this._ycontext = this._sharedDoc.createMap('context');
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
       ? docProviderFactory({
           path: this._path,
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
-          ymodel
+          sharedDoc: this._sharedDoc
         })
       : new ProviderMock();
 
@@ -106,11 +113,10 @@ export class Context<
       contents: manager.contents
     }));
     this._ycontext.set('path', this._path);
-    this._ycontext.observe(event => {
-      const pathChanged = event.changes.keys.get('path');
-      if (pathChanged) {
+    this._ycontext.changed.connect((sender, args) => {
+      if (args.key === 'path') {
         const newPath = this._ycontext.get('path')!;
-        if (newPath && newPath !== pathChanged.oldValue) {
+        if (newPath && newPath !== args.oldValue) {
           urlResolver.path = newPath;
           this._path = newPath;
           this._provider.setPath(newPath);
@@ -230,8 +236,8 @@ export class Context<
     }
     this._model.dispose();
     this._provider.destroy();
-    this._model.sharedModel.dispose();
-    this._ydoc.destroy();
+    this._ycontext.dispose();
+    this._sharedDoc.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -731,8 +737,8 @@ export class Context<
         if (!this._isPopulated) {
           return this._populate();
         }
-      })
-      .catch(async err => {
+      });
+    /* .catch(async err => {
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
         void this._handleError(
@@ -740,7 +746,7 @@ export class Context<
           this._trans.__('File Load Error for %1', name)
         );
         throw err;
-      });
+      }); */
   }
 
   /**
@@ -926,6 +932,8 @@ or load the version on disk (revert)?`,
   ) => void;
   private _model: T;
   private _modelDB: IModelDB;
+  private _sharedDoc: ISharedDoc;
+  private _ycontext: ISharedMap<any>;
   private _path = '';
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
@@ -941,8 +949,6 @@ or load the version on disk (revert)?`,
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _provider: IDocumentProvider;
-  private _ydoc: Y.Doc;
-  private _ycontext: Y.Map<string>;
   private _lastModifiedCheckMargin = 500;
   private _timeConflictModalIsOpen = false;
 }

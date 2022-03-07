@@ -1,4 +1,4 @@
-import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
+import { ISharedDoc } from '@jupyterlab/shared-models';
 import { Token } from '@lumino/coreutils';
 
 /**
@@ -49,10 +49,6 @@ export namespace IDocumentProviderFactory {
     path: string;
     contentType: string;
     format: string;
-
-    /**
-     * The YNotebook.
-     */
-    ymodel: YDocument<DocumentChange>;
+    sharedDoc: ISharedDoc;
   }
 }

@@ -7,7 +7,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
-import { IObservableString } from '@jupyterlab/observables';
+import { ISharedString } from '@jupyterlab/shared-models';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -243,8 +243,8 @@ export class EditorHandler implements IDisposable {
   private _editor: CodeEditor.IEditor;
   private _debuggerService: IDebugger;
   private _editorMonitor: ActivityMonitor<
-    IObservableString,
-    IObservableString.IChangedArgs
+    ISharedString,
+    ISharedString.IChangedArgs
   >;
 }
 

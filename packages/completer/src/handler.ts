@@ -170,7 +170,9 @@ export class CompletionHandler implements IDisposable {
     const { start, end, value } = patch;
     const cursorBeforeChange = editor.getOffsetAt(editor.getCursorPosition());
     // we need to update the shared model in a single transaction so that the undo manager works as expected
-    editor.model.sharedModel.updateSource(start, end, value);
+    // TODO: make sure the completer works
+    //editor.model.sharedModel.updateSource(start, end, value);
+    editor.model.value.insert(start, value);
     if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
       editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
     }

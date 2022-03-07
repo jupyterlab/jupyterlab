@@ -10,7 +10,7 @@ import {
 import { IModelDB, IObservableList } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Kernel } from '@jupyterlab/services';
-import * as models from '@jupyterlab/shared-models';
+import { ISharedDoc } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   fileIcon,
@@ -833,10 +833,7 @@ export namespace DocumentRegistry {
      */
     readonly modelDB: IModelDB;
 
-    /**
-     * The shared notebook model.
-     */
-    readonly sharedModel: models.ISharedDocument;
+    readonly sharedDoc: ISharedDoc;
 
     /**
      * Serialize the model to a string.
@@ -877,9 +874,7 @@ export namespace DocumentRegistry {
   /**
    * The interface for a document model that represents code.
    */
-  export interface ICodeModel extends IModel, CodeEditor.IModel {
-    sharedModel: models.ISharedFile;
-  }
+  export interface ICodeModel extends IModel, CodeEditor.IModel {}
 
   /**
    * The document context object.
@@ -1200,6 +1195,7 @@ export namespace DocumentRegistry {
     createNew(
       languagePreference?: string,
       modelDB?: IModelDB,
+      sharedDoc?: ISharedDoc,
       isInitialized?: boolean
     ): T;
 

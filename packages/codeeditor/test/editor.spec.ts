@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IObservableString } from '@jupyterlab/observables';
+import { ISharedString } from '@jupyterlab/shared-models';
 
 describe('CodeEditor.Model', () => {
   let model: CodeEditor.Model;
@@ -58,8 +58,8 @@ describe('CodeEditor.Model', () => {
     it('should be the observable value of the model', () => {
       let called = false;
       const handler = (
-        sender: IObservableString,
-        args: IObservableString.IChangedArgs
+        sender: ISharedString,
+        args: ISharedString.IChangedArgs
       ) => {
         expect(sender).toBe(model.value);
         expect(args.type).toBe('set');
@@ -75,8 +75,8 @@ describe('CodeEditor.Model', () => {
     it('should handle an insert', () => {
       let called = false;
       const handler = (
-        sender: IObservableString,
-        args: IObservableString.IChangedArgs
+        sender: ISharedString,
+        args: ISharedString.IChangedArgs
       ) => {
         expect(args.type).toBe('insert');
         expect(args.value).toBe('foo');
@@ -92,8 +92,8 @@ describe('CodeEditor.Model', () => {
       let called = false;
       model.value.text = 'foo';
       const handler = (
-        sender: IObservableString,
-        args: IObservableString.IChangedArgs
+        sender: ISharedString,
+        args: ISharedString.IChangedArgs
       ) => {
         expect(args.type).toBe('remove');
         expect(args.value).toBe('f');

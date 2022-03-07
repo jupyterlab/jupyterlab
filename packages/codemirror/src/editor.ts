@@ -6,11 +6,7 @@
 
 import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
-  ICollaborator,
-  IObservableMap,
-  IObservableString
-} from '@jupyterlab/observables';
+import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
 import {
   ITranslator,
@@ -124,8 +120,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
     this._initializeEditorBinding();
-    // every time the model is switched, we need to re-initialize the editor binding
-    this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
     const doc = editor.getDoc();
 
@@ -209,13 +203,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._yeditorBinding?.destroy();
-    const sharedModel = this.model.sharedModel as models.IYText;
-    const opts = sharedModel.undoManager
-      ? { yUndoManager: sharedModel.undoManager }
+    const opts = this.model.value.undoManager
+      ? { yUndoManager: this.model.value.undoManager }
       : {};
-    const awareness = sharedModel.awareness;
+    const awareness = this.model.sharedDoc.awareness;
     this._yeditorBinding = new CodemirrorBinding(
-      sharedModel.ysource,
+      this.model.value.underlyingModel,
       this.editor,
       awareness,
       opts
@@ -392,14 +385,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this.model.sharedModel.undo();
+    this.model.value.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this.model.sharedModel.redo();
+    this.model.value.redo();
   }
 
   /**
@@ -952,8 +945,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handle model value changes.
    */
   private _onValueChanged(
-    value: IObservableString,
-    args: IObservableString.IChangedArgs
+    value: models.ISharedString,
+    args: models.ISharedString.IChangedArgs
   ): void {
     if (this._changeGuard) {
       return;
@@ -966,7 +959,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
-        doc.replaceRange(args.value, pos, pos, '+input');
+        doc.replaceRange(args.value!, pos, pos, '+input');
         break;
       }
       case 'remove': {
@@ -979,7 +972,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         break;
       }
       case 'set':
-        doc.setValue(args.value);
+        doc.setValue(args.value!);
         break;
       default:
         break;

@@ -26,6 +26,7 @@ import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
+import { CellList } from './celllist';
 import { INotebookModel } from './model';
 import { Notebook, StaticNotebook } from './widget';
 
@@ -1196,34 +1197,52 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     const model = notebook.model;
-
+    const cells = notebook.model.cells;
     notebook.mode = 'command';
 
-    const newCells = values.map(cell => {
-      switch (cell.cell_type) {
-        case 'code':
-          if (
-            notebook.lastClipboardInteraction === 'cut' &&
-            typeof cell.id === 'string'
-          ) {
-            let cellId = cell.id as string;
-            return model.contentFactory.createCodeCell({
-              id: cellId,
-              cell: cell
-            });
-          } else {
-            return model.contentFactory.createCodeCell({ cell });
-          }
-        case 'markdown':
-          return model.contentFactory.createMarkdownCell({ cell });
-        default:
-          return model.contentFactory.createRawCell({ cell });
+    // Find the cells to delete.
+    const toDelete: number[] = [];
+    const cellsToDelete: any = {};
+    notebook.widgets.forEach((child, index) => {
+      const deletable = child.model.metadata.get('deletable') !== false;
+
+      if (notebook.isSelectedOrActive(child) && deletable) {
+        toDelete.push(index);
+        cellsToDelete[child.model.id] = child.model;
       }
     });
 
-    const cells = notebook.model.cells;
+    const newCells = values.map(cell => {
+      let id: string | undefined = undefined;
+      if (
+        notebook.lastClipboardInteraction === 'cut' &&
+        typeof cell.id === 'string'
+      ) {
+        id = cell.id as string;
+      }
+
+      switch (cell.cell_type) {
+        case 'code':
+          return model.contentFactory.createCodeCell({
+            id,
+            cell
+          });
+        case 'markdown':
+          return model.contentFactory.createMarkdownCell({
+            id,
+            cell
+          });
+        default:
+          return model.contentFactory.createRawCell({
+            id,
+            cell
+          });
+      }
+    });
+
     let index: number;
 
+    // TODO: Use doc.transact
     cells.beginCompoundOperation();
 
     // Set the starting index of the paste operation depending upon the mode.
@@ -1243,17 +1262,6 @@ export namespace NotebookActions {
         index = notebook.activeCellIndex - 1;
         break;
       case 'replace': {
-        // Find the cells to delete.
-        const toDelete: number[] = [];
-
-        notebook.widgets.forEach((child, index) => {
-          const deletable = child.model.metadata.get('deletable') !== false;
-
-          if (notebook.isSelectedOrActive(child) && deletable) {
-            toDelete.push(index);
-          }
-        });
-
         // If cells are not deletable, we may not have anything to delete.
         if (toDelete.length > 0) {
           // Delete the cells as one undo event.
@@ -1300,7 +1308,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.model.sharedModel.undo();
+    notebook.model.cells.undo();
     notebook.deselectAll();
     Private.handleState(notebook, state);
   }
@@ -1321,7 +1329,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.model.sharedModel.redo();
+    notebook.model.cells.redo();
     notebook.deselectAll();
     Private.handleState(notebook, state);
   }
@@ -2155,16 +2163,34 @@ Please wait for the complete rendering before invoking that action.`,
     model: INotebookModel,
     cell: ICellModel
   ): ICellModel {
+    const id = cell.id;
+    const sharedDoc = model.sharedDoc;
+    const sharedModel = cell.sharedModel;
     switch (cell.type) {
       case 'code':
         // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
+        return model.contentFactory.createCodeCell({
+          id,
+          cell: cell.toJSON(),
+          sharedDoc,
+          sharedModel
+        });
       case 'markdown':
         // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });
+        return model.contentFactory.createMarkdownCell({
+          id,
+          cell: cell.toJSON(),
+          sharedDoc,
+          sharedModel
+        });
       default:
         // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createRawCell({ cell: cell.toJSON() });
+        return model.contentFactory.createRawCell({
+          id,
+          cell: cell.toJSON(),
+          sharedDoc,
+          sharedModel
+        });
     }
   }
 
@@ -2411,7 +2437,7 @@ Please wait for the complete rendering before invoking that action.`,
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
-      deleteCells(notebook);
+      deleteCells(notebook, false);
     } else {
       notebook.deselectAll();
     }
@@ -2443,27 +2469,45 @@ Please wait for the complete rendering before invoking that action.`,
     const model = notebook.model!;
     const cells = model.cells;
 
+    // TODO: Use doc.transact
     cells.beginCompoundOperation();
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
         return;
       }
       if (child.model.type !== value) {
+        const id = child.model.id;
         const cell = child.model.toJSON();
+        const sharedDoc = notebook.model!.sharedDoc;
+        const sharedModel = child.model.sharedModel;
         let newCell: ICellModel;
-
         switch (value) {
           case 'code':
-            newCell = model.contentFactory.createCodeCell({ cell });
+            newCell = model.contentFactory.createCodeCell({
+              id,
+              cell,
+              sharedDoc,
+              sharedModel
+            });
             break;
           case 'markdown':
-            newCell = model.contentFactory.createMarkdownCell({ cell });
+            newCell = model.contentFactory.createMarkdownCell({
+              id,
+              cell,
+              sharedDoc,
+              sharedModel
+            });
             if (child.model.type === 'code') {
               newCell.trusted = false;
             }
             break;
           default:
-            newCell = model.contentFactory.createRawCell({ cell });
+            newCell = model.contentFactory.createRawCell({
+              id,
+              cell,
+              sharedDoc,
+              sharedModel
+            });
             if (child.model.type === 'code') {
               newCell.trusted = false;
             }
@@ -2491,9 +2535,9 @@ Please wait for the complete rendering before invoking that action.`,
    * It will add a code cell if all cells are deleted.
    * This action can be undone.
    */
-  export function deleteCells(notebook: Notebook): void {
+  export function deleteCells(notebook: Notebook, del: boolean = true): void {
     const model = notebook.model!;
-    const cells = model.cells;
+    const cells = model.cells as CellList;
     const toDelete: number[] = [];
 
     notebook.mode = 'command';
@@ -2514,7 +2558,7 @@ Please wait for the complete rendering before invoking that action.`,
       cells.beginCompoundOperation();
       // Delete cells in reverse order to maintain the correct indices.
       toDelete.reverse().forEach(index => {
-        cells.remove(index);
+        cells.remove(index, del);
       });
       // Add a new cell if the notebook is empty. This is done
       // within the compound operation to make the deletion of

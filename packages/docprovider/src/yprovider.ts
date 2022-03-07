@@ -33,9 +33,9 @@ export class WebSocketProvider
     super(
       options.url,
       options.format + ':' + options.contentType + ':' + options.path,
-      options.ymodel.ydoc,
+      options.sharedDoc.underlyingDoc,
       {
-        awareness: options.ymodel.awareness
+        awareness: options.sharedDoc.awareness
       }
     );
     this._path = options.path;
@@ -56,7 +56,7 @@ export class WebSocketProvider
       );
     };
 
-    const awareness = options.ymodel.awareness;
+    const awareness = options.sharedDoc.awareness;
     const user = options.user;
     const userChanged = () => {
       const name = user.displayName !== '' ? user.displayName : user.name;

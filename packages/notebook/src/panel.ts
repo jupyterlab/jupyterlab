@@ -17,7 +17,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { each } from '@lumino/algorithm';
-import { Token } from '@lumino/coreutils';
+import { JSONValue, Token } from '@lumino/coreutils';
 import { INotebookModel } from './model';
 import { Notebook, StaticNotebook } from './widget';
 
@@ -239,7 +239,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    this.model!.metadata.set('language_info', language);
+    this.model!.metadata.set('language_info', language as JSONValue);
   }
 
   /**
@@ -254,7 +254,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       name: kernel.name,
       display_name: spec?.display_name,
       language: spec?.language
-    });
+    } as JSONValue);
   }
 
   translator: ITranslator;

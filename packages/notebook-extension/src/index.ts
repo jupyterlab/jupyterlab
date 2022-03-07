@@ -1177,7 +1177,12 @@ function activateCodeConsole(
       const { context, content } = current;
 
       const cell = content.activeCell;
-      const metadata = cell?.model.metadata.toJSON();
+      const metadata: JSONObject = {};
+      cell?.model.metadata
+        .keys()
+        .forEach(
+          key => (metadata[key] = cell.model.metadata.get(key) as JSONValue)
+        );
       const path = context.path;
       // ignore action in non-code cell
       if (!cell || cell.model.type !== 'code') {

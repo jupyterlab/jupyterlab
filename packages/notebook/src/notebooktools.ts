@@ -17,6 +17,7 @@ import {
 import { Collapser, Styling } from '@jupyterlab/ui-components';
 import { ArrayExt, chain, each } from '@lumino/algorithm';
 import {
+  JSONValue,
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
@@ -590,6 +591,7 @@ export namespace NotebookTools {
     }
 
     private _update() {
+      // TODO: Create Metadata editor
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
@@ -623,6 +625,7 @@ export namespace NotebookTools {
     }
 
     private _update() {
+      // TODO: Create Metadata editor
       const cell = this.notebookTools.activeCell;
       this.editor.source = cell ? cell.model.metadata : null;
     }
@@ -761,7 +764,7 @@ export namespace NotebookTools {
     private _getValue = (cell: Cell) => {
       let value = cell.model.metadata.get(this.key);
       if (value === undefined) {
-        value = this._default;
+        value = this._default as JSONValue;
       }
       return value;
     };
@@ -776,7 +779,7 @@ export namespace NotebookTools {
       if (value === this._default) {
         cell.model.metadata.delete(this.key);
       } else {
-        cell.model.metadata.set(this.key, value);
+        cell.model.metadata.set(this.key, value as JSONValue);
       }
     };
 

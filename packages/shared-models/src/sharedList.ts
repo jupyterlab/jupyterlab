@@ -786,6 +786,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
         delta.insert.length === 1 &&
         args.oldIndex !== currpos
       ) {
+        // Moving forward
         //console.debug('MOVE:');
         const value = SharedDoc.abstractTypeToISharedType(
           delta.insert[0],
@@ -797,6 +798,21 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
           newIndex: currpos,
           oldValues: [value],
           newValues: [value]
+        };
+      } else if (
+        args.type === 'add' &&
+        args.newValues.length === 1 &&
+        delta.delete === 1 &&
+        args.newIndex !== currpos
+      ) {
+        // Moving backwards
+        //console.debug('MOVE:');
+        args = {
+          type: 'move',
+          oldIndex: currpos - 1,
+          newIndex: args.newIndex,
+          oldValues: args.oldValues,
+          newValues: args.newValues
         };
       } else if (delta.insert != null) {
         const values = (delta.insert as any[]).map(

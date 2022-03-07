@@ -15,8 +15,6 @@ import { DirListing } from '@jupyterlab/filebrowser';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableJSON, IObservableMap } from '@jupyterlab/observables';
-
 import {
   IOutputPrompt,
   IStdin,
@@ -37,6 +35,8 @@ import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 
+import { ISharedMap } from '@jupyterlab/shared-models';
+
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { addIcon } from '@jupyterlab/ui-components';
@@ -44,7 +44,6 @@ import { addIcon } from '@jupyterlab/ui-components';
 import {
   JSONObject,
   JSONValue,
-  PartialJSONValue,
   PromiseDelegate,
   UUID
 } from '@lumino/coreutils';
@@ -557,8 +556,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableJSON,
-    args: IObservableMap.IChangedArgs<PartialJSONValue | undefined>
+    model: ISharedMap<JSONValue>,
+    args: ISharedMap.IChangedArgs<JSONValue>
   ): void {
     switch (args.key) {
       case 'jupyter':
@@ -1054,8 +1053,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableJSON,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    model: ISharedMap<JSONValue>,
+    args: ISharedMap.IChangedArgs<JSONValue>
   ): void {
     if (this._savingMetadata) {
       // We are in middle of a metadata transaction, so don't react to it.
@@ -1130,8 +1129,14 @@ export namespace CodeCell {
       return;
     }
     const cellId = { cellId: model.id };
+    const modelMetadata: JSONObject = {};
+    model.metadata
+      .keys()
+      .forEach(
+        key => (modelMetadata[key] = model.metadata.get(key) as JSONValue)
+      );
     metadata = {
-      ...model.metadata.toJSON(),
+      ...modelMetadata,
       ...metadata,
       ...cellId
     };

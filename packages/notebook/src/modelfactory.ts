@@ -5,6 +5,7 @@ import { CodeCellModel } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IModelDB } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
+import { ISharedDoc } from '@jupyterlab/shared-models';
 import { INotebookModel, NotebookModel } from './model';
 
 /**
@@ -82,6 +83,7 @@ export class NotebookModelFactory
   createNew(
     languagePreference?: string,
     modelDB?: IModelDB,
+    sharedDoc?: ISharedDoc,
     isInitialized?: boolean
   ): INotebookModel {
     const contentFactory = this.contentFactory;
@@ -89,6 +91,7 @@ export class NotebookModelFactory
       languagePreference,
       contentFactory,
       modelDB,
+      sharedDoc,
       isInitialized,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
     });
