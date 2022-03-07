@@ -184,8 +184,7 @@ export class User implements ICurrentUser {
         initials !== ''
           ? initials
           : `A${anonymousName.substring(0, 1).toLocaleUpperCase()}`;
-      this._color =
-        '#' + (color !== '' ? color : Private.getRandomColor().slice(1));
+      this._color = color !== '' ? '#' + color : Private.getRandomColor();
       this._anonymous = true;
       this._cursor = undefined;
       this._save();
@@ -204,14 +203,13 @@ namespace Private {
    * Predefined colors for users
    */
   const userColors = [
-    '#12A0D3',
-    '#17AB30',
-    '#CC8500',
-    '#A79011',
-    '#ee6352',
-    '#609DA9',
-    '#4BA749',
-    '#00A1B3'
+    'var(--jp-collaborator-color1)',
+    'var(--jp-collaborator-color2)',
+    'var(--jp-collaborator-color3)',
+    'var(--jp-collaborator-color4)',
+    'var(--jp-collaborator-color5)',
+    'var(--jp-collaborator-color6)',
+    'var(--jp-collaborator-color7)'
   ];
 
   /**
