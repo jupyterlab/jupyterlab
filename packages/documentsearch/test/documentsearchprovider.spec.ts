@@ -24,53 +24,53 @@ describe('documentsearch/genericsearchprovider', () => {
 
     describe('#startQuery()', () => {
       it.each([
-        [/x/, '<pre>xyz</pre>', `<span class="${MATCH_CLASSES}">x</span>yz`],
-        [/y/, '<pre>xyz</pre>', `x<span class="${MATCH_CLASSES}">y</span>z`],
-        [/z/, '<pre>xyz</pre>', `xy<span class="${MATCH_CLASSES}">z</span>`],
+        [/x/, '<pre>xyz</pre>', `<mark class="${MATCH_CLASSES}">x</mark>yz`],
+        [/y/, '<pre>xyz</pre>', `x<mark class="${MATCH_CLASSES}">y</mark>z`],
+        [/z/, '<pre>xyz</pre>', `xy<mark class="${MATCH_CLASSES}">z</mark>`],
         [
           /x/,
           '<pre><span>x</span>yz</pre>',
-          `<span><span class="${MATCH_CLASSES}">x</span></span>yz`
+          `<span><mark class="${MATCH_CLASSES}">x</mark></span>yz`
         ],
         [
           /y/,
           '<pre><span>x</span>yz</pre>',
-          `<span>x</span><span class="${MATCH_CLASSES}">y</span>z`
+          `<span>x</span><mark class="${MATCH_CLASSES}">y</mark>z`
         ],
         [
           /z/,
           '<pre><span>x</span>yz</pre>',
-          `<span>x</span>y<span class="${MATCH_CLASSES}">z</span>`
+          `<span>x</span>y<mark class="${MATCH_CLASSES}">z</mark>`
         ],
         [
           /x/,
           '<pre>x<span>y</span>z</pre>',
-          `<span class="${MATCH_CLASSES}">x</span><span>y</span>z`
+          `<mark class="${MATCH_CLASSES}">x</mark><span>y</span>z`
         ],
         [
           /y/,
           '<pre>x<span>y</span>z</pre>',
-          `x<span><span class="${MATCH_CLASSES}">y</span></span>z`
+          `x<span><mark class="${MATCH_CLASSES}">y</mark></span>z`
         ],
         [
           /z/,
           '<pre>x<span>y</span>z</pre>',
-          `x<span>y</span><span class="${MATCH_CLASSES}">z</span>`
+          `x<span>y</span><mark class="${MATCH_CLASSES}">z</mark>`
         ],
         [
           /x/,
           '<pre>xy<span>z</span></pre>',
-          `<span class="${MATCH_CLASSES}">x</span>y<span>z</span>`
+          `<mark class="${MATCH_CLASSES}">x</mark>y<span>z</span>`
         ],
         [
           /y/,
           '<pre>xy<span>z</span></pre>',
-          `x<span class="${MATCH_CLASSES}">y</span><span>z</span>`
+          `x<mark class="${MATCH_CLASSES}">y</mark><span>z</span>`
         ],
         [
           /z/,
           '<pre>xy<span>z</span></pre>',
-          `xy<span><span class="${MATCH_CLASSES}">z</span></span>`
+          `xy<span><mark class="${MATCH_CLASSES}">z</mark></span>`
         ]
       ])(
         'should highlight %s fragment in %s',

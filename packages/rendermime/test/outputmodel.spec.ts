@@ -40,7 +40,6 @@ describe('rendermime/outputmodel', () => {
         let called = false;
         model.changed.connect((sender, args) => {
           expect(sender).toBe(model);
-          expect(args).toEqual('data');
           called = true;
         });
         model.setData({ ...model.data });

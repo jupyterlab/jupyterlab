@@ -221,7 +221,9 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
       return;
     }
 
-    this.endQuery();
+    this.endQuery().catch(reason => {
+      console.error(`Failed to end search query.`, reason);
+    });
     super.dispose();
   }
 

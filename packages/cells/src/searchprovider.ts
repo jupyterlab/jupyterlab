@@ -98,7 +98,9 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
     this._isDisposed = true;
     Signal.clearData(this);
     if (this.isActive) {
-      this.endQuery();
+      this.endQuery().catch(reason => {
+        console.error(`Failed to end search query on cells.`, reason);
+      });
     }
   }
 
@@ -356,7 +358,9 @@ class CodeCellSearchProvider extends CellSearchProvider {
     this.outputsProvider = [];
 
     const outputs = (this.cell as CodeCell).outputArea;
-    this._onOutputsChanged(outputs, outputs.widgets.length);
+    this._onOutputsChanged(outputs, outputs.widgets.length).catch(reason => {
+      console.error(`Failed to initialize search on cell outputs.`, reason);
+    });
     outputs.outputLengthChanged.connect(this._onOutputsChanged, this);
     outputs.disposed.connect(() => {
       outputs.outputLengthChanged.disconnect(this._onOutputsChanged);
@@ -537,9 +541,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
     );
 
     if (this.isActive && this.query && this.filters?.output !== false) {
-      this.outputsProvider.forEach(provider => {
-        provider.startQuery(this.query);
-      });
+      await Promise.all([
+        this.outputsProvider.map(provider => {
+          provider.startQuery(this.query);
+        })
+      ]);
     }
 
     this.changed.emit();

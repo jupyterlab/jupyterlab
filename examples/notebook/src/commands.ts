@@ -93,10 +93,7 @@ export const SetupCommands = (
         searchInstance.focusInput();
         return;
       }
-      const provider = new NotebookSearchProvider(
-        nullTranslator,
-        searchRegistry
-      );
+      const provider = new NotebookSearchProvider(nbWidget, nullTranslator);
       searchInstance = new SearchInstance(nbWidget, provider, 500);
       searchInstance.disposed.connect(() => {
         searchInstance = undefined;
