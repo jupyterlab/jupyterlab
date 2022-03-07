@@ -79,17 +79,17 @@ export namespace IUser {
    */
   export type User = {
     /**
-     * User's Username.
+     * User's unique identifier.
      */
     readonly username: string;
 
     /**
-     * User's name.
+     * User's full name.
      */
     readonly name: string;
 
     /**
-     * User's last name.
+     * Shorter version of the name for displaying it on the UI.
      */
     readonly displayName: string;
 
