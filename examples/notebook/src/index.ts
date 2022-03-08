@@ -42,14 +42,10 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { SearchProviderRegistry } from '@jupyterlab/documentsearch';
-
 import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-
-import { nullTranslator } from '@jupyterlab/translation';
 
 import { SetupCommands } from './commands';
 
@@ -171,8 +167,7 @@ function createApp(manager: ServiceManager.IManager): void {
     panel.update();
   });
 
-  const searchRegistry = new SearchProviderRegistry(nullTranslator);
-  SetupCommands(commands, palette, nbWidget, handler, searchRegistry);
+  SetupCommands(commands, palette, nbWidget, handler);
 
   console.debug('Example started!');
 }

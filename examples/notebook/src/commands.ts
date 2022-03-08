@@ -3,10 +3,7 @@
  */
 import { sessionContextDialogs } from '@jupyterlab/apputils';
 import { CompletionHandler } from '@jupyterlab/completer';
-import {
-  ISearchProviderRegistry,
-  SearchInstance
-} from '@jupyterlab/documentsearch';
+import { SearchInstance } from '@jupyterlab/documentsearch';
 import {
   NotebookActions,
   NotebookPanel,
@@ -52,8 +49,7 @@ export const SetupCommands = (
   commands: CommandRegistry,
   palette: CommandPalette,
   nbWidget: NotebookPanel,
-  handler: CompletionHandler,
-  searchRegistry: ISearchProviderRegistry
+  handler: CompletionHandler
 ): void => {
   // Add commands.
   commands.addCommand(cmdIds.invoke, {
