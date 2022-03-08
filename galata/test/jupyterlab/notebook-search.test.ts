@@ -52,7 +52,9 @@ test.describe('Notebook Search', () => {
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot('search-within-outputs.png');
+    expect(await nbPanel.screenshot()).toMatchSnapshot(
+      'search-within-outputs.png'
+    );
   });
 
   test('Search in selected cells', async ({ page }) => {
