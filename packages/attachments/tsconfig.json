@@ -17,6 +17,9 @@
     },
     {
       "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../shared-models"
     }
   ]
 }

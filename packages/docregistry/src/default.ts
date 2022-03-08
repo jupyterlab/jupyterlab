@@ -28,12 +28,8 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(
-    languagePreference?: string,
-    modelDB?: IModelDB,
-    sharedDoc?: ISharedDoc
-  ) {
-    super({ modelDB, sharedDoc });
+  constructor(languagePreference?: string, sharedDoc?: ISharedDoc) {
+    super({ sharedDoc });
     this._defaultLang = languagePreference || '';
 
     this.value.changed.connect(this._onValueChanged, this);
@@ -254,6 +250,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @param languagePreference - An optional kernel language preference.
    * @param modelDB - An optional modelDB.
+   * @param sharedDoc - An optional sharedDoc.
    * @param isInitialized - An optional flag to check if the model is initialized.
    *
    * @returns A new document model.
@@ -264,7 +261,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
     sharedDoc?: ISharedDoc,
     isInitialized?: boolean
   ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB, sharedDoc);
+    return new DocumentModel(languagePreference, sharedDoc);
   }
 
   /**

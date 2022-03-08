@@ -15,12 +15,7 @@ import {
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
-import {
-  IModelDB,
-  IObservableList,
-  IObservableUndoableList,
-  ModelDB
-} from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { ISharedDoc, ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
 import {
   ITranslator,
@@ -29,7 +24,7 @@ import {
 } from '@jupyterlab/translation';
 import { JSONObject, JSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { CellList } from './celllist';
+import { CellList, ICellList } from './celllist';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -38,7 +33,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The list of cells in the notebook.
    */
-  readonly cells: IObservableUndoableList<ICellModel>;
+  readonly cells: ICellList;
 
   /**
    * The cell model factory for the notebook.
@@ -79,11 +74,6 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    if (options.modelDB) {
-      this.modelDB = options.modelDB;
-    } else {
-      this.modelDB = new ModelDB();
-    }
     if (options.sharedDoc) {
       this.sharedDoc = options.sharedDoc;
     } else {
@@ -92,15 +82,8 @@ export class NotebookModel implements INotebookModel {
     this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
-    this.contentFactory = factory.clone(
-      this.modelDB.view('cells'),
-      this.sharedDoc
-    );
-    this._cells = new CellList(
-      this.modelDB,
-      this.contentFactory,
-      this.sharedDoc
-    );
+    this.contentFactory = factory.clone(this.sharedDoc);
+    this._cells = new CellList(this.contentFactory, this.sharedDoc);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._cells.changed.connect(this._onCellsChanged, this);
 
@@ -176,7 +159,7 @@ export class NotebookModel implements INotebookModel {
   /**
    * Get the observable list of notebook cells.
    */
-  get cells(): IObservableUndoableList<ICellModel> {
+  get cells(): ICellList {
     return this._cells;
   }
 
@@ -317,10 +300,10 @@ export class NotebookModel implements INotebookModel {
           continue;
       }
     }
-    this.cells.beginCompoundOperation();
-    this.cells.clear();
-    this.cells.pushAll(cells);
-    this.cells.endCompoundOperation();
+    this.cells.transact(() => {
+      this.cells.clear();
+      this.cells.pushAll(cells);
+    });
 
     this._state.set('nbformat', nbformat.MAJOR_VERSION);
     this._state.set('nbformat_minor', nbformat.MINOR_VERSION);
@@ -483,11 +466,9 @@ close the notebook without saving it.`,
   readonly contentFactory: NotebookModel.IContentFactory;
 
   /**
-   * The underlying `IModelDB` instance in which model
+   * The underlying `ISharedDoc` instance in which model
    * data is stored.
    */
-  readonly modelDB: IModelDB;
-
   readonly sharedDoc: ISharedDoc;
 
   private _dirty = false;
@@ -497,7 +478,7 @@ close the notebook without saving it.`,
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 
   private _trans: TranslationBundle;
-  private _cells: CellList;
+  private _cells: ICellList;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
@@ -526,10 +507,8 @@ export namespace NotebookModel {
     contentFactory?: IContentFactory;
 
     /**
-     * A modelDB for storing notebook data.
+     * A ISharedDoc for storing notebook data.
      */
-    modelDB?: IModelDB;
-
     sharedDoc?: ISharedDoc;
 
     /**
@@ -558,10 +537,8 @@ export namespace NotebookModel {
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
-     * The IModelDB in which to put data for the notebook model.
+     * The ISharedDoc in which to put data for the notebook model.
      */
-    modelDB: IModelDB | undefined;
-
     readonly sharedDoc: ISharedDoc | undefined;
 
     /**
@@ -613,7 +590,7 @@ export namespace NotebookModel {
     /**
      * Clone the content factory with a new IModelDB.
      */
-    clone(modelDB: IModelDB, sharedDoc: ISharedDoc): IContentFactory;
+    clone(sharedDoc: ISharedDoc): IContentFactory;
   }
 
   /**
@@ -626,7 +603,6 @@ export namespace NotebookModel {
     constructor(options: ContentFactory.IOptions) {
       this.codeCellContentFactory =
         options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
-      this.modelDB = options.modelDB;
       this.sharedDoc = options.sharedDoc;
     }
 
@@ -636,10 +612,8 @@ export namespace NotebookModel {
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
-     * The IModelDB in which to put the notebook data.
+     * The ISharedDoc in which to put the notebook data.
      */
-    readonly modelDB: IModelDB | undefined;
-
     readonly sharedDoc: ISharedDoc | undefined;
 
     /**
@@ -685,9 +659,6 @@ export namespace NotebookModel {
       if (!options.id) {
         options.id = UUID.uuid4();
       }
-      if (this.modelDB) {
-        options.modelDB = this.modelDB.view(options.id);
-      }
       if (this.sharedDoc) {
         options.sharedDoc = this.sharedDoc;
       }
@@ -705,9 +676,6 @@ export namespace NotebookModel {
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
       if (!options.id) {
         options.id = UUID.uuid4();
-      }
-      if (this.modelDB) {
-        options.modelDB = this.modelDB.view(options.id);
       }
       if (this.sharedDoc) {
         options.sharedDoc = this.sharedDoc;
@@ -727,9 +695,6 @@ export namespace NotebookModel {
       if (!options.id) {
         options.id = UUID.uuid4();
       }
-      if (this.modelDB) {
-        options.modelDB = this.modelDB.view(options.id);
-      }
       if (this.sharedDoc) {
         options.sharedDoc = this.sharedDoc;
       }
@@ -739,9 +704,8 @@ export namespace NotebookModel {
     /**
      * Clone the content factory with a new IModelDB.
      */
-    clone(modelDB: IModelDB, sharedDoc: ISharedDoc): ContentFactory {
+    clone(sharedDoc: ISharedDoc): ContentFactory {
       return new ContentFactory({
-        modelDB,
         sharedDoc,
         codeCellContentFactory: this.codeCellContentFactory
       });
@@ -762,10 +726,8 @@ export namespace NotebookModel {
       codeCellContentFactory?: CodeCellModel.IContentFactory;
 
       /**
-       * The modelDB in which to place new content.
+       * The ISharedDoc in which to place new content.
        */
-      modelDB?: IModelDB;
-
       sharedDoc?: ISharedDoc;
     }
   }

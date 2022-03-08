@@ -30,7 +30,11 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
+import {
+  JSONValue,
+  PartialJSONValue,
+  PromiseDelegate
+} from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -55,15 +59,17 @@ export class Context<
     this._factory = options.factory;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._opener = options.opener || Private.noOp;
-    this._path = this._manager.contents.normalize(options.path);
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
-    const localPath = this._manager.contents.localPath(this._path);
+
+    const path = this._manager.contents.normalize(options.path);
+    const localPath = this._manager.contents.localPath(path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    const dbFactory = options.modelDBFactory;
     this._sharedDoc = new SharedDoc({ path: localPath });
+    this._sharedContext = this._sharedDoc.createMap('context');
+
+    const dbFactory = options.modelDBFactory;
     if (dbFactory) {
-      const localPath = manager.contents.localPath(this._path);
       this._modelDB = dbFactory.createNew(localPath);
       this._model = this._factory.createNew(
         lang,
@@ -80,11 +86,10 @@ export class Context<
       );
     }
 
-    this._ycontext = this._sharedDoc.createMap('context');
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
       ? docProviderFactory({
-          path: this._path,
+          path,
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
           sharedDoc: this._sharedDoc
@@ -95,11 +100,11 @@ export class Context<
       return this._populatedPromise.promise;
     });
 
-    const ext = PathExt.extname(this._path);
+    const ext = PathExt.extname(path);
     this.sessionContext = new SessionContext({
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
-      path: this._path,
+      path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false },
@@ -108,23 +113,16 @@ export class Context<
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    const urlResolver = (this.urlResolver = new RenderMimeRegistry.UrlResolver({
-      path: this._path,
+    this.urlResolver = new RenderMimeRegistry.UrlResolver({
+      path,
       contents: manager.contents
-    }));
-    this._ycontext.set('path', this._path);
-    this._ycontext.changed.connect((sender, args) => {
-      if (args.key === 'path') {
-        const newPath = this._ycontext.get('path')!;
-        if (newPath && newPath !== args.oldValue) {
-          urlResolver.path = newPath;
-          this._path = newPath;
-          this._provider.setPath(newPath);
-          this._pathChanged.emit(this.path);
-          this.sessionContext.session?.setPath(newPath) as any;
-        }
-      }
     });
+
+    // If the context was not initialized by another client
+    if (!this._sharedContext.has('path')) {
+      this._sharedContext.set('path', path);
+    }
+    this._sharedContext.changed.connect(this._onSharedContextChanged, this);
   }
 
   /**
@@ -182,7 +180,7 @@ export class Context<
    * The current path associated with the document.
    */
   get path(): string {
-    return this._path;
+    return this._sharedContext.get('path') as string;
   }
 
   /**
@@ -191,7 +189,8 @@ export class Context<
    * this is the same as the path.
    */
   get localPath(): string {
-    return this._manager.contents.localPath(this._path);
+    const path = this._sharedContext.get('path') as string;
+    return this._manager.contents.localPath(path);
   }
 
   /**
@@ -236,7 +235,7 @@ export class Context<
     }
     this._model.dispose();
     this._provider.destroy();
-    this._ycontext.dispose();
+    this._sharedContext.dispose();
     this._sharedDoc.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -314,13 +313,15 @@ export class Context<
   saveAs(): Promise<void> {
     return this.ready
       .then(() => {
-        return Private.getSavePath(this._path);
+        const path = this._sharedContext.get('path') as string;
+        return Private.getSavePath(path);
       })
       .then(newPath => {
         if (this.isDisposed || !newPath) {
           return;
         }
-        if (newPath === this._path) {
+        const path = this._sharedContext.get('path') as string;
+        if (newPath === path) {
           return this.save();
         }
         // Make sure the path does not exist.
@@ -349,7 +350,8 @@ export class Context<
    *   downloading.
    */
   async download(): Promise<void> {
-    const url = await this._manager.contents.getDownloadUrl(this._path);
+    const path = this._sharedContext.get('path') as string;
+    const url = await this._manager.contents.getDownloadUrl(path);
     const element = document.createElement('a');
     element.href = url;
     element.download = '';
@@ -374,7 +376,8 @@ export class Context<
   createCheckpoint(): Promise<Contents.ICheckpointModel> {
     const contents = this._manager.contents;
     return this._manager.ready.then(() => {
-      return contents.createCheckpoint(this._path);
+      const path = this._sharedContext.get('path') as string;
+      return contents.createCheckpoint(path);
     });
   }
 
@@ -384,7 +387,8 @@ export class Context<
   deleteCheckpoint(checkpointId: string): Promise<void> {
     const contents = this._manager.contents;
     return this._manager.ready.then(() => {
-      return contents.deleteCheckpoint(this._path, checkpointId);
+      const path = this._sharedContext.get('path') as string;
+      return contents.deleteCheckpoint(path, checkpointId);
     });
   }
 
@@ -393,7 +397,7 @@ export class Context<
    */
   restoreCheckpoint(checkpointId?: string): Promise<void> {
     const contents = this._manager.contents;
-    const path = this._path;
+    const path = this._sharedContext.get('path') as string;
     return this._manager.ready.then(() => {
       if (checkpointId) {
         return contents.restoreCheckpoint(path, checkpointId);
@@ -414,7 +418,8 @@ export class Context<
   listCheckpoints(): Promise<Contents.ICheckpointModel[]> {
     const contents = this._manager.contents;
     return this._manager.ready.then(() => {
-      return contents.listCheckpoints(this._path);
+      const path = this._sharedContext.get('path') as string;
+      return contents.listCheckpoints(path);
     });
   }
 
@@ -456,15 +461,15 @@ export class Context<
     }
     let oldPath = change.oldValue && change.oldValue.path;
     let newPath = change.newValue && change.newValue.path;
-
-    if (newPath && this._path.indexOf(oldPath || '') === 0) {
+    const path = this._sharedContext.get('path') as string;
+    if (newPath && path.indexOf(oldPath || '') === 0) {
       let changeModel = change.newValue;
       // When folder name changed, `oldPath` is `foo`, `newPath` is `bar` and `this._path` is `foo/test`,
       // we should update `foo/test` to `bar/test` as well
 
-      if (oldPath !== this._path) {
-        newPath = this._path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = this._path;
+      if (oldPath !== path) {
+        newPath = path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
+        oldPath = path;
 
         // Update client file model from folder change
         changeModel = {
@@ -472,7 +477,8 @@ export class Context<
           path: newPath
         };
       }
-      this._path = newPath;
+
+      this._sharedContext.set('path', newPath);
       void this.sessionContext.session?.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
@@ -481,7 +487,6 @@ export class Context<
       const localPath = this._manager.contents.localPath(newPath);
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
-      this._ycontext.set('path', this._path);
     }
   }
 
@@ -492,10 +497,23 @@ export class Context<
     if (type !== 'path') {
       return;
     }
-    const path = this.sessionContext.session!.path;
-    if (path !== this._path) {
-      this._path = path;
-      this._ycontext.set('path', this._path);
+    const newPath = this.sessionContext.session!.path;
+    const path = this._sharedContext.get('path') as string;
+    if (newPath !== path) {
+      this._sharedContext.set('path', newPath);
+    }
+  }
+
+  private _onSharedContextChanged(
+    sender: ISharedMap<JSONValue>,
+    args: ISharedMap.IChangedArgs<JSONValue>
+  ): void {
+    if (args.key === 'path') {
+      const newPath = args.newValue as string;
+      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+      this._provider.setPath(newPath);
+      this._pathChanged.emit(newPath);
+      this.sessionContext.session?.setPath(newPath);
     }
   }
 
@@ -518,7 +536,7 @@ export class Context<
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
-    this._ycontext.set('last_modified', newModel.last_modified);
+    this._sharedContext.set('last_modified', newModel.last_modified);
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -571,8 +589,7 @@ export class Context<
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newName);
 
-    this._path = newPath;
-    this._ycontext.set('path', this._path);
+    this._sharedContext.set('path', newPath);
   }
 
   /**
@@ -604,11 +621,13 @@ export class Context<
     try {
       let value: Contents.IModel;
       await this._manager.ready;
-      if (!model.modelDB.isCollaborative) {
+      value = await this._maybeSave(options);
+      // TODO: Keep the collaborative logic around for now
+      /* if (!model.modelDB.isCollaborative) {
         value = await this._maybeSave(options);
       } else {
         value = await this._manager.contents.save(this._path, options);
-      }
+      } */
       if (this.isDisposed) {
         return;
       }
@@ -631,7 +650,7 @@ export class Context<
       }
 
       // Otherwise show an error message and throw the error.
-      const localPath = this._manager.contents.localPath(this._path);
+      const localPath = this._manager.contents.localPath(this.path);
       const file = PathExt.basename(localPath);
       void this._handleError(
         err,
@@ -655,7 +674,7 @@ export class Context<
         ? { format: this._factory.fileFormat }
         : {})
     };
-    const path = this._path;
+    const path = this.path;
     return this._manager.ready
       .then(() => {
         return this._manager.contents.get(path, opts);
@@ -675,7 +694,7 @@ export class Context<
         }
       })
       .catch(async err => {
-        const localPath = this._manager.contents.localPath(this._path);
+        const localPath = this._manager.contents.localPath(this.path);
         const name = PathExt.basename(localPath);
         void this._handleError(
           err,
@@ -699,7 +718,7 @@ export class Context<
         ? { format: this._factory.fileFormat }
         : {})
     };
-    const path = this._path;
+    const path = this._sharedContext.get('path') as string;
     const model = this._model;
     return this._manager.ready
       .then(() => {
@@ -737,16 +756,17 @@ export class Context<
         if (!this._isPopulated) {
           return this._populate();
         }
-      });
-    /* .catch(async err => {
-        const localPath = this._manager.contents.localPath(this._path);
+      })
+      .catch(async err => {
+        const path = this._sharedContext.get('path') as string;
+        const localPath = this._manager.contents.localPath(path);
         const name = PathExt.basename(localPath);
         void this._handleError(
           err,
           this._trans.__('File Load Error for %1', name)
         );
         throw err;
-      }); */
+      });
   }
 
   /**
@@ -755,7 +775,7 @@ export class Context<
   private _maybeSave(
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
-    const path = this._path;
+    const path = this._sharedContext.get('path') as string;
     // Make sure the file has not changed on disk.
     const promise = this._manager.contents.get(path, { content: false });
     return promise.then(
@@ -767,7 +787,9 @@ export class Context<
         // (our last save)
         // In some cases the filesystem reports an inconsistent time, so we allow buffer when comparing.
         const lastModifiedCheckMargin = this._lastModifiedCheckMargin;
-        const ycontextModified = this._ycontext.get('last_modified');
+        const ycontextModified = this._sharedContext.get(
+          'last_modified'
+        ) as string;
         // prefer using the timestamp from ycontext because it is more up to date
         const modified = ycontextModified || this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
@@ -867,7 +889,8 @@ or load the version on disk (revert)?`,
         return Promise.reject(new Error('Disposed'));
       }
       if (result.button.label === this._trans.__('Overwrite')) {
-        return this._manager.contents.save(this._path, options);
+        const path = this._sharedContext.get('path') as string;
+        return this._manager.contents.save(path, options);
       }
       // FIXME-TRANS: Why compare to label?
       if (result.button.label === this._trans.__('Revert')) {
@@ -913,11 +936,9 @@ or load the version on disk (revert)?`,
    * Finish a saveAs operation given a new path.
    */
   private async _finishSaveAs(newPath: string): Promise<void> {
-    this._path = newPath;
+    this._sharedContext.set('path', newPath);
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
-    // we must rename the document before saving with the new path
-    this._ycontext.set('path', this._path);
     await this._provider.renameAck;
     await this.save();
     await this._maybeCheckpoint(true);
@@ -933,8 +954,7 @@ or load the version on disk (revert)?`,
   private _model: T;
   private _modelDB: IModelDB;
   private _sharedDoc: ISharedDoc;
-  private _ycontext: ISharedMap<any>;
-  private _path = '';
+  private _sharedContext: ISharedMap<JSONValue>;
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;

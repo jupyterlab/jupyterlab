@@ -46,6 +46,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
   ExecutionIndicator,
+  ICellList,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
@@ -62,10 +63,7 @@ import {
   StaticNotebook,
   ToolbarItems
 } from '@jupyterlab/notebook';
-import {
-  IObservableList,
-  IObservableUndoableList
-} from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -1813,10 +1811,7 @@ function addCommands(
         return;
       }
       panel.content.model.cells.changed.connect(
-        (
-          list: IObservableUndoableList<ICellModel>,
-          args: IObservableList.IChangedArgs<ICellModel>
-        ) => {
+        (list: ICellList, args: IObservableList.IChangedArgs<ICellModel>) => {
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);

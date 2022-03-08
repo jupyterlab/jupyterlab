@@ -2,19 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import {
-  IModelDB,
-  IObservableMap,
-  IObservableValue,
-  ObservableMap,
-  ObservableValue
-} from '@jupyterlab/observables';
+import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
+import { ISharedMap, ISharedType } from '@jupyterlab/shared-models';
 import {
   AttachmentModel,
   IAttachmentModel,
   imageRendererFactory
 } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -108,9 +104,9 @@ export namespace IAttachmentsModel {
     contentFactory?: IContentFactory;
 
     /**
-     * An optional IModelDB to store the attachments model.
+     * An optional ISharedMap to store the attachments model.
      */
-    modelDB?: IModelDB;
+    sharedModel?: ISharedMap<ISharedType>;
   }
 
   /**
@@ -150,15 +146,17 @@ export class AttachmentsModel implements IAttachmentsModel {
 
     // If we are given a IModelDB, keep an up-to-date
     // serialized copy of the AttachmentsModel in it.
-    if (options.modelDB) {
-      this._modelDB = options.modelDB;
-      this._serialized = this._modelDB.createValue('attachments');
-      if (this._serialized.get()) {
-        this.fromJSON(this._serialized.get() as nbformat.IAttachments);
+    // TODO: Should we keep a copy in the SharedModel?
+    if (options.sharedModel) {
+      this._sharedModel = options.sharedModel;
+      if (this._sharedModel.has('attachments')) {
+        this.fromJSON(
+          this._sharedModel.get('attachments') as nbformat.IAttachments
+        );
       } else {
-        this._serialized.set(this.toJSON());
+        this._sharedModel.set('attachments', this.toJSON() as JSONObject);
       }
-      this._serialized.changed.connect(this._onSerializedChanged, this);
+      this._sharedModel.changed.connect(this._onSerializedChanged, this);
     }
   }
 
@@ -297,9 +295,9 @@ export class AttachmentsModel implements IAttachmentsModel {
     sender: IObservableMap<IAttachmentModel>,
     args: IObservableMap.IChangedArgs<IAttachmentModel>
   ) {
-    if (this._serialized && !this._changeGuard) {
+    if (this._sharedModel && !this._changeGuard) {
       this._changeGuard = true;
-      this._serialized.set(this.toJSON());
+      this._sharedModel.set('attachments', this.toJSON() as JSONObject);
       this._changeGuard = false;
     }
     this._changed.emit(args);
@@ -311,8 +309,8 @@ export class AttachmentsModel implements IAttachmentsModel {
    * action, then update the model accordingly.
    */
   private _onSerializedChanged(
-    sender: IObservableValue,
-    args: ObservableValue.IChangedArgs
+    sender: ISharedMap<JSONObject>,
+    args: ISharedMap.IChangedArgs<JSONObject>
   ) {
     if (!this._changeGuard) {
       this._changeGuard = true;
@@ -332,8 +330,7 @@ export class AttachmentsModel implements IAttachmentsModel {
   private _isDisposed = false;
   private _stateChanged = new Signal<IAttachmentsModel, void>(this);
   private _changed = new Signal<this, IAttachmentsModel.ChangedArgs>(this);
-  private _modelDB: IModelDB | null = null;
-  private _serialized: IObservableValue | null = null;
+  private _sharedModel: ISharedMap<ISharedType> | null = null;
   private _changeGuard = false;
 }
 

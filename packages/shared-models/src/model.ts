@@ -6,6 +6,8 @@ import { ISharedString, SharedString } from './sharedString';
 import { ISharedMap, SharedMap } from './sharedMap';
 import { ISharedList, SharedList } from './sharedList';
 
+type Type = 'Map' | 'List' | 'String';
+
 /**
  * Base interface for Shared objects.
  */
@@ -13,7 +15,7 @@ export interface IShared extends IDisposable {
   /**
    * The type of this object.
    */
-  readonly type: 'Map' | 'List' | 'String';
+  readonly type: Type;
 
   /**
    * The specific model behind the IShared abstraction.
@@ -25,6 +27,26 @@ export interface IShared extends IDisposable {
 }
 
 export type ISharedType = IShared | JSONValue;
+
+/**
+ * Base type for the schema.
+ */
+export type SharedSchema = {
+  /**
+   * The type for the IShared.
+   */
+  type: Type;
+
+  /**
+   * Unique name for the IShared.
+   */
+  name: string;
+}[];
+
+/**
+ * TODO: define an interface for the UndoManager.
+ */
+export type IUndoManager = any;
 
 /**
  * An interface for a path based database for
@@ -74,7 +96,7 @@ export interface ISharedDoc extends IDisposable {
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
    */
-  transact(f: () => void, undoable: boolean): void;
+  transact(f: () => void, origin?: any): void;
 
   /**
    * Get a value for a path.
@@ -128,6 +150,26 @@ export interface ISharedDoc extends IDisposable {
    * JSON Objects and primitives.
    */
   createMap<T extends ISharedType>(name: string): ISharedMap<T>;
+
+  /**
+   * Create a multiple IShared that uses the same
+   * undo manager.
+   *
+   * @param schema: the SharedSchema with the specification
+   * of the IShared classes to create.
+   *
+   * @param origin: the instance to track for filtering changes.
+   *
+   * @returns a list o IShared.
+   *
+   * #### Notes
+   * The map can only store objects that are simple
+   * JSON Objects and primitives.
+   */
+  createFromSchema(
+    schema: SharedSchema,
+    origin?: any
+  ): [IUndoManager, ...IShared[]];
 }
 
 /**
@@ -190,8 +232,8 @@ export class SharedDoc implements ISharedDoc {
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
    */
-  transact(f: () => void, undoable = true): void {
-    this._ydoc.transact(f, undoable ? this : null);
+  transact(f: () => void, origin: any = this): void {
+    this._ydoc.transact(f, origin);
   }
 
   /**
@@ -266,6 +308,78 @@ export class SharedDoc implements ISharedDoc {
     const map = new SharedMap<T>({ ymap, doc: this });
     return map;
   }
+
+  /**
+   * Create a multiple IShared that uses the same
+   * undo manager.
+   *
+   * @param schema: the SharedSchema with the specification
+   * of the IShared classes to create.
+   *
+   * @param origin: the instance to track for filtering changes.
+   *
+   * @returns a list o IShared.
+   */
+  createFromSchema(
+    schema: SharedSchema,
+    origin: any = this
+  ): [Y.UndoManager, ...IShared[]] {
+    const yItems: Y.AbstractType<any>[] = [];
+    schema.forEach(type => {
+      switch (type.type) {
+        case 'String':
+          yItems.push(this._ydoc.getText(type.name));
+          break;
+        case 'List':
+          yItems.push(this._ydoc.getArray(type.name));
+          break;
+        case 'Map':
+          yItems.push(this._ydoc.getMap(type.name));
+          break;
+      }
+    });
+
+    const undoManager = new Y.UndoManager(yItems, {
+      trackedOrigins: new Set([origin])
+    });
+
+    const sharedTypes: IShared[] = [];
+    schema.forEach((type, index) => {
+      switch (type.type) {
+        case 'String':
+          sharedTypes.push(
+            new SharedString({
+              ytext: yItems[index] as Y.Text,
+              doc: this,
+              origin,
+              undoManager
+            })
+          );
+          break;
+        case 'List':
+          sharedTypes.push(
+            new SharedList({
+              yarray: yItems[index] as Y.Array<any>,
+              doc: this,
+              origin,
+              undoManager
+            })
+          );
+          break;
+        case 'Map':
+          sharedTypes.push(
+            new SharedMap({
+              ymap: yItems[index] as Y.Map<any>,
+              doc: this,
+              origin,
+              undoManager
+            })
+          );
+          break;
+      }
+    });
+    return [undoManager, ...sharedTypes];
+  }
 }
 
 /**
@@ -283,6 +397,26 @@ export namespace SharedDoc {
      * ISharedDoc. If none is given, it uses its own store.
      */
     doc?: Y.Doc;
+  }
+  export interface IModelOptions {
+    /**
+     * The object to track for the undo manager.
+     */
+    origin?: any;
+
+    undoManager?: any;
+
+    /**
+     * Whether to initialize the undo manager or not.
+     *
+     * NOTE: The undo manager can not be initialized
+     * before the Y.Array is inserted in the Y.Doc.
+     * This option allows to create a SharedList
+     * before the Y.Array was integrated into the Y.Doc
+     * and then call `SharedList.initialize()` to
+     * initialize the undo manager.
+     */
+    initialize?: boolean;
   }
 
   /**

@@ -60,6 +60,11 @@ export interface ISharedMap<T extends ISharedType> extends IShared {
   redo(): void;
 
   /**
+   * Clear the change stack.
+   */
+  clearUndo(): void;
+
+  /**
    * Set a key-value pair in the map
    *
    * @param key - The key to set.
@@ -174,6 +179,7 @@ export namespace ISharedMap {
 export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
   private _ymap: Y.Map<any>;
   private _doc: SharedDoc;
+  private _origin: any;
   private _undoManager: Y.UndoManager;
   private _changed = new Signal<this, ISharedMap.IChangedArgs<T>>(this);
   private _isDisposed = false;
@@ -189,8 +195,11 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
     }
 
     this._doc = options.doc;
+    this._origin = options.origin ?? this;
 
-    if (options.initialize !== false) {
+    if (options.undoManager) {
+      this._undoManager = options.undoManager;
+    } else if (options.initialize !== false) {
       this.initialize();
     }
 
@@ -247,7 +256,7 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
 
   initialize(): void {
     this._undoManager = new Y.UndoManager(this._ymap, {
-      trackedOrigins: new Set([this])
+      trackedOrigins: new Set([this._origin])
     });
   }
 
@@ -280,6 +289,13 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
   }
 
   /**
+   * Clear the change stack.
+   */
+  clearUndo(): void {
+    this._undoManager.clear();
+  }
+
+  /**
    * Set a key-value pair in the map
    *
    * @param key - The key to set.
@@ -302,7 +318,7 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
     this._doc.transact(() => {
       oldVal = this._ymap.get(key);
       this._ymap.set(key, SharedDoc.sharedTypeToAbstractType(value));
-    });
+    }, this._origin);
     return oldVal;
   }
 
@@ -378,7 +394,7 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
         this._doc
       );
       this._ymap.delete(key);
-    });
+    }, this._origin);
     return oldVal;
   }
 
@@ -389,7 +405,7 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
     // Delete one by one to emit the correct signals.
     this._doc.transact(() => {
       this._ymap.clear();
-    });
+    }, this._origin);
   }
 
   private _onMapChanged = (event: Y.YMapEvent<any>): void => {
@@ -440,7 +456,7 @@ export namespace SharedMap {
   /**
    * Options for creating a `SharedMap` object.
    */
-  export interface IOptions {
+  export interface IOptions extends SharedDoc.IModelOptions {
     /**
      * A specific document to use as the store for this
      * SharedDoc.
@@ -451,7 +467,5 @@ export namespace SharedMap {
      * The underlying Y.Map for the SharedMap.
      */
     ymap?: Y.Map<any>;
-
-    initialize?: boolean;
   }
 }

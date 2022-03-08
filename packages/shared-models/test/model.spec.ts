@@ -13,8 +13,6 @@ import {
   SharedString
 } from '../src';
 
-import { ArrayExt } from '@lumino/algorithm';
-
 describe('@jupyterlab/shared-models', () => {
   describe('model', () => {
     // TODO: Tests undoManager and Awareness
@@ -474,6 +472,14 @@ describe('@jupyterlab/shared-models', () => {
       expect(foo.get(3)).toBe('foo2');
       expect(foo.get(4)).toBe('foo4');
 
+      foo.moveRange(2, 3, 1);
+      expect(foo.length).toBe(5);
+      expect(foo.get(0)).toBe('foo0');
+      expect(foo.get(1)).toBe('foo1');
+      expect(foo.get(2)).toBe('foo2');
+      expect(foo.get(3)).toBe('foo3');
+      expect(foo.get(4)).toBe('foo4');
+
       foo.clear();
       expect(foo.length).toBe(0);
     });
@@ -540,7 +546,7 @@ describe('@jupyterlab/shared-models', () => {
       await emission;
     });
 
-    it('should emit a "set" signal', async () => {
+    it('should emit a set signal', async () => {
       const res: ISharedList.IChangedArgs<ISharedType> = {
         type: 'set',
         newIndex: 0,

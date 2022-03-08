@@ -69,6 +69,11 @@ export interface ISharedList<T extends ISharedType> extends IShared {
   redo(): void;
 
   /**
+   * Clear the change stack.
+   */
+  clearUndo(): void;
+
+  /**
    * Create an iterator over the values in the list.
    *
    * @returns A new iterator starting at the front of the list.
@@ -164,6 +169,18 @@ export interface ISharedList<T extends ISharedType> extends IShared {
    * A `fromIndex` or a `toIndex` which is non-integral.
    */
   move(fromIndex: number, toIndex: number): void;
+
+  /**
+   * Move multiple values from one index to another.
+   * NOTE: not ready yet
+   *
+   * @parm start - The start index of the elements to move.
+   *
+   * @parm end - The end index of the elements to move.
+   *
+   * @param toIndex - The index to move the element to.
+   */
+  moveRange(start: number, end: number, toIndex: number): void;
 
   /**
    * Add a value to the back of the list.
@@ -340,6 +357,7 @@ export namespace ISharedList {
 export class SharedList<T extends ISharedType> implements ISharedList<T> {
   private _yarray: Y.Array<any>;
   private _doc: SharedDoc;
+  private _origin: any;
   private _undoManager: Y.UndoManager;
   private _isDisposed: boolean = false;
   private _oldLength = 0;
@@ -356,8 +374,11 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
     }
 
     this._doc = options.doc;
+    this._origin = options.origin ?? this;
 
-    if (options.initialize !== false) {
+    if (options.undoManager) {
+      this._undoManager = options.undoManager;
+    } else if (options.initialize !== false) {
       this.initialize();
     }
 
@@ -414,7 +435,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
 
   initialize(): void {
     this._undoManager = new Y.UndoManager(this._yarray, {
-      trackedOrigins: new Set([this])
+      trackedOrigins: new Set([this._origin])
     });
   }
 
@@ -444,6 +465,13 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    */
   redo(): void {
     this._undoManager.redo();
+  }
+
+  /**
+   * Clear the change stack.
+   */
+  clearUndo(): void {
+    this._undoManager.clear();
   }
 
   /**
@@ -505,7 +533,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
     this._doc.transact(() => {
       this._yarray.delete(index);
       this._yarray.insert(index, [SharedDoc.sharedTypeToAbstractType(value)]);
-    });
+    }, this._origin);
   }
 
   /**
@@ -528,7 +556,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
   push(value: T): number {
     this._doc.transact(() => {
       this._yarray.push([SharedDoc.sharedTypeToAbstractType(value)]);
-    });
+    }, this._origin);
     return this.length;
   }
 
@@ -560,7 +588,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
   insert(index: number, value: T): void {
     this._doc.transact(() => {
       this._yarray.insert(index, [SharedDoc.sharedTypeToAbstractType(value)]);
-    });
+    }, this._origin);
   }
 
   /**
@@ -611,7 +639,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
         this._doc
       );
       this._yarray.delete(index);
-    });
+    }, this._origin);
     return oldVal;
   }
 
@@ -627,36 +655,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
   clear(): void {
     this._doc.transact(() => {
       this._yarray.delete(0, this.length);
-    });
-  }
-
-  /**
-   * Move a value from one index to another.
-   *
-   * @parm fromIndex - The index of the element to move.
-   *
-   * @param toIndex - The index to move the element to.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * Iterators pointing at the lesser of the `fromIndex` and the `toIndex`
-   * and beyond are invalidated.
-   *
-   * #### Undefined Behavior
-   * A `fromIndex` or a `toIndex` which is non-integral.
-   */
-  move(fromIndex: number, toIndex: number): void {
-    // TODO: use the new move feature from yjs
-    if (this.length <= 1 || fromIndex === toIndex) {
-      return;
-    }
-    this._doc.transact(() => {
-      const value = this._yarray.get(fromIndex);
-      this._yarray.delete(fromIndex);
-      this._yarray.insert(toIndex, [value]);
-    });
+    }, this._origin);
   }
 
   /**
@@ -682,7 +681,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
     );
     this._doc.transact(() => {
       this._yarray.push(types);
-    });
+    }, this._origin);
     return this.length;
   }
 
@@ -713,7 +712,48 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
     );
     this._doc.transact(() => {
       this._yarray.insert(index, types);
-    });
+    }, this._origin);
+  }
+
+  /**
+   * Move a value from one index to another.
+   *
+   * @parm fromIndex - The index of the element to move.
+   *
+   * @param toIndex - The index to move the element to.
+   *
+   * #### Iterator Validity
+   * Iterators pointing at the lesser of the `fromIndex` and the `toIndex`
+   * and beyond are invalidated.
+   *
+   * #### Undefined Behavior
+   * A `fromIndex` or a `toIndex` which is non-integral.
+   */
+  move(fromIndex: number, toIndex: number): void {
+    // TODO: use the new move feature from yjs
+    if (this.length <= 1 || fromIndex === toIndex) {
+      return;
+    }
+    const adaptionIncrease = fromIndex < toIndex ? 1 : 0;
+    this._doc.transact(() => {
+      this._yarray.move(fromIndex, toIndex + adaptionIncrease);
+    }, this._origin);
+  }
+
+  /**
+   * Move multiple values from one index to another.
+   *
+   * @parm start - The start index of the elements to move.
+   *
+   * @parm end - The end index of the elements to move.
+   *
+   * @param toIndex - The index to move the element to.
+   */
+  moveRange(start: number, end: number, toIndex: number): void {
+    this._doc.transact(() => {
+      const adaptionIncrease = start < toIndex ? end - start : 0;
+      this._yarray.moveRange(start, end, toIndex + adaptionIncrease);
+    }, this._origin);
   }
 
   /**
@@ -737,7 +777,7 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
   removeRange(startIndex: number, endIndex: number): number {
     this._doc.transact(() => {
       this._yarray.delete(startIndex, endIndex - startIndex);
-    });
+    }, this._origin);
     return this.length;
   }
 
@@ -759,14 +799,11 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
     });
 
     event.changes.delta.forEach(delta => {
-      //console.debug(args);
-      //console.debug(delta);
-
       if (
-        args.type === 'add' &&
-        args.newValues.length === 1 &&
-        delta.delete === 1 &&
-        args.newIndex === currpos - 1
+        args.type === 'remove' &&
+        args.oldValues?.length === 1 &&
+        delta.insert?.length === 1 &&
+        args.oldIndex === currpos
       ) {
         //console.debug('SET:');
         /* TODO:
@@ -778,40 +815,39 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
           oldIndex: args.newIndex,
           newIndex: args.newIndex,
           oldValues,
-          newValues: args.newValues
+          newValues: delta.insert
         };
       } else if (
         args.type === 'remove' &&
         delta.insert !== undefined &&
-        delta.insert.length === 1 &&
+        args.oldValues?.length === 0 &&
         args.oldIndex !== currpos
       ) {
         // Moving forward
-        //console.debug('MOVE:');
-        const value = SharedDoc.abstractTypeToISharedType(
-          delta.insert[0],
-          this._doc
-        ) as T;
+        //console.debug('MOVE forward:',args.oldIndex, currpos);
+        const values = (delta.insert as any[]).map(
+          type => SharedDoc.abstractTypeToISharedType(type, this._doc) as T
+        );
         args = {
           type: 'move',
           oldIndex: args.oldIndex,
           newIndex: currpos,
-          oldValues: [value],
-          newValues: [value]
+          oldValues: values,
+          newValues: values
         };
       } else if (
         args.type === 'add' &&
-        args.newValues.length === 1 &&
-        delta.delete === 1 &&
+        args.newValues?.length === delta.delete &&
+        args.oldValues?.length === 0 &&
         args.newIndex !== currpos
       ) {
         // Moving backwards
-        //console.debug('MOVE:');
+        //console.debug('MOVE backwards:');
         args = {
           type: 'move',
           oldIndex: currpos - 1,
           newIndex: args.newIndex,
-          oldValues: args.oldValues,
+          oldValues: args.newValues,
           newValues: args.newValues
         };
       } else if (delta.insert != null) {
@@ -857,9 +893,6 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
       }
     });
 
-    //console.debug("_onArrayChanged:");
-    //console.debug("DELTA:", event.changes.delta);
-    //console.debug("EMIT:", args);
     this._oldLength = this._yarray.length;
     this._changed.emit(args);
   };
@@ -872,7 +905,7 @@ export namespace SharedList {
   /**
    * Options for creating a `SharedList` object.
    */
-  export interface IOptions {
+  export interface IOptions extends SharedDoc.IModelOptions {
     /**
      * A specific document to use as the store for this
      * SharedDoc.
@@ -883,7 +916,5 @@ export namespace SharedList {
      * The underlying Y.Array for the SharedList.
      */
     yarray?: Y.Array<any>;
-
-    initialize?: boolean;
   }
 }

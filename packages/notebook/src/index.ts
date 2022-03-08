@@ -6,6 +6,7 @@
  */
 
 export * from './actions';
+export * from './celllist';
 export * from './default-toolbar';
 export * from './model';
 export * from './modelfactory';

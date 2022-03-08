@@ -172,6 +172,7 @@ export class CompletionHandler implements IDisposable {
     // we need to update the shared model in a single transaction so that the undo manager works as expected
     // TODO: make sure the completer works
     //editor.model.sharedModel.updateSource(start, end, value);
+    editor.model.value.remove(start, end);
     editor.model.value.insert(start, value);
     if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
       editor.setCursorPosition(editor.getPositionAt(start + value.length)!);

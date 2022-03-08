@@ -256,18 +256,18 @@ export class GalataInpage implements IGalataInpage {
       const numCells = nb.widgets.length;
 
       if (nb.model) {
-        nb.model.cells.beginCompoundOperation();
-        nb.model.cells.set(
-          numCells - 1,
-          nb.model.contentFactory.createCell(cellType, {
-            cell: {
-              cell_type: cellType,
-              source: source,
-              metadata: {}
-            }
-          })
-        );
-        nb.model.cells.endCompoundOperation();
+        nb.model.cells.transact(() => {
+          nb.model!.cells.set(
+            numCells - 1,
+            nb.model!.contentFactory.createCell(cellType, {
+              cell: {
+                cell_type: cellType,
+                source: source,
+                metadata: {}
+              }
+            })
+          );
+        });
       }
       nb.update();
     } else {
@@ -300,18 +300,18 @@ export class GalataInpage implements IGalataInpage {
       }
 
       if (nb.model) {
-        nb.model.cells.beginCompoundOperation();
-        nb.model.cells.set(
-          cellIndex,
-          nb.model.contentFactory.createCell(cellType, {
-            cell: {
-              cell_type: cellType,
-              source: source,
-              metadata: {}
-            }
-          })
-        );
-        nb.model.cells.endCompoundOperation();
+        nb.model.cells.transact(() => {
+          nb.model!.cells.set(
+            cellIndex,
+            nb.model!.contentFactory.createCell(cellType, {
+              cell: {
+                cell_type: cellType,
+                source: source,
+                metadata: {}
+              }
+            })
+          );
+        });
       }
       nb.update();
     } else {

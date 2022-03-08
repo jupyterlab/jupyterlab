@@ -90,7 +90,6 @@ export class NotebookModelFactory
     return new NotebookModel({
       languagePreference,
       contentFactory,
-      modelDB,
       sharedDoc,
       isInitialized,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo

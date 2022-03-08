@@ -3,13 +3,7 @@
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import {
-  IModelDB,
-  IObservableMap,
-  IObservableValue,
-  ModelDB,
-  ObservableValue
-} from '@jupyterlab/observables';
+import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 import {
   ISharedDoc,
   ISharedString,
@@ -196,12 +190,6 @@ export namespace CodeEditor {
     readonly selections: IObservableMap<ITextSelection[]>;
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
      * The underlying `ISharedDoc` instance in which model
      * data is stored.
      */
@@ -217,28 +205,19 @@ export namespace CodeEditor {
      */
     constructor(options?: Model.IOptions) {
       options = options || {};
-      if (options.modelDB) {
-        this.modelDB = options.modelDB;
-      } else {
-        this.modelDB = new ModelDB();
-      }
       if (options.sharedDoc) {
         this.sharedDoc = options.sharedDoc;
       } else {
         this.sharedDoc = new SharedDoc();
       }
 
+      // Do not connect yet since the "value" object can change on cells
       this._value = this.sharedDoc.createString('value');
-      // Do not connect yet since the "value" object can change
-      // on cells
-      //this._value.changed.connect(this._onValueChanged, this);
       this._value.text = this.value.text || options.value || '';
 
-      const mimeType = this.modelDB.createValue('mimeType');
-      mimeType.changed.connect(this._onMimeTypeChanged, this);
-      mimeType.set(options.mimeType || 'text/plain');
+      this._mimeType = options.mimeType || 'text/plain';
 
-      this.modelDB.createMap('selections');
+      this._selections = new ObservableMap<ITextSelection[]>();
     }
 
     get type(): nbformat.CellType {
@@ -253,13 +232,7 @@ export namespace CodeEditor {
     }
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
-     * The underlying `IModelDB` instance in which model
+     * The underlying `ISharedDoc` instance in which model
      * data is stored.
      */
     readonly sharedDoc: ISharedDoc;
@@ -275,21 +248,22 @@ export namespace CodeEditor {
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this.modelDB.get('selections') as IObservableMap<ITextSelection[]>;
+      return this._selections;
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this.modelDB.getValue('mimeType') as string;
+      return this._mimeType;
     }
     set mimeType(newValue: string) {
-      const oldValue = this.mimeType;
+      const oldValue = this._mimeType;
       if (oldValue === newValue) {
         return;
       }
-      this.modelDB.setValue('mimeType', newValue);
+      this._mimeType = newValue;
+      this._mimeTypeChanged.emit({ name: 'mimeType', oldValue, newValue });
     }
 
     /**
@@ -320,19 +294,10 @@ export namespace CodeEditor {
       // TODO: emit signal?
     }
 
-    private _onMimeTypeChanged(
-      mimeType: IObservableValue,
-      args: ObservableValue.IChangedArgs
-    ): void {
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue: args.oldValue as string,
-        newValue: args.newValue as string
-      });
-    }
-
     protected _value: ISharedString;
+    private _mimeType: string;
     private _isDisposed = false;
+    private _selections: IObservableMap<ITextSelection[]>;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   }
 
@@ -769,11 +734,6 @@ export namespace CodeEditor {
   export namespace Model {
     export interface IOptions {
       /**
-       * A unique identifier for the model.
-       */
-      id?: string;
-
-      /**
        * The initial value of the model.
        */
       value?: string;
@@ -784,9 +744,9 @@ export namespace CodeEditor {
       mimeType?: string;
 
       /**
-       * An optional modelDB for storing model state.
+       * An optional underlying `ISharedDoc` instance in which model
+       * data is stored.
        */
-      modelDB?: IModelDB;
       sharedDoc?: ISharedDoc;
     }
   }

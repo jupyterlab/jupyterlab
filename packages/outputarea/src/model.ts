@@ -4,10 +4,20 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import {
+  createMutex,
+  ISharedDoc,
+  ISharedList,
+  ISharedMap,
+  SharedDoc,
+  SharedMap
+} from '@jupyterlab/shared-models';
 import { each, map, toArray } from '@lumino/algorithm';
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
+
+const globalMutex = createMutex();
 
 /**
  * The model for an output area.
@@ -106,6 +116,10 @@ export namespace IOutputAreaModel {
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
+
+    sharedDoc?: ISharedDoc;
+
+    sharedList?: ISharedList<ISharedMap<JSONObject>>;
   }
 
   /**
@@ -135,15 +149,43 @@ export class OutputAreaModel implements IOutputAreaModel {
     this._trusted = !!options.trusted;
     this.contentFactory =
       options.contentFactory || OutputAreaModel.defaultContentFactory;
+
+    if (options.sharedDoc && options.sharedList) {
+      this._sharedDoc = options.sharedDoc;
+      this._sharedList = options.sharedList;
+    } else {
+      this._sharedDoc = new SharedDoc();
+      this._sharedList = this._sharedDoc.createList<ISharedMap<JSONObject>>(
+        'outputs'
+      );
+    }
+
     this.list = new ObservableList<IOutputModel>();
     if (options.values) {
+      // Initialize the shared model
       each(options.values, value => {
         const index = this._add(value) - 1;
         const item = this.list.get(index);
         item.changed.connect(this._onGenericChange, this);
       });
+    } else {
+      // Shared model initialized by another client
+      each(this._sharedList, sharedModel => {
+        const newItem = this._createItem({
+          trusted: this._trusted,
+          sharedModel: sharedModel
+        });
+        this.list.push(newItem);
+        this._changed.emit({
+          type: 'add',
+          oldIndex: -1,
+          newIndex: this.length - 1,
+          oldValues: [],
+          newValues: [newItem]
+        });
+      });
     }
-    this.list.changed.connect(this._onListChanged, this);
+    this._sharedList.changed.connect(this._onListChanged, this);
   }
 
   /**
@@ -164,7 +206,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Get the length of the items in the model.
    */
   get length(): number {
-    return this.list ? this.list.length : 0;
+    return this._sharedList ? this._sharedList.length : 0;
   }
 
   /**
@@ -188,9 +230,31 @@ export class OutputAreaModel implements IOutputAreaModel {
     for (let i = 0; i < this.list.length; i++) {
       const oldItem = this.list.get(i);
       const value = oldItem.toJSON();
-      const item = this._createItem({ value, trusted });
-      this.list.set(i, item);
+      
+      let sharedItem = this._sharedList.get(i);
+      sharedItem.dispose();
       oldItem.dispose();
+
+      const sharedModel = new SharedMap<JSONObject>({
+        doc: this._sharedDoc as SharedDoc,
+        initialize: false
+      });
+      const newItem = this._createItem({
+        value,
+        trusted,
+        sharedModel: sharedModel
+      });
+      globalMutex(() => {
+        this._sharedList.set(i, sharedModel);
+        this.list.set(i, newItem);
+      });
+      this._changed.emit({
+        type: 'set',
+        oldIndex: i,
+        newIndex: i,
+        oldValues: [oldItem],
+        newValues: [newItem]
+      });
     }
   }
 
@@ -214,6 +278,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       return;
     }
     this._isDisposed = true;
+    this._sharedList.dispose();
     this.list.dispose();
     Signal.clearData(this);
   }
@@ -232,8 +297,27 @@ export class OutputAreaModel implements IOutputAreaModel {
     value = JSONExt.deepCopy(value);
     // Normalize stream data.
     Private.normalize(value);
-    const item = this._createItem({ value, trusted: this._trusted });
-    this.list.set(index, item);
+    const sharedModel = new SharedMap<JSONObject>({
+      doc: this._sharedDoc as SharedDoc,
+      initialize: false
+    });
+    const oldItem = this.list.get(index);
+    const newItem = this._createItem({
+      value,
+      trusted: this._trusted,
+      sharedModel: sharedModel
+    });
+    globalMutex(() => {
+      this._sharedList.set(index, sharedModel);
+      this.list.set(index, newItem);
+    });
+    this._changed.emit({
+      type: 'set',
+      oldIndex: index,
+      newIndex: index,
+      oldValues: [oldItem],
+      newValues: [newItem]
+    });
   }
 
   /**
@@ -266,10 +350,22 @@ export class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = true;
       return;
     }
+    const oldItems: IOutputModel[] = [];
     each(this.list, (item: IOutputModel) => {
+      oldItems.push(item);
       item.dispose();
     });
-    this.list.clear();
+    globalMutex(() => {
+      this.list.clear();
+      this._sharedList.clear();
+    });
+    this._changed.emit({
+      type: 'remove',
+      oldIndex: 0,
+      newIndex: 0,
+      oldValues: oldItems,
+      newValues: []
+    });
   }
 
   /**
@@ -320,20 +416,39 @@ export class OutputAreaModel implements IOutputAreaModel {
       this._lastStream += value.text as string;
       this._lastStream = Private.removeOverwrittenChars(this._lastStream);
       value.text = this._lastStream;
-      const item = this._createItem({ value, trusted });
+
       const index = this.length - 1;
-      const prev = this.list.get(index);
-      this.list.set(index, item);
-      prev.dispose();
-      return this.length;
+      const sharedPrev = this._sharedList.get(index);
+      sharedPrev.dispose();
+      const oldItem = this.list.get(index);
+      oldItem.dispose();
+
+      const sharedModel = new SharedMap<JSONObject>({
+        doc: this._sharedDoc as SharedDoc,
+        initialize: false
+      });
+      const newItem = this._createItem({
+        value,
+        trusted,
+        sharedModel: sharedModel
+      });
+      globalMutex(() => {
+        this._sharedList.set(index, sharedModel);
+        this.list.set(index, newItem);
+      });
+      this._changed.emit({
+        type: 'set',
+        oldIndex: index,
+        newIndex: index,
+        oldValues: [oldItem],
+        newValues: [newItem]
+      });
+      return index;
     }
 
     if (nbformat.isStream(value)) {
       value.text = Private.removeOverwrittenChars(value.text as string);
     }
-
-    // Create the new item.
-    const item = this._createItem({ value, trusted });
 
     // Update the stream information.
     if (nbformat.isStream(value)) {
@@ -343,8 +458,30 @@ export class OutputAreaModel implements IOutputAreaModel {
       this._lastStream = '';
     }
 
+    // Create the new item.
+    const sharedModel = new SharedMap<JSONObject>({
+      doc: this._sharedDoc as SharedDoc,
+      initialize: false
+    });
+    const newItem = this._createItem({
+      value,
+      trusted,
+      sharedModel: sharedModel
+    });
+
     // Add the item to our list and return the new length.
-    return this.list.push(item);
+    globalMutex(() => {
+      this._sharedList.push(sharedModel);
+      this.list.push(newItem);
+    });
+    this._changed.emit({
+      type: 'add',
+      oldIndex: -1,
+      newIndex: this.length - 1,
+      oldValues: [],
+      newValues: [newItem]
+    });
+    return this.length;
   }
 
   /**
@@ -385,30 +522,64 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Handle a change to the list.
    */
   private _onListChanged(
-    sender: IObservableList<IOutputModel>,
-    args: IObservableList.IChangedArgs<IOutputModel>
+    sender: ISharedList<ISharedMap<JSONObject>>,
+    args: ISharedList.IChangedArgs<ISharedMap<JSONObject>>
   ) {
-    switch (args.type) {
-      case 'add':
-        args.newValues.forEach(item => {
+    globalMutex(() => {
+      const oldValues: IOutputModel[] = [];
+      const newValues: IOutputModel[] = [];
+
+      if (args.type === 'set') {
+        args.newValues.forEach(sharedModel => {
+          const item = this._createItem({
+            trusted: this._trusted,
+            sharedModel: sharedModel
+          });
+          const index = args.newIndex;
+          const oldItem = this.list.get(index)
+          oldValues.push(oldItem);
+          oldItem.changed.disconnect(this._onGenericChange, this);
+          newValues.push(item);
+          this.list.set(index, item);
           item.changed.connect(this._onGenericChange, this);
         });
-        break;
-      case 'remove':
-        args.oldValues.forEach(item => {
-          item.changed.disconnect(this._onGenericChange, this);
-        });
-        break;
-      case 'set':
-        args.newValues.forEach(item => {
+      } else if (args.type === 'add') {
+        args.newValues.forEach(sharedModel => {
+          const item = this._createItem({
+            trusted: this._trusted,
+            sharedModel: sharedModel
+          });
+          newValues.push(item);
+          this.list.push(item);
           item.changed.connect(this._onGenericChange, this);
         });
-        args.oldValues.forEach(item => {
+      } else if (args.type === 'move') {
+        const fromIndex = args.oldIndex;
+        const toIndex = args.newIndex;
+        const item = this.list.get(fromIndex);
+        oldValues.push(item);
+        newValues.push(item);
+        this.list.move(fromIndex, toIndex);
+      } else if (args.type === 'remove') {
+        const startIndex = args.oldIndex;
+        const endIndex = startIndex + args.oldValues.length;
+        for (let i = args.oldIndex; i < endIndex; i++) {
+          const item = this.list.get(i);
+          item.dispose();
+          oldValues.push(item);
           item.changed.disconnect(this._onGenericChange, this);
-        });
-        break;
-    }
-    this._changed.emit(args);
+        }
+        this.list.removeRange(startIndex, endIndex);
+      }
+
+      this._changed.emit({
+        type: args.type,
+        oldIndex: args.oldIndex,
+        newIndex: args.newIndex,
+        oldValues,
+        newValues
+      });
+    });
   }
 
   /**
@@ -429,10 +600,10 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _lastName: 'stdout' | 'stderr';
   private _trusted = false;
   private _isDisposed = false;
-  private _stateChanged = new Signal<OutputAreaModel, number>(this);
-  private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(
-    this
-  );
+  private _sharedDoc: ISharedDoc;
+  private _sharedList: ISharedList<ISharedMap<JSONObject>>;
+  private _stateChanged = new Signal<IOutputAreaModel, number>(this);
+  private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(this);
 }
 
 /**

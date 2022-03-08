@@ -60,6 +60,11 @@ export interface ISharedString extends IShared {
   redo(): void;
 
   /**
+   * Clear the change stack.
+   */
+  clearUndo(): void;
+
+  /**
    * Insert a substring.
    *
    * @param index - The starting index.
@@ -151,6 +156,7 @@ export namespace ISharedString {
 export class SharedString implements ISharedString {
   private _ytext: Y.Text;
   private _doc: SharedDoc;
+  private _origin: any;
   private _undoManager: Y.UndoManager;
   private _isDisposed: boolean = false;
   private _changed = new Signal<this, ISharedString.IChangedArgs>(this);
@@ -164,9 +170,13 @@ export class SharedString implements ISharedString {
     } else {
       this._ytext = new Y.Text();
     }
-    this._doc = options.doc;
 
-    if (options.initialize !== false) {
+    this._doc = options.doc;
+    this._origin = options.origin ?? this;
+
+    if (options.undoManager) {
+      this._undoManager = options.undoManager;
+    } else if (options.initialize !== false) {
       this.initialize();
     }
 
@@ -202,7 +212,7 @@ export class SharedString implements ISharedString {
     this._doc.transact(() => {
       this._ytext.delete(0, this._ytext.length);
       this._ytext.insert(0, value);
-    });
+    }, this._origin);
   }
 
   /**
@@ -233,7 +243,7 @@ export class SharedString implements ISharedString {
 
   initialize(): void {
     this._undoManager = new Y.UndoManager(this._ytext, {
-      trackedOrigins: new Set([this])
+      trackedOrigins: new Set([this._origin])
     });
   }
 
@@ -266,6 +276,13 @@ export class SharedString implements ISharedString {
   }
 
   /**
+   * Clear the change stack.
+   */
+  clearUndo(): void {
+    this._undoManager.clear();
+  }
+
+  /**
    * Insert a substring.
    *
    * @param index - The starting index.
@@ -275,7 +292,7 @@ export class SharedString implements ISharedString {
   insert(index: number, text: string): void {
     this._doc.transact(() => {
       this._ytext.insert(index, text);
-    });
+    }, this._origin);
   }
 
   /**
@@ -288,7 +305,7 @@ export class SharedString implements ISharedString {
   remove(start: number, end: number): void {
     this._doc.transact(() => {
       this._ytext.delete(start, end - start);
-    });
+    }, this._origin);
   }
 
   /**
@@ -339,9 +356,6 @@ export class SharedString implements ISharedString {
       }
     });
 
-    //console.debug("_onTextChanged:");
-    //console.debug("DELTA:", event.changes.delta);
-    //console.debug("EMIT:", args);
     this._changed.emit(args);
   };
 }
@@ -353,7 +367,7 @@ export namespace SharedString {
   /**
    * Options for creating a `SharedString` object.
    */
-  export interface IOptions {
+  export interface IOptions extends SharedDoc.IModelOptions {
     /**
      * A specific document to use as the store for this
      * SharedDoc.
@@ -364,7 +378,5 @@ export namespace SharedString {
      * The underlying Y.Text for the SharedString.
      */
     ytext?: Y.Text;
-
-    initialize?: boolean;
   }
 }

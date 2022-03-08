@@ -824,15 +824,13 @@ export namespace DocumentRegistry {
     readonly defaultKernelLanguage: string;
 
     /**
-     * The underlying `IModelDB` instance in which model
+     * The underlying `SharedDoc` instance in which model
      * data is stored.
      *
      * ### Notes
      * Making direct edits to the values stored in the`IModelDB`
      * is not recommended, and may produce unpredictable results.
      */
-    readonly modelDB: IModelDB;
-
     readonly sharedDoc: ISharedDoc;
 
     /**
@@ -1188,6 +1186,7 @@ export namespace DocumentRegistry {
      *
      * @param languagePreference - An optional kernel language preference.
      * @param modelDB - An optional modelDB.
+     * @param sharedDoc - An optional sharedDoc.
      * @param isInitialized - An optional flag to check if the model is initialized.
      *
      * @returns A new document model.

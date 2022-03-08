@@ -21,6 +21,9 @@
       "path": "../services"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../translation"
     },
     {

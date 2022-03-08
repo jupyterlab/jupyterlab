@@ -308,6 +308,8 @@ export class StaticNotebook extends Widget {
     const oldValue = this._model;
     this._model = newValue;
 
+    /*
+    // TODO: Keep the collaborative logic around for now
     if (oldValue && oldValue.modelDB.isCollaborative) {
       void oldValue.modelDB.connected.then(() => {
         oldValue!.modelDB.collaborators!.changed.disconnect(
@@ -324,6 +326,7 @@ export class StaticNotebook extends Widget {
         );
       });
     }
+    */
 
     // Trigger private, protected, and public changes.
     this._onModelChanged(oldValue, newValue);
@@ -817,6 +820,8 @@ export class StaticNotebook extends Widget {
   /**
    * Handle an update to the collaborators.
    */
+  /*
+  // TODO: Keep the collaborative logic around for now
   private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
@@ -829,6 +834,7 @@ export class StaticNotebook extends Widget {
       }
     }
   }
+  */
 
   /**
    * Update editor settings for notebook cells.
@@ -1838,6 +1844,8 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
+    /*
+    // TODO: Keep the collaborative logic around for now
     if (this.model && this.model.modelDB.isCollaborative) {
       const modelDB = this.model.modelDB;
       void modelDB.connected.then(() => {
@@ -1852,6 +1860,7 @@ export class Notebook extends StaticNotebook {
         }
       });
     }
+    */
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
@@ -2323,17 +2332,17 @@ export class Notebook extends StaticNotebook {
       }
 
       // Move the cells one by one
-      model.cells.beginCompoundOperation();
-      if (fromIndex < toIndex) {
-        each(toMove, cellWidget => {
-          model.cells.move(fromIndex, toIndex);
-        });
-      } else if (fromIndex > toIndex) {
-        each(toMove, cellWidget => {
-          model.cells.move(fromIndex++, toIndex++);
-        });
-      }
-      model.cells.endCompoundOperation();
+      model.cells.transact(() => {
+        if (fromIndex < toIndex) {
+          each(toMove, cellWidget => {
+            model.cells.move(fromIndex, toIndex);
+          });
+        } else if (fromIndex > toIndex) {
+          each(toMove, cellWidget => {
+            model.cells.move(fromIndex++, toIndex++);
+          });
+        }
+      });
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -2348,23 +2357,23 @@ export class Notebook extends StaticNotebook {
       const factory = model.contentFactory;
 
       // Insert the copies of the original cells.
-      model.cells.beginCompoundOperation();
-      each(values, (cell: nbformat.ICell) => {
-        let value: ICellModel;
-        switch (cell.cell_type) {
-          case 'code':
-            value = factory.createCodeCell({ cell });
-            break;
-          case 'markdown':
-            value = factory.createMarkdownCell({ cell });
-            break;
-          default:
-            value = factory.createRawCell({ cell });
-            break;
-        }
-        model.cells.insert(index++, value);
+      model.cells.transact(() => {
+        each(values, (cell: nbformat.ICell) => {
+          let value: ICellModel;
+          switch (cell.cell_type) {
+            case 'code':
+              value = factory.createCodeCell({ cell });
+              break;
+            case 'markdown':
+              value = factory.createMarkdownCell({ cell });
+              break;
+            default:
+              value = factory.createRawCell({ cell });
+              break;
+          }
+          model.cells.insert(index++, value);
+        });
       });
-      model.cells.endCompoundOperation();
       // Select the inserted cells.
       this.deselectAll();
       this.activeCellIndex = start;
