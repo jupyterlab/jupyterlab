@@ -36,7 +36,7 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.click('button:has-text("Replace")');
 
-    await page.waitForSelector('text=1/19');
+    await page.waitForSelector('text=1/20');
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 
@@ -60,10 +60,6 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.fill('[placeholder="Replace"]', 'egg');
 
-    // First click will unrendered the cell an highlight the first match
-    await page.click('button:has-text("Replace")');
-
-    // The second click will replace the hit
     await page.click('button:has-text("Replace")');
 
     await page.waitForSelector('text=5/20');

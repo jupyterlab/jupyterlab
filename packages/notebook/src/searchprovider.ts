@@ -135,7 +135,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
     super.dispose();
 
-    this.widget.model!.cells.changed.disconnect(this._onCellsChanged, this);
+    this.widget.model?.cells.changed.disconnect(this._onCellsChanged, this);
     this.widget.content.activeCellChanged.disconnect(
       this._onActiveCellChanged,
       this

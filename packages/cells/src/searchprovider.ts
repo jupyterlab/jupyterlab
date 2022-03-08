@@ -510,7 +510,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
     await super.startQuery(query, filters);
 
     // Search outputs
-    if (filters?.output !== false) {
+    if (filters?.output !== false && this.isActive) {
       await Promise.all(
         this.outputsProvider.map(provider => provider.startQuery(query))
       );
@@ -519,7 +519,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
   async endQuery(): Promise<void> {
     await super.endQuery();
-    if (this.filters?.output !== false) {
+    if (this.filters?.output !== false && this.isActive) {
       await Promise.all(
         this.outputsProvider.map(provider => provider.endQuery())
       );
@@ -660,6 +660,22 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   }
 
   /**
+   * Replace all matches in the cell source with the provided text
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    const result = await super.replaceAllMatches(newText);
+    // if the cell is rendered force update
+    if ((this.cell as MarkdownCell).rendered) {
+      this.cell.update();
+    }
+
+    return result;
+  }
+
+  /**
    * Callback on rendered state change
    *
    * @param cell Cell that emitted the change
@@ -670,12 +686,14 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       this.currentIndex = null;
     }
     this._unrenderedByHighligh = false;
-    if (rendered) {
-      this.renderedProvider.startQuery(this.query);
-    } else {
-      // Force cursor position to ensure reverse search is working as expected
-      cell.editor.setCursorPosition({ column: 0, line: 0 });
-      this.renderedProvider.endQuery();
+    if (this.isActive) {
+      if (rendered) {
+        this.renderedProvider.startQuery(this.query);
+      } else {
+        // Force cursor position to ensure reverse search is working as expected
+        cell.editor.setCursorPosition({ column: 0, line: 0 });
+        this.renderedProvider.endQuery();
+      }
     }
   }
 

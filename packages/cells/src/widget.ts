@@ -1790,7 +1790,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       this._prevText = text;
       return this._renderer.renderModel(mimeModel);
     }
-    return Promise.resolve(void 0);
+    return Promise.resolve();
   }
 
   /**
