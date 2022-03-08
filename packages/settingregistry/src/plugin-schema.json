@@ -212,11 +212,34 @@
         },
         "keys": {
           "title": "The key sequence for the binding",
+          "description": "The key shortcut like `Accel A` or the sequence of shortcuts to press like [`Accel A`, `B`]",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "macKeys": {
+          "title": "The key sequence for the binding on macOS",
+          "description": "The key shortcut like `Cmd A` or the sequence of shortcuts to press like [`Cmd A`, `B`]",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "winKeys": {
+          "title": "The key sequence for the binding on Windows",
           "description": "The key shortcut like `Ctrl A` or the sequence of shortcuts to press like [`Ctrl A`, `B`]",
           "items": {
             "type": "string"
           },
-          "minItems": 1,
+          "type": "array"
+        },
+        "linuxKeys": {
+          "title": "The key sequence for the binding on Linux",
+          "description": "The key shortcut like `Ctrl A` or the sequence of shortcuts to press like [`Ctrl A`, `B`]",
+          "items": {
+            "type": "string"
+          },
           "type": "array"
         },
         "selector": {
