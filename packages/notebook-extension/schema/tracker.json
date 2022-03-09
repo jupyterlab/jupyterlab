@@ -520,12 +520,14 @@
     },
     {
       "command": "notebook:run-cell",
-      "keys": ["Ctrl Enter"],
+      "macKeys": ["Ctrl Enter"],
+      "keys": [],
       "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:run-cell",
-      "keys": ["Ctrl Enter"],
+      "macKeys": ["Ctrl Enter"],
+      "keys": [],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
