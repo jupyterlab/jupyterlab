@@ -158,6 +158,7 @@ test.describe('General', () => {
   });
 
   test('Tabs menu', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await openOverview(page);
 
     await page.click('text="Tabs"');
