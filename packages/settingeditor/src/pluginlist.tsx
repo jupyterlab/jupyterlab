@@ -279,8 +279,8 @@ export class PluginList extends ReactWidget {
       const subProps = props[value] as PartialJSONObject;
       if (
         !subProps &&
-        (filter((props.title as string)?.toLocaleLowerCase() ?? '') ||
-          filter((props.description as string)?.toLocaleLowerCase() ?? '') ||
+        (filter((props.title as string) ?? '') ||
+          filter((props.description as string) ?? '') ||
           filter(value))
       ) {
         acc.push(props.title ?? value);
@@ -289,9 +289,9 @@ export class PluginList extends ReactWidget {
 
       // If there are properties in the object, check for title / description
       if (
-        filter((subProps.title as string)?.toLocaleLowerCase() ?? '') ||
-        filter((subProps.description as string)?.toLocaleLowerCase() ?? '') ||
-        filter(value.toLocaleLowerCase())
+        filter((subProps.title as string) ?? '') ||
+        filter((subProps.description as string) ?? '') ||
+        filter(value)
       ) {
         acc.push(subProps.title ?? value);
       }
@@ -315,14 +315,14 @@ export class PluginList extends ReactWidget {
    */
   setFilter(filter: (item: string) => boolean): void {
     this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
+      if (filter(plugin.schema.title ?? '')) {
+        return null;
+      }
       const filtered = this.getFilterString(
         filter,
         plugin.schema ?? {},
         plugin.schema.definitions
       );
-      if (filter(plugin.schema.title?.toLocaleLowerCase() ?? '')) {
-        return null;
-      }
       return filtered;
     };
     this._updateFilterSignal.emit(this._filter);
@@ -365,7 +365,7 @@ export class PluginList extends ReactWidget {
         key={id}
         title={itemTitle}
       >
-        <div className="jp-pluginList-entry-label">
+        <div className="jp-pluginList-entry-label" role="tab">
           <div className="jp-SelectedIndicator" />
           <LabIcon.resolveReact
             icon={icon || (iconClass ? undefined : settingsIcon)}
@@ -379,8 +379,8 @@ export class PluginList extends ReactWidget {
         <ul>
           {
             // Shows fields that match search results under each entry.
-            typeof filteredProperties === 'object'
-              ? filteredProperties?.map(fieldValue => {
+            filteredProperties !== null
+              ? filteredProperties.map(fieldValue => {
                   return <li key={`${id}-${fieldValue}`}> {fieldValue} </li>;
                 })
               : undefined
@@ -415,6 +415,7 @@ export class PluginList extends ReactWidget {
           useFuzzyFilter={false}
           placeholder={trans.__('Search…')}
           forceRefresh={false}
+          caseSensitive={false}
         />
         {modifiedItems.length > 0 && (
           <div>

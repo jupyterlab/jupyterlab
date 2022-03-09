@@ -29,6 +29,11 @@ export interface IFilterBoxProps {
    * Whether to force a refresh.
    */
   forceRefresh?: boolean;
+
+  /**
+   * Whether to use case-sensitive search
+   */
+  caseSensitive?: boolean;
 }
 
 /**
@@ -124,6 +129,10 @@ export const FilterBox = (props: IFilterBoxProps) => {
         }
         return true;
       }
+      if (!props.caseSensitive) {
+        item = item.toLocaleLowerCase();
+        target.value = target.value.toLocaleLowerCase();
+      }
       const i = item.indexOf(target.value);
       if (i === -1) {
         return false;
@@ -154,6 +163,7 @@ export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
       useFuzzyFilter={props.useFuzzyFilter}
       placeholder={props.placeholder}
       forceRefresh={props.forceRefresh}
+      caseSensitive={props.caseSensitive}
     />
   );
 };
