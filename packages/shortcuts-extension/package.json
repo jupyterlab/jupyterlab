@@ -55,7 +55,7 @@
     "typestyle": "^2.0.4"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.5",
+    "@jupyterlab/testutils": "^3.3.0",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
