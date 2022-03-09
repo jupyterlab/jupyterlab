@@ -109,42 +109,6 @@ test('Main menu definition must target an valid command', async ({ page }) => {
   }, []);
 
   expect(missingCommands).toEqual([]);
-
-  function reduceItem(
-    item: ISettingRegistry.IMenuItem,
-    commands: string[]
-  ):
-    | ISettingRegistry.IMenuItem
-    | { [id: string]: ISettingRegistry.IMenuItem[] }
-    | null {
-    switch (item.type ?? 'command') {
-      case 'command':
-        if (!commands.includes(item.command)) {
-          return item;
-        }
-        break;
-      case 'submenu': {
-        const items =
-          item.submenu?.items?.reduce((agg, item) => {
-            const testedItem = reduceItem(item, commands);
-            if (testedItem !== null) {
-              agg.push(testedItem);
-            }
-            return agg;
-          }, []) ?? [];
-        if (items.length === 0) {
-          return null;
-        } else {
-          const r = {};
-          r[item.submenu?.label ?? 'unknown'] = items;
-          return r;
-        }
-      }
-      default:
-        break;
-    }
-    return null;
-  }
 });
 
 test('Context menu definition must target an valid command', async ({
@@ -177,40 +141,40 @@ test('Context menu definition must target an valid command', async ({
   }, []);
 
   expect(missingCommands).toEqual([]);
-
-  function reduceItem(
-    item: ISettingRegistry.IMenuItem,
-    commands: string[]
-  ):
-    | ISettingRegistry.IMenuItem
-    | { [id: string]: ISettingRegistry.IMenuItem[] }
-    | null {
-    switch (item.type ?? 'command') {
-      case 'command':
-        if (!commands.includes(item.command)) {
-          return item;
-        }
-        break;
-      case 'submenu': {
-        const items =
-          item.submenu?.items?.reduce((agg, item) => {
-            const testedItem = reduceItem(item, commands);
-            if (testedItem !== null) {
-              agg.push(testedItem);
-            }
-            return agg;
-          }, []) ?? [];
-        if (items.length === 0) {
-          return null;
-        } else {
-          const r = {};
-          r[item.submenu?.label ?? 'unknown'] = items;
-          return r;
-        }
-      }
-      default:
-        break;
-    }
-    return null;
-  }
 });
+
+function reduceItem(
+  item: ISettingRegistry.IMenuItem,
+  commands: string[]
+):
+  | ISettingRegistry.IMenuItem
+  | { [id: string]: ISettingRegistry.IMenuItem[] }
+  | null {
+  switch (item.type ?? 'command') {
+    case 'command':
+      if (!commands.includes(item.command)) {
+        return item;
+      }
+      break;
+    case 'submenu': {
+      const items =
+        item.submenu?.items?.reduce((agg, item) => {
+          const testedItem = reduceItem(item, commands);
+          if (testedItem !== null) {
+            agg.push(testedItem);
+          }
+          return agg;
+        }, []) ?? [];
+      if (items.length === 0) {
+        return null;
+      } else {
+        const r = {};
+        r[item.submenu?.label ?? 'unknown'] = items;
+        return r;
+      }
+    }
+    default:
+      break;
+  }
+  return null;
+}
