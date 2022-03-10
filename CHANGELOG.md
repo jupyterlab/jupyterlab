@@ -929,6 +929,32 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.3
 
+## 3.3.1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.0...a51e1110263c28211ed9e8e0a4bba247c828af94))
+
+### Enhancements made
+
+- Add a note to command line option that collaborative mode is experimental [#12173](https://github.com/jupyterlab/jupyterlab/pull/12173) ([@jasongrout](https://github.com/jasongrout))
+- Adds warning that RTC is experimental [#12171](https://github.com/jupyterlab/jupyterlab/pull/12171) ([@jweill-aws](https://github.com/jweill-aws))
+- Export KernelConnection [#12156](https://github.com/jupyterlab/jupyterlab/pull/12156) ([@tkrabel-db](https://github.com/tkrabel-db))
+
+### Bugs fixed
+
+- Backport PR #12122: Remove duplicated shortcuts [#12181](https://github.com/jupyterlab/jupyterlab/pull/12181) ([@fcollonval](https://github.com/fcollonval))
+- Correct the set item logic of `CodeCellModel.onModelDBOutputsChange` [#12147](https://github.com/jupyterlab/jupyterlab/pull/12147) ([@trungleduc](https://github.com/trungleduc))
+- fix: typo in ShortcutItem component [#12161](https://github.com/jupyterlab/jupyterlab/pull/12161) ([@sparanoid](https://github.com/sparanoid))
+
+### Documentation improvements
+
+- Adds warning that RTC is experimental [#12171](https://github.com/jupyterlab/jupyterlab/pull/12171) ([@jweill-aws](https://github.com/jweill-aws))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-03-02&to=2022-03-09&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2022-03-02..2022-03-09&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-03-02..2022-03-09&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2022-03-02..2022-03-09&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-03-02..2022-03-09&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-03-02..2022-03-09&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2022-03-02..2022-03-09&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-03-02..2022-03-09&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-03-02..2022-03-09&type=Issues) | [@jweill-aws](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajweill-aws+updated%3A2022-03-02..2022-03-09&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-03-02..2022-03-09&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2022-03-02..2022-03-09&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-03-02..2022-03-09&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-03-02..2022-03-09&type=Issues)
+
 ## 3.3.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.2.5...6e484f89df73e09c29e8608e5eca88fa48cc4267))
