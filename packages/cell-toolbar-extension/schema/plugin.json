@@ -99,7 +99,7 @@
     },
     "leftSpace": {
       "title": "Cell toolbar empty left space size",
-      "description": "Size of the empty space left of the cell toolbar in px. Ignored if `floatPosition` is not null.",
+      "description": "Size of the empty space left of the cell toolbar in pixels. Ignored if `floatPosition` is not null.",
       "type": "number",
       "minimum": 0,
       "default": 0
