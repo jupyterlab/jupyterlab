@@ -12,7 +12,6 @@ import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { CellToolbarWidget } from './celltoolbarwidget';
-import { PositionedButton } from './positionedbutton';
 import { EXTENSION_ID, ICellMenuItem } from './tokens';
 
 // icon svg import statements
@@ -24,9 +23,6 @@ import moveDownSvg from '../style/icons/movedown.svg';
 import moveUpSvg from '../style/icons/moveup.svg';
 
 const DEFAULT_LEFT_MENU: ICellMenuItem[] = [
-];
-
-const DEFAULT_HELPER_BUTTONS: ICellMenuItem[] = [
 ];
 
 /**
@@ -163,16 +159,8 @@ export class CellToolbarTracker implements IDisposable {
     const cell = this._getCell(model);
 
     if (cell) {
-      const {
-        helperButtons,
-        leftMenu,
-      } = (this._settings?.composite as any) ?? {};
+      const { leftMenu } = (this._settings?.composite as any) ?? {};
 
-      const helperButtons_ =
-        helperButtons === null
-          ? []
-          : helperButtons ??
-            DEFAULT_HELPER_BUTTONS.map(entry => entry.command.split(':')[1]);
       const leftMenu_ = leftMenu === null ? [] : leftMenu ?? DEFAULT_LEFT_MENU;
 
       const toolbar = new CellToolbarWidget(
@@ -187,26 +175,6 @@ export class CellToolbarTracker implements IDisposable {
 
       // Watch for changes in the cell's size.
       cell.model.contentChanged.connect(this._changedEventCallback, this);
-
-      DEFAULT_HELPER_BUTTONS.filter(entry =>
-        (helperButtons_ as string[]).includes(entry.command.split(':')[1])
-      ).forEach(entry => {
-        if (this._commands.hasCommand(entry.command)) {
-          const { cellType, command, tooltip, ...others } = entry;
-          const shortName = command.split(':')[1];
-          const button = new PositionedButton({
-            ...others,
-            callback: (): void => {
-              this._commands.execute(command);
-            },
-            className: shortName && `jp-cell-${shortName}`,
-            tooltip: tooltip || this._commands.label(entry.command)
-          });
-          button.addClass(CELL_BAR_CLASS);
-          button.addClass(`jp-cell-${cellType || 'all'}`);
-          (cell.layout as PanelLayout).addWidget(button);
-        }
-      });
     }
   }
 

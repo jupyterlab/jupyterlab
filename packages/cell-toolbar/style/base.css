@@ -1,30 +1,9 @@
-.lm-Widget.jp-cell-button {
-  background: none;
-  border: none;
-  display: none;
-  margin: 0;
-  padding: 0;
-  width: 16px;
-  position: absolute;
-  z-index: 1;
-  cursor: pointer;
-}
-
 .jp-cell-button .jp-icon3[fill] {
   fill: var(--jp-inverse-layout-color4);
 }
 
 .jp-cell-button:hover .jp-icon3[fill] {
   fill: var(--jp-inverse-layout-color2);
-}
-
-.jp-cell-run-cell-and-select-next {
-  left: 46px;
-  top: 46px;
-}
-
-.jp-toolbar-overlap .jp-cell-toolbar {
-  display: none;
 }
 
 .jp-cell-toolbar {

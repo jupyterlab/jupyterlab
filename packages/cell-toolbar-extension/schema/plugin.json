@@ -3,52 +3,20 @@
   "title": "Cell Toolbar",
   "description": "Cell Toolbar Settings.",
   "properties": {
-    "defaultTags": {
-      "title": "List of Default Tags",
-      "description": "List of tags to always display for quick selection.",
-      "default": ["parameters"],
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^[\\w-]+$"
-      }
-    },
-    "helperButtons": {
-      "title": "Helper buttons",
-      "description": "Set the list of visible helper buttons.",
-      "default": [
-      ],
-      "oneOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "insert-cell-below",
-              "move-cell-down",
-              "move-cell-up",
-              "run-cell-and-select-next"
-            ]
-          },
-          "uniqueItems": true
-        }
-      ]
-    },
     "leftMenu": {
       "title": "List of menu items",
       "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
       "oneOf": [
         {
-          "type": "null"
+          "type": "null",
+          "title": "No cell menu items"
         },
         {
           "type": "array",
           "items": {
             "$ref": "#/definitions/menuItem"
-          }
+          },
+          "title": "Cell menu items"
         }
       ],
       "default": [
@@ -83,12 +51,6 @@
           "tooltip": "Delete Cell"
         }
       ]
-    },
-    "showTags": {
-      "title": "Tags editor visibility",
-      "description": "Whether to show the tags editor widget (default) or not.",
-      "type": "boolean",
-      "default": true
     }
   },
   "additionalProperties": false,
@@ -111,7 +73,7 @@
         },
         "cellType": {
           "title": "Cell type on which to display the item",
-          "description": "Left empty to define on all cells",
+          "description": "Leave empty to define on all cells",
           "type": "string",
           "enum": ["code", "markdown", "raw"]
         }
