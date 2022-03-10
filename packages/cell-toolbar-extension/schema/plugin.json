@@ -13,19 +13,6 @@
         "pattern": "^[\\w-]+$"
       }
     },
-    "floatPosition": {
-      "title": "Floating cell toolbar position",
-      "description": "Place the cell toolbar above the cell. If set, `leftSpace` is ignored.",
-      "oneOf": [
-        {
-          "type": "null"
-        },
-        {
-          "$ref": "#/definitions/position"
-        }
-      ],
-      "default": null
-    },
     "helperButtons": {
       "title": "Helper buttons",
       "description": "Set the list of visible helper buttons.",
@@ -51,7 +38,7 @@
       ]
     },
     "leftMenu": {
-      "title": "List of left menu items",
+      "title": "List of menu items",
       "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
       "oneOf": [
         {
@@ -97,29 +84,6 @@
         }
       ]
     },
-    "leftSpace": {
-      "title": "Cell toolbar empty left space size",
-      "description": "Size of the empty space left of the cell toolbar in px. Ignored if `floatPosition` is not null.",
-      "type": "number",
-      "minimum": 0,
-      "default": 0
-    },
-    "rightMenu": {
-      "title": "List of left menu items",
-      "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
-      "oneOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/menuItem"
-          }
-        }
-      ],
-      "default": null
-    },
     "showTags": {
       "title": "Tags editor visibility",
       "description": "Whether to show the tags editor widget (default) or not.",
@@ -154,24 +118,6 @@
       },
       "additionalProperties": false,
       "required": ["command", "icon"]
-    },
-    "position": {
-      "properties": {
-        "right": {
-          "title": "Right distance in pixels",
-          "type": "number",
-          "minimum": 0,
-          "default": 0
-        },
-        "top": {
-          "title": "Top distance in pixels",
-          "type": "number",
-          "minimum": 0,
-          "default": 0
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
     }
   }
 }
