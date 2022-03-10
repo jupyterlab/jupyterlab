@@ -265,9 +265,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   readonly contentFactory: Cell.IContentFactory;
 
   /**
-   * Signal to indicate that widget has changed in size
+   * Signal to indicate that widget has changed visibly (in size, in type, etc)
    */
-  readonly sizeChanged = new Signal<this, void>(this);
+  readonly displayChanged = new Signal<this, void>(this);
 
   /**
    * Get the prompt node used by the cell.
@@ -575,7 +575,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _syncCollapse = false;
   private _syncEditable = false;
   private _resizeDebouncer = new Debouncer(() => {
-    this.sizeChanged.emit();
+    this.displayChanged.emit();
   }, 0);
 }
 
@@ -1575,6 +1575,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._rendered;
   }
   set rendered(value: boolean) {
+    const oldValue = this._rendered;
+
     // Show cell as rendered when cell is not editable
     if (this.readOnly && this._showEditorForReadOnlyMarkdown === false) {
       value = true;
@@ -1589,6 +1591,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     // request.
     if (!this._rendered) {
       this.editor.refresh();
+    }
+
+    // If the rendered state changed, raise an event.
+    if (oldValue !== value) {
+      this.displayChanged.emit();
     }
   }
 

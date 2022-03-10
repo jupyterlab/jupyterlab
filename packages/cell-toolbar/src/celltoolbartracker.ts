@@ -183,7 +183,7 @@ export class CellToolbarTracker implements IDisposable {
       (cell.layout as PanelLayout).insertWidget(0, toolbar);
 
       // For rendered markdown, watch for resize events.
-      cell.sizeChanged.connect(this._resizeEventCallback, this);
+      cell.displayChanged.connect(this._resizeEventCallback, this);
 
       // Watch for changes in the cell's size.
       cell.model.contentChanged.connect(this._changedEventCallback, this);
@@ -226,7 +226,7 @@ export class CellToolbarTracker implements IDisposable {
     if (cell) {
       this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
       // Attempt to remove the resize and changed event handlers.
-      cell.sizeChanged.disconnect(this._resizeEventCallback, this);
+      cell.displayChanged.disconnect(this._resizeEventCallback, this);
       cell.model.contentChanged.disconnect(this._changedEventCallback, this);
     }
   }
