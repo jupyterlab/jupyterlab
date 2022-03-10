@@ -690,6 +690,27 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /*
+   * Whether the add buttons for each main area tab bar are enabled.
+   */
+  get addButtonEnabled(): boolean {
+    return this._dockPanel.addButtonEnabled;
+  }
+
+  /*
+   * Set whether the add buttons for each main area tab bar are enabled.
+   */
+  set addButtonEnabled(value: boolean) {
+    this._dockPanel.addButtonEnabled = value;
+  }
+
+  /*
+   * A signal emitted when the add button on a main area tab bar is clicked.
+   */
+  get addRequested(): ISignal<DockPanel, TabBar<Widget>> {
+    return this._dockPanel.addRequested;
+  }
+
+  /*
    * Activate the previous Tab in the active TabBar.
    */
   activatePreviousTab(): void {

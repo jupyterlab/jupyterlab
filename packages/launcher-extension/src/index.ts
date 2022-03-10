@@ -101,6 +101,17 @@ function activate(
     });
   }
 
+  if (labShell) {
+    labShell.addButtonEnabled = true;
+    labShell.addRequested.connect(() => {
+      if (commands.hasCommand('filebrowser:create-main-launcher')) {
+        // If a file browser is defined connect the launcher to it
+        return commands.execute('filebrowser:create-main-launcher');
+      }
+      return commands.execute(CommandIDs.create);
+    });
+  }
+
   return model;
 }
 

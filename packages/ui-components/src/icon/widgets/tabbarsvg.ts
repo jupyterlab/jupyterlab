@@ -5,7 +5,7 @@ import { hpass, VirtualElement } from '@lumino/virtualdom';
 import { DockPanel, TabBar, TabPanel, Widget } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
-import { closeIcon } from '../iconimports';
+import { addIcon, closeIcon } from '../iconimports';
 
 /**
  * a widget which displays titles as a single row or column of tabs.
@@ -20,6 +20,7 @@ export class TabBarSvg<T> extends TabBar<T> {
   constructor(options: TabBar.IOptions<T> = {}) {
     options.renderer = options.renderer || TabBarSvg.defaultRenderer;
     super(options);
+    this.addButtonNode.innerHTML = addIcon.svgstr;
   }
 }
 
