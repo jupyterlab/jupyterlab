@@ -176,6 +176,9 @@
       "path": "./packages/markdownviewer-extension"
     },
     {
+      "path": "./packages/markedparser-extension"
+    },
+    {
       "path": "./packages/mathjax2"
     },
     {

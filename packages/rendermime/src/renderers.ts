@@ -4,13 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import { ISanitizer } from '@jupyterlab/apputils';
-import { CodeMirrorEditor, Mode } from '@jupyterlab/codemirror';
 import { URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { toArray } from '@lumino/algorithm';
 import escape from 'lodash.escape';
-import { marked } from 'marked';
 import { removeMath, replaceMath } from './latex';
 
 /**
@@ -321,7 +319,7 @@ export async function renderMarkdown(
   options: renderMarkdown.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, source, ...others } = options;
+  const { host, source, markdownParser, ...others } = options;
 
   // Clear the content if there is no source.
   if (!source) {
@@ -329,14 +327,20 @@ export async function renderMarkdown(
     return;
   }
 
-  // Separate math from normal markdown text.
-  const parts = removeMath(source);
+  let html = '';
+  if (markdownParser) {
+    // Separate math from normal markdown text.
+    const parts = removeMath(source);
 
-  // Convert the markdown to HTML.
-  let html = await Private.renderMarked(parts['text']);
+    // Convert the markdown to HTML.
+    html = await markdownParser.render(parts['text']);
 
-  // Replace math.
-  html = replaceMath(html, parts['math']);
+    // Replace math.
+    html = replaceMath(html, parts['math']);
+  } else {
+    // Fallback if the application does not have any markdown parser.
+    html = `<pre>${source}</pre>`;
+  }
 
   // Render HTML.
   await renderHTML({
@@ -396,6 +400,11 @@ export namespace renderMarkdown {
      * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+    /**
+     * The Markdown parser.
+     */
+    markdownParser: IRenderMime.IMarkdownParser | null;
 
     /**
      * The application language translator.
@@ -734,26 +743,6 @@ namespace Private {
   }
 
   /**
-   * Render markdown for the specified content.
-   *
-   * @param content - The string of markdown to render.
-   *
-   * @returns A promise which resolves with the rendered content.
-   */
-  export function renderMarked(content: string): Promise<string> {
-    initializeMarked();
-    return new Promise<string>((resolve, reject) => {
-      marked(content, (err: any, content: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(content);
-        }
-      });
-    });
-  }
-
-  /**
    * Handle the default behavior of nodes.
    */
   export function handleDefaults(
@@ -937,57 +926,6 @@ namespace Private {
         // just make it an empty link.
         anchor.href = '';
       });
-  }
-
-  let markedInitialized = false;
-
-  /**
-   * Support GitHub flavored Markdown, leave sanitizing to external library.
-   */
-  function initializeMarked(): void {
-    if (markedInitialized) {
-      return;
-    }
-    markedInitialized = true;
-    marked.setOptions({
-      gfm: true,
-      sanitize: false,
-      // breaks: true; We can't use GFM breaks as it causes problems with tables
-      langPrefix: `cm-s-${CodeMirrorEditor.defaultConfig.theme} language-`,
-      highlight: (code, lang, callback) => {
-        const cb = (err: Error | null, code: string) => {
-          if (callback) {
-            callback(err, code);
-          }
-          return code;
-        };
-        if (!lang) {
-          // no language, no highlight
-          return cb(null, code);
-        }
-        Mode.ensure(lang)
-          .then(spec => {
-            const el = document.createElement('div');
-            if (!spec) {
-              console.error(`No CodeMirror mode: ${lang}`);
-              return cb(null, code);
-            }
-            try {
-              Mode.run(code, spec.mime, el);
-              return cb(null, el.innerHTML);
-            } catch (err) {
-              console.error(`Failed to highlight ${lang} code`, err);
-              return cb(err, code);
-            }
-          })
-          .catch(err => {
-            console.error(`No CodeMirror mode: ${lang}`);
-            console.error(`Require CodeMirror mode error: ${err}`);
-            return cb(null, code);
-          });
-        return code;
-      }
-    });
   }
 
   const ANSI_COLORS = [
