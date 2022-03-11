@@ -6,19 +6,10 @@
     "leftMenu": {
       "title": "List of menu items",
       "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
-      "oneOf": [
-        {
-          "type": "null",
-          "title": "No cell menu items"
-        },
-        {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/menuItem"
-          },
-          "title": "Cell menu items"
-        }
-      ],
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/menuItem"
+      },
       "default": [
         {
           "command": "notebook:duplicate-below",

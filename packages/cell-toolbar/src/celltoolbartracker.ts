@@ -22,8 +22,7 @@ import duplicateSvg from '../style/icons/duplicate.svg';
 import moveDownSvg from '../style/icons/movedown.svg';
 import moveUpSvg from '../style/icons/moveup.svg';
 
-const DEFAULT_LEFT_MENU: ICellMenuItem[] = [
-];
+const DEFAULT_LEFT_MENU: ICellMenuItem[] = [];
 
 /**
  * Widget cell toolbar class
