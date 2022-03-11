@@ -30,7 +30,7 @@ Before we get started, here are some resources for hands-on practice or more in-
 
 We provide a set of guides to get started writing extensions for JupyterLab:
 
-- {ref}`extension_tutorial`: A tutorial to learn how to make a simple JupyterLab extension.
+- {ref}`extension-tutorial`: A tutorial to learn how to make a simple JupyterLab extension.
 - The [JupyterLab Extension Examples Repository](https://github.com/jupyterlab/extension-examples): A short tutorial series to learn how to develop extensions for JupyterLab by example.
 - {ref}`developer-extension-points`: A list of the most common JupyterLab extension points.
 - Another common pattern for extending JupyterLab document widgets with application plugins is covered in {ref}`documents`.
@@ -94,7 +94,7 @@ The `id` and `activate` fields are required and the other fields may be omitted.
 - `autostart` indicates whether your plugin should be activated at application startup. Typically this should be `true`. If it is `false` or omitted, your plugin will be activated when any other plugin requests the token your plugin is providing.
 - `requires` and `optional` are lists of {ref}`tokens <tokens>` corresponding to services other plugins provide. These services will be given as arguments to the `activate` function when the plugin is activated. If a `requires` service is not registered with JupyterLab, an error will be thrown and the plugin will not be activated.
 - `provides` is the {ref}`token <tokens>` associated with the service your plugin is providing to the system. If your plugin does not provide a service to the system, omit this field and do not return a value from your `activate` function.
-- `activate` is the function called when your plugin is activated. The arguments are, in order, the {ref}`application object <application_object>`, the services corresponding to the `requires` tokens, then the services corresponding to the `optional` tokens (or `null` if that particular `optional` token is not registered in the system). If a `provides` token is given, the return value of the `activate` function (or resolved return value if a promise is returned) will be registered as the service associated with the token.
+- `activate` is the function called when your plugin is activated. The arguments are, in order, the {ref}`application object <application-object>`, the services corresponding to the `requires` tokens, then the services corresponding to the `optional` tokens (or `null` if that particular `optional` token is not registered in the system). If a `provides` token is given, the return value of the `activate` function (or resolved return value if a promise is returned) will be registered as the service associated with the token.
 
 (application-object)=
 
@@ -194,7 +194,7 @@ If you would like publish your source extension to npm and want users to be able
 
 We will talk about each `jupyterlab` metadata field in `package.json` for source extensions below.
 
-- `extension`: {ref}`main_entry_point`
+- `extension`: {ref}`main-entry-point`
 - `mimeExtension`: {ref}`mimeExtension`
 - `themePath`: {ref}`themePath`
 - `schemaDir`: {ref}`schemaDir`
@@ -270,7 +270,7 @@ A system administrator or user can override default values provided in a plugin'
 
 ### Disabling other extensions
 
-The `jupyterlab.disabledExtensions` field gives a list of extensions or plugins to disable when this extension is installed, with the same semantics as the `disabledExtensions` field of {ref}`page_config.json <page_configjson>`. This is useful if your extension overrides built-in extensions. For example, if an extension replaces the `@jupyterlab/filebrowser-extension:share-file` plugin to {ref}`override the "Copy Shareable Link" <copy_shareable_link>` functionality in the file browser, it can automatically disable the `@jupyterlab/filebrowser-extension:share-file` plugin with:
+The `jupyterlab.disabledExtensions` field gives a list of extensions or plugins to disable when this extension is installed, with the same semantics as the `disabledExtensions` field of {ref}`page-config.json <page-configjson>`. This is useful if your extension overrides built-in extensions. For example, if an extension replaces the `@jupyterlab/filebrowser-extension:share-file` plugin to {ref}`override the "Copy Shareable Link" <copy_shareable_link>` functionality in the file browser, it can automatically disable the `@jupyterlab/filebrowser-extension:share-file` plugin with:
 
 ```
 "jupyterlab": {
@@ -300,7 +300,7 @@ By default, JupyterLab deduplicates direct dependencies of prebuilt extensions w
 
 #### Providing a service
 
-When an extension (the "provider") is providing a service identified by a token that is imported from a dependency `token-package`, the provider should configure the dependency as a singleton. This makes sure the provider is identifying the service with the same token that others are importing. If `token-package` is not a core package, it will be bundled with the provider and available for consumers to import if they {ref}`require the service <dedup_require_service>`.
+When an extension (the "provider") is providing a service identified by a token that is imported from a dependency `token-package`, the provider should configure the dependency as a singleton. This makes sure the provider is identifying the service with the same token that others are importing. If `token-package` is not a core package, it will be bundled with the provider and available for consumers to import if they {ref}`require the service <dedup-require-service>`.
 
 ```json
 "jupyterlab": {
@@ -450,7 +450,7 @@ A convention in JupyterLab for deduplicating CSS on the page is that if your ext
 
 ### package.json metadata
 
-In addition to the package metadata for {ref}`source extensions <source_extensions>`, prebuilt extensions have extra `jupyterlab` metadata.
+In addition to the package metadata for {ref}`source extensions <source-extensions>`, prebuilt extensions have extra `jupyterlab` metadata.
 
 - `outputDir`: {ref}`outputDir`
 - `webpackConfig`: {ref}`webpackConfig`
@@ -616,7 +616,7 @@ This would be discoverable from, for example, a
 
 ## Development workflow for source extensions
 
-{ref}`Developing prebuilt extensions <prebuilt_dev_workflow>` is usually much easier since they do not require rebuilding JupyterLab to see changes. If you need to develop a source extension, here are some tips for a development workflow.
+{ref}`Developing prebuilt extensions <prebuilt-dev-workflow>` is usually much easier since they do not require rebuilding JupyterLab to see changes. If you need to develop a source extension, here are some tips for a development workflow.
 
 While authoring a source extension, you can use the command:
 

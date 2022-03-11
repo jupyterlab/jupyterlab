@@ -46,7 +46,7 @@ slides, follow these steps:
 5. Repeat 3 and 4 until you selected the slide type for all of your cells.
 
 After completing these steps, browse the file menu and export as described in
-the {ref}`exporting notebooks <user_export>` section. A `.html` file that
+the {ref}`exporting notebooks <user-export>` section. A `.html` file that
 you will be prompted to download.
 
 If you don't know how to navigate and interact with a Reveal.js presentation,

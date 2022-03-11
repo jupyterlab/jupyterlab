@@ -345,7 +345,7 @@ jupyter lab --dev-mode
 Development mode ensures that you are running the JavaScript assets that
 are built in the dev-installed Python package. Note that when running in
 dev mode, extensions will not be activated by default - refer
-{ref}`documentation on extension development <prebuilt_dev_workflow>` to know more.
+{ref}`documentation on extension development <prebuilt-dev-workflow>` to know more.
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.

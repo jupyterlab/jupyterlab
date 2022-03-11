@@ -44,7 +44,7 @@ default menus are:
 - **Settings**: common settings and an advanced settings editor
 - **Help**: a list of JupyterLab and kernel help links
 
-{ref}`JupyterLab extensions <user_extensions>` can also create new top-level menus in the menu
+{ref}`JupyterLab extensions <user-extensions>` can also create new top-level menus in the menu
 bar.
 
 (sidebars)=
@@ -59,7 +59,7 @@ The left sidebar contains a number of commonly-used tabs including:
 - a list of tabs in the main work and of running kernels and terminals,
 - the command palette (in 3.0+ moved to a modal window accessible with a {ref}`keyboard shortcut <access-palette>`),
 - the {ref}`table of contents <toc>`,
-- the {ref}`extension manager <extension_manager>`.
+- the {ref}`extension manager <extension-manager>`.
 
 ```{image} ../images/interface-left.png
 :align: center

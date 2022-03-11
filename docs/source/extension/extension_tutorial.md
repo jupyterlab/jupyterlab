@@ -1004,4 +1004,4 @@ learning, here are some suggestions about what to try next:
 - Give users the ability to pin pictures in separate, permanent panels.
 - Add a setting for the user to put in their [API key](https://api.nasa.gov/#authentication) so they can make many more requests per hour than the demo key allows.
 - Push your extension git repository to GitHub.
-- Learn how to write {ref}`other kinds of extensions <developer_extensions>`.
+- Learn how to write {ref}`other kinds of extensions <developer-extensions>`.

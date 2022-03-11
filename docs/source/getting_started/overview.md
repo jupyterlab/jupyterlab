@@ -46,7 +46,7 @@ See {ref}`file-and-output-formats` for more information.
 To navigate the user interface, JupyterLab offers {ref}`customizable keyboard shortcuts <shortcuts>` and the ability to use {ref}`key maps <editor-keymaps>`
 from vim, emacs, and Sublime Text in the text editor.
 
-JupyterLab {ref}`extensions <user_extensions>` can customize or enhance any part
+JupyterLab {ref}`extensions <user-extensions>` can customize or enhance any part
 of JupyterLab, including new themes, file editors, and custom components.
 
 JupyterLab is served from the same [server](https://jupyter-notebook.readthedocs.io/en/stable/) and uses the same

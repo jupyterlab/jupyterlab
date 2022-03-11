@@ -54,7 +54,7 @@ bumped their major version (following semver convention):
 - `@jupyterlab/buildutils` from 3.x to 4.x
   : The `create-theme` script has been removed. If you want to create a new theme extension, you
   should use the [Theme Cookiecutter](https://github.com/jupyterlab/theme-cookiecutter) instead.
-  The `add-sibling` script has been removed. Check out {ref}`source_dev_workflow` instead.
+  The `add-sibling` script has been removed. Check out {ref}`source-dev-workflow` instead.
 - `@jupyterlab/statusbar` from 3.x to 4.x
   Setting `@jupyterlab/statusbar-extension:plugin . startMode` moved to `@jupyterlab/application-extension:shell . startMode`
   Plugin `@jupyterlab/statusbar-extension:mode-switch` renamed to `@jupyterlab/application-extension:mode-switch`
@@ -72,13 +72,13 @@ bumped their major version (following semver convention):
 - The `externalExtensions` field in the `dev_mode/package.json` file corresponding to the `@jupyterlab/application-top`
   `private` package has now been removed in `4.0`. If you were using this field to develop source extensions against
   a development build of JupyterLab, you should instead switch to the federated extensions system (via the `--extensions-in-dev-mode` flag)
-  or to using the `--splice-source` option. See {ref}`prebuilt_dev_workflow` and {ref}`source_dev_workflow` for more information.
+  or to using the `--splice-source` option. See {ref}`prebuilt-dev-workflow` and {ref}`source-dev-workflow` for more information.
 
 ## JupyterLab 3.0 to 3.1
 
 ### New main and context menus customization
 
-JupyterLab 3.1 introduces a new way to hook commands into {ref}`mainmenu` and {ref}`context_menu`.
+JupyterLab 3.1 introduces a new way to hook commands into {ref}`mainmenu` and {ref}`context-menu`.
 It allows the final user to customize those menus through settings as it is already possible for
 the shortcuts.
 Using the API is not recommended any longer except to create dynamic menus.
@@ -103,7 +103,7 @@ const esModules = [
 transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
 ```
 
-For more information, have a look at {ref}`testing_with_jest`.
+For more information, have a look at {ref}`testing-with-jest`.
 
 ```{note}
 Here is an example of pull request to update to JupyterLab 3.1 in `@jupyterlab/git` extension:
@@ -213,14 +213,14 @@ Extension developers do not need to interact with `@jupyterlab/builder` directly
 `jupyter labextension build` command. This command is run automatically as part of the `build` script
 (`jlpm run build`).
 
-For more details about the new file structure and packaging of the extension, check out the extension tutorial: {ref}`extension_tutorial`
+For more details about the new file structure and packaging of the extension, check out the extension tutorial: {ref}`extension-tutorial`
 
 ### Publishing the extension to PyPI and conda-forge
 
 Starting from JupyterLab 3.0, extensions can be distributed as a Python package.
 
 The extension tutorial provides explanations to package the extension so it can be
-published on PyPI and conda forge: {ref}`extension_tutorial_publish`.
+published on PyPI and conda forge: {ref}`extension-tutorial-publish`.
 
 ```{note}
 While publishing to PyPI is the new recommended way for distributing extensions to users,

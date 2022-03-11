@@ -11,7 +11,7 @@ for other extensions to use and can depend on other extensions. In fact, the
 whole of JupyterLab itself is simply a collection of extensions that are no
 more powerful or privileged than any custom extension.
 
-For information about developing extensions, see the {ref}`developer documentation <developer_extensions>`.
+For information about developing extensions, see the {ref}`developer documentation <developer-extensions>`.
 
 ```{contents} Table of contents
 :depth: 1
@@ -56,7 +56,7 @@ time for them to be broadly adopted.
 
 *You can help!* The proposal of classifiers to a packages's `setup.py`,
 `setup.cfg`, or `pyproject.toml` can make a *great* first open source
-{ref}`contribution <dev_trove_classifiers>`, as such contributions are:
+{ref}`contribution <dev-trove-classifiers>`, as such contributions are:
 
 - easy for *you*, often possible directly through a project's source code
   website, e.g. GitHub or GitLab,
@@ -134,7 +134,7 @@ follows:
 }
 ```
 
-See {ref}`documentation on LabConfig directories <labconfig_directories>` for
+See {ref}`documentation on LabConfig directories <labconfig-directories>` for
 more information.
 
 ## Managing Extensions Using the Extension Manager
@@ -245,7 +245,7 @@ prevent it from being activated, but without rebuilding the application.
 ### Listings
 
 When searching extensions in the Extension Manager, JupyterLab displays the complete
-search result and the user is free to install any source extension. This is the {ref}`default_mode`.
+search result and the user is free to install any source extension. This is the {ref}`default-mode`.
 
 To bring more security, you or your administrator can enable `blocklists` or `allowlists`
 mode. JupyterLab will check the extensions against the defined listings.
@@ -262,8 +262,8 @@ both block and allow listings, the JupyterLab server will not start.
 **Figure:** Simultaneous block and allow listings
 ```
 
-The following details the behavior for the {ref}`blocklist_mode` and the {ref}`allowlist_mode`.
-The details to enable configure the listings can be read {ref}`listings_conf`.
+The following details the behavior for the {ref}`blocklist-mode` and the {ref}`allowlist-mode`.
+The details to enable configure the listings can be read {ref}`listings-conf`.
 
 (default-mode)=
 

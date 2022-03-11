@@ -210,8 +210,8 @@ You can override default values of the extension settings by defining new
 default values in an `overrides.json` file. For example, if you would like
 to override the default theme to be the dark theme, create an
 `overrides.json` file containing the following lines in the
-{ref}`application settings directory <application_settings_directory>` (for
-example, if the {ref}`application_directory` is
+{ref}`application settings directory <application-settings-directory>` (for
+example, if the {ref}`application-directory` is
 `<sys.prefix>/local/share/jupyter/lab`, create this file at
 `<sys.prefix>/local/share/jupyter/lab/settings/overrides.json`).
 
