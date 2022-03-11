@@ -6,12 +6,30 @@
   fill: var(--jp-inverse-layout-color2);
 }
 
+.jp-toolbar-overlap .jp-cell-toolbar {
+  display: none;
+}
+
 .jp-cell-toolbar {
   display: flex;
   flex-direction: row;
   padding: 2px 0px;
   min-height: 25px;
   z-index: 10;
+  position: absolute;
+  top: 5px;
+  right: 8px;
+}
+
+/* Overrides for mobile view: Move cell toolbar up, don't hide it if it overlaps */
+@media only screen and (max-width: 760px) {
+  .jp-toolbar-overlap .jp-cell-toolbar {
+    display: block;
+  }
+  
+  .jp-cell-toolbar {
+    top: -5px;
+  }  
 }
 
 .jp-cell-menu {

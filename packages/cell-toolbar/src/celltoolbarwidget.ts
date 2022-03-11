@@ -18,10 +18,5 @@ export class CellToolbarWidget extends Widget {
     (this.layout as PanelLayout).addWidget(
       new CellMenu(commands, menuItems)
     );
-
-    // Set style
-    this.node.style.position = 'absolute';
-    this.node.style.top = '5px';
-    this.node.style.right = '8px';
   }
 }
