@@ -30,7 +30,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 - Typo in ShortcutItem component [#12161](https://github.com/jupyterlab/jupyterlab/pull/12161) ([@sparanoid](https://github.com/sparanoid))
 - Correct the set item logic of `CodeCellModel.onModelDBOutputsChange` [#12147](https://github.com/jupyterlab/jupyterlab/pull/12147) ([@trungleduc](https://github.com/trungleduc))
 - Build UMD module for @jupyterlab/services [#12141](https://github.com/jupyterlab/jupyterlab/pull/12141) ([@fcollonval](https://github.com/fcollonval))
-- Select kernal text (when open a no kernal .ipynb file) is not translated correctly  (#12133) [#12135](https://github.com/jupyterlab/jupyterlab/pull/12135) ([@yangql176](https://github.com/yangql176))
+- Select kernel text (when open a no kernal .ipynb file) is not translated correctly (#12133) [#12135](https://github.com/jupyterlab/jupyterlab/pull/12135) ([@yangql176](https://github.com/yangql176))
 - Remove duplicated shortcuts [#12122](https://github.com/jupyterlab/jupyterlab/pull/12122) ([@fcollonval](https://github.com/fcollonval))
 - Opening keyboard shortcuts UI result in "destruction" of shortcut settings [#12112](https://github.com/jupyterlab/jupyterlab/pull/12112) ([@fcollonval](https://github.com/fcollonval))
 
