@@ -52,6 +52,10 @@ bumped their major version (following semver convention):
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
    * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
    * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
+- ``@jupyterlab/rendermime`` from 3.x to 4.x
+  The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
+  that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
+  Consequently the ``IRendererFactory.createRenderer`` has a new option ``markdownParser``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x

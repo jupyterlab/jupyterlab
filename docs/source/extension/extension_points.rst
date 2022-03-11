@@ -109,6 +109,7 @@ might want to use the services in your extensions.
   for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a `mime renderer extension <#mime-renderer-extensions>`__ rather than using this service directly.
 - ``@jupyterlab/rendermime:ILatexTypesetter``: A service for the LaTeX typesetter for the
   application. Use this if you want to typeset math in your extension.
+- ``@jupyterlab/rendermime:IMarkdownParser``: A service for rendering markdown syntax as HTML content.
 - ``@jupyterlab/settingeditor:ISettingEditorTracker``: A widget tracker for setting editors.
   Use this if you want to be able to iterate over and interact with setting editors
   created by the application.

@@ -82,6 +82,7 @@
     "@jupyterlab/mainmenu-extension": "^4.0.0-alpha.5",
     "@jupyterlab/markdownviewer": "^4.0.0-alpha.5",
     "@jupyterlab/markdownviewer-extension": "^4.0.0-alpha.5",
+    "@jupyterlab/markedparser-extension": "^4.0.0-alpha.4",
     "@jupyterlab/mathjax2": "^4.0.0-alpha.5",
     "@jupyterlab/mathjax2-extension": "^4.0.0-alpha.5",
     "@jupyterlab/nbconvert-css": "^4.0.0-alpha.5",
