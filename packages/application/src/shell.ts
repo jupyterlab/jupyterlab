@@ -286,7 +286,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg({
-      hiddenMode: Widget.HiddenMode.Scale
+      hiddenMode: Widget.HiddenMode.Scale,
+      translator: options?.translator
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 

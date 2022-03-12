@@ -6,6 +6,7 @@ import { DockPanel, TabBar, TabPanel, Widget } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 import { addIcon, closeIcon } from '../iconimports';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
  * a widget which displays titles as a single row or column of tabs.
@@ -17,10 +18,16 @@ export class TabBarSvg<T> extends TabBar<T> {
    *
    * @param options - The options for initializing the tab bar.
    */
-  constructor(options: TabBar.IOptions<T> = {}) {
+  constructor(options: TabBarSvg.IOptions = {}) {
     options.renderer = options.renderer || TabBarSvg.defaultRenderer;
     super(options);
-    this.addButtonNode.innerHTML = addIcon.svgstr;
+    const trans = ((options && options.translator) || nullTranslator).load(
+      'jupyterlab'
+    );
+    addIcon.element({
+      container: this.addButtonNode,
+      title: trans.__('New Launcher')
+    });
   }
 }
 
@@ -55,6 +62,13 @@ export namespace TabBarSvg {
   }
 
   export const defaultRenderer = new Renderer();
+
+  export interface IOptions extends TabBar.IOptions<any> {
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  }
 }
 
 /**
@@ -67,7 +81,7 @@ export class DockPanelSvg extends DockPanel {
    *
    * @param options - The options for initializing the panel.
    */
-  constructor(options: DockPanel.IOptions = {}) {
+  constructor(options: DockPanelSvg.IOptions = {}) {
     options.renderer = options.renderer || DockPanelSvg.defaultRenderer;
     super(options);
   }
@@ -92,6 +106,13 @@ export namespace DockPanelSvg {
   }
 
   export const defaultRenderer = new Renderer();
+
+  export interface IOptions extends DockPanel.IOptions {
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  }
 }
 
 /**
