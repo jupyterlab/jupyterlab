@@ -75,7 +75,7 @@ ut elit.`
       });
     });
 
-    await page.keyboard.type('#2')
+    await page.keyboard.type('#2');
 
     const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
     expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
