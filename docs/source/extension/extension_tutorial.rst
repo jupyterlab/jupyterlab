@@ -457,6 +457,15 @@ And update the ``activate`` method to be ``async`` since we are now using
 
         activate: async (app: JupyterFrontEnd, palette: ICommandPalette) =>
 
+.. note::
+
+    If you are new to JavaScript / TypeScript and want to learn more about ``async``, ``await``,
+    and ``Promises``, you can check out the following `tutorial on MDN <https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises>`_
+
+    Be sure to also refer to the other resources in the
+    `See Also <https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises#see_also>`_
+    section for more materials.
+
 Rebuild your extension if necessary (``jlpm run build``), refresh your browser
 tab, and run the *Random Astronomy Picture* command again. You should now see a
 picture in the panel when it opens (if that random date had a picture and not a
