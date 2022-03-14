@@ -33,6 +33,8 @@ export class SearchDocumentModel
       }
     }
 
+    searchProvider.changed.connect(this.refresh, this);
+
     this._searchDebouncer = new Debouncer(() => {
       this._updateSearch();
     }, searchDebounceTime);
@@ -172,6 +174,8 @@ export class SearchDocumentModel
         );
       });
     }
+
+    this.searchProvider.changed.disconnect(this.refresh, this);
 
     this._searchDebouncer.dispose();
     super.dispose();

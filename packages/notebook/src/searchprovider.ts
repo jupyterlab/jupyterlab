@@ -288,7 +288,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     this._currentProviderIndex = this.widget.content.activeCellIndex;
 
-    await this.highlightNext(false);
+    if (!this._documentHasChanged) {
+      await this.highlightNext(false);
+    }
+    this._documentHasChanged = false;
 
     return Promise.resolve();
   }
@@ -422,7 +425,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
         break;
     }
-    this.changed.emit();
+    this._onSearchProviderChanged();
   }
 
   private _onPlaceholderRendered(
@@ -532,6 +535,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   private _onSearchProviderChanged() {
+    // Don't highlight the next occurrence when the query
+    // follows a document change
+    this._documentHasChanged = true;
     this.changed.emit();
   }
 
@@ -546,7 +552,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         )
       );
 
-      this.changed.emit();
+      this._onSearchProviderChanged();
     }
   }
 
@@ -555,4 +561,5 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _onSelectedCells = false;
   private _query: RegExp | null = null;
   private _searchProviders: CellSearchProvider[] = [];
+  private _documentHasChanged = false;
 }
