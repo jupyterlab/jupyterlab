@@ -13,7 +13,7 @@ export interface IFilterBoxProps {
   /**
    * A function to callback when filter is updated.
    */
-  updateFilter: (filterFn: (item: string) => boolean) => void;
+  updateFilter: (filterFn: (item: string) => boolean, query?: string) => void;
 
   /**
    * Whether to use the fuzzy filter.
@@ -138,7 +138,7 @@ export const FilterBox = (props: IFilterBoxProps) => {
         return false;
       }
       return true;
-    });
+    }, target.value);
   };
 
   return (

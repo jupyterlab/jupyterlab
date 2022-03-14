@@ -12,6 +12,7 @@ import {
   LabIcon,
   settingsIcon
 } from '@jupyterlab/ui-components';
+import { StringExt } from '@lumino/algorithm';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -277,23 +278,21 @@ export class PluginList extends ReactWidget {
     return Object.keys(props).reduce((acc: string[], value: any) => {
       // If this is the base case, check for matching title / description
       const subProps = props[value] as PartialJSONObject;
-      if (
-        !subProps &&
-        (filter((props.title as string) ?? '') ||
-          filter((props.description as string) ?? '') ||
-          filter(value))
-      ) {
-        acc.push(props.title ?? value);
-        return acc;
+      if (!subProps) {
+        if (filter((props.title as string) ?? '')) {
+          return props.title;
+        }
+        if (filter(value)) {
+          return value;
+        }
       }
 
       // If there are properties in the object, check for title / description
-      if (
-        filter((subProps.title as string) ?? '') ||
-        filter((subProps.description as string) ?? '') ||
-        filter(value)
-      ) {
-        acc.push(subProps.title ?? value);
+      if (filter((subProps.title as string) ?? '')) {
+        acc.push(subProps.title as string);
+      }
+      if (filter(value)) {
+        acc.push(value);
       }
 
       // Finally, recurse on the properties left.
@@ -313,7 +312,7 @@ export class PluginList extends ReactWidget {
    * Updates the filter when the search bar value changes.
    * @param filter Filter function passed by search bar based on search value.
    */
-  setFilter(filter: (item: string) => boolean): void {
+  setFilter(filter: (item: string) => boolean, query?: string): void {
     this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
       if (filter(plugin.schema.title ?? '')) {
         return null;
@@ -325,6 +324,7 @@ export class PluginList extends ReactWidget {
       );
       return filtered;
     };
+    this._query = query;
     this._updateFilterSignal.emit(this._filter);
     this.update();
   }
@@ -343,6 +343,17 @@ export class PluginList extends ReactWidget {
     const trans = this.translator.load('jupyterlab');
     const title =
       typeof schema.title === 'string' ? trans._p('schema', schema.title) : id;
+    const highlightedTitleIndices = StringExt.matchSumOfSquares(
+      title.toLocaleLowerCase(),
+      this._query ?? ''
+    );
+    const hightlightedTitle = StringExt.highlight(
+      title,
+      highlightedTitleIndices?.indices ?? [],
+      chunk => {
+        return <mark>{chunk}</mark>;
+      }
+    );
     const description =
       typeof schema.description === 'string'
         ? trans._p('schema', schema.description)
@@ -351,7 +362,20 @@ export class PluginList extends ReactWidget {
     const icon = this.getHint(ICON_KEY, this.registry, plugin);
     const iconClass = this.getHint(ICON_CLASS_KEY, this.registry, plugin);
     const iconTitle = this.getHint(ICON_LABEL_KEY, this.registry, plugin);
-    const filteredProperties = this._filter(plugin);
+    const filteredProperties = this._filter(plugin)?.map(fieldValue => {
+      const highlightedIndices = StringExt.matchSumOfSquares(
+        fieldValue.toLocaleLowerCase(),
+        this._query ?? ''
+      );
+      const highlighted = StringExt.highlight(
+        fieldValue,
+        highlightedIndices?.indices ?? [],
+        chunk => {
+          return <mark>{chunk}</mark>;
+        }
+      );
+      return <li key={`${id}-${fieldValue}`}> {highlighted} </li>;
+    });
 
     return (
       <div
@@ -374,18 +398,9 @@ export class PluginList extends ReactWidget {
             tag="span"
             stylesheet="settingsEditor"
           />
-          <span>{title}</span>
+          <span>{hightlightedTitle}</span>
         </div>
-        <ul>
-          {
-            // Shows fields that match search results under each entry.
-            filteredProperties !== null
-              ? filteredProperties.map(fieldValue => {
-                  return <li key={`${id}-${fieldValue}`}> {fieldValue} </li>;
-                })
-              : undefined
-          }
-        </ul>
+        <ul>{filteredProperties}</ul>
       </div>
     );
   }
@@ -442,6 +457,7 @@ export class PluginList extends ReactWidget {
   private _changed = new Signal<this, void>(this);
   private _errors: { [id: string]: boolean };
   private _filter: (item: ISettingRegistry.IPlugin) => string[] | null;
+  private _query: string | undefined;
   private _handleSelectSignal = new Signal<this, string>(this);
   private _updateFilterSignal = new Signal<
     this,
