@@ -1100,6 +1100,34 @@ export namespace NotebookActions {
   }
 
   /**
+   * Duplicate selected cells in the notebook without using the application clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param mode - the mode of the paste operation: 'below' pastes cells
+   *   below the active cell, 'above' pastes cells above the active cell,
+   *   and 'replace' removes the currently selected cells and pastes cells
+   *   in their place.
+   *
+   * #### Notes
+   * The last pasted cell becomes the active cell.
+   * This is a no-op if there is no cell data on the clipboard.
+   * This action can be undone.
+   */
+  export function duplicate(
+    notebook: Notebook,
+    mode: 'below' | 'above' | 'replace' = 'below'
+  ): void {
+    const values = Private.selectedCells(notebook);
+
+    if (!values || values.length === 0) {
+      return;
+    }
+
+    addCells(notebook, mode, values, false); // Cells not from the clipboard
+  }  
+  
+  /**
    * Adds cells to the notebook.
    *
    * @param notebook - The target notebook widget.
@@ -1202,7 +1230,9 @@ export namespace NotebookActions {
 
     notebook.activeCellIndex += newCells.length;
     notebook.deselectAll();
-    notebook.lastClipboardInteraction = 'paste';
+    if (cellsFromClipboard) {
+      notebook.lastClipboardInteraction = 'paste';
+    }
     Private.handleState(notebook, state);
   }
 
