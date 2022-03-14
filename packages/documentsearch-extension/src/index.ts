@@ -207,6 +207,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
             widget.contentHeader.node.getBoundingClientRect().height
           }px`;
         }
+        if (searchView.model.searchExpression) {
+          searchView.model.refresh();
+        }
       }
       return searchView;
     };

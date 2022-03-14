@@ -589,7 +589,7 @@ export class CodeMirrorSearchHighlighter {
     const from = this._cm.getCursor('from');
     const to = this._cm.getCursor('to');
     // Setting a reverse selection to allow search-as-you-type to maintain the
-    // current selected match.  See comment in _findNext for more details.
+    // current selected match. See comment in _findNext for more details.
     if (from !== to) {
       this._cm.setSelection({
         start: this._toEditorPos(to),

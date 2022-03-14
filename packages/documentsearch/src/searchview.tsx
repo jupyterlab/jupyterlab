@@ -689,6 +689,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         }}
         onClose={async () => {
           Widget.detach(this);
+          this._closed.emit();
           await this.model.endQuery();
         }}
         onReplaceEntryShown={(v: boolean) => {

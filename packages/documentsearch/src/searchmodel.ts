@@ -48,7 +48,7 @@ export class SearchDocumentModel
     if (this._caseSensitive !== v) {
       this._caseSensitive = v;
       this.stateChanged.emit();
-      this._searchDebouncer.invoke();
+      this.refresh();
     }
   }
 
@@ -76,7 +76,7 @@ export class SearchDocumentModel
     if (!JSONExt.deepEqual(this._filters, v)) {
       this._filters = v;
       this.stateChanged.emit();
-      this._searchDebouncer.invoke();
+      this.refresh();
     }
   }
 
@@ -131,7 +131,7 @@ export class SearchDocumentModel
     if (this._searchExpression !== v) {
       this._searchExpression = v;
       this.stateChanged.emit();
-      this._searchDebouncer.invoke();
+      this.refresh();
     }
   }
 
@@ -152,7 +152,7 @@ export class SearchDocumentModel
     if (this._useRegex !== v) {
       this._useRegex = v;
       this.stateChanged.emit();
-      this._searchDebouncer.invoke();
+      this.refresh();
     }
   }
 
@@ -201,6 +201,13 @@ export class SearchDocumentModel
     await this.searchProvider.highlightPrevious();
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
+  }
+
+  /**
+   * Refresh search
+   */
+  refresh(): void {
+    this._searchDebouncer.invoke();
   }
 
   /**

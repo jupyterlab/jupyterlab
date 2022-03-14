@@ -252,6 +252,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (!this.widget) {
       return;
     }
+    await this.endQuery();
     let cells = this.widget.content.widgets;
 
     this._query = query;
