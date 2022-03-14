@@ -460,8 +460,7 @@ And update the ``activate`` method to be ``async`` since we are now using
 .. note::
 
     If you are new to JavaScript / TypeScript and want to learn more about ``async``, ``await``,
-    and ``Promises``, you can check out the following tutorial on MDN:
-    https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises
+    and ``Promises``, you can check out the following `tutorial on MDN <https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises>`_
 
     Be sure to also refer to the other resources in the
     `See Also <https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises#see_also>`_
