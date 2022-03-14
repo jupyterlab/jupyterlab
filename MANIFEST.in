@@ -5,6 +5,7 @@ include pyproject.toml
 include setup.py
 include setup.cfg
 include conftest.py
+include scripts/ensure-buildutils.js
 
 # Documentation
 graft docs
