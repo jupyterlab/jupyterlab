@@ -77,7 +77,7 @@ jobs:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
 
-  test_miniumum_verisons:
+  test_minimum_versions:
     name: Test Minimum Versions
     timeout-minutes: 30
     runs-on: ubuntu-latest
