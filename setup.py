@@ -47,8 +47,11 @@ try:
     from jupyter_packaging import wrap_installers, npm_builder, get_data_files
 
     npm = ['node', pjoin(HERE, NAME, 'staging', 'yarn.js')]
-    # In develop mode, just run yarn
-    builder = npm_builder(build_cmd=None, npm=npm, force=True)
+    # In develop mode, just run yarn, unless this is an sdist.
+    force = True
+    if not os.path.exists(os.path.join(HERE, 'buildutils')):
+        force = False
+    builder = npm_builder(build_cmd=None, npm=npm, force=force)
     cmdclass = wrap_installers(post_develop=builder, post_dist=post_dist, ensured_targets=ensured_targets)
 
 
