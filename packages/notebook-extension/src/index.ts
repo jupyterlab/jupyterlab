@@ -2070,7 +2070,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        NotebookActions.duplicate(current.content, 'below');
+        NotebookActions.duplicate(current.content, 'belowSelected');
       }
     },
     // A "duplicate" icon is available in the cell-toolbar package

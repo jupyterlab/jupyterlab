@@ -1074,10 +1074,11 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param mode - the mode of the paste operation: 'below' pastes cells
-   *   below the active cell, 'above' pastes cells above the active cell,
-   *   and 'replace' removes the currently selected cells and pastes cells
-   *   in their place.
+   * @param mode - the mode of adding cells: 
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
    *
    * #### Notes
    * The last pasted cell becomes the active cell.
@@ -1086,7 +1087,7 @@ export namespace NotebookActions {
    */
   export function paste(
     notebook: Notebook,
-    mode: 'below' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
   ): void {
     const clipboard = Clipboard.getInstance();
 
@@ -1104,10 +1105,11 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param mode - the mode of the paste operation: 'below' pastes cells
-   *   below the active cell, 'above' pastes cells above the active cell,
-   *   and 'replace' removes the currently selected cells and pastes cells
-   *   in their place.
+   * @param mode - the mode of adding cells: 
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
    *
    * #### Notes
    * The last pasted cell becomes the active cell.
@@ -1116,7 +1118,7 @@ export namespace NotebookActions {
    */
   export function duplicate(
     notebook: Notebook,
-    mode: 'below' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
   ): void {
     const values = Private.selectedCells(notebook);
 
@@ -1132,10 +1134,11 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param mode - the mode of the paste operation: 'below' pastes cells
-   *   below the active cell, 'above' pastes cells above the active cell,
-   *   and 'replace' removes the currently selected cells and pastes cells
-   *   in their place.
+   * @param mode - the mode of adding cells: 
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
    *
    * @param values — The cells to add to the notebook.
    * 
@@ -1149,7 +1152,7 @@ export namespace NotebookActions {
 
   function addCells(
     notebook: Notebook,
-    mode: 'below' | 'above' | 'replace' = 'below',
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
     values: nbformat.IBaseCell[],
     cellsFromClipboard: boolean = false
   ): void {
@@ -1193,6 +1196,12 @@ export namespace NotebookActions {
     switch (mode) {
       case 'below':
         index = notebook.activeCellIndex;
+        break;
+      case 'belowSelected':
+        index = ArrayExt.findLastIndex(
+          notebook.widgets,
+          c => notebook.isSelected(c)
+        );
         break;
       case 'above':
         index = notebook.activeCellIndex - 1;
