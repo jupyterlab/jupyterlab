@@ -295,11 +295,9 @@ export interface ISearchProvider<T extends Widget = Widget>
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
-   * @param searchTarget The widget to be searched on
-   *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: T): string;
+  getInitialQuery(): string;
 
   /**
    * Set to true if the widget under search is read-only, false

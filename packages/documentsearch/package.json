@@ -37,15 +37,8 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.9",
-    "@jupyterlab/cells": "^4.0.0-alpha.9",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.9",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.9",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.9",
-    "@jupyterlab/notebook": "^4.0.0-alpha.9",
-    "@jupyterlab/translation": "^4.0.0-alpha.9",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.24",
-    "@lumino/algorithm": "^1.9.1",
+    "@jupyterlab/translation": "^4.0.0-alpha.7",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.21",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
     "@lumino/polling": "^1.10.0",

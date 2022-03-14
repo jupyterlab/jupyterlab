@@ -65,12 +65,10 @@ export class FileEditorSearchProvider
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
-   * @param searchTarget The widget to search in.
-   *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: FileEditorPanel): string {
-    const cm = searchTarget.content.editor as CodeMirrorEditor;
+  getInitialQuery(): string {
+    const cm = this.editor as CodeMirrorEditor;
     const selection = cm.doc.getSelection();
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';

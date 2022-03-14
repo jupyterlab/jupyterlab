@@ -79,11 +79,9 @@ export abstract class SearchProvider<T extends Widget = Widget>
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
-   * @param searchTarget The widget to be searched
-   *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: T): string {
+  getInitialQuery(): string {
     return '';
   }
 

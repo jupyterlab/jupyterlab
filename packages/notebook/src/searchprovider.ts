@@ -181,8 +181,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: NotebookPanel): string {
-    const activeCell = searchTarget.content.activeCell;
+  getInitialQuery(): string {
+    const activeCell = this.widget.content.activeCell;
     const selection = (activeCell?.editor as
       | CodeMirrorEditor
       | undefined)?.doc.getSelection();
