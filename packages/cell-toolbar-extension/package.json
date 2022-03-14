@@ -39,12 +39,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.5",
-    "@jupyterlab/cell-toolbar": "^4.0.0-alpha.5",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.5"
+    "@jupyterlab/application": "^4.0.0-alpha.6",
+    "@jupyterlab/cell-toolbar": "^4.0.0-alpha.6",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.6"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.5",
+    "@jupyterlab/testutils": "^4.0.0-alpha.6",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
