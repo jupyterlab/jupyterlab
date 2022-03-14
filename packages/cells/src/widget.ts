@@ -239,6 +239,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
 
+    this._isPlaceholder = options.placeholder ?? false;
+
     // Editor settings
     if (options.editorConfig) {
       this.editor.setOptions({ ...options.editorConfig });
@@ -327,6 +329,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       this.saveEditableState();
     }
     this.update();
+  }
+
+  /**
+   * Whether the cell is a placeholder that differ rendering
+   */
+  isPlaceholder(): boolean {
+    return this._isPlaceholder;
   }
 
   /**
@@ -576,6 +585,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _input: InputArea;
   private _inputWrapper: Widget;
   private _inputPlaceholder: InputPlaceholder;
+  private _isPlaceholder = false;
   private _syncCollapse = false;
   private _syncEditable = false;
   private _resizeDebouncer = new Debouncer(() => {

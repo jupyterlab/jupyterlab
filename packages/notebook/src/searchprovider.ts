@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Cell,
   CellSearchProvider,
   createCellSearchProvider,
   ICellModel,
@@ -24,6 +25,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from './panel';
+import { Notebook } from './widget';
 
 /**
  * Notebook document search provider
@@ -44,6 +46,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this.widget.model!.cells.changed.connect(this._onCellsChanged, this);
     this.widget.content.activeCellChanged.connect(
       this._onActiveCellChanged,
+      this
+    );
+    this.widget.content.placeholderCellRendered.connect(
+      this._onPlaceholderRendered,
       this
     );
   }
@@ -135,16 +141,22 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
     super.dispose();
 
-    this.widget.model?.cells.changed.disconnect(this._onCellsChanged, this);
+    this.widget.content.placeholderCellRendered.disconnect(
+      this._onPlaceholderRendered,
+      this
+    );
     this.widget.content.activeCellChanged.disconnect(
       this._onActiveCellChanged,
       this
     );
+    this.widget.model?.cells.changed.disconnect(this._onCellsChanged, this);
 
     const index = this.widget.content.activeCellIndex;
     this.endQuery()
       .then(() => {
-        this.widget.content.activeCellIndex = index;
+        if (!this.widget.isDisposed) {
+          this.widget.content.activeCellIndex = index;
+        }
       })
       .catch(reason => {
         console.error(`Fail to end search query in notebook:\n${reason}`);
@@ -354,40 +366,39 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return replacementOccurred.includes(true);
   }
 
+  private _addCellProvider(index: number) {
+    const cell = this.widget.content.widgets[index];
+    const cellSearchProvider = createCellSearchProvider(cell);
+    cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
+
+    ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
+
+    cellSearchProvider
+      .setIsActive(
+        !(this._filters?.selectedCells ?? false) ||
+          this.widget.content.isSelectedOrActive(cell)
+      )
+      .then(() => {
+        cellSearchProvider.startQuery(this._query, this._filters);
+      });
+  }
+
+  private _removeCellProvider(index: number) {
+    const provider = ArrayExt.removeAt(this._searchProviders, index);
+    provider?.changed.disconnect(this._onSearchProviderChanged, this);
+    provider?.dispose();
+  }
+
   private _onCellsChanged(
     cells: IObservableUndoableList<ICellModel>,
     changes: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    // It was removed in https://github.com/jupyterlab/jupyterlab/pull/7835
     this.clearHighlight();
-
-    const addCellProvider = (index: number) => {
-      const cell = this.widget.content.widgets[index];
-      const cellSearchProvider = createCellSearchProvider(cell);
-      cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
-
-      ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
-
-      cellSearchProvider
-        .setIsActive(
-          !(this._filters?.selectedCells ?? false) ||
-            this.widget.content.isSelectedOrActive(cell)
-        )
-        .then(() => {
-          cellSearchProvider.startQuery(this._query, this._filters);
-        });
-    };
-
-    const removeCellProvider = (index: number) => {
-      const provider = ArrayExt.removeAt(this._searchProviders, index);
-      provider?.changed.disconnect(this._onSearchProviderChanged, this);
-      provider?.dispose();
-    };
 
     switch (changes.type) {
       case 'add':
         changes.newValues.forEach((model, index) => {
-          addCellProvider(changes.newIndex + index);
+          this._addCellProvider(changes.newIndex + index);
         });
         break;
       case 'move':
@@ -399,18 +410,34 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         break;
       case 'remove':
         for (let index = 0; index < changes.oldValues.length; index++) {
-          removeCellProvider(changes.oldIndex);
+          this._removeCellProvider(changes.oldIndex);
         }
         break;
       case 'set':
         changes.newValues.forEach((model, index) => {
-          addCellProvider(changes.newIndex + index);
-          removeCellProvider(changes.newIndex + index + 1);
+          this._addCellProvider(changes.newIndex + index);
+          this._removeCellProvider(changes.newIndex + index + 1);
         });
 
         break;
     }
     this.changed.emit();
+  }
+
+  private _onPlaceholderRendered(
+    panel: Notebook,
+    renderedCell: Cell<ICellModel>
+  ): void {
+    const index = panel.widgets.findIndex(cell => cell.id === renderedCell.id);
+    if (index >= 0) {
+      this._onCellsChanged(panel.model!.cells, {
+        newIndex: index,
+        newValues: [renderedCell.model],
+        oldIndex: index,
+        oldValues: [renderedCell.model],
+        type: 'set'
+      });
+    }
   }
 
   private async _stepNext(
