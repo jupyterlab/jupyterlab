@@ -3,7 +3,11 @@
 
 import { galata, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
-import { generateCaptureArea, positionMouse } from './utils';
+import {
+  generateCaptureArea,
+  positionMouse,
+  setLeftSidebarWidth
+} from './utils';
 
 test.use({
   autoGoto: false,
@@ -25,7 +29,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 62, left: 1050, width: 190, height: 28 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_kernel.png');
@@ -47,7 +50,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 62, left: 800, width: 190, height: 28 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_activate.png');
@@ -71,7 +73,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_breakpoint.png');
@@ -93,7 +94,6 @@ test.describe('Debugger', () => {
       ]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_run.png');
@@ -123,7 +123,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 100, left: 300, width: 300, height: 80 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_stop_on_breakpoint.png');
@@ -149,7 +148,6 @@ test.describe('Debugger', () => {
       ]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_sidebar.png');
@@ -179,7 +177,6 @@ test.describe('Debugger', () => {
       [generateCaptureArea({ top: 58, left: 998, width: 280, height: 138 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('debugger_variables.png');
@@ -306,6 +303,8 @@ test.describe('Debugger', () => {
 
 async function createNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.createNew();
+
+  await setLeftSidebarWidth(page);
 
   await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
 }

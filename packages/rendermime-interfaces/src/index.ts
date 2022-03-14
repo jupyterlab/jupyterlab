@@ -360,6 +360,11 @@ export namespace IRenderMime {
     latexTypesetter: ILatexTypesetter | null;
 
     /**
+     * The Markdown parser.
+     */
+    markdownParser?: IMarkdownParser | null;
+
+    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -429,13 +434,20 @@ export namespace IRenderMime {
      *
      * @param element - the DOM element to typeset. The typesetting may
      *   happen synchronously or asynchronously.
-     *
-     * #### Notes
-     * The application-wide rendermime object has a settable
-     * `latexTypesetter` property which is used wherever LaTeX
-     * typesetting is required. Extensions wishing to provide their
-     * own typesetter may replace that on the global `lab.rendermime`.
      */
     typeset(element: HTMLElement): void;
+  }
+
+  /**
+   * The interface for a Markdown parser.
+   */
+  export interface IMarkdownParser {
+    /**
+     * Render a markdown source.
+     *
+     * @param source - The string to render.
+     * @returns - A promise of the string.
+     */
+    render(source: string): Promise<string>;
   }
 }

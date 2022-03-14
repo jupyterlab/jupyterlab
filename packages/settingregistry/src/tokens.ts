@@ -592,7 +592,12 @@ export namespace ISettingRegistry {
     disabled?: boolean;
 
     /**
-     * The key combination of the shortcut.
+     * The key sequence of the shortcut.
+     *
+     * ### Notes
+     *
+     * If this is a list like `['Ctrl A', 'B']`, the user needs to press
+     * `Ctrl A` followed by `B` to trigger the shortcuts.
      */
     keys: string[];
 

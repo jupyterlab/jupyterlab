@@ -20,7 +20,6 @@ from jupyter_core.paths import (
     jupyter_data_dir, SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH,
 )
 from jupyter_core.utils import ensure_dir_exists
-from ipython_genutils.py3compat import cast_unicode_py2
 from jupyterlab_server.config import get_federated_extensions
 from jupyter_server.extension.serverextension import ArgumentConflict
 
@@ -81,11 +80,8 @@ def develop_labextension(path, symlink=True, overwrite=False,
     if isinstance(path, (list, tuple)):
         raise TypeError("path must be a string pointing to a single extension to install; call this function multiple times to install multiple extensions")
 
-    path = cast_unicode_py2(path)
-
     if not destination:
         destination = basename(normpath(path))
-    destination = cast_unicode_py2(destination)
 
     full_dest = normpath(pjoin(labext, destination))
     if overwrite and os.path.lexists(full_dest):

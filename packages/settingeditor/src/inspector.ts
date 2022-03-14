@@ -100,7 +100,9 @@ class InspectorConnector extends DataConnector<
    * Render validation errors as an HTML string.
    */
   protected render(errors: ISchemaValidator.IError[]): ReadonlyJSONObject {
-    return { 'text/markdown': errors.map(this.renderError).join('') };
+    return {
+      'text/markdown': errors.map(this.renderError.bind(this)).join('')
+    };
   }
 
   /**
