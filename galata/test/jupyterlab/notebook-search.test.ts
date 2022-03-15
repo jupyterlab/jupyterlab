@@ -67,6 +67,8 @@ test.describe('Notebook Search', () => {
 
     await page.click('text=Search Selected Cell(s)');
 
+    await page.waitForSelector('text=1/4');
+
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(
