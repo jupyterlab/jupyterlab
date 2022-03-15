@@ -36,7 +36,9 @@ export class SearchDocumentModel
     searchProvider.changed.connect(this.refresh, this);
 
     this._searchDebouncer = new Debouncer(() => {
-      this._updateSearch();
+      this._updateSearch().catch(reason => {
+        console.error('Failed to update search on document.', reason);
+      });
     }, searchDebounceTime);
   }
 
@@ -211,7 +213,9 @@ export class SearchDocumentModel
    * Refresh search
    */
   refresh(): void {
-    this._searchDebouncer.invoke();
+    this._searchDebouncer.invoke().catch(reason => {
+      console.error('Failed to invoke search document debouncer.', reason);
+    });
   }
 
   /**
