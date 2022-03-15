@@ -58,7 +58,7 @@ export class CellMenu extends Widget {
             icon: LabIcon.resolve({ icon: entry.icon }),
             className: `jp-cell-${entry.cellType ?? 'all'}`,
             onClickWithEvent: (e: Event): void => {
-              // Prevent propagation of this event in case the command causes the 
+              // Prevent propagation of this event in case the command causes the
               // current cell to move. If the cell moves and the event propagates to the
               // new cell, this may have an effect on the new cell.
               this._commands.execute(entry.command);

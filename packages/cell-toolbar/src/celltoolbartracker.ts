@@ -3,7 +3,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import {
   IObservableList,
-  IObservableUndoableList,
+  IObservableUndoableList
 } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
@@ -36,7 +36,7 @@ const TOOLBAR_OVERLAP_CLASS = 'jp-toolbar-overlap';
 
 /**
  * Icons for use in toolbar.
- * 
+ *
  * These are copied from icon.ts, which is not part of the webpack bundle
  * because nothing is imported from it.
  */
@@ -101,7 +101,10 @@ export class CellToolbarTracker implements IDisposable {
       return;
     }
 
-    if (this._previousActiveCell !== null && this._previousActiveCell !== undefined) {
+    if (
+      this._previousActiveCell !== null &&
+      this._previousActiveCell !== undefined
+    ) {
       this._removeToolbar(this._previousActiveCell.model);
     }
     this._addToolbar(activeCell.model);
@@ -143,12 +146,13 @@ export class CellToolbarTracker implements IDisposable {
     cells: IObservableUndoableList<ICellModel>,
     changed: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content.activeCell;
+    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content
+      .activeCell;
     if (activeCell === null || activeCell === undefined) {
       return;
     }
 
-    if (changed.oldValues.find((m) => m === activeCell.model)) {
+    if (changed.oldValues.find(m => m === activeCell.model)) {
       this._removeToolbar(activeCell.model);
       this._addToolbar(activeCell.model);
     }
@@ -162,10 +166,7 @@ export class CellToolbarTracker implements IDisposable {
 
       const leftMenu_ = leftMenu === null ? [] : leftMenu ?? DEFAULT_LEFT_MENU;
 
-      const toolbar = new CellToolbarWidget(
-        this._commands,
-        leftMenu_,
-      );
+      const toolbar = new CellToolbarWidget(this._commands, leftMenu_);
       toolbar.addClass(CELL_BAR_CLASS);
       (cell.layout as PanelLayout).insertWidget(0, toolbar);
 
@@ -203,10 +204,11 @@ export class CellToolbarTracker implements IDisposable {
    */
   private _onSettingsChanged(): void {
     // Reset toolbar when settings changes
-    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content.activeCell;
+    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content
+      .activeCell;
     if (activeCell) {
-        this._removeToolbar(activeCell.model);
-        this._addToolbar(activeCell.model);
+      this._removeToolbar(activeCell.model);
+      this._addToolbar(activeCell.model);
     }
   }
 
@@ -247,13 +249,13 @@ export class CellToolbarTracker implements IDisposable {
     const cellLeft = this._cellEditorWidgetLeft(activeCell);
     const cellRight = this._cellEditorWidgetRight(activeCell);
     const toolbarLeft = this._cellToolbarLeft(activeCell);
-    
+
     if (toolbarLeft === null) {
       return false;
     }
 
     // The toolbar should not take up more than 50% of the cell.
-    if ((cellLeft + cellRight) / 2 > (toolbarLeft)) {
+    if ((cellLeft + cellRight) / 2 > toolbarLeft) {
       return true;
     }
 
@@ -265,10 +267,10 @@ export class CellToolbarTracker implements IDisposable {
     // Check for overlap in code content
     return this._codeOverlapsToolbar(activeCell);
   }
-  
+
   /**
    * Check for overlap between rendered Markdown and the cell toolbar
-   * 
+   *
    * @param activeCell A rendered MarkdownCell
    * @returns `true` if the first line of the output overlaps with the cell toolbar, `false` otherwise
    */
@@ -278,26 +280,26 @@ export class CellToolbarTracker implements IDisposable {
     // Get the rendered markdown as a widget.
     const markdownOutputWidget = markdownOutput.renderedInput;
     const markdownOutputElement = markdownOutputWidget.node;
-  
+
     const firstOutputElementChild = markdownOutputElement.firstElementChild as HTMLElement;
     if (firstOutputElementChild === null) {
       return false;
     }
-  
+
     // Temporarily set the element's max width so that the bounding client rectangle only encompasses the content.
     const oldMaxWidth = firstOutputElementChild.style.maxWidth;
     firstOutputElementChild.style.maxWidth = 'max-content';
-  
+
     const lineRight = firstOutputElementChild.getBoundingClientRect().right;
-  
+
     // Reinstate the old max width.
     firstOutputElementChild.style.maxWidth = oldMaxWidth;
-  
+
     const toolbarLeft = this._cellToolbarLeft(activeCell);
-  
+
     return toolbarLeft === null ? false : lineRight > toolbarLeft;
   }
-  
+
   private _codeOverlapsToolbar(activeCell: Cell<ICellModel>): boolean {
     const editorWidget = activeCell.editorWidget;
     const editor = activeCell.editor;
@@ -305,16 +307,17 @@ export class CellToolbarTracker implements IDisposable {
       return false; // Nothing in the editor
     }
 
-    const codeMirrorLines = editorWidget.node
-      .getElementsByClassName('CodeMirror-line');
+    const codeMirrorLines = editorWidget.node.getElementsByClassName(
+      'CodeMirror-line'
+    );
     if (codeMirrorLines.length < 1) {
       return false; // No lines present
     }
     const lineRight = codeMirrorLines[0].children[0] // First span under first pre
       .getBoundingClientRect().right;
-  
+
     const toolbarLeft = this._cellToolbarLeft(activeCell);
-  
+
     return toolbarLeft === null ? false : lineRight > toolbarLeft;
   }
 
@@ -332,9 +335,9 @@ export class CellToolbarTracker implements IDisposable {
       return null;
     }
     const activeCellToolbar = toolbarWidgets[0].node;
-    
+
     return activeCellToolbar.getBoundingClientRect().left;
-  }  
+  }
 
   private _commands: CommandRegistry;
   private _isDisposed = false;

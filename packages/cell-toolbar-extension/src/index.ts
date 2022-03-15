@@ -22,7 +22,9 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null
   ) => {
     const settings =
-      (await settingRegistry?.load(`@jupyterlab/cell-toolbar-extension:plugin`)) ?? null;
+      (await settingRegistry?.load(
+        `@jupyterlab/cell-toolbar-extension:plugin`
+      )) ?? null;
     app.docRegistry.addWidgetExtension(
       'Notebook',
       new CellBarExtension(app.commands, settings)

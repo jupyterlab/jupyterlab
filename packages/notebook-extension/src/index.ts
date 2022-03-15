@@ -2065,7 +2065,9 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.duplicateBelow, {
     label: trans.__('Duplicate Cells Below'),
-    caption: trans.__('Copy the selected cells and paste them below the selection'),
+    caption: trans.__(
+      'Copy the selected cells and paste them below the selection'
+    ),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 

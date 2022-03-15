@@ -102,7 +102,7 @@ export class InputArea extends Widget {
     return this._prompt.node;
   }
 
-  /** 
+  /**
    * Get the rendered input area widget, if any.
    */
   get renderedInput(): Widget {

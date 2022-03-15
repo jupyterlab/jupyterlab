@@ -1074,7 +1074,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param mode - the mode of adding cells: 
+   * @param mode - the mode of adding cells:
    *   'below' (default) adds cells below the active cell,
    *   'belowSelected' adds cells below all selected cells,
    *   'above' adds cells above the active cell, and
@@ -1105,7 +1105,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param mode - the mode of adding cells: 
+   * @param mode - the mode of adding cells:
    *   'below' (default) adds cells below the active cell,
    *   'belowSelected' adds cells below all selected cells,
    *   'above' adds cells above the active cell, and
@@ -1127,23 +1127,23 @@ export namespace NotebookActions {
     }
 
     addCells(notebook, mode, values, false); // Cells not from the clipboard
-  }  
-  
+  }
+
   /**
    * Adds cells to the notebook.
    *
    * @param notebook - The target notebook widget.
    *
-   * @param mode - the mode of adding cells: 
+   * @param mode - the mode of adding cells:
    *   'below' (default) adds cells below the active cell,
    *   'belowSelected' adds cells below all selected cells,
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
    * @param values — The cells to add to the notebook.
-   * 
+   *
    * @param cellsFromClipboard — True if the cells were sourced from the clipboard.
-   * 
+   *
    * #### Notes
    * The last added cell becomes the active cell.
    * This is a no-op if values is an empty array.
@@ -1198,9 +1198,8 @@ export namespace NotebookActions {
         index = notebook.activeCellIndex;
         break;
       case 'belowSelected':
-        index = ArrayExt.findLastIndex(
-          notebook.widgets,
-          c => notebook.isSelected(c)
+        index = ArrayExt.findLastIndex(notebook.widgets, c =>
+          notebook.isSelected(c)
         );
         break;
       case 'above':
@@ -2301,11 +2300,11 @@ namespace Private {
     }
   }
 
-  /** 
+  /**
    * Get the selected cell(s) without affecting the clipboard.
-   * 
+   *
    * @param notebook - The target notebook widget.
-   * 
+   *
    * @returns A list of 0 or more selected cells
    */
   export function selectedCells(notebook: Notebook): nbformat.ICell[] {
@@ -2319,7 +2318,7 @@ namespace Private {
         return cellJSON;
       });
   }
-  
+
   /**
    * Copy or cut the selected cell data to the application clipboard.
    *

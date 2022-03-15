@@ -26,10 +26,10 @@
   .jp-toolbar-overlap .jp-cell-toolbar {
     display: block;
   }
-  
+
   .jp-cell-toolbar {
     top: -5px;
-  }  
+  }
 }
 
 .jp-cell-menu {
