@@ -18,7 +18,7 @@ export class TabBarSvg<T> extends TabBar<T> {
    *
    * @param options - The options for initializing the tab bar.
    */
-  constructor(options: TabBarSvg.IOptions = {}) {
+  constructor(options: TabBarSvg.IOptions<T> = {}) {
     options.renderer = options.renderer || TabBarSvg.defaultRenderer;
     super(options);
     const trans = ((options && options.translator) || nullTranslator).load(
