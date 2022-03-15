@@ -63,7 +63,7 @@ export namespace TabBarSvg {
 
   export const defaultRenderer = new Renderer();
 
-  export interface IOptions extends TabBar.IOptions<any> {
+  export interface IOptions<T> extends TabBar.IOptions<T> {
     /**
      * The application language translator.
      */

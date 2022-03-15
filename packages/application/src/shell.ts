@@ -697,9 +697,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return this._dockPanel.addButtonEnabled;
   }
 
-  /*
-   * Set whether the add buttons for each main area tab bar are enabled.
-   */
   set addButtonEnabled(value: boolean) {
     this._dockPanel.addButtonEnabled = value;
   }
