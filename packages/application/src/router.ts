@@ -158,11 +158,11 @@ export class Router implements IRouter {
         const request = this.current.request;
         const result = await commands.execute(command, current);
         if (result === stop) {
-          queue.length = 0;
-          console.debug(`Routing ${request} was short-circuited by ${command}`);
+          queue.length =  0;
+          console.debug(`Routing ${request} was short-circuited by  ${command }`);
         }
       } catch (reason) {
-        console.warn(`Routing ${request} to ${command} failed`, reason);
+        console.warn(`Routing ${request} to ${command} failed %s`, reason);
       }
       void next();
     };
