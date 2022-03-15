@@ -785,10 +785,10 @@ export class DirListing extends Widget {
     }
 
     // Remove extra classes from the nodes.
-    nodes.forEach(item => {
-      item.classList.remove(SELECTED_CLASS);
-      item.classList.remove(RUNNING_CLASS);
-      item.classList.remove(CUT_CLASS);
+    nodes.forEach(node => {
+      node.classList.remove(SELECTED_CLASS);
+      node.classList.remove(RUNNING_CLASS);
+      node.classList.remove(CUT_CLASS);
     });
 
     // Add extra classes to item nodes based on widget state.
