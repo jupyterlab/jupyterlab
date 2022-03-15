@@ -529,7 +529,12 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
         if (options?.content !== false) {
           const content: Contents.IModel[] = [];
           files.forEach(fileModel => {
-            if (PathExt.dirname(fileModel.path) == model.path) {
+            if (
+              // If file path is under this directory, add it to contents array
+              PathExt.dirname(fileModel.path) == model.path &&
+              // unless it's this directory
+              fileModel !== model
+            ) {
               content.push(fileModel);
             }
           });
