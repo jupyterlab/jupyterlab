@@ -524,7 +524,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Handle `resize` messages.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
-    this._resizeDebouncer.invoke();
+    void this._resizeDebouncer.invoke();
   }
 
   /**

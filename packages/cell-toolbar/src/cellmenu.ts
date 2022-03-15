@@ -61,7 +61,7 @@ export class CellMenu extends Widget {
               // Prevent propagation of this event in case the command causes the
               // current cell to move. If the cell moves and the event propagates to the
               // new cell, this may have an effect on the new cell.
-              this._commands.execute(entry.command);
+              void this._commands.execute(entry.command);
               e.stopPropagation();
             },
             tooltip: entry.tooltip ?? this._commands.label(entry.command)
