@@ -93,19 +93,17 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [id: string]: boolean;
   }> = React.useRef({});
 
-  React.useEffect(() => {
-    // When filter updates, only show plugins that match search.
-    updateFilterSignal.connect(
-      (
-        list: PluginList,
-        newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | null
-      ) => {
-        setFilter(() => newFilter);
-      }
-    );
-  }, []);
-
   useEffect(() => {
+    const onFilterUpdate = (
+      list: PluginList,
+      newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | null
+    ) => {
+      setFilter(() => newFilter);
+    };
+
+    // When filter updates, only show plugins that match search.
+    updateFilterSignal.connect(onFilterUpdate);
+
     const onSelectChange = (list: PluginList, pluginId: string) => {
       setExpandedPlugin(expandedPlugin !== pluginId ? pluginId : null);
       // Scroll to the plugin when a selection is made in the left panel.
@@ -114,6 +112,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     handleSelectSignal?.connect?.(onSelectChange);
 
     return () => {
+      updateFilterSignal.disconnect(onFilterUpdate);
       handleSelectSignal?.disconnect?.(onSelectChange);
     };
   }, []);

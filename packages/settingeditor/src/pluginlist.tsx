@@ -445,9 +445,9 @@ export class PluginList extends ReactWidget {
           </div>
         )}
         {modifiedItems.length === 0 && otherItems.length === 0 && (
-          <h1 className="jp-PluginList-noResults">
+          <p className="jp-PluginList-noResults">
             {trans.__('No items match your search.')}
-          </h1>
+          </p>
         )}
       </div>
     );
