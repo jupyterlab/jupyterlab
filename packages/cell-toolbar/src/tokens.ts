@@ -1,3 +1,7 @@
+/* -----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 import { LabIcon } from '@jupyterlab/ui-components';
 
 export const EXTENSION_ID = '@jupyterlab/cell-toolbar';
