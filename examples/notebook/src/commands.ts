@@ -3,7 +3,10 @@
  */
 import { sessionContextDialogs } from '@jupyterlab/apputils';
 import { CompletionHandler } from '@jupyterlab/completer';
-import { SearchInstance } from '@jupyterlab/documentsearch';
+import {
+  SearchDocumentModel,
+  SearchDocumentView
+} from '@jupyterlab/documentsearch';
 import {
   NotebookActions,
   NotebookPanel,
@@ -11,7 +14,7 @@ import {
 } from '@jupyterlab/notebook';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
-import { CommandPalette } from '@lumino/widgets';
+import { CommandPalette, Widget } from '@lumino/widgets';
 
 /**
  * The map of command ids used by the notebook.
@@ -81,24 +84,53 @@ export const SetupCommands = (
     execute: () => nbWidget.context.save()
   });
 
-  let searchInstance: SearchInstance | undefined;
+  let searchInstance: SearchDocumentView | undefined;
   commands.addCommand(cmdIds.startSearch, {
     label: 'Find…',
     execute: () => {
-      if (searchInstance) {
-        searchInstance.focusInput();
-        return;
+      if (!searchInstance) {
+        const provider = new NotebookSearchProvider(nbWidget, nullTranslator);
+        const searchModel = new SearchDocumentModel(provider, 500);
+        searchInstance = new SearchDocumentView(searchModel);
+        /**
+         * Activate the target widget when the search panel is closing
+         */
+        searchInstance.closed.connect(() => {
+          if (!nbWidget.isDisposed) {
+            nbWidget.activate();
+          }
+        });
+
+        searchInstance.disposed.connect(() => {
+          if (!nbWidget.isDisposed) {
+            nbWidget.activate();
+          }
+          // find next and previous are now disabled
+          commands.notifyCommandChanged();
+        });
+
+        /**
+         * Dispose resources when the widget is disposed.
+         */
+        nbWidget.disposed.connect(() => {
+          searchInstance?.dispose();
+          searchModel.dispose();
+          provider.dispose();
+        });
       }
-      const provider = new NotebookSearchProvider(nbWidget, nullTranslator);
-      searchInstance = new SearchInstance(nbWidget, provider, 500);
-      searchInstance.disposed.connect(() => {
-        searchInstance = undefined;
-        // find next and previous are now not enabled
-        commands.notifyCommandChanged();
-      });
-      // find next and previous are now enabled
-      commands.notifyCommandChanged();
-      searchInstance.focusInput();
+
+      if (!searchInstance.isAttached) {
+        Widget.attach(searchInstance, nbWidget.node);
+        searchInstance.node.style.top = `${
+          nbWidget.toolbar.node.getBoundingClientRect().height +
+          nbWidget.contentHeader.node.getBoundingClientRect().height
+        }px`;
+
+        if (searchInstance.model.searchExpression) {
+          searchInstance.model.refresh();
+        }
+      }
+      searchInstance.focusSearchInput();
     }
   });
   commands.addCommand(cmdIds.findNext, {
@@ -108,8 +140,7 @@ export const SetupCommands = (
       if (!searchInstance) {
         return;
       }
-      await searchInstance.provider.highlightNext();
-      searchInstance.updateIndices();
+      await searchInstance.model.highlightNext();
     }
   });
   commands.addCommand(cmdIds.findPrevious, {
@@ -119,8 +150,7 @@ export const SetupCommands = (
       if (!searchInstance) {
         return;
       }
-      await searchInstance.provider.highlightPrevious();
-      searchInstance.updateIndices();
+      await searchInstance.model.highlightPrevious();
     }
   });
   commands.addCommand(cmdIds.interrupt, {
