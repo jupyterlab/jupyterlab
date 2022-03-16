@@ -456,7 +456,7 @@ Then, start JupyterLab using the dev build:
 
 .. code:: bash
 
-   jupyter lab --dev --NotebookApp.token=''  --no-browser
+   jupyter lab --dev-mode --NotebookApp.token=''  --no-browser
 
 Now run Lighthouse against this local server and show the results:
 
