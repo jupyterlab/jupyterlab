@@ -345,7 +345,7 @@ export class PluginList extends ReactWidget {
       typeof schema.title === 'string' ? trans._p('schema', schema.title) : id;
     const highlightedTitleIndices = StringExt.matchSumOfSquares(
       title.toLocaleLowerCase(),
-      this._query ?? ''
+      this._query?.toLocaleLowerCase() ?? ''
     );
     const hightlightedTitle = StringExt.highlight(
       title,
@@ -365,7 +365,7 @@ export class PluginList extends ReactWidget {
     const filteredProperties = this._filter(plugin)?.map(fieldValue => {
       const highlightedIndices = StringExt.matchSumOfSquares(
         fieldValue.toLocaleLowerCase(),
-        this._query ?? ''
+        this._query?.toLocaleLowerCase() ?? ''
       );
       const highlighted = StringExt.highlight(
         fieldValue,
