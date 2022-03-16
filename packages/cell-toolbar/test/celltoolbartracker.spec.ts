@@ -1,9 +1,12 @@
 import { CellBarExtension } from "@jupyterlab/cell-toolbar";
+import { NotebookPanel } from "@jupyterlab/notebook";
 import { ISettingRegistry } from "@jupyterlab/settingregistry";
+import { NBTestUtils } from '@jupyterlab/testutils';
 
 import { CommandRegistry } from "@lumino/commands";
 import { Signal } from "@lumino/signaling";
 
+import { CellToolbarTracker } from "../src/celltoolbartracker";
 
 class TestSettings implements ISettingRegistry.ISettings {
   changed = new Signal<this, void>(this);
@@ -42,6 +45,8 @@ describe('@jupyterlab/cell-toolbar', () => {
   describe('CellBarExtension', () => {
     let commands: CommandRegistry;
     let settings: ISettingRegistry.ISettings;
+    let panel: NotebookPanel;
+    let extension: CellBarExtension;
 
     beforeAll(() => {
       commands = new CommandRegistry();
@@ -53,12 +58,31 @@ describe('@jupyterlab/cell-toolbar', () => {
       });
 
       settings = new TestSettings();
+
+      extension = new CellBarExtension(commands, settings);
+    });
+
+    afterEach(() => {
+      if (panel) {
+        panel.dispose();
+      }
     });
 
     describe('#constructor()', () => {
       it('should create a cell toolbar extension', () => {
-        const extension = new CellBarExtension(commands, settings);
         expect(extension).toBeInstanceOf(CellBarExtension);
+      });
+    });
+
+    describe('#createNew()', () => {
+      it('should create a new cell toolbar tracker', () => {
+        NBTestUtils.createMockContext().then(
+          context => {
+            panel = NBTestUtils.createNotebookPanel(context);
+            const tracker = extension.createNew(panel);
+            expect(tracker).toBeInstanceOf(CellToolbarTracker);
+          }
+        );
       });
     });
   });
