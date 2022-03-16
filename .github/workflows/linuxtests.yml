@@ -93,24 +93,6 @@ jobs:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
 
-  test_minimum_versions:
-    name: Test Minimum Versions
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-        with:
-          python_version: "3.7"
-      - name: Install miniumum versions
-        uses: jupyterlab/maintainer-tools/.github/actions/install-minimums@v1
-      - name: Install dependencies
-        run: |
-          bash ./scripts/ci_install.sh
-      - name: Run the unit tests
-        run: pytest -vv || pytest -vv --lf
-
   make_sdist:
     name: Make SDist
     runs-on: ubuntu-latest
