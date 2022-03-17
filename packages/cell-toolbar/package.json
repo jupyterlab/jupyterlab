@@ -19,7 +19,8 @@
   "types": "lib/index.d.ts",
   "style": "style/index.css",
   "directories": {
-    "lib": "lib/"
+    "lib": "lib",
+    "test": "test"
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
