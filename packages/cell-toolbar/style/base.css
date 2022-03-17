@@ -13,7 +13,7 @@
 .jp-cell-toolbar {
   display: flex;
   flex-direction: row;
-  padding: 2px 0px;
+  padding: 2px 0;
   min-height: 25px;
   z-index: 10;
   position: absolute;
@@ -66,6 +66,7 @@
   border-color: transparent;
   border-style: solid;
 }
+
 .jp-mod-active .jp-MarkdownOutput {
   border-color: var(--jp-cell-editor-border-color);
 }
