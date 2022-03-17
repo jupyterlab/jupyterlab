@@ -177,7 +177,7 @@ export class CellToolbarTracker implements IDisposable {
       // For rendered markdown, watch for resize events.
       cell.displayChanged.connect(this._resizeEventCallback, this);
 
-      // Watch for changes in the cell's size.
+      // Watch for changes in the cell's contents.
       cell.model.contentChanged.connect(this._changedEventCallback, this);
     }
   }
