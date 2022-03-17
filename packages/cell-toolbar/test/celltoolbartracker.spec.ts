@@ -1,17 +1,17 @@
-import { CellBarExtension } from "@jupyterlab/cell-toolbar";
-import { NotebookPanel } from "@jupyterlab/notebook";
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
+import { CellBarExtension } from '@jupyterlab/cell-toolbar';
+import { NotebookPanel } from '@jupyterlab/notebook';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { NBTestUtils } from '@jupyterlab/testutils';
 
-import { CommandRegistry } from "@lumino/commands";
-import { Signal } from "@lumino/signaling";
+import { CommandRegistry } from '@lumino/commands';
+import { Signal } from '@lumino/signaling';
 
-import { CellToolbarTracker } from "../src/celltoolbartracker";
+import { CellToolbarTracker } from '../src/celltoolbartracker';
 
 class TestSettings implements ISettingRegistry.ISettings {
   changed = new Signal<this, void>(this);
   composite = {};
-  id = "test-settings";
+  id = 'test-settings';
   isDisposed = false;
   plugin = {
     id: 'test-plugin',
@@ -20,11 +20,11 @@ class TestSettings implements ISettingRegistry.ISettings {
       user: {}
     }, // ISettingBundle
     raw: '',
-    schema: {type: 'object'} as ISettingRegistry.ISchema,
+    schema: { type: 'object' } as ISettingRegistry.ISchema,
     version: '0.0.1'
   };
   raw = '';
-  schema = {type: 'object'} as ISettingRegistry.ISchema;
+  schema = { type: 'object' } as ISettingRegistry.ISchema;
   user = {};
   version = '0.0.2';
   annotatedDefaults = jest.fn();
@@ -51,10 +51,10 @@ describe('@jupyterlab/cell-toolbar', () => {
     beforeAll(() => {
       commands = new CommandRegistry();
       commands.addCommand('notebook:move-cell-up', {
-        execute: (args) => null,
+        execute: args => null
       });
       commands.addCommand('notebook:move-cell-down', {
-        execute: (args) => null,
+        execute: args => null
       });
 
       settings = new TestSettings();
@@ -73,16 +73,43 @@ describe('@jupyterlab/cell-toolbar', () => {
         expect(extension).toBeInstanceOf(CellBarExtension);
       });
     });
+  });
+
+  describe('CellToolbarTracker', () => {
+    let commands: CommandRegistry;
+    let settings: ISettingRegistry.ISettings;
+    let panel: NotebookPanel;
+    let extension: CellBarExtension;
+
+    beforeAll(() => {
+      commands = new CommandRegistry();
+      commands.addCommand('notebook:move-cell-up', {
+        execute: args => null
+      });
+      commands.addCommand('notebook:move-cell-down', {
+        execute: args => null
+      });
+
+      settings = new TestSettings();
+
+      extension = new CellBarExtension(commands, settings);
+    });
+
+    afterEach(() => {
+      if (panel) {
+        panel.dispose();
+      }
+    });
 
     describe('#createNew()', () => {
-      it('should create a new cell toolbar tracker', () => {
-        NBTestUtils.createMockContext().then(
-          context => {
-            panel = NBTestUtils.createNotebookPanel(context);
-            const tracker = extension.createNew(panel);
-            expect(tracker).toBeInstanceOf(CellToolbarTracker);
-          }
-        );
+      it('should create a new cell toolbar tracker', async () => {
+        const context = await NBTestUtils.createMockContext();
+        panel = NBTestUtils.createNotebookPanel(context);
+
+        await panel.revealed;
+
+        const tracker = extension.createNew(panel);
+        expect(tracker).toBeInstanceOf(CellToolbarTracker);
       });
     });
   });

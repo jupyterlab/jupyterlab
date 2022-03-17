@@ -15,18 +15,18 @@ describe('@jupyterlab/cell-toolbar', () => {
     beforeAll(() => {
       commands = new CommandRegistry();
       commands.addCommand('notebook:move-cell-up', {
-        execute: (args) => null,
+        execute: args => null
       });
       commands.addCommand('notebook:move-cell-down', {
-        execute: (args) => null,
+        execute: args => null
       });
     });
-  
+
     afterEach(() => {
       if (cellMenu) {
         cellMenu.dispose();
       }
-    });  
+    });
 
     describe('#constructor()', () => {
       it('should create an empty cell menu widget', () => {
@@ -37,15 +37,15 @@ describe('@jupyterlab/cell-toolbar', () => {
       it('should create a cell menu with toolbar buttons in it', () => {
         const items = [
           {
-            "command": "notebook:move-cell-up",
-            "icon": "@jupyterlab/cell-toolbar:move-up",
-            "tooltip": "Move Cell Up"
+            command: 'notebook:move-cell-up',
+            icon: '@jupyterlab/cell-toolbar:move-up',
+            tooltip: 'Move Cell Up'
           },
           {
-            "command": "notebook:move-cell-down",
-            "icon": "@jupyterlab/cell-toolbar:move-down",
-            "tooltip": "Move Cell Down"
-          },
+            command: 'notebook:move-cell-down',
+            icon: '@jupyterlab/cell-toolbar:move-down',
+            tooltip: 'Move Cell Down'
+          }
         ];
         cellMenu = new CellMenu(commands, items);
         const menuLayout = (cellMenu.layout as PanelLayout).widgets;
