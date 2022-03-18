@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Cell Toolbar",
+  "description": "Cell Toolbar Settings.",
+  "properties": {
+    "leftMenu": {
+      "title": "List of menu items",
+      "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/menuItem"
+      },
+      "default": [
+        {
+          "command": "notebook:duplicate-below",
+          "icon": "@jupyterlab/cell-toolbar:duplicate",
+          "tooltip": "Duplicate Cell"
+        },
+        {
+          "command": "notebook:move-cell-up",
+          "icon": "@jupyterlab/cell-toolbar:move-up",
+          "tooltip": "Move Cell Up"
+        },
+        {
+          "command": "notebook:move-cell-down",
+          "icon": "@jupyterlab/cell-toolbar:move-down",
+          "tooltip": "Move Cell Down"
+        },
+        {
+          "command": "notebook:insert-cell-above",
+          "icon": "@jupyterlab/cell-toolbar:add-above",
+          "tooltip": "Insert Cell Above"
+        },
+        {
+          "command": "notebook:insert-cell-below",
+          "icon": "@jupyterlab/cell-toolbar:add-below",
+          "tooltip": "Insert Cell Below"
+        },
+        {
+          "command": "notebook:delete-cell",
+          "icon": "@jupyterlab/cell-toolbar:delete",
+          "tooltip": "Delete Cell"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "definitions": {
+    "menuItem": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "title": "Command ID to be executed",
+          "type": "string"
+        },
+        "icon": {
+          "title": "Item icon ID",
+          "type": "string"
+        },
+        "tooltip": {
+          "title": "Item tooltip",
+          "type": "string"
+        },
+        "cellType": {
+          "title": "Cell type on which to display the item",
+          "description": "Leave empty to define on all cells",
+          "type": "string",
+          "enum": ["code", "markdown", "raw"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["command", "icon"]
+    }
+  }
+}

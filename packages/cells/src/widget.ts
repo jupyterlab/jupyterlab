@@ -53,6 +53,8 @@ import { IDragEvent } from '@lumino/dragdrop';
 
 import { Message } from '@lumino/messaging';
 
+import { Debouncer } from '@lumino/polling';
+
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
@@ -261,6 +263,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * The content factory used by the widget.
    */
   readonly contentFactory: Cell.IContentFactory;
+
+  /**
+   * Signal to indicate that widget has changed visibly (in size, in type, etc)
+   */
+  readonly displayChanged = new Signal<this, void>(this);
 
   /**
    * Get the prompt node used by the cell.
@@ -514,6 +521,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Handle `resize` messages.
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    void this._resizeDebouncer.invoke();
+  }
+
+  /**
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -560,6 +574,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _inputPlaceholder: InputPlaceholder;
   private _syncCollapse = false;
   private _syncEditable = false;
+  private _resizeDebouncer = new Debouncer(() => {
+    this.displayChanged.emit();
+  }, 0);
 }
 
 /**
@@ -1558,6 +1575,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._rendered;
   }
   set rendered(value: boolean) {
+    const oldValue = this._rendered;
+
     // Show cell as rendered when cell is not editable
     if (this.readOnly && this._showEditorForReadOnlyMarkdown === false) {
       value = true;
@@ -1572,6 +1591,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     // request.
     if (!this._rendered) {
       this.editor.refresh();
+    }
+
+    // If the rendered state changed, raise an event.
+    if (oldValue !== value) {
+      this.displayChanged.emit();
     }
   }
 

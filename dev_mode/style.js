@@ -3,6 +3,7 @@
 
 import '@jupyterlab/application-extension/style/index.js';
 import '@jupyterlab/apputils-extension/style/index.js';
+import '@jupyterlab/cell-toolbar-extension/style/index.js';
 import '@jupyterlab/celltags-extension/style/index.js';
 import '@jupyterlab/codemirror-extension/style/index.js';
 import '@jupyterlab/completer-extension/style/index.js';
