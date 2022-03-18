@@ -123,14 +123,14 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
 export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
   id: '@jupyterlab/codemirror-extension:line-col-status',
   autoStart: true,
-  requires: [IStatusBar, ITranslator],
-  optional: [ILabShell],
+  requires: [ITranslator],
+  optional: [ILabShell, IStatusBar],
   provides: IPositionModel,
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
     translator: ITranslator,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    statusBar: IStatusBar | null
   ): IPositionModel => {
     const item = new LineCol(translator);
 
@@ -138,13 +138,15 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
       (widget: Widget | null) => CodeEditor.IEditor | null
     >();
 
-    // Add the status item to the status bar.
-    statusBar.registerStatusItem(lineColItem.id, {
-      item,
-      align: 'right',
-      rank: 2,
-      isActive: () => !!item.model.editor
-    });
+    if (statusBar) {
+      // Add the status item to the status bar.
+      statusBar.registerStatusItem(lineColItem.id, {
+        item,
+        align: 'right',
+        rank: 2,
+        isActive: () => !!item.model.editor
+      });
+    }
 
     const addEditorProvider = (
       provider: (widget: Widget | null) => CodeEditor.IEditor | null
