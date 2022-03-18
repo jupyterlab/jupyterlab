@@ -832,7 +832,7 @@ risks or contain malicious code that runs on your machine.`)}
             listMode={model.listMode}
             viewType={'installed'}
             entries={
-              model.searchResult.length > 0
+              model.query && model.searchResult.length > 0
                 ? model.installed.filter(
                     entry => model.searchResult.indexOf(entry) > -1
                   )
