@@ -32,10 +32,16 @@ export namespace ProgressBar {
  * A functional tsx component for a progress bar.
  */
 export function ProgressBar(props: ProgressBar.IProps): JSX.Element {
-  const { width, ...rest } = props;
+  const { width, percentage, ...rest } = props;
   return (
-    <div className={'jp-Statusbar-ProgressBar-progress-bar'}>
-      <Filler {...rest} contentWidth={width} />
+    <div
+      className={'jp-Statusbar-ProgressBar-progress-bar'}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percentage}
+    >
+      <Filler {...{ percentage, ...rest }} contentWidth={width} />
     </div>
   );
 }
