@@ -460,13 +460,21 @@ export async function ensurePackage(
 
   // Ensure style and lib are included in files metadata.
   const filePatterns: string[] = data.files || [];
+  const ignoreDirs: string[] = ['.ipynb_checkpoints'];
 
   // Function to get all of the files in a directory, recursively.
-  function recurseDir(dirname: string, files: string[]) {
+  function recurseDir(
+    dirname: string,
+    files: string[],
+    skipDirs: string[] = ignoreDirs
+  ) {
     if (!fs.existsSync(dirname)) {
       return files;
     }
     fs.readdirSync(dirname).forEach(fpath => {
+      if (skipDirs.includes(fpath)) {
+        return files;
+      }
       const absolute = path.join(dirname, fpath);
       if (fs.statSync(absolute).isDirectory())
         return recurseDir(absolute, files);
