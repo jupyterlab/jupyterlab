@@ -378,6 +378,10 @@ export class FileBrowserModel implements IDisposable {
       }
 
       const path = (value as ReadonlyJSONObject)['path'] as string;
+      // need to return to root path if preferred dir is set
+      if (path) {
+        await this.cd('/');
+      }
       const localPath = manager.services.contents.localPath(path);
 
       await manager.services.contents.get(path);
