@@ -474,7 +474,6 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   background: transparent;
   overflow: hidden;
   padding: 4px 0 4px 4px;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -482,11 +481,18 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   margin-left: 27px;
   margin-top: 5px;
   color: var(--jp-ui-font-color1);
-  width: fit-content;
+  overflow-x: auto;
+  text-overflow: ellipsis;
 }
 
 .jp-pluginList-entry-label {
   display: flex;
+}
+
+.jp-pluginList-entry-label span {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
 }
 
 .jp-SettingsPanel .jp-SettingsHeader-Name {
