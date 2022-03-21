@@ -56,7 +56,7 @@
     "lodash.escape": "^4.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/markedparser-extension": "^4.0.0-alpha.6",
+    "@jupyterlab/markedparser-extension": "^4.0.0-alpha.7",
     "@jupyterlab/mathjax2": "^4.0.0-alpha.7",
     "@jupyterlab/testutils": "^4.0.0-alpha.7",
     "@types/jest": "^26.0.10",

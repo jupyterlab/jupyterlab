@@ -1353,7 +1353,8 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     const result = await showDialog({
       title: trans.__('Restart Kernel?'),
       body: trans.__(
-        'Do you want to restart the current kernel? All variables will be lost.'
+        'Do you want to restart the kernel of %1? All variables will be lost.',
+        sessionContext.name
       ),
       buttons: [Dialog.cancelButton(), restartBtn]
     });
