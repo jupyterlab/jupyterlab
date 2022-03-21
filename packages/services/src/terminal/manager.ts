@@ -175,7 +175,11 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   async startNew(
     options?: Terminal.ITerminal.IOptions
   ): Promise<Terminal.ITerminalConnection> {
-    const model = await startNew(this.serverSettings, options?.name);
+    const model = await startNew(
+      this.serverSettings,
+      options?.name,
+      options?.cwd
+    );
     await this.refreshRunning();
     return this.connectTo({ model });
   }
