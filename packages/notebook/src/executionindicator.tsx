@@ -80,6 +80,7 @@ export function ExecutionIndicatorComponent(
     <div
       className={'jp-Notebook-ExecutionIndicator'}
       title={showProgress ? '' : titleFactory(kernelStatuses[status])}
+      data-status={status}
     >
       {circle}
       <div
