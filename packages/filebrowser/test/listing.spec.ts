@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DocumentManager } from '@jupyterlab/docmanager';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
 import { signalToPromises } from '@jupyterlab/testutils';
 import * as Mock from '@jupyterlab/testutils/lib/mock';
 import { Signal } from '@lumino/signaling';
@@ -28,6 +28,12 @@ const createOptionsForConstructor: () => DirListing.IOptions = () => ({
     })
   })
 });
+
+const addFile = async (dirListing: DirListing, options): Promise<void> => {
+  const fileBrowserModel = dirListing.model;
+  const documentManager = fileBrowserModel.manager;
+  await documentManager.newUntitled(options);
+};
 
 class TestDirListing extends DirListing {
   updated = new Signal<this, void>(this);
@@ -66,12 +72,7 @@ describe('filebrowser/listing', () => {
           dirListing.updated,
           2
         );
-        const fileBrowserModel = dirListing.model;
-        const documentManager = fileBrowserModel.manager;
-        await documentManager.newUntitled({
-          path: '',
-          type: 'file'
-        });
+        addFile(dirListing, { path: '', type: 'file' });
         await fileDrivenUpdate;
         const itemNode = dirListing.node.querySelector(
           ITEM_CLASS_SELECTOR
@@ -83,6 +84,20 @@ describe('filebrowser/listing', () => {
         await mouseDrivenUpdate;
         expect(itemNode.classList).toContain(SELECTED_CLASS);
       });
+
+      // https://github.com/jupyterlab/jupyterlab/pull/468
+      // Context Menus:
+
+      // Right clicking on an unselected item when a context menu is open selects a new item and opens the context menu
+      // A left click anywhere when there is a context menu clears the menu but keeps the selection
+      // Soft Selection:
+
+      // Unmodified mouse down an item in an existing selection is a "soft selection" for dragging or context menu
+      // Mouse up on a soft selection clears other selection unless there is an active context menu
+      // Drag-drop:
+
+      // Fixes a bug when dragging multiple items - the original node text was being changed
+      // Uses a file icon for all multi-item drags
     });
   });
 });
