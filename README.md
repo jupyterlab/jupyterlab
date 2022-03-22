@@ -105,11 +105,11 @@ We encourage you to ask questions on the [Discourse forum](https://discourse.jup
 
 ### Bug report
 
-To report a bug please read the [guidelines](https://jupyterlab.readthedocs.io/en/latest/getting_started/issue.html) and then open a [Github issue](https://github.com/jupyterlab/jupyterlab/issues/new?template=bug_report.md). To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
+To report a bug please read the [guidelines](https://jupyterlab.readthedocs.io/en/latest/getting_started/issue.html) and then open a [Github issue](https://github.com/jupyterlab/jupyterlab/issues/new?labels=bug%2C+status%3ANeeds+Triage&template=bug_report.md). To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
 
 ### Feature request
 
-We also welcome suggestions for new features as they help make the project more useful for everyone. To request a feature please use the [feature request template](https://github.com/jupyterlab/jupyterlab/issues/new?template=feature_request.md).
+We also welcome suggestions for new features as they help make the project more useful for everyone. To request a feature please use the [feature request template](https://github.com/jupyterlab/jupyterlab/issues/new?labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md).
 
 ---
 
