@@ -702,8 +702,13 @@ function activateWidgetFactory(
   sessionContextDialogs: ISessionContextDialogs,
   translator: ITranslator
 ): NotebookWidgetFactory.IFactory {
+  const canStartKernelOption = PageConfig.getOption('notebookStartsKernel');
+
+  // If the option is not set, assume `true`
   const canStartKernelValue: boolean =
-    PageConfig.getOption('notebookStartsKernel').toLowerCase() === 'true';
+    canStartKernelOption === ''
+      ? true
+      : canStartKernelOption.toLowerCase() === 'true';
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
