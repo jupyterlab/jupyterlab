@@ -672,7 +672,6 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
       .then(() => {
         return Private.loadSettingsContextMenu(
           app,
-          app.contextMenu,
           settingRegistry,
           createMenu,
           translator
@@ -1188,7 +1187,6 @@ namespace Private {
 
   export async function loadSettingsContextMenu(
     app: JupyterFrontEnd,
-    contextMenu: ContextMenuSvg,
     registry: ISettingRegistry,
     menuFactory: (options: ISettingRegistry.IMenu) => RankedMenu,
     translator: ITranslator
@@ -1297,7 +1295,7 @@ namespace Private {
           rank: DEFAULT_CONTEXT_ITEM_RANK,
           ...item
         },
-        contextMenu,
+        app.contextMenu,
         menuFactory
       );
     });
@@ -1339,7 +1337,7 @@ namespace Private {
                   rank: DEFAULT_CONTEXT_ITEM_RANK,
                   ...item
                 },
-                contextMenu,
+                app.contextMenu,
                 menuFactory
               );
             });
