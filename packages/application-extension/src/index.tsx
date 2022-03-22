@@ -40,7 +40,6 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   buildIcon,
-  ContextMenuSvg,
   jupyterIcon,
   RankedMenu,
   Switch
