@@ -671,6 +671,7 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
     app.started
       .then(() => {
         return Private.loadSettingsContextMenu(
+          app,
           app.contextMenu,
           settingRegistry,
           createMenu,
@@ -1186,6 +1187,7 @@ namespace Private {
   }
 
   export async function loadSettingsContextMenu(
+    app: JupyterFrontEnd,
     contextMenu: ContextMenuSvg,
     registry: ISettingRegistry,
     menuFactory: (options: ISettingRegistry.IMenu) => RankedMenu,
@@ -1205,6 +1207,7 @@ namespace Private {
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
       const pluginDefaults = Object.keys(registry.plugins)
+        .filter(plugin => app.hasPlugin(plugin))
         .map(plugin => {
           const items =
             registry.plugins[plugin]!.schema['jupyter.lab.menus']?.context ??
