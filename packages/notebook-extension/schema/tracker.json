@@ -856,7 +856,7 @@
       "title": "Number of cells to render directly",
       "description": "Define the number of cells to render directly when virtual notebook intersection observer is available",
       "type": "number",
-      "default": 20
+      "default": 99999
     },
     "renderCellOnIdle": {
       "title": "Render cell on browser idle time",
