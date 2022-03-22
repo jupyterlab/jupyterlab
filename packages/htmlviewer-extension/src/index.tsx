@@ -84,13 +84,14 @@ function activateHTMLViewer(
     );
 
     if (settingRegistry) {
-      toolbarFactory = createToolbarFactory(
+      toolbarFactory = createToolbarFactory({
         toolbarRegistry,
         settingRegistry,
-        FACTORY,
-        htmlPlugin.id,
-        translator
-      );
+        factoryName: FACTORY,
+        pluginId: htmlPlugin.id,
+        translator,
+        isPluginAvailable: (pluginId: string) => app.hasPlugin(pluginId)
+      });
     }
   }
 

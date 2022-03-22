@@ -212,13 +212,14 @@ function activate(
     | undefined;
 
   if (toolbarRegistry) {
-    toolbarFactory = createToolbarFactory(
+    toolbarFactory = createToolbarFactory({
       toolbarRegistry,
       settingRegistry,
-      FACTORY,
-      id,
-      translator
-    );
+      factoryName: FACTORY,
+      pluginId: id,
+      translator,
+      isPluginAvailable: (pluginId: string) => app.hasPlugin(pluginId)
+    });
   }
 
   const factory = new FileEditorFactory({

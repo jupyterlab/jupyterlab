@@ -299,13 +299,13 @@ describe('@jupyterlab/apputils', () => {
         load: jest.fn()
       };
 
-      const factory = createToolbarFactory(
+      const factory = createToolbarFactory({
         toolbarRegistry,
         settingRegistry,
         factoryName,
         pluginId,
         translator
-      );
+      });
 
       await settingRegistry.load(bar.id);
 
@@ -407,13 +407,13 @@ describe('@jupyterlab/apputils', () => {
         load: jest.fn()
       };
 
-      const factory = createToolbarFactory(
+      const factory = createToolbarFactory({
         toolbarRegistry,
         settingRegistry,
         factoryName,
         pluginId,
         translator
-      );
+      });
 
       await settingRegistry.load(bar.id);
       // Trick push this test after all other promise in the hope they get resolve
