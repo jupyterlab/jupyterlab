@@ -601,8 +601,8 @@ export class StaticNotebook extends Widget {
       // the number of cells to render directly, so we render directly.
       layout.insertWidget(index, widget);
       this._incrementRenderedCount();
-      this._scheduleCellRenderOnIdle();
     }
+    this._scheduleCellRenderOnIdle();
   }
 
   private _scheduleCellRenderOnIdle() {
@@ -611,13 +611,15 @@ export class StaticNotebook extends Widget {
       this.notebookConfig.renderCellOnIdle &&
       !this.isDisposed
     ) {
-      const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
-      this._idleCallBack = (window as any).requestIdleCallback(
-        renderPlaceholderCells,
-        {
-          timeout: 3000
-        }
-      );
+      if (!this._idleCallBack) {
+        const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
+        this._idleCallBack = (window as any).requestIdleCallback(
+          renderPlaceholderCells,
+          {
+            timeout: 3000
+          }
+        );
+      }
     }
   }
 
@@ -632,10 +634,11 @@ export class StaticNotebook extends Widget {
       ) {
         if (this._idleCallBack) {
           window.cancelIdleCallback(this._idleCallBack);
+          this._idleCallBack = null;
         }
+        this._scheduleCellRenderOnIdle();
       }
     }
-    this._scheduleCellRenderOnIdle();
 
     if (
       this._renderedCellsCount < this._cellsArray.length &&
