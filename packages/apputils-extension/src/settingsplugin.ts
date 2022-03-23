@@ -20,6 +20,12 @@ export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
     const { isDisabled } = PageConfig.Extension;
     const connector = new SettingConnector(app.serviceManager.settings);
 
+    // On startup, check if a plugin is available in the application.
+    // This helps avoid loading plugin files from other lab-based applications
+    // that have placed their schemas next to the JupyterLab schemas. Different lab-based
+    // applications might not have the same set of plugins loaded on the page.
+    // As an example this helps prevent having new toolbar items added by another application
+    // appear in JupyterLab as a side-effect when they are defined via the settings system.
     const registry = new SettingRegistry({
       connector,
       plugins: (await connector.list('active')).values.filter(value =>
