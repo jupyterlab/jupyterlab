@@ -605,7 +605,11 @@ export class StaticNotebook extends Widget {
   }
 
   private _scheduleCellRenderOnIdle() {
-    if (this._observer && this.notebookConfig.renderCellOnIdle) {
+    if (
+      this._observer &&
+      this.notebookConfig.renderCellOnIdle &&
+      !this.isDisposed
+    ) {
       const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
       (window as any).requestIdleCallback(renderPlaceholderCells, {
         timeout: 3000
