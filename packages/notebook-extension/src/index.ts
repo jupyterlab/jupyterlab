@@ -702,21 +702,21 @@ function activateWidgetFactory(
   sessionContextDialogs: ISessionContextDialogs,
   translator: ITranslator
 ): NotebookWidgetFactory.IFactory {
-  const canStartKernelOption = PageConfig.getOption('notebookStartsKernel');
+  const preferKernelOption = PageConfig.getOption('notebookStartsKernel');
 
   // If the option is not set, assume `true`
-  const canStartKernelValue: boolean =
-    canStartKernelOption === ''
+  const preferKernelValue: boolean =
+    preferKernelOption === ''
       ? true
-      : canStartKernelOption.toLowerCase() === 'true';
+      : preferKernelOption.toLowerCase() === 'true';
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
     modelName: 'notebook',
     defaultFor: ['notebook'],
-    preferKernel: true,
-    canStartKernel: canStartKernelValue,
+    preferKernel: preferKernelValue,
+    canStartKernel: true,
     rendermime: rendermime,
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
