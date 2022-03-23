@@ -420,12 +420,16 @@ function activateEditorCommands(
         return;
       }
       const line = args['line'] as number | undefined;
+      const column = args['column'] as number | undefined;
 
       const editor = widget.content.editor as CodeMirrorEditor;
-      if (line) {
-        editor.setCursorPosition({ line: line - 1, column: 0 });
+      if (line !== undefined || number !== undefined) {
+        editor.setCursorPosition({
+          line: (line ?? 1) - 1,
+          column: (column ?? 1) - 1,
+        });
       } else {
-        editor.execCommand('jumpToLine');
+        editor.execCommand("jumpToLine");
       }
       editor.focus();
     },

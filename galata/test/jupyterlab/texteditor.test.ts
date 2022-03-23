@@ -71,11 +71,12 @@ ut elit.`
 
     await page.evaluate(async () => {
       await window.jupyterapp.commands.execute('codemirror:go-to-line', {
-        line: 2
+        line: 2,
+        column: 8
       });
     });
 
-    await page.keyboard.type('#2');
+    await page.keyboard.type('#2:8#');
 
     const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
     expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
