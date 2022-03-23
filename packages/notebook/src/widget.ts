@@ -856,8 +856,8 @@ export class StaticNotebook extends Widget {
     this._renderedCellsCount++;
   }
 
-  public get cellsToRender(): Map<string, { index: number; cell: Cell }> {
-    return this._toRenderMap;
+  public get remainingCellToRenderCount(): number {
+    return this._toRenderMap.size;
   }
 
   private _editorConfig = StaticNotebook.defaultEditorConfig;

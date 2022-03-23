@@ -2001,9 +2001,9 @@ namespace Private {
   }
 
   export function isNotebookRendered(notebook: Notebook): boolean {
-    if (notebook.cellsToRender.size !== 0) {
+    if (notebook.remainingCellToRenderCount !== 0) {
       showDialog({
-        body: `Notebook is still rendering and has for now ${notebook.cellsToRender.size} remaining cells to render.
+        body: `Notebook is still rendering and has for now ${notebook.remainingCellToRenderCount} remaining cells to render.
 
 Please wait for the complete rendering before invoking that action.`,
         buttons: [Dialog.okButton({ label: 'Ok' })]
