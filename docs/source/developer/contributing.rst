@@ -842,7 +842,7 @@ To test the docs run:
 
 .. code:: bash
 
-   py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+   python -m pytest --check-links -k .md . || python -m pytest --check-links -k .md --lf .
 
 The Read the Docs pages can be built using ``make``:
 
