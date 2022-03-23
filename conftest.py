@@ -15,7 +15,7 @@ pytest_plugins = [
 
 def pytest_addoption(parser):
     """
-    Adds flags for py.test.
+    Adds flags for pytest.
 
     This is called by the pytest API
     """
