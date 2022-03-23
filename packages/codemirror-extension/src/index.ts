@@ -423,7 +423,7 @@ function activateEditorCommands(
       const column = args['column'] as number | undefined;
 
       const editor = widget.content.editor as CodeMirrorEditor;
-      if (line !== undefined || number !== undefined) {
+      if (line !== undefined || column !== undefined) {
         editor.setCursorPosition({
           line: (line ?? 1) - 1,
           column: (column ?? 1) - 1,
