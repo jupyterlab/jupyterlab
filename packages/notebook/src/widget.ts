@@ -211,6 +211,7 @@ export class StaticNotebook extends Widget {
     this.renderingLayout = options.notebookConfig?.renderingLayout;
 
     // Section for the virtual-notebook behavior.
+    this._idleCallBack = null;
     this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
     this._cellsArray = new Array<Cell>();
     if ('IntersectionObserver' in window) {
@@ -611,20 +612,30 @@ export class StaticNotebook extends Widget {
       !this.isDisposed
     ) {
       const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
-      (window as any).requestIdleCallback(renderPlaceholderCells, {
-        timeout: 3000
-      });
+      this._idleCallBack = (window as any).requestIdleCallback(
+        renderPlaceholderCells,
+        {
+          timeout: 3000
+        }
+      );
     }
   }
 
   private _renderPlaceholderCells(deadline: any) {
-    const timeRemaining = deadline.timeRemaining();
-
-    // In case this got triggered because of timeout or when there are screen updates (https://w3c.github.io/requestidlecallback/#idle-periods),
-    // avoiding the render and rescheduling the place holder cell rendering.
-    if (deadline.didTimeout || timeRemaining < 50) {
-      this._scheduleCellRenderOnIdle();
+    if (this.notebookConfig.remainingTimeBeforeRescheduling > 0) {
+      const timeRemaining = deadline.timeRemaining();
+      // In case this got triggered because of timeout or when there are screen updates (https://w3c.github.io/requestidlecallback/#idle-periods),
+      // avoiding the render and rescheduling the place holder cell rendering.
+      if (
+        deadline.didTimeout ||
+        timeRemaining < this.notebookConfig.remainingTimeBeforeRescheduling
+      ) {
+        if (this._idleCallBack) {
+          window.cancelIdleCallback(this._idleCallBack);
+        }
+      }
     }
+    this._scheduleCellRenderOnIdle();
 
     if (
       this._renderedCellsCount < this._cellsArray.length &&
@@ -876,6 +887,7 @@ export class StaticNotebook extends Widget {
   private _observer: IntersectionObserver;
   private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
+  private _idleCallBack: any;
   private _cellsArray: Array<Cell>;
   private _renderingLayout: RenderingLayout | undefined;
 }
@@ -1022,10 +1034,16 @@ export namespace StaticNotebook {
     recordTiming: boolean;
 
     /*
+     * Remaining time in milliseconds before
+     * virtual notebook rendering is rescheduled.
+     */
+    numberCellsToRenderDirectly: number;
+
+    /*
      * Number of cells to render directly when virtual
      * notebook intersection observer is available.
      */
-    numberCellsToRenderDirectly: number;
+    remainingTimeBeforeRescheduling: number;
 
     /**
      * Defines if the placeholder cells should be rendered
@@ -1087,6 +1105,7 @@ export namespace StaticNotebook {
     defaultCell: 'code',
     recordTiming: false,
     numberCellsToRenderDirectly: 99999,
+    remainingTimeBeforeRescheduling: 50,
     renderCellOnIdle: true,
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',

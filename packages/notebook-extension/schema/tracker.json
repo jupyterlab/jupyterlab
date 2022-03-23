@@ -858,6 +858,12 @@
       "type": "number",
       "default": 99999
     },
+    "remainingTimeBeforeRescheduling": {
+      "title": "Remaining time in milliseconds before virtual notebook rendering is rescheduled",
+      "description": "Define the remaining time in milliseconds before virtual notebook rendering is rescheduled. Set 0 if you want to disable any rescheduling",
+      "type": "number",
+      "default": 50
+    },
     "renderCellOnIdle": {
       "title": "Render cell on browser idle time",
       "description": "Defines if the placeholder cells should be rendered when the browser is idle",
