@@ -429,7 +429,7 @@ function activateEditorCommands(
           column: (column ?? 1) - 1,
         });
       } else {
-        editor.execCommand("jumpToLine");
+        editor.execCommand('jumpToLine');
       }
       editor.focus();
     },
