@@ -426,7 +426,7 @@ function activateEditorCommands(
       if (line !== undefined || column !== undefined) {
         editor.setCursorPosition({
           line: (line ?? 1) - 1,
-          column: (column ?? 1) - 1,
+          column: (column ?? 1) - 1
         });
       } else {
         editor.execCommand('jumpToLine');
