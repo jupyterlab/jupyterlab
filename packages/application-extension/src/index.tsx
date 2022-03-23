@@ -40,6 +40,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   buildIcon,
+  ContextMenuSvg,
   jupyterIcon,
   RankedMenu,
   Switch
@@ -670,7 +671,7 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
     app.started
       .then(() => {
         return Private.loadSettingsContextMenu(
-          app,
+          app.contextMenu,
           settingRegistry,
           createMenu,
           translator
@@ -1185,7 +1186,7 @@ namespace Private {
   }
 
   export async function loadSettingsContextMenu(
-    app: JupyterFrontEnd,
+    contextMenu: ContextMenuSvg,
     registry: ISettingRegistry,
     menuFactory: (options: ISettingRegistry.IMenu) => RankedMenu,
     translator: ITranslator
@@ -1204,7 +1205,6 @@ namespace Private {
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
       const pluginDefaults = Object.keys(registry.plugins)
-        .filter(plugin => app.hasPlugin(plugin))
         .map(plugin => {
           const items =
             registry.plugins[plugin]!.schema['jupyter.lab.menus']?.context ??
@@ -1294,7 +1294,7 @@ namespace Private {
           rank: DEFAULT_CONTEXT_ITEM_RANK,
           ...item
         },
-        app.contextMenu,
+        contextMenu,
         menuFactory
       );
     });
@@ -1336,7 +1336,7 @@ namespace Private {
                   rank: DEFAULT_CONTEXT_ITEM_RANK,
                   ...item
                 },
-                app.contextMenu,
+                contextMenu,
                 menuFactory
               );
             });

@@ -22,7 +22,9 @@ export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
 
     const registry = new SettingRegistry({
       connector,
-      plugins: (await connector.list('active')).values
+      plugins: (await connector.list('active')).values.filter(value =>
+        app.hasPlugin(value.id)
+      )
     });
 
     // If there are plugins that have schemas that are not in the setting
@@ -32,7 +34,7 @@ export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
     void app.restored.then(async () => {
       const plugins = await connector.list('all');
       plugins.ids.forEach(async (id, index) => {
-        if (isDisabled(id) || id in registry.plugins) {
+        if (!app.hasPlugin(id) || isDisabled(id) || id in registry.plugins) {
           return;
         }
 

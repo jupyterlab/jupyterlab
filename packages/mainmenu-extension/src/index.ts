@@ -153,7 +153,6 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     // Built menu from settings
     if (registry) {
       await Private.loadSettingsMenu(
-        app,
         registry,
         (aMenu: JupyterLabMenu) => {
           menu.addMenu(aMenu, { rank: aMenu.rank });
@@ -777,7 +776,6 @@ namespace Private {
   }
 
   export async function loadSettingsMenu(
-    app: JupyterFrontEnd,
     registry: ISettingRegistry,
     addMenu: (menu: Menu) => void,
     menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu,
@@ -793,7 +791,6 @@ namespace Private {
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
       const pluginDefaults = Object.keys(registry.plugins)
-        .filter(plugin => app.hasPlugin(plugin))
         .map(plugin => {
           const menus =
             registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];

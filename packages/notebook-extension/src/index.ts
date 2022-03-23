@@ -952,14 +952,13 @@ function activateWidgetFactory(
 
   if (settingRegistry) {
     // Create the factory
-    toolbarFactory = createToolbarFactory({
+    toolbarFactory = createToolbarFactory(
       toolbarRegistry,
       settingRegistry,
-      factoryName: FACTORY,
-      pluginId: PANEL_SETTINGS,
-      translator,
-      isPluginAvailable: (pluginId: string) => app.hasPlugin(pluginId)
-    });
+      FACTORY,
+      PANEL_SETTINGS,
+      translator
+    );
   }
 
   const trans = translator.load('jupyterlab');

@@ -48,7 +48,6 @@ async function displayInformation(trans: TranslationBundle): Promise<void> {
  * @param pluginId Settings plugin id
  * @param translator Translator object
  * @param propertyId Property holding the toolbar definition in the settings; default 'toolbar'
- * @param isPluginAvailable An optional function to check whether a plugin is available
  * @returns List of toolbar items
  */
 async function setToolbarItems(
@@ -57,8 +56,7 @@ async function setToolbarItems(
   factoryName: string,
   pluginId: string,
   translator: ITranslator,
-  propertyId: string = 'toolbar',
-  isPluginAvailable?: (pluginId: string) => boolean
+  propertyId: string = 'toolbar'
 ): Promise<void> {
   const trans = translator.load('jupyterlab');
   let canonical: ISettingRegistry.ISchema | null;
@@ -73,7 +71,6 @@ async function setToolbarItems(
   function populate(schema: ISettingRegistry.ISchema) {
     loaded = {};
     const pluginDefaults = Object.keys(registry.plugins)
-      .filter(plugin => isPluginAvailable?.(plugin) ?? true)
       .map(plugin => {
         const items =
           (registry.plugins[plugin]!.schema['jupyter.lab.toolbars'] ?? {})[
@@ -225,31 +222,21 @@ async function setToolbarItems(
  * on a data description stored in settings
  *
  * @param toolbarRegistry Toolbar widgets registry
- * @param settingRegistry Settings registry
+ * @param settingsRegistry Settings registry
  * @param factoryName Toolbar container factory name
  * @param pluginId Settings plugin id
  * @param translator Translator
  * @param propertyId Toolbar definition key in the settings plugin
- * @param isPluginAvailable A function to check whether a plugin is available
  * @returns List of toolbar widgets
  */
-export function createToolbarFactory({
-  toolbarRegistry,
-  settingRegistry: settingRegistry,
-  factoryName,
-  pluginId,
-  translator,
-  propertyId = 'toolbar',
-  isPluginAvailable = undefined
-}: {
-  toolbarRegistry: IToolbarWidgetRegistry;
-  settingRegistry: ISettingRegistry;
-  factoryName: string;
-  pluginId: string;
-  translator: ITranslator;
-  propertyId?: string;
-  isPluginAvailable?: (pluginId: string) => boolean;
-}): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
+export function createToolbarFactory(
+  toolbarRegistry: IToolbarWidgetRegistry,
+  settingsRegistry: ISettingRegistry,
+  factoryName: string,
+  pluginId: string,
+  translator: ITranslator,
+  propertyId: string = 'toolbar'
+): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
   const items = new ObservableList<ISettingRegistry.IToolbarItem>({
     itemCmp: (a, b) => JSONExt.deepEqual(a as any, b as any)
   });
@@ -257,12 +244,11 @@ export function createToolbarFactory({
   // Get toolbar definition from the settings
   setToolbarItems(
     items,
-    settingRegistry,
+    settingsRegistry,
     factoryName,
     pluginId,
     translator,
-    propertyId,
-    isPluginAvailable
+    propertyId
   ).catch(reason => {
     console.error(
       `Failed to load toolbar items for factory ${factoryName} from ${pluginId}`,

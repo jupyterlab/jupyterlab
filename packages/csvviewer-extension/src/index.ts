@@ -116,14 +116,13 @@ function activateCsv(
     );
 
     if (settingRegistry) {
-      toolbarFactory = createToolbarFactory({
+      toolbarFactory = createToolbarFactory(
         toolbarRegistry,
         settingRegistry,
-        factoryName: FACTORY_CSV,
-        pluginId: csv.id,
-        translator,
-        isPluginAvailable: (pluginId: string) => app.hasPlugin(pluginId)
-      });
+        FACTORY_CSV,
+        csv.id,
+        translator
+      );
     }
   }
 
@@ -261,14 +260,13 @@ function activateTsv(
     );
 
     if (settingRegistry) {
-      toolbarFactory = createToolbarFactory({
+      toolbarFactory = createToolbarFactory(
         toolbarRegistry,
         settingRegistry,
-        factoryName: FACTORY_TSV,
-        pluginId: tsv.id,
-        translator,
-        isPluginAvailable: (pluginId: string) => app.hasPlugin(pluginId)
-      });
+        FACTORY_TSV,
+        tsv.id,
+        translator
+      );
     }
   }
 
