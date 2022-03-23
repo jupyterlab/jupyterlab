@@ -5,10 +5,11 @@ import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IModelDB } from '@jupyterlab/observables';
+import { IModelDB, IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { findIndex, toArray } from '@lumino/algorithm';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Title, Widget } from '@lumino/widgets';
@@ -419,15 +420,84 @@ export abstract class ABCWidgetFactory<
     const widget = this.createNewWidget(context, source);
 
     // Add toolbar items
-    let items: DocumentRegistry.IToolbarItem[];
-    if (this._toolbarFactory) {
-      items = this._toolbarFactory(widget);
+    const items:
+      | DocumentRegistry.IToolbarItem[]
+      | IObservableList<DocumentRegistry.IToolbarItem> = (
+      this._toolbarFactory?.bind(this) ?? this.defaultToolbarFactory.bind(this)
+    )(widget);
+
+    if (Array.isArray(items)) {
+      items.forEach(({ name, widget: item }) => {
+        widget.toolbar.addItem(name, item);
+      });
     } else {
-      items = this.defaultToolbarFactory(widget);
+      const updateToolbar = (
+        list: IObservableList<DocumentRegistry.IToolbarItem>,
+        changes: IObservableList.IChangedArgs<DocumentRegistry.IToolbarItem>
+      ) => {
+        switch (changes.type) {
+          case 'add':
+            changes.newValues.forEach((item, index) => {
+              widget.toolbar.insertItem(
+                changes.newIndex + index,
+                item.name,
+                item.widget
+              );
+            });
+            break;
+          case 'move':
+            changes.oldValues.forEach(item => {
+              item.widget.parent = null;
+            });
+            changes.newValues.forEach((item, index) => {
+              widget.toolbar.insertItem(
+                changes.newIndex + index,
+                item.name,
+                item.widget
+              );
+            });
+            break;
+          case 'remove':
+            changes.oldValues.forEach(item => {
+              item.widget.parent = null;
+            });
+            break;
+          case 'set':
+            changes.oldValues.forEach(item => {
+              item.widget.parent = null;
+            });
+
+            changes.newValues.forEach((item, index) => {
+              const existingIndex = findIndex(
+                widget.toolbar.names(),
+                name => item.name === name
+              );
+              if (existingIndex >= 0) {
+                toArray(widget.toolbar.children())[existingIndex].parent = null;
+              }
+
+              widget.toolbar.insertItem(
+                changes.newIndex + index,
+                item.name,
+                item.widget
+              );
+            });
+            break;
+        }
+      };
+
+      updateToolbar(items, {
+        newIndex: 0,
+        newValues: toArray(items),
+        oldIndex: 0,
+        oldValues: [],
+        type: 'add'
+      });
+      items.changed.connect(updateToolbar);
+      widget.disposed.connect(() => {
+        items.changed.disconnect(updateToolbar);
+      });
     }
-    items.forEach(({ name, widget: item }) => {
-      widget.toolbar.addItem(name, item);
-    });
 
     // Emit widget created signal
     this._widgetCreated.emit(widget);
@@ -451,7 +521,11 @@ export abstract class ABCWidgetFactory<
   }
 
   private _toolbarFactory:
-    | ((widget: T) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: T
+      ) =>
+        | DocumentRegistry.IToolbarItem[]
+        | IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
   private _isDisposed = false;
   private _translator: ITranslator;
@@ -586,6 +660,10 @@ export namespace DocumentWidget {
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   > extends MainAreaWidget.IOptionsOptionalContent<T> {
     context: DocumentRegistry.IContext<U>;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }

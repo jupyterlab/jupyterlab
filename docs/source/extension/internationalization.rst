@@ -4,7 +4,7 @@ Internationalization and Localization
 To internationalize your extension, the following tasks are required:
 
 .. note::
-    
+
     Please read carefully the :ref:`internationalization-rules` as they are strong constraints for internationalization to work.
 
 1. Add the token ``ITranslator`` from ``@jupyterlab/translation`` package to your plugin dependencies.
@@ -47,7 +47,7 @@ You could also look at the following pull requests on the
 4. Create and publish the translation for your extension.
 
 There are two options: you can either add your extension to the JupyterLab `language packs <https://github.com/jupyterlab/language-packs/#adding-a-new-extension>`_
-or you can create a python package to distribute your extension translation (see `test example <https://github.com/jupyterlab/jupyterlab_server/tree/master/jupyterlab_server/tests/translations/jupyterlab-some-package>`_).
+or you can create a python package to distribute your extension translation (see `test example <https://github.com/jupyterlab/jupyterlab_server/tree/main/tests/translations/jupyterlab-some-package>`_).
 
 
 Settings translation

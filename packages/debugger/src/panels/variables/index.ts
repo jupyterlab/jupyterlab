@@ -37,7 +37,12 @@ export class Variables extends Panel {
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     this._header = new VariablesHeader(translator);
-    this._tree = new VariablesBodyTree({ model, service });
+    this._tree = new VariablesBodyTree({
+      model,
+      service,
+      commands,
+      translator
+    });
     this._table = new VariablesBodyGrid({ model, commands, themeManager });
     this._table.hide();
 

@@ -7,6 +7,7 @@ import { each } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import { CSVViewer } from './widget';
 
 /**
  * The class name added to a csv toolbar widget.
@@ -28,12 +29,18 @@ export class CSVDelimiter extends Widget {
    * Construct a new csv table widget.
    */
   constructor(options: CSVToolbar.IOptions) {
-    super({ node: Private.createNode(options.selected, options.translator) });
+    super({
+      node: Private.createNode(options.widget.delimiter, options.translator)
+    });
+    this._widget = options.widget;
     this.addClass(CSV_DELIMITER_CLASS);
   }
 
   /**
    * A signal emitted when the delimiter selection has changed.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   get delimiterChanged(): ISignal<this, string> {
     return this._delimiterChanged;
@@ -60,6 +67,7 @@ export class CSVDelimiter extends Widget {
     switch (event.type) {
       case 'change':
         this._delimiterChanged.emit(this.selectNode.value);
+        this._widget.delimiter = this.selectNode.value;
         break;
       default:
         break;
@@ -81,6 +89,7 @@ export class CSVDelimiter extends Widget {
   }
 
   private _delimiterChanged = new Signal<this, string>(this);
+  protected _widget: CSVViewer;
 }
 
 /**
@@ -92,9 +101,9 @@ export namespace CSVToolbar {
    */
   export interface IOptions {
     /**
-     * The initially selected delimiter.
+     * Document widget for this toolbar
      */
-    selected: string;
+    widget: CSVViewer;
 
     /**
      * The application language translator.

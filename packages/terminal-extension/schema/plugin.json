@@ -81,6 +81,12 @@
       "type": "boolean",
       "default": false
     },
+    "closeOnExit": {
+      "title": "Close on exit",
+      "description": "Close the widget when exiting the terminal.",
+      "type": "boolean",
+      "default": true
+    },
     "pasteWithCtrlV": {
       "title": "Paste with Ctrl+V",
       "description": "Enable pasting with Ctrl+V.  This can be disabled to use Ctrl+V in the vi editor, for instance.  This setting has no effect on macOS, where Cmd+V is available",

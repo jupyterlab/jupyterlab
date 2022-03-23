@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, test } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 
 const DEFAULT_NAME = 'untitled.txt';
@@ -26,23 +26,23 @@ test.describe('Text Editor Tests', () => {
     await page.menu.clickMenuItem('Settings>Advanced Settings Editor');
 
     await page.click('text=Text Editor');
-    const defaultParams =
-      galata.DEFAULT_SETTINGS['@jupyterlab/fileeditor-extension:plugin'] ?? {};
-    await page.click(`text=/.*${JSON.stringify(defaultParams)}.*/`, {
-      clickCount: 3
-    });
-    const newParams = {
-      ...defaultParams,
-      editorConfig: {
-        ...(defaultParams.editorConfig ?? {}),
-        rulers: [50, 75]
-      }
-    };
-    await page.keyboard.type(JSON.stringify(newParams));
-    await page.click('button:has-text("Save User Settings")');
 
-    await page.waitForResponse(
-      /.*api\/settings\/@jupyterlab\/fileeditor-extension:plugin/
+    // Add two rulers
+    await page.click('text="Add"');
+    await page.click(
+      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]'
+    );
+    await page.type(
+      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]',
+      '50'
+    );
+    await page.click('text="Add"');
+    await page.click(
+      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]'
+    );
+    await page.type(
+      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]',
+      '75'
     );
 
     await page.activity.activateTab(DEFAULT_NAME);

@@ -15,7 +15,7 @@ import { isHeadingFiltered } from './is_heading_filtered';
  * @param tags - filter tags
  * @returns result tuple
  */
-function appendHeading(
+export function appendHeading(
   headings: INotebookHeading[],
   heading: INotebookHeading,
   prev: INotebookHeading | null,
@@ -39,8 +39,3 @@ function appendHeading(
   }
   return [headings, prev];
 }
-
-/**
- * Exports.
- */
-export { appendHeading };

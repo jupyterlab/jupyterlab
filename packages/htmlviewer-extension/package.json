@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/htmlviewer-extension",
-  "version": "3.3.0-alpha.15",
+  "version": "3.3.2",
   "description": "JupyterLab extension to render HTML files",
   "keywords": [
     "jupyter",
@@ -24,6 +24,7 @@
   "style": "style/index.css",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/*.json",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "style/index.js"
   ],
@@ -33,12 +34,14 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.3.0-alpha.15",
-    "@jupyterlab/apputils": "^3.3.0-alpha.15",
-    "@jupyterlab/docregistry": "^3.3.0-alpha.15",
-    "@jupyterlab/htmlviewer": "^3.3.0-alpha.15",
-    "@jupyterlab/translation": "^3.3.0-alpha.15",
-    "@jupyterlab/ui-components": "^3.3.0-alpha.14"
+    "@jupyterlab/application": "^3.3.2",
+    "@jupyterlab/apputils": "^3.3.2",
+    "@jupyterlab/docregistry": "^3.3.2",
+    "@jupyterlab/htmlviewer": "^3.3.2",
+    "@jupyterlab/observables": "^4.3.2",
+    "@jupyterlab/settingregistry": "^3.3.2",
+    "@jupyterlab/translation": "^3.3.2",
+    "@jupyterlab/ui-components": "^3.3.2"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -48,7 +51,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }

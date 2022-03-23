@@ -24,8 +24,9 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ISessionContext, sessionContextDialogs } from './sessioncontext';
-import { ReactWidget, UseSignal } from './vdom';
+import { ISessionContext, sessionContextDialogs } from '../sessioncontext';
+import { translateKernelStatuses } from '../kernelstatuses';
+import { ReactWidget, UseSignal } from '../vdom';
 import { Throttler } from '@lumino/polling';
 
 /**
@@ -335,7 +336,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   /**
    * Handle a DOM click event.
    */
-  protected handleClick(event: Event) {
+  protected handleClick(event: Event): void {
+    // Stop propagating the click outside the toolbar
+    event.stopPropagation();
+
     // Clicking a label focuses the corresponding control
     // that is linked with `for` attribute, so let it be.
     if (event.target instanceof HTMLLabelElement) {
@@ -568,6 +572,9 @@ export class ReactiveToolbar extends Toolbar<Widget> {
 export namespace Toolbar {
   /**
    * Create an interrupt toolbar item.
+   *
+   * @deprecated since version v3.2
+   * This is dead code now.
    */
   export function createInterruptButton(
     sessionContext: ISessionContext,
@@ -586,6 +593,9 @@ export namespace Toolbar {
 
   /**
    * Create a restart toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createRestartButton(
     sessionContext: ISessionContext,
@@ -697,7 +707,9 @@ export namespace ToolbarButtonComponent {
  *
  * @param props - The props for ToolbarButtonComponent.
  */
-export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
+export function ToolbarButtonComponent(
+  props: ToolbarButtonComponent.IProps
+): JSX.Element {
   // In some browsers, a button click event moves the focus from the main
   // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
   // We avoid a click event by calling preventDefault in mousedown, and
@@ -876,9 +888,26 @@ export namespace CommandToolbarButtonComponent {
    * Interface for CommandToolbarButtonComponent props.
    */
   export interface IProps {
+    /**
+     * Application commands registry
+     */
     commands: CommandRegistry;
+    /**
+     * Command unique id
+     */
     id: string;
+    /**
+     * Command arguments
+     */
     args?: ReadonlyJSONObject;
+    /**
+     * Overrides command icon
+     */
+    icon?: LabIcon;
+    /**
+     * Overrides command label
+     */
+    label?: string;
   }
 }
 
@@ -925,7 +954,7 @@ export class CommandToolbarButton extends ReactWidget {
     super();
     addCommandToolbarButtonClass(this);
   }
-  render() {
+  render(): JSX.Element {
     return <CommandToolbarButtonComponent {...this.props} />;
   }
 }
@@ -1112,7 +1141,7 @@ namespace Private {
     const iconLabel = commands.iconLabel(id, args);
     // DEPRECATED: remove _icon when lumino 2.0 is adopted
     // if icon is aliasing iconClass, don't use it
-    const _icon = commands.icon(id, args);
+    const _icon = options.icon ?? commands.icon(id, args);
     const icon = _icon === iconClass ? undefined : _icon;
 
     const label = commands.label(id, args);
@@ -1124,7 +1153,9 @@ namespace Private {
     if (!commands.isVisible(id, args)) {
       className += ' lm-mod-hidden';
     }
-    let tooltip = commands.caption(id, args) || label || iconLabel;
+
+    let tooltip =
+      commands.caption(id, args) || options.label || label || iconLabel;
     // Shows hot keys in tooltips
     const binding = commands.keyBindings.find(b => b.command === id);
     if (binding) {
@@ -1136,7 +1167,15 @@ namespace Private {
     };
     const enabled = commands.isEnabled(id, args);
 
-    return { className, icon, iconClass, tooltip, onClick, enabled, label };
+    return {
+      className,
+      icon,
+      iconClass,
+      tooltip,
+      onClick,
+      enabled,
+      label: options.label ?? label
+    };
   }
 
   /**
@@ -1223,22 +1262,7 @@ namespace Private {
       this.translator = translator || nullTranslator;
       this._trans = this.translator.load('jupyterlab');
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
-      // TODO-FIXME: this mapping is duplicated in statusbar/kernelStatus.tsx
-      this._statusNames = {
-        unknown: this._trans.__('Unknown'),
-        starting: this._trans.__('Starting'),
-        idle: this._trans.__('Idle'),
-        busy: this._trans.__('Busy'),
-        terminating: this._trans.__('Terminating'),
-        restarting: this._trans.__('Restarting'),
-        autorestarting: this._trans.__('Autorestarting'),
-        dead: this._trans.__('Dead'),
-        connected: this._trans.__('Connected'),
-        connecting: this._trans.__('Connecting'),
-        disconnected: this._trans.__('Disconnected'),
-        initializing: this._trans.__('Initializing'),
-        '': ''
-      };
+      this._statusNames = translateKernelStatuses(this.translator);
       this._onStatusChanged(sessionContext);
       sessionContext.statusChanged.connect(this._onStatusChanged, this);
       sessionContext.connectionStatusChanged.connect(
@@ -1256,7 +1280,6 @@ namespace Private {
       }
 
       const status = sessionContext.kernelDisplayStatus;
-
       const circleIconProps: LabIcon.IProps = {
         container: this.node,
         title: this._trans.__('Kernel %1', this._statusNames[status] || status),

@@ -11,13 +11,15 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   ICommandPalette,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
@@ -27,6 +29,7 @@ import {
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
@@ -54,7 +57,8 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILauncher,
     IMainMenu,
     ILayoutRestorer,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    IToolbarWidgetRegistry
   ],
   provides: IEditorTracker,
   autoStart: true
@@ -155,17 +159,36 @@ function activate(
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
+  let toolbarFactory:
+    | ((
+        widget: IDocumentWidget<FileEditor>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
+    | undefined;
+
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      FACTORY,
+      id,
+      translator
+    );
+  }
+
   const factory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
       name: FACTORY,
       fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
-      defaultFor: ['markdown', '*'] // it outranks the defaultRendered viewer.
+      defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
+      toolbarFactory,
+      translator
     }
   });
   const { commands, restored, shell } = app;

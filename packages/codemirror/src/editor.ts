@@ -350,14 +350,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions<K extends keyof CodeMirrorEditor.IConfig>(
-    options: CodeMirrorEditor.IConfigOptions<K>[]
-  ): void {
+  setOptions(options: Partial<CodeMirrorEditor.IConfig>): void {
     const editor = this._editor;
     editor.startOperation();
-    for (let key in options) {
+    for (const key in options) {
+      const k = key as keyof CodeMirrorEditor.IConfig;
       editor.operation(() => {
-        this.setOption(key as any, options[key]);
+        this.setOption(k, options[k]);
       });
     }
     editor.endOperation();
@@ -1367,13 +1366,6 @@ export namespace CodeMirrorEditor {
     foldGutter: false,
     handlePaste: true
   };
-
-  /**
-   * The options used to set several options at once with setOptions.
-   */
-  export interface IConfigOptions<K extends keyof IConfig> {
-    K: IConfig[K];
-  }
 
   /**
    * Add a command to CodeMirror.

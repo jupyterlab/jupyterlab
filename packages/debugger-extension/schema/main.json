@@ -21,6 +21,16 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "command": "debugger:inspect-variable",
+        "selector": ".jp-DebuggerVariables-body .jp-DebuggerVariables-grid"
+      },
+      {
+        "command": "debugger:render-mime-variable",
+        "selector": ".jp-DebuggerVariables-body"
+      }
     ]
   },
   "jupyter.lab.shortcuts": [
@@ -69,7 +79,10 @@
     "variableFilters": {
       "properties": {
         "xpython": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }
@@ -97,6 +110,12 @@
           "__spec__"
         ]
       }
+    },
+    "defaultKernelSourcesFilter": {
+      "title": "Default kernel sources regexp filter",
+      "description": "A regular expression filter to apply by default when showing the kernel sources",
+      "type": "string",
+      "default": ""
     }
   },
   "additionalProperties": false,

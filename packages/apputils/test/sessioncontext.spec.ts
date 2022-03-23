@@ -370,10 +370,10 @@ describe('@jupyterlab/apputils', () => {
         expect(sessionContext.kernelDisplayStatus).toBe('initializing');
       });
 
-      it('should be "idle" if there is no current kernel', async () => {
+      it('should be "unknown" if there is no current kernel', async () => {
         await sessionContext.initialize();
         await sessionContext.shutdown();
-        expect(sessionContext.kernelDisplayStatus).toBe('idle');
+        expect(sessionContext.kernelDisplayStatus).toBe('unknown');
       });
     });
 

@@ -98,7 +98,7 @@ function updateIconButtonState(
 /**
  * A handler for debugging a widget.
  */
-export class DebuggerHandler {
+export class DebuggerHandler implements DebuggerHandler.IHandler {
   /**
    * Instantiate a new DebuggerHandler.
    *
@@ -108,6 +108,15 @@ export class DebuggerHandler {
     this._type = options.type;
     this._shell = options.shell;
     this._service = options.service;
+  }
+
+  /**
+   * Get the active widget.
+   */
+  get activeWidget():
+    | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+    | null {
+    return this._activeWidget;
   }
 
   /**
@@ -175,6 +184,7 @@ export class DebuggerHandler {
     }
     connection.iopubMessage.connect(iopubMessage);
     this._iopubMessageHandlers[widget.id] = iopubMessage;
+    this._activeWidget = widget;
 
     return this.updateWidget(widget, connection);
   }
@@ -326,6 +336,9 @@ export class DebuggerHandler {
       this._previousConnection = connection;
       await this._service.restoreState(true);
       await this._service.displayDefinedVariables();
+      if (this._service.session?.capabilities?.supportsModulesRequest) {
+        await this._service.displayModules();
+      }
     };
 
     const toggleDebugging = async (): Promise<void> => {
@@ -365,6 +378,9 @@ export class DebuggerHandler {
     await this._service.restoreState(false);
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
       await this._service.displayDefinedVariables();
+      if (this._service.session?.capabilities?.supportsModulesRequest) {
+        await this._service.displayModules();
+      }
     }
 
     updateIconButtonState(
@@ -393,6 +409,9 @@ export class DebuggerHandler {
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
   private _previousConnection: Session.ISessionConnection | null;
+  private _activeWidget:
+    | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+    | null;
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};
@@ -456,6 +475,42 @@ export namespace DebuggerHandler {
      * The debugger service.
      */
     service: IDebugger;
+  }
+
+  /**
+   * An interface for debugger handler.
+   */
+  export interface IHandler {
+    /**
+     * Get the active widget.
+     */
+    activeWidget:
+      | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+      | null;
+
+    /**
+     * Update a debug handler for the given widget, and
+     * handle kernel changed events.
+     *
+     * @param widget The widget to update.
+     * @param connection The session connection.
+     */
+    update(
+      widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
+      connection: Session.ISessionConnection | null
+    ): Promise<void>;
+
+    /**
+     * Update a debug handler for the given widget, and
+     * handle connection kernel changed events.
+     *
+     * @param widget The widget to update.
+     * @param sessionContext The session context.
+     */
+    updateContext(
+      widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
+      sessionContext: ISessionContext
+    ): Promise<void>;
   }
 
   /**

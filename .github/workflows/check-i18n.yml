@@ -10,34 +10,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.9
-
-      - name: Get pip cache dir
-        id: pip-cache
-        run: |
-          echo "::set-output name=dir::$(pip cache dir)"
-      - name: Cache pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: ${{ runner.os }}-pip-i18n-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-i18n-
-            ${{ runner.os }}-pip-
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip
-          python -m pip install jupyterlab-translate~=1.0
+          python -m pip install -U pip jupyterlab-translate~=1.0
 
       - name: Compute hash
         id: currentHash

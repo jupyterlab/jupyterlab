@@ -233,13 +233,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
     // Editor settings
     if (options.editorConfig) {
-      let editorOptions: any = {};
-      Object.keys(options.editorConfig).forEach(
-        (key: keyof CodeEditor.IConfig) => {
-          editorOptions[key] = options.editorConfig?.[key] ?? null;
-        }
-      );
-      this.editor.setOptions(editorOptions);
+      this.editor.setOptions({ ...options.editorConfig });
     }
 
     model.metadata.changed.connect(this.onMetadataChanged, this);
@@ -1456,6 +1450,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
     this.renderCollapseButtons(this._renderer!);
     this.renderInput(this._renderer!);
+    this._showEditorForReadOnlyMarkdown =
+      options.showEditorForReadOnlyMarkdown ??
+      MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
   }
 
   /**
@@ -1531,6 +1528,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._rendered;
   }
   set rendered(value: boolean) {
+    // Show cell as rendered when cell is not editable
+    if (this.readOnly && this._showEditorForReadOnlyMarkdown === false) {
+      value = true;
+    }
     if (value === this._rendered) {
       return;
     }
@@ -1541,6 +1542,19 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     // request.
     if (!this._rendered) {
       this.editor.refresh();
+    }
+  }
+
+  /*
+   * Whether the Markdown editor is visible in read-only mode.
+   */
+  get showEditorForReadOnly(): boolean {
+    return this._showEditorForReadOnlyMarkdown;
+  }
+  set showEditorForReadOnly(value: boolean) {
+    this._showEditorForReadOnlyMarkdown = value;
+    if (value === false) {
+      this.rendered = true;
     }
   }
 
@@ -1712,6 +1726,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendered = true;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
+  private _showEditorForReadOnlyMarkdown = true;
 }
 
 /**
@@ -1726,7 +1741,17 @@ export namespace MarkdownCell {
      * The mime renderer for the cell widget.
      */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * Show editor for read-only Markdown cells.
+     */
+    showEditorForReadOnlyMarkdown?: boolean;
   }
+
+  /**
+   * Default value for showEditorForReadOnlyMarkdown.
+   */
+  export const defaultShowEditorForReadOnlyMarkdown = true;
 }
 
 /** ****************************************************************************

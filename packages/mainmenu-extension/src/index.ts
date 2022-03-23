@@ -33,6 +33,12 @@ import {
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  fastForwardIcon,
+  refreshIcon,
+  runIcon,
+  stopIcon
+} from '@jupyterlab/ui-components';
 import { each, find } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -463,6 +469,8 @@ export function createKernelMenu(
 
   commands.addCommand(CommandIDs.interruptKernel, {
     label: trans.__('Interrupt Kernel'),
+    caption: trans.__('Interrupt the kernel'),
+    icon: args => (args.toolbar ? stopIcon : undefined),
     isEnabled: Private.delegateEnabled(
       app,
       menu.kernelUsers,
@@ -483,6 +491,8 @@ export function createKernelMenu(
 
   commands.addCommand(CommandIDs.restartKernel, {
     label: trans.__('Restart Kernel…'),
+    caption: trans.__('Restart the kernel'),
+    icon: args => (args.toolbar ? refreshIcon : undefined),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'restartKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'restartKernel')
   });
@@ -634,6 +644,16 @@ export function createRunMenu(
       const enabled = Private.delegateEnabled(app, menu.codeRunners, 'run')();
       return enabled ? localizedLabel : trans.__('Run Selected');
     },
+    caption: () => {
+      const localizedCaption = Private.delegateLabel(
+        app,
+        menu.codeRunners,
+        'runCaption'
+      );
+      const enabled = Private.delegateEnabled(app, menu.codeRunners, 'run')();
+      return enabled ? localizedCaption : trans.__('Run Selected');
+    },
+    icon: args => (args.toolbar ? runIcon : undefined),
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'run')
   });
@@ -655,6 +675,22 @@ export function createRunMenu(
       }
       return localizedLabel;
     },
+    caption: () => {
+      let localizedCaption = trans.__('Run All');
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.codeRunners,
+        'runAll'
+      )();
+      if (enabled) {
+        localizedCaption = Private.delegateLabel(
+          app,
+          menu.codeRunners,
+          'runAllCaption'
+        );
+      }
+      return localizedCaption;
+    },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
@@ -675,6 +711,23 @@ export function createRunMenu(
       }
       return localizedLabel;
     },
+    caption: () => {
+      let localizedCaption = trans.__('Restart Kernel and Run All');
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.codeRunners,
+        'restartAndRunAll'
+      )();
+      if (enabled) {
+        localizedCaption = Private.delegateLabel(
+          app,
+          menu.codeRunners,
+          'restartAndRunAllLabel'
+        );
+      }
+      return localizedCaption;
+    },
+    icon: args => (args.toolbar ? fastForwardIcon : undefined),
     isEnabled: Private.delegateEnabled(
       app,
       menu.codeRunners,
@@ -916,21 +969,28 @@ namespace Private {
      */
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
-      schema.properties!.menus.default = Object.keys(registry.plugins)
+      const pluginDefaults = Object.keys(registry.plugins)
         .map(plugin => {
           const menus =
             registry.plugins[plugin]!.schema['jupyter.lab.menus']?.main ?? [];
           loaded[plugin] = menus;
           return menus;
         })
-        .concat([
-          schema['jupyter.lab.menus']?.main ?? [],
-          schema.properties!.menus.default as any[]
-        ])
+        .concat([schema['jupyter.lab.menus']?.main ?? []])
         .reduceRight(
           (acc, val) => SettingRegistry.reconcileMenus(acc, val, true),
-          []
-        ) // flatten one level
+          schema.properties!.menus.default as any[]
+        );
+
+      // Apply default value as last step to take into account overrides.json
+      // The standard default being [] as the plugin must use `jupyter.lab.menus.main`
+      // to define their default value.
+      schema.properties!.menus.default = SettingRegistry.reconcileMenus(
+        pluginDefaults,
+        schema.properties!.menus.default as any[],
+        true
+      )
+        // flatten one level
         .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
     }
 
@@ -945,9 +1005,11 @@ namespace Private {
 
         const defaults = canonical.properties?.menus?.default ?? [];
         const user = {
+          ...plugin.data.user,
           menus: plugin.data.user.menus ?? []
         };
         const composite = {
+          ...plugin.data.composite,
           menus: SettingRegistry.reconcileMenus(
             defaults as ISettingRegistry.IMenu[],
             user.menus as ISettingRegistry.IMenu[]

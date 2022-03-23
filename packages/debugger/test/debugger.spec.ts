@@ -105,6 +105,10 @@ describe('Debugger', () => {
         stepOut: '',
         evaluate: ''
       },
+      breakpointsCommands: {
+        registry,
+        pause: ''
+      },
       editorServices: {
         factoryService,
         mimeTypeService
@@ -152,6 +156,81 @@ describe('Debugger', () => {
   describe('#constructor()', () => {
     it('should create a new debugger sidebar', () => {
       expect(sidebar).toBeInstanceOf(Debugger.Sidebar);
+    });
+  });
+
+  describe('Panel', () => {
+    describe('Variable toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = sidebar.variables.node;
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'div.jp-stack-panel-header > h2'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Variables');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(2);
+        expect(buttons[0].title).toBe('Tree View');
+        expect(buttons[1].title).toBe('Table View');
+      });
+    });
+    describe('Callstack toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = sidebar.callstack.node;
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'div.jp-stack-panel-header > h2'
+        );
+        console;
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Callstack');
+      });
+      it('should have six buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(6);
+      });
+    });
+    describe('Breakpoints toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = sidebar.breakpoints.node;
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'div.jp-stack-panel-header > h2'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Breakpoints');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(2);
+      });
+    });
+    describe('Source toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = sidebar.sources.node;
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'div.jp-stack-panel-header > h2'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Source');
+      });
+
+      it('should have one button', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(1);
+      });
     });
   });
 

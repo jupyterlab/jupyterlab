@@ -7,7 +7,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from './debugger';
 
@@ -56,6 +56,23 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   get isStarted(): boolean {
     return this._session?.isStarted ?? false;
+  }
+
+  /**
+   * Whether the current debugger is pausing on exceptions.
+   */
+  get isPausingOnExceptions(): boolean {
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    if (kernel) {
+      const tmpFileParams = this._config.getTmpFileParams(kernel);
+      if (tmpFileParams) {
+        return (
+          this._session?.pausingOnExceptions.includes(tmpFileParams.prefix) ??
+          false
+        );
+      }
+    }
+    return false;
   }
 
   /**
@@ -260,6 +277,31 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Request rich representation of a variable.
+   *
+   * @param variableName The variable name to request
+   * @param frameId The current frame id in which to request the variable
+   * @returns The mime renderer data model
+   */
+  async inspectRichVariable(
+    variableName: string,
+    frameId?: number
+  ): Promise<IDebugger.IRichVariable> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+    const reply = await this.session.sendRequest('richInspectVariables', {
+      variableName,
+      frameId
+    });
+    if (reply.success) {
+      return reply.body;
+    } else {
+      throw new Error(reply.message);
+    }
+  }
+
+  /**
    * Request variables for a given variable reference.
    *
    * @param variablesReference The variable reference to request.
@@ -273,7 +315,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     const reply = await this.session.sendRequest('variables', {
       variablesReference
     });
-    return reply.body.variables;
+    if (reply.success) {
+      return reply.body.variables;
+    } else {
+      throw new Error(reply.message);
+    }
   }
 
   /**
@@ -318,9 +364,10 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const reply = await this.session.restoreState();
     const { body } = reply;
-    const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
-    const stoppedThreads = new Set(reply.body.stoppedThreads);
+    const breakpoints = this._mapBreakpoints(body.breakpoints);
+    const stoppedThreads = new Set(body.stoppedThreads);
 
+    this._model.hasRichVariableRendering = body.richRendering === true;
     this._config.setHashParams({
       kernel: this.session?.connection?.kernel?.name ?? '',
       method: body.hashMethod,
@@ -459,6 +506,72 @@ export class DebuggerService implements IDebugger, IDisposable {
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
     await this.session.sendRequest('configurationDone', {});
+  }
+
+  /**
+   * Determines if pausing on exceptions is supported by the kernel
+   *
+   */
+  pauseOnExceptionsIsValid(): boolean {
+    if (this.isStarted) {
+      if (this.session?.exceptionBreakpointFilters) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Enable or disable pausing on exceptions.
+   *
+   * @param enable - Whether to enbale or disable pausing on exceptions.
+   */
+  async pauseOnExceptions(enable: boolean): Promise<void> {
+    if (!this.session?.isStarted) {
+      return;
+    }
+
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    if (!kernel) {
+      return;
+    }
+    const tmpFileParams = this._config.getTmpFileParams(kernel);
+    if (!tmpFileParams) {
+      return;
+    }
+    let prefix = tmpFileParams.prefix;
+    const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
+    let pauseOnExceptionKernels = this.session.pausingOnExceptions;
+    if (enable) {
+      if (!this.session.pausingOnExceptions.includes(prefix)) {
+        pauseOnExceptionKernels.push(prefix);
+        this.session.pausingOnExceptions = pauseOnExceptionKernels;
+      }
+    } else {
+      let prefixIndex = this.session.pausingOnExceptions.indexOf(prefix);
+      if (prefixIndex > -1) {
+        this.session.pausingOnExceptions = pauseOnExceptionKernels.splice(
+          prefixIndex,
+          1
+        );
+        this.session.pausingOnExceptions = pauseOnExceptionKernels;
+      }
+    }
+    const filters: string[] = [];
+    const exceptionOptions: DebugProtocol.ExceptionOptions[] = [];
+    const breakMode = enable ? 'userUnhandled' : 'never';
+    for (let filterDict of exceptionBreakpointFilters ?? []) {
+      filters.push(filterDict.filter);
+      exceptionOptions.push({
+        path: [{ names: this.session.exceptionPaths }],
+        breakMode: breakMode
+      });
+    }
+    const options: DebugProtocol.SetExceptionBreakpointsArguments = {
+      filters: filters,
+      exceptionOptions: exceptionOptions
+    };
+    await this.session.sendRequest('setExceptionBreakpoints', options);
   }
 
   /**
@@ -738,6 +851,22 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._model.variables.scopes = variableScopes;
   }
 
+  async displayModules(): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+
+    const modules = await this.session.sendRequest('modules', {});
+    this._model.kernelSources.kernelSources = modules.body.modules.map(
+      module => {
+        return {
+          name: module.name as string,
+          path: module.path as string
+        };
+      }
+    );
+  }
+
   /**
    * Handle a variable expanded event and request variables from the kernel.
    *
@@ -800,7 +929,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
   ): Promise<void> {
     for (const [source, points] of breakpoints) {
-      console.log(source);
       await this._setBreakpoints(
         points
           .filter(({ line }) => typeof line === 'number')

@@ -40,6 +40,9 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../observables"
+    },
+    {
       "path": "../settingregistry"
     },
     {

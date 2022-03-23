@@ -57,7 +57,11 @@ const notice =
   }
 });
 
-// Create a new yarn.lock file to ensure it is correct.
+// Copy the root yarn.lock, then update and deduplicate to prune it.
+fs.copySync(
+  path.join('.', 'yarn.lock'),
+  path.join('.', 'jupyterlab', 'staging', 'yarn.lock')
+);
 utils.run('jlpm', { cwd: staging });
 try {
   utils.run('jlpm yarn-deduplicate -s fewer --fail', { cwd: staging });

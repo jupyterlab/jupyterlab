@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mock-token",
-  "version": "3.3.0-alpha.15",
+  "version": "3.3.2",
   "private": true,
   "dependencies": {
     "@lumino/coreutils": "^1.5.3"

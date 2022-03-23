@@ -331,11 +331,13 @@ export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
 const modeSwitch: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:mode-switch',
   requires: [ILabShell, ITranslator, IStatusBar],
+  optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     shell: ILabShell,
     translator: ITranslator,
-    statusBar: IStatusBar
+    statusBar: IStatusBar,
+    settingRegistry: ISettingRegistry | null
   ) => {
     const trans = translator.load('jupyterlab');
     const modeSwitch = new Switch();
@@ -347,6 +349,26 @@ const modeSwitch: JupyterFrontEndPlugin<void> = {
     shell.modeChanged.connect((_, mode) => {
       modeSwitch.value = mode === 'single-document';
     });
+
+    if (settingRegistry) {
+      const loadSettings = settingRegistry.load(STATUSBAR_PLUGIN_ID);
+      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        const startMode = settings.get('startMode').composite as string;
+        if (startMode) {
+          shell.mode =
+            startMode === 'single' ? 'single-document' : 'multiple-document';
+        }
+      };
+
+      Promise.all([loadSettings, app.restored])
+        .then(([settings]) => {
+          updateSettings(settings);
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
+
     modeSwitch.value = shell.mode === 'single-document';
 
     // Show the current file browser shortcut in its title.

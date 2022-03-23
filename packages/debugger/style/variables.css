@@ -30,6 +30,38 @@
   padding: 5px 0 0 0;
   cursor: pointer;
   color: var(--jp-content-font-color1);
+  display: flex;
+  align-items: center;
+}
+
+.jp-DebuggerVariables-body ul li:hover .jp-DebuggerVariables-renderVariable {
+  display: block;
+}
+
+.jp-DebuggerVariables-body .jp-DebuggerVariables-hspacer {
+  flex: 1 1 auto;
+}
+
+.jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: none;
+  padding: 0px 8px;
+}
+
+.jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable:active {
+  transform: scale(1.272) translateX(-4px);
+  overflow: hidden;
+}
+
+.jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable:disabled {
+  cursor: default;
 }
 
 .jp-DebuggerVariables-body ul li > ul {
@@ -83,4 +115,18 @@
 
 .jp-DebuggerVariables-colorPalette .jp-mod-text {
   color: var(--jp-content-font-color0);
+}
+
+.jp-VariableRenderer-TrustButton[aria-pressed='true'] {
+  box-shadow: inset 0 var(--jp-border-width) 4px
+    rgba(
+      var(--jp-shadow-base-lightness),
+      var(--jp-shadow-base-lightness),
+      var(--jp-shadow-base-lightness),
+      0.6
+    );
+}
+
+.jp-DebuggerRichVariable div[data-mime-type='text/plain'] > pre {
+  white-space: normal;
 }

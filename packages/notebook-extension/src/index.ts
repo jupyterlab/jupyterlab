@@ -6,34 +6,33 @@
  */
 
 import {
+  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
+  createToolbarFactory,
   Dialog,
   ICommandPalette,
   InputDialog,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
   MainAreaWidget,
   sessionContextDialogs,
   showDialog,
+  Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
 import { PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
+import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import {
   IEditMenu,
   IFileMenu,
@@ -43,11 +42,10 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import {
   CommandEditStatus,
+  ExecutionIndicator,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
@@ -59,31 +57,29 @@ import {
   NotebookTracker,
   NotebookTrustStatus,
   NotebookWidgetFactory,
-  StaticNotebook
+  StaticNotebook,
+  ToolbarItems
 } from '@jupyterlab/notebook';
 import {
   IObservableList,
   IObservableUndoableList
 } from '@jupyterlab/observables';
-
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
-import { buildIcon, notebookIcon } from '@jupyterlab/ui-components';
-
+import {
+  addIcon,
+  buildIcon,
+  copyIcon,
+  cutIcon,
+  notebookIcon,
+  pasteIcon
+} from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONExt,
   JSONObject,
@@ -92,13 +88,9 @@ import {
   ReadonlyPartialJSONObject,
   UUID
 } from '@lumino/coreutils';
-
-import { DisposableSet } from '@lumino/disposable';
-
+import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { Menu, Panel } from '@lumino/widgets';
-
 import { logNotebookOutput } from './nboutput';
 
 /**
@@ -275,6 +267,16 @@ const FACTORY = 'Notebook';
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
 
 /**
+ * Setting Id storing the customized toolbar definition.
+ */
+const PANEL_SETTINGS = '@jupyterlab/notebook-extension:panel';
+
+/**
+ * The id to use on the style tag for the side by side margins.
+ */
+const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
+
+/**
  * The notebook widget tracker provider.
  */
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
@@ -356,6 +358,113 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
         !!tracker.currentWidget &&
         shell.currentWidget === tracker.currentWidget
     });
+  }
+};
+
+/**
+ * A plugin that provides a execution indicator item to the status bar.
+ */
+export const executionIndicator: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:execution-indicator',
+  autoStart: true,
+  requires: [INotebookTracker, ILabShell, ITranslator],
+  optional: [IStatusBar, ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    notebookTracker: INotebookTracker,
+    labShell: ILabShell,
+    translator: ITranslator,
+    statusBar: IStatusBar | null,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    let statusbarItem: ExecutionIndicator;
+    let labShellCurrentChanged: (
+      _: ILabShell,
+      change: ILabShell.IChangedArgs
+    ) => void;
+
+    let statusBarDisposable: IDisposable;
+
+    const updateSettings = (settings: {
+      showOnToolBar: boolean;
+      showProgress: boolean;
+    }): void => {
+      let { showOnToolBar, showProgress } = settings;
+
+      if (!showOnToolBar) {
+        // Status bar mode, only one `ExecutionIndicator` is needed.
+        if (!statusBar) {
+          // Automatically disable if statusbar missing
+          return;
+        }
+
+        if (!statusbarItem?.model) {
+          statusbarItem = new ExecutionIndicator(translator);
+          labShellCurrentChanged = (
+            _: ILabShell,
+            change: ILabShell.IChangedArgs
+          ) => {
+            const { newValue } = change;
+            if (newValue && notebookTracker.has(newValue)) {
+              const panel = newValue as NotebookPanel;
+              statusbarItem.model!.attachNotebook({
+                content: panel.content,
+                context: panel.sessionContext
+              });
+            }
+          };
+          statusBarDisposable = statusBar.registerStatusItem(
+            '@jupyterlab/notebook-extension:execution-indicator',
+            {
+              item: statusbarItem,
+              align: 'left',
+              rank: 3,
+              isActive: () => {
+                const current = labShell.currentWidget;
+                return !!current && notebookTracker.has(current);
+              }
+            }
+          );
+
+          statusbarItem.model.attachNotebook({
+            content: notebookTracker.currentWidget?.content,
+            context: notebookTracker.currentWidget?.sessionContext
+          });
+
+          labShell.currentChanged.connect(labShellCurrentChanged);
+          statusbarItem.disposed.connect(() => {
+            labShell.currentChanged.disconnect(labShellCurrentChanged);
+          });
+        }
+
+        statusbarItem.model.displayOption = {
+          showOnToolBar,
+          showProgress
+        };
+      } else {
+        //Remove old indicator widget on status bar
+        if (statusBarDisposable) {
+          labShell.currentChanged.disconnect(labShellCurrentChanged);
+          statusBarDisposable.dispose();
+        }
+      }
+    };
+
+    if (settingRegistry) {
+      // Indicator is default in tool bar, user needs to specify its
+      // position in settings in order to have indicator on status bar.
+      const loadSettings = settingRegistry.load(trackerPlugin.id);
+      Promise.all([loadSettings, app.restored])
+        .then(([settings]) => {
+          updateSettings(ExecutionIndicator.getSettingValue(settings));
+          settings.changed.connect(sender =>
+            updateSettings(ExecutionIndicator.getSettingValue(sender))
+          );
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
   }
 };
 
@@ -521,8 +630,10 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
     IEditorServices,
     IRenderMimeRegistry,
     ISessionContextDialogs,
+    IToolbarWidgetRegistry,
     ITranslator
   ],
+  optional: [ISettingRegistry],
   activate: activateWidgetFactory,
   autoStart: true
 };
@@ -564,6 +675,7 @@ const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   trackerPlugin,
+  executionIndicator,
   exportPlugin,
   tools,
   commandEditItem,
@@ -700,7 +812,9 @@ function activateWidgetFactory(
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
   sessionContextDialogs: ISessionContextDialogs,
-  translator: ITranslator
+  toolbarRegistry: IToolbarWidgetRegistry,
+  translator: ITranslator,
+  settingRegistry: ISettingRegistry | null
 ): NotebookWidgetFactory.IFactory {
   const preferKernelOption = PageConfig.getOption('notebookStartsKernel');
 
@@ -710,6 +824,53 @@ function activateWidgetFactory(
       ? true
       : preferKernelOption.toLowerCase() === 'true';
 
+  const { commands } = app;
+  let toolbarFactory:
+    | ((
+        widget: NotebookPanel
+      ) =>
+        | DocumentRegistry.IToolbarItem[]
+        | IObservableList<DocumentRegistry.IToolbarItem>)
+    | undefined;
+
+  // Register notebook toolbar widgets
+  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'save', panel =>
+    DocToolbarItems.createSaveButton(commands, panel.context.fileChanged)
+  );
+  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
+    ToolbarItems.createCellTypeItem(panel, translator)
+  );
+  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'kernelName', panel =>
+    Toolbar.createKernelNameItem(
+      panel.sessionContext,
+      sessionContextDialogs,
+      translator
+    )
+  );
+
+  toolbarRegistry.registerFactory<NotebookPanel>(
+    FACTORY,
+    'executionProgress',
+    panel => {
+      return ExecutionIndicator.createExecutionIndicatorItem(
+        panel,
+        translator,
+        settingRegistry?.load(trackerPlugin.id)
+      );
+    }
+  );
+
+  if (settingRegistry) {
+    // Create the factory
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      FACTORY,
+      PANEL_SETTINGS,
+      translator
+    );
+  }
+
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -717,12 +878,13 @@ function activateWidgetFactory(
     defaultFor: ['notebook'],
     preferKernel: preferKernelValue,
     canStartKernel: true,
-    rendermime: rendermime,
+    rendermime,
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
     mimeTypeService: editorServices.mimeTypeService,
     sessionDialogs: sessionContextDialogs,
+    toolbarFactory,
     translator: translator
   });
   app.docRegistry.addWidgetFactory(factory);
@@ -1069,53 +1231,54 @@ function activateNotebookHandler(
     ? settingRegistry.load(trackerPlugin.id)
     : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
 
+  fetchSettings
+    .then(settings => {
+      updateConfig(settings);
+      settings.changed.connect(() => {
+        updateConfig(settings);
+      });
+      commands.addCommand(CommandIDs.autoClosingBrackets, {
+        execute: args => {
+          const codeConfig = settings.get('codeCellConfig')
+            .composite as JSONObject;
+          const markdownConfig = settings.get('markdownCellConfig')
+            .composite as JSONObject;
+          const rawConfig = settings.get('rawCellConfig')
+            .composite as JSONObject;
+
+          const anyToggled =
+            codeConfig.autoClosingBrackets ||
+            markdownConfig.autoClosingBrackets ||
+            rawConfig.autoClosingBrackets;
+          const toggled = !!(args['force'] ?? !anyToggled);
+          [
+            codeConfig.autoClosingBrackets,
+            markdownConfig.autoClosingBrackets,
+            rawConfig.autoClosingBrackets
+          ] = [toggled, toggled, toggled];
+
+          void settings.set('codeCellConfig', codeConfig);
+          void settings.set('markdownCellConfig', markdownConfig);
+          void settings.set('rawCellConfig', rawConfig);
+        },
+        label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
+        isToggled: () =>
+          ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
+            x => (settings.get(x).composite as JSONObject).autoClosingBrackets
+          )
+      });
+    })
+    .catch((reason: Error) => {
+      console.warn(reason.message);
+      updateTracker({
+        editorConfig: factory.editorConfig,
+        notebookConfig: factory.notebookConfig,
+        kernelShutdown: factory.shutdownOnClose
+      });
+    });
+
   // Handle state restoration.
   if (restorer) {
-    fetchSettings
-      .then(settings => {
-        updateConfig(settings);
-        settings.changed.connect(() => {
-          updateConfig(settings);
-        });
-        commands.addCommand(CommandIDs.autoClosingBrackets, {
-          execute: args => {
-            const codeConfig = settings.get('codeCellConfig')
-              .composite as JSONObject;
-            const markdownConfig = settings.get('markdownCellConfig')
-              .composite as JSONObject;
-            const rawConfig = settings.get('rawCellConfig')
-              .composite as JSONObject;
-
-            const anyToggled =
-              codeConfig.autoClosingBrackets ||
-              markdownConfig.autoClosingBrackets ||
-              rawConfig.autoClosingBrackets;
-            const toggled = !!(args['force'] ?? !anyToggled);
-            [
-              codeConfig.autoClosingBrackets,
-              markdownConfig.autoClosingBrackets,
-              rawConfig.autoClosingBrackets
-            ] = [toggled, toggled, toggled];
-
-            void settings.set('codeCellConfig', codeConfig);
-            void settings.set('markdownCellConfig', markdownConfig);
-            void settings.set('rawCellConfig', rawConfig);
-          },
-          label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
-          isToggled: () =>
-            ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
-              x => (settings.get(x).composite as JSONObject).autoClosingBrackets
-            )
-        });
-      })
-      .catch((reason: Error) => {
-        console.warn(reason.message);
-        updateTracker({
-          editorConfig: factory.editorConfig,
-          notebookConfig: factory.notebookConfig,
-          kernelShutdown: factory.shutdownOnClose
-        });
-      });
     void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: panel => ({ path: panel.context.path, factory: FACTORY }),
@@ -1198,13 +1361,33 @@ function activateNotebookHandler(
       observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string,
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
+      showEditorForReadOnlyMarkdown: settings.get(
+        'showEditorForReadOnlyMarkdown'
+      ).composite as boolean,
       disableDocumentWideUndoRedo: settings.get(
         'experimentalDisableDocumentWideUndoRedo'
       ).composite as boolean,
       renderingLayout: settings.get('renderingLayout').composite as
         | 'default'
-        | 'side-by-side'
+        | 'side-by-side',
+      sideBySideLeftMarginOverride: settings.get('sideBySideLeftMarginOverride')
+        .composite as string,
+      sideBySideRightMarginOverride: settings.get(
+        'sideBySideRightMarginOverride'
+      ).composite as string
     };
+    const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell { 
+      margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
+      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
+    const sideBySideMarginTag = document.getElementById(SIDE_BY_SIDE_STYLE_ID);
+    if (sideBySideMarginTag) {
+      sideBySideMarginTag.innerText = sideBySideMarginStyle;
+    } else {
+      document.head.insertAdjacentHTML(
+        'beforeend',
+        `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
+      );
+    }
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
@@ -1672,6 +1855,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.cut, {
     label: trans.__('Cut Cells'),
+    caption: trans.__('Cut the selected cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1679,10 +1863,12 @@ function addCommands(
         return NotebookActions.cut(current.content);
       }
     },
+    icon: args => (args.toolbar ? cutIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.copy, {
     label: trans.__('Copy Cells'),
+    caption: trans.__('Copy the selected cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1690,10 +1876,12 @@ function addCommands(
         return NotebookActions.copy(current.content);
       }
     },
+    icon: args => (args.toolbar ? copyIcon : ''),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteBelow, {
     label: trans.__('Paste Cells Below'),
+    caption: trans.__('Paste cells from the clipboard'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1701,6 +1889,7 @@ function addCommands(
         return NotebookActions.paste(current.content, 'below');
       }
     },
+    icon: args => (args.toolbar ? pasteIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAbove, {
@@ -1793,6 +1982,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.insertBelow, {
     label: trans.__('Insert Cell Below'),
+    caption: trans.__('Insert a cell below'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1800,6 +1990,7 @@ function addCommands(
         return NotebookActions.insertBelow(current.content);
       }
     },
+    icon: args => (args.toolbar ? addIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.selectAbove, {
@@ -2490,9 +2681,13 @@ function populateMenus(
   mainMenu.runMenu.codeRunners.add({
     tracker,
     runLabel: (n: number) => trans.__('Run Selected Cells'),
+    runCaption: (n: number) => trans.__('Run the selected cells and advance'),
     runAllLabel: (n: number) => trans.__('Run All Cells'),
+    runAllCaption: (n: number) => trans.__('Run the all notebook cells'),
     restartAndRunAllLabel: (n: number) =>
       trans.__('Restart Kernel and Run All Cells…'),
+    restartAndRunAllCaption: (n: number) =>
+      trans.__('Restart the kernel, then re-run the whole notebook'),
     run: current => {
       const { context, content } = current;
       return NotebookActions.runAndAdvance(

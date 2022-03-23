@@ -30,6 +30,12 @@
       "title": "Status Bar Visibility",
       "description": "Whether to show status bar or not",
       "default": true
+    },
+    "startMode": {
+      "enum": ["", "single", "multiple"],
+      "title": "Start mode: ``, `single`or `multiple`",
+      "description": "The mode under which JupyterLab should start. If empty, the mode will be imposed by the URL",
+      "default": ""
     }
   },
   "additionalProperties": false,

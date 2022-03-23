@@ -17,6 +17,8 @@ import { Callstack as CallstackPanel } from './panels/callstack';
 
 import { Sources as SourcesPanel } from './panels/sources';
 
+import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
+
 import { Variables as VariablesPanel } from './panels/variables';
 
 import { IDebugger } from './tokens';
@@ -38,6 +40,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
 
     const {
       callstackCommands,
+      breakpointsCommands,
       editorServices,
       service,
       themeManager
@@ -61,6 +64,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
 
     this.breakpoints = new BreakpointsPanel({
       service,
+      commands: breakpointsCommands,
       model: model.breakpoints,
       translator
     });
@@ -69,6 +73,12 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
       model: model.sources,
       service,
       editorServices,
+      translator
+    });
+
+    this.kernelSources = new KernelSourcesPanel({
+      model: model.kernelSources,
+      service,
       translator
     });
 
@@ -88,6 +98,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
     this.addItem(this.callstack);
     this.addItem(this.breakpoints);
     this.addItem(this.sources);
+    this.addItem(this.kernelSources);
   }
 
   /**
@@ -161,6 +172,11 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
   readonly sources: SourcesPanel;
 
   /**
+   * The kernel sources widget.
+   */
+  readonly kernelSources: KernelSourcesPanel;
+
+  /**
    * Container for debugger panels.
    */
   private _body: SplitPanel;
@@ -183,6 +199,12 @@ export namespace DebuggerSidebar {
      * The callstack toolbar commands.
      */
     callstackCommands: CallstackPanel.ICommands;
+
+    /**
+     * The callstack toolbar commands.
+     */
+    breakpointsCommands: BreakpointsPanel.ICommands;
+
     /**
      * The editor services.
      */

@@ -998,7 +998,7 @@ namespace Private {
      */
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
-      schema.properties!.contextMenu.default = Object.keys(registry.plugins)
+      const pluginDefaults = Object.keys(registry.plugins)
         .map(plugin => {
           const items =
             registry.plugins[plugin]!.schema['jupyter.lab.menus']?.context ??
@@ -1006,17 +1006,24 @@ namespace Private {
           loaded[plugin] = items;
           return items;
         })
-        .concat([
-          schema['jupyter.lab.menus']?.context ?? [],
-          schema.properties!.contextMenu.default as any[]
-        ])
+        .concat([schema['jupyter.lab.menus']?.context ?? []])
         .reduceRight(
           (
             acc: ISettingRegistry.IContextMenuItem[],
             val: ISettingRegistry.IContextMenuItem[]
           ) => SettingRegistry.reconcileItems(acc, val, true),
           []
-        )! // flatten one level
+        )!;
+
+      // Apply default value as last step to take into account overrides.json
+      // The standard default being [] as the plugin must use `jupyter.lab.menus.context`
+      // to define their default value.
+      schema.properties!.contextMenu.default = SettingRegistry.reconcileItems(
+        pluginDefaults,
+        schema.properties!.contextMenu.default as any[],
+        true
+      )!
+        // flatten one level
         .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
     }
 
@@ -1031,9 +1038,11 @@ namespace Private {
 
         const defaults = canonical.properties?.contextMenu?.default ?? [];
         const user = {
+          ...plugin.data.user,
           contextMenu: plugin.data.user.contextMenu ?? []
         };
         const composite = {
+          ...plugin.data.composite,
           contextMenu: SettingRegistry.reconcileItems(
             defaults as ISettingRegistry.IContextMenuItem[],
             user.contextMenu as ISettingRegistry.IContextMenuItem[],

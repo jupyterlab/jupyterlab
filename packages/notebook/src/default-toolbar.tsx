@@ -53,6 +53,9 @@ const TOOLBAR_CELLTYPE_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDropdown';
 export namespace ToolbarItems {
   /**
    * Create save button toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createSaveButton(
     panel: NotebookPanel,
@@ -100,6 +103,9 @@ export namespace ToolbarItems {
 
   /**
    * Create an insert toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createInsertButton(
     panel: NotebookPanel,
@@ -117,6 +123,9 @@ export namespace ToolbarItems {
 
   /**
    * Create a cut toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createCutButton(
     panel: NotebookPanel,
@@ -134,6 +143,9 @@ export namespace ToolbarItems {
 
   /**
    * Create a copy toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createCopyButton(
     panel: NotebookPanel,
@@ -151,6 +163,9 @@ export namespace ToolbarItems {
 
   /**
    * Create a paste toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createPasteButton(
     panel: NotebookPanel,
@@ -168,6 +183,9 @@ export namespace ToolbarItems {
 
   /**
    * Create a run toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createRunButton(
     panel: NotebookPanel,
@@ -184,6 +202,9 @@ export namespace ToolbarItems {
   }
   /**
    * Create a restart run all toolbar item
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createRestartRunAllButton(
     panel: NotebookPanel,
@@ -265,10 +286,6 @@ export namespace ToolbarItems {
           sessionDialogs,
           translator
         )
-      },
-      {
-        name: 'kernelStatus',
-        widget: Toolbar.createKernelStatusItem(panel.sessionContext, translator)
       }
     ];
   }
@@ -316,7 +333,7 @@ export class CellTypeSwitcher extends ReactWidget {
     }
   };
 
-  render() {
+  render(): JSX.Element {
     let value = '-';
     if (this._notebook.activeCell) {
       value = this._notebook.activeCell.model.type;

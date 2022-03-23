@@ -424,7 +424,7 @@ Then, start JupyterLab using the dev build:
 
 .. code:: bash
 
-   jupyter lab --dev --NotebookApp.token=''  --no-browser
+   jupyter lab --dev-mode --NotebookApp.token=''  --no-browser
 
 Now run Lighthouse against this local server and show the results:
 
@@ -651,7 +651,7 @@ Main reasons for UI test failures are:
 
    If your code change is introducing an update to UI which causes existing UI Tests to fail, then you will need to update reference image(s) for the failing tests. In order to do that, simply go to GitHub Actions page for the failed test and download test artifacts. It will contain test captures in directory ``test/screenshots``. You can copy the capture for the failed test and paste into reference screenshots directory in JupyterLab source code, replacing the failing test's reference capture. Reference captures are located in ``ui-tests/reference-output/screenshots`` in JupyterLab source code.
 
-For more information on UI Testing, please read the `UI Testing developer documentation <.https://github.com/jupyterlab/jupyterlab/blob/3.3.x/galata/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
+For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/3.3.x/galata/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
 
 Good Practices for Integration tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -842,7 +842,7 @@ To test the docs run:
 
 .. code:: bash
 
-   py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+   python -m pytest --check-links -k .md . || python -m pytest --check-links -k .md --lf .
 
 The Read the Docs pages can be built using ``make``:
 

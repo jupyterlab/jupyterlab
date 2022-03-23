@@ -32,6 +32,7 @@ import '@jupyterlab/pdf-extension/style/index.js';
 import '@jupyterlab/rendermime-extension/style/index.js';
 import '@jupyterlab/running-extension/style/index.js';
 import '@jupyterlab/settingeditor-extension/style/index.js';
+import '@jupyterlab/shortcuts-extension/style/index.js';
 import '@jupyterlab/statusbar-extension/style/index.js';
 import '@jupyterlab/terminal-extension/style/index.js';
 import '@jupyterlab/toc-extension/style/index.js';

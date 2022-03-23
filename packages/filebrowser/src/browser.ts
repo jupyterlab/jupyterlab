@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  FilenameSearcher,
   ReactWidget,
   showErrorMessage,
   Toolbar,
@@ -20,7 +21,6 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import { FilterFileBrowserModel } from './model';
-import { FilenameSearcher } from './search';
 import { Uploader } from './upload';
 
 /**
@@ -112,7 +112,11 @@ export class FileBrowser extends Widget {
     });
 
     this._filenameSearcher = FilenameSearcher({
-      listing: this.listing,
+      updateFilter: (filterFn: (item: string) => boolean) => {
+        this.listing.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
       useFuzzyFilter: this._useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name')
     });
@@ -182,7 +186,11 @@ export class FileBrowser extends Widget {
     this._useFuzzyFilter = value;
 
     this._filenameSearcher = FilenameSearcher({
-      listing: this.listing,
+      updateFilter: (filterFn: (item: string) => boolean) => {
+        this.listing.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
       useFuzzyFilter: this._useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name'),
       forceRefresh: true

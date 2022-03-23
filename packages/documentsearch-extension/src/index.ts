@@ -21,6 +21,7 @@ import {
   SearchProviderRegistry
 } from '@jupyterlab/documentsearch';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
@@ -77,14 +78,17 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch:plugin',
   provides: ISearchProviderRegistry,
   requires: [ITranslator],
-  optional: [ICommandPalette],
+  optional: [ICommandPalette, ISettingRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    palette: ICommandPalette
+    palette: ICommandPalette | null,
+    settingRegistry: ISettingRegistry | null
   ) => {
     const trans = translator.load('jupyterlab');
+
+    let searchDebounceTime = 500;
 
     // Create registry, retrieve all default providers
     const registry: SearchProviderRegistry = new SearchProviderRegistry();
@@ -99,6 +103,27 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     const startReplaceCommand: string = 'documentsearch:startWithReplace';
     const nextCommand: string = 'documentsearch:highlightNext';
     const prevCommand: string = 'documentsearch:highlightPrevious';
+
+    if (settingRegistry) {
+      const loadSettings = settingRegistry.load(
+        '@jupyterlab/documentsearch-extension:plugin'
+      );
+      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        searchDebounceTime = settings.get('searchDebounceTime')
+          .composite as number;
+      };
+
+      Promise.all([loadSettings, app.restored])
+        .then(([settings]) => {
+          updateSettings(settings);
+          settings.changed.connect(settings => {
+            updateSettings(settings);
+          });
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
 
     const currentWidgetHasSearchProvider = () => {
       const currentWidget = app.shell.currentWidget;
@@ -122,7 +147,8 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         searchInstance = new SearchInstance(
           currentWidget,
           searchProvider,
-          translator
+          translator,
+          searchDebounceTime
         );
 
         activeSearches.set(widgetId, searchInstance);

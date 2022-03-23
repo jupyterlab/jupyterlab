@@ -184,7 +184,7 @@ export namespace ISettingRegistry {
     | 'jp-menu-tabs';
 
   /**
-   * Menu defined by a specific plugin
+   * An interface defining a menu.
    */
   export interface IMenu extends PartialJSONObject {
     /**
@@ -235,6 +235,9 @@ export namespace ISettingRegistry {
     disabled?: boolean;
   }
 
+  /**
+   * An interface describing a menu item.
+   */
   export interface IMenuItem extends PartialJSONObject {
     /**
      * The type of the menu item.
@@ -405,6 +408,15 @@ export namespace ISettingRegistry {
      * The JupyterLab icon label hint.
      */
     'jupyter.lab.setting-icon-label'?: string;
+
+    /**
+     * The JupyterLab toolbars created by a plugin's schema.
+     *
+     * #### Notes
+     * The toolbar items are grouped by document or widget factory name
+     * that will contain a toolbar.
+     */
+    'jupyter.lab.toolbars'?: { [factory: string]: IToolbarItem[] };
 
     /**
      * A flag that indicates plugin should be transformed before being used by
@@ -582,7 +594,12 @@ export namespace ISettingRegistry {
     disabled?: boolean;
 
     /**
-     * The key combination of the shortcut.
+     * The key sequence of the shortcut.
+     *
+     * ### Notes
+     *
+     * If this is a list like `['Ctrl A', 'B']`, the user needs to press
+     * `Ctrl A` followed by `B` to trigger the shortcuts.
      */
     keys: string[];
 
@@ -590,5 +607,64 @@ export namespace ISettingRegistry {
      * The CSS selector applicable to the shortcut.
      */
     selector: string;
+  }
+
+  /**
+   * An interface describing a toolbar item.
+   */
+  export interface IToolbarItem extends PartialJSONObject {
+    /**
+     * Unique toolbar item name
+     */
+    name: string;
+
+    /**
+     * The command to execute when the item is triggered.
+     *
+     * The default value is an empty string.
+     */
+    command?: string;
+
+    /**
+     * The arguments for the command.
+     *
+     * The default value is an empty object.
+     */
+    args?: PartialJSONObject;
+
+    /**
+     * Whether the toolbar item is ignored (i.e. not created). `false` by default.
+     *
+     * #### Notes
+     * This allows an user to suppress toolbar items.
+     */
+    disabled?: boolean;
+
+    /**
+     * Item icon id
+     *
+     * #### Note
+     * The id will be looked for in the LabIcon registry.
+     * The command icon will be overridden by this label if defined.
+     */
+    icon?: string;
+
+    /**
+     * Item label
+     *
+     * #### Note
+     * The command label will be overridden by this label if defined.
+     */
+    label?: string;
+
+    /**
+     * The rank order of the toolbar item among its siblings.
+     */
+    rank?: number;
+
+    /**
+     * The type of the toolbar item.
+     */
+    type?: 'command' | 'spacer';
   }
 }

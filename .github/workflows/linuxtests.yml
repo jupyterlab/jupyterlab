@@ -30,73 +30,48 @@ jobs:
             linkcheck,
             lint,
           ]
-        python: [3.6, 3.8]
+        # This will be used by the base setup action
+        python-version: ['3.7', '3.10']
         include:
           - group: release_test
             upload-output: true
         exclude:
           - group: integrity
-            python: 3.6
+            python-version: '3.7'
           - group: integrity2
-            python: 3.6
+            python-version: '3.7'
           - group: integrity3
-            python: 3.6
+            python-version: '3.7'
           - group: release_test
-            python: 3.6
+            python-version: '3.7'
           - group: docs
-            python: 3.6
+            python-version: '3.7'
           - group: usage
-            python: 3.6
+            python-version: '3.7'
           - group: usage2
-            python: 3.6
+            python-version: '3.7'
           - group: linkcheck
-            python: 3.6
+            python-version: '3.7'
           - group: nonode
-            python: 3.6
+            python-version: '3.7'
           - group: lint
-            python: 3.6
+            python-version: '3.7'
           - group: examples
-            python: 3.6
+            python-version: '3.7'
           - group: splice_source
-            python: 3.6
+            python-version: '3.7'
       fail-fast: false
-    timeout-minutes: 30
+    timeout-minutes: 45
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python }}
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Set up Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Setup firefox
         uses: browser-actions/setup-firefox@latest
-
-      - name: Cache pip on Linux
-        uses: actions/cache@v2
-        if: startsWith(runner.os, 'Linux')
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python }}-${{ hashFiles('**/requirements.txt', 'setup.py') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python }}
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Cache yarn
-        uses: actions/cache@v2
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
         env:

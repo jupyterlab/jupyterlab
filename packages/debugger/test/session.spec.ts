@@ -17,7 +17,7 @@ import { find } from '@lumino/algorithm';
 
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from '../src/debugger';
 

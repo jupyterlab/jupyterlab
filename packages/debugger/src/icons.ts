@@ -8,7 +8,9 @@ import stepIntoSvgStr from '../style/icons/step-into.svg';
 import stepOutSvgStr from '../style/icons/step-out.svg';
 import stepOverSvgStr from '../style/icons/step-over.svg';
 import variableSvgStr from '../style/icons/variable.svg';
+import pauseSvgStr from '../style/icons/pause.svg';
 import viewBreakpointSvgStr from '../style/icons/view-breakpoint.svg';
+import openKernelSourceSvgStr from '../style/icons/open-kernel-source.svg';
 
 export {
   runIcon as continueIcon,
@@ -18,6 +20,11 @@ export {
 export const closeAllIcon = new LabIcon({
   name: 'debugger:close-all',
   svgstr: closeAllSvgStr
+});
+
+export const pauseOnExceptionsIcon = new LabIcon({
+  name: 'debugger:pause',
+  svgstr: pauseSvgStr
 });
 
 export const stepIntoIcon = new LabIcon({
@@ -43,4 +50,9 @@ export const variableIcon = new LabIcon({
 export const viewBreakpointIcon = new LabIcon({
   name: 'debugger:view-breakpoint',
   svgstr: viewBreakpointSvgStr
+});
+
+export const openKernelSourceIcon = new LabIcon({
+  name: 'debugger:open-kernel-source',
+  svgstr: openKernelSourceSvgStr
 });

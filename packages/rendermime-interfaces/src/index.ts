@@ -72,7 +72,13 @@ export namespace IRenderMime {
    * A toolbar item.
    */
   export interface IToolbarItem {
+    /**
+     * Item name
+     */
     name: string;
+    /**
+     * Toolbar widget
+     */
     widget: Widget;
   }
 

@@ -10,7 +10,6 @@ import { WebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
 import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 import { getAnonymousUserName, getRandomColor } from './awareness';
-import * as env from 'lib0/environment';
 
 /**
  * A class to provide Yjs synchronization over WebSocket.
@@ -42,8 +41,10 @@ export class WebSocketProviderWithLocks
     this._path = options.path;
     this._contentType = options.contentType;
     this._serverUrl = options.url;
-    const color = '#' + env.getParam('--usercolor', getRandomColor().slice(1));
-    const name = env.getParam('--username', getAnonymousUserName());
+    const searchParams = new URL(options.url).searchParams;
+    const color =
+      '#' + searchParams.get('usercolor') ?? getRandomColor().slice(1);
+    const name = searchParams.get('username') ?? getAnonymousUserName();
     const awareness = options.ymodel.awareness;
     const currState = awareness.getLocalState();
     // only set if this was not already set by another plugin
@@ -82,9 +83,7 @@ export class WebSocketProviderWithLocks
       const initialContent = decoding.readTailAsUint8Array(decoder);
       // Apply data from server
       if (initialContent.byteLength > 0) {
-        setTimeout(() => {
-          Y.applyUpdate(this.doc, initialContent);
-        }, 0);
+        Y.applyUpdate(this.doc, initialContent);
       }
       const initialContentRequest = this._initialContentRequest;
       this._initialContentRequest = null;

@@ -490,7 +490,8 @@ export class DocumentManager implements IDocumentManager {
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
       docProviderFactory: this._docProviderFactory,
-      lastModifiedCheckMargin: this._lastModifiedCheckMargin
+      lastModifiedCheckMargin: this._lastModifiedCheckMargin,
+      translator: this.translator
     });
     const handler = new SaveHandler({
       context,
@@ -590,6 +591,10 @@ export class DocumentManager implements IDocumentManager {
 
     // If the initial opening of the context fails, dispose of the widget.
     ready.catch(err => {
+      console.error(
+        `Failed to initialize the context with '${factory.name}' for ${path}`,
+        err
+      );
       widget.close();
     });
 

@@ -36,7 +36,7 @@ export class VariablesBodyGrid extends Panel {
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
     const { model, commands, themeManager, scopes } = options;
-    this._grid = new Grid({ commands, themeManager });
+    this._grid = new Grid({ commands, model, themeManager });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
     this._model.changed.connect((model: VariablesModel): void => {
@@ -119,16 +119,26 @@ class Grid extends Panel {
    */
   constructor(options: Grid.IOptions) {
     super();
-    const { commands, themeManager } = options;
+    const { commands, model, themeManager } = options;
+    this.model = model;
     const dataModel = new GridModel();
     const grid = new DataGrid();
     const mouseHandler = new Private.MouseHandler();
     mouseHandler.doubleClicked.connect((_, hit) =>
       commands.execute(Debugger.CommandIDs.inspectVariable, {
         variableReference: dataModel.getVariableReference(hit.row),
-        title: dataModel.getVariableName(hit.row)
+        name: dataModel.getVariableName(hit.row)
       })
     );
+    mouseHandler.selected.connect((_, hit) => {
+      const { row } = hit;
+      this.model.selectedVariable = {
+        name: dataModel.getVariableName(row),
+        value: dataModel.data('body', row, 1),
+        type: dataModel.data('body', row, 2),
+        variablesReference: dataModel.getVariableReference(row)
+      };
+    });
     grid.dataModel = dataModel;
     grid.keyHandler = new BasicKeyHandler();
     grid.mouseHandler = mouseHandler;
@@ -193,6 +203,7 @@ class Grid extends Panel {
   }
 
   private _grid: DataGrid;
+  protected model: IDebugger.Model.IVariables;
 }
 
 /**
@@ -207,6 +218,11 @@ namespace Grid {
      * The commands registry.
      */
     commands: CommandRegistry;
+
+    /**
+     * The variables model.
+     */
+    model: IDebugger.Model.IVariables;
 
     /**
      * An optional application theme manager to detect theme changes.
@@ -435,6 +451,26 @@ namespace Private {
     }
 
     /**
+     * A signal emitted when the variables grid received mouse down or context menu event.
+     */
+    get selected(): ISignal<this, DataGrid.HitTestResult> {
+      return this._selected;
+    }
+
+    /**
+     * Dispose of the resources held by the mouse handler.
+     */
+    dispose(): void {
+      if (this.isDisposed) {
+        return;
+      }
+
+      Signal.disconnectSender(this);
+
+      super.dispose();
+    }
+
+    /**
      * Handle a mouse double-click event.
      *
      * @param grid The datagrid clicked.
@@ -445,6 +481,41 @@ namespace Private {
       this._doubleClicked.emit(hit);
     }
 
+    /**
+     * Handle the mouse down event for the data grid.
+     *
+     * @param grid - The data grid of interest.
+     *
+     * @param event - The mouse down event of interest.
+     */
+    onMouseDown(grid: DataGrid, event: MouseEvent): void {
+      // Unpack the event.
+      let { clientX, clientY } = event;
+
+      // Hit test the grid.
+      let hit = grid.hitTest(clientX, clientY);
+
+      this._selected.emit(hit);
+    }
+
+    /**
+     * Handle the context menu event for the data grid.
+     *
+     * @param grid - The data grid of interest.
+     *
+     * @param event - The context menu event of interest.
+     */
+    onContextMenu(grid: DataGrid, event: MouseEvent): void {
+      // Unpack the event.
+      let { clientX, clientY } = event;
+
+      // Hit test the grid.
+      let hit = grid.hitTest(clientX, clientY);
+
+      this._selected.emit(hit);
+    }
+
     private _doubleClicked = new Signal<this, DataGrid.HitTestResult>(this);
+    private _selected = new Signal<this, DataGrid.HitTestResult>(this);
   }
 }

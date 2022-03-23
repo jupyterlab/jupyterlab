@@ -11,7 +11,8 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'lib/lib-inpage'),
     filename: 'inpage.js',
-    publicPath: '/'
+    publicPath: '/',
+    hashFunction: 'sha256'
   },
   resolve: {
     extensions: ['.ts', '.js']

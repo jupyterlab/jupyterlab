@@ -3,8 +3,6 @@
 
 import { codeIcon, runIcon, stopIcon } from '@jupyterlab/ui-components';
 
-import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
-
 import { DebuggerConfig } from './config';
 
 import { DebuggerEvaluateDialog } from './dialogs/evaluate';
@@ -13,8 +11,11 @@ import { ReadOnlyEditorFactory as EditorFactory } from './factory';
 
 import { DebuggerHandler } from './handler';
 
+import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
+
 import {
   closeAllIcon as closeAll,
+  pauseOnExceptionsIcon as pauseOnExceptions,
   stepIntoIcon as stepInto,
   stepOutIcon as stepOut,
   stepOverIcon as stepOver,
@@ -25,6 +26,8 @@ import {
 import { DebuggerModel } from './model';
 
 import { VariablesBodyGrid } from './panels/variables/grid';
+
+import { VariableMimeRenderer } from './panels/variables/mimerenderer';
 
 import { DebuggerService } from './service';
 
@@ -89,6 +92,11 @@ export namespace Debugger {
   export class VariablesGrid extends VariablesBodyGrid {}
 
   /**
+   * A widget to display data according to its mime type
+   */
+  export class VariableRenderer extends VariableMimeRenderer {}
+
+  /**
    * The command IDs used by the debugger plugin.
    */
   export namespace CommandIDs {
@@ -104,9 +112,13 @@ export namespace Debugger {
 
     export const inspectVariable = 'debugger:inspect-variable';
 
+    export const renderMimeVariable = 'debugger:render-mime-variable';
+
     export const evaluate = 'debugger:evaluate';
 
     export const restartDebug = 'debugger:restart-debug';
+
+    export const pause = 'debugger:pause';
   }
 
   /**
@@ -122,6 +134,7 @@ export namespace Debugger {
     export const terminateIcon = stopIcon;
     export const variableIcon = variable;
     export const viewBreakpointIcon = viewBreakpoint;
+    export const pauseOnExceptionsIcon = pauseOnExceptions;
   }
 
   /**
