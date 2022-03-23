@@ -54,6 +54,8 @@ JupyterLab can be installed using [conda](https://docs.conda.io/en/latest/), [ma
 
 Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
+### mamba and conda
+
 If you use `mamba` or `conda`, you can install it with:
 
 ```shell
