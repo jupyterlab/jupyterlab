@@ -57,6 +57,7 @@ import {
 import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
+import { JSONObject } from '@lumino/coreutils';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -1106,7 +1107,8 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createLauncher, {
     label: trans.__('New Launcher'),
-    execute: () => Private.createLauncher(commands, browser)
+    execute: (args: JSONObject) =>
+      Private.createLauncher(commands, browser, args)
   });
 
   if (settingRegistry) {
@@ -1180,12 +1182,13 @@ namespace Private {
    */
   export function createLauncher(
     commands: CommandRegistry,
-    browser: FileBrowser
+    browser: FileBrowser,
+    args?: JSONObject
   ): Promise<MainAreaWidget<Launcher>> {
     const { model } = browser;
 
     return commands
-      .execute('launcher:create', { cwd: model.path })
+      .execute('launcher:create', { cwd: model.path, ...args })
       .then((launcher: MainAreaWidget<Launcher>) => {
         model.pathChanged.connect(() => {
           if (launcher.content) {
