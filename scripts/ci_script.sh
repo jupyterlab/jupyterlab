@@ -14,7 +14,7 @@ fi
 if [[ $GROUP == python ]]; then
     jupyter lab build --debug
     # Run the python tests
-    py.test
+    python -m pytest
 fi
 
 
