@@ -2007,7 +2007,12 @@ namespace Private {
 
 Please wait for the complete rendering before invoking that action.`,
         buttons: [Dialog.okButton({ label: 'Ok' })]
-      }).catch((reason) => { console.error('An error occurred when displaying notebook rendering warning', reason); });
+      }).catch(reason => {
+        console.error(
+          'An error occurred when displaying notebook rendering warning',
+          reason
+        );
+      });
       return false;
     }
     return true;
