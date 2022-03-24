@@ -39,6 +39,7 @@ const notebookConfig = {
   defaultCell: 'code' as nbformat.CellType,
   recordTiming: false,
   numberCellsToRenderDirectly: 2,
+  remainingTimeBeforeRescheduling: 50,
   renderCellOnIdle: true,
   observedTopMargin: '1000px',
   observedBottomMargin: '1000px',
