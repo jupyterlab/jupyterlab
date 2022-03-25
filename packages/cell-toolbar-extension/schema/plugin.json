@@ -3,12 +3,12 @@
   "title": "Cell Toolbar",
   "description": "Cell Toolbar Settings.",
   "properties": {
-    "leftMenu": {
-      "title": "List of menu items",
+    "toolbar": {
+      "title": "List of toolbar items",
       "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/menuItem"
+        "$ref": "#/definitions/toolbarItem"
       },
       "default": [
         {
@@ -47,7 +47,7 @@
   "additionalProperties": false,
   "type": "object",
   "definitions": {
-    "menuItem": {
+    "toolbarItem": {
       "type": "object",
       "properties": {
         "command": {

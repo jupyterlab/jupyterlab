@@ -166,13 +166,13 @@ export class CellToolbarTracker implements IDisposable {
     const cell = this._getCell(model);
 
     if (cell) {
-      const { leftMenu } = (this._settings?.composite as any) ?? {};
+      const { toolbar } = (this._settings?.composite as any) ?? {};
 
-      const leftMenu_ = leftMenu === null ? [] : leftMenu ?? DEFAULT_LEFT_MENU;
+      const toolbar_ = toolbar === null ? [] : toolbar ?? DEFAULT_LEFT_MENU;
 
-      const toolbar = new CellToolbarWidget(this._commands, leftMenu_);
-      toolbar.addClass(CELL_BAR_CLASS);
-      (cell.layout as PanelLayout).insertWidget(0, toolbar);
+      const toolbarWidget = new CellToolbarWidget(this._commands, toolbar_);
+      toolbarWidget.addClass(CELL_BAR_CLASS);
+      (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
 
       // For rendered markdown, watch for resize events.
       cell.displayChanged.connect(this._resizeEventCallback, this);
