@@ -122,12 +122,13 @@ class CssProp {
   };
 
   private static readonly _C3 = {
-    linear_gradient: `linear-gradient\\((((${CssProp.B.angle})|to (${CssProp.A.side_or_corner}))\\s*,\\s*)?\\s*(${CssProp._C2.color_stop_list})\\s*\\)`
+    linear_gradient: `linear-gradient\\((((${CssProp.B.angle})|to\\s+(${CssProp.A.side_or_corner}))\\s*,\\s*)?\\s*(${CssProp._C2.color_stop_list})\\s*\\)`,
+    radial_gradient: `radial-gradient\\(((((${CssProp.A.ending_shape})|(${CssProp._C.size}))\\s*)*\\s*(at\\s+${CssProp._C.position})?\\s*,\\s*)?\\s*(${CssProp._C2.color_stop_list})\\s*\\)`
   };
 
   private static readonly _C4 = {
-    image: `${CssProp.B.url}|${CssProp._C3.linear_gradient}|${CssProp._C1.image_list}`,
-    bg_image: `(${CssProp.B.url}|${CssProp._C3.linear_gradient}|${CssProp._C1.image_list})|none`
+    image: `${CssProp.B.url}|${CssProp._C3.linear_gradient}|${CssProp._C3.radial_gradient}|${CssProp._C1.image_list}`,
+    bg_image: `(${CssProp.B.url}|${CssProp._C3.linear_gradient}|${CssProp._C3.radial_gradient}|${CssProp._C1.image_list})|none`
   };
 
   private static readonly C = {

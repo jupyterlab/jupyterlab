@@ -136,6 +136,18 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(div)).toBe(div);
     });
 
+    it('should allow simple background CSS radial-gradient', () => {
+      const div =
+        '<div style="background:radial-gradient(#e66465, #9198e5)"></div>';
+      expect(defaultSanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow fully specified background CSS radial-gradient', () => {
+      const div =
+        '<div style="background:radial-gradient(ellipse farthest-corner at 90% 90%, red, yellow 10%, #1e90ff 50%, beige)"></div>';
+      expect(defaultSanitizer.sanitize(div)).toBe(div);
+    });
+
     it('strip incorrect CSS line-gradient', () => {
       const div =
         '<div style="background:linear-gradient(http://example.com)"></div>';
