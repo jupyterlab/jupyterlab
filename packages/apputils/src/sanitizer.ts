@@ -94,6 +94,8 @@ class CssProp {
     border_width: `thin|medium|thick|${CssProp.B.length}`,
     bottom: `${CssProp.B.length}|auto`,
     color: `${CssProp._COLOR.hex}|${CssProp._COLOR.rgb}|${CssProp._COLOR.rgba}|${CssProp._COLOR.name}`,
+    color_stop_length: `(${CssProp.B.len_or_perc}\\s*){1,2}`,
+    linear_color_hint: `${CssProp.B.len_or_perc}`,
     family_name: `${CssProp.B.string}|(${CssProp.B.ident}\\s*)+`,
     image_decl: CssProp.B.url,
     left: `${CssProp.B.length}|auto`,
@@ -110,16 +112,31 @@ class CssProp {
 
   private static readonly _C1 = {
     image_list: `image\\(\\s*(${CssProp.B.url})*\\s*(${CssProp.B.url}|${CssProp._C.color})\\s*\\)`,
+    linear_color_stop: `(${CssProp._C.color})(\\s*${CssProp._C.color_stop_length})?`,
     shadow: `((${CssProp._C.color})\\s+((${CssProp.B.length})\\s*){2,4}(\s+inset)?)|((inset\\s+)?((${CssProp.B.length})\\s*){2,4}\\s*(${CssProp._C.color})?)`
   };
 
   private static readonly _C2 = {
-    bg_image: `(${CssProp.B.url}|${CssProp._C1.image_list})|none`,
-    image: `${CssProp.B.url}|${CssProp._C1.image_list}`,
+    color_stop_list: `((${CssProp._C1.linear_color_stop})(\\s*(${CssProp._C.linear_color_hint}))?\\s*,\\s*)+(${CssProp._C1.linear_color_stop})`,
     shape: `rect\\(\\s*(${CssProp._C.top})\\s*,\\s*(${CssProp._C.right})\\s*,\\s*(${CssProp._C.bottom})\\s*,\\s*(${CssProp._C.left})\\s*\\)`
   };
 
-  private static readonly C = { ...CssProp._C, ...CssProp._C1, ...CssProp._C2 };
+  private static readonly _C3 = {
+    linear_gradient: `linear-gradient\\((((${CssProp.B.angle})|to (${CssProp.A.side_or_corner}))\\s*,\\s*)?\\s*(${CssProp._C2.color_stop_list})\\s*\\)`
+  };
+
+  private static readonly _C4 = {
+    image: `${CssProp.B.url}|${CssProp._C3.linear_gradient}|${CssProp._C1.image_list}`,
+    bg_image: `(${CssProp.B.url}|${CssProp._C3.linear_gradient}|${CssProp._C1.image_list})|none`
+  };
+
+  private static readonly C = {
+    ...CssProp._C,
+    ...CssProp._C1,
+    ...CssProp._C2,
+    ...CssProp._C3,
+    ...CssProp._C4
+  };
 
   /*
    * Property value regular expressions not dependant on other sub expressions
