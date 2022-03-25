@@ -2015,7 +2015,7 @@ namespace Private {
 Please wait for the complete rendering before invoking that action.`,
           notebook.remainingCellToRenderCount
         ),
-        buttons: [Dialog.okButton({ label: 'Ok' })]
+        buttons: [Dialog.okButton({ label: trans.__('Ok') })]
       }).catch(reason => {
         console.error(
           'An error occurred when displaying notebook rendering warning',
