@@ -57,7 +57,7 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
       if (!widget) {
         return;
       }
-      const providerForWidget = registry.getProviderForWidget(widget);
+      const providerForWidget = registry.getProvider(widget);
       if (providerForWidget) {
         widget.addClass(SEARCHABLE_CLASS);
       } else {
@@ -135,7 +135,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       if (!widget) {
         return false;
       }
-      return registry.getProviderForWidget(widget) !== undefined;
+      return registry.getProvider(widget) !== undefined;
     };
 
     const getSearchWidget = (widget: Widget | null) => {
@@ -145,7 +145,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       const widgetId = widget.id;
       let searchView = searchViews.get(widgetId);
       if (!searchView) {
-        const searchProvider = registry.getProviderForWidget(widget);
+        const searchProvider = registry.getProvider(widget);
         if (!searchProvider) {
           return;
         }

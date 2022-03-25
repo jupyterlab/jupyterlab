@@ -779,7 +779,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
-    registry.register('jp-notebookSearchProvider', NotebookSearchProvider);
+    registry.add('jp-notebookSearchProvider', NotebookSearchProvider);
   }
 };
 

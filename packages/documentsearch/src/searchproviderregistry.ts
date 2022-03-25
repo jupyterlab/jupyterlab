@@ -28,7 +28,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * @param key - The provider key.
    * @returns A disposable delegate that, when disposed, deregisters the given search provider
    */
-  register<T extends Widget = Widget>(
+  add<T extends Widget = Widget>(
     key: string,
     provider: ISearchProviderFactory<T>
   ): IDisposable {
@@ -46,7 +46,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * @param widget - The widget to search over.
    * @returns the search provider, or undefined if none exists.
    */
-  getProviderForWidget<T extends Widget = Widget>(
+  getProvider<T extends Widget = Widget>(
     widget: T
   ): ISearchProvider | undefined {
     return this._findMatchingProvider(this._providerMap, widget);

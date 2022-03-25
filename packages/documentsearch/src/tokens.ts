@@ -186,7 +186,7 @@ export interface ISearchProviderRegistry {
    * @param key - The provider key.
    * @returns A disposable delegate that, when disposed, deregisters the given search provider
    */
-  register(key: string, provider: ISearchProviderFactory<Widget>): IDisposable;
+  add(key: string, provider: ISearchProviderFactory<Widget>): IDisposable;
 
   /**
    * Returns a matching provider for the widget.
@@ -194,7 +194,7 @@ export interface ISearchProviderRegistry {
    * @param widget - The widget to search over.
    * @returns the search provider, or undefined if none exists.
    */
-  getProviderForWidget(widget: Widget): ISearchProvider | undefined;
+  getProvider(widget: Widget): ISearchProvider | undefined;
 
   /**
    * Signal that emits when a new search provider has been registered
