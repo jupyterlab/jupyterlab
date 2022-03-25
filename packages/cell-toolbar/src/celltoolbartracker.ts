@@ -10,21 +10,13 @@ import {
   IObservableUndoableList
 } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { LabIcon } from '@jupyterlab/ui-components';
+
 import { each } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { CellToolbarWidget } from './celltoolbarwidget';
-import { EXTENSION_ID, ICellMenuItem } from './tokens';
-
-// icon svg import statements
-import addAboveSvg from '../style/icons/addabove.svg';
-import addBelowSvg from '../style/icons/addbelow.svg';
-import deleteSvg from '../style/icons/delete.svg';
-import duplicateSvg from '../style/icons/duplicate.svg';
-import moveDownSvg from '../style/icons/movedown.svg';
-import moveUpSvg from '../style/icons/moveup.svg';
+import { ICellMenuItem } from './tokens';
 
 const DEFAULT_LEFT_MENU: ICellMenuItem[] = [];
 
@@ -37,37 +29,6 @@ const CELL_BAR_CLASS = 'jp-cell-bar';
  * Class for a cell whose contents overlap with the cell toolbar
  */
 const TOOLBAR_OVERLAP_CLASS = 'jp-toolbar-overlap';
-
-/**
- * Icons for use in toolbar.
- *
- * These are copied from icon.ts, which is not part of the webpack bundle
- * because nothing is imported from it.
- */
-export const addAboveIcon = new LabIcon({
-  name: `${EXTENSION_ID}:add-above`,
-  svgstr: addAboveSvg
-});
-export const addBelowIcon = new LabIcon({
-  name: `${EXTENSION_ID}:add-below`,
-  svgstr: addBelowSvg
-});
-export const deleteIcon = new LabIcon({
-  name: `${EXTENSION_ID}:delete`,
-  svgstr: deleteSvg
-});
-export const duplicateIcon = new LabIcon({
-  name: `${EXTENSION_ID}:duplicate`,
-  svgstr: duplicateSvg
-});
-export const moveDownIcon = new LabIcon({
-  name: `${EXTENSION_ID}:move-down`,
-  svgstr: moveDownSvg
-});
-export const moveUpIcon = new LabIcon({
-  name: `${EXTENSION_ID}:move-up`,
-  svgstr: moveUpSvg
-});
 
 /**
  * Watch a notebook so that a cell toolbar appears on the active cell

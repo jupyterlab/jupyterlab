@@ -12,6 +12,8 @@
 /* Icons urls */
 
 :root {
+  --jp-icon-add-above: url('icons/toolbar/add-above.svg');
+  --jp-icon-add-below: url('icons/toolbar/add-below.svg');
   --jp-icon-add: url('icons/toolbar/add.svg');
   --jp-icon-bug-dot: url('icons/toolbar/bug-dot.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
@@ -34,7 +36,9 @@
   --jp-icon-copy: url('icons/toolbar/copy.svg');
   --jp-icon-copyright: url('icons/licenses/copyright.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
+  --jp-icon-delete: url('icons/toolbar/delete.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
+  --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
@@ -60,6 +64,8 @@
   --jp-icon-list: url('icons/statusbar/list.svg');
   --jp-icon-listings-info: url('icons/listings/listings-info.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
+  --jp-icon-move-down: url('icons/toolbar/move-down.svg');
+  --jp-icon-move-up: url('icons/toolbar/move-up.svg');
   --jp-icon-new-folder: url('icons/toolbar/new-folder.svg');
   --jp-icon-not-trusted: url('icons/statusbar/not-trusted.svg');
   --jp-icon-notebook: url('icons/filetype/notebook.svg');
@@ -97,6 +103,14 @@
 }
 
 /* Icon CSS class declarations */
+
+.jp-AddAboveIcon {
+  background-image: var(--jp-icon-add-above);
+}
+
+.jp-AddBelowIcon {
+  background-image: var(--jp-icon-add-below);
+}
 
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
@@ -186,8 +200,16 @@
   background-image: var(--jp-icon-cut);
 }
 
+.jp-DeleteIcon {
+  background-image: var(--jp-icon-delete);
+}
+
 .jp-DownloadIcon {
   background-image: var(--jp-icon-download);
+}
+
+.jp-DuplicateIcon {
+  background-image: var(--jp-icon-duplicate);
 }
 
 .jp-EditIcon {
@@ -288,6 +310,14 @@
 
 .jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown);
+}
+
+.jp-MoveDownIcon {
+  background-image: var(--jp-icon-move-down);
+}
+
+.jp-MoveUpIcon {
+  background-image: var(--jp-icon-move-up);
 }
 
 .jp-NewFolderIcon {

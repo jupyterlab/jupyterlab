@@ -38,12 +38,12 @@ describe('@jupyterlab/cell-toolbar', () => {
         const items = [
           {
             command: 'notebook:move-cell-up',
-            icon: '@jupyterlab/cell-toolbar:move-up',
+            icon: 'ui-components:move-up',
             tooltip: 'Move Cell Up'
           },
           {
             command: 'notebook:move-cell-down',
-            icon: '@jupyterlab/cell-toolbar:move-down',
+            icon: 'ui-components:move-down',
             tooltip: 'Move Cell Down'
           }
         ];

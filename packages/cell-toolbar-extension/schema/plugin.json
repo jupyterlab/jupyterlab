@@ -13,32 +13,32 @@
       "default": [
         {
           "command": "notebook:duplicate-below",
-          "icon": "@jupyterlab/cell-toolbar:duplicate",
+          "icon": "ui-components:duplicate",
           "tooltip": "Duplicate Cell"
         },
         {
           "command": "notebook:move-cell-up",
-          "icon": "@jupyterlab/cell-toolbar:move-up",
+          "icon": "ui-components:move-up",
           "tooltip": "Move Cell Up"
         },
         {
           "command": "notebook:move-cell-down",
-          "icon": "@jupyterlab/cell-toolbar:move-down",
+          "icon": "ui-components:move-down",
           "tooltip": "Move Cell Down"
         },
         {
           "command": "notebook:insert-cell-above",
-          "icon": "@jupyterlab/cell-toolbar:add-above",
+          "icon": "ui-components:add-above",
           "tooltip": "Insert Cell Above"
         },
         {
           "command": "notebook:insert-cell-below",
-          "icon": "@jupyterlab/cell-toolbar:add-below",
+          "icon": "ui-components:add-below",
           "tooltip": "Insert Cell Below"
         },
         {
           "command": "notebook:delete-cell",
-          "icon": "@jupyterlab/cell-toolbar:delete",
+          "icon": "ui-components:delete",
           "tooltip": "Delete Cell"
         }
       ]
