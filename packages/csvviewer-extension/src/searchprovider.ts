@@ -6,7 +6,7 @@ import { ISearchProvider, SearchProvider } from '@jupyterlab/documentsearch';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
-// The type for which canSearchFor returns true
+// The type for which isApplicable returns true
 export type CSVDocumentWidget = DocumentWidget<CSVViewer>;
 
 /**
@@ -17,7 +17,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * Instantiate a search provider for the widget.
    *
    * #### Notes
-   * The widget provided is always checked using `canSearchOn` before calling
+   * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
    * @param widget The widget to search on
@@ -25,7 +25,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    *
    * @returns The search provider on the widget
    */
-  static createSearchProvider(
+  static createNew(
     widget: CSVDocumentWidget,
     translator?: ITranslator
   ): ISearchProvider<CSVDocumentWidget> {
@@ -35,7 +35,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: Widget): domain is CSVDocumentWidget {
+  static isApplicable(domain: Widget): domain is CSVDocumentWidget {
     // check to see if the CSVSearchProvider can search on the
     // first cell, false indicates another editor is present
     return (

@@ -7,7 +7,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import {
   ISearchProvider,
-  ISearchProviderConstructor,
+  ISearchProviderFactory,
   ISearchProviderRegistry
 } from './tokens';
 
@@ -30,7 +30,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    */
   register<T extends Widget = Widget>(
     key: string,
-    provider: ISearchProviderConstructor<T>
+    provider: ISearchProviderFactory<T>
   ): IDisposable {
     this._providerMap.set(key, provider);
     this._changed.emit();
@@ -67,8 +67,8 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     // iterate through all providers and ask each one if it can search on the
     // widget.
     for (const P of providerMap.values()) {
-      if (P.canSearchOn(widget)) {
-        return P.createSearchProvider(widget, this.translator);
+      if (P.isApplicable(widget)) {
+        return P.createNew(widget, this.translator);
       }
     }
     return undefined;
@@ -77,10 +77,10 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
   private _changed = new Signal<this, void>(this);
   private _providerMap: Private.ProviderMap = new Map<
     string,
-    ISearchProviderConstructor<Widget>
+    ISearchProviderFactory<Widget>
   >();
 }
 
 namespace Private {
-  export type ProviderMap = Map<string, ISearchProviderConstructor<Widget>>;
+  export type ProviderMap = Map<string, ISearchProviderFactory<Widget>>;
 }

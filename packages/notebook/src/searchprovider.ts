@@ -60,7 +60,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @param domain Widget to test
    * @returns Search ability
    */
-  static canSearchOn(domain: Widget): domain is NotebookPanel {
+  static isApplicable(domain: Widget): domain is NotebookPanel {
     // check to see if the CMSearchProvider can search on the
     // first cell, false indicates another editor is present
     return domain instanceof NotebookPanel;
@@ -70,7 +70,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * Instantiate a search provider for the notebook panel.
    *
    * #### Notes
-   * The widget provided is always checked using `canSearchOn` before calling
+   * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
    * @param widget The widget to search on
@@ -78,7 +78,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    *
    * @returns The search provider on the notebook panel
    */
-  static createSearchProvider(
+  static createNew(
     widget: NotebookPanel,
     translator?: ITranslator
   ): ISearchProvider<NotebookPanel> {

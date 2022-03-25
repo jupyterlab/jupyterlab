@@ -35,7 +35,7 @@ export class FileEditorSearchProvider
    * Instantiate a search provider for the widget.
    *
    * #### Notes
-   * The widget provided is always checked using `canSearchOn` before calling
+   * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
    * @param widget The widget to search on
@@ -43,7 +43,7 @@ export class FileEditorSearchProvider
    *
    * @returns The search provider on the widget
    */
-  static createSearchProvider(
+  static createNew(
     widget: FileEditorPanel,
     translator?: ITranslator
   ): ISearchProvider<FileEditorPanel> {
@@ -53,7 +53,7 @@ export class FileEditorSearchProvider
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: Widget): domain is FileEditorPanel {
+  static isApplicable(domain: Widget): domain is FileEditorPanel {
     return (
       domain instanceof MainAreaWidget &&
       domain.content instanceof FileEditor &&

@@ -151,12 +151,12 @@ export interface IHTMLSearchMatch extends ISearchMatch {
 /**
  * Interface for search provider factory
  */
-export interface ISearchProviderConstructor<T extends Widget = Widget> {
+export interface ISearchProviderFactory<T extends Widget = Widget> {
   /**
    * Instantiate a search provider for the widget.
    *
    * #### Notes
-   * The widget provided is always checked using `canSearchOn` before calling
+   * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
    * @param widget The widget to search on
@@ -164,7 +164,10 @@ export interface ISearchProviderConstructor<T extends Widget = Widget> {
    *
    * @returns The search provider on the widget
    */
-  createSearchProvider(widget: T, translator?: ITranslator): ISearchProvider<T>;
+  readonly createNew: (
+    widget: T,
+    translator?: ITranslator
+  ) => ISearchProvider<T>;
 
   /**
    * Report whether or not this provider has the ability to search on the
@@ -173,7 +176,7 @@ export interface ISearchProviderConstructor<T extends Widget = Widget> {
    *
    * @param domain Widget to test
    */
-  canSearchOn(domain: Widget): domain is T;
+  readonly isApplicable: (domain: Widget) => domain is T;
 }
 
 /**
@@ -186,10 +189,7 @@ export interface ISearchProviderRegistry {
    * @param key - The provider key.
    * @returns A disposable delegate that, when disposed, deregisters the given search provider
    */
-  register(
-    key: string,
-    provider: ISearchProviderConstructor<Widget>
-  ): IDisposable;
+  register(key: string, provider: ISearchProviderFactory<Widget>): IDisposable;
 
   /**
    * Returns a matching provider for the widget.
