@@ -60,6 +60,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     );
     const openedLabel = trans.__('Contextual Help');
     const namespace = 'inspector';
+    const datasetKey = 'jpInspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
       namespace
     });
@@ -87,7 +88,12 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         shell.add(inspector, 'main', { activate: false, mode: 'split-right' });
       }
       shell.activateById(inspector.id);
+      document.body.dataset[datasetKey] = 'open';
       return inspector;
+    }
+    function closeInspector(): void {
+      inspector.dispose();
+      delete document.body.dataset[datasetKey];
     }
 
     // Add inspector:open command to registry.
@@ -118,7 +124,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       isEnabled: () => isInspectorOpen(),
       label: closeLabel,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
-      execute: () => inspector.dispose()
+      execute: () => closeInspector()
     });
 
     // Add inspector:toggle command to registry.
@@ -129,7 +135,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       isToggled: () => isInspectorOpen(),
       execute: args => {
         if (isInspectorOpen()) {
-          inspector.dispose();
+          closeInspector();
         } else {
           const text = args && (args.text as string);
           openInspector(text);
