@@ -118,6 +118,11 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(div)).toBe(div);
     });
 
+    it('should allow abbreviated floats in CSS', () => {
+      const div = '<div style="color:rgba(255,0,0,.8)"></div>';
+      expect(defaultSanitizer.sanitize(div)).toBe(div);
+    });
+
     it('should allow background CSS line-gradient with directional', () => {
       const div =
         '<div style="background:linear-gradient(to left top, blue, red)"></div>';
