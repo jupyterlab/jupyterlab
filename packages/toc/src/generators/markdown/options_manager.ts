@@ -3,8 +3,8 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { TableOfContents } from '../../toc';
-import { ITableOfContentsRegistry as Registry } from '../../tokens';
+import { TableOfContentsWidget } from '../../treeview';
+import { TableOfContents as Registry } from '../../tokens';
 
 /**
  * Interface describing constructor options.
@@ -46,7 +46,7 @@ class OptionsManager implements Registry.IOptionsManager {
    * @param options - generator options
    * @returns options manager
    */
-  constructor(widget: TableOfContents, options: IOptions) {
+  constructor(widget: TableOfContentsWidget, options: IOptions) {
     this._numbering = options.numbering;
     this._numberingH1 = options.numberingH1;
     this._widget = widget;
@@ -103,7 +103,7 @@ class OptionsManager implements Registry.IOptionsManager {
   translator: ITranslator;
   private _numbering: boolean;
   private _numberingH1: boolean;
-  private _widget: TableOfContents;
+  private _widget: TableOfContentsWidget;
 }
 
 /**

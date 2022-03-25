@@ -3,7 +3,7 @@
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { IHeading, ITableOfContentsRegistry as Registry } from '../../tokens';
+import { IHeading, TableOfContents as Registry } from '../../tokens';
 import { render } from './render';
 
 /**
@@ -85,7 +85,7 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
  */
 function createPythonGenerator(
   tracker: IEditorTracker
-): Registry.IGenerator<IDocumentWidget<FileEditor>> {
+): Registry.IModel<IDocumentWidget<FileEditor>> {
   return {
     tracker,
     isEnabled: isEnabled,

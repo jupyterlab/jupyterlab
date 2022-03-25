@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { generateNumbering } from '../../utils/generate_numbering';
-import { INumberedHeading } from '../../tokens';
+import { IHeading } from '../../tokens';
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { parseHeading } from '../../utils/parse_heading';
 
@@ -30,12 +30,12 @@ function getHeadings(
   onClick: onClickFactory,
   dict: INumberingDictionary,
   numberingH1: boolean
-): INumberedHeading[] {
+): IHeading[] {
   // Split the text into lines:
   const lines = text.split('\n');
 
   // Iterate over the lines to get the header level and text for each line:
-  let headings: INumberedHeading[] = [];
+  let headings: IHeading[] = [];
   let FLG;
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
@@ -56,7 +56,7 @@ function getHeadings(
       }
       headings.push({
         text: heading.text,
-        numbering: generateNumbering(dict, level),
+        prefix: generateNumbering(dict, level),
         level: heading.level,
         onClick: onClick(i)
       });

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-import { INumberedHeading } from '../../tokens';
+import { IHeading } from '../../tokens';
 import { generateNumbering } from '../../utils/generate_numbering';
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
@@ -37,9 +37,9 @@ function getRenderedHeadings(
   dict: INumberingDictionary,
   numbering = true,
   numberingH1 = true
-): INumberedHeading[] {
+): IHeading[] {
   let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  let headings: INumberedHeading[] = [];
+  let headings: IHeading[] = [];
   for (let i = 0; i < nodes.length; i++) {
     const heading = nodes[i];
     let level = parseInt(heading.tagName[1], 10);
@@ -69,7 +69,7 @@ function getRenderedHeadings(
     headings.push({
       level,
       text: text.replace('¶', ''),
-      numbering: nstr,
+      prefix: nstr,
       html,
       onClick: onClick(heading)
     });

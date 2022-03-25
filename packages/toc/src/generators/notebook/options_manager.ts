@@ -5,8 +5,8 @@ import { ISanitizer } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ISignal, Signal } from '@lumino/signaling';
-import { TableOfContents } from '../../toc';
-import { ITableOfContentsRegistry as Registry } from '../../tokens';
+import { TableOfContentsWidget } from '../../treeview';
+import { TableOfContents as Registry } from '../../tokens';
 import { TagsToolComponent } from './tagstool';
 
 /**
@@ -62,7 +62,7 @@ class OptionsManager implements Registry.IOptionsManager {
    * @returns options manager
    */
   constructor(
-    widget: TableOfContents,
+    widget: TableOfContentsWidget,
     notebook: INotebookTracker,
     options: IOptions
   ) {
@@ -295,7 +295,7 @@ class OptionsManager implements Registry.IOptionsManager {
   private _showMarkdown = false;
   private _showTags = false;
   private _notebook: INotebookTracker;
-  private _widget: TableOfContents;
+  private _widget: TableOfContentsWidget;
   private _collapseChanged: Signal<this, Registry.ICollapseChangedArgs>;
   private _tagTool: TagsToolComponent | null = null;
   translator: ITranslator; // FIXME-TRANS:

@@ -3,7 +3,7 @@
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { IHeading, ITableOfContentsRegistry as Registry } from '../../tokens';
+import { IHeading, TableOfContents as Registry } from '../../tokens';
 
 /**
  * Maps LaTeX section headings to HTML header levels.
@@ -110,7 +110,7 @@ function generate(editor: IDocumentWidget<FileEditor>): IHeading[] {
  */
 function createLatexGenerator(
   tracker: IEditorTracker
-): Registry.IGenerator<IDocumentWidget<FileEditor>> {
+): Registry.IModel<IDocumentWidget<FileEditor>> {
   return {
     tracker,
     usesLatex: true,

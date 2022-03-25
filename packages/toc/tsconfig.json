@@ -4,19 +4,13 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/**/*"],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../apputils"
     },
     {
       "path": "../cells"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docmanager"
     },
     {
       "path": "../docregistry"
@@ -29,6 +23,9 @@
     },
     {
       "path": "../notebook"
+    },
+    {
+      "path": "../observables"
     },
     {
       "path": "../rendermime"

@@ -5,9 +5,10 @@
  * @module toc
  */
 
-export * from './generators';
+export * from './model';
+export * from './panel';
 export * from './registry';
-export * from './toc';
-export * from './toc_item';
+export * from './treeview';
+export * from './tocitem';
+export * from './toctree';
 export * from './tokens';
-export * from './utils/headings';

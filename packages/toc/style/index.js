@@ -9,7 +9,6 @@ import '@jupyterlab/ui-components/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/rendermime/style/index.js';
 import '@jupyterlab/docregistry/style/index.js';
-import '@jupyterlab/docmanager/style/index.js';
 import '@jupyterlab/cells/style/index.js';
 import '@jupyterlab/fileeditor/style/index.js';
 import '@jupyterlab/markdownviewer/style/index.js';

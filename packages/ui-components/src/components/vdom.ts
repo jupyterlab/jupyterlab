@@ -95,7 +95,7 @@ export abstract class VDomRenderer<
   /**
    * Create a new VDomRenderer
    */
-  constructor(model: T extends null ? void : T) {
+  constructor(model?: T) {
     super();
     this.model = ((model ?? null) as unknown) as T;
   }

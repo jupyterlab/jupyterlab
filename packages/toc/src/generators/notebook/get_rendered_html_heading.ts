@@ -93,7 +93,7 @@ function getRenderedHTMLHeadings(
     headings.push({
       level: level,
       text: el.textContent ? el.textContent : '',
-      numbering: nstr,
+      prefix: nstr,
       html: html,
       onClick: onClick(el),
       type: 'header',

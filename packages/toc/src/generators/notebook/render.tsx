@@ -6,7 +6,7 @@ import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
 import { classes, ellipsesIcon } from '@jupyterlab/ui-components';
 import { ElementExt } from '@lumino/domutils';
 import * as React from 'react';
-import { TableOfContents } from '../..';
+import { TableOfContentsWidget } from '../..';
 import { INotebookHeading, RunningStatus } from '../../tokens';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { CodeComponent } from './codemirror';
@@ -31,7 +31,7 @@ const TOC_TREE_CLASS = 'jp-TableOfContents-content';
 export function render(
   options: OptionsManager,
   tracker: INotebookTracker,
-  widget: TableOfContents,
+  widget: TableOfContentsWidget,
   item: INotebookHeading,
   toc: INotebookHeading[] = []
 ): JSX.Element | null {
@@ -40,7 +40,7 @@ export function render(
       item.type === 'header'
         ? `toc-level-size-${item.level}`
         : 'toc-level-size-default';
-    const numbering = item.numbering && options.numbering ? item.numbering : '';
+    const numbering = item.prefix && options.numbering ? item.prefix : '';
     const cellCollapseMetadata = options.syncCollapseState
       ? MARKDOWN_HEADING_COLLAPSED
       : 'toc-hr-collapsed';

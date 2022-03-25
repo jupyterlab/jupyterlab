@@ -45,13 +45,13 @@ function getMarkdownHeadings(
     );
   }
   for (const line of text.split('\n')) {
-    if (line) {
+    if(line){
       const heading = parseHeading(line);
       if (heading) {
         headings.push({
           text: heading.text,
           level: heading.level,
-          numbering: generateNumbering(dict, heading.level),
+          prefix: generateNumbering(dict, heading.level),
           onClick: callback,
           type: 'header',
           cellRef: cellRef,
@@ -61,7 +61,7 @@ function getMarkdownHeadings(
         });
       } else {
         headings.push({
-          text: line,
+          text: text,
           level: lastLevel + 1,
           onClick: callback,
           type: 'markdown',

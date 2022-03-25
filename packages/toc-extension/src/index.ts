@@ -11,25 +11,14 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
-import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  createLatexGenerator,
-  createMarkdownGenerator,
-  createNotebookGenerator,
-  createPythonGenerator,
-  createRenderedMarkdownGenerator,
-  INotebookHeading,
   ITableOfContentsRegistry,
-  TableOfContents,
+  TableOfContentsPanel,
   TableOfContentsRegistry
 } from '@jupyterlab/toc';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -46,7 +35,6 @@ namespace CommandIDs {
  *
  * @private
  * @param app - Jupyter application
- * @param docmanager - document manager
  * @param rendermime - rendered MIME registry
  * @param translator - translator
  * @param editorTracker - editor tracker
@@ -59,23 +47,15 @@ namespace CommandIDs {
  */
 async function activateTOC(
   app: JupyterFrontEnd,
-  docmanager: IDocumentManager,
   rendermime: IRenderMimeRegistry,
-  translator: ITranslator,
-  editorTracker?: IEditorTracker,
-  restorer?: ILayoutRestorer,
-  labShell?: ILabShell,
-  markdownViewerTracker?: IMarkdownViewerTracker,
-  notebookTracker?: INotebookTracker,
-  settingRegistry?: ISettingRegistry
+  translator?: ITranslator | null,
+  restorer?: ILayoutRestorer | null,
+  labShell?: ILabShell | null,
+  settingRegistry?: ISettingRegistry | null
 ): Promise<ITableOfContentsRegistry> {
-  const trans = translator.load('jupyterlab');
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
   // Create the ToC widget:
-  const toc = new TableOfContents({
-    docmanager,
-    rendermime,
-    translator
-  });
+  const toc = new TableOfContentsPanel(rendermime, translator ?? undefined);
 
   // Create the ToC registry:
   const registry = new TableOfContentsRegistry();
@@ -89,6 +69,7 @@ async function activateTOC(
 
   app.shell.add(toc, 'left', { rank: 400 });
 
+  /*
   app.commands.addCommand(CommandIDs.runCells, {
     execute: args => {
       if (!notebookTracker) {
@@ -131,6 +112,7 @@ async function activateTOC(
     },
     label: trans.__('Run Cell(s)')
   });
+  */
 
   app.commands.addCommand(CommandIDs.showPanel, {
     label: trans.__('Table of Contents'),
@@ -145,6 +127,7 @@ async function activateTOC(
   }
 
   // Attempt to load plugin settings:
+  // @ts-ignore
   let settings: ISettingRegistry.ISettings | undefined;
   if (settingRegistry) {
     try {
@@ -155,6 +138,7 @@ async function activateTOC(
       );
     }
   }
+  /*
 
   // Create a notebook generator:
   if (notebookTracker) {
@@ -200,10 +184,15 @@ async function activateTOC(
     registry.add(renderedMarkdownGenerator);
   }
 
+  */
+
   // Update the ToC when the active widget changes:
   if (labShell) {
     labShell.currentChanged.connect(onConnect);
   }
+
+  // Connect to current widget
+  onConnect();
 
   return registry;
 
@@ -217,16 +206,7 @@ async function activateTOC(
     if (!widget) {
       return;
     }
-    let generator = registry.find(widget);
-    if (!generator) {
-      // If the previously used widget is still available, stick with it.
-      // Otherwise, set the current ToC widget to null.
-      if (toc.current && toc.current.widget.isDisposed) {
-        toc.current = null;
-      }
-      return;
-    }
-    toc.current = { widget, generator };
+    toc.model = registry.getModel(widget) ?? null;
   }
 }
 
@@ -239,15 +219,8 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc-extension:registry',
   autoStart: true,
   provides: ITableOfContentsRegistry,
-  requires: [IDocumentManager, IRenderMimeRegistry, ITranslator],
-  optional: [
-    IEditorTracker,
-    ILayoutRestorer,
-    ILabShell,
-    IMarkdownViewerTracker,
-    INotebookTracker,
-    ISettingRegistry
-  ],
+  requires: [IRenderMimeRegistry],
+  optional: [ITranslator, ILayoutRestorer, ILabShell, ISettingRegistry],
   activate: activateTOC
 };
 

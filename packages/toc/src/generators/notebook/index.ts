@@ -18,12 +18,8 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ISignal } from '@lumino/signaling';
-import { TableOfContents } from '../../toc';
-import {
-  INotebookHeading,
-  ITableOfContentsRegistry,
-  RunningStatus
-} from '../../tokens';
+import { TableOfContentsWidget } from '../../treeview';
+import { INotebookHeading, RunningStatus, TableOfContents } from '../../tokens';
 import { isDOM } from '../../utils/is_dom';
 import { isMarkdown } from '../../utils/is_markdown';
 import { appendHeading } from './append_heading';
@@ -48,11 +44,11 @@ import { toolbar } from './toolbar_generator';
  */
 export function createNotebookGenerator(
   tracker: INotebookTracker,
-  widget: TableOfContents,
+  widget: TableOfContentsWidget,
   sanitizer: ISanitizer,
   translator?: ITranslator,
   settings?: ISettingRegistry.ISettings
-): ITableOfContentsRegistry.IGenerator<NotebookPanel> {
+): TableOfContents.IModel<NotebookPanel> {
   return new NotebookGenerator(
     tracker,
     widget,
@@ -62,8 +58,7 @@ export function createNotebookGenerator(
   );
 }
 
-class NotebookGenerator
-  implements ITableOfContentsRegistry.IGenerator<NotebookPanel> {
+class NotebookGenerator implements TableOfContents.IModel<NotebookPanel> {
   /**
    * Notebook Table of Content Generator constructor
    *
@@ -75,7 +70,7 @@ class NotebookGenerator
    */
   constructor(
     tracker: INotebookTracker,
-    widget: TableOfContents,
+    widget: TableOfContentsWidget,
     sanitizer: ISanitizer,
     translator?: ITranslator,
     settings?: ISettingRegistry.ISettings
@@ -133,8 +128,8 @@ class NotebookGenerator
    * within the ToC.
    */
   get collapseChanged(): ISignal<
-    ITableOfContentsRegistry.IOptionsManager,
-    ITableOfContentsRegistry.ICollapseChangedArgs
+    TableOfContents.IOptionsManager,
+    TableOfContents.ICollapseChangedArgs
   > {
     return this.options.collapseChanged;
   }
@@ -371,6 +366,6 @@ class NotebookGenerator
   readonly tracker: INotebookTracker;
 
   protected readonly sanitizer: ISanitizer;
-  protected readonly widget: TableOfContents;
+  protected readonly widget: TableOfContentsWidget;
   private _runningCells: Cell[];
 }

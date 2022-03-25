@@ -10,11 +10,8 @@ import {
 } from '@jupyterlab/markdownviewer';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { TableOfContents } from '../../toc';
-import {
-  INumberedHeading,
-  ITableOfContentsRegistry as Registry
-} from '../../tokens';
+import { TableOfContentsWidget } from '../../treeview';
+import { IHeading, TableOfContents as Registry } from '../../tokens';
 import { isMarkdown } from '../../utils/is_markdown';
 import { getHeadings } from './get_headings';
 import { getRenderedHeadings } from './get_rendered_headings';
@@ -45,7 +42,7 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
 function generate(
   editor: IDocumentWidget<FileEditor>,
   options?: OptionsManager
-): INumberedHeading[] {
+): IHeading[] {
   let dict = {};
   let numberingH1 = true;
   if (options !== undefined) {
@@ -87,14 +84,14 @@ function generate(
  */
 function createMarkdownGenerator(
   tracker: IEditorTracker,
-  widget: TableOfContents,
+  widget: TableOfContentsWidget,
   sanitizer: ISanitizer,
   translator?: ITranslator,
   settings?: ISettingRegistry.ISettings
 ): Registry.IGenerator<IDocumentWidget<FileEditor>> {
   let numberingH1 = true;
   if (settings) {
-    numberingH1 = settings.composite.numberingH1 as boolean;
+    numberinIProviderings.composite.numberingH1 as boolean;
   }
   const options = new OptionsManager(widget, {
     numbering: true,
@@ -134,7 +131,7 @@ function createMarkdownGenerator(
    * @param item - heading to render
    * @returns rendered item
    */
-  function renderItem(item: INumberedHeading) {
+  function renderItem(item: IHeading) {
     return render(options, item);
   }
 }
@@ -150,14 +147,14 @@ function createMarkdownGenerator(
  */
 function createRenderedMarkdownGenerator(
   tracker: IMarkdownViewerTracker,
-  widget: TableOfContents,
+  widget: TableOfContentsWidget,
   sanitizer: ISanitizer,
   translator?: ITranslator,
   settings?: ISettingRegistry.ISettings
 ): Registry.IGenerator<MarkdownDocument> {
   let numberingH1 = true;
   if (settings) {
-    numberingH1 = settings.composite.numberingH1 as boolean;
+    numberinIProviderings.composite.numberingH1 as boolean;
   }
   const options = new OptionsManager(widget, {
     numbering: true,
@@ -196,7 +193,7 @@ function createRenderedMarkdownGenerator(
    * @param item - heading to render
    * @returns rendered item
    */
-  function renderItem(item: INumberedHeading) {
+  function renderItem(item: IHeading) {
     return render(options, item);
   }
 
@@ -207,7 +204,7 @@ function createRenderedMarkdownGenerator(
    * @param widget - Markdown document widget
    * @returns a list of headings
    */
-  function generate(widget: MarkdownDocument): INumberedHeading[] {
+  function generate(widget: MarkdownDocument): IHeading[] {
     let dict = {};
     return getRenderedHeadings(
       widget.content.node,
