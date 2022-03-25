@@ -21,7 +21,7 @@ export type FileEditorPanel = MainAreaWidget<FileEditor>;
  */
 export class FileEditorSearchProvider
   extends CodeMirrorSearchProvider
-  implements ISearchProvider<FileEditorPanel> {
+  implements ISearchProvider {
   /**
    * Constructor
    * @param widget File editor panel
@@ -46,7 +46,7 @@ export class FileEditorSearchProvider
   static createNew(
     widget: FileEditorPanel,
     translator?: ITranslator
-  ): ISearchProvider<FileEditorPanel> {
+  ): ISearchProvider {
     return new FileEditorSearchProvider(widget);
   }
 

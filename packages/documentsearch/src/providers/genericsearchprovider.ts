@@ -151,7 +151,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     widget: Widget,
     registry: ISearchProviderRegistry,
     translator?: ITranslator
-  ): ISearchProvider<Widget> {
+  ): ISearchProvider {
     return new GenericSearchProvider(widget);
   }
 
@@ -409,7 +409,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     this._currentMatchIndex = -1;
     // This is typically cheap, but we do not control the rate of change or size of the output
     await this.startQuery(this._query);
-    this.changed.emit();
+    this.stateChanged.emit();
   }
 
   private _query: RegExp | null;

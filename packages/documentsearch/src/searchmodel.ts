@@ -33,7 +33,7 @@ export class SearchDocumentModel
       }
     }
 
-    searchProvider.changed.connect(this.refresh, this);
+    searchProvider.stateChanged.connect(this.refresh, this);
 
     this._searchDebouncer = new Debouncer(() => {
       this._updateSearch().catch(reason => {
@@ -177,7 +177,7 @@ export class SearchDocumentModel
       });
     }
 
-    this.searchProvider.changed.disconnect(this.refresh, this);
+    this.searchProvider.stateChanged.disconnect(this.refresh, this);
 
     this._searchDebouncer.dispose();
     super.dispose();

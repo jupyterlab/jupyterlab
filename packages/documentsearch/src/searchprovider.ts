@@ -9,21 +9,21 @@ import { IFilter, IFiltersType, ISearchMatch, ISearchProvider } from './tokens';
  * Abstract class implementing the search provider interface.
  */
 export abstract class SearchProvider<T extends Widget = Widget>
-  implements ISearchProvider<T> {
+  implements ISearchProvider {
   /**
    * Constructor
    *
    * @param widget The widget to search in
    */
   constructor(protected widget: T) {
-    this._changed = new Signal<SearchProvider<T>, void>(this);
+    this._changed = new Signal<this, void>(this);
     this._disposed = false;
   }
 
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
-  get changed(): Signal<SearchProvider<T>, void> {
+  get stateChanged(): Signal<this, void> {
     return this._changed;
   }
 
@@ -147,6 +147,6 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   abstract replaceAllMatches(newText: string): Promise<boolean>;
 
-  private _changed: Signal<SearchProvider<T>, void>;
+  private _changed: Signal<this, void>;
   private _disposed: boolean;
 }

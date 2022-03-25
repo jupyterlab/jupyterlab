@@ -48,7 +48,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    */
   getProviderForWidget<T extends Widget = Widget>(
     widget: T
-  ): ISearchProvider<T> | undefined {
+  ): ISearchProvider | undefined {
     return this._findMatchingProvider(this._providerMap, widget);
   }
 
@@ -63,7 +63,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
   private _findMatchingProvider<T extends Widget = Widget>(
     providerMap: Private.ProviderMap,
     widget: T
-  ): ISearchProvider<T> | undefined {
+  ): ISearchProvider | undefined {
     // iterate through all providers and ask each one if it can search on the
     // widget.
     for (const P of providerMap.values()) {

@@ -15,7 +15,6 @@ import {
 } from '@jupyterlab/documentsearch';
 import { IObservableString } from '@jupyterlab/observables';
 import { OutputArea } from '@jupyterlab/outputarea';
-import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { CodeCell } from '.';
 import { ICellModel } from './model';
@@ -29,7 +28,7 @@ export const SELECTED_HIGHLIGHT_CLASS = 'jp-mod-selected';
 /**
  * Search provider for cells.
  */
-export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
+export class CellSearchProvider implements IBaseSearchProvider {
   /**
    * Constructor
    *
@@ -46,7 +45,7 @@ export class CellSearchProvider implements IDisposable, IBaseSearchProvider {
   /**
    * Changed signal to be emitted when search matches change.
    */
-  get changed(): Signal<IBaseSearchProvider, void> {
+  get stateChanged(): Signal<IBaseSearchProvider, void> {
     return this._changed;
   }
 
@@ -548,7 +547,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
       ]);
     }
 
-    this.changed.emit();
+    this.stateChanged.emit();
   }
 
   protected outputsProvider: GenericSearchProvider[];

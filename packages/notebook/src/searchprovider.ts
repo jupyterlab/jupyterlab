@@ -81,7 +81,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   static createNew(
     widget: NotebookPanel,
     translator?: ITranslator
-  ): ISearchProvider<NotebookPanel> {
+  ): ISearchProvider {
     return new NotebookSearchProvider(widget, translator);
   }
 
@@ -274,7 +274,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchProviders = await Promise.all(
       cells.map(async cell => {
         const cellSearchProvider = createCellSearchProvider(cell);
-        cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
+        cellSearchProvider.stateChanged.connect(
+          this._onSearchProviderChanged,
+          this
+        );
 
         await cellSearchProvider.setIsActive(
           !this._filters!.selectedCells ||
@@ -302,7 +305,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   async endQuery(): Promise<void> {
     await Promise.all(
       this._searchProviders.map(provider => {
-        provider.changed.disconnect(this._onSearchProviderChanged, this);
+        provider.stateChanged.disconnect(this._onSearchProviderChanged, this);
 
         return provider.endQuery().then(() => {
           provider.dispose();
@@ -373,7 +376,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _addCellProvider(index: number) {
     const cell = this.widget.content.widgets[index];
     const cellSearchProvider = createCellSearchProvider(cell);
-    cellSearchProvider.changed.connect(this._onSearchProviderChanged, this);
+    cellSearchProvider.stateChanged.connect(
+      this._onSearchProviderChanged,
+      this
+    );
 
     ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
 
@@ -389,7 +395,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
   private _removeCellProvider(index: number) {
     const provider = ArrayExt.removeAt(this._searchProviders, index);
-    provider?.changed.disconnect(this._onSearchProviderChanged, this);
+    provider?.stateChanged.disconnect(this._onSearchProviderChanged, this);
     provider?.dispose();
   }
 
@@ -538,7 +544,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // Don't highlight the next occurrence when the query
     // follows a document change
     this._documentHasChanged = true;
-    this.changed.emit();
+    this.stateChanged.emit();
   }
 
   private async _onSelectionChanged() {

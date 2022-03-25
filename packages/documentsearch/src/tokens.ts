@@ -164,10 +164,7 @@ export interface ISearchProviderFactory<T extends Widget = Widget> {
    *
    * @returns The search provider on the widget
    */
-  readonly createNew: (
-    widget: T,
-    translator?: ITranslator
-  ) => ISearchProvider<T>;
+  readonly createNew: (widget: T, translator?: ITranslator) => ISearchProvider;
 
   /**
    * Report whether or not this provider has the ability to search on the
@@ -197,7 +194,7 @@ export interface ISearchProviderRegistry {
    * @param widget - The widget to search over.
    * @returns the search provider, or undefined if none exists.
    */
-  getProviderForWidget(widget: Widget): ISearchProvider<Widget> | undefined;
+  getProviderForWidget(widget: Widget): ISearchProvider | undefined;
 
   /**
    * Signal that emits when a new search provider has been registered
@@ -212,7 +209,7 @@ export interface ISearchProviderRegistry {
  * #### Notes
  * It is implemented by subprovider like searching on a single cell.
  */
-export interface IBaseSearchProvider {
+export interface IBaseSearchProvider extends IDisposable {
   /**
    * Start a search
    *
@@ -272,7 +269,7 @@ export interface IBaseSearchProvider {
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
-  readonly changed: ISignal<IBaseSearchProvider, void>;
+  readonly stateChanged: ISignal<IBaseSearchProvider, void>;
 
   /**
    * The current index of the selected match.
@@ -288,9 +285,7 @@ export interface IBaseSearchProvider {
 /**
  * Search provider interface
  */
-export interface ISearchProvider<T extends Widget = Widget>
-  extends IBaseSearchProvider,
-    IDisposable {
+export interface ISearchProvider extends IBaseSearchProvider {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
@@ -307,9 +302,9 @@ export interface ISearchProvider<T extends Widget = Widget>
   readonly isReadOnly: boolean;
 
   /**
-   * Get the filters for the given provider.
+   * Get the filters definition for the given provider.
    *
-   * @returns The filters.
+   * @returns The filters definition.
    *
    * ### Notes
    * TODO For now it only supports boolean filters (represented with checkboxes)

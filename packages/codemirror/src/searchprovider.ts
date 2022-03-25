@@ -37,7 +37,6 @@ import {
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { JSONExt } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorEditor } from './editor';
@@ -47,8 +46,7 @@ type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 /**
  * CodeMirror search provider for file editor
  */
-export class CodeMirrorSearchProvider
-  implements IBaseSearchProvider, IDisposable {
+export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * Whether the search provider is disposed or not.
    */
@@ -268,7 +266,7 @@ export class CodeMirrorSearchProvider
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
-  get changed(): ISignal<this, void> {
+  get stateChanged(): ISignal<this, void> {
     return this._changed;
   }
 

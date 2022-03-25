@@ -28,7 +28,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   static createNew(
     widget: CSVDocumentWidget,
     translator?: ITranslator
-  ): ISearchProvider<CSVDocumentWidget> {
+  ): ISearchProvider {
     return new CSVSearchProvider(widget);
   }
 
