@@ -2000,12 +2000,21 @@ namespace Private {
     activeCell: Cell | null;
   }
 
-  export function isNotebookRendered(notebook: Notebook): boolean {
+  export function isNotebookRendered(
+    notebook: Notebook,
+    translator?: ITranslator
+  ): boolean {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+
     if (notebook.remainingCellToRenderCount !== 0) {
       showDialog({
-        body: `Notebook is still rendering and has for now ${notebook.remainingCellToRenderCount} remaining cells to render.
+        body: trans.__(
+          `Notebook is still rendering and has for now (%1) remaining cells to render.
 
 Please wait for the complete rendering before invoking that action.`,
+          notebook.remainingCellToRenderCount
+        ),
         buttons: [Dialog.okButton({ label: 'Ok' })]
       }).catch(reason => {
         console.error(
