@@ -22,7 +22,6 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import { FilterFileBrowserModel } from './model';
-import { Uploader } from './upload';
 
 /**
  * The class name added to file browsers.
@@ -92,7 +91,6 @@ export class FileBrowser extends Widget {
       },
       tooltip: this._trans.__('New Folder')
     });
-    const uploader = new Uploader({ model, translator: this.translator });
 
     const refresher = new ToolbarButton({
       icon: refreshIcon,
@@ -103,7 +101,6 @@ export class FileBrowser extends Widget {
     });
 
     this.toolbar.addItem('newFolder', newFolder);
-    this.toolbar.addItem('upload', uploader);
     this.toolbar.addItem('refresher', refresher);
 
     this.listing = this.createDirListing({
