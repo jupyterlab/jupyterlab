@@ -1,0 +1,72 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: forbid-new-submodules
+      - id: end-of-file-fixer
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: requirements-txt-fixer
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: check-builtin-literals
+      - id: trailing-whitespace
+
+  - repo: https://github.com/psf/black
+    rev: 22.1.0
+    hooks:
+      - id: black
+        args: ["--line-length", "100"]
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        files: \.py$
+        args: [--profile=black]
+
+  # - repo: https://github.com/pycqa/flake8
+  #   rev: 4.0.1
+  #   hooks:
+  #     - id: flake8
+  #       additional_dependencies:
+  #         [
+  #           "flake8-bugbear==20.1.4",
+  #           "flake8-logging-format==0.6.0",
+  #           "flake8-implicit-str-concat==0.2.0",
+  #         ]
+
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.10.2
+    hooks:
+      - id: check-jsonschema
+        name: 'Check GitHub Workflows'
+        files: ^\.github/workflows/
+        types: [yaml]
+        args: ['--schemafile', 'https://json.schemastore.org/github-workflow']
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: 'jlpm run prettier:files'
+        language: system
+        types_or: [json, markdown, ts, tsx, javascript, jsx, css]
+      - id: eslint
+        name: eslint
+        entry: 'jlpm run eslint:files'
+        language: system
+        types_or: [ts, tsx, javascript, jsx]
+      - id: stylelint
+        name: stylelint
+        entry: 'jlpm run stylelint:files'
+        language: system
+        types: [css]
+      - id: integrity
+        name: integrity
+        entry: 'jlpm run integritry --force'
+        language: system
+        stages: [push]

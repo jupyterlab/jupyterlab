@@ -138,3 +138,13 @@ jobs:
         run: |
           cd sdist/test
           pytest -vv || pytest -vv --lf
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+      - uses: pre-commit/action@v2.0.0
