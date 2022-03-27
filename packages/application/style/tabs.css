@@ -12,6 +12,7 @@
   --jp-private-horizontal-tab-height: 24px;
   --jp-private-horizontal-tab-width: 216px;
   --jp-private-horizontal-tab-active-top-border: 2px;
+  --jp-horizontal-min-tab-width: 120px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -37,8 +38,8 @@
   min-width: 80px;
 }
 
-.lm-DockPanel-tabBar > .lm-TabBar-content,
-.lm-TabPanel-tabBar > .lm-TabBar-content {
+.lm-DockPanel-tabBar > .lm-TabBar-wrapper > .lm-TabBar-content,
+.lm-TabPanel-tabBar > .lm-TabBar-wrapper > .lm-TabBar-content {
   align-items: flex-end;
   min-width: 0;
   min-height: 0;
@@ -51,7 +52,7 @@
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + var(--jp-border-width)
   );
-  min-width: 0;
+  min-width: var(--jp-horizontal-min-tab-width);
   margin-left: calc(-1 * var(--jp-border-width));
   line-height: var(--jp-private-horizontal-tab-height);
   padding: 0 8px;
@@ -168,4 +169,20 @@
   min-width: var(--jp-private-horizontal-tab-width);
   padding: 0 10px;
   transform: translateX(-40%) translateY(-58%);
+}
+
+.lm-TabBar[data-orientation='horizontal'] > .lm-TabBar-wrapper::after {
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0),
+    var(--jp-border-color0)
+  );
+}
+
+.lm-TabBar[data-orientation='horizontal'] > .lm-TabBar-wrapper::before {
+  background: linear-gradient(
+    to left,
+    rgba(0, 0, 0, 0),
+    var(--jp-border-color0)
+  );
 }

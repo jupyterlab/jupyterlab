@@ -116,6 +116,8 @@ export namespace ILabShell {
      * for the transform action.
      */
     hiddenMode: 'display' | 'scale';
+
+    tabScrolling: boolean;
   }
 
   /**
@@ -287,7 +289,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg({
       hiddenMode: Widget.HiddenMode.Scale,
-      translator: options?.translator
+      translator: options?.translator,
+      tabScrollingEnabled: true
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
@@ -1107,6 +1110,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         config.hiddenMode === 'display'
           ? Widget.HiddenMode.Display
           : Widget.HiddenMode.Scale;
+    }
+    if (typeof config.tabScrolling !== 'undefined') {
+      console.log(config.tabScrolling);
+      this._dockPanel.tabScrollingEnabled = config.tabScrolling;
     }
   }
 
