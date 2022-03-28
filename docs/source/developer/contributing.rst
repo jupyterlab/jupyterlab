@@ -56,14 +56,37 @@ All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
-All source code is formatted using `prettier <https://prettier.io>`__.
+All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `black <https://github.com/psf/black>`__.
 When code is modified and committed, all staged files will be
-automatically formatted using pre-commit git hooks (with help from the
-`lint-staged <https://github.com/okonet/lint-staged>`__ and
-`husky <https://github.com/typicode/husky>`__ libraries). The benefit of
-using a code formatter like prettier is that it removes the topic of
+automatically formatted using pre-commit git hooks (with help from
+`pre-commit <https://github.com/pre-commit/pre-commit>`__). The benefit of
+using a code formatters like ``prettier`` and ``black`` is that it removes the topic of
 code style from the conversation when reviewing pull requests, thereby
 speeding up the review process.
+
+As long as your code is valid,
+the pre-commit hook should take care of how it should look.
+`pre-commit` and its associated hooks will automatically be installed when
+you run ``pip install -e ".[test]"``
+
+To install ``pre-commit`` manually, run the following::
+
+    pip install pre-commit
+    pre-commit install
+
+You can invoke the pre-commit hook by hand at any time with::
+
+    pre-commit run
+
+which should run any autoformatting on your code
+and tell you about any errors it couldn't fix automatically.
+You may also install `black integration <https://github.com/psf/black#editor-integration>`__
+into your text editor to format code automatically.
+
+If you have already committed files before setting up the pre-commit
+hook with ``pre-commit install``, you can fix everything up using
+``pre-commit run --all-files``. You need to make the fixing commit
+yourself after that.
 
 You may also use the prettier npm script (e.g. ``npm run prettier`` or
 ``yarn prettier`` or ``jlpm prettier``) to format the entire code base.

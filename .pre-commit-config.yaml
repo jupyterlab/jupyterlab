@@ -14,6 +14,7 @@ repos:
       - id: debug-statements
       - id: check-builtin-literals
       - id: trailing-whitespace
+        exclude: .bumpversion.cfg
 
   - repo: https://github.com/psf/black
     rev: 22.1.0
@@ -52,21 +53,21 @@ repos:
     hooks:
       - id: prettier
         name: prettier
-        entry: 'jlpm run prettier:files'
-        language: system
+        entry: 'npm run prettier:files'
+        language: node
         types_or: [json, markdown, ts, tsx, javascript, jsx, css]
       - id: eslint
         name: eslint
-        entry: 'jlpm run eslint:files'
-        language: system
+        entry: 'npm run eslint:files'
+        language: node
         types_or: [ts, tsx, javascript, jsx]
       - id: stylelint
         name: stylelint
-        entry: 'jlpm run stylelint:files'
-        language: system
+        entry: 'npm run stylelint:files'
+        language: node
         types: [css]
       - id: integrity
         name: integrity
-        entry: 'jlpm run integritry --force'
-        language: system
+        entry: 'npm run integrity --force'
+        language: node
         stages: [push]

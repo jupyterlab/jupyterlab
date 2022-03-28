@@ -141,10 +141,11 @@ jobs:
 
   pre-commit:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v3
-        with:
-          python-version: 3.8
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Install Jupyterlab
+        run: pip install -e .
       - uses: pre-commit/action@v2.0.0

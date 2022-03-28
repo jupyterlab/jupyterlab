@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
 
 import json
 import os
 import os.path as osp
 import subprocess
 import sys
-
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
 from os.path import join as pjoin
 
 from setuptools import setup
@@ -62,10 +61,13 @@ try:
 
         def post_develop(*args, **kwargs):
             builder(*args, **kwargs)
-            subprocess.run([sys.executable, "-m", "pre_commit", "install"])
-            subprocess.run(
-                [sys.executable, "-m", "pre_commit", "install", "--hook-type", "pre-push"]
-            )
+            try:
+                subprocess.run([sys.executable, "-m", "pre_commit", "install"])
+                subprocess.run(
+                    [sys.executable, "-m", "pre_commit", "install", "--hook-type", "pre-push"]
+                )
+            except Exception:
+                pass
 
         cmdclass = wrap_installers(
             post_develop=post_develop, post_dist=post_dist, ensured_targets=ensured_targets
@@ -75,7 +77,7 @@ try:
 
     setup_args = dict(cmdclass=cmdclass, data_files=get_data_files(data_files_spec))
 except ImportError:
-    setup_args = dict()
+    setup_args = {}
 
 
 if __name__ == "__main__":
