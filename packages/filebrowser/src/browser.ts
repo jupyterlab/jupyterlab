@@ -4,7 +4,7 @@
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
   ReactWidget,
@@ -64,10 +64,10 @@ export class FileBrowser extends SidePanel {
     this.addClass(FILE_BROWSER_CLASS);
     this.toolbar.addClass(TOOLBAR_CLASS);
     this.id = options.id;
+    const translator = (this.translator = options.translator ?? nullTranslator);
 
     const model = (this.model = options.model);
     const renderer = options.renderer;
-    const translator = this.translator;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
     this._manager = model.manager;
@@ -92,7 +92,7 @@ export class FileBrowser extends SidePanel {
     this.listing = this.createDirListing({
       model,
       renderer,
-      translator: this.translator
+      translator
     });
     this.listing.addClass(LISTING_CLASS);
 

@@ -428,7 +428,10 @@ export abstract class ABCWidgetFactory<
     const widget = this.createNewWidget(context, source);
 
     // Add toolbar
-    setToolbar(widget, this._toolbarFactory ?? this.defaultToolbarFactory);
+    setToolbar(
+      widget,
+      this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)
+    );
 
     // Emit widget created signal
     this._widgetCreated.emit(widget);
