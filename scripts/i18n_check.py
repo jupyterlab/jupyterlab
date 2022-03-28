@@ -6,8 +6,8 @@ from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from jupyterlab_translate.api import extract_language_pack
 import polib
+from jupyterlab_translate.api import extract_language_pack
 
 HERE = Path(__file__).parent
 

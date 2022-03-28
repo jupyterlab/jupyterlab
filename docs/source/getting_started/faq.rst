@@ -18,7 +18,7 @@ General
 Development
 -----------
 
-  
+
 -  `How can you
    contribute? <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`__
 -  :ref:`How can you extend or customize JupyterLab? <user_extensions>`
@@ -30,7 +30,7 @@ Development
    like trigger some behavior in response to the user executing some code in a notebook, you can output a custom
    mimetype (:ref:`rendermime`). We currently don't allow access to the JupyterLab
    API from the Javascript renderer, because this would tie the kernel and the notebook output to JupyterLab
-   and make it hard for other frontends to support it. 
+   and make it hard for other frontends to support it.
    If you have comments or suggestions on changes here, please comment on `this issue <https://github.com/jupyterlab/jupyterlab/issues/4623>`__.
 
 

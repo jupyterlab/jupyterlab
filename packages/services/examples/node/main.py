@@ -1,9 +1,11 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from __future__ import print_function, absolute_import
+from __future__ import absolute_import, print_function
+
 import json
 import os.path as osp
+
 from jupyterlab_server.process import which
 from jupyterlab_server.process_app import ProcessApp
 
@@ -11,35 +13,28 @@ HERE = osp.dirname(osp.realpath(__file__))
 
 
 def _jupyter_server_extension_points():
-    return [
-        {
-            'module': __name__,
-            'app': NodeApp
-        }
-    ]
+    return [{"module": __name__, "app": NodeApp}]
+
 
 class NodeApp(ProcessApp):
 
     name = __name__
-    serverapp_config = dict(
-        allow_origin = "*"
-    )
+    serverapp_config = dict(allow_origin="*")
 
     def get_command(self):
-        """Get the command and kwargs to run.
-        """
+        """Get the command and kwargs to run."""
         # Run the node script with command arguments.
         config = dict(
-            baseUrl='http://localhost:{}{}'.format(self.serverapp.port, self.settings['base_url']),
-            token=self.settings['token'])
+            baseUrl="http://localhost:{}{}".format(self.serverapp.port, self.settings["base_url"]),
+            token=self.settings["token"],
+        )
 
-        with open(osp.join(HERE, 'config.json'), 'w') as fid:
+        with open(osp.join(HERE, "config.json"), "w") as fid:
             json.dump(config, fid)
 
-        cmd = [which('node'),
-               'index.js', '--jupyter-config-data=./config.json']
+        cmd = [which("node"), "index.js", "--jupyter-config-data=./config.json"]
         return cmd, dict(cwd=HERE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     NodeApp.launch_instance()

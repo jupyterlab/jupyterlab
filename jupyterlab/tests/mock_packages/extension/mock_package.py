@@ -3,11 +3,9 @@ import os.path as osp
 
 HERE = osp.abspath(osp.dirname(__file__))
 
-with open(osp.join(HERE, 'package.json')) as fid:
+with open(osp.join(HERE, "package.json")) as fid:
     data = json.load(fid)
 
+
 def _jupyter_labextension_paths():
-    return [{
-        'src': data['jupyterlab'].get('outputDir', 'static'),
-        'dest': data['name']
-    }]
+    return [{"src": data["jupyterlab"].get("outputDir", "static"), "dest": data["name"]}]

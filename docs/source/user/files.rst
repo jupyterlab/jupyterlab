@@ -178,4 +178,3 @@ Hidden files and folders can be displayed in JupyterLab by combining two paramet
 
 1. First the server should be allowed to serve hidden files by setting ``ContentsManager.allow_hidden = True``; see `server documentation <https://jupyter-server.readthedocs.io/en/latest/users/configuration.html>`_.
 2. Then you will be able to display or hide the hidden files through the menu ``View`` -> ``Show Hidden Files``.
-

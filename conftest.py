@@ -5,11 +5,10 @@
 
 import pytest
 
-
 pytest_plugins = [
     "jupyter_server.pytest_plugin",
     "jupyterlab_server.pytest_plugin",
-    "jupyterlab.pytest_plugin"
+    "jupyterlab.pytest_plugin",
 ]
 
 
@@ -20,10 +19,8 @@ def pytest_addoption(parser):
     This is called by the pytest API
     """
     group = parser.getgroup("general")
-    group.addoption('--quick', action='store_true',
-                    help="Skip slow tests")
-    group.addoption('--slow', action='store_true',
-                    help="Run only slow tests")
+    group.addoption("--quick", action="store_true", help="Skip slow tests")
+    group.addoption("--slow", action="store_true", help="Run only slow tests")
 
 
 def pytest_configure(config):

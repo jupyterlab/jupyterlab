@@ -5,6 +5,6 @@
 
 from jupyterlab.commands import watch_packages
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     procs = watch_packages()
     procs[0].wait()

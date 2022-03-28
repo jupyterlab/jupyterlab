@@ -23,7 +23,7 @@ documentation <developer_extensions>`.
 Installing Extensions
 ---------------------
 
-A JupyterLab extension contains JavaScript that is installed into Jupyterlab and 
+A JupyterLab extension contains JavaScript that is installed into Jupyterlab and
 run in the browser. An extension contains one or more plugins that extend JupyterLab.
 The preferred JupyterLab extension type is a *prebuilt extension* because it does not
 require rebuilding JupyterLab JavaScript files.

@@ -40,7 +40,7 @@ export function generateCaptureArea(
   id = 'capture-screenshot'
 ): string {
   const { top, left, width, height } = position;
-  return `<div 
+  return `<div
     id="${id}"
     style="position: absolute; top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px; pointer-events: none;">
   </div>`;

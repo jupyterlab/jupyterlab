@@ -26,7 +26,7 @@ Here is an animation showing the table of content use, with a notebook from the 
 
 
 
-The table of contents tool will automatically generate a table of contents for your notebook by taking all the headings from your markdown cells. 
+The table of contents tool will automatically generate a table of contents for your notebook by taking all the headings from your markdown cells.
 Because the Notebook does not utilize formal page breaks or numbers, each listed section will be hyperlinked to the actual section within your document.
 
 
