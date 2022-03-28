@@ -1125,7 +1125,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createLauncher, {
     label: trans.__('New Launcher'),
-    icon: addIcon,
+    icon: args => (args.toolbar ? addIcon : undefined),
     execute: (args: JSONObject) => {
       if (commands.hasCommand('launcher:create')) {
         return Private.createLauncher(commands, browser, args);
