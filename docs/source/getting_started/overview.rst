@@ -57,7 +57,7 @@ classic Jupyter Notebook.
 
 .. toctree::
    :maxdepth: 2
-   
+
    installation
    starting
    issue

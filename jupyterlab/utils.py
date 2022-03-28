@@ -6,6 +6,7 @@ class jupyterlab_deprecation(Warning):
     """Create our own deprecation class, since Python >= 2.7
     silences deprecations by default.
     """
+
     pass
 
 
@@ -24,42 +25,42 @@ class deprecated(object):
         The package version in which the deprecated function will be removed.
     """
 
-    def __init__(self, alt_func=None, behavior='warn', removed_version=None):
+    def __init__(self, alt_func=None, behavior="warn", removed_version=None):
         self.alt_func = alt_func
         self.behavior = behavior
         self.removed_version = removed_version
 
     def __call__(self, func):
 
-        alt_msg = ''
+        alt_msg = ""
         if self.alt_func is not None:
-            alt_msg = ' Use ``%s`` instead.' % self.alt_func
-        rmv_msg = ''
+            alt_msg = " Use ``%s`` instead." % self.alt_func
+        rmv_msg = ""
         if self.removed_version is not None:
-            rmv_msg = (' and will be removed in version %s' %
-                       self.removed_version)
+            rmv_msg = " and will be removed in version %s" % self.removed_version
 
-        msg = ('Function ``%s`` is deprecated' % func.__name__ +
-               rmv_msg + '.' + alt_msg)
+        msg = "Function ``%s`` is deprecated" % func.__name__ + rmv_msg + "." + alt_msg
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            if self.behavior == 'warn':
+            if self.behavior == "warn":
                 func_code = func.__code__
-                warnings.simplefilter('always', jupyterlab_deprecation)
-                warnings.warn_explicit(msg,
-                                       category=jupyterlab_deprecation,
-                                       filename=func_code.co_filename,
-                                       lineno=func_code.co_firstlineno + 1)
-            elif self.behavior == 'raise':
+                warnings.simplefilter("always", jupyterlab_deprecation)
+                warnings.warn_explicit(
+                    msg,
+                    category=jupyterlab_deprecation,
+                    filename=func_code.co_filename,
+                    lineno=func_code.co_firstlineno + 1,
+                )
+            elif self.behavior == "raise":
                 raise jupyterlab_deprecation(msg)
             return func(*args, **kwargs)
 
         # modify doc string to display deprecation warning
-        doc = '**Deprecated function**.' + alt_msg
+        doc = "**Deprecated function**." + alt_msg
         if wrapped.__doc__ is None:
             wrapped.__doc__ = doc
         else:
-            wrapped.__doc__ = doc + '\n\n    ' + wrapped.__doc__
+            wrapped.__doc__ = doc + "\n\n    " + wrapped.__doc__
 
         return wrapped
