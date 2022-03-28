@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { ToolbarRegistry } from '@jupyterlab/apputils';
 import type { Cell } from '@jupyterlab/cells';
 import { IObservableList } from '@jupyterlab/observables';
@@ -5,7 +8,6 @@ import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { VDomRenderer } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
-import type { ISignal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
 
 /**
@@ -22,7 +24,7 @@ export interface ITableOfContentsRegistry {
    * @param widget - widget
    * @returns Table of contents model or undefined if not found
    */
-  getModel(widget: Widget): TableOfContents.IModel | undefined;
+  getModel(widget: Widget): TableOfContents.Model | undefined;
 
   /**
    * Adds a table of contents factory to the registry.
@@ -38,46 +40,6 @@ export interface ITableOfContentsRegistry {
 export const ITableOfContentsRegistry = new Token<ITableOfContentsRegistry>(
   '@jupyterlab/toc:ITableOfContentsRegistry'
 );
-
-/**
- * Interface describing a heading.
- */
-export interface IHeading {
-  /**
-   * Heading text.
-   */
-  text: string;
-
-  /**
-   * HTML heading level.
-   */
-  level: number;
-
-  /**
-   * Special HTML markup.
-   *
-   * ## Notes
-   *
-   * -   The HTML string **should** be properly **sanitized**!
-   * -   The HTML string can be used to render Markdown headings which have already been rendered as HTML.
-   */
-  html?: string;
-
-  /**
-   * Heading prefix.
-   */
-  prefix?: string | null;
-
-  /**
-   * Dataset to add to the outline item node
-   */
-  dataset?: Record<string, string>;
-
-  /**
-   * Whether the heading is collapsed or not
-   */
-  collapsed?: boolean;
-}
 
 /**
  * Cell running status
@@ -100,7 +62,7 @@ export enum RunningStatus {
 /**
  * Interface describing a notebook cell heading.
  */
-export interface INotebookHeading extends IHeading {
+export interface INotebookHeading extends TableOfContents.IHeading {
   /**
    * Heading type.
    */
@@ -136,21 +98,6 @@ export interface INotebookHeading extends IHeading {
  * Namespace for table of contents interface
  */
 export namespace TableOfContents {
-  /**
-   * Interface for the arguments needed in the collapse signal of a generator
-   */
-  export interface ICollapseChangedArgs {
-    /**
-     * Whether the given heading is collapsed in the table of contents or not
-     */
-    collapsed: boolean;
-
-    /**
-     * Targeted heading
-     */
-    heading: IHeading;
-  }
-
   export interface IFactory<W extends Widget = Widget> {
     /**
      * Whether the factory can handle the widget or not.
@@ -160,30 +107,73 @@ export namespace TableOfContents {
      */
     isApplicable: (widget: W) => boolean;
 
-    createNew: (widget: W) => IModel;
+    /**
+     * Create a new table of contents model for the widget
+     *
+     * @param widget - widget
+     * @returns The table of contens model
+     */
+    createNew: (widget: W) => IModel<IHeading>;
+  }
+
+  /**
+   * Interface describing a heading.
+   */
+  export interface IHeading {
+    /**
+     * Heading text.
+     */
+    text: string;
+
+    /**
+     * HTML heading level.
+     */
+    level: number;
+
+    /**
+     * Special HTML markup.
+     *
+     * ## Notes
+     *
+     * -   The HTML string **should** be properly **sanitized**!
+     * -   The HTML string can be used to render Markdown headings which have already been rendered as HTML.
+     */
+    html?: string;
+
+    /**
+     * Heading prefix.
+     */
+    prefix?: string | null;
+
+    /**
+     * Dataset to add to the outline item node
+     */
+    dataset?: Record<string, string>;
+
+    /**
+     * Whether the heading is collapsed or not
+     */
+    collapsed?: boolean;
   }
 
   /**
    * Interface describing a widget table of contents model.
    */
-  export interface IModel extends VDomRenderer.IModel {
-    activeHeading: IHeading | null;
+  export interface IModel<H extends IHeading> extends VDomRenderer.IModel {
+    activeHeading: H | null;
 
-    toggleCollapse: (heading: IHeading) => void;
-
-    title?: string;
-
-    /**
-     * Signal to indicate that a collapse event happened.
-     */
-    collapseChanged?: ISignal<IModel, ICollapseChangedArgs>;
+    isActive: boolean;
 
     /**
      * Returns the list of headings.
      *
      * @returns list of headings
      */
-    readonly headings: IHeading[];
+    readonly headings: H[];
+
+    title?: string;
+
+    toggleCollapse: (heading: H) => void;
 
     /**
      * Toolbar items for the table of contents.
@@ -198,11 +188,13 @@ export namespace TableOfContents {
     readonly usesLatex?: boolean;
   }
 
+  export type Model = IModel<IHeading>;
+
   /**
    * Interface describing table of contents widget options.
    */
   export interface IOptions {
-    model?: IModel;
+    model?: IModel<IHeading>;
 
     /**
      * Application rendered MIME type.

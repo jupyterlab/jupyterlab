@@ -33,6 +33,7 @@ import {
   FileEditorFactory,
   FileEditorSearchProvider,
   IEditorTracker,
+  PythonToCFactory,
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
@@ -47,6 +48,7 @@ import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
 import { Session } from '@jupyterlab/services';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 
 export { Commands } from './commands';
 
@@ -69,6 +71,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IMainMenu,
     ILayoutRestorer,
     ISessionContextDialogs,
+    ITableOfContentsRegistry,
     IToolbarWidgetRegistry
   ],
   provides: IEditorTracker,
@@ -217,6 +220,7 @@ function activate(
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
   sessionDialogs: ISessionContextDialogs | null,
+  tocRegistry: ITableOfContentsRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
@@ -429,6 +433,10 @@ function activate(
     .catch((reason: Error) => {
       console.error(reason.message);
     });
+
+  if (tocRegistry) {
+    tocRegistry.add(new PythonToCFactory(tracker));
+  }
 
   return tracker;
 }

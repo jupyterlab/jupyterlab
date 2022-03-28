@@ -15,11 +15,13 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITableOfContentsRegistry,
+  TableOfContents,
   TableOfContentsPanel,
   TableOfContentsRegistry
 } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
+import { Widget } from '@lumino/widgets';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -56,6 +58,8 @@ async function activateTOC(
   const trans = (translator ?? nullTranslator).load('jupyterlab');
   // Create the ToC widget:
   const toc = new TableOfContentsPanel(rendermime, translator ?? undefined);
+
+  const tocModels = new WeakMap<Widget, TableOfContents.Model | null>();
 
   // Create the ToC registry:
   const registry = new TableOfContentsRegistry();
@@ -166,10 +170,6 @@ async function activateTOC(
     // Create a LaTeX generator:
     const latexGenerator = createLatexGenerator(editorTracker);
     registry.add(latexGenerator);
-
-    // Create a Python generator:
-    const pythonGenerator = createPythonGenerator(editorTracker);
-    registry.add(pythonGenerator);
   }
 
   // Create a rendered Markdown generator:
@@ -206,7 +206,13 @@ async function activateTOC(
     if (!widget) {
       return;
     }
-    toc.model = registry.getModel(widget) ?? null;
+    let model = tocModels.get(widget);
+    if (!model) {
+      model = registry.getModel(widget) ?? null;
+      tocModels.set(widget, model);
+    }
+
+    toc.model = model;
   }
 }
 

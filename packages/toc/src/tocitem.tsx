@@ -3,7 +3,7 @@
 
 import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { IHeading } from './tokens';
+import { TableOfContents } from './tokens';
 
 /**
  * Interface describing component properties.
@@ -14,11 +14,11 @@ export interface ITOCItemProps {
   /**
    * Heading to render.
    */
-  heading: IHeading;
+  heading: TableOfContents.IHeading;
 
-  onClick: (heading: IHeading) => void;
+  onClick: (heading: TableOfContents.IHeading) => void;
 
-  onCollapse: (heading: IHeading) => void;
+  onCollapse: (heading: TableOfContents.IHeading) => void;
 }
 
 /**
@@ -44,22 +44,24 @@ export class TOCItem extends React.PureComponent<
           onClick(heading);
         }}
       >
-        {children && (
-          <button
-            className="jp-toc-item-collapser"
-            onClick={() => {
-              onCollapse(heading);
-            }}
-          >
-            {heading.collapsed ? (
-              <caretRightIcon.react tag="span" width="25px" />
-            ) : (
-              <caretDownIcon.react tag="span" width="25px" />
-            )}
-          </button>
-        )}
-        {heading.text}
-        {children && !heading.collapsed && <ul>{children}</ul>}
+        <span className="jp-tocItem-content">
+          {children && (
+            <button
+              className="jp-tocItem-collapser"
+              onClick={() => {
+                onCollapse(heading);
+              }}
+            >
+              {heading.collapsed ? (
+                <caretRightIcon.react tag="span" width="25px" />
+              ) : (
+                <caretDownIcon.react tag="span" width="25px" />
+              )}
+            </button>
+          )}
+          {heading.text}
+        </span>
+        {children && !heading.collapsed && <ol>{children}</ol>}
       </li>
     );
   }

@@ -7,28 +7,6 @@
 | Table of Contents
 |----------------------------------------------------------------------------*/
 
-.jp-TableOfContents-content {
-  flex: 1 1 auto;
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-  overflow: auto;
-  background-color: var(--jp-layout-color1);
-}
-
-.jp-TableOfContents-content li {
-  display: flex;
-  flex-direction: row;
-  padding: 4px 12px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  cursor: pointer;
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
 .jp-TableOfContents {
   display: flex;
   flex-direction: column;
@@ -47,6 +25,37 @@
   margin: 0;
   padding: 8px 12px;
   text-transform: uppercase;
+}
+
+.jp-TableOfContents-tree {
+  margin: 8px 12px;
+}
+
+.jp-TableOfContents ol {
+  list-style-type: none;
+}
+
+.jp-TableOfContents-content {
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-tocItem {
+  padding: 4px 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.jp-tocItem-content {
+  display: block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
 }
 
 .jp-TableOfContents-codeContainer {

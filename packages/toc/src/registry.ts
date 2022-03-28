@@ -19,7 +19,7 @@ export class TableOfContentsRegistry implements ITableOfContentsRegistry {
    * @param widget - widget
    * @returns table of contents model
    */
-  getModel(widget: Widget): TableOfContents.IModel | undefined {
+  getModel(widget: Widget): TableOfContents.Model | undefined {
     for (const generator of this._generators.values()) {
       if (generator.isApplicable(widget)) {
         return generator.createNew(widget);

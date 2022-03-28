@@ -33,6 +33,10 @@
   height: var(--jp-private-toolbar-height);
 }
 
+.jp-SidePanel-toolbar.jp-Toolbar-micro {
+  display: none;
+}
+
 .lm-AccordionPanel .jp-AccordionPanel-title {
   box-sizing: border-box;
   line-height: 25px;

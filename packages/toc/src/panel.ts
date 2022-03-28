@@ -5,6 +5,7 @@ import { each } from '@lumino/algorithm';
 import { Panel, Widget } from '@lumino/widgets';
 import { TableOfContentsWidget } from './treeview';
 import { TableOfContents } from './tokens';
+import { Message } from '@lumino/messaging';
 
 export class TableOfContentsPanel extends SidePanel {
   constructor(rendermime: IRenderMimeRegistry, translator?: ITranslator) {
@@ -19,30 +20,36 @@ export class TableOfContentsPanel extends SidePanel {
     this._treeview = new TableOfContentsWidget({
       rendermime
     });
+    this._treeview.addClass('jp-TableOfContents-tree');
     this.content.addWidget(this._treeview);
   }
 
   /**
    * Get the current model.
    */
-  get model(): TableOfContents.IModel | null {
+  get model(): TableOfContents.Model | null {
     return this._model;
   }
-  set model(newValue: TableOfContents.IModel | null) {
+  set model(newValue: TableOfContents.Model | null) {
     if (this._model !== newValue) {
-      this._model = newValue;
+      this._model?.stateChanged.disconnect(this._onTitleChanged, this);
 
-      this._title.setTitle(
-        this._model?.title ?? this._trans.__('Table of Contents')
-      );
+      this._model = newValue;
+      if (this._model) {
+        this._model.isActive = this.isVisible;
+      }
+
+      this._model?.stateChanged.connect(this._onTitleChanged, this);
+      this._onTitleChanged();
+
       // Clear the current toolbar
-      each(this._toolbar.children(), item => {
+      each(this.toolbar.children(), item => {
         item.parent = null;
       });
       // Add the new items
       if (this._model?.toolbarItems) {
         each(this._model.toolbarItems.iter(), item => {
-          this._toolbar.addItem(item.name, item.widget);
+          this.toolbar.addItem(item.name, item.widget);
         });
       }
 
@@ -50,7 +57,27 @@ export class TableOfContentsPanel extends SidePanel {
     }
   }
 
-  private _model: TableOfContents.IModel | null;
+  protected onAfterHide(msg: Message): void {
+    super.onAfterHide(msg);
+    if (this._model) {
+      this._model.isActive = false;
+    }
+  }
+
+  protected onBeforeShow(msg: Message): void {
+    super.onBeforeShow(msg);
+    if (this._model) {
+      this._model.isActive = true;
+    }
+  }
+
+  private _onTitleChanged(): void {
+    this._title.setTitle(
+      this._model?.title ?? this._trans.__('Table of Contents')
+    );
+  }
+
+  private _model: TableOfContents.Model | null;
   private _title: Private.Header;
   private _treeview: TableOfContentsWidget;
 }

@@ -5,6 +5,7 @@
  * @module toc
  */
 
+export * from './factory';
 export * from './model';
 export * from './panel';
 export * from './registry';

@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { TOCItem } from './tocitem';
-import { IHeading } from './tokens';
+import { TableOfContents } from './tokens';
 
 /**
  * Interface describing component properties.
@@ -12,11 +12,11 @@ export interface ITOCTreeProps {
   /**
    * List of headings to render.
    */
-  headings: IHeading[];
+  headings: TableOfContents.IHeading[];
 
-  setActiveHeading: (heading: IHeading) => void;
+  setActiveHeading: (heading: TableOfContents.IHeading) => void;
 
-  onCollapseChange: (heading: IHeading) => void;
+  onCollapseChange: (heading: TableOfContents.IHeading) => void;
 }
 
 /**
@@ -27,7 +27,7 @@ export class TOCTree extends React.PureComponent<ITOCTreeProps> {
    * Renders a table of contents tree.
    */
   render(): JSX.Element {
-    return <ul className="jp-TableOfContents-content">{this.buildTree()}</ul>;
+    return <ol className="jp-TableOfContents-content">{this.buildTree()}</ol>;
   }
 
   /**
@@ -40,7 +40,10 @@ export class TOCTree extends React.PureComponent<ITOCTreeProps> {
 
     let globalIndex = 0;
 
-    const getChildren = (items: IHeading[], level: number): JSX.Element[] => {
+    const getChildren = (
+      items: TableOfContents.IHeading[],
+      level: number
+    ): JSX.Element[] => {
       const nested = new Array<JSX.Element>();
       while (globalIndex < items.length) {
         const current = items[globalIndex];
