@@ -4,10 +4,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from tornado import web
-from jupyterlab_server.server import JupyterHandler
 from jupyter_server.extension.handler import ExtensionHandlerMixin
-
+from jupyterlab_server.server import JupyterHandler
+from tornado import web
 
 TEMPLATE = """
 <!DOCTYPE HTML>
@@ -22,8 +21,8 @@ TEMPLATE = """
 </body>
 """
 
-class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
 
+class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
     def initialize(self, messages=None, name=None):
         super(ErrorHandler, self).initialize(name=name)
         self.messages = messages
@@ -31,5 +30,5 @@ class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
     @web.authenticated
     @web.removeslash
     def get(self):
-        msgs = ['<h2>%s</h2>' % msg for msg in self.messages]
-        self.write(TEMPLATE % '\n'.join(msgs))
+        msgs = ["<h2>%s</h2>" % msg for msg in self.messages]
+        self.write(TEMPLATE % "\n".join(msgs))

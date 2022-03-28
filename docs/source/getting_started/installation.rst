@@ -37,7 +37,7 @@ instead of ``pip``.
 
 If installing using ``pip install --user``, you must add the user-level
 ``bin`` directory to your ``PATH`` environment variable in order to launch
-``jupyter lab``. If you are using a Unix derivative (FreeBSD, GNU/Linux, 
+``jupyter lab``. If you are using a Unix derivative (FreeBSD, GNU/Linux,
 macOS), you can do this by running ``export PATH="$HOME/.local/bin:$PATH"``.
 
 pipenv
@@ -64,8 +64,8 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
 
     pipenv shell
     jupyter lab
-    
-Alternatively, you can run ``jupyter lab`` inside the virtualenv with 
+
+Alternatively, you can run ``jupyter lab`` inside the virtualenv with
 
 .. code:: bash
 
@@ -116,7 +116,7 @@ reaching directly public registry and have a private registry. To use it, you ne
 
     npm config set registry https://registry.company.com/
     yarn config set registry https://registry.company.com/
-    
+
 JupyterLab will pick up that registry automatically. You can check which registry URL is used by JupyterLab by running::
 
     python -c "from jupyterlab.commands import AppOptions; print(AppOptions().registry)"
@@ -177,7 +177,7 @@ which means SSL communication will not be required for downloading Python librar
     pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pandas
 
 
-Using the tips from above, you can handle many network problems 
+Using the tips from above, you can handle many network problems
 related to installing Python libraries.
 
 Many Jupyter extensions require having working ``npm`` and ``jlpm`` (alias for ``yarn``) commands,

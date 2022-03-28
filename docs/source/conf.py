@@ -27,9 +27,8 @@ import time
 from collections import ChainMap
 from functools import partial
 from pathlib import Path
-from typing import List
 from subprocess import check_call
-
+from typing import List
 
 HERE = Path(__file__).parent.resolve()
 
@@ -152,20 +151,20 @@ def copy_code_files(temp_folder: Path):
         if file == "packages/settingregistry/src/plugin-schema.json":
             schema = json.loads(Path(target).read_text())
 
-            partial_schema = ChainMap(
-                schema.get("definitions", {}), schema.get("properties", {})
-            )
+            partial_schema = ChainMap(schema.get("definitions", {}), schema.get("properties", {}))
             for key in partial_schema:
                 fragment = target.parent / f"{key}.json"
                 with fragment.open("w") as f:
                     json.dump({key: partial_schema[key]}, f, indent=2)
 
+
 IMAGES_FOLDER = "images"
 AUTOMATED_SCREENSHOTS_FOLDER = "galata/test/documentation"
 
+
 def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
     """Copy PlayWright automated screenshots in documentation folder.
-    
+
     Args:
         temp_folder: Target directory in which to copy the file
     Returns:
@@ -178,12 +177,13 @@ def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
     src = root / AUTOMATED_SCREENSHOTS_FOLDER
 
     copied_files = []
-    for img in src.rglob('*.png'):
-        target = temp_folder / (img.name.replace('-documentation-linux', ''))
+    for img in src.rglob("*.png"):
+        target = temp_folder / (img.name.replace("-documentation-linux", ""))
         shutil.copyfile(str(img), str(target))
         copied_files.append(target)
 
     return copied_files
+
 
 # -- Options for HTML output ----------------------------------------------
 

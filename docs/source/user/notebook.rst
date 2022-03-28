@@ -120,7 +120,7 @@ information about the types of the matched items:
 
 Note: IPython 6.3.1 has temporarily disabled type annotations.
 To re-enable them, add ``c.Completer.use_jedi = True`` to an
-`ipython_config.py <https://ipython.readthedocs.io/en/stable/development/config.html>`__ file. 
+`ipython_config.py <https://ipython.readthedocs.io/en/stable/development/config.html>`__ file.
 
 .. _tooltip:
 

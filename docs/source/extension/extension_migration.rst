@@ -427,5 +427,3 @@ Using the new icon system and ``LabIcon``
   For full API documentation and examples of how to use
   the new icon support based on ``LabIcon`` from ``@jupyterlab/ui-components``,
   `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/master/packages/ui-components#readme>`__.
-
-
