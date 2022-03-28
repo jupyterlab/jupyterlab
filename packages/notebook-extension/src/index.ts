@@ -816,6 +816,11 @@ function activateWidgetFactory(
   translator: ITranslator,
   settingRegistry: ISettingRegistry | null
 ): NotebookWidgetFactory.IFactory {
+  const preferKernelOption = PageConfig.getOption('notebookStartsKernel');
+
+  // If the option is not set, assume `true`
+  const preferKernelValue = preferKernelOption === '' || preferKernelOption.toLowerCase() === 'true';
+
   const { commands } = app;
   let toolbarFactory:
     | ((
@@ -868,7 +873,7 @@ function activateWidgetFactory(
     fileTypes: ['notebook'],
     modelName: 'notebook',
     defaultFor: ['notebook'],
-    preferKernel: true,
+    preferKernel: preferKernelValue,
     canStartKernel: true,
     rendermime,
     contentFactory,
