@@ -5,42 +5,45 @@ import os
 
 HERE = os.path.dirname(__file__)
 
-os.environ['JUPYTERLAB_SETTINGS_DIR'] = str(os.path.join(HERE, 'settings'))
+os.environ["JUPYTERLAB_SETTINGS_DIR"] = str(os.path.join(HERE, "settings"))
 
-from jupyterlab.labapp import LabApp
-from jupyterlab_server import LabServerApp, LabConfig
-from notebook.base.handlers import IPythonHandler, FileFindHandler
-from notebook.utils import url_path_join as ujoin
 import json
+
+from jupyterlab_server import LabConfig, LabServerApp
+from notebook.base.handlers import FileFindHandler, IPythonHandler
+from notebook.utils import url_path_join as ujoin
 from traitlets import Unicode
 
-with open(os.path.join(HERE, 'package.json')) as fid:
-    version = json.load(fid)['version']
+from jupyterlab.labapp import LabApp
+
+with open(os.path.join(HERE, "package.json")) as fid:
+    version = json.load(fid)["version"]
+
 
 class ListingsApp(LabApp):
-    base_url = '/'
-    default_url = Unicode('/lab',
-                          help='The default URL to redirect to from `/`')
+    base_url = "/"
+    default_url = Unicode("/lab", help="The default URL to redirect to from `/`")
 
     def init_webapp(self):
-        """initialize tornado webapp and httpserver.
-        """
+        """initialize tornado webapp and httpserver."""
         super().init_webapp()
         default_handlers = [
             (
-                ujoin(self.base_url, r"/listings/(.*)"), FileFindHandler,
-                 {'path': os.path.join(HERE, 'list')}
+                ujoin(self.base_url, r"/listings/(.*)"),
+                FileFindHandler,
+                {"path": os.path.join(HERE, "list")},
             )
         ]
-        self.web_app.add_handlers('.*$', default_handlers)
+        self.web_app.add_handlers(".*$", default_handlers)
 
     def start(self):
         settings = self.web_app.settings
 
         # By default, make terminals available.
-        settings.setdefault('terminals_available', True)
+        settings.setdefault("terminals_available", True)
 
         super().start()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     ListingsApp.launch_instance()
