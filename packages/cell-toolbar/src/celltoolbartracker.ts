@@ -146,13 +146,7 @@ export class CellToolbarTracker implements IDisposable {
             new ToolbarButton({
               icon: LabIcon.resolve({ icon: toolbarItem.icon ?? '' }),
               className: `jp-cell-${toolbarItem.cellType ?? 'all'}`,
-              onClickWithEvent: (e: Event): void => {
-                // Prevent propagation of this event in case the command causes the
-                // current cell to move. If the cell moves and the event propagates to the
-                // new cell, this may have an effect on the new cell.
-                void this._commands.execute(toolbarItem.command!);
-                e.stopPropagation();
-              },
+              actualOnClick: true,
               tooltip: toolbarItem.tooltip
                 ? toolbarItem.tooltip.toString()
                 : this._commands.label(toolbarItem.command)

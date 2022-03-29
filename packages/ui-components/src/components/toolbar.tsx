@@ -583,7 +583,6 @@ export namespace ToolbarButtonComponent {
     iconLabel?: string;
     tooltip?: string;
     onClick?: () => void;
-    onClickWithEvent?: (e: Event) => void;
     enabled?: boolean;
     pressed?: boolean;
     pressedIcon?: LabIcon.IMaybeResolvable;
@@ -621,7 +620,6 @@ export function ToolbarButtonComponent(
     // Fire action only when left button is pressed.
     if (event.button === 0) {
       event.preventDefault();
-      props.onClickWithEvent?.(event.nativeEvent);
       props.onClick?.();
     }
   };
@@ -629,14 +627,12 @@ export function ToolbarButtonComponent(
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
-      props.onClickWithEvent?.(event.nativeEvent);
       props.onClick?.();
     }
   };
 
   const handleClick = (event: React.MouseEvent) => {
     if (event.button === 0) {
-      props.onClickWithEvent?.(event.nativeEvent);
       props.onClick?.();
     }
   };
