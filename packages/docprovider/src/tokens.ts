@@ -23,19 +23,6 @@ export interface IDocumentProvider {
   putInitializedState(): void;
 
   /**
-   * Acquire a lock.
-   * Returns a Promise that resolves to the lock number.
-   */
-  acquireLock(): Promise<number>;
-
-  /**
-   * Release a lock.
-   *
-   * @param lock The lock to release.
-   */
-  releaseLock(lock: number): void;
-
-  /**
    * Returns a Promise that resolves when renaming is ackownledged.
    * TODO: make it non-optional in JupyterLab 4.0
    */

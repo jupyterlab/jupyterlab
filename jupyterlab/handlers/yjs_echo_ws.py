@@ -28,25 +28,18 @@ ROOMS = {}
 
 
 class ServerMessageType(IntEnum):
-    # The client is asking for a lock. Should return a lock-identifier if one is available.
-    ACQUIRE_LOCK = 127
-    # The client is asking to release a lock to make it available to other users again.
-    RELEASE_LOCK = 126
     # The client is asking to retrieve the initial state of the Yjs document. Return an empty buffer when nothing is available.
-    REQUEST_INITIALIZED_CONTENT = 125
-    # The client retrieved an empty "initial content" and generated the initial state of the document after acquiring a lock. Store this.
-    PUT_INITIALIZED_CONTENT = 124
+    REQUEST_INITIALIZED_CONTENT = 127
+    # The client retrieved an empty "initial content" and generated the initial state of the document. Store this.
+    PUT_INITIALIZED_CONTENT = 126
     # The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
     # The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
-    RENAME_SESSION = 123
+    RENAME_SESSION = 125
 
 
 class YjsRoom:
     def __init__(self, type):
         self.type = type
-        self.lock = None
-        self.timeout = None
-        self.lock_holder = None
         self.clients = {}
         self.content = bytes([])
         self.ydoc = YDOCS.get(type, YFILE)()
@@ -85,35 +78,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         # print("[YJSEchoWS]: message,", message)
         room_id = self.room_id
         room = ROOMS.get(room_id)
-        if message[0] == ServerMessageType.ACQUIRE_LOCK:
-            now = int(time.time())
-            if room.lock is None or now - room.timeout > (
-                10 * len(room.clients)
-            ):  # no lock or timeout
-                room.lock = now
-                room.timeout = now
-                room.lock_holder = self.id
-                # print('Acquired new lock:', room.lock)
-                # return acquired lock
-                self.write_message(
-                    bytes([ServerMessageType.ACQUIRE_LOCK])
-                    + room.lock.to_bytes(4, byteorder="little"),
-                    binary=True,
-                )
-
-            elif room.lock_holder == self.id:
-                # print('Update lock:', room.timeout)
-                room.timeout = now
-
-        elif message[0] == ServerMessageType.RELEASE_LOCK:
-            releasedLock = int.from_bytes(message[1:], byteorder="little")
-            # print("trying release lock:", releasedLock)
-            if room.lock == releasedLock:
-                # print('released lock:', room.lock)
-                room.lock = None
-                room.timeout = None
-                room.lock_holder = None
-        elif message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
+        if message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
             # print("client requested initial content")
             self.write_message(
                 bytes([ServerMessageType.REQUEST_INITIALIZED_CONTENT]) + room.content, binary=True
