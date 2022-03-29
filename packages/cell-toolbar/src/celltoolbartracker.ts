@@ -146,7 +146,12 @@ export class CellToolbarTracker implements IDisposable {
             new ToolbarButton({
               icon: LabIcon.resolve({ icon: toolbarItem.icon ?? '' }),
               className: `jp-cell-${toolbarItem.cellType ?? 'all'}`,
+              // We need to listen for the actual onClick event, not onMouseDown,
+              // to avoid the "click" event causing another cell to get the focus.
               actualOnClick: true,
+              onClick: () => {
+                void this._commands.execute(toolbarItem.command!);
+              },
               tooltip: toolbarItem.tooltip
                 ? toolbarItem.tooltip.toString()
                 : this._commands.label(toolbarItem.command)
