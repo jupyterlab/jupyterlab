@@ -39,15 +39,37 @@ export class LaTeXToCModel extends EditorToCModel {
       string
     >;
 
+    const levels = [];
+    let previousLevel = levels.length;
     const headings = new Array<IEditorHeading>();
     for (let i = 0; i < lines.length; i++) {
       const match = lines[i].match(SECTIONS);
       if (match) {
-        headings.push({
-          text: match[2],
-          level: LATEX_LEVELS[match[1]],
-          line: i
-        });
+        const level = LATEX_LEVELS[match[1]];
+        if (level <= this.configuration.maximalDepth) {
+          // Update prefix
+          if (level > previousLevel) {
+            // Initialize the new level
+            levels[level - 1] = 1;
+          } else {
+            // Increment the current level
+            levels[level - 1] += 1;
+
+            // Drop higher levels
+            if (level < previousLevel) {
+              levels.splice(level);
+            }
+          }
+          previousLevel = level;
+
+          headings.push({
+            text: match[2],
+            // If the header list skips some level, replace missing elements by 0
+            prefix: levels.map(level => level ?? 0).join('.') + '.',
+            level,
+            line: i
+          });
+        }
       }
     }
     return headings;
