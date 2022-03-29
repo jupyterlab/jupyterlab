@@ -917,7 +917,8 @@ function activateWidgetFactory(
   const preferKernelOption = PageConfig.getOption('notebookStartsKernel');
 
   // If the option is not set, assume `true`
-  const preferKernelValue = preferKernelOption === '' || preferKernelOption.toLowerCase() === 'true';
+  const preferKernelValue =
+    preferKernelOption === '' || preferKernelOption.toLowerCase() === 'true';
 
   const { commands } = app;
   let toolbarFactory:
