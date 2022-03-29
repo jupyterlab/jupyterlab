@@ -149,8 +149,8 @@ and select “New Console for Notebook”:
 
 .. _cell-toolbar:
 
-If there is enough room for it, each cell has a toolbar that provides quick access to 
-commonly-used functions. If you would like to disable the cell toolbar, run 
-``jupyter labextension disable @jupyterlab/cell-toolbar-extension`` on the command line. 
-You can enable it again by running 
+If there is enough room for it, each cell has a toolbar that provides quick access to
+commonly-used functions. If you would like to disable the cell toolbar, run
+``jupyter labextension disable @jupyterlab/cell-toolbar-extension`` on the command line.
+You can enable it again by running
 ``jupyter labextension enable @jupyterlab/cell-toolbar-extension``.
