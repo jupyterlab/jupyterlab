@@ -13,3 +13,4 @@ export * from './treeview';
 export * from './tocitem';
 export * from './toctree';
 export * from './tokens';
+export * from './utils';

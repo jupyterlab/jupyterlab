@@ -17,7 +17,7 @@ export abstract class EditorToCModel extends TableOfContentsModel<
     super.activeHeading = heading;
     if (heading) {
       this.widget.content.editor.setCursorPosition({
-        line: heading.line - 1,
+        line: heading.line,
         column: 0
       });
     }

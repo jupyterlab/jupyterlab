@@ -124,7 +124,7 @@ namespace Private {
           headings1[i].level !== headings2[i].level ||
           headings1[i].text !== headings2[i].text
         ) {
-          break;
+          return false;
         }
       }
       return true;

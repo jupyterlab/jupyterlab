@@ -26,7 +26,7 @@ export class PythonToCModel extends EditorToCModel {
 
     let indent = 1;
 
-    let lineIdx = 0;
+    let lineIdx = -1;
     for (const line of lines) {
       lineIdx++;
       const hasKeyword = KEYWORDS.exec(line);

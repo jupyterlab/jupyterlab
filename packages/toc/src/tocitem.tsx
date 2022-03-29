@@ -40,15 +40,19 @@ export class TOCItem extends React.PureComponent<
         className="jp-tocItem"
         key={`${heading.level}-${heading.text}`}
         onClick={(event: React.SyntheticEvent<HTMLLIElement>) => {
-          event.preventDefault();
-          onClick(heading);
+          // React only on deepest item
+          if (!event.defaultPrevented) {
+            event.preventDefault();
+            onClick(heading);
+          }
         }}
       >
         <span className="jp-tocItem-content">
           {children && (
             <button
               className="jp-tocItem-collapser"
-              onClick={() => {
+              onClick={(event: React.MouseEvent) => {
+                event.preventDefault();
                 onCollapse(heading);
               }}
             >
@@ -59,6 +63,7 @@ export class TOCItem extends React.PureComponent<
               )}
             </button>
           )}
+          {heading.prefix}
           {heading.text}
         </span>
         {children && !heading.collapsed && <ol>{children}</ol>}
