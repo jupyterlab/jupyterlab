@@ -19,6 +19,11 @@
   position: absolute;
   top: 5px;
   right: 8px;
+
+  /* Override .jp-Toolbar */
+  background-color: inherit;
+  border-bottom: inherit;
+  box-shadow: inherit;
 }
 
 /* Overrides for mobile view: Move cell toolbar up, don't hide it if it overlaps */

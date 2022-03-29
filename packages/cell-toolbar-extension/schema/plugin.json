@@ -5,7 +5,7 @@
   "properties": {
     "toolbar": {
       "title": "List of toolbar items",
-      "description": "An item is defined by a 'command' name and an 'icon' name + optionally a 'tooltip' and the 'cellType' on which it applies",
+      "description": "An item is defined by a 'name', a 'command' name, and an 'icon' name",
       "type": "array",
       "items": {
         "$ref": "#/definitions/toolbarItem"
@@ -14,32 +14,32 @@
         {
           "command": "notebook:duplicate-below",
           "icon": "ui-components:duplicate",
-          "tooltip": "Duplicate Cell"
+          "name": "Duplicate Cell"
         },
         {
           "command": "notebook:move-cell-up",
           "icon": "ui-components:move-up",
-          "tooltip": "Move Cell Up"
+          "name": "Move Cell Up"
         },
         {
           "command": "notebook:move-cell-down",
           "icon": "ui-components:move-down",
-          "tooltip": "Move Cell Down"
+          "name": "Move Cell Down"
         },
         {
           "command": "notebook:insert-cell-above",
           "icon": "ui-components:add-above",
-          "tooltip": "Insert Cell Above"
+          "name": "Insert Cell Above"
         },
         {
           "command": "notebook:insert-cell-below",
           "icon": "ui-components:add-below",
-          "tooltip": "Insert Cell Below"
+          "name": "Insert Cell Below"
         },
         {
           "command": "notebook:delete-cell",
           "icon": "ui-components:delete",
-          "tooltip": "Delete Cell"
+          "name": "Delete Cell"
         }
       ]
     }
@@ -48,29 +48,50 @@
   "type": "object",
   "definitions": {
     "toolbarItem": {
-      "type": "object",
       "properties": {
-        "command": {
-          "title": "Command ID to be executed",
+        "name": {
+          "title": "Unique name",
           "type": "string"
+        },
+        "args": {
+          "title": "Command arguments",
+          "type": "object"
+        },
+        "command": {
+          "title": "Command id",
+          "type": "string",
+          "default": ""
+        },
+        "disabled": {
+          "title": "Whether the item is ignored or not",
+          "type": "boolean",
+          "default": false
         },
         "icon": {
-          "title": "Item icon ID",
+          "title": "Item icon id",
+          "description": "If defined, it will override the command icon",
           "type": "string"
         },
-        "tooltip": {
-          "title": "Item tooltip",
+        "label": {
+          "title": "Item label",
+          "description": "If defined, it will override the command label",
           "type": "string"
         },
-        "cellType": {
-          "title": "Cell type on which to display the item",
-          "description": "Leave empty to define on all cells",
+        "type": {
+          "title": "Item type",
           "type": "string",
-          "enum": ["code", "markdown", "raw"]
+          "enum": ["command", "spacer"]
+        },
+        "rank": {
+          "title": "Item rank",
+          "type": "number",
+          "minimum": 0,
+          "default": 50
         }
       },
+      "required": ["name"],
       "additionalProperties": false,
-      "required": ["command", "icon"]
+      "type": "object"
     }
   }
 }

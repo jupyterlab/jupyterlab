@@ -10,20 +10,20 @@ import {
   IObservableUndoableList
 } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LabIcon, Toolbar, ToolbarButton } from '@jupyterlab/ui-components';
 
 import { each } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { CellToolbarWidget } from './celltoolbarwidget';
-import { ICellMenuItem } from './tokens';
 
-const DEFAULT_LEFT_MENU: ICellMenuItem[] = [];
+const DEFAULT_LEFT_MENU: ISettingRegistry.IToolbarItem[] = [];
 
 /**
- * Widget cell toolbar class
+ * Widget cell toolbar classes
  */
-const CELL_BAR_CLASS = 'jp-cell-bar';
+const CELL_TOOLBAR_CLASS = 'jp-cell-toolbar';
+const CELL_MENU_CLASS = 'jp-cell-menu';
 
 /**
  * Class for a cell whose contents overlap with the cell toolbar
@@ -129,10 +129,39 @@ export class CellToolbarTracker implements IDisposable {
     if (cell) {
       const { toolbar } = (this._settings?.composite as any) ?? {};
 
-      const toolbar_ = toolbar === null ? [] : toolbar ?? DEFAULT_LEFT_MENU;
+      const toolbarItems: ISettingRegistry.IToolbarItem[] =
+        toolbar === null ? [] : toolbar ?? DEFAULT_LEFT_MENU;
 
-      const toolbarWidget = new CellToolbarWidget(this._commands, toolbar_);
-      toolbarWidget.addClass(CELL_BAR_CLASS);
+      const toolbarWidget = new Toolbar();
+      toolbarWidget.addClass(CELL_MENU_CLASS);
+
+      const toolbarLayout = toolbarWidget.layout as PanelLayout;
+
+      toolbarItems.forEach(toolbarItem => {
+        if (
+          toolbarItem.command !== undefined &&
+          this._commands.hasCommand(toolbarItem.command)
+        ) {
+          toolbarLayout.addWidget(
+            new ToolbarButton({
+              icon: LabIcon.resolve({ icon: toolbarItem.icon ?? '' }),
+              className: `jp-cell-${toolbarItem.cellType ?? 'all'}`,
+              onClickWithEvent: (e: Event): void => {
+                // Prevent propagation of this event in case the command causes the
+                // current cell to move. If the cell moves and the event propagates to the
+                // new cell, this may have an effect on the new cell.
+                void this._commands.execute(toolbarItem.command!);
+                e.stopPropagation();
+              },
+              tooltip: toolbarItem.tooltip
+                ? toolbarItem.tooltip.toString()
+                : this._commands.label(toolbarItem.command)
+            })
+          );
+        }
+      });
+
+      toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
       (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
 
       // For rendered markdown, watch for resize events.
@@ -151,7 +180,7 @@ export class CellToolbarTracker implements IDisposable {
     const widgets = (cell.layout as PanelLayout).widgets;
 
     // Search for header using the CSS class or use the first one if not found.
-    return widgets.filter(widget => widget.hasClass(CELL_BAR_CLASS)) || [];
+    return widgets.filter(widget => widget.hasClass(CELL_TOOLBAR_CLASS)) || [];
   }
 
   private _removeToolbar(model: ICellModel): void {
