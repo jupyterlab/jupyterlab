@@ -133,7 +133,7 @@ class BuildHandler(ExtensionHandlerMixin, APIHandler):
     @web.authenticated
     @gen.coroutine
     def delete(self):
-        self.log.warninging("Canceling build")
+        self.log.warning("Canceling build")
         try:
             yield self.builder.cancel()
         except Exception as e:

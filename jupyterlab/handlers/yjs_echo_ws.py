@@ -64,7 +64,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
 
     async def get(self, *args, **kwargs):
         if self.get_current_user() is None:
-            self.log.warninging("Couldn't authenticate WebSocket connection")
+            self.log.warning("Couldn't authenticate WebSocket connection")
             raise web.HTTPError(403)
         return await super().get(*args, **kwargs)
 

@@ -968,7 +968,7 @@ class _AppHandler(object):
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         if name not in self.info["extensions"]:
-            self.logger.warninging('No labextension named "%s" installed' % name)
+            self.logger.warning('No labextension named "%s" installed' % name)
             return False
         return self._update_extension(name)
 
@@ -1012,10 +1012,10 @@ class _AppHandler(object):
             return self.install_extension(path)
 
         # Warn that it is a linked package.
-        self.logger.warninging(
+        self.logger.warning(
             "Installing %s as a linked package because it does not have extension metadata:", path
         )
-        [self.logger.warninging("   %s" % m) for m in messages]
+        [self.logger.warning("   %s" % m) for m in messages]
 
         # Add to metadata.
         config = self._read_build_config()
@@ -2443,7 +2443,7 @@ def _fetch_package_metadata(registry, name, logger):
         with contextlib.closing(urlopen(req)) as response:
             return json.loads(response.read().decode("utf-8"))
     except URLError as exc:
-        logger.warninging("Failed to fetch package metadata for %r: %r", name, exc)
+        logger.warning("Failed to fetch package metadata for %r: %r", name, exc)
         raise
 
 
