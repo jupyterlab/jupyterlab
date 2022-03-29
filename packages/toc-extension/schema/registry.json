@@ -30,6 +30,12 @@
     }
   ],
   "properties": {
+    "maximalDepth": {
+      "title": "Maximal depth of headings",
+      "type": "integer",
+      "minimum": 1,
+      "default": 4
+    },
     "numberingH1": {
       "title": "Enable h1 numbering",
       "description": "Whether to number first-level headings",
@@ -45,7 +51,7 @@
     "syncCollapseState": {
       "type": "boolean",
       "title": "Synchronize collapse state",
-      "description": "If set to true, when a header is collapsed in the table of contents the corresponding section in the notebook is collapsed as well and vice versa.",
+      "description": "If set to true, when a heading is collapsed in the table of contents the corresponding section in the notebook is collapsed as well and vice versa.",
       "default": false
     }
   },

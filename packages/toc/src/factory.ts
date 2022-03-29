@@ -37,10 +37,14 @@ export abstract class TableOfContentsFactory<W extends IDocumentWidget>
    * Create a new table of contents model for the widget
    *
    * @param widget - widget
+   * @param configuration - Table of contents configuration
    * @returns The table of contens model
    */
-  createNew(widget: W): TableOfContentsModel<TableOfContents.IHeading, W> {
-    const model = this._createNew(widget);
+  createNew(
+    widget: W,
+    configuration?: TableOfContents.IConfig
+  ): TableOfContentsModel<TableOfContents.IHeading, W> {
+    const model = this._createNew(widget, configuration);
 
     const context = widget.context;
 
@@ -76,6 +80,7 @@ export abstract class TableOfContentsFactory<W extends IDocumentWidget>
   }
 
   protected abstract _createNew(
-    widget: W
+    widget: W,
+    configuration?: TableOfContents.IConfig
   ): TableOfContentsModel<TableOfContents.IHeading, W>;
 }

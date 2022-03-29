@@ -53,6 +53,7 @@ export class TOCTree extends React.PureComponent<ITOCTreeProps> {
 
           nested.push(
             <TOCItem
+              key={`${current.level}-${current.text}`}
               heading={current}
               onClick={this.props.setActiveHeading}
               onCollapse={this.props.onCollapseChange}

@@ -6,7 +6,7 @@ import type { Cell } from '@jupyterlab/cells';
 import { IObservableList } from '@jupyterlab/observables';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { VDomRenderer } from '@jupyterlab/ui-components';
-import { Token } from '@lumino/coreutils';
+import { JSONObject, Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { Widget } from '@lumino/widgets';
 
@@ -22,9 +22,13 @@ export interface ITableOfContentsRegistry {
    * -   If unable to find a table of contents model, the method return `undefined`.
    *
    * @param widget - widget
+   * @param configuration - Table of contents configuration
    * @returns Table of contents model or undefined if not found
    */
-  getModel(widget: Widget): TableOfContents.Model | undefined;
+  getModel(
+    widget: Widget,
+    configuration?: TableOfContents.IConfig
+  ): TableOfContents.Model | undefined;
 
   /**
    * Adds a table of contents factory to the registry.
@@ -111,10 +115,46 @@ export namespace TableOfContents {
      * Create a new table of contents model for the widget
      *
      * @param widget - widget
+     * @param configuration - Table of contents configuration
      * @returns The table of contens model
      */
-    createNew: (widget: W) => IModel<IHeading>;
+    createNew: (
+      widget: W,
+      configuration?: TableOfContents.IConfig
+    ) => IModel<IHeading>;
   }
+
+  /**
+   * Table of Contents configuration
+   *
+   * #### Notes
+   * A document model may ignore some of those options.
+   */
+  export interface IConfig extends JSONObject {
+    /**
+     * Maximal depth of headings to display
+     */
+    maximalDepth: number;
+    /**
+     * Whether to number first-level headings or not.
+     */
+    numberingH1: boolean;
+    /**
+     * Whether to include cell outputs in headings or not.
+     */
+    includeOutputs: boolean;
+    /**
+     * Whether to synchronize heading collapse state between the ToC and the document or not.
+     */
+    synchronizeCollapseState: boolean;
+  }
+
+  export const defaultConfig: IConfig = {
+    maximalDepth: 4,
+    numberingH1: true,
+    includeOutputs: true,
+    synchronizeCollapseState: false
+  };
 
   /**
    * Interface describing a heading.
@@ -163,6 +203,8 @@ export namespace TableOfContents {
     activeHeading: H | null;
 
     isActive: boolean;
+
+    configuration: IConfig;
 
     /**
      * Returns the list of headings.

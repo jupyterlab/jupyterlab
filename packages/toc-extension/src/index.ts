@@ -21,7 +21,6 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -56,10 +55,12 @@ async function activateTOC(
   settingRegistry?: ISettingRegistry | null
 ): Promise<ITableOfContentsRegistry> {
   const trans = (translator ?? nullTranslator).load('jupyterlab');
+  let configuration = { ...TableOfContents.defaultConfig };
+
   // Create the ToC widget:
   const toc = new TableOfContentsPanel(rendermime, translator ?? undefined);
 
-  const tocModels = new WeakMap<Widget, TableOfContents.Model | null>();
+  const tocModels = new Map<string, TableOfContents.Model | null>();
 
   // Create the ToC registry:
   const registry = new TableOfContentsRegistry();
@@ -131,11 +132,26 @@ async function activateTOC(
   }
 
   // Attempt to load plugin settings:
-  // @ts-ignore
   let settings: ISettingRegistry.ISettings | undefined;
   if (settingRegistry) {
     try {
       settings = await settingRegistry.load(extension.id);
+      const updateSettings = (plugin: ISettingRegistry.ISettings) => {
+        const composite = plugin.composite;
+        for (const key of [...Object.keys(configuration)]) {
+          configuration[key] = composite[key] as any;
+        }
+
+        for (const model of tocModels.values()) {
+          if (model) {
+            model.configuration = configuration;
+          }
+        }
+      };
+      if (settings) {
+        settings.changed.connect(updateSettings);
+        updateSettings(settings);
+      }
     } catch (error) {
       console.error(
         `Failed to load settings for the Table of Contents extension.\n\n${error}`
@@ -206,10 +222,16 @@ async function activateTOC(
     if (!widget) {
       return;
     }
-    let model = tocModels.get(widget);
-    if (!model) {
-      model = registry.getModel(widget) ?? null;
-      tocModels.set(widget, model);
+    const id = widget.id;
+    let model = tocModels.get(id);
+    if (!model || model.isDisposed) {
+      model = registry.getModel(widget, configuration) ?? null;
+      tocModels.set(id, model);
+
+      widget.disposed.connect(() => {
+        tocModels.delete(id);
+        model?.dispose();
+      });
     }
 
     toc.model = model;

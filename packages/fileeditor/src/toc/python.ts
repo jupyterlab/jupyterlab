@@ -63,9 +63,15 @@ export class PythonToCModel extends TableOfContentsModel<
         }
         processingImports = isImport;
 
+        const level = 1 + start / indent;
+
+        if (level > this.configuration.maximalDepth) {
+          continue;
+        }
+
         headings.push({
           text: line.slice(start),
-          level: 1 + start / indent,
+          level,
           line: lineIdx
         });
       }
@@ -101,9 +107,13 @@ export class PythonToCFactory extends TableOfContentsFactory<
    * Create a new table of contents model for the widget
    *
    * @param widget - widget
+   * @param configuration - Table of contents configuration
    * @returns The table of contents model
    */
-  protected _createNew(widget: IDocumentWidget<FileEditor>): PythonToCModel {
-    return new PythonToCModel(widget);
+  protected _createNew(
+    widget: IDocumentWidget<FileEditor>,
+    configuration?: TableOfContents.IConfig
+  ): PythonToCModel {
+    return new PythonToCModel(widget, configuration);
   }
 }

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel } from '@jupyterlab/ui-components';
+import { JSONExt } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { TableOfContents } from './tokens';
 
@@ -16,10 +17,11 @@ export abstract class TableOfContentsModel<
    *
    * @param widget The widget to search in
    */
-  constructor(protected widget: T) {
+  constructor(protected widget: T, configuration?: TableOfContents.IConfig) {
     super();
     this._isActive = false;
     this._activeHeading = null;
+    this._configuration = configuration ?? { ...TableOfContents.defaultConfig };
     this._headings = new Array<H>();
   }
 
@@ -33,6 +35,16 @@ export abstract class TableOfContentsModel<
   }
   set activeHeading(heading: H | null) {
     this._activeHeading = heading;
+  }
+
+  get configuration(): TableOfContents.IConfig {
+    return this._configuration;
+  }
+  set configuration(c: TableOfContents.IConfig) {
+    if (!JSONExt.deepEqual(this._configuration, c)) {
+      this._configuration = c;
+      this.stateChanged.emit();
+    }
   }
 
   /**
@@ -95,6 +107,7 @@ export abstract class TableOfContentsModel<
   }
 
   private _activeHeading: H | null;
+  private _configuration: TableOfContents.IConfig;
   private _headings: H[];
   private _isActive: boolean;
   private _title?: string;
