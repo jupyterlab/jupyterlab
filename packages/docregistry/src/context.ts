@@ -596,7 +596,7 @@ export class Context<
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue = null;
-    if (PageConfig.getOption('collaborative') != 'true') {
+    if (PageConfig.getOption('collaborative') !== 'true') {
       if (this._factory.fileFormat === 'json') {
         content = model.toJSON();
       } else {
