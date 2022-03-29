@@ -24,9 +24,8 @@ export interface IDocumentProvider {
 
   /**
    * Returns a Promise that resolves when renaming is ackownledged.
-   * TODO: make it non-optional in JupyterLab 4.0
    */
-  readonly renameAck?: Promise<boolean>;
+  readonly renameAck: Promise<boolean>;
 
   /**
    * This should be called by the docregistry when the file has been renamed to update the websocket connection url
