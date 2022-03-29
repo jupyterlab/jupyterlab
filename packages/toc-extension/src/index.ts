@@ -182,10 +182,6 @@ async function activateTOC(
       settings
     );
     registry.add(markdownGenerator);
-
-    // Create a LaTeX generator:
-    const latexGenerator = createLatexGenerator(editorTracker);
-    registry.add(latexGenerator);
   }
 
   // Create a rendered Markdown generator:

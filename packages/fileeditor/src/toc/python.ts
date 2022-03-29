@@ -2,35 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import {
-  TableOfContents,
-  TableOfContentsFactory,
-  TableOfContentsModel
-} from '@jupyterlab/toc';
+import { TableOfContents, TableOfContentsFactory } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from '../widget';
-
-export interface IPythonHeading extends TableOfContents.IHeading {
-  line: number;
-}
+import { EditorToCModel, IEditorHeading } from './model';
 
 const KEYWORDS = new RegExp(/^\s*(class |def |from |import )/, 'd');
 
-export class PythonToCModel extends TableOfContentsModel<
-  IPythonHeading,
-  IDocumentWidget<FileEditor>
-> {
-  set activeHeading(heading: IPythonHeading | null) {
-    super.activeHeading = heading;
-    if (heading) {
-      this.widget.content.editor.setCursorPosition({
-        line: heading.line - 1,
-        column: 0
-      });
-    }
-  }
-
-  protected getHeadings(): IPythonHeading[] | null {
+export class PythonToCModel extends EditorToCModel {
+  protected getHeadings(): IEditorHeading[] | null {
     if (!this.isActive) {
       return null;
     }
@@ -41,7 +21,7 @@ export class PythonToCModel extends TableOfContentsModel<
     >;
 
     // Iterate over the lines to get the heading level and text for each line:
-    let headings = new Array<IPythonHeading>();
+    let headings = new Array<IEditorHeading>();
     let processingImports = false;
 
     let indent = 1;

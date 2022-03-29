@@ -33,6 +33,7 @@ import {
   FileEditorFactory,
   FileEditorSearchProvider,
   IEditorTracker,
+  LaTeXToCFactory,
   PythonToCFactory,
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
@@ -435,6 +436,7 @@ function activate(
     });
 
   if (tocRegistry) {
+    tocRegistry.add(new LaTeXToCFactory(tracker));
     tocRegistry.add(new PythonToCFactory(tracker));
   }
 
