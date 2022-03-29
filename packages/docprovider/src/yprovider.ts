@@ -78,6 +78,18 @@ export class WebSocketProviderWithLocks
         initialContentRequest.resolve(initialContent.byteLength > 0);
       }
     };
+    // Message handler that receives the rename acknowledge
+    this.messageHandlers[123] = (
+      encoder,
+      decoder,
+      provider,
+      emitSynced,
+      messageType
+    ) => {
+      this._renameAck.resolve(
+        decoding.readTailAsUint8Array(decoder)[0] ? true : false
+      );
+    };
     this._isInitialized = false;
     this._onConnectionStatus = this._onConnectionStatus.bind(this);
     this.on('status', this._onConnectionStatus);
@@ -95,10 +107,15 @@ export class WebSocketProviderWithLocks
     user.changed.connect(userChanged);
   }
 
+  get renameAck(): Promise<boolean> {
+    return this._renameAck.promise;
+  }
+
   setPath(newPath: string): void {
     if (newPath !== this._path) {
       this._path = newPath;
       const encoder = encoding.createEncoder();
+      this._renameAck = new PromiseDelegate<boolean>();
       encoding.write(encoder, 123);
       // writing a utf8 string to the encoder
       const escapedPath = unescape(
@@ -244,6 +261,7 @@ export class WebSocketProviderWithLocks
     reject: () => void;
   } | null = null;
   private _initialContentRequest: PromiseDelegate<boolean> | null = null;
+  private _renameAck: PromiseDelegate<boolean>;
 }
 
 /**
