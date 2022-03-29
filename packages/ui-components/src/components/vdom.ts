@@ -78,6 +78,10 @@ export abstract class ReactWidget extends Widget {
         ReactDOM.render(vnode, this.node, resolve);
       } else if (vnode) {
         ReactDOM.render(vnode, this.node, resolve);
+      } else {
+        // If the virtual node is null, unmount the node content
+        ReactDOM.unmountComponentAtNode(this.node);
+        resolve();
       }
     });
   }
