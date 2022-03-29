@@ -172,18 +172,6 @@ async function activateTOC(
     registry.add(notebookGenerator);
   }
 
-  // Create a Markdown generator:
-  if (editorTracker) {
-    const markdownGenerator = createMarkdownGenerator(
-      editorTracker,
-      toc,
-      rendermime.sanitizer,
-      translator,
-      settings
-    );
-    registry.add(markdownGenerator);
-  }
-
   // Create a rendered Markdown generator:
   if (markdownViewerTracker) {
     const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
@@ -204,7 +192,9 @@ async function activateTOC(
   }
 
   // Connect to current widget
-  onConnect();
+  app.restored.then(() => {
+    onConnect();
+  });
 
   return registry;
 
