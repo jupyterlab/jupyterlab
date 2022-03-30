@@ -29,9 +29,9 @@ const LATEX_LEVELS: { [label: string]: number } = {
 const SECTIONS = /^\s*\\(section|subsection|subsubsection){(.+)}/;
 
 export class LaTeXToCModel extends EditorToCModel {
-  protected getHeadings(): IEditorHeading[] | null {
+  protected getHeadings(): Promise<IEditorHeading[] | null> {
     if (!this.isActive) {
-      return null;
+      return Promise.resolve(null);
     }
 
     // Split the text into lines:
@@ -72,7 +72,7 @@ export class LaTeXToCModel extends EditorToCModel {
         }
       }
     }
-    return headings;
+    return Promise.resolve(headings);
   }
 }
 

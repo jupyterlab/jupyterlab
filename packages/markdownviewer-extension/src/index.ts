@@ -16,13 +16,15 @@ import {
   IMarkdownViewerTracker,
   MarkdownDocument,
   MarkdownViewer,
-  MarkdownViewerFactory
+  MarkdownViewerFactory,
+  MarkdownViewerToCFactory
 } from '@jupyterlab/markdownviewer';
 import {
   IRenderMimeRegistry,
   markdownRendererFactory
 } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -46,7 +48,7 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
   id: '@jupyterlab/markdownviewer-extension:plugin',
   provides: IMarkdownViewerTracker,
   requires: [IRenderMimeRegistry, ITranslator],
-  optional: [ILayoutRestorer, ISettingRegistry],
+  optional: [ILayoutRestorer, ISettingRegistry, ITableOfContentsRegistry],
   autoStart: true
 };
 
@@ -58,7 +60,8 @@ function activate(
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  tocRegistry: ITableOfContentsRegistry | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
   const { commands, docRegistry } = app;
@@ -173,6 +176,12 @@ function activate(
     },
     label: trans.__('Show Markdown Editor')
   });
+
+  if (tocRegistry) {
+    tocRegistry.add(
+      new MarkdownViewerToCFactory(tracker, rendermime.markdownParser)
+    );
+  }
 
   return tracker;
 }

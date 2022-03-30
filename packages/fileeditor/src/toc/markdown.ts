@@ -12,16 +12,15 @@ import { EditorToCModel, IEditorHeading } from './model';
 import { FileEditor } from '../widget';
 
 export class MarkdownToCModel extends EditorToCModel {
-  protected getHeadings(): IEditorHeading[] | null {
+  protected getHeadings(): Promise<IEditorHeading[] | null> {
     if (!this.isActive) {
-      return null;
+      return Promise.resolve(null);
     }
 
     const content = this.widget.content.model.value.text;
 
     const headings = ToCUtils.Markdown.getHeadings(content, this.configuration);
-
-    return headings;
+    return Promise.resolve(headings);
   }
 }
 

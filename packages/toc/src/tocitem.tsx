@@ -47,7 +47,7 @@ export class TOCItem extends React.PureComponent<
           }
         }}
       >
-        <span className="jp-tocItem-content">
+        <span className="jp-tocItem-content" title={heading.text}>
           {children && (
             <button
               className="jp-tocItem-collapser"

@@ -38,11 +38,8 @@ namespace CommandIDs {
  * @param app - Jupyter application
  * @param rendermime - rendered MIME registry
  * @param translator - translator
- * @param editorTracker - editor tracker
  * @param restorer - application layout restorer
  * @param labShell - Jupyter lab shell
- * @param markdownViewerTracker - Markdown viewer tracker
- * @param notebookTracker - notebook tracker
  * @param settingRegistry - setting registry
  * @returns table of contents registry
  */

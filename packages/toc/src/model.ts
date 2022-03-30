@@ -19,10 +19,12 @@ export abstract class TableOfContentsModel<
    */
   constructor(protected widget: T, configuration?: TableOfContents.IConfig) {
     super();
-    this._isActive = false;
     this._activeHeading = null;
     this._configuration = configuration ?? { ...TableOfContents.defaultConfig };
     this._headings = new Array<H>();
+    this._isActive = false;
+    this._isRefreshing = false;
+    this._needsRefreshing = false;
   }
 
   /**
@@ -35,6 +37,10 @@ export abstract class TableOfContentsModel<
   }
   set activeHeading(heading: H | null) {
     this._activeHeading = heading;
+  }
+
+  protected get isAlwaysActive(): boolean {
+    return false;
   }
 
   get configuration(): TableOfContents.IConfig {
@@ -59,9 +65,12 @@ export abstract class TableOfContentsModel<
   }
   set isActive(v: boolean) {
     this._isActive = v;
-    // Refresh on activation
-    if (this._isActive) {
-      this.refresh();
+    // Refresh on activation expect if it is always active
+    //  => a ToC model is always active e.g. when displaying numbering in the document
+    if (this._isActive && !this.isAlwaysActive) {
+      this.refresh().catch(reason => {
+        console.error('Failed to refresh ToC model.', reason);
+      });
     }
   }
 
@@ -91,13 +100,34 @@ export abstract class TableOfContentsModel<
     return false;
   }
 
-  protected abstract getHeadings(): H[] | null;
+  protected abstract getHeadings(): Promise<H[] | null>;
 
-  refresh(): void {
-    const newHeadings = this.getHeadings();
-    if (newHeadings && !Private.areHeadingsEqual(newHeadings, this._headings)) {
-      this._headings = newHeadings;
-      this.stateChanged.emit();
+  async refresh(): Promise<void> {
+    if (this._isRefreshing) {
+      // Schedule a refresh if one is in progress
+      this._needsRefreshing = true;
+      return Promise.resolve();
+    }
+
+    this._isRefreshing = true;
+    try {
+      const newHeadings = await this.getHeadings();
+
+      if (this._needsRefreshing) {
+        this._needsRefreshing = false;
+        this._isRefreshing = false;
+        return this.refresh();
+      }
+
+      if (
+        newHeadings &&
+        !Private.areHeadingsEqual(newHeadings, this._headings)
+      ) {
+        this._headings = newHeadings;
+        this.stateChanged.emit();
+      }
+    } finally {
+      this._isRefreshing = false;
     }
   }
 
@@ -110,6 +140,8 @@ export abstract class TableOfContentsModel<
   private _configuration: TableOfContents.IConfig;
   private _headings: H[];
   private _isActive: boolean;
+  private _isRefreshing: boolean;
+  private _needsRefreshing: boolean;
   private _title?: string;
 }
 
