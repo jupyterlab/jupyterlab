@@ -1,3 +1,7 @@
+ci:
+  # skip any check that needs internet access
+  skip: [check-jsonschema, prettier, eslint, stylelint, integrity]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.1.0
