@@ -728,9 +728,7 @@ export class Settings implements ISettingRegistry.ISettings {
       const defaultValue = this.default(key);
       if (
         value === undefined ||
-        value === null ||
         defaultValue === undefined ||
-        defaultValue === null ||
         JSONExt.deepEqual(value, JSONExt.emptyObject) ||
         JSONExt.deepEqual(value, JSONExt.emptyArray)
       ) {
