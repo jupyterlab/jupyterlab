@@ -9,13 +9,19 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { ellipsesIcon, folderIcon } from '@jupyterlab/ui-components';
+import { ellipsesIcon, folderIcon, LabIcon } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { ElementExt } from '@lumino/domutils';
 import { IDragEvent } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { FileBrowserModel } from './model';
+import slashSvgStr from '../style/icons/preferred.svg';
+
+const preferredIcon = new LabIcon({
+  name: 'filebrowser:preferred',
+  svgstr: slashSvgStr
+});
 
 /**
  * The class name added to the breadcrumb node.
@@ -26,6 +32,11 @@ const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
  * The class name for the breadcrumbs home node
  */
 const BREADCRUMB_HOME_CLASS = 'jp-BreadCrumbs-home';
+
+/**
+ * The class name for the breadcrumbs preferred node
+ */
+const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
 
 /**
  * The class name added to the breadcrumb node.
@@ -149,6 +160,18 @@ export class BreadCrumbs extends Widget {
     // Find a valid click target.
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
+      if (node.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+        this._model
+          .cd(PageConfig.getOption('preferredPath'))
+          .catch(error =>
+            showErrorMessage(this._trans.__('Open Error'), error)
+          );
+
+        // Stop the event propagation.
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
         node.classList.contains(BREADCRUMB_HOME_CLASS)
@@ -310,7 +333,8 @@ namespace Private {
     Home,
     Ellipsis,
     Parent,
-    Current
+    Current,
+    Preferred
   }
 
   /**
@@ -328,7 +352,12 @@ namespace Private {
     while (firstChild && firstChild.nextSibling) {
       node.removeChild(firstChild.nextSibling);
     }
-    node.appendChild(separators[0]);
+
+    if (PageConfig.getOption('preferredPath')) {
+      node.appendChild(breadcrumbs[Crumb.Preferred]);
+    } else {
+      node.appendChild(separators[0]);
+    }
 
     const parts = path.split('/');
     if (parts.length > 2) {
@@ -372,7 +401,13 @@ namespace Private {
     parent.className = BREADCRUMB_ITEM_CLASS;
     const current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
-    return [home, ellipsis, parent, current];
+    const preferred = preferredIcon.element({
+      className: BREADCRUMB_PREFERRED_CLASS,
+      tag: 'span',
+      title: PageConfig.getOption('preferredPath') || 'Jupyter Preferred Path',
+      stylesheet: 'breadCrumb'
+    });
+    return [home, ellipsis, parent, current, preferred];
   }
 
   /**
