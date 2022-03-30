@@ -55,13 +55,19 @@ try:
     from jupyter_packaging import get_data_files, npm_builder, wrap_installers
 
     npm = ["node", pjoin(HERE, NAME, "staging", "yarn.js")]
-    # In develop mode, just run yarn
-    builder = npm_builder(build_cmd=None, npm=npm, force=True)
-    cmdclass = wrap_installers(
-        post_develop=builder, post_dist=post_dist, ensured_targets=ensured_targets
-    )
+    # In develop mode, just run yarn, unless this is an sdist.
+    if os.path.exists(os.path.join(HERE, "buildutils")):
+        builder = npm_builder(build_cmd=None, npm=npm, force=True)
+        cmdclass = wrap_installers(
+            post_develop=builder, post_dist=post_dist, ensured_targets=ensured_targets
+        )
+    else:
+        cmdclass = wrap_installers(post_dist=post_dist, ensured_targets=ensured_targets)
 
-    setup_args = dict(cmdclass=cmdclass, data_files=get_data_files(data_files_spec))
+    setup_args = dict(
+        cmdclass=cmdclass,
+        data_files=get_data_files(data_files_spec)
+    )
 except ImportError:
     setup_args = dict()
 

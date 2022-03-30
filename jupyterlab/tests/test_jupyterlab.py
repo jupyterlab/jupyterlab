@@ -22,6 +22,7 @@ from jupyter_core import paths
 
 from jupyterlab import commands
 from jupyterlab.commands import (
+    DEV_DIR,
     AppOptions,
     _compare_ranges,
     _test_overlap,
@@ -460,6 +461,7 @@ class TestExtension(AppHandlerTest):
         assert self.pkg_names["extension"] in data
 
     @pytest.mark.slow
+    @pytest.mark.skipif(not os.path.exists(DEV_DIR), reason="Not in git checkout")
     def test_build_splice_packages(self):
         app_options = AppOptions(splice_source=True)
         assert install_extension(self.mock_extension) is True

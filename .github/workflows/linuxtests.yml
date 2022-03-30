@@ -92,3 +92,47 @@ jobs:
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
+
+  make_sdist:
+    name: Make SDist
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+      - name: Build SDist
+        run: |
+          pip install build
+          python -m build --sdist
+      - uses: actions/upload-artifact@v2
+        with:
+          name: "sdist"
+          path: dist/*.tar.gz
+
+  test_sdist:
+    runs-on: ubuntu-latest
+    needs: [make_sdist]
+    name: Install from SDist and Test
+    timeout-minutes: 20
+    steps:
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Download sdist
+        uses: actions/download-artifact@v2
+      - name: Install From SDist
+        run: |
+          set -ex
+          cd sdist
+          mkdir test
+          tar --strip-components=1 -zxvf *.tar.gz -C ./test
+          cd test
+          pip install -e .[test]
+          pip install pytest-github-actions-annotate-failures
+      - name: Run Test
+        run: |
+          cd sdist/test
+          pytest -vv || pytest -vv --lf
