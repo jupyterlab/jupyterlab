@@ -138,14 +138,3 @@ jobs:
         run: |
           cd sdist/test
           pytest -vv || pytest -vv --lf
-
-  pre-commit:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v2
-      - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-      - name: Install Jupyterlab
-        run: pip install -e .
-      - uses: pre-commit/action@v2.0.0
