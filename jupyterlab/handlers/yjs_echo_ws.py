@@ -3,8 +3,10 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import asyncio
 import uuid
 from enum import IntEnum
+from typing import Optional
 
 import pkg_resources
 import y_py as Y
@@ -49,6 +51,8 @@ class YjsRoom:
 
 class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
 
+    saving_document: Optional[asyncio.Task]
+
     # Override max_message size to 1GB
     @property
     def max_message_size(self):
@@ -63,6 +67,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
     def open(self, type_path):
         # print("[YJSEchoWS]: open", type_path)
         type, path = type_path.split(":", 1)
+        self.saving_document = None
         self.id = str(uuid.uuid4())
         self.room_id = path
         room = ROOMS.get(self.room_id)
@@ -73,10 +78,10 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         # Send SyncStep1 message (based on y-protocols)
         self.write_message(bytes([0, 0, 1, 0]), binary=True)
 
-    def on_message(self, message):
+    async def on_message(self, message):
         # print("[YJSEchoWS]: message,", message)
         room_id = self.room_id
-        room = ROOMS.get(room_id)
+        room = ROOMS[room_id]
         if message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
             # print("client requested initial content")
             self.write_message(
@@ -98,6 +103,15 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         elif room:
             if message[0] == 0:  # sync message
                 read_sync_message(self, room.ydoc.ydoc, message[1:])
+                if self.saving_document is not None and not self.saving_document.done():
+                    self.saving_document.cancel()
+                    self.saving_document = None
+                try:
+                    source = room.get_source()
+                except Exception:
+                    source = None
+                if source is not None:
+                    self.saving_document = asyncio.create_task(save_document(room_id, source))
             for client_id, (loop, hook_send_message, _) in room.clients.items():
                 if self.id != client_id:
                     loop.add_callback(hook_send_message, message)
@@ -118,6 +132,11 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
 
     def hook_send_message(self, msg):
         self.write_message(msg, binary=True)
+
+
+async def save_document(path, source):
+    await asyncio.sleep(1)
+    print("Saved:", path)
 
 
 message_yjs_sync_step1 = 0
