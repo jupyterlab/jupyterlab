@@ -17,6 +17,11 @@ API breaking changes
 Here is a list of JupyterLab npm packages that encountered API changes and therefore have
 bumped their major version (following semver convention):
 
+- ``@jupyterlab/docprovider`` from 3.x to 4.x
+   ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+   ``acquireLock`` and ``releaseLock`` have been removed from ``IDocumentProvider``.
+   ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   The ``renameAck`` property is
 - ``@jupyterlab/completer`` from 3.x to 4.x
    Major version bumped following the removal of ``ICompletionManager`` token and the replacement
    of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
