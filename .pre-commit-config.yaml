@@ -56,10 +56,9 @@ repos:
     hooks:
       - id: install-editable
         name: "Install in Editable Mode"
-        entry: "python -m pip install -e ."
+        entry: "./scripts/maybe_install.sh"
         language: system
-        stages: [manual]
-        require_serial: true
+        always_run: true
       - id: prettier
         name: prettier
         entry: 'npm run prettier:files'
