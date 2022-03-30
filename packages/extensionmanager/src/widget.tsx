@@ -862,18 +862,15 @@ risks or contain malicious code that runs on your machine.`)}
           </ErrorMessage>
         );
       } else {
+        const query = new RegExp(model.query?.toLowerCase() ?? '');
         installedContent.push(
           <ListView
             key="installed-items"
             listMode={model.listMode}
             viewType={'installed'}
-            entries={
-              model.searchResult.length > 0
-                ? model.installed.filter(
-                    entry => model.searchResult.indexOf(entry) > -1
-                  )
-                : model.installed
-            }
+            entries={model.installed.filter(
+              pkg => !model.query || query.test(pkg.name)
+            )}
             numPages={1}
             translator={this.translator}
             onPage={value => {

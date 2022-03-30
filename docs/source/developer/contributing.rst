@@ -424,7 +424,7 @@ Then, start JupyterLab using the dev build:
 
 .. code:: bash
 
-   jupyter lab --dev --NotebookApp.token=''  --no-browser
+   jupyter lab --dev-mode --NotebookApp.token=''  --no-browser
 
 Now run Lighthouse against this local server and show the results:
 
@@ -842,7 +842,7 @@ To test the docs run:
 
 .. code:: bash
 
-   py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+   python -m pytest --check-links -k .md . || python -m pytest --check-links -k .md --lf .
 
 The Read the Docs pages can be built using ``make``:
 
