@@ -4,12 +4,14 @@
 # Distributed under the terms of the Modified BSD License.
 
 import asyncio
+import json
 import uuid
 from enum import IntEnum
 from typing import Optional
 
 import pkg_resources
 import y_py as Y
+from anyio import open_file
 from jupyter_server.base.handlers import JupyterHandler
 from tornado import web
 from tornado.ioloop import IOLoop
@@ -78,7 +80,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         # Send SyncStep1 message (based on y-protocols)
         self.write_message(bytes([0, 0, 1, 0]), binary=True)
 
-    async def on_message(self, message):
+    def on_message(self, message):
         # print("[YJSEchoWS]: message,", message)
         room_id = self.room_id
         room = ROOMS[room_id]
@@ -103,15 +105,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         elif room:
             if message[0] == 0:  # sync message
                 read_sync_message(self, room.ydoc.ydoc, message[1:])
-                if self.saving_document is not None and not self.saving_document.done():
-                    self.saving_document.cancel()
-                    self.saving_document = None
-                try:
-                    source = room.get_source()
-                except Exception:
-                    source = None
-                if source is not None:
-                    self.saving_document = asyncio.create_task(save_document(room_id, source))
+                self.save_document()
             for client_id, (loop, hook_send_message, _) in room.clients.items():
                 if self.id != client_id:
                     loop.add_callback(hook_send_message, message)
@@ -133,10 +127,29 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
     def hook_send_message(self, msg):
         self.write_message(msg, binary=True)
 
+    def save_document(self):
+        room = ROOMS[self.room_id]
+        if self.saving_document is not None and not self.saving_document.done():
+            # the document is being saved, cancel that
+            self.saving_document.cancel()
+            self.saving_document = None
+        # the document might not be already fully created, try to generate its source
+        try:
+            source = room.get_source()
+        except Exception:
+            source = None
+        # save the document if we could generate its source
+        if source is not None:
+            if room.type == "notebook":
+                source = json.dumps(source, indent=2)
+            self.saving_document = asyncio.create_task(self._save_document(source))
 
-async def save_document(path, source):
-    await asyncio.sleep(1)
-    print("Saved:", path)
+    async def _save_document(self, source):
+        await asyncio.sleep(1)
+        path = self.room_id
+        self.log.info(f"Saving file at /{path}")
+        async with await open_file(path, "w") as f:
+            await f.write(source)
 
 
 message_yjs_sync_step1 = 0
