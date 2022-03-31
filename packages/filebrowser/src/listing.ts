@@ -1456,13 +1456,17 @@ export class DirListing extends Widget {
     const path = items[index].path;
     const selected = Object.keys(this.selection);
 
-    const wasItemSelectedViaCheckbox = this.isWithinCheckboxHitArea(event);
+    const isLeftClickOnCheckbox =
+      event.button === 0 &&
+      // On Mac, a left-click with the ctrlKey is treated as a right-click.
+      !(IS_MAC && event.ctrlKey) &&
+      this.isWithinCheckboxHitArea(event);
 
     // Handle toggling.
     if (
       (IS_MAC && event.metaKey) ||
       (!IS_MAC && event.ctrlKey) ||
-      wasItemSelectedViaCheckbox
+      isLeftClickOnCheckbox
     ) {
       if (this.selection[path]) {
         delete this.selection[path];

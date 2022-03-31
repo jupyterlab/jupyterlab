@@ -105,8 +105,7 @@ describe('filebrowser/listing', () => {
         ) as HTMLElement[];
         // JSDOM doesn't render anything, which means that all the elements have
         // zero dimensions, so this is needed in order for the DirListing
-        // mousedown handler to believe that the mousedown event is relevant to
-        // one of its items.
+        // mousedown handler to believe that the mousedown event is relevant.
         itemNodes[0].getBoundingClientRect = (): any => ({
           left: 0,
           right: 10,
@@ -138,6 +137,22 @@ describe('filebrowser/listing', () => {
         expect(dirListing.isSelected(items[1].name)).toBe(true);
       });
 
+      it('should reflect multiple items selected', async () => {
+        const itemNodes = Array.from(
+          dirListing.contentNode.children
+        ) as HTMLElement[];
+        const checkboxes = itemNodes.map(node =>
+          dirListing.renderer.getCheckboxNode!(node)
+        );
+        expect(checkboxes[0].checked).toBe(false);
+        expect(checkboxes[1].checked).toBe(false);
+        dirListing.selectNext();
+        dirListing.selectNext(true); // true = keep existing selection
+        await signalToPromise(dirListing.updated);
+        expect(checkboxes[0].checked).toBe(true);
+        expect(checkboxes[1].checked).toBe(true);
+      });
+
       // A double click on the item should open the item; however, a double
       // click on the checkbox should only check/uncheck the box.
       it('should not open item on double click', () => {
@@ -148,6 +163,32 @@ describe('filebrowser/listing', () => {
         simulate(checkbox, 'dblclick');
         expect(wasOpened).not.toHaveBeenCalled();
         dirListing.onItemOpened.disconnect(wasOpened);
+      });
+
+      it('should not become unchecked due to right-click on selected item', async () => {
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        itemNode.getBoundingClientRect = (): any => ({
+          left: 0,
+          right: 10,
+          top: 0,
+          bottom: 10
+        });
+        const checkbox = dirListing.renderer.getCheckboxNode!(itemNode);
+        const item = dirListing.sortedItems().next()!;
+        dirListing.selectItemByName(item.name);
+        await signalToPromise(dirListing.updated);
+        expect(checkbox.checked).toBe(true);
+        expect(dirListing.isSelected(item.name)).toBe(true);
+        simulate(checkbox, 'mousedown', {
+          clientX: 1,
+          clientY: 1,
+          button: 2
+        });
+        await signalToPromise(dirListing.updated);
+        // Item is still selected and checkbox is still checked after
+        // right-click.
+        expect(dirListing.isSelected(item.name)).toBe(true);
+        expect(checkbox.checked).toBe(true);
       });
 
       // This essentially tests that preventDefault has been called on the click
