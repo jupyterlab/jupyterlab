@@ -55,7 +55,7 @@ class TestAppHandlerRegistry(AppHandlerTest):
     def test_yarn_config_failure(self):
         with patch("subprocess.check_output") as check_output:
             check_output.side_effect = subprocess.CalledProcessError(
-                1, ["yarn", "config", "list"], stderr=b"yarn config failed.", stdout=b""
+                1, ["yarn", "config", "list"], b"", stderr=b"yarn config failed."
             )
 
             logger = logging.getLogger("jupyterlab")
