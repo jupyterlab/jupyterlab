@@ -4,6 +4,7 @@ import y_py as Y
 class YBaseDoc:
     def __init__(self):
         self._ydoc = Y.YDoc()
+        self._state = self._ydoc.get_map("state")
 
     @property
     def ydoc(self):
@@ -12,6 +13,16 @@ class YBaseDoc:
     @property
     def source(self):
         raise RuntimeError("Y document source generation not implemented")
+
+    @property
+    def dirty(self) -> None:
+        with self._ydoc.begin_transaction() as t:
+            return self._state.get(t, "dirty")
+
+    @dirty.setter
+    def dirty(self, value: bool) -> None:
+        with self._ydoc.begin_transaction() as t:
+            self._state.set(t, "dirty", value)
 
 
 class YFile(YBaseDoc):

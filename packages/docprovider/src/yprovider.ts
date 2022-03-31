@@ -74,6 +74,16 @@ export class WebSocketProvider
         decoding.readTailAsUint8Array(decoder)[0] ? true : false
       );
     };
+    // Message handler that receives the "content saved"
+    this.messageHandlers[124] = (
+      encoder,
+      decoder,
+      provider,
+      emitSynced,
+      messageType
+    ) => {
+      options.ymodel.dirty = false;
+    };
     this._isInitialized = false;
     this._onConnectionStatus = this._onConnectionStatus.bind(this);
     this.on('status', this._onConnectionStatus);

@@ -15,7 +15,7 @@ from anyio import open_file
 from jupyter_server.base.handlers import JupyterHandler
 from tornado import web
 from tornado.ioloop import IOLoop
-from tornado.websocket import WebSocketHandler
+from tornado.websocket import WebSocketClosedError, WebSocketHandler
 
 YDOCS = {}
 for ep in pkg_resources.iter_entry_points(group="jupyter_ydoc"):
@@ -31,13 +31,19 @@ ROOMS = {}
 
 
 class ServerMessageType(IntEnum):
+
     # The client is asking to retrieve the initial state of the Yjs document. Return an empty buffer when nothing is available.
     REQUEST_INITIALIZED_CONTENT = 127
+
     # The client retrieved an empty "initial content" and generated the initial state of the document. Store this.
     PUT_INITIALIZED_CONTENT = 126
+
     # The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
     # The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
     RENAME_SESSION = 125
+
+    # The document was saved (notify the front-end that the document is not dirty anymore).
+    CONTENT_SAVED = 124
 
 
 class YjsRoom:
@@ -47,8 +53,17 @@ class YjsRoom:
         self.content = bytes([])
         self.ydoc = YDOCS.get(type, YFILE)()
 
-    def get_source(self):
+    @property
+    def source(self):
         return self.ydoc.source
+
+    @property
+    def dirty(self) -> None:
+        return self.ydoc.dirty
+
+    @dirty.setter
+    def dirty(self, value: bool) -> None:
+        self.ydoc.dirty = value
 
 
 class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
@@ -59,6 +74,14 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
     @property
     def max_message_size(self):
         return 1024 * 1024 * 1024
+
+    @property
+    def room(self):
+        return ROOMS.get(self.room_id)
+
+    @room.setter
+    def room(self, value):
+        ROOMS[self.room_id] = value
 
     async def get(self, *args, **kwargs):
         if self.get_current_user() is None:
@@ -72,41 +95,37 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         self.saving_document = None
         self.id = str(uuid.uuid4())
         self.room_id = path
-        room = ROOMS.get(self.room_id)
-        if room is None:
-            room = YjsRoom(type)
-            ROOMS[self.room_id] = room
-        room.clients[self.id] = (IOLoop.current(), self.hook_send_message, self)
+        self.room = self.room or YjsRoom(type)
+        self.room.clients[self.id] = (IOLoop.current(), self.hook_send_message, self)
         # Send SyncStep1 message (based on y-protocols)
         self.write_message(bytes([0, 0, 1, 0]), binary=True)
 
     def on_message(self, message):
         # print("[YJSEchoWS]: message,", message)
-        room_id = self.room_id
-        room = ROOMS[room_id]
         if message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
             # print("client requested initial content")
             self.write_message(
-                bytes([ServerMessageType.REQUEST_INITIALIZED_CONTENT]) + room.content, binary=True
+                bytes([ServerMessageType.REQUEST_INITIALIZED_CONTENT]) + self.room.content,
+                binary=True,
             )
         elif message[0] == ServerMessageType.PUT_INITIALIZED_CONTENT:
             # print("client put initialized content")
-            room.content = message[1:]
+            self.room.content = message[1:]
         elif message[0] == ServerMessageType.RENAME_SESSION:
             # We move the room to a different entry and also change the room_id property of each connected client
             new_room_id = message[1:].decode("utf-8").split(":", 1)[1]
-            for _, (_, _, client) in room.clients.items():
+            ROOMS[new_room_id] = self.room
+            del ROOMS[self.room_id]
+            for _, (_, _, client) in self.room.clients.items():
                 client.room_id = new_room_id
-            ROOMS.pop(room_id)
-            ROOMS[new_room_id] = room
             # send rename acknowledge
             self.write_message(bytes([ServerMessageType.RENAME_SESSION, 1]), binary=True)
             # print("renamed room to " + new_room_id + ". Old room name was " + room_id)
-        elif room:
+        elif self.room:
             if message[0] == 0:  # sync message
-                read_sync_message(self, room.ydoc.ydoc, message[1:])
-                self.save_document()
-            for client_id, (loop, hook_send_message, _) in room.clients.items():
+                read_sync_message(self, self.room.ydoc.ydoc, message[1:])
+                self.maybe_save_document()
+            for client_id, (loop, hook_send_message, _) in self.room.clients.items():
                 if self.id != client_id:
                     loop.add_callback(hook_send_message, message)
 
@@ -127,29 +146,38 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
     def hook_send_message(self, msg):
         self.write_message(msg, binary=True)
 
-    def save_document(self):
-        room = ROOMS[self.room_id]
+    def maybe_save_document(self):
+        if not self.room.dirty:
+            return
         if self.saving_document is not None and not self.saving_document.done():
             # the document is being saved, cancel that
             self.saving_document.cancel()
             self.saving_document = None
         # the document might not be already fully created, try to generate its source
         try:
-            source = room.get_source()
+            source = self.room.source
         except Exception:
             source = None
         # save the document if we could generate its source
         if source is not None:
-            if room.type == "notebook":
+            if self.room.type == "notebook":
                 source = json.dumps(source, indent=2)
-            self.saving_document = asyncio.create_task(self._save_document(source))
+            self.saving_document = asyncio.create_task(self.save_document(source))
 
-    async def _save_document(self, source):
+    async def save_document(self, source):
+        # save after 1 second of inactivity to prevent too frequent saving
         await asyncio.sleep(1)
         path = self.room_id
         self.log.info(f"Saving file at /{path}")
         async with await open_file(path, "w") as f:
             await f.write(source)
+        # the client could be gone at that time (for instance, the user closed their browser)
+        # so try sending the "content saved" to the front-end and tolerate a closed WebSocket
+        try:
+            self.write_message(bytes([ServerMessageType.CONTENT_SAVED, 1]), binary=True)
+            # self.room.dirty = False
+        except WebSocketClosedError:
+            pass
 
 
 message_yjs_sync_step1 = 0
