@@ -2,6 +2,29 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "title": "Cell Toolbar",
   "description": "Cell Toolbar Settings.",
+  "jupyter.lab.toolbars": {
+    "Cell": [
+      {
+        "name": "duplicate",
+        "command": "notebook:duplicate-below",
+        "rank": 10
+      },
+      { "name": "moveUp", "command": "notebook:move-cell-up", "rank": 20 },
+      { "name": "moveDown", "command": "notebook:move-cell-down", "rank": 30 },
+      {
+        "name": "addAbove",
+        "command": "notebook:insert-cell-above",
+        "rank": 40
+      },
+      {
+        "name": "addBelow",
+        "command": "notebook:insert-cell-below",
+        "rank": 50
+      },
+      { "name": "delete", "command": "notebook:delete-cell", "rank": 60 }
+    ]
+  },
+  "jupyter.lab.transform": true,
   "properties": {
     "toolbar": {
       "title": "List of toolbar items",
@@ -10,38 +33,7 @@
       "items": {
         "$ref": "#/definitions/toolbarItem"
       },
-      "default": [
-        {
-          "command": "notebook:duplicate-below",
-          "icon": "ui-components:duplicate",
-          "name": "Duplicate Cell"
-        },
-        {
-          "command": "notebook:move-cell-up",
-          "icon": "ui-components:move-up",
-          "name": "Move Cell Up"
-        },
-        {
-          "command": "notebook:move-cell-down",
-          "icon": "ui-components:move-down",
-          "name": "Move Cell Down"
-        },
-        {
-          "command": "notebook:insert-cell-above",
-          "icon": "ui-components:add-above",
-          "name": "Insert Cell Above"
-        },
-        {
-          "command": "notebook:insert-cell-below",
-          "icon": "ui-components:add-below",
-          "name": "Insert Cell Below"
-        },
-        {
-          "command": "notebook:delete-cell",
-          "icon": "ui-components:delete",
-          "name": "Delete Cell"
-        }
-      ]
+      "default": []
     }
   },
   "additionalProperties": false,

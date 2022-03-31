@@ -10,10 +10,25 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../cell-toolbar"
     },
     {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../observables"
+    },
+    {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

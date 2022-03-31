@@ -7,3 +7,4 @@
  * @module cell-toolbar
  */
 export { CellBarExtension } from './celltoolbartracker';
+export { CellToolbarFactory } from './widget';

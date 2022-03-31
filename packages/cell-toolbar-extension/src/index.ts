@@ -11,26 +11,61 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import {
+  createToolbarFactory,
+  IToolbarWidgetRegistry
+} from '@jupyterlab/apputils';
+import { CellToolbarFactory } from '@jupyterlab/cell-toolbar';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { CellBarExtension } from '@jupyterlab/cell-toolbar';
+import { ITranslator } from '@jupyterlab/translation';
+import { Toolbar } from '@jupyterlab/ui-components';
+
+const FACTORY = 'Cell';
+const PLUGIN_ID = '@jupyterlab/cell-toolbar-extension:plugin';
+
+async function activatePlugin(
+  app: JupyterFrontEnd,
+  settingRegistry: ISettingRegistry,
+  translator: ITranslator,
+  toolbarRegistry: IToolbarWidgetRegistry | null
+) {
+  let toolbarFactory:
+    | ((
+        widget: IDocumentWidget<Toolbar>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
+    | undefined;
+
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      FACTORY,
+      PLUGIN_ID,
+      translator
+    );
+  }
+
+  const trans = translator.load('jupyterlab');
+
+  const factory = new CellToolbarFactory({
+    name: FACTORY,
+    label: trans.__('Notebook'),
+    fileTypes: ['notebook'],
+    toolbarFactory,
+    translator: translator
+  });
+
+  app.docRegistry.addWidgetFactory(factory);
+}
 
 const cellToolbar: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/cell-toolbar-extension:plugin',
+  id: PLUGIN_ID,
   autoStart: true,
-  activate: async (
-    app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry | null
-  ) => {
-    const settings =
-      (await settingRegistry?.load(
-        `@jupyterlab/cell-toolbar-extension:plugin`
-      )) ?? null;
-    app.docRegistry.addWidgetExtension(
-      'Notebook',
-      new CellBarExtension(app.commands, settings)
-    );
-  },
-  optional: [ISettingRegistry]
+  activate: activatePlugin,
+  requires: [ISettingRegistry, ITranslator],
+  optional: [IToolbarWidgetRegistry]
 };
 
 export default cellToolbar;
