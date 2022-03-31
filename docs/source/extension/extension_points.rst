@@ -916,13 +916,13 @@ And the toolbar item must follow this definition:
 Generic Widget with Toolbar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The logic explain in the previous paragraph can be used to customize any widgets with a toolbar.
+The logic detailed in the previous section can be used to customize any widgets with a toolbar.
 
 The additional keys used in ``jupyter.lab.toolbars`` settings attributes are:
 
 - ``FileBrowser``: Default file browser panel toolbar items
 
-To create the toolbar items from that definition on a widget would can use a logic like the following:
+Here is an example for enabling that definition on a widget:
 
 .. code:: typescript
 
@@ -936,7 +936,7 @@ To create the toolbar items from that definition on a widget would can use a log
      const browser = new FileBrowser();
 
      // Toolbar
-     // - Define a customized toolbar item
+     // - Define a custom toolbar item
      toolbarRegistry.registerFactory(
        'FileBrowser', // Factory name
        'uploader',
