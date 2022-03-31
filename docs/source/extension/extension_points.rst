@@ -780,7 +780,7 @@ Toolbar Registry
 
 JupyterLab provides an infrastructure to define and customize toolbar widgets
 from the settings, which is similar to that defining the context menu and the main menu
-bar. 
+bar.
 
 Document Widgets
 ^^^^^^^^^^^^^^^^
@@ -943,7 +943,7 @@ Here is an example for enabling that definition on a widget:
        (browser: FileBrowser) =>
          new Uploader({ model: browser.model, translator })
      );
- 
+
      // - Link the widget toolbar and its definition from the settings
      setToolbar(
        browser,
