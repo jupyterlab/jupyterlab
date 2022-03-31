@@ -795,16 +795,16 @@ export class DirListing extends Widget {
       node.classList.remove(SELECTED_CLASS);
       node.classList.remove(RUNNING_CLASS);
       node.classList.remove(CUT_CLASS);
-      if (renderer.getCheckboxNode) {
+      const checkbox = renderer.getCheckboxNode?.(node);
+      if (checkbox) {
         // Uncheck each file checkbox
-        const checkbox = renderer.getCheckboxNode(node);
         checkbox.checked = false;
       }
     });
 
     // Put the check-all checkbox in the header into the correct state
-    if (renderer.getCheckboxNode) {
-      const checkAllCheckbox = renderer.getCheckboxNode(this.headerNode);
+    const checkAllCheckbox = renderer.getCheckboxNode?.(this.headerNode);
+    if (checkAllCheckbox) {
       const totalSelected = Object.keys(this.selection).length;
       const allSelected = totalSelected === items.length;
       const someSelected = !allSelected && totalSelected > 0;
@@ -836,8 +836,8 @@ export class DirListing extends Widget {
           node.classList.add(CUT_CLASS);
         }
 
-        if (renderer.getCheckboxNode) {
-          const checkbox = renderer.getCheckboxNode(node);
+        const checkbox = renderer.getCheckboxNode?.(node);
+        if (checkbox) {
           checkbox.checked = true;
         }
       }
@@ -927,8 +927,8 @@ export class DirListing extends Widget {
     const header = this.headerNode;
     const renderer = this._renderer;
     if (header.contains(target)) {
-      if (renderer.getCheckboxNode && this.isWithinCheckboxHitArea(event)) {
-        const checkbox = renderer.getCheckboxNode(header);
+      const checkbox = renderer.getCheckboxNode?.(header);
+      if (checkbox && this.isWithinCheckboxHitArea(event)) {
         const previouslyUnchecked =
           checkbox.dataset.indeterminate === 'false' &&
           checkbox.dataset.checked === 'false';
@@ -1917,7 +1917,7 @@ export namespace DirListing {
      *
      * @returns The checkbox node.
      */
-    getCheckboxNode?: (node: HTMLElement) => HTMLInputElement;
+    getCheckboxNode?: (node: HTMLElement) => HTMLInputElement | void;
 
     /**
      * Create an appropriate drag image for an item.
@@ -2258,10 +2258,10 @@ export namespace DirListing {
      *
      * @returns The checkbox node.
      */
-    getCheckboxNode(node: HTMLElement): HTMLInputElement {
+    getCheckboxNode(node: HTMLElement): HTMLInputElement | void {
       return node.querySelector(
         `.${CHECKBOX_WRAPPER_CLASS} input[type=checkbox]`
-      ) as HTMLInputElement;
+      ) as HTMLInputElement | void;
     }
 
     /**

@@ -80,7 +80,9 @@ describe('filebrowser/listing', () => {
 
       it('should be checked after item is selected', async () => {
         const itemNode = dirListing.contentNode.children[0] as HTMLElement;
-        const checkbox = dirListing.renderer.getCheckboxNode!(itemNode);
+        const checkbox = dirListing.renderer.getCheckboxNode!(
+          itemNode
+        ) as HTMLInputElement;
         expect(checkbox.checked).toBe(false);
         dirListing.selectNext();
         await signalToPromise(dirListing.updated);
@@ -89,7 +91,9 @@ describe('filebrowser/listing', () => {
 
       it('should be unchecked after item is unselected', async () => {
         const itemNode = dirListing.contentNode.children[0] as HTMLElement;
-        const checkbox = dirListing.renderer.getCheckboxNode!(itemNode);
+        const checkbox = dirListing.renderer.getCheckboxNode!(
+          itemNode
+        ) as HTMLInputElement;
         dirListing.selectNext();
         await signalToPromise(dirListing.updated);
         expect(checkbox.checked).toBe(true);
@@ -120,7 +124,7 @@ describe('filebrowser/listing', () => {
         });
         const checkboxes = itemNodes.map(node =>
           dirListing.renderer.getCheckboxNode!(node)
-        );
+        ) as HTMLInputElement[];
         const items = toArray(dirListing.sortedItems());
         expect(dirListing.isSelected(items[0].name)).toBe(false);
         expect(dirListing.isSelected(items[1].name)).toBe(false);
@@ -143,7 +147,7 @@ describe('filebrowser/listing', () => {
         ) as HTMLElement[];
         const checkboxes = itemNodes.map(node =>
           dirListing.renderer.getCheckboxNode!(node)
-        );
+        ) as HTMLInputElement[];
         expect(checkboxes[0].checked).toBe(false);
         expect(checkboxes[1].checked).toBe(false);
         dirListing.selectNext();
@@ -157,7 +161,9 @@ describe('filebrowser/listing', () => {
       // click on the checkbox should only check/uncheck the box.
       it('should not open item on double click', () => {
         const itemNode = dirListing.contentNode.children[0] as HTMLElement;
-        const checkbox = dirListing.renderer.getCheckboxNode!(itemNode);
+        const checkbox = dirListing.renderer.getCheckboxNode!(
+          itemNode
+        ) as HTMLInputElement;
         const wasOpened = jest.fn();
         dirListing.onItemOpened.connect(wasOpened);
         simulate(checkbox, 'dblclick');
@@ -173,7 +179,9 @@ describe('filebrowser/listing', () => {
           top: 0,
           bottom: 10
         });
-        const checkbox = dirListing.renderer.getCheckboxNode!(itemNode);
+        const checkbox = dirListing.renderer.getCheckboxNode!(
+          itemNode
+        ) as HTMLInputElement;
         const item = dirListing.sortedItems().next()!;
         dirListing.selectItemByName(item.name);
         await signalToPromise(dirListing.updated);
@@ -197,7 +205,9 @@ describe('filebrowser/listing', () => {
       // the checkbox, not the browser's built-in default handler for the click.
       it('should not get checked by the default action of a click', () => {
         const itemNode = dirListing.contentNode.children[0] as HTMLElement;
-        const checkbox = dirListing.renderer.getCheckboxNode!(itemNode);
+        const checkbox = dirListing.renderer.getCheckboxNode!(
+          itemNode
+        ) as HTMLInputElement;
         expect(checkbox.checked).toBe(false);
         simulate(checkbox, 'click', { bubbles: false });
         expect(checkbox.checked).toBe(false);
@@ -209,15 +219,15 @@ describe('filebrowser/listing', () => {
         it('check initial conditions', () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
             dirListing.headerNode
-          );
+          ) as HTMLInputElement;
           expect(headerCheckbox.checked).toBe(false);
-          expect(headerCheckbox.indeterminate).toBe(false);
+          expect(headerCheckbox!.indeterminate).toBe(false);
           expect(toArray(dirListing.selectedItems())).toHaveLength(0);
         });
         it('should check all', async () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
             dirListing.headerNode
-          );
+          ) as HTMLInputElement;
           simulate(headerCheckbox, 'click');
           await signalToPromise(dirListing.updated);
           expect(toArray(dirListing.selectedItems())).toHaveLength(2);
@@ -232,14 +242,14 @@ describe('filebrowser/listing', () => {
         it('check initial conditions', () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
             dirListing.headerNode
-          );
+          ) as HTMLInputElement;
           expect(headerCheckbox.indeterminate).toBe(true);
           expect(toArray(dirListing.selectedItems())).toHaveLength(1);
         });
         it('should uncheck all', async () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
             dirListing.headerNode
-          );
+          ) as HTMLInputElement;
           simulate(headerCheckbox, 'click');
           await signalToPromise(dirListing.updated);
           expect(toArray(dirListing.selectedItems())).toHaveLength(0);
@@ -255,7 +265,7 @@ describe('filebrowser/listing', () => {
         it('check initial conditions', () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
             dirListing.headerNode
-          );
+          ) as HTMLInputElement;
           expect(headerCheckbox.checked).toBe(true);
           expect(headerCheckbox.indeterminate).toBe(false);
           expect(toArray(dirListing.selectedItems())).toHaveLength(2);
@@ -263,7 +273,7 @@ describe('filebrowser/listing', () => {
         it('should uncheck all', async () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
             dirListing.headerNode
-          );
+          ) as HTMLInputElement;
           simulate(headerCheckbox, 'click');
           await signalToPromise(dirListing.updated);
           expect(toArray(dirListing.selectedItems())).toHaveLength(0);
