@@ -125,7 +125,7 @@ def develop_labextension(
 
     elif os.path.isdir(path):
         path = pjoin(os.path.abspath(path), "")  # end in path separator
-        for parent, dirs, files in os.walk(path):
+        for parent, _, files in os.walk(path):
             dest_dir = pjoin(full_dest, parent[len(path) :])
             if not os.path.exists(dest_dir):
                 if logger:
@@ -313,7 +313,7 @@ def _should_copy(src, dest, logger=None):
         # we add a fudge factor to work around a bug in python 2.x
         # that was fixed in python 3.x: https://bugs.python.org/issue12904
         if logger:
-            logger.warn("Out of date: %s" % dest)
+            logger.warning("Out of date: %s" % dest)
         return True
     if logger:
         logger.info("Up to date: %s" % dest)

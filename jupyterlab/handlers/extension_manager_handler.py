@@ -13,7 +13,6 @@ from jupyter_server.extension.handler import ExtensionHandlerMixin
 from tornado import gen, web
 
 from ..commands import (
-    AppOptions,
     _AppHandler,
     _ensure_options,
     disable_extension,
