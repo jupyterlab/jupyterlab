@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Text } from '@jupyterlab/coreutils';
-import { IObservableString } from '@jupyterlab/observables';
 import { KernelMessage } from '@jupyterlab/services';
+import { ISharedString } from '@jupyterlab/shared-models';
 import { JSONObject } from '@lumino/coreutils';
 import { CompletionHandler } from '../handler';
 import { ICompletionContext, ICompletionProvider } from '../tokens';
@@ -119,16 +119,17 @@ export class KernelCompleterProvider implements ICompletionProvider {
    */
   shouldShowContinuousHint(
     visible: boolean,
-    changed: IObservableString.IChangedArgs
+    changed: ISharedString.IChangedArgs
   ): boolean {
-    if (changed.type === 'remove') {
+    const last = changed.pop();
+    if (last?.delete || last?.insert == undefined) {
       return false;
     }
-    if (changed.value === '.') {
+    if (last.insert === '.') {
       return true;
     }
 
-    return !visible && changed.value.trim().length > 0;
+    return !visible && last.insert.trim().length > 0;
   }
 
   readonly identifier = KERNEL_PROVIDER_ID;

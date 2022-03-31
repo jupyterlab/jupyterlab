@@ -169,8 +169,8 @@ export class LoggerOutputAreaModel
    * Manually apply length limit.
    */
   private _applyMaxLength() {
-    if (this.list.length > this._maxLength) {
-      this.list.removeRange(0, this.list.length - this._maxLength);
+    if (this.length > this._maxLength) {
+      this.removeRange(0, this.length - this._maxLength);
     }
   }
 

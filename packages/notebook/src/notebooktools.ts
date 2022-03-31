@@ -8,7 +8,8 @@ import {
   JSONEditor
 } from '@jupyterlab/codeeditor';
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
+import { ObservableJSON } from '@jupyterlab/observables';
+import { ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -17,6 +18,7 @@ import {
 import { Collapser, Styling } from '@jupyterlab/ui-components';
 import { ArrayExt, chain, each } from '@lumino/algorithm';
 import {
+  JSONObject,
   JSONValue,
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
@@ -210,15 +212,17 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change in the active cell metadata.
    */
   private _onActiveNotebookPanelMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
-    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
+    sender: ISharedMap<JSONObject>,
+    args: ISharedMap.IChangedArgs<JSONObject>
   ): void {
-    const message = new ObservableJSON.ChangeMessage(
-      'activenotebookpanel-metadata-changed',
-      args
-    );
-    each(this._toolChildren(), widget => {
-      MessageLoop.sendMessage(widget, message);
+    args.forEach(arg => {
+      const message = new ObservableJSON.ChangeMessage(
+        'activenotebookpanel-metadata-changed',
+        arg
+      );
+      each(this._toolChildren(), widget => {
+        MessageLoop.sendMessage(widget, message);
+      });
     });
   }
 
@@ -226,15 +230,17 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change in the notebook model metadata.
    */
   private _onActiveCellMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
-    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
+    sender: ISharedMap<JSONObject>,
+    args: ISharedMap.IChangedArgs<JSONObject>
   ): void {
-    const message = new ObservableJSON.ChangeMessage(
-      'activecell-metadata-changed',
-      args
-    );
-    each(this._toolChildren(), widget => {
-      MessageLoop.sendMessage(widget, message);
+    args.forEach(arg => {
+      const message = new ObservableJSON.ChangeMessage(
+        'activecell-metadata-changed',
+        arg
+      );
+      each(this._toolChildren(), widget => {
+        MessageLoop.sendMessage(widget, message);
+      });
     });
   }
 
@@ -503,7 +509,10 @@ export namespace NotebookTools {
       this._model.mimeType = this._cellModel!.mimeType;
     }
 
-    private _model = new CodeEditor.Model();
+    private _model = new CodeEditor.Model({
+      isDocument: true,
+      sharedDoc: new SharedDoc()
+    });
     private _cellModel: CodeEditor.IModel | null;
   }
 

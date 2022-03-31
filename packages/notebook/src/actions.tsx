@@ -193,16 +193,6 @@ export namespace NotebookActions {
       clones.push(clone);
     }
 
-    for (let i = 0; i < clones.length; i++) {
-      if (i !== clones.length - 1 && clones[i].type === 'code') {
-        (clones[i] as ICodeCellModel).outputs.clear();
-      }
-      clones[i].value.text = orig
-        .slice(offsets[i], offsets[i + 1])
-        .replace(/^\n+/, '')
-        .replace(/\n+$/, '');
-    }
-
     const cells = nbModel.cells;
     cells.transact(() => {
       for (let i = 0; i < clones.length; i++) {
@@ -213,6 +203,17 @@ export namespace NotebookActions {
         }
       }
     });
+
+    // Update content after initializing the cells
+    for (let i = 0; i < clones.length; i++) {
+      if (i !== clones.length - 1 && clones[i].type === 'code') {
+        (clones[i] as ICodeCellModel).outputs.clear();
+      }
+      clones[i].value.text = orig
+        .slice(offsets[i], offsets[i + 1])
+        .replace(/^\n+/, '')
+        .replace(/\n+$/, '');
+    }
 
     // If there is a selection the selected cell will be activated
     const activeCellDelta = start !== end ? 2 : 1;
@@ -308,13 +309,6 @@ export namespace NotebookActions {
     // Create a new cell for the source to preserve history.
     const newModel = Private.cloneCell(model, primary.model);
 
-    newModel.value.text = toMerge.join('\n\n');
-    if (isCodeCellModel(newModel)) {
-      newModel.outputs.clear();
-    } else if (isMarkdownCellModel(newModel) || isRawCellModel(newModel)) {
-      newModel.attachments.fromJSON(attachments);
-    }
-
     // Make the changes while preserving history.
     cells.transact(() => {
       cells.set(active, newModel);
@@ -322,6 +316,14 @@ export namespace NotebookActions {
         cells.removeValue(cell);
       });
     });
+
+    // Set the content once the cell is initialized
+    newModel.value.text = toMerge.join('\n\n');
+    if (isCodeCellModel(newModel)) {
+      newModel.outputs.clear();
+    } else if (isMarkdownCellModel(newModel) || isRawCellModel(newModel)) {
+      newModel.attachments.fromJSON(attachments);
+    }
 
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
@@ -378,8 +380,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
-      notebook.notebookConfig.defaultCell,
-      {}
+      notebook.notebookConfig.defaultCell
     );
     const active = notebook.activeCellIndex;
 
@@ -413,8 +414,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
-      notebook.notebookConfig.defaultCell,
-      {}
+      notebook.notebookConfig.defaultCell
     );
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
@@ -442,6 +442,7 @@ export namespace NotebookActions {
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
 
+    // TODO: Use moveRange for multiple cells
     cells.transact(() => {
       for (let i = cells.length - 2; i > -1; i--) {
         if (notebook.isSelectedOrActive(widgets[i])) {
@@ -476,6 +477,7 @@ export namespace NotebookActions {
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
 
+    // TODO: Use moveRange for multiple cells
     cells.transact(() => {
       for (let i = 1; i < cells.length; i++) {
         if (notebook.isSelectedOrActive(widgets[i])) {
@@ -577,8 +579,7 @@ export namespace NotebookActions {
 
     if (notebook.activeCellIndex === notebook.widgets.length - 1) {
       const cell = model.contentFactory.createCell(
-        notebook.notebookConfig.defaultCell,
-        {}
+        notebook.notebookConfig.defaultCell
       );
 
       // Do not use push here, as we want an widget insertion
@@ -623,8 +624,7 @@ export namespace NotebookActions {
     const promise = Private.runSelected(notebook, sessionContext);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
-      notebook.notebookConfig.defaultCell,
-      {}
+      notebook.notebookConfig.defaultCell
     );
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
@@ -1219,24 +1219,8 @@ export namespace NotebookActions {
       ) {
         id = cell.id as string;
       }
-
-      switch (cell.cell_type) {
-        case 'code':
-          return model.contentFactory.createCodeCell({
-            id,
-            cell
-          });
-        case 'markdown':
-          return model.contentFactory.createMarkdownCell({
-            id,
-            cell
-          });
-        default:
-          return model.contentFactory.createRawCell({
-            id,
-            cell
-          });
-      }
+      const type = cell.cell_type as nbformat.CellType;
+      return model.contentFactory.createCell(type, id, cell);
     });
 
     let index: number;
@@ -2158,35 +2142,7 @@ Please wait for the complete rendering before invoking that action.`,
     model: INotebookModel,
     cell: ICellModel
   ): ICellModel {
-    const id = cell.id;
-    const sharedDoc = model.sharedDoc;
-    const sharedModel = cell.sharedModel;
-    switch (cell.type) {
-      case 'code':
-        // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createCodeCell({
-          id,
-          cell: cell.toJSON(),
-          sharedDoc,
-          sharedModel
-        });
-      case 'markdown':
-        // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createMarkdownCell({
-          id,
-          cell: cell.toJSON(),
-          sharedDoc,
-          sharedModel
-        });
-      default:
-        // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createRawCell({
-          id,
-          cell: cell.toJSON(),
-          sharedDoc,
-          sharedModel
-        });
-    }
+    return model.contentFactory.createCell(cell.type, cell.id, cell.toJSON());
   }
 
   /**
@@ -2379,7 +2335,7 @@ Please wait for the complete rendering before invoking that action.`,
     }
 
     // Create a new code cell and add as the next cell.
-    const newCell = notebook.model!.contentFactory.createCodeCell({});
+    const newCell = notebook.model!.contentFactory.createCodeCell();
     const cells = notebook.model!.cells;
     const index = ArrayExt.firstIndexOf(toArray(cells), cell.model);
 
@@ -2472,39 +2428,9 @@ Please wait for the complete rendering before invoking that action.`,
         if (child.model.type !== value) {
           const id = child.model.id;
           const cell = child.model.toJSON();
-          const sharedDoc = notebook.model!.sharedDoc;
-          const sharedModel = child.model.sharedModel;
-          let newCell: ICellModel;
-          switch (value) {
-            case 'code':
-              newCell = model.contentFactory.createCodeCell({
-                id,
-                cell,
-                sharedDoc,
-                sharedModel
-              });
-              break;
-            case 'markdown':
-              newCell = model.contentFactory.createMarkdownCell({
-                id,
-                cell,
-                sharedDoc,
-                sharedModel
-              });
-              if (child.model.type === 'code') {
-                newCell.trusted = false;
-              }
-              break;
-            default:
-              newCell = model.contentFactory.createRawCell({
-                id,
-                cell,
-                sharedDoc,
-                sharedModel
-              });
-              if (child.model.type === 'code') {
-                newCell.trusted = false;
-              }
+          const newCell = model.contentFactory.createCell(value, id, cell);
+          if (child.model.type === 'code') {
+            newCell.trusted = false;
           }
           cells.set(index, newCell);
         }
@@ -2559,10 +2485,7 @@ Please wait for the complete rendering before invoking that action.`,
         // a notebook's last cell undoable.
         if (!cells.length) {
           cells.push(
-            model.contentFactory.createCell(
-              notebook.notebookConfig.defaultCell,
-              {}
-            )
+            model.contentFactory.createCell(notebook.notebookConfig.defaultCell)
           );
         }
       });
@@ -2773,7 +2696,7 @@ Please wait for the complete rendering before invoking that action.`,
       notebook: Notebook
     ) {
       const state = Private.getState(notebook);
-      const newCell = notebook.model!.contentFactory.createMarkdownCell({});
+      const newCell = notebook.model!.contentFactory.createMarkdownCell();
       notebook.model!.cells.insert(cellIndex, newCell);
       Private.setMarkdownHeader(newCell, headingLevel);
       notebook.activeCellIndex = cellIndex;

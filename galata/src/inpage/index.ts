@@ -259,12 +259,10 @@ export class GalataInpage implements IGalataInpage {
         nb.model.cells.transact(() => {
           nb.model!.cells.set(
             numCells - 1,
-            nb.model!.contentFactory.createCell(cellType, {
-              cell: {
-                cell_type: cellType,
-                source: source,
-                metadata: {}
-              }
+            nb.model!.contentFactory.createCell(cellType, undefined, {
+              cell_type: cellType,
+              source: source,
+              metadata: {}
             })
           );
         });
@@ -303,12 +301,10 @@ export class GalataInpage implements IGalataInpage {
         nb.model.cells.transact(() => {
           nb.model!.cells.set(
             cellIndex,
-            nb.model!.contentFactory.createCell(cellType, {
-              cell: {
-                cell_type: cellType,
-                source: source,
-                metadata: {}
-              }
+            nb.model!.contentFactory.createCell(cellType, undefined, {
+              cell_type: cellType,
+              source: source,
+              metadata: {}
             })
           );
         });

@@ -6,6 +6,7 @@ import {
   CodeEditorWrapper,
   IEditorServices
 } from '@jupyterlab/codeeditor';
+import { SharedDoc } from '@jupyterlab/shared-models';
 
 import { IDebugger } from '.';
 
@@ -33,7 +34,8 @@ export class ReadOnlyEditorFactory {
     const mimeTypeService = this._services.mimeTypeService;
     const editor = new CodeEditorWrapper({
       model: new CodeEditor.Model({
-        value: content,
+        isDocument: true,
+        sharedDoc: new SharedDoc(),
         mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
       }),
       factory,
@@ -42,6 +44,7 @@ export class ReadOnlyEditorFactory {
         lineNumbers: true
       }
     });
+    editor.model.value.text = content;
     editor.node.setAttribute('data-jp-debugger', 'true');
     return editor;
   }

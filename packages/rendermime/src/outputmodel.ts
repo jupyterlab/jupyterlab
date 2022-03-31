@@ -5,7 +5,6 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
 import {
   JSONExt,
   JSONObject,
@@ -63,14 +62,12 @@ export namespace IOutputModel {
     /**
      * The raw output value.
      */
-    value?: nbformat.IOutput;
+    value: nbformat.IOutput;
 
     /**
      * Whether the output is trusted.  The default is false.
      */
     trusted?: boolean;
-
-    sharedModel?: ISharedMap<JSONObject>;
   }
 }
 
@@ -82,51 +79,24 @@ export class OutputModel implements IOutputModel {
    * Construct a new output model.
    */
   constructor(options: IOutputModel.IOptions) {
-    if (options.sharedModel) {
-      this._sharedModel = options.sharedModel;
-    } else {
-      const doc = new SharedDoc();
-      this._sharedModel = doc.createMap<JSONObject>('outputs');
-    }
-    let value: nbformat.IOutput;
-    let rawData: JSONObject;
-    let rawMetadata: JSONObject;
-
-    if (options.value) {
-      const { data, metadata } = Private.getBundleOptions(options);
-
-      rawData = data as JSONObject;
-      const sharedData = JSON.parse(JSON.stringify(data));
-      this._sharedModel.set('rawData', sharedData);
-
-      rawMetadata = metadata as JSONObject;
-      const sharedMetadata = JSON.parse(JSON.stringify(metadata));
-      this._sharedModel.set('rawMetadata', sharedMetadata);
-
-      value = options.value;
-      const tmp: PartialJSONObject = {};
-      for (const key in value) {
-        // Ignore data and metadata that were stripped.
-        switch (key) {
-          case 'data':
-          case 'metadata':
-            break;
-          default:
-            tmp[key] = Private.extract(value, key);
-        }
-      }
-      this._sharedModel.set('raw', tmp as JSONObject);
-    } else {
-      value = this._sharedModel.get('raw') as nbformat.IOutput;
-      rawData = this._sharedModel.get('rawData') as JSONObject;
-      rawMetadata = this._sharedModel.get('rawMetadata') as JSONObject;
-    }
-
-    this._data = new ObservableJSON({ values: rawData });
-    this._metadata = new ObservableJSON({ values: rawMetadata });
-    this.trusted = !!options.trusted;
-
+    const { data, metadata, trusted } = Private.getBundleOptions(options);
+    this._data = new ObservableJSON({ values: data as JSONObject });
+    this._rawData = data;
+    this._metadata = new ObservableJSON({ values: metadata as JSONObject });
+    this._rawMetadata = metadata;
+    this.trusted = trusted;
     // Make a copy of the data.
+    const value = options.value;
+    for (const key in value) {
+      // Ignore data and metadata that were stripped.
+      switch (key) {
+        case 'data':
+        case 'metadata':
+          break;
+        default:
+          this._raw[key] = Private.extract(value, key);
+      }
+    }
     this.type = value.output_type;
     if (nbformat.isExecuteResult(value)) {
       this.executionCount = value.execution_count;
@@ -170,14 +140,14 @@ export class OutputModel implements IOutputModel {
    * The data associated with the model.
    */
   get data(): ReadonlyPartialJSONObject {
-    return this._sharedModel.get('rawData') as ReadonlyPartialJSONObject;
+    return this._rawData;
   }
 
   /**
    * The metadata associated with the model.
    */
   get metadata(): ReadonlyPartialJSONObject {
-    return this._sharedModel.get('rawMetadata') as ReadonlyPartialJSONObject;
+    return this._rawMetadata;
   }
 
   /**
@@ -190,11 +160,11 @@ export class OutputModel implements IOutputModel {
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     if (options.data) {
       this._updateObservable(this._data, options.data);
-      this._sharedModel.set('rawData', options.data as JSONObject);
+      this._rawData = options.data;
     }
     if (options.metadata) {
       this._updateObservable(this._metadata, options.metadata!);
-      this._sharedModel.set('rawMetadata', options.metadata as JSONObject);
+      this._rawMetadata = options.metadata;
     }
     this._changed.emit();
   }
@@ -204,9 +174,8 @@ export class OutputModel implements IOutputModel {
    */
   toJSON(): nbformat.IOutput {
     const output: PartialJSONValue = {};
-    const raw = this._sharedModel.get('raw');
-    for (const key in raw) {
-      output[key] = Private.extract(raw, key);
+    for (const key in this._raw) {
+      output[key] = Private.extract(this._raw, key);
     }
     switch (this.type) {
       case 'display_data':
@@ -251,9 +220,11 @@ export class OutputModel implements IOutputModel {
   }
 
   private _changed = new Signal<this, void>(this);
+  private _raw: PartialJSONObject = {};
+  private _rawMetadata: ReadonlyPartialJSONObject;
+  private _rawData: ReadonlyPartialJSONObject;
   private _data: IObservableJSON;
   private _metadata: IObservableJSON;
-  private _sharedModel: ISharedMap<JSONObject>;
 }
 
 /**
@@ -332,8 +303,8 @@ namespace Private {
   export function getBundleOptions(
     options: IOutputModel.IOptions
   ): Required<Omit<MimeModel.IOptions, 'callback'>> {
-    const data = getData(options.value!);
-    const metadata = getMetadata(options.value!);
+    const data = getData(options.value);
+    const metadata = getMetadata(options.value);
     const trusted = !!options.trusted;
     return { data, metadata, trusted };
   }

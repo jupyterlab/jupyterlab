@@ -238,11 +238,14 @@ export class OutputArea extends Widget {
     sender: IOutputAreaModel,
     args: IOutputAreaModel.ChangedArgs
   ): void {
-    switch (args.type) {
-      case 'add':
-        this._insertOutput(args.newIndex, args.newValues[0]);
-        break;
-      case 'remove':
+    let currpos = 0;
+    args.delta.forEach(delta => {
+      if (delta.insert != null) {
+        delta.insert.forEach(value => {
+          this._insertOutput(currpos++, value);
+        });
+        this.outputLengthChanged.emit(this.model.length);
+      } else if (delta.delete != null) {
         if (this.widgets.length) {
           // all items removed from model
           if (this.model.length === 0) {
@@ -250,34 +253,23 @@ export class OutputArea extends Widget {
           } else {
             // range of items removed from model
             // remove widgets corresponding to removed model items
-            const startIndex = args.oldIndex;
-            for (
-              let i = 0;
-              i < args.oldValues.length && startIndex < this.widgets.length;
-              ++i
-            ) {
-              const widget = this.widgets[startIndex];
+            for (let i = currpos; i < currpos + delta.delete; i++) {
+              const widget = this.widgets[currpos];
               widget.parent = null;
               widget.dispose();
             }
 
             // apply item offset to target model item indices in _displayIdMap
-            this._moveDisplayIdIndices(startIndex, args.oldValues.length);
+            this._moveDisplayIdIndices(currpos, delta.delete);
 
             // prevent jitter caused by immediate height change
             this._preventHeightChangeJitter();
           }
         }
-        break;
-      case 'set':
-        this._setOutput(args.newIndex, args.newValues[0]);
-        break;
-      default:
-        break;
-    }
-    this.outputLengthChanged.emit(
-      Math.min(this.model.length, this._maxNumberOutputs)
-    );
+      } else if (delta.retain != null) {
+        currpos += delta.retain;
+      }
+    });
   }
 
   /**

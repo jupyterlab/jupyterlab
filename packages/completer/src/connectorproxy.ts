@@ -1,4 +1,4 @@
-import { IObservableString } from '@jupyterlab/observables';
+import { ISharedString } from '@jupyterlab/shared-models';
 import { CompletionHandler } from './handler';
 import {
   ICompletionContext,
@@ -72,7 +72,7 @@ export class ConnectorProxy implements IConnectorProxy {
    */
   public shouldShowContinuousHint(
     completerIsVisible: boolean,
-    changed: IObservableString.IChangedArgs
+    changed: ISharedString.IChangedArgs
   ): boolean {
     if (this._providers[0].shouldShowContinuousHint) {
       return this._providers[0].shouldShowContinuousHint(
@@ -85,12 +85,13 @@ export class ConnectorProxy implements IConnectorProxy {
 
   private _defaultShouldShowContinuousHint(
     completerIsVisible: boolean,
-    changed: IObservableString.IChangedArgs
+    changed: ISharedString.IChangedArgs
   ): boolean {
+    const last = changed.pop();
     return (
       !completerIsVisible &&
-      changed.type !== 'remove' &&
-      changed.value.trim().length > 0
+      last?.insert !== undefined &&
+      last?.insert.trim().length > 0
     );
   }
 

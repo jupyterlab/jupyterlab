@@ -9,6 +9,13 @@ import { ISharedList, SharedList } from './sharedList';
 type Type = 'Map' | 'List' | 'String';
 
 /**
+ * Changes on Sequence-like data are expressed as Quill-inspired deltas.
+ *
+ * @source https://quilljs.com/docs/delta/
+ */
+export type Delta<T> = { insert?: T; delete?: number; retain?: number };
+
+/**
  * Base interface for Shared objects.
  */
 export interface IShared extends IDisposable {
@@ -20,12 +27,28 @@ export interface IShared extends IDisposable {
   /**
    * The specific model behind the IShared abstraction.
    *
-   * Note: The default implementation is based on Yjs so the underlying
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
    * model is a YText, YArray or YMap.
    */
   readonly underlyingModel: any;
+
+  /**
+   * The specific undo manager class behind the IShared abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.UndoManager.
+   *
+   * TODO: Define an API
+   */
+  readonly undoManager: any;
 }
 
+/**
+ * Base type for serializable objects that can
+ * be inserted into an IShared.
+ */
 export type ISharedType = IShared | JSONValue;
 
 /**
@@ -74,7 +97,8 @@ export interface ISharedDoc extends IDisposable {
   /**
    * The specific document behind the ISharedDoc abstraction.
    *
-   * Note: The default implementation is based on Yjs so the underlying
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
    * model is a YDoc.
    */
   readonly underlyingDoc: any;
@@ -82,8 +106,11 @@ export interface ISharedDoc extends IDisposable {
   /**
    * The specific awareness class behind the ISharedDoc abstraction.
    *
-   * Note: The default implementation is based on Yjs so the underlying
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
    * model is a Y.Awareness.
+   *
+   * TODO: Define an API
    */
   readonly awareness: any;
 
@@ -209,10 +236,26 @@ export class SharedDoc implements ISharedDoc {
    */
   readonly isCollaborative: boolean = true;
 
+  /**
+   * The specific document behind the ISharedDoc abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a YDoc.
+   */
   get underlyingDoc(): Y.Doc {
     return this._ydoc;
   }
 
+  /**
+   * The specific awareness class behind the ISharedDoc abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.Awareness.
+   *
+   * TODO: Define an API
+   */
   get awareness(): Awareness {
     return this._awareness;
   }
@@ -271,8 +314,8 @@ export class SharedDoc implements ISharedDoc {
    * @returns the string that was created.
    */
   createString(name: string): ISharedString {
-    const ytext = this._ydoc.getText(name);
-    return new SharedString({ ytext, doc: this });
+    const underlyingModel = this._ydoc.getText(name);
+    return new SharedString({ sharedDoc: this, underlyingModel });
   }
 
   /**
@@ -287,8 +330,8 @@ export class SharedDoc implements ISharedDoc {
    * JSON Objects and primitives.
    */
   createList<T extends ISharedType>(name: string): ISharedList<T> {
-    const yarray = this._ydoc.getArray(name);
-    const vec = new SharedList<T>({ yarray, doc: this });
+    const underlyingModel = this._ydoc.getArray(name);
+    const vec = new SharedList<T>({ sharedDoc: this, underlyingModel });
     return vec;
   }
 
@@ -304,8 +347,8 @@ export class SharedDoc implements ISharedDoc {
    * JSON Objects and primitives.
    */
   createMap<T extends ISharedType>(name: string): ISharedMap<T> {
-    const ymap = this._ydoc.getMap(name);
-    const map = new SharedMap<T>({ ymap, doc: this });
+    const underlyingModel = this._ydoc.getMap(name);
+    const map = new SharedMap<T>({ sharedDoc: this, underlyingModel });
     return map;
   }
 
@@ -349,8 +392,8 @@ export class SharedDoc implements ISharedDoc {
         case 'String':
           sharedTypes.push(
             new SharedString({
-              ytext: yItems[index] as Y.Text,
-              doc: this,
+              sharedDoc: this,
+              underlyingModel: yItems[index] as Y.Text,
               origin,
               undoManager
             })
@@ -359,8 +402,8 @@ export class SharedDoc implements ISharedDoc {
         case 'List':
           sharedTypes.push(
             new SharedList({
-              yarray: yItems[index] as Y.Array<any>,
-              doc: this,
+              sharedDoc: this,
+              underlyingModel: yItems[index] as Y.Array<any>,
               origin,
               undoManager
             })
@@ -369,8 +412,8 @@ export class SharedDoc implements ISharedDoc {
         case 'Map':
           sharedTypes.push(
             new SharedMap({
-              ymap: yItems[index] as Y.Map<any>,
-              doc: this,
+              sharedDoc: this,
+              underlyingModel: yItems[index] as Y.Map<any>,
               origin,
               undoManager
             })
@@ -404,57 +447,70 @@ export namespace SharedDoc {
      */
     origin?: any;
 
+    /**
+     * The undo manager for the model.
+     */
     undoManager?: any;
 
     /**
      * Whether to initialize the undo manager or not.
      *
-     * NOTE: The undo manager can not be initialized
+     * #### Notes
+     * The undo manager can not be initialized
      * before the Y.Array is inserted in the Y.Doc.
-     * This option allows to create a SharedList
+     * This option allows to instantiate a `Shared` object
      * before the Y.Array was integrated into the Y.Doc
-     * and then call `SharedList.initialize()` to
+     * and then call `Shared.initialize()` to
      * initialize the undo manager.
      */
     initialize?: boolean;
   }
 
   /**
-   * Options for creating a `ISharedDoc` object.
+   * Convenience function to transform from
+   * Y.AbstractType to IShared.
    */
   export function abstractTypeToIShared(
-    type: Y.AbstractType<Y.YEvent>,
-    doc: SharedDoc
+    underlyingModel: Y.AbstractType<any>,
+    sharedDoc: SharedDoc
   ): IShared | undefined {
-    if (type instanceof Y.Text) {
-      return new SharedString({ ytext: type, doc });
-    } else if (type instanceof Y.Array) {
-      return new SharedList({ yarray: type, doc });
-    } else if (type instanceof Y.Map) {
-      return new SharedMap({ ymap: type, doc });
+    if (underlyingModel instanceof Y.Text) {
+      return new SharedString({ sharedDoc, underlyingModel });
+    } else if (underlyingModel instanceof Y.Array) {
+      return new SharedList({ sharedDoc, underlyingModel });
+    } else if (underlyingModel instanceof Y.Map) {
+      return new SharedMap({ sharedDoc, underlyingModel });
     } else {
       return;
     }
   }
 
+  /**
+   * Convenience function to transform from
+   * Y.AbstractType to ISharedType.
+   */
   export function abstractTypeToISharedType(
-    type: Y.AbstractType<Y.YEvent> | JSONValue,
-    doc: SharedDoc
+    type: Y.AbstractType<any> | JSONValue,
+    sharedDoc: SharedDoc
   ): ISharedType {
     if (type instanceof Y.Text) {
-      return new SharedString({ ytext: type, doc });
+      return new SharedString({ sharedDoc, underlyingModel: type });
     } else if (type instanceof Y.Array) {
-      return new SharedList({ yarray: type, doc });
+      return new SharedList({ sharedDoc, underlyingModel: type });
     } else if (type instanceof Y.Map) {
-      return new SharedMap({ ymap: type, doc });
+      return new SharedMap({ sharedDoc, underlyingModel: type });
     } else {
       return type as JSONValue;
     }
   }
 
+  /**
+   * Convenience function to transform from
+   * ISharedType to Y.AbstractType.
+   */
   export function sharedTypeToAbstractType(
     type: ISharedType
-  ): Y.AbstractType<Y.YEvent> | JSONValue {
+  ): Y.AbstractType<any> | JSONValue {
     if (type instanceof SharedString) {
       return type.underlyingModel;
     } else if (type instanceof SharedList) {

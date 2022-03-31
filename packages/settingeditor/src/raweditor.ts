@@ -4,6 +4,7 @@
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SharedDoc } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandToolbarButton, Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
@@ -48,7 +49,10 @@ export class RawEditor extends SplitPanel {
 
     // Create read-only defaults editor.
     const defaults = (this._defaults = new CodeEditorWrapper({
-      model: new CodeEditor.Model(),
+      model: new CodeEditor.Model({
+        isDocument: true,
+        sharedDoc: new SharedDoc()
+      }),
       factory: editorFactory
     }));
 
@@ -58,7 +62,10 @@ export class RawEditor extends SplitPanel {
 
     // Create read-write user settings editor.
     const user = (this._user = new CodeEditorWrapper({
-      model: new CodeEditor.Model(),
+      model: new CodeEditor.Model({
+        isDocument: true,
+        sharedDoc: new SharedDoc()
+      }),
       factory: editorFactory,
       config: { lineNumbers: true }
     }));

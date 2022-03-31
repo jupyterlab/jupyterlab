@@ -31,6 +31,7 @@ import {
   SharedMap,
   SharedString
 } from '@jupyterlab/shared-models';
+import { each } from '@lumino/algorithm';
 
 /**
  * The definition of a model object for a cell.
@@ -45,6 +46,20 @@ export interface ICellModel extends CodeEditor.IModel {
    * A unique identifier for the cell.
    */
   readonly id: string;
+
+  /**
+   * The metadata associated with the cell.
+   */
+  readonly metadata: ISharedMap<JSONValue>;
+
+  /**
+   * The underlying model where data is stored.
+   *
+   * #### Notes
+   * Making direct edits to the values stored in the`ISharedMap`
+   * is not recommended, and may produce unpredictable results.
+   */
+  //readonly sharedModel: ISharedMap<ISharedType>;
 
   /**
    * A signal emitted when the content of the model changes.
@@ -62,14 +77,10 @@ export interface ICellModel extends CodeEditor.IModel {
   trusted: boolean;
 
   /**
-   * The metadata associated with the cell.
+   * Initialize the model.
+   *
+   * TODO: documentation
    */
-  readonly metadata: ISharedMap<JSONValue>;
-
-  readonly sharedModel: ISharedMap<ISharedType>;
-
-  readonly sharedDoc: ISharedDoc;
-
   initialize(): void;
 
   /**
@@ -98,7 +109,7 @@ export interface ICodeCellModel extends ICellModel {
    * #### Notes
    * This is a read-only property.
    */
-  readonly type: 'code';
+  readonly type: nbformat.CellType;
 
   /**
    * Whether the code cell has been edited since the last run.
@@ -106,9 +117,9 @@ export interface ICodeCellModel extends ICellModel {
   readonly isDirty: boolean;
 
   /**
-   * Serialize the model to JSON.
+   * The cell outputs.
    */
-  toJSON(): nbformat.ICodeCell;
+  readonly outputs: IOutputAreaModel;
 
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
@@ -116,19 +127,14 @@ export interface ICodeCellModel extends ICellModel {
   executionCount: nbformat.ExecutionCount;
 
   /**
-   * The cell outputs.
+   * Serialize the model to JSON.
    */
-  readonly outputs: IOutputAreaModel;
+  toJSON(): nbformat.ICodeCell;
 
   /**
    * Clear execution, outputs, and related metadata
    */
   clearExecution(): void;
-
-  /**
-   * The code cell shared model
-   */
-  sharedModel: models.ISharedCodeCell;
 }
 
 /**
@@ -138,7 +144,7 @@ export interface IMarkdownCellModel extends IAttachmentsCellModel {
   /**
    * The type of the cell.
    */
-  readonly type: 'markdown';
+  readonly type: nbformat.CellType;
 
   /**
    * Serialize the model to JSON.
@@ -153,7 +159,7 @@ export interface IRawCellModel extends IAttachmentsCellModel {
   /**
    * The type of the cell.
    */
-  readonly type: 'raw';
+  readonly type: nbformat.CellType;
 
   /**
    * Serialize the model to JSON.
@@ -179,114 +185,19 @@ export function isRawCellModel(model: ICellModel): model is IRawCellModel {
  * An implementation of the cell model.
  */
 export class CellModel extends CodeEditor.Model implements ICellModel {
-  private _trusted: boolean;
-
   /**
    * Construct a cell model from optional cell content.
    */
   constructor(options: CellModel.IOptions) {
-    super({ sharedDoc: options.sharedDoc });
-    this.id = options.id || (options.cell?.id as string) || UUID.uuid4();
-
-    if (options.sharedDoc) {
-      // If options include the shared doc,
-      // the cell belongs to a notebook
-
-      if (options.sharedModel) {
-        // If options include the shared model,
-        // the cell was initialized by another client
-        this.sharedModel = options.sharedModel;
-        this.sharedModel.set('id', this.id);
-        this.sharedModel.set('type', this.type);
-        const value = this.sharedModel.get('value') as ISharedString;
-        this._value = value;
-        const metadata = this.sharedModel.get('metadata') as ISharedMap<
-          JSONValue
-        >;
-        this.metadata = metadata;
-      } else {
-        // If options doesn't include the shared model,
-        // this client has to initialize it
-        this.sharedModel = new SharedMap<ISharedType>({
-          doc: options.sharedDoc as SharedDoc,
-          initialize: false
-        });
-        this.sharedModel.set('id', this.id);
-        this.sharedModel.set('type', this.type);
-        // Overwrite the value in the base class.
-        // Now it comes from the shared model instead of the shared doc
-        this._value = new SharedString({
-          doc: options.sharedDoc as SharedDoc,
-          initialize: false
-        });
-        this.sharedModel.set('value', this._value);
-        this.metadata = new SharedMap<JSONValue>({
-          doc: options.sharedDoc as SharedDoc,
-          initialize: false
-        });
-        this.sharedModel.set('metadata', this.metadata);
-      }
-    } else {
-      // If options doesn't include the shared doc,
-      // this is a standalone cell
-      this.sharedModel = this.sharedDoc.createMap<ISharedType>('model');
-      this.sharedModel.set('id', this.id);
-      this.sharedModel.set('type', this.type);
-      // the "value" is initialized by the base class
-      this.metadata = new SharedMap<JSONValue>({
-        doc: this.sharedDoc as SharedDoc,
-        initialize: false
-      });
-      this.sharedModel.set('metadata', this.metadata);
-    }
-
-    this.value.changed.connect(this._onValueChanged, this);
-    this.metadata.changed.connect(this.onGenericChange, this);
-    this.sharedModel.changed.connect(this._onSharedModelChanged, this);
-
-    const cell = options.cell;
-
-    if (!cell) {
-      this.trusted = false;
-      return;
-    }
-    this.trusted = !!cell.metadata['trusted'];
-    delete cell.metadata['trusted'];
-
-    // Set the text value, normalizing line endings to \n
-    if (Array.isArray(cell.source)) {
-      this.value.text = cell.source
-        .map(s => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n'))
-        .join('');
-    } else {
-      this.value.text = cell.source.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    }
-    const metadata = JSONExt.deepCopy(cell.metadata);
-    if (this.type !== 'raw') {
-      delete metadata['format'];
-    }
-    if (this.type !== 'code') {
-      delete metadata['collapsed'];
-      delete metadata['scrolled'];
-    }
-
-    for (const key in metadata) {
-      this.metadata.set(key, metadata[key] as JSONValue);
-    }
+    super({ isDocument: false, sharedDoc: options.sharedDoc });
+    this.id = options.id;
+    this._sharedModel = options.sharedModel as SharedMap<ISharedType>;
   }
-
-  readonly id: string;
-
-  readonly sharedModel: ISharedMap<ISharedType>;
 
   /**
-   * The type of cell.
+   * A unique identifier for the cell.
    */
-  get type(): nbformat.CellType {
-    // This getter really should be abstract, but our current constructor
-    // depends on .type working
-    return 'raw';
-  }
+  readonly id: string;
 
   /**
    * A signal emitted when the state of the model changes.
@@ -299,9 +210,34 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   readonly stateChanged = new Signal<this, IChangedArgs<any>>(this);
 
   /**
+   * The type of cell.
+   */
+  get type(): nbformat.CellType {
+    // This getter really should be abstract, but our current constructor
+    // depends on .type working
+    return 'raw';
+  }
+
+  /**
+   * The underlying model where the data is stored.
+   *
+   * #### Notes
+   * Making direct edits to the values stored in the`ISharedMap`
+   * is not recommended, and may produce unpredictable results.
+   */
+  get sharedModel(): ISharedMap<ISharedType> {
+    return this._sharedModel;
+  }
+
+  /**
    * The metadata associated with the cell.
    */
-  readonly metadata: ISharedMap<JSONValue>;
+  get metadata(): ISharedMap<JSONValue> {
+    if (!this.isReady) {
+      throw Error('The model is not ready');
+    }
+    return this._metadata;
+  }
 
   /**
    * Get the trusted state of the model.
@@ -322,10 +258,28 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     this._onTrustedChanged({ oldValue, newValue });
   }
 
-  initialize(): void {
-    (this.sharedModel as SharedMap<ISharedType>).initialize();
-    (this.value as SharedString).initialize();
-    (this.metadata as SharedMap<JSONValue>).initialize();
+  /**
+   * Initialize the model.
+   *
+   * TODO: documentation
+   */
+  initialize(ready: boolean = true): void {
+    if (this.isReady) return;
+    this._sharedModel.initialize();
+    this._sharedModel.changed.connect(this._onSharedModelChanged, this);
+
+    this._value = this._sharedModel.get('source') as SharedString;
+    this._value.initialize();
+    this._value.changed.connect(this._onValueChanged, this);
+
+    this._metadata = this._sharedModel.get('metadata') as SharedMap<JSONValue>;
+    this._metadata.initialize();
+    this._metadata.changed.connect(this.onGenericChange, this);
+
+    // TODO: check the initialization of trusted
+    this.trusted = !!this._metadata.get('trusted');
+
+    if (ready) this._triggerModelReady();
   }
 
   /**
@@ -374,12 +328,119 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     this.contentChanged.emit(void 0);
   }
 
+  /**
+   * Handle a change in the shared model.
+   */
   protected _onSharedModelChanged(
     sender: ISharedMap<ISharedType>,
     args: ISharedMap.IChangedArgs<ISharedType>
   ): void {
     // TODO: not sure yet
   }
+
+  /**
+   * Creates the model.
+   *
+   * TODO: documentation
+   */
+  static createSharedModel(
+    id: string,
+    isDocument: boolean,
+    sharedDoc: ISharedDoc,
+    cell?: nbformat.IBaseCell
+  ): ISharedMap<ISharedType> {
+    let sharedModel;
+    if (isDocument) {
+      sharedModel = sharedDoc.createMap('model');
+    } else {
+      sharedModel = new SharedMap({
+        sharedDoc: sharedDoc as SharedDoc,
+        initialize: false
+      });
+    }
+
+    sharedModel.set('id', id);
+    // this.prototype.type not great
+    sharedModel.set('cell_type', this.prototype.type);
+    const value = new SharedString({
+      sharedDoc: sharedDoc as SharedDoc,
+      initialize: false
+    });
+    sharedModel.set('source', value);
+    const metadata = new SharedMap({
+      sharedDoc: sharedDoc as SharedDoc,
+      initialize: false
+    });
+    sharedModel.set('metadata', metadata);
+
+    if (cell) {
+      // TODO: how to initialize trusted?
+      //const trusted = !!cell.metadata['trusted'];
+      //delete cell.metadata['trusted'];
+
+      // Set the text value, normalizing line endings to \n
+      if (Array.isArray(cell.source)) {
+        value.text = cell.source
+          .map(s => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n'))
+          .join('');
+      } else {
+        value.text = cell.source.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      }
+
+      const meta = JSONExt.deepCopy(cell.metadata);
+      if (this.prototype.type !== 'raw') {
+        delete meta['format'];
+      }
+      if (this.prototype.type !== 'code') {
+        delete meta['collapsed'];
+        delete meta['scrolled'];
+      }
+
+      for (const key in meta) {
+        metadata.set(key, meta[key] as JSONValue);
+      }
+    }
+
+    return sharedModel;
+  }
+
+  /**
+   * Creates a standalone the model.
+   *
+   * TODO: documentation
+   */
+  static createStandaloneModel(
+    id?: string,
+    cell?: nbformat.IBaseCell
+  ): CellModel {
+    const cellId = id || UUID.uuid4();
+    const sharedDoc = new SharedDoc({ path: cellId });
+    const sharedModel = CellModel.createSharedModel(
+      cellId,
+      true,
+      sharedDoc,
+      cell
+    );
+    const model = new CellModel({ id: cellId, sharedDoc, sharedModel });
+    model.initialize();
+    return model;
+  }
+
+  /**
+   * Underlying shared model.
+   *
+   * TODO: documentation
+   */
+  protected _sharedModel: SharedMap<ISharedType>;
+
+  /**
+   * Metadata.
+   *
+   * TODO: documentation
+   */
+  protected _metadata: SharedMap<JSONValue>;
+
+  private _trusted: boolean = false;
 }
 
 /**
@@ -391,24 +452,19 @@ export namespace CellModel {
    */
   export interface IOptions {
     /**
-     * The source cell data.
+     * A unique identifier for the cell.
      */
-    cell?: nbformat.IBaseCell;
+    id: string;
 
     /**
-     * A unique identifier for this cell.
+     * An ISharedDoc to store cell's data.
      */
-    id?: string;
+    sharedDoc: ISharedDoc;
 
     /**
-     * An ISharedDoc in which to store cell data.
+     * An ISharedMap to store cell's data.
      */
-    sharedDoc?: ISharedDoc;
-
-    /**
-     * An ISharedMap in which to store cell data.
-     */
-    sharedModel?: ISharedMap<ISharedType>;
+    sharedModel: ISharedMap<ISharedType>;
   }
 }
 
@@ -421,27 +477,35 @@ export class AttachmentsCellModel extends CellModel {
    */
   constructor(options: AttachmentsCellModel.IOptions) {
     super(options);
-    const factory =
+    this._contentFactory =
       options.contentFactory || AttachmentsCellModel.defaultContentFactory;
-    let attachments: nbformat.IAttachments | undefined;
-    const cell = options.cell;
-    if (cell && (cell.cell_type === 'raw' || cell.cell_type === 'markdown')) {
-      attachments = (cell as nbformat.IRawCell | nbformat.IMarkdownCell)
-        .attachments;
-    }
-
-    this._attachments = factory.createAttachmentsModel({
-      values: attachments,
-      sharedModel: this.sharedModel
-    });
-    this._attachments.stateChanged.connect(this.onGenericChange, this);
   }
 
   /**
    * Get the attachments of the model.
    */
   get attachments(): IAttachmentsModel {
+    if (!this.isReady) {
+      throw Error('The model is not ready');
+    }
     return this._attachments;
+  }
+
+  /**
+   * Initialize the model.
+   *
+   * TODO: documentation
+   */
+  initialize(ready: boolean = true): void {
+    if (this.isReady) return;
+    super.initialize(false);
+    // TODO: initialize the attachments, and change the model
+    this._attachments = this._contentFactory.createAttachmentsModel({
+      sharedMap: this._sharedModel.get('attachments') as ISharedMap<JSONObject>
+    });
+    this._attachments.stateChanged.connect(this.onGenericChange, this);
+
+    if (ready) this._triggerModelReady();
   }
 
   /**
@@ -455,7 +519,76 @@ export class AttachmentsCellModel extends CellModel {
     return cell;
   }
 
+  /**
+   * Creates the shared model.
+   *
+   * TODO: documentation
+   */
+  static createSharedModel(
+    id: string,
+    isDocument: boolean,
+    sharedDoc: ISharedDoc,
+    cell?: nbformat.IRawCell | nbformat.IMarkdownCell
+  ): ISharedMap<ISharedType> {
+    const sharedModel = super.createSharedModel(
+      id,
+      isDocument,
+      sharedDoc,
+      cell
+    );
+    // TODO: initialize the attachments, and change the model
+    const attachments = new SharedMap<JSONValue>({
+      sharedDoc: sharedDoc as SharedDoc,
+      initialize: false
+    });
+    sharedModel.set('attachments', attachments);
+
+    if (
+      cell &&
+      (cell.cell_type === 'raw' || cell.cell_type === 'markdown') &&
+      cell.attachments
+    ) {
+      const values = cell.attachments;
+      Object.keys(values).forEach(key => {
+        if (values[key] !== undefined) {
+          attachments.set(key, values[key] as JSONValue);
+        }
+      });
+    }
+
+    return sharedModel;
+  }
+
+  /**
+   * Creates a standalone model.
+   *
+   * TODO: documentation
+   */
+  static createStandaloneModel(
+    id?: string,
+    cell?: nbformat.IRawCell | nbformat.IMarkdownCell,
+    contentFactory?: AttachmentsCellModel.IContentFactory
+  ): AttachmentsCellModel {
+    const cellId = id || UUID.uuid4();
+    const sharedDoc = new SharedDoc({ path: cellId });
+    const sharedModel = AttachmentsCellModel.createSharedModel(
+      cellId,
+      true,
+      sharedDoc,
+      cell
+    );
+    const model = new AttachmentsCellModel({
+      id: cellId,
+      sharedDoc,
+      sharedModel,
+      contentFactory
+    });
+    model.initialize();
+    return model;
+  }
+
   private _attachments: IAttachmentsModel;
+  private _contentFactory: AttachmentsCellModel.ContentFactory;
 }
 
 /**
@@ -523,6 +656,48 @@ export class RawCellModel extends AttachmentsCellModel {
     cell.id = this.id;
     return cell;
   }
+
+  /**
+   * Creates the shared model.
+   *
+   * TODO: documentation
+   */
+  static createSharedModel(
+    id: string,
+    isDocument: boolean,
+    sharedDoc: ISharedDoc,
+    cell?: nbformat.IRawCell
+  ): ISharedMap<ISharedType> {
+    return super.createSharedModel(id, isDocument, sharedDoc, cell);
+  }
+
+  /**
+   * Creates a standalone model.
+   *
+   * TODO: documentation
+   */
+  static createStandaloneModel(
+    id?: string,
+    cell?: nbformat.IRawCell,
+    contentFactory?: AttachmentsCellModel.IContentFactory
+  ): RawCellModel {
+    const cellId = id || UUID.uuid4();
+    const sharedDoc = new SharedDoc({ path: cellId });
+    const sharedModel = RawCellModel.createSharedModel(
+      cellId,
+      true,
+      sharedDoc,
+      cell
+    );
+    const model = new RawCellModel({
+      id: cellId,
+      sharedDoc,
+      sharedModel,
+      contentFactory
+    });
+    model.initialize();
+    return model;
+  }
 }
 
 /**
@@ -553,6 +728,42 @@ export class MarkdownCellModel extends AttachmentsCellModel {
     cell.id = this.id;
     return cell;
   }
+
+  /**
+   * Creates the shared model.
+   *
+   * TODO: documentation
+   */
+  static createSharedModel(
+    id: string,
+    isDocument: boolean,
+    sharedDoc: ISharedDoc,
+    cell?: nbformat.IMarkdownCell
+  ): ISharedMap<ISharedType> {
+    return super.createSharedModel(id, isDocument, sharedDoc, cell);
+  }
+
+  /**
+   * Creates an standalone model.
+   *
+   * TODO: documentation
+   */
+  static createStandaloneModel(
+    id?: string,
+    cell?: nbformat.IMarkdownCell
+  ): MarkdownCellModel {
+    const cellId = id || UUID.uuid4();
+    const sharedDoc = new SharedDoc({ path: cellId });
+    const sharedModel = MarkdownCellModel.createSharedModel(
+      cellId,
+      true,
+      sharedDoc,
+      cell
+    );
+    const model = new MarkdownCellModel({ id: cellId, sharedDoc, sharedModel });
+    model.initialize();
+    return model;
+  }
 }
 
 /**
@@ -564,76 +775,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   constructor(options: CodeCellModel.IOptions) {
     super(options);
-    const factory =
+    this._contentFactory =
       options.contentFactory || CodeCellModel.defaultContentFactory;
-    const trusted = this.trusted;
-    const cell = options.cell as nbformat.ICodeCell;
-
-    if (cell && cell.cell_type === 'code') {
-      // If options contains cell, this client initializes
-      // the shared model
-      this.sharedModel.set('executionCount', cell.execution_count || null);
-      const outputs = new SharedList<any>({
-        doc: this.sharedDoc as SharedDoc,
-        initialize: false
-      });
-      this.sharedModel.set('outputs', outputs);
-      this._outputs = factory.createOutputArea({
-        trusted,
-        values: cell.outputs ?? [],
-        sharedDoc: this.sharedDoc,
-        sharedList: outputs
-      });
-
-      // If execution count is not null presume the input code was the latest executed
-      // TODO load from the notebook file when the dirty state is stored in it
-      if (cell.execution_count !== null) {
-        // True if execution_count is null or undefined
-        this._executedCode = this.value.text.trim();
-      }
-    } else {
-      // If options doesn't contains cell, get values from
-      // the shared model
-      this._outputs = factory.createOutputArea({
-        trusted,
-        sharedDoc: this.sharedDoc,
-        sharedList: this.sharedModel.get('outputs') as ISharedList<any>
-      });
-    }
-
-    this._outputs.changed.connect(this.onGenericChange, this);
-
-    // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
-    // they are redundant in nbformat 4.4. See
-    // https://github.com/jupyter/nbformat/issues/137
-    this.metadata.changed.connect(Private.collapseChanged, this);
-
-    // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
-    // preference to `collapsed`.
-    if (this.metadata.has('collapsed')) {
-      const collapsed = this.metadata.get('collapsed') as boolean | undefined;
-      Private.collapseChanged(this.metadata, {
-        type: 'change',
-        key: 'collapsed',
-        oldValue: collapsed,
-        newValue: collapsed
-      });
-    } else if (this.metadata.has('jupyter')) {
-      const jupyter = this.metadata.get('jupyter') as JSONObject;
-      if (jupyter.hasOwnProperty('outputs_hidden')) {
-        Private.collapseChanged(this.metadata, {
-          type: 'change',
-          key: 'jupyter',
-          oldValue: jupyter,
-          newValue: jupyter
-        });
-      }
-    }
   }
 
-  /**
-   * The type of the cell.
-   */
   get type(): 'code' {
     return 'code';
   }
@@ -642,8 +787,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this.sharedModel.has('executionCount')
-      ? (this.sharedModel.get('executionCount') as nbformat.ExecutionCount)
+    return this.sharedModel.has('execution_count')
+      ? (this.sharedModel.get('execution_count') as nbformat.ExecutionCount)
       : null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
@@ -651,7 +796,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (newValue === oldValue) {
       return;
     }
-    this.sharedModel.set('executionCount', newValue || null);
+    this.sharedModel.set('execution_count', newValue || null);
   }
 
   /**
@@ -667,33 +812,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Set whether the cell is dirty or not.
-   */
-  private _setDirty(v: boolean) {
-    if (v !== this._isDirty) {
-      if (!v) {
-        this._executedCode = this.value.text.trim();
-      }
-      this._isDirty = v;
-      this.stateChanged.emit({
-        name: 'isDirty',
-        oldValue: !v,
-        newValue: v
-      });
-    }
-  }
-
-  clearExecution(): void {
-    this.outputs.clear();
-    this.executionCount = null;
-    this._setDirty(false);
-    this.metadata.delete('execution');
-  }
-
-  /**
    * The cell outputs.
    */
   get outputs(): IOutputAreaModel {
+    if (!this.isReady) {
+      throw Error('The model is not ready');
+    }
     return this._outputs;
   }
 
@@ -710,6 +834,63 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * Initialize model.
+   *
+   * TODO: documentation
+   */
+  initialize(ready: boolean = true): void {
+    if (this.isReady) return;
+    super.initialize(false);
+
+    this._outputs = this._contentFactory.createOutputArea({
+      trusted: this.trusted,
+      sharedList: this._sharedModel.get('outputs') as ISharedList<JSONObject>
+    });
+
+    this._outputs.changed.connect(this.onGenericChange, this);
+
+    // If execution count is not null presume the input code was the latest executed
+    // TODO load from the notebook file when the dirty state is stored in it
+    if (this._sharedModel.get('execution_count') !== null) {
+      // True if execution_count is null or undefined
+      this._executedCode = this._value.text.trim();
+    }
+
+    const metadata = this._sharedModel.get('metadata') as ISharedMap<JSONValue>;
+    // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
+    // preference to `collapsed`.
+    if (metadata.has('collapsed')) {
+      const collapsed = metadata.get('collapsed') as boolean | undefined;
+      Private.collapseChanged(metadata, [
+        {
+          type: 'change',
+          key: 'collapsed',
+          oldValue: collapsed,
+          newValue: collapsed
+        }
+      ]);
+    } else if (metadata.has('jupyter')) {
+      const jupyter = metadata.get('jupyter') as JSONObject;
+      if (jupyter.hasOwnProperty('outputs_hidden')) {
+        Private.collapseChanged(metadata, [
+          {
+            type: 'change',
+            key: 'jupyter',
+            oldValue: jupyter,
+            newValue: jupyter
+          }
+        ]);
+      }
+    }
+
+    // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
+    // they are redundant in nbformat 4.4. See
+    // https://github.com/jupyter/nbformat/issues/137
+    this._metadata.changed.connect(Private.collapseChanged, this);
+    if (ready) this._triggerModelReady();
+  }
+
+  /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICodeCell {
@@ -718,6 +899,16 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     cell.outputs = this.outputs.toJSON();
     cell.id = this.id;
     return cell;
+  }
+
+  /**
+   * Clear the outputs and execution count.
+   */
+  clearExecution(): void {
+    this.outputs.clear();
+    this.executionCount = null;
+    this._setDirty(false);
+    this.metadata.delete('execution');
   }
 
   /**
@@ -761,29 +952,110 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     args: ISharedMap.IChangedArgs<ISharedType>
   ): void {
     super._onSharedModelChanged(sender, args);
-    if (args.key === 'outputs') {
-      // TODO: trigger signal?
-      // We are listening for outputs change and triggering
-      // this.onGenericChange in the constructor
-    }
-    if (args.key === 'executionCount') {
-      this.contentChanged.emit(void 0);
-      this.stateChanged.emit({
-        name: 'executionCount',
-        oldValue: args.oldValue,
-        newValue: args.newValue
-      });
-      if (args.newValue && this.isDirty) {
-        this._setDirty(false);
+    args.forEach(arg => {
+      if (arg.key === 'outputs') {
+        // TODO: trigger signal?
+        // We are listening for outputs change and triggering
+        // this.onGenericChange in the constructor
       }
+      if (arg.key === 'execution_count') {
+        this.contentChanged.emit(void 0);
+        this.stateChanged.emit({
+          name: 'execution_count',
+          oldValue: arg.oldValue,
+          newValue: arg.newValue
+        });
+        if (arg.newValue && this.isDirty) {
+          this._setDirty(false);
+        }
+      }
+    });
+  }
+
+  /**
+   * Set whether the cell is dirty or not.
+   */
+  private _setDirty(v: boolean) {
+    if (v !== this._isDirty) {
+      if (!v) {
+        this._executedCode = this.value.text.trim();
+      }
+      this._isDirty = v;
+      this.stateChanged.emit({
+        name: 'isDirty',
+        oldValue: !v,
+        newValue: v
+      });
     }
   }
 
-  sharedModel: models.ISharedCodeCell;
+  /**
+   * Creates the shared model.
+   *
+   * TODO: documentation
+   */
+  static createSharedModel(
+    id: string,
+    isDocument: boolean,
+    sharedDoc: ISharedDoc,
+    cell?: nbformat.ICodeCell
+  ): ISharedMap<ISharedType> {
+    const sharedModel = super.createSharedModel(
+      id,
+      isDocument,
+      sharedDoc,
+      cell
+    );
+
+    sharedModel.set('execution_count', null);
+    const outputs = new SharedList<JSONObject>({
+      sharedDoc: sharedDoc as SharedDoc,
+      initialize: false
+    });
+    sharedModel.set('outputs', outputs);
+
+    if (cell && cell.cell_type === 'code') {
+      sharedModel.set('execution_count', cell.execution_count || null);
+      each(cell.outputs, value => {
+        outputs.push(value as JSONObject);
+      });
+    }
+
+    return sharedModel;
+  }
+
+  /**
+   * Creates an standalone model.
+   *
+   * TODO: documentation
+   */
+  static createStandaloneModel(
+    id?: string,
+    cell?: nbformat.ICodeCell,
+    contentFactory?: CodeCellModel.IContentFactory
+  ): CodeCellModel {
+    const cellId = id || UUID.uuid4();
+    const sharedDoc = new SharedDoc({ path: cellId });
+    const sharedModel = CodeCellModel.createSharedModel(
+      cellId,
+      true,
+      sharedDoc,
+      cell
+    );
+    const model = new CodeCellModel({
+      id: cellId,
+      sharedDoc,
+      sharedModel,
+      contentFactory
+    });
+    model.initialize();
+    return model;
+  }
 
   private _executedCode: string = '';
   private _isDirty = false;
   private _outputs: IOutputAreaModel;
+  private _contentFactory: CodeCellModel.ContentFactory;
 }
 
 /**
@@ -833,27 +1105,29 @@ namespace Private {
     metadata: ISharedMap<JSONValue>,
     args: ISharedMap.IChangedArgs<JSONValue>
   ): void {
-    if (args.key === 'collapsed') {
-      const jupyter = (metadata.get('jupyter') || {}) as JSONObject;
-      const { outputs_hidden, ...newJupyter } = jupyter;
+    args.forEach(arg => {
+      if (arg.key === 'collapsed') {
+        const jupyter = (metadata.get('jupyter') || {}) as JSONObject;
+        const { outputs_hidden, ...newJupyter } = jupyter;
 
-      if (outputs_hidden !== args.newValue) {
-        if (args.newValue !== undefined) {
-          newJupyter['outputs_hidden'] = args.newValue;
+        if (outputs_hidden !== arg.newValue) {
+          if (arg.newValue !== undefined) {
+            newJupyter['outputs_hidden'] = arg.newValue;
+          }
+          if (Object.keys(newJupyter).length === 0) {
+            metadata.delete('jupyter');
+          } else {
+            metadata.set('jupyter', newJupyter);
+          }
         }
-        if (Object.keys(newJupyter).length === 0) {
-          metadata.delete('jupyter');
+      } else if (arg.key === 'jupyter') {
+        const jupyter = (arg.newValue || {}) as JSONObject;
+        if (jupyter.hasOwnProperty('outputs_hidden')) {
+          metadata.set('collapsed', jupyter.outputs_hidden);
         } else {
-          metadata.set('jupyter', newJupyter);
+          metadata.delete('collapsed');
         }
       }
-    } else if (args.key === 'jupyter') {
-      const jupyter = (args.newValue || {}) as JSONObject;
-      if (jupyter.hasOwnProperty('outputs_hidden')) {
-        metadata.set('collapsed', jupyter.outputs_hidden);
-      } else {
-        metadata.delete('collapsed');
-      }
-    }
+    });
   }
 }

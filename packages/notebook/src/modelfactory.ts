@@ -5,7 +5,7 @@ import { CodeCellModel } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IModelDB } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import { ISharedDoc } from '@jupyterlab/shared-models';
+import { ISharedDoc, SharedDoc } from '@jupyterlab/shared-models';
 import { INotebookModel, NotebookModel } from './model';
 
 /**
@@ -23,7 +23,10 @@ export class NotebookModelFactory
     const codeCellContentFactory = options.codeCellContentFactory;
     this.contentFactory =
       options.contentFactory ||
-      new NotebookModel.ContentFactory({ codeCellContentFactory });
+      new NotebookModel.ContentFactory({
+        sharedDoc: new SharedDoc(),
+        codeCellContentFactory
+      });
   }
 
   /**

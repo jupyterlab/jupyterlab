@@ -3,9 +3,9 @@
 
 import { ISessionContext } from '@jupyterlab/apputils';
 import {
+  AttachmentsCellModel,
   Cell,
   CellDragUtils,
-  CellModel,
   CodeCell,
   CodeCellModel,
   ICodeCellModel,
@@ -223,7 +223,7 @@ export class CodeConsole extends Widget {
       cell.disposed.connect(this._onCellDisposed, this);
     }
     // Create the banner.
-    const model = this.modelFactory.createRawCell({});
+    const model = this.modelFactory.createRawCell();
     model.value.text = '...';
     const banner = (this._banner = new RawCell({
       model,
@@ -720,7 +720,7 @@ export class CodeConsole extends Widget {
   private _createCodeCellOptions(): CodeCell.IOptions {
     const contentFactory = this.contentFactory;
     const modelFactory = this.modelFactory;
-    const model = modelFactory.createCodeCell({});
+    const model = modelFactory.createCodeCell();
     const rendermime = this.rendermime;
     const editorConfig = this.editorConfig;
     return {
@@ -955,7 +955,11 @@ export namespace CodeConsole {
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
+    createCodeCell(
+      id?: string,
+      cell?: nbformat.ICodeCell,
+      contentFactory?: CodeCellModel.IContentFactory
+    ): ICodeCellModel;
 
     /**
      * Create a new raw cell.
@@ -965,7 +969,11 @@ export namespace CodeConsole {
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createRawCell(options: CellModel.IOptions): IRawCellModel;
+    createRawCell(
+      id?: string,
+      cell?: nbformat.IRawCell,
+      contentFactory?: AttachmentsCellModel.IContentFactory
+    ): IRawCellModel;
   }
 
   /**
@@ -995,11 +1003,15 @@ export namespace CodeConsole {
      *   If the contentFactory is not provided, the instance
      *   `codeCellContentFactory` will be used.
      */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (!options.contentFactory) {
-        options.contentFactory = this.codeCellContentFactory;
+    createCodeCell(
+      id?: string,
+      cell?: nbformat.ICodeCell,
+      contentFactory?: CodeCellModel.IContentFactory
+    ): ICodeCellModel {
+      if (!contentFactory) {
+        contentFactory = this.codeCellContentFactory;
       }
-      return new CodeCellModel(options);
+      return CodeCellModel.createStandaloneModel(id, cell, contentFactory);
     }
 
     /**
@@ -1010,8 +1022,12 @@ export namespace CodeConsole {
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createRawCell(options: CellModel.IOptions): IRawCellModel {
-      return new RawCellModel(options);
+    createRawCell(
+      id?: string,
+      cell?: nbformat.IRawCell,
+      contentFactory?: AttachmentsCellModel.IContentFactory
+    ): IRawCellModel {
+      return RawCellModel.createStandaloneModel(id, cell, contentFactory);
     }
   }
 

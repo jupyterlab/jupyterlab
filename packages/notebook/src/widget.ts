@@ -14,11 +14,11 @@ import {
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISharedMap } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, each, findIndex } from '@lumino/algorithm';
-import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { JSONObject, MimeData } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag, IDragEvent } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
@@ -27,6 +27,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
+import { ICellList } from './celllist';
 import { INotebookModel } from './model';
 
 /**
@@ -428,16 +429,18 @@ export class StaticNotebook extends Widget {
    * when the `language_info` metadata changes.
    */
   protected onMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
-    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
+    sender: ISharedMap<JSONObject>,
+    args: ISharedMap.IChangedArgs<JSONObject>
   ): void {
-    switch (args.key) {
-      case 'language_info':
-        this._updateMimetype();
-        break;
-      default:
-        break;
-    }
+    args.forEach(arg => {
+      switch (arg.key) {
+        case 'language_info':
+          this._updateMimetype();
+          break;
+        default:
+          break;
+      }
+    });
   }
 
   /**
@@ -493,7 +496,7 @@ export class StaticNotebook extends Widget {
     const cells = newValue.cells;
     if (!cells.length && newValue.isInitialized) {
       cells.push(
-        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+        newValue.contentFactory.createCell(this.notebookConfig.defaultCell)
       );
     }
 
@@ -508,58 +511,39 @@ export class StaticNotebook extends Widget {
   /**
    * Handle a change cells event.
    */
-  private _onCellsChanged(
-    sender: IObservableList<ICellModel>,
-    args: IObservableList.IChangedArgs<ICellModel>
-  ) {
-    let index = 0;
-    switch (args.type) {
-      case 'add':
-        index = args.newIndex;
-        // eslint-disable-next-line no-case-declarations
-        const insertType: InsertType = args.oldIndex == -1 ? 'push' : 'insert';
-        each(args.newValues, value => {
-          this._insertCell(index++, value, insertType);
+  private _onCellsChanged(sender: ICellList, args: ICellList.IChangedArgs) {
+    let currpos = 0;
+    args.delta.forEach(delta => {
+      if (delta.insert != null) {
+        const insertType: InsertType =
+          currpos + delta.insert.length == sender.length ? 'push' : 'insert';
+        delta.insert.forEach(value => {
+          this._insertCell(currpos++, value, insertType);
         });
-        break;
-      case 'move':
-        this._moveCell(args.oldIndex, args.newIndex);
-        break;
-      case 'remove':
-        each(args.oldValues, value => {
-          this._removeCell(args.oldIndex);
-        });
-        // Add default cell if there are no cells remaining.
-        if (!sender.length) {
-          const model = this.model;
-          // Add the cell in a new context to avoid triggering another
-          // cell changed event during the handling of this signal.
-          requestAnimationFrame(() => {
-            if (model && !model.isDisposed && !model.cells.length) {
-              model.cells.push(
-                model.contentFactory.createCell(
-                  this.notebookConfig.defaultCell,
-                  {}
-                )
-              );
-            }
-          });
+      } else if (delta.delete != null) {
+        for (let i = currpos; i < currpos + delta.delete; i++) {
+          this._removeCell(currpos);
         }
-        break;
-      case 'set':
-        // TODO: reuse existing widgets if possible.
-        index = args.newIndex;
-        each(args.newValues, value => {
-          // Note: this ordering (insert then remove)
-          // is important for getting the active cell
-          // index for the editable notebook correct.
-          this._insertCell(index, value, 'set');
-          this._removeCell(index + 1);
-          index++;
-        });
-        break;
-      default:
-        return;
+      } else if (delta.retain != null) {
+        currpos += delta.retain;
+      } else {
+        // TODO: Implement the move feature
+        this._moveCell(currpos, currpos);
+      }
+    });
+
+    // Add default cell if there are no cells remaining.
+    if (!sender.length) {
+      const model = this.model;
+      // Add the cell in a new context to avoid triggering another
+      // cell changed event during the handling of this signal.
+      requestAnimationFrame(() => {
+        if (model && !model.isDisposed && !model.cells.length) {
+          model.cells.push(
+            model.contentFactory.createCell(this.notebookConfig.defaultCell)
+          );
+        }
+      });
     }
   }
 
@@ -2359,18 +2343,11 @@ export class Notebook extends StaticNotebook {
       // Insert the copies of the original cells.
       model.cells.transact(() => {
         each(values, (cell: nbformat.ICell) => {
-          let value: ICellModel;
-          switch (cell.cell_type) {
-            case 'code':
-              value = factory.createCodeCell({ cell });
-              break;
-            case 'markdown':
-              value = factory.createMarkdownCell({ cell });
-              break;
-            default:
-              value = factory.createRawCell({ cell });
-              break;
-          }
+          const value = factory.createCell(
+            cell.cell_type as nbformat.CellType,
+            undefined,
+            cell
+          );
           model.cells.insert(index++, value);
         });
       });

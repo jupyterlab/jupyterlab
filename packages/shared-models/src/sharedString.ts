@@ -3,31 +3,41 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import * as Y from 'yjs';
-import { IShared, SharedDoc } from './model';
+import { Delta, IShared, SharedDoc } from './model';
 
 /**
- * A string which can be observed for changes.
+ * A string which can be shared by multiple clients.
  */
 export interface ISharedString extends IShared {
   /**
-   * The type of the Observable.
+   * The type of the IShared.
    */
   readonly type: 'String';
+
+  /**
+   * The specific model behind the ISharedString abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.Text.
+   */
+  readonly underlyingModel: any;
+
+  /**
+   * The specific undo manager class behind the IShared abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.UndoManager.
+   *
+   * TODO: Define an API
+   */
+  readonly undoManager: any;
 
   /**
    * A signal emitted when the string has changed.
    */
   readonly changed: ISignal<this, ISharedString.IChangedArgs>;
-
-  /**
-   * The specific model behind the ISharedMap abstraction.
-   *
-   * Note: The default implementation is based on Yjs so the underlying
-   * model is a Y.Text.
-   */
-  readonly underlyingModel: any;
-
-  readonly undoManager: any;
 
   /**
    * The value of the string.
@@ -40,12 +50,12 @@ export interface ISharedString extends IShared {
   dispose(): void;
 
   /**
-   * Whether the SharedString can undo changes.
+   * Whether the ISharedString can undo changes.
    */
   canUndo(): boolean;
 
   /**
-   * Whether the SharedString can redo changes.
+   * Whether the ISharedString can redo changes.
    */
   canRedo(): boolean;
 
@@ -83,95 +93,43 @@ export interface ISharedString extends IShared {
   remove(start: number, end: number): void;
 
   /**
-   * Set the ObservableString to an empty string.
+   * Set the ISharedString to an empty string.
    */
   clear(): void;
 }
 
 /**
- * The namespace for `IObservableString` associate interfaces.
+ * The namespace for `ISharedString` associate interfaces.
  */
 export namespace ISharedString {
   /**
-   * The change types which occur on an observable string.
+   * The changed args object which is emitted by an SharedString string.
    */
-  export type ChangeType =
-    /**
-     * Text was inserted.
-     */
-    | 'insert'
-
-    /**
-     * Text was removed.
-     */
-    | 'remove'
-
-    /**
-     * Text was set.
-     */
-    | 'set';
-
-  /**
-   * The changed args object which is emitted by an observable string.
-   */
-  export interface IChangedArgs {
-    /**
-     * The type of change undergone by the list.
-     */
-    type: ChangeType;
-
-    /**
-     * The starting index of the change.
-     */
-    start: number;
-
-    /**
-     * The end index of the change.
-     */
-    end: number;
-
-    /**
-     * The value of the change.
-     *
-     * ### Notes
-     * If `ChangeType` is `set`, then
-     * this is the new value of the string.
-     *
-     * If `ChangeType` is `insert` this is
-     * the value of the inserted string.
-     *
-     * If `ChangeType` is remove this is the
-     * value of the removed substring.
-     * TODO:
-     * ModelDb returns the old value when removing, but we can not extract
-     * the old value from the YTextEvent. Should we return undefined?
-     */
-    value?: string;
-  }
+  export type IChangedArgs = Array<Delta<string>>;
 }
 
 /**
- * A concrete implementation of [[IObservableString]]
+ * A concrete implementation of [[ISharedString]]
  */
 export class SharedString implements ISharedString {
-  private _ytext: Y.Text;
-  private _doc: SharedDoc;
   private _origin: any;
+  private _sharedDoc: SharedDoc;
   private _undoManager: Y.UndoManager;
   private _isDisposed: boolean = false;
   private _changed = new Signal<this, ISharedString.IChangedArgs>(this);
 
   /**
-   * Construct a new observable string.
+   * Construct a new SharedString.
    */
   constructor(options: SharedString.IOptions) {
-    if (options.ytext) {
-      this._ytext = options.ytext;
+    this._sharedDoc = options.sharedDoc;
+
+    if (options.underlyingModel) {
+      this.underlyingModel = options.underlyingModel;
     } else {
-      this._ytext = new Y.Text();
+      this.underlyingModel = new Y.Text();
     }
 
-    this._doc = options.doc;
     this._origin = options.origin ?? this;
 
     if (options.undoManager) {
@@ -180,20 +138,32 @@ export class SharedString implements ISharedString {
       this.initialize();
     }
 
-    this._ytext.observe(this._onTextChanged);
+    this.underlyingModel.observe(this._onTextChanged);
   }
 
   /**
-   * The type of the Observable.
+   * The type of the IShared.
    */
-  get type(): 'String' {
-    return 'String';
-  }
+  readonly type = 'String';
 
-  get underlyingModel(): Y.Text {
-    return this._ytext;
-  }
+  /**
+   * The specific model behind the ISharedString abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.Text.
+   */
+  readonly underlyingModel: Y.Text;
 
+  /**
+   * The specific undo manager class behind the IShared abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.UndoManager.
+   *
+   * TODO: Define an API
+   */
   get undoManager(): any {
     return this._undoManager;
   }
@@ -209,9 +179,9 @@ export class SharedString implements ISharedString {
    * Set the value of the string.
    */
   set text(value: string) {
-    this._doc.transact(() => {
-      this._ytext.delete(0, this._ytext.length);
-      this._ytext.insert(0, value);
+    this._sharedDoc.transact(() => {
+      this.underlyingModel.delete(0, this.underlyingModel.length);
+      this.underlyingModel.insert(0, value);
     }, this._origin);
   }
 
@@ -219,7 +189,7 @@ export class SharedString implements ISharedString {
    * Get the value of the string.
    */
   get text(): string {
-    return this._ytext.toString();
+    return this.underlyingModel.toString();
   }
 
   /**
@@ -238,24 +208,35 @@ export class SharedString implements ISharedString {
     }
     this._isDisposed = true;
     Signal.clearData(this);
-    this._ytext.unobserve(this._onTextChanged);
+    this.underlyingModel.unobserve(this._onTextChanged);
   }
 
+  /**
+   * Initialize the model.
+   *
+   * #### Notes
+   * The undo manager can not be initialized
+   * before the Y.Text is inserted in the Y.Doc.
+   * This option allows to instantiate a `SharedString` object
+   * before the Y.Text was integrated into the Y.Doc
+   * and then call `SharedString.initialize()` to
+   * initialize the undo manager.
+   */
   initialize(): void {
-    this._undoManager = new Y.UndoManager(this._ytext, {
+    this._undoManager = new Y.UndoManager(this.underlyingModel, {
       trackedOrigins: new Set([this._origin])
     });
   }
 
   /**
-   * Whether the SharedString can undo changes.
+   * Whether the ISharedString can undo changes.
    */
   canUndo(): boolean {
     return this._undoManager.undoStack.length > 0;
   }
 
   /**
-   * Whether the SharedString can redo changes.
+   * Whether the ISharedString can redo changes.
    */
   canRedo(): boolean {
     return this._undoManager.redoStack.length > 0;
@@ -290,8 +271,8 @@ export class SharedString implements ISharedString {
    * @param text - The substring to insert.
    */
   insert(index: number, text: string): void {
-    this._doc.transact(() => {
-      this._ytext.insert(index, text);
+    this._sharedDoc.transact(() => {
+      this.underlyingModel.insert(index, text);
     }, this._origin);
   }
 
@@ -303,60 +284,20 @@ export class SharedString implements ISharedString {
    * @param end - The ending index.
    */
   remove(start: number, end: number): void {
-    this._doc.transact(() => {
-      this._ytext.delete(start, end - start);
+    this._sharedDoc.transact(() => {
+      this.underlyingModel.delete(start, end - start);
     }, this._origin);
   }
 
   /**
-   * Set the ObservableString to an empty string.
+   * Set the ISharedString to an empty string.
    */
   clear(): void {
     this.text = '';
   }
 
   private _onTextChanged = (event: Y.YTextEvent): void => {
-    let currpos = 0;
-    let args: any = {};
-
-    event.changes.delta.forEach(delta => {
-      if (
-        args.type === 'remove' &&
-        delta.insert != null &&
-        args.end === delta.insert.length
-      ) {
-        args = {
-          type: 'set',
-          start: 0,
-          end: delta.insert.length,
-          value: delta.insert as string
-        };
-        currpos += delta.insert.length;
-      } else if (delta.insert != null) {
-        args = {
-          type: 'insert',
-          start: currpos,
-          end: currpos + delta.insert.length,
-          value: delta.insert as string
-        };
-        currpos += delta.insert.length;
-      } else if (delta.delete != null) {
-        /* TODO:
-         * ModelDb returns the old value, but we can not extract
-         * the old value from the YTextEvent. Should we return undefined?
-         */
-        args = {
-          type: 'remove',
-          start: currpos,
-          end: currpos + delta.delete,
-          value: undefined
-        };
-      } else if (delta.retain != null) {
-        currpos += delta.retain;
-      }
-    });
-
-    this._changed.emit(args);
+    this._changed.emit(event.changes.delta as ISharedString.IChangedArgs);
   };
 }
 
@@ -372,11 +313,11 @@ export namespace SharedString {
      * A specific document to use as the store for this
      * SharedDoc.
      */
-    doc: SharedDoc;
+    sharedDoc: SharedDoc;
 
     /**
      * The underlying Y.Text for the SharedString.
      */
-    ytext?: Y.Text;
+    underlyingModel?: Y.Text;
   }
 }

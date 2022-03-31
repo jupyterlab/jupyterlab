@@ -10,7 +10,8 @@ import { Contents } from '@jupyterlab/services';
 import {
   ISharedDoc,
   ISharedMap,
-  ISharedString
+  ISharedString,
+  SharedDoc
 } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONValue, PartialJSONValue } from '@lumino/coreutils';
@@ -29,15 +30,10 @@ export class DocumentModel
    * Construct a new document model.
    */
   constructor(languagePreference?: string, sharedDoc?: ISharedDoc) {
-    super({ sharedDoc });
+    super({ isDocument: true, sharedDoc: sharedDoc || new SharedDoc() });
     this._defaultLang = languagePreference || '';
 
-    this.value.changed.connect(this._onValueChanged, this);
-
-    // TODO: initialize only on first client
-    // use initialize?
-    this._state = this.sharedDoc.createMap<JSONValue>('state');
-    this._state.set('dirty', false);
+    this._state = this._sharedDoc.createMap<JSONValue>('state');
     this._state.changed.connect(this._onStateChanged, this);
   }
 
@@ -151,7 +147,7 @@ export class DocumentModel
   }
 
   /**
-   * Trigger a content changed signal.
+   * Handle a change to the shared model value.
    */
   protected _onValueChanged(
     sender: ISharedString,
@@ -176,17 +172,22 @@ export class DocumentModel
     this.dirty = true;
   }
 
+  /**
+   * Handle a change on the state.
+   */
   protected _onStateChanged(
     sender: ISharedMap<any>,
     args: ISharedMap.IChangedArgs<any>
   ): void {
-    if (args.key === 'dirty' && this._dirty !== value.newValue) {
-      this._dirty = value.newValue;
-    }
-    this.triggerStateChange({
-      name: args.key,
-      newValue: args.newValue,
-      oldValue: args.oldValue
+    args.forEach(arg => {
+      if (arg.key === 'dirty' && this._dirty !== arg.newValue) {
+        this._dirty = arg.newValue;
+      }
+      this.triggerStateChange({
+        name: arg.key,
+        newValue: arg.newValue,
+        oldValue: arg.oldValue
+      });
     });
   }
 

@@ -27,7 +27,7 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
+import { Cell, CodeCell, MarkdownCell } from '@jupyterlab/cells';
 import {
   CodeEditor,
   IEditorServices,
@@ -63,7 +63,6 @@ import {
   StaticNotebook,
   ToolbarItems
 } from '@jupyterlab/notebook';
-import { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -98,6 +97,7 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
+import { IObservableList } from '@jupyterlab/observables';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -1811,7 +1811,7 @@ function addCommands(
         return;
       }
       panel.content.model.cells.changed.connect(
-        (list: ICellList, args: IObservableList.IChangedArgs<ICellModel>) => {
+        (list: ICellList, args: ICellList.IChangedArgs) => {
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);

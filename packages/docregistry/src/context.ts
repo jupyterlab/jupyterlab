@@ -61,8 +61,8 @@ export class Context<
     this._opener = options.opener || Private.noOp;
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
 
-    const path = this._manager.contents.normalize(options.path);
-    const localPath = this._manager.contents.localPath(path);
+    this._path = this._manager.contents.normalize(options.path);
+    const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     this._sharedDoc = new SharedDoc({ path: localPath });
@@ -89,7 +89,7 @@ export class Context<
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
       ? docProviderFactory({
-          path,
+          path: this._path,
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
           sharedDoc: this._sharedDoc
@@ -100,11 +100,11 @@ export class Context<
       return this._populatedPromise.promise;
     });
 
-    const ext = PathExt.extname(path);
+    const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
-      path,
+      path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false },
@@ -114,14 +114,10 @@ export class Context<
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
     this.urlResolver = new RenderMimeRegistry.UrlResolver({
-      path,
+      path: this._path,
       contents: manager.contents
     });
 
-    // If the context was not initialized by another client
-    if (!this._sharedContext.has('path')) {
-      this._sharedContext.set('path', path);
-    }
     this._sharedContext.changed.connect(this._onSharedContextChanged, this);
   }
 
@@ -180,7 +176,7 @@ export class Context<
    * The current path associated with the document.
    */
   get path(): string {
-    return this._sharedContext.get('path') as string;
+    return (this._sharedContext.get('path') as string) || this._path;
   }
 
   /**
@@ -189,8 +185,7 @@ export class Context<
    * this is the same as the path.
    */
   get localPath(): string {
-    const path = this._sharedContext.get('path') as string;
-    return this._manager.contents.localPath(path);
+    return this._manager.contents.localPath(this.path);
   }
 
   /**
@@ -313,15 +308,13 @@ export class Context<
   saveAs(): Promise<void> {
     return this.ready
       .then(() => {
-        const path = this._sharedContext.get('path') as string;
-        return Private.getSavePath(path);
+        return Private.getSavePath(this.path);
       })
       .then(newPath => {
         if (this.isDisposed || !newPath) {
           return;
         }
-        const path = this._sharedContext.get('path') as string;
-        if (newPath === path) {
+        if (newPath === this.path) {
           return this.save();
         }
         // Make sure the path does not exist.
@@ -350,8 +343,7 @@ export class Context<
    *   downloading.
    */
   async download(): Promise<void> {
-    const path = this._sharedContext.get('path') as string;
-    const url = await this._manager.contents.getDownloadUrl(path);
+    const url = await this._manager.contents.getDownloadUrl(this.path);
     const element = document.createElement('a');
     element.href = url;
     element.download = '';
@@ -376,8 +368,7 @@ export class Context<
   createCheckpoint(): Promise<Contents.ICheckpointModel> {
     const contents = this._manager.contents;
     return this._manager.ready.then(() => {
-      const path = this._sharedContext.get('path') as string;
-      return contents.createCheckpoint(path);
+      return contents.createCheckpoint(this.path);
     });
   }
 
@@ -387,8 +378,7 @@ export class Context<
   deleteCheckpoint(checkpointId: string): Promise<void> {
     const contents = this._manager.contents;
     return this._manager.ready.then(() => {
-      const path = this._sharedContext.get('path') as string;
-      return contents.deleteCheckpoint(path, checkpointId);
+      return contents.deleteCheckpoint(this.path, checkpointId);
     });
   }
 
@@ -397,17 +387,16 @@ export class Context<
    */
   restoreCheckpoint(checkpointId?: string): Promise<void> {
     const contents = this._manager.contents;
-    const path = this._sharedContext.get('path') as string;
     return this._manager.ready.then(() => {
       if (checkpointId) {
-        return contents.restoreCheckpoint(path, checkpointId);
+        return contents.restoreCheckpoint(this.path, checkpointId);
       }
       return this.listCheckpoints().then(checkpoints => {
         if (this.isDisposed || !checkpoints.length) {
           return;
         }
         checkpointId = checkpoints[checkpoints.length - 1].id;
-        return contents.restoreCheckpoint(path, checkpointId);
+        return contents.restoreCheckpoint(this.path, checkpointId);
       });
     });
   }
@@ -418,8 +407,7 @@ export class Context<
   listCheckpoints(): Promise<Contents.ICheckpointModel[]> {
     const contents = this._manager.contents;
     return this._manager.ready.then(() => {
-      const path = this._sharedContext.get('path') as string;
-      return contents.listCheckpoints(path);
+      return contents.listCheckpoints(this.path);
     });
   }
 
@@ -461,15 +449,14 @@ export class Context<
     }
     let oldPath = change.oldValue && change.oldValue.path;
     let newPath = change.newValue && change.newValue.path;
-    const path = this._sharedContext.get('path') as string;
-    if (newPath && path.indexOf(oldPath || '') === 0) {
+    if (newPath && this.path.indexOf(oldPath || '') === 0) {
       let changeModel = change.newValue;
       // When folder name changed, `oldPath` is `foo`, `newPath` is `bar` and `this._path` is `foo/test`,
       // we should update `foo/test` to `bar/test` as well
 
-      if (oldPath !== path) {
-        newPath = path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = path;
+      if (oldPath !== this.path) {
+        newPath = this.path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
+        oldPath = this.path;
 
         // Update client file model from folder change
         changeModel = {
@@ -498,8 +485,7 @@ export class Context<
       return;
     }
     const newPath = this.sessionContext.session!.path;
-    const path = this._sharedContext.get('path') as string;
-    if (newPath !== path) {
+    if (newPath !== this.path) {
       this._sharedContext.set('path', newPath);
     }
   }
@@ -508,13 +494,15 @@ export class Context<
     sender: ISharedMap<JSONValue>,
     args: ISharedMap.IChangedArgs<JSONValue>
   ): void {
-    if (args.key === 'path') {
-      const newPath = args.newValue as string;
-      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
-      this._provider.setPath(newPath);
-      this._pathChanged.emit(newPath);
-      this.sessionContext.session?.setPath(newPath);
-    }
+    args.forEach(arg => {
+      if (arg.key === 'path') {
+        this._path = arg.newValue as string;
+        (this.urlResolver as RenderMimeRegistry.UrlResolver).path = this._path;
+        this._provider.setPath(this._path);
+        this._pathChanged.emit(this._path);
+        this.sessionContext.session?.setPath(this._path);
+      }
+    });
   }
 
   /**
@@ -718,11 +706,10 @@ export class Context<
         ? { format: this._factory.fileFormat }
         : {})
     };
-    const path = this._sharedContext.get('path') as string;
     const model = this._model;
     return this._manager.ready
       .then(() => {
-        return this._manager.contents.get(path, opts);
+        return this._manager.contents.get(this.path, opts);
       })
       .then(contents => {
         if (this.isDisposed) {
@@ -758,9 +745,7 @@ export class Context<
         }
       })
       .catch(async err => {
-        const path = this._sharedContext.get('path') as string;
-        const localPath = this._manager.contents.localPath(path);
-        const name = PathExt.basename(localPath);
+        const name = PathExt.basename(this.localPath);
         void this._handleError(
           err,
           this._trans.__('File Load Error for %1', name)
@@ -775,9 +760,8 @@ export class Context<
   private _maybeSave(
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
-    const path = this._sharedContext.get('path') as string;
     // Make sure the file has not changed on disk.
-    const promise = this._manager.contents.get(path, { content: false });
+    const promise = this._manager.contents.get(this.path, { content: false });
     return promise.then(
       model => {
         if (this.isDisposed) {
@@ -800,11 +784,11 @@ export class Context<
         ) {
           return this._timeConflict(tClient, model, options);
         }
-        return this._manager.contents.save(path, options);
+        return this._manager.contents.save(this.path, options);
       },
       err => {
         if (err.response && err.response.status === 404) {
-          return this._manager.contents.save(path, options);
+          return this._manager.contents.save(this.path, options);
         }
         throw err;
       }
@@ -889,8 +873,7 @@ or load the version on disk (revert)?`,
         return Promise.reject(new Error('Disposed'));
       }
       if (result.button.label === this._trans.__('Overwrite')) {
-        const path = this._sharedContext.get('path') as string;
-        return this._manager.contents.save(path, options);
+        return this._manager.contents.save(this.path, options);
       }
       // FIXME-TRANS: Why compare to label?
       if (result.button.label === this._trans.__('Revert')) {
@@ -955,6 +938,7 @@ or load the version on disk (revert)?`,
   private _modelDB: IModelDB;
   private _sharedDoc: ISharedDoc;
   private _sharedContext: ISharedMap<JSONValue>;
+  private _path: string;
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;

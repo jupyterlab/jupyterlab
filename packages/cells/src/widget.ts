@@ -559,20 +559,22 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     model: ISharedMap<JSONValue>,
     args: ISharedMap.IChangedArgs<JSONValue>
   ): void {
-    switch (args.key) {
-      case 'jupyter':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      case 'editable':
-        if (this.syncEditable) {
-          this.loadEditableState();
-        }
-        break;
-      default:
-        break;
-    }
+    args.forEach(arg => {
+      switch (arg.key) {
+        case 'jupyter':
+          if (this.syncCollapse) {
+            this.loadCollapseState();
+          }
+          break;
+        case 'editable':
+          if (this.syncEditable) {
+            this.loadEditableState();
+          }
+          break;
+        default:
+          break;
+      }
+    });
   }
 
   // Used in clone() to instantiate a new instance of the current widget
@@ -1060,20 +1062,22 @@ export class CodeCell extends Cell<ICodeCellModel> {
       // We are in middle of a metadata transaction, so don't react to it.
       return;
     }
-    switch (args.key) {
-      case 'scrolled':
-        if (this.syncScrolled) {
-          this.loadScrolledState();
-        }
-        break;
-      case 'collapsed':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      default:
-        break;
-    }
+    args.forEach(arg => {
+      switch (arg.key) {
+        case 'scrolled':
+          if (this.syncScrolled) {
+            this.loadScrolledState();
+          }
+          break;
+        case 'collapsed':
+          if (this.syncCollapse) {
+            this.loadCollapseState();
+          }
+          break;
+        default:
+          break;
+      }
+    });
     super.onMetadataChanged(model, args);
   }
 

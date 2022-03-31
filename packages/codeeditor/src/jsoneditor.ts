@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISharedMap } from '@jupyterlab/shared-models';
+import { ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -75,10 +75,13 @@ export class JSONEditor extends Widget {
     this.node.appendChild(this.headerNode);
     this.node.appendChild(this.editorHostNode);
 
-    const model = new CodeEditor.Model();
+    const model = new CodeEditor.Model({
+      isDocument: true,
+      sharedDoc: new SharedDoc(),
+      mimeType: 'application/json'
+    });
 
     model.value.text = this._trans.__('No data!');
-    model.mimeType = 'application/json';
     model.value.changed.connect(this._onValueChanged, this);
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });

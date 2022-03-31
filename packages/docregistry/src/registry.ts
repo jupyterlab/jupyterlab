@@ -824,16 +824,6 @@ export namespace DocumentRegistry {
     readonly defaultKernelLanguage: string;
 
     /**
-     * The underlying `SharedDoc` instance in which model
-     * data is stored.
-     *
-     * ### Notes
-     * Making direct edits to the values stored in the`IModelDB`
-     * is not recommended, and may produce unpredictable results.
-     */
-    readonly sharedDoc: ISharedDoc;
-
-    /**
      * Serialize the model to a string.
      */
     toString(): string;

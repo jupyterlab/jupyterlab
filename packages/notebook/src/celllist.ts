@@ -1,13 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ICellModel } from '@jupyterlab/cells';
+import { CellModel, ICellModel } from '@jupyterlab/cells';
 import {
-  IObservableList,
-  IObservableMap,
-  ObservableMap
-} from '@jupyterlab/observables';
-import {
+  Delta,
   ISharedDoc,
   ISharedList,
   ISharedMap,
@@ -31,14 +27,15 @@ import { NotebookModel } from './model';
  * A cell list object that supports undo/redo.
  */
 export interface ICellList extends IDisposable {
+  /**
+   * The type of this object.
+   */
   readonly type: 'List';
-
-  readonly underlyingModel: ISharedList<ISharedMap<ISharedType>>;
 
   /**
    * A signal emitted when the cell list has changed.
    */
-  readonly changed: ISignal<this, IObservableList.IChangedArgs<ICellModel>>;
+  readonly changed: ISignal<this, ISharedList.IChangedArgs<ICellModel>>;
 
   /**
    * Test whether the list is empty.
@@ -143,7 +140,7 @@ export interface ICellList extends IDisposable {
    * @returns The index of the removed cell, or `-1` if the cell
    *   is not contained in the cell list.
    */
-  removeValue(cell: ICellModel): number;
+  removeValue(cell: ICellModel): number | -1;
 
   /**
    * Remove and return the cell at a specific index.
@@ -153,7 +150,7 @@ export interface ICellList extends IDisposable {
    * @returns The cell at the specified index, or `undefined` if the
    *   index is out of range.
    */
-  remove(index: number): ICellModel;
+  remove(index: number): ICellModel | undefined;
 
   /**
    * Remove all cells from the cell list.
@@ -201,6 +198,10 @@ export interface ICellList extends IDisposable {
   removeRange(startIndex: number, endIndex: number): number;
 }
 
+export namespace ICellList {
+  export type IChangedArgs = ISharedList.IChangedArgs<ICellModel>;
+}
+
 /**
  * A cell list object that supports undo/redo.
  */
@@ -208,29 +209,30 @@ export class CellList implements ICellList {
   /**
    * Construct the cell list.
    */
-  constructor(factory: NotebookModel.IContentFactory, sharedDoc: ISharedDoc) {
+  constructor(
+    factory: NotebookModel.IContentFactory,
+    sharedDoc: ISharedDoc,
+    sharedList: ISharedList<ISharedMap<ISharedType>>
+  ) {
     this._factory = factory;
-    this._cellMap = new ObservableMap<ICellModel>();
+    this._cellMap = new Map<any, ICellModel>();
 
     this._sharedDoc = sharedDoc;
-    this._sharedList = this._sharedDoc.createList<ISharedMap<ISharedType>>(
-      'cellsOrder'
-    );
+    this._sharedList = sharedList;
     this._undoManager = this._sharedList.undoManager;
 
     this._sharedList.changed.connect(this._onOrderChanged, this);
   }
 
+  /**
+   * The type of this object.
+   */
   readonly type: 'List';
-
-  get underlyingModel(): ISharedList<ISharedMap<ISharedType>> {
-    return this._sharedList;
-  }
 
   /**
    * A signal emitted when the cell list has changed.
    */
-  get changed(): ISignal<this, IObservableList.IChangedArgs<ICellModel>> {
+  get changed(): ISignal<this, ISharedList.IChangedArgs<ICellModel>> {
     return this._changed;
   }
 
@@ -300,7 +302,7 @@ export class CellList implements ICellList {
     for (const cell of this._cellMap.values()) {
       cell.dispose();
     }
-    this._cellMap.dispose();
+    this._cellMap.clear();
     this._sharedList.dispose();
   }
 
@@ -309,9 +311,7 @@ export class CellList implements ICellList {
    * document are bundled into a single event.
    */
   transact(f: () => void): void {
-    this._transactionsGuard(() => {
-      this._sharedDoc.transact(f, this._sharedList);
-    });
+    this._sharedDoc.transact(f, this._sharedList);
   }
 
   /**
@@ -343,8 +343,8 @@ export class CellList implements ICellList {
    * @returns The cell at the specified index.
    */
   get(index: number): ICellModel {
-    const id = this._sharedList.get(index).get('id') as string;
-    return this._cellMap.get(id)!;
+    const cellType = this._sharedList.get(index);
+    return this._cellMap.get(cellType.underlyingModel)!;
   }
 
   /**
@@ -355,24 +355,9 @@ export class CellList implements ICellList {
    * @param cell - The cell to set at the specified index.
    */
   set(index: number, cell: ICellModel): void {
-    // Set the internal data structures.
-    this._operationsGuard(() => {
-      const id = this._sharedList.get(index).get('id') as string;
-      const oldValues: ICellModel[] =
-        id !== undefined ? [this._cellMap.get(id)!] : [];
-
-      this._cellMap.set(cell.id, cell);
-      this._sharedList.set(index, cell.sharedModel);
-      cell.initialize();
-
-      this._changed.emit({
-        type: 'set',
-        oldIndex: index,
-        newIndex: index,
-        oldValues,
-        newValues: [cell]
-      });
-    });
+    const cellType = (cell as CellModel).sharedModel;
+    this._cellMap.set(cellType.underlyingModel, cell);
+    this._sharedList.set(index, cellType);
   }
 
   /**
@@ -383,20 +368,9 @@ export class CellList implements ICellList {
    * @returns The new length of the cell list.
    */
   push(cell: ICellModel): number {
-    // Set the internal data structures.
-    this._operationsGuard(() => {
-      this._cellMap.set(cell.id, cell);
-      this._sharedList.push(cell.sharedModel);
-      cell.initialize();
-
-      this._changed.emit({
-        type: 'add',
-        oldIndex: -1,
-        newIndex: this.length - 1,
-        oldValues: [],
-        newValues: [cell]
-      });
-    });
+    const cellType = (cell as CellModel).sharedModel;
+    this._cellMap.set(cellType.underlyingModel, cell);
+    this._sharedList.push(cellType);
     return this.length;
   }
 
@@ -410,20 +384,9 @@ export class CellList implements ICellList {
    * @returns The new length of the cell list.
    */
   insert(index: number, cell: ICellModel): void {
-    // Set the internal data structures.
-    this._operationsGuard(() => {
-      this._cellMap.set(cell.id, cell);
-      this._sharedList.insert(index, cell.sharedModel);
-      cell.initialize();
-
-      this._changed.emit({
-        type: 'add',
-        oldIndex: -2,
-        newIndex: index,
-        oldValues: [],
-        newValues: [cell]
-      });
-    });
+    const cellType = (cell as CellModel).sharedModel;
+    this._cellMap.set(cellType.underlyingModel, cell);
+    this._sharedList.insert(index, cellType);
   }
 
   /**
@@ -437,7 +400,7 @@ export class CellList implements ICellList {
   removeValue(cell: ICellModel): number {
     const index = ArrayExt.findFirstIndex(
       toArray(this._sharedList),
-      cellType => this._cellMap.get(cellType.get('id') as string) === cell
+      cellType => this._cellMap.get(cellType.underlyingModel) === cell
     );
     this.remove(index);
     return index;
@@ -451,46 +414,20 @@ export class CellList implements ICellList {
    * @returns The cell at the specified index, or `undefined` if the
    *   index is out of range.
    */
-  remove(index: number): ICellModel {
-    const id = this._sharedList.get(index).get('id') as string;
-    const cell = this._cellMap.get(id)!;
-
-    this._operationsGuard(() => {
-      this._cellMap.delete(id);
-      this._sharedList.remove(index);
-
-      this._changed.emit({
-        type: 'remove',
-        oldIndex: index,
-        newIndex: -1,
-        oldValues: [cell],
-        newValues: []
-      });
-    });
-    return cell;
+  remove(index: number): ICellModel | undefined {
+    const cellType = this._sharedList.remove(index);
+    if (cellType) {
+      return this._cellMap.get(cellType.underlyingModel);
+    } else {
+      return undefined;
+    }
   }
 
   /**
    * Remove all cells from the cell list.
    */
   clear(): void {
-    this._operationsGuard(() => {
-      const oldValues: ICellModel[] = [];
-      each(this._cellMap.values(), cell => {
-        oldValues.push(cell);
-      });
-
-      this._cellMap.clear();
-      this._sharedList.clear();
-
-      this._changed.emit({
-        type: 'remove',
-        oldIndex: 0,
-        newIndex: 0,
-        oldValues,
-        newValues: []
-      });
-    });
+    this._sharedList.clear();
   }
 
   /**
@@ -501,20 +438,7 @@ export class CellList implements ICellList {
    * @param toIndex - The index to move the element to.
    */
   move(fromIndex: number, toIndex: number): void {
-    this._operationsGuard(() => {
-      const id = this._sharedList.get(fromIndex).get('id') as string;
-      const value = this._cellMap.get(id)!;
-
-      this._sharedList.move(fromIndex, toIndex);
-
-      this._changed.emit({
-        type: 'move',
-        oldIndex: fromIndex,
-        newIndex: toIndex,
-        oldValues: [value],
-        newValues: [value]
-      });
-    });
+    this._sharedList.move(fromIndex, toIndex);
   }
 
   /**
@@ -525,24 +449,13 @@ export class CellList implements ICellList {
    * @returns The new length of the cell list.
    */
   pushAll(cells: IterableOrArrayLike<ICellModel>): number {
-    this._operationsGuard(() => {
-      const order: ISharedMap<ISharedType>[] = [];
-
-      each(cells, cell => {
-        order.push(cell.sharedModel);
-        this._cellMap.set(cell.id, cell);
-      });
-      this._sharedList.pushAll(order);
-      each(cells, cell => cell.initialize());
-
-      this._changed.emit({
-        type: 'add',
-        oldIndex: -1,
-        newIndex: this.length - 1,
-        oldValues: [],
-        newValues: toArray(cells)
-      });
+    const order: ISharedMap<ISharedType>[] = [];
+    each(cells, cell => {
+      const cellType = (cell as CellModel).sharedModel;
+      order.push(cellType);
+      this._cellMap.set(cellType.underlyingModel, cell);
     });
+    this._sharedList.pushAll(order);
     return this.length;
   }
 
@@ -556,24 +469,13 @@ export class CellList implements ICellList {
    * @returns The new length of the cell list.
    */
   insertAll(index: number, cells: IterableOrArrayLike<ICellModel>): number {
-    this._operationsGuard(() => {
-      const order: ISharedMap<ISharedType>[] = [];
-
-      each(cells, cell => {
-        order.push(cell.sharedModel);
-        this._cellMap.set(cell.id, cell);
-      });
-      this._sharedList.insertAll(index, order);
-      each(cells, cell => cell.initialize());
-
-      this._changed.emit({
-        type: 'add',
-        oldIndex: -2,
-        newIndex: index,
-        oldValues: [],
-        newValues: toArray(cells)
-      });
+    const order: ISharedMap<ISharedType>[] = [];
+    each(cells, cell => {
+      const cellType = (cell as CellModel).sharedModel;
+      order.push(cellType);
+      this._cellMap.set(cellType.underlyingModel, cell);
     });
+    this._sharedList.insertAll(index, order);
     return this.length;
   }
 
@@ -587,146 +489,66 @@ export class CellList implements ICellList {
    * @returns The new length of the cell list.
    */
   removeRange(startIndex: number, endIndex: number): number {
-    this._operationsGuard(() => {
-      const oldValues: ICellModel[] = [];
-      for (let i = startIndex; i < endIndex; i++) {
-        const id = this._sharedList.get(i).get('id') as string;
-        oldValues.push(this._cellMap.delete(id)!);
-      }
-      this._sharedList.removeRange(startIndex, endIndex);
-
-      this._changed.emit({
-        type: 'remove',
-        oldIndex: startIndex,
-        newIndex: -1,
-        oldValues,
-        newValues: []
-      });
-    });
+    this._sharedList.removeRange(startIndex, endIndex);
     return this.length;
-  }
-
-  private _operationsGuard(operation: () => void): void {
-    if (!this._changeGuard) {
-      try {
-        this._changeGuard = true;
-        operation();
-      } finally {
-        this._changeGuard = false;
-      }
-    }
-  }
-
-  private _transactionsGuard(operation: () => void): void {
-    if (!this._transactionGuard) {
-      try {
-        this._transactionGuard = true;
-        operation();
-      } finally {
-        this._transactionGuard = false;
-      }
-    }
   }
 
   private _onOrderChanged(
     sender: ISharedList<ISharedMap<ISharedType>>,
     args: ISharedList.IChangedArgs<ISharedMap<ISharedType>>
   ): void {
-    this._transactionsGuard(() => {
-      this._operationsGuard(() => {
-        // Get the old values before removing them
-        const oldValues: ICellModel[] = [];
-        each(args.oldValues, (cellType: ISharedMap<ISharedType>) => {
-          this._cellMap.values().forEach(cell => {
-            if (cell.sharedModel.underlyingModel === cellType.underlyingModel) {
-              oldValues.push(cell);
-            }
-          });
-        });
-
-        if (args.type === 'set') {
-          args.newValues.forEach((cellType: ISharedMap<ISharedType>) => {
-            const id = cellType.get('id') as string;
-            const cell = this._createCellModel(id, cellType);
-            this._cellMap.set(id, cell);
-            cell.initialize();
-          });
-        } else if (args.type === 'add') {
-          args.newValues.forEach((cellType: ISharedMap<ISharedType>) => {
-            const id = cellType.get('id') as string;
-            const cell = this._createCellModel(id, cellType);
-            this._cellMap.set(id, cell);
-            cell.initialize();
-          });
-        } else if (args.type === 'move') {
-          // Do nothing
-        } else if (args.type === 'remove') {
-          // TODO: remove cells from the cell map
-          // we need the oldValues
-          // check which ones are missing and remove them
-          oldValues.forEach(cell => {
-            this._cellMap.delete(cell.id);
-          });
-        }
-
-        // Get new values after creating them
-        const newValues: ICellModel[] = [];
-        each(args.newValues, (cellType: ISharedMap<ISharedType>) => {
-          const id = cellType.get('id') as string;
-          newValues.push(this._cellMap.get(id)!);
-        });
-
-        this._changed.emit({
-          type: args.type,
-          oldIndex: args.oldIndex,
-          newIndex: args.newIndex,
-          oldValues,
-          newValues
-        });
-      });
+    const added = new Set<ICellModel>();
+    args.added.forEach(cellType => {
+      if (this._cellMap.has(cellType.underlyingModel)) {
+        const cell = this._cellMap.get(cellType.underlyingModel)!;
+        cell.initialize();
+        added.add(cell);
+      } else {
+        const cell = this._factory.createCellFromSharedModel(cellType);
+        this._cellMap.set(cellType.underlyingModel, cell);
+        cell.initialize();
+        added.add(cell);
+      }
     });
-  }
 
-  private _createCellModel(
-    id: string,
-    sharedModel: ISharedMap<ISharedType>
-  ): ICellModel {
-    const sharedDoc = this._sharedDoc;
-    let cell: ICellModel;
-    switch (sharedModel.get('type')) {
-      case 'code':
-        cell = this._factory.createCodeCell({
-          id,
-          sharedDoc,
-          sharedModel
+    // Get the old values before removing them
+    const deleted = new Set<ICellModel>();
+    args.deleted.forEach(cellType => {
+      if (this._cellMap.has(cellType.underlyingModel)) {
+        const cell = this._cellMap.get(cellType.underlyingModel)!;
+        this._cellMap.delete(cellType.underlyingModel);
+        cell.dispose();
+        deleted.add(cell);
+      }
+    });
+
+    const changes: ISharedList.IChangedArgs<ICellModel> = {
+      added,
+      deleted,
+      delta: new Array<Delta<Array<ICellModel>>>()
+    };
+    args.delta.forEach(delta => {
+      if (delta.insert != null) {
+        const insertedCells = new Array<ICellModel>();
+        delta.insert.forEach(cellType => {
+          insertedCells.push(this._cellMap.get(cellType.underlyingModel)!);
         });
-        break;
-      case 'markdown':
-        cell = this._factory.createMarkdownCell({
-          id,
-          sharedDoc,
-          sharedModel
-        });
-        break;
-      default:
-        cell = this._factory.createRawCell({
-          id,
-          sharedDoc,
-          sharedModel
-        });
-        break;
-    }
-    return cell;
+        changes.delta.push({ insert: insertedCells });
+      } else if (delta.delete != null) {
+        changes.delta.push({ delete: delta.delete });
+      } else if (delta.retain != null) {
+        changes.delta.push({ retain: delta.retain });
+      }
+    });
+    this._changed.emit(changes);
   }
 
   private _isDisposed: boolean = false;
-  private _changeGuard = false;
-  private _transactionGuard = false;
-  private _cellMap: IObservableMap<ICellModel>;
+  private _cellMap: Map<any, ICellModel>;
   private _sharedDoc: ISharedDoc;
   private _sharedList: ISharedList<ISharedMap<ISharedType>>;
   private _undoManager: IUndoManager;
-  private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(
+  private _changed = new Signal<this, ISharedList.IChangedArgs<ICellModel>>(
     this
   );
   private _factory: NotebookModel.IContentFactory;

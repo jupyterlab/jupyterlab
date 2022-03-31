@@ -100,7 +100,7 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
 
     const { rendermime, mimeType } = options;
 
-    const model = new CodeCellModel({});
+    const model = CodeCellModel.createStandaloneModel();
     model.mimeType = mimeType ?? '';
     this._prompt = new CodeCell({
       rendermime,

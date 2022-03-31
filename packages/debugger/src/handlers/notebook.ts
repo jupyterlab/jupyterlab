@@ -1,13 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 
-import {
-  IObservableList,
-  IObservableMap,
-  ObservableMap
-} from '@jupyterlab/observables';
+import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 
 import { ICellList, Notebook, NotebookPanel } from '@jupyterlab/notebook';
 
@@ -69,16 +65,20 @@ export class NotebookHandler implements IDisposable {
    */
   private _onCellsChanged(
     cells?: ICellList,
-    changes?: IObservableList.IChangedArgs<ICellModel>
+    changes?: ICellList.IChangedArgs
   ): void {
     this._notebookPanel.content.widgets.forEach(cell =>
       this._addEditorHandler(cell)
     );
 
-    if (changes?.type === 'move') {
+    // TODO: implement the move feature
+    /* if (changes?.type === 'move') {
       for (const cell of changes.newValues) {
         this._cellMap.get(cell.id)?.refreshBreakpoints();
       }
+    } */
+    if (changes?.added.size === 0 && changes.deleted.size === 0) {
+      this._cellMap.values().forEach(cell => cell.refreshBreakpoints());
     }
   }
 

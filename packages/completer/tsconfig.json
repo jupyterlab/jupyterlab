@@ -16,13 +16,13 @@
       "path": "../coreutils"
     },
     {
-      "path": "../observables"
-    },
-    {
       "path": "../rendermime"
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../statedb"

@@ -7,7 +7,8 @@ import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 import {
   ISharedDoc,
   ISharedString,
-  SharedDoc
+  SharedDoc,
+  SharedString
 } from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
@@ -167,9 +168,16 @@ export namespace CodeEditor {
    */
   export interface IModel extends IDisposable {
     /**
-     * A signal emitted when a property changes.
+     * Whether the model is ready or not.
+     *
+     * #### Notes
+     * With RTC, the IModel may be initialized by a remote client.
+     * In this case, we need to instantiate the IModel without
+     * initializing it, because the data will come from the remote
+     * client. For that reason we now need to wait until the IModel
+     * is initialized to be able to access the data.
      */
-    mimeTypeChanged: ISignal<IModel, IChangedArgs<string>>;
+    readonly isReady: boolean;
 
     /**
      * The text stored in the model.
@@ -185,15 +193,38 @@ export namespace CodeEditor {
     mimeType: string;
 
     /**
-     * The currently selected code.
+     * A signal emitted when the model is ready.
+     *
+     * #### Notes
+     * With RTC, the IModel may be initialized by a remote client.
+     * In this case, we need to instantiate the IModel without
+     * initializing it, because the data will come from the remote
+     * client. For that reason we now need to wait until the IModel
+     * is initialized to be able to access the data.
      */
-    readonly selections: IObservableMap<ITextSelection[]>;
+    ready: ISignal<IModel, void>;
 
     /**
-     * The underlying `ISharedDoc` instance in which model
-     * data is stored.
+     * A signal emitted when a property changes.
      */
-    readonly sharedDoc: ISharedDoc;
+    mimeTypeChanged: ISignal<IModel, IChangedArgs<string>>;
+
+    /**
+     * The awareness object.
+     *
+     * TODO: define the API
+     */
+    readonly awareness: any;
+
+    /**
+     * The currently selected code.
+     *
+     * TODO: Remove selections?
+     * Now selections comes from the awareness object, so
+     * maybe we should remove it an define an API for the
+     * awareness.
+     */
+    readonly selections: IObservableMap<ITextSelection[]>;
   }
 
   /**
@@ -203,39 +234,74 @@ export namespace CodeEditor {
     /**
      * Construct a new Model.
      */
-    constructor(options?: Model.IOptions) {
-      options = options || {};
-      if (options.sharedDoc) {
-        this.sharedDoc = options.sharedDoc;
-      } else {
-        this.sharedDoc = new SharedDoc();
+    constructor(options: Model.IOptions) {
+      this._sharedDoc = options.sharedDoc as SharedDoc;
+
+      if (options.isDocument) {
+        // The IModel is a document, so we create the
+        // `source` from the root of the ISharedDoc
+        this._value = this._sharedDoc.createString('source') as SharedString;
+        this._value.changed.connect(this._onValueChanged, this);
+        this._triggerModelReady();
       }
 
-      // Do not connect yet since the "value" object can change on cells
-      this._value = this.sharedDoc.createString('value');
-      this._value.text = this.value.text || options.value || '';
-
       this._mimeType = options.mimeType || 'text/plain';
-
       this._selections = new ObservableMap<ITextSelection[]>();
     }
 
+    /**
+     * The type of the IModel
+     */
     get type(): nbformat.CellType {
       return 'code';
+    }
+
+    /**
+     * Whether the model is ready or not.
+     *
+     * #### Notes
+     * With RTC, the IModel may be initialized by a remote client.
+     * In this case, we need to instantiate the IModel without
+     * initializing it, because the data will come from the remote
+     * client. For that reason we now need to wait until the IModel
+     * is initialized to be able to access the data.
+     */
+    get isReady(): boolean {
+      return this._isReady;
     }
 
     /**
      * Get the value of the model.
      */
     get value(): ISharedString {
+      if (!this._isReady) {
+        throw Error('The model is not ready');
+      }
       return this._value;
     }
 
     /**
-     * The underlying `ISharedDoc` instance in which model
-     * data is stored.
+     * The awareness object.
+     *
+     * TODO: define the API
      */
-    readonly sharedDoc: ISharedDoc;
+    get awareness(): any {
+      return this._sharedDoc.awareness;
+    }
+
+    /**
+     * A signal emitted when the model is ready.
+     *
+     * #### Notes
+     * With RTC, the IModel may be initialized by a remote client.
+     * In this case, we need to instantiate the IModel without
+     * initializing it, because the data will come from the remote
+     * client. For that reason we now need to wait until the IModel
+     * is initialized to be able to access the data.
+     */
+    get ready(): ISignal<this, void> {
+      return this._ready;
+    }
 
     /**
      * A signal emitted when a mimetype changes.
@@ -285,7 +351,19 @@ export namespace CodeEditor {
     }
 
     /**
-     * Handle a change to the modelDB value.
+     * Trigger the signal ready.
+     *
+     * #### Notes
+     * This is a convenience method to trigger the signal
+     * from child classes.
+     */
+    protected _triggerModelReady(): void {
+      this._isReady = true;
+      this._ready.emit();
+    }
+
+    /**
+     * Handle a change to the shared model value.
      */
     protected _onValueChanged(
       sender: ISharedString,
@@ -294,10 +372,30 @@ export namespace CodeEditor {
       // TODO: emit signal?
     }
 
-    protected _value: ISharedString;
-    private _mimeType: string;
+    /**
+     * The underlying `ISharedDoc` instance where model's data is stored.
+     *
+     * #### Notes
+     * Making direct edits to the values stored in the`ISharedDoc`
+     * is not recommended, and may produce unpredictable results.
+     */
+    protected _sharedDoc: SharedDoc;
+
+    /**
+     * The `ISharedString` instance where source's data is stored.
+     *
+     * #### Notes
+     * This property is protected to be able to initialize it from
+     * child classes (mostly the CellModel) when initializing the
+     * model.
+     */
+    protected _value: SharedString;
+
+    private _isReady = false;
     private _isDisposed = false;
+    private _mimeType: string;
     private _selections: IObservableMap<ITextSelection[]>;
+    private _ready = new Signal<this, void>(this);
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   }
 
@@ -734,20 +832,32 @@ export namespace CodeEditor {
   export namespace Model {
     export interface IOptions {
       /**
-       * The initial value of the model.
+       * Whether the model is a document or part of a document.
+       *
+       * ### Notes
+       * The IModel is the base class used in documents to store
+       * the source. In some cases like the Notebook, there is multiple
+       * sources since each cell contains its own source. In this case
+       * the IModel is not a document by it self, but part of one.
+       * When the IModel is a document we create the source from the
+       * root of the datastore but when the IModel is part of a document,
+       * the source comes from an ISharedList or ISharedMap.
        */
-      value?: string;
+      isDocument: boolean;
+
+      /**
+       * The underlying `ISharedDoc` instance where model's data is stored.
+       *
+       * ### Notes
+       * Making direct edits to the values stored in the`ISharedDoc`
+       * is not recommended, and may produce unpredictable results.
+       */
+      sharedDoc: ISharedDoc;
 
       /**
        * The mimetype of the model.
        */
       mimeType?: string;
-
-      /**
-       * An optional underlying `ISharedDoc` instance in which model
-       * data is stored.
-       */
-      sharedDoc?: ISharedDoc;
     }
   }
 }

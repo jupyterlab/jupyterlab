@@ -6,22 +6,32 @@ import * as Y from 'yjs';
 import { IShared, ISharedType, SharedDoc } from './model';
 
 /**
- * A map which can be observed for changes.
+ * A map which can be shared by multiple clients.
  */
 export interface ISharedMap<T extends ISharedType> extends IShared {
   /**
-   * The type of the Observable.
+   * The type of the IShared.
    */
   readonly type: 'Map';
 
   /**
    * The specific model behind the ISharedMap abstraction.
    *
-   * Note: The default implementation is based on Yjs so the underlying
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
    * model is a YMap.
    */
   readonly underlyingModel: any;
 
+  /**
+   * The specific undo manager class behind the IShared abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.UndoManager.
+   *
+   * TODO: Define an API
+   */
   readonly undoManager: any;
 
   /**
@@ -119,17 +129,17 @@ export interface ISharedMap<T extends ISharedType> extends IShared {
   delete(key: string): T | undefined;
 
   /**
-   * Set the ObservableMap to an empty map.
+   * Set the ISharedMap to an empty map.
    */
   clear(): void;
 }
 
 /**
- * The interfaces associated with an IObservableMap.
+ * The interfaces associated with an ISharedMap.
  */
 export namespace ISharedMap {
   /**
-   * The change types which occur on an observable map.
+   * The change types which occur on an ISharedMap.
    */
   export type ChangeType =
     /**
@@ -148,9 +158,9 @@ export namespace ISharedMap {
     | 'change';
 
   /**
-   * The changed args object which is emitted by an observable map.
+   * A change emitted by a SharedMap.
    */
-  export interface IChangedArgs<T> {
+  export interface IChangedArg<T> {
     /**
      * The type of change undergone by the map.
      */
@@ -171,15 +181,19 @@ export namespace ISharedMap {
      */
     newValue: T | undefined;
   }
+
+  /**
+   * A list of changes emitted by an ISharedMap.
+   */
+  export type IChangedArgs<T> = Array<IChangedArg<T>>;
 }
 
 /**
- * A concrete implementation of IObservableMap<T>.
+ * A concrete implementation of ISharedMap<T>.
  */
 export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
-  private _ymap: Y.Map<any>;
-  private _doc: SharedDoc;
   private _origin: any;
+  private _sharedDoc: SharedDoc;
   private _undoManager: Y.UndoManager;
   private _changed = new Signal<this, ISharedMap.IChangedArgs<T>>(this);
   private _isDisposed = false;
@@ -188,13 +202,14 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
    * Construct a new SharedMap.
    */
   constructor(options: SharedMap.IOptions) {
-    if (options.ymap) {
-      this._ymap = options.ymap;
+    this._sharedDoc = options.sharedDoc;
+
+    if (options.underlyingModel) {
+      this.underlyingModel = options.underlyingModel;
     } else {
-      this._ymap = new Y.Map<any>();
+      this.underlyingModel = new Y.Map<any>();
     }
 
-    this._doc = options.doc;
     this._origin = options.origin ?? this;
 
     if (options.undoManager) {
@@ -203,20 +218,32 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
       this.initialize();
     }
 
-    this._ymap.observe(this._onMapChanged);
+    this.underlyingModel.observe(this._onMapChanged);
   }
 
   /**
-   * The type of the Observable.
+   * The type of the IShared.
    */
-  get type(): 'Map' {
-    return 'Map';
-  }
+  readonly type = 'Map';
 
-  get underlyingModel(): Y.Map<any> {
-    return this._ymap;
-  }
+  /**
+   * The specific model behind the ISharedMap abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a YMap.
+   */
+  readonly underlyingModel: Y.Map<any>;
 
+  /**
+   * The specific undo manager class behind the IShared abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.UndoManager.
+   *
+   * TODO: Define an API
+   */
   get undoManager(): any {
     return this._undoManager;
   }
@@ -239,7 +266,7 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
    * The number of key-value pairs in the map.
    */
   get size(): number {
-    return this._ymap.size;
+    return this.underlyingModel.size;
   }
 
   /**
@@ -251,11 +278,22 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
     }
     this._isDisposed = true;
     Signal.clearData(this);
-    this._ymap.unobserve(this._onMapChanged);
+    this.underlyingModel.unobserve(this._onMapChanged);
   }
 
+  /**
+   * Initialize the model.
+   *
+   * ### Notes
+   * The undo manager can not be initialized
+   * before the Y.Map is inserted in the Y.Doc.
+   * This option allows to instantiate a `SharedMap` object
+   * before the Y.Map was integrated into the Y.Doc
+   * and then call `SharedMap.initialize()` to
+   * initialize the undo manager.
+   */
   initialize(): void {
-    this._undoManager = new Y.UndoManager(this._ymap, {
+    this._undoManager = new Y.UndoManager(this.underlyingModel, {
       trackedOrigins: new Set([this._origin])
     });
   }
@@ -315,9 +353,9 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
       throw Error('Cannot set an undefined value, use remove');
     }
     let oldVal;
-    this._doc.transact(() => {
-      oldVal = this._ymap.get(key);
-      this._ymap.set(key, SharedDoc.sharedTypeToAbstractType(value));
+    this._sharedDoc.transact(() => {
+      oldVal = this.underlyingModel.get(key);
+      this.underlyingModel.set(key, SharedDoc.sharedTypeToAbstractType(value));
     }, this._origin);
     return oldVal;
   }
@@ -330,11 +368,11 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
    * @returns the value for that key.
    */
   get(key: string): T | undefined {
-    const value = this._ymap.get(key);
+    const value = this.underlyingModel.get(key);
     if (value === undefined) {
       return;
     } else {
-      return SharedDoc.abstractTypeToISharedType(value, this._doc) as T;
+      return SharedDoc.abstractTypeToISharedType(value, this._sharedDoc) as T;
     }
   }
 
@@ -346,7 +384,7 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
    * @returns `true` if the map has the key, `false` otherwise.
    */
   has(key: string): boolean {
-    return this._ymap.has(key);
+    return this.underlyingModel.has(key);
   }
 
   /**
@@ -356,7 +394,7 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
    */
   keys(): string[] {
     const keyList: string[] = [];
-    this._ymap.forEach((v: T, k: string) => {
+    this.underlyingModel.forEach((v: T, k: string) => {
       keyList.push(k);
     });
     return keyList;
@@ -369,8 +407,10 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
    */
   values(): T[] {
     const valList: T[] = [];
-    this._ymap.forEach((v: any, k: string) => {
-      valList.push(SharedDoc.abstractTypeToISharedType(v, this._doc) as T);
+    this.underlyingModel.forEach((v: any, k: string) => {
+      valList.push(
+        SharedDoc.abstractTypeToISharedType(v, this._sharedDoc) as T
+      );
     });
     return valList;
   }
@@ -388,12 +428,12 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
    */
   delete(key: string): T | undefined {
     let oldVal;
-    this._doc.transact(() => {
+    this._sharedDoc.transact(() => {
       oldVal = SharedDoc.abstractTypeToISharedType(
-        this._ymap.get(key),
-        this._doc
+        this.underlyingModel.get(key),
+        this._sharedDoc
       );
-      this._ymap.delete(key);
+      this.underlyingModel.delete(key);
     }, this._origin);
     return oldVal;
   }
@@ -403,49 +443,52 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
    */
   clear(): void {
     // Delete one by one to emit the correct signals.
-    this._doc.transact(() => {
-      this._ymap.clear();
+    this._sharedDoc.transact(() => {
+      this.underlyingModel.clear();
     }, this._origin);
   }
 
-  private _onMapChanged = (event: Y.YMapEvent<any>): void => {
+  private _onMapChanged = (event: Y.YMapEvent<T>): void => {
+    const args = new Array<ISharedMap.IChangedArg<T>>();
     event.keysChanged.forEach(key => {
       const change = event.changes.keys.get(key);
       if (change?.action === 'add') {
-        this._changed.emit({
+        args.push({
           type: change.action,
           key,
           oldValue: undefined,
           newValue: SharedDoc.abstractTypeToISharedType(
-            this._ymap.get(key),
-            this._doc
+            this.underlyingModel.get(key),
+            this._sharedDoc
           ) as T
         });
       } else if (change?.action === 'delete') {
-        this._changed.emit({
+        args.push({
           type: 'remove',
           key,
           oldValue: SharedDoc.abstractTypeToISharedType(
             change.oldValue,
-            this._doc
+            this._sharedDoc
           ) as T,
           newValue: undefined
         });
       } else if (change?.action === 'update') {
-        this._changed.emit({
+        args.push({
           type: 'change',
           key,
           oldValue: SharedDoc.abstractTypeToISharedType(
             change.oldValue,
-            this._doc
+            this._sharedDoc
           ) as T,
           newValue: SharedDoc.abstractTypeToISharedType(
-            this._ymap.get(key),
-            this._doc
+            this.underlyingModel.get(key),
+            this._sharedDoc
           ) as T
         });
       }
     });
+
+    this._changed.emit(args);
   };
 }
 
@@ -461,11 +504,11 @@ export namespace SharedMap {
      * A specific document to use as the store for this
      * SharedDoc.
      */
-    doc: SharedDoc;
+    sharedDoc: SharedDoc;
 
     /**
      * The underlying Y.Map for the SharedMap.
      */
-    ymap?: Y.Map<any>;
+    underlyingModel?: Y.Map<any>;
   }
 }

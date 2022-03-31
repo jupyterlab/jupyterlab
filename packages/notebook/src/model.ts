@@ -3,7 +3,6 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
-  CellModel,
   CodeCellModel,
   ICellModel,
   ICodeCellModel,
@@ -15,8 +14,12 @@ import {
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList } from '@jupyterlab/observables';
-import { ISharedDoc, ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
+import {
+  ISharedDoc,
+  ISharedMap,
+  ISharedType,
+  SharedDoc
+} from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -75,34 +78,44 @@ export class NotebookModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     if (options.sharedDoc) {
-      this.sharedDoc = options.sharedDoc;
+      this._sharedDoc = options.sharedDoc;
     } else {
-      this.sharedDoc = new SharedDoc();
+      this._sharedDoc = new SharedDoc();
     }
-    this._isInitialized = options.isInitialized === false ? false : true;
-    const factory =
-      options.contentFactory || NotebookModel.defaultContentFactory;
-    this.contentFactory = factory.clone(this.sharedDoc);
-    this._cells = new CellList(this.contentFactory, this.sharedDoc);
-    this._trans = (options.translator || nullTranslator).load('jupyterlab');
-    this._cells.changed.connect(this._onCellsChanged, this);
 
-    // Handle initial metadata.
-    this.metadata = this.sharedDoc.createMap<JSONObject>('metadata');
-    if (!this.metadata.has('language_info')) {
-      const name = options.languagePreference || '';
-      this.metadata.set('language_info', { name });
-    }
-    this._ensureMetadata();
-    this.metadata.changed.connect(this._onMetadataChanged, this);
+    this._isInitialized = options.isInitialized === false ? false : true;
+    this._trans = (options.translator || nullTranslator).load('jupyterlab');
+    this._defaultLang = options.languagePreference || '';
     this._deletedCells = [];
 
-    // TODO: initialize only on first client
-    // use initialize?
-    this._state = this.sharedDoc.createMap<JSONValue>('state');
-    this._state.set('dirty', false);
+    if (options.contentFactory) {
+      this.contentFactory = options.contentFactory.clone(this._sharedDoc);
+    } else {
+      this.contentFactory = new NotebookModel.ContentFactory({
+        sharedDoc: this._sharedDoc
+      });
+    }
+
+    const cellList = this._sharedDoc.createList<ISharedMap<ISharedType>>(
+      'cells'
+    );
+    this._cells = new CellList(this.contentFactory, this._sharedDoc, cellList);
+    this._cells.changed.connect(this._onCellsChanged, this);
+
+    this._metadata = this._sharedDoc.createMap<JSONObject>('metadata');
+    this._metadata.changed.connect(this._onMetadataChanged, this);
+
+    this._state = this._sharedDoc.createMap<JSONValue>('state');
     this._state.changed.connect(this._onStateChanged, this);
   }
+
+  /**
+   * Whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
   /**
    * A signal emitted when the document content changes.
    */
@@ -152,15 +165,22 @@ export class NotebookModel implements INotebookModel {
   }
 
   /**
-   * The metadata associated with the notebook.
+   * The cell model factory for the notebook.
    */
-  readonly metadata: ISharedMap<JSONValue>;
+  readonly contentFactory: NotebookModel.IContentFactory;
 
   /**
    * Get the observable list of notebook cells.
    */
   get cells(): ICellList {
     return this._cells;
+  }
+
+  /**
+   * The metadata associated with the notebook.
+   */
+  get metadata(): ISharedMap<JSONValue> {
+    return this._metadata;
   }
 
   /**
@@ -181,7 +201,7 @@ export class NotebookModel implements INotebookModel {
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    const spec = this.metadata.get(
+    const spec = this._metadata.get(
       'kernelspec'
     ) as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
@@ -205,7 +225,7 @@ export class NotebookModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    const info = this.metadata.get(
+    const info = this._metadata.get(
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
@@ -222,7 +242,9 @@ export class NotebookModel implements INotebookModel {
     const cells = this.cells;
     this._cells = null!;
     cells.dispose();
-    this.sharedDoc.dispose();
+    this._metadata.dispose();
+    this._state.dispose();
+    this._sharedDoc.dispose();
     this._isDisposed = true;
     Signal.clearData(this);
   }
@@ -259,8 +281,8 @@ export class NotebookModel implements INotebookModel {
     }
     this._ensureMetadata();
     const metadata: JSONObject = {};
-    for (const key of this.metadata.keys()) {
-      metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
+    for (const key of this._metadata.keys()) {
+      metadata[key] = JSON.parse(JSON.stringify(this._metadata.get(key)));
     }
     return {
       metadata,
@@ -280,26 +302,13 @@ export class NotebookModel implements INotebookModel {
     const cells: ICellModel[] = [];
     const factory = this.contentFactory;
     const useId = value.nbformat === 4 && value.nbformat_minor >= 5;
-    const sharedDoc = this.sharedDoc;
+
     for (const cell of value.cells) {
-      const options: CellModel.IOptions = { cell, sharedDoc };
-      if (useId) {
-        options.id = (cell as any).id;
-      }
-      switch (cell.cell_type) {
-        case 'code':
-          cells.push(factory.createCodeCell(options));
-          break;
-        case 'markdown':
-          cells.push(factory.createMarkdownCell(options));
-          break;
-        case 'raw':
-          cells.push(factory.createRawCell(options));
-          break;
-        default:
-          continue;
-      }
+      const id = useId ? (cell as any).id : UUID.uuid4();
+      const type = cell.cell_type as nbformat.CellType;
+      cells.push(factory.createCell(type, id, cell));
     }
+
     this.cells.transact(() => {
       this.cells.clear();
       this.cells.pushAll(cells);
@@ -350,17 +359,17 @@ close the notebook without saving it.`,
     }
 
     // Update the metadata.
-    this.metadata.clear();
+    this._metadata.clear();
     const metadata = value.metadata;
     for (const key in metadata) {
       // orig_nbformat is not intended to be stored per spec.
       if (key === 'orig_nbformat') {
         continue;
       }
-      this.metadata.set(key, metadata[key] as JSONValue);
+      this._metadata.set(key, metadata[key] as JSONValue);
     }
     this._ensureMetadata();
-    this.dirty = true;
+    this._state.set('dirty', false);
   }
 
   /**
@@ -373,69 +382,10 @@ close the notebook without saving it.`,
   initialize(): void {
     if (!this.cells.length) {
       const factory = this.contentFactory;
-      this.cells.push(factory.createCodeCell({}));
+      this.cells.push(factory.createCodeCell());
     }
     this._isInitialized = true;
     this.cells.clearUndo();
-  }
-
-  /**
-   * Handle a change in the cells list.
-   */
-  private _onCellsChanged(
-    list: IObservableList<ICellModel>,
-    change: IObservableList.IChangedArgs<ICellModel>
-  ): void {
-    switch (change.type) {
-      case 'add':
-        change.newValues.forEach(cell => {
-          cell.contentChanged.connect(this.triggerContentChange, this);
-        });
-        break;
-      case 'remove':
-        break;
-      case 'set':
-        change.newValues.forEach(cell => {
-          cell.contentChanged.connect(this.triggerContentChange, this);
-        });
-        break;
-      default:
-        break;
-    }
-    this.triggerContentChange();
-  }
-
-  private _onStateChanged(
-    sender: ISharedMap<JSONValue>,
-    args: ISharedMap.IChangedArgs<JSONValue>
-  ): void {
-    if (args.key === 'dirty' && this._dirty !== value.newValue) {
-      this._dirty = value.newValue;
-    }
-    this.triggerStateChange({
-      name: args.key,
-      oldValue: args.oldValue,
-      newValue: args.newValue
-    });
-  }
-
-  private _onMetadataChanged(
-    sender: ISharedMap<JSONValue>,
-    args: ISharedMap.IChangedArgs<JSONValue>
-  ): void {
-    this.triggerContentChange();
-  }
-
-  /**
-   * Make sure we have the required metadata fields.
-   */
-  private _ensureMetadata(): void {
-    if (!this.metadata.has('language_info')) {
-      this.metadata.set('language_info', { name: '' });
-    }
-    if (!this.metadata.has('kernelspec')) {
-      this.metadata.set('kernelspec', { name: '', display_name: '' });
-    }
   }
 
   /**
@@ -454,36 +404,74 @@ close the notebook without saving it.`,
   }
 
   /**
-   * Whether the model is disposed.
+   * Handle a change in the cells list.
    */
-  get isDisposed(): boolean {
-    return this._isDisposed;
+  private _onCellsChanged(list: ICellList, args: ICellList.IChangedArgs): void {
+    args.added.forEach(cell => {
+      cell.contentChanged.connect(this.triggerContentChange, this);
+    });
+    this.triggerContentChange();
   }
 
   /**
-   * The cell model factory for the notebook.
+   * Handle a change in notebook's state.
    */
-  readonly contentFactory: NotebookModel.IContentFactory;
+  private _onStateChanged(
+    sender: ISharedMap<JSONValue>,
+    args: ISharedMap.IChangedArgs<JSONValue>
+  ): void {
+    args.forEach(arg => {
+      if (arg.key === 'dirty' && this._dirty !== arg.newValue) {
+        this._dirty = arg.newValue as boolean;
+      }
+      this.triggerStateChange({
+        name: arg.key,
+        newValue: arg.newValue,
+        oldValue: arg.oldValue
+      });
+    });
+  }
 
   /**
-   * The underlying `ISharedDoc` instance in which model
-   * data is stored.
+   * Handle a change in notebook's metadata.
    */
-  readonly sharedDoc: ISharedDoc;
+  private _onMetadataChanged(
+    sender: ISharedMap<JSONValue>,
+    args: ISharedMap.IChangedArgs<JSONValue>
+  ): void {
+    this.triggerContentChange();
+  }
+
+  /**
+   * Make sure we have the required metadata fields.
+   */
+  private _ensureMetadata(): void {
+    if (!this._metadata.has('language_info')) {
+      this._metadata.set('language_info', { name: this._defaultLang });
+    }
+    if (!this._metadata.has('kernelspec')) {
+      this._metadata.set('kernelspec', { name: '', display_name: '' });
+    }
+  }
 
   private _dirty = false;
   private _readOnly = false;
-  private _state: ISharedMap<JSONValue>;
-  private _contentChanged = new Signal<this, void>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
-
+  private _isDisposed = false;
+  private _isInitialized: boolean;
   private _trans: TranslationBundle;
-  private _cells: ICellList;
+
+  private _defaultLang: string;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
+
+  private _cells: ICellList;
   private _deletedCells: string[];
-  private _isInitialized: boolean;
-  private _isDisposed = false;
+  private _sharedDoc: ISharedDoc;
+  private _metadata: ISharedMap<JSONValue>;
+  private _state: ISharedMap<JSONValue>;
+
+  private _contentChanged = new Signal<this, void>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 }
 
 /**
@@ -554,8 +542,11 @@ export namespace NotebookModel {
      */
     createCell(
       type: nbformat.CellType,
-      options: CellModel.IOptions
+      id?: string,
+      cell?: nbformat.ICell
     ): ICellModel;
+
+    createCellFromSharedModel(sharedModel: ISharedMap<ISharedType>): ICellModel;
 
     /**
      * Create a new code cell.
@@ -565,7 +556,11 @@ export namespace NotebookModel {
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
+    createCodeCell(
+      id?: string,
+      cell?: nbformat.ICodeCell,
+      contentFactory?: CodeCellModel.IContentFactory
+    ): ICodeCellModel;
 
     /**
      * Create a new markdown cell.
@@ -575,7 +570,10 @@ export namespace NotebookModel {
      * @returns A new markdown cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel;
+    createMarkdownCell(
+      id?: string,
+      cell?: nbformat.IMarkdownCell
+    ): IMarkdownCellModel;
 
     /**
      * Create a new raw cell.
@@ -585,7 +583,7 @@ export namespace NotebookModel {
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createRawCell(options: CellModel.IOptions): IRawCellModel;
+    createRawCell(id?: string, cell?: nbformat.IRawCell): IRawCellModel;
 
     /**
      * Clone the content factory with a new IModelDB.
@@ -596,25 +594,25 @@ export namespace NotebookModel {
   /**
    * The default implementation of an `IContentFactory`.
    */
-  export class ContentFactory {
+  export class ContentFactory implements IContentFactory {
     /**
      * Create a new cell model factory.
      */
     constructor(options: ContentFactory.IOptions) {
+      this.sharedDoc = options.sharedDoc;
       this.codeCellContentFactory =
         options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
-      this.sharedDoc = options.sharedDoc;
     }
+
+    /**
+     * The ISharedDoc in which to put the notebook data.
+     */
+    readonly sharedDoc: ISharedDoc;
 
     /**
      * The factory for code cell content.
      */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
-     * The ISharedDoc in which to put the notebook data.
-     */
-    readonly sharedDoc: ISharedDoc | undefined;
 
     /**
      * Create a new cell by cell type.
@@ -629,17 +627,63 @@ export namespace NotebookModel {
      */
     createCell(
       type: nbformat.CellType,
-      options: CellModel.IOptions
+      id?: string,
+      cell?: nbformat.ICell
     ): ICellModel {
       switch (type) {
         case 'code':
-          return this.createCodeCell(options);
+          return this.createCodeCell(id, cell as nbformat.ICodeCell);
         case 'markdown':
-          return this.createMarkdownCell(options);
+          return this.createMarkdownCell(id, cell as nbformat.IMarkdownCell);
         case 'raw':
         default:
-          return this.createRawCell(options);
+          return this.createRawCell(id, cell as nbformat.IRawCell);
       }
+    }
+
+    /**
+     * Create a new cell by cell type.
+     *
+     * @param type:  the type of the cell to create.
+     *
+     * @param options: the cell creation options.
+     *
+     * #### Notes
+     * This method is intended to be a convenience method to programmatically
+     * call the other cell creation methods in the factory.
+     */
+    createCellFromSharedModel(
+      sharedModel: ISharedMap<ISharedType>
+    ): ICellModel {
+      const id = sharedModel.get('id') as string;
+      let codeCell;
+      switch (sharedModel.get('cell_type')) {
+        case 'code':
+          codeCell = new CodeCellModel({
+            id,
+            sharedDoc: this.sharedDoc,
+            sharedModel,
+            contentFactory: this.codeCellContentFactory
+          });
+          break;
+        case 'markdown':
+          codeCell = new MarkdownCellModel({
+            id,
+            sharedDoc: this.sharedDoc,
+            sharedModel
+          });
+          break;
+        case 'raw':
+        default:
+          codeCell = new RawCellModel({
+            id,
+            sharedDoc: this.sharedDoc,
+            sharedModel
+          });
+          break;
+      }
+      codeCell.initialize();
+      return codeCell;
     }
 
     /**
@@ -652,17 +696,25 @@ export namespace NotebookModel {
      *   If the contentFactory is not provided, the instance
      *   `codeCellContentFactory` will be used.
      */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (options.contentFactory) {
-        options.contentFactory = this.codeCellContentFactory;
-      }
-      if (!options.id) {
-        options.id = UUID.uuid4();
-      }
-      if (this.sharedDoc) {
-        options.sharedDoc = this.sharedDoc;
-      }
-      return new CodeCellModel(options);
+    createCodeCell(
+      id?: string,
+      cell?: nbformat.ICodeCell,
+      contentFactory?: CodeCellModel.IContentFactory
+    ): ICodeCellModel {
+      id = id || cell?.id || UUID.uuid4();
+      contentFactory = contentFactory || this.codeCellContentFactory;
+      const sharedModel = CodeCellModel.createSharedModel(
+        id,
+        false,
+        this.sharedDoc,
+        cell
+      );
+      return new CodeCellModel({
+        id,
+        sharedDoc: this.sharedDoc,
+        sharedModel,
+        contentFactory
+      });
     }
 
     /**
@@ -673,14 +725,23 @@ export namespace NotebookModel {
      * @returns A new markdown cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
-      if (!options.id) {
-        options.id = UUID.uuid4();
-      }
-      if (this.sharedDoc) {
-        options.sharedDoc = this.sharedDoc;
-      }
-      return new MarkdownCellModel(options);
+    createMarkdownCell(
+      id?: string,
+      cell?: nbformat.IMarkdownCell
+    ): IMarkdownCellModel {
+      id = id || cell?.id || UUID.uuid4();
+      const sharedModel = MarkdownCellModel.createSharedModel(
+        id,
+        false,
+        this.sharedDoc,
+        cell
+      );
+      const cellModel = new MarkdownCellModel({
+        id,
+        sharedDoc: this.sharedDoc,
+        sharedModel
+      });
+      return cellModel;
     }
 
     /**
@@ -691,14 +752,15 @@ export namespace NotebookModel {
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createRawCell(options: CellModel.IOptions): IRawCellModel {
-      if (!options.id) {
-        options.id = UUID.uuid4();
-      }
-      if (this.sharedDoc) {
-        options.sharedDoc = this.sharedDoc;
-      }
-      return new RawCellModel(options);
+    createRawCell(id?: string, cell?: nbformat.IRawCell): IRawCellModel {
+      id = id || cell?.id || UUID.uuid4();
+      const sharedModel = RawCellModel.createSharedModel(
+        id,
+        false,
+        this.sharedDoc,
+        cell
+      );
+      return new RawCellModel({ id, sharedDoc: this.sharedDoc, sharedModel });
     }
 
     /**
@@ -721,19 +783,14 @@ export namespace NotebookModel {
      */
     export interface IOptions {
       /**
+       * The ISharedDoc in which to place new content.
+       */
+      sharedDoc: ISharedDoc;
+
+      /**
        * The factory for code cell model content.
        */
       codeCellContentFactory?: CodeCellModel.IContentFactory;
-
-      /**
-       * The ISharedDoc in which to place new content.
-       */
-      sharedDoc?: ISharedDoc;
     }
   }
-
-  /**
-   * The default `ContentFactory` instance.
-   */
-  export const defaultContentFactory = new ContentFactory({});
 }

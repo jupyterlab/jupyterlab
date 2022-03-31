@@ -7,7 +7,7 @@
 import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import { ISharedString } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -206,11 +206,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const opts = this.model.value.undoManager
       ? { yUndoManager: this.model.value.undoManager }
       : {};
-    const awareness = this.model.sharedDoc.awareness;
     this._yeditorBinding = new CodemirrorBinding(
       this.model.value.underlyingModel,
       this.editor,
-      awareness,
+      this.model.awareness,
       opts
     );
   }
@@ -946,38 +945,34 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handle model value changes.
    */
   private _onValueChanged(
-    value: models.ISharedString,
-    args: models.ISharedString.IChangedArgs
+    value: ISharedString,
+    args: ISharedString.IChangedArgs
   ): void {
     if (this._changeGuard) {
       return;
     }
     this._changeGuard = true;
     const doc = this.doc;
-    switch (args.type) {
-      case 'insert': {
-        const pos = doc.posFromIndex(args.start);
+    let currpos = 0;
+    args.forEach(delta => {
+      if (delta.insert != null) {
+        const pos = doc.posFromIndex(currpos);
         // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
-        doc.replaceRange(args.value!, pos, pos, '+input');
-        break;
-      }
-      case 'remove': {
-        const from = doc.posFromIndex(args.start);
-        const to = doc.posFromIndex(args.end);
+        doc.replaceRange(delta.insert!, pos, pos, '+input');
+        currpos += delta.insert.length;
+      } else if (delta.delete != null) {
+        const from = doc.posFromIndex(currpos);
+        const to = doc.posFromIndex(currpos + delta.delete);
         // Replace the range, including a '+input' origin,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
         doc.replaceRange('', from, to, '+input');
-        break;
+      } else if (delta.retain != null) {
+        currpos += delta.retain;
       }
-      case 'set':
-        doc.setValue(args.value!);
-        break;
-      default:
-        break;
-    }
+    });
     this._changeGuard = false;
   }
 
