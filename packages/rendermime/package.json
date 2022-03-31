@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime",
-  "version": "4.0.0-alpha.5",
+  "version": "4.0.0-alpha.7",
   "description": "JupyterLab - RenderMime",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,28 +41,27 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.5",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.5",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.5",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.5",
-    "@jupyterlab/observables": "^5.0.0-alpha.5",
-    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.5",
-    "@jupyterlab/services": "^7.0.0-alpha.5",
-    "@jupyterlab/translation": "^4.0.0-alpha.5",
+    "@jupyterlab/apputils": "^4.0.0-alpha.7",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.7",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.7",
+    "@jupyterlab/observables": "^5.0.0-alpha.7",
+    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.7",
+    "@jupyterlab/services": "^7.0.0-alpha.7",
+    "@jupyterlab/translation": "^4.0.0-alpha.7",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/messaging": "^1.10.1",
     "@lumino/signaling": "^1.10.1",
     "@lumino/widgets": "^1.31.1",
-    "lodash.escape": "^4.0.1",
-    "marked": "^4.0.10"
+    "lodash.escape": "^4.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/mathjax2": "^4.0.0-alpha.5",
-    "@jupyterlab/testutils": "^4.0.0-alpha.5",
+    "@jupyterlab/markedparser-extension": "^4.0.0-alpha.7",
+    "@jupyterlab/mathjax2": "^4.0.0-alpha.7",
+    "@jupyterlab/testutils": "^4.0.0-alpha.7",
     "@types/jest": "^26.0.10",
     "@types/lodash.escape": "^4.0.6",
-    "@types/marked": "^4.0.1",
+    "fs-extra": "^9.0.1",
     "jest": "^26.4.2",
     "json2html": "^0.0.8",
     "rimraf": "~3.0.0",

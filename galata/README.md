@@ -396,7 +396,7 @@ Benchmark of JupyterLab is done using Playwright. The actions measured are:
 Two files are tested: a notebook with many code cells and another with many markdown cells.
 
 The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
-the same CI job to ensure using the same hardware.  
+the same CI job to ensure using the same hardware.
 The benchmark job is triggered on:
 
 - Approved PR review

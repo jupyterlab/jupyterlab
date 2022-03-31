@@ -286,7 +286,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg({
-      hiddenMode: Widget.HiddenMode.Scale
+      hiddenMode: Widget.HiddenMode.Scale,
+      translator: options?.translator
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
@@ -687,6 +688,24 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         }
       }
     }
+  }
+
+  /*
+   * Whether the add buttons for each main area tab bar are enabled.
+   */
+  get addButtonEnabled(): boolean {
+    return this._dockPanel.addButtonEnabled;
+  }
+
+  set addButtonEnabled(value: boolean) {
+    this._dockPanel.addButtonEnabled = value;
+  }
+
+  /*
+   * A signal emitted when the add button on a main area tab bar is clicked.
+   */
+  get addRequested(): ISignal<DockPanel, TabBar<Widget>> {
+    return this._dockPanel.addRequested;
   }
 
   /*

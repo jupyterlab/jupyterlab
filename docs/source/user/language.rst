@@ -9,7 +9,7 @@ the display language of the user interface.
 Language packs
 --------------
 
-To be able to provide a new display language, you will need to 
+To be able to provide a new display language, you will need to
 install a language pack.
 
 Visit the `language packs repository <https://github.com/jupyterlab/language-packs/>`__

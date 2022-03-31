@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.5",
+  "version": "7.0.0-alpha.7",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -35,6 +35,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:all": "npm run build && webpack",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
@@ -45,11 +46,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.5",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.5",
-    "@jupyterlab/observables": "^5.0.0-alpha.5",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.5",
-    "@jupyterlab/statedb": "^4.0.0-alpha.5",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.7",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.7",
+    "@jupyterlab/observables": "^5.0.0-alpha.7",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.7",
+    "@jupyterlab/statedb": "^4.0.0-alpha.7",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
@@ -59,7 +60,7 @@
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.5",
+    "@jupyterlab/testutils": "^4.0.0-alpha.7",
     "@types/jest": "^26.0.10",
     "@types/node-fetch": "^2.5.4",
     "@types/text-encoding": "^0.0.35",

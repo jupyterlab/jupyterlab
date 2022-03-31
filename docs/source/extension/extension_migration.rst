@@ -17,6 +17,11 @@ API breaking changes
 Here is a list of JupyterLab npm packages that encountered API changes and therefore have
 bumped their major version (following semver convention):
 
+- ``@jupyterlab/docprovider`` from 3.x to 4.x
+   ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+   ``acquireLock`` and ``releaseLock`` have been removed from ``IDocumentProvider``.
+   ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   The ``renameAck`` property is
 - ``@jupyterlab/completer`` from 3.x to 4.x
    Major version bumped following the removal of ``ICompletionManager`` token and the replacement
    of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
@@ -52,6 +57,10 @@ bumped their major version (following semver convention):
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
    * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
    * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
+- ``@jupyterlab/rendermime`` from 3.x to 4.x
+  The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
+  that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
+  Consequently the ``IRendererFactory.createRenderer`` has a new option ``markdownParser``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
@@ -423,5 +432,3 @@ Using the new icon system and ``LabIcon``
   For full API documentation and examples of how to use
   the new icon support based on ``LabIcon`` from ``@jupyterlab/ui-components``,
   `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/master/packages/ui-components#readme>`__.
-
-

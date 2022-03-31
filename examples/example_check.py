@@ -14,9 +14,8 @@ import shutil
 import sys
 from pathlib import Path
 
+from jupyterlab.browser_check import run_async_process, run_test
 from jupyterlab.labapp import get_app_dir
-from jupyterlab.browser_check import run_test, run_async_process
-
 
 here = Path(__file__).parent.resolve()
 TEST_FILE = here / "example.spec.ts"
@@ -63,12 +62,8 @@ async def run_browser(url):
         if not target.exists():
             target.mkdir(parents=True, exist_ok=True)
         await run_async_process(["npm", "init", "-y"], cwd=str(target))
-        await run_async_process(
-            ["npm", "install", "@playwright/test@^1"], cwd=str(target)
-        )
-        await run_async_process(
-            ["npx", "playwright", "install", "chromium"], cwd=str(target)
-        )
+        await run_async_process(["npm", "install", "@playwright/test@^1"], cwd=str(target))
+        await run_async_process(["npx", "playwright", "install", "chromium"], cwd=str(target))
     test_target = target / TEST_FILE.name
 
     shutil.copy(
@@ -78,9 +73,7 @@ async def run_browser(url):
 
     current_env = os.environ.copy()
     current_env["BASE_URL"] = url
-    await run_async_process(
-        ["npx", "playwright", "test"], env=current_env, cwd=str(target)
-    )
+    await run_async_process(["npx", "playwright", "test"], env=current_env, cwd=str(target))
 
 
 if __name__ == "__main__":

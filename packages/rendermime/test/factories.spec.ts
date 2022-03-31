@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-const sampleData = require('../../../examples/filebrowser/sample.md');
-
 import { defaultSanitizer } from '@jupyterlab/apputils';
+import * as marked from '@jupyterlab/markedparser-extension';
 import { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
+import { IMarkdownParser } from '../lib';
 import {
   htmlRendererFactory,
   imageRendererFactory,
@@ -16,6 +16,7 @@ import {
   svgRendererFactory,
   textRendererFactory
 } from '../src';
+import * as fs from 'fs-extra';
 
 function createModel(
   mimeType: string,
@@ -259,12 +260,34 @@ describe('rendermime/factories', () => {
     });
 
     describe('#createRenderer()', () => {
-      it('should set the inner html', async () => {
+      let markdownParser: IMarkdownParser;
+
+      beforeAll(() => {
+        markdownParser = marked.default.activate(
+          jest.fn() as any
+        ) as IMarkdownParser;
+      });
+
+      it('should set the inner html with no parser', async () => {
         const f = markdownRendererFactory;
         const source = '<p>hello</p>';
         const mimeType = 'text/markdown';
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(`<pre>${source}</pre>`);
+      });
+
+      it('should set the inner html with md parser', async () => {
+        const f = markdownRendererFactory;
+        const source = '<p>hello</p>';
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser
+        });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(source);
       });
@@ -274,19 +297,33 @@ describe('rendermime/factories', () => {
         const source = '<p>hello</p>';
         const mimeType = 'text/markdown';
         const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser
+        });
         await w.renderModel(model);
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(source);
+        expect(w.node.innerHTML).toBe(`${source}`);
       });
 
       it('should add header anchors', async () => {
         const f = markdownRendererFactory;
         const mimeType = 'text/markdown';
+        const sampleData = fs.readFileSync(
+          '../../examples/filebrowser/sample.md',
+          { encoding: 'utf-8' }
+        );
+
         const model = createModel(mimeType, sampleData);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser
+        });
         await w.renderModel(model);
         Widget.attach(w, document.body);
+
         const node = document.getElementById('Title-third-level')!;
         expect(node.localName).toBe('h3');
         const anchor = node.firstChild!.nextSibling as HTMLAnchorElement;

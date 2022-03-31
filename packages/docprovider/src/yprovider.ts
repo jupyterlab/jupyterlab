@@ -7,7 +7,7 @@ import { ICurrentUser } from '@jupyterlab/user';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
-import { WebsocketProvider } from 'y-websocket';
+import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
 import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 
@@ -21,15 +21,15 @@ import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
  * We specify custom messages that the server can interpret. For reference please look in yjs_ws_server.
  *
  */
-export class WebSocketProviderWithLocks
-  extends WebsocketProvider
+export class WebSocketProvider
+  extends YWebsocketProvider
   implements IDocumentProvider {
   /**
-   * Construct a new WebSocketProviderWithLocks
+   * Construct a new WebSocketProvider
    *
-   * @param options The instantiation options for a WebSocketProviderWithLocks
+   * @param options The instantiation options for a WebSocketProvider
    */
-  constructor(options: WebSocketProviderWithLocks.IOptions) {
+  constructor(options: WebSocketProvider.IOptions) {
     super(
       options.url,
       options.contentType + ':' + options.path,
@@ -42,24 +42,8 @@ export class WebSocketProviderWithLocks
     this._contentType = options.contentType;
     this._serverUrl = options.url;
 
-    // Message handler that confirms when a lock has been acquired
-    this.messageHandlers[127] = (
-      encoder,
-      decoder,
-      provider,
-      emitSynced,
-      messageType
-    ) => {
-      // acquired lock
-      const timestamp = decoding.readUint32(decoder);
-      const lockRequest = this._currentLockRequest;
-      this._currentLockRequest = null;
-      if (lockRequest) {
-        lockRequest.resolve(timestamp);
-      }
-    };
     // Message handler that receives the initial content
-    this.messageHandlers[125] = (
+    this.messageHandlers[127] = (
       encoder,
       decoder,
       provider,
@@ -78,6 +62,18 @@ export class WebSocketProviderWithLocks
         initialContentRequest.resolve(initialContent.byteLength > 0);
       }
     };
+    // Message handler that receives the rename acknowledge
+    this.messageHandlers[125] = (
+      encoder,
+      decoder,
+      provider,
+      emitSynced,
+      messageType
+    ) => {
+      this._renameAck.resolve(
+        decoding.readTailAsUint8Array(decoder)[0] ? true : false
+      );
+    };
     this._isInitialized = false;
     this._onConnectionStatus = this._onConnectionStatus.bind(this);
     this.on('status', this._onConnectionStatus);
@@ -95,11 +91,16 @@ export class WebSocketProviderWithLocks
     user.changed.connect(userChanged);
   }
 
+  get renameAck(): Promise<boolean> {
+    return this._renameAck.promise;
+  }
+
   setPath(newPath: string): void {
     if (newPath !== this._path) {
       this._path = newPath;
       const encoder = encoding.createEncoder();
-      encoding.write(encoder, 123);
+      this._renameAck = new PromiseDelegate<boolean>();
+      encoding.write(encoder, 125);
       // writing a utf8 string to the encoder
       const escapedPath = unescape(
         encodeURIComponent(this._contentType + ':' + newPath)
@@ -130,7 +131,7 @@ export class WebSocketProviderWithLocks
     }
 
     this._initialContentRequest = new PromiseDelegate<boolean>();
-    this._sendMessage(new Uint8Array([125]));
+    this._sendMessage(new Uint8Array([127]));
 
     // Resolve with true if the server doesn't respond for some reason.
     // In case of a connection problem, we don't want the user to re-initialize the window.
@@ -145,55 +146,10 @@ export class WebSocketProviderWithLocks
    */
   putInitializedState(): void {
     const encoder = encoding.createEncoder();
-    encoding.writeVarUint(encoder, 124);
+    encoding.writeVarUint(encoder, 126);
     encoding.writeUint8Array(encoder, Y.encodeStateAsUpdate(this.doc));
     this._sendMessage(encoding.toUint8Array(encoder));
     this._isInitialized = true;
-  }
-
-  /**
-   * Acquire a lock.
-   * Returns a Promise that resolves to the lock number.
-   */
-  acquireLock(): Promise<number> {
-    if (this._currentLockRequest) {
-      return this._currentLockRequest.promise;
-    }
-    this._sendMessage(new Uint8Array([127]));
-    // try to acquire lock in regular interval
-    if (this._requestLockInterval) {
-      clearInterval(this._requestLockInterval);
-    }
-    this._requestLockInterval = setInterval(() => {
-      if (this.wsconnected) {
-        // try to acquire lock
-        this._sendMessage(new Uint8Array([127]));
-      }
-    }, 500);
-    let resolve: any, reject: any;
-    const promise: Promise<number> = new Promise((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-    this._currentLockRequest = { promise, resolve, reject };
-    return promise;
-  }
-
-  /**
-   * Release a lock.
-   *
-   * @param lock The lock to release.
-   */
-  releaseLock(lock: number): void {
-    const encoder = encoding.createEncoder();
-    // reply with release lock
-    encoding.writeVarUint(encoder, 126);
-    encoding.writeUint32(encoder, lock);
-    // releasing lock
-    this._sendMessage(encoding.toUint8Array(encoder));
-    if (this._requestLockInterval) {
-      clearInterval(this._requestLockInterval);
-    }
   }
 
   /**
@@ -224,12 +180,10 @@ export class WebSocketProviderWithLocks
     status: 'connected' | 'disconnected';
   }): Promise<void> {
     if (this._isInitialized && status.status === 'connected') {
-      const lock = await this.acquireLock();
       const contentIsInitialized = await this.requestInitialContent();
       if (!contentIsInitialized) {
         this.putInitializedState();
       }
-      this.releaseLock(lock);
     }
   }
 
@@ -237,21 +191,16 @@ export class WebSocketProviderWithLocks
   private _contentType: string;
   private _serverUrl: string;
   private _isInitialized: boolean;
-  private _requestLockInterval: number;
-  private _currentLockRequest: {
-    promise: Promise<number>;
-    resolve: (lock: number) => void;
-    reject: () => void;
-  } | null = null;
   private _initialContentRequest: PromiseDelegate<boolean> | null = null;
+  private _renameAck: PromiseDelegate<boolean>;
 }
 
 /**
- * A namespace for WebSocketProviderWithLocks statics.
+ * A namespace for WebSocketProvider statics.
  */
-export namespace WebSocketProviderWithLocks {
+export namespace WebSocketProvider {
   /**
-   * The instantiation options for a WebSocketProviderWithLocks.
+   * The instantiation options for a WebSocketProvider.
    */
   export interface IOptions extends IDocumentProviderFactory.IOptions {
     /**

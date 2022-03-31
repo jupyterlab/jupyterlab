@@ -11,7 +11,7 @@ if ($Env:GROUP -eq "python") {
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
     # Run the python tests
-    py.test
+    python -m pytest
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 }
 

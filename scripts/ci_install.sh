@@ -42,4 +42,3 @@ fi
 if [[ $GROUP == js-debugger ]]; then
     pip install xeus-python">=0.9.0,<0.10.0"
 fi
-

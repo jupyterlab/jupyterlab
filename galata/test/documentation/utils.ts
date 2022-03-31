@@ -1,3 +1,5 @@
+import { Page } from '@playwright/test';
+
 /**
  * Generate a SVG arrow to inject in a HTML document.
  *
@@ -38,7 +40,7 @@ export function generateCaptureArea(
   id = 'capture-screenshot'
 ): string {
   const { top, left, width, height } = position;
-  return `<div 
+  return `<div
     id="${id}"
     style="position: absolute; top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px; pointer-events: none;">
   </div>`;
@@ -55,4 +57,20 @@ export function positionMouse(position: { x: number; y: number }): string {
   <path d="m3.6043 1.0103 0.28628 12.757 2.7215-3.3091 2.5607 5.7514 2.0005-0.89067-2.5607-5.7514 4.2802 0.19174z"
       stroke="#ffffff" stroke-width=".54745" style="paint-order:markers fill stroke" />
 </svg>`;
+}
+
+export async function setLeftSidebarWidth(
+  page: Page,
+  width = 251
+): Promise<void> {
+  const splitHandle = await page.$('.lm-SplitPanel-handle');
+  const handleBBox = await splitHandle.boundingBox();
+
+  await page.mouse.move(
+    handleBBox.x + 0.5 * handleBBox.width,
+    handleBBox.y + 0.5 * handleBBox.height
+  );
+  await page.mouse.down();
+  await page.mouse.move(33 + width, handleBBox.y + 0.5 * handleBBox.height);
+  await page.mouse.up();
 }

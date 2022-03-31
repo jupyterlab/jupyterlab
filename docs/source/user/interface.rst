@@ -226,7 +226,7 @@ wish to run are passed in the ``args`` argument as a list of strings:
       ]
     }
 
-In this example ``docmanager:save`` and ``application:close`` commands are mapped to ``Accel T``. 
+In this example ``docmanager:save`` and ``application:close`` commands are mapped to ``Accel T``.
 The commands are run in succession when you use the shortcut.
 
 .. _editor-keymaps:

@@ -56,14 +56,37 @@ All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
-All source code is formatted using `prettier <https://prettier.io>`__.
+All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `black <https://github.com/psf/black>`__.
 When code is modified and committed, all staged files will be
-automatically formatted using pre-commit git hooks (with help from the
-`lint-staged <https://github.com/okonet/lint-staged>`__ and
-`husky <https://github.com/typicode/husky>`__ libraries). The benefit of
-using a code formatter like prettier is that it removes the topic of
+automatically formatted using pre-commit git hooks (with help from
+`pre-commit <https://github.com/pre-commit/pre-commit>`__). The benefit of
+using a code formatters like ``prettier`` and ``black`` is that it removes the topic of
 code style from the conversation when reviewing pull requests, thereby
 speeding up the review process.
+
+As long as your code is valid,
+the pre-commit hook should take care of how it should look.
+`pre-commit` and its associated hooks will automatically be installed when
+you run ``pip install -e ".[test]"``
+
+To install ``pre-commit`` manually, run the following::
+
+    pip install pre-commit
+    pre-commit install
+
+You can invoke the pre-commit hook by hand at any time with::
+
+    pre-commit run
+
+which should run any autoformatting on your code
+and tell you about any errors it couldn't fix automatically.
+You may also install `black integration <https://github.com/psf/black#editor-integration>`__
+into your text editor to format code automatically.
+
+If you have already committed files before setting up the pre-commit
+hook with ``pre-commit install``, you can fix everything up using
+``pre-commit run --all-files``. You need to make the fixing commit
+yourself after that.
 
 You may also use the prettier npm script (e.g. ``npm run prettier`` or
 ``yarn prettier`` or ``jlpm prettier``) to format the entire code base.
@@ -75,7 +98,7 @@ Submitting a Pull Request Contribution
 --------------------------------------
 
 Generally, an issue should be opened describing a piece of proposed work
-and the issues it solves before a pull request is opened. A triager will 
+and the issues it solves before a pull request is opened. A triager will
 ensure that your issue meets our definition of ready before we can merge
 any pull requests that relate to it.
 
@@ -95,9 +118,9 @@ Issue Management
 
 Opening an issue lets community members participate in the design
 discussion, makes others aware of work being done, and sets the stage
-for a fruitful community interaction. When you open a new bug or 
-enhancement request, please provide all the requested information 
-in the issue template 
+for a fruitful community interaction. When you open a new bug or
+enhancement request, please provide all the requested information
+in the issue template
 so that a responder will be able to triage your bug without delay.
 
 A pull request should reference
@@ -109,7 +132,7 @@ bot <https://github.com/apps/lock>`__ will lock the issue. If additional
 discussion is desired, or if the pull request doesn't fully address the
 locked issue, please open a new issue referencing the locked issue.
 
-New issues are subject to triage. A developer with triage permissions 
+New issues are subject to triage. A developer with triage permissions
 (a *triager*) will do the following:
 
 1. Read the issue
@@ -118,24 +141,24 @@ New issues are subject to triage. A developer with triage permissions
 4. If the issue is ready to be worked on, assign it to a milestone
 5. Apply appropriate labels to the issue (see examples below)
 
-A developer may start to work on an issue as soon as it is filed. Please 
-work with a triager if they have any questions about your issue so that 
+A developer may start to work on an issue as soon as it is filed. Please
+work with a triager if they have any questions about your issue so that
 your changes can be merged in without delay.
 
 Definition of Ready
 ^^^^^^^^^^^^^^^^^^^
 
 One of the main goals of triage is to get issues into a state where they
-are **ready** for someone to work on. Once a triager is satisfied that an 
+are **ready** for someone to work on. Once a triager is satisfied that an
 issue meets the definition below, they will remove the ``status:Needs Triage``
-label from it. We will not merge a pull request for an issue that still 
+label from it. We will not merge a pull request for an issue that still
 needs triage.
 
-Triagers should also ensure that the issue has appropriate labels that 
-describe it, such as labels with the ``pkg:`` prefix for issues that 
+Triagers should also ensure that the issue has appropriate labels that
+describe it, such as labels with the ``pkg:`` prefix for issues that
 affect one or more packages.
 
-**All requested information, where applicable, is provided.** From the 
+**All requested information, where applicable, is provided.** From the
 templates in JupyterLab’s issues:
 
 For a **bug**:
@@ -151,7 +174,7 @@ For a **feature request**:
 * Description of the proposed solution
 * Additional context
 
-**The issue should represent real, relevant, feasible work**. In short, if a 
+**The issue should represent real, relevant, feasible work**. In short, if a
 knowledgeable person were to be assigned this issue, they would be able to
 complete it with a reasonable amount of effort and assistance, and it
 furthers the goals of the Jupyter project.
@@ -160,9 +183,9 @@ furthers the goals of the Jupyter project.
 * Bugs represent valid expectations for use of Jupyter products and services.
 * Expectations for security, performance, accessibility, and localization match
   generally-accepted norms in the community that uses Jupyter products.
-* The issue represents work that one developer can commit to owning, even if 
-  they collaborate with other developers for feedback. Excessively large issues 
-  should be split into multiple issues, each triaged individually, or into 
+* The issue represents work that one developer can commit to owning, even if
+  they collaborate with other developers for feedback. Excessively large issues
+  should be split into multiple issues, each triaged individually, or into
   `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
   more substantive changes.
 
@@ -173,15 +196,15 @@ All new bugs and enhancement requests have the ``status:Needs Triage`` label.
 
 On a regular basis, Jupyter contributors (triage reviewers or triagers)
 review JupyterLab issues tagged
-with ``status:Needs Triage``, starting with the oldest, and determine 
+with ``status:Needs Triage``, starting with the oldest, and determine
 whether they meet the definition of ready.
 
-Once triaged, if the issue is ready, the reviewer removes the 
-``status:Needs Triage`` label; no additional label is required. If there 
+Once triaged, if the issue is ready, the reviewer removes the
+``status:Needs Triage`` label; no additional label is required. If there
 is not enough information in the issue as filed, the triage reviewer applies
 the ``status:Needs Info`` label and leaves ``status:Needs Triage`` in place.
-If an issue has remained in ``status:Needs Info`` for more than 14 days 
-without any follow-up communication, the reviewer should apply 
+If an issue has remained in ``status:Needs Info`` for more than 14 days
+without any follow-up communication, the reviewer should apply
 ``status:Blocked``. A blocked issue should be closed after another 14 days
 pass without a reply that unblocks it.
 
@@ -456,7 +479,7 @@ Then, start JupyterLab using the dev build:
 
 .. code:: bash
 
-   jupyter lab --dev --NotebookApp.token=''  --no-browser
+   jupyter lab --dev-mode --ServerApp.token=''  --no-browser
 
 Now run Lighthouse against this local server and show the results:
 
@@ -517,7 +540,7 @@ the results:
 .. code:: bash
 
    jlpm build:dev
-   jupyter lab --dev --NotebookApp.token='' --no-browser
+   jupyter lab --dev --ServerApp.token='' --no-browser
 
    # in new window
    jlpm run lighthouse --output json --output-path normal.json
@@ -527,7 +550,7 @@ Then rebuild with the production build and retest:
 .. code:: bash
 
    jlpm run build:dev:prod
-   jupyter lab --dev --NotebookApp.token='' --no-browser
+   jupyter lab --dev --ServerApp.token='' --no-browser
 
    # in new window
    jlpm run lighthouse --output json --output-path prod.json
@@ -705,7 +728,7 @@ Main reasons for UI test failures are:
 
    - ``please update galata snapshots``: A bot will push a new commit to your PR updating galata
      test snaphsots.
-   - ``please update documentation snapshots``: A bot will push a new commit to your PR updating 
+   - ``please update documentation snapshots``: A bot will push a new commit to your PR updating
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.
 
@@ -898,7 +921,7 @@ To test the docs run:
 
 .. code:: bash
 
-   py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+   python -m pytest --check-links -k .md . || python -m pytest --check-links -k .md --lf .
 
 The Read the Docs pages can be built using ``make``:
 
@@ -941,35 +964,35 @@ Documents, Files, and Activities
 Refer to files as either files or documents, depending on the context.
 
 *Documents* are more human centered. If human viewing, interpretation,
-or interaction is an important part of the experience, use the term 
+or interaction is an important part of the experience, use the term
 "document". For example, notebooks and Markdown files will often be
-referred to as documents except in the context of a file system 
+referred to as documents except in the context of a file system
 (e.g., the notebook filename).
 
 Use the term *files* in a less human-focused context. For example,
 refer to files in relation to a file system or file name.
 
-*Activities* are either an opened document or another UI panel that is 
+*Activities* are either an opened document or another UI panel that is
 not related to a file, such as terminals, consoles or the inspector.
 
 Notebook Cells
 """"""""""""""
 
-A notebook contains *cells*, each of which have *input* and one or more 
+A notebook contains *cells*, each of which have *input* and one or more
 *outputs*. When the user runs a cell, the kernel reads and executes the
 input and generates outputs. The notebook then displays the cell's output.
 The term *output* describes one of possibly multiple results of running a
-cell. *Cell output* describes the collective output of one cell. Use 
+cell. *Cell output* describes the collective output of one cell. Use
 *outputs of all cells* to describe all outputs from all cells.
 
 Command Names
 """""""""""""
 
-Command names appear in menus, in the Command Palette, and in toolbar buttons 
+Command names appear in menus, in the Command Palette, and in toolbar buttons
 (where the name typically appears on hover).
 
 -  Keep command names short, concise, and unambiguous.
--  Add an ellipsis (…) after any command name that requires more options. This 
+-  Add an ellipsis (…) after any command name that requires more options. This
    tells the user that they should expect a pop-up window to appear before they
    execute the command.
 -  Commands should use verbs in the imperative case. Do not use articles with nouns.
@@ -984,7 +1007,7 @@ Element Names
 -  The *menu bar* contains *menu items* that have their own *submenus*.
 -  Refer to the *main work area* as the work area when the name
    is unambiguous.
--  When describing elements in the UI, prefer colloquial names over 
+-  When describing elements in the UI, prefer colloquial names over
    technical names. For example, use “File browser” instead of “Files panel”.
 
 Write most element names in lowercase. These names include:
@@ -1003,7 +1026,7 @@ Write most element names in lowercase. These names include:
 -  cell inspector
 -  code console
 
-Write the following sections of the user interface with one or more 
+Write the following sections of the user interface with one or more
 initial capitals, mirroring their use in the UI:
 
 -  Activity Bar

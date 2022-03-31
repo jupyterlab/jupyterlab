@@ -203,15 +203,6 @@ export interface IJupyterLabPage {
   ): Promise<void>;
 
   /**
-   * Wait for `n` animation frames.
-   *
-   * By default wait for 1 animation frame.
-   *
-   * @param n Number of frames
-   */
-  waitForFrames(n?: number): Promise<void>;
-
-  /**
    * Wait for an element to emit 'transitionend' event.
    *
    * @param element Element or selector to watch
@@ -572,28 +563,6 @@ export class JupyterLabPage implements IJupyterLabPage {
     timeout?: number
   ): Promise<void> {
     return Utils.waitForCondition(condition, timeout);
-  }
-
-  /**
-   * Wait for `n` animation frames.
-   *
-   * By default wait for 1 animation frame.
-   *
-   * @param n Number of frames
-   */
-  async waitForFrames(n: number = 1): Promise<void> {
-    await this.page.evaluate(async (n: number) => {
-      for (let i = 0; i < n; i++) {
-        let resolveFrame: (value?: unknown) => void;
-        const waitForFrame = new Promise(resolve => {
-          resolveFrame = resolve;
-        });
-        requestAnimationFrame(() => {
-          resolveFrame();
-        });
-        await waitForFrame;
-      }
-    }, n);
   }
 
   /**

@@ -9,12 +9,6 @@
       "selector": "body"
     },
     {
-      "command": "settingeditor:open-json",
-      "args": {},
-      "keys": ["Shift Accel ,"],
-      "selector": "body"
-    },
-    {
       "command": "settingeditor:save",
       "args": {},
       "keys": ["Accel S"],

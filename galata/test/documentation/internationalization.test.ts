@@ -3,7 +3,7 @@
 
 import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
-import { generateCaptureArea } from './utils';
+import { generateCaptureArea, setLeftSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -14,6 +14,8 @@ test.use({
 test.describe('Internationalization', () => {
   test('Menu', async ({ page }) => {
     await page.goto();
+
+    await setLeftSidebarWidth(page);
 
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
@@ -26,7 +28,6 @@ test.describe('Internationalization', () => {
       [generateCaptureArea({ top: 5, left: 250, width: 800, height: 600 })]
     );
 
-    await page.waitForFrames(5);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_settings.png');
@@ -34,6 +35,8 @@ test.describe('Internationalization', () => {
 
   test('Confirm language', async ({ page }) => {
     await page.goto();
+
+    await setLeftSidebarWidth(page);
 
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
@@ -47,7 +50,6 @@ test.describe('Internationalization', () => {
       [generateCaptureArea({ top: 200, left: 350, width: 600, height: 300 })]
     );
 
-    await page.waitForFrames(3);
     expect(
       await (await page.$('#capture-screenshot')).screenshot()
     ).toMatchSnapshot('language_change.png');
@@ -56,6 +58,8 @@ test.describe('Internationalization', () => {
   test('UI in Chinese', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
+
+    await setLeftSidebarWidth(page);
 
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
@@ -80,7 +84,6 @@ test.describe('Internationalization', () => {
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
 
-    await page.waitForFrames(3);
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
 });

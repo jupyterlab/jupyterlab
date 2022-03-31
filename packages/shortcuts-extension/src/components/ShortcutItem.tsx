@@ -76,7 +76,7 @@ function getCommands(
     shortcutEdit: {
       commandId: 'shortcutui:Edit',
       label: trans.__('Edit'),
-      caption: trans.__('Edit existing sortcut')
+      caption: trans.__('Edit existing shortcut')
     },
     shortcutAddNew: {
       commandId: 'shortcutui:AddNew',
