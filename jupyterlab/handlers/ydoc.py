@@ -39,6 +39,9 @@ class YNotebook(YBaseDoc):
             meta = self._ymeta.to_json(t)
             state = self._ystate.to_json(t)
         for cell in cells:
+            if "id" in cell and state["nbformat"] == 4 and state["nbformatMinor"] <= 4:
+                # strip cell ids if we have notebook format 4.0-4.4
+                del cell["id"]
             if "execution_count" in cell:
                 execution_count = cell["execution_count"]
                 if isinstance(execution_count, float):
