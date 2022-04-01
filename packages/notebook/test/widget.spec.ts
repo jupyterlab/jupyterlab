@@ -38,7 +38,7 @@ const notebookConfig = {
   scrollPastEnd: true,
   defaultCell: 'code' as nbformat.CellType,
   recordTiming: false,
-  numberCellsToRenderDirectly: 2,
+  numberCellsToRenderDirectly: 9999,
   remainingTimeBeforeRescheduling: 50,
   renderCellOnIdle: true,
   observedTopMargin: '1000px',
