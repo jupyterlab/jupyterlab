@@ -93,5 +93,7 @@ test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
   const terminal = page.locator(TERMINAL_SELECTOR);
   await terminal.waitFor();
 
+  await page.keyboard.type('pwd');
+  await page.keyboard.press('Enter');
   expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
 });
