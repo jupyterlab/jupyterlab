@@ -9,11 +9,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import {
-  ellipsesIcon,
-  slashIcon as preferredIcon,
-  folderIcon as rootIcon
-} from '@jupyterlab/ui-components';
+import { ellipsesIcon, folderIcon, slashIcon } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { ElementExt } from '@lumino/domutils';
 import { IDragEvent } from '@lumino/dragdrop';
@@ -73,7 +69,13 @@ export class BreadCrumbs extends Widget {
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
-    this.node.appendChild(this._crumbs[Private.Crumb.Home]);
+    this._hasPreferred =
+      PageConfig.getOption('preferredPath') !== '/' ? true : false;
+    if (this._hasPreferred) {
+      this.node.appendChild(this._crumbs[Private.Crumb.Home]);
+    } else {
+      this.node.appendChild(this._crumbs[Private.Crumb.Home]);
+    }
     this._model.refreshed.connect(this.update, this);
   }
 
@@ -143,7 +145,12 @@ export class BreadCrumbs extends Widget {
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
-    Private.updateCrumbs(this._crumbs, this._crumbSeps, localPath);
+    Private.updateCrumbs(
+      this._crumbs,
+      this._crumbSeps,
+      localPath,
+      this._hasPreferred
+    );
   }
 
   /**
@@ -296,6 +303,7 @@ export class BreadCrumbs extends Widget {
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _model: FileBrowserModel;
+  private _hasPreferred: boolean;
   private _crumbs: ReadonlyArray<HTMLElement>;
   private _crumbSeps: ReadonlyArray<HTMLElement>;
 }
@@ -341,7 +349,8 @@ namespace Private {
   export function updateCrumbs(
     breadcrumbs: ReadonlyArray<HTMLElement>,
     separators: ReadonlyArray<HTMLElement>,
-    path: string
+    path: string,
+    hasPreferred: boolean
   ): void {
     const node = breadcrumbs[0].parentNode as HTMLElement;
 
@@ -351,10 +360,7 @@ namespace Private {
       node.removeChild(firstChild.nextSibling);
     }
 
-    if (
-      PageConfig.getOption('preferredPath') &&
-      PageConfig.getOption('preferredPath') !== '/'
-    ) {
+    if (hasPreferred) {
       node.appendChild(breadcrumbs[Crumb.Preferred]);
     } else {
       node.appendChild(separators[0]);
@@ -387,7 +393,7 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
-    const home = rootIcon.element({
+    const home = folderIcon.element({
       className: BREADCRUMB_ROOT_CLASS,
       tag: 'span',
       title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
@@ -402,7 +408,7 @@ namespace Private {
     parent.className = BREADCRUMB_ITEM_CLASS;
     const current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
-    const preferred = preferredIcon.element({
+    const preferred = slashIcon.element({
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
       title: PageConfig.getOption('preferredPath') || 'Jupyter Preferred Path',
