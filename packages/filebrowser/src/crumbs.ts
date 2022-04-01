@@ -9,19 +9,17 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { ellipsesIcon, folderIcon, LabIcon } from '@jupyterlab/ui-components';
+import {
+  ellipsesIcon,
+  slashIcon as preferredIcon,
+  folderIcon as rootIcon
+} from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { ElementExt } from '@lumino/domutils';
 import { IDragEvent } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { FileBrowserModel } from './model';
-import slashSvgStr from '../style/icons/preferred.svg';
-
-const preferredIcon = new LabIcon({
-  name: 'filebrowser:preferred',
-  svgstr: slashSvgStr
-});
 
 /**
  * The class name added to the breadcrumb node.
@@ -31,7 +29,7 @@ const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
 /**
  * The class name for the breadcrumbs home node
  */
-const BREADCRUMB_HOME_CLASS = 'jp-BreadCrumbs-home';
+const BREADCRUMB_ROOT_CLASS = 'jp-BreadCrumbs-root';
 
 /**
  * The class name for the breadcrumbs preferred node
@@ -174,7 +172,7 @@ export class BreadCrumbs extends Widget {
       }
       if (
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
-        node.classList.contains(BREADCRUMB_HOME_CLASS)
+        node.classList.contains(BREADCRUMB_ROOT_CLASS)
       ) {
         const index = ArrayExt.findFirstIndex(
           this._crumbs,
@@ -353,7 +351,10 @@ namespace Private {
       node.removeChild(firstChild.nextSibling);
     }
 
-    if (PageConfig.getOption('preferredPath')) {
+    if (
+      PageConfig.getOption('preferredPath') &&
+      PageConfig.getOption('preferredPath') !== '/'
+    ) {
       node.appendChild(breadcrumbs[Crumb.Preferred]);
     } else {
       node.appendChild(separators[0]);
@@ -386,8 +387,8 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
-    const home = folderIcon.element({
-      className: BREADCRUMB_HOME_CLASS,
+    const home = rootIcon.element({
+      className: BREADCRUMB_ROOT_CLASS,
       tag: 'span',
       title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
       stylesheet: 'breadCrumb'
