@@ -80,6 +80,7 @@
   --jp-icon-search: url('icons/toolbar/search.svg');
   --jp-icon-settings: url('icons/filetype/settings.svg');
   --jp-icon-share: url('icons/sidebar/share.svg');
+  --jp-icon-slash: url('icons/files/slash.svg');
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
   --jp-icon-stop: url('icons/toolbar/stop.svg');
   --jp-icon-tab: url('icons/sidebar/tab.svg');
@@ -368,6 +369,10 @@
 
 .jp-ShareIcon {
   background-image: var(--jp-icon-share);
+}
+
+.jp-SlashIcon {
+  background-image: var(--jp-icon-slash);
 }
 
 .jp-SpreadsheetIcon {
