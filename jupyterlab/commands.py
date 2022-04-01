@@ -18,7 +18,6 @@ import stat
 import subprocess
 import sys
 import tarfile
-import warnings
 from copy import deepcopy
 from glob import glob
 from pathlib import Path
@@ -35,7 +34,6 @@ from jupyter_server.extension.serverextension import (
     RED_X,
 )
 from jupyterlab_server.config import (
-    LabConfig,
     get_federated_extensions,
     get_package_url,
     get_page_config,
@@ -44,7 +42,7 @@ from jupyterlab_server.config import (
 )
 from jupyterlab_server.process import Process, WatchHelper, list2cmdline, which
 from packaging.version import Version
-from traitlets import Bool, Dict, HasTraits, Instance, List, Unicode, default
+from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab._version import __version__
 from jupyterlab.coreconfig import CoreConfig
@@ -97,7 +95,7 @@ class ProgressProcess(Process):
         self.logger = _ensure_logger(logger)
         self._last_line = ""
         self.cmd = cmd
-        self.logger.debug("> " + list2cmdline(cmd))
+        self.logger.debug(f"> {list2cmdline(cmd)}")
 
         self.proc = self._create_process(
             cwd=cwd,
@@ -337,7 +335,7 @@ class AppOptions(HasTraits):
 
     use_sys_dir = Bool(
         True,
-        help=("Whether to shadow the default app_dir if that is set to a " "non-default value"),
+        help=("Whether to shadow the default app_dir if that is set to a non-default value"),
     )
 
     logger = Instance(logging.Logger, help="The logger to use")
@@ -451,7 +449,6 @@ def update_extension(name=None, all_=False, app_dir=None, app_options=None):
 def clean(app_options=None):
     """Clean the JupyterLab application directory."""
     app_options = _ensure_options(app_options)
-    handler = _AppHandler(app_options)
     logger = app_options.logger
     app_dir = app_options.app_dir
 
@@ -937,7 +934,7 @@ class _AppHandler(object):
                     self._write_build_config(config)
                 return True
 
-        logger.warn('No labextension named "%s" installed' % name)
+        logger.warning('No labextension named "%s" installed' % name)
         return False
 
     def uninstall_all_extensions(self):
@@ -982,14 +979,14 @@ class _AppHandler(object):
         """
         data = self.info["extensions"][name]
         if data["alias_package_source"]:
-            self.logger.warn("Skipping updating pinned extension '%s'." % name)
+            self.logger.warning("Skipping updating pinned extension '%s'." % name)
             return False
         try:
             latest = self._latest_compatible_package_version(name)
         except URLError:
             return False
         if latest is None:
-            self.logger.warn("No compatible version found for %s!" % (name,))
+            self.logger.warning("No compatible version found for %s!" % (name,))
             return False
         if latest == data["version"]:
             self.logger.info("Extension %r already up to date" % name)
@@ -1067,7 +1064,6 @@ class _AppHandler(object):
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
-        lab_config = LabConfig()
         app_settings_dir = osp.join(self.app_dir, "settings")
 
         page_config = get_static_page_config(
@@ -1551,7 +1547,7 @@ class _AppHandler(object):
             data = read_package(path)
             name = data["name"]
             if name not in info:
-                self.logger.warn("Removing orphaned linked package %s" % name)
+                self.logger.warning("Removing orphaned linked package %s" % name)
                 os.remove(path)
                 continue
             item = info[name]
@@ -1697,7 +1693,7 @@ class _AppHandler(object):
         for name in dead:
             link_type = source.replace("_", " ")
             msg = '**Note: Removing dead %s "%s"' % (link_type, name)
-            self.logger.warn(msg)
+            self.logger.warning(msg)
             del data[name]
 
         if dead:
@@ -2014,8 +2010,8 @@ def _yarn_config(logger):
         )
     except Exception as e:
         logger.error("Fail to get yarn configuration. {!s}".format(e))
-    finally:
-        return configuration
+
+    return configuration
 
 
 def _ensure_logger(logger=None):
@@ -2270,7 +2266,7 @@ def _is_disabled(name, disabled=None):
     disabled = disabled or {}
     for pattern, value in disabled.items():
         # skip packages explicitly marked as not disabled
-        if value == False:
+        if value is False:
             continue
         if name == pattern:
             return True
@@ -2311,7 +2307,7 @@ def _log_multiple_compat_errors(logger, errors_map):
     outdated = []
     others = []
 
-    for name, (version, errors) in errors_map.items():
+    for name, (_, errors) in errors_map.items():
         age = _compat_error_age(errors)
         if age > 0:
             outdated.append(name)
@@ -2319,11 +2315,11 @@ def _log_multiple_compat_errors(logger, errors_map):
             others.append(name)
 
     if outdated:
-        logger.warn(
+        logger.warning(
             "\n        ".join(
-                ["\n   The following extension are outdated:"]
-                + outdated
-                + [
+                ["\n   The following extension are outdated:"]  # noqa
+                + outdated  # noqa
+                + [  # noqa
                     '\n   Consider running "jupyter labextension update --all" '
                     "to check for updates.\n"
                 ]
@@ -2333,7 +2329,7 @@ def _log_multiple_compat_errors(logger, errors_map):
     for name in others:
         version, errors = errors_map[name]
         msg = _format_compatibility_errors(name, version, errors)
-        logger.warn(msg + "\n")
+        logger.warning(f"{msg}\n")
 
 
 def _log_single_compat_errors(logger, name, version, errors):
@@ -2341,10 +2337,10 @@ def _log_single_compat_errors(logger, name, version, errors):
 
     age = _compat_error_age(errors)
     if age > 0:
-        logger.warn('The extension "%s" is outdated.\n', name)
+        logger.warning('The extension "%s" is outdated.\n', name)
     else:
         msg = _format_compatibility_errors(name, version, errors)
-        logger.warn(msg + "\n")
+        logger.warning(f"{msg}\n")
 
 
 def _compat_error_age(errors):
@@ -2436,9 +2432,7 @@ def _fetch_package_metadata(registry, name, logger):
     req = Request(
         urljoin(registry, quote(name, safe="@")),
         headers={
-            "Accept": (
-                "application/vnd.npm.install-v1+json;" " q=1.0, application/json; q=0.8, */*"
-            )
+            "Accept": ("application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*")
         },
     )
     try:

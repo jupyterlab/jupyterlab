@@ -122,7 +122,7 @@ class TestEnv(object):
         self.path_patch.stop()
         try:
             self.test_dir.cleanup()
-        except (OSError, PermissionError) as e:
+        except OSError:
             pass
 
     def __enter__(self):

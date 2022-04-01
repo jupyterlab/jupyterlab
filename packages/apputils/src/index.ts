@@ -51,7 +51,8 @@ export * from './tokens';
 export {
   ToolbarWidgetRegistry,
   createDefaultFactory,
-  createToolbarFactory
+  createToolbarFactory,
+  setToolbar
 } from './toolbar';
 export * from './widgettracker';
 export * from './windowresolver';

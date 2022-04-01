@@ -736,7 +736,7 @@ class TestExtension(AppHandlerTest):
         assert installed == [self.pkg_names["extension"]]
 
     def test_update_missing_extension(self):
-        assert False == update_extension("foo")
+        assert update_extension("foo") is False
 
     def test_update_multiple(self):
         installed = []

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/user-extension",
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.8",
   "description": "JupyterLab - User Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,9 +41,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.7",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.7",
-    "@jupyterlab/user": "^4.0.0-alpha.7",
+    "@jupyterlab/application": "^4.0.0-alpha.8",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.8",
+    "@jupyterlab/user": "^4.0.0-alpha.8",
     "@lumino/widgets": "^1.31.1"
   },
   "devDependencies": {

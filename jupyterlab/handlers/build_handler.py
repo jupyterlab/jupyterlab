@@ -12,7 +12,6 @@ from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
 from ..commands import AppOptions, _ensure_options, build, build_check, clean
-from ..coreconfig import CoreConfig
 
 
 class Builder(object):
@@ -44,12 +43,12 @@ class Builder(object):
             )
             status = "needed" if messages else "stable"
             if messages:
-                self.log.warn("Build recommended")
-                [self.log.warn(m) for m in messages]
+                self.log.warning("Build recommended")
+                [self.log.warning(m) for m in messages]
             else:
                 self.log.info("Build is up to date")
-        except ValueError as e:
-            self.log.warn("Could not determine jupyterlab build status without nodejs")
+        except ValueError:
+            self.log.warning("Could not determine jupyterlab build status without nodejs")
             status = "stable"
             messages = []
 
@@ -112,10 +111,10 @@ class Builder(object):
         )
         try:
             return build(app_options=app_options)
-        except Exception as e:
+        except Exception:
             if self._kill_event.is_set():
                 return
-            self.log.warn("Build failed, running a clean and rebuild")
+            self.log.warning("Build failed, running a clean and rebuild")
             clean(app_options=app_options)
             return build(app_options=app_options)
 
