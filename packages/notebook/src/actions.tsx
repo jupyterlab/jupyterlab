@@ -2002,9 +2002,8 @@ namespace Private {
 
   export function isNotebookRendered(
     notebook: Notebook,
-    translator?: ITranslator
   ): boolean {
-    translator = translator || nullTranslator;
+    translator = notebook.translator;
     const trans = translator.load('jupyterlab');
 
     if (notebook.remainingCellToRenderCount !== 0) {
