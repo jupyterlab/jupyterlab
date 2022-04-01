@@ -2003,7 +2003,7 @@ namespace Private {
   export function isNotebookRendered(
     notebook: Notebook,
   ): boolean {
-    translator = notebook.translator;
+    const translator = notebook.translator;
     const trans = translator.load('jupyterlab');
 
     if (notebook.remainingCellToRenderCount !== 0) {
