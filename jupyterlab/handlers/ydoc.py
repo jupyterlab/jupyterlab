@@ -21,8 +21,7 @@ class YFile(YBaseDoc):
 
     @property
     def source(self):
-        with self._ydoc.begin_transaction() as t:
-            return self._ysource.to_string(t)
+        return str(self._ysource)
 
 
 class YNotebook(YBaseDoc):
@@ -34,10 +33,9 @@ class YNotebook(YBaseDoc):
 
     @property
     def source(self):
-        with self._ydoc.begin_transaction() as t:
-            cells = self._ycells.to_json(t)
-            meta = self._ymeta.to_json(t)
-            state = self._ystate.to_json(t)
+        cells = self._ycells.to_json()
+        meta = self._ymeta.to_json()
+        state = self._ystate.to_json()
         for cell in cells:
             if "execution_count" in cell:
                 execution_count = cell["execution_count"]
