@@ -73,6 +73,7 @@ import {
   buildIcon,
   copyIcon,
   cutIcon,
+  duplicateIcon,
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
@@ -2082,8 +2083,7 @@ function addCommands(
         NotebookActions.duplicate(current.content, 'belowSelected');
       }
     },
-    // A "duplicate" icon is available in the cell-toolbar package
-    icon: args => (args.toolbar ? copyIcon : ''),
+    icon: args => (args.toolbar ? duplicateIcon : ''),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
