@@ -125,7 +125,6 @@ const NARROW_ID_CLASS = 'jp-id-narrow';
  * The class name added to the modified column header cell and modified item cell when hidden.
  */
 const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
-const SELECTED_COLUMN_HIDDEN = 'jp-IsSelected-hidden';
 
 /**
  * The mime type for a contents drag object.
@@ -1970,9 +1969,6 @@ export namespace DirListing {
     ): void {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
-      const checkboxWrapper = this.createCheckboxWrapperNode({
-        alwaysVisible: true
-      });
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
       const modified = this.createHeaderItemNode(trans.__('Last Modified'));
@@ -1981,16 +1977,15 @@ export namespace DirListing {
       modified.classList.add(MODIFIED_ID_CLASS);
       narrow.classList.add(NARROW_ID_CLASS);
       narrow.textContent = '...';
-      node.appendChild(checkboxWrapper);
+      if (!hiddenColumns?.has?.('is_selected')) {
+        const checkboxWrapper = this.createCheckboxWrapperNode({
+          alwaysVisible: true
+        });
+        node.appendChild(checkboxWrapper);
+      }
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
-
-      if (hiddenColumns?.has?.('is_selected')) {
-        checkboxWrapper.classList.add(SELECTED_COLUMN_HIDDEN);
-      } else {
-        checkboxWrapper.classList.remove(SELECTED_COLUMN_HIDDEN);
-      }
 
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
@@ -2085,14 +2080,16 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>
     ): HTMLElement {
       const node = document.createElement('li');
-      const checkboxWrapper = this.createCheckboxWrapperNode();
       const icon = document.createElement('span');
       const text = document.createElement('span');
       const modified = document.createElement('span');
       icon.className = ITEM_ICON_CLASS;
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
-      node.appendChild(checkboxWrapper);
+      if (!hiddenColumns?.has?.('is_selected')) {
+        const checkboxWrapper = this.createCheckboxWrapperNode();
+        node.appendChild(checkboxWrapper);
+      }
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
@@ -2102,12 +2099,6 @@ export namespace DirListing {
       // text element gets substituted with input area during file name edits
       // which conveniently deactivate irrelevant shortcuts.
       text.tabIndex = 0;
-
-      if (hiddenColumns?.has?.('is_selected')) {
-        checkboxWrapper.classList.add(SELECTED_COLUMN_HIDDEN);
-      } else {
-        checkboxWrapper.classList.remove(SELECTED_COLUMN_HIDDEN);
-      }
 
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
@@ -2185,10 +2176,12 @@ export namespace DirListing {
         CHECKBOX_WRAPPER_CLASS
       );
 
-      if (hiddenColumns?.has?.('is_selected')) {
-        checkboxWrapper.classList.add(SELECTED_COLUMN_HIDDEN);
-      } else {
-        checkboxWrapper.classList.remove(SELECTED_COLUMN_HIDDEN);
+      const showFileCheckboxes = !hiddenColumns?.has?.('is_selected');
+      if (checkboxWrapper && !showFileCheckboxes) {
+        node.removeChild(checkboxWrapper);
+      } else if (showFileCheckboxes && !checkboxWrapper) {
+        const checkboxWrapper = this.createCheckboxWrapperNode();
+        node.insertBefore(checkboxWrapper, iconContainer);
       }
 
       if (hiddenColumns?.has?.('last_modified')) {

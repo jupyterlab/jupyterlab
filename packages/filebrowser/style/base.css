@@ -112,11 +112,6 @@
   display: none;
 }
 
-/* Hide the file checkboxes */
-.jp-IsSelected-hidden {
-  display: none;
-}
-
 .jp-FileBrowser-filterBox {
   padding: 0;
   flex: 0 0 auto;
@@ -234,8 +229,10 @@
   padding: 4px;
 }
 
-.jp-DirListing-header .jp-DirListing-checkboxWrapper {
-  margin-right: -4px;
+.jp-DirListing-header
+  .jp-DirListing-checkboxWrapper
+  + .jp-DirListing-headerItem {
+  padding-left: 4px;
 }
 
 .jp-DirListing-content .jp-DirListing-checkboxWrapper {
