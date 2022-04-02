@@ -124,6 +124,8 @@ namespace CommandIDs {
   export const search = 'filebrowser:search';
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
+
+  export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 }
 
 /**
@@ -1166,6 +1168,22 @@ function addCommands(
           .set('@jupyterlab/filebrowser-extension:browser', key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set showHiddenFiles setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleFileCheckboxes, {
+    label: trans.__('Show File Checkboxes'),
+    isToggled: () => browser.showFileCheckboxes,
+    execute: () => {
+      const value = !browser.showFileCheckboxes;
+      const key = 'showFileCheckboxes';
+      if (settingRegistry) {
+        return settingRegistry
+          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set showFileCheckboxes setting`);
           });
       }
     }

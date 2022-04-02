@@ -127,6 +127,11 @@
         "rank": 14
       },
       {
+        "command": "filebrowser:toggle-file-checkboxes",
+        "selector": ".jp-DirListing-header",
+        "rank": 14.5
+      },
+      {
         "command": "filebrowser:share-main",
         "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 15
