@@ -112,6 +112,10 @@
   display: none;
 }
 
+.jp-IsSelected-hidden {
+  display: none;
+}
+
 .jp-FileBrowser-filterBox {
   padding: 0;
   flex: 0 0 auto;

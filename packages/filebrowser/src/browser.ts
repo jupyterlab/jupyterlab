@@ -220,6 +220,22 @@ export class FileBrowser extends Widget {
   }
 
   /**
+   * Whether to show checkboxes next to files and folders
+   */
+  get showFileCheckboxes(): boolean {
+    return this._showFileCheckboxes;
+  }
+
+  set showFileCheckboxes(value: boolean) {
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('is_selected', value);
+      this._showFileCheckboxes = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -435,6 +451,7 @@ export class FileBrowser extends Widget {
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
   private _showHiddenFiles: boolean = false;
+  private _showFileCheckboxes: boolean = true;
 }
 
 /**

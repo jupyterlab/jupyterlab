@@ -221,6 +221,12 @@
       "title": "Show hidden files",
       "description": "Whether to show hidden files. The server parameter `ContentsManager.allow_hidden` must be set to `True` to display hidden files.",
       "default": false
+    },
+    "showFileCheckboxes": {
+      "type": "boolean",
+      "title": "Use checkboxes to select items",
+      "description": "Whether to show checkboxes next to files and folders",
+      "default": true
     }
   },
   "additionalProperties": false,

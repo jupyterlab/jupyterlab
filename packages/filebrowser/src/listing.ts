@@ -125,6 +125,7 @@ const NARROW_ID_CLASS = 'jp-id-narrow';
  * The class name added to the modified column header cell and modified item cell when hidden.
  */
 const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
+const SELECTED_COLUMN_HIDDEN = 'jp-IsSelected-hidden';
 
 /**
  * The mime type for a contents drag object.
@@ -1822,7 +1823,7 @@ export namespace DirListing {
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified';
+  export type ToggleableColumn = 'last_modified' | 'is_selected';
 
   /**
    * A file contents model thunk.
@@ -1985,6 +1986,12 @@ export namespace DirListing {
       node.appendChild(narrow);
       node.appendChild(modified);
 
+      if (hiddenColumns?.has?.('is_selected')) {
+        checkboxWrapper.classList.add(SELECTED_COLUMN_HIDDEN);
+      } else {
+        checkboxWrapper.classList.remove(SELECTED_COLUMN_HIDDEN);
+      }
+
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
@@ -2096,6 +2103,12 @@ export namespace DirListing {
       // which conveniently deactivate irrelevant shortcuts.
       text.tabIndex = 0;
 
+      if (hiddenColumns?.has?.('is_selected')) {
+        checkboxWrapper.classList.add(SELECTED_COLUMN_HIDDEN);
+      } else {
+        checkboxWrapper.classList.remove(SELECTED_COLUMN_HIDDEN);
+      }
+
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
@@ -2167,6 +2180,16 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const checkboxWrapper = DOMUtils.findElement(
+        node,
+        CHECKBOX_WRAPPER_CLASS
+      );
+
+      if (hiddenColumns?.has?.('is_selected')) {
+        checkboxWrapper.classList.add(SELECTED_COLUMN_HIDDEN);
+      } else {
+        checkboxWrapper.classList.remove(SELECTED_COLUMN_HIDDEN);
+      }
 
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);

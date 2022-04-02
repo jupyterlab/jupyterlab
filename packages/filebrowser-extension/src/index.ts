@@ -203,6 +203,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       let showLastModifiedColumn: boolean = true;
       let useFuzzyFilter: boolean = true;
       let showHiddenFiles: boolean = false;
+      let showFileCheckboxes: boolean = true;
 
       if (settingRegistry) {
         void settingRegistry
@@ -247,6 +248,16 @@ const browser: JupyterFrontEndPlugin<void> = {
               .composite as boolean;
 
             browser.showHiddenFiles = showHiddenFiles;
+
+            settings.changed.connect(settings => {
+              showFileCheckboxes = settings.get('showFileCheckboxes')
+                .composite as boolean;
+              browser.showFileCheckboxes = showFileCheckboxes;
+            });
+            showFileCheckboxes = settings.get('showFileCheckboxes')
+              .composite as boolean;
+
+            browser.showFileCheckboxes = showFileCheckboxes;
           });
       }
     });
