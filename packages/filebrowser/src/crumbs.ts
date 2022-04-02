@@ -9,7 +9,11 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { ellipsesIcon, folderIcon, slashIcon } from '@jupyterlab/ui-components';
+import {
+  ellipsesIcon,
+  homeIcon as preferredIcon,
+  folderIcon as rootIcon
+} from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { ElementExt } from '@lumino/domutils';
 import { IDragEvent } from '@lumino/dragdrop';
@@ -72,10 +76,9 @@ export class BreadCrumbs extends Widget {
     this._hasPreferred =
       PageConfig.getOption('preferredPath') !== '/' ? true : false;
     if (this._hasPreferred) {
-      this.node.appendChild(this._crumbs[Private.Crumb.Home]);
-    } else {
-      this.node.appendChild(this._crumbs[Private.Crumb.Home]);
+      this.node.appendChild(this._crumbs[Private.Crumb.Preferred]);
     }
+    this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
   }
 
@@ -354,14 +357,15 @@ namespace Private {
   ): void {
     const node = breadcrumbs[0].parentNode as HTMLElement;
 
-    // Remove all but the home node.
+    // Remove all but the home or preferred node.
     const firstChild = node.firstChild as HTMLElement;
     while (firstChild && firstChild.nextSibling) {
       node.removeChild(firstChild.nextSibling);
     }
 
     if (hasPreferred) {
-      node.appendChild(breadcrumbs[Crumb.Preferred]);
+      node.appendChild(breadcrumbs[Crumb.Home]);
+      node.appendChild(separators[0]);
     } else {
       node.appendChild(separators[0]);
     }
@@ -393,7 +397,7 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
-    const home = folderIcon.element({
+    const home = rootIcon.element({
       className: BREADCRUMB_ROOT_CLASS,
       tag: 'span',
       title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
@@ -408,7 +412,7 @@ namespace Private {
     parent.className = BREADCRUMB_ITEM_CLASS;
     const current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
-    const preferred = slashIcon.element({
+    const preferred = preferredIcon.element({
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
       title: PageConfig.getOption('preferredPath') || 'Jupyter Preferred Path',
