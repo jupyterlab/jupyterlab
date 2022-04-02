@@ -149,7 +149,7 @@
 }
 
 .jp-DirListing-headerItem {
-  padding: 5px 12px 2px 6px;
+  padding: 4px 12px 2px;
   font-weight: 500;
 }
 
@@ -158,11 +158,11 @@
 }
 
 .jp-DirListing-headerItem.jp-id-name {
-  flex: 1 0 94px;
+  flex: 1 0 84px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
-  flex: 0 0 102px;
+  flex: 0 0 112px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -219,8 +219,7 @@
 .jp-DirListing-item {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  padding-right: 12px;
+  padding: 4px 12px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -268,11 +267,11 @@
 
 .jp-DirListing-itemIcon {
   flex: 0 0 20px;
-  margin: 0 4px;
+  margin-right: 4px;
 }
 
 .jp-DirListing-itemText {
-  flex: 1 0 74px;
+  flex: 1 0 64px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -280,7 +279,7 @@
 }
 
 .jp-DirListing-itemModified {
-  flex: 0 0 115px;
+  flex: 0 0 125px;
   text-align: right;
 }
 
