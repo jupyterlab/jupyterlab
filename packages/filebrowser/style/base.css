@@ -112,6 +112,7 @@
   display: none;
 }
 
+/* Hide the file checkboxes */
 .jp-IsSelected-hidden {
   display: none;
 }
@@ -141,6 +142,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
+  align-items: center;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -219,6 +221,7 @@
 .jp-DirListing-item {
   display: flex;
   flex-direction: row;
+  align-items: center;
   padding: 4px 12px;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -229,6 +232,16 @@
 .jp-DirListing-checkboxWrapper {
   /* Increases hit area of checkbox. */
   padding: 4px;
+}
+
+.jp-DirListing-header .jp-DirListing-checkboxWrapper {
+  margin-right: -4px;
+}
+
+.jp-DirListing-content .jp-DirListing-checkboxWrapper {
+  position: relative;
+  left: -4px;
+  margin: -4px 0 -4px -8px;
 }
 
 .jp-DirListing-checkboxWrapper.jp-mod-visible {
