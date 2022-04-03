@@ -19,11 +19,6 @@
 @import './switch.css';
 @import './toolbar.css';
 
-/* Override Blueprint's _reset.scss styles */
-html {
-  box-sizing: unset;
-}
-
 *,
 *::before,
 *::after {
@@ -33,12 +28,6 @@ html {
 body {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
-
-  /* Blueprint reset rules */
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.28581;
-  text-transform: none;
 }
 
 p {
