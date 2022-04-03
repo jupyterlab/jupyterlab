@@ -1,0 +1,15 @@
+# This action rejects PRs with changes to the jupyterlab/staging directory
+
+name: 'Reject changes to staging'
+on:
+  push:
+    paths:
+      - './jupyterlab/staging'
+
+jobs:
+  fail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fail
+        run: exit 1
