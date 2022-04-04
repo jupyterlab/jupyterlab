@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": [
+    "src/*",
+    "test/*"
+  ],
   "references": [
     {
       "path": "../application"
@@ -12,19 +15,10 @@
       "path": "../cell-toolbar"
     },
     {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../observables"
-    },
-    {
       "path": "../settingregistry"
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     },
     {
       "path": "."

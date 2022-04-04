@@ -5,23 +5,24 @@
   "jupyter.lab.toolbars": {
     "Cell": [
       {
-        "name": "duplicate",
-        "command": "notebook:duplicate-below",
-        "rank": 10
+        "name": "duplicate-cell",
+        "command": "notebook:duplicate-below"
       },
-      { "name": "moveUp", "command": "notebook:move-cell-up", "rank": 20 },
-      { "name": "moveDown", "command": "notebook:move-cell-down", "rank": 30 },
+      { "name": "move-cell-up", "command": "notebook:move-cell-up" },
+      { "name": "move-cell-down", "command": "notebook:move-cell-down" },
       {
-        "name": "addAbove",
-        "command": "notebook:insert-cell-above",
-        "rank": 40
+        "name": "insert-cell-above",
+        "command": "notebook:insert-cell-above"
       },
       {
-        "name": "addBelow",
-        "command": "notebook:insert-cell-below",
-        "rank": 50
+        "name": "insert-cell-below",
+        "command": "notebook:insert-cell-below"
       },
-      { "name": "delete", "command": "notebook:delete-cell", "rank": 60 }
+      {
+        "command": "notebook:delete-cell",
+        "icon": "ui-components:delete",
+        "name": "delete-cell"
+      }
     ]
   },
   "jupyter.lab.transform": true,

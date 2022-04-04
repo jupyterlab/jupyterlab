@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../application"
@@ -16,19 +18,10 @@
       "path": "../cell-toolbar"
     },
     {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../observables"
-    },
-    {
       "path": "../settingregistry"
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }
