@@ -13,6 +13,7 @@ jobs:
   check_release:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         group: [check_release, link_check]
     steps:
