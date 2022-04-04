@@ -2083,7 +2083,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        NotebookActions.duplicate(current.content, 'belowSelected');
+        NotebookActions.duplicate(current.content, 'below');
       }
     },
     icon: args => (args.toolbar ? duplicateIcon : ''),
