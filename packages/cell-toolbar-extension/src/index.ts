@@ -13,24 +13,38 @@ import {
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
+import {
+  createToolbarFactory,
+  IToolbarWidgetRegistry
+} from '@jupyterlab/apputils';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 const cellToolbar: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/cell-toolbar-extension:plugin',
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry | null
+    settingRegistry: ISettingRegistry | null,
+    toolbarRegistry: IToolbarWidgetRegistry | null,
+    translator: ITranslator | null
   ) => {
-    const settings =
-      (await settingRegistry?.load(
-        `@jupyterlab/cell-toolbar-extension:plugin`
-      )) ?? null;
+    const toolbarItems =
+      settingRegistry && toolbarRegistry
+        ? createToolbarFactory(
+            toolbarRegistry,
+            settingRegistry,
+            CellBarExtension.FACTORY_NAME,
+            cellToolbar.id,
+            translator ?? nullTranslator
+          )
+        : undefined;
+
     app.docRegistry.addWidgetExtension(
       'Notebook',
-      new CellBarExtension(app.commands, settings)
+      new CellBarExtension(app.commands, toolbarItems)
     );
   },
-  optional: [ISettingRegistry]
+  optional: [ISettingRegistry, IToolbarWidgetRegistry, ITranslator]
 };
 
 export default cellToolbar;

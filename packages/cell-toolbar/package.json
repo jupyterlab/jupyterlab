@@ -45,7 +45,6 @@
     "@jupyterlab/docregistry": "^4.0.0-alpha.8",
     "@jupyterlab/notebook": "^4.0.0-alpha.8",
     "@jupyterlab/observables": "^5.0.0-alpha.8",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.8",
     "@jupyterlab/ui-components": "^4.0.0-alpha.23",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",

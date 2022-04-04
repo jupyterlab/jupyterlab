@@ -2,22 +2,20 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
 import { Cell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import {
   IObservableList,
-  IObservableUndoableList
+  IObservableUndoableList,
+  ObservableList
 } from '@jupyterlab/observables';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { LabIcon, Toolbar, ToolbarButton } from '@jupyterlab/ui-components';
-
-import { each } from '@lumino/algorithm';
+import { Toolbar } from '@jupyterlab/ui-components';
+import { each, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { PanelLayout, Widget } from '@lumino/widgets';
-
-const DEFAULT_LEFT_MENU: ISettingRegistry.IToolbarItem[] = [];
 
 /**
  * Widget cell toolbar classes
@@ -36,18 +34,14 @@ const TOOLBAR_OVERLAP_CLASS = 'jp-toolbar-overlap';
 export class CellToolbarTracker implements IDisposable {
   constructor(
     panel: NotebookPanel,
-    commands: CommandRegistry,
-    settings: ISettingRegistry.ISettings | null
+    toolbar: IObservableList<ToolbarRegistry.IToolbarItem>
   ) {
-    this._commands = commands;
     this._panel = panel;
-    this._settings = settings;
     this._previousActiveCell = this._panel.content.activeCell;
+    this._toolbar = toolbar;
 
-    if (this._settings) {
-      this._onSettingsChanged();
-      this._settings.changed.connect(this._onSettingsChanged, this);
-    }
+    this._onToolbarChanged();
+    this._toolbar.changed.connect(this._onToolbarChanged, this);
 
     const notebookModel = this._panel.context.model;
     const cells = notebookModel.cells;
@@ -88,9 +82,7 @@ export class CellToolbarTracker implements IDisposable {
     }
     this._isDisposed = true;
 
-    if (this._settings) {
-      this._settings.changed.disconnect(this._onSettingsChanged, this);
-    }
+    this._toolbar.changed.disconnect(this._onToolbarChanged, this);
 
     const cells = this._panel?.context.model.cells;
     if (cells) {
@@ -127,37 +119,11 @@ export class CellToolbarTracker implements IDisposable {
     const cell = this._getCell(model);
 
     if (cell) {
-      const { toolbar } = (this._settings?.composite as any) ?? {};
-
-      const toolbarItems: ISettingRegistry.IToolbarItem[] =
-        toolbar === null ? [] : toolbar ?? DEFAULT_LEFT_MENU;
-
       const toolbarWidget = new Toolbar();
       toolbarWidget.addClass(CELL_MENU_CLASS);
 
-      const toolbarLayout = toolbarWidget.layout as PanelLayout;
-
-      toolbarItems.forEach(toolbarItem => {
-        if (
-          toolbarItem.command !== undefined &&
-          this._commands.hasCommand(toolbarItem.command)
-        ) {
-          toolbarLayout.addWidget(
-            new ToolbarButton({
-              icon: LabIcon.resolve({ icon: toolbarItem.icon ?? '' }),
-              className: `jp-cell-${toolbarItem.cellType ?? 'all'}`,
-              // We need to listen for the actual onClick event, not onMouseDown,
-              // to avoid the "click" event causing another cell to get the focus.
-              actualOnClick: true,
-              onClick: () => {
-                void this._commands.execute(toolbarItem.command!);
-              },
-              tooltip: toolbarItem.tooltip
-                ? toolbarItem.tooltip.toString()
-                : this._commands.label(toolbarItem.command)
-            })
-          );
-        }
+      toArray(this._toolbar).forEach(({ name, widget }) => {
+        toolbarWidget.addItem(name, widget);
       });
 
       toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
@@ -195,7 +161,7 @@ export class CellToolbarTracker implements IDisposable {
   /**
    * Call back on settings changes
    */
-  private _onSettingsChanged(): void {
+  private _onToolbarChanged(): void {
     // Reset toolbar when settings changes
     const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content
       .activeCell;
@@ -332,30 +298,77 @@ export class CellToolbarTracker implements IDisposable {
     return activeCellToolbar.getBoundingClientRect().left;
   }
 
-  private _commands: CommandRegistry;
   private _isDisposed = false;
   private _panel: NotebookPanel | null;
   private _previousActiveCell: Cell<ICellModel> | null;
-  private _settings: ISettingRegistry.ISettings | null;
+  private _toolbar: IObservableList<ToolbarRegistry.IToolbarItem>;
 }
+
+const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
+  {
+    command: 'notebook:duplicate-below',
+    name: 'duplicate-cell'
+  },
+  {
+    command: 'notebook:move-cell-up',
+    name: 'move-cell-up'
+  },
+  {
+    command: 'notebook:move-cell-down',
+    name: 'move-cell-down'
+  },
+  {
+    command: 'notebook:insert-cell-above',
+    name: 'insert-cell-above'
+  },
+  {
+    command: 'notebook:insert-cell-below',
+    name: 'insert-cell-below'
+  },
+  {
+    command: 'notebook:delete-cell',
+    name: 'delete-cell'
+  }
+];
 
 /**
  * Widget extension that creates a CellToolbarTracker each time a notebook is
  * created.
  */
 export class CellBarExtension implements DocumentRegistry.WidgetExtension {
+  static FACTORY_NAME = 'Cell';
+
   constructor(
     commands: CommandRegistry,
-    settings: ISettingRegistry.ISettings | null
+    toolbarFactory?: (
+      widget: Widget
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>
   ) {
     this._commands = commands;
-    this._settings = settings;
+    this._toolbarFactory = toolbarFactory ?? this.defaultToolbarFactory;
+  }
+
+  protected get defaultToolbarFactory(): (
+    widget: Widget
+  ) => IObservableList<ToolbarRegistry.IToolbarItem> {
+    const itemFactory = createDefaultFactory(this._commands);
+    return (widget: Widget) =>
+      new ObservableList({
+        values: defaultToolbarItems.map(item => {
+          return {
+            name: item.name,
+            widget: itemFactory(CellBarExtension.FACTORY_NAME, widget, item)
+          };
+        })
+      });
   }
 
   createNew(panel: NotebookPanel): IDisposable {
-    return new CellToolbarTracker(panel, this._commands, this._settings);
+    return new CellToolbarTracker(panel, this._toolbarFactory(panel));
   }
 
   private _commands: CommandRegistry;
-  private _settings: ISettingRegistry.ISettings | null;
+  private _toolbarFactory: (
+    widget: Widget
+  ) => IObservableList<ToolbarRegistry.IToolbarItem>;
 }

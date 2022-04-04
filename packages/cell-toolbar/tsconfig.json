@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../apputils"
@@ -20,9 +22,6 @@
     },
     {
       "path": "../observables"
-    },
-    {
-      "path": "../settingregistry"
     },
     {
       "path": "../ui-components"

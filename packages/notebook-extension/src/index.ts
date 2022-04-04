@@ -69,10 +69,14 @@ import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  addIcon,
+  addAboveIcon,
+  addBelowIcon,
   buildIcon,
   copyIcon,
   cutIcon,
+  duplicateIcon,
+  moveDownIcon,
+  moveUpIcon,
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
@@ -2082,8 +2086,7 @@ function addCommands(
         NotebookActions.duplicate(current.content, 'belowSelected');
       }
     },
-    // A "duplicate" icon is available in the cell-toolbar package
-    icon: args => (args.toolbar ? copyIcon : ''),
+    icon: args => (args.toolbar ? duplicateIcon : ''),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
@@ -2161,6 +2164,7 @@ function addCommands(
         return NotebookActions.insertAbove(current.content);
       }
     },
+    icon: args => (args.toolbar ? addAboveIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.insertBelow, {
@@ -2173,7 +2177,7 @@ function addCommands(
         return NotebookActions.insertBelow(current.content);
       }
     },
-    icon: args => (args.toolbar ? addIcon : undefined),
+    icon: args => (args.toolbar ? addBelowIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.selectAbove, {
@@ -2321,7 +2325,8 @@ function addCommands(
         return NotebookActions.moveUp(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? moveUpIcon : undefined)
   });
   commands.addCommand(CommandIDs.moveDown, {
     label: trans.__('Move Cells Down'),
@@ -2332,7 +2337,8 @@ function addCommands(
         return NotebookActions.moveDown(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? moveDownIcon : undefined)
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: trans.__('Show Line Numbers'),
