@@ -19,7 +19,7 @@ export { IModel, isAvailable };
 export namespace ITerminal {
   export interface IOptions {
     /**
-     * Terminal name and directory it will start in.
+     * The terminal name.
      */
     name?: string;
     /**
