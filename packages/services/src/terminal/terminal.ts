@@ -19,9 +19,13 @@ export { IModel, isAvailable };
 export namespace ITerminal {
   export interface IOptions {
     /**
-     * Terminal name.
+     * The terminal name.
      */
-    name: string;
+    name?: string;
+    /**
+     *  The terminal current directory.
+     */
+    cwd?: string;
   }
 }
 
