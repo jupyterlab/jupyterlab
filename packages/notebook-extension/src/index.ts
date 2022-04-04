@@ -1647,7 +1647,7 @@ function activateNotebookCompleterService(
         session: notebook.sessionContext.session,
         widget: notebook
       };
-      manager.updateCompleter(newCompleterContext);
+      manager.updateCompleter(newCompleterContext).catch(console.error);
     });
     notebook.sessionContext.sessionChanged.connect(() => {
       const newCompleterContext = {
@@ -1655,16 +1655,14 @@ function activateNotebookCompleterService(
         session: notebook.sessionContext.session,
         widget: notebook
       };
-      manager.updateCompleter(newCompleterContext);
+      manager.updateCompleter(newCompleterContext).catch(console.error);
     });
   };
-  manager.providersActivated.connect(() => {
-    if (notebooks.currentWidget) {
-      updateCompleter(undefined, notebooks.currentWidget).catch(e =>
-        console.error(e)
-      );
-    }
-    notebooks.widgetAdded.connect(updateCompleter);
+  notebooks.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    notebooks.forEach(panel => {
+      updateCompleter(undefined, panel).catch(e => console.error(e));
+    });
   });
 }
 

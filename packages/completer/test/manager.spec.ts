@@ -187,7 +187,7 @@ describe('completer/manager', () => {
           widget
         };
         const handler = manager['_panelHandlers'].get(widget.id);
-        manager.updateCompleter(newCompleterContext);
+        manager.updateCompleter(newCompleterContext).catch(console.error);
         expect(handler.editor).toBe(newCompleterContext.editor);
       });
     });

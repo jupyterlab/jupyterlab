@@ -402,16 +402,20 @@ function activateFileEditorCompleterService(
   }
 
   Commands.addCompleterCommands(app.commands, editorTracker, manager);
+  const sessionManager = app.serviceManager.sessions;
 
   const _activeSessions = new Map<string, Session.ISessionConnection>();
-  editorTracker.widgetAdded.connect(async (_, widget) => {
+  const updateCompleter = async (
+    _: IEditorTracker,
+    widget: IDocumentWidget<FileEditor>
+  ) => {
     const completerContext = {
       editor: widget.content.editor,
       widget
     };
-    const sessionManager = app.serviceManager.sessions;
+
     await manager.updateCompleter(completerContext);
-    const onRunningChanged = async (
+    const onRunningChanged = (
       _: Session.IManager,
       models: Session.IModel[]
     ) => {
@@ -436,7 +440,7 @@ function activateFileEditorCompleterService(
           widget,
           session
         };
-        manager.updateCompleter(newCompleterContext);
+        manager.updateCompleter(newCompleterContext).catch(console.error);
         _activeSessions.set(widget.id, session);
       } else {
         // If we didn't find a match, make sure
@@ -449,7 +453,7 @@ function activateFileEditorCompleterService(
       }
     };
 
-    await onRunningChanged(sessionManager, toArray(sessionManager.running()));
+    onRunningChanged(sessionManager, toArray(sessionManager.running()));
     sessionManager.runningChanged.connect(onRunningChanged);
 
     widget.disposed.connect(() => {
@@ -459,6 +463,12 @@ function activateFileEditorCompleterService(
         _activeSessions.delete(widget.id);
         session.dispose();
       }
+    });
+  };
+  editorTracker.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    editorTracker.forEach(editorWidget => {
+      updateCompleter(editorTracker, editorWidget).catch(console.error);
     });
   });
 }

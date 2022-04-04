@@ -71,27 +71,31 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
       manager.activateProvider(sortedProviders);
     };
 
-    app.restored.then(() => {
-      const availableProviders = [...manager.getProviders().keys()];
-      settings.transform(COMPLETION_MANAGER_PLUGIN, {
-        fetch: plugin => {
-          const schema = plugin.schema.properties!;
-          const defaultValue: { [key: string]: number } = {};
-          availableProviders.forEach((item, index) => {
-            defaultValue[item] = (index + 1) * 100;
-          });
-          schema[AVAILABLE_PROVIDERS]['default'] = defaultValue;
-          return plugin;
-        }
-      });
-      const settingsPromise = settings.load(COMPLETION_MANAGER_PLUGIN);
-      settingsPromise.then(settingValues => {
-        updateSetting(settingValues, availableProviders);
-        settingValues.changed.connect(newSettings => {
-          updateSetting(newSettings, availableProviders);
+    app.restored
+      .then(() => {
+        const availableProviders = [...manager.getProviders().keys()];
+        settings.transform(COMPLETION_MANAGER_PLUGIN, {
+          fetch: plugin => {
+            const schema = plugin.schema.properties!;
+            const defaultValue: { [key: string]: number } = {};
+            availableProviders.forEach((item, index) => {
+              defaultValue[item] = (index + 1) * 100;
+            });
+            schema[AVAILABLE_PROVIDERS]['default'] = defaultValue;
+            return plugin;
+          }
         });
-      });
-    });
+        const settingsPromise = settings.load(COMPLETION_MANAGER_PLUGIN);
+        settingsPromise
+          .then(settingValues => {
+            updateSetting(settingValues, availableProviders);
+            settingValues.changed.connect(newSettings => {
+              updateSetting(newSettings, availableProviders);
+            });
+          })
+          .catch(console.error);
+      })
+      .catch(console.error);
 
     if (editorRegistry) {
       editorRegistry.addRenderer('availableProviders', (props: FieldProps) => {

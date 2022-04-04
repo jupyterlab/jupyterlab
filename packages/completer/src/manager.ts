@@ -25,13 +25,13 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   constructor() {
     this._providers = new Map();
     this._panelHandlers = new Map();
-    this._providersActivated = new Signal<ICompletionProviderManager, void>(
+    this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
       this
     );
   }
 
-  get providersActivated(): ISignal<ICompletionProviderManager, void> {
-    return this._providersActivated;
+  get activeProvidersChanged(): ISignal<ICompletionProviderManager, void> {
+    return this._activeProvidersChanged;
   }
 
   /**
@@ -102,7 +102,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       this._activeProviders.add(KERNEL_PROVIDER_ID);
       this._activeProviders.add(CONTEXT_PROVIDER_ID);
     }
-    this._providersActivated.emit();
+    this._activeProvidersChanged.emit();
   }
 
   /**
@@ -216,6 +216,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     }
 
     const completer = new Completer({ model, renderer });
+    completer.showDocsPanel = this._showDoc;
     completer.hide();
     Widget.attach(completer, document.body);
     const connectorProxy = await this.generateConnectorProxy(completerContext);
@@ -260,8 +261,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _autoCompletion: boolean;
 
   /**
-   * Signal emitted when all providers are registered.
+   * Signal emitted when active providers list is changed.
    *
    */
-  private _providersActivated: Signal<ICompletionProviderManager, void>;
+  private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
 }

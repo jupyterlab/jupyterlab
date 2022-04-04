@@ -141,10 +141,10 @@ export interface ICompletionProviderManager {
   updateCompleter(newCompleterContext: ICompletionContext): Promise<void>;
 
   /**
-   * Signal emitted when all providers are registered.
+   * Signal emitted when active providers list is changed.
    *
    */
-  providersActivated: ISignal<ICompletionProviderManager, void>;
+  activeProvidersChanged: ISignal<ICompletionProviderManager, void>;
 }
 
 export interface IConnectorProxy {

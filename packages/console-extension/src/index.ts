@@ -906,13 +906,13 @@ function activateConsoleCompleterService(
       widget: consolePanel
     };
     await manager.updateCompleter(completerContext);
-    consolePanel.console.promptCellCreated.connect((console, cell) => {
+    consolePanel.console.promptCellCreated.connect((codeConsole, cell) => {
       const newContext = {
         editor: cell.editor,
-        session: console.sessionContext.session,
+        session: codeConsole.sessionContext.session,
         widget: consolePanel
       };
-      manager.updateCompleter(newContext);
+      manager.updateCompleter(newContext).catch(console.error);
     });
     consolePanel.console.sessionContext.sessionChanged.connect(() => {
       const newContext = {
@@ -920,15 +920,13 @@ function activateConsoleCompleterService(
         session: consolePanel.console.sessionContext.session,
         widget: consolePanel
       };
-      manager.updateCompleter(newContext);
+      manager.updateCompleter(newContext).catch(console.error);
     });
   };
-  manager.providersActivated.connect(() => {
-    if (consoles.currentWidget) {
-      updateCompleter(undefined, consoles.currentWidget).catch(e =>
-        console.error(e)
-      );
-    }
-    consoles.widgetAdded.connect(updateCompleter);
+  consoles.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    consoles.forEach(consoleWidget => {
+      updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
+    });
   });
 }
