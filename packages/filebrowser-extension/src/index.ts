@@ -211,6 +211,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       let showLastModifiedColumn: boolean = true;
       let useFuzzyFilter: boolean = true;
       let showHiddenFiles: boolean = false;
+      let filterDirectories: boolean = true;
 
       if (settingRegistry) {
         void settingRegistry
@@ -254,7 +255,15 @@ const browser: JupyterFrontEndPlugin<void> = {
             showHiddenFiles = settings.get('showHiddenFiles')
               .composite as boolean;
 
-            browser.showHiddenFiles = showHiddenFiles;
+            settings.changed.connect(settings => {
+              filterDirectories = settings.get('filterDirectories')
+                .composite as boolean;
+              browser.model.filterDirectories = filterDirectories;
+            });
+            filterDirectories = settings.get('filterDirectories')
+              .composite as boolean;
+
+            browser.model.filterDirectories = filterDirectories;
           });
       }
     });

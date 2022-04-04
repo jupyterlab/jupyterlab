@@ -155,7 +155,10 @@ export class FileBrowser extends SidePanel {
    */
   set useFuzzyFilter(value: boolean) {
     this._useFuzzyFilter = value;
+    this._createFilenameSearcher();
+  }
 
+  private _createFilenameSearcher() {
     // Detach and dispose the current widget
     this._filenameSearcher.parent = null;
     this._filenameSearcher.dispose();
