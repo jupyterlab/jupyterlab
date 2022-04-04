@@ -7,6 +7,8 @@ import { FilterBox, ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { classes, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
+import { StringExt } from '@lumino/algorithm';
+import { PartialJSONObject } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import React from 'react';
@@ -46,7 +48,7 @@ export class PluginList extends ReactWidget {
       this.update();
     }, this);
     this.mapPlugins = this.mapPlugins.bind(this);
-    this._filter = (item: ISettingRegistry.IPlugin) => true;
+    this._filter = (item: ISettingRegistry.IPlugin) => null;
     this.setFilter = this.setFilter.bind(this);
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
@@ -63,13 +65,21 @@ export class PluginList extends ReactWidget {
         // If this is the new settings editor, remove context menu / main menu settings.
         (!this._confirm && !(options.toSkip ?? []).includes(plugin.id));
 
-      return (
-        !deprecated &&
-        correctEditor &&
-        (editable || extensible) &&
-        this._filter?.(plugin)
-      );
+      return !deprecated && correctEditor && (editable || extensible);
     });
+
+    /**
+     * Loads all settings and stores them for easy access when displaying search results.
+     */
+    const loadSettings = async () => {
+      for (const plugin of this._allPlugins) {
+        const pluginSettings = (await this.registry.load(
+          plugin.id
+        )) as Settings;
+        this._settings[plugin.id] = pluginSettings;
+      }
+    };
+    void loadSettings();
 
     this._errors = {};
     this.selection = this._allPlugins[0].id;
@@ -114,35 +124,14 @@ export class PluginList extends ReactWidget {
     this.update();
   }
 
-  get filter(): (item: ISettingRegistry.IPlugin) => boolean {
-    return this._filter;
-  }
-  set filter(filter: (item: ISettingRegistry.IPlugin) => boolean) {
-    this._filter = filter;
-  }
-
-  protected async updateModifiedPlugins(): Promise<void> {
-    const modifiedPlugins = [];
-    for (const plugin of this._allPlugins) {
-      const settings: Settings = (await this.registry.load(
-        plugin.id
-      )) as Settings;
-      if (settings.isModified) {
-        modifiedPlugins.push(plugin);
-      }
-    }
-    if (this._modifiedPlugins.length !== modifiedPlugins.length) {
-      this._modifiedPlugins = modifiedPlugins;
-      this.update();
-      return;
-    }
-    for (const plugin of modifiedPlugins) {
-      if (!this._modifiedPlugins.find(p => p.id === plugin.id)) {
-        this._modifiedPlugins = modifiedPlugins;
-        this.update();
-        return;
-      }
-    }
+  /**
+   * Signal that fires when search filter is updated so that settings panel can filter results.
+   */
+  get updateFilterSignal(): ISignal<
+    this,
+    (plugin: ISettingRegistry.IPlugin) => string[] | null
+  > {
+    return this._updateFilterSignal;
   }
 
   get handleSelectSignal(): ISignal<this, string> {
@@ -153,7 +142,6 @@ export class PluginList extends ReactWidget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    void this.updateModifiedPlugins();
     const ul = this.node.querySelector('ul');
     if (ul && this._scrollTop !== undefined) {
       ul.scrollTop = this._scrollTop;
@@ -166,7 +154,7 @@ export class PluginList extends ReactWidget {
    *
    * @param event - The DOM event sent to the widget
    */
-  private _evtMousedown(event: React.MouseEvent<HTMLButtonElement>): void {
+  private _evtMousedown(event: React.MouseEvent<HTMLDivElement>): void {
     const target = event.currentTarget;
     const id = target.getAttribute('data-id');
 
@@ -232,10 +220,107 @@ export class PluginList extends ReactWidget {
     return typeof hint === 'string' ? hint : '';
   }
 
-  setFilter(filter: (item: string) => boolean): void {
-    this._filter = (value: ISettingRegistry.IPlugin) => {
-      return filter(value.schema.title?.toLowerCase() ?? '');
+  /**
+   * Function to recursively filter properties that match search results.
+   * @param filter - Function to filter based on search results
+   * @param props - Schema properties being filtered
+   * @param definitions - Definitions to use for filling in references in properties
+   * @param ref - Reference to a definition
+   * @returns - String array of properties that match the search results.
+   */
+  getFilterString(
+    filter: (item: string) => boolean,
+    props: ISettingRegistry.IProperty,
+    definitions?: any,
+    ref?: string
+  ): string[] {
+    // If properties given are references, populate properties
+    // with corresponding definition.
+    if (ref && definitions) {
+      ref = ref.replace('#/definitions/', '');
+      props = definitions[ref] ?? {};
+    }
+
+    // If given properties are an object, advance into the properties
+    // for that object instead.
+    if (props.properties) {
+      props = props.properties;
+      // If given properties are an array, advance into the properties
+      // for the items instead.
+    } else if (props.items) {
+      props = props.items as any;
+      // Otherwise, you've reached the base case and don't need to check for matching properties
+    } else {
+      return [];
+    }
+
+    // If reference found, recurse
+    if (props['$ref']) {
+      return this.getFilterString(
+        filter,
+        props,
+        definitions,
+        props['$ref'] as string
+      );
+    }
+
+    // Make sure props is non-empty before calling reduce
+    if (Object.keys(props).length === 0) {
+      return [];
+    }
+
+    // Iterate through the properties and check for titles / descriptions that match search.
+    return Object.keys(props).reduce((acc: string[], value: any) => {
+      // If this is the base case, check for matching title / description
+      const subProps = props[value] as PartialJSONObject;
+      if (!subProps) {
+        if (filter((props.title as string) ?? '')) {
+          return props.title;
+        }
+        if (filter(value)) {
+          return value;
+        }
+      }
+
+      // If there are properties in the object, check for title / description
+      if (filter((subProps.title as string) ?? '')) {
+        acc.push(subProps.title as string);
+      }
+      if (filter(value)) {
+        acc.push(value);
+      }
+
+      // Finally, recurse on the properties left.
+      acc.concat(
+        this.getFilterString(
+          filter,
+          subProps as ISettingRegistry.IProperty,
+          definitions,
+          subProps['$ref'] as string
+        )
+      );
+      return acc;
+    }, []);
+  }
+
+  /**
+   * Updates the filter when the search bar value changes.
+   * @param filter Filter function passed by search bar based on search value.
+   */
+  setFilter(filter: (item: string) => boolean, query?: string): void {
+    this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
+      if (filter(plugin.schema.title ?? '')) {
+        return null;
+      }
+      const filtered = this.getFilterString(
+        filter,
+        plugin.schema ?? {},
+        plugin.schema.definitions
+      );
+      return filtered;
     };
+    this._query = query;
+    this._updateFilterSignal.emit(this._filter);
     this.update();
   }
 
@@ -253,6 +338,17 @@ export class PluginList extends ReactWidget {
     const trans = this.translator.load('jupyterlab');
     const title =
       typeof schema.title === 'string' ? trans._p('schema', schema.title) : id;
+    const highlightedTitleIndices = StringExt.matchSumOfSquares(
+      title.toLocaleLowerCase(),
+      this._query?.toLocaleLowerCase() ?? ''
+    );
+    const hightlightedTitle = StringExt.highlight(
+      title,
+      highlightedTitleIndices?.indices ?? [],
+      chunk => {
+        return <mark>{chunk}</mark>;
+      }
+    );
     const description =
       typeof schema.description === 'string'
         ? trans._p('schema', schema.description)
@@ -261,9 +357,23 @@ export class PluginList extends ReactWidget {
     const icon = this.getHint(ICON_KEY, this.registry, plugin);
     const iconClass = this.getHint(ICON_CLASS_KEY, this.registry, plugin);
     const iconTitle = this.getHint(ICON_LABEL_KEY, this.registry, plugin);
+    const filteredProperties = this._filter(plugin)?.map(fieldValue => {
+      const highlightedIndices = StringExt.matchSumOfSquares(
+        fieldValue.toLocaleLowerCase(),
+        this._query?.toLocaleLowerCase() ?? ''
+      );
+      const highlighted = StringExt.highlight(
+        fieldValue,
+        highlightedIndices?.indices ?? [],
+        chunk => {
+          return <mark>{chunk}</mark>;
+        }
+      );
+      return <li key={`${id}-${fieldValue}`}> {highlighted} </li>;
+    });
 
     return (
-      <button
+      <div
         onClick={this._evtMousedown}
         className={`${
           id === this.selection
@@ -274,41 +384,48 @@ export class PluginList extends ReactWidget {
         key={id}
         title={itemTitle}
       >
-        {id === this.selection || this._errors[id] ? (
+        <div className="jp-pluginList-entry-label" role="tab">
           <div className="jp-SelectedIndicator" />
-        ) : null}
-        <LabIcon.resolveReact
-          icon={icon || (iconClass ? undefined : settingsIcon)}
-          iconClass={classes(iconClass, 'jp-Icon')}
-          title={iconTitle}
-          tag="span"
-          stylesheet="settingsEditor"
-        />
-        <span>{title}</span>
-      </button>
+          <LabIcon.resolveReact
+            icon={icon || (iconClass ? undefined : settingsIcon)}
+            iconClass={classes(iconClass, 'jp-Icon')}
+            title={iconTitle}
+            tag="span"
+            stylesheet="settingsEditor"
+          />
+          <span>{hightlightedTitle}</span>
+        </div>
+        <ul>{filteredProperties}</ul>
+      </div>
     );
   }
 
   render(): JSX.Element {
     const trans = this.translator.load('jupyterlab');
+    // Filter all plugins based on search value before displaying list.
+    const allPlugins = this._allPlugins.filter(plugin => {
+      const filtered = this._filter(plugin);
+      return filtered === null || filtered.length > 0;
+    });
 
-    const modifiedItems = this._modifiedPlugins
-      .filter(this._filter)
-      .map(this.mapPlugins);
-    const otherItems = this._allPlugins
-      .filter(
-        plugin =>
-          !this._modifiedPlugins.includes(plugin) && this._filter(plugin)
-      )
+    const modifiedPlugins = allPlugins.filter(plugin => {
+      return this._settings[plugin.id]?.isModified;
+    });
+    const modifiedItems = modifiedPlugins.map(this.mapPlugins);
+    const otherItems = allPlugins
+      .filter(plugin => {
+        return !modifiedPlugins.includes(plugin);
+      })
       .map(this.mapPlugins);
 
     return (
       <div className="jp-PluginList-wrapper">
         <FilterBox
           updateFilter={this.setFilter}
-          useFuzzyFilter={true}
+          useFuzzyFilter={false}
           placeholder={trans.__('Search…')}
           forceRefresh={false}
+          caseSensitive={false}
         />
         {modifiedItems.length > 0 && (
           <div>
@@ -316,8 +433,17 @@ export class PluginList extends ReactWidget {
             <ul>{modifiedItems}</ul>
           </div>
         )}
-        <h1 className="jp-PluginList-header">{trans.__('Settings')}</h1>
-        <ul>{otherItems}</ul>
+        {otherItems.length > 0 && (
+          <div>
+            <h1 className="jp-PluginList-header">{trans.__('Settings')}</h1>
+            <ul>{otherItems}</ul>
+          </div>
+        )}
+        {modifiedItems.length === 0 && otherItems.length === 0 && (
+          <p className="jp-PluginList-noResults">
+            {trans.__('No items match your search.')}
+          </p>
+        )}
       </div>
     );
   }
@@ -325,10 +451,15 @@ export class PluginList extends ReactWidget {
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
   private _errors: { [id: string]: boolean };
-  private _filter: (item: ISettingRegistry.IPlugin) => boolean;
+  private _filter: (item: ISettingRegistry.IPlugin) => string[] | null;
+  private _query: string | undefined;
   private _handleSelectSignal = new Signal<this, string>(this);
-  private _modifiedPlugins: ISettingRegistry.IPlugin[] = [];
+  private _updateFilterSignal = new Signal<
+    this,
+    (plugin: ISettingRegistry.IPlugin) => string[] | null
+  >(this);
   private _allPlugins: ISettingRegistry.IPlugin[] = [];
+  private _settings: { [id: string]: Settings } = {};
   private _confirm?: (id: string) => Promise<void>;
   private _scrollTop: number | undefined = 0;
   private _selection = '';
