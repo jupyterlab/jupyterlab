@@ -5,6 +5,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IObservableString } from '@jupyterlab/observables';
 import { Session } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
@@ -130,6 +131,12 @@ export interface ICompletionProviderManager {
    * @param newCompleterContext - The completion context.
    */
   updateCompleter(newCompleterContext: ICompletionContext): Promise<void>;
+
+  /**
+   * Signal emitted when all providers are registered.
+   *
+   */
+  providersActivated: ISignal<ICompletionProviderManager, void>
 }
 
 export interface IConnectorProxy {

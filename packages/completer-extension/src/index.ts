@@ -68,6 +68,8 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
         .filter(val => val[1] >= 0 && availableProviders.includes(val[0]))
         .sort(([, rank1], [, rank2]) => rank2 - rank1)
         .map(item => item[0]);
+        console.log('activate', sortedProviders );
+        
       manager.activateProvider(sortedProviders);
     };
 

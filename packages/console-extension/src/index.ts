@@ -899,8 +899,7 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-
-  consoles.widgetAdded.connect(async (_, consolePanel) => {
+  const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
       session: consolePanel.console.sessionContext.session,
@@ -923,5 +922,11 @@ function activateConsoleCompleterService(
       };
       manager.updateCompleter(newContext);
     });
-  });
+  }
+  manager.providersActivated.connect(()=> {
+    if(consoles.currentWidget){
+      updateCompleter(undefined, consoles.currentWidget).catch(e => console.error(e))
+    }
+    consoles.widgetAdded.connect(updateCompleter);
+  })
 }
