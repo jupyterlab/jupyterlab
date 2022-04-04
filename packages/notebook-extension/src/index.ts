@@ -1631,7 +1631,10 @@ function activateNotebookCompleterService(
     keys: ['Enter'],
     selector: '.jp-Notebook .jp-mod-completer-active'
   });
-  const updateCompleter =  async (_: INotebookTracker | undefined, notebook: NotebookPanel) => {
+  const updateCompleter = async (
+    _: INotebookTracker | undefined,
+    notebook: NotebookPanel
+  ) => {
     const completerContext = {
       editor: notebook.content.activeCell?.editor ?? null,
       session: notebook.sessionContext.session,
@@ -1654,13 +1657,15 @@ function activateNotebookCompleterService(
       };
       manager.updateCompleter(newCompleterContext);
     });
-  } 
-  manager.providersActivated.connect(()=> {
-    if(notebooks.currentWidget){
-      updateCompleter(undefined, notebooks.currentWidget).catch(e => console.error(e))
+  };
+  manager.providersActivated.connect(() => {
+    if (notebooks.currentWidget) {
+      updateCompleter(undefined, notebooks.currentWidget).catch(e =>
+        console.error(e)
+      );
     }
     notebooks.widgetAdded.connect(updateCompleter);
-  })
+  });
 }
 
 // Get the current widget and activate unless the args specify otherwise.

@@ -25,11 +25,13 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   constructor() {
     this._providers = new Map();
     this._panelHandlers = new Map();
-    this._providersActivated = new Signal<ICompletionProviderManager, void>(this)
+    this._providersActivated = new Signal<ICompletionProviderManager, void>(
+      this
+    );
   }
 
   get providersActivated(): ISignal<ICompletionProviderManager, void> {
-    return this._providersActivated
+    return this._providersActivated;
   }
 
   /**
@@ -100,7 +102,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       this._activeProviders.add(KERNEL_PROVIDER_ID);
       this._activeProviders.add(CONTEXT_PROVIDER_ID);
     }
-    this._providersActivated.emit()
+    this._providersActivated.emit();
   }
 
   /**
@@ -199,13 +201,20 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     completerContext: ICompletionContext
   ): Promise<CompletionHandler> {
     const firstProvider = [...this._activeProviders][0];
-    let renderer = this._providers.get(firstProvider)?.renderer;
+    const provider = this._providers.get(firstProvider);
+
+    let renderer = provider?.renderer;
     if (!renderer) {
       renderer = Completer.defaultRenderer;
     }
-    console.log('using', renderer, firstProvider);
-    
-    const model = new CompleterModel();
+    const modelFactory = provider?.modelFactory;
+    let model: Completer.IModel;
+    if (modelFactory) {
+      model = await modelFactory(completerContext);
+    } else {
+      model = new CompleterModel();
+    }
+
     const completer = new Completer({ model, renderer });
     completer.hide();
     Widget.attach(completer, document.body);
@@ -254,5 +263,5 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    * Signal emitted when all providers are registered.
    *
    */
-   private _providersActivated: Signal<ICompletionProviderManager, void>
+  private _providersActivated: Signal<ICompletionProviderManager, void>;
 }

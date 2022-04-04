@@ -922,11 +922,13 @@ function activateConsoleCompleterService(
       };
       manager.updateCompleter(newContext);
     });
-  }
-  manager.providersActivated.connect(()=> {
-    if(consoles.currentWidget){
-      updateCompleter(undefined, consoles.currentWidget).catch(e => console.error(e))
+  };
+  manager.providersActivated.connect(() => {
+    if (consoles.currentWidget) {
+      updateCompleter(undefined, consoles.currentWidget).catch(e =>
+        console.error(e)
+      );
     }
     consoles.widgetAdded.connect(updateCompleter);
-  })
+  });
 }

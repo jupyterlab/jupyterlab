@@ -44,6 +44,11 @@ export interface ICompletionProvider<
   readonly identifier: string;
 
   /**
+   * Renderer for provider's completions (optional).
+   */
+  readonly renderer?: Completer.IRenderer | null;
+
+  /**
    * Is completion provider applicable to specified context?
    * @param request - the completion request text and details
    * @param context - additional information about context of completion request
@@ -62,9 +67,12 @@ export interface ICompletionProvider<
   ): Promise<CompletionHandler.ICompletionItemsReply<T>>;
 
   /**
-   * Renderer for provider's completions (optional).
+   * This method is called to customize the model of a completer widget.
+   * If it is not provided, the default model will be used.
+   *
+   * @param context - additional information about context of completion request
    */
-  readonly renderer: Completer.IRenderer | null | undefined;
+  modelFactory?(context: ICompletionContext): Promise<Completer.IModel>;
 
   /**
    * Given an incomplete (unresolved) completion item, resolve it by adding
@@ -136,7 +144,7 @@ export interface ICompletionProviderManager {
    * Signal emitted when all providers are registered.
    *
    */
-  providersActivated: ISignal<ICompletionProviderManager, void>
+  providersActivated: ISignal<ICompletionProviderManager, void>;
 }
 
 export interface IConnectorProxy {
