@@ -22,7 +22,10 @@ export namespace ITerminal {
      * Terminal name and directory it will start in.
      */
     name?: string;
-    cwd?: string | undefined;
+    /**
+     *  The terminal current directory.
+     */
+    cwd?: string;
   }
 }
 
