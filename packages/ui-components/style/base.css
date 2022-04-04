@@ -19,30 +19,6 @@
 @import './switch.css';
 @import './toolbar.css';
 
-*,
-*::before,
-*::after {
-  box-sizing: unset;
-}
-
-body {
-  color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size1);
-}
-
-p {
-  margin-top: unset;
-  margin-bottom: unset;
-}
-
-small {
-  font-size: unset;
-}
-
-strong {
-  font-weight: unset;
-}
-
 /* Disable native link decoration styles everywhere outside of dialog boxes */
 a {
   text-decoration: unset;
@@ -63,13 +39,6 @@ a:hover {
 .jp-Dialog-content a:hover {
   text-decoration: revert;
   color: revert;
-}
-
-/* Override Blueprint's _accessibility.scss styles */
-:focus {
-  outline: unset;
-  outline-offset: unset;
-  -moz-outline-radius: unset;
 }
 
 /* Styles for ui-components */
