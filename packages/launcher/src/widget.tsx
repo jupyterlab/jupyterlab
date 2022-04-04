@@ -68,7 +68,7 @@ export class LauncherModel extends VDomModel implements ILauncher.IModel {
     return new ArrayIterator(this._items);
   }
 
-  private _items: ILauncher.IItemOptions[] = [];
+  protected _items: ILauncher.IItemOptions[] = [];
 }
 
 /**
