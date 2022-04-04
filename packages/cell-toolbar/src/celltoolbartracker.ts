@@ -15,6 +15,7 @@ import { Toolbar } from '@jupyterlab/ui-components';
 import { each, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
+import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -91,6 +92,8 @@ export class CellToolbarTracker implements IDisposable {
     }
 
     this._panel = null;
+
+    Signal.clearData(this);
   }
 
   /**
