@@ -102,7 +102,7 @@ test.describe('Benchmark', () => {
 
       await page.goto(baseURL + '?reset');
 
-      await page.click('#filebrowser >> .jp-BreadCrumbs-home');
+      await page.click('#filebrowser >> .jp-BreadCrumbs-root');
       await page.dblclick(`#filebrowser >> text=${tmpPath}`);
 
       const openTime = await perf.measure(async () => {
