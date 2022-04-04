@@ -6,15 +6,12 @@ import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
 import { Cell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import {
-  IObservableList,
-  IObservableUndoableList,
-  ObservableList
-} from '@jupyterlab/observables';
+import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { Toolbar } from '@jupyterlab/ui-components';
 import { each, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
+import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -43,10 +40,6 @@ export class CellToolbarTracker implements IDisposable {
     this._onToolbarChanged();
     this._toolbar.changed.connect(this._onToolbarChanged, this);
 
-    const notebookModel = this._panel.context.model;
-    const cells = notebookModel.cells;
-    cells.changed.connect(this.updateConnectedCells, this);
-
     // Only add the toolbar to the notebook's active cell (if any) once it has fully rendered and been revealed.
     panel.revealed.then(() => this._onActiveCellChanged(panel.content));
 
@@ -55,17 +48,15 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   _onActiveCellChanged(notebook: Notebook): void {
+    if (this._previousActiveCell) {
+      this._removeToolbar(this._previousActiveCell.model);
+    }
+
     const activeCell = notebook.activeCell;
     if (!activeCell) {
       return;
     }
 
-    if (
-      this._previousActiveCell !== null &&
-      this._previousActiveCell !== undefined
-    ) {
-      this._removeToolbar(this._previousActiveCell.model);
-    }
     this._addToolbar(activeCell.model);
     this._previousActiveCell = activeCell;
 
@@ -86,33 +77,12 @@ export class CellToolbarTracker implements IDisposable {
 
     const cells = this._panel?.context.model.cells;
     if (cells) {
-      cells.changed.disconnect(this.updateConnectedCells, this);
       each(cells.iter(), model => this._removeToolbar(model));
     }
 
     this._panel = null;
-  }
 
-  /**
-   * Callback to react to cells list changes
-   *
-   * @param cells List of notebook cells
-   * @param changed Modification of the list
-   */
-  updateConnectedCells(
-    cells: IObservableUndoableList<ICellModel>,
-    changed: IObservableList.IChangedArgs<ICellModel>
-  ): void {
-    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content
-      .activeCell;
-    if (activeCell === null || activeCell === undefined) {
-      return;
-    }
-
-    if (changed.oldValues.find(m => m === activeCell.model)) {
-      this._removeToolbar(activeCell.model);
-      this._addToolbar(activeCell.model);
-    }
+    Signal.clearData(this);
   }
 
   private _addToolbar(model: ICellModel): void {
