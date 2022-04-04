@@ -6,10 +6,7 @@ import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
 import { Cell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import {
-  IObservableList,
-  ObservableList
-} from '@jupyterlab/observables';
+import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { Toolbar } from '@jupyterlab/ui-components';
 import { each, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -54,12 +51,12 @@ export class CellToolbarTracker implements IDisposable {
     if (this._previousActiveCell) {
       this._removeToolbar(this._previousActiveCell.model);
     }
-    
+
     const activeCell = notebook.activeCell;
     if (!activeCell) {
       return;
     }
-    
+
     this._addToolbar(activeCell.model);
     this._previousActiveCell = activeCell;
 
