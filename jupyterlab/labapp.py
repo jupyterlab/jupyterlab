@@ -6,7 +6,6 @@
 
 import json
 import os
-from os.path import join as pjoin
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
@@ -603,11 +602,11 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.log.info("Running JupyterLab in dev mode")
 
         if self.watch and self.core_mode:
-            self.log.warn("Cannot watch in core mode, did you mean --dev-mode?")
+            self.log.warning("Cannot watch in core mode, did you mean --dev-mode?")
             self.watch = False
 
         if self.core_mode and self.dev_mode:
-            self.log.warn("Conflicting modes, choosing dev_mode over core_mode")
+            self.log.warning("Conflicting modes, choosing dev_mode over core_mode")
             self.core_mode = False
 
         # Set the paths based on JupyterLab's mode.

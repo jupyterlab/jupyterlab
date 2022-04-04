@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": [
+    "src/*",
+    "test/*"
+  ],
   "references": [
     {
       "path": "../apputils"
@@ -21,10 +24,10 @@
       "path": "../settingregistry"
     },
     {
-      "path": "../ui-components"
+      "path": "../translation"
     },
     {
-      "path": "../translation"
+      "path": "../ui-components"
     },
     {
       "path": "."

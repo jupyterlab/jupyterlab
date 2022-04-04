@@ -21,9 +21,9 @@ YFILE = YDOCS["file"]
 
 ROOMS = {}
 
-## The y-protocol defines messages types that just need to be propagated to all other peers.
-## Here, we define some additional messageTypes that the server can interpret.
-## Messages that the server can't interpret should be broadcasted to all other clients.
+# The y-protocol defines messages types that just need to be propagated to all other peers.
+# Here, we define some additional messageTypes that the server can interpret.
+# Messages that the server can't interpret should be broadcasted to all other clients.
 
 
 class ServerMessageType(IntEnum):
@@ -88,7 +88,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         elif message[0] == ServerMessageType.RENAME_SESSION:
             # We move the room to a different entry and also change the room_id property of each connected client
             new_room_id = message[1:].decode("utf-8").split(":", 1)[1]
-            for client_id, (loop, hook_send_message, client) in room.clients.items():
+            for _, (_, _, client) in room.clients.items():
                 client.room_id = new_room_id
             ROOMS.pop(room_id)
             ROOMS[new_room_id] = room
@@ -98,7 +98,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         elif room:
             if message[0] == 0:  # sync message
                 read_sync_message(self, room.ydoc.ydoc, message[1:])
-            for client_id, (loop, hook_send_message, client) in room.clients.items():
+            for client_id, (loop, hook_send_message, _) in room.clients.items():
                 if self.id != client_id:
                     loop.add_callback(hook_send_message, message)
 

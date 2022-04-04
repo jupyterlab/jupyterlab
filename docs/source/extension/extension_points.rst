@@ -778,9 +778,14 @@ When the ``labStatus`` busy state changes, we update the text content of the
 Toolbar Registry
 ----------------
 
-JupyterLab provides an infrastructure to define and customize toolbar widgets of ``DocumentWidget`` s
+JupyterLab provides an infrastructure to define and customize toolbar widgets
 from the settings, which is similar to that defining the context menu and the main menu
-bar. A typical example is the notebook toolbar as in the snippet below:
+bar.
+
+Document Widgets
+^^^^^^^^^^^^^^^^
+
+A typical example is the notebook toolbar as in the snippet below:
 
 .. code:: typescript
 
@@ -908,6 +913,49 @@ And the toolbar item must follow this definition:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/toolbarItem.json
    :language: json
+
+Generic Widget with Toolbar
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The logic detailed in the previous section can be used to customize any widgets with a toolbar.
+
+The additional keys used in ``jupyter.lab.toolbars`` settings attributes are:
+
+- ``FileBrowser``: Default file browser panel toolbar items
+
+Here is an example for enabling that definition on a widget:
+
+.. code:: typescript
+
+   function activatePlugin(
+     app: JupyterFrontEnd,
+     // ...
+     toolbarRegistry: IToolbarWidgetRegistry,
+     settingRegistry: ISettingRegistry
+   ): void {
+
+     const browser = new FileBrowser();
+
+     // Toolbar
+     // - Define a custom toolbar item
+     toolbarRegistry.registerFactory(
+       'FileBrowser', // Factory name
+       'uploader',
+       (browser: FileBrowser) =>
+         new Uploader({ model: browser.model, translator })
+     );
+
+     // - Link the widget toolbar and its definition from the settings
+     setToolbar(
+       browser,
+       createToolbarFactory(
+         toolbarRegistry,
+         settings,
+         'FileBrowser', // Factory name
+         plugin.id,
+         translator
+       )
+     );
 
 .. _widget-tracker:
 

@@ -48,7 +48,7 @@ class LogErrorHandler(logging.Handler):
         # https://github.com/tornadoweb/tornado/issues/2834
         if (
             hasattr(record, "exc_info")
-            and not record.exc_info is None
+            and record.exc_info is not None
             and isinstance(record.exc_info[1], (StreamClosedError, WebSocketClosedError))
         ):
             return
