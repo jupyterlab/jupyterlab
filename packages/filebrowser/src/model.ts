@@ -774,7 +774,7 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   constructor(options: FilterFileBrowserModel.IOptions) {
     super(options);
     this._filter = options.filter ? options.filter : model => true;
-    this._filterDirectories = options.filterDirectories ?? false;
+    this._filterDirectories = options.filterDirectories ?? true;
   }
 
   /**
