@@ -950,9 +950,10 @@ namespace Private {
     const testA = isJupyterOrg(a.name);
     const testB = isJupyterOrg(b.name);
 
-    if (testA && !testB) {
-      return -1;
-    } else if (a.name < b.name) {
+    if (testA === testB) {
+      // Retain sort-order from API
+      return 0;
+    } else if (testA && !testB) {
       return -1;
     } else {
       return 1;
