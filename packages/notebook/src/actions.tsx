@@ -1198,9 +1198,12 @@ export namespace NotebookActions {
         index = notebook.activeCellIndex;
         break;
       case 'belowSelected':
-        index = ArrayExt.findLastIndex(notebook.widgets, c =>
-          notebook.isSelected(c)
-        );
+        notebook.widgets.forEach((child, childIndex) => {
+          if (notebook.isSelectedOrActive(child)) {
+            index = childIndex;
+          }
+        });
+
         break;
       case 'above':
         index = notebook.activeCellIndex - 1;
