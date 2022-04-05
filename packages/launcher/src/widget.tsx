@@ -52,11 +52,11 @@ export class LauncherModel extends VDomModel implements ILauncher.IModel {
     // Create a copy of the options to circumvent mutations to the original.
     const item = Private.createItem(options);
 
-    this._items.push(item);
+    this.itemsList.push(item);
     this.stateChanged.emit(void 0);
 
     return new DisposableDelegate(() => {
-      ArrayExt.removeFirstOf(this._items, item);
+      ArrayExt.removeFirstOf(this.itemsList, item);
       this.stateChanged.emit(void 0);
     });
   }
@@ -65,10 +65,10 @@ export class LauncherModel extends VDomModel implements ILauncher.IModel {
    * Return an iterator of launcher items.
    */
   items(): IIterator<ILauncher.IItemOptions> {
-    return new ArrayIterator(this._items);
+    return new ArrayIterator(this.itemsList);
   }
 
-  protected _items: ILauncher.IItemOptions[] = [];
+  protected itemsList: ILauncher.IItemOptions[] = [];
 }
 
 /**
