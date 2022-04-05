@@ -54,7 +54,7 @@
     "read-package-tree": "^5.3.1",
     "rimraf": "~3.0.0",
     "style-loader": "~3.3.1",
-    "svg-url-loader": "~6.0.0",
+    "svg-url-loader": "~7.1.1",
     "to-string-loader": "^1.1.6",
     "url-loader": "~4.1.0",
     "webpack": "^5.71.0",

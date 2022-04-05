@@ -26,7 +26,7 @@ const rules = [
   },
   {
     test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+    type: 'asset/resource'
   },
   { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, type: 'asset/resource' },
   {

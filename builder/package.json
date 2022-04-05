@@ -60,7 +60,7 @@
     "raw-loader": "~4.0.0",
     "style-loader": "~3.3.1",
     "supports-color": "^7.2.0",
-    "svg-url-loader": "~6.0.0",
+    "svg-url-loader": "~7.1.1",
     "terser-webpack-plugin": "^4.1.0",
     "to-string-loader": "^1.1.6",
     "url-loader": "~4.1.0",
