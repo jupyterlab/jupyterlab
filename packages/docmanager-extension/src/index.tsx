@@ -88,34 +88,30 @@ namespace CommandIDs {
 const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
 /**
- * The default document manager provider.
+ * A plugin providing the default document manager.
  */
-const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
-  id: docManagerPluginId,
+const manager: JupyterFrontEndPlugin<IDocumentManager> = {
+  id: '@jupyterlab/docmanager-extension:manager',
   provides: IDocumentManager,
-  requires: [ISettingRegistry, ITranslator],
+  requires: [ITranslator],
   optional: [
     ILabStatus,
-    ICommandPalette,
-    ILabShell,
     ISessionContextDialogs,
     IDocumentProviderFactory,
     JupyterLab.IInfo
   ],
   activate: (
     app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry,
     translator: ITranslator,
     status: ILabStatus | null,
-    palette: ICommandPalette | null,
-    labShell: ILabShell | null,
     sessionDialogs: ISessionContextDialogs | null,
     docProviderFactory: IDocumentProviderFactory | null,
     info: JupyterLab.IInfo | null
-  ): IDocumentManager => {
-    const trans = translator.load('jupyterlab');
-    const manager = app.serviceManager;
+  ) => {
+    const { serviceManager: manager, docRegistry: registry } = app;
     const contexts = new WeakSet<DocumentRegistry.Context>();
+    const when = app.restored.then(() => void 0);
+
     const opener: DocumentManager.IWidgetOpener = {
       open: (widget, options) => {
         if (!widget.id) {
@@ -140,8 +136,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
         }
       }
     };
-    const registry = app.docRegistry;
-    const when = app.restored.then(() => void 0);
+
     const docManager = new DocumentManager({
       registry,
       manager,
@@ -159,6 +154,35 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
         return true;
       }
     });
+
+    return docManager;
+  }
+};
+
+/**
+ * The default document manager provider.
+ */
+const docManagerPlugin: JupyterFrontEndPlugin<void> = {
+  id: docManagerPluginId,
+  requires: [IDocumentManager, ISettingRegistry, ITranslator],
+  optional: [
+    ILabStatus,
+    ICommandPalette,
+    ILabShell,
+    ISessionContextDialogs,
+    IDocumentProviderFactory,
+    JupyterLab.IInfo
+  ],
+  activate: (
+    app: JupyterFrontEnd,
+    docManager: IDocumentManager,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator,
+    palette: ICommandPalette | null,
+    labShell: ILabShell | null
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const registry = app.docRegistry;
 
     // Register the file operations commands.
     addCommands(
@@ -274,8 +298,6 @@ Available file types:
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
     registry.changed.connect(() => settingRegistry.reload(docManagerPluginId));
-
-    return docManager;
   }
 };
 
@@ -445,6 +467,7 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  manager,
   docManagerPlugin,
   pathStatusPlugin,
   savingStatusPlugin,
