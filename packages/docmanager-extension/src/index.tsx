@@ -168,6 +168,7 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
  */
 const docManagerPlugin: JupyterFrontEndPlugin<void> = {
   id: docManagerPluginId,
+  autoStart: true,
   requires: [IDocumentManager, ISettingRegistry],
   optional: [
     ITranslator,
