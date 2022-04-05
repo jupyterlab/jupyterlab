@@ -1,4 +1,5 @@
 # This workflow fails in PRs with changes to the jupyterlab/staging directory
+# Won't start unless there is a modification in the staging directory
 
 name: 'Reject changes to staging'
 on:
