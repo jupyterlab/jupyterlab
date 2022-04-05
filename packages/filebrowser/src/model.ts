@@ -780,6 +780,9 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   /**
    * Whether to filter directories.
    */
+  get filterDirectories(): boolean {
+     return this._filterDirectories;
+  }
   set filterDirectories(value: boolean) {
     this._filterDirectories = value;
   }
