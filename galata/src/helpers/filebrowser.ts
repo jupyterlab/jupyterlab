@@ -136,6 +136,7 @@ export class FileBrowserHelper {
         '.jp-FileBrowser .jp-FileBrowser-crumbs span'
       );
       return (
+        // The home is the root if no preferred dir is defined.
         spans.length === 2 && spans[0].classList.contains('jp-BreadCrumbs-home')
       );
     });
