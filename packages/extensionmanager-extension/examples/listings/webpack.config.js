@@ -35,15 +35,15 @@ module.exports = [
         { test: /\.js.map$/, type: 'asset/resource' },
         {
           test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-          use: 'url-loader?limit=10000&mimetype=application/font-woff'
+          type: 'asset/resource'
         },
         {
           test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-          use: 'url-loader?limit=10000&mimetype=application/font-woff'
+          type: 'asset/resource'
         },
         {
           test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-          use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+          type: 'asset/resource'
         },
         { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, type: 'asset/resource' },
         {
