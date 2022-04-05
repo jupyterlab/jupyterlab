@@ -600,7 +600,7 @@ async function openOverview(page) {
   await page.dblclick('text=Data.ipynb');
 
   // Back home
-  await page.click('.jp-BreadCrumbs-root svg');
+  await page.click('.jp-BreadCrumbs-home svg');
 
   // Open jupyterlab.md
   await page.dblclick('[aria-label="File Browser Section"] >> text=narrative');
@@ -611,7 +611,7 @@ async function openOverview(page) {
   await page.click('text=Markdown Preview');
 
   // Back home
-  await page.click('.jp-BreadCrumbs-root svg');
+  await page.click('.jp-BreadCrumbs-home svg');
 
   // Open bar.vl.json
   await page.dblclick('[aria-label="File Browser Section"] >> text=data');

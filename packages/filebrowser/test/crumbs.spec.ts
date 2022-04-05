@@ -12,7 +12,7 @@ import expect from 'expect';
 import { simulate } from 'simulate-event';
 import { BreadCrumbs, FileBrowserModel } from '../src';
 
-const HOME_ITEM_CLASS = 'jp-BreadCrumbs-root';
+const HOME_ITEM_CLASS = 'jp-BreadCrumbs-home';
 const ITEM_CLASS = 'jp-BreadCrumbs-item';
 const ITEM_QUERY = `.${HOME_ITEM_CLASS}, .${ITEM_CLASS}`;
 
