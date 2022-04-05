@@ -12,8 +12,8 @@ module.exports = {
   module: {
     rules: [
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.html$/, use: 'file-loader' },
-      { test: /\.md$/, use: 'raw-loader' },
+      { test: /\.html$/, type: 'asset/resource' },
+      { test: /\.md$/, type: 'asset/source' },
       {
         // In .css files, svg is loaded as a data URI.
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
@@ -28,13 +28,11 @@ module.exports = {
         // must be loaded as a raw string instead of data URIs.
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         issuer: /\.js$/,
-        use: {
-          loader: 'raw-loader'
-        }
+        type: 'asset/source'
       },
       {
         test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        use: [{ loader: 'url-loader', options: { limit: 10000 } }]
+        type: 'asset/resource'
       }
     ]
   },

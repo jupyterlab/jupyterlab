@@ -263,7 +263,7 @@ function generateConfig({
           publicPath: staticUrl || 'auto'
         },
         module: {
-          rules: [{ test: /\.html$/, use: 'file-loader' }]
+          rules: [{ test: /\.html$/, type: 'asset/resource' }]
         },
         plugins
       },

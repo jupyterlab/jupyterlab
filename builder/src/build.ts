@@ -213,7 +213,7 @@ export namespace Build {
             },
             {
               test: /\.(cur|png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-              use: [{ loader: 'url-loader', options: { limit: 10000 } }]
+              type: 'asset/resource'
             }
           ]
         },
