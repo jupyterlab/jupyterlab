@@ -12,23 +12,23 @@ crypto.createHash = (algorithm: string) =>
 
 const rules = [
   { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-  { test: /\.txt$/, use: 'raw-loader' },
-  { test: /\.md$/, use: 'raw-loader' },
-  { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
-  { test: /\.js.map$/, use: 'file-loader' },
+  { test: /\.txt$/, type: 'asset/source' },
+  { test: /\.md$/, type: 'asset/source' },
+  { test: /\.(jpg|png|gif)$/, type: 'asset/resource' },
+  { test: /\.js.map$/, type: 'asset/resource' },
   {
     test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/font-woff'
+    type: 'asset/resource'
   },
   {
     test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/font-woff'
+    type: 'asset/resource'
   },
   {
     test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
     use: 'url-loader?limit=10000&mimetype=application/octet-stream'
   },
-  { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
+  { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, type: 'asset/resource' },
   {
     // In .css files, svg is loaded as a data URI.
     test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
@@ -43,9 +43,7 @@ const rules = [
     // must be loaded as a raw string instead of data URIs.
     test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
     issuer: /\.js$/,
-    use: {
-      loader: 'raw-loader'
-    }
+    type: 'asset/source'
   },
   {
     test: /\.m?js$/,
