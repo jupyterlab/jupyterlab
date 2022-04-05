@@ -7,9 +7,20 @@ on:
       - 'jupyterlab/staging/**'
 
 jobs:
-  fail:
+  staging-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Fail
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Get modified files in staging
+        id: modified-files-in-staging
+        uses: tj-actions/changed-files@v18.6
+        with:
+          files: jupyterlab/staging
+          files_ignore: |
+            jupyterlab/staging/yarn.js
+
+      - name: Fail if fiels in staging are modified
+        if: steps.modified-files-in-staging.outputs.any_changed == 'true'
         run: exit 1
