@@ -40,7 +40,7 @@ export function getHeadings(
   const lines = text.split('\n');
 
   // Iterate over the lines to get the header level and text for each line:
-  const levels = [...initialLevels];
+  const levels = initialLevels;
   let previousLevel = levels.length;
   let headings = new Array<IMarkdownHeading>();
   let isCodeBlock;
@@ -138,12 +138,6 @@ interface IHeader {
    */
   level: number;
 
-  /**
-   * Heading type.
-   */
-  // TODO needed?
-  type: 'html' | 'markdown' | 'markdown-alt';
-
   raw: string;
 }
 
@@ -206,7 +200,6 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
     return {
       text: match[2].replace(/\[(.+)\]\(.+\)/g, '$1'), // take special care to parse Markdown links into raw text
       level: match[1].length,
-      type: 'markdown',
       raw: line
     };
   }
@@ -217,7 +210,6 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
       return {
         text: line.replace(/\[(.+)\]\(.+\)/g, '$1'), // take special care to parse Markdown links into raw text
         level: match[1][0] === '=' ? 1 : 2,
-        type: 'markdown-alt',
         raw: line + nextLine
       };
     }
@@ -228,7 +220,6 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
     return {
       text: match[2],
       level: parseInt(match[1], 10),
-      type: 'html',
       raw: line
     };
   }

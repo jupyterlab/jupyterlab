@@ -39,6 +39,14 @@ export abstract class TableOfContentsModel<
     this._activeHeading = heading;
   }
 
+  /**
+   * Whether the model gets updated even if the table of contents panel
+   * is hidden or not.
+   *
+   * #### Notes
+   * For example, ToC models use to add title numbering will
+   * set this to true.
+   */
   protected get isAlwaysActive(): boolean {
     return false;
   }

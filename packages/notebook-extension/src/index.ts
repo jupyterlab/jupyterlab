@@ -17,6 +17,7 @@ import {
   ICommandPalette,
   IKernelStatusModel,
   InputDialog,
+  ISanitizer,
   ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
@@ -53,6 +54,7 @@ import {
   NotebookModelFactory,
   NotebookPanel,
   NotebookSearchProvider,
+  NotebookToCFactory,
   NotebookTools,
   NotebookTracker,
   NotebookTrustStatus,
@@ -65,10 +67,11 @@ import {
   IObservableUndoableList
 } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addAboveIcon,
@@ -786,6 +789,22 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const tocPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:toc',
+  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
+  optional: [IMarkdownParser],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    tocRegistry: ITableOfContentsRegistry,
+    sanitizer: ISanitizer,
+    mdParser: IMarkdownParser | null
+  ): void => {
+    tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -805,7 +824,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelStatus,
   lineColStatus,
   completerPlugin,
-  searchProvider
+  searchProvider,
+  tocPlugin
 ];
 export default plugins;
 

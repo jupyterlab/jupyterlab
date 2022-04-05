@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ToolbarRegistry } from '@jupyterlab/apputils';
-import type { Cell } from '@jupyterlab/cells';
-import { IObservableList } from '@jupyterlab/observables';
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import type { IObservableList } from '@jupyterlab/observables';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { VDomRenderer } from '@jupyterlab/ui-components';
-import { JSONObject, Token } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { Widget } from '@lumino/widgets';
 
@@ -44,59 +44,6 @@ export interface ITableOfContentsRegistry {
 export const ITableOfContentsRegistry = new Token<ITableOfContentsRegistry>(
   '@jupyterlab/toc:ITableOfContentsRegistry'
 );
-
-/**
- * Cell running status
- */
-export enum RunningStatus {
-  /**
-   * Cell is idle
-   */
-  Idle = -1,
-  /**
-   * Cell execution is scheduled
-   */
-  Scheduled = 0,
-  /**
-   * Cell is running
-   */
-  Running = 1
-}
-
-/**
- * Interface describing a notebook cell heading.
- */
-export interface INotebookHeading extends TableOfContents.IHeading {
-  /**
-   * Heading type.
-   */
-  type: 'header' | 'markdown' | 'code';
-
-  /**
-   * Reference to a notebook cell.
-   */
-  cellRef: Cell;
-
-  /**
-   * Heading prompt.
-   */
-  prompt?: string;
-
-  /**
-   * Boolean indicating whether a heading has a child node.
-   */
-  hasChild?: boolean;
-
-  /**
-   * index of reference cell in the notebook
-   */
-  index: number;
-
-  /**
-   * Running status of the cells in the heading
-   */
-  isRunning: RunningStatus;
-}
 
 /**
  * Namespace for table of contents interface

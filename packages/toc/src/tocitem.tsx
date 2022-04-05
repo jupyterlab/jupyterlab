@@ -47,7 +47,7 @@ export class TOCItem extends React.PureComponent<
           }
         }}
       >
-        <span className="jp-tocItem-content" title={heading.text}>
+        <div className="jp-tocItem-heading">
           {children && (
             <button
               className="jp-tocItem-collapser"
@@ -57,15 +57,21 @@ export class TOCItem extends React.PureComponent<
               }}
             >
               {heading.collapsed ? (
-                <caretRightIcon.react tag="span" width="25px" />
+                <caretRightIcon.react tag="span" width="20px" />
               ) : (
-                <caretDownIcon.react tag="span" width="25px" />
+                <caretDownIcon.react tag="span" width="20px" />
               )}
             </button>
           )}
-          {heading.prefix}
-          {heading.text}
-        </span>
+          <span
+            className="jp-tocItem-content"
+            title={heading.text}
+            {...heading.dataset}
+          >
+            {heading.prefix}
+            {heading.text}
+          </span>
+        </div>
         {children && !heading.collapsed && <ol>{children}</ol>}
       </li>
     );
