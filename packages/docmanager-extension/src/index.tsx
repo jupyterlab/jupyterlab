@@ -37,7 +37,11 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
 import { each, map, some, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -93,8 +97,8 @@ const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   id: '@jupyterlab/docmanager-extension:manager',
   provides: IDocumentManager,
-  requires: [ITranslator],
   optional: [
+    ITranslator,
     ILabStatus,
     ISessionContextDialogs,
     IDocumentProviderFactory,
@@ -102,7 +106,7 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   ],
   activate: (
     app: JupyterFrontEnd,
-    translator: ITranslator,
+    translator: ITranslator | null,
     status: ILabStatus | null,
     sessionDialogs: ISessionContextDialogs | null,
     docProviderFactory: IDocumentProviderFactory | null,
@@ -144,7 +148,7 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
       when,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       sessionDialogs: sessionDialogs || undefined,
-      translator,
+      translator: translator ?? nullTranslator,
       collaborative: true,
       docProviderFactory: docProviderFactory ?? undefined,
       isConnectedCallback: () => {
@@ -164,8 +168,9 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
  */
 const docManagerPlugin: JupyterFrontEndPlugin<void> = {
   id: docManagerPluginId,
-  requires: [IDocumentManager, ISettingRegistry, ITranslator],
+  requires: [IDocumentManager, ISettingRegistry],
   optional: [
+    ITranslator,
     ILabStatus,
     ICommandPalette,
     ILabShell,
@@ -177,10 +182,11 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     settingRegistry: ISettingRegistry,
-    translator: ITranslator,
+    translator: ITranslator | null,
     palette: ICommandPalette | null,
     labShell: ILabShell | null
   ): void => {
+    translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
     const registry = app.docRegistry;
 
@@ -307,20 +313,23 @@ Available file types:
 export const savingStatusPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:saving-status',
   autoStart: true,
-  requires: [IDocumentManager, ILabShell, ITranslator],
-  optional: [IStatusBar],
+  requires: [IDocumentManager, ILabShell],
+  optional: [ITranslator, IStatusBar],
   activate: (
     _: JupyterFrontEnd,
     docManager: IDocumentManager,
     labShell: ILabShell,
-    translator: ITranslator,
+    translator: ITranslator | null,
     statusBar: IStatusBar | null
   ) => {
     if (!statusBar) {
       // Automatically disable if statusbar missing
       return;
     }
-    const saving = new SavingStatus({ docManager, translator });
+    const saving = new SavingStatus({
+      docManager,
+      translator: translator ?? nullTranslator
+    });
 
     // Keep the currently active widget synchronized.
     saving.model!.widget = labShell.currentWidget;
@@ -377,15 +386,15 @@ export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
 export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:download',
   autoStart: true,
-  requires: [ITranslator, IDocumentManager],
-  optional: [ICommandPalette],
+  requires: [IDocumentManager],
+  optional: [ITranslator, ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
-    translator: ITranslator,
     docManager: IDocumentManager,
+    translator: ITranslator | null,
     palette: ICommandPalette | null
   ) => {
-    const trans = translator.load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const { commands, shell } = app;
     const isEnabled = () => {
       const { currentWidget } = shell;
@@ -430,13 +439,14 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
 export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:open-browser-tab',
   autoStart: true,
-  requires: [ITranslator, IDocumentManager],
+  requires: [IDocumentManager],
+  optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,
-    translator: ITranslator,
-    docManager: IDocumentManager
+    docManager: IDocumentManager,
+    translator: ITranslator | null
   ) => {
-    const trans = translator.load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const { commands } = app;
     commands.addCommand(CommandIDs.openBrowserTab, {
       execute: args => {
