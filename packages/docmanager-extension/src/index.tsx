@@ -170,15 +170,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
   id: docManagerPluginId,
   autoStart: true,
   requires: [IDocumentManager, ISettingRegistry],
-  optional: [
-    ITranslator,
-    ILabStatus,
-    ICommandPalette,
-    ILabShell,
-    ISessionContextDialogs,
-    IDocumentProviderFactory,
-    JupyterLab.IInfo
-  ],
+  optional: [ITranslator, ICommandPalette, ILabShell],
   activate: (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
