@@ -71,6 +71,7 @@ export interface ICompletionProvider<
    * If it is not provided, the default model will be used.
    *
    * @param context - additional information about context of completion request
+   * @returns The completer model
    */
   modelFactory?(context: ICompletionContext): Promise<Completer.IModel>;
 
@@ -142,7 +143,6 @@ export interface ICompletionProviderManager {
 
   /**
    * Signal emitted when active providers list is changed.
-   *
    */
   activeProvidersChanged: ISignal<ICompletionProviderManager, void>;
 }

@@ -30,6 +30,9 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     );
   }
 
+  /**
+   * Signal emitted when active providers list is changed.
+   */
   get activeProvidersChanged(): ISignal<ICompletionProviderManager, void> {
     return this._activeProvidersChanged;
   }
@@ -260,9 +263,5 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    */
   private _autoCompletion: boolean;
 
-  /**
-   * Signal emitted when active providers list is changed.
-   *
-   */
   private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
 }
