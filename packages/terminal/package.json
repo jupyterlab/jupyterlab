@@ -54,7 +54,7 @@
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.8",
     "@types/jest": "^26.0.10",
-    "canvas": "^2.6.1",
+    "canvas": "^2.9.1",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
