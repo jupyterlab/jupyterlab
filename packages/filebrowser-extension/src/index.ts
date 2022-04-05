@@ -30,6 +30,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import {
   FileBrowser,
+  FileDialog,
   FileUploadStatus,
   FilterFileBrowserModel,
   IFileBrowserFactory,
@@ -298,6 +299,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       id: string,
       options: IFileBrowserFactory.IOptions = {}
     ) => {
+      setTimeout(() => {
+        FileDialog.getExistingDirectory({ manager: docManager });
+      }, 2000);
+
       const model = new FilterFileBrowserModel({
         translator: translator,
         auto: options.auto ?? true,

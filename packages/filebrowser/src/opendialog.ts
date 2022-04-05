@@ -108,7 +108,7 @@ export namespace FileDialog {
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
     return getOpenFiles({
       ...options,
-      filter: model => false
+      filter: model => model.type === 'directory'
     });
   }
 }
