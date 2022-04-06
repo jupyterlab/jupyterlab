@@ -36,19 +36,19 @@ module.exports = {
       { test: /\.js.map$/, type: 'asset/resource' },
       {
         test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-        type: 'asset/resource'
+        type: 'asset'
       },
       {
         test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-        type: 'asset/resource'
+        type: 'asset'
       },
       {
         test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        type: 'asset/resource'
+        type: 'asset'
       },
       {
         test: /\.otf(\?v=\d+\.\d+\.\d+)?$/,
-        type: 'asset/resource'
+        type: 'asset'
       },
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, type: 'asset/resource' },
       {
