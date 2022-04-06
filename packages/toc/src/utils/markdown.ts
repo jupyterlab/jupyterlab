@@ -44,8 +44,8 @@ export function getHeadings(
   let previousLevel = levels.length;
   let headings = new Array<IMarkdownHeading>();
   let isCodeBlock;
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
+  for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+    let line = lines[lineIdx];
 
     if (line === '') {
       // Bail early
@@ -60,7 +60,7 @@ export function getHeadings(
       continue;
     }
 
-    const heading = parseHeading(line, line[i + 1]); // append the next line to capture alternative style Markdown headings
+    const heading = parseHeading(line, line[lineIdx + 1]); // append the next line to capture alternative style Markdown headings
 
     if (heading) {
       let level = heading.level;
@@ -70,7 +70,10 @@ export function getHeadings(
 
       if (level > 0 && level <= maximalDepth) {
         if (level > previousLevel) {
-          // Initialize the new level
+          // Initialize the new levels
+          for (let l = previousLevel; l < level - 1; l++) {
+            levels[l] = 0;
+          }
           levels[level - 1] = 1;
         } else {
           // Increment the current level
@@ -85,10 +88,9 @@ export function getHeadings(
 
         headings.push({
           text: heading.text,
-          // If the header list skips some level, replace missing elements by 0
-          prefix: levels.map(level => level ?? 0).join('.') + '.',
+          prefix: levels.map(level => level.toString()).join('.') + '.',
           level,
-          line: i,
+          line: lineIdx,
           raw: heading.raw
         });
       }

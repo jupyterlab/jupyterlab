@@ -11,6 +11,7 @@ import { TableOfContents } from './tokens';
  * @private
  */
 export interface ITOCItemProps {
+  isActive: boolean;
   /**
    * Heading to render.
    */
@@ -33,21 +34,22 @@ export class TOCItem extends React.PureComponent<
    * @returns rendered entry
    */
   render(): JSX.Element | null {
-    const { children, heading, onClick, onCollapse } = this.props;
+    const { children, isActive, heading, onClick, onCollapse } = this.props;
 
     return (
-      <li
-        className="jp-tocItem"
-        key={`${heading.level}-${heading.text}`}
-        onClick={(event: React.SyntheticEvent<HTMLLIElement>) => {
-          // React only on deepest item
-          if (!event.defaultPrevented) {
-            event.preventDefault();
-            onClick(heading);
-          }
-        }}
-      >
-        <div className="jp-tocItem-heading">
+      <li className="jp-tocItem" key={`${heading.level}-${heading.text}`}>
+        <div
+          className={`jp-tocItem-heading ${
+            isActive ? 'jp-tocItem-active' : ''
+          }`}
+          onClick={(event: React.SyntheticEvent<HTMLDivElement>) => {
+            // React only on deepest item
+            if (!event.defaultPrevented) {
+              event.preventDefault();
+              onClick(heading);
+            }
+          }}
+        >
           {children && (
             <button
               className="jp-tocItem-collapser"

@@ -16,15 +16,8 @@
   height: 100%;
 }
 
-.jp-TableOfContents .jp-stack-panel-header {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  flex: 0 0 auto;
-  font-size: var(--jp-ui-font-size0);
-  font-weight: 600;
-  letter-spacing: 1px;
-  margin: 0;
-  padding: 8px 12px;
-  text-transform: uppercase;
+.jp-TableOfContents .jp-SidePanel-content {
+  overflow-y: auto;
 }
 
 .jp-TableOfContents-tree {
@@ -35,10 +28,14 @@
   list-style-type: none;
 }
 
+.jp-TableOfContents li > ol {
+  /* button width + margin */
+  padding-left: 24px;
+}
+
 .jp-TableOfContents-content {
   margin: 0;
   padding: 0;
-  overflow-y: auto;
   background-color: var(--jp-layout-color1);
 }
 
@@ -54,6 +51,10 @@
   cursor: pointer;
 }
 
+.jp-tocItem-heading:hover {
+  background-color: var(--jp-layout-color2);
+}
+
 .jp-tocItem-content {
   display: block;
   padding: 4px 0;
@@ -64,11 +65,41 @@
 
 .jp-tocItem-collapser {
   height: 20px;
+  margin: 2px 2px 0;
   padding: 0;
   background: none;
   border: none;
   cursor: pointer;
 }
+
+.jp-tocItem-collapser:hover {
+  background-color: var(--jp-layout-color3);
+}
+
+/* Active heading indicator */
+
+.jp-tocItem-heading::before {
+  content: ' ';
+  background: transparent;
+  width: 4px;
+  height: 24px;
+  position: absolute;
+  left: 0;
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-tocItem-heading.jp-tocItem-active::before {
+  background-color: var(--jp-brand-color1);
+}
+
+.jp-tocItem-heading:hover.jp-tocItem-active::before {
+  background: var(--jp-brand-color0);
+  opacity: 1;
+}
+
+/*
+ * Old
+ */
 
 .toc-toolbar-icon,
 .toc-toolbar-icon-selected {
@@ -114,11 +145,6 @@
   align-items: center;
 }
 
-.toc-code-cell-div {
-  display: inline-flex;
-  width: 100%;
-}
-
 .toc-entry-holder {
   width: 100%;
   display: flex;
@@ -126,42 +152,6 @@
   padding: 0;
   margin: 0;
   overflow: visible;
-}
-
-.toc-Collapser-child {
-  background: transparent;
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-}
-
-.toc-entry-holder:hover .toc-Collapser-child {
-  box-shadow: var(--jp-elevation-z2);
-  background: var(--jp-brand-color1);
-  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
-}
-
-.toc-active-cell .toc-Collapser-child {
-  background: var(--jp-brand-color1);
-}
-
-.toc-active-cell .toc-Collapser-child:hover {
-  background: var(--jp-brand-color0);
-  opacity: 1;
-}
-
-.toc-active-cell:hover .toc-Collapser-child {
-  background: var(--jp-brand-color0);
-  opacity: 1;
-}
-
-.toc-Collapser-child:hover {
-  box-shadow: var(--jp-elevation-z2);
-  background: var(--jp-brand-color1);
-  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
 }
 
 .toc-twist-placeholder {

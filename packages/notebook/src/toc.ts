@@ -75,7 +75,7 @@ export class NotebookToCModel extends TableOfContentsModel<
   ) {
     super(widget, configuration);
     this._runningCells = new Array<Cell>();
-    this._cellToHeading = new WeakMap<Cell, INotebookHeading>();
+    this._cellToHeadingIndex = new WeakMap<Cell, number>();
 
     this.widget.content.activeCellChanged.connect(
       this.onActiveCellChanged,
@@ -104,6 +104,11 @@ export class NotebookToCModel extends TableOfContentsModel<
     super.dispose();
   }
 
+  toggleCollapse(heading: INotebookHeading): void {
+    super.toggleCollapse(heading);
+    this.updateRunningStatus(this.headings);
+  }
+
   protected get isAlwaysActive(): boolean {
     return true;
   }
@@ -122,12 +127,6 @@ export class NotebookToCModel extends TableOfContentsModel<
         : 'toc-hr-collapsed';
       const collapsed =
         (model.metadata.get(cellCollapseMetadata) as boolean) ?? false;
-
-      const isRunning = this._runningCells.includes(cell)
-        ? this._runningCells[0] === cell
-          ? RunningStatus.Running
-          : RunningStatus.Scheduled
-        : RunningStatus.Idle;
 
       switch (model.type) {
         case 'code': {
@@ -161,7 +160,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                       cellRef: cell,
                       index: [i, j],
                       collapsed,
-                      isRunning
+                      isRunning: RunningStatus.Idle
                     };
                   })
                 );
@@ -177,7 +176,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                       cellRef: cell,
                       index: [i, j],
                       collapsed,
-                      isRunning
+                      isRunning: RunningStatus.Idle
                     };
                   })
                 );
@@ -199,7 +198,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                 cellRef: cell,
                 index: [i, 0],
                 collapsed,
-                isRunning
+                isRunning: RunningStatus.Idle
               };
             })
           );
@@ -208,15 +207,7 @@ export class NotebookToCModel extends TableOfContentsModel<
       }
 
       if (headings.length > 0) {
-        this._cellToHeading.set(cell, headings[headings.length - 1]);
-      }
-
-      // TODO as collapsed headings are gonna be part of the list, the running
-      // status needs to be propagated upstream.
-      // Must be done afterwards as `heading.hasChild` needs to be up to date.
-      const lastHeading = headings[headings.length - 1];
-      if (lastHeading) {
-        lastHeading.isRunning = Math.max(lastHeading.isRunning, isRunning);
+        this._cellToHeadingIndex.set(cell, headings.length - 1);
       }
     }
     this.updateRunningStatus(headings);
@@ -227,11 +218,21 @@ export class NotebookToCModel extends TableOfContentsModel<
     notebook: Notebook,
     cell: Cell<ICellModel>
   ): void {
-    const activeHeading = this.headings.find(
-      heading => heading.cellRef === cell
-    );
+    let activeHeadingIndex = this._cellToHeadingIndex.get(cell);
 
-    this.activeHeading = activeHeading ?? null;
+    if (activeHeadingIndex !== undefined) {
+      const candidate = this.headings[activeHeadingIndex];
+      // Highlight the first title as active (if multiple titles are in the same cell)
+      while (
+        this.headings[activeHeadingIndex - 1] &&
+        this.headings[activeHeadingIndex - 1].cellRef === candidate.cellRef
+      ) {
+        activeHeadingIndex--;
+      }
+      this.activeHeading = this.headings[activeHeadingIndex];
+    } else {
+      this.activeHeading = null;
+    }
   }
 
   protected onExecuted(
@@ -241,8 +242,17 @@ export class NotebookToCModel extends TableOfContentsModel<
     this._runningCells.forEach((cell, index) => {
       if (cell === args.cell) {
         this._runningCells.splice(index, 1);
+
+        const headingIndex = this._cellToHeadingIndex.get(cell);
+        if (headingIndex) {
+          const heading = this.headings[headingIndex];
+          heading.isRunning = RunningStatus.Idle;
+        }
       }
     });
+
+    this.updateRunningStatus(this.headings);
+    this.stateChanged.emit();
   }
 
   protected onExecutionScheduled(
@@ -252,9 +262,24 @@ export class NotebookToCModel extends TableOfContentsModel<
     if (!this._runningCells.includes(args.cell)) {
       this._runningCells.push(args.cell);
     }
+
+    this.updateRunningStatus(this.headings);
+    this.stateChanged.emit();
   }
 
   protected updateRunningStatus(headings: INotebookHeading[]): void {
+    // Update isRunning
+    this._runningCells.forEach((cell, index) => {
+      const headingIndex = this._cellToHeadingIndex.get(cell);
+      if (headingIndex) {
+        const heading = this.headings[headingIndex];
+        heading.isRunning = Math.max(
+          index > 0 ? RunningStatus.Scheduled : RunningStatus.Running,
+          heading.isRunning
+        );
+      }
+    });
+
     let globalIndex = 0;
     while (globalIndex < headings.length) {
       const heading = headings[globalIndex];
@@ -312,7 +337,7 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   private _runningCells: Cell[];
-  private _cellToHeading: WeakMap<Cell, INotebookHeading>;
+  private _cellToHeadingIndex: WeakMap<Cell, number>;
 }
 
 export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {

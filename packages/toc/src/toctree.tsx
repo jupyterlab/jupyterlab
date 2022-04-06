@@ -9,6 +9,7 @@ import { TableOfContents } from './tokens';
  * Interface describing component properties.
  */
 export interface ITOCTreeProps {
+  activeHeading: TableOfContents.IHeading | null;
   /**
    * List of headings to render.
    */
@@ -47,18 +48,22 @@ export class TOCTree extends React.PureComponent<ITOCTreeProps> {
       const nested = new Array<JSX.Element>();
       while (globalIndex < items.length) {
         const current = items[globalIndex];
-        if (current.level === level) {
+        if (current.level >= level) {
           globalIndex += 1;
           const next = items[globalIndex];
 
           nested.push(
             <TOCItem
               key={`${current.level}-${current.text}`}
+              isActive={
+                !!this.props.activeHeading &&
+                current === this.props.activeHeading
+              }
               heading={current}
               onClick={this.props.setActiveHeading}
               onCollapse={this.props.onCollapseChange}
             >
-              {next?.level > level && getChildren(items, next.level)}
+              {next && next.level > level && getChildren(items, level + 1)}
             </TOCItem>
           );
         } else {

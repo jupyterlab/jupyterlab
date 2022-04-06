@@ -36,7 +36,10 @@ export abstract class TableOfContentsModel<
     return this._activeHeading;
   }
   set activeHeading(heading: H | null) {
-    this._activeHeading = heading;
+    if (this._activeHeading !== heading) {
+      this._activeHeading = heading;
+      this.stateChanged.emit();
+    }
   }
 
   /**

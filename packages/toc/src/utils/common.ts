@@ -53,7 +53,10 @@ export function getHTMLHeadings(
 
     if (level > 0 && level <= maximalDepth) {
       if (level > previousLevel) {
-        // Initialize the new level
+        // Initialize the new levels
+        for (let l = previousLevel; l < level - 1; l++) {
+          levels[l] = 0;
+        }
         levels[level - 1] = 1;
       } else {
         // Increment the current level
