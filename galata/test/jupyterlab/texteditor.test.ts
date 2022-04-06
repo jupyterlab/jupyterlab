@@ -61,11 +61,11 @@ test.describe('Text Editor Tests', () => {
     await page.fill(
       '[role="main"] >> textarea',
       `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam urna
-libero, dictum a egestas non, placerat vel neque. In imperdiet iaculis fermentum. 
-Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia 
-Curae; Cras augue tortor, tristique vitae varius nec, dictum eu lectus. Pellentesque 
-id eleifend eros. In non odio in lorem iaculis sollicitudin. In faucibus ante ut 
-arcu fringilla interdum. Maecenas elit nulla, imperdiet nec blandit et, consequat 
+libero, dictum a egestas non, placerat vel neque. In imperdiet iaculis fermentum.
+Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia
+Curae; Cras augue tortor, tristique vitae varius nec, dictum eu lectus. Pellentesque
+id eleifend eros. In non odio in lorem iaculis sollicitudin. In faucibus ante ut
+arcu fringilla interdum. Maecenas elit nulla, imperdiet nec blandit et, consequat
 ut elit.`
     );
 
