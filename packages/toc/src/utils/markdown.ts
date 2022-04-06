@@ -88,7 +88,7 @@ export function getHeadings(
 
         headings.push({
           text: heading.text,
-          prefix: levels.map(level => level.toString()).join('.') + '.',
+          prefix: levels.map(level => level.toString()).join('.') + '. ',
           level,
           line: lineIdx,
           raw: heading.raw

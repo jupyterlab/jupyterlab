@@ -72,7 +72,7 @@ export function getHTMLHeadings(
       headings.push({
         text: h.textContent ?? '',
         // If the header list skips some level, replace missing elements by 0
-        prefix: levels.map(level => level ?? 0).join('.') + '.',
+        prefix: levels.map(level => level ?? 0).join('.') + '. ',
         level
       });
     }
