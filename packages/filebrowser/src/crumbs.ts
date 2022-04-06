@@ -32,8 +32,8 @@ const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
 const BREADCRUMB_ROOT_CLASS = 'jp-BreadCrumbs-home';
 
 /**
-* The class name for the breadcrumbs preferred node
-*/
+ * The class name for the breadcrumbs preferred node
+ */
 const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
 
 /**
