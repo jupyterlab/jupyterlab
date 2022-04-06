@@ -13,6 +13,10 @@ class YBaseDoc:
     def source(self):
         raise RuntimeError("Y document source generation not implemented")
 
+    @source.setter
+    def source(self, value):
+        raise RuntimeError("Y document source initialization not implemented")
+
 
 class YFile(YBaseDoc):
     def __init__(self):
@@ -22,6 +26,11 @@ class YFile(YBaseDoc):
     @property
     def source(self):
         return str(self._ysource)
+
+    @source.setter
+    def source(self, value):
+        with self._ydoc.begin_transaction() as t:
+            self._ysource.push(t, value)
 
 
 class YNotebook(YBaseDoc):
@@ -52,7 +61,17 @@ class YNotebook(YBaseDoc):
                             output["execution_count"] = int(execution_count)
         return dict(
             cells=cells,
-            metadata=meta["metadata"],
+            metadata=meta,
             nbformat=int(state["nbformat"]),
             nbformat_minor=int(state["nbformatMinor"]),
         )
+
+    @source.setter
+    def source(self, value):
+        with self._ydoc.begin_transaction() as t:
+            self._ycells.push(t, value["cells"])
+            for k, v in value["metadata"].items():
+                self._ymeta.set(t, k, v)
+            self._ystate.set(t, "dirty", False)
+            self._ystate.set(t, "nbformat", value["nbformat"])
+            self._ystate.set(t, "nbformatMinor", value["nbformat_minor"])

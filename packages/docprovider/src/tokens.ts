@@ -13,16 +13,6 @@ export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
  */
 export interface IDocumentProvider {
   /**
-   * Resolves to true if the initial content has been initialized on the server. false otherwise.
-   */
-  requestInitialContent(): Promise<boolean>;
-
-  /**
-   * Put the initialized state.
-   */
-  putInitializedState(): void;
-
-  /**
    * Returns a Promise that resolves when renaming is ackownledged.
    */
   readonly renameAck: Promise<boolean>;

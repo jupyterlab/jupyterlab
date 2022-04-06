@@ -261,18 +261,20 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean): Promise<void> {
-    const contentIsInitialized = await this._provider.requestInitialContent();
+    // FIXME: revert/save is broken
+    // revert will change with #12306 anyway
     let promise;
-    if (isNew || contentIsInitialized) {
+    if (isNew) {
       promise = this._save();
     } else {
-      promise = this._revert();
+      // promise = this._revert();
+      promise = Promise.resolve(void 0);
+      const model = this._model;
+      model.dirty = false;
+      if (!this._isPopulated) {
+        return this._populate();
+      }
     }
-    // if save/revert completed successfully, we set the initialized content in the rtc server.
-    promise = promise.then(() => {
-      this._provider.putInitializedState();
-      this._model.initialize();
-    });
     return promise;
   }
 
@@ -296,10 +298,6 @@ export class Context<
     await this.ready;
     let promise: Promise<void>;
     promise = this._save();
-    // if save completed successfully, we set the initialized content in the rtc server.
-    promise = promise.then(() => {
-      this._provider.putInitializedState();
-    });
     return await promise;
   }
 

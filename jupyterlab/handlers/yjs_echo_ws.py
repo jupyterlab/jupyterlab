@@ -9,6 +9,7 @@ from enum import IntEnum
 
 import y_py as Y
 from jupyter_server.base.handlers import JupyterHandler
+from jupyter_server.utils import ensure_async
 from tornado import web
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
@@ -33,24 +34,25 @@ ROOMS = {}
 
 
 class ServerMessageType(IntEnum):
-    # The client is asking to retrieve the initial state of the Yjs document. Return an empty buffer when nothing is available.
-    REQUEST_INITIALIZED_CONTENT = 127
-    # The client retrieved an empty "initial content" and generated the initial state of the document. Store this.
-    PUT_INITIALIZED_CONTENT = 126
     # The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
     # The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
-    RENAME_SESSION = 125
+    RENAME_SESSION = 127
 
 
 class YjsRoom:
     def __init__(self, type):
         self.type = type
         self.clients = {}
-        self.content = bytes([])
+        self.initialized = False
         self.ydoc = YDOCS.get(type, YFILE)()
 
-    def get_source(self):
+    @property
+    def source(self):
         return self.ydoc.source
+
+    @source.setter
+    def source(self, value):
+        self.ydoc.source = value
 
 
 class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
@@ -66,7 +68,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
             raise web.HTTPError(403)
         return await super().get(*args, **kwargs)
 
-    def open(self, type_path):
+    async def open(self, type_path):
         # print("[YJSEchoWS]: open", type_path)
         type, path = type_path.split(":", 1)
         self.id = str(uuid.uuid4())
@@ -76,6 +78,12 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
             room = YjsRoom(type)
             ROOMS[self.room_id] = room
         room.clients[self.id] = (IOLoop.current(), self.hook_send_message, self)
+        if not room.initialized:
+            model = await ensure_async(self.settings["contents_manager"].get(self.room_id))
+            # check again if initialized, because loading the file can be async
+            if not room.initialized:
+                room.source = model["content"]
+                room.initialized = True
         # Send SyncStep1 message (based on y-protocols)
         self.write_message(bytes([0, 0, 1, 0]), binary=True)
 
@@ -83,15 +91,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         # print("[YJSEchoWS]: message,", message)
         room_id = self.room_id
         room = ROOMS.get(room_id)
-        if message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
-            # print("client requested initial content")
-            self.write_message(
-                bytes([ServerMessageType.REQUEST_INITIALIZED_CONTENT]) + room.content, binary=True
-            )
-        elif message[0] == ServerMessageType.PUT_INITIALIZED_CONTENT:
-            # print("client put initialized content")
-            room.content = message[1:]
-        elif message[0] == ServerMessageType.RENAME_SESSION:
+        if message[0] == ServerMessageType.RENAME_SESSION:
             # We move the room to a different entry and also change the room_id property of each connected client
             new_room_id = message[1:].decode("utf-8").split(":", 1)[1]
             for _, (_, _, client) in room.clients.items():

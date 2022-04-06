@@ -644,7 +644,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 if path in ROOMS:
                     # we found the RTC session as expected
                     # set the document content from y-py
-                    model["content"] = ROOMS[path].get_source()
+                    model["content"] = ROOMS[path].source
                 else:
                     # RTC session not available, shouldn't happen
                     raise web.HTTPError(
