@@ -46,8 +46,8 @@
     "null-loader": "^4.0.0",
     "rimraf": "~3.0.0",
     "url-loader": "~4.1.0",
-    "webpack": "^5.55.1",
-    "webpack-cli": "^4.8.0"
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2"
   },
   "publishConfig": {
     "access": "public"
