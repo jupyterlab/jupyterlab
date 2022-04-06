@@ -45,30 +45,32 @@ function getMarkdownHeadings(
     );
   }
   for (const line of text.split('\n')) {
-    const heading = parseHeading(line);
-    if (heading) {
-      headings.push({
-        text: heading.text,
-        level: heading.level,
-        numbering: generateNumbering(dict, heading.level),
-        onClick: callback,
-        type: 'header',
-        cellRef: cellRef,
-        hasChild: false,
-        isRunning,
-        index
-      });
-    } else {
-      headings.push({
-        text: text,
-        level: lastLevel + 1,
-        onClick: callback,
-        type: 'markdown',
-        cellRef: cellRef,
-        hasChild: false,
-        isRunning,
-        index
-      });
+    if (line) {
+      const heading = parseHeading(line);
+      if (heading) {
+        headings.push({
+          text: heading.text,
+          level: heading.level,
+          numbering: generateNumbering(dict, heading.level),
+          onClick: callback,
+          type: 'header',
+          cellRef: cellRef,
+          hasChild: false,
+          isRunning,
+          index
+        });
+      } else {
+        headings.push({
+          text: line,
+          level: lastLevel + 1,
+          onClick: callback,
+          type: 'markdown',
+          cellRef: cellRef,
+          hasChild: false,
+          isRunning,
+          index
+        });
+      }
     }
   }
   return headings;

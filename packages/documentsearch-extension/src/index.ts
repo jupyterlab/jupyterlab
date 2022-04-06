@@ -165,9 +165,13 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     app.commands.addCommand(startCommand, {
       label: trans.__('Find…'),
       isEnabled: currentWidgetHasSearchProvider,
-      execute: () => {
+      execute: args => {
         const searchInstance = getCurrentWidgetSearchInstance();
         if (searchInstance) {
+          const searchText = args['searchText'] as string;
+          if (searchText) {
+            searchInstance.setSearchText(searchText);
+          }
           searchInstance.focusInput();
         }
       }
@@ -176,9 +180,17 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     app.commands.addCommand(startReplaceCommand, {
       label: trans.__('Find and Replace…'),
       isEnabled: currentWidgetHasSearchProvider,
-      execute: () => {
+      execute: args => {
         const searchInstance = getCurrentWidgetSearchInstance();
         if (searchInstance) {
+          const searchText = args['searchText'] as string;
+          if (searchText) {
+            searchInstance.setSearchText(searchText);
+          }
+          const replaceText = args['replaceText'] as string;
+          if (replaceText) {
+            searchInstance.setReplaceText(replaceText);
+          }
           searchInstance.showReplace();
           searchInstance.focusInput();
         }
