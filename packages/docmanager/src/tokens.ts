@@ -45,6 +45,11 @@ export interface IDocumentManager extends IDisposable {
   autosaveInterval: number;
 
   /**
+   * Defines max acceptable difference, in milliseconds, between last modified timestamps on disk and client.
+   */
+  lastModifiedCheckMargin: number;
+
+  /**
    * Clone a widget.
    *
    * @param widget - The source widget.
