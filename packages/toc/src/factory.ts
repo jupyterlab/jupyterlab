@@ -15,8 +15,16 @@ import { TableOfContents } from './tokens';
  */
 const RENDER_TIMEOUT = 1000;
 
+/**
+ * Abstract table of contents model factory for IDocumentWidget.
+ */
 export abstract class TableOfContentsFactory<W extends IDocumentWidget>
   implements TableOfContents.IFactory<W> {
+  /**
+   * Constructor
+   *
+   * @param tracker Widget tracker
+   */
   constructor(protected tracker: IWidgetTracker<W>) {}
 
   /**
@@ -38,7 +46,7 @@ export abstract class TableOfContentsFactory<W extends IDocumentWidget>
    *
    * @param widget - widget
    * @param configuration - Table of contents configuration
-   * @returns The table of contens model
+   * @returns The table of contents model
    */
   createNew(
     widget: W,
@@ -79,6 +87,15 @@ export abstract class TableOfContentsFactory<W extends IDocumentWidget>
     return model;
   }
 
+  /**
+   * Abstract table of contents model instantiation to allow
+   * override by real implementation to customize it. The public
+   * `createNew` contains the signal connections standards for IDocumentWidget
+   * when the model has been instantiated.
+   *
+   * @param widget
+   * @param configuration
+   */
   protected abstract _createNew(
     widget: W,
     configuration?: TableOfContents.IConfig

@@ -7,9 +7,20 @@ import { Widget } from '@lumino/widgets';
 import { FileEditor } from '../widget';
 import { EditorToCModel, IEditorHeading } from './model';
 
+/**
+ * Regular expression to create the outline
+ */
 const KEYWORDS = new RegExp(/^\s*(class |def |from |import )/, 'd');
 
+/**
+ * Table of content model for Python files.
+ */
 export class PythonToCModel extends EditorToCModel {
+  /**
+   * Produce the headings for a document.
+   *
+   * @returns The list of new headings or `null` if nothing needs to be updated.
+   */
   protected getHeadings(): Promise<IEditorHeading[] | null> {
     if (!this.isActive) {
       return Promise.resolve(null);
@@ -61,6 +72,9 @@ export class PythonToCModel extends EditorToCModel {
   }
 }
 
+/**
+ * Table of content model factory for Python files.
+ */
 export class PythonToCFactory extends TableOfContentsFactory<
   IDocumentWidget<FileEditor>
 > {

@@ -26,9 +26,20 @@ const LATEX_LEVELS: { [label: string]: number } = {
   subparagraph: 5
 };
 
+/**
+ * Regular expression to create the outline
+ */
 const SECTIONS = /^\s*\\(section|subsection|subsubsection){(.+)}/;
 
+/**
+ * Table of content model for LaTeX files.
+ */
 export class LaTeXToCModel extends EditorToCModel {
+  /**
+   * Produce the headings for a document.
+   *
+   * @returns The list of new headings or `null` if nothing needs to be updated.
+   */
   protected getHeadings(): Promise<IEditorHeading[] | null> {
     if (!this.isActive) {
       return Promise.resolve(null);
@@ -76,6 +87,9 @@ export class LaTeXToCModel extends EditorToCModel {
   }
 }
 
+/**
+ * Table of content model factory for LaTeX files.
+ */
 export class LaTeXToCFactory extends TableOfContentsFactory<
   IDocumentWidget<FileEditor>
 > {

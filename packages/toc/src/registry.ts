@@ -17,7 +17,8 @@ export class TableOfContentsRegistry implements ITableOfContentsRegistry {
    * -   If unable to find a table of contents model, the method return `undefined`.
    *
    * @param widget - widget
-   * @returns table of contents model
+   * @param configuration - Default model configuration
+   * @returns Table of contents model
    */
   getModel(
     widget: Widget,

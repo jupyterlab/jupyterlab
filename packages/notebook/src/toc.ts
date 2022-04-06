@@ -63,10 +63,21 @@ export interface INotebookHeading extends TableOfContents.IHeading {
   isRunning: RunningStatus;
 }
 
+/**
+ * Table of content model for Notebook files.
+ */
 export class NotebookToCModel extends TableOfContentsModel<
   INotebookHeading,
   NotebookPanel
 > {
+  /**
+   * Constructor
+   *
+   * @param widget The widget to search in
+   * @param parser Markdown parser
+   * @param sanitizer Sanitizer
+   * @param configuration Default model configuration
+   */
   constructor(
     widget: NotebookPanel,
     protected parser: IMarkdownParser | null,
@@ -85,6 +96,17 @@ export class NotebookToCModel extends TableOfContentsModel<
     NotebookActions.executed.connect(this.onExecuted, this);
   }
 
+  /**
+   * Whether the model gets updated even if the table of contents panel
+   * is hidden or not.
+   */
+  protected get isAlwaysActive(): boolean {
+    return true;
+  }
+
+  /**
+   * Dispose the object
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -104,15 +126,19 @@ export class NotebookToCModel extends TableOfContentsModel<
     super.dispose();
   }
 
+  /**
+   * Callback on heading collapse.
+   */
   toggleCollapse(heading: INotebookHeading): void {
     super.toggleCollapse(heading);
     this.updateRunningStatus(this.headings);
   }
 
-  protected get isAlwaysActive(): boolean {
-    return true;
-  }
-
+  /**
+   * Produce the headings for a document.
+   *
+   * @returns The list of new headings or `null` if nothing needs to be updated.
+   */
   protected getHeadings(): Promise<INotebookHeading[] | null> {
     const cells = this.widget.content.widgets;
     const headings: INotebookHeading[] = [];
@@ -122,7 +148,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     for (let i = 0; i < cells.length; i++) {
       const cell: Cell = cells[i];
       const model = cell.model;
-      const cellCollapseMetadata = this.configuration.synchronizeCollapseState
+      const cellCollapseMetadata = this.configuration.syncCollapseState
         ? MARKDOWN_HEADING_COLLAPSED
         : 'toc-hr-collapsed';
       const collapsed =
@@ -130,7 +156,7 @@ export class NotebookToCModel extends TableOfContentsModel<
 
       switch (model.type) {
         case 'code': {
-          if (this.configuration.includeOutputs) {
+          if (this.configuration.includeOutput) {
             // Iterate over the code cell outputs to check for Markdown or HTML from which we can generate ToC headings...
             const outputs = (model as CodeCellModel).outputs;
             for (let j = 0; j < outputs.length; j++) {
@@ -340,7 +366,17 @@ export class NotebookToCModel extends TableOfContentsModel<
   private _cellToHeadingIndex: WeakMap<Cell, number>;
 }
 
+/**
+ * Table of content model factory for Notebook files.
+ */
 export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
+  /**
+   * Constructor
+   *
+   * @param tracker Widget tracker
+   * @param parser Markdown parser
+   * @param sanitizer Sanitizer
+   */
   constructor(
     tracker: INotebookTracker,
     protected parser: IMarkdownParser | null,

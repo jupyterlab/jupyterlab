@@ -6,6 +6,9 @@ import { JSONExt } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { TableOfContents } from './tokens';
 
+/**
+ * Abstract table of contents model.
+ */
 export abstract class TableOfContentsModel<
     H extends TableOfContents.IHeading,
     T extends Widget = Widget
@@ -16,6 +19,7 @@ export abstract class TableOfContentsModel<
    * Constructor
    *
    * @param widget The widget to search in
+   * @param configuration Default model configuration
    */
   constructor(protected widget: T, configuration?: TableOfContents.IConfig) {
     super();
@@ -54,6 +58,9 @@ export abstract class TableOfContentsModel<
     return false;
   }
 
+  /**
+   * Model configuration
+   */
   get configuration(): TableOfContents.IConfig {
     return this._configuration;
   }
@@ -94,6 +101,9 @@ export abstract class TableOfContentsModel<
     return this._headings;
   }
 
+  /**
+   * Document title
+   */
   get title(): string | undefined {
     return this._title;
   }
@@ -105,14 +115,15 @@ export abstract class TableOfContentsModel<
   }
 
   /**
-   * Boolean indicating whether a document uses LaTeX typesetting.
+   * Abstract function that will produce the headings for a document.
+   *
+   * @returns The list of new headings or `null` if nothing needs to be updated.
    */
-  get usesLatex(): boolean {
-    return false;
-  }
-
   protected abstract getHeadings(): Promise<H[] | null>;
 
+  /**
+   * Refresh the headings list.
+   */
   async refresh(): Promise<void> {
     if (this._isRefreshing) {
       // Schedule a refresh if one is in progress
@@ -142,6 +153,9 @@ export abstract class TableOfContentsModel<
     }
   }
 
+  /**
+   * Callback on heading collapse.
+   */
   toggleCollapse(heading: H): void {
     heading.collapsed = !heading.collapsed;
     this.stateChanged.emit();
@@ -156,7 +170,17 @@ export abstract class TableOfContentsModel<
   private _title?: string;
 }
 
+/**
+ * Private functions namespace
+ */
 namespace Private {
+  /**
+   * Test if two list of headings are equal or not.
+   *
+   * @param headings1 First list of headings
+   * @param headings2 Second list of headings
+   * @returns Whether the array are identical or not.
+   */
   export function areHeadingsEqual(
     headings1: TableOfContents.IHeading[],
     headings2: TableOfContents.IHeading[]

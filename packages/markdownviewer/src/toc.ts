@@ -11,14 +11,30 @@ import {
 } from '@jupyterlab/toc';
 import { MarkdownDocument } from './widget';
 
+/**
+ * Interface describing a Markdown viewer heading.
+ */
 export interface IMarkdownViewerHeading extends TableOfContents.IHeading {
+  /**
+   * Heading element handle.
+   */
   element?: Element | null;
 }
 
+/**
+ * Table of content model for Markdown viewer files.
+ */
 export class MarkdownViewerToCModel extends TableOfContentsModel<
   IMarkdownViewerHeading,
   MarkdownDocument
 > {
+  /**
+   * Constructor
+   *
+   * @param widget The widget to search in
+   * @param parser Markdown parser
+   * @param configuration Default model configuration
+   */
   constructor(
     widget: MarkdownDocument,
     protected parser: IMarkdownParser | null,
@@ -44,10 +60,19 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
     }
   }
 
+  /**
+   * Whether the model gets updated even if the table of contents panel
+   * is hidden or not.
+   */
   protected get isAlwaysActive(): boolean {
     return true;
   }
 
+  /**
+   * Produce the headings for a document.
+   *
+   * @returns The list of new headings or `null` if nothing needs to be updated.
+   */
   protected getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
     const headings = ToCUtils.Markdown.getHeadings(content, this.configuration);
@@ -133,9 +158,18 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
   }
 }
 
+/**
+ * Table of content model factory for Markdown viewer files.
+ */
 export class MarkdownViewerToCFactory extends TableOfContentsFactory<
   MarkdownDocument
 > {
+  /**
+   * Constructor
+   *
+   * @param tracker Widget tracker
+   * @param parser Markdown parser
+   */
   constructor(
     tracker: IWidgetTracker<MarkdownDocument>,
     protected parser: IMarkdownParser | null

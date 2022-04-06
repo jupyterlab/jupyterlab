@@ -7,18 +7,25 @@ import { TableOfContents } from './tokens';
 
 /**
  * Interface describing component properties.
- *
- * @private
  */
 export interface ITOCItemProps {
+  /**
+   * Whether this item is active or not.
+   */
   isActive: boolean;
   /**
    * Heading to render.
    */
   heading: TableOfContents.IHeading;
 
+  /**
+   * Click event callback.
+   */
   onClick: (heading: TableOfContents.IHeading) => void;
 
+  /**
+   * Collapse event callback.
+   */
   onCollapse: (heading: TableOfContents.IHeading) => void;
 }
 

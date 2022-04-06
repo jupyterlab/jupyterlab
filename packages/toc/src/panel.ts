@@ -1,4 +1,3 @@
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ITranslator } from '@jupyterlab/translation';
 import { SidePanel } from '@jupyterlab/ui-components';
 import { each } from '@lumino/algorithm';
@@ -7,8 +6,16 @@ import { TableOfContentsWidget } from './treeview';
 import { TableOfContents } from './tokens';
 import { Message } from '@lumino/messaging';
 
+/**
+ * Table of contents sidebar panel.
+ */
 export class TableOfContentsPanel extends SidePanel {
-  constructor(rendermime: IRenderMimeRegistry, translator?: ITranslator) {
+  /**
+   * Constructor
+   *
+   * @param translator - Translator tool
+   */
+  constructor(translator?: ITranslator) {
     super({ content: new Panel(), translator });
     this._model = null;
 
@@ -17,9 +24,7 @@ export class TableOfContentsPanel extends SidePanel {
     this._title = new Private.Header(this._trans.__('Table of Contents'));
     this.header.addWidget(this._title);
 
-    this._treeview = new TableOfContentsWidget({
-      rendermime
-    });
+    this._treeview = new TableOfContentsWidget();
     this._treeview.addClass('jp-TableOfContents-tree');
     this.content.addWidget(this._treeview);
   }
@@ -82,8 +87,19 @@ export class TableOfContentsPanel extends SidePanel {
   private _treeview: TableOfContentsWidget;
 }
 
+/**
+ * Private helpers namespace
+ */
 namespace Private {
+  /**
+   * Panel header
+   */
   export class Header extends Widget {
+    /**
+     * Constructor
+     *
+     * @param title - Title text
+     */
     constructor(title: string) {
       const node = document.createElement('h2');
       node.textContent = title;
@@ -92,6 +108,9 @@ namespace Private {
       this._title = node;
     }
 
+    /**
+     * Set the header title.
+     */
     setTitle(title: string): void {
       this._title.textContent = title;
     }

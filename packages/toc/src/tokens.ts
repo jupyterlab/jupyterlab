@@ -3,7 +3,6 @@
 
 import type { ToolbarRegistry } from '@jupyterlab/apputils';
 import type { IObservableList } from '@jupyterlab/observables';
-import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { VDomRenderer } from '@jupyterlab/ui-components';
 import type { JSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
@@ -63,7 +62,7 @@ export namespace TableOfContents {
      *
      * @param widget - widget
      * @param configuration - Table of contents configuration
-     * @returns The table of contens model
+     * @returns The table of contents model
      */
     createNew: (
       widget: W,
@@ -89,18 +88,18 @@ export namespace TableOfContents {
     /**
      * Whether to include cell outputs in headings or not.
      */
-    includeOutputs: boolean;
+    includeOutput: boolean;
     /**
      * Whether to synchronize heading collapse state between the ToC and the document or not.
      */
-    synchronizeCollapseState: boolean;
+    syncCollapseState: boolean;
   }
 
   export const defaultConfig: IConfig = {
     maximalDepth: 4,
     numberingH1: true,
-    includeOutputs: true,
-    synchronizeCollapseState: false
+    includeOutput: true,
+    syncCollapseState: false
   };
 
   /**
@@ -118,22 +117,12 @@ export namespace TableOfContents {
     level: number;
 
     /**
-     * Special HTML markup.
-     *
-     * ## Notes
-     *
-     * -   The HTML string **should** be properly **sanitized**!
-     * -   The HTML string can be used to render Markdown headings which have already been rendered as HTML.
-     */
-    html?: string;
-
-    /**
      * Heading prefix.
      */
     prefix?: string | null;
 
     /**
-     * Dataset to add to the outline item node
+     * Dataset to add to the item node
      */
     dataset?: Record<string, string>;
 
@@ -147,10 +136,24 @@ export namespace TableOfContents {
    * Interface describing a widget table of contents model.
    */
   export interface IModel<H extends IHeading> extends VDomRenderer.IModel {
+    /**
+     * Active heading
+     */
     activeHeading: H | null;
 
+    /**
+     * Whether the model needs to be kept up to date or not.
+     *
+     * ### Notes
+     * This is set to `true` if the ToC panel is visible and
+     * to `false` if it is hidden. But some models may require
+     * to be always active; e.g. to add numbering in the document.
+     */
     isActive: boolean;
 
+    /**
+     * Model configuration
+     */
     configuration: IConfig;
 
     /**
@@ -160,35 +163,35 @@ export namespace TableOfContents {
      */
     readonly headings: H[];
 
+    /**
+     * Document title
+     */
     title?: string;
 
+    /**
+     * Callback on heading collapse.
+     */
     toggleCollapse: (heading: H) => void;
 
     /**
      * Toolbar items for the table of contents.
      */
     readonly toolbarItems?: IToolbarItems;
-
-    /**
-     * Boolean indicating whether a document uses LaTeX typesetting.
-     *
-     * @default false
-     */
-    readonly usesLatex?: boolean;
   }
 
+  /**
+   * Generic table of contents type
+   */
   export type Model = IModel<IHeading>;
 
   /**
    * Interface describing table of contents widget options.
    */
   export interface IOptions {
-    model?: IModel<IHeading>;
-
     /**
-     * Application rendered MIME type.
+     * Table of contents model.
      */
-    rendermime: IRenderMimeRegistry;
+    model?: IModel<IHeading>;
   }
 
   /**

@@ -4,10 +4,6 @@
 import { TableOfContents } from '../tokens';
 
 /**
- * Table of Contents Markdown utilities
- */
-
-/**
  * Markdown heading
  */
 export interface IMarkdownHeading extends TableOfContents.IHeading {
@@ -15,6 +11,9 @@ export interface IMarkdownHeading extends TableOfContents.IHeading {
    * Heading line
    */
   line: number;
+  /**
+   * Raw string containing the heading
+   */
   raw: string;
 }
 
@@ -140,6 +139,9 @@ interface IHeader {
    */
   level: number;
 
+  /**
+   * Raw string containing the heading
+   */
   raw: string;
 }
 

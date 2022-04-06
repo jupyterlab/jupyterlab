@@ -3,6 +3,9 @@
 
 import { TableOfContents } from '../tokens';
 
+/**
+ * Class used to mark numbering prefix for headings in a document.
+ */
 export const NUMBERING_CLASS = 'numbering-entry';
 
 /**
@@ -23,6 +26,14 @@ export function isHTML(mime: string): boolean {
   return mime === 'text/html';
 }
 
+/**
+ * Parse a HTML string for headings.
+ *
+ * @param html HTML string to parse
+ * @param options Options
+ * @param initialLevels Initial levels for prefix computation
+ * @returns Extracted headings
+ */
 export function getHTMLHeadings(
   html: string,
   options?: Partial<TableOfContents.IConfig>,

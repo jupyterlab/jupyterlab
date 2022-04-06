@@ -9,14 +9,21 @@ import { TableOfContents } from './tokens';
  * Interface describing component properties.
  */
 export interface ITOCTreeProps {
+  /**
+   * Currently active heading.
+   */
   activeHeading: TableOfContents.IHeading | null;
   /**
    * List of headings to render.
    */
   headings: TableOfContents.IHeading[];
-
+  /**
+   * Set active heading.
+   */
   setActiveHeading: (heading: TableOfContents.IHeading) => void;
-
+  /**
+   * Collapse heading callback.
+   */
   onCollapseChange: (heading: TableOfContents.IHeading) => void;
 }
 

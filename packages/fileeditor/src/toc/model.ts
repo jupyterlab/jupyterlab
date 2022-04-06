@@ -5,7 +5,13 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
 import { FileEditor } from '../widget';
 
+/**
+ * Interface describing a file editor heading.
+ */
 export interface IEditorHeading extends TableOfContents.IHeading {
+  /**
+   * Heading line number.
+   */
   line: number;
 }
 

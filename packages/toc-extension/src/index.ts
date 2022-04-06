@@ -11,7 +11,6 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITableOfContentsRegistry,
@@ -36,7 +35,6 @@ namespace CommandIDs {
  *
  * @private
  * @param app - Jupyter application
- * @param rendermime - rendered MIME registry
  * @param translator - translator
  * @param restorer - application layout restorer
  * @param labShell - Jupyter lab shell
@@ -45,7 +43,6 @@ namespace CommandIDs {
  */
 async function activateTOC(
   app: JupyterFrontEnd,
-  rendermime: IRenderMimeRegistry,
   translator?: ITranslator | null,
   restorer?: ILayoutRestorer | null,
   labShell?: ILabShell | null,
@@ -55,7 +52,7 @@ async function activateTOC(
   let configuration = { ...TableOfContents.defaultConfig };
 
   // Create the ToC widget:
-  const toc = new TableOfContentsPanel(rendermime, translator ?? undefined);
+  const toc = new TableOfContentsPanel(translator ?? undefined);
 
   const tocModels = new Map<string, TableOfContents.Model | null>();
 
@@ -155,33 +152,6 @@ async function activateTOC(
       );
     }
   }
-  /*
-
-  // Create a notebook generator:
-  if (notebookTracker) {
-    const notebookGenerator = createNotebookGenerator(
-      notebookTracker,
-      toc,
-      rendermime.sanitizer,
-      translator,
-      settings
-    );
-    registry.add(notebookGenerator);
-  }
-
-  // Create a rendered Markdown generator:
-  if (markdownViewerTracker) {
-    const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
-      markdownViewerTracker,
-      toc,
-      rendermime.sanitizer,
-      translator,
-      settings
-    );
-    registry.add(renderedMarkdownGenerator);
-  }
-
-  */
 
   // Update the ToC when the active widget changes:
   if (labShell) {
@@ -230,7 +200,6 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc-extension:registry',
   autoStart: true,
   provides: ITableOfContentsRegistry,
-  requires: [IRenderMimeRegistry],
   optional: [ITranslator, ILayoutRestorer, ILabShell, ISettingRegistry],
   activate: activateTOC
 };

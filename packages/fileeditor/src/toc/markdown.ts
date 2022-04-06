@@ -11,7 +11,15 @@ import { Widget } from '@lumino/widgets';
 import { EditorToCModel, IEditorHeading } from './model';
 import { FileEditor } from '../widget';
 
+/**
+ * Table of content model for Markdown files.
+ */
 export class MarkdownToCModel extends EditorToCModel {
+  /**
+   * Produce the headings for a document.
+   *
+   * @returns The list of new headings or `null` if nothing needs to be updated.
+   */
   protected getHeadings(): Promise<IEditorHeading[] | null> {
     if (!this.isActive) {
       return Promise.resolve(null);
@@ -24,6 +32,9 @@ export class MarkdownToCModel extends EditorToCModel {
   }
 }
 
+/**
+ * Table of content model factory for Markdown files.
+ */
 export class MarkdownToCFactory extends TableOfContentsFactory<
   IDocumentWidget<FileEditor>
 > {
