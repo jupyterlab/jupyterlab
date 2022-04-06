@@ -3,13 +3,7 @@
 
 import * as path from 'path';
 import * as webpack from 'webpack';
-import crypto from 'crypto';
 import miniSVGDataURI from 'mini-svg-data-uri';
-
-// Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
-const cryptoOrigCreateHash = crypto.createHash;
-crypto.createHash = (algorithm: string) =>
-  cryptoOrigCreateHash(algorithm == 'md4' ? 'sha256' : algorithm);
 
 const rules = [
   { test: /\.css$/, use: ['style-loader', 'css-loader'] },
