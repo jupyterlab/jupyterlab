@@ -1,14 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-var data = require('./package.json');
-var Build = require('@jupyterlab/builder').Build;
+const data = require('./package.json');
+const Build = require('@jupyterlab/builder').Build;
+const miniSVGDataURI = require('mini-svg-data-uri');
 
-var names = Object.keys(data.dependencies).filter(function (name) {
-  var packageData = require(name + '/package.json');
+const names = Object.keys(data.dependencies).filter(function (name) {
+  const packageData = require(name + '/package.json');
   return packageData.jupyterlab !== undefined;
 });
 
-var extras = Build.ensureAssets({
+const extras = Build.ensureAssets({
   packageNames: names,
   output: './build'
 });
@@ -50,9 +51,9 @@ module.exports = [
           // In .css files, svg is loaded as a data URI.
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           issuer: /\.css$/,
-          use: {
-            loader: 'svg-url-loader',
-            options: { encoding: 'none', limit: 10000 }
+          type: 'asset',
+          generator: {
+            dataUrl: content => miniSVGDataURI(content.toString())
           }
         },
         {

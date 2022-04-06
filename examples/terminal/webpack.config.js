@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const miniSVGDataURI = require('mini-svg-data-uri');
 
 module.exports = {
   entry: ['whatwg-fetch', './build/index.js'],
@@ -18,9 +19,9 @@ module.exports = {
         // In .css files, svg is loaded as a data URI.
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         issuer: /\.css$/,
-        use: {
-          loader: 'svg-url-loader',
-          options: { encoding: 'none', limit: 10000 }
+        type: 'asset',
+        generator: {
+          dataUrl: content => miniSVGDataURI(content.toString())
         }
       },
       {

@@ -3,6 +3,7 @@
 const data = require('./package.json');
 const webpack = require('webpack');
 const Build = require('@jupyterlab/builder').Build;
+const miniSVGDataURI = require('mini-svg-data-uri');
 
 // Generate webpack config to copy extension assets to the build directory,
 // such as setting schema files, theme assets, etc.
@@ -45,9 +46,9 @@ module.exports = [
           // In .css files, svg is loaded as a data URI.
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           issuer: /\.css$/,
-          use: {
-            loader: 'svg-url-loader',
-            options: { encoding: 'none', limit: 10000 }
+          type: 'asset/inline',
+          generator: {
+            dataUrl: content => miniSVGDataURI(content.toString())
           }
         },
         {

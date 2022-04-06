@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
 import crypto from 'crypto';
+import miniSVGDataURI from 'mini-svg-data-uri';
 
 // Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
 const cryptoOrigCreateHash = crypto.createHash;
@@ -33,9 +34,9 @@ const rules = [
     // In .css files, svg is loaded as a data URI.
     test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
     issuer: /\.css$/,
-    use: {
-      loader: 'svg-url-loader',
-      options: { encoding: 'none', limit: 10000 }
+    type: 'asset',
+    generator: {
+      dataUrl: (content: any) => miniSVGDataURI(content.toString())
     }
   },
   {

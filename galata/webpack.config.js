@@ -4,6 +4,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const miniSVGDataURI = require('mini-svg-data-uri');
 
 module.exports = {
   entry: './src/inpage/index.ts',
@@ -54,9 +55,9 @@ module.exports = {
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         issuer: /\.css$/,
-        use: {
-          loader: 'svg-url-loader',
-          options: { encoding: 'none', limit: 10000 }
+        type: 'asset',
+        generator: {
+          dataUrl: content => miniSVGDataURI(content.toString())
         }
       },
       {
