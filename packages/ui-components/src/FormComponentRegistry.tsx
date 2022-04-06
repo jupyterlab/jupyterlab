@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { Token } from '@lumino/coreutils';
-import { Field } from '@rjsf/core';
+import type { Field } from '@rjsf/core';
 
 /**
  * A registry for rendering fields used in the FormEditor component.
