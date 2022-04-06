@@ -103,6 +103,24 @@ export class SearchInstance implements IDisposable {
   }
 
   /**
+   * Set the search text
+   *
+   * It does not trigger a view update.
+   */
+  setSearchText(search: string): void {
+    this._displayState.searchText = search;
+  }
+
+  /**
+   * Set the replace text
+   *
+   * It does not trigger a view update.
+   */
+  setReplaceText(replace: string): void {
+    this._displayState.replaceText = replace;
+  }
+
+  /**
    * If there is a replace box, show it.
    */
   showReplace(): void {
