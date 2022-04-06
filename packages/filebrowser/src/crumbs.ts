@@ -9,7 +9,11 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { ellipsesIcon, folderIcon } from '@jupyterlab/ui-components';
+import {
+  ellipsesIcon,
+  homeIcon as preferredIcon,
+  folderIcon as rootIcon
+} from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { ElementExt } from '@lumino/domutils';
 import { IDragEvent } from '@lumino/dragdrop';
@@ -25,7 +29,12 @@ const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
 /**
  * The class name for the breadcrumbs home node
  */
-const BREADCRUMB_HOME_CLASS = 'jp-BreadCrumbs-home';
+const BREADCRUMB_ROOT_CLASS = 'jp-BreadCrumbs-home';
+
+/**
+ * The class name for the breadcrumbs preferred node
+ */
+const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
 
 /**
  * The class name added to the breadcrumb node.
@@ -64,6 +73,11 @@ export class BreadCrumbs extends Widget {
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
+    this._hasPreferred =
+      PageConfig.getOption('preferredPath') !== '/' ? true : false;
+    if (this._hasPreferred) {
+      this.node.appendChild(this._crumbs[Private.Crumb.Preferred]);
+    }
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
   }
@@ -134,7 +148,12 @@ export class BreadCrumbs extends Widget {
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
-    Private.updateCrumbs(this._crumbs, this._crumbSeps, localPath);
+    Private.updateCrumbs(
+      this._crumbs,
+      this._crumbSeps,
+      localPath,
+      this._hasPreferred
+    );
   }
 
   /**
@@ -149,9 +168,21 @@ export class BreadCrumbs extends Widget {
     // Find a valid click target.
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
+      if (node.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+        this._model
+          .cd(PageConfig.getOption('preferredPath'))
+          .catch(error =>
+            showErrorMessage(this._trans.__('Open Error'), error)
+          );
+
+        // Stop the event propagation.
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
-        node.classList.contains(BREADCRUMB_HOME_CLASS)
+        node.classList.contains(BREADCRUMB_ROOT_CLASS)
       ) {
         const index = ArrayExt.findFirstIndex(
           this._crumbs,
@@ -275,6 +306,7 @@ export class BreadCrumbs extends Widget {
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _model: FileBrowserModel;
+  private _hasPreferred: boolean;
   private _crumbs: ReadonlyArray<HTMLElement>;
   private _crumbSeps: ReadonlyArray<HTMLElement>;
 }
@@ -310,7 +342,8 @@ namespace Private {
     Home,
     Ellipsis,
     Parent,
-    Current
+    Current,
+    Preferred
   }
 
   /**
@@ -319,16 +352,23 @@ namespace Private {
   export function updateCrumbs(
     breadcrumbs: ReadonlyArray<HTMLElement>,
     separators: ReadonlyArray<HTMLElement>,
-    path: string
+    path: string,
+    hasPreferred: boolean
   ): void {
     const node = breadcrumbs[0].parentNode as HTMLElement;
 
-    // Remove all but the home node.
+    // Remove all but the home or preferred node.
     const firstChild = node.firstChild as HTMLElement;
     while (firstChild && firstChild.nextSibling) {
       node.removeChild(firstChild.nextSibling);
     }
-    node.appendChild(separators[0]);
+
+    if (hasPreferred) {
+      node.appendChild(breadcrumbs[Crumb.Home]);
+      node.appendChild(separators[0]);
+    } else {
+      node.appendChild(separators[0]);
+    }
 
     const parts = path.split('/');
     if (parts.length > 2) {
@@ -357,8 +397,8 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
-    const home = folderIcon.element({
-      className: BREADCRUMB_HOME_CLASS,
+    const home = rootIcon.element({
+      className: BREADCRUMB_ROOT_CLASS,
       tag: 'span',
       title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
       stylesheet: 'breadCrumb'
@@ -372,7 +412,13 @@ namespace Private {
     parent.className = BREADCRUMB_ITEM_CLASS;
     const current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
-    return [home, ellipsis, parent, current];
+    const preferred = preferredIcon.element({
+      className: BREADCRUMB_PREFERRED_CLASS,
+      tag: 'span',
+      title: PageConfig.getOption('preferredPath') || 'Jupyter Preferred Path',
+      stylesheet: 'breadCrumb'
+    });
+    return [home, ellipsis, parent, current, preferred];
   }
 
   /**
