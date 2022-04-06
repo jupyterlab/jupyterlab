@@ -127,7 +127,7 @@ message_yjs_update = 2
 
 def read_sync_step1(handler, doc, encoded_state_vector):
     message = Y.encode_state_as_update(doc, encoded_state_vector)
-    message = bytes([message_yjs_sync_step2] + write_var_uint(len(message)) + message)
+    message = bytes([0, message_yjs_sync_step2] + write_var_uint(len(message)) + message)
     handler.write_message(message, binary=True)
 
 
