@@ -121,9 +121,19 @@ packages:
 
   // Set registry to local registry
   const local_registry = `http://localhost:${port}`;
-  child_process.execSync(`npm config set registry "${local_registry}"`);
+  child_process.execFileSync('npm', [
+    'config',
+    'set',
+    'registry',
+    local_registry
+  ]);
   try {
-    child_process.execSync(`yarn config set registry "${local_registry}"`);
+    child_process.execFileSync('yarn', [
+      'config',
+      'set',
+      'registry',
+      local_registry
+    ]);
   } catch (e) {
     // yarn not available
   }
