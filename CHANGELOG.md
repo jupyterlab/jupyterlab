@@ -18,19 +18,19 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.3.x/CHANGELOG.md'
 
 ### Enhancements made
 
-- Backport PR #12297 on branch 3.3.x (Add a preferred-dir icon to the file browser crumbs) [#12354](https://github.com/jupyterlab/jupyterlab/pull/12354) ([@echarles](https://github.com/echarles))
+- Add a preferred-dir icon to the file browser crumbs [#12354](https://github.com/jupyterlab/jupyterlab/pull/12354) ([@echarles](https://github.com/echarles))
 - Adds preferKernel option to JupyterLab code [#12260](https://github.com/jupyterlab/jupyterlab/pull/12260) ([@jweill-aws](https://github.com/jweill-aws))
 - Add aria progressbar role and data-status for testing in extensions [#12238](https://github.com/jupyterlab/jupyterlab/pull/12238) ([@krassowski](https://github.com/krassowski))
 
 ### Bugs fixed
 
-- fix: Markdown cell generates duplicate toc content (#12312) [#12314](https://github.com/jupyterlab/jupyterlab/pull/12314) ([@yangql176](https://github.com/yangql176))
+- Fix Markdown cell generates duplicate toc content (#12312) [#12314](https://github.com/jupyterlab/jupyterlab/pull/12314) ([@yangql176](https://github.com/yangql176))
 - Fix settings with `null` default not getting marked as modified [#12240](https://github.com/jupyterlab/jupyterlab/pull/12240) ([@krassowski](https://github.com/krassowski))
 - Allow linear and radial gradient [#12276](https://github.com/jupyterlab/jupyterlab/pull/12276) ([@krassowski](https://github.com/krassowski))
 - Don't rely on search results to filter installed extension [#12249](https://github.com/jupyterlab/jupyterlab/pull/12249) ([@fcollonval](https://github.com/fcollonval))
-- fixes directory not found error when preferred_dir is set [#12220](https://github.com/jupyterlab/jupyterlab/pull/12220) ([@andrewfulton9](https://github.com/andrewfulton9))
+- Fix directory not found error when preferred_dir is set [#12220](https://github.com/jupyterlab/jupyterlab/pull/12220) ([@andrewfulton9](https://github.com/andrewfulton9))
 - Fix state restoration in the notebook extension [#12218](https://github.com/jupyterlab/jupyterlab/pull/12218) ([@jtpio](https://github.com/jtpio))
-- Backport PR #12208 on branch 3.3.x (Fix sdist editable install and add tests) [#12224](https://github.com/jupyterlab/jupyterlab/pull/12224) ([@blink1073](https://github.com/blink1073))
+- Fix sdist editable install and add tests [#12224](https://github.com/jupyterlab/jupyterlab/pull/12224) ([@blink1073](https://github.com/blink1073))
 
 ### Maintenance and upkeep improvements
 
