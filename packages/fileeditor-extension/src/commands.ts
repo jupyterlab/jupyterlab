@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
@@ -36,13 +37,13 @@ import {
   textEditorIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
+import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONObject,
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { JupyterFrontEnd } from '@jupyterlab/application';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
