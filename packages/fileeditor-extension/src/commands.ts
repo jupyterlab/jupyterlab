@@ -5,10 +5,15 @@ import {
   Clipboard,
   ICommandPalette,
   ISessionContextDialogs,
+  MainAreaWidget,
   sessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  CodeViewerWidget,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
@@ -37,6 +42,7 @@ import {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
@@ -99,6 +105,8 @@ export namespace CommandIDs {
   export const invokeCompleter = 'completer:invoke-file';
 
   export const selectCompleter = 'completer:select-file';
+
+  export const openCodeViewer = 'code-viewer:open';
 }
 
 export interface IFileTypeData extends ReadonlyJSONObject {
@@ -1190,6 +1198,54 @@ export namespace Commands {
     menu.runMenu.codeRunners.runAll.add({
       id: CommandIDs.runAllCode,
       isEnabled
+    });
+  }
+
+  export function addOpenCodeViewerCommand(
+    app: JupyterFrontEnd,
+    editorServices: IEditorServices
+  ) {
+    const openCodeViewer = (args: {
+      content: string;
+      label?: string;
+      mimeType?: string;
+      extension?: string;
+    }): void => {
+      const func = editorServices.factoryService.newDocumentEditor;
+      const factory: CodeEditor.Factory = options => {
+        return func(options);
+      };
+
+      // Derive mimetype from extension
+      let mimetype = args.mimeType;
+      if (!mimetype && args.extension) {
+        mimetype = editorServices.mimeTypeService.getMimeTypeByFilePath(
+          `temp.${args.extension.replace(/\\.$/, '')}`
+        );
+      }
+
+      const widget = new CodeViewerWidget({
+        factory,
+        content: args.content,
+        mimeType: mimetype
+      });
+      widget.title.label = args.label || 'Code Viewer';
+      widget.title.caption = widget.title.label;
+
+      // Get the fileType based on the mimetype to determine the icon
+      const fileType = toArray(app.docRegistry.fileTypes()).find(fileType => {
+        return mimetype ? fileType.mimeTypes.includes(mimetype) : undefined;
+      });
+      widget.title.icon = fileType?.icon ?? textEditorIcon;
+
+      const main = new MainAreaWidget({ content: widget });
+      app.shell.add(main, 'main');
+    };
+
+    app.commands.addCommand(CommandIDs.openCodeViewer, {
+      execute: (args: any) => {
+        openCodeViewer(args);
+      }
     });
   }
 }
