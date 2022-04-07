@@ -25,7 +25,9 @@ import { IFormComponentRegistry, launchIcon } from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   IJSONSettingEditorTracker,
-  ISettingEditorTracker,
+  ISettingEditorTracker
+} from '@jupyterlab/settingeditor/lib/tokens';
+import type {
   JsonSettingEditor,
   SettingsEditor
 } from '@jupyterlab/settingeditor';
@@ -104,13 +106,15 @@ function activate(
   }
 
   commands.addCommand(CommandIDs.open, {
-    execute: () => {
+    execute: async () => {
       if (tracker.currentWidget) {
         shell.activateById(tracker.currentWidget.id);
         return;
       }
 
       const key = plugin.id;
+
+      const { SettingsEditor } = await import('@jupyterlab/settingeditor');
 
       const editor = new MainAreaWidget<SettingsEditor>({
         content: new SettingsEditor({
@@ -207,7 +211,7 @@ function activateJSON(
   }
 
   commands.addCommand(CommandIDs.openJSON, {
-    execute: () => {
+    execute: async () => {
       if (tracker.currentWidget) {
         shell.activateById(tracker.currentWidget.id);
         return;
@@ -215,6 +219,8 @@ function activateJSON(
 
       const key = plugin.id;
       const when = app.restored;
+
+      const { JsonSettingEditor } = await import('@jupyterlab/settingeditor');
 
       const editor = new JsonSettingEditor({
         commands: {
