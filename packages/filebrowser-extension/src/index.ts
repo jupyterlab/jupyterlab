@@ -29,6 +29,7 @@ import {
   FileBrowser,
   FileUploadStatus,
   FilterFileBrowserModel,
+  IFileBrowserCommands,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 import { Launcher } from '@jupyterlab/launcher';
@@ -141,6 +142,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     ITreePathUpdater,
     ICommandPalette
   ],
+  provides: IFileBrowserCommands,
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
@@ -190,7 +192,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       updateBrowserTitle();
     });
 
-    void Promise.all([app.restored, browser.model.restored]).then(() => {
+    return void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
         browser.model.pathChanged.connect((sender, args) => {
           treePathUpdater(args.newValue);
@@ -361,7 +363,13 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
  */
 const browserWidget: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:widget',
-  requires: [IDocumentManager, IFileBrowserFactory, ITranslator, ILabShell],
+  requires: [
+    IDocumentManager,
+    IFileBrowserFactory,
+    ITranslator,
+    ILabShell,
+    IFileBrowserCommands
+  ],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
