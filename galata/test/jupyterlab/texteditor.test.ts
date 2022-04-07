@@ -25,6 +25,7 @@ test.describe('Text Editor Tests', () => {
 
     await page.menu.clickMenuItem('Settings>Settings Editor');
 
+    await page.waitForSelector('text=Text Editor');
     await page.click('text=Text Editor');
 
     // Add two rulers
