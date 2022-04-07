@@ -32,6 +32,13 @@ export namespace galata {
       codeCellConfig: { cursorBlinkRate: 0 },
       markdownCellConfig: { cursorBlinkRate: 0 },
       rawCellConfig: { cursorBlinkRate: 0 }
+    },
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        'content-font-family': 'DejaVu Sans',
+        'ui-font-family': 'DejaVu Sans',
+        'code-font-family': 'DejaVu Sans Mono'
+      }
     }
   };
 
@@ -42,6 +49,38 @@ export namespace galata {
       }
     }
   };
+
+  /**
+   * Helper function to do a deep merge/override of DEFAULT_SETTINGS.
+   *
+   * Usage:
+   *   test.use({mockSettings: galata.mergeOverrideDefaultSettings({@foo/bar:bla: 'xyz'})})
+   *
+   */
+  export function mergeOverrideDefaultSettings(addendum: Record<string, any>) {
+    // helper for recursive merge/override
+    const mergeOverride = (
+      base: Record<string, any>,
+      addendum: Record<string, any>
+    ) => {
+      let retval = { ...base };
+      for (const key of Object.keys(addendum)) {
+        if (key in retval) {
+          if (retval[key] instanceof Object) {
+            retval[key] = mergeOverride(retval[key], addendum[key]);
+          } else {
+            retval[key] = addendum[key];
+          }
+        } else {
+          retval[key] = addendum[key];
+        }
+      }
+      return retval;
+    };
+
+    // do it
+    return mergeOverride(DEFAULT_SETTINGS, addendum);
+  }
 
   /**
    * Sidebar position

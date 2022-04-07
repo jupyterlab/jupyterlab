@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import { galata, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 
 const fileName = 'notebook.ipynb';
@@ -62,11 +62,11 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   });
   // use non-standard showHiddenCellsButton=false
   test.use({
-    mockSettings: {
+    mockSettings: galata.mergeOverrideDefaultSettings({
       '@jupyterlab/notebook-extension:tracker': {
         showHiddenCellsButton: false
       }
-    }
+    })
   });
 
   test('Show Collapser Unselected; no_showHCB', async ({ page }) => {
