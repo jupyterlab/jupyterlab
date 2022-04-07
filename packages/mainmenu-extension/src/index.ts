@@ -860,7 +860,8 @@ namespace Private {
       // Coerce the result to be a string. When Typedoc is updated to use
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a string.
-      return (extender[label] as any)(count) as string;
+      const labeller = extender[label] as any;
+      return labeller ? (labeller(count) as string) : '';
     }
   }
 
