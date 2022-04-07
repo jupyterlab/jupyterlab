@@ -300,7 +300,7 @@ Then use the following steps:
 
    git clone https://github.com/<your-github-username>/jupyterlab.git
    cd jupyterlab
-   pip install -e .
+   pip install -e ".[test]"
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
    jlpm run build:core  # Build the core mode assets (optional)

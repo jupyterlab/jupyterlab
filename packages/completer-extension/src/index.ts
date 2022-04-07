@@ -17,7 +17,7 @@ import {
 } from '@jupyterlab/completer';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
-import { FieldProps } from '@rjsf/core';
+import type { FieldProps } from '@rjsf/core';
 
 import { renderAvailableProviders } from './renderer';
 
