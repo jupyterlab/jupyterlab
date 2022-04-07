@@ -14,12 +14,8 @@ import { MarkdownDocument } from './widget';
 /**
  * Interface describing a Markdown viewer heading.
  */
-export interface IMarkdownViewerHeading extends TableOfContents.IHeading {
-  /**
-   * Heading element handle.
-   */
-  element?: Element | null;
-}
+export interface IMarkdownViewerHeading
+  extends ToCUtils.Markdown.IMarkdownHeading {}
 
 /**
  * Table of content model for Markdown viewer files.
@@ -43,23 +39,6 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
     super(widget, configuration);
   }
 
-  set activeHeading(heading: IMarkdownViewerHeading | null) {
-    super.activeHeading = heading;
-    if (heading?.element) {
-      const widgetBox = this.widget.content.node.getBoundingClientRect();
-      const elementBox = heading.element.getBoundingClientRect();
-
-      if (
-        elementBox.top > widgetBox.bottom ||
-        elementBox.bottom < widgetBox.top ||
-        elementBox.left > widgetBox.right ||
-        elementBox.right < widgetBox.left
-      ) {
-        heading.element.scrollIntoView({ inline: 'center' });
-      }
-    }
-  }
-
   /**
    * Whether the model gets updated even if the table of contents panel
    * is hidden or not.
@@ -76,85 +55,7 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
   protected getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
     const headings = ToCUtils.Markdown.getHeadings(content, this.configuration);
-    // Clear all numbering items
-    this.widget.content.node
-      .querySelectorAll(`span.${ToCUtils.NUMBERING_CLASS}`)
-      .forEach(el => {
-        el.remove();
-      });
-
-    if (this.parser) {
-      this.findElement(headings).catch(reason => {
-        console.error('Failed to link heading and DOM nodes.', reason);
-      });
-    }
     return Promise.resolve(headings);
-  }
-
-  protected async findElement(
-    headings: (ToCUtils.Markdown.IMarkdownHeading & {
-      element?: Element | null;
-    })[]
-  ): Promise<void> {
-    await this.widget.content.ready;
-
-    // Process headings in order to deal with multiple identical selectors
-    for (const heading of headings) {
-      try {
-        const innerHTML = await this.parser?.render(heading.raw);
-
-        if (!innerHTML) {
-          continue;
-        }
-
-        const container = document.createElement('div');
-        container.innerHTML = innerHTML;
-        // See packages/rendermime/src/renderers.ts::Private.headerAnchors for header id construction
-        const elementId = (
-          container.querySelector(`h${heading.level}`)?.textContent ?? ''
-        ).replace(/ /g, '-');
-
-        if (!elementId) {
-          continue;
-        }
-
-        const selector = `h${heading.level}[id="${elementId}"]`;
-
-        const element = (heading.element = this.widget.content.node.querySelector(
-          selector
-        ) as HTMLElement | null);
-
-        if (!element) {
-          continue;
-        }
-
-        if (!element.querySelector(`span.${ToCUtils.NUMBERING_CLASS}`)) {
-          addNumbering(element, heading.prefix ?? '');
-        } else {
-          // There are likely multiple elements with the same selector
-          //  => use the first one without prefix
-          const allElements = this.widget.content.node.querySelectorAll(
-            selector
-          );
-          for (const el of allElements) {
-            if (!el.querySelector(`span.${ToCUtils.NUMBERING_CLASS}`)) {
-              heading.element = el;
-              addNumbering(el, heading.prefix ?? '');
-              break;
-            }
-          }
-        }
-      } catch (reason) {
-        console.error('Failed to parse a heading.', reason);
-      }
-    }
-
-    function addNumbering(el: Element, numbering: string) {
-      el.insertAdjacentHTML(
-        'afterbegin',
-        `<span class="${ToCUtils.NUMBERING_CLASS}">${numbering}</span>`
-      );
-    }
   }
 }
 
@@ -188,6 +89,86 @@ export class MarkdownViewerToCFactory extends TableOfContentsFactory<
     widget: MarkdownDocument,
     configuration?: TableOfContents.IConfig
   ): TableOfContentsModel<TableOfContents.IHeading, MarkdownDocument> {
-    return new MarkdownViewerToCModel(widget, this.parser, configuration);
+    const model = new MarkdownViewerToCModel(
+      widget,
+      this.parser,
+      configuration
+    );
+
+    let headingToElement = new WeakMap<
+      IMarkdownViewerHeading,
+      Element | null
+    >();
+
+    const onActiveHeadingChanged = (
+      model: TableOfContentsModel<IMarkdownViewerHeading, MarkdownDocument>,
+      heading: IMarkdownViewerHeading | null
+    ) => {
+      if (heading) {
+        const el = headingToElement.get(heading);
+
+        if (el) {
+          const widgetBox = widget.content.node.getBoundingClientRect();
+          const elementBox = el.getBoundingClientRect();
+
+          if (
+            elementBox.top > widgetBox.bottom ||
+            elementBox.bottom < widgetBox.top ||
+            elementBox.left > widgetBox.right ||
+            elementBox.right < widgetBox.left
+          ) {
+            el.scrollIntoView({ inline: 'center' });
+          }
+        }
+      }
+    };
+
+    const onHeadingsChanged = (
+      model: TableOfContentsModel<IMarkdownViewerHeading, MarkdownDocument>
+    ) => {
+      if (!this.parser) {
+        return;
+      }
+
+      // Clear all numbering items
+      ToCUtils.clearNumbering(widget.content.node);
+
+      // Create a new mapping
+      headingToElement = new WeakMap<IMarkdownViewerHeading, Element | null>();
+      model.headings.forEach(async heading => {
+        const elementId = await ToCUtils.Markdown.getHeadingId(
+          this.parser!,
+          heading.raw,
+          heading.level
+        );
+
+        if (!elementId) {
+          return;
+        }
+        const selector = `h${heading.level}[id="${elementId}"]`;
+
+        headingToElement.set(
+          heading,
+          ToCUtils.addPrefix(
+            widget.content.node,
+            selector,
+            heading.prefix ?? ''
+          )
+        );
+      });
+    };
+
+    widget.content.ready.then(() => {
+      onHeadingsChanged(model);
+
+      model.activeHeadingChanged.connect(onActiveHeadingChanged);
+      model.headingsChanged.connect(onHeadingsChanged);
+      widget.disposed.connect(() => {
+        model.activeHeadingChanged.disconnect(onActiveHeadingChanged);
+        model.headingsChanged.disconnect(onHeadingsChanged);
+      });
+    });
+
+    return model;
   }
 }

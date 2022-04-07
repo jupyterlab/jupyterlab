@@ -7,6 +7,7 @@ import type { VDomRenderer } from '@jupyterlab/ui-components';
 import type { JSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
 
 /**
@@ -48,6 +49,9 @@ export const ITableOfContentsRegistry = new Token<ITableOfContentsRegistry>(
  * Namespace for table of contents interface
  */
 export namespace TableOfContents {
+  /**
+   * Table of content model factory interface
+   */
   export interface IFactory<W extends Widget = Widget> {
     /**
      * Whether the factory can handle the widget or not.
@@ -142,14 +146,14 @@ export namespace TableOfContents {
     activeHeading: H | null;
 
     /**
-     * Whether the model needs to be kept up to date or not.
-     *
-     * ### Notes
-     * This is set to `true` if the ToC panel is visible and
-     * to `false` if it is hidden. But some models may require
-     * to be always active; e.g. to add numbering in the document.
+     * Signal emitted when the active heading changes.
      */
-    isActive: boolean;
+    readonly activeHeadingChanged: ISignal<IModel<H>, H | null>;
+
+    /**
+     * Signal emitted when a table of content section collapse state changes.
+     */
+    readonly collapseChanged: ISignal<IModel<H>, H>;
 
     /**
      * Model configuration
@@ -162,6 +166,21 @@ export namespace TableOfContents {
      * @returns list of headings
      */
     readonly headings: H[];
+
+    /**
+     * Signal emitted when the headings changes.
+     */
+    readonly headingsChanged: ISignal<IModel<H>, void>;
+
+    /**
+     * Whether the model needs to be kept up to date or not.
+     *
+     * ### Notes
+     * This is set to `true` if the ToC panel is visible and
+     * to `false` if it is hidden. But some models may require
+     * to be always active; e.g. to add numbering in the document.
+     */
+    isActive: boolean;
 
     /**
      * Document title

@@ -3,6 +3,7 @@
 
 import { VDomModel } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { TableOfContents } from './tokens';
 
@@ -24,8 +25,14 @@ export abstract class TableOfContentsModel<
   constructor(protected widget: T, configuration?: TableOfContents.IConfig) {
     super();
     this._activeHeading = null;
+    this._activeHeadingChanged = new Signal<
+      TableOfContentsModel<H, T>,
+      H | null
+    >(this);
+    this._collapseChanged = new Signal<TableOfContentsModel<H, T>, H>(this);
     this._configuration = configuration ?? { ...TableOfContents.defaultConfig };
     this._headings = new Array<H>();
+    this._headingsChanged = new Signal<TableOfContentsModel<H, T>, void>(this);
     this._isActive = false;
     this._isRefreshing = false;
     this._needsRefreshing = false;
@@ -43,19 +50,22 @@ export abstract class TableOfContentsModel<
     if (this._activeHeading !== heading) {
       this._activeHeading = heading;
       this.stateChanged.emit();
+      this._activeHeadingChanged.emit(heading);
     }
   }
 
   /**
-   * Whether the model gets updated even if the table of contents panel
-   * is hidden or not.
-   *
-   * #### Notes
-   * For example, ToC models use to add title numbering will
-   * set this to true.
+   * Signal emitted when the active heading changes.
    */
-  protected get isAlwaysActive(): boolean {
-    return false;
+  get activeHeadingChanged(): ISignal<TableOfContents.IModel<H>, H | null> {
+    return this._activeHeadingChanged;
+  }
+
+  /**
+   * Signal emitted when a table of content section collapse state changes.
+   */
+  get collapseChanged(): ISignal<TableOfContents.IModel<H>, H> {
+    return this._collapseChanged;
   }
 
   /**
@@ -69,6 +79,22 @@ export abstract class TableOfContentsModel<
       this._configuration = c;
       this.stateChanged.emit();
     }
+  }
+
+  /**
+   * List of headings.
+   *
+   * @returns table of contents list of headings
+   */
+  get headings(): H[] {
+    return this._headings;
+  }
+
+  /**
+   * Signal emitted when the headings changes.
+   */
+  get headingsChanged(): ISignal<TableOfContents.IModel<H>, void> {
+    return this._headingsChanged;
   }
 
   /**
@@ -93,12 +119,15 @@ export abstract class TableOfContentsModel<
   }
 
   /**
-   * List of headings.
+   * Whether the model gets updated even if the table of contents panel
+   * is hidden or not.
    *
-   * @returns table of contents list of headings
+   * #### Notes
+   * For example, ToC models use to add title numbering will
+   * set this to true.
    */
-  get headings(): H[] {
-    return this._headings;
+  protected get isAlwaysActive(): boolean {
+    return false;
   }
 
   /**
@@ -147,6 +176,7 @@ export abstract class TableOfContentsModel<
       ) {
         this._headings = newHeadings;
         this.stateChanged.emit();
+        this._headingsChanged.emit();
       }
     } finally {
       this._isRefreshing = false;
@@ -159,11 +189,15 @@ export abstract class TableOfContentsModel<
   toggleCollapse(heading: H): void {
     heading.collapsed = !heading.collapsed;
     this.stateChanged.emit();
+    this._collapseChanged.emit(heading);
   }
 
   private _activeHeading: H | null;
+  private _activeHeadingChanged: Signal<TableOfContentsModel<H, T>, H | null>;
+  private _collapseChanged: Signal<TableOfContentsModel<H, T>, H>;
   private _configuration: TableOfContents.IConfig;
   private _headings: H[];
+  private _headingsChanged: Signal<TableOfContentsModel<H, T>, void>;
   private _isActive: boolean;
   private _isRefreshing: boolean;
   private _needsRefreshing: boolean;

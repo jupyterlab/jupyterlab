@@ -9,6 +9,16 @@ import { TableOfContents } from '../tokens';
 export const NUMBERING_CLASS = 'numbering-entry';
 
 /**
+ * HTML heading
+ */
+export interface IHTMLHeading extends TableOfContents.IHeading {
+  /**
+   * HTML id
+   */
+  id?: string | null;
+}
+
+/**
  * Returns whether a MIME type corresponds to either HTML.
  *
  * @param mime - MIME type string
@@ -38,18 +48,18 @@ export function getHTMLHeadings(
   html: string,
   options?: Partial<TableOfContents.IConfig>,
   initialLevels: number[] = []
-): TableOfContents.IHeading[] {
+): IHTMLHeading[] {
   const { numberingH1, maximalDepth } = {
     ...TableOfContents.defaultConfig,
     ...options
   };
 
-  const container = document.createElement('div');
+  const container: HTMLDivElement = document.createElement('div');
   container.innerHTML = html;
 
   const levels = initialLevels;
   let previousLevel = levels.length;
-  const headings = new Array<TableOfContents.IHeading>();
+  const headings = new Array<IHTMLHeading>();
   const headers = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
   for (const h of headers) {
     // TODO support tocSkip class from toc2
@@ -84,9 +94,62 @@ export function getHTMLHeadings(
         text: h.textContent ?? '',
         // If the header list skips some level, replace missing elements by 0
         prefix: levels.map(level => level ?? 0).join('.') + '. ',
-        level
+        level,
+        id: h?.getAttribute('id')
       });
     }
   }
   return headings;
+}
+
+export function addPrefix(
+  container: Element,
+  selector: string,
+  prefix: string
+): Element | null {
+  let element = container.querySelector(selector) as Element | null;
+
+  if (!element) {
+    return null;
+  }
+
+  if (!element.querySelector(`span.${NUMBERING_CLASS}`)) {
+    addNumbering(element, prefix);
+  } else {
+    // There are likely multiple elements with the same selector
+    //  => use the first one without prefix
+    const allElements = container.querySelectorAll(selector);
+    for (const el of allElements) {
+      if (!el.querySelector(`span.${NUMBERING_CLASS}`)) {
+        element = el;
+        addNumbering(el, prefix);
+        break;
+      }
+    }
+  }
+
+  return element;
+}
+
+/**
+ * Add a numbering prefix to a HTML element.
+ *
+ * @param el HTML element
+ * @param numbering Numbering prefix to add
+ */
+function addNumbering(el: Element, numbering: string): void {
+  el.insertAdjacentHTML(
+    'afterbegin',
+    `<span class="${NUMBERING_CLASS}">${numbering}</span>`
+  );
+}
+
+/**
+ * Remove all numbering nodes from element
+ * @param element Node to clear
+ */
+export function clearNumbering(element: Element): void {
+  element.querySelectorAll(`span.${NUMBERING_CLASS}`).forEach(el => {
+    el.remove();
+  });
 }

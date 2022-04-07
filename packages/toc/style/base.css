@@ -7,6 +7,10 @@
 | Table of Contents
 |----------------------------------------------------------------------------*/
 
+:root {
+  --jp-private-toc-active-width: 4px;
+}
+
 .jp-TableOfContents {
   display: flex;
   flex-direction: column;
@@ -34,7 +38,8 @@
 }
 
 .jp-TableOfContents-content {
-  margin: 0;
+  /* left margin for the active heading indicator */
+  margin: 0 0 0 var(--jp-private-toc-active-width);
   padding: 0;
   background-color: var(--jp-layout-color1);
 }
@@ -81,7 +86,7 @@
 .jp-tocItem-heading::before {
   content: ' ';
   background: transparent;
-  width: 4px;
+  width: var(--jp-private-toc-active-width);
   height: 24px;
   position: absolute;
   left: 0;

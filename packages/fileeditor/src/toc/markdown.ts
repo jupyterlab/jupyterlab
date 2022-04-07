@@ -4,17 +4,20 @@
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   TableOfContents,
-  TableOfContentsFactory,
+  TableOfContentsModel,
   ToCUtils
 } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
-import { EditorToCModel, IEditorHeading } from './model';
 import { FileEditor } from '../widget';
+import { EditorToCModelFactory, IEditorHeading } from './factory';
 
 /**
  * Table of content model for Markdown files.
  */
-export class MarkdownToCModel extends EditorToCModel {
+export class MarkdownToCModel extends TableOfContentsModel<
+  IEditorHeading,
+  IDocumentWidget<FileEditor, DocumentRegistry.IModel>
+> {
   /**
    * Produce the headings for a document.
    *
@@ -35,9 +38,7 @@ export class MarkdownToCModel extends EditorToCModel {
 /**
  * Table of content model factory for Markdown files.
  */
-export class MarkdownToCFactory extends TableOfContentsFactory<
-  IDocumentWidget<FileEditor>
-> {
+export class MarkdownToCFactory extends EditorToCModelFactory {
   /**
    * Whether the factory can handle the widget or not.
    *

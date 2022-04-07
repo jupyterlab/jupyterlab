@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { TableOfContents, TableOfContentsFactory } from '@jupyterlab/toc';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from '../widget';
-import { EditorToCModel, IEditorHeading } from './model';
+import { EditorToCModelFactory, IEditorHeading } from './factory';
 
 /**
  * Regular expression to create the outline
@@ -15,7 +15,10 @@ const KEYWORDS = new RegExp(/^\s*(class |def |from |import )/, 'd');
 /**
  * Table of content model for Python files.
  */
-export class PythonToCModel extends EditorToCModel {
+export class PythonToCModel extends TableOfContentsModel<
+  IEditorHeading,
+  IDocumentWidget<FileEditor, DocumentRegistry.IModel>
+> {
   /**
    * Produce the headings for a document.
    *
@@ -75,9 +78,7 @@ export class PythonToCModel extends EditorToCModel {
 /**
  * Table of content model factory for Python files.
  */
-export class PythonToCFactory extends TableOfContentsFactory<
-  IDocumentWidget<FileEditor>
-> {
+export class PythonToCFactory extends EditorToCModelFactory {
   /**
    * Whether the factory can handle the widget or not.
    *

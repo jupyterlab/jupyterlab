@@ -4,6 +4,7 @@
 import { ISanitizer } from '@jupyterlab/apputils';
 import {
   Cell,
+  CodeCell,
   CodeCellModel,
   ICellModel,
   MARKDOWN_HEADING_COLLAPSED
@@ -38,6 +39,11 @@ export enum RunningStatus {
   Running = 1
 }
 
+export enum HeadingType {
+  HTML,
+  Markdown
+}
+
 /**
  * Interface describing a notebook cell heading.
  */
@@ -48,19 +54,19 @@ export interface INotebookHeading extends TableOfContents.IHeading {
   cellRef: Cell;
 
   /**
-   * Boolean indicating whether a heading has a child node.
-   */
-  hasChild?: boolean;
-
-  /**
-   * index of reference cell in the notebook
-   */
-  index: number[];
-
-  /**
    * Running status of the cells in the heading
    */
   isRunning: RunningStatus;
+
+  /**
+   * Index of the output containing the heading
+   */
+  outputIndex?: number;
+
+  /**
+   * Type of heading
+   */
+  type: HeadingType;
 }
 
 /**
@@ -186,7 +192,8 @@ export class NotebookToCModel extends TableOfContentsModel<
                       cellRef: cell,
                       index: [i, j],
                       collapsed,
-                      isRunning: RunningStatus.Idle
+                      isRunning: RunningStatus.Idle,
+                      type: HeadingType.HTML
                     };
                   })
                 );
@@ -202,7 +209,8 @@ export class NotebookToCModel extends TableOfContentsModel<
                       cellRef: cell,
                       index: [i, j],
                       collapsed,
-                      isRunning: RunningStatus.Idle
+                      isRunning: RunningStatus.Idle,
+                      type: HeadingType.Markdown
                     };
                   })
                 );
@@ -224,7 +232,8 @@ export class NotebookToCModel extends TableOfContentsModel<
                 cellRef: cell,
                 index: [i, 0],
                 collapsed,
-                isRunning: RunningStatus.Idle
+                isRunning: RunningStatus.Idle,
+                type: HeadingType.Markdown
               };
             })
           );
@@ -396,11 +405,103 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     widget: NotebookPanel,
     configuration?: TableOfContents.IConfig
   ): TableOfContentsModel<TableOfContents.IHeading, NotebookPanel> {
-    return new NotebookToCModel(
+    const model = new NotebookToCModel(
       widget,
       this.parser,
       this.sanitizer,
       configuration
     );
+
+    let headingToElement = new WeakMap<INotebookHeading, Element | null>();
+
+    const onActiveHeadingChanged = (
+      model: TableOfContentsModel<INotebookHeading, NotebookPanel>,
+      heading: INotebookHeading | null
+    ) => {
+      if (heading) {
+        const el = headingToElement.get(heading);
+
+        if (el) {
+          const widgetBox = widget.content.node.getBoundingClientRect();
+          const elementBox = el.getBoundingClientRect();
+
+          if (
+            elementBox.top > widgetBox.bottom ||
+            elementBox.bottom < widgetBox.top ||
+            elementBox.left > widgetBox.right ||
+            elementBox.right < widgetBox.left
+          ) {
+            el.scrollIntoView({ inline: 'center' });
+          }
+        }
+      }
+    };
+
+    const onHeadingsChanged = (
+      model: TableOfContentsModel<INotebookHeading, NotebookPanel>
+    ) => {
+      if (!this.parser) {
+        return;
+      }
+      // Clear all numbering items
+      ToCUtils.clearNumbering(widget.content.node);
+
+      // Create a new mapping
+      headingToElement = new WeakMap<INotebookHeading, Element | null>();
+      model.headings.forEach(async heading => {
+        let elementId: string | null = null;
+        if (heading.type === HeadingType.Markdown) {
+          elementId = await ToCUtils.Markdown.getHeadingId(
+            this.parser!,
+            // Type from ToCUtils.Markdown.IMarkdownHeading
+            (heading as any).raw,
+            heading.level
+          );
+        } else if (heading.type === HeadingType.HTML) {
+          // Type from ToCUtils.IHTMLHeading
+          elementId = (heading as any).id;
+        }
+
+        const selector = elementId
+          ? `h${heading.level}[id="${elementId}"]`
+          : `h${heading.level}`;
+
+        if (heading.outputIndex !== undefined) {
+          // Code cell
+          headingToElement.set(
+            heading,
+            ToCUtils.addPrefix(
+              (heading.cellRef as CodeCell).outputArea.widgets[
+                heading.outputIndex
+              ].node,
+              selector,
+              heading.prefix ?? ''
+            )
+          );
+        } else {
+          headingToElement.set(
+            heading,
+            ToCUtils.addPrefix(
+              heading.cellRef.node,
+              selector,
+              heading.prefix ?? ''
+            )
+          );
+        }
+      });
+    };
+
+    widget.context.ready.then(() => {
+      onHeadingsChanged(model);
+
+      model.activeHeadingChanged.connect(onActiveHeadingChanged);
+      model.headingsChanged.connect(onHeadingsChanged);
+      widget.disposed.connect(() => {
+        model.activeHeadingChanged.disconnect(onActiveHeadingChanged);
+        model.headingsChanged.disconnect(onHeadingsChanged);
+      });
+    });
+
+    return model;
   }
 }

@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { TableOfContents, TableOfContentsFactory } from '@jupyterlab/toc';
+import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
-import { EditorToCModel, IEditorHeading } from './model';
 import { FileEditor } from '../widget';
+import { EditorToCModelFactory, IEditorHeading } from './factory';
 
 /**
  * Maps LaTeX section headings to HTML header levels.
@@ -34,7 +34,10 @@ const SECTIONS = /^\s*\\(section|subsection|subsubsection){(.+)}/;
 /**
  * Table of content model for LaTeX files.
  */
-export class LaTeXToCModel extends EditorToCModel {
+export class LaTeXToCModel extends TableOfContentsModel<
+  IEditorHeading,
+  IDocumentWidget<FileEditor, DocumentRegistry.IModel>
+> {
   /**
    * Produce the headings for a document.
    *
@@ -90,9 +93,7 @@ export class LaTeXToCModel extends EditorToCModel {
 /**
  * Table of content model factory for LaTeX files.
  */
-export class LaTeXToCFactory extends TableOfContentsFactory<
-  IDocumentWidget<FileEditor>
-> {
+export class LaTeXToCFactory extends EditorToCModelFactory {
   /**
    * Whether the factory can handle the widget or not.
    *
