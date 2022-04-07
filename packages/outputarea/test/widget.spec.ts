@@ -376,6 +376,14 @@ describe('outputarea/widget', () => {
           const factory = new OutputArea.ContentFactory();
           const future = kernel.requestExecute({ code: CODE });
           const options = {
+            parent_header: {
+              date: '',
+              msg_id: '',
+              msg_type: 'input_request',
+              session: '',
+              username: '',
+              version: ''
+            },
             prompt: 'hello',
             password: false,
             future
