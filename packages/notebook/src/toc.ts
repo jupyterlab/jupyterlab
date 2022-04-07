@@ -180,7 +180,7 @@ export class NotebookToCModel extends TableOfContentsModel<
               });
 
               // Parse HTML output only if trusted
-              if (model.trusted && htmlType) {
+              if (htmlType) {
                 headings.push(
                   ...ToCUtils.getHTMLHeadings(
                     this.sanitizer.sanitize(m.data[htmlType] as string),
