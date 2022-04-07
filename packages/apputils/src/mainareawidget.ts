@@ -9,6 +9,11 @@ import { DOMUtils } from './domutils';
 import { Printing } from './printing';
 
 /**
+ * A flag to indicate that event handlers are caught in the capture phase.
+ */
+const USE_CAPTURE = true;
+
+/**
  * A widget meant to be contained in the JupyterLab main area.
  *
  * #### Notes
@@ -169,6 +174,49 @@ export class MainAreaWidget<T extends Widget = Widget>
     } else {
       this._spinner.node.focus();
     }
+  }
+
+  /**
+   * Ensure the widget is focused if it contains the target element
+   * and the active element is not within it.
+   *
+   * @param event Mouse event
+   */
+  protected ensureFocused(event: Event): void {
+    const target = event.target as Node;
+    if (
+      this.node.contains(target) &&
+      !this.node.contains(document.activeElement)
+    ) {
+      this._focusContent();
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    // Ensure the current widget is active at capture event phase
+    // because CommandToolbarButton acts on mousedown event at bubbling phase
+    // but they act on the current active widget that may not be the one
+    // targeted.
+    // Ref: https://github.com/jupyterlab/jupyterlab/issues/12177
+    document.addEventListener(
+      'mousedown',
+      this.ensureFocused.bind(this),
+      USE_CAPTURE
+    );
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    document.removeEventListener(
+      'mousedown',
+      this.ensureFocused.bind(this),
+      USE_CAPTURE
+    );
   }
 
   /**
