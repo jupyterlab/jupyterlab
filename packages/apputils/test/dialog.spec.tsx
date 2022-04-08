@@ -2,8 +2,6 @@
 
 // Distributed under the terms of the Modified BSD License.
 
-// import { expect } from 'chai';
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
   acceptDialog,
