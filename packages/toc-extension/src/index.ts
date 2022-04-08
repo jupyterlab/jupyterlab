@@ -170,19 +170,11 @@ async function activateTOC(
     actualOnClick: true,
     onClick: () => {
       app.commands.execute(CommandIDs.displayNumbering);
-      const numberingToggled = app.commands.isToggled(
-        CommandIDs.displayNumbering
-      );
-      numberingToggled
-        ? numbering.addClass('lm-mod-toggled')
-        : numbering.removeClass('lm-mod-toggled');
+      setNumberingButtonState();
     }
   });
   numbering.addClass('jp-toc-numberingButton');
-  const numberingToggled = app.commands.isToggled(CommandIDs.displayNumbering);
-  numberingToggled
-    ? numbering.addClass('lm-mod-toggled')
-    : numbering.removeClass('lm-mod-toggled');
+  setNumberingButtonState();
   toc.toolbar.addItem('display-numbering', numbering);
 
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
@@ -243,6 +235,10 @@ async function activateTOC(
     }
 
     toc.model = model;
+    setNumberingButtonState();
+  }
+
+  function setNumberingButtonState() {
     const numberingToggled = app.commands.isToggled(
       CommandIDs.displayNumbering
     );

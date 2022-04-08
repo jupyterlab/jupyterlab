@@ -31,7 +31,7 @@
   ],
   "properties": {
     "maximalDepth": {
-      "title": "Maximal depth of headings",
+      "title": "Maximal headings depth",
       "type": "integer",
       "minimum": 1,
       "default": 4
@@ -57,7 +57,7 @@
     "syncCollapseState": {
       "type": "boolean",
       "title": "Synchronize collapse state",
-      "description": "If set to true, when a heading is collapsed in the table of contents the corresponding section in the document is collapsed as well and vice versa.",
+      "description": "If set to true, when a heading is collapsed in the table of contents the corresponding section in the document is collapsed as well and vice versa. This inhibits the cell output headings.",
       "default": false
     }
   },
