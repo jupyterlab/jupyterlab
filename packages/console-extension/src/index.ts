@@ -899,21 +899,20 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-
-  consoles.widgetAdded.connect(async (_, consolePanel) => {
+  const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
       session: consolePanel.console.sessionContext.session,
       widget: consolePanel
     };
     await manager.updateCompleter(completerContext);
-    consolePanel.console.promptCellCreated.connect((console, cell) => {
+    consolePanel.console.promptCellCreated.connect((codeConsole, cell) => {
       const newContext = {
         editor: cell.editor,
-        session: console.sessionContext.session,
+        session: codeConsole.sessionContext.session,
         widget: consolePanel
       };
-      manager.updateCompleter(newContext);
+      manager.updateCompleter(newContext).catch(console.error);
     });
     consolePanel.console.sessionContext.sessionChanged.connect(() => {
       const newContext = {
@@ -921,7 +920,13 @@ function activateConsoleCompleterService(
         session: consolePanel.console.sessionContext.session,
         widget: consolePanel
       };
-      manager.updateCompleter(newContext);
+      manager.updateCompleter(newContext).catch(console.error);
+    });
+  };
+  consoles.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    consoles.forEach(consoleWidget => {
+      updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
     });
   });
 }

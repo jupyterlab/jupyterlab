@@ -977,7 +977,7 @@ export namespace Completer {
       const sanitizer = { sanitize: (dirty: string) => dirty };
       const source = activeItem.documentation || '';
 
-      renderText({ host, sanitizer, source });
+      renderText({ host, sanitizer, source }).catch(console.error);
       return host;
     }
 
