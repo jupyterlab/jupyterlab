@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
 const fileName = 'toc_notebook.ipynb';
