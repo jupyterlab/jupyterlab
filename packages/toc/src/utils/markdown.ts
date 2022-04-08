@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IMarkdownParser } from '@jupyterlab/rendermime';
+import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
 import { TableOfContents } from '../tokens';
 
 /**
@@ -38,12 +38,12 @@ export async function getHeadingId(
 
     const container = document.createElement('div');
     container.innerHTML = innerHTML;
-    // See packages/rendermime/src/renderers.ts::Private.headerAnchors for header id construction
-    const elementId = (
-      container.querySelector(`h${level}`)?.textContent ?? ''
-    ).replace(/ /g, '-');
+    const header = container.querySelector(`h${level}`);
+    if (!header) {
+      return null;
+    }
 
-    return elementId;
+    return renderMarkdown.createHeaderId(header);
   } catch (reason) {
     console.error('Failed to parse a heading.', reason);
   }
