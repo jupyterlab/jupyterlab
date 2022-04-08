@@ -134,9 +134,7 @@ export class MarkdownViewerToCFactory extends TableOfContentsFactory<
       }
     };
 
-    const onHeadingsChanged = (
-      model: TableOfContentsModel<IMarkdownViewerHeading, MarkdownDocument>
-    ) => {
+    const onHeadingsChanged = () => {
       if (!this.parser) {
         return;
       }
@@ -170,11 +168,13 @@ export class MarkdownViewerToCFactory extends TableOfContentsFactory<
     };
 
     widget.content.ready.then(() => {
-      onHeadingsChanged(model);
+      onHeadingsChanged();
 
+      widget.content.rendered.connect(onHeadingsChanged);
       model.activeHeadingChanged.connect(onActiveHeadingChanged);
       model.headingsChanged.connect(onHeadingsChanged);
       widget.disposed.connect(() => {
+        widget.content.rendered.disconnect(onHeadingsChanged);
         model.activeHeadingChanged.disconnect(onActiveHeadingChanged);
         model.headingsChanged.disconnect(onHeadingsChanged);
       });

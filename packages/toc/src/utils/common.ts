@@ -39,6 +39,9 @@ export function isHTML(mime: string): boolean {
 /**
  * Parse a HTML string for headings.
  *
+ * ### Notes
+ * The html string is not sanitized - use with caution
+ *
  * @param html HTML string to parse
  * @param options Options
  * @param initialLevels Initial levels for prefix computation

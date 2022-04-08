@@ -30,7 +30,12 @@ export class MarkdownToCModel extends TableOfContentsModel<
 
     const content = this.widget.content.model.value.text;
 
-    const headings = ToCUtils.Markdown.getHeadings(content, this.configuration);
+    const headings = ToCUtils.Markdown.getHeadings(content, {
+      ...this.configuration,
+      // Force removing numbering as they cannot be displayed
+      // in the document
+      numberHeaders: false
+    });
     return Promise.resolve(headings);
   }
 }

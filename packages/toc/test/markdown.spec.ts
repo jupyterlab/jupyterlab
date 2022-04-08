@@ -6,7 +6,7 @@ import { ToCUtils } from '@jupyterlab/toc';
 describe('ToCUtils', () => {
   describe('Markdown', () => {
     describe('#getHeadings', () => {
-      it.each<[string, Partial<ToCUtils.Markdown.IMarkdownHeading>[]]>([
+      it.each<[string, ToCUtils.Markdown.IMarkdownHeading[]]>([
         [
           '# Title',
           [{ text: 'Title', level: 1, line: 0, raw: '# Title', prefix: '1. ' }]

@@ -20,6 +20,7 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  CommandToolbarButton,
   ellipsesIcon,
   MenuSvg,
   numberingIcon,
@@ -94,6 +95,7 @@ async function activateTOC(
           ...toc.model.configuration,
           numberHeaders: !toc.model.configuration.numberHeaders
         };
+        app.commands.notifyCommandChanged(CommandIDs.displayNumbering);
       }
     },
     isEnabled: () =>
@@ -141,7 +143,10 @@ async function activateTOC(
       const updateSettings = (plugin: ISettingRegistry.ISettings) => {
         const composite = plugin.composite;
         for (const key of [...Object.keys(configuration)]) {
-          configuration[key] = composite[key] as any;
+          const value = composite[key] as any;
+          if (value !== undefined) {
+            configuration[key] = value;
+          }
         }
 
         for (const model of tocModels.values()) {
@@ -162,19 +167,15 @@ async function activateTOC(
   }
 
   // Set up the panel toolbar
-  const numbering = new ToolbarButton({
-    tooltip: app.commands.label(CommandIDs.displayNumbering),
-    icon: app.commands.icon(CommandIDs.displayNumbering, {
+  const numbering = new CommandToolbarButton({
+    commands: app.commands,
+    id: CommandIDs.displayNumbering,
+    args: {
       toolbar: true
-    }),
-    actualOnClick: true,
-    onClick: () => {
-      app.commands.execute(CommandIDs.displayNumbering);
-      setNumberingButtonState();
-    }
+    },
+    label: ''
   });
   numbering.addClass('jp-toc-numberingButton');
-  setNumberingButtonState();
   toc.toolbar.addItem('display-numbering', numbering);
 
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
@@ -239,12 +240,7 @@ async function activateTOC(
   }
 
   function setNumberingButtonState() {
-    const numberingToggled = app.commands.isToggled(
-      CommandIDs.displayNumbering
-    );
-    numberingToggled
-      ? numbering.addClass('lm-mod-toggled')
-      : numbering.removeClass('lm-mod-toggled');
+    app.commands.notifyCommandChanged(CommandIDs.displayNumbering);
   }
 }
 
