@@ -379,7 +379,7 @@ describe('outputarea/widget', () => {
             parent_header: {
               date: '',
               msg_id: '',
-              msg_type: 'input_request',
+              msg_type: 'input_request' as const,
               session: '',
               username: '',
               version: ''
