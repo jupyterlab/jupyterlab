@@ -267,12 +267,10 @@ export class Context<
     if (isNew) {
       promise = this._save();
     } else {
-      // promise = this._revert();
-      promise = Promise.resolve(void 0);
-      const model = this._model;
-      model.dirty = false;
-      if (!this._isPopulated) {
-        return this._populate();
+      if (PageConfig.getOption('collaborative') == 'true') {
+        promise = this._loadContext();
+      } else {
+        promise = this._revert();
       }
     }
     return promise;
@@ -633,6 +631,43 @@ export class Context<
       this._saveState.emit('failed');
       throw err;
     }
+  }
+
+  /**
+   * Load the metadata of the document without the content.
+   */
+  private _loadContext(): Promise<void> {
+    const opts: Contents.IFetchOptions = {
+      type: this._factory.contentType,
+      content: false,
+      ...(this._factory.fileFormat !== null
+        ? { format: this._factory.fileFormat }
+        : {})
+    };
+    const path = this._path;
+    return this._manager.ready
+      .then(() => {
+        return this._manager.contents.get(path, opts);
+      })
+      .then(contents => {
+        if (this.isDisposed) {
+          return;
+        }
+        this._updateContentsModel(contents);
+        this._model.dirty = false;
+        if (!this._isPopulated) {
+          return this._populate();
+        }
+      })
+      .catch(async err => {
+        const localPath = this._manager.contents.localPath(this._path);
+        const name = PathExt.basename(localPath);
+        void this._handleError(
+          err,
+          this._trans.__('File Load Error for %1', name)
+        );
+        throw err;
+      });
   }
 
   /**
