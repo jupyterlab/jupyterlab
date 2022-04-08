@@ -229,7 +229,6 @@ export namespace CodeEditor {
      */
     constructor(options?: Model.IOptions) {
       options = options || {};
-
       if (options.modelDB) {
         this.modelDB = options.modelDB;
       } else {
