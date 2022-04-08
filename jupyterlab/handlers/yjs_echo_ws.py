@@ -3,6 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import asyncio
 import sys
 import uuid
 from enum import IntEnum
@@ -44,6 +45,7 @@ class YjsRoom:
         self.type = type
         self.clients = {}
         self.initialized = False
+        self.timer = None
         self.ydoc = YDOCS.get(type, YFILE)()
 
     @property
@@ -78,6 +80,10 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
             room = YjsRoom(type)
             ROOMS[self.room_id] = room
         room.clients[self.id] = (IOLoop.current(), self.hook_send_message, self)
+
+        if room.timer is not None:
+            room.timer.cancel()
+
         if not room.initialized:
             model = await ensure_async(self.settings["contents_manager"].get(self.room_id))
             # check again if initialized, because loading the file can be async
@@ -109,12 +115,11 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
                     loop.add_callback(hook_send_message, message)
 
     def on_close(self):
-        # print("[YJSEchoWS]: close")
+        # print("[YJSEchoWS]: close", self.id, self.room_id)
         room = ROOMS.get(self.room_id)
         room.clients.pop(self.id)
         if not room.clients:
-            ROOMS.pop(self.room_id)
-            # print("[YJSEchoWS]: close room " + self.room_id)
+            room.timer = asyncio.create_task(self.timer_coroutine())
 
         return True
 
@@ -124,6 +129,10 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
 
     def hook_send_message(self, msg):
         self.write_message(msg, binary=True)
+
+    async def timer_coroutine(self):
+        await asyncio.sleep(60)
+        ROOMS.pop(self.room_id)
 
 
 message_yjs_sync_step1 = 0
