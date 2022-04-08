@@ -600,6 +600,7 @@ export class StaticNotebook extends Widget {
       // We have no intersection observer, or we insert, or we are below
       // the number of cells to render directly, so we render directly.
       layout.insertWidget(index, widget);
+      this.onCellInserted(index, widget);
       this._incrementRenderedCount();
     }
     this._scheduleCellRenderOnIdle();
