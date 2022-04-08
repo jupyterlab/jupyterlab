@@ -51,7 +51,7 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
    * List of configuration options supported by the model.
    */
   get supportedOptions(): (keyof TableOfContents.IConfig)[] {
-    return ['baseNumbering', 'maximalDepth', 'numberingH1', 'numberHeaders'];
+    return ['maximalDepth', 'numberingH1', 'numberHeaders'];
   }
 
   /**
@@ -61,7 +61,11 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
    */
   protected getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
-    const headings = ToCUtils.Markdown.getHeadings(content, this.configuration);
+    const headings = ToCUtils.Markdown.getHeadings(content, {
+      ...this.configuration,
+      // Force base number to be equal to 1
+      baseNumbering: 1
+    });
     return Promise.resolve(headings);
   }
 }
