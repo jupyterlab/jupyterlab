@@ -175,7 +175,11 @@ export class NotebookToCModel extends TableOfContentsModel<
 
       switch (model.type) {
         case 'code': {
-          if (this.configuration.includeOutput) {
+          // Collapsing cells is incompatible with output headings
+          if (
+            !this.configuration.syncCollapseState &&
+            this.configuration.includeOutput
+          ) {
             // Iterate over the code cell outputs to check for Markdown or HTML from which we can generate ToC headings...
             const outputs = (model as CodeCellModel).outputs;
             for (let j = 0; j < outputs.length; j++) {
