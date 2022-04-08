@@ -94,7 +94,7 @@ export function getHeadings(
       continue;
     }
 
-    const heading = parseHeading(line, line[lineIdx + 1]); // append the next line to capture alternative style Markdown headings
+    const heading = parseHeading(line, lines[lineIdx + 1]); // append the next line to capture alternative style Markdown headings
 
     if (heading) {
       let level = heading.level;
@@ -201,15 +201,15 @@ interface IHeader {
  *
  * @example
  * const out = parseHeading('### Foo\n');
- * // returns {'text': 'Foo', 'level': 3, 'type': 'markdown'}
+ * // returns {'text': 'Foo', 'level': 3}
  *
  * @example
  * const out = parseHeading('Foo\n===\n');
- * // returns {'text': 'Foo', 'level': 1, 'type': 'markdown-alt'}
+ * // returns {'text': 'Foo', 'level': 1}
  *
  * @example
  * const out = parseHeading('<h4>Foo</h4>\n');
- * // returns {'text': 'Foo', 'level': 4, 'type': 'html'}
+ * // returns {'text': 'Foo', 'level': 4}
  *
  * @example
  * const out = parseHeading('Foo');
@@ -219,32 +219,48 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
   // Case: Markdown heading
   let match = line.match(/^([#]{1,6}) (.*)/);
   if (match) {
-    return {
-      text: match[2].replace(/\[(.+)\]\(.+\)/g, '$1'), // take special care to parse Markdown links into raw text
-      level: match[1].length,
-      raw: line
-    };
+    if (!skipHeading.test(match[0])) {
+      return {
+        text: cleanTitle(match[2]),
+        level: match[1].length,
+        raw: line
+      };
+    }
   }
   // Case: Markdown heading (alternative style)
   if (nextLine) {
     match = nextLine.match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
     if (match) {
-      return {
-        text: line.replace(/\[(.+)\]\(.+\)/g, '$1'), // take special care to parse Markdown links into raw text
-        level: match[1][0] === '=' ? 1 : 2,
-        raw: line + nextLine
-      };
+      if (!skipHeading.test(line)) {
+        return {
+          text: cleanTitle(line),
+          level: match[1][0] === '=' ? 1 : 2,
+          raw: [line, nextLine].join('\n')
+        };
+      }
     }
   }
   // Case: HTML heading (WARNING: this is not particularly robust, as HTML headings can span multiple lines)
   match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i);
   if (match) {
-    return {
-      text: match[2],
-      level: parseInt(match[1], 10),
-      raw: line
-    };
+    if (!skipHeading.test(match[0])) {
+      return {
+        text: match[2],
+        level: parseInt(match[1], 10),
+        raw: line
+      };
+    }
   }
 
   return null;
 }
+
+function cleanTitle(heading: string): string {
+  // take special care to parse Markdown links into raw text
+  return heading.replace(/\[(.+)\]\(.+\)/g, '$1');
+}
+
+/**
+ * Ignore title with html tag with a class name equal to `jp-toc-ignore` or `tocSkip`
+ */
+const skipHeading = /<\w+\s(.*?\s)?class="(.*?\s)?(jp-toc-ignore|tocSkip)(\s.*?)?"(\s.*?)?>/;

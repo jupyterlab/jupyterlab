@@ -62,8 +62,10 @@ export function getHTMLHeadings(
   const headings = new Array<IHTMLHeading>();
   const headers = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
   for (const h of headers) {
-    // TODO support tocSkip class from toc2
-    if (h.classList.contains('jp-toc-ignore')) {
+    if (
+      h.classList.contains('jp-toc-ignore') ||
+      h.classList.contains('tocSkip')
+    ) {
       // skip this element if a special class name is included
       continue;
     }
