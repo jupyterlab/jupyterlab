@@ -4,6 +4,8 @@
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { Cell, CellModel } from '@jupyterlab/cells';
 import {
+  Completer,
+  CompleterModel,
   CompletionHandler,
   CompletionProviderManager,
   ConnectorProxy,
@@ -39,6 +41,9 @@ function contextFactory(): Context<INotebookModel> {
   });
   return context;
 }
+
+class CustomCompleterModel extends CompleterModel {}
+
 class FooCompletionProvider implements ICompletionProvider {
   identifier: string = SAMPLE_PROVIDER_ID;
   renderer = null;
@@ -57,6 +62,10 @@ class FooCompletionProvider implements ICompletionProvider {
   }
   async isApplicable(context: ICompletionContext): Promise<boolean> {
     return true;
+  }
+
+  async modelFactory(context: ICompletionContext): Promise<Completer.IModel> {
+    return new CustomCompleterModel();
   }
 }
 
@@ -139,8 +148,19 @@ describe('completer/manager', () => {
 
     describe('#generateHandler()', () => {
       it('should create a handler with connector proxy', async () => {
-        const handler = await manager['generateHandler']({});
+        const handler = (await manager['generateHandler'](
+          {}
+        )) as CompletionHandler;
         expect(handler).toBeInstanceOf(CompletionHandler);
+      });
+
+      it('should create a handler with a custom model', async () => {
+        manager.registerProvider(new FooCompletionProvider());
+        manager.activateProvider([SAMPLE_PROVIDER_ID]);
+        const handler = (await manager['generateHandler'](
+          {}
+        )) as CompletionHandler;
+        expect(handler.completer.model).toBeInstanceOf(CustomCompleterModel);
       });
     });
 
@@ -167,7 +187,7 @@ describe('completer/manager', () => {
           widget
         };
         const handler = manager['_panelHandlers'].get(widget.id);
-        manager.updateCompleter(newCompleterContext);
+        manager.updateCompleter(newCompleterContext).catch(console.error);
         expect(handler.editor).toBe(newCompleterContext.editor);
       });
     });

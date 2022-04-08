@@ -35,8 +35,7 @@ module.exports = require('@jupyterlab/galata/lib/playwright-config');
 Create `ui-tests/foo.spec.ts` to define your test.
 
 ```typescript
-import { test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, test } from '@jupyterlab/galata';
 
 test.describe('Notebook Tests', () => {
   test('Create New Notebook', async ({ page, tmpPath }) => {
