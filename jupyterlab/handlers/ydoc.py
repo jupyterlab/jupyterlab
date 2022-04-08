@@ -69,7 +69,15 @@ class YNotebook(YBaseDoc):
     @source.setter
     def source(self, value):
         with self._ydoc.begin_transaction() as t:
-            self._ycells.push(t, value["cells"])
+            ycells = []
+            for cell in value["cells"]:
+                ycell = Y.YMap()
+                ycell.set(t, "source", cell["source"])
+                ycell.set(t, "metadata", cell["metadata"])
+                ycell.set(t, "cell_type", cell["cell_type"])
+                ycell.set(t, "id", cell["id"])
+                ycells.append(ycell)
+            self._ycells.push(t, ycells)
             for k, v in value["metadata"].items():
                 self._ymeta.set(t, k, v)
             self._ystate.set(t, "dirty", False)
