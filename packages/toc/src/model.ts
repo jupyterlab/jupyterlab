@@ -77,7 +77,7 @@ export abstract class TableOfContentsModel<
   set configuration(c: TableOfContents.IConfig) {
     if (!JSONExt.deepEqual(this._configuration, c)) {
       this._configuration = c;
-      this.stateChanged.emit();
+      this.refresh();
     }
   }
 
@@ -128,6 +128,13 @@ export abstract class TableOfContentsModel<
    */
   protected get isAlwaysActive(): boolean {
     return false;
+  }
+
+  /**
+   * List of configuration options supported by the model.
+   */
+  get supportedOptions(): (keyof TableOfContents.IConfig)[] {
+    return ['maximalDepth'];
   }
 
   /**
@@ -223,7 +230,8 @@ namespace Private {
       for (let i = 0; i < headings1.length; i++) {
         if (
           headings1[i].level !== headings2[i].level ||
-          headings1[i].text !== headings2[i].text
+          headings1[i].text !== headings2[i].text ||
+          headings1[i].prefix !== headings2[i].prefix
         ) {
           return false;
         }

@@ -48,6 +48,13 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
   }
 
   /**
+   * List of configuration options supported by the model.
+   */
+  get supportedOptions(): (keyof TableOfContents.IConfig)[] {
+    return ['maximalDepth', 'numberingH1', 'numberHeaders'];
+  }
+
+  /**
    * Produce the headings for a document.
    *
    * @returns The list of new headings or `null` if nothing needs to be updated.

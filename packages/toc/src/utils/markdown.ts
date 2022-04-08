@@ -64,7 +64,7 @@ export function getHeadings(
   options?: Partial<TableOfContents.IConfig>,
   initialLevels: number[] = []
 ): IMarkdownHeading[] {
-  const { numberingH1, maximalDepth } = {
+  const { numberingH1, numberHeaders, maximalDepth } = {
     ...TableOfContents.defaultConfig,
     ...options
   };
@@ -97,31 +97,44 @@ export function getHeadings(
 
     if (heading) {
       let level = heading.level;
-      if (!numberingH1) {
-        level -= 1;
-      }
 
       if (level > 0 && level <= maximalDepth) {
-        if (level > previousLevel) {
-          // Initialize the new levels
-          for (let l = previousLevel; l < level - 1; l++) {
-            levels[l] = 0;
-          }
-          levels[level - 1] = 1;
-        } else {
-          // Increment the current level
-          levels[level - 1] += 1;
+        let prefix = '';
+        if (numberHeaders) {
+          if (level > previousLevel) {
+            // Initialize the new levels
+            for (let l = previousLevel; l < level - 1; l++) {
+              levels[l] = 0;
+            }
+            levels[level - 1] = 1;
+          } else {
+            // Increment the current level
+            levels[level - 1] += 1;
 
-          // Drop higher levels
-          if (level < previousLevel) {
-            levels.splice(level);
+            // Drop higher levels
+            if (level < previousLevel) {
+              levels.splice(level);
+            }
+          }
+          previousLevel = level;
+
+          // If the header list skips some level, replace missing elements by 0
+          if (numberingH1) {
+            prefix = levels.map(level => level ?? 0).join('.') + '. ';
+          } else {
+            if (levels.length > 1) {
+              prefix =
+                levels
+                  .slice(1)
+                  .map(level => level ?? 0)
+                  .join('.') + '. ';
+            }
           }
         }
-        previousLevel = level;
 
         headings.push({
           text: heading.text,
-          prefix: levels.map(level => level.toString()).join('.') + '. ',
+          prefix,
           level,
           line: lineIdx,
           raw: heading.raw

@@ -2,7 +2,7 @@
   "jupyter.lab.setting-icon": "ui-components:toc",
   "jupyter.lab.setting-icon-label": "Table of Contents",
   "title": "Table of Contents",
-  "description": "Table of contents settings.",
+  "description": "Default table of contents settings.",
   "jupyter.lab.menus": {
     "main": [
       {

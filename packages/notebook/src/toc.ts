@@ -111,6 +111,19 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   /**
+   * List of configuration options supported by the model.
+   */
+  get supportedOptions(): (keyof TableOfContents.IConfig)[] {
+    return [
+      'maximalDepth',
+      'numberingH1',
+      'numberHeaders',
+      'includeOutput',
+      'syncCollapseState'
+    ];
+  }
+
+  /**
    * Dispose the object
    */
   dispose(): void {

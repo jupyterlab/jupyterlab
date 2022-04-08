@@ -49,7 +49,7 @@ export function getHTMLHeadings(
   options?: Partial<TableOfContents.IConfig>,
   initialLevels: number[] = []
 ): IHTMLHeading[] {
-  const { numberingH1, maximalDepth } = {
+  const { numberingH1, numberHeaders, maximalDepth } = {
     ...TableOfContents.defaultConfig,
     ...options
   };
@@ -68,32 +68,44 @@ export function getHTMLHeadings(
       continue;
     }
     let level = parseInt(h.tagName[1], 10);
-    if (!numberingH1) {
-      level -= 1;
-    }
 
     if (level > 0 && level <= maximalDepth) {
-      if (level > previousLevel) {
-        // Initialize the new levels
-        for (let l = previousLevel; l < level - 1; l++) {
-          levels[l] = 0;
-        }
-        levels[level - 1] = 1;
-      } else {
-        // Increment the current level
-        levels[level - 1] += 1;
+      let prefix = '';
+      if (numberHeaders) {
+        if (level > previousLevel) {
+          // Initialize the new levels
+          for (let l = previousLevel; l < level - 1; l++) {
+            levels[l] = 0;
+          }
+          levels[level - 1] = 1;
+        } else {
+          // Increment the current level
+          levels[level - 1] += 1;
 
-        // Drop higher levels
-        if (level < previousLevel) {
-          levels.splice(level);
+          // Drop higher levels
+          if (level < previousLevel) {
+            levels.splice(level);
+          }
+        }
+        previousLevel = level;
+
+        // If the header list skips some level, replace missing elements by 0
+        if (numberingH1) {
+          prefix = levels.map(level => level ?? 0).join('.') + '. ';
+        } else {
+          if (levels.length > 1) {
+            prefix =
+              levels
+                .slice(1)
+                .map(level => level ?? 0)
+                .join('.') + '. ';
+          }
         }
       }
-      previousLevel = level;
 
       headings.push({
         text: h.textContent ?? '',
-        // If the header list skips some level, replace missing elements by 0
-        prefix: levels.map(level => level ?? 0).join('.') + '. ',
+        prefix,
         level,
         id: h?.getAttribute('id')
       });

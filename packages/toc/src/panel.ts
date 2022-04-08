@@ -1,6 +1,5 @@
 import { ITranslator } from '@jupyterlab/translation';
 import { SidePanel } from '@jupyterlab/ui-components';
-import { each } from '@lumino/algorithm';
 import { Panel, Widget } from '@lumino/widgets';
 import { TableOfContentsWidget } from './treeview';
 import { TableOfContents } from './tokens';
@@ -46,17 +45,6 @@ export class TableOfContentsPanel extends SidePanel {
 
       this._model?.stateChanged.connect(this._onTitleChanged, this);
       this._onTitleChanged();
-
-      // Clear the current toolbar
-      each(this.toolbar.children(), item => {
-        item.parent = null;
-      });
-      // Add the new items
-      if (this._model?.toolbarItems) {
-        each(this._model.toolbarItems.iter(), item => {
-          this.toolbar.addItem(item.name, item.widget);
-        });
-      }
 
       this._treeview.model = this._model;
     }

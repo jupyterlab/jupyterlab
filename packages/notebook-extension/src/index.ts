@@ -285,6 +285,8 @@ namespace CommandIDs {
   export const invokeCompleter = 'completer:invoke-notebook';
 
   export const selectCompleter = 'completer:select-notebook';
+
+  export const tocRunCells = 'toc:run-cells';
 }
 
 /**
@@ -792,15 +794,60 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 const tocPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:toc',
   requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
-  optional: [IMarkdownParser],
+  optional: [IMarkdownParser, ITranslator],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
     sanitizer: ISanitizer,
-    mdParser: IMarkdownParser | null
+    mdParser: IMarkdownParser | null,
+    translator: ITranslator | null
   ): void => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    app.commands.addCommand(CommandIDs.tocRunCells, {
+      label: trans.__('Run Cell(s)'),
+      execute: args => {
+        // TODO - sounds like every notebook should get its own ToC model independently of toc extension
+        // to set its headingInfo
+        /*
+        const panel = tracker.currentWidget;
+        if (panel === null) {
+          return;
+        }
+
+        const cells = panel.content.widgets;
+        if (cells === undefined) {
+          return;
+        }
+
+        const activeCell = (toc.activeEntry as INotebookHeading).cellRef;
+
+        if (activeCell instanceof MarkdownCell) {
+          let level = activeCell.headingInfo.level;
+          for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
+            const cell = cells[i];
+            if (
+              cell instanceof MarkdownCell &&
+              cell.headingInfo.level <= level
+            ) {
+              break;
+            }
+
+            if (cell instanceof CodeCell) {
+              void CodeCell.execute(cell, panel.sessionContext);
+            }
+          }
+        } else {
+          if (activeCell instanceof CodeCell) {
+            void CodeCell.execute(activeCell, panel.sessionContext);
+          }
+        }
+        */
+      }
+    });
+
     tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
   }
 };

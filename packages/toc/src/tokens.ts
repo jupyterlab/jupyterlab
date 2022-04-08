@@ -90,6 +90,10 @@ export namespace TableOfContents {
      */
     numberingH1: boolean;
     /**
+     * Whether to number headings in document or not.
+     */
+    numberHeaders: boolean;
+    /**
      * Whether to include cell outputs in headings or not.
      */
     includeOutput: boolean;
@@ -102,6 +106,7 @@ export namespace TableOfContents {
   export const defaultConfig: IConfig = {
     maximalDepth: 4,
     numberingH1: true,
+    numberHeaders: true,
     includeOutput: true,
     syncCollapseState: false
   };
@@ -183,6 +188,11 @@ export namespace TableOfContents {
     isActive: boolean;
 
     /**
+     * List of configuration options supported by the model.
+     */
+    readonly supportedOptions: (keyof IConfig)[];
+
+    /**
      * Document title
      */
     title?: string;
@@ -191,11 +201,6 @@ export namespace TableOfContents {
      * Callback on heading collapse.
      */
     toggleCollapse: (heading: H) => void;
-
-    /**
-     * Toolbar items for the table of contents.
-     */
-    readonly toolbarItems?: IToolbarItems;
   }
 
   /**

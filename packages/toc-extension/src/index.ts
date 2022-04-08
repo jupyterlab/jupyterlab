@@ -19,13 +19,24 @@ import {
   TableOfContentsRegistry
 } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { tocIcon } from '@jupyterlab/ui-components';
+import {
+  ellipsesIcon,
+  MenuSvg,
+  numberingIcon,
+  tocIcon,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 
 /**
  * A namespace for command IDs of table of contents plugin.
  */
 namespace CommandIDs {
-  export const runCells = 'toc:run-cells';
+  export const displayNumbering = 'toc:display-numbering';
+
+  export const displayH1Numbering = 'toc:display-h1-numbering';
+
+  export const displayOutputNumbering = 'toc:display-outputs-numbering';
 
   export const showPanel = 'toc:show-panel';
 }
@@ -53,65 +64,57 @@ async function activateTOC(
 
   // Create the ToC widget:
   const toc = new TableOfContentsPanel(translator ?? undefined);
-
-  const tocModels = new Map<string, TableOfContents.Model | null>();
-
-  // Create the ToC registry:
-  const registry = new TableOfContentsRegistry();
-
-  // Add the ToC to the left area:
   toc.title.icon = tocIcon;
   toc.title.caption = trans.__('Table of Contents');
   toc.id = 'table-of-contents';
   toc.node.setAttribute('role', 'region');
   toc.node.setAttribute('aria-label', trans.__('Table of Contents section'));
 
-  app.shell.add(toc, 'left', { rank: 400 });
-
-  /*
-  app.commands.addCommand(CommandIDs.runCells, {
-    execute: args => {
-      if (!notebookTracker) {
-        return null;
-      }
-
-      const panel = notebookTracker.currentWidget;
-      if (panel == null) {
-        return;
-      }
-
-      const cells = panel.content.widgets;
-      if (cells === undefined) {
-        return;
-      }
-
-      const activeCell = (toc.activeEntry as INotebookHeading).cellRef;
-
-      if (activeCell instanceof MarkdownCell) {
-        let level = activeCell.headingInfo.level;
-        for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
-          const cell = cells[i];
-          if (
-            cell instanceof MarkdownCell &&
-            cell.headingInfo.level <= level &&
-            cell.headingInfo.level > -1
-          ) {
-            break;
-          }
-
-          if (cell instanceof CodeCell) {
-            void CodeCell.execute(cell, panel.sessionContext);
-          }
-        }
-      } else {
-        if (activeCell instanceof CodeCell) {
-          void CodeCell.execute(activeCell, panel.sessionContext);
-        }
+  app.commands.addCommand(CommandIDs.displayH1Numbering, {
+    label: trans.__('Show first-level heading number'),
+    execute: () => {
+      if (toc.model) {
+        toc.model.configuration = {
+          ...toc.model.configuration,
+          numberingH1: !toc.model.configuration.numberingH1
+        };
       }
     },
-    label: trans.__('Run Cell(s)')
+    isEnabled: () =>
+      toc.model?.supportedOptions.includes('numberingH1') ?? false,
+    isToggled: () => toc.model?.configuration.numberingH1 ?? false
   });
-  */
+
+  app.commands.addCommand(CommandIDs.displayNumbering, {
+    label: trans.__('Show heading number in the document'),
+    icon: args => (args.toolbar ? numberingIcon : undefined),
+    execute: () => {
+      if (toc.model) {
+        toc.model.configuration = {
+          ...toc.model.configuration,
+          numberHeaders: !toc.model.configuration.numberHeaders
+        };
+      }
+    },
+    isEnabled: () =>
+      toc.model?.supportedOptions.includes('numberHeaders') ?? false,
+    isToggled: () => toc.model?.configuration.numberHeaders ?? false
+  });
+
+  app.commands.addCommand(CommandIDs.displayOutputNumbering, {
+    label: trans.__('Show output headings'),
+    execute: () => {
+      if (toc.model) {
+        toc.model.configuration = {
+          ...toc.model.configuration,
+          includeOutput: !toc.model.configuration.includeOutput
+        };
+      }
+    },
+    isEnabled: () =>
+      toc.model?.supportedOptions.includes('includeOutput') ?? false,
+    isToggled: () => toc.model?.configuration.includeOutput ?? false
+  });
 
   app.commands.addCommand(CommandIDs.showPanel, {
     label: trans.__('Table of Contents'),
@@ -119,6 +122,11 @@ async function activateTOC(
       app.shell.activateById(toc.id);
     }
   });
+
+  const tocModels = new Map<string, TableOfContents.Model | null>();
+
+  // Create the ToC registry:
+  const registry = new TableOfContentsRegistry();
 
   if (restorer) {
     // Add the ToC widget to the application restorer:
@@ -152,6 +160,53 @@ async function activateTOC(
       );
     }
   }
+
+  // Set up the panel toolbar
+  const numbering = new ToolbarButton({
+    tooltip: app.commands.label(CommandIDs.displayNumbering),
+    icon: app.commands.icon(CommandIDs.displayNumbering, {
+      toolbar: true
+    }),
+    actualOnClick: true,
+    onClick: () => {
+      app.commands.execute(CommandIDs.displayNumbering);
+      const numberingToggled = app.commands.isToggled(
+        CommandIDs.displayNumbering
+      );
+      numberingToggled
+        ? numbering.addClass('lm-mod-toggled')
+        : numbering.removeClass('lm-mod-toggled');
+    }
+  });
+  numbering.addClass('jp-toc-numberingButton');
+  const numberingToggled = app.commands.isToggled(CommandIDs.displayNumbering);
+  numberingToggled
+    ? numbering.addClass('lm-mod-toggled')
+    : numbering.removeClass('lm-mod-toggled');
+  toc.toolbar.addItem('display-numbering', numbering);
+
+  toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+
+  const toolbarMenu = new MenuSvg({ commands: app.commands });
+  toolbarMenu.addItem({
+    command: CommandIDs.displayH1Numbering
+  });
+  toolbarMenu.addItem({
+    command: CommandIDs.displayOutputNumbering
+  });
+  const menuButton = new ToolbarButton({
+    tooltip: trans.__('More actions…'),
+    icon: ellipsesIcon,
+    actualOnClick: true,
+    onClick: () => {
+      const bbox = menuButton.node.getBoundingClientRect();
+      toolbarMenu.open(bbox.x, bbox.bottom);
+    }
+  });
+  toc.toolbar.addItem('submenu', menuButton);
+
+  // Add the ToC to the left area:
+  app.shell.add(toc, 'left', { rank: 400 });
 
   // Update the ToC when the active widget changes:
   if (labShell) {
@@ -188,6 +243,12 @@ async function activateTOC(
     }
 
     toc.model = model;
+    const numberingToggled = app.commands.isToggled(
+      CommandIDs.displayNumbering
+    );
+    numberingToggled
+      ? numbering.addClass('lm-mod-toggled')
+      : numbering.removeClass('lm-mod-toggled');
   }
 }
 
