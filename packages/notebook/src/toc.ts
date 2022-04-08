@@ -115,6 +115,7 @@ export class NotebookToCModel extends TableOfContentsModel<
    */
   get supportedOptions(): (keyof TableOfContents.IConfig)[] {
     return [
+      'baseNumbering',
       'maximalDepth',
       'numberingH1',
       'numberHeaders',
@@ -429,6 +430,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       configuration
     );
 
+    // Connect model signals to notebook panel
+
     let headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
     const onActiveHeadingChanged = (
@@ -509,6 +512,37 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
 
     widget.context.ready.then(() => {
+      // Customize toc model with notebook metadata
+      //  This is considered as deprecated and we don't sync configuration with metadata
+      //  as those are user view state preferences not document attributes.
+      const nbModel = widget.content.model;
+
+      if (nbModel) {
+        const newConfig = { ...model.configuration };
+        for (const option in this._configMetadataMap) {
+          const keys = this._configMetadataMap[option];
+          for (const k of keys) {
+            let key = k;
+            const negate = key[0] === '!';
+            if (negate) {
+              key = key.slice(1);
+            }
+
+            const keyPath = key.split('/');
+            let value = nbModel.metadata.get(keyPath[0]) as any;
+            for (let p = 1; p < keyPath.length; p++) {
+              value = (value ?? {})[keyPath[p]];
+            }
+            if (typeof value === 'boolean' && negate) {
+              value = !value;
+            }
+            newConfig[option] = value ?? model.configuration[option];
+          }
+        }
+
+        model.configuration = newConfig;
+      }
+
       onHeadingsChanged(model);
 
       model.activeHeadingChanged.connect(onActiveHeadingChanged);
@@ -521,4 +555,19 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     return model;
   }
+
+  /**
+   * Mapping between configuration options and notebook metadata.
+   *
+   * If it starts with `!`, the boolean value of the configuration option is
+   * opposite to the one stored in metadata.
+   * If it contains `/`, the metadata data is nested.
+   */
+  private _configMetadataMap: {
+    [k: keyof TableOfContents.IConfig]: string[];
+  } = {
+    numberHeaders: ['toc-autonumbering', 'toc/number_sections'],
+    numberingH1: ['!toc/skip_h1_title'],
+    baseNumbering: ['toc/base_numbering']
+  };
 }

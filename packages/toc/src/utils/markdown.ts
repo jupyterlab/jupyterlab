@@ -3,6 +3,7 @@
 
 import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
 import { TableOfContents } from '../tokens';
+import { getPrefix } from './common';
 
 /**
  * Markdown heading
@@ -64,10 +65,10 @@ export function getHeadings(
   options?: Partial<TableOfContents.IConfig>,
   initialLevels: number[] = []
 ): IMarkdownHeading[] {
-  const { numberingH1, numberHeaders, maximalDepth } = {
+  const config = {
     ...TableOfContents.defaultConfig,
     ...options
-  };
+  } as TableOfContents.IConfig;
 
   // Split the text into lines:
   const lines = text.split('\n');
@@ -98,39 +99,9 @@ export function getHeadings(
     if (heading) {
       let level = heading.level;
 
-      if (level > 0 && level <= maximalDepth) {
-        let prefix = '';
-        if (numberHeaders) {
-          if (level > previousLevel) {
-            // Initialize the new levels
-            for (let l = previousLevel; l < level - 1; l++) {
-              levels[l] = 0;
-            }
-            levels[level - 1] = 1;
-          } else {
-            // Increment the current level
-            levels[level - 1] += 1;
-
-            // Drop higher levels
-            if (level < previousLevel) {
-              levels.splice(level);
-            }
-          }
-          previousLevel = level;
-
-          // If the header list skips some level, replace missing elements by 0
-          if (numberingH1) {
-            prefix = levels.map(level => level ?? 0).join('.') + '. ';
-          } else {
-            if (levels.length > 1) {
-              prefix =
-                levels
-                  .slice(1)
-                  .map(level => level ?? 0)
-                  .join('.') + '. ';
-            }
-          }
-        }
+      if (level > 0 && level <= config.maximalDepth) {
+        const prefix = getPrefix(level, previousLevel, levels, config);
+        previousLevel = level;
 
         headings.push({
           text: heading.text,

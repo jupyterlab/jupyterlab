@@ -49,10 +49,10 @@ export function getHTMLHeadings(
   options?: Partial<TableOfContents.IConfig>,
   initialLevels: number[] = []
 ): IHTMLHeading[] {
-  const { numberingH1, numberHeaders, maximalDepth } = {
+  const config = {
     ...TableOfContents.defaultConfig,
     ...options
-  };
+  } as TableOfContents.IConfig;
 
   const container: HTMLDivElement = document.createElement('div');
   container.innerHTML = html;
@@ -69,39 +69,9 @@ export function getHTMLHeadings(
     }
     let level = parseInt(h.tagName[1], 10);
 
-    if (level > 0 && level <= maximalDepth) {
-      let prefix = '';
-      if (numberHeaders) {
-        if (level > previousLevel) {
-          // Initialize the new levels
-          for (let l = previousLevel; l < level - 1; l++) {
-            levels[l] = 0;
-          }
-          levels[level - 1] = 1;
-        } else {
-          // Increment the current level
-          levels[level - 1] += 1;
-
-          // Drop higher levels
-          if (level < previousLevel) {
-            levels.splice(level);
-          }
-        }
-        previousLevel = level;
-
-        // If the header list skips some level, replace missing elements by 0
-        if (numberingH1) {
-          prefix = levels.map(level => level ?? 0).join('.') + '. ';
-        } else {
-          if (levels.length > 1) {
-            prefix =
-              levels
-                .slice(1)
-                .map(level => level ?? 0)
-                .join('.') + '. ';
-          }
-        }
-      }
+    if (level > 0 && level <= config.maximalDepth) {
+      const prefix = getPrefix(level, previousLevel, levels, config);
+      previousLevel = level;
 
       headings.push({
         text: h.textContent ?? '',
@@ -141,6 +111,57 @@ export function addPrefix(
   }
 
   return element;
+}
+
+/**
+ * Update the levels and create the numbering prefix
+ *
+ * @param level Current level
+ * @param previousLevel Previous level
+ * @param levels Levels list
+ * @param options Options
+ * @returns The numbering prefix
+ */
+export function getPrefix(
+  level: number,
+  previousLevel: number,
+  levels: number[],
+  options: TableOfContents.IConfig
+): string {
+  const { baseNumbering, numberingH1, numberHeaders } = options;
+  let prefix = '';
+  if (numberHeaders) {
+    const highestLevel = numberingH1 ? 1 : 2;
+    if (level > previousLevel) {
+      // Initialize the new levels
+      for (let l = previousLevel; l < level - 1; l++) {
+        levels[l] = 0;
+      }
+      levels[level - 1] = level === highestLevel ? baseNumbering : 1;
+    } else {
+      // Increment the current level
+      levels[level - 1] += 1;
+
+      // Drop higher levels
+      if (level < previousLevel) {
+        levels.splice(level);
+      }
+    }
+
+    // If the header list skips some level, replace missing elements by 0
+    if (numberingH1) {
+      prefix = levels.map(level => level ?? 0).join('.') + '. ';
+    } else {
+      if (levels.length > 1) {
+        prefix =
+          levels
+            .slice(1)
+            .map(level => level ?? 0)
+            .join('.') + '. ';
+      }
+    }
+  }
+  return prefix;
 }
 
 /**

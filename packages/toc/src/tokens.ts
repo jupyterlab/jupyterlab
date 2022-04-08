@@ -82,6 +82,10 @@ export namespace TableOfContents {
    */
   export interface IConfig extends JSONObject {
     /**
+     * Base level for the highest headings
+     */
+    baseNumbering: number;
+    /**
      * Maximal depth of headings to display
      */
     maximalDepth: number;
@@ -104,6 +108,7 @@ export namespace TableOfContents {
   }
 
   export const defaultConfig: IConfig = {
+    baseNumbering: 1,
     maximalDepth: 4,
     numberingH1: true,
     numberHeaders: true,

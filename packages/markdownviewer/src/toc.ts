@@ -51,7 +51,7 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
    * List of configuration options supported by the model.
    */
   get supportedOptions(): (keyof TableOfContents.IConfig)[] {
-    return ['maximalDepth', 'numberingH1', 'numberHeaders'];
+    return ['baseNumbering', 'maximalDepth', 'numberingH1', 'numberHeaders'];
   }
 
   /**
