@@ -23,6 +23,7 @@ jobs:
           # ignores modifications to these files
           files_ignore: |
             jupyterlab/staging/yarn.js
+            jupyterlab/staging/.yarnrc
 
       - name: Fail if files in staging are modified
         if: steps.modified-files-in-staging.outputs.any_changed == 'true'
