@@ -237,6 +237,10 @@ export class StaticNotebook extends Widget {
     }
   }
 
+  get cellCollapsed(): ISignal<this, Cell> {
+    return this._cellCollapsed;
+  }
+
   /**
    * A signal emitted when the notebook is fully rendered.
    */
@@ -714,6 +718,7 @@ export class StaticNotebook extends Widget {
     cell.toggleCollapsedSignal.connect(
       (newCell: MarkdownCell, collapsed: boolean) => {
         NotebookActions.setHeadingCollapse(newCell, collapsed, this);
+        this._cellCollapsed.emit(newCell);
       }
     );
     return cell;
@@ -879,6 +884,7 @@ export class StaticNotebook extends Widget {
     return this._toRenderMap.size;
   }
 
+  private _cellCollapsed = new Signal<this, Cell>(this);
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';

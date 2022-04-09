@@ -14,9 +14,11 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITableOfContentsRegistry,
+  ITableOfContentsTracker,
   TableOfContents,
   TableOfContentsPanel,
-  TableOfContentsRegistry
+  TableOfContentsRegistry,
+  TableOfContentsTracker
 } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -28,6 +30,7 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -47,6 +50,7 @@ namespace CommandIDs {
  *
  * @private
  * @param app - Jupyter application
+ * @param registry - Table of contents registry
  * @param translator - translator
  * @param restorer - application layout restorer
  * @param labShell - Jupyter lab shell
@@ -55,11 +59,12 @@ namespace CommandIDs {
  */
 async function activateTOC(
   app: JupyterFrontEnd,
+  tocRegistry: ITableOfContentsRegistry,
   translator?: ITranslator | null,
   restorer?: ILayoutRestorer | null,
   labShell?: ILabShell | null,
   settingRegistry?: ISettingRegistry | null
-): Promise<ITableOfContentsRegistry> {
+): Promise<ITableOfContentsTracker> {
   const trans = (translator ?? nullTranslator).load('jupyterlab');
   let configuration = { ...TableOfContents.defaultConfig };
 
@@ -125,10 +130,7 @@ async function activateTOC(
     }
   });
 
-  const tocModels = new Map<string, TableOfContents.Model | null>();
-
-  // Create the ToC registry:
-  const registry = new TableOfContentsRegistry();
+  const tracker = new TableOfContentsTracker();
 
   if (restorer) {
     // Add the ToC widget to the application restorer:
@@ -139,7 +141,7 @@ async function activateTOC(
   let settings: ISettingRegistry.ISettings | undefined;
   if (settingRegistry) {
     try {
-      settings = await settingRegistry.load(extension.id);
+      settings = await settingRegistry.load(registry.id);
       const updateSettings = (plugin: ISettingRegistry.ISettings) => {
         const composite = plugin.composite;
         for (const key of [...Object.keys(configuration)]) {
@@ -149,9 +151,19 @@ async function activateTOC(
           }
         }
 
-        for (const model of tocModels.values()) {
-          if (model) {
-            model.configuration = configuration;
+        if (labShell) {
+          toArray(labShell.widgets('main')).forEach(widget => {
+            const model = tracker.get(widget);
+            if (model) {
+              model.configuration = configuration;
+            }
+          });
+        } else {
+          if (app.shell.currentWidget) {
+            const model = tracker.get(app.shell.currentWidget);
+            if (model) {
+              model.configuration = configuration;
+            }
           }
         }
       };
@@ -211,7 +223,7 @@ async function activateTOC(
     onConnect();
   });
 
-  return registry;
+  return tracker;
 
   /**
    * Callback invoked when the active widget changes.
@@ -223,14 +235,14 @@ async function activateTOC(
     if (!widget) {
       return;
     }
-    const id = widget.id;
-    let model = tocModels.get(id);
-    if (!model || model.isDisposed) {
-      model = registry.getModel(widget, configuration) ?? null;
-      tocModels.set(id, model);
+    let model = tracker.get(widget);
+    if (!model) {
+      model = tocRegistry.getModel(widget, configuration) ?? null;
+      if (model) {
+        tracker.add(widget, model);
+      }
 
       widget.disposed.connect(() => {
-        tocModels.delete(id);
         model?.dispose();
       });
     }
@@ -245,14 +257,28 @@ async function activateTOC(
 }
 
 /**
- * Initialization data for the ToC extension.
+ * Table of contents registry plugin.
  *
  * @private
  */
-const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
+const registry: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc-extension:registry',
   autoStart: true,
   provides: ITableOfContentsRegistry,
+  activate: (): ITableOfContentsRegistry => {
+    // Create the ToC registry
+    return new TableOfContentsRegistry();
+  }
+};
+
+/**
+ * Table of contents tracker plugin.
+ */
+const tracker: JupyterFrontEndPlugin<ITableOfContentsTracker> = {
+  id: '@jupyterlab/toc-extension:tracker',
+  autoStart: true,
+  provides: ITableOfContentsTracker,
+  requires: [ITableOfContentsRegistry],
   optional: [ITranslator, ILayoutRestorer, ILabShell, ISettingRegistry],
   activate: activateTOC
 };
@@ -260,4 +286,4 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
 /**
  * Exports.
  */
-export default extension;
+export default [registry, tracker];

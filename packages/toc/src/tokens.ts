@@ -46,6 +46,25 @@ export const ITableOfContentsRegistry = new Token<ITableOfContentsRegistry>(
 );
 
 /**
+ * Interface for the table of contents tracker
+ */
+export interface ITableOfContentsTracker {
+  /**
+   * Get the model associated with a given widget.
+   *
+   * @param widget Widget
+   */
+  get(widget: Widget): TableOfContents.IModel<TableOfContents.IHeading> | null;
+}
+
+/**
+ * Table of contents tracker token.
+ */
+export const ITableOfContentsTracker = new Token<ITableOfContentsTracker>(
+  '@jupyterlab/toc:ITableOfContentsTracker'
+);
+
+/**
  * Namespace for table of contents interface
  */
 export namespace TableOfContents {

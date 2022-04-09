@@ -13,5 +13,6 @@ export * from './treeview';
 export * from './tocitem';
 export * from './toctree';
 export * from './tokens';
+export * from './tracker';
 // Namespace the utils
 export * as ToCUtils from './utils';

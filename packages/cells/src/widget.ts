@@ -154,7 +154,7 @@ const MARKDOWN_CELL_CLASS = 'jp-MarkdownCell';
  */
 const MARKDOWN_OUTPUT_CLASS = 'jp-MarkdownOutput';
 
-export const MARKDOWN_HEADING_COLLAPSED = 'jp-MarkdownHeadingCollapsed';
+const MARKDOWN_HEADING_COLLAPSED = 'jp-MarkdownHeadingCollapsed';
 
 const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
 

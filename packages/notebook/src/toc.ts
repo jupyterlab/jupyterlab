@@ -7,7 +7,7 @@ import {
   CodeCell,
   CodeCellModel,
   ICellModel,
-  MARKDOWN_HEADING_COLLAPSED
+  MarkdownCell
 } from '@jupyterlab/cells';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
 import {
@@ -125,6 +125,32 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   /**
+   * Get the first heading of a given cell.
+   *
+   * It will be `null` if the cell has no headings.
+   *
+   * @param cell Cell
+   * @returns The associated heading
+   */
+  getCellHeading(cell: Cell): INotebookHeading | null {
+    let headingIndex = this._cellToHeadingIndex.get(cell);
+
+    if (headingIndex !== undefined) {
+      const candidate = this.headings[headingIndex];
+      // Highlight the first title as active (if multiple titles are in the same cell)
+      while (
+        this.headings[headingIndex - 1] &&
+        this.headings[headingIndex - 1].cellRef === candidate.cellRef
+      ) {
+        headingIndex--;
+      }
+      return this.headings[headingIndex];
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * Dispose the object
    */
   dispose(): void {
@@ -168,11 +194,6 @@ export class NotebookToCModel extends TableOfContentsModel<
     for (let i = 0; i < cells.length; i++) {
       const cell: Cell = cells[i];
       const model = cell.model;
-      const cellCollapseMetadata = this.configuration.syncCollapseState
-        ? MARKDOWN_HEADING_COLLAPSED
-        : 'toc-hr-collapsed';
-      const collapsed =
-        (model.metadata.get(cellCollapseMetadata) as boolean) ?? false;
 
       switch (model.type) {
         case 'code': {
@@ -209,7 +230,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                       ...heading,
                       cellRef: cell,
                       index: [i, j],
-                      collapsed,
+                      collapsed: false,
                       isRunning: RunningStatus.Idle,
                       type: HeadingType.HTML
                     };
@@ -226,7 +247,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                       ...heading,
                       cellRef: cell,
                       index: [i, j],
-                      collapsed,
+                      collapsed: false,
                       isRunning: RunningStatus.Idle,
                       type: HeadingType.Markdown
                     };
@@ -244,12 +265,16 @@ export class NotebookToCModel extends TableOfContentsModel<
               cell.model.value.text,
               this.configuration,
               documentLevels
-            ).map(heading => {
+            ).map((heading, index) => {
               return {
                 ...heading,
                 cellRef: cell,
                 index: [i, 0],
-                collapsed,
+                collapsed:
+                  // If there are multiple headings, only collapse the first one
+                  this.configuration.syncCollapseState && index === 0
+                    ? (cell as MarkdownCell).headingCollapsed
+                    : false,
                 isRunning: RunningStatus.Idle,
                 type: HeadingType.Markdown
               };
@@ -511,6 +536,23 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       });
     };
 
+    const onHeadingCollapsed = (
+      _: NotebookToCModel,
+      heading: INotebookHeading
+    ) => {
+      if (model.configuration.syncCollapseState) {
+        (heading.cellRef as MarkdownCell).headingCollapsed = true;
+      }
+    };
+    const onCellCollapsed = (_: unknown, cell: Cell) => {
+      if (model.configuration.syncCollapseState) {
+        const h = model.getCellHeading(cell);
+        if (h) {
+          model.toggleCollapse(h);
+        }
+      }
+    };
+
     widget.context.ready.then(() => {
       // Customize toc model with notebook metadata
       //  This is considered as deprecated and we don't sync configuration with metadata
@@ -547,9 +589,14 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
       model.activeHeadingChanged.connect(onActiveHeadingChanged);
       model.headingsChanged.connect(onHeadingsChanged);
+      model.collapseChanged.connect(onHeadingCollapsed);
+      widget.content.cellCollapsed.connect(onCellCollapsed);
+      // widget.content.
       widget.disposed.connect(() => {
         model.activeHeadingChanged.disconnect(onActiveHeadingChanged);
         model.headingsChanged.disconnect(onHeadingsChanged);
+        model.collapseChanged.disconnect(onHeadingCollapsed);
+        widget.content.cellCollapsed.disconnect(onCellCollapsed);
       });
     });
 
