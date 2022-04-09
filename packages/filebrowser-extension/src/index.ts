@@ -208,7 +208,6 @@ const browser: JupyterFrontEndPlugin<void> = {
       }
 
       if (settingRegistry) {
-
         void settingRegistry
           .load('@jupyterlab/filebrowser-extension:browser')
           .then(settings => {
@@ -219,16 +218,27 @@ const browser: JupyterFrontEndPlugin<void> = {
               navigateToCurrentDirectory: false,
               showLastModifiedColumn: true,
               useFuzzyFilter: true,
-              showHiddenFiles: false,
-              filterDirectories: true,
-            }
+              showHiddenFiles: false
+            };
+            const fileBrowserModelConfig = {
+              filterDirectories: true
+            };
 
-            function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
-              for (const key of fileBrowserConfig) {
+            function onSettingsChanged(
+              settings: ISettingRegistry.ISettings
+            ): void {
+              for (const key in fileBrowserConfig) {
                 const value = settings.get(key).composite as boolean;
-                fileBrowserConfig[key] = value;
-                browser.model[key] = value;
-              };
+                fileBrowserConfig[
+                  key as keyof typeof fileBrowserConfig
+                ] = value;
+                browser[key as keyof typeof fileBrowserConfig] = value;
+              }
+
+              const value = settings.get('filterDirectories')
+                .composite as boolean;
+              fileBrowserModelConfig.filterDirectories = value;
+              browser.model.filterDirectories = value;
             }
             settings.changed.connect(onSettingsChanged);
             onSettingsChanged(settings);
