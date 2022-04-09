@@ -223,7 +223,7 @@ const browser: JupyterFrontEndPlugin<void> = {
               filterDirectories: true,
             }
 
-            function onSettingsChanged(settings: ISettingRegistry.IPlugin): void {
+            function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
               for (const key of fileBrowserConfig) {
                 const value = settings.get(key).composite as boolean;
                 fileBrowserConfig[key] = value;
