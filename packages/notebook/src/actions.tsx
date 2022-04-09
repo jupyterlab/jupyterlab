@@ -2000,9 +2000,7 @@ namespace Private {
     activeCell: Cell | null;
   }
 
-  export function isNotebookRendered(
-    notebook: Notebook,
-  ): boolean {
+  export function isNotebookRendered(notebook: Notebook): boolean {
     const translator = notebook.translator;
     const trans = translator.load('jupyterlab');
 
