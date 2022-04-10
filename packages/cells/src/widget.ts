@@ -1552,23 +1552,26 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._headingCollapsed;
   }
   set headingCollapsed(value: boolean) {
-    this._headingCollapsed = value;
-    if (value) {
-      this.model.metadata.set(MARKDOWN_HEADING_COLLAPSED, value);
-    } else if (this.model.metadata.has(MARKDOWN_HEADING_COLLAPSED)) {
-      this.model.metadata.delete(MARKDOWN_HEADING_COLLAPSED);
-    }
-    const collapseButton = this.inputArea.promptNode.getElementsByClassName(
-      HEADING_COLLAPSER_CLASS
-    )[0];
-    if (collapseButton) {
+    if (this._headingCollapsed !== value) {
+      this._headingCollapsed = value;
       if (value) {
-        collapseButton.classList.add('jp-mod-collapsed');
-      } else {
-        collapseButton.classList.remove('jp-mod-collapsed');
+        this.model.metadata.set(MARKDOWN_HEADING_COLLAPSED, value);
+      } else if (this.model.metadata.has(MARKDOWN_HEADING_COLLAPSED)) {
+        this.model.metadata.delete(MARKDOWN_HEADING_COLLAPSED);
       }
+      const collapseButton = this.inputArea.promptNode.getElementsByClassName(
+        HEADING_COLLAPSER_CLASS
+      )[0];
+      if (collapseButton) {
+        if (value) {
+          collapseButton.classList.add('jp-mod-collapsed');
+        } else {
+          collapseButton.classList.remove('jp-mod-collapsed');
+        }
+      }
+      this.renderCollapseButtons(this._renderer!);
+      this._toggleCollapsedSignal.emit(this._headingCollapsed);
     }
-    this.renderCollapseButtons(this._renderer);
   }
 
   get numberChildNodes(): number {
@@ -1659,7 +1662,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       }
       collapseButton.onclick = (event: Event) => {
         this.headingCollapsed = !this.headingCollapsed;
-        this._toggleCollapsedSignal.emit(this._headingCollapsed);
       };
     }
   }
@@ -1691,7 +1693,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       newShowHiddenCellsButton.appendChild(buttonTextElement);
       newShowHiddenCellsButton.onclick = () => {
         this.headingCollapsed = false;
-        this._toggleCollapsedSignal.emit(this._headingCollapsed);
       };
       this.node.appendChild(newShowHiddenCellsButton);
     }

@@ -621,14 +621,21 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       _: NotebookToCModel,
       heading: INotebookHeading
     ) => {
-      if (model.configuration.syncCollapseState) {
-        (heading.cellRef as MarkdownCell).headingCollapsed = true;
+      const cell = heading.cellRef as MarkdownCell;
+      if (
+        model.configuration.syncCollapseState &&
+        cell.headingCollapsed !== (heading.collapsed ?? false)
+      ) {
+        cell.headingCollapsed = heading.collapsed ?? false;
       }
     };
-    const onCellCollapsed = (_: unknown, cell: Cell) => {
+    const onCellCollapsed = (_: unknown, cell: MarkdownCell) => {
       if (model.configuration.syncCollapseState) {
         const h = model.getCellHeading(cell);
-        if (h) {
+        if (
+          typeof h?.collapsed === 'boolean' &&
+          h.collapsed !== cell.headingCollapsed
+        ) {
           model.toggleCollapse(h);
         }
       }
