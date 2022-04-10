@@ -2141,7 +2141,7 @@ namespace Private {
           }
           if (sessionContext.hasNoKernel) {
             void sessionContextDialogs.selectKernel(sessionContext);
-            break;
+            return Promise.resolve(false);
           }
           const deletedCells = notebook.model?.deletedCells ?? [];
           executionScheduled.emit({ notebook, cell });
