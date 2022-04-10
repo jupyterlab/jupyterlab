@@ -74,12 +74,6 @@ export abstract class TableOfContentsModel<
   get configuration(): TableOfContents.IConfig {
     return this._configuration;
   }
-  set configuration(c: TableOfContents.IConfig) {
-    if (!JSONExt.deepEqual(this._configuration, c)) {
-      this._configuration = c;
-      this.refresh();
-    }
-  }
 
   /**
    * List of headings.
@@ -128,6 +122,19 @@ export abstract class TableOfContentsModel<
    */
   protected get isAlwaysActive(): boolean {
     return false;
+  }
+
+  /**
+   * Model configuration setter.
+   *
+   * @param c New configuration
+   */
+  setConfiguration(c: Partial<TableOfContents.IConfig>): void {
+    const newConfiguration = { ...this._configuration, ...c };
+    if (!JSONExt.deepEqual(this._configuration, newConfiguration)) {
+      this._configuration = newConfiguration as TableOfContents.IConfig;
+      this.refresh();
+    }
   }
 
   /**

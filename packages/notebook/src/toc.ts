@@ -94,6 +94,15 @@ export class NotebookToCModel extends TableOfContentsModel<
     this._runningCells = new Array<Cell>();
     this._cellToHeadingIndex = new WeakMap<Cell, number>();
 
+    void widget.context.ready.then(() => {
+      // Load configuration from metadata
+      this.setConfiguration({});
+    });
+
+    this.widget.context.model.metadata.changed.connect(
+      this.onMetadataChanged,
+      this
+    );
     this.widget.content.activeCellChanged.connect(
       this.onActiveCellChanged,
       this
@@ -158,7 +167,10 @@ export class NotebookToCModel extends TableOfContentsModel<
       return;
     }
 
-    this._runningCells.length = 0;
+    this.widget.context.model.metadata.changed.disconnect(
+      this.onMetadataChanged,
+      this
+    );
     this.widget.content.activeCellChanged.disconnect(
       this.onActiveCellChanged,
       this
@@ -169,7 +181,20 @@ export class NotebookToCModel extends TableOfContentsModel<
     );
     NotebookActions.executed.disconnect(this.onExecuted, this);
 
+    this._runningCells.length = 0;
+
     super.dispose();
+  }
+
+  /**
+   * Model configuration setter.
+   *
+   * @param c New configuration
+   */
+  setConfiguration(c: Partial<TableOfContents.IConfig>): void {
+    // Ensure configuration update
+    const metadataConfig = this.loadConfigurationFromMetadata();
+    super.setConfiguration({ ...this.configuration, ...metadataConfig, ...c });
   }
 
   /**
@@ -292,6 +317,43 @@ export class NotebookToCModel extends TableOfContentsModel<
     return Promise.resolve(headings);
   }
 
+  /**
+   * Read table of content configuration from notebook metadata.
+   *
+   * @returns ToC configuration from metadata
+   */
+  protected loadConfigurationFromMetadata(): Partial<TableOfContents.IConfig> {
+    const nbModel = this.widget.content.model;
+    const newConfig: Partial<TableOfContents.IConfig> = {};
+
+    if (nbModel) {
+      for (const option in this.configMetadataMap) {
+        const keys = this.configMetadataMap[option];
+        for (const k of keys) {
+          let key = k;
+          const negate = key[0] === '!';
+          if (negate) {
+            key = key.slice(1);
+          }
+
+          const keyPath = key.split('/');
+          let value = nbModel.metadata.get(keyPath[0]) as any;
+          for (let p = 1; p < keyPath.length; p++) {
+            value = (value ?? {})[keyPath[p]];
+          }
+
+          if (value !== undefined) {
+            if (typeof value === 'boolean' && negate) {
+              value = !value;
+            }
+            newConfig[option] = value;
+          }
+        }
+      }
+    }
+    return newConfig;
+  }
+
   protected onActiveCellChanged(
     notebook: Notebook,
     cell: Cell<ICellModel>
@@ -343,6 +405,10 @@ export class NotebookToCModel extends TableOfContentsModel<
 
     this.updateRunningStatus(this.headings);
     this.stateChanged.emit();
+  }
+
+  protected onMetadataChanged(): void {
+    this.setConfiguration({});
   }
 
   protected updateRunningStatus(headings: INotebookHeading[]): void {
@@ -413,6 +479,21 @@ export class NotebookToCModel extends TableOfContentsModel<
       return maxIsRunning;
     }
   }
+
+  /**
+   * Mapping between configuration options and notebook metadata.
+   *
+   * If it starts with `!`, the boolean value of the configuration option is
+   * opposite to the one stored in metadata.
+   * If it contains `/`, the metadata data is nested.
+   */
+  protected configMetadataMap: {
+    [k: keyof TableOfContents.IConfig]: string[];
+  } = {
+    numberHeaders: ['toc-autonumbering', 'toc/number_sections'],
+    numberingH1: ['!toc/skip_h1_title'],
+    baseNumbering: ['toc/base_numbering']
+  };
 
   private _runningCells: Cell[];
   private _cellToHeadingIndex: WeakMap<Cell, number>;
@@ -554,37 +635,6 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
 
     widget.context.ready.then(() => {
-      // Customize toc model with notebook metadata
-      //  This is considered as deprecated and we don't sync configuration with metadata
-      //  as those are user view state preferences not document attributes.
-      const nbModel = widget.content.model;
-
-      if (nbModel) {
-        const newConfig = { ...model.configuration };
-        for (const option in this._configMetadataMap) {
-          const keys = this._configMetadataMap[option];
-          for (const k of keys) {
-            let key = k;
-            const negate = key[0] === '!';
-            if (negate) {
-              key = key.slice(1);
-            }
-
-            const keyPath = key.split('/');
-            let value = nbModel.metadata.get(keyPath[0]) as any;
-            for (let p = 1; p < keyPath.length; p++) {
-              value = (value ?? {})[keyPath[p]];
-            }
-            if (typeof value === 'boolean' && negate) {
-              value = !value;
-            }
-            newConfig[option] = value ?? model.configuration[option];
-          }
-        }
-
-        model.configuration = newConfig;
-      }
-
       onHeadingsChanged(model);
 
       model.activeHeadingChanged.connect(onActiveHeadingChanged);
@@ -602,19 +652,4 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     return model;
   }
-
-  /**
-   * Mapping between configuration options and notebook metadata.
-   *
-   * If it starts with `!`, the boolean value of the configuration option is
-   * opposite to the one stored in metadata.
-   * If it contains `/`, the metadata data is nested.
-   */
-  private _configMetadataMap: {
-    [k: keyof TableOfContents.IConfig]: string[];
-  } = {
-    numberHeaders: ['toc-autonumbering', 'toc/number_sections'],
-    numberingH1: ['!toc/skip_h1_title'],
-    baseNumbering: ['toc/base_numbering']
-  };
 }

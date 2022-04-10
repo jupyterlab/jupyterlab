@@ -791,6 +791,132 @@ export namespace NotebookTools {
   }
 
   /**
+   * A notebook metadata number editor
+   */
+  export class NotebookMetadataNumberTool extends Tool {
+    constructor(options: { key: string; label: string }) {
+      super({
+        node: Private.createInputNode({
+          label: options.label,
+          value: '1'
+        })
+      });
+      this.addClass('jp-NumberSetter');
+      this._key = options.key;
+    }
+
+    /**
+     * The select node for the widget.
+     */
+    get inputNode(): HTMLInputElement {
+      return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+    }
+
+    /**
+     * Handle the DOM events for the widget.
+     *
+     * @param event - The DOM event sent to the widget.
+     *
+     * #### Notes
+     * This method implements the DOM `EventListener` interface and is
+     * called in response to events on the notebook panel's node. It should
+     * not be called directly by user code.
+     */
+    handleEvent(event: Event): void {
+      switch (event.type) {
+        case 'change':
+        case 'input':
+          this.onValueChanged();
+          break;
+        default:
+          break;
+      }
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      const node = this.inputNode;
+      node.addEventListener('change', this);
+      node.addEventListener('input', this);
+    }
+
+    /**
+     * Handle `before-detach` messages for the widget.
+     */
+    protected onBeforeDetach(msg: Message): void {
+      const node = this.inputNode;
+      node.removeEventListener('change', this);
+      node.removeEventListener('input', this);
+    }
+
+    /**
+     * Handle a change to the notebook.
+     */
+    protected onActiveNotebookPanelChanged(msg: Message): void {
+      this._update();
+    }
+
+    /**
+     * Handle a change to the notebook metadata.
+     */
+    protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
+      this._update();
+    }
+
+    /**
+     * Handle a change to the value.
+     */
+    protected onValueChanged(): void {
+      const nb =
+        this.notebookTools.activeNotebookPanel &&
+        this.notebookTools.activeNotebookPanel.content;
+      const metadata = nb?.model?.metadata ?? null;
+      if (metadata) {
+        const keyPath = this._key.split('/');
+        const value = { ...((metadata.get(keyPath[0]) ?? {}) as any) };
+        let lastObj = value;
+        for (let p = 1; p < keyPath.length - 1; p++) {
+          if (lastObj[keyPath[p]] === undefined) {
+            lastObj[keyPath[p]] = {};
+          }
+          lastObj = lastObj[keyPath[p]];
+        }
+        lastObj[keyPath[keyPath.length - 1]] =
+          this.inputNode.valueAsNumber ?? 1;
+
+        metadata.set(keyPath[0], value);
+      }
+    }
+
+    private _update() {
+      const nb =
+        this.notebookTools.activeNotebookPanel &&
+        this.notebookTools.activeNotebookPanel.content;
+      const metadata = nb?.model?.metadata ?? null;
+      if (metadata) {
+        const keyPath = this._key.split('/');
+        let value = metadata.get(keyPath[0]) as any;
+        for (let p = 1; p < keyPath.length; p++) {
+          value = (value ?? {})[keyPath[p]];
+        }
+
+        if (value !== undefined) {
+          this.inputNode.valueAsNumber = value;
+        } else {
+          this.inputNode.valueAsNumber = 1;
+        }
+      }
+    }
+
+    /**
+     * Metadata key to set
+     */
+    private _key: string;
+  }
+
+  /**
    * The namespace for `KeySelector` static data.
    */
   export namespace KeySelector {
@@ -937,6 +1063,18 @@ export namespace NotebookTools {
       default: true
     });
   }
+
+  /**
+   * Create base table of content numbering
+   */
+  export function createToCBaseNumbering(translator?: ITranslator): Tool {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return new NotebookMetadataNumberTool({
+      key: 'toc/base_numbering',
+      label: trans.__('Table of content - Base numbering')
+    });
+  }
 }
 
 /**
@@ -987,6 +1125,24 @@ namespace Private {
     });
     const node = VirtualDOM.realize(
       h.div({}, h.label(title, h.select({}, optionNodes)))
+    );
+    Styling.styleNode(node);
+    return node;
+  }
+
+  /**
+   * Create the node for a number input.
+   */
+  export function createInputNode(options: {
+    label: string;
+    value: string;
+  }): HTMLElement {
+    const title = options.label;
+    const node = VirtualDOM.realize(
+      h.div(
+        {},
+        h.label(title, h.input({ value: options.value, type: 'number' }))
+      )
     );
     Styling.styleNode(node);
     return node;

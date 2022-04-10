@@ -126,6 +126,9 @@ export namespace TableOfContents {
     syncCollapseState: boolean;
   }
 
+  /**
+   * Default table of content configuration
+   */
   export const defaultConfig: IConfig = {
     baseNumbering: 1,
     maximalDepth: 4,
@@ -187,7 +190,7 @@ export namespace TableOfContents {
     /**
      * Model configuration
      */
-    configuration: IConfig;
+    readonly configuration: IConfig;
 
     /**
      * Returns the list of headings.
@@ -210,6 +213,13 @@ export namespace TableOfContents {
      * to be always active; e.g. to add numbering in the document.
      */
     isActive: boolean;
+
+    /**
+     * Model configuration setter.
+     *
+     * @param c New configuration
+     */
+    setConfiguration(c: Partial<IConfig>): void;
 
     /**
      * List of configuration options supported by the model.

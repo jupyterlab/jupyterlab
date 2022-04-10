@@ -893,6 +893,7 @@ function activateNotebookTools(
   const activeCellTool = new NotebookTools.ActiveCellTool();
   const editable = NotebookTools.createEditableToggle(translator);
   const slideShow = NotebookTools.createSlideShowSelector(translator);
+  const tocBaseNumbering = NotebookTools.createToCBaseNumbering(translator);
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
     editorFactory,
@@ -969,6 +970,7 @@ function activateNotebookTools(
   notebookTools.addItem({ tool: activeCellTool, section: 'common', rank: 1 });
   notebookTools.addItem({ tool: editable, section: 'common', rank: 2 });
   notebookTools.addItem({ tool: slideShow, section: 'common', rank: 3 });
+  notebookTools.addItem({ tool: tocBaseNumbering, section: 'common', rank: 4 });
 
   notebookTools.addItem({
     tool: cellMetadataEditor,

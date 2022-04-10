@@ -272,13 +272,19 @@
 }
 
 .jp-KeySelector label,
-.jp-MetadataEditorTool label {
+.jp-MetadataEditorTool label,
+.jp-NumberSetter label {
   line-height: 1.4;
 }
 
 .jp-NotebookTools .jp-select-wrapper {
   margin-top: 4px;
   margin-bottom: 0;
+}
+
+.jp-NumberSetter input {
+  width: 100%;
+  margin-top: 4px;
 }
 
 .jp-NotebookTools .jp-Collapse {

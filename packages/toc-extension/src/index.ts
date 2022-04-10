@@ -80,10 +80,9 @@ async function activateTOC(
     label: trans.__('Show first-level heading number'),
     execute: () => {
       if (toc.model) {
-        toc.model.configuration = {
-          ...toc.model.configuration,
+        toc.model.setConfiguration({
           numberingH1: !toc.model.configuration.numberingH1
-        };
+        });
       }
     },
     isEnabled: () =>
@@ -96,10 +95,9 @@ async function activateTOC(
     icon: args => (args.toolbar ? numberingIcon : undefined),
     execute: () => {
       if (toc.model) {
-        toc.model.configuration = {
-          ...toc.model.configuration,
+        toc.model.setConfiguration({
           numberHeaders: !toc.model.configuration.numberHeaders
-        };
+        });
         app.commands.notifyCommandChanged(CommandIDs.displayNumbering);
       }
     },
@@ -112,10 +110,9 @@ async function activateTOC(
     label: trans.__('Show output headings'),
     execute: () => {
       if (toc.model) {
-        toc.model.configuration = {
-          ...toc.model.configuration,
+        toc.model.setConfiguration({
           includeOutput: !toc.model.configuration.includeOutput
-        };
+        });
       }
     },
     isEnabled: () =>
@@ -155,14 +152,14 @@ async function activateTOC(
           toArray(labShell.widgets('main')).forEach(widget => {
             const model = tracker.get(widget);
             if (model) {
-              model.configuration = configuration;
+              model.setConfiguration(configuration);
             }
           });
         } else {
           if (app.shell.currentWidget) {
             const model = tracker.get(app.shell.currentWidget);
             if (model) {
-              model.configuration = configuration;
+              model.setConfiguration(configuration);
             }
           }
         }
