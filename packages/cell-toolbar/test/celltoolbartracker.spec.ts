@@ -1,7 +1,17 @@
+/* -----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+import {
+  createToolbarFactory,
+  ToolbarWidgetRegistry
+} from '@jupyterlab/apputils';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
+import { IDataConnector } from '@jupyterlab/statedb';
 import { NBTestUtils } from '@jupyterlab/testutils';
+import { ITranslator } from '@jupyterlab/translation';
 
 import { CommandRegistry } from '@lumino/commands';
 import { Signal } from '@lumino/signaling';
@@ -37,14 +47,88 @@ class TestSettings implements ISettingRegistry.ISettings {
   dispose = jest.fn();
 }
 
-/* -----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+function testToolbarFactory() {
+  const pluginId = '@jupyterlab/cell-toolbar';
+
+  const toolbarRegistry = new ToolbarWidgetRegistry({
+    defaultFactory: jest.fn()
+  });
+
+  const bar: ISettingRegistry.IPlugin = {
+    data: {
+      composite: {},
+      user: {}
+    },
+    id: pluginId,
+    raw: '{}',
+    schema: {
+      'jupyter.lab.toolbars': {
+        dummyFactory: [
+          {
+            name: 'insert',
+            command: 'notebook:insert-cell-below',
+            rank: 20
+          },
+          { name: 'spacer', type: 'spacer', rank: 100 },
+          { name: 'cut', command: 'notebook:cut-cell', rank: 21 },
+          {
+            name: 'clear-all',
+            command: 'notebook:clear-all-cell-outputs',
+            rank: 60,
+            disabled: true
+          }
+        ]
+      },
+      'jupyter.lab.transform': true,
+      properties: {
+        toolbar: {
+          type: 'array'
+        }
+      },
+      type: 'object'
+    },
+    version: 'test'
+  };
+
+  const connector: IDataConnector<
+    ISettingRegistry.IPlugin,
+    string,
+    string,
+    string
+  > = {
+    fetch: jest.fn().mockImplementation((id: string) => {
+      switch (id) {
+        case bar.id:
+          return bar;
+        default:
+          return {};
+      }
+    }),
+    list: jest.fn(),
+    save: jest.fn(),
+    remove: jest.fn()
+  };
+
+  const settingRegistry = new SettingRegistry({
+    connector
+  });
+  const factoryName = 'dummyFactory';
+  const translator: ITranslator = {
+    load: jest.fn()
+  };
+
+  return createToolbarFactory(
+    toolbarRegistry,
+    settingRegistry,
+    factoryName,
+    pluginId,
+    translator
+  );
+}
+
 describe('@jupyterlab/cell-toolbar', () => {
   describe('CellBarExtension', () => {
     let commands: CommandRegistry;
-    let settings: ISettingRegistry.ISettings;
     let panel: NotebookPanel;
     let extension: CellBarExtension;
 
@@ -57,9 +141,7 @@ describe('@jupyterlab/cell-toolbar', () => {
         execute: args => null
       });
 
-      settings = new TestSettings();
-
-      extension = new CellBarExtension(commands, settings);
+      extension = new CellBarExtension(commands, testToolbarFactory());
     });
 
     afterEach(() => {
@@ -92,7 +174,7 @@ describe('@jupyterlab/cell-toolbar', () => {
 
       settings = new TestSettings();
 
-      extension = new CellBarExtension(commands, settings);
+      extension = new CellBarExtension(commands, testToolbarFactory());
     });
 
     afterEach(() => {
