@@ -109,6 +109,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     );
     NotebookActions.executionScheduled.connect(this.onExecutionScheduled, this);
     NotebookActions.executed.connect(this.onExecuted, this);
+    this.headingsChanged.connect(this.onHeadingsChanged, this);
   }
 
   /**
@@ -195,6 +196,7 @@ export class NotebookToCModel extends TableOfContentsModel<
       return;
     }
 
+    this.headingsChanged.disconnect(this.onHeadingsChanged, this);
     this.widget.context.model.metadata.changed.disconnect(
       this.onMetadataChanged,
       this
@@ -405,6 +407,15 @@ export class NotebookToCModel extends TableOfContentsModel<
     }
   }
 
+  protected onHeadingsChanged(): void {
+    if (this.widget.content.activeCell) {
+      this.onActiveCellChanged(
+        this.widget.content,
+        this.widget.content.activeCell
+      );
+    }
+  }
+
   protected onExecuted(
     _: unknown,
     args: { notebook: Notebook; cell: Cell }
@@ -414,7 +425,7 @@ export class NotebookToCModel extends TableOfContentsModel<
         this._runningCells.splice(index, 1);
 
         const headingIndex = this._cellToHeadingIndex.get(cell);
-        if (headingIndex) {
+        if (headingIndex !== undefined) {
           const heading = this.headings[headingIndex];
           heading.isRunning = RunningStatus.Idle;
         }
@@ -445,7 +456,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     // Update isRunning
     this._runningCells.forEach((cell, index) => {
       const headingIndex = this._cellToHeadingIndex.get(cell);
-      if (headingIndex) {
+      if (headingIndex !== undefined) {
         const heading = this.headings[headingIndex];
         heading.isRunning = Math.max(
           index > 0 ? RunningStatus.Scheduled : RunningStatus.Running,

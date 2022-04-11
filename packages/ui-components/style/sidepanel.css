@@ -10,7 +10,6 @@
 .jp-SidePanel-header {
   flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
