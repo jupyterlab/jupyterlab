@@ -794,60 +794,15 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 const tocPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:toc',
   requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
-  optional: [IMarkdownParser, ITranslator],
+  optional: [IMarkdownParser],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
     sanitizer: ISanitizer,
-    mdParser: IMarkdownParser | null,
-    translator: ITranslator | null
+    mdParser: IMarkdownParser | null
   ): void => {
-    const trans = (translator ?? nullTranslator).load('jupyterlab');
-
-    app.commands.addCommand(CommandIDs.tocRunCells, {
-      label: trans.__('Run Cell(s)'),
-      execute: args => {
-        // TODO - sounds like every notebook should get its own ToC model independently of toc extension
-        // to set its headingInfo
-        /*
-        const panel = tracker.currentWidget;
-        if (panel === null) {
-          return;
-        }
-
-        const cells = panel.content.widgets;
-        if (cells === undefined) {
-          return;
-        }
-
-        const activeCell = (toc.activeEntry as INotebookHeading).cellRef;
-
-        if (activeCell instanceof MarkdownCell) {
-          let level = activeCell.headingInfo.level;
-          for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
-            const cell = cells[i];
-            if (
-              cell instanceof MarkdownCell &&
-              cell.headingInfo.level <= level
-            ) {
-              break;
-            }
-
-            if (cell instanceof CodeCell) {
-              void CodeCell.execute(cell, panel.sessionContext);
-            }
-          }
-        } else {
-          if (activeCell instanceof CodeCell) {
-            void CodeCell.execute(activeCell, panel.sessionContext);
-          }
-        }
-        */
-      }
-    });
-
     tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
   }
 };
@@ -2813,8 +2768,9 @@ function addCommands(
     },
     isEnabled
   });
+
   commands.addCommand(CommandIDs.toggleCollapseCmd, {
-    label: 'Toggle Collapse Notebook Heading',
+    label: trans.__('Toggle Collapse Notebook Heading'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -2824,7 +2780,7 @@ function addCommands(
     isEnabled: isEnabledAndHeadingSelected
   });
   commands.addCommand(CommandIDs.collapseAllCmd, {
-    label: 'Collapse All Headings',
+    label: trans.__('Collapse All Headings'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -2833,12 +2789,44 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.expandAllCmd, {
-    label: 'Expand All Headings',
+    label: trans.__('Expand All Headings'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
         return NotebookActions.expandAllHeadings(current.content);
       }
+    }
+  });
+
+  commands.addCommand(CommandIDs.tocRunCells, {
+    label: trans.__('Select and Run Cell(s) for this Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, { activate: false, ...args });
+      if (current === null) {
+        return;
+      }
+
+      const activeCell = current.content.activeCell;
+      let lastIndex = current.content.activeCellIndex;
+
+      if (activeCell instanceof MarkdownCell) {
+        const cells = current.content.widgets;
+        const level = activeCell.headingInfo.level;
+        for (
+          let i = current.content.activeCellIndex + 1;
+          i < cells.length;
+          i++
+        ) {
+          const cell = cells[i];
+          if (cell instanceof MarkdownCell && cell.headingInfo.level <= level) {
+            break;
+          }
+          lastIndex = i;
+        }
+      }
+
+      current.content.extendContiguousSelectionTo(lastIndex);
+      NotebookActions.run(current.content, current.sessionContext);
     }
   });
 }

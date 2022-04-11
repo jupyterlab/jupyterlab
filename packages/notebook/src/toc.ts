@@ -112,6 +112,34 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   /**
+   * Current active entry.
+   *
+   * @returns table of contents active entry
+   */
+  get activeHeading(): INotebookHeading | null {
+    return super.activeHeading;
+  }
+  set activeHeading(heading: INotebookHeading | null) {
+    super.activeHeading = heading;
+    if (this.activeHeading && !this._activeCellLock) {
+      const cells = this.widget.content.widgets;
+      const idx = cells.indexOf(this.activeHeading.cellRef);
+      this.widget.content.activeCellIndex = idx;
+    }
+  }
+
+  /**
+   * Type of document supported by the model.
+   *
+   * #### Notes
+   * A `data-document-type` attribute with this value will be set
+   * on the tree view `.jp-TableOfContents-content[data-document-type="..."]`
+   */
+  get documentType(): string {
+    return 'notebook';
+  }
+
+  /**
    * Whether the model gets updated even if the table of contents panel
    * is hidden or not.
    */
@@ -369,7 +397,9 @@ export class NotebookToCModel extends TableOfContentsModel<
       ) {
         activeHeadingIndex--;
       }
+      this._activeCellLock = true;
       this.activeHeading = this.headings[activeHeadingIndex];
+      this._activeCellLock = false;
     } else {
       this.activeHeading = null;
     }
@@ -495,6 +525,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     baseNumbering: ['toc/base_numbering']
   };
 
+  private _activeCellLock: boolean;
   private _runningCells: Cell[];
   private _cellToHeadingIndex: WeakMap<Cell, number>;
 }

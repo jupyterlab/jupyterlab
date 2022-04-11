@@ -19,9 +19,9 @@ export interface ITOCItemProps {
   heading: TableOfContents.IHeading;
 
   /**
-   * Click event callback.
+   * On `mouse-down` event callback.
    */
-  onClick: (heading: TableOfContents.IHeading) => void;
+  onMouseDown: (heading: TableOfContents.IHeading) => void;
 
   /**
    * Collapse event callback.
@@ -41,7 +41,7 @@ export class TOCItem extends React.PureComponent<
    * @returns rendered entry
    */
   render(): JSX.Element | null {
-    const { children, isActive, heading, onClick, onCollapse } = this.props;
+    const { children, isActive, heading, onCollapse, onMouseDown } = this.props;
 
     return (
       <li className="jp-tocItem" key={`${heading.level}-${heading.text}`}>
@@ -49,11 +49,11 @@ export class TOCItem extends React.PureComponent<
           className={`jp-tocItem-heading ${
             isActive ? 'jp-tocItem-active' : ''
           }`}
-          onClick={(event: React.SyntheticEvent<HTMLDivElement>) => {
+          onMouseDown={(event: React.SyntheticEvent<HTMLDivElement>) => {
             // React only on deepest item
             if (!event.defaultPrevented) {
               event.preventDefault();
-              onClick(heading);
+              onMouseDown(heading);
             }
           }}
         >

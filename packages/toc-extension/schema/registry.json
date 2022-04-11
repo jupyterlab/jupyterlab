@@ -18,7 +18,7 @@
     "context": [
       {
         "command": "toc:run-cells",
-        "selector": ".jp-tocItem"
+        "selector": ".jp-TableOfContents-content[data-document-type=\"notebook\"] .jp-tocItem"
       }
     ]
   },

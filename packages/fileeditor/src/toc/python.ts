@@ -20,6 +20,17 @@ export class PythonToCModel extends TableOfContentsModel<
   IDocumentWidget<FileEditor, DocumentRegistry.IModel>
 > {
   /**
+   * Type of document supported by the model.
+   *
+   * #### Notes
+   * A `data-document-type` attribute with this value will be set
+   * on the tree view `.jp-TableOfContents-content[data-document-type="..."]`
+   */
+  get documentType(): string {
+    return 'python';
+  }
+
+  /**
    * Produce the headings for a document.
    *
    * @returns The list of new headings or `null` if nothing needs to be updated.

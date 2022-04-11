@@ -14,6 +14,10 @@ export interface ITOCTreeProps {
    */
   activeHeading: TableOfContents.IHeading | null;
   /**
+   * Type of document supported by the model.
+   */
+  documentType: string;
+  /**
    * List of headings to render.
    */
   headings: TableOfContents.IHeading[];
@@ -35,7 +39,15 @@ export class TOCTree extends React.PureComponent<ITOCTreeProps> {
    * Renders a table of contents tree.
    */
   render(): JSX.Element {
-    return <ol className="jp-TableOfContents-content">{this.buildTree()}</ol>;
+    const { documentType } = this.props;
+    return (
+      <ol
+        className="jp-TableOfContents-content"
+        {...{ 'data-document-type': documentType }}
+      >
+        {this.buildTree()}
+      </ol>
+    );
   }
 
   /**
@@ -67,7 +79,7 @@ export class TOCTree extends React.PureComponent<ITOCTreeProps> {
                 current === this.props.activeHeading
               }
               heading={current}
-              onClick={this.props.setActiveHeading}
+              onMouseDown={this.props.setActiveHeading}
               onCollapse={this.props.onCollapseChange}
             >
               {next && next.level > level && getChildren(items, level + 1)}

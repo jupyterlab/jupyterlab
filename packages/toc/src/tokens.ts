@@ -193,6 +193,15 @@ export namespace TableOfContents {
     readonly configuration: IConfig;
 
     /**
+     * Type of document supported by the model.
+     *
+     * #### Notes
+     * A `data-document-type` attribute with this value will be set
+     * on the tree view `.jp-TableOfContents-content[data-document-type="..."]`
+     */
+    readonly documentType: string;
+
+    /**
      * Returns the list of headings.
      *
      * @returns list of headings

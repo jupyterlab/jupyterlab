@@ -40,6 +40,17 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
   }
 
   /**
+   * Type of document supported by the model.
+   *
+   * #### Notes
+   * A `data-document-type` attribute with this value will be set
+   * on the tree view `.jp-TableOfContents-content[data-document-type="..."]`
+   */
+  get documentType(): string {
+    return 'markdown-viewer';
+  }
+
+  /**
    * Whether the model gets updated even if the table of contents panel
    * is hidden or not.
    */

@@ -35,6 +35,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<
     return (
       <TOCTree
         activeHeading={this.model.activeHeading}
+        documentType={this.model.documentType}
         headings={this.model.headings}
         onCollapseChange={(heading: TableOfContents.IHeading) => {
           this.model!.toggleCollapse(heading);
