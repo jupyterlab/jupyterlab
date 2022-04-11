@@ -57,7 +57,9 @@ export abstract class TableOfContentsFactory<W extends IDocumentWidget>
     const context = widget.context;
 
     const updateHeadings = () => {
-      model.refresh();
+      model.refresh().catch(reason => {
+        console.error('Failed to update the table of contents.', reason);
+      });
     };
     const monitor = new ActivityMonitor({
       signal: context.model.contentChanged,

@@ -46,7 +46,7 @@
       "title": "Enable headings numbering",
       "description": "Whether to automatically number the headings or not.",
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "includeOutput": {
       "title": "Include cell output in headings",

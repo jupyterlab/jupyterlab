@@ -133,7 +133,7 @@ export namespace TableOfContents {
     baseNumbering: 1,
     maximalDepth: 4,
     numberingH1: true,
-    numberHeaders: true,
+    numberHeaders: false,
     includeOutput: true,
     syncCollapseState: false
   };

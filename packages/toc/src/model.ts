@@ -142,7 +142,9 @@ export abstract class TableOfContentsModel<
     const newConfiguration = { ...this._configuration, ...c };
     if (!JSONExt.deepEqual(this._configuration, newConfiguration)) {
       this._configuration = newConfiguration as TableOfContents.IConfig;
-      this.refresh();
+      this.refresh().catch(reason => {
+        console.error('Failed to update the table of contents.', reason);
+      });
     }
   }
 

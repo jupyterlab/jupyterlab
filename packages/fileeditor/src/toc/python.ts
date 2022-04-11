@@ -10,7 +10,7 @@ import { EditorToCModelFactory, IEditorHeading } from './factory';
 /**
  * Regular expression to create the outline
  */
-const KEYWORDS = new RegExp(/^\s*(class |def |from |import )/, 'd');
+const KEYWORDS = new RegExp(/^\s*(class |def |from |import )/);
 
 /**
  * Table of content model for Python files.
