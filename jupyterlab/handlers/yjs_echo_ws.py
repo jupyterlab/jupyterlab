@@ -13,6 +13,7 @@ from tornado import web
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
+# See compatibility note on `group` keyword in https://docs.python.org/3/library/importlib.metadata.html#entry-points
 if sys.version_info < (3, 10):
     from importlib_metadata import entry_points
 else:
