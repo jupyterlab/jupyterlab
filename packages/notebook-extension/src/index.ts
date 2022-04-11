@@ -2818,7 +2818,12 @@ function addCommands(
           i++
         ) {
           const cell = cells[i];
-          if (cell instanceof MarkdownCell && cell.headingInfo.level <= level) {
+          if (
+            cell instanceof MarkdownCell &&
+            // cell.headingInfo.level === -1 if no heading
+            cell.headingInfo.level >= 0 &&
+            cell.headingInfo.level <= level
+          ) {
             break;
           }
           lastIndex = i;

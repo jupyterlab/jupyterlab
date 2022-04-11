@@ -1527,7 +1527,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
-   * Text that represents the heading if cell is a heading.
+   * Text that represents the highest heading (i.e. lowest level) if cell is a heading.
    * Returns empty string if not a heading.
    */
   get headingInfo(): { text: string; level: number } {
@@ -1538,7 +1538,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
 
     if (headings.length > 0) {
-      const { text, level } = headings[0];
+      // Return the highest level
+      const { text, level } = headings.reduce(
+        (prev, curr) => (prev.level <= curr.level ? prev : curr),
+        headings[0]
+      );
       return { text, level };
     } else {
       return { text: '', level: -1 };

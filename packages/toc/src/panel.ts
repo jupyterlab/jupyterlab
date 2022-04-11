@@ -91,7 +91,7 @@ namespace Private {
     constructor(title: string) {
       const node = document.createElement('h2');
       node.textContent = title;
-      node.classList.add('jp-left-truncated');
+      node.classList.add('jp-text-truncated');
       super({ node });
       this._title = node;
     }

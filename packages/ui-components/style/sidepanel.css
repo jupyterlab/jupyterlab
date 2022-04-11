@@ -86,3 +86,9 @@
 .lm-AccordionPanel .lm-SplitPanel-handle:hover {
   background: var(--jp-layout-color3);
 }
+
+.jp-text-truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

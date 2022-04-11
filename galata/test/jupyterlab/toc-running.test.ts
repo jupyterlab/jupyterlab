@@ -10,6 +10,7 @@ test.describe('ToC Running indicator', () => {
     await page.notebook.addCell('code', 'from time import sleep');
     await page.notebook.addCell('code', 'sleep(2)');
     await page.notebook.addCell('markdown', '## Title 1.1');
+    await page.notebook.addCell('markdown', 'No heading');
     await page.notebook.addCell('code', 'sleep(2)');
     await page.notebook.addCell('markdown', '## Title 1.2');
     await page.notebook.addCell('code', 'sleep(1)');
@@ -47,7 +48,7 @@ test.describe('ToC Running indicator', () => {
       '[aria-label="Table of Contents section"] >> button:left-of(:text("1. Title 1"))'
     );
 
-    const executed = page.notebook.runCell(4);
+    const executed = page.notebook.runCell(5);
 
     await tocPanel.waitForSelector('[data-running="1"]');
     expect(await tocPanel.screenshot()).toMatchSnapshot(
