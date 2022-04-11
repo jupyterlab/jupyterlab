@@ -74,7 +74,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   updateFilterSignal,
   translator
 }: ISettingsPanelProps): JSX.Element => {
-  const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
+  const [expandedPlugin, setExpandedPlugin] = useState<string | null>(settings.length === 1 ? settings[0].id : null);
   const [filterPlugin, setFilter] = useState<
     (plugin: ISettingRegistry.IPlugin) => string[] | null
   >(() => (plugin: ISettingRegistry.IPlugin): string[] | null => {

@@ -106,10 +106,18 @@ function activate(
       category: trans.__('Settings'),
       command: CommandIDs.open
     });
+
+    palette.addItem({
+      category: trans.__('Settings'),
+      command: CommandIDs.open,
+      args: {
+        plugin: "@jupyterlab/apputils-extension:palette"
+      }
+    });
   }
 
   commands.addCommand(CommandIDs.open, {
-    execute: async () => {
+    execute: async (args) => {
       if (tracker.currentWidget) {
         shell.activateById(tracker.currentWidget.id);
         return;
@@ -131,7 +139,8 @@ function activate(
             '@jupyterlab/mainmenu-extension:plugin'
           ],
           translator,
-          status
+          status,
+          plugin: args.plugin as string
         })
       });
 
@@ -156,7 +165,12 @@ function activate(
       void tracker.add(editor);
       shell.add(editor);
     },
-    label: trans.__('Settings Editor')
+    label: args => {
+      if (args.plugin) {
+        return trans.__(`${args.plugin} Settings`)
+      }
+      return trans.__('Settings Editor')
+    }
   });
 
   return tracker;
