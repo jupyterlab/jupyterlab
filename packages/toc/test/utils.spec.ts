@@ -76,7 +76,8 @@ describe('ToCUtils', () => {
       ['<h2 id="another-h6-id" class="tocSkip b">Title</h2>', []]
     ])('should extract headings from %s', (src, headers) => {
       const headings = ToCUtils.getHTMLHeadings(src, {
-        maximalDepth: 6
+        maximalDepth: 6,
+        numberHeaders: true
       });
       expect(headings).toHaveLength(headers.length);
 
@@ -120,7 +121,8 @@ describe('ToCUtils', () => {
         const src = '<h1>Title</h1>';
 
         const headings = ToCUtils.getHTMLHeadings(src, {
-          numberingH1
+          numberingH1,
+          numberHeaders: true
         });
         expect(headings).toHaveLength(1);
         expect(headings[0].prefix).toEqual(numberingH1 ? '1. ' : '');
@@ -134,6 +136,7 @@ describe('ToCUtils', () => {
 <h2>Title</h2>`;
 
         const headings = ToCUtils.getHTMLHeadings(src, {
+          numberHeaders: true,
           numberingH1,
           baseNumbering: 3
         });

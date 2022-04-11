@@ -174,7 +174,8 @@ describe('ToCUtils', () => {
         ['```\n<h1>Title</h1>\n```', []]
       ])('should extract headings from %s', (src, headers) => {
         const headings = ToCUtils.Markdown.getHeadings(src, {
-          maximalDepth: 6
+          maximalDepth: 6,
+          numberHeaders: true
         });
         expect(headings).toHaveLength(headers.length);
 
@@ -207,7 +208,7 @@ describe('ToCUtils', () => {
         text: 'Title with link',
         line: 0,
         raw: src,
-        prefix: '0.1. '
+        prefix: ''
       });
     });
 
@@ -246,7 +247,8 @@ describe('ToCUtils', () => {
         const src = '# h1';
 
         const headings = ToCUtils.Markdown.getHeadings(src, {
-          numberingH1
+          numberingH1,
+          numberHeaders: true
         });
         expect(headings).toHaveLength(1);
         expect(headings[0].prefix).toEqual(numberingH1 ? '1. ' : '');
@@ -261,6 +263,7 @@ describe('ToCUtils', () => {
 
         const headings = ToCUtils.Markdown.getHeadings(src, {
           numberingH1,
+          numberHeaders: true,
           baseNumbering: 3
         });
         expect(headings).toHaveLength(2);
