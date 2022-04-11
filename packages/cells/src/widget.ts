@@ -3,8 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { marked } from 'marked';
-
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { ISessionContext } from '@jupyterlab/apputils';
@@ -36,6 +34,8 @@ import {
 } from '@jupyterlab/rendermime';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
+
+import { ToCUtils } from '@jupyterlab/toc';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -1531,23 +1531,23 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Returns empty string if not a heading.
    */
   get headingInfo(): { text: string; level: number } {
-    let text = this.model.value.text;
-    const lines = marked.lexer(text);
-    let line: any;
-    for (line of lines) {
-      if (line.type === 'heading') {
-        return { text: line.text, level: line.depth };
-      } else if (line.type === 'html') {
-        let match = line.raw.match(/<h([1-6])(.*?)>(.*?)<\/h\1>/);
-        if (match?.[3]) {
-          return { text: match[3], level: parseInt(match[1]) };
-        }
-        return { text: '', level: -1 };
-      }
+    // Use table of content algorithm for consistency
+    const headings = ToCUtils.Markdown.getHeadings(this.model.value.text, {
+      maximalDepth: 6,
+      numberHeaders: false
+    });
+
+    if (headings.length > 0) {
+      const { text, level } = headings[0];
+      return { text, level };
+    } else {
+      return { text: '', level: -1 };
     }
-    return { text: '', level: -1 };
   }
 
+  /**
+   * Whether the heading is collapsed or not.
+   */
   get headingCollapsed(): boolean {
     return this._headingCollapsed;
   }
@@ -1569,11 +1569,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
           collapseButton.classList.remove('jp-mod-collapsed');
         }
       }
-      this.renderCollapseButtons(this._renderer!);
-      this._toggleCollapsedSignal.emit(this._headingCollapsed);
+      this.renderCollapseButtons(this._renderer);
+      this._headingCollapsedChanged.emit(this._headingCollapsed);
     }
   }
 
+  /**
+   * Number of collapsed sub cells.
+   */
   get numberChildNodes(): number {
     return this._numberChildNodes;
   }
@@ -1582,8 +1585,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     this.renderCollapseButtons(this._renderer);
   }
 
-  get toggleCollapsedSignal(): Signal<this, boolean> {
-    return this._toggleCollapsedSignal;
+  /**
+   * Signal emitted when the cell collapsed state changes.
+   */
+  get headingCollapsedChanged(): ISignal<MarkdownCell, boolean> {
+    return this._headingCollapsedChanged;
   }
 
   /**
@@ -1822,6 +1828,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _numberChildNodes: number;
   private _headingCollapsed: boolean;
   private _toggleCollapsedSignal = new Signal<this, boolean>(this);
+  private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
   private _renderer: IRenderMime.IRenderer;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;

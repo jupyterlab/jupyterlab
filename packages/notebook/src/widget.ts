@@ -715,7 +715,7 @@ export class StaticNotebook extends Widget {
     cell.syncCollapse = true;
     cell.syncEditable = true;
     // Connect collapsed signal for each markdown cell widget
-    cell.toggleCollapsedSignal.connect(
+    cell.headingCollapsedChanged.connect(
       (newCell: MarkdownCell, collapsed: boolean) => {
         NotebookActions.setHeadingCollapse(newCell, collapsed, this);
         this._cellCollapsed.emit(newCell);

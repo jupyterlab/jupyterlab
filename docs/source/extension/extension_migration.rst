@@ -17,22 +17,6 @@ API breaking changes
 Here is a list of JupyterLab npm packages that encountered API changes and therefore have
 bumped their major version (following semver convention):
 
-- ``@jupyterlab/docprovider`` from 3.x to 4.x
-   ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-   ``acquireLock`` and ``releaseLock`` have been removed from ``IDocumentProvider``.
-   ``renameAck`` is not optional anymore in ``IDocumentProvider``.
-   The ``renameAck`` property is
-- ``@jupyterlab/completer`` from 3.x to 4.x
-   Major version bumped following the removal of ``ICompletionManager`` token and the replacement
-   of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
-   for JupyterLab, users need to implement the interface ``ICompletionProvider`` and then register
-   this provider with ``ICompletionProviderManager`` token.
-- ``@jupyterlab/ui-components`` from 3.x to 4.x
-   Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
-   components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly
-   from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
-   need to switch to the Blueprint components as the interfaces of those components in JupyterLab
-   do not match those of Blueprint JS.
 - ``@jupyterlab/application`` from 3.x to 4.x
    Major version bump to allow alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
    Specifically this allows the use of a mock manager.
@@ -40,10 +24,22 @@ bumped their major version (following semver convention):
    given and allow a shell that meets the ``ILabShell`` interface.
    As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
-- ``@jupyterlab/toc`` from 3.x to 4.x
-   ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
-   This may impact application configuration (for instance if the plugin was disabled).
-   The namespace ``TableOfContentsRegistry`` has been renamed ``ITableOfContentsRegistry``.
+- ``@jupyterlab/buildutils`` from 3.x to 4.x
+   * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
+     should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
+   * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
+   * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
+- ``@jupyterlab/cells`` from 3.x to 4.x
+   ``MarkdownCell.toggleCollapsedSignal`` renamed ``MarkdownCell.headingCollapsedChanged``
+- ``@jupyterlab/completer`` from 3.x to 4.x
+   Major version bumped following the removal of ``ICompletionManager`` token and the replacement
+   of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
+   for JupyterLab, users need to implement the interface ``ICompletionProvider`` and then register
+   this provider with ``ICompletionProviderManager`` token.
+- ``@jupyterlab/docprovider`` from 3.x to 4.x
+   ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+   ``acquireLock`` and ``releaseLock`` have been removed from ``IDocumentProvider``.
+   ``renameAck`` is not optional anymore in ``IDocumentProvider``.
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    ``@jupyterlab/documentsearch:plugin`` renamed ``@jupyterlab/documentsearch-extension:plugin``
    This may impact application configuration (for instance if the plugin was disabled).
@@ -66,11 +62,6 @@ bumped their major version (following semver convention):
   the constructor if needed by the renderer factory.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
-- ``@jupyterlab/buildutils`` from 3.x to 4.x
-   * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
-     should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
-   * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
-   * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
   Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
   Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
@@ -78,8 +69,23 @@ bumped their major version (following semver convention):
   Plugin ``@jupyterlab/statusbar-extension:running-sessions-status`` renamed to ``@jupyterlab/apputils-extension:running-sessions-status``
   Plugin ``@jupyterlab/statusbar-extension:line-col-status`` renamed to ``@jupyterlab/codemirror-extension:line-col-status``
   ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
-- TypeScript 4.5 update
-   As a result of the update to TypeScript 4.5, a couple of interfaces have had their definitions changed.
+- ``@jupyterlab/toc`` from 3.x to 4.x
+   ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
+   This may impact application configuration (for instance if the plugin was disabled).
+   The namespace ``TableOfContentsRegistry`` has been renamed ``TableOfContents``.
+   The API has been fully rework. New table of content providers must implement a factory
+   ``TableOfContents.IFactory`` that will create a model ``TableOfContents.IModel<TableOfContents.IHeading>``
+   for supported widget. The model provide a list of headings described by a ``text`` and
+   a ``level`` and optionally a ``prefix``, a ``collapsed`` state and a ``dataset`` (data
+   DOM attributes dictionary).
+- ``@jupyterlab/ui-components`` from 3.x to 4.x
+   Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
+   components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly
+   from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
+   need to switch to the Blueprint components as the interfaces of those components in JupyterLab
+   do not match those of Blueprint JS.
+- TypeScript 4.6 update
+   As a result of the update to TypeScript 4.5+, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 - ``@jupyterlab/fileeditor`` from 3.x to 4.x

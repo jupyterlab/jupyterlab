@@ -66,13 +66,11 @@
     "@lumino/signaling": "^1.10.1",
     "@lumino/virtualdom": "^1.14.1",
     "@lumino/widgets": "^1.31.1",
-    "marked": "^4.0.10",
     "react": "^17.0.1"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.9",
     "@types/jest": "^26.0.10",
-    "@types/marked": "^4.0.1",
     "@types/react": "^17.0.0",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
