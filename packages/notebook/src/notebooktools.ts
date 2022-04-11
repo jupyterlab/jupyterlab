@@ -1072,7 +1072,7 @@ export namespace NotebookTools {
     const trans = translator.load('jupyterlab');
     return new NotebookMetadataNumberTool({
       key: 'toc/base_numbering',
-      label: trans.__('Table of content - Base numbering')
+      label: trans.__('Table of content - Base number')
     });
   }
 }
