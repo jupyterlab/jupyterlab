@@ -194,35 +194,36 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
       label: trans.__('Restart Kernel and Debug…'),
       caption: trans.__('Restart Kernel and Debug…'),
-      isEnabled: () => {
-        return service.isStarted;
-      },
+      isEnabled: () => service.isStarted,
       execute: async () => {
         const state = service.getDebuggerState();
-        console.log(state.cells);
-        const { context, content } = notebookTracker.currentWidget!;
-
         await service.stop();
-        const restarted = await sessionContextDialogs!.restart(
-          context.sessionContext
-        );
-        if (restarted) {
-          await service.restoreDebuggerState(state);
-          await handler.updateWidget(
-            notebookTracker.currentWidget!,
-            notebookTracker.currentWidget!.sessionContext.session
-          );
-          await NotebookActions.runAll(content, context.sessionContext);
+
+        const widget = notebookTracker.currentWidget;
+        if (!widget) {
+          return;
         }
+
+        const { content, sessionContext } = widget;
+        const restarted = await sessionContextDialogs.restart(sessionContext);
+        if (!restarted || widget.isDisposed) {
+          return;
+        }
+
+        await service.restoreDebuggerState(state);
+        await handler.updateWidget(widget, sessionContext.session);
+        await NotebookActions.runAll(content, sessionContext);
       }
     });
 
     const updateHandlerAndCommands = async (
-      widget: NotebookPanel
+      widget: NotebookPanel | null
     ): Promise<void> => {
-      const { sessionContext } = widget;
-      await sessionContext.ready;
-      await handler.updateContext(widget, sessionContext);
+      if (widget) {
+        const { sessionContext } = widget;
+        await sessionContext.ready;
+        await handler.updateContext(widget, sessionContext);
+      }
       app.commands.notifyCommandChanged();
     };
 
@@ -236,7 +237,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       });
     } else {
       notebookTracker.currentChanged.connect(
-        async (_, notebookPanel: NotebookPanel) => {
+        async (_, notebookPanel: NotebookPanel | null) => {
           await updateHandlerAndCommands(notebookPanel);
         }
       );
@@ -250,7 +251,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     }
 
     notebookTracker.currentChanged.connect(
-      async (_, notebookPanel: NotebookPanel) => {
+      async (_, notebookPanel: NotebookPanel | null) => {
         await updateHandlerAndCommands(notebookPanel);
       }
     );
