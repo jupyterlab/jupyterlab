@@ -3,20 +3,21 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import sys
 import time
 import uuid
 from enum import IntEnum
-
-try:
-    from importlib.metadata import entry_points
-except ImportError:
-    from importlib_metadata import entry_points
 
 import y_py as Y
 from jupyter_server.base.handlers import JupyterHandler
 from tornado import web
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
+
+if sys.version_info < (3, 10):
+    from importlib_metadata import entry_points
+else:
+    from importlib.metadata import entry_points
 
 YDOCS = {}
 for ep in entry_points(group="jupyter_ydoc"):
