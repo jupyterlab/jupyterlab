@@ -7,13 +7,21 @@ import asyncio
 import sys
 import uuid
 from enum import IntEnum
+from pathlib import Path
 
-import y_py as Y
+import pkg_resources
 from jupyter_server.base.handlers import JupyterHandler
+from jupyter_server.services.contents.fileio import (
+    AsyncFileManagerMixin,
+    FileManagerMixin,
+)
 from jupyter_server.utils import ensure_async
 from tornado import web
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
+from watchfiles import awatch
+
+from .yutils import read_sync_message
 
 # See compatibility note on `group` keyword in https://docs.python.org/3/library/importlib.metadata.html#entry-points
 if sys.version_info < (3, 10):
@@ -41,12 +49,13 @@ class ServerMessageType(IntEnum):
 
 
 class YjsRoom:
-    def __init__(self, type):
+    def __init__(self, type, handler):
         self.type = type
         self.clients = {}
         self.initialized = False
-        self.timer = None
-        self.ydoc = YDOCS.get(type, YFILE)()
+        self.cleaner = None
+        self.watcher = None
+        self.ydoc = YDOCS.get(type, YFILE)(handler)
 
     @property
     def source(self):
@@ -72,26 +81,45 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
 
     async def open(self, type_path):
         # print("[YJSEchoWS]: open", type_path)
-        type, path = type_path.split(":", 1)
+        file_type, path = type_path.split(":", 1)
         self.id = str(uuid.uuid4())
         self.room_id = path
         room = ROOMS.get(self.room_id)
         if room is None:
-            room = YjsRoom(type)
+            room = YjsRoom(file_type, self)
             ROOMS[self.room_id] = room
         room.clients[self.id] = (IOLoop.current(), self.hook_send_message, self)
 
-        if room.timer is not None:
-            room.timer.cancel()
+        if room.cleaner is not None:
+            room.cleaner.cancel()
 
         if not room.initialized:
-            model = await ensure_async(self.settings["contents_manager"].get(self.room_id))
+            contents_manager = self.settings["contents_manager"]
+            file_path = self.room_id
+            model = await ensure_async(contents_manager.get(file_path))
             # check again if initialized, because loading the file can be async
             if not room.initialized:
-                room.source = model["content"]
                 room.initialized = True
+                room.source = model["content"]
+                # can only watch file changes if local file system
+                # if/when https://github.com/jupyter-server/jupyter_server/pull/783 gets in,
+                # we will check for a contents manager ability to watch file changes
+                if isinstance(contents_manager, (FileManagerMixin, AsyncFileManagerMixin)):
+                    room.watcher = asyncio.create_task(self.watch_file(file_path))
         # Send SyncStep1 message (based on y-protocols)
         self.write_message(bytes([0, 0, 1, 0]), binary=True)
+
+    async def watch_file(self, path):
+        abs_path = str(Path(path).resolve())
+
+        def filter(change, path):
+            return path == abs_path
+
+        contents_manager = self.settings["contents_manager"]
+        room = ROOMS.get(self.room_id)
+        async for _ in awatch(abs_path, watch_filter=filter):
+            model = await ensure_async(contents_manager.get(path))
+            room.source = model["content"]
 
     def on_message(self, message):
         # print("[YJSEchoWS]: message,", message)
@@ -117,9 +145,10 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
     def on_close(self):
         # print("[YJSEchoWS]: close", self.id, self.room_id)
         room = ROOMS.get(self.room_id)
-        room.clients.pop(self.id)
+        del room.clients[self.id]
         if not room.clients:
-            room.timer = asyncio.create_task(self.timer_coroutine())
+            # keep the document for a while after every client disconnects
+            room.cleaner = asyncio.create_task(self.clean_room())
 
         return True
 
@@ -130,74 +159,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
     def hook_send_message(self, msg):
         self.write_message(msg, binary=True)
 
-    async def timer_coroutine(self):
+    async def clean_room(self):
         await asyncio.sleep(60)
-        ROOMS.pop(self.room_id)
-
-
-message_yjs_sync_step1 = 0
-message_yjs_sync_step2 = 1
-message_yjs_update = 2
-
-
-def read_sync_step1(handler, doc, encoded_state_vector):
-    message = Y.encode_state_as_update(doc, encoded_state_vector)
-    message = bytes([0, message_yjs_sync_step2] + write_var_uint(len(message)) + message)
-    handler.write_message(message, binary=True)
-
-
-def read_sync_step2(doc, update):
-    try:
-        Y.apply_update(doc, update)
-    except Exception:
-        raise RuntimeError("Caught error while handling a Y update")
-
-
-def read_sync_message(handler, doc, message):
-    message_type = message[0]
-    message = message[1:]
-    if message_type == message_yjs_sync_step1:
-        for msg in get_message(message):
-            read_sync_step1(handler, doc, msg)
-    elif message_type == message_yjs_sync_step2:
-        for msg in get_message(message):
-            read_sync_step2(doc, msg)
-    elif message_type == message_yjs_update:
-        for msg in get_message(message):
-            read_sync_step2(doc, msg)
-    else:
-        raise RuntimeError("Unknown message type")
-
-
-def write_var_uint(num):
-    res = []
-    while num > 127:
-        res += [128 | (127 & num)]
-        num >>= 7
-    res += [num]
-    return res
-
-
-def get_message(message):
-    length = len(message)
-    i0 = 0
-    while True:
-        msg_len = 0
-        i = 0
-        while True:
-            byte = message[i0]
-            msg_len += (byte & 127) << i
-            i += 7
-            i0 += 1
-            length -= 1
-            if byte < 128:
-                break
-        i1 = i0 + msg_len
-        msg = message[i0:i1]
-        length -= msg_len
-        yield msg
-        if length <= 0:
-            if length < 0:
-                raise RuntimeError("Y protocol error")
-            break
-        i0 = i1
+        ROOMS[self.room_id].watcher.cancel()
+        del ROOMS[self.room_id]

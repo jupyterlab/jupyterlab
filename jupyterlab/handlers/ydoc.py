@@ -1,9 +1,18 @@
 import y_py as Y
 
+from .yutils import message_yjs_update, write_var_uint
+
 
 class YBaseDoc:
-    def __init__(self):
+
+    _ydoc: Y.YDoc
+    transaction: "Transaction"
+
+    def __init__(self, handler):
+        self._handler = handler
         self._ydoc = Y.YDoc()
+        self._initialized = False
+        self.transaction = Transaction(self)
 
     @property
     def ydoc(self):
@@ -18,9 +27,36 @@ class YBaseDoc:
         raise RuntimeError("Y document source initialization not implemented")
 
 
+class Transaction:
+
+    ydoc: YBaseDoc
+
+    def __init__(self, ydoc: YBaseDoc):
+        self.ydoc = ydoc
+
+    def __enter__(self):
+        if self.ydoc._initialized:
+            self.state = Y.encode_state_vector(self.ydoc.ydoc)
+        self.transaction_context = self.ydoc.ydoc.begin_transaction()
+        self.transaction = self.transaction_context.__enter__()
+        return self.transaction
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        res = self.transaction_context.__exit__(exc_type, exc_value, exc_tb)
+        del self.transaction_context
+        del self.transaction
+        if self.ydoc._initialized:
+            update = Y.encode_state_as_update(self.ydoc.ydoc, self.state)
+            msg = bytes([0, message_yjs_update] + write_var_uint(len(update)) + update)
+            self.ydoc._handler.write_message(msg, binary=True)
+        else:
+            self.ydoc._initialized = True
+        return res
+
+
 class YFile(YBaseDoc):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._ysource = self._ydoc.get_text("source")
 
     @property
@@ -29,13 +65,16 @@ class YFile(YBaseDoc):
 
     @source.setter
     def source(self, value):
-        with self._ydoc.begin_transaction() as t:
+        with self.transaction as t:
+            # clear document
+            self._ysource.delete(t, 0, len(self._ysource))
+            # initialize document
             self._ysource.push(t, value)
 
 
 class YNotebook(YBaseDoc):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._ycells = self._ydoc.get_array("cells")
         self._ymeta = self._ydoc.get_map("meta")
         self._ystate = self._ydoc.get_map("state")
@@ -68,7 +107,14 @@ class YNotebook(YBaseDoc):
 
     @source.setter
     def source(self, value):
-        with self._ydoc.begin_transaction() as t:
+        with self.transaction as t:
+            # clear document
+            self._ycells.delete(t, 0, len(self._ycells))
+            for key in self._ymeta:
+                self._ymeta.delete(t, key)
+            for key in self._ystate:
+                self._ystate.delete(t, key)
+            # initialize document
             ycells = []
             for cell in value["cells"]:
                 ycell = Y.YMap()
