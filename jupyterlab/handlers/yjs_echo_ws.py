@@ -7,7 +7,11 @@ import time
 import uuid
 from enum import IntEnum
 
-import pkg_resources
+try:
+    from importlib.metadata import entry_points
+except ImportError:
+    from importlib_metadata import entry_points
+
 import y_py as Y
 from jupyter_server.base.handlers import JupyterHandler
 from tornado import web
@@ -15,7 +19,7 @@ from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
 YDOCS = {}
-for ep in pkg_resources.iter_entry_points(group="jupyter_ydoc"):
+for ep in entry_points(group="jupyter_ydoc"):
     YDOCS.update({ep.name: ep.load()})
 
 YFILE = YDOCS["file"]

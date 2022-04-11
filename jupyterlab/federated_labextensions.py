@@ -14,6 +14,11 @@ import platform
 import shutil
 import subprocess
 import sys
+
+try:
+    from importlib.metadata import PackageNotFoundError, version
+except ImportError:
+    from importlib_metadata import PackageNotFoundError, version
 from os.path import basename
 from os.path import join as pjoin
 from os.path import normpath
@@ -423,11 +428,9 @@ def _get_labextension_metadata(module):
         )
 
     # Make sure the package is installed
-    import pkg_resources
-
     try:
-        pkg_resources.get_distribution(package)
-    except pkg_resources.DistributionNotFound:
+        version(package)
+    except PackageNotFoundError:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-e", mod_path])
         sys.path.insert(0, mod_path)
 
