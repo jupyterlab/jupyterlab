@@ -1,6 +1,6 @@
 import y_py as Y
 
-from .yutils import message_yjs_update, write_var_uint
+from .yutils import create_update_message
 
 
 class YBaseDoc:
@@ -8,11 +8,16 @@ class YBaseDoc:
     _ydoc: Y.YDoc
     transaction: "Transaction"
 
-    def __init__(self, handler):
-        self._handler = handler
+    def __init__(self, room):
+        self._room = room
         self._ydoc = Y.YDoc()
-        self._initialized = False
+        self._ystate = self._ydoc.get_map("state")
+        self.initialized = False
         self.transaction = Transaction(self)
+
+    @property
+    def ystate(self):
+        return self._ystate
 
     @property
     def ydoc(self):
@@ -26,6 +31,22 @@ class YBaseDoc:
     def source(self, value):
         raise RuntimeError("Y document source initialization not implemented")
 
+    @property
+    def dirty(self) -> None:
+        return self._ystate["dirty"]
+
+    @dirty.setter
+    def dirty(self, value: bool) -> None:
+        if self.dirty != value:
+            with self.transaction as t:
+                self._ystate.set(t, "dirty", value)
+
+    def observe(self, callback):
+        raise RuntimeError("Y document observe not implemented")
+
+    def unobserve(self, subscription_id):
+        raise RuntimeError("Y document unobserve not implemented")
+
 
 class Transaction:
 
@@ -35,7 +56,7 @@ class Transaction:
         self.ydoc = ydoc
 
     def __enter__(self):
-        if self.ydoc._initialized:
+        if self.ydoc.initialized:
             self.state = Y.encode_state_vector(self.ydoc.ydoc)
         self.transaction_context = self.ydoc.ydoc.begin_transaction()
         self.transaction = self.transaction_context.__enter__()
@@ -43,14 +64,11 @@ class Transaction:
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         res = self.transaction_context.__exit__(exc_type, exc_value, exc_tb)
-        del self.transaction_context
-        del self.transaction
-        if self.ydoc._initialized:
+        if self.ydoc.initialized:
             update = Y.encode_state_as_update(self.ydoc.ydoc, self.state)
-            msg = bytes([0, message_yjs_update] + write_var_uint(len(update)) + update)
-            self.ydoc._handler.write_message(msg, binary=True)
-        else:
-            self.ydoc._initialized = True
+            message = create_update_message(update)
+            for client in self.ydoc._room.clients:
+                client.write_message(message, binary=True)
         return res
 
 
@@ -67,9 +85,17 @@ class YFile(YBaseDoc):
     def source(self, value):
         with self.transaction as t:
             # clear document
-            self._ysource.delete(t, 0, len(self._ysource))
+            source_len = len(self._ysource)
+            if source_len:
+                self._ysource.delete(t, 0, source_len)
             # initialize document
             self._ysource.push(t, value)
+
+    def observe(self, callback):
+        self.source_subscription_id = self._ysource.observe(callback)
+
+    def unobserve(self):
+        self._ysource.unobserve(self.source_subscription_id)
 
 
 class YNotebook(YBaseDoc):
@@ -77,7 +103,6 @@ class YNotebook(YBaseDoc):
         super().__init__(*args, **kwargs)
         self._ycells = self._ydoc.get_array("cells")
         self._ymeta = self._ydoc.get_map("meta")
-        self._ystate = self._ydoc.get_map("state")
 
     @property
     def source(self):
@@ -109,10 +134,12 @@ class YNotebook(YBaseDoc):
     def source(self, value):
         with self.transaction as t:
             # clear document
-            self._ycells.delete(t, 0, len(self._ycells))
+            cells_len = len(self._ycells)
+            if cells_len:
+                self._ycells.delete(t, 0, cells_len)
             for key in self._ymeta:
                 self._ymeta.delete(t, key)
-            for key in self._ystate:
+            for key in [k for k in self._ystate if k != "dirty"]:
                 self._ystate.delete(t, key)
             # initialize document
             ycells = []
@@ -126,6 +153,13 @@ class YNotebook(YBaseDoc):
             self._ycells.push(t, ycells)
             for k, v in value["metadata"].items():
                 self._ymeta.set(t, k, v)
-            self._ystate.set(t, "dirty", False)
             self._ystate.set(t, "nbformat", value["nbformat"])
             self._ystate.set(t, "nbformatMinor", value["nbformat_minor"])
+
+    def observe(self, callback):
+        self.cells_subscription_id = self._ycells.observe(callback)
+        self.meta_subscription_id = self._ymeta.observe(callback)
+
+    def unobserve(self):
+        self._ycells.unobserve(self.cells_subscription_id)
+        self._ymeta.unobserve(self.meta_subscription_id)

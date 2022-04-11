@@ -19,7 +19,6 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from notebook_shim.shim import NotebookConfigShimMixin
-from tornado import web
 from traitlets import Bool, Instance, Unicode, default
 
 from ._version import __version__
@@ -49,7 +48,7 @@ from .handlers.extension_manager_handler import (
     ExtensionManager,
     extensions_handler_path,
 )
-from .handlers.yjs_echo_ws import ROOMS, YjsEchoWebSocket
+from .handlers.yjs_echo_ws import YjsEchoWebSocket
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -626,33 +625,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         else:
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
-
-    def initialize_settings(self):
-        def hook(model, path, **kwargs):
-            if "type" in model and model["type"] == "directory":
-                pass
-            elif "content" in model and model["content"] is not None:
-                # content sent through HTTP, it must not be an RTC session
-                if path in ROOMS:
-                    raise web.HTTPError(
-                        409,
-                        "Document content cannot be present both in RTC session and HTTP request",
-                    )
-                # keep the content sent through HTTP
-            else:
-                # no content sent through HTTP, it must be an RTC session
-                if path in ROOMS:
-                    # we found the RTC session as expected
-                    # set the document content from y-py
-                    model["content"] = ROOMS[path].source
-                else:
-                    # RTC session not available, shouldn't happen
-                    raise web.HTTPError(
-                        410, "Could not find an RTC session corresponding to this document"
-                    )
-
-        self.serverapp.contents_manager.register_pre_save_hook(hook)
-        super().initialize_settings()
 
     def initialize_handlers(self):
 

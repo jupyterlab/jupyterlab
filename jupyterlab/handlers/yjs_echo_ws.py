@@ -6,10 +6,11 @@
 import asyncio
 import sys
 import uuid
-from enum import IntEnum
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
-import pkg_resources
+import y_py as Y
 from jupyter_server.base.handlers import JupyterHandler
 from jupyter_server.services.contents.fileio import (
     AsyncFileManagerMixin,
@@ -17,11 +18,10 @@ from jupyter_server.services.contents.fileio import (
 )
 from jupyter_server.utils import ensure_async
 from tornado import web
-from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 from watchfiles import awatch
 
-from .yutils import read_sync_message
+from .yutils import YMessageType, create_sync_step1_message, process_sync_message
 
 # See compatibility note on `group` keyword in https://docs.python.org/3/library/importlib.metadata.html#entry-points
 if sys.version_info < (3, 10):
@@ -42,36 +42,31 @@ ROOMS = {}
 # Messages that the server can't interpret should be broadcasted to all other clients.
 
 
-class ServerMessageType(IntEnum):
-    # The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
-    # The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
-    RENAME_SESSION = 127
-
-
 class YjsRoom:
-    def __init__(self, type, handler):
+    def __init__(self, type):
         self.type = type
-        self.clients = {}
-        self.initialized = False
+        self.clients = []
         self.cleaner = None
         self.watcher = None
-        self.ydoc = YDOCS.get(type, YFILE)(handler)
-
-    @property
-    def source(self):
-        return self.ydoc.source
-
-    @source.setter
-    def source(self, value):
-        self.ydoc.source = value
+        self.ydoc = YDOCS.get(type, YFILE)(self)
 
 
 class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
+
+    saving_document: Optional[asyncio.Task]
 
     # Override max_message size to 1GB
     @property
     def max_message_size(self):
         return 1024 * 1024 * 1024
+
+    @property
+    def room(self):
+        return ROOMS.get(self.room_id)
+
+    @room.setter
+    def room(self, value):
+        ROOMS[self.room_id] = value
 
     async def get(self, *args, **kwargs):
         if self.get_current_user() is None:
@@ -80,34 +75,36 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         return await super().get(*args, **kwargs)
 
     async def open(self, type_path):
-        # print("[YJSEchoWS]: open", type_path)
-        file_type, path = type_path.split(":", 1)
+        file_type, file_path = type_path.split(":", 1)
+        self.saving_document = None
         self.id = str(uuid.uuid4())
-        self.room_id = path
-        room = ROOMS.get(self.room_id)
-        if room is None:
-            room = YjsRoom(file_type, self)
-            ROOMS[self.room_id] = room
-        room.clients[self.id] = (IOLoop.current(), self.hook_send_message, self)
+        self.room_id = file_path
+        self.room = self.room or YjsRoom(file_type)
+        self.room.clients.append(self)
 
-        if room.cleaner is not None:
-            room.cleaner.cancel()
+        # cancel the deletion of the room if it was scheduled
+        if self.room.cleaner is not None:
+            self.room.cleaner.cancel()
 
-        if not room.initialized:
-            contents_manager = self.settings["contents_manager"]
+        if not self.room.ydoc.initialized:
             file_path = self.room_id
-            model = await ensure_async(contents_manager.get(file_path))
+            model = await ensure_async(self.contents_manager.get(file_path))
+            self.last_saved = model["last_modified"]
             # check again if initialized, because loading the file can be async
-            if not room.initialized:
-                room.initialized = True
-                room.source = model["content"]
+            if not self.room.ydoc.initialized:
+                self.room.ydoc.source = model["content"]
+                self.room.ydoc.initialized = True
                 # can only watch file changes if local file system
                 # if/when https://github.com/jupyter-server/jupyter_server/pull/783 gets in,
                 # we will check for a contents manager ability to watch file changes
-                if isinstance(contents_manager, (FileManagerMixin, AsyncFileManagerMixin)):
-                    room.watcher = asyncio.create_task(self.watch_file(file_path))
-        # Send SyncStep1 message (based on y-protocols)
-        self.write_message(bytes([0, 0, 1, 0]), binary=True)
+                if isinstance(self.contents_manager, (FileManagerMixin, AsyncFileManagerMixin)):
+                    self.room.watcher = asyncio.create_task(self.watch_file(file_path))
+                # save the document when changed
+                self.room.ydoc.observe(self.maybe_save_document)
+        # send our state
+        state = Y.encode_state_vector(self.room.ydoc.ydoc)
+        message = create_sync_step1_message(state)
+        self.write_message(message, binary=True)
 
     async def watch_file(self, path):
         abs_path = str(Path(path).resolve())
@@ -115,51 +112,74 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         def filter(change, path):
             return path == abs_path
 
-        contents_manager = self.settings["contents_manager"]
-        room = ROOMS.get(self.room_id)
         async for _ in awatch(abs_path, watch_filter=filter):
-            model = await ensure_async(contents_manager.get(path))
-            room.source = model["content"]
+            model = await ensure_async(self.contents_manager.get(path, content=False))
+            # do nothing if the file was saved by us
+            if model["last_modified"] != self.last_saved:
+                model = await ensure_async(self.contents_manager.get(path))
+                self.room.ydoc.source = model["content"]
 
     def on_message(self, message):
-        # print("[YJSEchoWS]: message,", message)
-        room_id = self.room_id
-        room = ROOMS.get(room_id)
-        if message[0] == ServerMessageType.RENAME_SESSION:
-            # We move the room to a different entry and also change the room_id property of each connected client
+        if message[0] == YMessageType.RENAME_SESSION:
+            # The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
+            # The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
+            # move the room to a different entry and change the room_id of each connected client
             new_room_id = message[1:].decode("utf-8").split(":", 1)[1]
-            for _, (_, _, client) in room.clients.items():
+            ROOMS[new_room_id] = self.room
+            del ROOMS[self.room_id]
+            for client in self.room.clients:
                 client.room_id = new_room_id
-            ROOMS.pop(room_id)
-            ROOMS[new_room_id] = room
             # send rename acknowledge
-            self.write_message(bytes([ServerMessageType.RENAME_SESSION, 1]), binary=True)
-            # print("renamed room to " + new_room_id + ". Old room name was " + room_id)
-        elif room:
-            if message[0] == 0:  # sync message
-                read_sync_message(self, room.ydoc.ydoc, message[1:])
-            for client_id, (loop, hook_send_message, _) in room.clients.items():
-                if self.id != client_id:
-                    loop.add_callback(hook_send_message, message)
+            self.write_message(bytes([YMessageType.RENAME_SESSION, 1]), binary=True)
+        elif self.room:
+            if message[0] == YMessageType.SYNC:
+                process_sync_message(self, self.room.ydoc.ydoc, message[1:])
+            for client in [c for c in self.room.clients if c.id != self.id]:
+                # broadcast to everybody else but me
+                client.write_message(message, binary=True)
 
-    def on_close(self):
-        # print("[YJSEchoWS]: close", self.id, self.room_id)
-        room = ROOMS.get(self.room_id)
-        del room.clients[self.id]
-        if not room.clients:
+    def on_close(self) -> bool:
+        # quit the room
+        self.room.clients = [c for c in self.room.clients if c.id != self.id]
+        if not self.room.clients:
             # keep the document for a while after every client disconnects
-            room.cleaner = asyncio.create_task(self.clean_room())
-
+            self.room.cleaner = asyncio.create_task(self.clean_room())
         return True
 
-    def check_origin(self, origin):
-        # print("[YJSEchoWS]: check origin")
-        return True
-
-    def hook_send_message(self, msg):
-        self.write_message(msg, binary=True)
-
-    async def clean_room(self):
+    async def clean_room(self) -> None:
         await asyncio.sleep(60)
-        ROOMS[self.room_id].watcher.cancel()
+        self.room.watcher.cancel()
+        self.room.ydoc.unobserve()
         del ROOMS[self.room_id]
+
+    def maybe_save_document(self, event):
+        if self.saving_document is not None and not self.saving_document.done():
+            # the document is being saved, cancel that
+            self.saving_document.cancel()
+            self.saving_document = None
+        self.saving_document = asyncio.create_task(self.save_document())
+
+    async def save_document(self):
+        # save after 1 second of inactivity to prevent too frequent saving
+        await asyncio.sleep(1)
+        path = self.room_id
+        model = await ensure_async(self.contents_manager.get(path, content=False))
+        if not isinstance(self.contents_manager, (FileManagerMixin, AsyncFileManagerMixin)):
+            # we could not watch the file changes, so check if it is newer than last time it was saved
+            last_modified = datetime.strptime(
+                model["last_modified"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).astimezone(timezone.utc)
+            if self.last_saved < last_modified:
+                # file changed on disk, let's revert
+                # FIXME: notify front-end?
+                self.room.ydoc.source = model["content"]
+                self.room.ydoc.dirty = False
+                return
+        model["format"] = "text"
+        model["content"] = self.room.ydoc.source
+        model = await ensure_async(self.contents_manager.save(model, path))
+        self.last_saved = model["last_modified"]
+        self.room.ydoc.dirty = False
+
+    def check_origin(self, origin) -> bool:
+        return True

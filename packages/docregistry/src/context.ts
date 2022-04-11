@@ -568,17 +568,20 @@ export class Context<
    * Save the document contents to disk.
    */
   private async _save(): Promise<void> {
+    // if collaborative mode is enabled, saving happens in the back-end
+    // after each change to the document
+    if (PageConfig.getOption('collaborative') === 'true') {
+      return;
+    }
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue = null;
-    if (PageConfig.getOption('collaborative') !== 'true') {
-      if (this._factory.fileFormat === 'json') {
-        content = model.toJSON();
-      } else {
-        content = model.toString();
-        if (this._lineEnding) {
-          content = content.replace(/\n/g, this._lineEnding);
-        }
+    if (this._factory.fileFormat === 'json') {
+      content = model.toJSON();
+    } else {
+      content = model.toString();
+      if (this._lineEnding) {
+        content = content.replace(/\n/g, this._lineEnding);
       }
     }
 
