@@ -4,7 +4,6 @@
 # Distributed under the terms of the Modified BSD License.
 
 import sys
-import time
 import uuid
 from enum import IntEnum
 
@@ -27,31 +26,24 @@ YFILE = YDOCS["file"]
 
 ROOMS = {}
 
-## The y-protocol defines messages types that just need to be propagated to all other peers.
-## Here, we define some additional messageTypes that the server can interpret.
-## Messages that the server can't interpret should be broadcasted to all other clients.
+# The y-protocol defines messages types that just need to be propagated to all other peers.
+# Here, we define some additional messageTypes that the server can interpret.
+# Messages that the server can't interpret should be broadcasted to all other clients.
 
 
 class ServerMessageType(IntEnum):
-    # The client is asking for a lock. Should return a lock-identifier if one is available.
-    ACQUIRE_LOCK = 127
-    # The client is asking to release a lock to make it available to other users again.
-    RELEASE_LOCK = 126
     # The client is asking to retrieve the initial state of the Yjs document. Return an empty buffer when nothing is available.
-    REQUEST_INITIALIZED_CONTENT = 125
-    # The client retrieved an empty "initial content" and generated the initial state of the document after acquiring a lock. Store this.
-    PUT_INITIALIZED_CONTENT = 124
+    REQUEST_INITIALIZED_CONTENT = 127
+    # The client retrieved an empty "initial content" and generated the initial state of the document. Store this.
+    PUT_INITIALIZED_CONTENT = 126
     # The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
     # The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
-    RENAME_SESSION = 123
+    RENAME_SESSION = 125
 
 
 class YjsRoom:
     def __init__(self, type):
         self.type = type
-        self.lock = None
-        self.timeout = None
-        self.lock_holder = None
         self.clients = {}
         self.content = bytes([])
         self.ydoc = YDOCS.get(type, YFILE)()
@@ -90,35 +82,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         # print("[YJSEchoWS]: message,", message)
         room_id = self.room_id
         room = ROOMS.get(room_id)
-        if message[0] == ServerMessageType.ACQUIRE_LOCK:
-            now = int(time.time())
-            if room.lock is None or now - room.timeout > (
-                10 * len(room.clients)
-            ):  # no lock or timeout
-                room.lock = now
-                room.timeout = now
-                room.lock_holder = self.id
-                # print('Acquired new lock:', room.lock)
-                # return acquired lock
-                self.write_message(
-                    bytes([ServerMessageType.ACQUIRE_LOCK])
-                    + room.lock.to_bytes(4, byteorder="little"),
-                    binary=True,
-                )
-
-            elif room.lock_holder == self.id:
-                # print('Update lock:', room.timeout)
-                room.timeout = now
-
-        elif message[0] == ServerMessageType.RELEASE_LOCK:
-            releasedLock = int.from_bytes(message[1:], byteorder="little")
-            # print("trying release lock:", releasedLock)
-            if room.lock == releasedLock:
-                # print('released lock:', room.lock)
-                room.lock = None
-                room.timeout = None
-                room.lock_holder = None
-        elif message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
+        if message[0] == ServerMessageType.REQUEST_INITIALIZED_CONTENT:
             # print("client requested initial content")
             self.write_message(
                 bytes([ServerMessageType.REQUEST_INITIALIZED_CONTENT]) + room.content, binary=True
@@ -129,7 +93,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         elif message[0] == ServerMessageType.RENAME_SESSION:
             # We move the room to a different entry and also change the room_id property of each connected client
             new_room_id = message[1:].decode("utf-8").split(":", 1)[1]
-            for client_id, (loop, hook_send_message, client) in room.clients.items():
+            for _, (_, _, client) in room.clients.items():
                 client.room_id = new_room_id
             ROOMS.pop(room_id)
             ROOMS[new_room_id] = room
@@ -139,7 +103,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         elif room:
             if message[0] == 0:  # sync message
                 read_sync_message(self, room.ydoc.ydoc, message[1:])
-            for client_id, (loop, hook_send_message, client) in room.clients.items():
+            for client_id, (loop, hook_send_message, _) in room.clients.items():
                 if self.id != client_id:
                     loop.add_callback(hook_send_message, message)
 
@@ -168,7 +132,7 @@ message_yjs_update = 2
 
 def read_sync_step1(handler, doc, encoded_state_vector):
     message = Y.encode_state_as_update(doc, encoded_state_vector)
-    message = bytes([message_yjs_sync_step2] + write_var_uint(len(message)) + message)
+    message = bytes([0, message_yjs_sync_step2] + write_var_uint(len(message)) + message)
     handler.write_message(message, binary=True)
 
 

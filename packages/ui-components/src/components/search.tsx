@@ -13,7 +13,7 @@ export interface IFilterBoxProps {
   /**
    * A function to callback when filter is updated.
    */
-  updateFilter: (filterFn: (item: string) => boolean) => void;
+  updateFilter: (filterFn: (item: string) => boolean, query?: string) => void;
 
   /**
    * Whether to use the fuzzy filter.
@@ -29,6 +29,11 @@ export interface IFilterBoxProps {
    * Whether to force a refresh.
    */
   forceRefresh?: boolean;
+
+  /**
+   * Whether to use case-sensitive search
+   */
+  caseSensitive?: boolean;
 }
 
 /**
@@ -124,12 +129,16 @@ export const FilterBox = (props: IFilterBoxProps) => {
         }
         return true;
       }
+      if (!props.caseSensitive) {
+        item = item.toLocaleLowerCase();
+        target.value = target.value.toLocaleLowerCase();
+      }
       const i = item.indexOf(target.value);
       if (i === -1) {
         return false;
       }
       return true;
-    });
+    }, target.value);
   };
 
   return (
@@ -154,6 +163,7 @@ export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
       useFuzzyFilter={props.useFuzzyFilter}
       placeholder={props.placeholder}
       forceRefresh={props.forceRefresh}
+      caseSensitive={props.caseSensitive}
     />
   );
 };

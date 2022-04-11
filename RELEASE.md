@@ -467,3 +467,10 @@ frozen and non-frozen version of the files.
 - Close the release issue and rename milestone to use ".x"
 - Make an announcement on Discourse
 - Make a blog post
+
+## Postmortems
+
+Here is a list of previous issues that happened while releasing JupyterLab, that can be used as reference in case
+new issues show up in the future:
+
+- HTTP Error 502: Bad Gateway (JupyterLab `4.0.0a23`): https://github.com/jupyterlab/jupyterlab/issues/12324

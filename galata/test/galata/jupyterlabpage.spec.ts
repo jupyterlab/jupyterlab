@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
-import { expect, test as playwrightTest } from '@playwright/test';
+import { expect, test } from '@jupyterlab/galata';
+import { test as playwrightTest } from '@playwright/test';
 
 test.describe('appPath', () => {
   const APP_PATH = '/retro';

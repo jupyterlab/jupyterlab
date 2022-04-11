@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.7",
+  "version": "7.0.0-alpha.8",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -46,11 +46,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.7",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.7",
-    "@jupyterlab/observables": "^5.0.0-alpha.7",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.7",
-    "@jupyterlab/statedb": "^4.0.0-alpha.7",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.8",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.8",
+    "@jupyterlab/observables": "^5.0.0-alpha.8",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.8",
+    "@jupyterlab/statedb": "^4.0.0-alpha.8",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
@@ -60,7 +60,7 @@
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.7",
+    "@jupyterlab/testutils": "^4.0.0-alpha.8",
     "@types/jest": "^26.0.10",
     "@types/node-fetch": "^2.5.4",
     "@types/text-encoding": "^0.0.35",
@@ -70,9 +70,9 @@
     "text-encoding": "^0.7.0",
     "ts-jest": "^26.3.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.5.2",
-    "webpack": "^5.55.1",
-    "webpack-cli": "^4.8.0"
+    "typescript": "~4.6.3",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2"
   },
   "publishConfig": {
     "access": "public"

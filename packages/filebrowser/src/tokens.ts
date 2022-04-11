@@ -106,3 +106,10 @@ export namespace IFileBrowserFactory {
     state?: IStateDB | null;
   }
 }
+
+/**
+ * The token that indicates the default file browser commands are loaded.
+ */
+export const IFileBrowserCommands = new Token<void>(
+  '@jupyterlab/filebrowser:IFileBrowserCommands'
+);

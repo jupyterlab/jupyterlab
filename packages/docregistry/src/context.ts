@@ -261,7 +261,6 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean): Promise<void> {
-    const lock = await this._provider.acquireLock();
     const contentIsInitialized = await this._provider.requestInitialContent();
     let promise;
     if (isNew || contentIsInitialized) {
@@ -269,17 +268,11 @@ export class Context<
     } else {
       promise = this._revert();
     }
-    // make sure that the lock is released after the above operations are completed.
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
     // if save/revert completed successfully, we set the initialized content in the rtc server.
-    promise
-      .then(() => {
-        this._provider.putInitializedState();
-        this._model.initialize();
-      })
-      .then(finally_, finally_);
+    promise = promise.then(() => {
+      this._provider.putInitializedState();
+      this._model.initialize();
+    });
     return promise;
   }
 
@@ -300,20 +293,13 @@ export class Context<
    * Save the document contents to disk.
    */
   async save(): Promise<void> {
-    const [lock] = await Promise.all([
-      this._provider.acquireLock(),
-      this.ready
-    ]);
+    await this.ready;
     let promise: Promise<void>;
     promise = this._save();
     // if save completed successfully, we set the initialized content in the rtc server.
     promise = promise.then(() => {
       this._provider.putInitializedState();
     });
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    promise.then(finally_, finally_);
     return await promise;
   }
 
@@ -372,15 +358,8 @@ export class Context<
    * Revert the document contents to disk contents.
    */
   async revert(): Promise<void> {
-    const [lock] = await Promise.all([
-      this._provider.acquireLock(),
-      this.ready
-    ]);
+    await this.ready;
     const promise = this._revert();
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    promise.then(finally_, finally_);
     return await promise;
   }
 

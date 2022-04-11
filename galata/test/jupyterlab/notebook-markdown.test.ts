@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
 const fileName = 'markdown_notebook.ipynb';

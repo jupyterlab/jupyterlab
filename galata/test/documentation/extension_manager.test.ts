@@ -1,8 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
 import { generateCaptureArea, setLeftSidebarWidth } from './utils';
 
 test.use({

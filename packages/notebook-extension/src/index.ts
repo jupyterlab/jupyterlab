@@ -1631,8 +1631,10 @@ function activateNotebookCompleterService(
     keys: ['Enter'],
     selector: '.jp-Notebook .jp-mod-completer-active'
   });
-
-  notebooks.widgetAdded.connect(async (_, notebook) => {
+  const updateCompleter = async (
+    _: INotebookTracker | undefined,
+    notebook: NotebookPanel
+  ) => {
     const completerContext = {
       editor: notebook.content.activeCell?.editor ?? null,
       session: notebook.sessionContext.session,
@@ -1645,7 +1647,7 @@ function activateNotebookCompleterService(
         session: notebook.sessionContext.session,
         widget: notebook
       };
-      manager.updateCompleter(newCompleterContext);
+      manager.updateCompleter(newCompleterContext).catch(console.error);
     });
     notebook.sessionContext.sessionChanged.connect(() => {
       const newCompleterContext = {
@@ -1653,7 +1655,13 @@ function activateNotebookCompleterService(
         session: notebook.sessionContext.session,
         widget: notebook
       };
-      manager.updateCompleter(newCompleterContext);
+      manager.updateCompleter(newCompleterContext).catch(console.error);
+    });
+  };
+  notebooks.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    notebooks.forEach(panel => {
+      updateCompleter(undefined, panel).catch(e => console.error(e));
     });
   });
 }

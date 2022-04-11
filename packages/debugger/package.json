@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger",
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.8",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
     "jupyter",
@@ -48,21 +48,21 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.7",
-    "@jupyterlab/apputils": "^4.0.0-alpha.7",
-    "@jupyterlab/cells": "^4.0.0-alpha.7",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.7",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.7",
-    "@jupyterlab/console": "^4.0.0-alpha.7",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.7",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.7",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.7",
-    "@jupyterlab/notebook": "^4.0.0-alpha.7",
-    "@jupyterlab/observables": "^5.0.0-alpha.7",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.7",
-    "@jupyterlab/services": "^7.0.0-alpha.7",
-    "@jupyterlab/translation": "^4.0.0-alpha.7",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.22",
+    "@jupyterlab/application": "^4.0.0-alpha.8",
+    "@jupyterlab/apputils": "^4.0.0-alpha.8",
+    "@jupyterlab/cells": "^4.0.0-alpha.8",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.8",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.8",
+    "@jupyterlab/console": "^4.0.0-alpha.8",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.8",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.8",
+    "@jupyterlab/fileeditor": "^4.0.0-alpha.8",
+    "@jupyterlab/notebook": "^4.0.0-alpha.8",
+    "@jupyterlab/observables": "^5.0.0-alpha.8",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.8",
+    "@jupyterlab/services": "^7.0.0-alpha.8",
+    "@jupyterlab/translation": "^4.0.0-alpha.8",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.23",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",
     "@lumino/coreutils": "^1.12.0",
@@ -79,12 +79,12 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^4.0.0-alpha.7",
+    "@jupyterlab/testutils": "^4.0.0-alpha.8",
     "@types/codemirror": "^0.0.109",
     "@types/jest": "^26.0.10",
     "@types/react-dom": "^17.0.0",
     "@types/text-encoding": "^0.0.35",
-    "canvas": "^2.6.1",
+    "canvas": "^2.9.1",
     "jest": "^26.4.2",
     "jest-junit": "^11.1.0",
     "jest-raw-loader": "^1.0.1",
@@ -94,7 +94,7 @@
     "text-encoding": "^0.7.0",
     "ts-jest": "^26.3.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.5.2"
+    "typescript": "~4.6.3"
   },
   "publishConfig": {
     "access": "public"
