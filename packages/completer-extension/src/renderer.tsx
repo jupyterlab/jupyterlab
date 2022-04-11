@@ -40,7 +40,7 @@ export function renderAvailableProviders(props: FieldProps): JSX.Element {
       [key]: parseInt(e.target.value)
     };
 
-    settings.set(AVAILABLE_PROVIDERS, newValue);
+    settings.set(AVAILABLE_PROVIDERS, newValue).catch(console.error);
 
     setValue(newValue);
   };

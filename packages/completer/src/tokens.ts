@@ -5,6 +5,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IObservableString } from '@jupyterlab/observables';
 import { Session } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
@@ -43,6 +44,11 @@ export interface ICompletionProvider<
   readonly identifier: string;
 
   /**
+   * Renderer for provider's completions (optional).
+   */
+  readonly renderer?: Completer.IRenderer | null;
+
+  /**
    * Is completion provider applicable to specified context?
    * @param request - the completion request text and details
    * @param context - additional information about context of completion request
@@ -61,9 +67,13 @@ export interface ICompletionProvider<
   ): Promise<CompletionHandler.ICompletionItemsReply<T>>;
 
   /**
-   * Renderer for provider's completions (optional).
+   * This method is called to customize the model of a completer widget.
+   * If it is not provided, the default model will be used.
+   *
+   * @param context - additional information about context of completion request
+   * @returns The completer model
    */
-  readonly renderer: Completer.IRenderer | null | undefined;
+  modelFactory?(context: ICompletionContext): Promise<Completer.IModel>;
 
   /**
    * Given an incomplete (unresolved) completion item, resolve it by adding
@@ -130,6 +140,11 @@ export interface ICompletionProviderManager {
    * @param newCompleterContext - The completion context.
    */
   updateCompleter(newCompleterContext: ICompletionContext): Promise<void>;
+
+  /**
+   * Signal emitted when active providers list is changed.
+   */
+  activeProvidersChanged: ISignal<ICompletionProviderManager, void>;
 }
 
 export interface IConnectorProxy {
