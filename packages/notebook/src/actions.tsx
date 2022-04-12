@@ -150,6 +150,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
 
     notebook.deselectAll();
@@ -245,6 +248,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const toMerge: string[] = [];
     const toDelete: ICellModel[] = [];
@@ -341,6 +347,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
@@ -363,6 +372,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
@@ -395,6 +407,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
@@ -420,6 +435,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
@@ -451,6 +469,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
@@ -595,6 +616,9 @@ export namespace NotebookActions {
       return Promise.resolve(false);
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return Promise.resolve(false);
+    }
     const state = Private.getState(notebook);
     const promise = Private.runSelected(notebook, sessionContext);
     const model = notebook.model;
@@ -1067,6 +1091,9 @@ export namespace NotebookActions {
    * A new code cell is added if all cells are cut.
    */
   export function cut(notebook: Notebook): void {
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     Private.copyOrCut(notebook, true);
   }
 
@@ -1090,6 +1117,10 @@ export namespace NotebookActions {
     mode: 'below' | 'above' | 'replace' = 'below'
   ): void {
     if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    if (!Private.isNotebookRendered(notebook)) {
       return;
     }
 
@@ -1190,6 +1221,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
@@ -1965,6 +1999,30 @@ namespace Private {
      * The active cell before the action.
      */
     activeCell: Cell | null;
+  }
+
+  export function isNotebookRendered(notebook: Notebook): boolean {
+    const translator = notebook.translator;
+    const trans = translator.load('jupyterlab');
+
+    if (notebook.remainingCellToRenderCount !== 0) {
+      showDialog({
+        body: trans.__(
+          `Notebook is still rendering and has for now (%1) remaining cells to render.
+
+Please wait for the complete rendering before invoking that action.`,
+          notebook.remainingCellToRenderCount
+        ),
+        buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+      }).catch(reason => {
+        console.error(
+          'An error occurred when displaying notebook rendering warning',
+          reason
+        );
+      });
+      return false;
+    }
+    return true;
   }
 
   /**
