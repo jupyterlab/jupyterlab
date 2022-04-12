@@ -273,9 +273,9 @@ export class StaticNotebook extends Widget {
   /**
    * Translator to be used by cell renderers
    */
-   readonly translator: ITranslator;
-   
-   /**
+  readonly translator: ITranslator;
+
+  /**
    * The model for the widget.
    */
   get model(): INotebookModel | null {
