@@ -111,7 +111,8 @@ function activate(
       category: trans.__('Settings'),
       command: CommandIDs.open,
       args: {
-        plugin: "@jupyterlab/apputils-extension:palette"
+        plugin: "@jupyterlab/apputils-extension:palette",
+        label: 'Open command palette settings'
       }
     });
   }
@@ -166,8 +167,8 @@ function activate(
       shell.add(editor);
     },
     label: args => {
-      if (args.plugin) {
-        return trans.__(`${args.plugin} Settings`)
+      if (args.label) {
+        return trans.__(args.label as string)
       }
       return trans.__('Settings Editor')
     }
