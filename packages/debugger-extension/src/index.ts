@@ -77,21 +77,19 @@ const consoles: JupyterFrontEndPlugin<void> = {
     };
 
     if (labShell) {
-      labShell.currentChanged.connect(async (_, update) => {
+      labShell.currentChanged.connect((_, update) => {
         const widget = update.newValue;
-        if (!(widget instanceof ConsolePanel)) {
-          return;
+        if (widget instanceof ConsolePanel) {
+          void updateHandlerAndCommands(widget);
         }
-        await updateHandlerAndCommands(widget);
       });
-      return;
+    } else {
+      consoleTracker.currentChanged.connect((_, consolePanel) => {
+        if (consolePanel) {
+          void updateHandlerAndCommands(consolePanel);
+        }
+      });
     }
-
-    consoleTracker.currentChanged.connect(async (_, consolePanel) => {
-      if (consolePanel) {
-        void updateHandlerAndCommands(consolePanel);
-      }
-    });
   }
 };
 
@@ -145,25 +143,24 @@ const files: JupyterFrontEndPlugin<void> = {
     };
 
     if (labShell) {
-      labShell.currentChanged.connect(async (_, update) => {
+      labShell.currentChanged.connect((_, update) => {
         const widget = update.newValue;
-        if (!(widget instanceof DocumentWidget)) {
-          return;
+        if (widget instanceof DocumentWidget) {
+          const { content } = widget;
+          if (content instanceof FileEditor) {
+            void updateHandlerAndCommands(widget);
+          }
         }
-
-        const content = widget.content;
-        if (!(content instanceof FileEditor)) {
-          return;
+      });
+    } else {
+      editorTracker.currentChanged.connect((_, documentWidget) => {
+        if (documentWidget) {
+          void updateHandlerAndCommands(
+            (documentWidget as unknown) as DocumentWidget
+          );
         }
-        await updateHandlerAndCommands(widget);
       });
     }
-
-    editorTracker.currentChanged.connect(async (_, documentWidget) => {
-      await updateHandlerAndCommands(
-        (documentWidget as unknown) as DocumentWidget
-      );
-    });
   }
 };
 
@@ -206,7 +203,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
         const { content, sessionContext } = widget;
         const restarted = await sessionContextDialogs.restart(sessionContext);
-        if (!restarted || widget.isDisposed) {
+        if (!restarted) {
           return;
         }
 
@@ -217,7 +214,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     });
 
     const updateHandlerAndCommands = async (
-      widget: NotebookPanel | null
+      widget: NotebookPanel
     ): Promise<void> => {
       if (widget) {
         const { sessionContext } = widget;
@@ -228,19 +225,18 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     };
 
     if (labShell) {
-      labShell.currentChanged.connect(async (_, update) => {
+      labShell.currentChanged.connect((_, update) => {
         const widget = update.newValue;
-        if (!(widget instanceof NotebookPanel)) {
-          return;
+        if (widget instanceof NotebookPanel) {
+          void updateHandlerAndCommands(widget);
         }
-        await updateHandlerAndCommands(widget);
       });
     } else {
-      notebookTracker.currentChanged.connect(
-        async (_, notebookPanel: NotebookPanel | null) => {
-          await updateHandlerAndCommands(notebookPanel);
+      notebookTracker.currentChanged.connect((_, notebookPanel) => {
+        if (notebookPanel) {
+          void updateHandlerAndCommands(notebookPanel);
         }
-      );
+      });
     }
 
     if (palette) {
@@ -249,12 +245,6 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         command: Debugger.CommandIDs.restartDebug
       });
     }
-
-    notebookTracker.currentChanged.connect(
-      async (_, notebookPanel: NotebookPanel | null) => {
-        await updateHandlerAndCommands(notebookPanel);
-      }
-    );
 
     return handler;
   }
