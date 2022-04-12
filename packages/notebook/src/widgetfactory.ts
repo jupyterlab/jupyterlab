@@ -93,7 +93,8 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       editorConfig: source ? source.content.editorConfig : this._editorConfig,
       notebookConfig: source
         ? source.content.notebookConfig
-        : this._notebookConfig
+        : this._notebookConfig,
+      translator: this.translator
     };
     const content = this.contentFactory.createNotebook(nbOptions);
 
