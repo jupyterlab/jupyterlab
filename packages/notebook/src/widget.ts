@@ -619,7 +619,7 @@ export class StaticNotebook extends Widget {
         timeRemaining < this.notebookConfig.remainingTimeBeforeRescheduling
       ) {
         if (this._idleCallBack) {
-          window.cancelIdleCallback(this._idleCallBack);
+          (window as any).cancelIdleCallback(this._idleCallBack);
           this._idleCallBack = null;
         }
         this._scheduleCellRenderOnIdle();
