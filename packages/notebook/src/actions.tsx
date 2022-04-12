@@ -1127,6 +1127,8 @@ export namespace NotebookActions {
       return;
     }
 
+    const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+
     addCells(notebook, mode, values, true);
   }
 
