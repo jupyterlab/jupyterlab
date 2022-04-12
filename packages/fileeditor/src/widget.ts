@@ -30,6 +30,11 @@ const UNDOER = 'jpUndoer';
 
 /**
  * A code editor wrapper for the file editor.
+ *
+ * @deprecated since v3.4
+ * Note: This class will be removed in v4.0.
+ * From now on, you can directly use the class
+ * `CodeEditorWrapper` instead on `FileEditorCodeWrapper`.
  */
 export class FileEditorCodeWrapper extends CodeEditorWrapper {
   /**
