@@ -39,9 +39,6 @@ export class SettingsEditor extends SplitPanel {
     void Promise.all(
       PluginList.sortPlugins(options.registry)
         .filter(plugin => {
-          if (options.plugin) {
-            return options.plugin === plugin.id;
-          }
           const { schema } = plugin;
           const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
           const editable = Object.keys(schema.properties || {}).length > 0;
@@ -67,6 +64,7 @@ export class SettingsEditor extends SplitPanel {
             updateFilterSignal={this._list.updateFilterSignal}
             updateDirtyState={this.setDirtyState}
             translator={this.translator}
+            defaultPlugin={options.plugin}
           />
         );
 
