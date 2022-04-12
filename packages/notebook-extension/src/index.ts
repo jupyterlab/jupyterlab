@@ -1467,6 +1467,9 @@ function activateNotebookHandler(
       recordTiming: settings.get('recordTiming').composite as boolean,
       numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
         .composite as number,
+      remainingTimeBeforeRescheduling: settings.get(
+        'remainingTimeBeforeRescheduling'
+      ).composite as number,
       renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
       observedTopMargin: settings.get('observedTopMargin').composite as string,
       observedBottomMargin: settings.get('observedBottomMargin')

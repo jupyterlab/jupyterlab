@@ -856,7 +856,13 @@
       "title": "Number of cells to render directly",
       "description": "Define the number of cells to render directly when virtual notebook intersection observer is available",
       "type": "number",
-      "default": 20
+      "default": 99999
+    },
+    "remainingTimeBeforeRescheduling": {
+      "title": "Remaining time in milliseconds before virtual notebook rendering is rescheduled",
+      "description": "Define the remaining time in milliseconds before virtual notebook rendering is rescheduled. Set 0 if you want to disable any rescheduling",
+      "type": "number",
+      "default": 50
     },
     "renderCellOnIdle": {
       "title": "Render cell on browser idle time",

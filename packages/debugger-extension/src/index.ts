@@ -77,21 +77,19 @@ const consoles: JupyterFrontEndPlugin<void> = {
     };
 
     if (labShell) {
-      labShell.currentChanged.connect(async (_, update) => {
+      labShell.currentChanged.connect((_, update) => {
         const widget = update.newValue;
-        if (!(widget instanceof ConsolePanel)) {
-          return;
+        if (widget instanceof ConsolePanel) {
+          void updateHandlerAndCommands(widget);
         }
-        await updateHandlerAndCommands(widget);
       });
-      return;
+    } else {
+      consoleTracker.currentChanged.connect((_, consolePanel) => {
+        if (consolePanel) {
+          void updateHandlerAndCommands(consolePanel);
+        }
+      });
     }
-
-    consoleTracker.currentChanged.connect(async (_, consolePanel) => {
-      if (consolePanel) {
-        void updateHandlerAndCommands(consolePanel);
-      }
-    });
   }
 };
 
@@ -145,25 +143,24 @@ const files: JupyterFrontEndPlugin<void> = {
     };
 
     if (labShell) {
-      labShell.currentChanged.connect(async (_, update) => {
+      labShell.currentChanged.connect((_, update) => {
         const widget = update.newValue;
-        if (!(widget instanceof DocumentWidget)) {
-          return;
+        if (widget instanceof DocumentWidget) {
+          const { content } = widget;
+          if (content instanceof FileEditor) {
+            void updateHandlerAndCommands(widget);
+          }
         }
-
-        const content = widget.content;
-        if (!(content instanceof FileEditor)) {
-          return;
+      });
+    } else {
+      editorTracker.currentChanged.connect((_, documentWidget) => {
+        if (documentWidget) {
+          void updateHandlerAndCommands(
+            (documentWidget as unknown) as DocumentWidget
+          );
         }
-        await updateHandlerAndCommands(widget);
       });
     }
-
-    editorTracker.currentChanged.connect(async (_, documentWidget) => {
-      await updateHandlerAndCommands(
-        (documentWidget as unknown) as DocumentWidget
-      );
-    });
   }
 };
 
@@ -194,52 +191,52 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
       label: trans.__('Restart Kernel and Debug…'),
       caption: trans.__('Restart Kernel and Debug…'),
-      isEnabled: () => {
-        return service.isStarted;
-      },
+      isEnabled: () => service.isStarted,
       execute: async () => {
         const state = service.getDebuggerState();
-        console.log(state.cells);
-        const { context, content } = notebookTracker.currentWidget!;
-
         await service.stop();
-        const restarted = await sessionContextDialogs!.restart(
-          context.sessionContext
-        );
-        if (restarted) {
-          await service.restoreDebuggerState(state);
-          await handler.updateWidget(
-            notebookTracker.currentWidget!,
-            notebookTracker.currentWidget!.sessionContext.session
-          );
-          await NotebookActions.runAll(content, context.sessionContext);
+
+        const widget = notebookTracker.currentWidget;
+        if (!widget) {
+          return;
         }
+
+        const { content, sessionContext } = widget;
+        const restarted = await sessionContextDialogs.restart(sessionContext);
+        if (!restarted) {
+          return;
+        }
+
+        await service.restoreDebuggerState(state);
+        await handler.updateWidget(widget, sessionContext.session);
+        await NotebookActions.runAll(content, sessionContext);
       }
     });
 
     const updateHandlerAndCommands = async (
       widget: NotebookPanel
     ): Promise<void> => {
-      const { sessionContext } = widget;
-      await sessionContext.ready;
-      await handler.updateContext(widget, sessionContext);
+      if (widget) {
+        const { sessionContext } = widget;
+        await sessionContext.ready;
+        await handler.updateContext(widget, sessionContext);
+      }
       app.commands.notifyCommandChanged();
     };
 
     if (labShell) {
-      labShell.currentChanged.connect(async (_, update) => {
+      labShell.currentChanged.connect((_, update) => {
         const widget = update.newValue;
-        if (!(widget instanceof NotebookPanel)) {
-          return;
+        if (widget instanceof NotebookPanel) {
+          void updateHandlerAndCommands(widget);
         }
-        await updateHandlerAndCommands(widget);
       });
     } else {
-      notebookTracker.currentChanged.connect(
-        async (_, notebookPanel: NotebookPanel) => {
-          await updateHandlerAndCommands(notebookPanel);
+      notebookTracker.currentChanged.connect((_, notebookPanel) => {
+        if (notebookPanel) {
+          void updateHandlerAndCommands(notebookPanel);
         }
-      );
+      });
     }
 
     if (palette) {
@@ -248,12 +245,6 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         command: Debugger.CommandIDs.restartDebug
       });
     }
-
-    notebookTracker.currentChanged.connect(
-      async (_, notebookPanel: NotebookPanel) => {
-        await updateHandlerAndCommands(notebookPanel);
-      }
-    );
 
     return handler;
   }
@@ -625,9 +616,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Evaluate Code'),
       caption: trans.__('Evaluate Code'),
       icon: Debugger.Icons.evaluateIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         const mimeType = await getMimeType();
         const result = await Debugger.Dialogs.getCode({
@@ -662,9 +651,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Continue'),
       caption: trans.__('Continue'),
       icon: Debugger.Icons.continueIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.continue();
         commands.notifyCommandChanged();
@@ -675,9 +662,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Terminate'),
       caption: trans.__('Terminate'),
       icon: Debugger.Icons.terminateIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.restart();
         commands.notifyCommandChanged();
@@ -688,9 +673,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Next'),
       caption: trans.__('Next'),
       icon: Debugger.Icons.stepOverIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.next();
       }
@@ -700,9 +683,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Step In'),
       caption: trans.__('Step In'),
       icon: Debugger.Icons.stepIntoIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepIn();
       }
@@ -712,9 +693,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Step Out'),
       caption: trans.__('Step Out'),
       icon: Debugger.Icons.stepOutIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepOut();
       }
@@ -735,9 +714,7 @@ const main: JupyterFrontEndPlugin<void> = {
       isToggled: () => {
         return service.isPausingOnExceptions;
       },
-      isEnabled: () => {
-        return service.pauseOnExceptionsIsValid();
-      },
+      isEnabled: () => service.pauseOnExceptionsIsValid(),
       execute: async () => {
         await service.pauseOnExceptions(!service.isPausingOnExceptions);
         commands.notifyCommandChanged();
