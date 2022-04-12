@@ -616,9 +616,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Evaluate Code'),
       caption: trans.__('Evaluate Code'),
       icon: Debugger.Icons.evaluateIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         const mimeType = await getMimeType();
         const result = await Debugger.Dialogs.getCode({
@@ -653,9 +651,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Continue'),
       caption: trans.__('Continue'),
       icon: Debugger.Icons.continueIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.continue();
         commands.notifyCommandChanged();
@@ -666,9 +662,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Terminate'),
       caption: trans.__('Terminate'),
       icon: Debugger.Icons.terminateIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.restart();
         commands.notifyCommandChanged();
@@ -679,9 +673,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Next'),
       caption: trans.__('Next'),
       icon: Debugger.Icons.stepOverIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.next();
       }
@@ -691,9 +683,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Step In'),
       caption: trans.__('Step In'),
       icon: Debugger.Icons.stepIntoIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepIn();
       }
@@ -703,9 +693,7 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Step Out'),
       caption: trans.__('Step Out'),
       icon: Debugger.Icons.stepOutIcon,
-      isEnabled: () => {
-        return service.hasStoppedThreads();
-      },
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepOut();
       }
@@ -726,9 +714,7 @@ const main: JupyterFrontEndPlugin<void> = {
       isToggled: () => {
         return service.isPausingOnExceptions;
       },
-      isEnabled: () => {
-        return service.pauseOnExceptionsIsValid();
-      },
+      isEnabled: () => service.pauseOnExceptionsIsValid(),
       execute: async () => {
         await service.pauseOnExceptions(!service.isPausingOnExceptions);
         commands.notifyCommandChanged();
