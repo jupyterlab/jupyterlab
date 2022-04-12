@@ -201,6 +201,7 @@ export class StaticNotebook extends Widget {
     this.renderingLayout = options.notebookConfig?.renderingLayout;
 
     // Section for the virtual-notebook behavior.
+    this._idleCallBack = null;
     this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
     this._cellsArray = new Array<Cell>();
     if ('IntersectionObserver' in window) {
@@ -584,19 +585,47 @@ export class StaticNotebook extends Widget {
       // We have no intersection observer, or we insert, or we are below
       // the number of cells to render directly, so we render directly.
       layout.insertWidget(index, widget);
-      this._incrementRenderedCount();
       this.onCellInserted(index, widget);
+      this._incrementRenderedCount();
     }
+    this._scheduleCellRenderOnIdle();
+  }
 
-    if (this._observer && this.notebookConfig.renderCellOnIdle) {
-      const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
-      (window as any).requestIdleCallback(renderPlaceholderCells, {
-        timeout: 1000
-      });
+  private _scheduleCellRenderOnIdle() {
+    if (
+      this._observer &&
+      this.notebookConfig.renderCellOnIdle &&
+      !this.isDisposed
+    ) {
+      if (!this._idleCallBack) {
+        const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
+        this._idleCallBack = (window as any).requestIdleCallback(
+          renderPlaceholderCells,
+          {
+            timeout: 3000
+          }
+        );
+      }
     }
   }
 
   private _renderPlaceholderCells(deadline: any) {
+    if (this.notebookConfig.remainingTimeBeforeRescheduling > 0) {
+      const timeRemaining = deadline.timeRemaining();
+      // In case this got triggered because of timeout or when there are screen updates (https://w3c.github.io/requestidlecallback/#idle-periods),
+      // avoiding the render and rescheduling the place holder cell rendering.
+      if (
+        deadline.didTimeout ||
+        timeRemaining < this.notebookConfig.remainingTimeBeforeRescheduling
+      ) {
+        if (this._idleCallBack) {
+          window.cancelIdleCallback(this._idleCallBack);
+          this._idleCallBack = null;
+        }
+        this._scheduleCellRenderOnIdle();
+      }
+    }
+
     if (
       this._renderedCellsCount < this._cellsArray.length &&
       this._renderedCellsCount >=
@@ -608,6 +637,11 @@ export class StaticNotebook extends Widget {
   }
 
   private _renderPlaceholderCell(cell: Cell, index: number) {
+    // We don't have cancel mechanism for scheduled requestIdleCallback(renderPlaceholderCells),
+    // adding defensive check for layout in case tab is closed.
+    if (!this.layout) {
+      return;
+    }
     const pl = this.layout as PanelLayout;
     pl.removeWidgetAt(index);
     pl.insertWidget(index, cell);
@@ -821,6 +855,10 @@ export class StaticNotebook extends Widget {
     this._renderedCellsCount++;
   }
 
+  public get remainingCellToRenderCount(): number {
+    return this._toRenderMap.size;
+  }
+
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
@@ -833,6 +871,7 @@ export class StaticNotebook extends Widget {
   private _observer: IntersectionObserver;
   private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
+  private _idleCallBack: any;
   private _cellsArray: Array<Cell>;
   private _renderingLayout: RenderingLayout | undefined;
 }
@@ -969,10 +1008,16 @@ export namespace StaticNotebook {
     recordTiming: boolean;
 
     /*
+     * Remaining time in milliseconds before
+     * virtual notebook rendering is rescheduled.
+     */
+    numberCellsToRenderDirectly: number;
+
+    /*
      * Number of cells to render directly when virtual
      * notebook intersection observer is available.
      */
-    numberCellsToRenderDirectly: number;
+    remainingTimeBeforeRescheduling: number;
 
     /**
      * Defines if the placeholder cells should be rendered
@@ -1032,7 +1077,8 @@ export namespace StaticNotebook {
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
-    numberCellsToRenderDirectly: 20,
+    numberCellsToRenderDirectly: 99999,
+    remainingTimeBeforeRescheduling: 50,
     renderCellOnIdle: true,
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px',
