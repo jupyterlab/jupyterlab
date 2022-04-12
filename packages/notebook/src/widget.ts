@@ -191,7 +191,7 @@ export class StaticNotebook extends Widget {
     this.node.dataset[UNDOER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
     this.rendermime = options.rendermime;
-    this.translator = options.translator || nullTranslator;
+    this.translator = options.translator ?? nullTranslator;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory =
       options.contentFactory || StaticNotebook.defaultContentFactory;
