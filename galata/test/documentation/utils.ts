@@ -59,6 +59,12 @@ export function positionMouse(position: { x: number; y: number }): string {
 </svg>`;
 }
 
+/**
+ * Set the left sidebar width
+ *
+ * @param page Page object
+ * @param width Sidebar width in pixels
+ */
 export async function setLeftSidebarWidth(
   page: Page,
   width = 251
