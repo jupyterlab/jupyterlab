@@ -1073,7 +1073,7 @@ export namespace NotebookActions {
   }
 
   /**
-   * Copy the selected cell data to a clipboard.
+   * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
    */
@@ -1102,10 +1102,11 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param mode - the mode of the paste operation: 'below' pastes cells
-   *   below the active cell, 'above' pastes cells above the active cell,
-   *   and 'replace' removes the currently selected cells and pastes cells
-   *   in their place.
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
    *
    * #### Notes
    * The last pasted cell becomes the active cell.
@@ -1114,12 +1115,8 @@ export namespace NotebookActions {
    */
   export function paste(
     notebook: Notebook,
-    mode: 'below' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
   ): void {
-    if (!notebook.model || !notebook.activeCell) {
-      return;
-    }
-
     if (!Private.isNotebookRendered(notebook)) {
       return;
     }
@@ -1130,8 +1127,72 @@ export namespace NotebookActions {
       return;
     }
 
-    const state = Private.getState(notebook);
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+
+    addCells(notebook, mode, values, true);
+  }
+
+  /**
+   * Duplicate selected cells in the notebook without using the application clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
+   *
+   * #### Notes
+   * The last pasted cell becomes the active cell.
+   * This is a no-op if there is no cell data on the clipboard.
+   * This action can be undone.
+   */
+  export function duplicate(
+    notebook: Notebook,
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+  ): void {
+    const values = Private.selectedCells(notebook);
+
+    if (!values || values.length === 0) {
+      return;
+    }
+
+    addCells(notebook, mode, values, false); // Cells not from the clipboard
+  }
+
+  /**
+   * Adds cells to the notebook.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
+   *
+   * @param values — The cells to add to the notebook.
+   *
+   * @param cellsFromClipboard — True if the cells were sourced from the clipboard.
+   *
+   * #### Notes
+   * The last added cell becomes the active cell.
+   * This is a no-op if values is an empty array.
+   * This action can be undone.
+   */
+
+  function addCells(
+    notebook: Notebook,
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    values: nbformat.IBaseCell[],
+    cellsFromClipboard: boolean = false
+  ): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    const state = Private.getState(notebook);
     const model = notebook.model;
 
     notebook.mode = 'command';
@@ -1167,6 +1228,14 @@ export namespace NotebookActions {
     switch (mode) {
       case 'below':
         index = notebook.activeCellIndex;
+        break;
+      case 'belowSelected':
+        notebook.widgets.forEach((child, childIndex) => {
+          if (notebook.isSelectedOrActive(child)) {
+            index = childIndex;
+          }
+        });
+
         break;
       case 'above':
         index = notebook.activeCellIndex - 1;
@@ -1204,7 +1273,9 @@ export namespace NotebookActions {
 
     notebook.activeCellIndex += newCells.length;
     notebook.deselectAll();
-    notebook.lastClipboardInteraction = 'paste';
+    if (cellsFromClipboard) {
+      notebook.lastClipboardInteraction = 'paste';
+    }
     Private.handleState(notebook, state);
   }
 
@@ -2296,11 +2367,30 @@ Please wait for the complete rendering before invoking that action.`,
   }
 
   /**
+   * Get the selected cell(s) without affecting the clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @returns A list of 0 or more selected cells
+   */
+  export function selectedCells(notebook: Notebook): nbformat.ICell[] {
+    return notebook.widgets
+      .filter(cell => notebook.isSelectedOrActive(cell))
+      .map(cell => cell.model.toJSON())
+      .map(cellJSON => {
+        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
+          delete (cellJSON.metadata as JSONObject).deletable;
+        }
+        return cellJSON;
+      });
+  }
+
+  /**
    * Copy or cut the selected cell data to the application clipboard.
    *
    * @param notebook - The target notebook widget.
    *
-   * @param cut - Whether to copy or cut.
+   * @param cut - True if the cells should be cut, false if they should be copied.
    */
   export function copyOrCut(notebook: Notebook, cut: boolean): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -2313,15 +2403,7 @@ Please wait for the complete rendering before invoking that action.`,
     notebook.mode = 'command';
     clipboard.clear();
 
-    const data = notebook.widgets
-      .filter(cell => notebook.isSelectedOrActive(cell))
-      .map(cell => cell.model.toJSON())
-      .map(cellJSON => {
-        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
-          delete (cellJSON.metadata as JSONObject).deletable;
-        }
-        return cellJSON;
-      });
+    const data = Private.selectedCells(notebook);
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {

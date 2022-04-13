@@ -1,0 +1,67 @@
+{
+  "name": "@jupyterlab/cell-toolbar",
+  "version": "4.0.0-alpha.6",
+  "description": "Contextual cell toolbar adapted from jlab-enhanced-cell-toolbar",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/**/*"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/*.json",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "build:all": "npm run build",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^4.0.0-alpha.8",
+    "@jupyterlab/cells": "^4.0.0-alpha.8",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.8",
+    "@jupyterlab/notebook": "^4.0.0-alpha.8",
+    "@jupyterlab/observables": "^5.0.0-alpha.8",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.23",
+    "@lumino/algorithm": "^1.9.1",
+    "@lumino/commands": "^1.20.0",
+    "@lumino/disposable": "^1.10.1",
+    "@lumino/signaling": "^1.10.1",
+    "@lumino/widgets": "^1.31.1"
+  },
+  "devDependencies": {
+    "@jupyterlab/testutils": "^4.0.0-alpha.8",
+    "@types/jest": "^26.0.10",
+    "jest": "^26.4.2",
+    "rimraf": "~3.0.0",
+    "ts-jest": "^26.3.0",
+    "typescript": "~4.6.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "styleModule": "style/index.js"
+}

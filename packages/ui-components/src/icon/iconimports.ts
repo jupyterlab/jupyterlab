@@ -8,6 +8,8 @@
 import { LabIcon } from './labicon';
 
 // icon svg import statements
+import addAboveSvgstr from '../../style/icons/toolbar/add-above.svg';
+import addBelowSvgstr from '../../style/icons/toolbar/add-below.svg';
 import addSvgstr from '../../style/icons/toolbar/add.svg';
 import bugDotSvgstr from '../../style/icons/toolbar/bug-dot.svg';
 import bugSvgstr from '../../style/icons/toolbar/bug.svg';
@@ -30,7 +32,9 @@ import consoleSvgstr from '../../style/icons/filetype/console.svg';
 import copySvgstr from '../../style/icons/toolbar/copy.svg';
 import copyrightSvgstr from '../../style/icons/licenses/copyright.svg';
 import cutSvgstr from '../../style/icons/toolbar/cut.svg';
+import deleteSvgstr from '../../style/icons/toolbar/delete.svg';
 import downloadSvgstr from '../../style/icons/toolbar/download.svg';
+import duplicateSvgstr from '../../style/icons/toolbar/duplicate.svg';
 import editSvgstr from '../../style/icons/toolbar/edit.svg';
 import ellipsesSvgstr from '../../style/icons/toolbar/ellipses.svg';
 import extensionSvgstr from '../../style/icons/sidebar/extension.svg';
@@ -58,6 +62,8 @@ import linkSvgstr from '../../style/icons/toolbar/link.svg';
 import listSvgstr from '../../style/icons/statusbar/list.svg';
 import listingsInfoSvgstr from '../../style/icons/listings/listings-info.svg';
 import markdownSvgstr from '../../style/icons/filetype/markdown.svg';
+import moveDownSvgstr from '../../style/icons/toolbar/move-down.svg';
+import moveUpSvgstr from '../../style/icons/toolbar/move-up.svg';
 import newFolderSvgstr from '../../style/icons/toolbar/new-folder.svg';
 import notTrustedSvgstr from '../../style/icons/statusbar/not-trusted.svg';
 import notebookSvgstr from '../../style/icons/filetype/notebook.svg';
@@ -94,6 +100,8 @@ import vegaSvgstr from '../../style/icons/filetype/vega.svg';
 import yamlSvgstr from '../../style/icons/filetype/yaml.svg';
 
 // LabIcon instance construction
+export const addAboveIcon = new LabIcon({ name: 'ui-components:add-above', svgstr: addAboveSvgstr });
+export const addBelowIcon = new LabIcon({ name: 'ui-components:add-below', svgstr: addBelowSvgstr });
 export const addIcon = new LabIcon({ name: 'ui-components:add', svgstr: addSvgstr });
 export const bugDotIcon = new LabIcon({ name: 'ui-components:bug-dot', svgstr: bugDotSvgstr });
 export const bugIcon = new LabIcon({ name: 'ui-components:bug', svgstr: bugSvgstr });
@@ -116,7 +124,9 @@ export const consoleIcon = new LabIcon({ name: 'ui-components:console', svgstr: 
 export const copyIcon = new LabIcon({ name: 'ui-components:copy', svgstr: copySvgstr });
 export const copyrightIcon = new LabIcon({ name: 'ui-components:copyright', svgstr: copyrightSvgstr });
 export const cutIcon = new LabIcon({ name: 'ui-components:cut', svgstr: cutSvgstr });
+export const deleteIcon = new LabIcon({ name: 'ui-components:delete', svgstr: deleteSvgstr });
 export const downloadIcon = new LabIcon({ name: 'ui-components:download', svgstr: downloadSvgstr });
+export const duplicateIcon = new LabIcon({ name: 'ui-components:duplicate', svgstr: duplicateSvgstr });
 export const editIcon = new LabIcon({ name: 'ui-components:edit', svgstr: editSvgstr });
 export const ellipsesIcon = new LabIcon({ name: 'ui-components:ellipses', svgstr: ellipsesSvgstr });
 export const extensionIcon = new LabIcon({ name: 'ui-components:extension', svgstr: extensionSvgstr });
@@ -144,6 +154,8 @@ export const linkIcon = new LabIcon({ name: 'ui-components:link', svgstr: linkSv
 export const listIcon = new LabIcon({ name: 'ui-components:list', svgstr: listSvgstr });
 export const listingsInfoIcon = new LabIcon({ name: 'ui-components:listings-info', svgstr: listingsInfoSvgstr });
 export const markdownIcon = new LabIcon({ name: 'ui-components:markdown', svgstr: markdownSvgstr });
+export const moveDownIcon = new LabIcon({ name: 'ui-components:move-down', svgstr: moveDownSvgstr });
+export const moveUpIcon = new LabIcon({ name: 'ui-components:move-up', svgstr: moveUpSvgstr });
 export const newFolderIcon = new LabIcon({ name: 'ui-components:new-folder', svgstr: newFolderSvgstr });
 export const notTrustedIcon = new LabIcon({ name: 'ui-components:not-trusted', svgstr: notTrustedSvgstr });
 export const notebookIcon = new LabIcon({ name: 'ui-components:notebook', svgstr: notebookSvgstr });
