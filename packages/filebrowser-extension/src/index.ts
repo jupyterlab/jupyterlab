@@ -210,54 +210,41 @@ const browser: JupyterFrontEndPlugin<void> = {
         });
       }
 
-      let navigateToCurrentDirectory: boolean = false;
-      let showLastModifiedColumn: boolean = true;
-      let useFuzzyFilter: boolean = true;
-      let showHiddenFiles: boolean = false;
-
       if (settingRegistry) {
         void settingRegistry
           .load('@jupyterlab/filebrowser-extension:browser')
           .then(settings => {
-            settings.changed.connect(settings => {
-              navigateToCurrentDirectory = settings.get(
-                'navigateToCurrentDirectory'
-              ).composite as boolean;
-              browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
-            });
-            navigateToCurrentDirectory = settings.get(
-              'navigateToCurrentDirectory'
-            ).composite as boolean;
-            browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
+            /**
+             * File browser configuration.
+             */
+            const fileBrowserConfig = {
+              navigateToCurrentDirectory: false,
+              showLastModifiedColumn: true,
+              useFuzzyFilter: true,
+              showHiddenFiles: false
+            };
+            const fileBrowserModelConfig = {
+              filterDirectories: true
+            };
 
-            settings.changed.connect(settings => {
-              showLastModifiedColumn = settings.get('showLastModifiedColumn')
+            function onSettingsChanged(
+              settings: ISettingRegistry.ISettings
+            ): void {
+              for (const key in fileBrowserConfig) {
+                const value = settings.get(key).composite as boolean;
+                fileBrowserConfig[
+                  key as keyof typeof fileBrowserConfig
+                ] = value;
+                browser[key as keyof typeof fileBrowserConfig] = value;
+              }
+
+              const value = settings.get('filterDirectories')
                 .composite as boolean;
-              browser.showLastModifiedColumn = showLastModifiedColumn;
-            });
-            showLastModifiedColumn = settings.get('showLastModifiedColumn')
-              .composite as boolean;
-
-            browser.showLastModifiedColumn = showLastModifiedColumn;
-
-            settings.changed.connect(settings => {
-              useFuzzyFilter = settings.get('useFuzzyFilter')
-                .composite as boolean;
-              browser.useFuzzyFilter = useFuzzyFilter;
-            });
-            useFuzzyFilter = settings.get('useFuzzyFilter')
-              .composite as boolean;
-            browser.useFuzzyFilter = useFuzzyFilter;
-
-            settings.changed.connect(settings => {
-              showHiddenFiles = settings.get('showHiddenFiles')
-                .composite as boolean;
-              browser.showHiddenFiles = showHiddenFiles;
-            });
-            showHiddenFiles = settings.get('showHiddenFiles')
-              .composite as boolean;
-
-            browser.showHiddenFiles = showHiddenFiles;
+              fileBrowserModelConfig.filterDirectories = value;
+              browser.model.filterDirectories = value;
+            }
+            settings.changed.connect(onSettingsChanged);
+            onSettingsChanged(settings);
           });
       }
     });

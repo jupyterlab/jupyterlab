@@ -75,10 +75,11 @@ describe('@jupyterlab/filebrowser', () => {
         expect(filteredItems.length).toBe(items.length);
       });
 
-      it('should list all directories whatever the filter', async () => {
+      it('should list all directories if filterDirectories is false', async () => {
         const filteredModel = new FilterFileBrowserModel({
           manager,
-          filter: (model: Contents.IModel) => null
+          filter: (model: Contents.IModel) => false,
+          filterDirectories: false
         });
         await filteredModel.cd();
         const model = new FileBrowserModel({ manager });
@@ -88,6 +89,20 @@ describe('@jupyterlab/filebrowser', () => {
         const items = toArray(model.items());
         const folders = items.filter(item => item.type === 'directory');
         expect(filteredItems.length).toBe(folders.length);
+      });
+
+      it('should filter files and directories if filterDirectories is true', async () => {
+        const filteredModel = new FilterFileBrowserModel({
+          manager,
+          filter: (model: Contents.IModel) => false,
+          filterDirectories: true
+        });
+        await filteredModel.cd();
+        const model = new FileBrowserModel({ manager });
+        await model.cd();
+
+        const filteredItems = toArray(filteredModel.items());
+        expect(filteredItems.length).toBe(0);
       });
 
       it('should respect the filter', async () => {
@@ -104,9 +119,7 @@ describe('@jupyterlab/filebrowser', () => {
           filteredModel.items()
         ) as Contents.IModel[];
         const items = toArray(model.items());
-        const shownItems = items.filter(
-          item => item.type === 'directory' || item.type === 'notebook'
-        );
+        const shownItems = items.filter(item => item.type === 'notebook');
         expect(filteredItems.length).toBe(shownItems.length);
         const notebooks = filteredItems.filter(
           item => item.type === 'notebook'
