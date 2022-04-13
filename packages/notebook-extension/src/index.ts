@@ -71,10 +71,14 @@ import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  addIcon,
+  addAboveIcon,
+  addBelowIcon,
   buildIcon,
   copyIcon,
   cutIcon,
+  duplicateIcon,
+  moveDownIcon,
+  moveUpIcon,
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
@@ -154,6 +158,8 @@ namespace CommandIDs {
   export const pasteAbove = 'notebook:paste-cell-above';
 
   export const pasteBelow = 'notebook:paste-cell-below';
+
+  export const duplicateBelow = 'notebook:duplicate-below';
 
   export const pasteAndReplace = 'notebook:paste-and-replace-cell';
 
@@ -1904,6 +1910,21 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.duplicateBelow, {
+    label: trans.__('Duplicate Cells Below'),
+    caption: trans.__(
+      'Copy the selected cells and paste them below the selection'
+    ),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        NotebookActions.duplicate(current.content, 'belowSelected');
+      }
+    },
+    icon: args => (args.toolbar ? duplicateIcon : ''),
+    isEnabled
+  });
   commands.addCommand(CommandIDs.pasteAndReplace, {
     label: trans.__('Paste Cells and Replace'),
     execute: args => {
@@ -1979,6 +2000,7 @@ function addCommands(
         return NotebookActions.insertAbove(current.content);
       }
     },
+    icon: args => (args.toolbar ? addAboveIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.insertBelow, {
@@ -1991,7 +2013,7 @@ function addCommands(
         return NotebookActions.insertBelow(current.content);
       }
     },
-    icon: args => (args.toolbar ? addIcon : undefined),
+    icon: args => (args.toolbar ? addBelowIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.selectAbove, {
@@ -2091,7 +2113,8 @@ function addCommands(
         return NotebookActions.moveUp(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? moveUpIcon : undefined)
   });
   commands.addCommand(CommandIDs.moveDown, {
     label: trans.__('Move Cells Down'),
@@ -2102,7 +2125,8 @@ function addCommands(
         return NotebookActions.moveDown(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? moveDownIcon : undefined)
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: trans.__('Toggle All Line Numbers'),

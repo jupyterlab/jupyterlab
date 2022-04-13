@@ -22,6 +22,12 @@
       "path": "../attachments"
     },
     {
+      "path": "../cell-toolbar"
+    },
+    {
+      "path": "../cell-toolbar-extension"
+    },
+    {
       "path": "../cells"
     },
     {

@@ -103,6 +103,13 @@ export class InputArea extends Widget {
   }
 
   /**
+   * Get the rendered input area widget, if any.
+   */
+  get renderedInput(): Widget {
+    return this._rendered;
+  }
+
+  /**
    * Render an input instead of the text editor.
    */
   renderInput(widget: Widget): void {

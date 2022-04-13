@@ -36,6 +36,8 @@
     "@jupyterlab/apputils": "^3.3.4",
     "@jupyterlab/apputils-extension": "^3.3.4",
     "@jupyterlab/attachments": "^3.3.4",
+    "@jupyterlab/cell-toolbar": "^3.3.4",
+    "@jupyterlab/cell-toolbar-extension": "^3.3.4",
     "@jupyterlab/cells": "^3.3.4",
     "@jupyterlab/celltags": "^3.3.4",
     "@jupyterlab/celltags-extension": "^3.3.4",

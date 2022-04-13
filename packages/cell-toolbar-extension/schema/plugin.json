@@ -1,42 +1,39 @@
 {
-  "title": "Notebook Panel",
-  "description": "Notebook Panel settings.",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Cell Toolbar",
+  "description": "Cell Toolbar Settings.",
   "jupyter.lab.toolbars": {
-    "Notebook": [
-      { "name": "save", "rank": 10 },
+    "Cell": [
       {
-        "name": "insert",
-        "command": "notebook:insert-cell-below",
-        "icon": "ui-components:add",
-        "rank": 20
+        "name": "duplicate-cell",
+        "command": "notebook:duplicate-below"
       },
-      { "name": "cut", "command": "notebook:cut-cell", "rank": 21 },
-      { "name": "copy", "command": "notebook:copy-cell", "rank": 22 },
-      { "name": "paste", "command": "notebook:paste-cell-below", "rank": 23 },
-      { "name": "run", "command": "runmenu:run", "rank": 30 },
-      { "name": "interrupt", "command": "kernelmenu:interrupt", "rank": 31 },
-      { "name": "restart", "command": "kernelmenu:restart", "rank": 32 },
+      { "name": "move-cell-up", "command": "notebook:move-cell-up" },
+      { "name": "move-cell-down", "command": "notebook:move-cell-down" },
       {
-        "name": "restart-and-run",
-        "command": "runmenu:restart-and-run-all",
-        "rank": 33
+        "name": "insert-cell-above",
+        "command": "notebook:insert-cell-above"
       },
-      { "name": "cellType", "rank": 40 },
-      { "name": "spacer", "type": "spacer", "rank": 100 },
-      { "name": "kernelName", "rank": 1000 },
-      { "name": "kernelStatus", "rank": 1001 },
-      { "name": "executionProgress", "rank": 1002 }
+      {
+        "name": "insert-cell-below",
+        "command": "notebook:insert-cell-below"
+      },
+      {
+        "command": "notebook:delete-cell",
+        "icon": "ui-components:delete",
+        "name": "delete-cell"
+      }
     ]
   },
   "jupyter.lab.transform": true,
   "properties": {
     "toolbar": {
-      "title": "Notebook panel toolbar items",
-      "description": "Note: To disable a toolbar item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable the Interrupt button item:\n{\n  \"toolbar\": [\n    {\n      \"name\": \"interrupt\",\n      \"disabled\": true\n    }\n  ]\n}\n\nToolbar description:",
+      "title": "List of toolbar items",
+      "description": "An item is defined by a 'name', a 'command' name, and an 'icon' name",
+      "type": "array",
       "items": {
         "$ref": "#/definitions/toolbarItem"
       },
-      "type": "array",
       "default": []
     }
   },
