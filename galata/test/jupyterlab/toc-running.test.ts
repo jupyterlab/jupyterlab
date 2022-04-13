@@ -45,7 +45,7 @@ test.describe('ToC Running indicator', () => {
 
     // Collapse ToC
     await page.click(
-      '[aria-label="Table of Contents section"] >> button:left-of(:text("1. Title 1"))'
+      '[aria-label="Table of Contents section"] >> button:left-of(:text("Title 1"))'
     );
 
     const executed = page.notebook.runCell(5);

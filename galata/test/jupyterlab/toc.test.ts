@@ -20,6 +20,10 @@ test.describe('Table of Contents', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     await page.notebook.activate(fileName);
+
+    await page.sidebar.openTab('table-of-contents');
+
+    await page.click('.jp-toc-numberingButton');
   });
 
   test.afterEach(async ({ page }) => {
@@ -33,8 +37,6 @@ test.describe('Table of Contents', () => {
 
   test('Open Table of Contents panel', async ({ page }) => {
     const imageName = 'toc-panel.png';
-
-    await page.sidebar.openTab('table-of-contents');
     const tocPanel = await page.sidebar.getContentPanel(
       await page.sidebar.getTabPosition('table-of-contents')
     );
@@ -44,7 +46,6 @@ test.describe('Table of Contents', () => {
 
   test('Toggle list', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.sidebar.openTab('table-of-contents');
 
     const tocPanel = await page.sidebar.getContentPanel(
       await page.sidebar.getTabPosition('table-of-contents')
@@ -62,7 +63,6 @@ test.describe('Table of Contents', () => {
 
   test('Notebook context menu', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.sidebar.openTab('table-of-contents');
 
     const tocPanel = await page.sidebar.getContentPanel(
       await page.sidebar.getTabPosition('table-of-contents')
