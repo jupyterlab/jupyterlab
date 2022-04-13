@@ -17,15 +17,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser {
+.jp-FileBrowser .jp-SidePanel-content {
   display: flex;
   flex-direction: column;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-
-  /* This is needed so that all font sizing of children done in ems is
-   * relative to this base size */
-  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
@@ -35,6 +29,12 @@
   box-shadow: none;
   padding: 0;
   justify-content: flex-start;
+}
+
+.jp-FileBrowser-Panel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .jp-BreadCrumbs {
@@ -66,32 +66,29 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
   padding-right: 2px;
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
   width: 40px;
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent {
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher'] {
   width: 72px;
   background: var(--jp-brand-color1);
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent:focus-visible {
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']:focus-visible {
   background-color: var(--jp-accept-color-active, var(--jp-brand-color0));
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']
   .jp-icon3 {
   fill: var(--jp-layout-color1);
 }
@@ -116,6 +113,10 @@
   padding: 0;
   flex: 0 0 auto;
   margin: 8px 12px 0;
+}
+
+.jp-FileBrowser .lm-AccordionPanel > h3:first-child {
+  display: none;
 }
 
 /*-----------------------------------------------------------------------------

@@ -217,4 +217,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    update_extension(args.path, args.branch, args.no_input == False)
+    update_extension(args.path, args.branch, args.no_input is False)

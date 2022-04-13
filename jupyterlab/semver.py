@@ -354,7 +354,7 @@ def clean(version, loose):
         return None
 
 
-NUMERIC = re.compile("^\d+$")
+NUMERIC = re.compile(r"^\d+$")
 
 
 def semver(version, loose):
@@ -806,7 +806,7 @@ class Range(object):
         range_ = regexp[CARETTRIM].sub(caretTrimReplace, range_)
 
         #  normalize spaces
-        range_ = " ".join(re.split("\s+", range_))
+        range_ = " ".join(re.split(r"\s+", range_))
 
         #  At this point, the range is completely trimmed and
         #  ready to be split into comparators.
@@ -815,7 +815,7 @@ class Range(object):
         else:
             comp_re = regexp[COMPARATOR]
         set_ = re.split(
-            "\s+", " ".join([parse_comparator(comp, loose) for comp in range_.split(" ")])
+            r"\s+", " ".join([parse_comparator(comp, loose) for comp in range_.split(" ")])
         )
         if self.loose:
             # in loose mode, throw out any that are not valid comparators
@@ -875,7 +875,7 @@ def is_x(id):
 
 
 def replace_tildes(comp, loose):
-    return " ".join([replace_tilde(c, loose) for c in re.split("\s+", comp.strip())])
+    return " ".join([replace_tilde(c, loose) for c in re.split(r"\s+", comp.strip())])
 
 
 def replace_tilde(comp, loose):
@@ -916,7 +916,7 @@ def replace_tilde(comp, loose):
 #  ^1.2.3 --> >=1.2.3 <2.0.0
 #  ^1.2.0 --> >=1.2.0 <2.0.0
 def replace_carets(comp, loose):
-    return " ".join([replace_caret(c, loose) for c in re.split("\s+", comp.strip())])
+    return " ".join([replace_caret(c, loose) for c in re.split(r"\s+", comp.strip())])
 
 
 def replace_caret(comp, loose):
@@ -1018,7 +1018,7 @@ def replace_caret(comp, loose):
 
 def replace_xranges(comp, loose):
     logger.debug("replaceXRanges %s %s", comp, loose)
-    return " ".join([replace_xrange(c, loose) for c in re.split("\s+", comp.strip())])
+    return " ".join([replace_xrange(c, loose) for c in re.split(r"\s+", comp.strip())])
 
 
 def replace_xrange(comp, loose):
@@ -1155,7 +1155,7 @@ def test_set(set_, version):
 def satisfies(version, range_, loose=False):
     try:
         range_ = make_range(range_, loose)
-    except Exception as e:
+    except Exception:
         return False
     return range_.test(version)
 
@@ -1163,7 +1163,7 @@ def satisfies(version, range_, loose=False):
 def max_satisfying(versions, range_, loose=False):
     try:
         range_ob = make_range(range_, loose=loose)
-    except:
+    except Exception:
         return None
     max_ = None
     max_sv = None
@@ -1180,7 +1180,7 @@ def valid_range(range_, loose):
         #  Return '*' instead of '' so that truthiness works.
         #  This will throw if it's invalid anyway
         return make_range(range_, loose).range or "*"
-    except:
+    except Exception:
         return None
 
 

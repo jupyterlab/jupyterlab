@@ -87,8 +87,6 @@ disable_aliases["level"] = "DisableLabExtensionsApp.level"
 
 VERSION = get_app_version()
 
-HERE = os.path.abspath(os.path.dirname(__file__))
-
 
 class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     version = VERSION
@@ -307,7 +305,9 @@ class UpdateLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         if not self.all and not self.extra_args:
-            self.log.warn("Specify an extension to update, or use --all to update all extensions")
+            self.log.warning(
+                "Specify an extension to update, or use --all to update all extensions"
+            )
             return False
         app_options = AppOptions(
             app_dir=self.app_dir,

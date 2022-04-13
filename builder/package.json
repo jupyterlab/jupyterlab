@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/builder",
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.8",
   "description": "JupyterLab - Extension Builder",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,7 +33,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/buildutils": "^4.0.0-alpha.7",
+    "@jupyterlab/buildutils": "^4.0.0-alpha.8",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/application": "^1.28.1",
     "@lumino/commands": "^1.20.0",
@@ -64,8 +64,8 @@
     "terser-webpack-plugin": "^4.1.0",
     "to-string-loader": "^1.1.6",
     "url-loader": "~4.1.0",
-    "webpack": "^5.55.1",
-    "webpack-cli": "^4.8.0",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2",
     "webpack-merge": "^5.8.0",
     "worker-loader": "^3.0.2"
   },
@@ -75,7 +75,7 @@
     "@types/node": "^14.6.1",
     "@types/supports-color": "^5.3.0",
     "rimraf": "~3.0.0",
-    "typescript": "~4.5.2"
+    "typescript": "~4.6.3"
   },
   "publishConfig": {
     "access": "public"

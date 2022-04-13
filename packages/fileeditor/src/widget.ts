@@ -30,6 +30,11 @@ const UNDOER = 'jpUndoer';
 
 /**
  * A code editor wrapper for the file editor.
+ *
+ * @deprecated since v3.4
+ * Note: This class will be removed in v4.0.
+ * From now on, you can directly use the class
+ * `CodeEditorWrapper` instead on `FileEditorCodeWrapper`.
  */
 export class FileEditorCodeWrapper extends CodeEditorWrapper {
   /**
@@ -42,13 +47,13 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     });
 
     const context = (this._context = options.context);
-    const editor = this.editor;
 
+    // TODO: move this to the FileEditor when removing the
+    // `FileEditorCodeWrapper`
     this.addClass('jp-FileEditorCodeWrapper');
     this.node.dataset[CODE_RUNNER] = 'true';
     this.node.dataset[UNDOER] = 'true';
 
-    editor.model.value.text = context.model.toString();
     void context.ready.then(() => {
       this._onContextReady();
     });
@@ -98,34 +103,11 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     if (this.isDisposed) {
       return;
     }
-    const contextModel = this._context.model;
-    const editor = this.editor;
-    const editorModel = editor.model;
-
-    // Set the editor model value.
-    editorModel.value.text = contextModel.toString();
 
     // Prevent the initial loading from disk from being in the editor history.
-    editor.clearHistory();
-
-    // Wire signal connections.
-    contextModel.contentChanged.connect(this._onContentChanged, this);
-
+    this.editor.clearHistory();
     // Resolve the ready promise.
     this._ready.resolve(undefined);
-  }
-
-  /**
-   * Handle a change in context model content.
-   */
-  private _onContentChanged(): void {
-    const editorModel = this.editor.model;
-    const oldValue = editorModel.value.text;
-    const newValue = this._context.model.toString();
-
-    if (oldValue !== newValue) {
-      editorModel.value.text = newValue;
-    }
   }
 
   /**

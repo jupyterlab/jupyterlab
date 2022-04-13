@@ -132,8 +132,8 @@ export class Completer extends Widget {
   /**
    * Enable/disable the document panel.
    */
-  set showDocsPanel(showDoc: boolean | null) {
-    this._showDoc = showDoc ?? true;
+  set showDocsPanel(showDoc: boolean) {
+    this._showDoc = showDoc;
   }
 
   get showDocsPanel(): boolean {
@@ -977,7 +977,7 @@ export namespace Completer {
       const sanitizer = { sanitize: (dirty: string) => dirty };
       const source = activeItem.documentation || '';
 
-      renderText({ host, sanitizer, source });
+      renderText({ host, sanitizer, source }).catch(console.error);
       return host;
     }
 

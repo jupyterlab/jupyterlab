@@ -1,9 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
 import { generateCaptureArea, setLeftSidebarWidth } from './utils';
+import { default as extensionsList } from './data/extensions.json';
 
 test.use({
   autoGoto: false,
@@ -12,6 +17,22 @@ test.use({
 });
 
 test.describe('Extension Manager', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock get extensions list
+    await page.route(galata.Routes.extensions, async (route, request) => {
+      switch (request.method()) {
+        case 'GET':
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(extensionsList)
+          });
+        default:
+          return route.continue();
+      }
+    });
+  });
+
   test('Sidebar', async ({ page }) => {
     await page.goto();
 

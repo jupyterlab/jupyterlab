@@ -5,6 +5,7 @@ import {
   Clipboard,
   Dialog,
   ISessionContext,
+  sessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
 import {
@@ -149,6 +150,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
 
     notebook.deselectAll();
@@ -244,6 +248,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const toMerge: string[] = [];
     const toDelete: ICellModel[] = [];
@@ -340,6 +347,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
@@ -362,6 +372,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
@@ -394,6 +407,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
@@ -419,6 +435,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
@@ -450,6 +469,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
@@ -594,6 +616,9 @@ export namespace NotebookActions {
       return Promise.resolve(false);
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return Promise.resolve(false);
+    }
     const state = Private.getState(notebook);
     const promise = Private.runSelected(notebook, sessionContext);
     const model = notebook.model;
@@ -1048,7 +1073,7 @@ export namespace NotebookActions {
   }
 
   /**
-   * Copy the selected cell data to a clipboard.
+   * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
    */
@@ -1066,6 +1091,9 @@ export namespace NotebookActions {
    * A new code cell is added if all cells are cut.
    */
   export function cut(notebook: Notebook): void {
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     Private.copyOrCut(notebook, true);
   }
 
@@ -1074,10 +1102,11 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param mode - the mode of the paste operation: 'below' pastes cells
-   *   below the active cell, 'above' pastes cells above the active cell,
-   *   and 'replace' removes the currently selected cells and pastes cells
-   *   in their place.
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
    *
    * #### Notes
    * The last pasted cell becomes the active cell.
@@ -1086,9 +1115,9 @@ export namespace NotebookActions {
    */
   export function paste(
     notebook: Notebook,
-    mode: 'below' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
   ): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!Private.isNotebookRendered(notebook)) {
       return;
     }
 
@@ -1098,8 +1127,72 @@ export namespace NotebookActions {
       return;
     }
 
-    const state = Private.getState(notebook);
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+
+    addCells(notebook, mode, values, true);
+  }
+
+  /**
+   * Duplicate selected cells in the notebook without using the application clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
+   *
+   * #### Notes
+   * The last pasted cell becomes the active cell.
+   * This is a no-op if there is no cell data on the clipboard.
+   * This action can be undone.
+   */
+  export function duplicate(
+    notebook: Notebook,
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+  ): void {
+    const values = Private.selectedCells(notebook);
+
+    if (!values || values.length === 0) {
+      return;
+    }
+
+    addCells(notebook, mode, values, false); // Cells not from the clipboard
+  }
+
+  /**
+   * Adds cells to the notebook.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
+   *
+   * @param values — The cells to add to the notebook.
+   *
+   * @param cellsFromClipboard — True if the cells were sourced from the clipboard.
+   *
+   * #### Notes
+   * The last added cell becomes the active cell.
+   * This is a no-op if values is an empty array.
+   * This action can be undone.
+   */
+
+  function addCells(
+    notebook: Notebook,
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    values: nbformat.IBaseCell[],
+    cellsFromClipboard: boolean = false
+  ): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    const state = Private.getState(notebook);
     const model = notebook.model;
 
     notebook.mode = 'command';
@@ -1135,6 +1228,14 @@ export namespace NotebookActions {
     switch (mode) {
       case 'below':
         index = notebook.activeCellIndex;
+        break;
+      case 'belowSelected':
+        notebook.widgets.forEach((child, childIndex) => {
+          if (notebook.isSelectedOrActive(child)) {
+            index = childIndex;
+          }
+        });
+
         break;
       case 'above':
         index = notebook.activeCellIndex - 1;
@@ -1172,7 +1273,9 @@ export namespace NotebookActions {
 
     notebook.activeCellIndex += newCells.length;
     notebook.deselectAll();
-    notebook.lastClipboardInteraction = 'paste';
+    if (cellsFromClipboard) {
+      notebook.lastClipboardInteraction = 'paste';
+    }
     Private.handleState(notebook, state);
   }
 
@@ -1189,6 +1292,9 @@ export namespace NotebookActions {
       return;
     }
 
+    if (!Private.isNotebookRendered(notebook)) {
+      return;
+    }
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
@@ -1966,6 +2072,30 @@ namespace Private {
     activeCell: Cell | null;
   }
 
+  export function isNotebookRendered(notebook: Notebook): boolean {
+    const translator = notebook.translator;
+    const trans = translator.load('jupyterlab');
+
+    if (notebook.remainingCellToRenderCount !== 0) {
+      showDialog({
+        body: trans.__(
+          `Notebook is still rendering and has for now (%1) remaining cells to render.
+
+Please wait for the complete rendering before invoking that action.`,
+          notebook.remainingCellToRenderCount
+        ),
+        buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+      }).catch(reason => {
+        console.error(
+          'An error occurred when displaying notebook rendering warning',
+          reason
+        );
+      });
+      return false;
+    }
+    return true;
+  }
+
   /**
    * Get the state of a widget before running an action.
    */
@@ -2139,6 +2269,10 @@ namespace Private {
             });
             return Promise.resolve(false);
           }
+          if (sessionContext.hasNoKernel) {
+            void sessionContextDialogs.selectKernel(sessionContext);
+            return Promise.resolve(false);
+          }
           const deletedCells = notebook.model?.deletedCells ?? [];
           executionScheduled.emit({ notebook, cell });
           return CodeCell.execute(cell as CodeCell, sessionContext, {
@@ -2233,11 +2367,30 @@ namespace Private {
   }
 
   /**
+   * Get the selected cell(s) without affecting the clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @returns A list of 0 or more selected cells
+   */
+  export function selectedCells(notebook: Notebook): nbformat.ICell[] {
+    return notebook.widgets
+      .filter(cell => notebook.isSelectedOrActive(cell))
+      .map(cell => cell.model.toJSON())
+      .map(cellJSON => {
+        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
+          delete (cellJSON.metadata as JSONObject).deletable;
+        }
+        return cellJSON;
+      });
+  }
+
+  /**
    * Copy or cut the selected cell data to the application clipboard.
    *
    * @param notebook - The target notebook widget.
    *
-   * @param cut - Whether to copy or cut.
+   * @param cut - True if the cells should be cut, false if they should be copied.
    */
   export function copyOrCut(notebook: Notebook, cut: boolean): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -2250,15 +2403,7 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    const data = notebook.widgets
-      .filter(cell => notebook.isSelectedOrActive(cell))
-      .map(cell => cell.model.toJSON())
-      .map(cellJSON => {
-        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
-          delete (cellJSON.metadata as JSONObject).deletable;
-        }
-        return cellJSON;
-      });
+    const data = Private.selectedCells(notebook);
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {

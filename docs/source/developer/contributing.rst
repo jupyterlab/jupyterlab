@@ -300,7 +300,7 @@ Then use the following steps:
 
    git clone https://github.com/<your-github-username>/jupyterlab.git
    cd jupyterlab
-   pip install -e .
+   pip install -e ".[test]"
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
    jlpm run build:core  # Build the core mode assets (optional)
@@ -479,7 +479,7 @@ Then, start JupyterLab using the dev build:
 
 .. code:: bash
 
-   jupyter lab --dev-mode --NotebookApp.token=''  --no-browser
+   jupyter lab --dev-mode --ServerApp.token=''  --no-browser
 
 Now run Lighthouse against this local server and show the results:
 
@@ -540,7 +540,7 @@ the results:
 .. code:: bash
 
    jlpm build:dev
-   jupyter lab --dev --NotebookApp.token='' --no-browser
+   jupyter lab --dev --ServerApp.token='' --no-browser
 
    # in new window
    jlpm run lighthouse --output json --output-path normal.json
@@ -550,7 +550,7 @@ Then rebuild with the production build and retest:
 .. code:: bash
 
    jlpm run build:dev:prod
-   jupyter lab --dev --NotebookApp.token='' --no-browser
+   jupyter lab --dev --ServerApp.token='' --no-browser
 
    # in new window
    jlpm run lighthouse --output json --output-path prod.json

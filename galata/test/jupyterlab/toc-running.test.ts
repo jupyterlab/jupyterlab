@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, test } from '@jupyterlab/galata';
 
 test.describe('ToC Running indicator', () => {
   test.beforeEach(async ({ page }) => {
@@ -62,11 +61,13 @@ test.describe('ToC Running indicator', () => {
     const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
     await toolbarButtons[0].click();
 
+    const tocEntry = page
+      .locator('.jp-TableOfContents-content .jp-tocItem')
+      .nth(2)
+      .locator('.toc-code-cell-prompt');
     const executed = page.notebook.runCell(3);
 
-    await expect(
-      tocPanel.waitForSelector('li:has-text("[*]: xxxxxxxxxx sleep(2)")')
-    ).toBeDefined();
+    await expect(tocEntry).toHaveText('[*]: ');
 
     await executed;
   });

@@ -101,6 +101,12 @@
 }
 
 .jp-PluginList .jp-PluginList-header {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-PluginList .jp-PluginList-noResults,
+.jp-PluginList .jp-PluginList-header {
   flex: 0 0 auto;
   font-weight: 600;
   text-transform: uppercase;
@@ -117,6 +123,11 @@
   width: 3px;
   background-color: var(--jp-brand-color1);
   height: var(--jp-cell-collapser-min-height);
+  visibility: hidden;
+}
+
+.jp-PluginList .jp-mod-selected .jp-SelectedIndicator {
+  visibility: inherit;
 }
 
 .jp-PluginList .jp-ErrorPlugin .jp-SelectedIndicator {
@@ -125,10 +136,6 @@
 
 .jp-PluginList button.jp-mod-selected.jp-ErrorPlugin span {
   color: var(--jp-error-color0);
-}
-
-.jp-PluginList button:not(.jp-mod-selected) {
-  margin-left: 3px;
 }
 
 .jp-PluginList button.jp-mod-selected span {
@@ -245,6 +252,16 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 
 .jp-SettingsPanel .checkbox label {
   cursor: pointer;
+  font-size: var(--jp-content-font-size2);
+}
+
+.jp-SettingsPanel .checkbox p {
+  font-size: var(--jp-content-font-size1);
+}
+
+.jp-SettingsPanel .checkbox {
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .jp-SettingsPanel .checkbox .field-description {
@@ -444,16 +461,38 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   margin: 8px 12px 0;
 }
 
+.jp-PluginList mark {
+  background-color: transparent;
+  font-weight: bold;
+  color: var(--jp-ui-font-color1);
+}
+
 .jp-PluginList-entry {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   border: 1px solid transparent;
   background: transparent;
   overflow: hidden;
   padding: 4px 0 4px 4px;
-  text-overflow: ellipsis;
   white-space: nowrap;
-  width: -webkit-fill-available;
+}
+
+.jp-PluginList-entry li {
+  margin-left: 27px;
+  margin-top: 5px;
+  color: var(--jp-ui-font-color1);
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}
+
+.jp-pluginList-entry-label {
+  display: flex;
+}
+
+.jp-pluginList-entry-label span {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
 }
 
 .jp-SettingsPanel .jp-SettingsHeader-Name {

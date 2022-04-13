@@ -69,10 +69,14 @@ import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  addIcon,
+  addAboveIcon,
+  addBelowIcon,
   buildIcon,
   copyIcon,
   cutIcon,
+  duplicateIcon,
+  moveDownIcon,
+  moveUpIcon,
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
@@ -157,6 +161,8 @@ namespace CommandIDs {
   export const pasteAbove = 'notebook:paste-cell-above';
 
   export const pasteBelow = 'notebook:paste-cell-below';
+
+  export const duplicateBelow = 'notebook:duplicate-below';
 
   export const pasteAndReplace = 'notebook:paste-and-replace-cell';
 
@@ -1461,6 +1467,9 @@ function activateNotebookHandler(
       recordTiming: settings.get('recordTiming').composite as boolean,
       numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
         .composite as number,
+      remainingTimeBeforeRescheduling: settings.get(
+        'remainingTimeBeforeRescheduling'
+      ).composite as number,
       renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
       observedTopMargin: settings.get('observedTopMargin').composite as string,
       observedBottomMargin: settings.get('observedBottomMargin')
@@ -1631,8 +1640,10 @@ function activateNotebookCompleterService(
     keys: ['Enter'],
     selector: '.jp-Notebook .jp-mod-completer-active'
   });
-
-  notebooks.widgetAdded.connect(async (_, notebook) => {
+  const updateCompleter = async (
+    _: INotebookTracker | undefined,
+    notebook: NotebookPanel
+  ) => {
     const completerContext = {
       editor: notebook.content.activeCell?.editor ?? null,
       session: notebook.sessionContext.session,
@@ -1645,7 +1656,7 @@ function activateNotebookCompleterService(
         session: notebook.sessionContext.session,
         widget: notebook
       };
-      manager.updateCompleter(newCompleterContext);
+      manager.updateCompleter(newCompleterContext).catch(console.error);
     });
     notebook.sessionContext.sessionChanged.connect(() => {
       const newCompleterContext = {
@@ -1653,7 +1664,13 @@ function activateNotebookCompleterService(
         session: notebook.sessionContext.session,
         widget: notebook
       };
-      manager.updateCompleter(newCompleterContext);
+      manager.updateCompleter(newCompleterContext).catch(console.error);
+    });
+  };
+  notebooks.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    notebooks.forEach(panel => {
+      updateCompleter(undefined, panel).catch(e => console.error(e));
     });
   });
 }
@@ -2068,6 +2085,21 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.duplicateBelow, {
+    label: trans.__('Duplicate Cells Below'),
+    caption: trans.__(
+      'Copy the selected cells and paste them below the selection'
+    ),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        NotebookActions.duplicate(current.content, 'belowSelected');
+      }
+    },
+    icon: args => (args.toolbar ? duplicateIcon : ''),
+    isEnabled
+  });
   commands.addCommand(CommandIDs.pasteAndReplace, {
     label: trans.__('Paste Cells and Replace'),
     execute: args => {
@@ -2143,6 +2175,7 @@ function addCommands(
         return NotebookActions.insertAbove(current.content);
       }
     },
+    icon: args => (args.toolbar ? addAboveIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.insertBelow, {
@@ -2155,7 +2188,7 @@ function addCommands(
         return NotebookActions.insertBelow(current.content);
       }
     },
-    icon: args => (args.toolbar ? addIcon : undefined),
+    icon: args => (args.toolbar ? addBelowIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.selectAbove, {
@@ -2303,7 +2336,8 @@ function addCommands(
         return NotebookActions.moveUp(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? moveUpIcon : undefined)
   });
   commands.addCommand(CommandIDs.moveDown, {
     label: trans.__('Move Cells Down'),
@@ -2314,7 +2348,8 @@ function addCommands(
         return NotebookActions.moveDown(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? moveDownIcon : undefined)
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: trans.__('Show Line Numbers'),

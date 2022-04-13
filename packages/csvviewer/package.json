@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/csvviewer",
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.8",
   "description": "JupyterLab - CSV Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,10 +41,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.7",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.7",
-    "@jupyterlab/translation": "^4.0.0-alpha.7",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.22",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.8",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.8",
+    "@jupyterlab/translation": "^4.0.0-alpha.8",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.23",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/datagrid": "^0.35.1",
@@ -54,15 +54,15 @@
     "@lumino/widgets": "^1.31.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.7",
+    "@jupyterlab/testutils": "^4.0.0-alpha.8",
     "@types/jest": "^26.0.10",
-    "canvas": "^2.6.1",
+    "canvas": "^2.9.1",
     "csv-spectrum": "^1.0.0",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.5.2"
+    "typescript": "~4.6.3"
   },
   "publishConfig": {
     "access": "public"
