@@ -121,55 +121,64 @@
 
 /* collapseHeadingButton (show always if hiddenCellsButton is _not_ shown) */
 .jp-collapseHeadingButton {
-  --bg-size: 25px;
-
   display: flex;
   min-height: var(--jp-cell-collapser-min-height);
   position: absolute;
-  background-size: var(--bg-size) !important;
+  background-color: transparent;
+  background-size: 25px;
+  background-repeat: no-repeat;
+  background-position-x: center;
+  background-position-y: top;
+  background-image: var(--jp-icon-caret-down);
   right: 0;
   top: 0;
   bottom: 0;
-
-  /* Calculate positioning */
-  --header-top-margin: 0.5 * var(--jp-content-heading-margin-top); /* top margin of <h> tags */
-  --collapser-top-offset: 0.5 * var(--bg-size); /* offset to center of --jp-icon-caret scaled by background-size */
-  background-position-y: calc(
-    var(--header-top-margin) - var(--collapser-top-offset) + 0.5em
-  ) !important;
 }
 
-/* set the container font size to match that of content 
-   so that the nested collapse buttons have the right size
+.jp-collapseHeadingButton.jp-mod-collapsed {
+  background-image: var(--jp-icon-caret-right);
+}
+
+/*
+ set the container font size to match that of content 
+ so that the nested collapse buttons have the right size
 */
 .jp-MarkdownCell .jp-InputPrompt {
   font-size: var(--jp-content-font-size1);
 }
 
-/* collapseHeadingButton should have same position as the corresponding <h> tag
-   these are the same rules as in packages/rendermime/style/base.css */
-.jp-collapseHeadingButton.jp-collapseHeadingButton-h1 {
+/* 
+  Align collapseHeadingButton with cell top header
+  The font sizes are identical to the ones in packages/rendermime/style/base.css
+*/
+.jp-collapseHeadingButton[data-heading-level='1'] {
   font-size: var(--jp-content-font-size5);
+  background-position-y: calc(0.3 * var(--jp-content-font-size5));
 }
 
-.jp-collapseHeadingButton.jp-collapseHeadingButton-h2 {
+.jp-collapseHeadingButton[data-heading-level='2'] {
   font-size: var(--jp-content-font-size4);
+  background-position-y: calc(0.3 * var(--jp-content-font-size4));
 }
 
-.jp-collapseHeadingButton.jp-collapseHeadingButton-h3 {
+.jp-collapseHeadingButton[data-heading-level='3'] {
   font-size: var(--jp-content-font-size3);
+  background-position-y: calc(0.3 * var(--jp-content-font-size3));
 }
 
-.jp-collapseHeadingButton.jp-collapseHeadingButton-h4 {
+.jp-collapseHeadingButton[data-heading-level='4'] {
   font-size: var(--jp-content-font-size2);
+  background-position-y: calc(0.3 * var(--jp-content-font-size2));
 }
 
-.jp-collapseHeadingButton.jp-collapseHeadingButton-h5 {
+.jp-collapseHeadingButton[data-heading-level='5'] {
   font-size: var(--jp-content-font-size1);
+  background-position-y: top;
 }
 
-.jp-collapseHeadingButton.jp-collapseHeadingButton-h6 {
+.jp-collapseHeadingButton[data-heading-level='6'] {
   font-size: var(--jp-content-font-size0);
+  background-position-y: top;
 }
 
 /* collapseHeadingButton (show only on (hover,active) if hiddenCellsButton is shown) */
