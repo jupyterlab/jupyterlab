@@ -140,14 +140,14 @@
 }
 
 /*
- set the container font size to match that of content 
+ set the container font size to match that of content
  so that the nested collapse buttons have the right size
 */
 .jp-MarkdownCell .jp-InputPrompt {
   font-size: var(--jp-content-font-size1);
 }
 
-/* 
+/*
   Align collapseHeadingButton with cell top header
   The font sizes are identical to the ones in packages/rendermime/style/base.css
 */
