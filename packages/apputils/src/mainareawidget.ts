@@ -168,27 +168,9 @@ export class MainAreaWidget<T extends Widget = Widget>
    */
   protected onActivateRequest(msg: Message): void {
     if (this._isRevealed) {
-      if (this._content) {
-        this._focusContent();
-      }
+      this._focusContent();
     } else {
       this._spinner.node.focus();
-    }
-  }
-
-  /**
-   * Ensure the widget is focused if it contains the target element
-   * and the active element is not within it.
-   *
-   * @param event Mouse event
-   */
-  protected ensureFocused(event: Event): void {
-    const target = event.target as Node;
-    if (
-      this.node.contains(target) &&
-      !this.node.contains(document.activeElement)
-    ) {
-      this._focusContent();
     }
   }
 
@@ -196,27 +178,20 @@ export class MainAreaWidget<T extends Widget = Widget>
    * Handle `after-attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    // Ensure the current widget is active at capture event phase
-    // because CommandToolbarButton acts on mousedown event at bubbling phase
-    // but they act on the current active widget that may not be the one
-    // targeted.
-    // Ref: https://github.com/jupyterlab/jupyterlab/issues/12177
-    document.addEventListener(
-      'mousedown',
-      this.ensureFocused.bind(this),
-      USE_CAPTURE
-    );
+    super.onAfterAttach(msg);
+    // Focus content in capture phase to ensure relevant commands operate on the
+    // current main area widget.
+    // Add the event listener directly instead of using `handleEvent` in order
+    // to save sub-classes from needing to reason about calling it as well.
+    this.node.addEventListener('mousedown', this._evtMouseDown, USE_CAPTURE);
   }
 
   /**
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    document.removeEventListener(
-      'mousedown',
-      this.ensureFocused.bind(this),
-      USE_CAPTURE
-    );
+    this.node.removeEventListener('mousedown', this._evtMouseDown, USE_CAPTURE);
+    super.onBeforeDetach(msg);
   }
 
   /**
@@ -314,6 +289,11 @@ export class MainAreaWidget<T extends Widget = Widget>
 
   private _isRevealed = false;
   private _revealed: Promise<void>;
+  private _evtMouseDown = () => {
+    if (!this.node.contains(document.activeElement)) {
+      this._focusContent();
+    }
+  };
 }
 
 /**
