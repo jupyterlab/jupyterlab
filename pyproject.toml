@@ -29,7 +29,7 @@ skip = ["check-links"]
 
 [tool.jupyter-releaser.options]
 ignore-glob = ["packages/ui-components/docs/source/ui_components.rst"]
-ignore-links = ["../api/*.*"]
+ignore-links = ["../api/*.*", "https://docs.github.com/en/.*"]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 npm-cmd = "npm publish --tag latest"
