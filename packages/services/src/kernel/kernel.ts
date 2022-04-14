@@ -367,7 +367,10 @@ export interface IKernelConnection extends IObservableDisposable {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void;
 
   /**
    * Create a new comm.
@@ -775,7 +778,10 @@ export interface IFuture<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void;
 }
 
 export interface IShellFuture<

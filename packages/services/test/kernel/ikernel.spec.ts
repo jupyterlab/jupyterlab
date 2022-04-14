@@ -98,7 +98,17 @@ describe('Kernel.IKernel', () => {
       defaultKernel.pendingInput.connect((sender, args) => {
         if (!called) {
           called = true;
-          defaultKernel.sendInputReply({ status: 'ok', value: 'foo' });
+          defaultKernel.sendInputReply(
+            { status: 'ok', value: 'foo' },
+            {
+              date: '',
+              msg_id: '',
+              msg_type: 'input_request',
+              session: '',
+              username: '',
+              version: ''
+            }
+          );
         }
       });
       const code = `input("Input something")`;
@@ -307,7 +317,17 @@ describe('Kernel.IKernel', () => {
           expect(direction).toBe('send');
         }
       });
-      kernel.sendInputReply({ status: 'ok', value: 'foo' });
+      kernel.sendInputReply(
+        { status: 'ok', value: 'foo' },
+        {
+          date: '',
+          msg_id: '',
+          msg_type: 'input_request',
+          session: '',
+          username: '',
+          version: ''
+        }
+      );
       await emission;
     });
   });
@@ -868,7 +888,17 @@ describe('Kernel.IKernel', () => {
         expect(msg.header.msg_type).toBe('input_reply');
         done.resolve(undefined);
       });
-      kernel.sendInputReply({ status: 'ok', value: 'test' });
+      kernel.sendInputReply(
+        { status: 'ok', value: 'test' },
+        {
+          date: '',
+          msg_id: '',
+          msg_type: 'input_request',
+          session: '',
+          username: '',
+          version: ''
+        }
+      );
       await done.promise;
       await tester.shutdown();
       tester.dispose();
@@ -885,7 +915,17 @@ describe('Kernel.IKernel', () => {
       tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
       expect(() => {
-        kernel.sendInputReply({ status: 'ok', value: 'test' });
+        kernel.sendInputReply(
+          { status: 'ok', value: 'test' },
+          {
+            date: '',
+            msg_id: '',
+            msg_type: 'input_request',
+            session: '',
+            username: '',
+            version: ''
+          }
+        );
       }).toThrowError(/Kernel is dead/);
       tester.dispose();
     });
