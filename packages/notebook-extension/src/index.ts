@@ -19,6 +19,7 @@ import {
   InputDialog,
   ISessionContext,
   ISessionContextDialogs,
+  IThemeManager,
   IToolbarWidgetRegistry,
   MainAreaWidget,
   sessionContextDialogs,
@@ -317,7 +318,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     ILayoutRestorer,
     IMainMenu,
     ISettingRegistry,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    IThemeManager
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -1323,7 +1325,8 @@ function activateNotebookHandler(
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
   settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  themeManager: IThemeManager | null
 ): INotebookTracker {
   const trans = translator.load('jupyterlab');
   const services = app.serviceManager;
@@ -1385,6 +1388,30 @@ function activateNotebookHandler(
         kernelShutdown: factory.shutdownOnClose
       });
     });
+
+  // Subscribe to changes in theme and rerender cell outputs in Vega
+  themeManager?.themeChanged.connect((sender, args) => {
+    const { oldValue, newValue } = args;
+    const oldThemeLight =
+      oldValue === null ? null : themeManager.isLight(oldValue);
+    const newThemeLight =
+      newValue === null ? null : themeManager.isLight(newValue);
+
+    const oldThemeScheme = oldThemeLight ? 'light' : 'dark';
+    const newThemeScheme = newThemeLight ? 'light' : 'dark';
+
+    console.log(
+      'Changing theme from ' + oldThemeScheme + ' to ' + newThemeScheme
+    );
+
+    if (oldThemeScheme === newThemeScheme) {
+      return; // Nothing to do
+    }
+
+    tracker.forEach(widget => {
+      // TODO: Modify each notebook (widget.content) to have a light/dark theme
+    });
+  });
 
   // Handle state restoration.
   if (restorer) {
@@ -1488,7 +1515,9 @@ function activateNotebookHandler(
         .composite as string,
       sideBySideRightMarginOverride: settings.get(
         'sideBySideRightMarginOverride'
-      ).composite as string
+      ).composite as string,
+      renderingThemeScheme:
+        document.body.dataset.jpThemeLight === 'true' ? 'light' : 'dark'
     };
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
