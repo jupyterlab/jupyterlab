@@ -37,8 +37,8 @@ Models contain an instance of `ModelDB <../api/classes/observables.modeldb-1.htm
 that acts as data storage for the model's content. In JupyterLab 3.1, we introduced
 the package ``@jupyterlab/shared-models`` to swap ``ModelDB`` as a data storage
 to make 'documents' collaborative. We implemented these shared models using
-`Yjs <https://yjs.dev>`_, a high-performance CRDT for building collaborative applications
-that automatically sync. You can find all the documentation of Yjs `here <https://docs.yjs.dev>`_.
+`Yjs <https://docs.yjs.dev>`_, a high-performance CRDT for building collaborative applications
+that automatically sync.
 At the moment, models contain both a ``ModelDB`` and a ``Shared Model`` instance, so it is
 possible to access ``ModelDB`` yet.
 
