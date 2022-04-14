@@ -131,9 +131,7 @@ test('Toolbar items act on owner widget', async ({ page }) => {
   expect(classlist.split(' ')).not.toContain('jp-mod-current');
 
   // When clicking on toolbar item of the first file
-  await (
-    await panel1.$('button[data-command="notebook:insert-cell-below"]')
-  ).click();
+  await (await panel1.$('button[title="Insert a cell below (B)"]')).click();
 
   // Then the first file is activated and the action is performed
   const classlistEnd = await tab1.getAttribute('class');
