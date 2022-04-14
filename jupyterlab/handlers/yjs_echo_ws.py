@@ -3,18 +3,24 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import sys
 import uuid
 from enum import IntEnum
 
-import pkg_resources
 import y_py as Y
 from jupyter_server.base.handlers import JupyterHandler
 from tornado import web
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
+# See compatibility note on `group` keyword in https://docs.python.org/3/library/importlib.metadata.html#entry-points
+if sys.version_info < (3, 10):
+    from importlib_metadata import entry_points
+else:
+    from importlib.metadata import entry_points
+
 YDOCS = {}
-for ep in pkg_resources.iter_entry_points(group="jupyter_ydoc"):
+for ep in entry_points(group="jupyter_ydoc"):
     YDOCS.update({ep.name: ep.load()})
 
 YFILE = YDOCS["file"]
