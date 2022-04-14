@@ -85,6 +85,13 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
       | undefined;
     const embedOptions =
       metadata && metadata.embed_options ? metadata.embed_options : {};
+
+    // If the JupyterLab theme is dark, render this using a dark Vega theme.
+    let bodyThemeLight = document.body.dataset.jpThemeLight === 'true';
+    if (!bodyThemeLight) {
+      embedOptions.theme = 'dark';
+    }
+
     const mode: VegaModuleType.Mode =
       this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
 
