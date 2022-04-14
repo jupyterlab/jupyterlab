@@ -1515,9 +1515,7 @@ function activateNotebookHandler(
         .composite as string,
       sideBySideRightMarginOverride: settings.get(
         'sideBySideRightMarginOverride'
-      ).composite as string,
-      renderingThemeScheme:
-        document.body.dataset.jpThemeLight === 'true' ? 'light' : 'dark'
+      ).composite as string
     };
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
