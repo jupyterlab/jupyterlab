@@ -923,7 +923,9 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _parent_header: KernelMessage.IInputReplyMsg['parent_header'] | undefined;
+  private _parent_header:
+    | KernelMessage.IInputReplyMsg['parent_header']
+    | undefined;
   private _future: Kernel.IShellFuture;
   private _input: HTMLInputElement;
   private _value: string;
