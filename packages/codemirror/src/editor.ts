@@ -41,11 +41,12 @@ import {
   Transaction
 } from '@codemirror/state';
 import { Text } from '@codemirror/text';
-import { Command, EditorView, KeyBinding, keymap } from '@codemirror/view';
+import { Command, EditorView, keymap } from '@codemirror/view';
 import * as Y from 'yjs';
 import { yCollab } from 'y-codemirror.next';
 import { Awareness } from 'y-protocols/awareness';
 import { Mode } from './mode';
+import { Configuration } from './editorconfiguration';
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
 /*import CodeMirror from 'codemirror';
@@ -128,6 +129,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a CodeMirror editor.
    */
   constructor(options: CodeMirrorEditor.IOptions) {
+    this._editorConfig = new Configuration.EditorConfiguration();
     const host = (this.host = options.host);
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
@@ -392,7 +394,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Don't bother setting the option if it is already the same.
     if (this._config[option] !== value) {
       this._config[option] = value;
-      Private.setOption(this.editor, option, value, this._config);
+      this._editorConfig.reconfigureExtension(this._editor, option, value);
     }
   }
 
@@ -405,16 +407,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * is set.
    */
   setOptions(options: Partial<CodeMirrorEditor.IConfig>): void {
-    // TODO: CM6 migration
-    /*const editor = this._editor;
-    editor.startOperation();
-    for (const key in options) {
-      const k = key as keyof CodeMirrorEditor.IConfig;
-      editor.operation(() => {
-        this.setOption(k, options[k]);
-      });
-    }
-    editor.endOperation();*/
+    this._config = { ...this._config, ...options };
+    this._editorConfig.reconfigureExtensions(this._editor, options);
   }
 
   /**
@@ -1254,7 +1248,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     [key: string]: CodeMirror.TextMarker[] | undefined;
   } = {};*/
   private _caretHover: HTMLElement | null;
-  private readonly _config: CodeMirrorEditor.IConfig;
+  private _config: CodeMirrorEditor.IConfig;
   private _hoverTimeout: number;
   //private _hoverId: string;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
@@ -1266,12 +1260,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _lastChange: Transaction | null = null;
   private _poll: Poll;
   private _yeditorBinding: IYCodeMirrorBinding | null;
+  private _editorConfig: Configuration.EditorConfiguration;
 }
 
 /**
  * The namespace for `CodeMirrorEditor` statics.
  */
 export namespace CodeMirrorEditor {
+  export interface IConfig extends Configuration.IConfig {}
   /**
    * The options used to initialize a code mirror editor.
    */
@@ -1283,144 +1279,10 @@ export namespace CodeMirrorEditor {
   }
 
   /**
-   * The configuration options for a codemirror editor.
+   * The options used to set several options at once with reconfigure.
    */
-  export interface IConfig extends CodeEditor.IConfig {
-    /**
-     * The mode to use.
-     */
-    mode?: string;
-
-    /**
-     * The theme to style the editor with.
-     * You must make sure the CSS file defining the corresponding
-     * .cm-s-[name] styles is loaded.
-     */
-    theme?: string;
-
-    // FIXME-TRANS: Handle theme localizable names
-    // themeDisplayName?: string
-
-    /**
-     * Whether to use the context-sensitive indentation that the mode provides
-     * (or just indent the same as the line before).
-     */
-    smartIndent?: boolean;
-
-    /**
-     * Configures whether the editor should re-indent the current line when a
-     * character is typed that might change its proper indentation
-     * (only works if the mode supports indentation).
-     */
-    electricChars?: boolean;
-
-    /**
-     * Configures the keymap to use. The default is "default", which is the
-     * only keymap defined in codemirror.js itself.
-     * Extra keymaps are found in the CodeMirror keymap directory.
-     */
-    keyMap?: string;
-
-    /**
-     * Can be used to specify extra keybindings for the editor, alongside the
-     * ones defined by keyMap. Should be either null, or a valid keymap value.
-     */
-    extraKeys?: KeyBinding[] | null;
-
-    /**
-     * Can be used to add extra gutters (beyond or instead of the line number
-     * gutter).
-     * Should be an array of CSS class names, each of which defines a width
-     * (and optionally a background),
-     * and which will be used to draw the background of the gutters.
-     * May include the CodeMirror-linenumbers class, in order to explicitly
-     * set the position of the line number gutter
-     * (it will default to be to the right of all other gutters).
-     * These class names are the keys passed to setGutterMarker.
-     */
-    gutters?: string[];
-
-    /**
-     * Determines whether the gutter scrolls along with the content
-     * horizontally (false)
-     * or whether it stays fixed during horizontal scrolling (true,
-     * the default).
-     */
-    fixedGutter?: boolean;
-
-    /**
-     * Whether the folding gutter should be drawn
-     */
-    foldGutter?: boolean;
-
-    /**
-     * Whether the cursor should be drawn when a selection is active.
-     */
-    showCursorWhenSelecting?: boolean;
-
-    /**
-     * When fixedGutter is on, and there is a horizontal scrollbar, by default
-     * the gutter will be visible to the left of this scrollbar. If this
-     * option is set to true, it will be covered by an element with class
-     * CodeMirror-gutter-filler.
-     */
-    coverGutterNextToScrollbar?: boolean;
-
-    /**
-     * Controls whether drag-and-drop is enabled.
-     */
-    dragDrop?: boolean;
-
-    /**
-     * Explicitly set the line separator for the editor.
-     * By default (value null), the document will be split on CRLFs as well as
-     * lone CRs and LFs, and a single LF will be used as line separator in all
-     * output (such as getValue). When a specific string is given, lines will
-     * only be split on that string, and output will, by default, use that
-     * same separator.
-     */
-    lineSeparator?: string | null;
-
-    /**
-     * Chooses a scrollbar implementation. The default is "native", showing
-     * native scrollbars. The core library also provides the "null" style,
-     * which completely hides the scrollbars. Addons can implement additional
-     * scrollbar models.
-     */
-    scrollbarStyle?: string;
-
-    /**
-     * When enabled, which is the default, doing copy or cut when there is no
-     * selection will copy or cut the whole lines that have cursors on them.
-     */
-    lineWiseCopyCut?: boolean;
-
-    /**
-     * Whether to scroll past the end of the buffer.
-     */
-    scrollPastEnd?: boolean;
-
-    /**
-     * Whether to give the wrapper of the line that contains the cursor the class
-     * CodeMirror-activeline, adds a background with the class
-     * CodeMirror-activeline-background, and adds the class
-     * CodeMirror-activeline-gutter to the line's gutter space is enabled.
-     */
-    styleActiveLine: boolean; //| CodeMirror.StyleActiveLine;
-
-    /**
-     * Whether to causes the selected text to be marked with the CSS class
-     * CodeMirror-selectedtext. Useful to change the colour of the selection
-     * (in addition to the background).
-     */
-    styleSelectedText: boolean;
-
-    /**
-     * Defines the mouse cursor appearance when hovering over the selection.
-     * It can be set to a string, like "pointer", or to true,
-     * in which case the "default" (arrow) cursor will be used.
-     */
-    selectionPointer: boolean | string;
+  export interface IConfigOptions<K extends keyof IConfig> {
+    K: IConfig[K];
   }
 
   /**
@@ -1450,13 +1312,6 @@ export namespace CodeMirrorEditor {
     foldGutter: false,
     handlePaste: true
   };
-
-  /**
-   * The options used to set several options at once with setOptions.
-   */
-  export interface IConfigOptions<K extends keyof IConfig> {
-    K: IConfig[K];
-  }
 
   /**
    * Add a command to CodeMirror.
