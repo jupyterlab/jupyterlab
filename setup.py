@@ -4,6 +4,7 @@
 import json
 import os
 import os.path as osp
+import subprocess
 import sys
 
 # Copyright (c) Jupyter Development Team.
@@ -58,8 +59,19 @@ try:
     # In develop mode, just run yarn, unless this is an sdist.
     if os.path.exists(os.path.join(HERE, "buildutils")):
         builder = npm_builder(build_cmd=None, npm=npm, force=True)
+
+        def post_develop(*args, **kwargs):
+            builder(*args, **kwargs)
+            try:
+                subprocess.run([sys.executable, "-m", "pre_commit", "install"])
+                subprocess.run(
+                    [sys.executable, "-m", "pre_commit", "install", "--hook-type", "pre-push"]
+                )
+            except Exception:
+                pass
+
         cmdclass = wrap_installers(
-            post_develop=builder, post_dist=post_dist, ensured_targets=ensured_targets
+            post_develop=post_develop, post_dist=post_dist, ensured_targets=ensured_targets
         )
     else:
         cmdclass = wrap_installers(post_dist=post_dist, ensured_targets=ensured_targets)
