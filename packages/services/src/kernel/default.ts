@@ -818,7 +818,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   sendInputReply(
     content: KernelMessage.IInputReplyMsg['content'],
-    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+    parent_header?: KernelMessage.IInputReplyMsg['parent_header']
   ): void {
     const msg = KernelMessage.createMessage({
       msgType: 'input_reply',
@@ -827,7 +827,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    msg.parent_header = parent_header;
+    if (parent_header) {
+      msg.parent_header = parent_header;
+    }
 
     this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });

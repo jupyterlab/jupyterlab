@@ -155,7 +155,7 @@ export abstract class KernelFutureHandler<
    */
   sendInputReply(
     content: KernelMessage.IInputReplyMsg['content'],
-    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+    parent_header?: KernelMessage.IInputReplyMsg['parent_header']
   ): void {
     this._kernel.sendInputReply(content, parent_header);
   }

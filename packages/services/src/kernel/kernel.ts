@@ -363,13 +363,15 @@ export interface IKernelConnection extends IObservableDisposable {
    * Send an `input_reply` message.
    *
    * @param content - The content of the reply.
+   * @param parent_header - The parent message header.
    *
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
+   * In v7.0.0, the `parent_header` argument will become mandatory.
    */
   sendInputReply(
     content: KernelMessage.IInputReplyMsg['content'],
-    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+    parent_header?: KernelMessage.IInputReplyMsg['parent_header']
   ): void;
 
   /**
@@ -780,7 +782,7 @@ export interface IFuture<
    */
   sendInputReply(
     content: KernelMessage.IInputReplyMsg['content'],
-    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+    parent_header?: KernelMessage.IInputReplyMsg['parent_header']
   ): void;
 }
 

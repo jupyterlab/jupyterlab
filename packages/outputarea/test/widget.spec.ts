@@ -392,6 +392,21 @@ describe('outputarea/widget', () => {
           await kernel.shutdown();
           kernel.dispose();
         });
+
+        it('should create a stdin widget without parent header', async () => {
+          const manager = new KernelManager();
+          const kernel = await manager.startNew();
+          const factory = new OutputArea.ContentFactory();
+          const future = kernel.requestExecute({ code: CODE });
+          const options = {
+            prompt: 'hello',
+            password: false,
+            future
+          };
+          expect(factory.createStdin(options)).toBeInstanceOf(Widget);
+          await kernel.shutdown();
+          kernel.dispose();
+        });
       });
     });
 
