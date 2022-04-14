@@ -365,6 +365,7 @@ export class OutputArea extends Widget {
     panel.addWidget(prompt);
 
     const input = factory.createStdin({
+      parent_header: msg.header,
       prompt: stdinPrompt,
       password,
       future
@@ -855,6 +856,7 @@ export class Stdin extends Widget implements IStdin {
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
     this._future = options.future;
+    this._parent_header = options.parent_header;
     this._value = options.prompt + ' ';
   }
 
@@ -880,10 +882,13 @@ export class Stdin extends Widget implements IStdin {
     if (event.type === 'keydown') {
       if ((event as KeyboardEvent).keyCode === 13) {
         // Enter
-        this._future.sendInputReply({
-          status: 'ok',
-          value: input.value
-        });
+        this._future.sendInputReply(
+          {
+            status: 'ok',
+            value: input.value
+          },
+          this._parent_header
+        );
         if (input.type === 'password') {
           this._value += Array(input.value.length + 1).join('·');
         } else {
@@ -916,6 +921,7 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
+  private _parent_header: KernelMessage.IInputReplyMsg['parent_header'];
   private _future: Kernel.IShellFuture;
   private _input: HTMLInputElement;
   private _value: string;
@@ -941,6 +947,11 @@ export namespace Stdin {
      * The kernel future associated with the request.
      */
     future: Kernel.IShellFuture;
+
+    /**
+     * The header of the input_request message.
+     */
+    parent_header: KernelMessage.IInputReplyMsg['parent_header'];
   }
 }
 

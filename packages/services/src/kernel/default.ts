@@ -816,7 +816,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void {
     const msg = KernelMessage.createMessage({
       msgType: 'input_reply',
       channel: 'stdin',
@@ -824,6 +827,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
+    msg.parent_header = parent_header;
 
     this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });
