@@ -129,27 +129,27 @@
       {
         "command": "filebrowser:toggle-file-checkboxes",
         "selector": ".jp-DirListing-header",
-        "rank": 14.5
+        "rank": 15
       },
       {
         "command": "filebrowser:share-main",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 15
+        "rank": 16
       },
       {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 50
+        "rank": 51
       },
       {
         "command": "filebrowser:create-new-file",
         "selector": ".jp-DirListing-content",
-        "rank": 51
+        "rank": 52
       },
       {
         "command": "filebrowser:create-new-directory",
         "selector": ".jp-DirListing-content",
-        "rank": 55
+        "rank": 56
       }
     ]
   },
