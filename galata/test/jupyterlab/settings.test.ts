@@ -2,13 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { test } from '@jupyterlab/galata';
+import { expect } from '@playwright/test';
 
 test('Open the settings editor with a specific search query', async ({
   page
 }) => {
-  await window.jupyterapp.commands.execute('settingeditor:open', {
-    label: 'Open command palette settings',
-    query: 'Command Palette'
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Command Palette'
+    });
   });
 
   expect(
