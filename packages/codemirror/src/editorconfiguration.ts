@@ -4,6 +4,7 @@ import { closeBrackets } from '@codemirror/closebrackets';
 import { defaultKeymap } from '@codemirror/commands';
 import * as gutter from '@codemirror/gutter';
 import { defaultHighlightStyle } from '@codemirror/highlight';
+import { LanguageSupport } from '@codemirror/language';
 import { indentUnit } from '@codemirror/language';
 
 import {
@@ -15,6 +16,8 @@ import {
 } from '@codemirror/state';
 
 import { EditorView, KeyBinding, keymap } from '@codemirror/view';
+
+import { Mode } from './mode';
 
 export namespace Configuration {
   /**
@@ -162,7 +165,7 @@ export namespace Configuration {
     extensionBuilder: IExtensionBuilder;
   }
 
-  abstract class ExtensionBuilderImpl<T> implements IExtensionBuilder {
+  abstract class ExtensionBuilder<T> implements IExtensionBuilder {
     abstract of(value: T): Extension;
 
     get extensionBuilder(): IExtensionBuilder {
@@ -170,7 +173,17 @@ export namespace Configuration {
     }
   }
 
-  class FacetWrapper<T, U> extends ExtensionBuilderImpl<T> {
+  class ExtensionForwarder<T extends Extension> extends ExtensionBuilder<T> {
+    constructor() {
+      super();
+    }
+
+    of(value: T): Extension {
+      return value as Extension;
+    }
+  }
+
+  class FacetWrapper<T, U> extends ExtensionBuilder<T> {
     constructor(facet: Facet<T, U>) {
       super();
       this._facet = facet;
@@ -183,7 +196,7 @@ export namespace Configuration {
     private _facet: Facet<T, U>;
   }
 
-  class ConditionalExtension extends ExtensionBuilderImpl<boolean> {
+  class ConditionalExtension extends ExtensionBuilder<boolean> {
     constructor(truthy: Extension, falsy: Extension = []) {
       super();
       this._truthy = truthy;
@@ -198,7 +211,7 @@ export namespace Configuration {
     private _falsy: Extension;
   }
 
-  class GenConditionalExtension<T> extends ExtensionBuilderImpl<T> {
+  class GenConditionalExtension<T> extends ExtensionBuilder<T> {
     constructor(
       fn: (a: T) => boolean,
       truthy: Extension,
@@ -218,27 +231,47 @@ export namespace Configuration {
   }
 
   interface IConfigurableBuilder {
-    compartment: Compartment;
-    builder: IExtensionBuilder;
+    of<T>(value: T): Extension;
+    reconfigure<T>(value: T): StateEffect<unknown>;
+  }
+
+  class ConfigurableBuilder implements IConfigurableBuilder {
+    constructor(builder: IExtensionBuilder) {
+      this._compartment = new Compartment();
+      this._builder = builder;
+    }
+
+    of<T>(value: T): Extension {
+      return this._compartment.of(
+        (this._builder as ExtensionBuilder<T>).of(value)
+      );
+    }
+
+    reconfigure<T>(value: T): StateEffect<unknown> {
+      return this._compartment.reconfigure(
+        (this._builder as ExtensionBuilder<T>).of(value)
+      );
+    }
+
+    private _compartment: Compartment;
+    private _builder: IExtensionBuilder;
+  }
+
+  function createForwarderBuilder<T extends Extension>(): IConfigurableBuilder {
+    return new ConfigurableBuilder(new ExtensionForwarder<T>());
   }
 
   function createConfigurableBuilder<T, U>(
     facet: Facet<T, U>
   ): IConfigurableBuilder {
-    return {
-      compartment: new Compartment(),
-      builder: new FacetWrapper<T, U>(facet)
-    };
+    return new ConfigurableBuilder(new FacetWrapper<T, U>(facet));
   }
 
   function createConditionalBuilder(
     truthy: Extension,
     falsy: Extension = []
   ): IConfigurableBuilder {
-    return {
-      compartment: new Compartment(),
-      builder: new ConditionalExtension(truthy, falsy)
-    };
+    return new ConfigurableBuilder(new ConditionalExtension(truthy, falsy));
   }
 
   function createGenConditionalBuilder<T>(
@@ -246,10 +279,9 @@ export namespace Configuration {
     truthy: Extension,
     falsy: Extension = []
   ): IConfigurableBuilder {
-    return {
-      compartment: new Compartment(),
-      builder: new GenConditionalExtension<T>(fn, truthy, falsy)
-    };
+    return new ConfigurableBuilder(
+      new GenConditionalExtension<T>(fn, truthy, falsy)
+    );
   }
 
   export class EditorConfiguration {
@@ -257,7 +289,7 @@ export namespace Configuration {
       this._configurableBuilderMap = new Map<string, IConfigurableBuilder>([
         ['tabSize', createConfigurableBuilder(EditorState.tabSize)],
         ['readOnly', createConfigurableBuilder(EditorState.readOnly)],
-        ['keyMap', createConfigurableBuilder(keymap)],
+        ['keymap', createConfigurableBuilder(keymap)],
         ['indentUnit', createConfigurableBuilder(indentUnit)],
         ['autoClosingBrackets', createConditionalBuilder(closeBrackets())],
         ['lineNumbers', createConditionalBuilder(gutter.lineNumbers())],
@@ -267,17 +299,16 @@ export namespace Configuration {
             (a: string) => a !== 'off',
             EditorView.lineWrapping
           )
-        ]
+        ],
+        ['language', createForwarderBuilder<LanguageSupport>()]
       ]);
     }
 
     reconfigureExtension<T>(view: EditorView, key: string, value: T): void {
-      const ext = this._configurableBuilderMap.get(key);
-      if (ext) {
+      const builder = this.get(key);
+      if (builder) {
         view.dispatch({
-          effects: ext.compartment.reconfigure(
-            (ext.builder as ExtensionBuilderImpl<T>).of(value)
-          )
+          effects: builder.reconfigure(value)
         });
       }
     }
@@ -285,13 +316,9 @@ export namespace Configuration {
     reconfigureExtensions(view: EditorView, config: Partial<IConfig>): void {
       const eff = [];
       for (const [key, value] of Object.entries(config)) {
-        const ext = this._configurableBuilderMap.get(key);
-        if (ext) {
-          eff.push(
-            ext.compartment.reconfigure(
-              (ext.builder as ExtensionBuilderImpl<typeof value>).of(value)
-            )
-          );
+        const builder = this.get(key);
+        if (builder) {
+          eff.push(builder.reconfigure(value));
         }
       }
       view.dispatch({
@@ -311,26 +338,36 @@ export namespace Configuration {
       );
       const extensions = [];
       for (const k of keys) {
-        const ext = this._configurableBuilderMap.get(k);
-        if (ext) {
-          const val = config[k as keyof IConfig];
-          const builder = ext.builder as ExtensionBuilderImpl<typeof val>;
-          extensions.push(ext.compartment.of(builder.of(val)));
+        const builder = this.get(k);
+        if (builder) {
+          const value = config[k as keyof IConfig];
+          extensions.push(builder.of(value));
         }
       }
 
-      let keymap_ext = keymap.of(
+      const builder = this.get('keymap');
+      const keymap_ext = builder!.of(
         config.extraKeys
           ? [...defaultKeymap, ...config.extraKeys!]
           : [...defaultKeymap]
       );
-      let insert_ext = config.insertSpaces
+      const insert_ext = config.insertSpaces
         ? indentUnit.of(' '.repeat(config.tabSize))
         : indentUnit.of('\t');
 
       extensions.push(keymap_ext, insert_ext, defaultHighlightStyle);
 
+      Mode.ensure('text/x-python').then(spec => {
+        if (spec) {
+          extensions.push(this.get('language')!.of(spec.support!));
+        }
+      });
+
       return extensions;
+    }
+
+    private get(key: string): IConfigurableBuilder | undefined {
+      return this._configurableBuilderMap.get(key);
     }
 
     private _configurableBuilderMap: Map<string, IConfigurableBuilder>;

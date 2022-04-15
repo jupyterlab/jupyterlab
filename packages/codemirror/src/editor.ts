@@ -23,25 +23,20 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 
-import { closeBrackets } from '@codemirror/closebrackets';
 import {
-  defaultKeymap,
   indentMore,
   insertNewlineAndIndent,
   insertTab
 } from '@codemirror/commands';
-import * as gutter from '@codemirror/gutter';
-import { defaultHighlightStyle } from '@codemirror/highlight';
-import { getIndentUnit, indentUnit } from '@codemirror/language';
+import { getIndentUnit } from '@codemirror/language';
 import {
-  Compartment,
   EditorSelection,
   EditorState,
   StateCommand,
   Transaction
 } from '@codemirror/state';
 import { Text } from '@codemirror/text';
-import { Command, EditorView, keymap } from '@codemirror/view';
+import { Command, EditorView, KeyBinding, keymap } from '@codemirror/view';
 import * as Y from 'yjs';
 import { yCollab } from 'y-codemirror.next';
 import { Awareness } from 'y-protocols/awareness';
@@ -160,12 +155,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // editor should be created alltogether.
     this._initializeEditorBinding();
 
-    this._language = new Compartment();
     const editor = (this._editor = Private.createEditor(
       host,
       fullConfig,
       this._yeditorBinding,
-      this._language
+      this._editorConfig
     ));
 
     // every time the model is switched, we need to re-initialize the editor binding
@@ -841,25 +835,36 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handles a mime type change.
    */
   private _onMimeTypeChanged(): void {
-    // TODO: CM6 migration
     const mime = this._model.mimeType;
-    /*const editor = this._editor;
-    const extraKeys = (editor.getOption('extraKeys' as any) ||
-      {}) as CodeMirror.KeyMap;
+    const keybindings = this._editor.state.facet<KeyBinding[]>(keymap);
     const isCode = mime !== 'text/plain' && mime !== 'text/x-ipythongfm';
     if (isCode) {
-      extraKeys['Backspace'] = 'delSpaceToPrevTabStop';
+      keybindings.push({
+        key: 'Backspace',
+        run: CodeMirrorEditor.delSpaceToPrevTabStop
+      });
     } else {
-      delete extraKeys['Backspace'];
+      keybindings.splice(
+        keybindings.findIndex(el => {
+          return el.key === 'Backspace';
+        }),
+        1
+      );
     }
-    this.setOption('extraKeys', extraKeys);*/
+    this._editorConfig.reconfigureExtension(
+      this._editor,
+      'keymap',
+      keybindings
+    );
 
     // TODO: should we provide a hook for when the mode is done being set?
     void Mode.ensure(mime).then(spec => {
       if (spec) {
-        this._editor.dispatch({
-          effects: this._language.reconfigure(spec.support!)
-        });
+        this._editorConfig.reconfigureExtension(
+          this._editor,
+          'language',
+          spec.support!
+        );
       }
     });
   }
@@ -1243,7 +1248,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
   private _editor: EditorView;
-  private _language: Compartment;
   /*protected selectionMarkers: {
     [key: string]: CodeMirror.TextMarker[] | undefined;
   } = {};*/
@@ -1355,7 +1359,7 @@ export namespace CodeMirrorEditor {
   /**
    * Delete spaces to the previous tab stop in a codemirror editor.
    */
-  export function delSpaceToPrevTabStop(target: EditorView): void {
+  export function delSpaceToPrevTabStop(target: EditorView): boolean {
     const indentUnit = getIndentUnit(target.state);
     const ranges = target.state.selection.ranges; // handle multicursor
     for (let i = ranges.length - 1; i >= 0; i--) {
@@ -1375,12 +1379,13 @@ export namespace CodeMirrorEditor {
           target.dispatch({ changes: { from: from, to: head, insert: '' } });
         } else {
           // delete non-tabs
-          // TODO
+          // TODO CM6
           // const from = cm.findPosH(head, -1, 'char', false);
           // doc.replaceRange('', from, head);
         }
       }
     }
+    return true;
   }
 }
 
@@ -1392,43 +1397,13 @@ namespace Private {
     host: HTMLElement,
     config: CodeMirrorEditor.IConfig,
     ybinding: IYCodeMirrorBinding | null,
-    language: Compartment
+    editorConfig: Configuration.EditorConfiguration
   ): EditorView {
-    const {
-      lineNumbers,
-      autoClosingBrackets,
-      //fontFamily,
-      //fontSize,
-      insertSpaces,
-      //lineHeight,
-      //lineWrap,
-      //wordWrapColumn,
-      tabSize,
-      readOnly,
-      extraKeys
-      //...otherOptions
-    } = config;
-
-    let extensions = [
-      EditorState.tabSize.of(tabSize),
-      EditorState.readOnly.of(readOnly),
-      insertSpaces ? indentUnit.of(' '.repeat(tabSize)) : indentUnit.of('\t'),
-      defaultHighlightStyle /*.fallback*/,
-      keymap.of([...defaultKeymap, ...extraKeys!])
-    ];
-
-    if (lineNumbers) {
-      extensions.push(gutter.lineNumbers());
-    }
-    if (autoClosingBrackets) {
-      extensions.push(closeBrackets());
-    }
+    let extensions = editorConfig.getInitialExtensions(config);
     if (ybinding) {
       extensions.push(yCollab(ybinding.text, ybinding.awareness));
     }
-    Mode.ensure('text/x-python').then(spec => {
-      extensions.push(spec?.support!);
-    });
+
     const doc = ybinding?.text.toString();
     const view = new EditorView({
       state: EditorState.create({
@@ -1439,7 +1414,16 @@ namespace Private {
     });
 
     return view;
-    /*const bareConfig = {
+    //TODO: CM6 use a theme to style this
+    /*const {
+      fontFamily,
+      fontSize,
+      lineHeight,
+      lineWrap,
+      wordWrapColumn,
+      readOnly,
+    } = config;
+    const bareConfig = {
       autoCloseBrackets: autoClosingBrackets ? {} : false,
       indentUnit: tabSize,
       indentWithTabs: !insertSpaces,
