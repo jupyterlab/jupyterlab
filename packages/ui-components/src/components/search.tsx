@@ -35,6 +35,9 @@ export interface IFilterBoxProps {
    */
   caseSensitive?: boolean;
 
+  /**
+   * An optional initial search value.
+   */
   initialQuery?: string;
 }
 
@@ -135,12 +138,16 @@ export const FilterBox = (props: IFilterBoxProps) => {
         return false;
       }
       return true;
-    }
+    };
   };
 
   useEffect(() => {
+    // If there is an initial search value, pass the parent the initial filter function for that value.
     if (props.initialQuery !== undefined) {
-      props.updateFilter(updateFilterFunction(props.initialQuery), props.initialQuery);
+      props.updateFilter(
+        updateFilterFunction(props.initialQuery),
+        props.initialQuery
+      );
     }
   }, []);
 

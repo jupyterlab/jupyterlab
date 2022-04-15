@@ -74,7 +74,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   updateFilterSignal,
   translator
 }: ISettingsPanelProps): JSX.Element => {
-  const [expandedPlugin, setExpandedPlugin] = useState<string | undefined>(undefined);
+  const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
   const [filterPlugin, setFilter] = useState<
     (plugin: ISettingRegistry.IPlugin) => string[] | null
   >(() => (plugin: ISettingRegistry.IPlugin): string[] | null => {
@@ -112,7 +112,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     updateFilterSignal.connect(onFilterUpdate);
 
     const onSelectChange = (list: PluginList, pluginId: string) => {
-      setExpandedPlugin(expandedPlugin !== pluginId ? pluginId : undefined);
+      setExpandedPlugin(expandedPlugin !== pluginId ? pluginId : null);
       // Scroll to the plugin when a selection is made in the left panel.
       editorRefs[pluginId]?.current?.scrollIntoView(true);
     };
@@ -158,7 +158,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
                 if (!willCollapse) {
                   setExpandedPlugin(pluginSettings.id);
                 } else if (pluginSettings.id === expandedPlugin) {
-                  setExpandedPlugin(undefined);
+                  setExpandedPlugin(null);
                 }
               }}
               filteredValues={filtered}

@@ -104,10 +104,6 @@ export class PluginList extends ReactWidget {
     return this._changed;
   }
 
-  get allSettings(): { [id: string]: Settings } {
-    return this._settings;
-  }
-
   /**
    * The selection value of the plugin list.
    */
@@ -510,6 +506,9 @@ export namespace PluginList {
      */
     translator?: ITranslator;
 
+    /**
+     * An optional initial query so the plugin list can filter on start.
+     */
     query?: string;
   }
 

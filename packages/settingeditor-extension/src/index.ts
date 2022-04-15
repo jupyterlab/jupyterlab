@@ -111,14 +111,14 @@ function activate(
       category: trans.__('Settings'),
       command: CommandIDs.open,
       args: {
-        query: "Command Palette",
+        query: 'Command Palette',
         label: 'Open command palette settings'
       }
     });
   }
 
   commands.addCommand(CommandIDs.open, {
-    execute: async (args) => {
+    execute: async args => {
       if (tracker.currentWidget) {
         shell.activateById(tracker.currentWidget.id);
         return;
@@ -168,9 +168,9 @@ function activate(
     },
     label: args => {
       if (args.label) {
-        return trans.__(args.label as string)
+        return trans.__(args.label as string);
       }
-      return trans.__('Settings Editor')
+      return trans.__('Settings Editor');
     }
   });
 
