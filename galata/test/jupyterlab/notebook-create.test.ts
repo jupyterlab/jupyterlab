@@ -7,13 +7,7 @@ const fileName = 'notebook.ipynb';
 
 const menuPaths = ['File', 'Edit', 'View', 'Run', 'Kernel', 'Help'];
 
-async function populateNotebook(page: IJupyterLabPageFixture) {
-  await page.notebook.setCell(0, 'raw', 'Just a raw cell');
-  await page.notebook.addCell(
-    'markdown',
-    '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)'
-  );
-  await page.notebook.addCell('code', '2 ** 3');
+async function populateNotebookVega(page: IJupyterLabPageFixture) {
   await page.notebook.addCell(
     'code',
     `from IPython.display import display
@@ -33,6 +27,15 @@ display({
 }, raw=True)
 `
   );
+}
+
+async function populateNotebook(page: IJupyterLabPageFixture) {
+  await page.notebook.setCell(0, 'raw', 'Just a raw cell');
+  await page.notebook.addCell(
+    'markdown',
+    '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)'
+  );
+  await page.notebook.addCell('code', '2 ** 3');
 }
 
 test.describe('Notebook Create', () => {
@@ -63,7 +66,6 @@ test.describe('Notebook Create', () => {
   });
 
   test('Save Notebook', async ({ page }) => {
-    test.setTimeout(120000);
     await populateNotebook(page);
 
     await expect(page.notebook.save()).resolves.not.toThrow();
@@ -86,7 +88,6 @@ test.describe('Notebook Create', () => {
   });
 
   test('Run cells', async ({ page }) => {
-    test.setTimeout(120000);
     await populateNotebook(page);
     await page.notebook.run();
     await page.notebook.save();
@@ -100,12 +101,32 @@ test.describe('Notebook Create', () => {
   });
 
   test('Toggle Dark theme', async ({ page }) => {
-    test.setTimeout(120000);
     await populateNotebook(page);
     await page.notebook.run();
     await page.theme.setDarkTheme();
     const nbPanel = await page.notebook.getNotebookInPanel();
     const imageName = 'dark-theme.png';
+
+    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Run Vega code in default theme', async ({ page }) => {
+    await populateNotebookVega(page);
+    await page.notebook.run();
+    await page.notebook.save();
+    const imageName = 'run-cells-vega.png';
+
+    const nbPanel = await page.notebook.getNotebookInPanel();
+
+    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Run Vega code in dark theme', async ({ page }) => {
+    await populateNotebookVega(page);
+    await page.notebook.run();
+    await page.theme.setDarkTheme();
+    const nbPanel = await page.notebook.getNotebookInPanel();
+    const imageName = 'dark-theme-vega.png';
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
   });
