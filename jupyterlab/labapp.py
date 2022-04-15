@@ -43,11 +43,11 @@ from .commands import (
 )
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
+from .extensions import MANAGERS as EXT_MANAGERS
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import (
     ExtensionHandler,
-    ExtensionManager,
     extensions_handler_path,
 )
 
@@ -526,6 +526,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         against published packages may not work correctly.""",
     )
 
+    extensions_manager = Unicode(
+        "pypi",
+        config=True,
+        help="""The extensions manager factory to use. The default options are:
+        "readonly" for a manager without installation capability or "pypi" for
+        a manager using PyPi.org and pip to install extensions.""",
+    )
+
     watch = Bool(False, config=True, help="Whether to serve the app in watch mode")
 
     splice_source = Bool(False, config=True, help="Splice source packages into app directory.")
@@ -713,7 +721,40 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.cache_files = False
 
         if not self.core_mode and not errored:
-            ext_manager = ExtensionManager(app_options=build_handler_options)
+            provider = self.extensions_manager
+            entry_point = EXT_MANAGERS.get(provider)
+            if entry_point is None:
+                self.log.error(f"Extensions Manager: No manager defined for provider '{provider}'.")
+                raise NotImplementedError()
+            else:
+                self.log.info(f"Extensions Manager is '{provider}'.")
+            manager_factory = entry_point.load()
+            config = self.settings.get("config", {}).get("LabServerApp", {})
+
+            blocked_extensions_uris = config.get("blocked_extensions_uris", "")
+            allowed_extensions_uris = config.get("allowed_extensions_uris", "")
+
+            if (blocked_extensions_uris) and (allowed_extensions_uris):
+                self.log.error(
+                    "Simultaneous LabServerApp.blocked_extensions_uris and LabServerApp.allowed_extensions_uris is not supported. Please define only one of those."
+                )
+                import sys
+
+                sys.exit(-1)
+
+            listings_config = {
+                "blocked_extensions_uris": set(blocked_extensions_uris.split(",")),
+                "allowed_extensions_uris": set(allowed_extensions_uris.split(",")),
+                "listings_refresh_seconds": config.get("listings_refresh_seconds", 60 * 60),
+                "listings_request_options": config.get("listings_request_options", {}),
+            }
+            if len(listings_config["blocked_extensions_uris"]) or len(
+                listings_config["allowed_extensions_uris"]
+            ):
+                self.log.debug(f"Extensions manager will be constrained by {listings_config}")
+
+            ext_manager = manager_factory(build_handler_options, listings_config)
+            page_config["extensions_manager_can_install"] = ext_manager.can_install
             ext_handler = (extensions_handler_path, ExtensionHandler, {"manager": ext_manager})
             handlers.append(ext_handler)
 
