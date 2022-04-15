@@ -65,6 +65,7 @@ import { ContextMenu } from '@lumino/widgets';
 import { JSONObject } from '@lumino/coreutils';
 
 const FILE_BROWSER_FACTORY = 'FileBrowser';
+const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -146,7 +147,7 @@ const namespace = 'filebrowser';
  * The default file browser extension.
  */
 const browser: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/filebrowser-extension:browser',
+  id: FILE_BROWSER_PLUGIN_ID,
   requires: [IFileBrowserFactory, ITranslator],
   optional: [
     ILayoutRestorer,
@@ -212,42 +213,38 @@ const browser: JupyterFrontEndPlugin<void> = {
       }
 
       if (settingRegistry) {
-        void settingRegistry
-          .load('@jupyterlab/filebrowser-extension:browser')
-          .then(settings => {
-            /**
-             * File browser configuration.
-             */
-            const fileBrowserConfig = {
-              navigateToCurrentDirectory: false,
-              showLastModifiedColumn: true,
-              useFuzzyFilter: true,
-              showHiddenFiles: false,
-              showFileCheckboxes: false
-            };
-            const fileBrowserModelConfig = {
-              filterDirectories: true
-            };
+        void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
+          /**
+           * File browser configuration.
+           */
+          const fileBrowserConfig = {
+            navigateToCurrentDirectory: false,
+            showLastModifiedColumn: true,
+            useFuzzyFilter: true,
+            showHiddenFiles: false,
+            showFileCheckboxes: false
+          };
+          const fileBrowserModelConfig = {
+            filterDirectories: true
+          };
 
-            function onSettingsChanged(
-              settings: ISettingRegistry.ISettings
-            ): void {
-              for (const key in fileBrowserConfig) {
-                const value = settings.get(key).composite as boolean;
-                fileBrowserConfig[
-                  key as keyof typeof fileBrowserConfig
-                ] = value;
-                browser[key as keyof typeof fileBrowserConfig] = value;
-              }
-
-              const value = settings.get('filterDirectories')
-                .composite as boolean;
-              fileBrowserModelConfig.filterDirectories = value;
-              browser.model.filterDirectories = value;
+          function onSettingsChanged(
+            settings: ISettingRegistry.ISettings
+          ): void {
+            for (const key in fileBrowserConfig) {
+              const value = settings.get(key).composite as boolean;
+              fileBrowserConfig[key as keyof typeof fileBrowserConfig] = value;
+              browser[key as keyof typeof fileBrowserConfig] = value;
             }
-            settings.changed.connect(onSettingsChanged);
-            onSettingsChanged(settings);
-          });
+
+            const value = settings.get('filterDirectories')
+              .composite as boolean;
+            fileBrowserModelConfig.filterDirectories = value;
+            browser.model.filterDirectories = value;
+          }
+          settings.changed.connect(onSettingsChanged);
+          onSettingsChanged(settings);
+        });
       }
     });
   }
@@ -1134,7 +1131,7 @@ function addCommands(
         const value = !browser.navigateToCurrentDirectory;
         const key = 'navigateToCurrentDirectory';
         return settingRegistry
-          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set navigateToCurrentDirectory setting`);
           });
@@ -1150,7 +1147,7 @@ function addCommands(
       const key = 'showLastModifiedColumn';
       if (settingRegistry) {
         return settingRegistry
-          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set showLastModifiedColumn setting`);
           });
@@ -1167,7 +1164,7 @@ function addCommands(
       const key = 'showHiddenFiles';
       if (settingRegistry) {
         return settingRegistry
-          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set showHiddenFiles setting`);
           });
@@ -1183,7 +1180,7 @@ function addCommands(
       const key = 'showFileCheckboxes';
       if (settingRegistry) {
         return settingRegistry
-          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set showFileCheckboxes setting`);
           });
