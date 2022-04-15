@@ -1917,7 +1917,7 @@ export namespace DirListing {
      *
      * @returns The checkbox node.
      */
-    getCheckboxNode?: (node: HTMLElement) => HTMLInputElement | void;
+    getCheckboxNode: (node: HTMLElement) => HTMLInputElement | void;
 
     /**
      * Create an appropriate drag image for an item.
