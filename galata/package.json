@@ -39,7 +39,7 @@
     "start:doc": "jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
     "test": "playwright test",
     "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
-    "test:benchmark:update": "jlpm run test -c playwright-benchmark.config.js --update-snapshots",
+    "test:benchmark:update": "BENCHMARK_NUMBER_SAMPLES=1 jlpm run test -c playwright-benchmark.config.js --update-snapshots",
     "test:debug": "PWDEBUG=1 playwright test",
     "test:doc": "jlpm run test -c playwright-documentation.config.js",
     "test:doc:update": "jlpm run test -c playwright-documentation.config.js --update-snapshots",
