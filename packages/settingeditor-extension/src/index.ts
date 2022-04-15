@@ -111,7 +111,7 @@ function activate(
       category: trans.__('Settings'),
       command: CommandIDs.open,
       args: {
-        plugin: "@jupyterlab/apputils-extension:palette",
+        query: "Command Palette",
         label: 'Open command palette settings'
       }
     });
@@ -141,7 +141,7 @@ function activate(
           ],
           translator,
           status,
-          plugin: args.plugin as string
+          query: args.query as string
         })
       });
 

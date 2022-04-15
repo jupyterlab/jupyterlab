@@ -57,6 +57,7 @@ export class PluginList extends ReactWidget {
     this.setFilter = this.setFilter.bind(this);
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
+    this._query = options.query;
 
     this._allPlugins = PluginList.sortPlugins(this.registry).filter(plugin => {
       const { schema } = plugin;
@@ -83,6 +84,7 @@ export class PluginList extends ReactWidget {
         )) as Settings;
         this._settings[plugin.id] = pluginSettings;
       }
+      this.update();
     };
     void loadSettings();
 
@@ -100,6 +102,10 @@ export class PluginList extends ReactWidget {
    */
   get changed(): ISignal<this, void> {
     return this._changed;
+  }
+
+  get allSettings(): { [id: string]: Settings } {
+    return this._settings;
   }
 
   /**
@@ -431,6 +437,7 @@ export class PluginList extends ReactWidget {
           placeholder={trans.__('Search…')}
           forceRefresh={false}
           caseSensitive={false}
+          initialQuery={this._query}
         />
         {modifiedItems.length > 0 && (
           <div>
@@ -502,6 +509,8 @@ export namespace PluginList {
      * The setting registry for the plugin list.
      */
     translator?: ITranslator;
+
+    query?: string;
   }
 
   /**

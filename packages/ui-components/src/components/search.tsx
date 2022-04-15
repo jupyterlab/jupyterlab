@@ -34,6 +34,8 @@ export interface IFilterBoxProps {
    * Whether to use case-sensitive search
    */
   caseSensitive?: boolean;
+
+  initialQuery?: string;
 }
 
 /**
@@ -102,7 +104,7 @@ function fuzzySearch(source: string, query: string): IScore | null {
 }
 
 export const FilterBox = (props: IFilterBoxProps) => {
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState(props.initialQuery ?? '');
 
   if (props.forceRefresh) {
     useEffect(() => {
@@ -112,16 +114,11 @@ export const FilterBox = (props: IFilterBoxProps) => {
     }, []);
   }
 
-  /**
-   * Handler for search input changes.
-   */
-  const handleChange = (e: React.FormEvent<HTMLElement>) => {
-    const target = e.target as HTMLInputElement;
-    setFilter(target.value);
-    props.updateFilter((item: string) => {
+  const updateFilterFunction = (value: string) => {
+    return (item: string) => {
       if (props.useFuzzyFilter) {
         // Run the fuzzy search for the item and query.
-        const query = target.value.toLowerCase();
+        const query = value.toLowerCase();
         let score = fuzzySearch(item, query);
         // Ignore the item if it is not a match.
         if (!score) {
@@ -131,14 +128,29 @@ export const FilterBox = (props: IFilterBoxProps) => {
       }
       if (!props.caseSensitive) {
         item = item.toLocaleLowerCase();
-        target.value = target.value.toLocaleLowerCase();
+        value = value.toLocaleLowerCase();
       }
-      const i = item.indexOf(target.value);
+      const i = item.indexOf(value);
       if (i === -1) {
         return false;
       }
       return true;
-    }, target.value);
+    }
+  };
+
+  useEffect(() => {
+    if (props.initialQuery !== undefined) {
+      props.updateFilter(updateFilterFunction(props.initialQuery), props.initialQuery);
+    }
+  }, []);
+
+  /**
+   * Handler for search input changes.
+   */
+  const handleChange = (e: React.FormEvent<HTMLElement>) => {
+    const target = e.target as HTMLInputElement;
+    setFilter(target.value);
+    props.updateFilter(updateFilterFunction(target.value), target.value);
   };
 
   return (

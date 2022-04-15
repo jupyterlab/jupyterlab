@@ -58,8 +58,6 @@ export interface ISettingsPanelProps {
     PluginList,
     (plugin: ISettingRegistry.IPlugin) => string[] | null
   >;
-
-  defaultPlugin?: string;
 }
 
 /**
@@ -74,16 +72,14 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   hasError,
   updateDirtyState,
   updateFilterSignal,
-  translator,
-  defaultPlugin
+  translator
 }: ISettingsPanelProps): JSX.Element => {
-  const [expandedPlugin, setExpandedPlugin] = useState<string | undefined>(defaultPlugin);
+  const [expandedPlugin, setExpandedPlugin] = useState<string | undefined>(undefined);
   const [filterPlugin, setFilter] = useState<
     (plugin: ISettingRegistry.IPlugin) => string[] | null
   >(() => (plugin: ISettingRegistry.IPlugin): string[] | null => {
     return null;
   });
-  const [singlePlugin, setSinglePlugin] = useState(defaultPlugin);
 
   // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
@@ -103,6 +99,13 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
       newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | null
     ) => {
       setFilter(() => newFilter);
+      for (const pluginSettings of settings) {
+        const filtered = newFilter(pluginSettings.plugin);
+        if (filtered === null || filtered.length > 0) {
+          setExpandedPlugin(pluginSettings.id);
+          break;
+        }
+      }
     };
 
     // When filter updates, only show plugins that match search.
@@ -110,7 +113,6 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
 
     const onSelectChange = (list: PluginList, pluginId: string) => {
       setExpandedPlugin(expandedPlugin !== pluginId ? pluginId : undefined);
-      setSinglePlugin(undefined);
       // Scroll to the plugin when a selection is made in the left panel.
       editorRefs[pluginId]?.current?.scrollIntoView(true);
     };
@@ -141,8 +143,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
         // Pass filtered results to SettingsFormEditor to only display filtered fields.
         const filtered = filterPlugin(pluginSettings.plugin);
         // If filtered results are an array, only show if the array is non-empty.
-        if ((singlePlugin !== undefined && singlePlugin !== pluginSettings.plugin.id) ||
-          (filtered !== null && filtered.length === 0)) {
+        if (filtered !== null && filtered.length === 0) {
           return undefined;
         }
         return (
