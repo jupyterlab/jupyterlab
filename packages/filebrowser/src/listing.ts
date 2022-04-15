@@ -2138,7 +2138,9 @@ export namespace DirListing {
       // Prevent the user from clicking (via mouse, keyboard, or touch) the
       // checkbox since other code handles the mouse and keyboard events and
       // controls the checked state of the checkbox.
-      checkbox.addEventListener('click', Private.preventDefault);
+      checkbox.addEventListener('click', event => {
+        event.preventDefault();
+      });
       labelWrapper.appendChild(checkbox);
       return labelWrapper;
     }
@@ -2494,13 +2496,5 @@ namespace Private {
       LabIcon.remove(container);
       container.className = HEADER_ITEM_ICON_CLASS;
     }
-  }
-
-  /**
-   * An event handler that just prevents the event's default action from
-   * happening (such as checking a checkbox after a click).
-   */
-  export function preventDefault(event: Event): void {
-    event.preventDefault();
   }
 }
