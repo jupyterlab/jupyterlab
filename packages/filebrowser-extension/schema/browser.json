@@ -139,17 +139,17 @@
       {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 51
+        "rank": 50
       },
       {
         "command": "filebrowser:create-new-file",
         "selector": ".jp-DirListing-content",
-        "rank": 52
+        "rank": 51
       },
       {
         "command": "filebrowser:create-new-directory",
         "selector": ".jp-DirListing-content",
-        "rank": 56
+        "rank": 55
       }
     ]
   },
