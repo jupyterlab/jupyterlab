@@ -183,7 +183,7 @@ describe('filebrowser/listing', () => {
           itemNode
         ) as HTMLInputElement;
         const item = dirListing.sortedItems().next()!;
-        dirListing.selectItemByName(item.name);
+        await dirListing.selectItemByName(item.name);
         await signalToPromise(dirListing.updated);
         expect(checkbox.checked).toBe(true);
         expect(dirListing.isSelected(item.name)).toBe(true);
