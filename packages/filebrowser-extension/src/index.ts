@@ -223,7 +223,7 @@ const browser: JupyterFrontEndPlugin<void> = {
               showLastModifiedColumn: true,
               useFuzzyFilter: true,
               showHiddenFiles: false,
-              showFileCheckboxes: true
+              showFileCheckboxes: false
             };
             const fileBrowserModelConfig = {
               filterDirectories: true

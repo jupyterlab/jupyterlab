@@ -420,7 +420,7 @@ export class FileBrowser extends SidePanel {
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
   private _showHiddenFiles: boolean = false;
-  private _showFileCheckboxes: boolean = true;
+  private _showFileCheckboxes: boolean = false;
 }
 
 /**

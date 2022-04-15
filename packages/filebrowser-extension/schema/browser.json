@@ -237,7 +237,7 @@
       "type": "boolean",
       "title": "Use checkboxes to select items",
       "description": "Whether to show checkboxes next to files and folders",
-      "default": true
+      "default": false
     }
   },
   "additionalProperties": false,
