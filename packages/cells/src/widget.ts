@@ -1498,13 +1498,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       HEADING_COLLAPSER_CLASS
     )[0];
     if (collapseButton) {
-      collapseButton.setAttribute(
-        'style',
-        `background:
-      ${
-        value ? 'var(--jp-icon-caret-right)' : 'var(--jp-icon-caret-down)'
-      } no-repeat center`
-      );
+      if (value) {
+        collapseButton.classList.add('jp-mod-collapsed');
+      } else {
+        collapseButton.classList.remove('jp-mod-collapsed');
+      }
     }
     this.renderCollapseButtons(this._renderer!);
   }
@@ -1567,12 +1565,16 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       let collapseButton = this.inputArea.promptNode.appendChild(
         document.createElement('button')
       );
-      collapseButton.className = `bp3-button bp3-minimal jp-Button minimal ${HEADING_COLLAPSER_CLASS}`;
-      collapseButton.style.background = `${
-        this._headingCollapsed
-          ? 'var(--jp-icon-caret-right)'
-          : 'var(--jp-icon-caret-down)'
-      } no-repeat center`;
+      collapseButton.className = `jp-Button ${HEADING_COLLAPSER_CLASS}`;
+      collapseButton.setAttribute(
+        'data-heading-level',
+        this.headingInfo.level.toString()
+      );
+      if (this._headingCollapsed) {
+        collapseButton.classList.add('jp-mod-collapsed');
+      } else {
+        collapseButton.classList.remove('jp-mod-collapsed');
+      }
       collapseButton.onclick = (event: Event) => {
         this.headingCollapsed = !this.headingCollapsed;
         this._toggleCollapsedSignal.emit(this._headingCollapsed);
