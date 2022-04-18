@@ -229,7 +229,7 @@ describe('ToCUtils', () => {
     );
 
     it.each<[boolean]>([[true], [false]])(
-      `should should have prefix or not`,
+      `should have prefix or not`,
       numberHeaders => {
         const src = '### h3';
 
@@ -242,7 +242,7 @@ describe('ToCUtils', () => {
     );
 
     it.each<[boolean]>([[true], [false]])(
-      `should should number h1 or not`,
+      `should number h1 or not`,
       numberingH1 => {
         const src = '# h1';
 
@@ -256,7 +256,7 @@ describe('ToCUtils', () => {
     );
 
     it.each<[boolean]>([[true], [false]])(
-      `should should respect base number`,
+      `should respect base number`,
       numberingH1 => {
         const src = `# h1
 ## h2`;

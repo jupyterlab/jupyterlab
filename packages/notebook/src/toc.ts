@@ -273,7 +273,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                 }
               });
 
-              // Parse HTML output only if trusted
+              // Parse HTML output
               if (htmlType) {
                 headings.push(
                   ...ToCUtils.getHTMLHeadings(
@@ -284,7 +284,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                     return {
                       ...heading,
                       cellRef: cell,
-                      index: [i, j],
+                      outputIndex: j,
                       collapsed: false,
                       isRunning: RunningStatus.Idle,
                       type: HeadingType.HTML
@@ -301,7 +301,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                     return {
                       ...heading,
                       cellRef: cell,
-                      index: [i, j],
+                      outputIndex: j,
                       collapsed: false,
                       isRunning: RunningStatus.Idle,
                       type: HeadingType.Markdown
@@ -324,7 +324,6 @@ export class NotebookToCModel extends TableOfContentsModel<
               return {
                 ...heading,
                 cellRef: cell,
-                index: [i, 0],
                 collapsed:
                   // If there are multiple headings, only collapse the first one
                   this.configuration.syncCollapseState && index === 0

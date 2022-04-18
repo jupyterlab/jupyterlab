@@ -255,8 +255,6 @@ async function activateTOC(
 
 /**
  * Table of contents registry plugin.
- *
- * @private
  */
 const registry: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc-extension:registry',

@@ -73,9 +73,9 @@ bumped their major version (following semver convention):
    ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
    The namespace ``TableOfContentsRegistry`` has been renamed ``TableOfContents``.
-   The API has been fully rework. New table of content providers must implement a factory
+   The API has been fully reworked. The new table of content providers must implement a factory
    ``TableOfContents.IFactory`` that will create a model ``TableOfContents.IModel<TableOfContents.IHeading>``
-   for supported widget. The model provide a list of headings described by a ``text`` and
+   for supported widget. The model provides a list of headings described by a ``text`` and
    a ``level`` and optionally a ``prefix``, a ``collapsed`` state and a ``dataset`` (data
    DOM attributes dictionary).
 - ``@jupyterlab/ui-components`` from 3.x to 4.x
