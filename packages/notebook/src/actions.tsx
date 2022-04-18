@@ -5,6 +5,7 @@ import {
   Clipboard,
   Dialog,
   ISessionContext,
+  sessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
 import {
@@ -2076,6 +2077,10 @@ Please wait for the complete rendering before invoking that action.`,
               ),
               buttons: [Dialog.okButton({ label: trans.__('Ok') })]
             });
+            return Promise.resolve(false);
+          }
+          if (sessionContext.hasNoKernel) {
+            void sessionContextDialogs.selectKernel(sessionContext);
             return Promise.resolve(false);
           }
           const deletedCells = notebook.model?.deletedCells ?? [];
