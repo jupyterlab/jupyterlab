@@ -95,6 +95,8 @@ export class WebSocketProviderWithLocks
     this._isInitialized = false;
     this._onConnectionStatus = this._onConnectionStatus.bind(this);
     this.on('status', this._onConnectionStatus);
+
+    this._requestLockNumber = 0;
   }
 
   setPath(newPath: string): void {
@@ -158,6 +160,8 @@ export class WebSocketProviderWithLocks
    * Returns a Promise that resolves to the lock number.
    */
   acquireLock(): Promise<number> {
+    this._requestLockNumber += 1;
+
     if (this._currentLockRequest) {
       return this._currentLockRequest.promise;
     }
@@ -193,7 +197,9 @@ export class WebSocketProviderWithLocks
     encoding.writeUint32(encoder, lock);
     // releasing lock
     this._sendMessage(encoding.toUint8Array(encoder));
-    if (this._requestLockInterval) {
+
+    this._requestLockNumber -= 1;
+    if (this._requestLockNumber === 0 && this._requestLockInterval) {
       clearInterval(this._requestLockInterval);
     }
   }
@@ -246,6 +252,7 @@ export class WebSocketProviderWithLocks
     reject: () => void;
   } | null = null;
   private _initialContentRequest: PromiseDelegate<boolean> | null = null;
+  private _requestLockNumber: number;
 }
 
 /**
