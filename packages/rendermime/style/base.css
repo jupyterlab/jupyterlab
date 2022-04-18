@@ -380,7 +380,7 @@
   border-spacing: 0;
   border: none;
   color: var(--jp-ui-font-color1);
-  font-size: 12px;
+  font-size: var(--jp-ui-font-size1);
   table-layout: fixed;
   margin-left: auto;
   margin-right: auto;
@@ -569,7 +569,7 @@ h6:hover .jp-InternalAnchorLink {
   border-radius: 3px;
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
   display: inline-block;
-  font-size: 0.8em;
+  font-size: var(--jp-ui-font-size0);
   line-height: 1em;
   padding: 0.2em 0.5em;
 }
