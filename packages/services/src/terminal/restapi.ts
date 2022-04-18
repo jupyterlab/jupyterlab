@@ -34,17 +34,20 @@ export interface IModel {
  *
  * @param name - The name of the target terminal.
  *
+ * @param cwd - The path in which the terminal will start.
+ *
  * @returns A promise that resolves with the session model.
  */
 export async function startNew(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
-  name?: string
+  name?: string,
+  cwd?: string
 ): Promise<IModel> {
   Private.errorIfNotAvailable();
   const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
   const init = {
     method: 'POST',
-    body: JSON.stringify({ name })
+    body: JSON.stringify({ name, cwd })
   };
 
   const response = await ServerConnection.makeRequest(url, init, settings);

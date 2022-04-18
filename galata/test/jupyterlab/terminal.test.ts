@@ -83,3 +83,18 @@ test.describe('Terminal', () => {
     });
   });
 });
+
+test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
+  await page.waitForSelector(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`);
+
+  await page.locator('[role="main"] >> p:has-text("Terminal")').click();
+
+  const terminal = page.locator(TERMINAL_SELECTOR);
+  await terminal.waitFor();
+
+  await page.waitForTimeout(1000);
+  await page.keyboard.type('basename $PWD');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(1000);
+  expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
+});
