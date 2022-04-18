@@ -52,4 +52,34 @@ test.describe('Text Editor Tests', () => {
 
     expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
   });
+
+  test('Go to line with argument', async ({ page }) => {
+    const imageName = 'go-to-line-editor.png';
+    await page.menu.clickMenuItem('File>New>Text File');
+
+    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+
+    await page.fill(
+      '[role="main"] >> textarea',
+      `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam urna
+libero, dictum a egestas non, placerat vel neque. In imperdiet iaculis fermentum. 
+Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia 
+Curae; Cras augue tortor, tristique vitae varius nec, dictum eu lectus. Pellentesque 
+id eleifend eros. In non odio in lorem iaculis sollicitudin. In faucibus ante ut 
+arcu fringilla interdum. Maecenas elit nulla, imperdiet nec blandit et, consequat 
+ut elit.`
+    );
+
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('codemirror:go-to-line', {
+        line: 2,
+        column: 8
+      });
+    });
+
+    await page.keyboard.type('#2:8#');
+
+    const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
+    expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+  });
 });
