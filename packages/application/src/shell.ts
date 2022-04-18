@@ -106,6 +106,18 @@ export namespace ILabShell {
    */
   export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 
+  export interface IConfig {
+    /**
+     * The method for hiding widgets in the dock panel.
+     *
+     * The default is `scale`.
+     *
+     * Using `scale` will often increase performance as most browsers will not trigger style computation
+     * for the transform action.
+     */
+    hiddenMode: 'display' | 'scale';
+  }
+
   /**
    * The args for the current path change signal.
    */
@@ -242,7 +254,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     bottomPanel.node.setAttribute('role', 'contentinfo');
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
-    const dockPanel = (this._dockPanel = new DockPanelSvg());
+    const dockPanel = (this._dockPanel = new DockPanelSvg({
+      hiddenMode: Widget.HiddenMode.Scale
+    }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     const hsplitPanel = (this._hsplitPanel = new Private.RestorableSplitPanel());
@@ -960,6 +974,19 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     };
 
     return layout;
+  }
+  /**
+   * Update the shell configuration.
+   *
+   * @param config Shell configuration
+   */
+  updateConfig(config: Partial<ILabShell.IConfig>): void {
+    if (config.hiddenMode) {
+      this._dockPanel.hiddenMode =
+        config.hiddenMode === 'display'
+          ? Widget.HiddenMode.Display
+          : Widget.HiddenMode.Scale;
+    }
   }
 
   /**
