@@ -77,6 +77,11 @@ export namespace SettingsFormEditor {
      * Sends whether this editor has unsaved changes to the parent class.
      */
     updateDirtyState: (dirty: boolean) => void;
+
+    /**
+     * List of strings that match search value.
+     */
+    filteredValues: string[] | null;
   }
 
   export interface IState {
@@ -360,7 +365,7 @@ export class SettingsFormEditor extends React.Component<
       .catch((reason: string) => {
         this.props.updateDirtyState(false);
         const trans = this.props.translator.load('jupyterlab');
-        showErrorMessage(trans.__('Error saving settings.'), reason);
+        void showErrorMessage(trans.__('Error saving settings.'), reason);
       });
   }
 
@@ -395,6 +400,22 @@ export class SettingsFormEditor extends React.Component<
         };
       }
     }
+
+    /**
+     * Only show fields that match search value.
+     */
+    const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
+    if (this.props.filteredValues?.length ?? 0 > 0) {
+      for (const field in filteredSchema.properties) {
+        if (
+          !this.props.filteredValues?.includes(
+            filteredSchema.properties[field].title ?? field
+          )
+        ) {
+          delete filteredSchema.properties[field];
+        }
+      }
+    }
     const icon = this.props.isCollapsed ? caretRightIcon : caretDownIcon;
 
     return (
@@ -425,7 +446,7 @@ export class SettingsFormEditor extends React.Component<
         </div>
         {!this.props.isCollapsed && (
           <Form
-            schema={this.props.settings.schema as JSONSchema7}
+            schema={filteredSchema as JSONSchema7}
             formData={this.state.formData}
             FieldTemplate={CustomTemplate}
             ArrayFieldTemplate={CustomArrayTemplateFactory(
