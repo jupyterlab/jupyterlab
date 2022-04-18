@@ -192,7 +192,7 @@ Upgrading library versions
 The ``@phosphor/*`` libraries that JupyterLab 1.x uses have been renamed to
 ``@lumino/*``. Updating your ``package.json`` is straightforward. The easiest
 way to do this is to look in the
-`JupyterLab core packages code base <https://github.com/jupyterlab/jupyterlab/tree/3.3.x/packages>`__
+`JupyterLab core packages code base <https://github.com/jupyterlab/jupyterlab/tree/3.4.x/packages>`__
 and to simply adopt the versions of the relevant libraries that are used
 there.
 
@@ -313,7 +313,7 @@ Using ``Session`` and ``SessionContext`` to manage kernel sessions
 
   For full API documentation and examples of how to use
   ``@jupyterlab/services``,
-  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/3.3.x/packages/services#readme>`__.
+  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/3.4.x/packages/services#readme>`__.
 
 ``ConsolePanel`` and ``NotebookPanel`` now expose a
 ``sessionContext: ISessionContext`` attribute that allows for a uniform way to
@@ -348,6 +348,6 @@ Using the new icon system and ``LabIcon``
 
   For full API documentation and examples of how to use
   the new icon support based on ``LabIcon`` from ``@jupyterlab/ui-components``,
-  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/3.3.x/packages/ui-components#readme>`__.
+  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/3.4.x/packages/ui-components#readme>`__.
 
 

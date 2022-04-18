@@ -10,7 +10,7 @@ In particular, there are many TypeScript packages and a single Python package.
 The Python package contains server-side code, and also distributes
 the bundled-and-compiled TypeScript code.
 
-See the `Contributing Guidelines <https://github.com/jupyterlab/jupyterlab/blob/3.3.x/CONTRIBUTING.md>`__
+See the `Contributing Guidelines <https://github.com/jupyterlab/jupyterlab/blob/3.4.x/CONTRIBUTING.md>`__
 for detailed developer installation instructions.
 
 Directories

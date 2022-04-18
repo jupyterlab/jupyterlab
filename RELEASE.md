@@ -138,8 +138,8 @@ These lines:
   - [ ] https://github.com/jupyterlab/jupyter-renderers
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:
-  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/3.3.x/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
-- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/3.3.x/RELEASE.md#updating-the-extension-tutorial)
+  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/3.4.x/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
+- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/3.4.x/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
 Now do the actual final release:
@@ -151,7 +151,7 @@ Now do the actual final release:
 - [ ] Update the API [docs](#updating-api-docs)
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
-- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/3.3.x/RELEASE.md#publishing-to-conda-forge).
+- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/3.4.x/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
 the next release:
@@ -160,7 +160,7 @@ the next release:
 - [ ] Put the commit and tags to master
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
-- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/3.3.x/RELEASE.md#update-version-for-binder)
+- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/3.4.x/RELEASE.md#update-version-for-binder)
 
 ### Updating the extension tutorial
 
