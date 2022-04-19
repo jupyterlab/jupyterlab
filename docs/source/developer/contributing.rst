@@ -326,7 +326,7 @@ Notes:
    If you are using mamba or conda, you can install the necessary packages
    with `conda install -c conda-forge pkg-config glib pango pixman`.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
-   `yarn <https://yarnpkg.com/en>`__ package manager. If you have
+   `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when
    developing, and it will use the local version of ``yarn`` in
    ``jupyterlab/yarn.js`` when run in the repository or a built
@@ -412,7 +412,7 @@ We use ``jest`` for all tests, so standard ``jest`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an
 ``it.only`` to a specific test when debugging. All of the ``test*``
 scripts in each package accept ``jest`` `cli
-options <https://jestjs.io/docs/en/cli.html>`__.
+options <https://jestjs.io/docs/cli>`__.
 
 VSCode Debugging
 """"""""""""""""

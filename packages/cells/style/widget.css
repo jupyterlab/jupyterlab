@@ -124,10 +124,61 @@
   display: flex;
   min-height: var(--jp-cell-collapser-min-height);
   position: absolute;
-  background-size: 25px !important;
+  background-color: transparent;
+  background-size: 25px;
+  background-repeat: no-repeat;
+  background-position-x: center;
+  background-position-y: top;
+  background-image: var(--jp-icon-caret-down);
   right: 0;
   top: 0;
   bottom: 0;
+}
+
+.jp-collapseHeadingButton.jp-mod-collapsed {
+  background-image: var(--jp-icon-caret-right);
+}
+
+/*
+ set the container font size to match that of content
+ so that the nested collapse buttons have the right size
+*/
+.jp-MarkdownCell .jp-InputPrompt {
+  font-size: var(--jp-content-font-size1);
+}
+
+/*
+  Align collapseHeadingButton with cell top header
+  The font sizes are identical to the ones in packages/rendermime/style/base.css
+*/
+.jp-collapseHeadingButton[data-heading-level='1'] {
+  font-size: var(--jp-content-font-size5);
+  background-position-y: calc(0.3 * var(--jp-content-font-size5));
+}
+
+.jp-collapseHeadingButton[data-heading-level='2'] {
+  font-size: var(--jp-content-font-size4);
+  background-position-y: calc(0.3 * var(--jp-content-font-size4));
+}
+
+.jp-collapseHeadingButton[data-heading-level='3'] {
+  font-size: var(--jp-content-font-size3);
+  background-position-y: calc(0.3 * var(--jp-content-font-size3));
+}
+
+.jp-collapseHeadingButton[data-heading-level='4'] {
+  font-size: var(--jp-content-font-size2);
+  background-position-y: calc(0.3 * var(--jp-content-font-size2));
+}
+
+.jp-collapseHeadingButton[data-heading-level='5'] {
+  font-size: var(--jp-content-font-size1);
+  background-position-y: top;
+}
+
+.jp-collapseHeadingButton[data-heading-level='6'] {
+  font-size: var(--jp-content-font-size0);
+  background-position-y: top;
 }
 
 /* collapseHeadingButton (show only on (hover,active) if hiddenCellsButton is shown) */

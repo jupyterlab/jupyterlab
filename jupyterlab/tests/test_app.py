@@ -7,6 +7,12 @@ import os
 import shutil
 import sys
 import tempfile
+
+try:
+    from importlib.resources import files
+except ImportError:
+    from importlib_resources import files
+
 from os import path as osp
 from os.path import join as pjoin
 from stat import S_IRGRP, S_IROTH, S_IRUSR
@@ -15,7 +21,6 @@ from unittest.mock import patch
 
 import jupyter_core
 import jupyterlab_server
-import pkg_resources
 from ipykernel.kernelspec import write_kernel_spec
 from jupyter_server.serverapp import ServerApp
 from jupyterlab_server.process_app import ProcessApp
@@ -68,8 +73,7 @@ def _create_schemas_dir():
     # Get schema content.
     schema_package = jupyterlab_server.__name__
     schema_path = "tests/schemas/@jupyterlab/apputils-extension/themes.json"
-    themes = pkg_resources.resource_string(schema_package, schema_path)
-
+    themes = files(schema_package).joinpath(schema_path).read_bytes()
     with open(osp.join(extension_dir, "themes.json"), "w") as fid:
         fid.write(themes.decode("utf-8"))
     atexit.register(lambda: shutil.rmtree(root_dir, True))

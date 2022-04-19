@@ -3,39 +3,34 @@
 
 import * as path from 'path';
 import * as webpack from 'webpack';
-import crypto from 'crypto';
-
-// Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
-const cryptoOrigCreateHash = crypto.createHash;
-crypto.createHash = (algorithm: string) =>
-  cryptoOrigCreateHash(algorithm == 'md4' ? 'sha256' : algorithm);
+import miniSVGDataURI from 'mini-svg-data-uri';
 
 const rules = [
   { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-  { test: /\.txt$/, use: 'raw-loader' },
-  { test: /\.md$/, use: 'raw-loader' },
-  { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
-  { test: /\.js.map$/, use: 'file-loader' },
+  { test: /\.txt$/, type: 'asset/source' },
+  { test: /\.md$/, type: 'asset/source' },
+  { test: /\.(jpg|png|gif)$/, type: 'asset/resource' },
+  { test: /\.js.map$/, type: 'asset/resource' },
   {
     test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/font-woff'
+    type: 'asset/resource'
   },
   {
     test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/font-woff'
+    type: 'asset/resource'
   },
   {
     test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+    type: 'asset/resource'
   },
-  { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
+  { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, type: 'asset/resource' },
   {
     // In .css files, svg is loaded as a data URI.
     test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
     issuer: /\.css$/,
-    use: {
-      loader: 'svg-url-loader',
-      options: { encoding: 'none', limit: 10000 }
+    type: 'asset',
+    generator: {
+      dataUrl: (content: any) => miniSVGDataURI(content.toString())
     }
   },
   {
@@ -43,9 +38,7 @@ const rules = [
     // must be loaded as a raw string instead of data URIs.
     test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
     issuer: /\.js$/,
-    use: {
-      loader: 'raw-loader'
-    }
+    type: 'asset/source'
   },
   {
     test: /\.m?js$/,
