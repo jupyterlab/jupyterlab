@@ -6,6 +6,7 @@
 /* Sibling imports */
 @import './deprecated.css';
 @import './deprecatedExtra.css';
+@import './tabbar.css';
 @import './icons.css';
 @import './iconsalt.css';
 @import './iconshover.css';

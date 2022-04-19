@@ -16,7 +16,7 @@ import { ITranslator } from '@jupyterlab/translation';
 import { launcherIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the launcher plugin.
@@ -81,7 +81,10 @@ function activate(
       main.title.closable = !!toArray(shell.widgets('main')).length;
       main.id = id;
 
-      shell.add(main, 'main', { activate: args['activate'] as boolean });
+      shell.add(main, 'main', {
+        activate: args['activate'] as boolean,
+        ref: args['ref'] as string
+      });
 
       if (labShell) {
         labShell.layoutModified.connect(() => {
@@ -98,6 +101,21 @@ function activate(
     palette.addItem({
       command: CommandIDs.create,
       category: trans.__('Launcher')
+    });
+  }
+
+  if (labShell) {
+    labShell.addButtonEnabled = true;
+    labShell.addRequested.connect((sender: DockPanel, arg: TabBar<Widget>) => {
+      // Get the ref for the current tab of the tabbar which the add button was clicked
+      const ref =
+        arg.currentTitle?.owner.id ||
+        arg.titles[arg.titles.length - 1].owner.id;
+      if (commands.hasCommand('filebrowser:create-main-launcher')) {
+        // If a file browser is defined connect the launcher to it
+        return commands.execute('filebrowser:create-main-launcher', { ref });
+      }
+      return commands.execute(CommandIDs.create, { ref });
     });
   }
 
