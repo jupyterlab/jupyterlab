@@ -22,8 +22,10 @@ import {
 } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  collapseAllIcon,
   CommandToolbarButton,
   ellipsesIcon,
+  expandAllIcon,
   MenuSvg,
   numberingIcon,
   tocIcon,
@@ -43,6 +45,8 @@ namespace CommandIDs {
   export const displayOutputNumbering = 'toc:display-outputs-numbering';
 
   export const showPanel = 'toc:show-panel';
+
+  export const toggleCollapse = 'toc:toggle-collapse';
 }
 
 /**
@@ -127,6 +131,33 @@ async function activateTOC(
     }
   });
 
+  function someExpanded(model: TableOfContents.Model): boolean {
+    return model.headings.some(h => !(h.collapsed ?? false));
+  }
+
+  app.commands.addCommand(CommandIDs.toggleCollapse, {
+    label: () =>
+      toc.model && !someExpanded(toc.model)
+        ? trans.__('Expand All Headings')
+        : trans.__('Collapse All Headings'),
+    icon: args =>
+      args.toolbar
+        ? toc.model && !someExpanded(toc.model)
+          ? expandAllIcon
+          : collapseAllIcon
+        : undefined,
+    execute: () => {
+      if (toc.model) {
+        if (someExpanded(toc.model)) {
+          toc.model.toggleCollapse({ collapsed: true });
+        } else {
+          toc.model.toggleCollapse({ collapsed: false });
+        }
+      }
+    },
+    isEnabled: () => toc.model !== null
+  });
+
   const tracker = new TableOfContentsTracker();
 
   if (restorer) {
@@ -189,6 +220,18 @@ async function activateTOC(
 
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
+  toc.toolbar.addItem(
+    'collapse-all',
+    new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.toggleCollapse,
+      args: {
+        toolbar: true
+      },
+      label: ''
+    })
+  );
+
   const toolbarMenu = new MenuSvg({ commands: app.commands });
   toolbarMenu.addItem({
     command: CommandIDs.displayH1Numbering
@@ -244,12 +287,22 @@ async function activateTOC(
       });
     }
 
+    if (toc.model) {
+      toc.model.collapseChanged.disconnect(onCollapseChange);
+    }
+
     toc.model = model;
-    setNumberingButtonState();
+    toc.model?.collapseChanged.connect(onCollapseChange);
+    setToolbarButtonsState();
   }
 
-  function setNumberingButtonState() {
+  function setToolbarButtonsState() {
     app.commands.notifyCommandChanged(CommandIDs.displayNumbering);
+    app.commands.notifyCommandChanged(CommandIDs.toggleCollapse);
+  }
+
+  function onCollapseChange() {
+    app.commands.notifyCommandChanged(CommandIDs.toggleCollapse);
   }
 }
 

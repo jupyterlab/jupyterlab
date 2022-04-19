@@ -64,7 +64,7 @@ export abstract class TableOfContentsModel<
   /**
    * Signal emitted when a table of content section collapse state changes.
    */
-  get collapseChanged(): ISignal<TableOfContents.IModel<H>, H> {
+  get collapseChanged(): ISignal<TableOfContents.IModel<H>, H | null> {
     return this._collapseChanged;
   }
 
@@ -210,16 +210,29 @@ export abstract class TableOfContentsModel<
 
   /**
    * Callback on heading collapse.
+   *
+   * @param options.heading The heading to change state (all headings if not provided)
+   * @param options.collapsed The new collapsed status (toggle existing status if not provided)
    */
-  toggleCollapse(heading: H): void {
-    heading.collapsed = !heading.collapsed;
-    this.stateChanged.emit();
-    this._collapseChanged.emit(heading);
+  toggleCollapse(options: { heading?: H; collapsed?: boolean }): void {
+    if (options.heading) {
+      options.heading.collapsed =
+        options.collapsed ?? !options.heading.collapsed;
+      this.stateChanged.emit();
+      this._collapseChanged.emit(options.heading);
+    } else {
+      // Use the provided state or collapsed all except if all are collapsed
+      const newState =
+        options.collapsed ?? !this.headings.some(h => !(h.collapsed ?? false));
+      this.headings.forEach(h => (h.collapsed = newState));
+      this.stateChanged.emit();
+      this._collapseChanged.emit(null);
+    }
   }
 
   private _activeHeading: H | null;
   private _activeHeadingChanged: Signal<TableOfContentsModel<H, T>, H | null>;
-  private _collapseChanged: Signal<TableOfContentsModel<H, T>, H>;
+  private _collapseChanged: Signal<TableOfContentsModel<H, T>, H | null>;
   private _configuration: TableOfContents.IConfig;
   private _headings: H[];
   private _headingsChanged: Signal<TableOfContentsModel<H, T>, void>;

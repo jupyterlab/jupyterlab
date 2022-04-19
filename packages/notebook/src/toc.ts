@@ -238,9 +238,15 @@ export class NotebookToCModel extends TableOfContentsModel<
 
   /**
    * Callback on heading collapse.
+   *
+   * @param options.heading The heading to change state (all headings if not provided)
+   * @param options.collapsed The new collapsed status (toggle existing status if not provided)
    */
-  toggleCollapse(heading: INotebookHeading): void {
-    super.toggleCollapse(heading);
+  toggleCollapse(options: {
+    heading?: INotebookHeading;
+    collapsed?: boolean;
+  }): void {
+    super.toggleCollapse(options);
     this.updateRunningStatus(this.headings);
   }
 
@@ -674,24 +680,34 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     const onHeadingCollapsed = (
       _: NotebookToCModel,
-      heading: INotebookHeading
+      heading: INotebookHeading | null
     ) => {
-      const cell = heading.cellRef as MarkdownCell;
-      if (
-        model.configuration.syncCollapseState &&
-        cell.headingCollapsed !== (heading.collapsed ?? false)
-      ) {
-        cell.headingCollapsed = heading.collapsed ?? false;
+      if (model.configuration.syncCollapseState) {
+        if (heading !== null) {
+          const cell = heading.cellRef as MarkdownCell;
+          if (cell.headingCollapsed !== (heading.collapsed ?? false)) {
+            cell.headingCollapsed = heading.collapsed ?? false;
+          }
+        } else {
+          const collapseState = model.headings[0]?.collapsed ?? false;
+          widget.content.widgets.forEach(cell => {
+            if (cell instanceof MarkdownCell) {
+              if (cell.headingInfo.level >= 0) {
+                cell.headingCollapsed = collapseState;
+              }
+            }
+          });
+        }
       }
     };
     const onCellCollapsed = (_: unknown, cell: MarkdownCell) => {
       if (model.configuration.syncCollapseState) {
         const h = model.getCellHeading(cell);
-        if (
-          typeof h?.collapsed === 'boolean' &&
-          h.collapsed !== cell.headingCollapsed
-        ) {
-          model.toggleCollapse(h);
+        if (h) {
+          model.toggleCollapse({
+            heading: h,
+            collapsed: cell.headingCollapsed
+          });
         }
       }
     };

@@ -184,8 +184,10 @@ export namespace TableOfContents {
 
     /**
      * Signal emitted when a table of content section collapse state changes.
+     *
+     * If all headings state are set at the same time, the argument is null.
      */
-    readonly collapseChanged: ISignal<IModel<H>, H>;
+    readonly collapseChanged: ISignal<IModel<H>, H | null>;
 
     /**
      * Model configuration
@@ -242,8 +244,11 @@ export namespace TableOfContents {
 
     /**
      * Callback on heading collapse.
+     *
+     * @param options.heading The heading to change state (all headings if not provided)
+     * @param options.collapsed The new collapsed status (toggle existing status if not provided)
      */
-    toggleCollapse: (heading: H) => void;
+    toggleCollapse: (options: { heading?: H; collapsed?: boolean }) => void;
   }
 
   /**
