@@ -44,7 +44,7 @@ const URL_CONFIG = {
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
-  '@jupyterlab/builder': ['path', 'crypto'],
+  '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path'],
   '@jupyterlab/testutils': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
@@ -74,15 +74,11 @@ const UNUSED: Dict<string[]> = {
     '@babel/preset-env',
     'babel-loader',
     'css-loader',
-    'file-loader',
     'path-browserify',
     'process',
-    'raw-loader',
     'style-loader',
-    'svg-url-loader',
     'terser-webpack-plugin',
     'to-string-loader',
-    'url-loader',
     'webpack-cli',
     'worker-loader'
   ],
