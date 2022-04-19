@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { generateCaptureArea, setLeftSidebarWidth } from './utils';
+import { setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -14,7 +14,7 @@ test.describe('Export Notebook', () => {
   test('Export Menu', async ({ page }) => {
     await page.goto();
 
-    await setLeftSidebarWidth(page);
+    await setSidebarWidth(page);
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -26,26 +26,18 @@ test.describe('Export Notebook', () => {
     await page.click('text=File');
     await page.click('ul[role="menu"] >> text=Save and Export Notebook As');
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 5, left: 0, width: 700, height: 700 })]
-    );
-
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 5, x: 0, width: 700, height: 700 } })
     ).toMatchSnapshot('exporting_menu.png');
   });
 
   test('Slides', async ({ page }) => {
     await page.goto();
 
-    await setLeftSidebarWidth(page);
+    await setSidebarWidth(page);
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -60,20 +52,11 @@ test.describe('Export Notebook', () => {
       '.jp-PropertyInspector >> text=Slide Type >> select',
       { label: 'Slide' }
     );
-
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 5, left: 283, width: 997, height: 400 })]
-    );
-
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 5, x: 283, width: 997, height: 400 } })
     ).toMatchSnapshot('exporting_slide_type.png');
   });
 });
