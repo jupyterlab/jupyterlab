@@ -42,13 +42,13 @@ export class FileEditor extends Widget {
     const context = (this._context = options.context);
     this._mimeTypeService = options.mimeTypeService;
 
-    const editorWidget = (this.editorWidget = new CodeEditorWrapper({
+    const editorWidget = (this._editorWidget = new CodeEditorWrapper({
       factory: options.factory,
       model: context.model
     }));
-    this.editorWidget.addClass('jp-FileEditorCodeWrapper');
-    this.editorWidget.node.dataset[CODE_RUNNER] = 'true';
-    this.editorWidget.node.dataset[UNDOER] = 'true';
+    this._editorWidget.addClass('jp-FileEditorCodeWrapper');
+    this._editorWidget.node.dataset[CODE_RUNNER] = 'true';
+    this._editorWidget.node.dataset[UNDOER] = 'true';
 
     this.editor = editorWidget.editor;
     this.model = editorWidget.model;
@@ -161,10 +161,10 @@ export class FileEditor extends Widget {
     );
   }
 
-  private editorWidget: CodeEditorWrapper;
-  public model: CodeEditor.IModel;
-  public editor: CodeEditor.IEditor;
-  protected _context: DocumentRegistry.Context;
+  model: CodeEditor.IModel;
+  editor: CodeEditor.IEditor;
+  private _context: DocumentRegistry.Context;
+  private _editorWidget: CodeEditorWrapper;
   private _mimeTypeService: IEditorMimeTypeService;
   private _ready = new PromiseDelegate<void>();
 }
