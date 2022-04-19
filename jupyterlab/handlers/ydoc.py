@@ -141,18 +141,29 @@ class YNotebook(YBaseDoc):
                 self._ymeta.delete(t, key)
             for key in [k for k in self._ystate if k != "dirty"]:
                 self._ystate.delete(t, key)
+
             # initialize document
             ycells = []
             for cell in value["cells"]:
-                ycell = Y.YMap()
+                ycell = Y.YMap({})
+                if "id" in cell:
+                    ycell.set(t, "id", cell["id"])
+
                 ycell.set(t, "source", cell["source"])
                 ycell.set(t, "metadata", cell["metadata"])
                 ycell.set(t, "cell_type", cell["cell_type"])
-                ycell.set(t, "id", cell["id"])
+
+                if cell["cell_type"] == "code":
+                    ycell.set(t, "execution_count", 0)
+                    ycell.set(t, "outputs", cell.get("outputs", []))
+
                 ycells.append(ycell)
+
             self._ycells.push(t, ycells)
+
             for k, v in value["metadata"].items():
                 self._ymeta.set(t, k, v)
+
             self._ystate.set(t, "nbformat", value["nbformat"])
             self._ystate.set(t, "nbformatMinor", value["nbformat_minor"])
 

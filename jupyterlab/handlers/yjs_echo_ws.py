@@ -79,6 +79,8 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         self.saving_document = None
         self.id = str(uuid.uuid4())
         self.room_id = file_path
+        self.file_type = file_type
+        self.file_format = "text"
         self.room = self.room or YjsRoom(file_type)
         self.room.clients.append(self)
 
@@ -88,7 +90,7 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
 
         if not self.room.ydoc.initialized:
             file_path = self.room_id
-            model = await ensure_async(self.contents_manager.get(file_path))
+            model = await ensure_async(self.contents_manager.get(file_path, type=self.file_type))
             self.last_saved = model["last_modified"]
             # check again if initialized, because loading the file can be async
             if not self.room.ydoc.initialized:
@@ -113,10 +115,12 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
             return path == abs_path
 
         async for _ in awatch(abs_path, watch_filter=filter):
-            model = await ensure_async(self.contents_manager.get(path, content=False))
+            model = await ensure_async(
+                self.contents_manager.get(path, content=False, type=self.file_type)
+            )
             # do nothing if the file was saved by us
             if model["last_modified"] != self.last_saved:
-                model = await ensure_async(self.contents_manager.get(path))
+                model = await ensure_async(self.contents_manager.get(path, type=self.file_type))
                 self.room.ydoc.source = model["content"]
 
     def on_message(self, message):
@@ -163,7 +167,9 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         # save after 1 second of inactivity to prevent too frequent saving
         await asyncio.sleep(1)
         path = self.room_id
-        model = await ensure_async(self.contents_manager.get(path, content=False))
+        model = await ensure_async(
+            self.contents_manager.get(path, content=False, type=self.file_type)
+        )
         if not isinstance(self.contents_manager, (FileManagerMixin, AsyncFileManagerMixin)):
             # we could not watch the file changes, so check if it is newer than last time it was saved
             last_modified = datetime.strptime(
