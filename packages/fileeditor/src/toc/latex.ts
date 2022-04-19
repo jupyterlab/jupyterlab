@@ -2,10 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
+import {
+  TableOfContents,
+  TableOfContentsModel,
+  ToCUtils
+} from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from '../widget';
-import { EditorToCModelFactory, IEditorHeading } from './factory';
+import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
 
 /**
  * Maps LaTeX section headings to HTML header levels.
@@ -34,7 +38,7 @@ const SECTIONS = /^\s*\\(section|subsection|subsubsection){(.+)}/;
 /**
  * Table of content model for LaTeX files.
  */
-export class LaTeXToCModel extends TableOfContentsModel<
+export class LaTeXTableOfContentsModel extends TableOfContentsModel<
   IEditorHeading,
   IDocumentWidget<FileEditor, DocumentRegistry.IModel>
 > {
@@ -47,6 +51,13 @@ export class LaTeXToCModel extends TableOfContentsModel<
    */
   get documentType(): string {
     return 'latex';
+  }
+
+  /**
+   * List of configuration options supported by the model.
+   */
+  get supportedOptions(): (keyof TableOfContents.IConfig)[] {
+    return ['maximalDepth', 'numberHeaders'];
   }
 
   /**
@@ -64,7 +75,7 @@ export class LaTeXToCModel extends TableOfContentsModel<
       string
     >;
 
-    const levels = [];
+    const levels = new Array<number>();
     let previousLevel = levels.length;
     const headings = new Array<IEditorHeading>();
     for (let i = 0; i < lines.length; i++) {
@@ -72,25 +83,17 @@ export class LaTeXToCModel extends TableOfContentsModel<
       if (match) {
         const level = LATEX_LEVELS[match[1]];
         if (level <= this.configuration.maximalDepth) {
-          // Update prefix
-          if (level > previousLevel) {
-            // Initialize the new level
-            levels[level - 1] = 1;
-          } else {
-            // Increment the current level
-            levels[level - 1] += 1;
-
-            // Drop higher levels
-            if (level < previousLevel) {
-              levels.splice(level);
-            }
-          }
+          const prefix = ToCUtils.getPrefix(level, previousLevel, levels, {
+            ...this.configuration,
+            // Force base numbering and numbering first level
+            baseNumbering: 1,
+            numberingH1: true
+          });
           previousLevel = level;
 
           headings.push({
             text: match[2],
-            // If the header list skips some level, replace missing elements by 0
-            prefix: levels.map(level => level ?? 0).join('.') + '.',
+            prefix: prefix,
             level,
             line: i
           });
@@ -104,7 +107,7 @@ export class LaTeXToCModel extends TableOfContentsModel<
 /**
  * Table of content model factory for LaTeX files.
  */
-export class LaTeXToCFactory extends EditorToCModelFactory {
+export class LaTeXTableOfContentsFactory extends EditorTableOfContentsFactory {
   /**
    * Whether the factory can handle the widget or not.
    *
@@ -131,7 +134,7 @@ export class LaTeXToCFactory extends EditorToCModelFactory {
   protected _createNew(
     widget: IDocumentWidget<FileEditor, DocumentRegistry.IModel>,
     configuration?: TableOfContents.IConfig
-  ): LaTeXToCModel {
-    return new LaTeXToCModel(widget, configuration);
+  ): LaTeXTableOfContentsModel {
+    return new LaTeXTableOfContentsModel(widget, configuration);
   }
 }

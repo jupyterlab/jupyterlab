@@ -9,12 +9,12 @@ import {
 } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from '../widget';
-import { EditorToCModelFactory, IEditorHeading } from './factory';
+import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
 
 /**
  * Table of content model for Markdown files.
  */
-export class MarkdownToCModel extends TableOfContentsModel<
+export class MarkdownTableOfContentsModel extends TableOfContentsModel<
   IEditorHeading,
   IDocumentWidget<FileEditor, DocumentRegistry.IModel>
 > {
@@ -54,7 +54,7 @@ export class MarkdownToCModel extends TableOfContentsModel<
 /**
  * Table of content model factory for Markdown files.
  */
-export class MarkdownToCFactory extends EditorToCModelFactory {
+export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory {
   /**
    * Whether the factory can handle the widget or not.
    *
@@ -81,7 +81,7 @@ export class MarkdownToCFactory extends EditorToCModelFactory {
   protected _createNew(
     widget: IDocumentWidget<FileEditor, DocumentRegistry.IModel>,
     configuration?: TableOfContents.IConfig
-  ): MarkdownToCModel {
-    return new MarkdownToCModel(widget, configuration);
+  ): MarkdownTableOfContentsModel {
+    return new MarkdownTableOfContentsModel(widget, configuration);
   }
 }

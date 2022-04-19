@@ -5,7 +5,7 @@ import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from '../widget';
-import { EditorToCModelFactory, IEditorHeading } from './factory';
+import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
 
 /**
  * Regular expression to create the outline
@@ -15,7 +15,7 @@ const KEYWORDS = new RegExp(/^\s*(class |def |from |import )/);
 /**
  * Table of content model for Python files.
  */
-export class PythonToCModel extends TableOfContentsModel<
+export class PythonTableOfContentsModel extends TableOfContentsModel<
   IEditorHeading,
   IDocumentWidget<FileEditor, DocumentRegistry.IModel>
 > {
@@ -89,7 +89,7 @@ export class PythonToCModel extends TableOfContentsModel<
 /**
  * Table of content model factory for Python files.
  */
-export class PythonToCFactory extends EditorToCModelFactory {
+export class PythonTableOfContentsFactory extends EditorTableOfContentsFactory {
   /**
    * Whether the factory can handle the widget or not.
    *
@@ -119,7 +119,7 @@ export class PythonToCFactory extends EditorToCModelFactory {
   protected _createNew(
     widget: IDocumentWidget<FileEditor>,
     configuration?: TableOfContents.IConfig
-  ): PythonToCModel {
-    return new PythonToCModel(widget, configuration);
+  ): PythonTableOfContentsModel {
+    return new PythonTableOfContentsModel(widget, configuration);
   }
 }

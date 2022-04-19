@@ -22,7 +22,7 @@ export interface IEditorHeading extends TableOfContents.IHeading {
 /**
  * Base table of contents model factory for file editor
  */
-export abstract class EditorToCModelFactory extends TableOfContentsFactory<
+export abstract class EditorTableOfContentsFactory extends TableOfContentsFactory<
   IDocumentWidget<FileEditor>
 > {
   /**

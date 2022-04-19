@@ -34,9 +34,9 @@ import {
   FileEditorFactory,
   FileEditorSearchProvider,
   IEditorTracker,
-  LaTeXToCFactory,
-  MarkdownToCFactory,
-  PythonToCFactory,
+  LaTeXTableOfContentsFactory,
+  MarkdownTableOfContentsFactory,
+  PythonTableOfContentsFactory,
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
@@ -437,9 +437,9 @@ function activate(
     });
 
   if (tocRegistry) {
-    tocRegistry.add(new LaTeXToCFactory(tracker));
-    tocRegistry.add(new MarkdownToCFactory(tracker));
-    tocRegistry.add(new PythonToCFactory(tracker));
+    tocRegistry.add(new LaTeXTableOfContentsFactory(tracker));
+    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker));
+    tocRegistry.add(new PythonTableOfContentsFactory(tracker));
   }
 
   return tracker;
