@@ -7,28 +7,6 @@ const fileName = 'notebook.ipynb';
 
 const menuPaths = ['File', 'Edit', 'View', 'Run', 'Kernel', 'Help'];
 
-async function populateNotebookVega(page: IJupyterLabPageFixture) {
-  await page.notebook.addCell(
-    'code',
-    `from IPython.display import display
-
-display({
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "data": {
-    "values": [
-      {"a": "A", "b": 28}, {"a": "B", "b": 55}
-    ]
-  },
-  "mark": "bar",
-  "encoding": {
-    "x": {"field": "a", "type": "nominal", "axis": {"labelAngle": 0}},
-    "y": {"field": "b", "type": "quantitative"}
-  }
-}, raw=True)
-`
-  );
-}
-
 async function populateNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.setCell(0, 'raw', 'Just a raw cell');
   await page.notebook.addCell(
@@ -106,31 +84,6 @@ test.describe('Notebook Create', () => {
     await page.theme.setDarkTheme();
     const nbPanel = await page.notebook.getNotebookInPanel();
     const imageName = 'dark-theme.png';
-
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
-  });
-
-  test('Run Vega code in default theme', async ({ page }) => {
-    const imageName = 'run-cells-vega.png';
-
-    await populateNotebookVega(page);
-    await page.notebook.run();
-    await page.waitForSelector('.vega-embed');
-
-    const nbPanel = await page.notebook.getNotebookInPanel();
-
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
-  });
-
-  test('Run Vega code in dark theme', async ({ page }) => {
-    const imageName = 'dark-theme-vega.png';
-
-    await populateNotebookVega(page);
-    await page.theme.setDarkTheme();
-    await page.notebook.run();
-    await page.waitForSelector('.vega-embed');
-
-    const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
   });
