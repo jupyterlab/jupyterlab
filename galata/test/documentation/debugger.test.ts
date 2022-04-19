@@ -35,7 +35,6 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-
     await setSidebarWidth(page, 251, 'right');
 
     expect(

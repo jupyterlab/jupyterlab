@@ -48,7 +48,9 @@ export async function setSidebarWidth(
   width = 251,
   side: 'left' | 'right' = 'left'
 ): Promise<void> {
-  const handles = page.locator('#jp-main-split-panel > .lm-SplitPanel-handle');
+  const handles = page.locator(
+    '#jp-main-split-panel > .lm-SplitPanel-handle:not(.lm-mod-hidden)'
+  );
   const splitHandle =
     side === 'left'
       ? await handles.first().elementHandle()
