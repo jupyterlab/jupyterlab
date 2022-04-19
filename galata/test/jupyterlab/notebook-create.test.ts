@@ -111,26 +111,26 @@ test.describe('Notebook Create', () => {
   });
 
   test('Run Vega code in default theme', async ({ page }) => {
-    await populateNotebookVega(page);
-    await page.notebook.run();
-    await page.notebook.save();
     const imageName = 'run-cells-vega.png';
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
-
+    await populateNotebookVega(page);
+    await page.notebook.run();
     await page.waitForSelector('.vega-embed');
+
+    const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Run Vega code in dark theme', async ({ page }) => {
-    await populateNotebookVega(page);
-    await page.notebook.run();
-    await page.theme.setDarkTheme();
-    const nbPanel = await page.notebook.getNotebookInPanel();
     const imageName = 'dark-theme-vega.png';
 
+    await populateNotebookVega(page);
+    await page.theme.setDarkTheme();
+    await page.notebook.run();
     await page.waitForSelector('.vega-embed');
+
+    const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
   });
