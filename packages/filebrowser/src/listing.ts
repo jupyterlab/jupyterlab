@@ -1912,8 +1912,9 @@ export namespace DirListing {
     /**
      * Get the checkbox input element node.
      *
-     * Downstream interface implementations that don't support checkboxes should
-     * simply always return null for this function.
+     * Downstream interface implementations,such as jupyterlab-unfold, that
+     * don't support checkboxes should simply always return null for this
+     * function.
      *
      * @param node A node created by [[createItemNode]] or
      * [[createHeaderItemNode]]
