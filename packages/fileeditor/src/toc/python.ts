@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+/*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
+
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
@@ -10,7 +12,7 @@ import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
 /**
  * Regular expression to create the outline
  */
-const KEYWORDS = new RegExp(/^\s*(class |def |from |import )/);
+const KEYWORDS = new RegExp('^\\s*(class |def |from |import )', 'd');
 
 /**
  * Table of content model for Python files.
