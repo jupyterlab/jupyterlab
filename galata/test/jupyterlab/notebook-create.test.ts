@@ -118,6 +118,8 @@ test.describe('Notebook Create', () => {
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 
+    await page.waitForSelector('.vega-embed');
+
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -127,6 +129,8 @@ test.describe('Notebook Create', () => {
     await page.theme.setDarkTheme();
     const nbPanel = await page.notebook.getNotebookInPanel();
     const imageName = 'dark-theme-vega.png';
+
+    await page.waitForSelector('.vega-embed');
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
   });
