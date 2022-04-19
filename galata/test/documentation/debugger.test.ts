@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { generateCaptureArea, positionMouse, setSidebarWidth } from './utils';
+import { positionMouse, setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,

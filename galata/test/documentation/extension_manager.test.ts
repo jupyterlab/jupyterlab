@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { generateCaptureArea, setSidebarWidth } from './utils';
+import { setSidebarWidth } from './utils';
 import { default as extensionsList } from './data/extensions.json';
 
 test.use({

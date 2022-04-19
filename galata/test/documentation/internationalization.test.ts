@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { generateCaptureArea, setSidebarWidth } from './utils';
+import { setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
