@@ -89,6 +89,14 @@ export function getHTMLHeadings(
   return headings;
 }
 
+/**
+ * Add an heading prefix to a HTML node.
+ *
+ * @param container HTML node containing the heading
+ * @param selector Heading selector
+ * @param prefix Title prefix to add
+ * @returns The modified HTML element
+ */
 export function addPrefix(
   container: Element,
   selector: string,

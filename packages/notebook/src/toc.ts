@@ -39,8 +39,17 @@ export enum RunningStatus {
   Running = 1
 }
 
+/**
+ * Type of headings
+ */
 export enum HeadingType {
+  /**
+   * Heading from HTML output
+   */
   HTML,
+  /**
+   * Heading from Markdown cell or Markdown output
+   */
   Markdown
 }
 
@@ -315,25 +324,30 @@ export class NotebookToCModel extends TableOfContentsModel<
           break;
         }
         case 'markdown': {
-          headings.push(
-            ...ToCUtils.Markdown.getHeadings(
-              cell.model.value.text,
-              this.configuration,
-              documentLevels
-            ).map((heading, index) => {
-              return {
-                ...heading,
-                cellRef: cell,
-                collapsed:
-                  // If there are multiple headings, only collapse the first one
-                  this.configuration.syncCollapseState && index === 0
-                    ? (cell as MarkdownCell).headingCollapsed
-                    : false,
-                isRunning: RunningStatus.Idle,
-                type: HeadingType.Markdown
-              };
-            })
-          );
+          const cellHeadings = ToCUtils.Markdown.getHeadings(
+            cell.model.value.text,
+            this.configuration,
+            documentLevels
+          ).map((heading, index) => {
+            return {
+              ...heading,
+              cellRef: cell,
+              collapsed: false,
+              isRunning: RunningStatus.Idle,
+              type: HeadingType.Markdown
+            };
+          });
+          // If there are multiple headings, only collapse the highest heading (i.e. minimal level)
+          // consistent with the cell.headingInfo
+          if (
+            this.configuration.syncCollapseState &&
+            (cell as MarkdownCell).headingCollapsed
+          ) {
+            const minLevel = Math.min(...cellHeadings.map(h => h.level));
+            const minHeading = cellHeadings.find(h => h.level === minLevel);
+            minHeading!.collapsed = (cell as MarkdownCell).headingCollapsed;
+          }
+          headings.push(...cellHeadings);
           break;
         }
       }
