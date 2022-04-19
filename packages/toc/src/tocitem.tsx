@@ -57,21 +57,20 @@ export class TOCItem extends React.PureComponent<
             }
           }}
         >
-          {children && (
-            <button
-              className="jp-tocItem-collapser"
-              onClick={(event: React.MouseEvent) => {
-                event.preventDefault();
-                onCollapse(heading);
-              }}
-            >
-              {heading.collapsed ? (
-                <caretRightIcon.react tag="span" width="20px" />
-              ) : (
-                <caretDownIcon.react tag="span" width="20px" />
-              )}
-            </button>
-          )}
+          <button
+            className="jp-tocItem-collapser"
+            onClick={(event: React.MouseEvent) => {
+              event.preventDefault();
+              onCollapse(heading);
+            }}
+            style={{ visibility: children ? 'visible' : 'hidden' }}
+          >
+            {heading.collapsed ? (
+              <caretRightIcon.react tag="span" width="20px" />
+            ) : (
+              <caretDownIcon.react tag="span" width="20px" />
+            )}
+          </button>
           <span
             className="jp-tocItem-content"
             title={heading.text}

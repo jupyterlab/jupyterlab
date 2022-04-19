@@ -33,8 +33,8 @@
 }
 
 .jp-TableOfContents li > ol {
-  /* button width + margin */
-  padding-left: 24px;
+  /* Align left border with triangle icon center */
+  padding-left: 11px;
 }
 
 .jp-TableOfContents-content {
