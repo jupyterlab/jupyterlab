@@ -32,6 +32,7 @@ import { getIndentUnit } from '@codemirror/language';
 import {
   EditorSelection,
   EditorState,
+  Extension,
   StateCommand,
   Transaction
 } from '@codemirror/state';
@@ -1379,9 +1380,7 @@ export namespace CodeMirrorEditor {
           target.dispatch({ changes: { from: from, to: head, insert: '' } });
         } else {
           // delete non-tabs
-          // TODO CM6
-          // const from = cm.findPosH(head, -1, 'char', false);
-          // doc.replaceRange('', from, head);
+          target.dispatch({ changes: { from: head - 1, to: head } });
         }
       }
     }
@@ -1393,13 +1392,49 @@ export namespace CodeMirrorEditor {
  * The namespace for module private data.
  */
 namespace Private {
+  function createEditorTheme(config: CodeMirrorEditor.IConfig): Extension {
+    const {
+      fontFamily,
+      fontSize,
+      lineHeight,
+      lineWrap,
+      wordWrapColumn
+    } = config;
+
+    const parentStyle: Record<string, any> = {};
+    if (fontSize) {
+      parentStyle.fontSize = fontSize + 'px';
+    }
+    if (fontFamily) {
+      parentStyle.fontFamily = fontFamily;
+    }
+    if (lineHeight) {
+      parentStyle.lineHeight = lineHeight.toString();
+    }
+
+    const lineStyle: Record<string, any> = {};
+    if (lineWrap === 'wordWrapColumn') {
+      lineStyle.width = wordWrapColumn + 'ch';
+    } else if (lineWrap === 'bounded') {
+      lineStyle.maxWidth = wordWrapColumn + 'ch';
+    }
+
+    return EditorView.baseTheme({
+      '&': parentStyle,
+      '.cm-line': lineStyle
+    });
+  }
+
   export function createEditor(
     host: HTMLElement,
     config: CodeMirrorEditor.IConfig,
     ybinding: IYCodeMirrorBinding | null,
     editorConfig: Configuration.EditorConfiguration
   ): EditorView {
-    let extensions = editorConfig.getInitialExtensions(config);
+    let extensions = [
+      ...editorConfig.getInitialExtensions(config),
+      createEditorTheme(config)
+    ];
     if (ybinding) {
       extensions.push(yCollab(ybinding.text, ybinding.awareness));
     }
@@ -1414,46 +1449,6 @@ namespace Private {
     });
 
     return view;
-    //TODO: CM6 use a theme to style this
-    /*const {
-      fontFamily,
-      fontSize,
-      lineHeight,
-      lineWrap,
-      wordWrapColumn,
-      readOnly,
-    } = config;
-    const bareConfig = {
-      autoCloseBrackets: autoClosingBrackets ? {} : false,
-      indentUnit: tabSize,
-      indentWithTabs: !insertSpaces,
-      lineWrapping: lineWrap === 'off' ? false : true,
-      readOnly,
-      ...otherOptions
-    } as CodeMirror.EditorConfiguration;
-    return CodeMirror(el => {
-      if (fontFamily) {
-        el.style.fontFamily = fontFamily;
-      }
-      if (fontSize) {
-        el.style.fontSize = fontSize + 'px';
-      }
-      if (lineHeight) {
-        el.style.lineHeight = lineHeight.toString();
-      }
-      if (readOnly) {
-        el.classList.add(READ_ONLY_CLASS);
-      }
-      if (lineWrap === 'wordWrapColumn') {
-        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
-        lines.style.width = `${wordWrapColumn}ch`;
-      }
-      if (lineWrap === 'bounded') {
-        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
-        lines.style.maxWidth = `${wordWrapColumn}ch`;
-      }
-      host.appendChild(el);
-    }, bareConfig);*/
   }
 
   /**

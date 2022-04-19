@@ -17,6 +17,8 @@ import {
 
 import { EditorView, KeyBinding, keymap } from '@codemirror/view';
 
+import { StyleSpec } from 'style-mod';
+
 import { Mode } from './mode';
 
 export namespace Configuration {
@@ -302,6 +304,7 @@ export namespace Configuration {
         ],
         ['language', createForwarderBuilder<LanguageSupport>()]
       ]);
+      this._themeSpec = { '&': {}, '.cm-line': {} };
     }
 
     reconfigureExtension<T>(view: EditorView, key: string, value: T): void {
@@ -310,6 +313,15 @@ export namespace Configuration {
         view.dispatch({
           effects: builder.reconfigure(value)
         });
+      } else {
+        const config: Record<string, any> = {};
+        config[key] = value;
+        const theme_extension = this.updateEditorTheme(config);
+        if (theme_extension) {
+          view.dispatch({
+            effects: this._theme.reconfigure(theme_extension)
+          });
+        }
       }
     }
 
@@ -321,6 +333,12 @@ export namespace Configuration {
           eff.push(builder.reconfigure(value));
         }
       }
+
+      const theme_extension = this.updateEditorTheme(config);
+      if (theme_extension) {
+        eff.push(this._theme.reconfigure(theme_extension));
+      }
+
       view.dispatch({
         effects: eff
       });
@@ -351,11 +369,22 @@ export namespace Configuration {
           ? [...defaultKeymap, ...config.extraKeys!]
           : [...defaultKeymap]
       );
+      // TODO: replace this with indentUnit in the IConfig object
       const insert_ext = config.insertSpaces
         ? indentUnit.of(' '.repeat(config.tabSize))
         : indentUnit.of('\t');
 
-      extensions.push(keymap_ext, insert_ext, defaultHighlightStyle);
+      let theme_extension = this.updateEditorTheme(config);
+      if (!theme_extension) {
+        theme_extension = EditorView.baseTheme({});
+      }
+
+      extensions.push(
+        keymap_ext,
+        insert_ext,
+        defaultHighlightStyle,
+        this._theme.of(theme_extension)
+      );
 
       Mode.ensure('text/x-python').then(spec => {
         if (spec) {
@@ -366,10 +395,61 @@ export namespace Configuration {
       return extensions;
     }
 
+    private updateEditorTheme(
+      config: Partial<IConfig> | Record<string, any>
+    ): Extension | null {
+      const {
+        fontFamily,
+        fontSize,
+        lineHeight,
+        lineWrap,
+        wordWrapColumn
+      } = config;
+
+      let needUpdate = false;
+
+      const parentStyle: Record<string, any> = {};
+      if (fontSize) {
+        parentStyle.fontSize = fontSize + 'px';
+        needUpdate = true;
+      }
+      if (fontFamily) {
+        parentStyle.fontFamily = fontFamily;
+        needUpdate = true;
+      }
+      if (lineHeight) {
+        parentStyle.lineHeight = lineHeight.toString();
+        needUpdate = true;
+      }
+
+      const lineStyle: Record<string, any> = {};
+      if (lineWrap === 'wordWrapColumn') {
+        lineStyle.width = wordWrapColumn + 'ch';
+        needUpdate = true;
+      } else if (lineWrap === 'bounded') {
+        lineStyle.maxWidth = wordWrapColumn + 'ch';
+        needUpdate = true;
+      }
+
+      if (needUpdate) {
+        const newThemeSpec = {
+          '&': parentStyle,
+          '.cm-line': lineStyle
+        };
+
+        this._themeSpec = { ...this._themeSpec, ...newThemeSpec };
+        return EditorView.baseTheme(this._themeSpec);
+      } else {
+        return null;
+      }
+    }
+
     private get(key: string): IConfigurableBuilder | undefined {
       return this._configurableBuilderMap.get(key);
     }
 
     private _configurableBuilderMap: Map<string, IConfigurableBuilder>;
+    private _themeSpec: Record<string, StyleSpec>;
+    private _theme: Compartment;
   }
 }
