@@ -571,6 +571,16 @@ export class ReactiveToolbar extends Toolbar<Widget> {
  */
 export namespace Toolbar {
   /**
+   * Widget with associated toolbar
+   */
+  export interface IWidgetToolbar extends Widget {
+    /**
+     * Toolbar of actions on the widget
+     */
+    toolbar?: Toolbar;
+  }
+
+  /**
    * Create an interrupt toolbar item.
    *
    * @deprecated since version v3.2
@@ -675,6 +685,10 @@ export namespace ToolbarButtonComponent {
    */
   export interface IProps {
     className?: string;
+    /**
+     * Data set of the button
+     */
+    dataset?: DOMStringMap;
     label?: string;
     icon?: LabIcon.IMaybeResolvable;
     iconClass?: string;
@@ -754,6 +768,7 @@ export function ToolbarButtonComponent(
       }
       aria-pressed={props.pressed}
       aria-disabled={props.enabled === false}
+      {...props.dataset}
       disabled={props.enabled === false}
       onClick={props.actualOnClick ?? false ? handleClick : undefined}
       onMouseDown={
@@ -1169,6 +1184,7 @@ namespace Private {
 
     return {
       className,
+      dataset: { 'data-command': options.id },
       icon,
       iconClass,
       tooltip,

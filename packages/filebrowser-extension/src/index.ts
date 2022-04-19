@@ -15,11 +15,13 @@ import {
 } from '@jupyterlab/application';
 import {
   Clipboard,
+  createToolbarFactory,
   ICommandPalette,
   InputDialog,
+  IToolbarWidgetRegistry,
   MainAreaWidget,
+  setToolbar,
   showErrorMessage,
-  ToolbarButton,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
@@ -30,7 +32,8 @@ import {
   FileUploadStatus,
   FilterFileBrowserModel,
   IFileBrowserCommands,
-  IFileBrowserFactory
+  IFileBrowserFactory,
+  Uploader
 } from '@jupyterlab/filebrowser';
 import { Launcher } from '@jupyterlab/launcher';
 import { Contents } from '@jupyterlab/services';
@@ -51,6 +54,7 @@ import {
   markdownIcon,
   newFolderIcon,
   pasteIcon,
+  refreshIcon,
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
@@ -58,6 +62,8 @@ import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
 import { JSONObject } from '@lumino/coreutils';
+
+const FILE_BROWSER_FACTORY = 'FileBrowser';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -100,6 +106,8 @@ namespace CommandIDs {
   export const createNewFile = 'filebrowser:create-new-file';
 
   export const createNewMarkdownFile = 'filebrowser:create-new-markdown-file';
+
+  export const refresh = 'filebrowser:refresh';
 
   export const rename = 'filebrowser:rename';
 
@@ -367,6 +375,8 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
   requires: [
     IDocumentManager,
     IFileBrowserFactory,
+    ISettingRegistry,
+    IToolbarWidgetRegistry,
     ITranslator,
     ILabShell,
     IFileBrowserCommands
@@ -376,6 +386,8 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     factory: IFileBrowserFactory,
+    settings: ISettingRegistry,
+    toolbarRegistry: IToolbarWidgetRegistry,
     translator: ITranslator,
     labShell: ILabShell
   ): void => {
@@ -387,6 +399,25 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     browser.node.setAttribute('role', 'region');
     browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
     browser.title.icon = folderIcon;
+
+    // Toolbar
+    toolbarRegistry.registerFactory(
+      FILE_BROWSER_FACTORY,
+      'uploader',
+      (browser: FileBrowser) =>
+        new Uploader({ model: browser.model, translator })
+    );
+
+    setToolbar(
+      browser,
+      createToolbarFactory(
+        toolbarRegistry,
+        settings,
+        FILE_BROWSER_FACTORY,
+        browserWidget.id,
+        translator
+      )
+    );
 
     labShell.add(browser, 'left', { rank: 100 });
 
@@ -659,37 +690,6 @@ export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
         activeStateChanged: item.model.stateChanged
       }
     );
-  }
-};
-
-/**
- * A plugin to add a launcher button to the file browser toolbar
- */
-export const launcherToolbarButton: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/filebrowser-extension:launcher-toolbar-button',
-  autoStart: true,
-  requires: [IFileBrowserFactory, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    factory: IFileBrowserFactory,
-    translator: ITranslator
-  ) => {
-    const { commands } = app;
-    const trans = translator.load('jupyterlab');
-    const { defaultBrowser: browser } = factory;
-
-    // Add a launcher toolbar item.
-    const launcher = new ToolbarButton({
-      icon: addIcon,
-      onClick: () => {
-        if (commands.hasCommand('launcher:create')) {
-          return Private.createLauncher(commands, browser);
-        }
-      },
-      tooltip: trans.__('New Launcher'),
-      actualOnClick: true
-    });
-    browser.toolbar.insertItem(0, 'launch', launcher);
   }
 };
 
@@ -1044,6 +1044,19 @@ function addCommands(
     label: trans.__('New Markdown File')
   });
 
+  commands.addCommand(CommandIDs.refresh, {
+    execute: args => {
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.model.refresh();
+      }
+    },
+    icon: refreshIcon.bindprops({ stylesheet: 'menuItem' }),
+    caption: trans.__('Refresh the file browser.'),
+    label: trans.__('Refresh File List')
+  });
+
   commands.addCommand(CommandIDs.rename, {
     execute: args => {
       const widget = tracker.currentWidget;
@@ -1101,8 +1114,12 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createLauncher, {
     label: trans.__('New Launcher'),
-    execute: (args: JSONObject) =>
-      Private.createLauncher(commands, browser, args)
+    icon: args => (args.toolbar ? addIcon : undefined),
+    execute: (args: JSONObject) => {
+      if (commands.hasCommand('launcher:create')) {
+        return Private.createLauncher(commands, browser, args);
+      }
+    }
   });
 
   if (settingRegistry) {
@@ -1310,7 +1327,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   fileUploadStatus,
   downloadPlugin,
   browserWidget,
-  launcherToolbarButton,
   openWithPlugin,
   openBrowserTabPlugin,
   openUrlPlugin
