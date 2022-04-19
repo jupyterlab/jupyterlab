@@ -86,6 +86,9 @@ Extension Development Changes
   ``private`` package has now been removed in ``4.0``. If you were using this field to develop source extensions against
   a development build of JupyterLab, you should instead switch to the federated extensions system (via the ``--extensions-in-dev-mode`` flag)
   or to using the ``--splice-source`` option. See :ref:`prebuilt_dev_workflow` and :ref:`source_dev_workflow` for more information.
+- The ``webpack`` dependency has been updated to ``5.72`` (or greater). Base rules have been updated to use the
+  `Asset Modules <https://webpack.js.org/guides/asset-modules>`_ instead of the previous ``file-loader``, ``raw-loader`` and ``url-loader```.
+  This might affect third-party extensions if they were relying on specific behaviors from these loaders.
 
 JupyterLab 3.0 to 3.1
 ---------------------
