@@ -64,9 +64,10 @@ bumped their major version (following semver convention):
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
-   The ``create-theme`` script has been removed. If you want to create a new theme extension, you
+   * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
    should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
-   The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
+   * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
+   * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
   Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
   Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
