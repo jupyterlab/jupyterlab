@@ -18,9 +18,6 @@
       "path": "../observables"
     },
     {
-      "path": "../ui-components"
-    },
-    {
       "path": "."
     },
     {
@@ -40,9 +37,6 @@
     },
     {
       "path": "../observables"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }
