@@ -9,6 +9,7 @@ describe('@jupyterlab/fileeditor', () => {
     describe('#getHeadings', () => {
       it.each<[string, IEditorHeading[]]>([
         ['', []],
+        ['a = 2', []],
         [
           'def f(a, b):',
           [
@@ -128,8 +129,9 @@ describe('@jupyterlab/fileeditor', () => {
 
         const newHeadings = signalToPromise(model.headingsChanged);
         model.isActive = true; // This will trigger refresh
-        if (text) {
-          // If text is empty the new computed headings are gonna be empty.
+        if (headers.length > 0) {
+          // If text has no associated headings the new computed headings
+          // are gonna be empty. So the signal won't be emitted.
           await newHeadings;
         } else {
           await model.refresh();
