@@ -1918,7 +1918,12 @@ export class Notebook extends StaticNotebook {
         activeCell.editor.focus();
       }
     }
-    if (force && !this.node.contains(document.activeElement)) {
+    if (
+      (force && !this.node.contains(document.activeElement)) ||
+      // Focus the notebook if the active cell changes but as not the focus
+      // Xref: https://github.com/jupyterlab/jupyterlab/issues/12437
+      (activeCell && !activeCell.node.contains(document.activeElement))
+    ) {
       this.node.focus();
     }
   }
