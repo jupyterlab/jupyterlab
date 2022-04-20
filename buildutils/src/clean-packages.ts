@@ -6,9 +6,9 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as glob from 'glob';
-import { exitOnUuncaughtException, readJSONFile } from './utils';
+import { exitOnUncaughtException, readJSONFile } from './utils';
 
-exitOnUuncaughtException();
+exitOnUncaughtException();
 
 // Get all of the packages.
 const basePath = path.resolve('.');

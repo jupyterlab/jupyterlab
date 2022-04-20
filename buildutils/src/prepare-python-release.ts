@@ -13,7 +13,7 @@ import * as utils from './utils';
 commander
   .description('Prepare the Python package for release')
   .action(async (options: any) => {
-    utils.exitOnUuncaughtException();
+    utils.exitOnUncaughtException();
 
     const distDir = './dist';
 
