@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { StackedLayout, Widget } from '@lumino/widgets';
-import { CodeEditor, CodeEditorWrapper } from './';
+import { CodeEditor } from './editor';
+import { CodeEditorWrapper } from './widget';
 
 export class CodeViewerWidget extends Widget {
   /**
@@ -27,8 +28,8 @@ export class CodeViewerWidget extends Widget {
     layout.addWidget(editorWidget);
   }
 
-  public model: CodeEditor.IModel;
-  public editor: CodeEditor.IEditor;
+  model: CodeEditor.IModel;
+  editor: CodeEditor.IEditor;
 }
 
 /**
