@@ -44,6 +44,7 @@ commander
 
       if (!options.dryRun) {
         // Make sure we are logged in.
+        utils.run('npm whoami');
         if (utils.checkStatus('npm whoami') !== 0) {
           console.error('Please run `npm login`');
           process.exit(1);
