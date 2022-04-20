@@ -12,7 +12,15 @@ import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
 /**
  * Regular expression to create the outline
  */
-const KEYWORDS = new RegExp('^\\s*(class |def |from |import )', 'd');
+let KEYWORDS: RegExp;
+try {
+  // https://github.com/tc39/proposal-regexp-match-indices was accepted
+  // in May 2021 (https://github.com/tc39/proposals/blob/main/finished-proposals.md)
+  // So we will fallback to the polyfill regexp-match-indices if not available
+  KEYWORDS = new RegExp('^\\s*(class |def |from |import )', 'd');
+} catch {
+  KEYWORDS = new RegExp('^\\s*(class |def |from |import )');
+}
 
 /**
  * Table of content model for Python files.
@@ -37,7 +45,7 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
    *
    * @returns The list of new headings or `null` if nothing needs to be updated.
    */
-  protected getHeadings(): Promise<IEditorHeading[] | null> {
+  protected async getHeadings(): Promise<IEditorHeading[] | null> {
     if (!this.isActive) {
       return Promise.resolve(null);
     }
@@ -56,7 +64,15 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
     let lineIdx = -1;
     for (const line of lines) {
       lineIdx++;
-      const hasKeyword = KEYWORDS.exec(line);
+      let hasKeyword: RegExpExecArray | null;
+      if (KEYWORDS.flags.includes('d')) {
+        hasKeyword = KEYWORDS.exec(line);
+      } else {
+        const { default: execWithIndices } = await import(
+          'regexp-match-indices'
+        );
+        hasKeyword = execWithIndices(KEYWORDS, line);
+      }
       if (hasKeyword) {
         // Index 0 contains the spaces, index 1 is the keyword group
         const [start] = (hasKeyword as any).indices[1];
