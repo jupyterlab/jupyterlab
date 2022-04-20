@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog } from '@jupyterlab/apputils';
+import { Dialog, setToolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { FileBrowser } from './browser';
@@ -124,7 +125,8 @@ class OpenDialog
     translator?: ITranslator
   ) {
     super();
-    translator = translator || nullTranslator;
+    translator = translator ?? nullTranslator;
+    const trans = translator.load('jupyterlab');
     this.addClass(OPEN_DIALOG_CLASS);
 
     this._browser = Private.createFilteredFileBrowser(
@@ -134,6 +136,35 @@ class OpenDialog
       {},
       translator
     );
+
+    // Add toolbar items
+    setToolbar(this._browser, (browser: FileBrowser) => [
+      {
+        name: 'new-folder',
+        widget: new ToolbarButton({
+          icon: newFolderIcon,
+          onClick: () => {
+            browser.createNewDirectory();
+          },
+          tooltip: trans.__('New Folder')
+        })
+      },
+      {
+        name: 'refresher',
+        widget: new ToolbarButton({
+          icon: refreshIcon,
+          onClick: () => {
+            browser.model.refresh().catch(reason => {
+              console.error(
+                'Failed to refresh file browser in open dialog.',
+                reason
+              );
+            });
+          },
+          tooltip: trans.__('Refresh File List')
+        })
+      }
+    ]);
 
     // Build the sub widgets
     const layout = new PanelLayout();

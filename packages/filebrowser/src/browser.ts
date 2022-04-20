@@ -5,8 +5,7 @@ import {
   FilenameSearcher,
   ReactWidget,
   showErrorMessage,
-  Toolbar,
-  ToolbarButton
+  Toolbar
 } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
@@ -15,13 +14,11 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { IIterator } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import { FilterFileBrowserModel } from './model';
-import { Uploader } from './upload';
 
 /**
  * The class name added to file browsers.
@@ -83,27 +80,6 @@ export class FileBrowser extends Widget {
       this._trans.__('file browser')
     );
     this._directoryPending = false;
-
-    const newFolder = new ToolbarButton({
-      icon: newFolderIcon,
-      onClick: () => {
-        this.createNewDirectory();
-      },
-      tooltip: this._trans.__('New Folder')
-    });
-    const uploader = new Uploader({ model, translator: this.translator });
-
-    const refresher = new ToolbarButton({
-      icon: refreshIcon,
-      onClick: () => {
-        void model.refresh();
-      },
-      tooltip: this._trans.__('Refresh File List')
-    });
-
-    this.toolbar.addItem('newFolder', newFolder);
-    this.toolbar.addItem('upload', uploader);
-    this.toolbar.addItem('refresher', refresher);
 
     this.listing = this.createDirListing({
       model,

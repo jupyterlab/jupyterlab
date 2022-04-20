@@ -30,8 +30,10 @@
 .jp-FileBrowser-toolbar.jp-Toolbar {
   border-bottom: none;
   height: auto;
-  margin: var(--jp-toolbar-header-margin);
+  margin: 8px 12px 0px 12px;
+  padding: 0px;
   box-shadow: none;
+  justify-content: flex-start;
 }
 
 .jp-BreadCrumbs {
@@ -63,41 +65,31 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar.jp-Toolbar {
-  padding: 0px;
-  margin: 8px 12px 0px 12px;
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar {
-  justify-content: flex-start;
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0px;
   padding-right: 2px;
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
   width: 40px;
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent {
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher'] {
   width: 72px;
   background: var(--jp-brand-color1);
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent:focus-visible {
-  background-color: var(--jp-brand-color0);
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']:hover,
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']:focus-visible {
+  background-color: var(--jp-brand-color0) !important;
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']
   .jp-icon3 {
   fill: var(--jp-layout-color1);
 }

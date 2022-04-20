@@ -1,11 +1,12 @@
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { toArray } from '@lumino/algorithm';
+import { findIndex, toArray } from '@lumino/algorithm';
 import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from '../dialog';
 import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
+import { Toolbar } from './widget';
 
 /**
  * Default toolbar item rank
@@ -227,7 +228,7 @@ async function setToolbarItems(
  * @param pluginId Settings plugin id
  * @param translator Translator
  * @param propertyId Toolbar definition key in the settings plugin
- * @returns List of toolbar widgets
+ * @returns List of toolbar widgets factory
  */
 export function createToolbarFactory(
   toolbarRegistry: IToolbarWidgetRegistry,
@@ -303,4 +304,99 @@ export function createToolbarFactory(
 
     return toolbar;
   };
+}
+
+/**
+ * Set the toolbar items of a widget from a factory
+ *
+ * @param widget Widget with the toolbar to set
+ * @param factory Toolbar items factory
+ */
+export function setToolbar(
+  widget: Toolbar.IWidgetToolbar,
+  factory: (
+    widget: Widget
+  ) =>
+    | IObservableList<ToolbarRegistry.IToolbarItem>
+    | ToolbarRegistry.IToolbarItem[]
+): void {
+  if (!widget.toolbar) {
+    console.log(`Widget ${widget.id} has no 'toolbar'.`);
+    return;
+  }
+  const items = factory(widget);
+
+  if (Array.isArray(items)) {
+    items.forEach(({ name, widget: item }) => {
+      widget.toolbar!.addItem(name, item);
+    });
+  } else {
+    const updateToolbar = (
+      list: IObservableList<ToolbarRegistry.IToolbarItem>,
+      changes: IObservableList.IChangedArgs<ToolbarRegistry.IToolbarItem>
+    ) => {
+      switch (changes.type) {
+        case 'add':
+          changes.newValues.forEach((item, index) => {
+            widget.toolbar!.insertItem(
+              changes.newIndex + index,
+              item.name,
+              item.widget
+            );
+          });
+          break;
+        case 'move':
+          changes.oldValues.forEach(item => {
+            item.widget.parent = null;
+          });
+          changes.newValues.forEach((item, index) => {
+            widget.toolbar!.insertItem(
+              changes.newIndex + index,
+              item.name,
+              item.widget
+            );
+          });
+          break;
+        case 'remove':
+          changes.oldValues.forEach(item => {
+            item.widget.parent = null;
+          });
+          break;
+        case 'set':
+          changes.oldValues.forEach(item => {
+            item.widget.parent = null;
+          });
+
+          changes.newValues.forEach((item, index) => {
+            const existingIndex = findIndex(
+              widget.toolbar!.names(),
+              name => item.name === name
+            );
+            if (existingIndex >= 0) {
+              toArray(widget.toolbar!.children())[existingIndex].parent = null;
+            }
+
+            widget.toolbar!.insertItem(
+              changes.newIndex + index,
+              item.name,
+              item.widget
+            );
+          });
+          break;
+      }
+    };
+
+    updateToolbar(items, {
+      newIndex: 0,
+      newValues: toArray(items),
+      oldIndex: 0,
+      oldValues: [],
+      type: 'add'
+    });
+
+    items.changed.connect(updateToolbar);
+    widget.disposed.connect(() => {
+      items.changed.disconnect(updateToolbar);
+    });
+  }
 }
