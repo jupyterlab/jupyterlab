@@ -12,15 +12,13 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
-import { doBuild } from './build-helper';
 import {
   IKernelInstallInfo,
   KernelCompanion,
   presentCompanions
 } from './companions';
 import { reportInstallError } from './dialog';
-import { IListEntry, Lister, ListResult } from './listings';
-import { ISearchResult, isJupyterOrg, Searcher } from './npm';
+import { isJupyterOrg } from './npm';
 
 /**
  * Information about an extension.
@@ -44,17 +42,17 @@ export interface IEntry {
   /**
    * Whether the extension is currently installed.
    */
-  installed: boolean;
+  installed?: boolean | null;
+
+  /**
+   * Whether the extension is allowed or not.
+   */
+  is_allowed: boolean;
 
   /**
    * Whether the extension is currently enabled.
    */
   enabled: boolean;
-
-  /**
-   * A flag indicating the status of an installed extension.
-   */
-  status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
 
   /**
    * The latest version of the extension.
@@ -66,9 +64,10 @@ export interface IEntry {
    */
   installed_version: string;
 
-  blockedExtensionsEntry: IListEntry | undefined;
-
-  allowedExtensionsEntry: IListEntry | undefined;
+  /**
+   * A flag indicating the status of an installed extension.
+   */
+  status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
 
   /**
    * The package type (prebuilt or source).
@@ -78,89 +77,13 @@ export interface IEntry {
   /**
    * The information about extension installation.
    */
-  install: IInstall | undefined;
+  install?: IInstall | null;
 }
 
 /**
  * Information about extension installation.
  */
 export interface IInstall {
-  /**
-   * The used package manager (e.g. pip, conda...)
-   */
-  packageManager: string | undefined;
-
-  /**
-   * The package name as known by the package manager.
-   */
-  packageName: string | undefined;
-
-  /**
-   * The uninstallation instructions as a comprehensive
-   * text for the end user.
-   */
-  uninstallInstructions: string | undefined;
-}
-
-/**
- * Wire format for installed extensions.
- */
-export interface IInstalledEntry {
-  /**
-   * The name of the extension.
-   */
-  name: string;
-
-  /**
-   * A short description of the extension.
-   */
-  description: string;
-
-  /**
-   * A representative link of the package.
-   */
-  url: string;
-
-  /**
-   * Whether the extension is currently installed.
-   */
-  installed?: boolean;
-
-  /**
-   * Whether the extension is currently enabled.
-   */
-  enabled: boolean;
-
-  /**
-   * The latest version of the extension.
-   */
-  latest_version: string;
-
-  /**
-   * The installed version of the extension.
-   */
-  installed_version: string;
-
-  /**
-   * A flag indicating the status of an installed extension.
-   */
-  status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
-
-  /**
-   * The package type (prebuilt or source).
-   */
-  pkg_type: 'prebuilt' | 'source';
-
-  /**
-   * The information about extension installation.
-   */
-  install: IInstallEntry | undefined;
-}
-
-/**
- * Information about extension installation.
- */
-export interface IInstallEntry {
   /**
    * The used package manager (e.g. pip, conda...)
    */
@@ -221,53 +144,11 @@ export class ListModel extends VDomModel {
     this.serviceManager = serviceManager;
     this.serverConnectionSettings = ServerConnection.makeSettings();
     this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
-    this.lister.listingsLoaded.connect(this._listingIsLoaded, this);
-    this.searcher = new Searcher(
-      settings.composite['npmRegistry'] as string,
-      settings.composite['npmCdn'] as string,
-      settings.composite['enableCdn'] as boolean
-    );
     _isDisclaimed = settings.composite['disclaimed'] === true;
     settings.changed.connect(() => {
       _isDisclaimed = settings.composite['disclaimed'] === true;
-      this.searcher = new Searcher(
-        settings.composite['npmRegistry'] as string,
-        settings.composite['npmCdn'] as string,
-        settings.composite['enableCdn'] as boolean
-      );
       void this.update();
     });
-  }
-
-  private _listingIsLoaded(_: Lister, listings: ListResult) {
-    this._listMode = listings!.mode;
-    this._blockedExtensionsArray = new Array<IListEntry>();
-    if (this._listMode === 'block') {
-      listings!.entries.map(e => {
-        this._blockedExtensionsArray.push({
-          name: e.name,
-          regexp: new RegExp(e.name),
-          type: e.type,
-          reason: e.reason,
-          creation_date: e.creation_date,
-          last_update_date: e.last_update_date
-        });
-      });
-    }
-    this._allowedExtensionsArray = new Array<IListEntry>();
-    if (this._listMode === 'allow') {
-      listings!.entries.map(e => {
-        this._allowedExtensionsArray.push({
-          name: e.name,
-          regexp: new RegExp(e.name),
-          type: e.type,
-          reason: e.reason,
-          creation_date: e.creation_date,
-          last_update_date: e.last_update_date
-        });
-      });
-    }
-    void this.initialize();
   }
 
   /**
@@ -298,10 +179,7 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * The current NPM repository search page.
-   *
-   * The npm repository search is paginated by the `pagination` attribute.
-   * The `page` value selects which page is used.
+   * The current search page.
    *
    * Setting its value triggers a new search.
    */
@@ -314,10 +192,7 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * The NPM repository search pagination.
-   *
-   * The npm repository search is paginated by the `pagination` attribute.
-   * The `page` value selects which page is used.
+   * The search pagination.
    *
    * Setting its value triggers a new search.
    */
@@ -492,53 +367,7 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Trigger a build check to incorporate actions taken.
-   */
-  triggerBuildCheck(): void {
-    const builder = this.serviceManager.builder;
-    if (builder.isAvailable && !this.promptBuild) {
-      const completed = builder.getStatus().then(response => {
-        if (response.status === 'building') {
-          // Piggy-back onto existing build
-          // TODO: Can this cause dialog collision on build completion?
-          return doBuild(this._app, builder);
-        }
-        if (response.status !== 'needed') {
-          return;
-        }
-        if (!this.promptBuild) {
-          this.promptBuild = true;
-          this.stateChanged.emit(undefined);
-        }
-      });
-      this._addPendingAction(completed);
-    }
-  }
-
-  /**
-   * Perform a build on the server
-   */
-  performBuild(): void {
-    if (this.promptBuild) {
-      this.promptBuild = false;
-      this.stateChanged.emit(undefined);
-    }
-    const completed = doBuild(this._app, this.serviceManager.builder);
-    this._addPendingAction(completed);
-  }
-
-  /**
-   * Ignore a build recommendation
-   */
-  ignoreBuildRecommendation(): void {
-    if (this.promptBuild) {
-      this.promptBuild = false;
-      this.stateChanged.emit(undefined);
-    }
-  }
-
-  /**
-   * Ignore a build recommendation
+   * Refresh installed packages
    */
   refreshInstalled(): void {
     const refresh = this.update(true);
@@ -546,127 +375,9 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Translate search results from an npm repository query into entries
-   * and remove entries with 'deprecated' in the keyword list
-   *
-   * @param res Promise to an npm query result.
-   */
-  protected async translateSearchResult(
-    res: Promise<ISearchResult>
-  ): Promise<{ [key: string]: IEntry }> {
-    const entries: { [key: string]: IEntry } = {};
-    this._totalblockedExtensionsFound = 0;
-    this._totalallowedExtensionsFound = 0;
-    this._totalEntries = 0;
-    for (const obj of (await res).objects) {
-      const pkg = obj.package;
-      if (pkg.keywords.indexOf('deprecated') >= 0) {
-        continue;
-      }
-      this._totalEntries = this._totalEntries + 1;
-      const isblockedExtensions = this.isListed(
-        pkg.name,
-        this._blockedExtensionsArray
-      );
-      if (isblockedExtensions) {
-        this._totalblockedExtensionsFound =
-          this._totalblockedExtensionsFound + 1;
-      }
-      const isallowedExtensions = this.isListed(
-        pkg.name,
-        this._allowedExtensionsArray
-      );
-      if (isallowedExtensions) {
-        this._totalallowedExtensionsFound =
-          this._totalallowedExtensionsFound + 1;
-      }
-      entries[pkg.name] = {
-        name: pkg.name,
-        description: pkg.description,
-        url:
-          'homepage' in pkg.links
-            ? pkg.links.homepage
-            : 'repository' in pkg.links
-            ? pkg.links.repository
-            : pkg.links.npm,
-        installed: false,
-        enabled: false,
-        status: null,
-        latest_version: pkg.version,
-        installed_version: '',
-        blockedExtensionsEntry: isblockedExtensions,
-        allowedExtensionsEntry: isallowedExtensions,
-        pkg_type: 'source',
-        install: undefined
-      };
-    }
-    return entries;
-  }
-
-  /**
-   * Translate installed extensions information from the server into entries.
-   *
-   * @param res Promise to the server reply data.
-   */
-  protected async translateInstalled(
-    res: Promise<IInstalledEntry[]>
-  ): Promise<{ [key: string]: IEntry }> {
-    const promises = [];
-    const entries: { [key: string]: IEntry } = {};
-    for (const pkg of await res) {
-      promises.push(
-        res.then(info => {
-          entries[pkg.name] = {
-            name: pkg.name,
-            description: pkg.description,
-            url: pkg.url,
-            installed: pkg.installed !== false,
-            enabled: pkg.enabled,
-            status: pkg.status,
-            latest_version: pkg.latest_version,
-            installed_version: pkg.installed_version,
-            blockedExtensionsEntry: this.isListed(
-              pkg.name,
-              this._blockedExtensionsArray
-            ),
-            allowedExtensionsEntry: this.isListed(
-              pkg.name,
-              this._allowedExtensionsArray
-            ),
-            pkg_type: pkg.pkg_type,
-            install: {
-              packageManager: pkg.install?.packageManager,
-              packageName: pkg.install?.packageName,
-              uninstallInstructions: pkg.install?.uninstallInstructions
-            }
-          };
-        })
-      );
-    }
-    return Promise.all(promises).then(() => {
-      return entries;
-    });
-  }
-
-  private isListed(
-    name: string,
-    listArray: Array<IListEntry>
-  ): IListEntry | undefined {
-    let entry: IListEntry | undefined = undefined;
-    listArray.forEach((listEntry: IListEntry) => {
-      if (listEntry.regexp && listEntry.regexp?.test(name)) {
-        entry = listEntry;
-      }
-    });
-    return entry;
-  }
-
-  /**
    * Make a request to the server for info about its installed extensions.
    */
-  protected fetchInstalled(
-    refreshInstalled = false
-  ): Promise<IInstalledEntry[]> {
+  protected fetchInstalled(refreshInstalled = false): Promise<IEntry[]> {
     const url = new URL(
       EXTENSION_API_PATH,
       this.serverConnectionSettings.baseUrl
@@ -680,7 +391,7 @@ export class ListModel extends VDomModel {
       this.serverConnectionSettings
     ).then(response => {
       Private.handleError(response);
-      return response.json() as Promise<IInstalledEntry[]>;
+      return response.json() as Promise<IEntry[]>;
     });
     request.then(
       () => {
@@ -889,13 +600,6 @@ export class ListModel extends VDomModel {
   protected serverConnectionSettings: ServerConnection.ISettings;
 
   /**
-   * A helper for performing searches of jupyterlab extensions on the NPM repository.
-   */
-  protected searcher: Searcher;
-
-  protected lister = new Lister();
-
-  /**
    * The service manager to use for building.
    */
   protected serviceManager: ServiceManager.IManager;
@@ -913,8 +617,6 @@ export class ListModel extends VDomModel {
   private _debouncedUpdate: Debouncer<void, void>;
 
   private _listMode: 'block' | 'allow' | 'default' | 'invalid';
-  private _blockedExtensionsArray: Array<IListEntry>;
-  private _allowedExtensionsArray: Array<IListEntry>;
   private _totalblockedExtensionsFound: number = 0;
   private _totalallowedExtensionsFound: number = 0;
 }

@@ -6,7 +6,7 @@
 import abc
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, Optional, Set
 
@@ -65,7 +65,7 @@ class ExtensionPackage:
         status: [optional] Package status - ["ok", "warning", "error"]; default "ok"
         companion: [optional] Type of companion for the frontend extension - [None, "kernel", "server"]; default None
         install: [optional] Extension package installation instructions - default None
-        installed: [optional] - default None
+        installed: [optional] Whether the extension is currently installed - default None
         is_allowed: [optional] Whether this extension is allowed or not - default True
     """
 
@@ -77,7 +77,7 @@ class ExtensionPackage:
     core: bool = False
     enabled: bool = False
     install: Optional[dict] = None
-    installed: Optional[dict] = None
+    installed: Optional[bool] = None
     installed_version: str = ""
     is_allowed: bool = True
     latest_version: str = ""
@@ -150,14 +150,14 @@ class ExtensionsManager(abc.ABC):
         self.core_config = app_options.core_config
         self.app_options = app_options
         self.options = ExtensionsOption(**(ext_options or {}))
-        self._extensions_cache: Optional[Set[ExtensionPackage]] = None
-        self._listings_cache = {
-            "blocked_extensions": [],
-            "allowed_extensions": [],
-        }
+        self._extensions_cache: Optional[Dict[str, ExtensionPackage]] = None
+        self._listings_cache: Optional[dict] = None
+        self._listings_block_mode = True
 
         self._listing_fetch: Optional[ioloop.PeriodicCallback] = None
         if len(self.options.allowed_extensions_uris) or len(self.options.blocked_extensions_uris):
+            self._listings_block_mode = len(self.options.allowed_extensions_uris) == 0
+
             self._listing_fetch = ioloop.PeriodicCallback(
                 lambda: self._fetch_listings(),
                 callback_time=self.options.listings_refresh_seconds * 1000,
@@ -273,18 +273,49 @@ class ExtensionsManager(abc.ABC):
         """
         return extension.name
 
-    async def list_extensions(self) -> Set[ExtensionPackage]:
-        """List all installed extensions.
+    async def list_extensions(self, query: str = "") -> Set[ExtensionPackage]:
+        """List extensions for a given ``query`` search term.
+
+        This will return the extensions installed or available if
+        allowed by the listing settings.
+
+        Args:
+            query: [optional] Query search term.
 
         Returns:
-            The installed extensions
+            The extensions
         """
         if self._extensions_cache is None:
             await self.refresh()
 
-        # TODO filter using listings settings
+        # filter using listings settings
+        if self._listings_cache is None and self._listing_fetch is not None:
+            self._listing_fetch.callback()
 
-        return self._extensions_cache
+        extensions = set(self._extensions_cache.values())
+        if self._listings_cache is not None:
+            listing = list(self._listings_cache)
+            extensions = set()
+            if self._listings_block_mode:
+                for name, ext in self._extensions_cache.items():
+                    if name not in listing:
+                        ext.is_allowed = True
+                        extensions.add(ext)
+                    elif ext.installed_version:
+                        self.log.warning(f"Blocked extension '{name}' is installed.")
+                        ext.is_allowed = False
+                        extensions.add(ext)
+            else:
+                for name, ext in self._extensions_cache.items():
+                    if name in listing:
+                        ext.is_allowed = True
+                        extensions.add(ext)
+                    elif ext.installed_version:
+                        self.log.warning(f"Not allowed extension '{name}' is installed.")
+                        ext.is_allowed = False
+                        extensions.add(ext)
+
+        return extensions
 
     async def refresh(self) -> None:
         """Refresh the list of extensions."""
@@ -293,34 +324,32 @@ class ExtensionsManager(abc.ABC):
 
     def _fetch_listings(self) -> None:
         """Fetch the listings for the extension manager."""
-        allowed_extensions = []
-        blocked_extensions = []
-        if len(self.options.allowed_extensions_uris):
+        rules = []
+        if self._listings_block_mode:
+            if len(self.options.blocked_extensions_uris):
+                self.log.info(
+                    f"Fetching blocked extensions from {self.options.blocked_extensions_uris}"
+                )
+                for blocked_extensions_uri in self.options.blocked_extensions_uris:
+                    r = requests.request(
+                        "GET",
+                        blocked_extensions_uri,
+                        **self.options.listings_request_opts,
+                    )
+                    j = json.loads(r.text)
+                    rules.extend(j.get("blocked_extensions", []))
+        elif len(self.options.allowed_extensions_uris):
             self.log.info(
-                f"Fetching allowed_extensions from { self.options.allowed_extensions_uris}"
+                f"Fetching allowed extensions from { self.options.allowed_extensions_uris}"
             )
             for allowed_extensions_uri in self.options.allowed_extensions_uris:
                 r = requests.request(
                     "GET", allowed_extensions_uri, **self.options.listings_request_opts
                 )
                 j = json.loads(r.text)
-                allowed_extensions.extend(j.get("allowed_extensions", []))
+                rules.extend(j.get("allowed_extensions", []))
 
-        elif len(self.options.blocked_extensions_uris):
-            self.log.info(
-                f"Fetching blocked_extensions from {self.options.blocked_extensions_uris}"
-            )
-            for blocked_extensions_uri in self.options.blocked_extensions_uris:
-                r = requests.request(
-                    "GET", blocked_extensions_uri, **self.options.listings_request_opts
-                )
-                j = json.loads(r.text)
-                blocked_extensions.extend(j.get("blocked_extensions", []))
-
-        self._listings_cache = {
-            "blocked_extensions": blocked_extensions,
-            "allowed_extensions": allowed_extensions,
-        }
+        self._listings_cache = dict([(r["name"], r) for r in rules])
 
     async def _get_installed_extensions(
         self, get_latest_version=True
@@ -438,4 +467,4 @@ class ExtensionsManager(abc.ABC):
         # Get the installed extensions
         extensions.update(await self._get_installed_extensions())
 
-        self._extensions_cache = set(extensions.value())
+        self._extensions_cache = extensions

@@ -108,6 +108,7 @@ module.exports = {
           'hist_access_type',
           'implementation_version',
           'installed_version',
+          'is_allowed',
           'jlab_core',
           'jupyterlab_extensions',
           'jupyterlab_mime_extensions',

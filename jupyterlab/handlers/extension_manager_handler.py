@@ -22,7 +22,8 @@ class ExtensionHandler(APIHandler):
         """GET query returns info on all extensions
 
         Query arguments:
-            refresh: Force refreshing the list of extensions - ["0", "1"]
+            refresh: [optional] Force refreshing the list of extensions - ["0", "1"]; default 0
+            query: [optional] Query to search for extensions - default None (i.e. returns installed extensions)
         """
         if self.get_argument("refresh", "0") == "1":
             await self.manager.refresh()

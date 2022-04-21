@@ -118,54 +118,6 @@ export namespace SearchBar {
   }
 }
 
-/**
- * Create a build prompt as a react element.
- *
- * @param props Configuration of the build prompt.
- */
-function BuildPrompt(props: BuildPrompt.IProperties): React.ReactElement<any> {
-  const translator = props.translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
-  return (
-    <div className="jp-extensionmanager-buildprompt">
-      <div className="jp-extensionmanager-buildmessage">
-        {trans.__('A build is needed to include the latest changes')}
-      </div>
-      <Button onClick={props.performBuild} minimal small>
-        {trans.__('Rebuild')}
-      </Button>
-      <Button onClick={props.ignoreBuild} minimal small>
-        {trans.__('Ignore')}
-      </Button>
-    </div>
-  );
-}
-
-/**
- * The namespace for build prompt statics.
- */
-namespace BuildPrompt {
-  /**
-   * Properties for build prompt react component.
-   */
-  export interface IProperties {
-    /**
-     * Callback for when a build is requested.
-     */
-    performBuild: () => void;
-
-    /**
-     * Callback for when a build notice is dismissed.
-     */
-    ignoreBuild: () => void;
-
-    /**
-     * The application language translator.
-     */
-    translator?: ITranslator;
-  }
-}
-
 function getExtensionGitHubUser(entry: IEntry) {
   if (entry.url && entry.url.startsWith('https://github.com/')) {
     return entry.url.split('/')[3];
@@ -708,20 +660,6 @@ administrator to verify the listings configuration.`)}
         settings={this._settings}
       />
     ];
-    if (model.promptBuild) {
-      elements.push(
-        <BuildPrompt
-          key="promt"
-          translator={this.translator}
-          performBuild={() => {
-            model.performBuild();
-          }}
-          ignoreBuild={() => {
-            model.ignoreBuildRecommendation();
-          }}
-        />
-      );
-    }
     // Indicator element for pending actions:
     elements.push(
       <div
