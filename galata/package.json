@@ -38,9 +38,10 @@
     "start:detached": "(jlpm run start&)",
     "test": "playwright test",
     "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
+    "test:benchmark:update": "BENCHMARK_NUMBER_SAMPLES=1 jlpm run test -c playwright-benchmark.config.js --update-snapshots",
     "test:debug": "PWDEBUG=1 playwright test",
     "test:report": "http-server ./playwright-report -a localhost -o",
-    "test:update": "playwright test --update-snapshots"
+    "test:update": "playwright test --update-snapshots && jlpm test:benchmark:update"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.3.4",
