@@ -38,6 +38,6 @@ jobs:
         if: ${{ matrix.group == 'check_release' }}
         uses: actions/upload-artifact@v2
         with:
-          name: dist-files
+          name: jupyterlab-releaser-dist-${{ github.run_number }}
           path: |
             .jupyter_releaser_checkout/dist/*.*
