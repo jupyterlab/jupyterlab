@@ -855,6 +855,7 @@ providing a different rank or adding ``"disabled": true`` to remove the item).
 The current widget factories supporting the toolbar customization are:
 
 - ``Notebook``: Notebook panel toolbar
+- ``Cell``: Cell toolbar
 - ``Editor``: Text editor toolbar
 - ``HTML Viewer``: HTML Viewer toolbar
 - ``CSVTable``: CSV (Comma Separated Value) Viewer toolbar
