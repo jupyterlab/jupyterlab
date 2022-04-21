@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docregistry",
-  "version": "3.3.4",
+  "version": "3.4.0-alpha.0",
   "description": "JupyterLab - Document Registry",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,18 +41,18 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.3.4",
-    "@jupyterlab/codeeditor": "^3.3.4",
-    "@jupyterlab/codemirror": "^3.3.4",
-    "@jupyterlab/coreutils": "^5.3.4",
-    "@jupyterlab/docprovider": "^3.3.4",
-    "@jupyterlab/observables": "^4.3.4",
-    "@jupyterlab/rendermime": "^3.3.4",
-    "@jupyterlab/rendermime-interfaces": "^3.3.4",
-    "@jupyterlab/services": "^6.3.4",
-    "@jupyterlab/shared-models": "^3.3.4",
-    "@jupyterlab/translation": "^3.3.4",
-    "@jupyterlab/ui-components": "^3.3.4",
+    "@jupyterlab/apputils": "^3.4.0-alpha.0",
+    "@jupyterlab/codeeditor": "^3.4.0-alpha.0",
+    "@jupyterlab/codemirror": "^3.4.0-alpha.0",
+    "@jupyterlab/coreutils": "^5.4.0-alpha.0",
+    "@jupyterlab/docprovider": "^3.4.0-alpha.0",
+    "@jupyterlab/observables": "^4.4.0-alpha.0",
+    "@jupyterlab/rendermime": "^3.4.0-alpha.0",
+    "@jupyterlab/rendermime-interfaces": "^3.4.0-alpha.0",
+    "@jupyterlab/services": "^6.4.0-alpha.0",
+    "@jupyterlab/shared-models": "^3.4.0-alpha.0",
+    "@jupyterlab/translation": "^3.4.0-alpha.0",
+    "@jupyterlab/ui-components": "^3.4.0-alpha.0",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/disposable": "^1.10.0",
@@ -62,7 +62,7 @@
     "yjs": "^13.5.17"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.3.4",
+    "@jupyterlab/testutils": "^3.4.0-alpha.0",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
