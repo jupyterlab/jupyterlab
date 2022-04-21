@@ -13,14 +13,26 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-//import { EditorView } from '@codemirror/view';
+import { gutter, GutterMarker } from '@codemirror/gutter';
+
+import { RangeSet } from '@codemirror/rangeset';
+
+import {
+  Compartment,
+  Prec,
+  StateEffect,
+  StateEffectType,
+  StateField
+} from '@codemirror/state';
+
+import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
 
 import { IDebugger } from '../tokens';
 
 /**
  * The class name added to the current line.
  */
-//const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
+const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
 
 /**
  * The timeout for listening to editor content changes.
@@ -37,7 +49,7 @@ export class EditorHandler implements IDisposable {
    * @param options The instantiation options for a EditorHandler.
    */
   constructor(options: EditorHandler.IOptions) {
-    //this._id = options.debuggerService.session?.connection?.id ?? '';
+    this._id = options.debuggerService.session?.connection?.id ?? '';
     this._path = options.path ?? '';
     this._debuggerService = options.debuggerService;
     this._editor = options.editor;
@@ -66,6 +78,59 @@ export class EditorHandler implements IDisposable {
 
     this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
       EditorHandler.clearHighlight(this._editor);
+    });
+
+    this._breakpointEffect = StateEffect.define<{ pos: number[] }>({
+      map: (value, mapping) => ({ pos: value.pos.map(v => mapping.mapPos(v)) })
+    });
+
+    this._breakpointState = StateField.define<RangeSet<GutterMarker>>({
+      create: () => {
+        return RangeSet.empty;
+      },
+      update: (breakpoints, transaction) => {
+        breakpoints = breakpoints.map(transaction.changes);
+        for (let ef of transaction.effects) {
+          if (ef.is(this._breakpointEffect)) {
+            let e = ef as StateEffect<{ pos: number[] }>;
+            if (e.value.pos.length) {
+              breakpoints = breakpoints.update({
+                add: e.value.pos.map(v => Private.breakpointMarker.range(v))
+              });
+            } else {
+              breakpoints = RangeSet.empty;
+            }
+          }
+        }
+        return breakpoints;
+      }
+    });
+
+    this._gutter = new Compartment();
+
+    this._highlightDeco = Decoration.line({ class: LINE_HIGHLIGHT_CLASS });
+
+    this._highlightState = StateField.define<DecorationSet>({
+      create: () => {
+        return Decoration.none;
+      },
+      update: (highlights, transaction) => {
+        highlights = highlights.map(transaction.changes);
+        for (let ef of transaction.effects) {
+          if (ef.is(EditorHandler._highlightEffect)) {
+            let e = ef as StateEffect<{ pos: number[] }>;
+            if (e.value.pos.length) {
+              highlights = highlights.update({
+                add: e.value.pos.map(v => this._highlightDeco.range(v))
+              });
+            } else {
+              highlights = Decoration.none;
+            }
+          }
+        }
+        return highlights;
+      },
+      provide: f => EditorView.decorations.from(f)
     });
 
     this._setupEditor();
@@ -111,16 +176,50 @@ export class EditorHandler implements IDisposable {
       return;
     }
 
-    this._addBreakpointsToEditor();
-
-    // TODO: CM6 migration
-    /*const editor = this._editor as CodeMirrorEditor;
+    const editor = this._editor as CodeMirrorEditor;
     editor.setOption('lineNumbers', true);
-    editor.editor.setOption('gutters', [
-      'CodeMirror-linenumbers',
-      'breakpoints'
-    ]);
-    editor.editor.on('gutterClick', this._onGutterClick);*/
+    const breakpointGutter = [
+      this._breakpointState,
+      this._highlightState,
+      Prec.highest(
+        gutter({
+          class: 'cm-breakpoint-gutter',
+          renderEmptyElements: true,
+          markers: v => v.state.field(this._breakpointState),
+          initialSpacer: () => Private.breakpointMarker,
+          domEventHandlers: {
+            mousedown: (view, line): boolean => {
+              this._onGutterClick(view, line.from);
+              return true;
+            }
+          }
+        })
+      )
+    ];
+    editor.injectExtension(this._gutter.of(breakpointGutter));
+
+    this._uglyCM6Workaround();
+    this._addBreakpointsToEditor();
+  }
+
+  // There is currently a bug in the gutter of CM6, gutter
+  // elements without any marker don't get a DOM class assigned.
+  // The bug is fixed in the master branch, we can remove this
+  // when it is released.
+  private _uglyCM6Workaround(): void {
+    const editor = this._editor as CodeMirrorEditor;
+    const lines = editor.doc.lines;
+    const breakpoint_pos = Array.from(Array(lines).keys()).map(
+      i => editor.doc.line(i + 1).from
+    );
+
+    editor.editor.dispatch({
+      effects: this._breakpointEffect.of({ pos: breakpoint_pos })
+    });
+
+    editor.editor.dispatch({
+      effects: this._breakpointEffect.of({ pos: [] })
+    });
   }
 
   /**
@@ -132,11 +231,11 @@ export class EditorHandler implements IDisposable {
     }
     const editor = this._editor as CodeMirrorEditor;
     EditorHandler.clearHighlight(editor);
-    EditorHandler.clearGutter(editor);
-    // TODO: CM6 migration
-    //editor.setOption('lineNumbers', false);
-    //editor.editor.setOption('gutters', []);
-    //editor.editor.off('gutterClick', this._onGutterClick);
+    this._clearGutter(editor);
+    editor.setOption('lineNumbers', false);
+    editor.editor.dispatch({
+      effects: this._gutter.reconfigure([])
+    });
   }
 
   /**
@@ -147,10 +246,10 @@ export class EditorHandler implements IDisposable {
       return;
     }
 
-    const breakpoints = this._getBreakpointsFromEditor().map(lineInfo => {
+    const breakpoints = this._getBreakpointsFromEditor().map(lineNumber => {
       return Private.createBreakpoint(
         this._debuggerService.session?.connection?.name || '',
-        lineInfo.line + 1
+        lineNumber
       );
     });
 
@@ -167,85 +266,99 @@ export class EditorHandler implements IDisposable {
    * @param editor The editor from where the click originated.
    * @param lineNumber The line corresponding to the click event.
    */
-  // TODO: CM6 migration
-  /*private _onGutterClick = (editor: Editor, lineNumber: number): void => {
-    const info = editor.lineInfo(lineNumber);
-    if (!info || this._id !== this._debuggerService.session?.connection?.id) {
+  private _onGutterClick(editor: EditorView, pos: number): void {
+    if (this._id !== this._debuggerService.session?.connection?.id) {
       return;
     }
 
-    const remove = !!info.gutterMarkers;
+    const lineNumber = editor.state.doc.lineAt(pos).number;
+    let stateBreakpoints = editor.state.field(this._breakpointState);
+    let hasBreakpoint = false;
+    stateBreakpoints.between(pos, pos, () => {
+      hasBreakpoint = true;
+    });
     let breakpoints: IDebugger.IBreakpoint[] = this._getBreakpoints();
-    if (remove) {
-      breakpoints = breakpoints.filter(ele => ele.line !== info.line + 1);
+    if (hasBreakpoint) {
+      breakpoints = breakpoints.filter(ele => ele.line !== lineNumber);
     } else {
       breakpoints.push(
         Private.createBreakpoint(
           this._path ?? this._debuggerService.session.connection.name,
-          info.line + 1
+          lineNumber
         )
       );
     }
+
+    breakpoints.sort((a, b) => {
+      return a.line! - b.line!;
+    });
 
     void this._debuggerService.updateBreakpoints(
       this._editor.model.value.text,
       breakpoints,
       this._path
     );
-  };*/
+  }
 
   /**
    * Add the breakpoints to the editor.
    */
   private _addBreakpointsToEditor(): void {
-    // TODO: CM6 migration
-    /*const editor = this._editor as CodeMirrorEditor;
-    const breakpoints = this._getBreakpoints();
     if (this._id !== this._debuggerService.session?.connection?.id) {
       return;
     }
-    EditorHandler.clearGutter(editor);
-    breakpoints.forEach(breakpoint => {
-      if (typeof breakpoint.line === 'number') {
-        editor.editor.setGutterMarker(
-          breakpoint.line - 1,
-          'breakpoints',
-          Private.createMarkerNode()
-        );
-      }
-    });*/
+
+    const editor = this._editor as CodeMirrorEditor;
+    const breakpoints = this._getBreakpoints();
+
+    this._clearGutter(editor);
+    const breakpoint_pos = breakpoints.map(b => {
+      return editor.state.doc.line(b.line!).from;
+    });
+
+    editor.editor.dispatch({
+      effects: this._breakpointEffect.of({ pos: breakpoint_pos })
+    });
   }
 
   /**
    * Retrieve the breakpoints from the editor.
    */
-  private _getBreakpointsFromEditor(): Private.ILineInfo[] {
-    // TODO: CM6 migration
-    /*const editor = this._editor as CodeMirrorEditor;
-    let lines = [];
-    for (let i = 0; i < editor.doc.lines; i++) {
-      const info = editor.editor.lineInfo(i);
-      if (info.gutterMarkers) {
-        lines.push(info);
-      }
+  private _getBreakpointsFromEditor(): number[] {
+    const editor = this._editor as CodeMirrorEditor;
+    const breakpoints = editor.editor.state.field(this._breakpointState);
+    let lines: number[] = [];
+    breakpoints.between(0, editor.doc.length, (from: number) => {
+      lines.push(editor.doc.lineAt(from).number);
+    });
+
+    return lines;
+  }
+
+  private _clearGutter(editor: CodeEditor.IEditor): void {
+    if (!editor) {
+      return;
     }
-    return lines;*/
-    return [];
+
+    const view = (editor as CodeMirrorEditor).editor;
+    view.dispatch({
+      effects: this._breakpointEffect.of({ pos: [] })
+    });
   }
 
   /**
    * Get the breakpoints for the editor using its content (code),
    * or its path (if it exists).
    */
-  // TODO: CM6 migration
-  /*private _getBreakpoints(): IDebugger.IBreakpoint[] {
-    const code = this._editor.model.value.text;
+  private _getBreakpoints(): IDebugger.IBreakpoint[] {
+    const editor = this._editor as CodeMirrorEditor;
+    const code = editor.doc.toString();
     return this._debuggerService.model.breakpoints.getBreakpoints(
       this._path || this._debuggerService.getCodeId(code)
     );
-  }*/
+  }
 
-  //private _id: string;
+  private _id: string;
   private _path: string;
   private _editor: CodeEditor.IEditor;
   private _debuggerService: IDebugger;
@@ -253,6 +366,11 @@ export class EditorHandler implements IDisposable {
     IObservableString,
     IObservableString.IChangedArgs
   >;
+  private _breakpointEffect: StateEffectType<{ pos: number[] }>;
+  private _breakpointState: StateField<RangeSet<GutterMarker>>;
+  private _gutter: Compartment;
+  private _highlightDeco: Decoration;
+  private _highlightState: StateField<DecorationSet>;
 }
 
 /**
@@ -279,6 +397,10 @@ export namespace EditorHandler {
     path?: string;
   }
 
+  export const _highlightEffect = StateEffect.define<{ pos: number[] }>({
+    map: (value, mapping) => ({ pos: value.pos.map(v => mapping.mapPos(v)) })
+  });
+
   /**
    * Highlight the current line of the frame in the given editor.
    *
@@ -290,10 +412,11 @@ export namespace EditorHandler {
     line: number
   ): void {
     clearHighlight(editor);
-    // TODO: CM6 migration
-    //const cmEditor = editor as CodeMirrorEditor;
-    //cmEditor.editor.addLineClass(line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
-    //cmEditor.scrollIntoViewCentered({ ch: 0, line: line - 1 });
+    const cmEditor = editor as CodeMirrorEditor;
+    const line_pos = cmEditor.doc.line(line).from;
+    cmEditor.editor.dispatch({
+      effects: _highlightEffect.of({ pos: [line_pos] })
+    });
   }
 
   /**
@@ -305,29 +428,10 @@ export namespace EditorHandler {
     if (!editor || editor.isDisposed) {
       return;
     }
-    // TODO: CM6 migration
-    /*const cmEditor = editor as CodeMirrorEditor;
-    cmEditor.doc.eachLine(line => {
-      cmEditor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
-    });*/
-  }
-
-  /**
-   * Remove line numbers and all gutters from editor.
-   *
-   * @param editor The editor to cleanup.
-   */
-  export function clearGutter(editor: CodeEditor.IEditor): void {
-    if (!editor) {
-      return;
-    }
-    // TODO: CM6 migration
-    /*const cmEditor = editor as CodeMirrorEditor;
-    cmEditor.doc.eachLine(line => {
-      if ((line as Private.ILineInfo).gutterMarkers) {
-        cmEditor.editor.setGutterMarker(line, 'breakpoints', null);
-      }
-    });*/
+    const cmEditor = editor as CodeMirrorEditor;
+    cmEditor.editor.dispatch({
+      effects: _highlightEffect.of({ pos: [] })
+    });
   }
 }
 
@@ -338,12 +442,12 @@ namespace Private {
   /**
    * Create a marker DOM element for a breakpoint.
    */
-  export function createMarkerNode(): HTMLElement {
-    const marker = document.createElement('div');
-    marker.className = 'jp-DebuggerEditor-marker';
-    marker.innerHTML = '●';
-    return marker;
-  }
+  export const breakpointMarker = new (class extends GutterMarker {
+    toDOM() {
+      const marker = document.createTextNode('●');
+      return marker;
+    }
+  })();
 
   /**
    * Create a new breakpoint.
@@ -362,21 +466,5 @@ namespace Private {
         name: session
       }
     };
-  }
-
-  /**
-   * An interface for an editor line info.
-   */
-  export interface ILineInfo {
-    line: any;
-    handle: any;
-    text: string;
-    /** Object mapping gutter IDs to marker elements. */
-    gutterMarkers: any;
-    textClass: string;
-    bgClass: string;
-    wrapClass: string;
-    /** Array of line widgets attached to this line. */
-    widgets: any;
   }
 }

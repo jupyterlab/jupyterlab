@@ -48,6 +48,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@codemirror/basic-setup": "^0.19.0",
+    "@codemirror/gutter": "~0.19.9",
+    "@codemirror/rangeset": "~0.19.9",
+    "@codemirror/state": "~0.19.6",
+    "@codemirror/text": "~0.19.5",
+    "@codemirror/view": "~0.19.28",
     "@jupyterlab/application": "^4.0.0-alpha.11",
     "@jupyterlab/apputils": "^4.0.0-alpha.11",
     "@jupyterlab/cells": "^4.0.0-alpha.11",

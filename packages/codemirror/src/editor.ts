@@ -406,6 +406,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._editorConfig.reconfigureExtensions(this._editor, options);
   }
 
+  injectExtension(ext: Extension): void {
+    this._editorConfig.injectExtension(this._editor, ext);
+  }
+
   /**
    * Returns the content for the given line number.
    */
@@ -1392,49 +1396,13 @@ export namespace CodeMirrorEditor {
  * The namespace for module private data.
  */
 namespace Private {
-  function createEditorTheme(config: CodeMirrorEditor.IConfig): Extension {
-    const {
-      fontFamily,
-      fontSize,
-      lineHeight,
-      lineWrap,
-      wordWrapColumn
-    } = config;
-
-    const parentStyle: Record<string, any> = {};
-    if (fontSize) {
-      parentStyle.fontSize = fontSize + 'px';
-    }
-    if (fontFamily) {
-      parentStyle.fontFamily = fontFamily;
-    }
-    if (lineHeight) {
-      parentStyle.lineHeight = lineHeight.toString();
-    }
-
-    const lineStyle: Record<string, any> = {};
-    if (lineWrap === 'wordWrapColumn') {
-      lineStyle.width = wordWrapColumn + 'ch';
-    } else if (lineWrap === 'bounded') {
-      lineStyle.maxWidth = wordWrapColumn + 'ch';
-    }
-
-    return EditorView.baseTheme({
-      '&': parentStyle,
-      '.cm-line': lineStyle
-    });
-  }
-
   export function createEditor(
     host: HTMLElement,
     config: CodeMirrorEditor.IConfig,
     ybinding: IYCodeMirrorBinding | null,
     editorConfig: Configuration.EditorConfiguration
   ): EditorView {
-    let extensions = [
-      ...editorConfig.getInitialExtensions(config),
-      createEditorTheme(config)
-    ];
+    let extensions = editorConfig.getInitialExtensions(config);
     if (ybinding) {
       extensions.push(yCollab(ybinding.text, ybinding.awareness));
     }

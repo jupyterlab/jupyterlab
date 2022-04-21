@@ -30,7 +30,7 @@ export class SourcesBody extends Widget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
-    //this._mimeTypeService = options.editorServices.mimeTypeService;
+    this._mimeTypeService = options.editorServices.mimeTypeService;
 
     const factory = new Debugger.ReadOnlyEditorFactory({
       editorServices: options.editorServices

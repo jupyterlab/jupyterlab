@@ -1293,7 +1293,7 @@
   dependencies:
     "@codemirror/state" "^0.19.0"
 
-"@codemirror/rangeset@^0.19.5":
+"@codemirror/rangeset@^0.19.5", "@codemirror/rangeset@~0.19.9":
   version "0.19.9"
   resolved "https://registry.npmjs.org/@codemirror/rangeset/-/rangeset-0.19.9.tgz#e80895de93c39dc7899f5be31d368c9d88aa4efc"
   integrity sha512-V8YUuOvK+ew87Xem+71nKcqu1SXd5QROMRLMS/ljT5/3MCxtgrRie1Cvild0G/Z2f1fpWxzX78V0U4jjXBorBQ==

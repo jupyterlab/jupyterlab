@@ -305,6 +305,7 @@ export namespace Configuration {
         ['language', createForwarderBuilder<LanguageSupport>()]
       ]);
       this._themeSpec = { '&': {}, '.cm-line': {} };
+      this._theme = new Compartment();
     }
 
     reconfigureExtension<T>(view: EditorView, key: string, value: T): void {
@@ -370,9 +371,10 @@ export namespace Configuration {
           : [...defaultKeymap]
       );
       // TODO: replace this with indentUnit in the IConfig object
-      const insert_ext = config.insertSpaces
-        ? indentUnit.of(' '.repeat(config.tabSize))
-        : indentUnit.of('\t');
+      const indent_builder = this.get('indentUnit');
+      const insert_ext = indent_builder!.of(
+        config.insertSpaces ? ' '.repeat(config.tabSize) : '\t'
+      );
 
       let theme_extension = this.updateEditorTheme(config);
       if (!theme_extension) {
@@ -380,10 +382,10 @@ export namespace Configuration {
       }
 
       extensions.push(
-        keymap_ext,
+        //this._theme.of(theme_extension),
         insert_ext,
-        defaultHighlightStyle,
-        this._theme.of(theme_extension)
+        defaultHighlightStyle.fallback,
+        keymap_ext
       );
 
       Mode.ensure('text/x-python').then(spec => {
