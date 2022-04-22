@@ -2281,10 +2281,9 @@ export namespace DirListing {
      * @returns The checkbox node.
      */
     getCheckboxNode(node: HTMLElement): HTMLInputElement | null {
-      const checkbox = node.querySelector(
+      return node.querySelector(
         `.${CHECKBOX_WRAPPER_CLASS} input[type=checkbox]`
-      ) as HTMLInputElement | void;
-      return checkbox || null;
+      );
     }
 
     /**
