@@ -1,19 +1,14 @@
-import y_py as Y
+from typing import Dict, List, Union
 
-from .yutils import create_update_message
+import y_py as Y
+from ypy_websocket.websocket_server import YDoc
 
 
 class YBaseDoc:
-
-    _ydoc: Y.YDoc
-    transaction: "Transaction"
-
-    def __init__(self, room):
-        self._room = room
-        self._ydoc = Y.YDoc()
+    def __init__(self, ydoc: YDoc):
+        self._ydoc = ydoc
         self._ystate = self._ydoc.get_map("state")
-        self.initialized = False
-        self.transaction = Transaction(self)
+        self._subscriptions = {}
 
     @property
     def ystate(self):
@@ -38,38 +33,16 @@ class YBaseDoc:
     @dirty.setter
     def dirty(self, value: bool) -> None:
         if self.dirty != value:
-            with self.transaction as t:
+            with self._ydoc.begin_transaction() as t:
                 self._ystate.set(t, "dirty", value)
 
     def observe(self, callback):
         raise RuntimeError("Y document observe not implemented")
 
-    def unobserve(self, subscription_id):
-        raise RuntimeError("Y document unobserve not implemented")
-
-
-class Transaction:
-
-    ydoc: YBaseDoc
-
-    def __init__(self, ydoc: YBaseDoc):
-        self.ydoc = ydoc
-
-    def __enter__(self):
-        if self.ydoc.initialized:
-            self.state = Y.encode_state_vector(self.ydoc.ydoc)
-        self.transaction_context = self.ydoc.ydoc.begin_transaction()
-        self.transaction = self.transaction_context.__enter__()
-        return self.transaction
-
-    def __exit__(self, exc_type, exc_value, exc_tb):
-        res = self.transaction_context.__exit__(exc_type, exc_value, exc_tb)
-        if self.ydoc.initialized:
-            update = Y.encode_state_as_update(self.ydoc.ydoc, self.state)
-            message = create_update_message(update)
-            for client in self.ydoc._room.clients:
-                client.write_message(message, binary=True)
-        return res
+    def unobserve(self):
+        for k, v in self._subscriptions.items():
+            k.unobserve(v)
+        self._subscriptions = {}
 
 
 class YFile(YBaseDoc):
@@ -83,7 +56,7 @@ class YFile(YBaseDoc):
 
     @source.setter
     def source(self, value):
-        with self.transaction as t:
+        with self._ydoc.begin_transaction() as t:
             # clear document
             source_len = len(self._ysource)
             if source_len:
@@ -92,10 +65,7 @@ class YFile(YBaseDoc):
             self._ysource.push(t, value)
 
     def observe(self, callback):
-        self.source_subscription_id = self._ysource.observe(callback)
-
-    def unobserve(self):
-        self._ysource.unobserve(self.source_subscription_id)
+        self._subscriptions[self._ysource] = self._ysource.observe(callback)
 
 
 class YNotebook(YBaseDoc):
@@ -109,20 +79,12 @@ class YNotebook(YBaseDoc):
         cells = self._ycells.to_json()
         meta = self._ymeta.to_json()
         state = self._ystate.to_json()
+        cast_all(cells, float, int)
+        cast_all(meta, float, int)
         for cell in cells:
             if "id" in cell and state["nbformat"] == 4 and state["nbformatMinor"] <= 4:
                 # strip cell ids if we have notebook format 4.0-4.4
                 del cell["id"]
-            if "execution_count" in cell:
-                execution_count = cell["execution_count"]
-                if isinstance(execution_count, float):
-                    cell["execution_count"] = int(execution_count)
-            if "outputs" in cell:
-                for output in cell["outputs"]:
-                    if "execution_count" in output:
-                        execution_count = output["execution_count"]
-                        if isinstance(execution_count, float):
-                            output["execution_count"] = int(execution_count)
         return dict(
             cells=cells,
             metadata=meta,
@@ -132,7 +94,8 @@ class YNotebook(YBaseDoc):
 
     @source.setter
     def source(self, value):
-        with self.transaction as t:
+        cast_all(value, int, float)
+        with self._ydoc.begin_transaction() as t:
             # clear document
             cells_len = len(self._ycells)
             if cells_len:
@@ -145,32 +108,38 @@ class YNotebook(YBaseDoc):
             # initialize document
             ycells = []
             for cell in value["cells"]:
-                ycell = Y.YMap({})
-                if "id" in cell:
-                    ycell.set(t, "id", cell["id"])
-
-                ycell.set(t, "source", cell["source"])
-                ycell.set(t, "metadata", cell["metadata"])
-                ycell.set(t, "cell_type", cell["cell_type"])
-
-                if cell["cell_type"] == "code":
-                    ycell.set(t, "execution_count", 0)
-                    ycell.set(t, "outputs", cell.get("outputs", []))
-
+                cell["source"] = Y.YText(cell["source"])
+                if "outputs" in cell:
+                    cell["outputs"] = Y.YArray(cell["outputs"])
+                ycell = Y.YMap(cell)
                 ycells.append(ycell)
 
             self._ycells.push(t, ycells)
-
-            for k, v in value["metadata"].items():
-                self._ymeta.set(t, k, v)
-
+            self._ymeta.set(t, "metadata", value["metadata"])
             self._ystate.set(t, "nbformat", value["nbformat"])
             self._ystate.set(t, "nbformatMinor", value["nbformat_minor"])
 
     def observe(self, callback):
-        self.cells_subscription_id = self._ycells.observe(callback)
-        self.meta_subscription_id = self._ymeta.observe(callback)
+        self.unobserve()
+        for cell in self._ycells:
+            self._subscriptions[cell["source"]] = cell["source"].observe(callback)
+            if "outputs" in cell:
+                self._subscriptions[cell["outputs"]] = cell["outputs"].observe(callback)
+            self._subscriptions[cell] = cell.observe(callback)
+        self._subscriptions[self._ycells] = self._ycells.observe(callback)
+        self._subscriptions[self._ymeta] = self._ymeta.observe(callback)
 
-    def unobserve(self):
-        self._ycells.unobserve(self.cells_subscription_id)
-        self._ymeta.unobserve(self.meta_subscription_id)
+
+def cast_all(o: Union[List, Dict], from_type, to_type) -> None:
+    if isinstance(o, list):
+        for i, v in enumerate(o):
+            if isinstance(v, from_type):
+                o[i] = to_type(v)
+            elif isinstance(v, (list, dict)):
+                cast_all(v, from_type, to_type)
+    elif isinstance(o, dict):
+        for k, v in o.items():
+            if isinstance(v, from_type):
+                o[k] = to_type(v)
+            elif isinstance(v, (list, dict)):
+                cast_all(v, from_type, to_type)
