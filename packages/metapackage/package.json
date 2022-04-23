@@ -21,7 +21,9 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "style/index.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -44,6 +46,7 @@
     "@jupyterlab/codeeditor": "^4.0.0-alpha.8",
     "@jupyterlab/codemirror": "^4.0.0-alpha.8",
     "@jupyterlab/codemirror-extension": "^4.0.0-alpha.8",
+    "@jupyterlab/comments": "^4.0.0-alpha.8",
     "@jupyterlab/completer": "^4.0.0-alpha.8",
     "@jupyterlab/completer-extension": "^4.0.0-alpha.8",
     "@jupyterlab/console": "^4.0.0-alpha.8",

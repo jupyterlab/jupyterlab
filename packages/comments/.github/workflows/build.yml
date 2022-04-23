@@ -1,0 +1,69 @@
+name: Build
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Base Setup
+      uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+    - name: Install dependencies
+      run: python -m pip install -U jupyterlab~=3.1 check-manifest
+
+    - name: Build the extension
+      run: |
+        set -eux
+        jlpm
+        jlpm lint:check
+        python -m pip install .
+
+        jupyter labextension list 2>&1 | grep -ie "comments.*OK"
+        python -m jupyterlab.browser_check
+
+        check-manifest -v
+
+        pip install build
+        python -m build --sdist
+        cp dist/*.tar.gz myextension.tar.gz
+        pip uninstall -y "comments" jupyterlab
+        rm -rf myextension
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: myextension-sdist
+        path: myextension.tar.gz
+
+  test_isolated:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+        architecture: 'x64'
+    - uses: actions/download-artifact@v2
+      with:
+        name: myextension-sdist
+    - name: Install and Test
+      run: |
+        set -eux
+        # Remove NodeJS, twice to take care of system and locally installed node versions.
+        sudo rm -rf $(which node)
+        sudo rm -rf $(which node)
+        pip install myextension.tar.gz
+        pip install jupyterlab
+        jupyter labextension list 2>&1 | grep -ie "comments.*OK"
+        python -m jupyterlab.browser_check --no-chrome-test
