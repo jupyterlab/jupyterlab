@@ -64,9 +64,10 @@ bumped their major version (following semver convention):
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
-   The ``create-theme`` script has been removed. If you want to create a new theme extension, you
-   should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
-   The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
+   * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
+     should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
+   * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
+   * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
   Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
   Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
@@ -78,6 +79,8 @@ bumped their major version (following semver convention):
    As a result of the update to TypeScript 4.5, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+- ``@jupyterlab/fileeditor`` from 3.x to 4.x
+   Removed the class ``FileEditorCodeWrapper``, instead, you can use ``CodeEditorWrapper`` from ``@jupyterlab/codeeditor``.
 
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
