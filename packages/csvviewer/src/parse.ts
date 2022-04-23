@@ -61,6 +61,11 @@ export namespace IParser {
     rowDelimiter?: string;
 
     /**
+     * The comment symbol to use. Defaults to '#'.
+     */
+    comment?: string;
+
+    /**
      * The quote character for quoting fields. Defaults to the double quote (").
      *
      * #### Notes
@@ -158,6 +163,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     data,
     columnOffsets,
     delimiter = ',',
+    comment = '#',
     startIndex = 0,
     maxRows = 0xffffffff,
     rowDelimiter = '\r\n',
@@ -175,6 +181,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
 
   // Set up some useful local variables.
   const CH_DELIMITER = delimiter.charCodeAt(0);
+  const CH_COMMENT = comment.charCodeAt(0);
   const CH_QUOTE = quote.charCodeAt(0);
   const CH_LF = 10; // \n
   const CH_CR = 13; // \r
@@ -232,10 +239,15 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     // after the switch statement). In some situations, we may increment i
     // inside this loop to skip over indices as a shortcut.
     switch (state) {
-      // At the beginning of a row or field, we can have a quote, row delimiter, or field delimiter.
+      // At the beginning of a row or field, we can have a comment, quote, row delimiter, or field delimiter.
       case NEW_ROW:
       case NEW_FIELD:
         switch (char) {
+          // If we have a comment, we are starting a new row.
+          case CH_COMMENT:
+            state = NEW_ROW;
+            break;
+
           // If we have a quote, we are starting an escaped field.
           case CH_QUOTE:
             state = QUOTED_FIELD;

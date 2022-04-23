@@ -45,6 +45,7 @@ export class DSVModel extends DataModel implements IDisposable {
       data,
       delimiter = ',',
       rowDelimiter = undefined,
+      comment = '#',
       quote = '"',
       quoteParser = undefined,
       header = true,
@@ -52,6 +53,7 @@ export class DSVModel extends DataModel implements IDisposable {
     } = options;
     this._rawData = data;
     this._delimiter = delimiter;
+    this._comment = comment;
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
     this._initialRows = initialRows;
@@ -145,6 +147,13 @@ export class DSVModel extends DataModel implements IDisposable {
    */
   get rowDelimiter(): string {
     return this._rowDelimiter;
+  }
+
+  /**
+   * The comment symbol at the beginning of rows.
+   */
+  get comment(): string {
+    return this._comment;
   }
 
   /**
@@ -298,6 +307,7 @@ export class DSVModel extends DataModel implements IDisposable {
         data: this._rawData,
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
+        comment: this._comment,
         quote: this._quote,
         columnOffsets: true,
         maxRows: maxRows,
@@ -414,6 +424,7 @@ export class DSVModel extends DataModel implements IDisposable {
         data: this._rawData,
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
+        comment: this._comment,
         quote: this._quote,
         columnOffsets: true,
         maxRows: 1
@@ -430,6 +441,7 @@ export class DSVModel extends DataModel implements IDisposable {
       startIndex: this._rowOffsets[this._rowCount! - reparse] ?? 0,
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
+      comment: this._comment,
       quote: this._quote,
       columnOffsets: false,
       maxRows: endRow - this._rowCount! + reparse
@@ -627,6 +639,7 @@ export class DSVModel extends DataModel implements IDisposable {
 
   // Parser settings
   private _delimiter: string;
+  private _comment: string;
   private _quote: string;
   private _quoteEscaped: RegExp;
   private _parser: 'quotes' | 'noquotes';
@@ -691,6 +704,11 @@ export namespace DSVModel {
      * The field delimiter must be a single character.
      */
     delimiter: string;
+
+    /**
+     * The comment symbol, such as '#' or '//'.
+     */
+    comment: string;
 
     /**
      * The data source for the data model.

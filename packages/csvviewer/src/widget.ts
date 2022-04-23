@@ -21,7 +21,7 @@ import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { DSVModel } from './model';
-import { CSVDelimiter } from './toolbar';
+import { CSVComment, CSVDelimiter } from './toolbar';
 
 /**
  * The class name added to a CSV viewer.
@@ -304,6 +304,20 @@ export class CSVViewer extends Widget {
   }
 
   /**
+   * The comment symbol for the file.
+   */
+  get comment(): string {
+    return this._comment;
+  }
+  set comment(value: string) {
+    if (value === this._comment) {
+      return;
+    }
+    this._comment = value;
+    this._updateGrid();
+  }
+
+  /**
    * The style used by the data grid.
    */
   get style(): DataGrid.Style {
@@ -359,10 +373,12 @@ export class CSVViewer extends Widget {
   private _updateGrid(): void {
     const data: string = this._context.model.toString();
     const delimiter = this._delimiter;
+    const comment = this._comment;
     const oldModel = this._grid.dataModel as DSVModel;
     const dataModel = (this._grid.dataModel = new DSVModel({
       data,
-      delimiter
+      delimiter,
+      comment
     }));
     this._grid.selectionModel = new BasicSelectionModel({ dataModel });
     if (oldModel) {
@@ -401,6 +417,7 @@ export class CSVViewer extends Widget {
     void
   > | null = null;
   private _delimiter = ',';
+  private _comment = '#';
   private _revealed = new PromiseDelegate<void>();
   private _baseRenderer: TextRenderConfig | null = null;
 }
@@ -425,13 +442,17 @@ export namespace CSVViewer {
  */
 export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
   constructor(options: CSVDocumentWidget.IOptions) {
-    let { content, context, delimiter, reveal, ...other } = options;
+    let { content, context, delimiter, comment, reveal, ...other } = options;
     content = content || Private.createContent(context);
     reveal = Promise.all([reveal, content.revealed]);
     super({ content, context, reveal, ...other });
 
     if (delimiter) {
       content.delimiter = delimiter;
+    }
+
+    if (comment) {
+      content.comment = comment;
     }
   }
 
@@ -472,6 +493,11 @@ export namespace CSVDocumentWidget {
      * Data delimiter character
      */
     delimiter?: string;
+
+    /**
+     * Comment character
+     */
+    comment?: string;
   }
 }
 
@@ -512,6 +538,13 @@ export class CSVViewerFactory extends ABCWidgetFactory<
           widget: widget.content,
           translator: this.translator
         })
+      },
+      {
+        name: 'comment',
+        widget: new CSVComment({
+          widget: widget.content,
+          translator: this.translator
+        })
       }
     ];
   }
@@ -528,9 +561,11 @@ export class TSVViewerFactory extends CSVViewerFactory {
     context: DocumentRegistry.Context
   ): IDocumentWidget<CSVViewer> {
     const delimiter = '\t';
+    const comment = '#';
     return new CSVDocumentWidget({
       context,
       delimiter,
+      comment,
       translator: this.translator
     });
   }
