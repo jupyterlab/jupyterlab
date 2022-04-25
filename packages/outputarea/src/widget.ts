@@ -493,6 +493,9 @@ export class OutputArea extends Widget {
    * @param lastShown Starting model index to insert.
    */
   private _showTrimmedOutputs(lastShown: number) {
+    // Dispose information widget
+    this.widgets[lastShown].dispose();
+
     for (let idx = lastShown; idx < this.model.length; idx++) {
       this._insertOutput(idx, this.model.get(idx));
     }
@@ -631,7 +634,10 @@ export class OutputArea extends Widget {
    * @param executionCount Execution count
    * @returns The output panel
    */
-  private _wrappedOutput(output: Widget, executionCount: number | null = null): Panel {
+  private _wrappedOutput(
+    output: Widget,
+    executionCount: number | null = null
+  ): Panel {
     const panel = new Private.OutputPanel();
 
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
@@ -1159,10 +1165,7 @@ namespace Private {
      */
     handleEvent(event: Event): void {
       if (event.type === 'click') {
-        // Detach the widget
-        this.parent = null;
         this._onClick(event as MouseEvent);
-        this.dispose();
       }
     }
 

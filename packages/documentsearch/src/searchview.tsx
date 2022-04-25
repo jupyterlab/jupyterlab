@@ -455,7 +455,8 @@ class SearchOverlay extends React.Component<
 
   render() {
     const trans = this.translator.load('jupyterlab');
-    const showReplace = !this.props.isReadOnly && this.props.replaceEntryVisible;
+    const showReplace =
+      !this.props.isReadOnly && this.props.replaceEntryVisible;
     const filters = this.props.filtersDefinition;
 
     const hasFilters = Object.keys(filters).length > 0;
@@ -487,7 +488,9 @@ class SearchOverlay extends React.Component<
         })}
       </div>
     ) : null;
-    const icon = this.props.replaceEntryVisible ? caretDownIcon : caretRightIcon;
+    const icon = this.props.replaceEntryVisible
+      ? caretDownIcon
+      : caretRightIcon;
 
     // TODO: Error messages from regex are not currently localizable.
     return (
