@@ -7,7 +7,7 @@
  * @module settingeditor-extension
  */
 
-import {
+ import {
   ILabStatus,
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -52,6 +52,8 @@ namespace CommandIDs {
 
   export const save = 'settingeditor:save';
 }
+
+type SettingEditorType = 'ui' | 'json';
 
 /**
  * The default setting editor extension.
@@ -101,61 +103,67 @@ function activate(
     });
   }
 
-  if (palette) {
-    palette.addItem({
-      category: trans.__('Settings'),
-      command: CommandIDs.open
+  const openUi = async (args: { query: string }) => {
+    if (tracker.currentWidget) {
+      shell.activateById(tracker.currentWidget.id);
+      return;
+    }
+
+    const key = plugin.id;
+
+    const { SettingsEditor } = await import('@jupyterlab/settingeditor');
+
+    const editor = new MainAreaWidget<SettingsEditor>({
+      content: new SettingsEditor({
+        editorRegistry,
+        key,
+        registry,
+        state,
+        commands,
+        toSkip: [
+          '@jupyterlab/application-extension:context-menu',
+          '@jupyterlab/mainmenu-extension:plugin'
+        ],
+        translator,
+        status,
+        query: args.query as string
+      })
     });
-  }
+
+    if (jsonEditor) {
+      editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+      editor.toolbar.addItem(
+        'open-json-editor',
+        new CommandToolbarButton({
+          commands,
+          id: CommandIDs.openJSON,
+          icon: launchIcon,
+          label: trans.__('JSON Settings Editor')
+        })
+      );
+    }
+
+    editor.id = namespace;
+    editor.title.icon = settingsIcon;
+    editor.title.label = trans.__('Settings');
+    editor.title.closable = true;
+
+    void tracker.add(editor);
+    shell.add(editor);
+  };
 
   commands.addCommand(CommandIDs.open, {
-    execute: async args => {
-      if (tracker.currentWidget) {
-        shell.activateById(tracker.currentWidget.id);
-        return;
-      }
-
-      const key = plugin.id;
-
-      const { SettingsEditor } = await import('@jupyterlab/settingeditor');
-
-      const editor = new MainAreaWidget<SettingsEditor>({
-        content: new SettingsEditor({
-          editorRegistry,
-          key,
-          registry,
-          state,
-          commands,
-          toSkip: [
-            '@jupyterlab/application-extension:context-menu',
-            '@jupyterlab/mainmenu-extension:plugin'
-          ],
-          translator,
-          status,
-          query: args.query as string
-        })
+    execute: async (args: {
+      query?: string;
+      settingEditorType?: SettingEditorType;
+    }) => {
+      registry.load(plugin.id).then(settings => {
+        args.settingEditorType ??
+        (settings.get('settingEditorType').composite as SettingEditorType) ===
+          'json'
+          ? commands.execute(CommandIDs.openJSON)
+          : openUi({ query: args.query ?? '' });
       });
-
-      if (jsonEditor) {
-        editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
-        editor.toolbar.addItem(
-          'open-json-editor',
-          new CommandToolbarButton({
-            commands,
-            id: CommandIDs.openJSON,
-            icon: launchIcon,
-            label: trans.__('JSON Settings Editor')
-          })
-        );
-      }
-
-      editor.id = namespace;
-      editor.title.icon = settingsIcon;
-      editor.title.label = trans.__('Settings');
-      editor.title.closable = true;
-
-      void tracker.add(editor);
-      shell.add(editor);
     },
     label: args => {
       if (args.label) {
@@ -164,6 +172,14 @@ function activate(
       return trans.__('Settings Editor');
     }
   });
+
+  if (palette) {
+    palette.addItem({
+      category: trans.__('Settings'),
+      command: CommandIDs.open,
+      args: { settingEditorType: 'ui' }
+    });
+  }
 
   return tracker;
 }
