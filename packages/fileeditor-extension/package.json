@@ -45,6 +45,7 @@
     "@jupyterlab/console": "^4.0.0-alpha.9",
     "@jupyterlab/coreutils": "^6.0.0-alpha.9",
     "@jupyterlab/docregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/documentsearch": "^4.0.0-alpha.9",
     "@jupyterlab/filebrowser": "^4.0.0-alpha.9",
     "@jupyterlab/fileeditor": "^4.0.0-alpha.9",
     "@jupyterlab/launcher": "^4.0.0-alpha.9",

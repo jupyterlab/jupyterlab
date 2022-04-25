@@ -42,6 +42,7 @@
     "@jupyterlab/apputils": "^4.0.0-alpha.9",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.9",
     "@jupyterlab/coreutils": "^6.0.0-alpha.9",
+    "@jupyterlab/documentsearch": "^4.0.0-alpha.9",
     "@jupyterlab/nbformat": "^4.0.0-alpha.9",
     "@jupyterlab/observables": "^5.0.0-alpha.9",
     "@jupyterlab/shared-models": "^4.0.0-alpha.9",
