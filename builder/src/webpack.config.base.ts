@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import * as webpack from 'webpack';
 import miniSVGDataURI from 'mini-svg-data-uri';
 
 const rules = [
@@ -98,8 +97,7 @@ module.exports = {
       url: false,
       buffer: false,
       // See https://github.com/webpack/webpack/blob/3471c776059ac2d26593ea39f9c47c1874253dbb/lib/ModuleNotFoundError.js#L13-L42
-      path: require.resolve('path-browserify'),
-      process: require.resolve('process/browser')
+      path: require.resolve('path-browserify')
     }
   },
   watchOptions: {
@@ -108,10 +106,5 @@ module.exports = {
   },
   output: {
     hashFunction: 'sha256'
-  },
-  plugins: [
-    new webpack.ProvidePlugin({
-      process: 'process/browser'
-    })
-  ]
+  }
 };
