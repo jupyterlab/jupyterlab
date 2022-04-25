@@ -626,7 +626,7 @@ export class OutputArea extends Widget {
 
   /**
    * Wrap a output widget within a output panel
-   * 
+   *
    * @param output Output widget to wrap
    * @param executionCount Execution count
    * @returns The output panel

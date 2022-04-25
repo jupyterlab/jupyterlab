@@ -294,7 +294,7 @@ export class OutputAreaModel implements IOutputAreaModel {
 
   /**
    * Add a copy of the item to the list.
-   * 
+   *
    * @returns The list length
    */
   private _add(value: nbformat.IOutput): number {
