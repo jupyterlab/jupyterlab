@@ -1,0 +1,14 @@
+{
+  "title": "Settings Editor Form UI",
+  "description": "Settings editor form ui settings.",
+  "properties": {
+    "useJsonEditor": {
+      "title": "Use the JSON editor.",
+      "description": "Set true if you you want to use the raw json editor to edit your settings.",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
