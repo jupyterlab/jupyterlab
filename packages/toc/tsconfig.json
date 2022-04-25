@@ -10,6 +10,9 @@
       "path": "../apputils"
     },
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -17,9 +20,6 @@
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../settingregistry"
     },
     {
       "path": "../translation"
