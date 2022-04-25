@@ -36,11 +36,9 @@ test.describe.serial('Notebook Run Vega', () => {
     const imageName = 'run-cells-vega.png';
 
     await page.notebook.run();
-    await page.waitForSelector('.vega-embed');
+    const graph = await page.waitForSelector('.vega-embed');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
-
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await graph.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Run notebook with Vega cell in dark theme', async ({
@@ -54,10 +52,8 @@ test.describe.serial('Notebook Run Vega', () => {
     const imageName = 'run-cells-dark-vega.png';
 
     await page.notebook.run();
-    await page.waitForSelector('.vega-embed');
+    const graph = await page.waitForSelector('.vega-embed');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
-
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await graph.screenshot()).toMatchSnapshot(imageName);
   });
 });
