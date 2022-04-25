@@ -36,10 +36,13 @@
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "start": "jupyter lab --config ./jupyter_server_test_config.py",
     "start:detached": "(jlpm run start&)",
+    "start:doc": "mkdir -p /tmp/dummy-server/lab && python -m http.server -d /tmp/dummy-server 8888",
     "test": "playwright test",
     "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
     "test:benchmark:update": "BENCHMARK_NUMBER_SAMPLES=1 jlpm run test -c playwright-benchmark.config.js --update-snapshots",
     "test:debug": "PWDEBUG=1 playwright test",
+    "test:doc": "echo \"No documentation tests\"",
+    "test:doc:update": "echo \"No documentation tests\"",
     "test:report": "http-server ./playwright-report -a localhost -o",
     "test:update": "playwright test --update-snapshots && jlpm test:benchmark:update"
   },
