@@ -12,7 +12,7 @@ import {
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
   IFilter,
-  IFiltersType,
+  IFilters,
   ISearchMatch,
   ISearchProvider,
   SearchProvider
@@ -99,7 +99,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         found = true;
         break;
       } else {
-        agg += provider.matchesSize;
+        agg += provider.matchesCount;
       }
     }
     return found ? agg : null;
@@ -108,9 +108,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * The number of matches.
    */
-  get matchesSize(): number | null {
+  get matchesCount(): number | null {
     return this._searchProviders.reduce(
-      (sum, provider) => (sum += provider.matchesSize),
+      (sum, provider) => (sum += provider.matchesCount),
       0
     );
   }
@@ -205,9 +205,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Clear currently highlighted match.
    */
-  clearHighlight(): void {
+  async clearHighlight(): Promise<void> {
     if (this._currentProviderIndex !== null) {
-      this._searchProviders[this._currentProviderIndex].clearHighlight();
+      await this._searchProviders[this._currentProviderIndex].clearHighlight();
       this._currentProviderIndex = null;
     }
   }
@@ -247,7 +247,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    */
   async startQuery(
     query: RegExp,
-    filters: IFiltersType | undefined
+    filters: IFilters | undefined
   ): Promise<void> {
     if (!this.widget) {
       return;
@@ -399,11 +399,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     provider?.dispose();
   }
 
-  private _onCellsChanged(
+  private async _onCellsChanged(
     cells: IObservableUndoableList<ICellModel>,
     changes: IObservableList.IChangedArgs<ICellModel>
-  ): void {
-    this.clearHighlight();
+  ): Promise<void> {
+    await this.clearHighlight();
 
     switch (changes.type) {
       case 'add':
@@ -536,7 +536,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     await this._onSelectionChanged();
 
     if (this.widget.content.activeCellIndex !== this._currentProviderIndex) {
-      this.clearHighlight();
+      await this.clearHighlight();
     }
   }
 
@@ -563,7 +563,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   private _currentProviderIndex: number | null = null;
-  private _filters: IFiltersType | undefined;
+  private _filters: IFilters | undefined;
   private _onSelectedCells = false;
   private _query: RegExp | null = null;
   private _searchProviders: CellSearchProvider[] = [];

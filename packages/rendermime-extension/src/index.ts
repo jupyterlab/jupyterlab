@@ -44,9 +44,9 @@ const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
 };
 
 /**
- * Export the plugins as default.
+ * Export the plugin as default.
  */
-export default [plugin];
+export default plugin;
 
 /**
  * Activate the rendermine plugin.

@@ -41,7 +41,7 @@ export interface IFilter {
  *
  * TODO support additional filter type
  */
-export interface IFiltersType {
+export interface IFilters {
   /**
    * Filter name: value
    */
@@ -110,12 +110,12 @@ export interface IDisplayState {
   /**
    * Whether or not the replace entry row is visible
    */
-  replaceEntryShown: boolean;
+  replaceEntryVisible: boolean;
 
   /**
    * What should we include when we search?
    */
-  filters: IFiltersType;
+  filters: IFilters;
 
   /**
    * Is the filters view open?
@@ -216,7 +216,7 @@ export interface IBaseSearchProvider extends IDisposable {
    * @param query Regular expression to test for
    * @param filters Filters to apply when searching
    */
-  startQuery(query: RegExp, filters: IFiltersType): Promise<void>;
+  startQuery(query: RegExp, filters: IFilters): Promise<void>;
 
   /**
    * Stop a search and clear any internal state of the provider
@@ -226,7 +226,7 @@ export interface IBaseSearchProvider extends IDisposable {
   /**
    * Clear currently highlighted match.
    */
-  clearHighlight(): void;
+  clearHighlight(): Promise<void>;
 
   /**
    * Highlight the next match
@@ -279,7 +279,7 @@ export interface IBaseSearchProvider extends IDisposable {
   /**
    * The number of matches.
    */
-  readonly matchesSize: number | null;
+  readonly matchesCount: number | null;
 }
 
 /**

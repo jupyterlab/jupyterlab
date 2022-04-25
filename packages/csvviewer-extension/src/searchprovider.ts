@@ -53,8 +53,9 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   /**
    * Clear currently highlighted match.
    */
-  clearHighlight(): void {
+  clearHighlight(): Promise<void> {
     // no-op
+    return Promise.resolve();
   }
 
   /**

@@ -22,7 +22,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { SearchDocumentModel } from './searchmodel';
-import { IFilter, IFiltersType } from './tokens';
+import { IFilter, IFilters } from './tokens';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
@@ -299,7 +299,7 @@ interface ISearchOverlayProps {
   /**
    * Filters values.
    */
-  filters: IFiltersType;
+  filters: IFilters;
   /**
    * Available filters definition.
    */
@@ -311,7 +311,7 @@ interface ISearchOverlayProps {
   /**
    * Whether or not the replace entry row is visible
    */
-  replaceEntryShown: boolean;
+  replaceEntryVisible: boolean;
   /**
    * Replacement expression
    */
@@ -353,7 +353,7 @@ interface ISearchOverlayProps {
    *
    * The provided filter values are the one changing.
    */
-  onFiltersChanged: (f: IFiltersType) => void;
+  onFiltersChanged: (f: IFilters) => void;
   /**
    * Callback on close button click.
    */
@@ -434,7 +434,7 @@ class SearchOverlay extends React.Component<
   private _onReplaceToggled() {
     // Deactivate invalid replace filters
     const filters = { ...this.props.filters };
-    if (!this.props.replaceEntryShown) {
+    if (!this.props.replaceEntryVisible) {
       for (const key in this.props.filtersDefinition) {
         const filter = this.props.filtersDefinition[key];
         if (!filter.supportReplace) {
@@ -444,7 +444,7 @@ class SearchOverlay extends React.Component<
     }
     this.props.onFiltersChanged(filters);
 
-    this.props.onReplaceEntryShown(!this.props.replaceEntryShown);
+    this.props.onReplaceEntryShown(!this.props.replaceEntryVisible);
   }
 
   private _toggleFiltersOpen() {
@@ -455,7 +455,7 @@ class SearchOverlay extends React.Component<
 
   render() {
     const trans = this.translator.load('jupyterlab');
-    const showReplace = !this.props.isReadOnly && this.props.replaceEntryShown;
+    const showReplace = !this.props.isReadOnly && this.props.replaceEntryVisible;
     const filters = this.props.filtersDefinition;
 
     const hasFilters = Object.keys(filters).length > 0;
@@ -477,7 +477,7 @@ class SearchOverlay extends React.Component<
               description={filter.description}
               isEnabled={!showReplace || filter.supportReplace}
               onToggle={() => {
-                const newFilter: IFiltersType = {};
+                const newFilter: IFilters = {};
                 newFilter[name] = !this.props.filters[name];
                 this.props.onFiltersChanged(newFilter);
               }}
@@ -487,7 +487,7 @@ class SearchOverlay extends React.Component<
         })}
       </div>
     ) : null;
-    const icon = this.props.replaceEntryShown ? caretDownIcon : caretRightIcon;
+    const icon = this.props.replaceEntryVisible ? caretDownIcon : caretRightIcon;
 
     // TODO: Error messages from regex are not currently localizable.
     return (
@@ -662,7 +662,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         errorMessage={this.model.parsingError}
         filters={this.model.filters}
         filtersDefinition={this.model.filtersDefinition}
-        replaceEntryShown={this._showReplace}
+        replaceEntryVisible={this._showReplace}
         replaceText={this.model.replaceText}
         searchText={this.model.searchExpression}
         searchInputRef={this._searchInput}
@@ -675,7 +675,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         onRegexToggled={() => {
           this.model.useRegex = !this.model.useRegex;
         }}
-        onFiltersChanged={(filters: IFiltersType) => {
+        onFiltersChanged={(filters: IFilters) => {
           this.model.filters = { ...this.model.filters, ...filters };
         }}
         onHighlightNext={() => {

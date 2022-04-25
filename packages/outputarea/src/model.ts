@@ -18,7 +18,7 @@ export interface IOutputAreaModel extends IDisposable {
    *
    * The number is the index of the output that changed.
    */
-  readonly stateChanged: ISignal<IOutputAreaModel, number | void>;
+  readonly stateChanged: ISignal<IOutputAreaModel, number>;
 
   /**
    * A signal emitted when the list of items changes.

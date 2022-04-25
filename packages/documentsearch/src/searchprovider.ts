@@ -3,7 +3,7 @@
 
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IFilter, IFiltersType, ISearchMatch, ISearchProvider } from './tokens';
+import { IFilter, IFilters, ISearchMatch, ISearchProvider } from './tokens';
 
 /**
  * Abstract class implementing the search provider interface.
@@ -44,7 +44,7 @@ export abstract class SearchProvider<T extends Widget = Widget>
   /**
    * The number of matches.
    */
-  get matchesSize(): number | null {
+  get matchesCount(): number | null {
     return null;
   }
 
@@ -103,7 +103,7 @@ export abstract class SearchProvider<T extends Widget = Widget>
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
    */
-  abstract startQuery(query: RegExp, filters: IFiltersType): Promise<void>;
+  abstract startQuery(query: RegExp, filters: IFilters): Promise<void>;
 
   /**
    * Stop a search and clear any internal state of the search provider.
@@ -113,7 +113,7 @@ export abstract class SearchProvider<T extends Widget = Widget>
   /**
    * Clear currently highlighted match.
    */
-  abstract clearHighlight(): void;
+  abstract clearHighlight(): Promise<void>;
 
   /**
    * Highlight the next match.

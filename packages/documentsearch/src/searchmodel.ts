@@ -6,7 +6,7 @@ import { JSONExt } from '@lumino/coreutils';
 import { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { IFilter, IFiltersType, ISearchProvider } from './tokens';
+import { IFilter, IFilters, ISearchProvider } from './tokens';
 
 /**
  * Search in a document model.
@@ -73,10 +73,10 @@ export class SearchDocumentModel
   /**
    * Filter values.
    */
-  get filters(): IFiltersType {
+  get filters(): IFilters {
     return this._filters;
   }
-  set filters(v: IFiltersType) {
+  set filters(v: IFilters) {
     if (!JSONExt.deepEqual(this._filters, v)) {
       this._filters = v;
       this.stateChanged.emit();
@@ -143,7 +143,7 @@ export class SearchDocumentModel
    * Total number of matches.
    */
   get totalMatches(): number | null {
-    return this.searchProvider.matchesSize;
+    return this.searchProvider.matchesCount;
   }
 
   /**
@@ -267,7 +267,7 @@ export class SearchDocumentModel
   private _caseSensitive = false;
   private _disposed = new Signal<this, void>(this);
   private _parsingError = '';
-  private _filters: IFiltersType = {};
+  private _filters: IFilters = {};
   private _replaceText: string;
   private _searchDebouncer: Debouncer;
   private _searchExpression = '';

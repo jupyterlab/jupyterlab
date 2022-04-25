@@ -183,7 +183,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * The number of matches.
    */
-  get matchesSize(): number | null {
+  get matchesCount(): number | null {
     return this._matches.length;
   }
 
@@ -197,12 +197,14 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Clear currently highlighted match.
    */
-  clearHighlight(): void {
+  clearHighlight(): Promise<void> {
     if (this._currentMatchIndex >= 0) {
       const hit = this._markNodes[this._currentMatchIndex];
       hit.classList.remove(...SELECTED_CLASSES);
     }
     this._currentMatchIndex = -1;
+
+    return Promise.resolve();
   }
 
   /**

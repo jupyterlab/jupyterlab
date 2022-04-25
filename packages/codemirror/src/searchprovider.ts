@@ -142,11 +142,13 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * Clear currently highlighted match.
    */
-  clearHighlight(): void {
+  clearHighlight(): Promise<void> {
     this._currentMatch = null;
     const cursor = this.editor.getCursorPosition();
     // Reset cursor position to remove any selection
     this.editor.setCursorPosition(cursor);
+
+    return Promise.resolve();
   }
 
   /**
@@ -248,7 +250,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   /**
    * The number of matches.
    */
-  get matchesSize(): number | null {
+  get matchesCount(): number | null {
     let size = 0;
     for (const line in this._matchState) {
       size += Object.keys(this._matchState[line]).length;

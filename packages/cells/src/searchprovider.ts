@@ -9,7 +9,7 @@ import {
 import {
   GenericSearchProvider,
   IBaseSearchProvider,
-  IFiltersType,
+  IFilters,
   ISearchMatch,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
@@ -75,16 +75,18 @@ export class CellSearchProvider implements IBaseSearchProvider {
   /**
    * Number of matches in the cell.
    */
-  get matchesSize(): number {
+  get matchesCount(): number {
     return this.isActive ? this.cmHandler.matches.length : 0;
   }
 
   /**
    * Clear currently highlighted match
    */
-  clearHighlight(): void {
+  clearHighlight(): Promise<void> {
     this.currentIndex = null;
     this.cmHandler.clearHighlight();
+
+    return Promise.resolve();
   }
 
   /**
@@ -131,10 +133,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
    */
-  async startQuery(
-    query: RegExp | null,
-    filters?: IFiltersType
-  ): Promise<void> {
+  async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
     this.query = query;
     this.filters = filters;
 
@@ -158,7 +157,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
    * @returns The next match if there is one.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
-    if (this.matchesSize === 0 || !this.isActive) {
+    if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (this._lastReplacementPosition) {
@@ -185,7 +184,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
    * @returns The previous match if there is one.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    if (this.matchesSize === 0 || !this.isActive) {
+    if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       // This starts from the cursor position
@@ -330,7 +329,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
   /**
    * Current search filters
    */
-  protected filters: IFiltersType | undefined;
+  protected filters: IFilters | undefined;
   /**
    * Current search query
    */
@@ -369,15 +368,15 @@ class CodeCellSearchProvider extends CellSearchProvider {
   /**
    * Number of matches in the cell.
    */
-  get matchesSize(): number {
+  get matchesCount(): number {
     if (!this.isActive) {
       return 0;
     }
 
     return (
-      super.matchesSize +
+      super.matchesCount +
       this.outputsProvider.reduce(
-        (sum, provider) => sum + (provider.matchesSize ?? 0),
+        (sum, provider) => sum + (provider.matchesCount ?? 0),
         0
       )
     );
@@ -386,11 +385,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
   /**
    * Clear currently highlighted match.
    */
-  clearHighlight(): void {
-    super.clearHighlight();
-    this.outputsProvider.forEach(provider => {
-      provider.clearHighlight();
-    });
+  async clearHighlight(): Promise<void> {
+    await super.clearHighlight();
+    await Promise.all(
+      this.outputsProvider.map(provider => provider.clearHighlight())
+    );
   }
 
   /**
@@ -413,7 +412,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @returns The next match if there is one.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
-    if (this.matchesSize === 0 || !this.isActive) {
+    if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (this.currentProviderIndex === -1) {
@@ -431,11 +430,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
         const match = await provider.highlightNext(false);
         if (match) {
           this.currentIndex =
-            super.matchesSize +
+            super.matchesCount +
             this.outputsProvider
               .slice(0, this.currentProviderIndex)
               .reduce(
-                (sum, provider) => (sum += provider.matchesSize ?? 0),
+                (sum, provider) => (sum += provider.matchesCount ?? 0),
                 0
               ) +
             provider.currentMatchIndex!;
@@ -457,7 +456,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @returns The previous match if there is one.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    if (this.matchesSize === 0 || !this.isActive) {
+    if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (this.currentIndex === null) {
@@ -470,11 +469,11 @@ class CodeCellSearchProvider extends CellSearchProvider {
         const match = await provider.highlightPrevious(false);
         if (match) {
           this.currentIndex =
-            super.matchesSize +
+            super.matchesCount +
             this.outputsProvider
               .slice(0, this.currentProviderIndex)
               .reduce(
-                (sum, provider) => (sum += provider.matchesSize ?? 0),
+                (sum, provider) => (sum += provider.matchesCount ?? 0),
                 0
               ) +
             provider.currentMatchIndex!;
@@ -502,10 +501,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
    */
-  async startQuery(
-    query: RegExp | null,
-    filters?: IFiltersType
-  ): Promise<void> {
+  async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
     await super.startQuery(query, filters);
 
     // Search outputs
@@ -573,9 +569,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Clear currently highlighted match
    */
-  clearHighlight(): void {
-    super.clearHighlight();
-    this.renderedProvider.clearHighlight();
+  async clearHighlight(): Promise<void> {
+    await super.clearHighlight();
+    await this.renderedProvider.clearHighlight();
   }
 
   /**
@@ -609,7 +605,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     const cell = this.cell as MarkdownCell;
-    if (cell.rendered && this.matchesSize > 0) {
+    if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell
       this._unrenderedByHighligh = true;
       cell.rendered = false;
@@ -628,7 +624,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
     const cell = this.cell as MarkdownCell;
-    if (cell.rendered && this.matchesSize > 0) {
+    if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell if there are matches within the cell
       this._unrenderedByHighligh = true;
       cell.rendered = false;
@@ -646,10 +642,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param query A RegExp to be use to perform the search
    * @param filters Filter parameters to pass to provider
    */
-  async startQuery(
-    query: RegExp | null,
-    filters?: IFiltersType
-  ): Promise<void> {
+  async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
     await super.startQuery(query, filters);
     const cell = this.cell as MarkdownCell;
     if (cell.rendered) {

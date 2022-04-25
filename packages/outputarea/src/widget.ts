@@ -455,44 +455,27 @@ export class OutputArea extends Widget {
       return;
     }
 
-    if (index === this._maxNumberOutputs) {
-      // TODO Improve style of the display message.
-      model = this.model.contentFactory.createOutputModel({
-        value: {
-          output_type: 'display_data',
-          data: {
-            'text/html': `
-              <a style="margin: 10px; text-decoration: none; cursor: pointer;">
-                <pre>Output of this cell has been trimmed on the initial display.</pre>
-                <pre>Displaying the first ${this._maxNumberOutputs} top outputs.</pre>
-                <pre>Click on this message to get the complete output.</pre>
-              </a>
-              `
-          }
-        }
-      });
-    }
-
-    let output = this.createOutputItem(model);
-    if (output) {
-      output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
-    } else {
-      output = new Widget();
-    }
-
-    if (!this._outputTracker.has(output)) {
-      void this._outputTracker.add(output);
-    }
-
     const layout = this.layout as PanelLayout;
-    layout.insertWidget(index, output);
 
     if (index === this._maxNumberOutputs) {
-      output.node.addEventListener('click', () => {
+      const warning = new Private.TrimmedOutputs(this._maxNumberOutputs, () => {
         const lastShown = this._maxNumberOutputs;
         this._maxNumberOutputs = Infinity;
         this._showTrimmedOutputs(lastShown);
       });
+      layout.insertWidget(index, this._wrappedOutput(warning));
+    } else {
+      let output = this.createOutputItem(model);
+      if (output) {
+        output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+      } else {
+        output = new Widget();
+      }
+
+      if (!this._outputTracker.has(output)) {
+        void this._outputTracker.add(output);
+      }
+      layout.insertWidget(index, output);
     }
   }
 
@@ -510,9 +493,6 @@ export class OutputArea extends Widget {
    * @param lastShown Starting model index to insert.
    */
   private _showTrimmedOutputs(lastShown: number) {
-    // Dispose information widget
-    this.widgets[lastShown].dispose();
-
     for (let idx = lastShown; idx < this.model.length; idx++) {
       this._insertOutput(idx, this.model.get(idx));
     }
@@ -535,18 +515,7 @@ export class OutputArea extends Widget {
       return null;
     }
 
-    const panel = new Private.OutputPanel();
-
-    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
-
-    const prompt = this.contentFactory.createOutputPrompt();
-    prompt.executionCount = model.executionCount;
-    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
-    panel.addWidget(prompt);
-
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-    panel.addWidget(output);
-    return panel;
+    return this._wrappedOutput(output, model.executionCount);
   }
 
   /**
@@ -654,6 +623,28 @@ export class OutputArea extends Widget {
     };
     model.add(output);
   };
+
+  /**
+   * Wrap a output widget within a output panel
+   * 
+   * @param output Output widget to wrap
+   * @param executionCount Execution count
+   * @returns The output panel
+   */
+  private _wrappedOutput(output: Widget, executionCount: number | null = null): Panel {
+    const panel = new Private.OutputPanel();
+
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    const prompt = this.contentFactory.createOutputPrompt();
+    prompt.executionCount = executionCount;
+    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
+    panel.addWidget(prompt);
+
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+    return panel;
+  }
 
   private _minHeightTimeout: number | null = null;
   private _future: Kernel.IShellFuture<
@@ -1120,5 +1111,78 @@ namespace Private {
       super.onAfterDetach(msg);
       this.node.removeEventListener('contextmenu', this._onContext.bind(this));
     }
+  }
+
+  /**
+   * Trimmed outputs information widget.
+   */
+  export class TrimmedOutputs extends Widget {
+    /**
+     * Widget constructor
+     *
+     * ### Notes
+     * The widget will be disposed on click after calling the callback.
+     *
+     * @param maxNumberOutputs Maximal number of outputs to display
+     * @param _onClick Callback on click event on the widget
+     */
+    constructor(
+      maxNumberOutputs: number,
+      onClick: (event: MouseEvent) => void
+    ) {
+      const node = document.createElement('div');
+      node.insertAdjacentHTML(
+        'afterbegin',
+        `<a>
+        <pre>Output of this cell has been trimmed on the initial display.</pre>
+        <pre>Displaying the first ${maxNumberOutputs} top outputs.</pre>
+        <pre>Click on this message to get the complete output.</pre>
+      </a>`
+      );
+      super({
+        node
+      });
+      this._onClick = onClick;
+      this.addClass('jp-TrimmedOutputs');
+      this.addClass('jp-RenderedHTMLCommon');
+    }
+
+    /**
+     * Handle the DOM events for widget.
+     *
+     * @param event - The DOM event sent to the widget.
+     *
+     * #### Notes
+     * This method implements the DOM `EventListener` interface and is
+     * called in response to events on the widget's DOM node. It should
+     * not be called directly by user code.
+     */
+    handleEvent(event: Event): void {
+      if (event.type === 'click') {
+        // Detach the widget
+        this.parent = null;
+        this._onClick(event as MouseEvent);
+        this.dispose();
+      }
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('click', this);
+    }
+
+    /**
+     * A message handler invoked on a `'before-detach'`
+     * message
+     */
+    protected onBeforeDetach(msg: Message): void {
+      super.onBeforeDetach(msg);
+      this.node.removeEventListener('click', this);
+    }
+
+    private _onClick: (event: MouseEvent) => void;
   }
 }
