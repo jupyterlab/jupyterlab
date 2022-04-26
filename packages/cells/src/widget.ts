@@ -37,6 +37,8 @@ import {
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
+import { addIcon } from '@jupyterlab/ui-components';
+
 import {
   JSONObject,
   JSONValue,
