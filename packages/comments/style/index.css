@@ -10,6 +10,7 @@
 @import url('~@jupyterlab/codeeditor/style/index.css');
 @import url('~codemirror/lib/codemirror.css');
 @import url('~@jupyterlab/codemirror/style/index.css');
+@import url('~@jupyterlab/user/style/index.css');
 @import url('~@jupyterlab/docprovider/style/index.css');
 @import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');

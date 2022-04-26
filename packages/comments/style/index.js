@@ -10,6 +10,7 @@ import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/codeeditor/style/index.js';
 import 'codemirror/lib/codemirror.css';
 import '@jupyterlab/codemirror/style/index.js';
+import '@jupyterlab/user/style/index.js';
 import '@jupyterlab/docprovider/style/index.js';
 import '@jupyterlab/rendermime/style/index.js';
 import '@jupyterlab/docregistry/style/index.js';
