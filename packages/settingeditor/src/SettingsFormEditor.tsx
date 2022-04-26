@@ -332,10 +332,11 @@ export class SettingsFormEditor extends React.Component<
   SettingsFormEditor.IProps,
   SettingsFormEditor.IState
 > {
+  private formState: any;
   constructor(props: SettingsFormEditor.IProps) {
     super(props);
     const { settings } = props;
-    this.state = {
+    this.formState = {
       formData: settings.composite,
       isModified: settings.isModified
     };
@@ -351,16 +352,18 @@ export class SettingsFormEditor extends React.Component<
     // Prevent unnecessary save when opening settings that haven't been modified.
     if (
       !this.props.settings.isModified &&
-      this.props.settings.isDefault(this.state.formData)
+      this.props.settings.isDefault(this.formState.formData)
     ) {
       this.props.updateDirtyState(false);
       return;
     }
     this.props.settings
-      .save(JSON.stringify(this.state.formData, undefined, JSON_INDENTATION))
+      .save(
+        JSON.stringify(this.formState.formData, undefined, JSON_INDENTATION)
+      )
       .then(() => {
         this.props.updateDirtyState(false);
-        this.setState({ isModified: this.props.settings.isModified });
+        this.formState = { isModified: this.props.settings.isModified };
       })
       .catch((reason: string) => {
         this.props.updateDirtyState(false);
@@ -378,10 +381,10 @@ export class SettingsFormEditor extends React.Component<
     for (const field in this.props.settings.user) {
       await this.props.settings.remove(field);
     }
-    this.setState({
+    this.formState = {
       formData: this.props.settings.composite,
       isModified: false
-    });
+    };
   };
 
   render(): JSX.Element {
@@ -438,7 +441,7 @@ export class SettingsFormEditor extends React.Component<
               {this.props.settings.schema.description}
             </div>
           </header>
-          {this.state.isModified && (
+          {this.formState.isModified && (
             <button className="jp-RestoreButton" onClick={this.reset}>
               {trans.__('Restore to Defaults')}
             </button>
@@ -447,7 +450,7 @@ export class SettingsFormEditor extends React.Component<
         {!this.props.isCollapsed && (
           <Form
             schema={filteredSchema as JSONSchema7}
-            formData={this.state.formData}
+            formData={this.formState.formData}
             FieldTemplate={CustomTemplate}
             ArrayFieldTemplate={CustomArrayTemplateFactory(
               this.props.translator
@@ -462,7 +465,7 @@ export class SettingsFormEditor extends React.Component<
             idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
             onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
               this.props.hasError(e.errors.length !== 0);
-              this.setState({ formData: e.formData });
+              this.formState = { formData: e.formData };
               if (e.errors.length === 0) {
                 this.props.updateDirtyState(true);
                 void this._debouncer.invoke();
