@@ -106,15 +106,6 @@ function activate(
       category: trans.__('Settings'),
       command: CommandIDs.open
     });
-
-    palette.addItem({
-      category: trans.__('Settings'),
-      command: CommandIDs.open,
-      args: {
-        query: 'Command Palette',
-        label: 'Open command palette settings'
-      }
-    });
   }
 
   commands.addCommand(CommandIDs.open, {
