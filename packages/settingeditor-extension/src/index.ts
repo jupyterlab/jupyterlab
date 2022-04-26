@@ -168,7 +168,7 @@ function activate(
     },
     label: args => {
       if (args.label) {
-        return trans.__(args.label as string);
+        return args.label as string;
       }
       return trans.__('Settings Editor');
     }
