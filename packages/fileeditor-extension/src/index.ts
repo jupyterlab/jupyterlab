@@ -347,7 +347,7 @@ function activate(
     sessionDialogs
   );
 
-  Commands.addOpenCodeViewerCommand(app, editorServices);
+  Commands.addOpenCodeViewerCommand(app, editorServices, trans);
 
   // Add a launcher item if the launcher is available.
   if (launcher) {

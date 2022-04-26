@@ -1204,7 +1204,8 @@ export namespace Commands {
 
   export function addOpenCodeViewerCommand(
     app: JupyterFrontEnd,
-    editorServices: IEditorServices
+    editorServices: IEditorServices,
+    trans: TranslationBundle
   ) {
     const openCodeViewer = (args: {
       content: string;
@@ -1230,7 +1231,7 @@ export namespace Commands {
         content: args.content,
         mimeType: mimetype
       });
-      widget.title.label = args.label || 'Code Viewer';
+      widget.title.label = args.label || trans.__('Code Viewer');
       widget.title.caption = widget.title.label;
 
       // Get the fileType based on the mimetype to determine the icon
