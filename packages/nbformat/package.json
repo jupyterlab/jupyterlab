@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/nbformat",
-  "version": "3.4.0-alpha.0",
+  "version": "3.4.0-beta.0",
   "description": "Notebook format interfaces",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,7 +40,7 @@
     "@lumino/coreutils": "^1.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.4.0-alpha.0",
+    "@jupyterlab/testutils": "^3.4.0-beta.0",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
