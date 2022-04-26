@@ -1,0 +1,89 @@
+:root {
+  --jc-comment-border-color: #c5c5c5;
+  --jc-comment-border: 1px solid var(--jc-comment-border-color);
+  --jc-timestamp-color: var(--jp-ui-font-color2);
+}
+
+.jc-panelHeader {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  z-index: 2;
+}
+
+.jc-panelHeader-identity-container {
+  color: var(--jp-ui-font-color2);
+  font-size: var(--jp-ui-font-size0);
+  display: flex;
+  justify-content: start;
+}
+
+.jc-panelHeader-editIcon {
+  transform: scale(0.72);
+  float: right;
+  display: block;
+  opacity: 0;
+}
+
+.jc-panelHeader-identity-container:hover .jc-panelHeader-editIcon {
+  opacity: 1;
+}
+
+.jc-panelHeader-filename {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+  margin-top: -3px;
+}
+
+.jc-panelHeader-left {
+  color: black;
+}
+
+.jc-panelHeader-right {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: auto;
+  align-items: start;
+  margin-top: 5px;
+  gap: 1em;
+}
+
+.jc-panelHeader-dropdown {
+  color: var(--jc-timestamp-color);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  margin-right: -5px;
+}
+
+.jc-panelHeader-EditInputArea-false {
+  color: var(--jp-ui-font-color3);
+  word-break: break-word;
+}
+
+.jc-panelHeader-EditInputArea-true {
+  border: var(--jc-comment-border);
+  color: var(--jp-ui-font-color3);
+  word-break: break-word;
+}
+
+.jc-Button {
+  cursor: pointer;
+}
+
+.jc-Button > svg {
+  width: 20px;
+}
+
+.jc-DirtyIndicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--jp-ui-font-color2);
+  margin-left: 8px;
+}

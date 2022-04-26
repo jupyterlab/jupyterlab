@@ -6,19 +6,28 @@
  */
 
 import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+  commentRegistryPlugin,
+  commentWidgetRegistryPlugin,
+  jupyterCommentingPlugin
+} from './api';
+// Importing directly from './text' causes the imported plugin to be undefined (??)
+import { textCommentingPlugin } from './text/plugin';
+import { notebookCommentsPlugin } from './notebook';
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+
+export * from './api';
+export * from './notebook';
+export * from './text';
+
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  jupyterCommentingPlugin,
+  commentRegistryPlugin,
+  commentWidgetRegistryPlugin,
+  notebookCommentsPlugin,
+  textCommentingPlugin
+];
 
 /**
- * Initialization data for the comments extension.
+ * Export the plugins as default.
  */
-const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'comments:plugin',
-  autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
-    console.log('JupyterLab extension comments is activated!');
-  }
-};
-
-export default plugin;
+export default plugins;

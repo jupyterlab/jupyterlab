@@ -1,11 +1,12 @@
 # comments
 
 [![Github Actions Status](https://github.com/github_username/comments/workflows/Build/badge.svg)](https://github.com/github_username/comments/actions/workflows/build.yml)
-Comment features
+Comment features. This is adapted from [jupyterlab-comments](https://github.com/jupytercalpoly/jupyterlab-comments),
+written by Cameron Toy, Srirag Vuppala, and Rahul Nair.
 
 ## Requirements
 
-- JupyterLab >= 3.0
+- JupyterLab >= 4.0
 
 ## Install
 
