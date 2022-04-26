@@ -58,6 +58,12 @@ export interface ISettingsPanelProps {
     PluginList,
     (plugin: ISettingRegistry.IPlugin) => string[] | null
   >;
+
+  /**
+   * If the settings editor is created with an initial search query, an initial
+   * filter function is passed to the settings panel.
+   */
+  initialFilter: (item: ISettingRegistry.IPlugin) => string[] | null;
 }
 
 /**
@@ -72,14 +78,13 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   hasError,
   updateDirtyState,
   updateFilterSignal,
-  translator
+  translator,
+  initialFilter
 }: ISettingsPanelProps): JSX.Element => {
   const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
   const [filterPlugin, setFilter] = useState<
     (plugin: ISettingRegistry.IPlugin) => string[] | null
-  >(() => (plugin: ISettingRegistry.IPlugin): string[] | null => {
-    return null;
-  });
+  >(() => initialFilter);
 
   // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
@@ -107,6 +112,15 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
         }
       }
     };
+
+    // Set first visible plugin as expanded plugin on initial load.
+    for (const pluginSettings of settings) {
+      const filtered = filterPlugin(pluginSettings.plugin);
+      if (filtered === null || filtered.length > 0) {
+        setExpandedPlugin(pluginSettings.id);
+        break;
+      }
+    }
 
     // When filter updates, only show plugins that match search.
     updateFilterSignal.connect(onFilterUpdate);

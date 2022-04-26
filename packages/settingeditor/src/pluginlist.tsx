@@ -10,7 +10,8 @@ import {
   classes,
   FilterBox,
   LabIcon,
-  settingsIcon
+  settingsIcon,
+  updateFilterFunction
 } from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
 import { PartialJSONObject } from '@lumino/coreutils';
@@ -53,8 +54,8 @@ export class PluginList extends ReactWidget {
       this.update();
     }, this);
     this.mapPlugins = this.mapPlugins.bind(this);
-    this._filter = (item: ISettingRegistry.IPlugin) => null;
     this.setFilter = this.setFilter.bind(this);
+    this.setFilter(updateFilterFunction(options.query ?? '', false, false));
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
     this._query = options.query;
@@ -118,6 +119,10 @@ export class PluginList extends ReactWidget {
       }
     }
     return false;
+  }
+
+  get filter(): (item: ISettingRegistry.IPlugin) => string[] | null {
+    return this._filter;
   }
 
   /**

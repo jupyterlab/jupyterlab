@@ -65,9 +65,9 @@ export class SettingsEditor extends SplitPanel {
             updateFilterSignal={this._list.updateFilterSignal}
             updateDirtyState={this.setDirtyState}
             translator={this.translator}
+            initialFilter={this._list.filter}
           />
         );
-
         this.addWidget(settingsPanel);
       })
       .catch(reason => {
