@@ -318,6 +318,11 @@ const CustomTemplate = (props: FieldTemplateProps) => {
         {schema.description && needsDescription && (
           <div className="jp-FormGroup-description">{schema.description}</div>
         )}
+        {isModified && schema.default !== undefined && (
+          <div className="jp-FormGroup-default">
+            Default: {schema.default?.toLocaleString()}
+          </div>
+        )}
         <div className="validationErrors">{errors}</div>
       </div>
     </div>
