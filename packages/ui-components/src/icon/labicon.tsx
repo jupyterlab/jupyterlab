@@ -237,10 +237,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         return icon;
       } else {
         // already loaded icon svg exists; replace it and warn
-        // TODO: need to see if this warning is useful or just noisy
-        console.warn(
-          `Redefining previously loaded icon svgstr. name: ${name}, svgstrOld: ${icon.svgstr}, svgstr: ${svgstr}`
-        );
+        if (LabIcon._debug) {
+          console.warn(
+            `Redefining previously loaded icon svgstr. name: ${name}, svgstrOld: ${icon.svgstr}, svgstr: ${svgstr}`
+          );
+        }
         icon.svgstr = svgstr;
         return icon;
       }
