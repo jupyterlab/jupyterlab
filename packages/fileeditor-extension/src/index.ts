@@ -15,10 +15,12 @@ import {
   ICommandPalette,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
+  MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
   CodeEditor,
+  CodeViewerWidget,
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
@@ -41,7 +43,7 @@ import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
-import { Commands, FACTORY, IFileTypeData } from './commands';
+import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
 import { Session } from '@jupyterlab/services';
 
 export { Commands } from './commands';
@@ -347,7 +349,32 @@ function activate(
     sessionDialogs
   );
 
-  Commands.addOpenCodeViewerCommand(app, editorServices, trans);
+  const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(
+    {
+      namespace: 'codeviewer'
+    }
+  );
+
+  // Handle state restoration for code viewers
+  if (restorer) {
+    void restorer.restore(codeViewerTracker, {
+      command: CommandIDs.openCodeViewer,
+      args: widget => ({
+        content: widget.content.content,
+        label: widget.content.title.label,
+        mimeType: widget.content.mimeType,
+        widgetId: widget.content.id
+      }),
+      name: widget => widget.content.id
+    });
+  }
+
+  Commands.addOpenCodeViewerCommand(
+    app,
+    editorServices,
+    codeViewerTracker,
+    trans
+  );
 
   // Add a launcher item if the launcher is available.
   if (launcher) {

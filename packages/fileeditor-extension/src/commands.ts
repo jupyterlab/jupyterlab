@@ -1205,14 +1205,16 @@ export namespace Commands {
   export function addOpenCodeViewerCommand(
     app: JupyterFrontEnd,
     editorServices: IEditorServices,
+    tracker: WidgetTracker<MainAreaWidget<CodeViewerWidget>>,
     trans: TranslationBundle
   ) {
-    const openCodeViewer = (args: {
+    const openCodeViewer = async (args: {
       content: string;
       label?: string;
       mimeType?: string;
       extension?: string;
-    }): void => {
+      widgetId?: string;
+    }): Promise<CodeViewerWidget> => {
       const func = editorServices.factoryService.newDocumentEditor;
       const factory: CodeEditor.Factory = options => {
         return func(options);
@@ -1240,13 +1242,18 @@ export namespace Commands {
       });
       widget.title.icon = fileType?.icon ?? textEditorIcon;
 
+      if (args.widgetId) {
+        widget.id = args.widgetId;
+      }
       const main = new MainAreaWidget({ content: widget });
+      await tracker.add(main);
       app.shell.add(main, 'main');
+      return widget;
     };
 
     app.commands.addCommand(CommandIDs.openCodeViewer, {
       execute: (args: any) => {
-        openCodeViewer(args);
+        return openCodeViewer(args);
       }
     });
   }

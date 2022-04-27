@@ -11,11 +11,13 @@ export class CodeViewerWidget extends Widget {
    */
   constructor(options: CodeViewerWidget.IOptions) {
     super();
+    this.content = options.content;
 
     this.model = new CodeEditor.Model({
       value: options.content,
       mimeType: options.mimeType
     });
+    this.mimeType = this.model.mimeType;
 
     const editorWidget = new CodeEditorWrapper({
       factory: options.factory,
@@ -28,6 +30,8 @@ export class CodeViewerWidget extends Widget {
     layout.addWidget(editorWidget);
   }
 
+  content: string;
+  mimeType: string;
   model: CodeEditor.IModel;
   editor: CodeEditor.IEditor;
 }
