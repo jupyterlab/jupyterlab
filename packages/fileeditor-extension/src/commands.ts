@@ -1228,7 +1228,7 @@ export namespace Commands {
         );
       }
 
-      const widget = new CodeViewerWidget({
+      const widget = CodeViewerWidget.getCodeViewer({
         factory,
         content: args.content,
         mimeType: mimetype
