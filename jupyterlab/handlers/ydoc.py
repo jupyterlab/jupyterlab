@@ -83,11 +83,11 @@ class YNotebook(YBaseDoc):
         cast_all(meta, float, int)
         for cell in cells:
             if "id" in cell and state["nbformat"] == 4 and state["nbformatMinor"] <= 4:
-                # strip cell ids if we have notebook format 4.0-4.4
+                # strip cell IDs if we have notebook format 4.0-4.4
                 del cell["id"]
         return dict(
             cells=cells,
-            metadata=meta,
+            metadata=meta["metadata"],
             nbformat=int(state["nbformat"]),
             nbformat_minor=int(state["nbformatMinor"]),
         )

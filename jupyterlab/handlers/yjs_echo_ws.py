@@ -42,7 +42,6 @@ class JupyterRoom(YRoom):
         self.cleaner = None
         self.watcher = None
         self.document = YDOCS.get(type, YFILE)(self.ydoc)
-        self.initialized = False
 
 
 class JupyterWebsocketServer(WebsocketServer):
@@ -94,15 +93,15 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         if self.room.cleaner is not None:
             self.room.cleaner.cancel()
 
-        if not self.room.initialized:
+        if not self.room.ydoc.initialized.is_set():
             model = await ensure_async(
                 self.contents_manager.get(self.file_path, type=self.file_type)
             )
             self.last_modified = model["last_modified"]
             # check again if initialized, because loading the file can be async
-            if not self.room.initialized:
+            if not self.room.ydoc.initialized.is_set():
                 self.room.document.source = model["content"]
-                self.room.initialized = True
+                self.room.document.ydoc.initialized.set()
                 self.room.watcher = asyncio.create_task(self.watch_file())
                 # save the document when changed
                 self.room.document.observe(self.maybe_save_document)
