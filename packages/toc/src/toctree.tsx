@@ -2,13 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { TOCItem } from './tocitem';
+import { TableOfContentsItem } from './tocitem';
 import { TableOfContents } from './tokens';
 
 /**
  * Interface describing component properties.
  */
-export interface ITOCTreeProps {
+export interface ITableOfContentsTreeProps {
   /**
    * Currently active heading.
    */
@@ -34,7 +34,9 @@ export interface ITOCTreeProps {
 /**
  * React component for a table of contents tree.
  */
-export class TOCTree extends React.PureComponent<ITOCTreeProps> {
+export class TableOfContentsTree extends React.PureComponent<
+  ITableOfContentsTreeProps
+> {
   /**
    * Renders a table of contents tree.
    */
@@ -72,7 +74,7 @@ export class TOCTree extends React.PureComponent<ITOCTreeProps> {
           const next = items[globalIndex];
 
           nested.push(
-            <TOCItem
+            <TableOfContentsItem
               key={`${current.level}-${current.text}`}
               isActive={
                 !!this.props.activeHeading &&
@@ -83,7 +85,7 @@ export class TOCTree extends React.PureComponent<ITOCTreeProps> {
               onCollapse={this.props.onCollapseChange}
             >
               {next && next.level > level && getChildren(items, level + 1)}
-            </TOCItem>
+            </TableOfContentsItem>
           );
         } else {
           break;

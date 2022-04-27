@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ToCUtils } from '@jupyterlab/toc';
+import { TableOfContentsUtils } from '@jupyterlab/toc';
 
-describe('ToCUtils', () => {
+describe('TableOfContentsUtils', () => {
   describe('Markdown', () => {
     describe('#getHeadings', () => {
-      it.each<[string, ToCUtils.Markdown.IMarkdownHeading[]]>([
+      it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
         [
           '# Title',
           [{ text: 'Title', level: 1, line: 0, raw: '# Title', prefix: '1. ' }]
@@ -173,7 +173,7 @@ describe('ToCUtils', () => {
         ['```\nTitle\n--\n```', []],
         ['```\n<h1>Title</h1>\n```', []]
       ])('should extract headings from %s', (src, headers) => {
-        const headings = ToCUtils.Markdown.getHeadings(src, {
+        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
           maximalDepth: 6,
           numberHeaders: true
         });
@@ -195,13 +195,13 @@ describe('ToCUtils', () => {
       ['<h4 class="a tocSkip">Title</h4>'],
       ['<h4 class="jp-toc-ignore b">Title</h4>']
     ])('should skip the heading from %s', src => {
-      const headings = ToCUtils.Markdown.getHeadings(src);
+      const headings = TableOfContentsUtils.Markdown.getHeadings(src);
       expect(headings).toHaveLength(0);
     });
 
     it('should clean the title', () => {
       const src = '## Title [with](https://jupyter.org "title") link';
-      const headings = ToCUtils.Markdown.getHeadings(src);
+      const headings = TableOfContentsUtils.Markdown.getHeadings(src);
       expect(headings).toHaveLength(1);
       expect(headings[0]).toEqual({
         level: 2,
@@ -222,7 +222,9 @@ describe('ToCUtils', () => {
 ##### h5
 ###### h6`;
 
-        const headings = ToCUtils.Markdown.getHeadings(src, { maximalDepth });
+        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
+          maximalDepth
+        });
         expect(headings).toHaveLength(maximalDepth);
         expect(headings[headings.length - 1].level).toEqual(maximalDepth);
       }
@@ -233,7 +235,7 @@ describe('ToCUtils', () => {
       numberHeaders => {
         const src = '### h3';
 
-        const headings = ToCUtils.Markdown.getHeadings(src, {
+        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
           numberHeaders
         });
         expect(headings).toHaveLength(1);
@@ -246,7 +248,7 @@ describe('ToCUtils', () => {
       numberingH1 => {
         const src = '# h1';
 
-        const headings = ToCUtils.Markdown.getHeadings(src, {
+        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
           numberingH1,
           numberHeaders: true
         });
@@ -261,7 +263,7 @@ describe('ToCUtils', () => {
         const src = `# h1
 ## h2`;
 
-        const headings = ToCUtils.Markdown.getHeadings(src, {
+        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
           numberingH1,
           numberHeaders: true,
           baseNumbering: 3

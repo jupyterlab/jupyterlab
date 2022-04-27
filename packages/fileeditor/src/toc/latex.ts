@@ -5,7 +5,7 @@ import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   TableOfContents,
   TableOfContentsModel,
-  ToCUtils
+  TableOfContentsUtils
 } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from '../widget';
@@ -83,12 +83,17 @@ export class LaTeXTableOfContentsModel extends TableOfContentsModel<
       if (match) {
         const level = LATEX_LEVELS[match[1]];
         if (level <= this.configuration.maximalDepth) {
-          const prefix = ToCUtils.getPrefix(level, previousLevel, levels, {
-            ...this.configuration,
-            // Force base numbering and numbering first level
-            baseNumbering: 1,
-            numberingH1: true
-          });
+          const prefix = TableOfContentsUtils.getPrefix(
+            level,
+            previousLevel,
+            levels,
+            {
+              ...this.configuration,
+              // Force base numbering and numbering first level
+              baseNumbering: 1,
+              numberingH1: true
+            }
+          );
           previousLevel = level;
 
           headings.push({

@@ -3,7 +3,7 @@
 
 import { VDomRenderer } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { TOCTree } from './toctree';
+import { TableOfContentsTree } from './toctree';
 import { TableOfContents } from './tokens';
 
 /**
@@ -33,7 +33,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<
     }
 
     return (
-      <TOCTree
+      <TableOfContentsTree
         activeHeading={this.model.activeHeading}
         documentType={this.model.documentType}
         headings={this.model.headings}
@@ -43,7 +43,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<
         setActiveHeading={(heading: TableOfContents.IHeading) => {
           this.model!.activeHeading = heading;
         }}
-      ></TOCTree>
+      ></TableOfContentsTree>
     );
   }
 }

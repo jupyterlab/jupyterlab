@@ -5,7 +5,7 @@ import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   TableOfContents,
   TableOfContentsModel,
-  ToCUtils
+  TableOfContentsUtils
 } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from '../widget';
@@ -41,7 +41,7 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
 
     const content = this.widget.content.model.value.text;
 
-    const headings = ToCUtils.Markdown.getHeadings(content, {
+    const headings = TableOfContentsUtils.Markdown.getHeadings(content, {
       ...this.configuration,
       // Force removing numbering as they cannot be displayed
       // in the document
@@ -66,7 +66,7 @@ export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory
 
     if (isApplicable) {
       let mime = (widget as any).content?.model?.mimeType;
-      return mime && ToCUtils.Markdown.isMarkdown(mime);
+      return mime && TableOfContentsUtils.Markdown.isMarkdown(mime);
     }
     return false;
   }

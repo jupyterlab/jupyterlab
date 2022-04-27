@@ -15,4 +15,4 @@ export * from './toctree';
 export * from './tokens';
 export * from './tracker';
 // Namespace the utils
-export * as ToCUtils from './utils';
+export * as TableOfContentsUtils from './utils';

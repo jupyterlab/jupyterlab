@@ -17,7 +17,7 @@ import {
   MarkdownDocument,
   MarkdownViewer,
   MarkdownViewerFactory,
-  MarkdownViewerToCFactory
+  MarkdownViewerTableOfContentsFactory
 } from '@jupyterlab/markdownviewer';
 import {
   IRenderMimeRegistry,
@@ -179,7 +179,10 @@ function activate(
 
   if (tocRegistry) {
     tocRegistry.add(
-      new MarkdownViewerToCFactory(tracker, rendermime.markdownParser)
+      new MarkdownViewerTableOfContentsFactory(
+        tracker,
+        rendermime.markdownParser
+      )
     );
   }
 

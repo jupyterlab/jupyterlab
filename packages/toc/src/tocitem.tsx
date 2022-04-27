@@ -8,7 +8,7 @@ import { TableOfContents } from './tokens';
 /**
  * Interface describing component properties.
  */
-export interface ITOCItemProps {
+export interface ITableOfContentsItemsProps {
   /**
    * Whether this item is active or not.
    */
@@ -32,8 +32,8 @@ export interface ITOCItemProps {
 /**
  * React component for a table of contents entry.
  */
-export class TOCItem extends React.PureComponent<
-  React.PropsWithChildren<ITOCItemProps>
+export class TableOfContentsItem extends React.PureComponent<
+  React.PropsWithChildren<ITableOfContentsItemsProps>
 > {
   /**
    * Renders a table of contents entry.

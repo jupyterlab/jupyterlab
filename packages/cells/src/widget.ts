@@ -35,7 +35,7 @@ import {
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { ToCUtils } from '@jupyterlab/toc';
+import { TableOfContentsUtils } from '@jupyterlab/toc';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -1532,10 +1532,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   get headingInfo(): { text: string; level: number } {
     // Use table of content algorithm for consistency
-    const headings = ToCUtils.Markdown.getHeadings(this.model.value.text, {
-      maximalDepth: 6,
-      numberHeaders: false
-    });
+    const headings = TableOfContentsUtils.Markdown.getHeadings(
+      this.model.value.text,
+      {
+        maximalDepth: 6,
+        numberHeaders: false
+      }
+    );
 
     if (headings.length > 0) {
       // Return the highest level

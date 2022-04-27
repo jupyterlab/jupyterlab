@@ -7,7 +7,7 @@ import {
   TableOfContents,
   TableOfContentsFactory,
   TableOfContentsModel,
-  ToCUtils
+  TableOfContentsUtils
 } from '@jupyterlab/toc';
 import { MarkdownDocument } from './widget';
 
@@ -15,12 +15,12 @@ import { MarkdownDocument } from './widget';
  * Interface describing a Markdown viewer heading.
  */
 export interface IMarkdownViewerHeading
-  extends ToCUtils.Markdown.IMarkdownHeading {}
+  extends TableOfContentsUtils.Markdown.IMarkdownHeading {}
 
 /**
  * Table of content model for Markdown viewer files.
  */
-export class MarkdownViewerToCModel extends TableOfContentsModel<
+export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
   IMarkdownViewerHeading,
   MarkdownDocument
 > {
@@ -72,7 +72,7 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
    */
   protected getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
-    const headings = ToCUtils.Markdown.getHeadings(content, {
+    const headings = TableOfContentsUtils.Markdown.getHeadings(content, {
       ...this.configuration,
       // Force base number to be equal to 1
       baseNumbering: 1
@@ -84,7 +84,7 @@ export class MarkdownViewerToCModel extends TableOfContentsModel<
 /**
  * Table of content model factory for Markdown viewer files.
  */
-export class MarkdownViewerToCFactory extends TableOfContentsFactory<
+export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory<
   MarkdownDocument
 > {
   /**
@@ -111,7 +111,7 @@ export class MarkdownViewerToCFactory extends TableOfContentsFactory<
     widget: MarkdownDocument,
     configuration?: TableOfContents.IConfig
   ): TableOfContentsModel<TableOfContents.IHeading, MarkdownDocument> {
-    const model = new MarkdownViewerToCModel(
+    const model = new MarkdownViewerTableOfContentsModel(
       widget,
       this.parser,
       configuration
@@ -151,12 +151,12 @@ export class MarkdownViewerToCFactory extends TableOfContentsFactory<
       }
 
       // Clear all numbering items
-      ToCUtils.clearNumbering(widget.content.node);
+      TableOfContentsUtils.clearNumbering(widget.content.node);
 
       // Create a new mapping
       headingToElement = new WeakMap<IMarkdownViewerHeading, Element | null>();
       model.headings.forEach(async heading => {
-        const elementId = await ToCUtils.Markdown.getHeadingId(
+        const elementId = await TableOfContentsUtils.Markdown.getHeadingId(
           this.parser!,
           heading.raw,
           heading.level
@@ -169,7 +169,7 @@ export class MarkdownViewerToCFactory extends TableOfContentsFactory<
 
         headingToElement.set(
           heading,
-          ToCUtils.addPrefix(
+          TableOfContentsUtils.addPrefix(
             widget.content.node,
             selector,
             heading.prefix ?? ''

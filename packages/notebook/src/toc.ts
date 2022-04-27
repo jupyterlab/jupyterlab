@@ -14,7 +14,7 @@ import {
   TableOfContents,
   TableOfContentsFactory,
   TableOfContentsModel,
-  ToCUtils
+  TableOfContentsUtils
 } from '@jupyterlab/toc';
 import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
@@ -281,9 +281,9 @@ export class NotebookToCModel extends TableOfContentsModel<
               let mdType: string | null = null;
 
               Object.keys(m.data).forEach(t => {
-                if (!mdType && ToCUtils.Markdown.isMarkdown(t)) {
+                if (!mdType && TableOfContentsUtils.Markdown.isMarkdown(t)) {
                   mdType = t;
-                } else if (!htmlType && ToCUtils.isHTML(t)) {
+                } else if (!htmlType && TableOfContentsUtils.isHTML(t)) {
                   htmlType = t;
                 }
               });
@@ -291,7 +291,7 @@ export class NotebookToCModel extends TableOfContentsModel<
               // Parse HTML output
               if (htmlType) {
                 headings.push(
-                  ...ToCUtils.getHTMLHeadings(
+                  ...TableOfContentsUtils.getHTMLHeadings(
                     this.sanitizer.sanitize(m.data[htmlType] as string),
                     this.configuration,
                     documentLevels
@@ -308,7 +308,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                 );
               } else if (mdType) {
                 headings.push(
-                  ...ToCUtils.Markdown.getHeadings(
+                  ...TableOfContentsUtils.Markdown.getHeadings(
                     m.data[mdType] as string,
                     this.configuration,
                     documentLevels
@@ -330,7 +330,7 @@ export class NotebookToCModel extends TableOfContentsModel<
           break;
         }
         case 'markdown': {
-          const cellHeadings = ToCUtils.Markdown.getHeadings(
+          const cellHeadings = TableOfContentsUtils.Markdown.getHeadings(
             cell.model.value.text,
             this.configuration,
             documentLevels
@@ -631,21 +631,21 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         return;
       }
       // Clear all numbering items
-      ToCUtils.clearNumbering(widget.content.node);
+      TableOfContentsUtils.clearNumbering(widget.content.node);
 
       // Create a new mapping
       headingToElement = new WeakMap<INotebookHeading, Element | null>();
       model.headings.forEach(async heading => {
         let elementId: string | null = null;
         if (heading.type === HeadingType.Markdown) {
-          elementId = await ToCUtils.Markdown.getHeadingId(
+          elementId = await TableOfContentsUtils.Markdown.getHeadingId(
             this.parser!,
-            // Type from ToCUtils.Markdown.IMarkdownHeading
+            // Type from TableOfContentsUtils.Markdown.IMarkdownHeading
             (heading as any).raw,
             heading.level
           );
         } else if (heading.type === HeadingType.HTML) {
-          // Type from ToCUtils.IHTMLHeading
+          // Type from TableOfContentsUtils.IHTMLHeading
           elementId = (heading as any).id;
         }
 
@@ -657,7 +657,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           // Code cell
           headingToElement.set(
             heading,
-            ToCUtils.addPrefix(
+            TableOfContentsUtils.addPrefix(
               (heading.cellRef as CodeCell).outputArea.widgets[
                 heading.outputIndex
               ].node,
@@ -668,7 +668,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         } else {
           headingToElement.set(
             heading,
-            ToCUtils.addPrefix(
+            TableOfContentsUtils.addPrefix(
               heading.cellRef.node,
               selector,
               heading.prefix ?? ''

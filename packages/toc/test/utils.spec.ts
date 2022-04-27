@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ToCUtils } from '@jupyterlab/toc';
+import { TableOfContentsUtils } from '@jupyterlab/toc';
 
-describe('ToCUtils', () => {
+describe('TableOfContentsUtils', () => {
   describe('#getHTMLHeadings', () => {
-    it.each<[string, ToCUtils.IHTMLHeading[]]>([
+    it.each<[string, TableOfContentsUtils.IHTMLHeading[]]>([
       [
         '<h1>Title</h1>',
         [
@@ -75,7 +75,7 @@ describe('ToCUtils', () => {
       ['<h2 class="a jp-toc-ignore" title="noisy title">Title</h2>', []],
       ['<h2 id="another-h6-id" class="tocSkip b">Title</h2>', []]
     ])('should extract headings from %s', (src, headers) => {
-      const headings = ToCUtils.getHTMLHeadings(src, {
+      const headings = TableOfContentsUtils.getHTMLHeadings(src, {
         maximalDepth: 6,
         numberHeaders: true
       });
@@ -96,7 +96,9 @@ describe('ToCUtils', () => {
 <h5>Title</h5>
 <h6>Title</h6>`;
 
-        const headings = ToCUtils.getHTMLHeadings(src, { maximalDepth });
+        const headings = TableOfContentsUtils.getHTMLHeadings(src, {
+          maximalDepth
+        });
         expect(headings).toHaveLength(maximalDepth);
         expect(headings[headings.length - 1].level).toEqual(maximalDepth);
       }
@@ -107,7 +109,7 @@ describe('ToCUtils', () => {
       numberHeaders => {
         const src = '<h3>Title</h3>';
 
-        const headings = ToCUtils.getHTMLHeadings(src, {
+        const headings = TableOfContentsUtils.getHTMLHeadings(src, {
           numberHeaders
         });
         expect(headings).toHaveLength(1);
@@ -120,7 +122,7 @@ describe('ToCUtils', () => {
       numberingH1 => {
         const src = '<h1>Title</h1>';
 
-        const headings = ToCUtils.getHTMLHeadings(src, {
+        const headings = TableOfContentsUtils.getHTMLHeadings(src, {
           numberingH1,
           numberHeaders: true
         });
@@ -135,7 +137,7 @@ describe('ToCUtils', () => {
         const src = `<h1>Title</h1>
 <h2>Title</h2>`;
 
-        const headings = ToCUtils.getHTMLHeadings(src, {
+        const headings = TableOfContentsUtils.getHTMLHeadings(src, {
           numberHeaders: true,
           numberingH1,
           baseNumbering: 3
