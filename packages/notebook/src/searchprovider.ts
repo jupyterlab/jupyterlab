@@ -441,7 +441,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   ): void {
     const index = panel.widgets.findIndex(cell => cell.id === renderedCell.id);
     if (index >= 0) {
-      this._onCellsChanged(panel.model!.cells, {
+      void this._onCellsChanged(panel.model!.cells, {
         newIndex: index,
         newValues: [renderedCell.model],
         oldIndex: index,
