@@ -5,7 +5,7 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
-import { Settings } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
 import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
@@ -88,13 +88,40 @@ export namespace SettingsFormEditor {
     /**
      * The current form values being displayed in the editor.
      */
-    formData: any;
+    // formData: any;
 
     /**
      * Indicates whether the settings have been modified. Used for hiding
      * the "Restore to Default" button when there are no changes.
      */
     isModified: boolean;
+
+    // The following are state derived from props for memoization to avoid
+    // `Form` update that results in focus lost
+    // A better fix (that will break the API) would be to move this as props
+    // of the component
+    /**
+     * Form UI schema
+     */
+    uiSchema: UiSchema;
+    /**
+     * Filtered schema
+     */
+    filteredSchema: ISettingRegistry.ISchema;
+    /**
+     * Array Field template
+     */
+    arrayFieldTemplate?: React.StatelessComponent<ArrayFieldTemplateProps<any>>;
+    /**
+     * Object Field template
+     */
+    objectFieldTemplate?: React.StatelessComponent<
+      ObjectFieldTemplateProps<any>
+    >;
+    /**
+     * Form context
+     */
+    formContext?: any;
   }
 }
 
@@ -332,16 +359,41 @@ export class SettingsFormEditor extends React.Component<
   SettingsFormEditor.IProps,
   SettingsFormEditor.IState
 > {
-  private formState: any;
   constructor(props: SettingsFormEditor.IProps) {
     super(props);
     const { settings } = props;
-    this.formState = {
-      formData: settings.composite,
-      isModified: settings.isModified
+    this._formData = settings.composite;
+    this.state = {
+      isModified: settings.isModified,
+      uiSchema: {},
+      filteredSchema: this.props.settings.schema,
+      arrayFieldTemplate: CustomArrayTemplateFactory(this.props.translator),
+      objectFieldTemplate: CustomObjectTemplateFactory(this.props.translator),
+      formContext: { settings: this.props.settings }
     };
     this.handleChange = this.handleChange.bind(this);
     this._debouncer = new Debouncer(this.handleChange);
+  }
+
+  componentDidMount(): void {
+    this._setUiSchema();
+    this._setFilteredSchema();
+  }
+
+  componentDidUpdate(prevProps: SettingsFormEditor.IProps): void {
+    this._setUiSchema(prevProps.renderers);
+    this._setFilteredSchema(prevProps.filteredValues);
+
+    if (prevProps.translator !== this.props.translator) {
+      this.setState({
+        arrayFieldTemplate: CustomArrayTemplateFactory(this.props.translator),
+        objectFieldTemplate: CustomObjectTemplateFactory(this.props.translator)
+      });
+    }
+
+    if (prevProps.settings !== this.props.settings) {
+      this.setState({ formContext: { settings: this.props.settings } });
+    }
   }
 
   /**
@@ -352,18 +404,16 @@ export class SettingsFormEditor extends React.Component<
     // Prevent unnecessary save when opening settings that haven't been modified.
     if (
       !this.props.settings.isModified &&
-      this.props.settings.isDefault(this.formState.formData)
+      this.props.settings.isDefault(this._formData)
     ) {
       this.props.updateDirtyState(false);
       return;
     }
     this.props.settings
-      .save(
-        JSON.stringify(this.formState.formData, undefined, JSON_INDENTATION)
-      )
+      .save(JSON.stringify(this._formData, undefined, JSON_INDENTATION))
       .then(() => {
         this.props.updateDirtyState(false);
-        this.formState = { isModified: this.props.settings.isModified };
+        this.setState({ isModified: this.props.settings.isModified });
       })
       .catch((reason: string) => {
         this.props.updateDirtyState(false);
@@ -377,48 +427,17 @@ export class SettingsFormEditor extends React.Component<
    * modified settings then calls `setFormData` to restore the
    * values.
    */
-  reset = async (): Promise<void> => {
+  reset = async (event: React.MouseEvent): Promise<void> => {
+    event.stopPropagation();
     for (const field in this.props.settings.user) {
       await this.props.settings.remove(field);
     }
-    this.formState = {
-      formData: this.props.settings.composite,
-      isModified: false
-    };
+    this._formData = this.props.settings.composite;
+    this.setState({ isModified: false });
   };
 
   render(): JSX.Element {
     const trans = this.props.translator.load('jupyterlab');
-
-    /**
-     * Construct uiSchema to pass any custom renderers to the form editor.
-     */
-    const uiSchema: UiSchema = {};
-    for (const id in this.props.renderers) {
-      if (
-        Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
-      ) {
-        uiSchema[id] = {
-          'ui:field': id
-        };
-      }
-    }
-
-    /**
-     * Only show fields that match search value.
-     */
-    const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
-    if (this.props.filteredValues?.length ?? 0 > 0) {
-      for (const field in filteredSchema.properties) {
-        if (
-          !this.props.filteredValues?.includes(
-            filteredSchema.properties[field].title ?? field
-          )
-        ) {
-          delete filteredSchema.properties[field];
-        }
-      }
-    }
     const icon = this.props.isCollapsed ? caretRightIcon : caretDownIcon;
 
     return (
@@ -441,7 +460,7 @@ export class SettingsFormEditor extends React.Component<
               {this.props.settings.schema.description}
             </div>
           </header>
-          {this.formState.isModified && (
+          {this.state.isModified && (
             <button className="jp-RestoreButton" onClick={this.reset}>
               {trans.__('Restore to Defaults')}
             </button>
@@ -449,40 +468,94 @@ export class SettingsFormEditor extends React.Component<
         </div>
         {!this.props.isCollapsed && (
           <Form
-            schema={filteredSchema as JSONSchema7}
-            formData={this.formState.formData}
+            schema={this.state.filteredSchema as JSONSchema7}
+            formData={this._formData}
             FieldTemplate={CustomTemplate}
-            ArrayFieldTemplate={CustomArrayTemplateFactory(
-              this.props.translator
-            )}
-            ObjectFieldTemplate={CustomObjectTemplateFactory(
-              this.props.translator
-            )}
-            uiSchema={uiSchema}
+            ArrayFieldTemplate={this.state.arrayFieldTemplate}
+            ObjectFieldTemplate={this.state.objectFieldTemplate}
+            uiSchema={this.state.uiSchema}
             fields={this.props.renderers}
-            formContext={{ settings: this.props.settings }}
+            formContext={this.state.formContext}
             liveValidate
             idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
-            onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-              this.props.hasError(e.errors.length !== 0);
-              this.formState = { formData: e.formData };
-              if (e.errors.length === 0) {
-                this.props.updateDirtyState(true);
-                void this._debouncer.invoke();
-              }
-              this.props.onSelect(this.props.settings.id);
-            }}
+            onChange={this._onChange}
           />
         )}
       </div>
     );
   }
 
+  /**
+   * Callback on plugin selection
+   * @param list Plugin list
+   * @param id Plugin id
+   */
   protected onSelect = (list: PluginList, id: string): void => {
     if (id === this.props.settings.id) {
       this.props.onCollapseChange(false);
     }
   };
 
+  private _onChange = (e: IChangeEvent<ReadonlyPartialJSONObject>): void => {
+    this.props.hasError(e.errors.length !== 0);
+    this._formData = e.formData;
+    if (e.errors.length === 0) {
+      this.props.updateDirtyState(true);
+      void this._debouncer.invoke();
+    }
+    this.props.onSelect(this.props.settings.id);
+  };
+
+  private _setUiSchema(prevRenderers?: { [id: string]: Field }) {
+    if (
+      !prevRenderers ||
+      !JSONExt.deepEqual(
+        Object.keys(prevRenderers).sort(),
+        Object.keys(this.props.renderers).sort()
+      )
+    ) {
+      /**
+       * Construct uiSchema to pass any custom renderers to the form editor.
+       */
+      const uiSchema: UiSchema = {};
+      for (const id in this.props.renderers) {
+        if (
+          Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
+        ) {
+          uiSchema[id] = {
+            'ui:field': id
+          };
+        }
+      }
+      this.setState({ uiSchema });
+    }
+  }
+
+  private _setFilteredSchema(prevFilteredValues?: string[] | null) {
+    if (
+      prevFilteredValues === undefined ||
+      !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues)
+    ) {
+      /**
+       * Only show fields that match search value.
+       */
+      const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
+      if (this.props.filteredValues?.length ?? 0 > 0) {
+        for (const field in filteredSchema.properties) {
+          if (
+            !this.props.filteredValues?.includes(
+              filteredSchema.properties[field].title ?? field
+            )
+          ) {
+            delete filteredSchema.properties[field];
+          }
+        }
+      }
+
+      this.setState({ filteredSchema });
+    }
+  }
+
   private _debouncer: Debouncer<void, any>;
+  private _formData: any;
 }
