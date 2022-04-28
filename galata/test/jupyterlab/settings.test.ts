@@ -17,5 +17,5 @@ test('Open the settings editor with a specific search query', async ({
     await page.locator('.jp-PluginList .jp-FilterBox input').inputValue()
   ).toEqual('Command Palette');
 
-  expect(await page.locator('.jp-SettingsForm')).toHaveCount(1);
+  await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
 });
