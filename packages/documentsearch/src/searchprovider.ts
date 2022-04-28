@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { IFilter, IFilters, ISearchMatch, ISearchProvider } from './tokens';
 
@@ -16,15 +16,15 @@ export abstract class SearchProvider<T extends Widget = Widget>
    * @param widget The widget to search in
    */
   constructor(protected widget: T) {
-    this._changed = new Signal<this, void>(this);
+    this._stateChanged = new Signal<this, void>(this);
     this._disposed = false;
   }
 
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
-  get stateChanged(): Signal<this, void> {
-    return this._changed;
+  get stateChanged(): ISignal<this, void> {
+    return this._stateChanged;
   }
 
   /**
@@ -147,6 +147,7 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   abstract replaceAllMatches(newText: string): Promise<boolean>;
 
-  private _changed: Signal<this, void>;
+  // Needs to be protected so subclass can emit the signal too.
+  protected _stateChanged: Signal<this, void>;
   private _disposed: boolean;
 }

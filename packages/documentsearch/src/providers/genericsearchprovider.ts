@@ -411,7 +411,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     this._currentMatchIndex = -1;
     // This is typically cheap, but we do not control the rate of change or size of the output
     await this.startQuery(this._query);
-    this.stateChanged.emit();
+    this._stateChanged.emit();
   }
 
   private _query: RegExp | null;

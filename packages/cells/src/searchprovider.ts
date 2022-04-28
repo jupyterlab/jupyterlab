@@ -15,7 +15,7 @@ import {
 } from '@jupyterlab/documentsearch';
 import { IObservableString } from '@jupyterlab/observables';
 import { OutputArea } from '@jupyterlab/outputarea';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { CodeCell } from '.';
 import { ICellModel } from './model';
 import { Cell, MarkdownCell } from './widget';
@@ -36,7 +36,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
    */
   constructor(protected cell: Cell<ICellModel>) {
     this.currentIndex = null;
-    this._changed = new Signal<IBaseSearchProvider, void>(this);
+    this._stateChanged = new Signal<IBaseSearchProvider, void>(this);
     this.cmHandler = new CodeMirrorSearchHighlighter(
       this.cell.editor as CodeMirrorEditor
     );
@@ -45,8 +45,8 @@ export class CellSearchProvider implements IBaseSearchProvider {
   /**
    * Changed signal to be emitted when search matches change.
    */
-  get stateChanged(): Signal<IBaseSearchProvider, void> {
-    return this._changed;
+  get stateChanged(): ISignal<IBaseSearchProvider, void> {
+    return this._stateChanged;
   }
 
   /**
@@ -302,7 +302,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
     changes?: IObservableString.IChangedArgs
   ): Promise<void> {
     await this._updateCodeMirror(content);
-    this._changed.emit();
+    this._stateChanged.emit();
   }
 
   private async _updateCodeMirror(content: IObservableString) {
@@ -334,7 +334,8 @@ export class CellSearchProvider implements IBaseSearchProvider {
    * Current search query
    */
   protected query: RegExp | null = null;
-  private _changed: Signal<IBaseSearchProvider, void>;
+  // Needs to be protected so subclass can emit the signal too.
+  protected _stateChanged: Signal<IBaseSearchProvider, void>;
   private _isActive = true;
   private _isDisposed = false;
   private _lastReplacementPosition: CodeEditor.IPosition | null = null;
@@ -543,7 +544,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
       ]);
     }
 
-    this.stateChanged.emit();
+    this._stateChanged.emit();
   }
 
   protected outputsProvider: GenericSearchProvider[];

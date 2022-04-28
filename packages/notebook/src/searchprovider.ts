@@ -139,7 +139,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (this.isDisposed) {
       return;
     }
-    super.dispose();
 
     this.widget.content.placeholderCellRendered.disconnect(
       this._onPlaceholderRendered,
@@ -150,6 +149,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this
     );
     this.widget.model?.cells.changed.disconnect(this._onCellsChanged, this);
+
+    super.dispose();
 
     const index = this.widget.content.activeCellIndex;
     this.endQuery()
@@ -544,7 +545,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // Don't highlight the next occurrence when the query
     // follows a document change
     this._documentHasChanged = true;
-    this.stateChanged.emit();
+    this._stateChanged.emit();
   }
 
   private async _onSelectionChanged() {

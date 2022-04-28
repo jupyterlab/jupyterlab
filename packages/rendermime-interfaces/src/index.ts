@@ -450,19 +450,4 @@ export namespace IRenderMime {
      */
     render(source: string): Promise<string>;
   }
-
-  /**
-   * The interface for highlighting a text fragment
-   */
-  export interface IHighlight {
-    /**
-     * Text to highlight
-     */
-    readonly text: string;
-
-    /**
-     * Start location of the match (in a text, this is the column)
-     */
-    position: any;
-  }
 }
