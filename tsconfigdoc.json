@@ -32,12 +32,6 @@
       "path": "./packages/attachments"
     },
     {
-      "path": "./packages/cell-toolbar"
-    },
-    {
-      "path": "./packages/cell-toolbar-extension"
-    },
-    {
       "path": "./packages/cells"
     },
     {
