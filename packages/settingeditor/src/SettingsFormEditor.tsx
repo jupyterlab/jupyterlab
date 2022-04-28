@@ -86,11 +86,6 @@ export namespace SettingsFormEditor {
 
   export interface IState {
     /**
-     * The current form values being displayed in the editor.
-     */
-    // formData: any;
-
-    /**
      * Indicates whether the settings have been modified. Used for hiding
      * the "Restore to Default" button when there are no changes.
      */
