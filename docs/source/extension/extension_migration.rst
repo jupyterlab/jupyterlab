@@ -61,6 +61,9 @@ bumped their major version (following semver convention):
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
   Consequently the ``IRendererFactory.createRenderer`` has a new option ``markdownParser``.
+- ``@jupyterlab/rendermime-interfaces`` from 3.x to 4.x
+  Remove ``IRenderMime.IRenderer.translator?`` attribute; the translator object is still passed to
+  the constructor if needed by the renderer factory.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
