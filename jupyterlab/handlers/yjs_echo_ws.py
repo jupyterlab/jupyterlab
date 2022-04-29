@@ -5,19 +5,12 @@
 
 import asyncio
 import sys
-from pathlib import Path
 from typing import Optional
 
 from jupyter_server.base.handlers import JupyterHandler
-
-# from jupyter_server.services.contents.fileio import (
-#     AsyncFileManagerMixin,
-#     FileManagerMixin,
-# )
 from jupyter_server.utils import ensure_async
 from tornado import web
 from tornado.websocket import WebSocketHandler
-from watchfiles import awatch
 from ypy_websocket.websocket_server import WebsocketServer, YRoom
 
 # See compatibility note on `group` keyword in https://docs.python.org/3/library/importlib.metadata.html#entry-points
@@ -107,21 +100,9 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
                 self.room.document.observe(self.maybe_save_document)
 
     async def watch_file(self):
-        # can only watch file changes if local file system
-        # if/when https://github.com/jupyter-server/jupyter_server/pull/783 gets in,
-        # we will check for a contents manager ability to watch file changes
-        if False:  # isinstance(self.contents_manager, (FileManagerMixin, AsyncFileManagerMixin)):
-            abs_path = Path(self.file_path).resolve()
-
-            def filter(change, path):
-                return Path(path).resolve() == abs_path
-
-            async for _ in awatch(abs_path.parent, watch_filter=filter):
-                await self.maybe_load_document()
-        else:
-            while True:
-                await asyncio.sleep(1)
-                await self.maybe_load_document()
+        while True:
+            await asyncio.sleep(1)
+            await self.maybe_load_document()
 
     async def maybe_load_document(self):
         model = await ensure_async(
@@ -181,16 +162,12 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         model = await ensure_async(
             self.contents_manager.get(path, content=False, type=self.file_type)
         )
-        if (
-            True
-        ):  # not isinstance(self.contents_manager, (FileManagerMixin, AsyncFileManagerMixin)):
-            # we could not watch the file changes, so check if it is newer than last time it was saved
-            if self.last_modified < model["last_modified"]:
-                # file changed on disk, let's revert
-                model = await ensure_async(self.contents_manager.get(path, type=self.file_type))
-                self.room.document.source = model["content"]
-                self.last_modified = model["last_modified"]
-                return
+        if self.last_modified < model["last_modified"]:
+            # file changed on disk, let's revert
+            model = await ensure_async(self.contents_manager.get(path, type=self.file_type))
+            self.room.document.source = model["content"]
+            self.last_modified = model["last_modified"]
+            return
         model["format"] = "text"
         model["content"] = self.room.document.source
         model = await ensure_async(self.contents_manager.save(model, path))
