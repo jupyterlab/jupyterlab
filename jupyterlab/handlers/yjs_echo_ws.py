@@ -97,11 +97,15 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
                 self.room.document.ydoc.initialized.set()
                 self.room.watcher = asyncio.create_task(self.watch_file())
                 # save the document when changed
-                self.room.document.observe(self.maybe_save_document)
+                self.room.document.observe(self.on_document_change)
 
     async def watch_file(self):
+        poll_interval = self.settings["collab_file_poll_interval"]
+        if not poll_interval:
+            self.room.watcher = None
+            return
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(poll_interval)
             await self.maybe_load_document()
 
     async def maybe_load_document(self):
@@ -140,22 +144,23 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
 
     async def clean_room(self) -> None:
         await asyncio.sleep(60)
-        self.room.watcher.cancel()
+        if self.room.watcher:
+            self.room.watcher.cancel()
         self.room.document.unobserve()
         WEBSOCKET_SERVER.delete_room(room=self.room)
 
-    def maybe_save_document(self, event):
+    def on_document_change(self, event):
         # unobserve and observe again because the structure of the document may have changed
         # e.g. a new cell added to a notebook
         self.room.document.unobserve()
-        self.room.document.observe(self.maybe_save_document)
+        self.room.document.observe(self.on_document_change)
         if self.saving_document is not None and not self.saving_document.done():
             # the document is being saved, cancel that
             self.saving_document.cancel()
             self.saving_document = None
-        self.saving_document = asyncio.create_task(self.save_document())
+        self.saving_document = asyncio.create_task(self.maybe_save_document())
 
-    async def save_document(self):
+    async def maybe_save_document(self):
         # save after 1 second of inactivity to prevent too frequent saving
         await asyncio.sleep(1)
         path = WEBSOCKET_SERVER.get_room_name(self.room)

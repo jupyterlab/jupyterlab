@@ -19,7 +19,7 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from notebook_shim.shim import NotebookConfigShimMixin
-from traitlets import Bool, Instance, Unicode, default
+from traitlets import Bool, Instance, Int, Unicode, default
 
 from ._version import __version__
 from .commands import (
@@ -537,6 +537,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
+    collab_file_poll_interval = Int(
+        1,
+        config=True,
+        help="""The period in seconds to check for file changes in the back-end (relevant only when
+        in collaborative mode). Defaults to 1s, if 0 then file changes will only be checked when
+        saving changes from the front-end.""",
+    )
+
     @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -710,6 +718,9 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config
+        self.serverapp.web_app.settings[
+            "collab_file_poll_interval"
+        ] = self.collab_file_poll_interval
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
