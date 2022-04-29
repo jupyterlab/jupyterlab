@@ -1150,69 +1150,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.4
 
-## 3.4.0b0
-
-([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.0a0...77a0af36bbf615e0f5227cba204f3663ca7de698))
-
-### Enhancements made
-
-- Display default value in setting editor for changed values [#12468](https://github.com/jupyterlab/jupyterlab/pull/12468) ([@echarles](https://github.com/echarles))
-- Uses dark theme for Vega when JupyterLab theme is dark [#12411](https://github.com/jupyterlab/jupyterlab/pull/12411) ([@jweill-aws](https://github.com/jweill-aws))
-
-### Bugs fixed
-
-- Check if process is declared before optional chaining in makeSettings [#12472](https://github.com/jupyterlab/jupyterlab/pull/12472) ([@fcollonval](https://github.com/fcollonval))
-- Signal should only export ISignal publicly [#12471](https://github.com/jupyterlab/jupyterlab/pull/12471) ([@fcollonval](https://github.com/fcollonval))
-- Move cell toolbar below search document widget [#12467](https://github.com/jupyterlab/jupyterlab/pull/12467) ([@fcollonval](https://github.com/fcollonval))
-
-### Maintenance and upkeep improvements
-
-- Fix update snapshot for 3.4.x [#12462](https://github.com/jupyterlab/jupyterlab/pull/12462) ([@fcollonval](https://github.com/fcollonval))
-
-### Contributors to this release
-
-([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-04-21&to=2022-04-26&type=c))
-
-[@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-04-21..2022-04-26&type=Issues) | [@gabalafou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agabalafou+updated%3A2022-04-21..2022-04-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-04-21..2022-04-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-04-21..2022-04-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-04-21..2022-04-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-04-21..2022-04-26&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2022-04-21..2022-04-26&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-04-21..2022-04-26&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-04-21..2022-04-26&type=Issues)
-
-## 3.4.0a0
-
-([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.4...0d166ef26bc505950abd65ee4e220d11eb197c1a))
-
-### Enhancements made
-
-- Creates cell-toolbar, cell-toolbar-extension packages and populates toolbar [#12028](https://github.com/jupyterlab/jupyterlab/pull/12028) ([@jweill-aws](https://github.com/jweill-aws))
-- Customize the file browser toolbar via the settings [#12441](https://github.com/jupyterlab/jupyterlab/pull/12441) ([@fcollonval](https://github.com/fcollonval))
-- Wait until file browser commands are ready before activating file browser widget [#12435](https://github.com/jupyterlab/jupyterlab/pull/12435) ([@fcollonval](https://github.com/fcollonval))
-- Add a "New Tab" button that opens the launcher [#12195](https://github.com/jupyterlab/jupyterlab/pull/12195) ([@ajbozarth](https://github.com/ajbozarth))
-- Simplify galata import by proxying `expect` [#12311](https://github.com/jupyterlab/jupyterlab/pull/12311) ([@fcollonval](https://github.com/fcollonval))
-- Open terminal in cwd from launcher [#12250](https://github.com/jupyterlab/jupyterlab/pull/12250) ([@rccern](https://github.com/rccern))
-- Add support for filtering by field names in setting editor [#12082](https://github.com/jupyterlab/jupyterlab/pull/12082) ([@marthacryan](https://github.com/marthacryan))
-- Use transform to quickly switch between tabs. [#11074](https://github.com/jupyterlab/jupyterlab/pull/11074) ([@fcollonval](https://github.com/fcollonval))
-- Pop up select kernel dialog when run a cell without kernel [#12379](https://github.com/jupyterlab/jupyterlab/pull/12379) ([@a3626a](https://github.com/a3626a))
-- Allow LauncherModel to be more extendable [#12344](https://github.com/jupyterlab/jupyterlab/pull/12344) ([@ajbozarth](https://github.com/ajbozarth))
-- Add argument `searchText` and `replaceText` to search and replace commands [#12310](https://github.com/jupyterlab/jupyterlab/pull/12310) ([@fcollonval](https://github.com/fcollonval))
-- Add argument line and column to codemirror go to line command [#12204](https://github.com/jupyterlab/jupyterlab/pull/12204) ([@fcollonval](https://github.com/fcollonval))
-- Default is no virtual rendering + Relax virtual notebook rendering and ensure no structural change until rendering is completed [#12258](https://github.com/jupyterlab/jupyterlab/pull/12258) ([@echarles](https://github.com/echarles))
-
-### Bugs fixed
-
-- Use css variable for font size. [#12255](https://github.com/jupyterlab/jupyterlab/pull/12255) ([@Carreau](https://github.com/Carreau))
-
-### Maintenance and upkeep improvements
-
-- Update benchmark snapshots [#12451](https://github.com/jupyterlab/jupyterlab/pull/12451) ([@fcollonval](https://github.com/fcollonval))
-
-### Deprecated features
-
-- Deprecate FileEditorCodeWrapper [#12381](https://github.com/jupyterlab/jupyterlab/pull/12381) ([@hbcarlos](https://github.com/hbcarlos))
-
-### Contributors to this release
-
-([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-04-15&to=2022-04-21&type=c))
-
-[@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2022-04-15..2022-04-21&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2022-04-15..2022-04-21&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-04-15..2022-04-21&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-04-15..2022-04-21&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-04-15..2022-04-21&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-04-15..2022-04-21&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-04-15..2022-04-21&type=Issues) | [@jweill-aws](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajweill-aws+updated%3A2022-04-15..2022-04-21&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-04-15..2022-04-21&type=Issues)
-
 ## 3.4.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.4...c394aa25d1845144ee7ebdce611ff12f8d962bb8))
