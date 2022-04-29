@@ -411,6 +411,7 @@
       "@jupyterlab/statusbar-extension": "../packages/statusbar-extension",
       "@jupyterlab/terminal": "../packages/terminal",
       "@jupyterlab/terminal-extension": "../packages/terminal-extension",
+      "@jupyterlab/testing": "../packages/testing",
       "@jupyterlab/theme-dark-extension": "../packages/theme-dark-extension",
       "@jupyterlab/theme-light-extension": "../packages/theme-light-extension",
       "@jupyterlab/toc": "../packages/toc",

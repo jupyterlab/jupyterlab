@@ -6,32 +6,18 @@
 
 /// <reference types="jest" />
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
-import {
-  Context,
-  IDocumentWidget,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
-
-import {
-  Contents,
-  ContentsManager,
-  Kernel,
-  KernelMessage,
-  KernelSpec,
-  ServerConnection,
-  ServiceManager,
-  Session
-} from '@jupyterlab/services';
-
+import { PartialJSONObject, ReadonlyJSONObject, UUID } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-
-import { UUID } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
+import { BaseManager } from './basemanager';
+import { Contents, ContentsManager } from './contents';
+import { Kernel, KernelMessage } from './kernel';
+import { KernelSpec } from './kernelspec';
+import { ServiceManager } from './manager';
+import { ServerConnection } from './serverconnection';
+import { Session } from './session';
+import { User, UserManager } from './user';
 
 // The default kernel name
 export const DEFAULT_NAME = 'python3';
@@ -87,59 +73,6 @@ export const NOTEBOOK_PATHS: { [kernelName: string]: string[] } = {
   python3: ['Untitled.ipynb', 'Untitled1.ipynb', 'Untitled2.ipynb'],
   r: ['Visualization.ipynb', 'Analysis.ipynb', 'Conclusion.ipynb']
 };
-
-/**
- * Forceably change the status of a session context.
- * An iopub message is emitted for the change.
- *
- * @param sessionContext The session context of interest.
- * @param newStatus The new kernel status.
- */
-export function updateKernelStatus(
-  sessionContext: ISessionContext,
-  newStatus: KernelMessage.Status
-): void {
-  const kernel = sessionContext.session!.kernel!;
-  (kernel as any).status = newStatus;
-  (sessionContext.statusChanged as any).emit(newStatus);
-  const msg = KernelMessage.createMessage({
-    session: kernel.clientId,
-    channel: 'iopub',
-    msgType: 'status',
-    content: { execution_state: newStatus }
-  });
-  emitIopubMessage(sessionContext, msg);
-}
-
-/**
- * Emit an iopub message on a session context.
- *
- * @param sessionContext The session context
- * @param msg Message created with `KernelMessage.createMessage`
- */
-export function emitIopubMessage(
-  context: ISessionContext,
-  msg: KernelMessage.IIOPubMessage
-): void {
-  const kernel = context!.session!.kernel!;
-  const msgId = Private.lastMessageProperty.get(kernel);
-  (msg.parent_header as any).session = kernel.clientId;
-  (msg.parent_header as any).msg_id = msgId;
-  (kernel.iopubMessage as any).emit(msg);
-}
-
-/**
- * Create a session context given a partial session model.
- *
- * @param model The session model to use.
- */
-export function createSimpleSessionContext(
-  model: Private.RecursivePartial<Session.IModel> = {}
-): ISessionContext {
-  const kernel = new KernelMock({ model: model?.kernel || {} });
-  const session = new SessionConnectionMock({ model }, kernel);
-  return new SessionContextMock({}, session);
-}
 
 /**
  * Clone a kernel connection.
@@ -295,7 +228,7 @@ export const SessionConnectionMock = jest.fn<
     ),
     dispose: jest.fn(),
     changeKernel: jest.fn(partialModel => {
-      return Private.changeKernel(kernel!, partialModel!);
+      return changeKernel(kernel!, partialModel!);
     }),
     shutdown: jest.fn(() => Promise.resolve(void 0)),
     setPath: jest.fn(path => {
@@ -367,93 +300,6 @@ export const SessionConnectionMock = jest.fn<
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).unhandledMessage = unhandledMessageSignal;
   (thisObject as any).pendingInput = pendingInputSignal;
-  return thisObject;
-});
-
-/**
- * A mock session context.
- *
- * @param session The session connection object to use
- */
-export const SessionContextMock = jest.fn<
-  ISessionContext,
-  [Partial<SessionContext.IOptions>, Session.ISessionConnection | null]
->((options, connection) => {
-  const session =
-    connection ||
-    new SessionConnectionMock(
-      {
-        model: {
-          path: options.path || '',
-          type: options.type || '',
-          name: options.name || ''
-        }
-      },
-      null
-    );
-  const thisObject: ISessionContext = {
-    ...jest.requireActual('@jupyterlab/apputils'),
-    ...options,
-    path: session.path,
-    type: session.type,
-    name: session.name,
-    session,
-    dispose: jest.fn(),
-    initialize: jest.fn(() => Promise.resolve(false)),
-    ready: Promise.resolve(),
-    changeKernel: jest.fn(partialModel => {
-      return Private.changeKernel(
-        session.kernel || Private.RUNNING_KERNELS[0],
-        partialModel!
-      );
-    }),
-    shutdown: jest.fn(() => Promise.resolve())
-  };
-
-  const disposedSignal = new Signal<ISessionContext, undefined>(thisObject);
-
-  const propertyChangedSignal = new Signal<
-    ISessionContext,
-    'path' | 'name' | 'type'
-  >(thisObject);
-
-  const statusChangedSignal = new Signal<ISessionContext, Kernel.Status>(
-    thisObject
-  );
-  const kernelChangedSignal = new Signal<
-    ISessionContext,
-    Session.ISessionConnection.IKernelChangedArgs
-  >(thisObject);
-
-  const iopubMessageSignal = new Signal<
-    ISessionContext,
-    KernelMessage.IIOPubMessage
-  >(thisObject);
-
-  session!.statusChanged.connect((_, args) => {
-    statusChangedSignal.emit(args);
-  }, thisObject);
-
-  session!.iopubMessage.connect((_, args) => {
-    iopubMessageSignal.emit(args);
-  });
-
-  session!.kernelChanged.connect((_, args) => {
-    kernelChangedSignal.emit(args);
-  });
-
-  session!.pendingInput.connect((_, args) => {
-    (thisObject as any).pendingInput = args;
-  });
-
-  (thisObject as any).statusChanged = statusChangedSignal;
-  (thisObject as any).kernelChanged = kernelChangedSignal;
-  (thisObject as any).iopubMessage = iopubMessageSignal;
-  (thisObject as any).propertyChanged = propertyChangedSignal;
-  (thisObject as any).disposed = disposedSignal;
-  (thisObject as any).session = session;
-  (thisObject as any).pendingInput = false;
-
   return thisObject;
 });
 
@@ -713,48 +559,45 @@ export const MockShellFuture = jest.fn<
   return thisObject;
 });
 
-/**
- * Create a context for a file.
- */
-export async function createFileContext(
-  startKernel = false,
-  manager?: ServiceManager.IManager
-): Promise<Context> {
-  const path = UUID.uuid4() + '.txt';
-  manager = manager || new ServiceManagerMock();
-  const factory = new TextModelFactory();
-
-  const context = new Context({
-    manager: manager || new ServiceManagerMock(),
-    factory,
-    path,
-    kernelPreference: {
-      shouldStart: startKernel,
-      canStart: startKernel,
-      autoStartDefault: startKernel
+export function changeKernel(
+  kernel: Kernel.IKernelConnection,
+  partialModel: Partial<Kernel.IModel>
+): Promise<Kernel.IKernelConnection> {
+  if (partialModel.id) {
+    const kernelIdx = KERNEL_MODELS.findIndex(model => {
+      return model.id === partialModel.id;
+    });
+    if (kernelIdx !== -1) {
+      (kernel.model as any) = Private.RUNNING_KERNELS[kernelIdx].model;
+      (kernel.id as any) = partialModel.id;
+      return Promise.resolve(Private.RUNNING_KERNELS[kernelIdx]);
+    } else {
+      throw new Error(
+        `Unable to change kernel to one with id: ${partialModel.id}`
+      );
     }
-  });
-  await context.initialize(true);
-  await context.sessionContext.initialize();
-  return context;
+  } else if (partialModel.name) {
+    const kernelIdx = KERNEL_MODELS.findIndex(model => {
+      return model.name === partialModel.name;
+    });
+    if (kernelIdx !== -1) {
+      (kernel.model as any) = Private.RUNNING_KERNELS[kernelIdx].model;
+      (kernel.id as any) = partialModel.id;
+      return Promise.resolve(Private.RUNNING_KERNELS[kernelIdx]);
+    } else {
+      throw new Error(
+        `Unable to change kernel to one with name: ${partialModel.name}`
+      );
+    }
+  } else {
+    throw new Error(`Unable to change kernel`);
+  }
 }
 
 /**
  * A namespace for module private data.
  */
 namespace Private {
-  export function flattenArray<T>(arr: T[][]): T[] {
-    const result: T[] = [];
-
-    arr.forEach(innerArr => {
-      innerArr.forEach(elem => {
-        result.push(elem);
-      });
-    });
-
-    return result;
-  }
-
   export type RecursivePartial<T> = {
     [P in keyof T]?: RecursivePartial<T[P]>;
   };
@@ -833,41 +676,6 @@ namespace Private {
     };
   }
 
-  export function changeKernel(
-    kernel: Kernel.IKernelConnection,
-    partialModel: Partial<Kernel.IModel>
-  ): Promise<Kernel.IKernelConnection> {
-    if (partialModel.id) {
-      const kernelIdx = KERNEL_MODELS.findIndex(model => {
-        return model.id === partialModel.id;
-      });
-      if (kernelIdx !== -1) {
-        (kernel.model as any) = RUNNING_KERNELS[kernelIdx].model;
-        (kernel.id as any) = partialModel.id;
-        return Promise.resolve(RUNNING_KERNELS[kernelIdx]);
-      } else {
-        throw new Error(
-          `Unable to change kernel to one with id: ${partialModel.id}`
-        );
-      }
-    } else if (partialModel.name) {
-      const kernelIdx = KERNEL_MODELS.findIndex(model => {
-        return model.name === partialModel.name;
-      });
-      if (kernelIdx !== -1) {
-        (kernel.model as any) = RUNNING_KERNELS[kernelIdx].model;
-        (kernel.id as any) = partialModel.id;
-        return Promise.resolve(RUNNING_KERNELS[kernelIdx]);
-      } else {
-        throw new Error(
-          `Unable to change kernel to one with name: ${partialModel.name}`
-        );
-      }
-    } else {
-      throw new Error(`Unable to change kernel`);
-    }
-  }
-
   // This list of running kernels simply mirrors the KERNEL_MODELS and KERNELSPECS lists
   export const RUNNING_KERNELS: Kernel.IKernelConnection[] = KERNEL_MODELS.map(
     (model, _) => {
@@ -885,17 +693,116 @@ namespace Private {
 }
 
 /**
- * A mock document widget opener.
+ * The user API service manager.
  */
-export class DocumentWidgetOpenerMock {
-  get opened(): ISignal<DocumentWidgetOpenerMock, IDocumentWidget> {
-    return this._opened;
+export class FakeUserManager extends BaseManager implements User.IManager {
+  private _isReady = false;
+  private _ready: Promise<void>;
+
+  private _identity: User.IIdentity;
+  private _permissions: ReadonlyJSONObject;
+
+  private _userChanged = new Signal<this, User.IUser>(this);
+  private _connectionFailure = new Signal<this, Error>(this);
+
+  /**
+   * Create a new user manager.
+   */
+  constructor(
+    options: UserManager.IOptions = {},
+    identity: User.IIdentity,
+    permissions: ReadonlyJSONObject
+  ) {
+    super(options);
+
+    // Initialize internal data.
+    this._ready = new Promise<void>(resolve => {
+      // Schedule updating the user to the next macro task queue.
+      setTimeout(() => {
+        this._identity = identity;
+        this._permissions = permissions;
+
+        this._userChanged.emit({
+          identity: this._identity,
+          permissions: this._permissions as PartialJSONObject
+        });
+
+        resolve();
+      }, 0);
+    })
+      .then(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        this._isReady = true;
+      })
+      .catch(_ => undefined);
   }
 
-  open(widget: IDocumentWidget): void {
-    // no-op, just emit the signal
-    this._opened.emit(widget);
+  /**
+   * The server settings for the manager.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Test whether the manager is ready.
+   */
+  get isReady(): boolean {
+    return this._isReady;
   }
 
-  private _opened = new Signal<this, IDocumentWidget>(this);
+  /**
+   * A promise that fulfills when the manager is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready;
+  }
+
+  /**
+   * Get the most recently fetched identity.
+   */
+  get identity(): User.IIdentity | null {
+    return this._identity;
+  }
+
+  /**
+   * Get the most recently fetched permissions.
+   */
+  get permissions(): ReadonlyJSONObject | null {
+    return this._permissions;
+  }
+
+  /**
+   * A signal emitted when the user changes.
+   */
+  get userChanged(): ISignal<this, User.IUser> {
+    return this._userChanged;
+  }
+
+  /**
+   * A signal emitted when there is a connection failure.
+   */
+  get connectionFailure(): ISignal<this, Error> {
+    return this._connectionFailure;
+  }
+
+  /**
+   * Dispose of the resources used by the manager.
+   */
+  dispose(): void {
+    super.dispose();
+  }
+
+  /**
+   * Force a refresh of the specs from the server.
+   *
+   * @returns A promise that resolves when the specs are fetched.
+   *
+   * #### Notes
+   * This is intended to be called only in response to a user action,
+   * since the manager maintains its internal state.
+   */
+  async refreshUser(): Promise<void> {
+    return Promise.resolve();
+  }
 }

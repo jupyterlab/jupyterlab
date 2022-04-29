@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { NotebookModel, NotebookModelFactory } from '../src';
+import { NotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModelFactory', () => {

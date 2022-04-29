@@ -7,7 +7,7 @@ import {
   acceptDialog,
   dismissDialog,
   waitForDialog
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';

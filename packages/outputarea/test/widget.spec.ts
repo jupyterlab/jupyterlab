@@ -2,18 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { SessionContext } from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   IOutputAreaModel,
   OutputArea,
   OutputAreaModel
 } from '@jupyterlab/outputarea';
 import { KernelManager } from '@jupyterlab/services';
+import { JupyterServer } from '@jupyterlab/testing';
 import {
-  createSessionContext,
-  defaultRenderMime,
-  JupyterServer,
-  NBTestUtils
-} from '@jupyterlab/testutils';
+  DEFAULT_OUTPUTS,
+  defaultRenderMime
+} from '@jupyterlab/rendermime/lib/testutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -60,7 +60,7 @@ describe('outputarea/widget', () => {
 
   beforeEach(() => {
     model = new OutputAreaModel({
-      values: NBTestUtils.DEFAULT_OUTPUTS,
+      values: DEFAULT_OUTPUTS,
       trusted: true
     });
     widget = new LogOutputArea({ rendermime, model });
@@ -186,9 +186,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should get the number of child widgets', () => {
-        expect(widget.widgets.length).toBe(
-          NBTestUtils.DEFAULT_OUTPUTS.length - 1
-        );
+        expect(widget.widgets.length).toBe(DEFAULT_OUTPUTS.length - 1);
         widget.model.clear();
         expect(widget.widgets.length).toBe(0);
       });
@@ -220,7 +218,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should clear existing outputs', async () => {
-        widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
         const future = sessionContext.session!.kernel!.requestExecute({
           code: CODE
         });
@@ -235,7 +233,7 @@ describe('outputarea/widget', () => {
       it('should handle an added output', () => {
         widget.model.clear();
         widget.methods = [];
-        widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        widget.model.add(DEFAULT_OUTPUTS[0]);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onModelChanged'])
         );
@@ -243,7 +241,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should handle a clear', () => {
-        widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
         widget.methods = [];
         widget.model.clear();
         expect(widget.methods).toEqual(
@@ -254,9 +252,9 @@ describe('outputarea/widget', () => {
 
       it('should handle a set', () => {
         widget.model.clear();
-        widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        widget.model.add(DEFAULT_OUTPUTS[0]);
         widget.methods = [];
-        widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        widget.model.add(DEFAULT_OUTPUTS[0]);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onModelChanged'])
         );
@@ -338,7 +336,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should clear existing outputs', async () => {
-        widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
         const reply = await OutputArea.execute(CODE, widget, sessionContext);
         expect(reply!.content.execution_count).toBeTruthy();
         expect(model.length).toBe(1);

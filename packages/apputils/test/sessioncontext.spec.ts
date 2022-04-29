@@ -18,7 +18,7 @@ import {
   dismissDialog,
   JupyterServer,
   testEmission
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 const server = new JupyterServer();

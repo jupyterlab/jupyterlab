@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { JupyterServer, testEmission } from '@jupyterlab/testutils';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import {
   Kernel,

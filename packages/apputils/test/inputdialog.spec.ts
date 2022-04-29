@@ -6,7 +6,7 @@ import {
   acceptDialog,
   dismissDialog,
   waitForDialog
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 
 describe('@jupyterlab/apputils', () => {
   describe('InputDialog', () => {

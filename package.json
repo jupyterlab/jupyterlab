@@ -89,7 +89,7 @@
     "stylelint": "jlpm stylelint:check --fix",
     "stylelint:check": "stylelint --cache \"{packages/*,galata}/style/**/*.css\" \"{examples/*,docs/**}/*.css\"",
     "stylelint:files": "stylelint --fix",
-    "test": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream",
+    "test": "lerna run test --scope \"@jupyterlab/!(template)*\" --concurrency 1 --stream",
     "test:all": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream --no-bail",
     "test:examples": "python examples/test_examples.py",
     "test:galata": "lerna run test --scope \"@jupyterlab/galata\" --concurrency 1 --stream",

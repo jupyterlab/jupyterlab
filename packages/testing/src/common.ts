@@ -5,20 +5,13 @@
 
 import { simulate } from 'simulate-event';
 
-import { ServiceManager, Session } from '@jupyterlab/services';
-
-import { SessionContext } from '@jupyterlab/apputils';
-
-import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
-import {
-  Context,
-  DocumentRegistry,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
 
-import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
+import { sleep } from '@jupyterlab/coreutils/lib/testutils';
+
+export { sleep } from '@jupyterlab/coreutils/lib/testutils';
 
 /**
  * Test a single emission from a signal.
@@ -182,134 +175,6 @@ export function framePromise(): Promise<void> {
 }
 
 /**
- * Return a promise that resolves in the given milliseconds with the given value.
- */
-export function sleep(milliseconds?: number): Promise<void>;
-export function sleep<T>(milliseconds: number, value: T): Promise<T>;
-export function sleep<T>(
-  milliseconds: number = 0,
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  value?: any
-): Promise<T> | Promise<void> {
-  return new Promise<T>((resolve, reject) => {
-    setTimeout(() => {
-      resolve(value);
-    }, milliseconds);
-  });
-}
-
-/**
- * Create a client session object.
- */
-export async function createSessionContext(
-  options: Partial<SessionContext.IOptions> = {}
-): Promise<SessionContext> {
-  const manager = options.sessionManager ?? Private.getManager().sessions;
-  const specsManager = options.specsManager ?? Private.getManager().kernelspecs;
-
-  await Promise.all([manager.ready, specsManager.ready]);
-  return new SessionContext({
-    sessionManager: manager,
-    specsManager,
-    path: options.path ?? UUID.uuid4(),
-    name: options.name,
-    type: options.type,
-    kernelPreference: options.kernelPreference ?? {
-      shouldStart: true,
-      canStart: true,
-      name: specsManager.specs?.default
-    }
-  });
-}
-
-/**
- * Create a session and return a session connection.
- */
-export async function createSession(
-  options: Session.ISessionOptions
-): Promise<Session.ISessionConnection> {
-  const manager = Private.getManager().sessions;
-  await manager.ready;
-  return manager.startNew(options);
-}
-
-/**
- * Create a context for a file.
- */
-export function createFileContext(
-  path: string = UUID.uuid4() + '.txt',
-  manager: ServiceManager.IManager = Private.getManager()
-): Context<DocumentRegistry.IModel> {
-  const factory = Private.textFactory;
-  return new Context({ manager, factory, path });
-}
-
-export async function createFileContextWithKernel(
-  path: string = UUID.uuid4() + '.txt',
-  manager: ServiceManager.IManager = Private.getManager()
-): Promise<Context> {
-  const factory = Private.textFactory;
-  const specsManager = manager.kernelspecs;
-  await specsManager.ready;
-
-  return new Context({
-    manager,
-    factory,
-    path,
-    kernelPreference: {
-      shouldStart: true,
-      canStart: true,
-      name: specsManager.specs?.default
-    }
-  });
-}
-
-/**
- * Create and initialize context for a notebook.
- */
-export async function initNotebookContext(
-  options: {
-    path?: string;
-    manager?: ServiceManager.IManager;
-    startKernel?: boolean;
-  } = {}
-): Promise<Context<INotebookModel>> {
-  const factory = Private.notebookFactory;
-  const manager = options.manager || Private.getManager();
-  const path = options.path || UUID.uuid4() + '.ipynb';
-  console.debug(
-    'Initializing notebook context for',
-    path,
-    'kernel:',
-    options.startKernel
-  );
-
-  const startKernel =
-    options.startKernel === undefined ? false : options.startKernel;
-  await manager.ready;
-
-  const context = new Context({
-    manager,
-    factory,
-    path,
-    kernelPreference: {
-      shouldStart: startKernel,
-      canStart: startKernel,
-      shutdownOnDispose: true,
-      name: manager.kernelspecs.specs?.default
-    }
-  });
-  await context.initialize(true);
-
-  if (startKernel) {
-    await context.sessionContext.initialize();
-    await context.sessionContext.session?.kernel?.info;
-  }
-
-  return context;
-}
-
-/**
  * Wait for a dialog to be attached to an element.
  */
 export async function waitForDialog(
@@ -379,28 +244,5 @@ export async function dismissDialog(
 
   if (node) {
     simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
-  }
-}
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  let manager: ServiceManager;
-
-  export const textFactory = new TextModelFactory();
-
-  export const notebookFactory = new NotebookModelFactory({
-    disableDocumentWideUndoRedo: false
-  });
-
-  /**
-   * Get or create the service manager singleton.
-   */
-  export function getManager(): ServiceManager {
-    if (!manager) {
-      manager = new ServiceManager({ standby: 'never' });
-    }
-    return manager;
   }
 }

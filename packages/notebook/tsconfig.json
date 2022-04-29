@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/*", "src/default.json"],
   "references": [
     {
       "path": "../apputils"

@@ -3,13 +3,19 @@
 
 import { ISessionContext } from '@jupyterlab/apputils';
 import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
+import { ForeignHandler } from '@jupyterlab/console';
+import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
+import * as Mock from '@jupyterlab/docregistry/lib/testutils';
+import {
+  cloneKernel,
+  KernelMock,
+  SessionConnectionMock
+} from '@jupyterlab/services/lib/testutils';
 import { KernelMessage } from '@jupyterlab/services';
-import { defaultRenderMime, NBTestUtils } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
-import { ForeignHandler } from '../src';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
   addCell(cell: CodeCell, msgId?: string): void {
@@ -108,14 +114,14 @@ describe('@jupyterlab/console', () => {
 
     beforeAll(async function () {
       const path = UUID.uuid4();
-      const kernel0 = new Mock.KernelMock({});
-      const kernel1 = Mock.cloneKernel(kernel0);
-      const connection0 = new Mock.SessionConnectionMock(
+      const kernel0 = new KernelMock({});
+      const kernel1 = cloneKernel(kernel0);
+      const connection0 = new SessionConnectionMock(
         { model: { path, type: 'test' } },
         kernel0
       );
       sessionContext = new Mock.SessionContextMock({}, connection0);
-      const connection1 = new Mock.SessionConnectionMock(
+      const connection1 = new SessionConnectionMock(
         { model: { path, type: 'test2' } },
         kernel1
       );

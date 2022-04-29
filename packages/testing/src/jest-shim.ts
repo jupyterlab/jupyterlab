@@ -18,7 +18,7 @@ if (
   globalThis.TextEncoder = util.TextEncoder;
 }
 
-const fetchMod = ((window as any).fetch = require('node-fetch')); // tslint:disable-line
+const fetchMod = ((window as any).fetch = require('node-fetch'));
 (window as any).Request = fetchMod.Request;
 (window as any).Headers = fetchMod.Headers;
 (window as any).Response = fetchMod.Response;

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { isFulfilled, JupyterServer } from '@jupyterlab/testutils';
+import { isFulfilled, JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Kernel, KernelManager, KernelMessage } from '../../src';
 

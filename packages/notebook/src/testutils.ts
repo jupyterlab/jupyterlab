@@ -1,89 +1,80 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { editorServices } from '@jupyterlab/codemirror';
-
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { Clipboard } from '@jupyterlab/apputils';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
-
-import {
-  INotebookModel,
-  Notebook,
-  NotebookModel,
-  NotebookModelFactory,
-  NotebookPanel,
-  NotebookWidgetFactory,
-  StaticNotebook
-} from '@jupyterlab/notebook';
-
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { editorServices } from '@jupyterlab/codemirror';
+import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
+import { INotebookContent } from '@jupyterlab/nbformat';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  DEFAULT_OUTPUTS as TEST_OUTPUTS,
+  defaultRenderMime as testRenderMime
+} from '@jupyterlab/rendermime/lib/testutils';
+import { ServiceManager } from '@jupyterlab/services';
+import { UUID } from '@lumino/coreutils';
+import * as defaultContent from './default.json';
+import { INotebookModel, NotebookModel } from './model';
+import { NotebookModelFactory } from './modelfactory';
+import { NotebookPanel } from './panel';
+import { Notebook, StaticNotebook } from './widget';
+import { NotebookWidgetFactory } from './widgetfactory';
 
-import { defaultRenderMime as localRendermime } from './rendermime';
-
-import * as Mock from './mock';
+export const DEFAULT_CONTENT: INotebookContent = defaultContent;
 
 /**
- * Stub for the require() function.
+ * Create and initialize context for a notebook.
  */
-declare let require: any;
+export async function initNotebookContext(
+  options: {
+    path?: string;
+    manager?: ServiceManager.IManager;
+    startKernel?: boolean;
+  } = {}
+): Promise<Context<INotebookModel>> {
+  const factory = Private.notebookFactory;
+  const manager = options.manager || Private.getManager();
+  const path = options.path || UUID.uuid4() + '.ipynb';
+  console.debug(
+    'Initializing notebook context for',
+    path,
+    'kernel:',
+    options.startKernel
+  );
+
+  const startKernel =
+    options.startKernel === undefined ? false : options.startKernel;
+  await manager.ready;
+
+  const context = new Context({
+    manager,
+    factory,
+    path,
+    kernelPreference: {
+      shouldStart: startKernel,
+      canStart: startKernel,
+      shutdownOnDispose: true,
+      name: manager.kernelspecs.specs?.default
+    }
+  });
+  await context.initialize(true);
+
+  if (startKernel) {
+    await context.sessionContext.initialize();
+    await context.sessionContext.session?.kernel?.info;
+  }
+
+  return context;
+}
 
 /**
  * The default notebook content.
  */
-// tslint:disable-next-line
 
 export namespace NBTestUtils {
-  /**
-   * The default outputs used for testing.
-   */
-  export const DEFAULT_OUTPUTS: nbformat.IOutput[] = [
-    {
-      name: 'stdout',
-      output_type: 'stream',
-      text: ['hello world\n', '0\n', '1\n', '2\n']
-    },
-    {
-      name: 'stderr',
-      output_type: 'stream',
-      text: ['output to stderr\n']
-    },
-    {
-      name: 'stderr',
-      output_type: 'stream',
-      text: ['output to stderr2\n']
-    },
-    {
-      output_type: 'execute_result',
-      execution_count: 1,
-      data: { 'text/plain': 'foo' },
-      metadata: {}
-    },
-    {
-      output_type: 'display_data',
-      data: { 'text/plain': 'hello, world' },
-      metadata: {}
-    },
-    {
-      output_type: 'error',
-      ename: 'foo',
-      evalue: 'bar',
-      traceback: ['fizz', 'buzz']
-    }
-  ];
-
-  export const DEFAULT_CONTENT: nbformat.INotebookContent =
-    require('../default.json') as nbformat.INotebookContent;
-  export const DEFAULT_CONTENT_45: nbformat.INotebookContent =
-    require('../default-45.json') as nbformat.INotebookContent;
+  export const DEFAULT_OUTPUTS = TEST_OUTPUTS;
 
   export const defaultEditorConfig = { ...StaticNotebook.defaultEditorConfig };
 
@@ -98,7 +89,7 @@ export namespace NBTestUtils {
    * Get a copy of the default rendermime instance.
    */
   export function defaultRenderMime(): RenderMimeRegistry {
-    return localRendermime();
+    return testRenderMime();
   }
 
   export const clipboard = Clipboard.getInstance();
@@ -198,7 +189,7 @@ export namespace NBTestUtils {
     startKernel = false
   ): Promise<Context<INotebookModel>> {
     const path = UUID.uuid4() + '.txt';
-    const manager = new Mock.ServiceManagerMock();
+    const manager = new ServiceManagerMock();
     const factory = new NotebookModelFactory({});
 
     const context = new Context({
@@ -214,5 +205,26 @@ export namespace NBTestUtils {
     await context.initialize(true);
     await context.sessionContext.initialize();
     return context;
+  }
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  let manager: ServiceManager;
+
+  export const notebookFactory = new NotebookModelFactory({
+    disableDocumentWideUndoRedo: false
+  });
+
+  /**
+   * Get or create the service manager singleton.
+   */
+  export function getManager(): ServiceManager {
+    if (!manager) {
+      manager = new ServiceManager({ standby: 'never' });
+    }
+    return manager;
   }
 }

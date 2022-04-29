@@ -8,9 +8,10 @@ import {
   MimeDocument,
   MimeDocumentFactory
 } from '@jupyterlab/docregistry';
+import { createFileContextWithMockedServices } from '@jupyterlab/docregistry/lib/testutils';
 import { IRenderMime, RenderedText } from '@jupyterlab/rendermime';
-import { defaultRenderMime, testEmission } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
+import { testEmission } from '@jupyterlab/testing';
 import { Message } from '@lumino/messaging';
 import { BoxLayout } from '@lumino/widgets';
 
@@ -47,7 +48,7 @@ describe('docregistry/mimedocument', () => {
   let dContext: Context<DocumentRegistry.IModel>;
 
   beforeEach(async () => {
-    dContext = await Mock.createFileContext();
+    dContext = (await createFileContextWithMockedServices()) as any;
   });
 
   afterEach(() => {

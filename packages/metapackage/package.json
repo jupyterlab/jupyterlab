@@ -26,8 +26,13 @@
   "scripts": {
     "build": "tsc -b",
     "build:all": "npm run build",
+    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "node build-doc-index.js",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -131,7 +136,10 @@
     "@jupyterlab/vega5-extension": "^4.0.0-alpha.16"
   },
   "devDependencies": {
+    "@jupyterlab/testing": "^4.0.0-alpha.16",
+    "@types/jest": "^29.2.0",
     "fs-extra": "^10.1.0",
+    "json-to-html": "~0.1.2",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
     "typescript": "~4.7.3"
