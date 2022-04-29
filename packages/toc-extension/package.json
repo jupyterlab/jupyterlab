@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc-extension",
-  "version": "5.4.0-beta.0",
+  "version": "5.4.0-rc.0",
   "description": "JupyterLab - Table of Contents widget extension",
   "keywords": [
     "jupyter",
@@ -40,17 +40,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.4.0-beta.0",
-    "@jupyterlab/cells": "^3.4.0-beta.0",
-    "@jupyterlab/docmanager": "^3.4.0-beta.0",
-    "@jupyterlab/fileeditor": "^3.4.0-beta.0",
-    "@jupyterlab/markdownviewer": "^3.4.0-beta.0",
-    "@jupyterlab/notebook": "^3.4.0-beta.0",
-    "@jupyterlab/rendermime": "^3.4.0-beta.0",
-    "@jupyterlab/settingregistry": "^3.4.0-beta.0",
-    "@jupyterlab/toc": "^5.4.0-beta.0",
-    "@jupyterlab/translation": "^3.4.0-beta.0",
-    "@jupyterlab/ui-components": "^3.4.0-beta.0"
+    "@jupyterlab/application": "^3.4.0-rc.0",
+    "@jupyterlab/cells": "^3.4.0-rc.0",
+    "@jupyterlab/docmanager": "^3.4.0-rc.0",
+    "@jupyterlab/fileeditor": "^3.4.0-rc.0",
+    "@jupyterlab/markdownviewer": "^3.4.0-rc.0",
+    "@jupyterlab/notebook": "^3.4.0-rc.0",
+    "@jupyterlab/rendermime": "^3.4.0-rc.0",
+    "@jupyterlab/settingregistry": "^3.4.0-rc.0",
+    "@jupyterlab/toc": "^5.4.0-rc.0",
+    "@jupyterlab/translation": "^3.4.0-rc.0",
+    "@jupyterlab/ui-components": "^3.4.0-rc.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

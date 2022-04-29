@@ -1,22 +1,22 @@
 {
   "name": "@jupyterlab/example-cell",
-  "version": "3.4.0-beta.0",
+  "version": "3.4.0-rc.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.4.0-beta.0",
-    "@jupyterlab/apputils": "^3.4.0-beta.0",
-    "@jupyterlab/cells": "^3.4.0-beta.0",
-    "@jupyterlab/codemirror": "^3.4.0-beta.0",
-    "@jupyterlab/completer": "^3.4.0-beta.0",
-    "@jupyterlab/coreutils": "^5.4.0-beta.0",
-    "@jupyterlab/rendermime": "^3.4.0-beta.0",
-    "@jupyterlab/services": "^6.4.0-beta.0",
-    "@jupyterlab/theme-light-extension": "^3.4.0-beta.0",
-    "@jupyterlab/ui-components": "^3.4.0-beta.0",
+    "@jupyterlab/application": "^3.4.0-rc.0",
+    "@jupyterlab/apputils": "^3.4.0-rc.0",
+    "@jupyterlab/cells": "^3.4.0-rc.0",
+    "@jupyterlab/codemirror": "^3.4.0-rc.0",
+    "@jupyterlab/completer": "^3.4.0-rc.0",
+    "@jupyterlab/coreutils": "^5.4.0-rc.0",
+    "@jupyterlab/rendermime": "^3.4.0-rc.0",
+    "@jupyterlab/services": "^6.4.0-rc.0",
+    "@jupyterlab/theme-light-extension": "^3.4.0-rc.0",
+    "@jupyterlab/ui-components": "^3.4.0-rc.0",
     "@lumino/commands": "^1.19.0",
     "@lumino/widgets": "^1.30.0",
     "es6-promise": "~4.2.8"
