@@ -124,6 +124,10 @@ class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
         # needed to be compatible with WebsocketServer (websocket.send)
         self.write_message(message, binary=True)
 
+    async def recv(self):
+        message = await self._message_queue.get()
+        return message
+
     def on_message(self, message):
         self._message_queue.put_nowait(message)
         if message[0] == RENAME_SESSION:

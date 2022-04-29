@@ -62,7 +62,8 @@ class YFile(YBaseDoc):
             if source_len:
                 self._ysource.delete(t, 0, source_len)
             # initialize document
-            self._ysource.push(t, value)
+            if value:
+                self._ysource.push(t, value)
 
     def observe(self, callback):
         self._subscriptions[self._ysource] = self._ysource.observe(callback)
