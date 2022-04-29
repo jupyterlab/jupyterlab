@@ -235,14 +235,21 @@ export namespace CodeEditor {
      * Construct a new Model.
      */
     constructor(options: Model.IOptions) {
-      this._sharedDoc = options.sharedDoc as SharedDoc;
+      this._isDocument = options.isDocument;
 
-      if (options.isDocument) {
+      if (this._isDocument) {
         // The IModel is a document, so we create the
         // `source` from the root of the ISharedDoc
+        this._sharedDoc = options.sharedDoc || new SharedDoc();
         this._value = this._sharedDoc.createString('source') as SharedString;
+        this._value.undoManager = SharedDoc.createUndoManager(
+          this._value.underlyingModel,
+          []
+        );
         this._value.changed.connect(this._onValueChanged, this);
         this._triggerModelReady();
+      } else {
+        this._sharedDoc = options.sharedDoc!;
       }
 
       this._mimeType = options.mimeType || 'text/plain';
@@ -347,6 +354,10 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this._value.dispose();
+      if (this._isDocument) {
+        this._sharedDoc.dispose();
+      }
       Signal.clearData(this);
     }
 
@@ -379,7 +390,7 @@ export namespace CodeEditor {
      * Making direct edits to the values stored in the`ISharedDoc`
      * is not recommended, and may produce unpredictable results.
      */
-    protected _sharedDoc: SharedDoc;
+    protected _sharedDoc: ISharedDoc;
 
     /**
      * The `ISharedString` instance where source's data is stored.
@@ -389,10 +400,11 @@ export namespace CodeEditor {
      * child classes (mostly the CellModel) when initializing the
      * model.
      */
-    protected _value: SharedString;
+    protected _value: ISharedString;
 
     private _isReady = false;
     private _isDisposed = false;
+    private _isDocument = false;
     private _mimeType: string;
     private _selections: IObservableMap<ITextSelection[]>;
     private _ready = new Signal<this, void>(this);
@@ -834,7 +846,7 @@ export namespace CodeEditor {
       /**
        * Whether the model is a document or part of a document.
        *
-       * ### Notes
+       * #### Notes
        * The IModel is the base class used in documents to store
        * the source. In some cases like the Notebook, there is multiple
        * sources since each cell contains its own source. In this case
@@ -848,11 +860,13 @@ export namespace CodeEditor {
       /**
        * The underlying `ISharedDoc` instance where model's data is stored.
        *
-       * ### Notes
+       * #### Notes
+       * If the IModel is not a document, this parameter is mandatory.
+       *
        * Making direct edits to the values stored in the`ISharedDoc`
        * is not recommended, and may produce unpredictable results.
        */
-      sharedDoc: ISharedDoc;
+      sharedDoc?: ISharedDoc;
 
       /**
        * The mimetype of the model.

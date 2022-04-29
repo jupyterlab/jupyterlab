@@ -6,7 +6,6 @@ import {
   CodeEditorWrapper,
   IEditorServices
 } from '@jupyterlab/codeeditor';
-import { SharedDoc } from '@jupyterlab/shared-models';
 
 import { IDebugger } from '.';
 
@@ -35,7 +34,6 @@ export class ReadOnlyEditorFactory {
     const editor = new CodeEditorWrapper({
       model: new CodeEditor.Model({
         isDocument: true,
-        sharedDoc: new SharedDoc(),
         mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
       }),
       factory,

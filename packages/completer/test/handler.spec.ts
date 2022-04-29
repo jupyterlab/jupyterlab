@@ -10,11 +10,11 @@ import {
   CompletionHandler,
   ConnectorProxy
 } from '@jupyterlab/completer';
-import { IObservableString } from '@jupyterlab/observables';
+import { ISharedString, SharedString } from '@jupyterlab/shared-models';
 import { createSessionContext } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
-  const model = new CodeEditor.Model();
+  const model = new CodeEditor.Model({ isDocument: true });
   const factory = (options: CodeEditor.IOptions) => {
     return new CodeMirrorEditor(options);
   };
@@ -38,10 +38,7 @@ class TestCompleterModel extends CompleterModel {
 class TestCompletionHandler extends CompletionHandler {
   methods: string[] = [];
 
-  onTextChanged(
-    str: IObservableString,
-    changed: IObservableString.IChangedArgs
-  ): void {
+  onTextChanged(str: ISharedString, changed: ISharedString.IChangedArgs): void {
     super.onTextChanged(str, changed);
     this.methods.push('onTextChanged');
   }
@@ -262,6 +259,9 @@ describe('@jupyterlab/completer', () => {
       });
 
       it('should be undoable and redoable', () => {
+        // This test is not possible anymore, Yjs groups changes once
+        // the user stops typing for 500ms.
+        // using a trick stopCapturing in line 289
         const model = new CompleterModel();
         const patch = 'foobar';
         const completer = new Completer({ editor: null, model });
@@ -282,7 +282,9 @@ describe('@jupyterlab/completer', () => {
 
         handler.editor = editor;
         handler.editor.model.value.text = text;
-        handler.editor.model.sharedModel.clearUndoHistory();
+        // Stop grouping insertions before adding the completion.
+        (handler.editor.model
+          .value as SharedString).undoManager!.stopCapturing();
         handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
         model.cursor = { start: column, end: column + 3 };
@@ -331,7 +333,6 @@ describe('@jupyterlab/completer', () => {
 
       handler.editor = editor;
       handler.editor.model.value.text = text;
-      handler.editor.model.sharedModel.clearUndoHistory();
       handler.editor.setCursorPosition({ line, column });
       model.original = request;
       const offset = handler.editor.getOffsetAt({ line, column });

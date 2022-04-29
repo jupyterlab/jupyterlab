@@ -96,10 +96,14 @@ export class NotebookModel implements INotebookModel {
       });
     }
 
-    const cellList = this._sharedDoc.createList<ISharedMap<ISharedType>>(
+    const sharedList = this._sharedDoc.createList<ISharedMap<ISharedType>>(
       'cells'
     );
-    this._cells = new CellList(this.contentFactory, this._sharedDoc, cellList);
+    sharedList.undoManager = SharedDoc.createUndoManager(
+      sharedList.underlyingModel,
+      []
+    );
+    this._cells = new CellList(this.contentFactory, sharedList);
     this._cells.changed.connect(this._onCellsChanged, this);
 
     this._metadata = this._sharedDoc.createMap<JSONObject>('metadata');
@@ -187,14 +191,16 @@ export class NotebookModel implements INotebookModel {
    * The major version number of the nbformat.
    */
   get nbformat(): number {
-    return this._nbformat;
+    return (this._state.get('nbformat') as number) || nbformat.MAJOR_VERSION;
   }
 
   /**
    * The minor version number of the nbformat.
    */
   get nbformatMinor(): number {
-    return this._nbformatMinor;
+    return (
+      (this._state.get('nbformat_minor') as number) || nbformat.MINOR_VERSION
+    );
   }
 
   /**
@@ -228,7 +234,7 @@ export class NotebookModel implements INotebookModel {
     const info = this._metadata.get(
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
-    return info ? info.name : '';
+    return info ? info.name : this._defaultLang;
   }
 
   /**
@@ -273,7 +279,7 @@ export class NotebookModel implements INotebookModel {
     const cells: nbformat.ICell[] = [];
     for (let i = 0; i < (this.cells?.length ?? 0); i++) {
       const cell = this.cells.get(i).toJSON();
-      if (this._nbformat === 4 && this._nbformatMinor <= 4) {
+      if (this.nbformat === 4 && this.nbformatMinor <= 4) {
         // strip cell ids if we have notebook format 4.0-4.4
         delete cell.id;
       }
@@ -286,8 +292,8 @@ export class NotebookModel implements INotebookModel {
     }
     return {
       metadata,
-      nbformat_minor: this._nbformatMinor,
-      nbformat: this._nbformat,
+      nbformat_minor: this.nbformatMinor,
+      nbformat: this.nbformat,
       cells
     };
   }
@@ -314,20 +320,19 @@ export class NotebookModel implements INotebookModel {
       this.cells.pushAll(cells);
     });
 
-    this._state.set('nbformat', nbformat.MAJOR_VERSION);
-    this._state.set('nbformat_minor', nbformat.MINOR_VERSION);
+    const nbformatMajor =
+      value.nbformat !== undefined ? value.nbformat : nbformat.MAJOR_VERSION;
+    const nbformatMinor =
+      value.nbformat_minor > nbformat.MINOR_VERSION
+        ? value.nbformat_minor
+        : nbformat.MINOR_VERSION;
+    this._state.set('nbformat', nbformatMajor);
+    this._state.set('nbformat_minor', nbformatMinor);
     const origNbformat = value.metadata.orig_nbformat;
 
-    if (value.nbformat !== this._nbformat) {
-      this._state.set('nbformat', value.nbformat);
-    }
-    if (value.nbformat_minor > this._nbformatMinor) {
-      this._state.set('nbformat_minor', value.nbformat_minor);
-    }
-
     // Alert the user if the format changes.
-    if (origNbformat !== undefined && this._nbformat !== origNbformat) {
-      const newer = this._nbformat > origNbformat;
+    if (origNbformat !== undefined && nbformatMajor !== origNbformat) {
+      const newer = nbformatMajor > origNbformat;
       let msg: string;
 
       if (newer) {
@@ -338,7 +343,7 @@ The next time you save this notebook, the current notebook format (v%2) will be 
 'Older versions of Jupyter may not be able to read the new format.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
-          this._nbformat
+          nbformatMajor
         );
       } else {
         msg = this._trans.__(
@@ -348,7 +353,7 @@ The next time you save this notebook, the current notebook format (v%2) will be 
 Some features of the original notebook may not be available.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
-          this._nbformat
+          nbformatMajor
         );
       }
       void showDialog({
@@ -369,13 +374,12 @@ close the notebook without saving it.`,
       this._metadata.set(key, metadata[key] as JSONValue);
     }
     this._ensureMetadata();
-    this._state.set('dirty', false);
   }
 
   /**
    * Initialize the model with its current state.
    *
-   * # Notes
+   * #### Notes
    * Adds an empty code cell if the model is empty
    * and clears undo state.
    */
@@ -386,6 +390,8 @@ close the notebook without saving it.`,
     }
     this._isInitialized = true;
     this.cells.clearUndo();
+    this._ensureMetadata();
+    this._state.set('dirty', false);
   }
 
   /**
@@ -461,8 +467,6 @@ close the notebook without saving it.`,
   private _trans: TranslationBundle;
 
   private _defaultLang: string;
-  private _nbformat = nbformat.MAJOR_VERSION;
-  private _nbformatMinor = nbformat.MINOR_VERSION;
 
   private _cells: ICellList;
   private _deletedCells: string[];
@@ -495,7 +499,11 @@ export namespace NotebookModel {
     contentFactory?: IContentFactory;
 
     /**
-     * A ISharedDoc for storing notebook data.
+     * The underlying `ISharedDoc` instance where model's data is stored.
+     *
+     * #### Notes
+     * Making direct edits to the values stored in the`ISharedDoc`
+     * is not recommended, and may produce unpredictable results.
      */
     sharedDoc?: ISharedDoc;
 
@@ -534,7 +542,12 @@ export namespace NotebookModel {
      *
      * @param type:  the type of the cell to create.
      *
-     * @param options: the cell creation options.
+     * @param id: optional unique identifier. If not provided, it will be generated randomly.
+     *
+     * @param cell: optional cell data.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be initialized with the data from the source.
      *
      * #### Notes
      * This method is intended to be a convenience method to programmatically
@@ -546,12 +559,30 @@ export namespace NotebookModel {
       cell?: nbformat.ICell
     ): ICellModel;
 
+    /**
+     * Create a new cell from a shared model.
+     *
+     * @param sharedModel:  shared model with the data already initialized.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be initialized with the data from the source.
+     *
+     * #### Notes
+     * This method is useful to create a cell when receiving the data from
+     * another client.
+     * This method is intended to be a convenience method to programmatically
+     * call the other cell creation methods in the factory.
+     */
     createCellFromSharedModel(sharedModel: ISharedMap<ISharedType>): ICellModel;
 
     /**
      * Create a new code cell.
      *
-     * @param options - The options used to create the cell.
+     * @param id: optional unique identifier. If not provided, it will be generated randomly.
+     *
+     * @param cell: optional cell data.
+     *
+     * @param contentFactory: optional factory for creating code cell model content.
      *
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
@@ -565,7 +596,9 @@ export namespace NotebookModel {
     /**
      * Create a new markdown cell.
      *
-     * @param options - The options used to create the cell.
+     * @param id: optional unique identifier. If not provided, it will be generated randomly.
+     *
+     * @param cell: optional cell data.
      *
      * @returns A new markdown cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
@@ -578,7 +611,9 @@ export namespace NotebookModel {
     /**
      * Create a new raw cell.
      *
-     * @param options - The options used to create the cell.
+     * @param id: optional unique identifier. If not provided, it will be generated randomly.
+     *
+     * @param cell: optional cell data.
      *
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
@@ -586,7 +621,9 @@ export namespace NotebookModel {
     createRawCell(id?: string, cell?: nbformat.IRawCell): IRawCellModel;
 
     /**
-     * Clone the content factory with a new IModelDB.
+     * Clone the content factory with a new ISharedDoc.
+     *
+     * @param sharedDoc: the new ISharedDoc for the factory.
      */
     clone(sharedDoc: ISharedDoc): IContentFactory;
   }
@@ -619,7 +656,12 @@ export namespace NotebookModel {
      *
      * @param type:  the type of the cell to create.
      *
-     * @param options: the cell creation options.
+     * @param id: optional unique identifier. If not provided, it will be generated randomly.
+     *
+     * @param cell: optional cell data.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be initialized with the data from the source.
      *
      * #### Notes
      * This method is intended to be a convenience method to programmatically
@@ -642,13 +684,16 @@ export namespace NotebookModel {
     }
 
     /**
-     * Create a new cell by cell type.
+     * Create a new cell from a shared model.
      *
-     * @param type:  the type of the cell to create.
+     * @param sharedModel:  shared model with the data already initialized.
      *
-     * @param options: the cell creation options.
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be initialized with the data from the source.
      *
      * #### Notes
+     * This method is useful to create a cell when receiving the data from
+     * another client.
      * This method is intended to be a convenience method to programmatically
      * call the other cell creation methods in the factory.
      */
@@ -689,7 +734,11 @@ export namespace NotebookModel {
     /**
      * Create a new code cell.
      *
-     * @param source - The data to use for the original source data.
+     * @param id: optional unique identifier. If not provided, it will be generated randomly.
+     *
+     * @param cell: optional cell data.
+     *
+     * @param contentFactory: optional factory for creating code cell model content.
      *
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
@@ -720,7 +769,9 @@ export namespace NotebookModel {
     /**
      * Create a new markdown cell.
      *
-     * @param source - The data to use for the original source data.
+     * @param id: optional unique identifier. If not provided, it will be generated randomly.
+     *
+     * @param cell: optional cell data.
      *
      * @returns A new markdown cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
@@ -747,7 +798,9 @@ export namespace NotebookModel {
     /**
      * Create a new raw cell.
      *
-     * @param source - The data to use for the original source data.
+     * @param id: optional unique identifier. If not provided, it will be generated randomly.
+     *
+     * @param cell: optional cell data.
      *
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
@@ -764,7 +817,9 @@ export namespace NotebookModel {
     }
 
     /**
-     * Clone the content factory with a new IModelDB.
+     * Clone the content factory with a new ISharedDoc.
+     *
+     * @param sharedDoc: the new ISharedDoc for the factory.
      */
     clone(sharedDoc: ISharedDoc): ContentFactory {
       return new ContentFactory({
@@ -783,7 +838,11 @@ export namespace NotebookModel {
      */
     export interface IOptions {
       /**
-       * The ISharedDoc in which to place new content.
+       * The underlying `ISharedDoc` instance where model's data is stored.
+       *
+       * #### Notes
+       * Making direct edits to the values stored in the`ISharedDoc`
+       * is not recommended, and may produce unpredictable results.
        */
       sharedDoc: ISharedDoc;
 
@@ -793,4 +852,11 @@ export namespace NotebookModel {
       codeCellContentFactory?: CodeCellModel.IContentFactory;
     }
   }
+
+  /**
+   * The default `ContentFactory` instance.
+   */
+  export const defaultContentFactory = new ContentFactory({
+    sharedDoc: new SharedDoc()
+  });
 }

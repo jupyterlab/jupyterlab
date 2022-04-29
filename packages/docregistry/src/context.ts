@@ -717,9 +717,6 @@ export class Context<
         }
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
-          if (initializeModel) {
-            model.initialize();
-          }
         } else {
           let content = contents.content;
           // Convert line endings if necessary, marking the file
@@ -734,9 +731,9 @@ export class Context<
             this._lineEnding = null;
           }
           model.fromString(content);
-          if (initializeModel) {
-            model.initialize();
-          }
+        }
+        if (initializeModel) {
+          model.initialize();
         }
         this._updateContentsModel(contents);
         model.dirty = false;

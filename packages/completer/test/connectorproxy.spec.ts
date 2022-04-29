@@ -6,8 +6,8 @@ import {
 } from '@jupyterlab/completer';
 import { Context } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
-import { IObservableString } from '@jupyterlab/observables';
 import { ServiceManager } from '@jupyterlab/services';
+import { ISharedString } from '@jupyterlab/shared-models';
 import { NBTestUtils } from '@jupyterlab/testutils';
 
 function contextFactory(): Context<INotebookModel> {
@@ -54,7 +54,7 @@ class FooCompletionProvider implements ICompletionProvider {
   }
   shouldShowContinuousHint(
     completerIsVisible: boolean,
-    changed: IObservableString.IChangedArgs
+    changed: ISharedString.IChangedArgs
   ) {
     return true;
   }

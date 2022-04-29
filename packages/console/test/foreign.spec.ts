@@ -21,7 +21,7 @@ class TestParent extends Panel implements ForeignHandler.IReceiver {
 
   createCodeCell(): CodeCell {
     const contentFactory = NBTestUtils.createCodeCellFactory();
-    const model = new CodeCellModel({});
+    const model = CodeCellModel.createStandaloneModel();
     const cell = new CodeCell({
       model,
       rendermime,

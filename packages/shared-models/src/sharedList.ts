@@ -9,7 +9,7 @@ import {
 } from '@lumino/algorithm';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as Y from 'yjs';
-import { Delta, IShared, ISharedType, SharedDoc } from './model';
+import { Delta, IShared, ISharedType, IUndoManager, SharedDoc } from './model';
 
 /**
  * A list which can be shared by multiple clients.
@@ -30,17 +30,6 @@ export interface ISharedList<T extends ISharedType> extends IShared {
   readonly underlyingModel: any;
 
   /**
-   * The specific undo manager class behind the IShared abstraction.
-   *
-   * #### Notes
-   * The default implementation is based on Yjs so the underlying
-   * model is a Y.UndoManager.
-   *
-   * TODO: Define an API
-   */
-  readonly undoManager: any;
-
-  /**
    * A signal emitted when the list has changed.
    */
   readonly changed: ISignal<this, ISharedList.IChangedArgs<T>>;
@@ -54,9 +43,26 @@ export interface ISharedList<T extends ISharedType> extends IShared {
   readonly length: number;
 
   /**
+   * The specific undo manager class behind the IShared abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.UndoManager.
+   *
+   * TODO: Define an API
+   */
+  undoManager: IUndoManager;
+
+  /**
    * Dispose of the resources held by the list.
    */
   dispose(): void;
+
+  /**
+   * Perform a transaction. While the function f is called, all changes to the SharedList
+   * document are bundled into a single event.
+   */
+  transact(f: () => void): void;
 
   /**
    * Whether the ISharedList can undo changes.
@@ -333,9 +339,8 @@ export namespace ISharedList {
  * A concrete implementation of ISharedList.
  */
 export class SharedList<T extends ISharedType> implements ISharedList<T> {
-  private _origin: any;
   private _sharedDoc: SharedDoc;
-  private _undoManager: Y.UndoManager;
+  private _undoManager: Y.UndoManager | undefined;
   private _isDisposed: boolean = false;
   private _changed = new Signal<this, ISharedList.IChangedArgs<T>>(this);
 
@@ -351,13 +356,8 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
       this.underlyingModel = new Y.Array<any>();
     }
 
-    this._origin = options.origin ?? this;
-
-    if (options.undoManager) {
-      this._undoManager = options.undoManager;
-    } else if (options.initialize !== false) {
-      this.initialize();
-    }
+    this._undoManager = options.undoManager;
+    this._undoManager?.addTrackedOrigin(SharedList);
 
     this.underlyingModel.observe(this._onArrayChanged);
   }
@@ -377,19 +377,6 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
   readonly underlyingModel: Y.Array<any>;
 
   /**
-   * The specific undo manager class behind the IShared abstraction.
-   *
-   * #### Notes
-   * The default implementation is based on Yjs so the underlying
-   * model is a Y.UndoManager.
-   *
-   * TODO: Define an API
-   */
-  get undoManager(): any {
-    return this._undoManager;
-  }
-
-  /**
    * A signal emitted when the list has changed.
    */
   get changed(): ISignal<this, ISharedList.IChangedArgs<T>> {
@@ -401,6 +388,23 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    */
   get length(): number {
     return this.underlyingModel.length;
+  }
+
+  /**
+   * The specific undo manager class behind the IShared abstraction.
+   *
+   * #### Notes
+   * The default implementation is based on Yjs so the underlying
+   * model is a Y.UndoManager.
+   *
+   * TODO: Define an API
+   */
+  get undoManager(): Y.UndoManager | undefined {
+    return this._undoManager;
+  }
+  set undoManager(undoManager: Y.UndoManager | undefined) {
+    this._undoManager = undoManager;
+    this._undoManager?.addTrackedOrigin(SharedList);
   }
 
   /**
@@ -423,55 +427,50 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
   }
 
   /**
-   * Initialize the model.
-   *
-   * #### Notes
-   * The undo manager can not be initialized
-   * before the Y.Array is inserted in the Y.Doc.
-   * This option allows to instantiate a `SharedList` object
-   * before the Y.Array was integrated into the Y.Doc
-   * and then call `SharedList.initialize()` to
-   * initialize the undo manager.
+   * Perform a transaction. While the function f is called, all changes to the SharedList
+   * document are bundled into a single event.
    */
-  initialize(): void {
-    this._undoManager = new Y.UndoManager(this.underlyingModel, {
-      trackedOrigins: new Set([this._origin])
-    });
+  transact(f: () => void): void {
+    this._sharedDoc.transact(f, this);
   }
 
   /**
    * Whether the ISharedList can undo changes.
    */
   canUndo(): boolean {
-    return this._undoManager.undoStack.length > 0;
+    return this._undoManager == undefined
+      ? false
+      : this._undoManager.undoStack.length > 0;
   }
 
   /**
    * Whether the ISharedList can redo changes.
    */
   canRedo(): boolean {
-    return this._undoManager.redoStack.length > 0;
+    return this._undoManager == undefined
+      ? false
+      : this._undoManager.redoStack.length > 0;
   }
 
   /**
    * Undo an operation.
    */
   undo(): void {
-    this._undoManager.undo();
+    this._undoManager?.undo();
   }
 
   /**
    * Redo an operation.
    */
   redo(): void {
-    this._undoManager.redo();
+    this._undoManager?.redo();
   }
 
   /**
    * Clear the change stack.
    */
   clearUndo(): void {
-    this._undoManager.clear();
+    this._undoManager?.clear();
   }
 
   /**
@@ -530,12 +529,12 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
     if (value === undefined) {
       throw new Error('Cannot set an undefined item');
     }
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.delete(index);
       this.underlyingModel.insert(index, [
         SharedDoc.sharedTypeToAbstractType(value)
       ]);
-    }, this._origin);
+    });
   }
 
   /**
@@ -556,9 +555,9 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    * No changes.
    */
   push(value: T): number {
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.push([SharedDoc.sharedTypeToAbstractType(value)]);
-    }, this._origin);
+    });
     return this.length;
   }
 
@@ -588,11 +587,11 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    * An `index` which is non-integral.
    */
   insert(index: number, value: T): void {
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.insert(index, [
         SharedDoc.sharedTypeToAbstractType(value)
       ]);
-    }, this._origin);
+    });
   }
 
   /**
@@ -639,13 +638,13 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    */
   remove(index: number): T | undefined {
     let oldVal;
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       oldVal = SharedDoc.abstractTypeToISharedType(
         this.underlyingModel.get(index),
         this._sharedDoc
       );
       this.underlyingModel.delete(index);
-    }, this._origin);
+    });
     return oldVal;
   }
 
@@ -659,9 +658,9 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    * All current iterators are invalidated.
    */
   clear(): void {
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.delete(0, this.length);
-    }, this._origin);
+    });
   }
 
   /**
@@ -685,9 +684,9 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
     const types = values.map((value: T) =>
       SharedDoc.sharedTypeToAbstractType(value)
     );
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.push(types);
-    }, this._origin);
+    });
     return this.length;
   }
 
@@ -716,9 +715,9 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
     const types = values.map((value: T) =>
       SharedDoc.sharedTypeToAbstractType(value)
     );
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.insert(index, types);
-    }, this._origin);
+    });
   }
 
   /**
@@ -741,9 +740,9 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
       return;
     }
     //const adaptionIncrease = fromIndex < toIndex ? 1 : 0;
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       //this.underlyingModel.move(fromIndex, toIndex + adaptionIncrease);
-    }, this._origin);
+    });
   }
 
   /**
@@ -756,10 +755,10 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    * @param toIndex - The index to move the element to.
    */
   moveRange(start: number, end: number, toIndex: number): void {
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       //const adaptionIncrease = start < toIndex ? end - start : 0;
       //this.underlyingModel.moveRange(start, end, toIndex + adaptionIncrease);
-    }, this._origin);
+    });
   }
 
   /**
@@ -781,9 +780,9 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    * A `startIndex` or `endIndex` which is non-integral.
    */
   removeRange(startIndex: number, endIndex: number): number {
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.delete(startIndex, endIndex - startIndex);
-    }, this._origin);
+    });
     return this.length;
   }
 

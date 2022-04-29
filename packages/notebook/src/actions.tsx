@@ -2420,26 +2420,24 @@ Please wait for the complete rendering before invoking that action.`,
     const model = notebook.model!;
     const cells = model.cells;
 
-    cells.transact(() => {
-      notebook.widgets.forEach((child, index) => {
-        if (!notebook.isSelectedOrActive(child)) {
-          return;
+    notebook.widgets.forEach((child, index) => {
+      if (!notebook.isSelectedOrActive(child)) {
+        return;
+      }
+      if (child.model.type !== value) {
+        const id = child.model.id;
+        const cell = child.model.toJSON();
+        const newCell = model.contentFactory.createCell(value, id, cell);
+        if (child.model.type === 'code') {
+          newCell.trusted = false;
         }
-        if (child.model.type !== value) {
-          const id = child.model.id;
-          const cell = child.model.toJSON();
-          const newCell = model.contentFactory.createCell(value, id, cell);
-          if (child.model.type === 'code') {
-            newCell.trusted = false;
-          }
-          cells.set(index, newCell);
-        }
-        if (value === 'markdown') {
-          // Fetch the new widget and unrender it.
-          child = notebook.widgets[index];
-          (child as MarkdownCell).rendered = false;
-        }
-      });
+        cells.set(index, newCell);
+      }
+      if (value === 'markdown') {
+        // Fetch the new widget and unrender it.
+        child = notebook.widgets[index];
+        (child as MarkdownCell).rendered = false;
+      }
     });
     notebook.deselectAll();
   }

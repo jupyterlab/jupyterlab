@@ -142,7 +142,7 @@ describe('console/widget', () => {
     describe('#addCell()', () => {
       it('should add a code cell to the content widget', () => {
         const contentFactory = NBTestUtils.createCodeCellFactory();
-        const model = new CodeCellModel({});
+        const model = CodeCellModel.createStandaloneModel();
         const cell = new CodeCell({
           model,
           contentFactory,
@@ -319,7 +319,7 @@ describe('console/widget', () => {
 
       describe('#createCodeCell', () => {
         it('should create a code cell', () => {
-          const model = new CodeCellModel({});
+          const model = CodeCellModel.createStandaloneModel();
           const prompt = contentFactory.createCodeCell({
             rendermime: widget.rendermime,
             model,
@@ -331,7 +331,7 @@ describe('console/widget', () => {
 
       describe('#createRawCell', () => {
         it('should create a foreign cell', () => {
-          const model = new RawCellModel({});
+          const model = RawCellModel.createStandaloneModel();
           const prompt = contentFactory.createRawCell({
             model,
             contentFactory
@@ -369,14 +369,14 @@ describe('console/widget', () => {
       describe('#createCodeCell()', () => {
         it('should create a code cell', () => {
           const factory = new CodeConsole.ModelFactory({});
-          expect(factory.createCodeCell({})).toBeInstanceOf(CodeCellModel);
+          expect(factory.createCodeCell()).toBeInstanceOf(CodeCellModel);
         });
       });
 
       describe('#createRawCell()', () => {
         it('should create a raw cell model', () => {
           const factory = new CodeConsole.ModelFactory({});
-          expect(factory.createRawCell({})).toBeInstanceOf(RawCellModel);
+          expect(factory.createRawCell()).toBeInstanceOf(RawCellModel);
         });
       });
     });

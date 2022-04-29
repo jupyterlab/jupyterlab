@@ -91,9 +91,11 @@ export namespace IOutputAreaModel {
    */
   export interface IOptions {
     /**
-     * The underlying shared model.
+     * An ISharedList to store outputs' data.
      *
-     * TODO: documentation
+     * #### Notes
+     * Making direct edits to the values stored in the`ISharedList`
+     * is not recommended, and may produce unpredictable results.
      */
     sharedList?: ISharedList<JSONObject>;
 
@@ -145,7 +147,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
 
     this._outputMap = new Map<any, IOutputModel>();
-    each(this._sharedList, value => {
+    each(this._sharedList, (value: JSONObject) => {
       const newItem = this._createItem({
         value: value as nbformat.IOutput,
         trusted: this._trusted
@@ -204,6 +206,7 @@ export class OutputAreaModel implements IOutputAreaModel {
         value,
         trusted
       });
+      newItem.changed.connect(this._onGenericChange, this);
       this._outputMap.set(value as JSONObject, newItem);
       this._sharedList.set(i, value as JSONObject);
     }
@@ -252,6 +255,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       value,
       trusted: this._trusted
     });
+    newItem.changed.connect(this._onGenericChange, this);
     this._outputMap.set(value as JSONObject, newItem);
     this._sharedList.set(index, value as JSONObject);
   }
@@ -308,7 +312,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    */
   toJSON(): nbformat.IOutput[] {
     const outputs: nbformat.IOutput[] = [];
-    each(this._sharedList, value => {
+    each(this._sharedList, (value: JSONObject) => {
       const item = this._outputMap.get(value)!;
       outputs.push(item.toJSON());
     });
@@ -363,6 +367,7 @@ export class OutputAreaModel implements IOutputAreaModel {
         trusted
       });
       this._lastModel = newItem;
+      newItem.changed.connect(this._onGenericChange, this);
       this._outputMap.set(value as JSONObject, newItem);
       this._sharedList.set(index, value as JSONObject);
       return index;
@@ -379,6 +384,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     });
 
     // Add the item to our list and return the new length.
+    newItem.changed.connect(this._onGenericChange, this);
     this._outputMap.set(value as JSONObject, newItem);
     this._sharedList.push(value as JSONObject);
 
@@ -501,7 +507,9 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _sharedList: ISharedList<JSONObject>;
   private _outputMap: Map<JSONObject, IOutputModel>;
   private _stateChanged = new Signal<IOutputAreaModel, number>(this);
-  private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(this);
+  private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(
+    this
+  );
 }
 
 /**

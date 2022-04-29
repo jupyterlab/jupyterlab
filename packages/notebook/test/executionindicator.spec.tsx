@@ -51,7 +51,8 @@ describe('@jupyterlab/notebook', () => {
     let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
     let indicator: ExecutionIndicator;
-    beforeAll(async function () {
+
+    beforeEach(async () => {
       jest.setTimeout(20000);
       rendermime = utils.defaultRenderMime();
 
@@ -65,9 +66,7 @@ describe('@jupyterlab/notebook', () => {
         createContext(),
         createContext({ kernelPreference: { name: 'ipython' } })
       ]);
-    });
 
-    beforeEach(async () => {
       widget = new Notebook({
         rendermime,
         contentFactory: utils.createNotebookFactory(),
@@ -80,29 +79,25 @@ describe('@jupyterlab/notebook', () => {
       };
 
       model.fromJSON(modelJson);
-
+      model.initialize();
       widget.model = model;
-      model.sharedModel.clearUndoHistory();
 
       widget.activeCellIndex = 0;
       for (let idx = 0; idx < widget.widgets.length; idx++) {
         widget.select(widget.widgets[idx]);
       }
+
       indicator = new ExecutionIndicator();
       indicator.model.attachNotebook({
         content: widget,
         context: ipySessionContext
       });
-      await ipySessionContext.restartKernel();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       widget.dispose();
       utils.clipboard.clear();
       indicator.dispose();
-    });
-
-    afterAll(async () => {
       await Promise.all([
         sessionContext.shutdown(),
         ipySessionContext.shutdown()

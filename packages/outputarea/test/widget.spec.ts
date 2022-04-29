@@ -8,6 +8,7 @@ import {
   OutputAreaModel
 } from '@jupyterlab/outputarea';
 import { KernelManager } from '@jupyterlab/services';
+import { SharedDoc } from '@jupyterlab/shared-models';
 import {
   createSessionContext,
   defaultRenderMime,
@@ -15,6 +16,8 @@ import {
   JupyterServer,
   NBTestUtils
 } from '@jupyterlab/testutils';
+import { each } from '@lumino/algorithm';
+import { JSONObject } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -59,9 +62,13 @@ describe('outputarea/widget', () => {
   let model: OutputAreaModel;
 
   beforeEach(() => {
+    const sharedList = new SharedDoc().createList<JSONObject>('outputs');
+    each(NBTestUtils.DEFAULT_OUTPUTS, value => {
+      sharedList.push(value as JSONObject);
+    });
     model = new OutputAreaModel({
-      values: NBTestUtils.DEFAULT_OUTPUTS,
-      trusted: true
+      trusted: true,
+      sharedList
     });
     widget = new LogOutputArea({ rendermime, model });
   });
@@ -186,9 +193,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should get the number of child widgets', () => {
-        expect(widget.widgets.length).toBe(
-          NBTestUtils.DEFAULT_OUTPUTS.length - 1
-        );
+        expect(widget.widgets.length).toBe(NBTestUtils.DEFAULT_OUTPUTS.length);
         widget.model.clear();
         expect(widget.widgets.length).toBe(0);
       });
@@ -466,7 +471,7 @@ describe('outputarea/widget', () => {
             password: false,
             future
           };
-          expect(factory.createStdin(options)).toBeInstanceOf(Widget);
+          expect(factory.createStdin(options as any)).toBeInstanceOf(Widget);
           await kernel.shutdown();
           kernel.dispose();
         });

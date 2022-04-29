@@ -53,15 +53,6 @@ export interface ICellModel extends CodeEditor.IModel {
   readonly metadata: ISharedMap<JSONValue>;
 
   /**
-   * The underlying model where data is stored.
-   *
-   * #### Notes
-   * Making direct edits to the values stored in the`ISharedMap`
-   * is not recommended, and may produce unpredictable results.
-   */
-  //readonly sharedModel: ISharedMap<ISharedType>;
-
-  /**
    * A signal emitted when the content of the model changes.
    */
   readonly contentChanged: ISignal<ICellModel, void>;
@@ -261,19 +252,44 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * Initialize the model.
    *
-   * TODO: documentation
+   * @param ready Whether to emit the signal ready or not.
+   *
+   * #### Notes
+   * We can not retrieve data from the shared models until they
+   * are added to a document. The CellModel receives an
+   * ISharedMap with the different objects that composes the
+   * structure of the cell. This objects (metadata, and source),
+   * cannot be extract from the shared model until this is added
+   * to its corresponding document (the notebook).
+   *
+   * In a notebook, some cell models are added to the notebook after
+   * its instantiation. For that reason, the CellList calls
+   * `CellModel.initialize()` after adding the CellModel to the
+   * notebook.
+   *
+   * In the case of standalone cells, and cells created by a remote
+   * client, they are instantiated with an initialized shared model
+   * that already pertains to a document, so we can call initialize
+   * right after instantiating them.
+   *
+   * Since the CellModel receives only the shared model as
+   * a parameter when instantiating it, we need to extract the data
+   * from the shared model and compose the CellModel after its
+   * instantiation. We use this method `initialize` to extract the
+   * initial data of the cell and create the different properties.
    */
   initialize(ready: boolean = true): void {
     if (this.isReady) return;
-    this._sharedModel.initialize();
     this._sharedModel.changed.connect(this._onSharedModelChanged, this);
 
     this._value = this._sharedModel.get('source') as SharedString;
-    this._value.initialize();
+    this._value.undoManager = SharedDoc.createUndoManager(
+      this._value.underlyingModel,
+      []
+    );
     this._value.changed.connect(this._onValueChanged, this);
 
     this._metadata = this._sharedModel.get('metadata') as SharedMap<JSONValue>;
-    this._metadata.initialize();
     this._metadata.changed.connect(this.onGenericChange, this);
 
     // TODO: check the initialization of trusted
@@ -295,6 +311,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
       metadata['trusted'] = true;
     }
     return {
+      id: this.id,
       cell_type: this.type,
       source: this.value.text,
       metadata
@@ -339,9 +356,29 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
-   * Creates the model.
+   * Creates the shared model for the CellModel.
    *
-   * TODO: documentation
+   * @param id Unique identifier.
+   *
+   * @param isDocument: Whether the cell is a document or part of one.
+   *
+   * @param sharedDoc: The underlying `ISharedDoc` of the document.
+   *
+   * @param cell: optional cell data.
+   *
+   * #### Notes
+   * With RTC, the CellModel can be initialized remotely by another client.
+   * For that reason, we need to instantiate the CellModel with a
+   * shared model already initialized with the schema and the corresponding
+   * data.
+   * This method is intended to be a convenience method to create the shared
+   * model with the correct schema and initialize it.
+   *
+   * #### Schema:
+   *  * id: string -- Unique identifier.
+   *  * cell_type: string -- Cell's type ('code' | 'markdown' | 'raw').
+   *  * source: ISharedString -- Cell's source.
+   *  * metadata: `ISharedMap<JSONObject>` -- Cell's metadata.
    */
   static createSharedModel(
     id: string,
@@ -353,24 +390,15 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     if (isDocument) {
       sharedModel = sharedDoc.createMap('model');
     } else {
-      sharedModel = new SharedMap({
-        sharedDoc: sharedDoc as SharedDoc,
-        initialize: false
-      });
+      sharedModel = new SharedMap({ sharedDoc: sharedDoc as SharedDoc });
     }
 
     sharedModel.set('id', id);
     // this.prototype.type not great
     sharedModel.set('cell_type', this.prototype.type);
-    const value = new SharedString({
-      sharedDoc: sharedDoc as SharedDoc,
-      initialize: false
-    });
+    const value = new SharedString({ sharedDoc: sharedDoc as SharedDoc });
     sharedModel.set('source', value);
-    const metadata = new SharedMap({
-      sharedDoc: sharedDoc as SharedDoc,
-      initialize: false
-    });
+    const metadata = new SharedMap({ sharedDoc: sharedDoc as SharedDoc });
     sharedModel.set('metadata', metadata);
 
     if (cell) {
@@ -405,15 +433,24 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
-   * Creates a standalone the model.
+   * Creates an standalone CellModel.
    *
-   * TODO: documentation
+   * @param id An optional unique identifier. If not provided, it will be generated randomly.
+   *
+   * @param cell: optional cell data.
+   *
+   * #### Notes
+   * This method is intended to be a convenience method to create a standalone
+   * CellModel with the correct schema and initialize it.
+   * A standalone cell is a document by its self, doesn't pertain to
+   * a document as the Notebook. An example could be the python console, the
+   * editors on the debugger, etc.
    */
   static createStandaloneModel(
     id?: string,
     cell?: nbformat.IBaseCell
   ): CellModel {
-    const cellId = id || UUID.uuid4();
+    const cellId = id || (cell?.id as string) || UUID.uuid4();
     const sharedDoc = new SharedDoc({ path: cellId });
     const sharedModel = CellModel.createSharedModel(
       cellId,
@@ -427,16 +464,16 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
-   * Underlying shared model.
+   * Underlying shared model to store cell's data.
    *
-   * TODO: documentation
+   * #### Notes
+   * Making direct edits to the values stored in the`ISharedMap`
+   * is not recommended, and may produce unpredictable results.
    */
   protected _sharedModel: SharedMap<ISharedType>;
 
   /**
-   * Metadata.
-   *
-   * TODO: documentation
+   * A SharedMap<JSONValue> that stores cell's metadata.
    */
   protected _metadata: SharedMap<JSONValue>;
 
@@ -457,12 +494,20 @@ export namespace CellModel {
     id: string;
 
     /**
-     * An ISharedDoc to store cell's data.
+     * The underlying `ISharedDoc` instance where model's data is stored.
+     *
+     * #### Notes
+     * Making direct edits to the values stored in the`ISharedDoc`
+     * is not recommended, and may produce unpredictable results.
      */
     sharedDoc: ISharedDoc;
 
     /**
      * An ISharedMap to store cell's data.
+     *
+     * #### Notes
+     * Making direct edits to the values stored in the`ISharedMap`
+     * is not recommended, and may produce unpredictable results.
      */
     sharedModel: ISharedMap<ISharedType>;
   }
@@ -494,7 +539,31 @@ export class AttachmentsCellModel extends CellModel {
   /**
    * Initialize the model.
    *
-   * TODO: documentation
+   * @param ready Whether to emit the signal ready or not.
+   *
+   * #### Notes
+   * We can not retrieve data from the shared models until they
+   * are added to a document. The CellModel receives an
+   * ISharedMap with the different objects that composes the
+   * structure of the cell. This objects (metadata, source, and attachments),
+   * cannot be extract from the shared model until this is added
+   * to its corresponding document (the notebook).
+   *
+   * In a notebook, some cell models are added to the notebook after
+   * its instantiation. For that reason, the CellList calls
+   * `CellModel.initialize()` after adding the CellModel to the
+   * notebook.
+   *
+   * In the case of standalone cells, and cells created by a remote
+   * client, they are instantiated with an initialized shared model
+   * that already pertains to a document, so we can call initialize
+   * right after instantiating them.
+   *
+   * Since the CellModel receives only the shared model as
+   * a parameter when instantiating it, we need to extract the data
+   * from the shared model and compose the CellModel after its
+   * instantiation. We use this method `initialize` to extract the
+   * initial data of the cell and create the different properties.
    */
   initialize(ready: boolean = true): void {
     if (this.isReady) return;
@@ -520,9 +589,29 @@ export class AttachmentsCellModel extends CellModel {
   }
 
   /**
-   * Creates the shared model.
+   * Creates the shared model for the AttachmentsCellModel.
    *
-   * TODO: documentation
+   * @param id Unique identifier.
+   *
+   * @param isDocument: Whether the cell is a document or part of one.
+   *
+   * @param sharedDoc: The underlying `ISharedDoc` of the document.
+   *
+   * @param cell: optional cell data.
+   *
+   * #### Notes
+   * With RTC, the AttachmentsCellModel can be initialized remotely by another client.
+   * For that reason, we need to instantiate the AttachmentsCellModel with a shared
+   * model already initialized with the schema and the corresponding data.
+   * This method is intended to be a convenience method to create the shared
+   * model with the correct schema and initialize it.
+   *
+   * #### Schema:
+   *  * id: string -- Unique identifier.
+   *  * cell_type: string -- Cell's type ('code' | 'markdown' | 'raw').
+   *  * source: ISharedString -- Cell's source.
+   *  * metadata: `ISharedMap<JSONObject>` -- Cell's metadata.
+   *  * attachments: `ISharedMap<JSONValue>` -- Cell's attachments.
    */
   static createSharedModel(
     id: string,
@@ -536,10 +625,9 @@ export class AttachmentsCellModel extends CellModel {
       sharedDoc,
       cell
     );
-    // TODO: initialize the attachments, and change the model
+
     const attachments = new SharedMap<JSONValue>({
-      sharedDoc: sharedDoc as SharedDoc,
-      initialize: false
+      sharedDoc: sharedDoc as SharedDoc
     });
     sharedModel.set('attachments', attachments);
 
@@ -560,16 +648,27 @@ export class AttachmentsCellModel extends CellModel {
   }
 
   /**
-   * Creates a standalone model.
+   * Creates an standalone AttachmentsCellModel.
    *
-   * TODO: documentation
+   * @param id An optional unique identifier. If not provided, it will be generated randomly.
+   *
+   * @param cell optional cell data.
+   *
+   * @param contentFactory optional factory for creating attachments cell model content.
+   *
+   * #### Notes
+   * This method is intended to be a convenience method to create a standalone
+   * AttachmentsCellModel with the correct schema and initialize it.
+   * A standalone cell is a document by its self, doesn't pertain to
+   * a document as the Notebook. An example could be the python console, the
+   * editors on the debugger, etc.
    */
   static createStandaloneModel(
     id?: string,
     cell?: nbformat.IRawCell | nbformat.IMarkdownCell,
     contentFactory?: AttachmentsCellModel.IContentFactory
   ): AttachmentsCellModel {
-    const cellId = id || UUID.uuid4();
+    const cellId = id || (cell?.id as string) || UUID.uuid4();
     const sharedDoc = new SharedDoc({ path: cellId });
     const sharedModel = AttachmentsCellModel.createSharedModel(
       cellId,
@@ -658,9 +757,30 @@ export class RawCellModel extends AttachmentsCellModel {
   }
 
   /**
-   * Creates the shared model.
+   * Creates the shared model for the RawCellModel.
    *
-   * TODO: documentation
+   * @param id Unique identifier.
+   *
+   * @param isDocument: Whether the cell is a document or part of one.
+   *
+   * @param sharedDoc: The underlying `ISharedDoc` of the document.
+   *
+   * @param cell: optional cell data.
+   *
+   * #### Notes
+   * With RTC, the RawCellModel can be initialized remotely by another client.
+   * For that reason, we need to instantiate the RawCellModel with a
+   * shared model already initialized with the schema and the corresponding
+   * data.
+   * This method is intended to be a convenience method to create the shared
+   * model with the correct schema and initialize it.
+   *
+   * #### Schema:
+   *  * id: string -- Unique identifier.
+   *  * cell_type: string -- Cell's type ('code' | 'markdown' | 'raw').
+   *  * source: ISharedString -- Cell's source.
+   *  * metadata: `ISharedMap<JSONObject>` -- Cell's metadata.
+   *  * attachments: `ISharedMap<JSONValue>` -- Cell's attachments.
    */
   static createSharedModel(
     id: string,
@@ -672,16 +792,27 @@ export class RawCellModel extends AttachmentsCellModel {
   }
 
   /**
-   * Creates a standalone model.
+   * Creates an standalone RawCellModel.
    *
-   * TODO: documentation
+   * @param id An optional unique identifier. If not provided, it will be generated randomly.
+   *
+   * @param cell: optional cell data.
+   *
+   * @param contentFactory optional factory for creating attachments cell model content.
+   *
+   * #### Notes
+   * This method is intended to be a convenience method to create a standalone
+   * RawCellModel with the correct schema and initialize it.
+   * A standalone cell is a document by its self, doesn't pertain to
+   * a document as the Notebook. An example could be the python console, the
+   * editors on the debugger, etc.
    */
   static createStandaloneModel(
     id?: string,
     cell?: nbformat.IRawCell,
     contentFactory?: AttachmentsCellModel.IContentFactory
   ): RawCellModel {
-    const cellId = id || UUID.uuid4();
+    const cellId = id || (cell?.id as string) || UUID.uuid4();
     const sharedDoc = new SharedDoc({ path: cellId });
     const sharedModel = RawCellModel.createSharedModel(
       cellId,
@@ -730,9 +861,29 @@ export class MarkdownCellModel extends AttachmentsCellModel {
   }
 
   /**
-   * Creates the shared model.
+   * Creates the shared model for the MarkdownCellModel.
    *
-   * TODO: documentation
+   * @param id Unique identifier.
+   *
+   * @param isDocument: Whether the cell is a document or part of one.
+   *
+   * @param sharedDoc: The underlying `ISharedDoc` of the document.
+   *
+   * @param cell: optional cell data.
+   *
+   * #### Notes
+   * With RTC, the MarkdownCellModel can be initialized remotely by another client.
+   * For that reason, we need to instantiate the MarkdownCellModel with a
+   * shared model already initialized with the schema and the corresponding data.
+   * This method is intended to be a convenience method to create the shared
+   * model with the correct schema and initialize it.
+   *
+   * #### Schema:
+   *  * id: string -- Unique identifier.
+   *  * cell_type: string -- Cell's type ('code' | 'markdown' | 'raw').
+   *  * source: ISharedString -- Cell's source.
+   *  * metadata: `ISharedMap<JSONObject>` -- Cell's metadata.
+   *  * attachments: `ISharedMap<JSONValue>` -- Cell's attachments.
    */
   static createSharedModel(
     id: string,
@@ -744,15 +895,24 @@ export class MarkdownCellModel extends AttachmentsCellModel {
   }
 
   /**
-   * Creates an standalone model.
+   * Creates an standalone MarkdownCellModel.
    *
-   * TODO: documentation
+   * @param id An optional unique identifier. If not provided, it will be generated randomly.
+   *
+   * @param cell: optional cell data.
+   *
+   * #### Notes
+   * This method is intended to be a convenience method to create a standalone
+   * MarkdownCellModel with the correct schema and initialize it.
+   * A standalone cell is a document by its self, doesn't pertain to
+   * a document as the Notebook. An example could be the python console, the
+   * editors on the debugger, etc.
    */
   static createStandaloneModel(
     id?: string,
     cell?: nbformat.IMarkdownCell
   ): MarkdownCellModel {
-    const cellId = id || UUID.uuid4();
+    const cellId = id || (cell?.id as string) || UUID.uuid4();
     const sharedDoc = new SharedDoc({ path: cellId });
     const sharedModel = MarkdownCellModel.createSharedModel(
       cellId,
@@ -779,6 +939,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       options.contentFactory || CodeCellModel.defaultContentFactory;
   }
 
+  /**
+   * The type of the cell.
+   */
   get type(): 'code' {
     return 'code';
   }
@@ -834,9 +997,33 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Initialize model.
+   * Initialize the model.
    *
-   * TODO: documentation
+   * @param ready Whether to emit the signal ready or not.
+   *
+   * #### Notes
+   * We can not retrieve data from the shared models until they
+   * are added to a document. The CellModel receives an
+   * ISharedMap with the different objects that composes the
+   * structure of the cell. This objects (execution_count, metadata,
+   * source, and outputs), cannot be extract from the shared model
+   * until this is added to its corresponding document (the notebook).
+   *
+   * In a notebook, some cell models are added to the notebook after
+   * its instantiation. For that reason, the CellList calls
+   * `CellModel.initialize()` after adding the CellModel to the
+   * notebook.
+   *
+   * In the case of standalone cells, and cells created by a remote
+   * client, they are instantiated with an initialized shared model
+   * that already pertains to a document, so we can call initialize
+   * right after instantiating them.
+   *
+   * Since the CellModel receives only the shared model as
+   * a parameter when instantiating it, we need to extract the data
+   * from the shared model and compose the CellModel after its
+   * instantiation. We use this method `initialize` to extract the
+   * initial data of the cell and create the different properties.
    */
   initialize(ready: boolean = true): void {
     if (this.isReady) return;
@@ -939,8 +1126,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Handle a change to the output shared model and reflect it in modelDB.
-   * We update the modeldb metadata when the nbcell changes.
+   * Handle a change to the output shared model.
    *
    * This method overrides the CellModel protected _onSharedModelChanged
    * so we first call super._onSharedModelChanged
@@ -960,8 +1146,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       }
       if (arg.key === 'execution_count') {
         this.contentChanged.emit(void 0);
+        // TODO: Change arg name to 'execution_count'?
         this.stateChanged.emit({
-          name: 'execution_count',
+          name: 'executionCount',
           oldValue: arg.oldValue,
           newValue: arg.newValue
         });
@@ -990,9 +1177,31 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Creates the shared model.
+   * Creates the shared model for the CodeCellModel.
    *
-   * TODO: documentation
+   * @param id Unique identifier.
+   *
+   * @param isDocument: Whether the cell is a document or part of one.
+   *
+   * @param sharedDoc: The underlying `ISharedDoc` of the document.
+   *
+   * @param cell: optional cell data.
+   *
+   * #### Notes
+   * With RTC, the CodeCellModel can be initialized remotely by another client.
+   * For that reason, we need to instantiate the CodeCellModel with a
+   * shared model already initialized with the schema and the corresponding
+   * data.
+   * This method is intended to be a convenience method to create the shared
+   * model with the correct schema and initialize it.
+   *
+   * #### Schema:
+   *  * id: string -- Unique identifier.
+   *  * cell_type: string -- Cell's type ('code' | 'markdown' | 'raw').
+   *  * execution_count: `number` -- Cell's execution count.
+   *  * source: ISharedString -- Cell's source.
+   *  * metadata: `ISharedMap<JSONObject>` -- Cell's metadata.
+   *  * outputs: `ISharedList<JSONObject>` -- Cell's outputs.
    */
   static createSharedModel(
     id: string,
@@ -1009,8 +1218,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
 
     sharedModel.set('execution_count', null);
     const outputs = new SharedList<JSONObject>({
-      sharedDoc: sharedDoc as SharedDoc,
-      initialize: false
+      sharedDoc: sharedDoc as SharedDoc
     });
     sharedModel.set('outputs', outputs);
 
@@ -1025,16 +1233,27 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Creates an standalone model.
+   * Creates an standalone CodeCellModel.
    *
-   * TODO: documentation
+   * @param id An optional unique identifier. If not provided, it will be generated randomly.
+   *
+   * @param cell: optional cell data.
+   *
+   * @param contentFactory optional factory for creating code cell model content.
+   *
+   * #### Notes
+   * This method is intended to be a convenience method to create a standalone
+   * CodeCellModel with the correct schema and initialize it.
+   * A standalone cell is a document by its self, doesn't pertain to
+   * a document as the Notebook. An example could be the python console, the
+   * editors on the debugger, etc.
    */
   static createStandaloneModel(
     id?: string,
     cell?: nbformat.ICodeCell,
     contentFactory?: CodeCellModel.IContentFactory
   ): CodeCellModel {
-    const cellId = id || UUID.uuid4();
+    const cellId = id || (cell?.id as string) || UUID.uuid4();
     const sharedDoc = new SharedDoc({ path: cellId });
     const sharedModel = CodeCellModel.createSharedModel(
       cellId,
@@ -1106,24 +1325,29 @@ namespace Private {
     args: ISharedMap.IChangedArgs<JSONValue>
   ): void {
     args.forEach(arg => {
-      if (arg.key === 'collapsed') {
-        const jupyter = (metadata.get('jupyter') || {}) as JSONObject;
-        const { outputs_hidden, ...newJupyter } = jupyter;
+      const collapse = metadata.get('collapsed');
+      const outputs_hidden = (metadata.get('jupyter') as any)?.outputs_hidden;
+      if (collapse === outputs_hidden) return;
 
-        if (outputs_hidden !== arg.newValue) {
-          if (arg.newValue !== undefined) {
-            newJupyter['outputs_hidden'] = arg.newValue;
-          }
-          if (Object.keys(newJupyter).length === 0) {
-            metadata.delete('jupyter');
-          } else {
-            metadata.set('jupyter', newJupyter);
-          }
+      if (arg.key === 'collapsed') {
+        const jupyter = JSONExt.deepCopy(
+          metadata.get('jupyter') || {}
+        ) as JSONObject;
+
+        if (arg.newValue !== undefined) {
+          jupyter['outputs_hidden'] = arg.newValue;
+        } else {
+          delete jupyter['outputs_hidden'];
+        }
+
+        if (Object.keys(jupyter).length === 0) {
+          metadata.delete('jupyter');
+        } else {
+          metadata.set('jupyter', jupyter);
         }
       } else if (arg.key === 'jupyter') {
-        const jupyter = (arg.newValue || {}) as JSONObject;
-        if (jupyter.hasOwnProperty('outputs_hidden')) {
-          metadata.set('collapsed', jupyter.outputs_hidden);
+        if (outputs_hidden !== undefined) {
+          metadata.set('collapsed', outputs_hidden);
         } else {
           metadata.delete('collapsed');
         }

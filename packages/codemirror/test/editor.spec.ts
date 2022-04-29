@@ -30,7 +30,7 @@ describe('CodeMirrorEditor', () => {
   beforeEach(() => {
     host = document.createElement('div');
     document.body.appendChild(host);
-    model = new CodeEditor.Model();
+    model = new CodeEditor.Model({ isDocument: true });
     editor = new LogFileEditor({ host, model });
   });
 

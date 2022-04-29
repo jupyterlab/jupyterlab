@@ -31,8 +31,8 @@ describe('@jupyterlab/notebook', () => {
 
       beforeEach(async () => {
         context = await utils.createMockContext();
-        panel = utils.createNotebookPanel(context);
         context.model.fromJSON(utils.DEFAULT_CONTENT);
+        panel = utils.createNotebookPanel(context);
       });
 
       afterEach(() => {
@@ -186,7 +186,7 @@ describe('@jupyterlab/notebook', () => {
             'select'
           )[0] as HTMLSelectElement;
           expect(node.value).toBe('code');
-          const cell = panel.model!.contentFactory.createCodeCell({});
+          const cell = panel.model!.contentFactory.createCodeCell();
           panel.model!.cells.insert(1, cell);
           panel.content.select(panel.content.widgets[1]);
           await framePromise();

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeCellModel } from '@jupyterlab/cells';
+import { SharedDoc } from '@jupyterlab/shared-models';
 import { NotebookModel, NotebookModelFactory } from '../src';
 
 describe('@jupyterlab/notebook', () => {
@@ -21,7 +22,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should accept a notebook model content factory', () => {
-        const contentFactory = new NotebookModel.ContentFactory({});
+        const contentFactory = new NotebookModel.ContentFactory({
+          sharedDoc: new SharedDoc()
+        });
         const factory = new NotebookModelFactory({ contentFactory });
         expect(factory.contentFactory).toBe(contentFactory);
       });

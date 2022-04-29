@@ -13,7 +13,7 @@ import {
   ISearchMatch,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
-import { IObservableString } from '@jupyterlab/observables';
+import { ISharedString } from '@jupyterlab/shared-models';
 import { OutputArea } from '@jupyterlab/outputarea';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CodeCell } from '.';
@@ -138,7 +138,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
     this.filters = filters;
 
     // Search input
-    const content = this.cell.model.modelDB.get('value') as IObservableString;
+    const content = this.cell.model.value;
     await this._updateCodeMirror(content);
     content.changed.connect(this.onInputChanged, this);
   }
@@ -298,14 +298,14 @@ export class CellSearchProvider implements IBaseSearchProvider {
    * @param changes Source change
    */
   protected async onInputChanged(
-    content: IObservableString,
-    changes?: IObservableString.IChangedArgs
+    content: ISharedString,
+    changes?: ISharedString.IChangedArgs
   ): Promise<void> {
     await this._updateCodeMirror(content);
     this._stateChanged.emit();
   }
 
-  private async _updateCodeMirror(content: IObservableString) {
+  private async _updateCodeMirror(content: ISharedString) {
     if (this.query !== null) {
       if (this.isActive) {
         this.cmHandler.matches = await TextSearchEngine.search(

@@ -42,7 +42,7 @@ export interface IShared extends IDisposable {
    *
    * TODO: Define an API
    */
-  readonly undoManager: any;
+  undoManager: IUndoManager;
 }
 
 /**
@@ -177,26 +177,6 @@ export interface ISharedDoc extends IDisposable {
    * JSON Objects and primitives.
    */
   createMap<T extends ISharedType>(name: string): ISharedMap<T>;
-
-  /**
-   * Create a multiple IShared that uses the same
-   * undo manager.
-   *
-   * @param schema: the SharedSchema with the specification
-   * of the IShared classes to create.
-   *
-   * @param origin: the instance to track for filtering changes.
-   *
-   * @returns a list o IShared.
-   *
-   * #### Notes
-   * The map can only store objects that are simple
-   * JSON Objects and primitives.
-   */
-  createFromSchema(
-    schema: SharedSchema,
-    origin?: any
-  ): [IUndoManager, ...IShared[]];
 }
 
 /**
@@ -275,7 +255,7 @@ export class SharedDoc implements ISharedDoc {
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
    */
-  transact(f: () => void, origin: any = this): void {
+  transact(f: () => void, origin: any = null): void {
     this._ydoc.transact(f, origin);
   }
 
@@ -351,78 +331,6 @@ export class SharedDoc implements ISharedDoc {
     const map = new SharedMap<T>({ sharedDoc: this, underlyingModel });
     return map;
   }
-
-  /**
-   * Create a multiple IShared that uses the same
-   * undo manager.
-   *
-   * @param schema: the SharedSchema with the specification
-   * of the IShared classes to create.
-   *
-   * @param origin: the instance to track for filtering changes.
-   *
-   * @returns a list o IShared.
-   */
-  createFromSchema(
-    schema: SharedSchema,
-    origin: any = this
-  ): [Y.UndoManager, ...IShared[]] {
-    const yItems: Y.AbstractType<any>[] = [];
-    schema.forEach(type => {
-      switch (type.type) {
-        case 'String':
-          yItems.push(this._ydoc.getText(type.name));
-          break;
-        case 'List':
-          yItems.push(this._ydoc.getArray(type.name));
-          break;
-        case 'Map':
-          yItems.push(this._ydoc.getMap(type.name));
-          break;
-      }
-    });
-
-    const undoManager = new Y.UndoManager(yItems, {
-      trackedOrigins: new Set([origin])
-    });
-
-    const sharedTypes: IShared[] = [];
-    schema.forEach((type, index) => {
-      switch (type.type) {
-        case 'String':
-          sharedTypes.push(
-            new SharedString({
-              sharedDoc: this,
-              underlyingModel: yItems[index] as Y.Text,
-              origin,
-              undoManager
-            })
-          );
-          break;
-        case 'List':
-          sharedTypes.push(
-            new SharedList({
-              sharedDoc: this,
-              underlyingModel: yItems[index] as Y.Array<any>,
-              origin,
-              undoManager
-            })
-          );
-          break;
-        case 'Map':
-          sharedTypes.push(
-            new SharedMap({
-              sharedDoc: this,
-              underlyingModel: yItems[index] as Y.Map<any>,
-              origin,
-              undoManager
-            })
-          );
-          break;
-      }
-    });
-    return [undoManager, ...sharedTypes];
-  }
 }
 
 /**
@@ -443,27 +351,9 @@ export namespace SharedDoc {
   }
   export interface IModelOptions {
     /**
-     * The object to track for the undo manager.
-     */
-    origin?: any;
-
-    /**
      * The undo manager for the model.
      */
-    undoManager?: any;
-
-    /**
-     * Whether to initialize the undo manager or not.
-     *
-     * #### Notes
-     * The undo manager can not be initialized
-     * before the Y.Array is inserted in the Y.Doc.
-     * This option allows to instantiate a `Shared` object
-     * before the Y.Array was integrated into the Y.Doc
-     * and then call `Shared.initialize()` to
-     * initialize the undo manager.
-     */
-    initialize?: boolean;
+    undoManager?: Y.UndoManager;
   }
 
   /**
@@ -520,5 +410,12 @@ export namespace SharedDoc {
     } else {
       return type as JSONValue;
     }
+  }
+
+  export function createUndoManager(
+    type: Y.AbstractType<any>,
+    origins: any[]
+  ): Y.UndoManager {
+    return new Y.UndoManager(type, { trackedOrigins: new Set(origins) });
   }
 }

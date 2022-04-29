@@ -4,11 +4,9 @@
 import { CellModel, ICellModel } from '@jupyterlab/cells';
 import {
   Delta,
-  ISharedDoc,
   ISharedList,
   ISharedMap,
-  ISharedType,
-  IUndoManager
+  ISharedType
 } from '@jupyterlab/shared-models';
 import {
   ArrayExt,
@@ -211,16 +209,12 @@ export class CellList implements ICellList {
    */
   constructor(
     factory: NotebookModel.IContentFactory,
-    sharedDoc: ISharedDoc,
     sharedList: ISharedList<ISharedMap<ISharedType>>
   ) {
     this._factory = factory;
     this._cellMap = new Map<any, ICellModel>();
 
-    this._sharedDoc = sharedDoc;
     this._sharedList = sharedList;
-    this._undoManager = this._sharedList.undoManager;
-
     this._sharedList.changed.connect(this._onOrderChanged, this);
   }
 
@@ -282,10 +276,9 @@ export class CellList implements ICellList {
    */
   iter(): IIterator<ICellModel> {
     const arr: ICellModel[] = [];
-    for (const cellType of toArray(this._sharedList)) {
-      const id = cellType.get('id') as string;
-      arr.push(this._cellMap.get(id)!);
-    }
+    each(this._sharedList, (cellType: ISharedMap<ISharedType>, i: number) => {
+      arr.push(this._cellMap.get(cellType.underlyingModel)!);
+    });
     return new ArrayIterator<ICellModel>(arr);
   }
 
@@ -311,28 +304,28 @@ export class CellList implements ICellList {
    * document are bundled into a single event.
    */
   transact(f: () => void): void {
-    this._sharedDoc.transact(f, this._sharedList);
+    this._sharedList.transact(f);
   }
 
   /**
    * Undo an operation.
    */
   undo(): void {
-    this._undoManager.undo();
+    this._sharedList.undo();
   }
 
   /**
    * Redo an operation.
    */
   redo(): void {
-    this._undoManager.redo();
+    this._sharedList.redo();
   }
 
   /**
    * Clear the change stack.
    */
   clearUndo(): void {
-    this._undoManager.clear();
+    this._sharedList.clearUndo();
   }
 
   /**
@@ -517,7 +510,6 @@ export class CellList implements ICellList {
       if (this._cellMap.has(cellType.underlyingModel)) {
         const cell = this._cellMap.get(cellType.underlyingModel)!;
         this._cellMap.delete(cellType.underlyingModel);
-        cell.dispose();
         deleted.add(cell);
       }
     });
@@ -545,9 +537,7 @@ export class CellList implements ICellList {
 
   private _isDisposed: boolean = false;
   private _cellMap: Map<any, ICellModel>;
-  private _sharedDoc: ISharedDoc;
   private _sharedList: ISharedList<ISharedMap<ISharedType>>;
-  private _undoManager: IUndoManager;
   private _changed = new Signal<this, ISharedList.IChangedArgs<ICellModel>>(
     this
   );

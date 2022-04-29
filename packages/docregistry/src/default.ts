@@ -10,8 +10,7 @@ import { Contents } from '@jupyterlab/services';
 import {
   ISharedDoc,
   ISharedMap,
-  ISharedString,
-  SharedDoc
+  ISharedString
 } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONValue, PartialJSONValue } from '@lumino/coreutils';
@@ -28,9 +27,17 @@ export class DocumentModel
 {
   /**
    * Construct a new document model.
+   *
+   * @param languagePreference The language preference for the model.
+   *
+   * @param sharedDoc The underlying `ISharedDoc` instance where model's data is stored.
+   *
+   * #### Notes
+   * Making direct edits to the values stored in the`ISharedDoc`
+   * is not recommended, and may produce unpredictable results.
    */
   constructor(languagePreference?: string, sharedDoc?: ISharedDoc) {
-    super({ isDocument: true, sharedDoc: sharedDoc || new SharedDoc() });
+    super({ isDocument: true, sharedDoc: sharedDoc });
     this._defaultLang = languagePreference || '';
 
     this._state = this._sharedDoc.createMap<JSONValue>('state');
@@ -143,6 +150,7 @@ export class DocumentModel
    * Initialize the model with its current state.
    */
   initialize(): void {
+    this._state.set('dirty', false);
     return;
   }
 

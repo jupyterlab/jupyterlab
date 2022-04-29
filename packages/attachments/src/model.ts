@@ -92,7 +92,11 @@ export namespace IAttachmentsModel {
    */
   export interface IOptions {
     /**
-     * An optional ISharedMap to store the attachments model.
+     * An ISharedMap to store attachments' data.
+     *
+     * #### Notes
+     * Making direct edits to the values stored in the`ISharedMap`
+     * is not recommended, and may produce unpredictable results.
      */
     sharedMap?: ISharedMap<JSONObject>;
 

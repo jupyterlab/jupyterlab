@@ -2,13 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISharedString } from '@jupyterlab/shared-models';
+import { ISharedString, SharedDoc } from '@jupyterlab/shared-models';
 
 describe('CodeEditor.Model', () => {
   let model: CodeEditor.Model;
 
   beforeEach(() => {
-    model = new CodeEditor.Model();
+    model = new CodeEditor.Model({ isDocument: true });
   });
 
   afterEach(() => {
@@ -22,7 +22,10 @@ describe('CodeEditor.Model', () => {
     });
 
     it('should create a CodeEditor Model with an initial value', () => {
-      const other = new CodeEditor.Model({ value: 'Initial text here' });
+      const sharedDoc = new SharedDoc();
+      const value = sharedDoc.createString('source');
+      value.text = 'Initial text here';
+      const other = new CodeEditor.Model({ isDocument: true, sharedDoc });
       expect(other).toBeInstanceOf(CodeEditor.Model);
       expect(other.value.text).toBe('Initial text here');
       other.dispose();
@@ -30,12 +33,11 @@ describe('CodeEditor.Model', () => {
 
     it('should create a CodeEditor Model with an initial mimetype', () => {
       const other = new CodeEditor.Model({
-        value: 'import this',
+        isDocument: true,
         mimeType: 'text/x-python'
       });
       expect(other).toBeInstanceOf(CodeEditor.Model);
       expect(other.mimeType).toBe('text/x-python');
-      expect(other.value.text).toBe('import this');
       other.dispose();
     });
   });
@@ -62,8 +64,7 @@ describe('CodeEditor.Model', () => {
         args: ISharedString.IChangedArgs
       ) => {
         expect(sender).toBe(model.value);
-        expect(args.type).toBe('set');
-        expect(args.value).toBe('foo');
+        expect(args[0].insert).toBe('foo');
         called = true;
       };
       model.value.changed.connect(handler);
@@ -78,8 +79,8 @@ describe('CodeEditor.Model', () => {
         sender: ISharedString,
         args: ISharedString.IChangedArgs
       ) => {
-        expect(args.type).toBe('insert');
-        expect(args.value).toBe('foo');
+        expect(sender).toBe(model.value);
+        expect(args[0].insert).toBe('foo');
         called = true;
       };
       model.value.changed.connect(handler);
@@ -95,8 +96,8 @@ describe('CodeEditor.Model', () => {
         sender: ISharedString,
         args: ISharedString.IChangedArgs
       ) => {
-        expect(args.type).toBe('remove');
-        expect(args.value).toBe('f');
+        expect(sender).toBe(model.value);
+        expect(args[0].delete).toBe(1);
         called = true;
       };
       model.value.changed.connect(handler);
@@ -120,16 +121,12 @@ describe('CodeEditor.Model', () => {
     });
   });
 
-  describe('#modelDB', () => {
-    it('should get the modelDB object associated with the model', () => {
-      expect(model.modelDB.has('value')).toBe(true);
-    });
-  });
-
   describe('#isDisposed', () => {
     it('should test whether the model is disposed', () => {
+      expect(model.value.isDisposed).toBe(false);
       expect(model.isDisposed).toBe(false);
       model.dispose();
+      expect(model.value.isDisposed).toBe(true);
       expect(model.isDisposed).toBe(true);
     });
   });

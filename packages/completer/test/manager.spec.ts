@@ -180,7 +180,7 @@ describe('completer/manager', () => {
         const completerContext = { widget };
 
         await manager.updateCompleter(completerContext);
-        const cell = new Cell({ model: new CellModel({}) });
+        const cell = new Cell({ model: CellModel.createStandaloneModel() });
         const newCompleterContext = {
           editor: cell.editor,
           session: widget.sessionContext.session,

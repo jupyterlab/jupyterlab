@@ -3,7 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import * as Y from 'yjs';
-import { Delta, IShared, SharedDoc } from './model';
+import { Delta, IShared, IUndoManager, SharedDoc } from './model';
 
 /**
  * A string which can be shared by multiple clients.
@@ -24,6 +24,11 @@ export interface ISharedString extends IShared {
   readonly underlyingModel: any;
 
   /**
+   * A signal emitted when the string has changed.
+   */
+  readonly changed: ISignal<this, ISharedString.IChangedArgs>;
+
+  /**
    * The specific undo manager class behind the IShared abstraction.
    *
    * #### Notes
@@ -32,12 +37,7 @@ export interface ISharedString extends IShared {
    *
    * TODO: Define an API
    */
-  readonly undoManager: any;
-
-  /**
-   * A signal emitted when the string has changed.
-   */
-  readonly changed: ISignal<this, ISharedString.IChangedArgs>;
+  undoManager: IUndoManager;
 
   /**
    * The value of the string.
@@ -48,6 +48,12 @@ export interface ISharedString extends IShared {
    * Dispose of the resources held by the string.
    */
   dispose(): void;
+
+  /**
+   * Perform a transaction. While the function f is called, all changes to the SharedString
+   * document are bundled into a single event.
+   */
+  transact(f: () => void): void;
 
   /**
    * Whether the ISharedString can undo changes.
@@ -112,9 +118,8 @@ export namespace ISharedString {
  * A concrete implementation of [[ISharedString]]
  */
 export class SharedString implements ISharedString {
-  private _origin: any;
   private _sharedDoc: SharedDoc;
-  private _undoManager: Y.UndoManager;
+  private _undoManager: Y.UndoManager | undefined;
   private _isDisposed: boolean = false;
   private _changed = new Signal<this, ISharedString.IChangedArgs>(this);
 
@@ -130,13 +135,8 @@ export class SharedString implements ISharedString {
       this.underlyingModel = new Y.Text();
     }
 
-    this._origin = options.origin ?? this;
-
-    if (options.undoManager) {
-      this._undoManager = options.undoManager;
-    } else if (options.initialize !== false) {
-      this.initialize();
-    }
+    this._undoManager = options.undoManager;
+    this._undoManager?.addTrackedOrigin(SharedString);
 
     this.underlyingModel.observe(this._onTextChanged);
   }
@@ -156,6 +156,13 @@ export class SharedString implements ISharedString {
   readonly underlyingModel: Y.Text;
 
   /**
+   * A signal emitted when the string has changed.
+   */
+  get changed(): ISignal<this, ISharedString.IChangedArgs> {
+    return this._changed;
+  }
+
+  /**
    * The specific undo manager class behind the IShared abstraction.
    *
    * #### Notes
@@ -164,25 +171,22 @@ export class SharedString implements ISharedString {
    *
    * TODO: Define an API
    */
-  get undoManager(): any {
+  get undoManager(): Y.UndoManager | undefined {
     return this._undoManager;
   }
-
-  /**
-   * A signal emitted when the string has changed.
-   */
-  get changed(): ISignal<this, ISharedString.IChangedArgs> {
-    return this._changed;
+  set undoManager(undoManager: Y.UndoManager | undefined) {
+    this._undoManager = undoManager;
+    this._undoManager?.addTrackedOrigin(SharedString);
   }
 
   /**
    * Set the value of the string.
    */
   set text(value: string) {
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.delete(0, this.underlyingModel.length);
       this.underlyingModel.insert(0, value);
-    }, this._origin);
+    });
   }
 
   /**
@@ -212,55 +216,50 @@ export class SharedString implements ISharedString {
   }
 
   /**
-   * Initialize the model.
-   *
-   * #### Notes
-   * The undo manager can not be initialized
-   * before the Y.Text is inserted in the Y.Doc.
-   * This option allows to instantiate a `SharedString` object
-   * before the Y.Text was integrated into the Y.Doc
-   * and then call `SharedString.initialize()` to
-   * initialize the undo manager.
+   * Perform a transaction. While the function f is called, all changes to the SharedString
+   * document are bundled into a single event.
    */
-  initialize(): void {
-    this._undoManager = new Y.UndoManager(this.underlyingModel, {
-      trackedOrigins: new Set([this._origin])
-    });
+  transact(f: () => void): void {
+    this._sharedDoc.transact(f, this);
   }
 
   /**
    * Whether the ISharedString can undo changes.
    */
   canUndo(): boolean {
-    return this._undoManager.undoStack.length > 0;
+    return this._undoManager == undefined
+      ? false
+      : this._undoManager.undoStack.length > 0;
   }
 
   /**
    * Whether the ISharedString can redo changes.
    */
   canRedo(): boolean {
-    return this._undoManager.redoStack.length > 0;
+    return this._undoManager == undefined
+      ? false
+      : this._undoManager.redoStack.length > 0;
   }
 
   /**
    * Undo an operation.
    */
   undo(): void {
-    this._undoManager.undo();
+    this._undoManager?.undo();
   }
 
   /**
    * Redo an operation.
    */
   redo(): void {
-    this._undoManager.redo();
+    this._undoManager?.redo();
   }
 
   /**
    * Clear the change stack.
    */
   clearUndo(): void {
-    this._undoManager.clear();
+    this._undoManager?.clear();
   }
 
   /**
@@ -271,9 +270,9 @@ export class SharedString implements ISharedString {
    * @param text - The substring to insert.
    */
   insert(index: number, text: string): void {
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.insert(index, text);
-    }, this._origin);
+    });
   }
 
   /**
@@ -284,9 +283,9 @@ export class SharedString implements ISharedString {
    * @param end - The ending index.
    */
   remove(start: number, end: number): void {
-    this._sharedDoc.transact(() => {
+    this.transact(() => {
       this.underlyingModel.delete(start, end - start);
-    }, this._origin);
+    });
   }
 
   /**

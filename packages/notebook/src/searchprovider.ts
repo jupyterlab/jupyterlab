@@ -17,13 +17,10 @@ import {
   ISearchProvider,
   SearchProvider
 } from '@jupyterlab/documentsearch';
-import {
-  IObservableList,
-  IObservableUndoableList
-} from '@jupyterlab/observables';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
+import { ICellList } from './celllist';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
 
@@ -401,37 +398,31 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   private async _onCellsChanged(
-    cells: IObservableUndoableList<ICellModel>,
-    changes: IObservableList.IChangedArgs<ICellModel>
+    cells: ICellList,
+    changes: ICellList.IChangedArgs
   ): Promise<void> {
     await this.clearHighlight();
-
-    switch (changes.type) {
-      case 'add':
-        changes.newValues.forEach((model, index) => {
-          this._addCellProvider(changes.newIndex + index);
+    let currpos = 0;
+    changes.delta.forEach(delta => {
+      if (delta.insert != null) {
+        delta.insert.forEach(value => {
+          this._addCellProvider(currpos++);
         });
-        break;
-      case 'move':
-        ArrayExt.move(
-          this._searchProviders,
-          changes.oldIndex,
-          changes.newIndex
-        );
-        break;
-      case 'remove':
-        for (let index = 0; index < changes.oldValues.length; index++) {
-          this._removeCellProvider(changes.oldIndex);
+      } else if (delta.delete != null) {
+        for (let i = currpos; i < currpos + delta.delete; i++) {
+          this._removeCellProvider(currpos);
         }
-        break;
-      case 'set':
-        changes.newValues.forEach((model, index) => {
-          this._addCellProvider(changes.newIndex + index);
-          this._removeCellProvider(changes.newIndex + index + 1);
-        });
-
-        break;
-    }
+      } else if (delta.retain != null) {
+        currpos += delta.retain;
+      } else {
+        // TODO: Implement the move feature
+        //ArrayExt.move(
+        //  this._searchProviders,
+        //  changes.oldIndex,
+        //  changes.newIndex
+        //);
+      }
+    });
     this._onSearchProviderChanged();
   }
 
@@ -442,11 +433,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     const index = panel.widgets.findIndex(cell => cell.id === renderedCell.id);
     if (index >= 0) {
       void this._onCellsChanged(panel.model!.cells, {
-        newIndex: index,
-        newValues: [renderedCell.model],
-        oldIndex: index,
-        oldValues: [renderedCell.model],
-        type: 'set'
+        added: new Set([renderedCell.model]),
+        deleted: new Set([renderedCell.model]),
+        delta: [
+          { retain: index },
+          { delete: 1 },
+          { insert: [renderedCell.model] }
+        ]
       });
     }
   }

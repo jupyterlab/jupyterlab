@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
+import { ISharedMap } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -77,7 +77,6 @@ export class JSONEditor extends Widget {
 
     const model = new CodeEditor.Model({
       isDocument: true,
-      sharedDoc: new SharedDoc(),
       mimeType: 'application/json'
     });
 

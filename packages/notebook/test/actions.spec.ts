@@ -66,8 +66,8 @@ describe('@jupyterlab/notebook', () => {
         disableDocumentWideUndoRedo: true
       });
       model.fromJSON(utils.DEFAULT_CONTENT);
+      model.initialize();
       widget.model = model;
-      model.sharedModel.clearUndoHistory();
 
       widget.activeCellIndex = 0;
     });
@@ -120,9 +120,9 @@ describe('@jupyterlab/notebook', () => {
           }
         });
 
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        cell.value.text = ERROR_INPUT;
+        const cell = widget.model!.contentFactory.createCodeCell();
         widget.model!.cells.push(cell);
+        cell.value.text = ERROR_INPUT;
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.run(widget, ipySessionContext);
         expect(result).toBe(false);
@@ -691,11 +691,11 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        let cell = widget.model!.contentFactory.createCodeCell({});
-        cell.value.text = ERROR_INPUT;
+        let cell = widget.model!.contentFactory.createCodeCell();
         widget.model!.cells.insert(2, cell);
+        cell.value.text = ERROR_INPUT;
         widget.select(widget.widgets[2]);
-        cell = widget.model!.contentFactory.createCodeCell({});
+        cell = widget.model!.contentFactory.createCodeCell();
         widget.model!.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.run(widget, ipySessionContext);
@@ -710,7 +710,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        const cell = widget.model!.contentFactory.createMarkdownCell({});
+        const cell = widget.model!.contentFactory.createMarkdownCell();
         widget.model!.cells.push(cell);
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         child.rendered = false;
@@ -813,7 +813,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should stop executing code cells on an error', async () => {
         widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.model!.contentFactory.createCodeCell({});
+        const cell = widget.model!.contentFactory.createCodeCell();
         widget.model!.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndAdvance(
@@ -912,7 +912,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should stop executing code cells on an error', async () => {
         widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.model!.contentFactory.createCodeCell({});
+        const cell = widget.model!.contentFactory.createCodeCell();
         widget.model!.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndInsert(
@@ -989,7 +989,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should stop executing code cells on an error', async () => {
         widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.model!.contentFactory.createCodeCell({});
+        const cell = widget.model!.contentFactory.createCodeCell();
         widget.model!.cells.push(cell);
         const result = await NotebookActions.runAll(widget, ipySessionContext);
         expect(result).toBe(false);
@@ -1387,7 +1387,7 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         NotebookActions.cut(widget);
         widget.activeCellIndex = 1;
-        widget.model?.sharedModel.clearUndoHistory();
+        widget.model?.cells.clearUndo();
         NotebookActions.paste(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);

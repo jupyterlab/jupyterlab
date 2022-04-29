@@ -562,7 +562,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     args.forEach(arg => {
       switch (arg.key) {
         case 'jupyter':
-          if (this.syncCollapse) {
+          if (
+            this.syncCollapse &&
+            this._inputHidden !== !!(arg.newValue as any)?.source_hidden
+          ) {
             this.loadCollapseState();
           }
           break;
@@ -1065,12 +1068,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
     args.forEach(arg => {
       switch (arg.key) {
         case 'scrolled':
-          if (this.syncScrolled) {
+          if (this.syncScrolled && this._outputsScrolled !== !!arg.newValue) {
             this.loadScrolledState();
           }
           break;
         case 'collapsed':
-          if (this.syncCollapse) {
+          if (this.syncCollapse && this._outputHidden !== !!arg.newValue) {
             this.loadCollapseState();
           }
           break;

@@ -59,8 +59,10 @@ const options: Notebook.IOptions = {
   notebookConfig
 };
 
-function createWidget(): LogStaticNotebook {
+function createWidget(data?: nbformat.INotebookContent): LogStaticNotebook {
   const model = new NotebookModel();
+  if (data) model.fromJSON(data);
+  model.initialize();
   const widget = new LogStaticNotebook(options);
   widget.model = model;
   return widget;
@@ -149,8 +151,10 @@ class LogNotebook extends Notebook {
   }
 }
 
-function createActiveWidget(): LogNotebook {
+function createActiveWidget(data?: nbformat.INotebookContent): LogNotebook {
   const model = new NotebookModel();
+  if (data) model.fromJSON(data);
+  model.initialize();
   const widget = new LogNotebook(options);
   widget.model = model;
   return widget;
@@ -195,6 +199,7 @@ describe('@jupyter/notebook', () => {
       it('should be emitted when the model changes', () => {
         const widget = new StaticNotebook(options);
         const model = new NotebookModel();
+        model.initialize();
         let called = false;
         widget.modelChanged.connect((sender, args) => {
           expect(sender).toBe(widget);
@@ -209,19 +214,23 @@ describe('@jupyter/notebook', () => {
     describe('#modelContentChanged', () => {
       it('should be emitted when a cell is added', () => {
         const widget = new StaticNotebook(options);
-        widget.model = new NotebookModel();
+        const model = new NotebookModel();
+        model.initialize();
+        widget.model = model;
         let called = false;
         widget.modelContentChanged.connect(() => {
           called = true;
         });
-        const cell = widget.model!.contentFactory.createCodeCell({});
+        const cell = widget.model!.contentFactory.createCodeCell();
         widget.model!.cells.push(cell);
         expect(called).toBe(true);
       });
 
       it('should be emitted when metadata is set', () => {
         const widget = new StaticNotebook(options);
-        widget.model = new NotebookModel();
+        const model = new NotebookModel();
+        model.initialize();
+        widget.model = model;
         let called = false;
         widget.modelContentChanged.connect(() => {
           called = true;
@@ -240,6 +249,7 @@ describe('@jupyter/notebook', () => {
       it('should set the model for the widget', () => {
         const widget = new StaticNotebook(options);
         const model = new NotebookModel();
+        model.initialize();
         widget.model = model;
         expect(widget.model).toBe(model);
       });
@@ -247,18 +257,22 @@ describe('@jupyter/notebook', () => {
       it('should emit the `modelChanged` signal', () => {
         const widget = new StaticNotebook(options);
         const model = new NotebookModel();
+        model.initialize();
         widget.model = model;
         let called = false;
         widget.modelChanged.connect(() => {
           called = true;
         });
-        widget.model = new NotebookModel();
+        const model2 = new NotebookModel();
+        model2.initialize();
+        widget.model = model2;
         expect(called).toBe(true);
       });
 
       it('should be a no-op if the value does not change', () => {
         const widget = new StaticNotebook(options);
         const model = new NotebookModel();
+        model.initialize();
         widget.model = model;
         let called = false;
         widget.modelChanged.connect(() => {
@@ -272,6 +286,7 @@ describe('@jupyter/notebook', () => {
         const widget = new LogStaticNotebook(options);
         const model = new NotebookModel();
         model.fromJSON(utils.DEFAULT_CONTENT);
+        model.initialize();
         widget.model = model;
         expect(widget.widgets.length).toBe(model.cells.length);
       });
@@ -280,6 +295,7 @@ describe('@jupyter/notebook', () => {
         const widget = new LogStaticNotebook(options);
         const model1 = new NotebookModel();
         expect(model1.cells.length).toBe(0);
+        model1.initialize();
         widget.model = model1;
         expect(model1.cells.length).toBe(1);
         expect(model1.cells.get(0).type).toBe('code');
@@ -298,6 +314,7 @@ describe('@jupyter/notebook', () => {
       it('should set the mime types of the cell widgets', () => {
         const widget = new LogStaticNotebook(options);
         const model = new NotebookModel();
+        model.initialize();
         const value = { name: 'python', codemirror_mode: 'python' };
         model.metadata.set('language_info', value);
         widget.model = model;
@@ -309,8 +326,7 @@ describe('@jupyter/notebook', () => {
         let widget: LogStaticNotebook;
 
         beforeEach(() => {
-          widget = createWidget();
-          widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+          widget = createWidget(utils.DEFAULT_CONTENT);
         });
 
         afterEach(() => {
@@ -333,7 +349,7 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should handle an add', () => {
-          const cell = widget.model!.contentFactory.createCodeCell({});
+          const cell = widget.model!.contentFactory.createCodeCell();
           widget.model!.cells.push(cell);
           expect(widget.widgets.length).toBe(widget.model!.cells.length);
           const child = widget.widgets[0];
@@ -341,18 +357,26 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should initially render markdown cells with content', () => {
-          const cell1 = widget.model!.contentFactory.createMarkdownCell({});
-          const cell2 = widget.model!.contentFactory.createMarkdownCell({});
-          cell1.value.text = '# Hello';
+          const cell = {
+            ...MarkdownCellModel.createStandaloneModel().toJSON(),
+            source: '# Hello'
+          };
+          const cell1 = widget.model!.contentFactory.createMarkdownCell(
+            undefined,
+            cell
+          );
+          const cell2 = widget.model!.contentFactory.createMarkdownCell();
           widget.model!.cells.push(cell1);
           widget.model!.cells.push(cell2);
           expect(widget.widgets.length).toBe(widget.model!.cells.length);
           const child1 = widget.widgets[
             widget.model!.cells.length - 2
           ] as MarkdownCell;
+          expect(child1.model).toBe(cell1);
           const child2 = widget.widgets[
             widget.model!.cells.length - 1
           ] as MarkdownCell;
+          expect(child2.model).toBe(cell2);
           expect(child1.rendered).toBe(true);
           expect(child2.rendered).toBe(false);
         });
@@ -364,7 +388,7 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should handle a clear', () => {
-          const cell = widget.model!.contentFactory.createCodeCell({});
+          const cell = widget.model!.contentFactory.createCodeCell();
           widget.model!.cells.push(cell);
           widget.model!.cells.clear();
           expect(widget.widgets.length).toBe(0);
@@ -438,6 +462,7 @@ describe('@jupyter/notebook', () => {
       it('should be set from language metadata', () => {
         const widget = new LogStaticNotebook(options);
         const model = new NotebookModel();
+        model.initialize();
         const value = { name: 'python', codemirror_mode: 'python' };
         model.metadata.set('language_info', value);
         widget.model = model;
@@ -484,7 +509,9 @@ describe('@jupyter/notebook', () => {
     describe('#onModelChanged()', () => {
       it('should be called when the model changes', () => {
         const widget = new LogStaticNotebook(options);
-        widget.model = new NotebookModel();
+        const model = new NotebookModel();
+        model.initialize();
+        widget.model = model;
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onModelChanged'])
         );
@@ -543,8 +570,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#onCellMoved()', () => {
       it('should be called when a cell is moved', () => {
-        const widget = createWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createWidget(utils.DEFAULT_CONTENT);
         widget.model!.cells.move(0, 1);
         expect(widget.methods).toEqual(expect.arrayContaining(['onCellMoved']));
       });
@@ -573,7 +599,7 @@ describe('@jupyter/notebook', () => {
       describe('#createCodeCell({})', () => {
         it('should create a `CodeCell`', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
-          const model = new CodeCellModel({});
+          const model = CodeCellModel.createStandaloneModel();
           const codeOptions = { model, rendermime, contentFactory };
           const parent = new StaticNotebook(options);
           const widget = contentFactory.createCodeCell(codeOptions, parent);
@@ -584,7 +610,7 @@ describe('@jupyter/notebook', () => {
       describe('#createMarkdownCell({})', () => {
         it('should create a `MarkdownCell`', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
-          const model = new MarkdownCellModel({});
+          const model = MarkdownCellModel.createStandaloneModel();
           const mdOptions = { model, rendermime, contentFactory };
           const parent = new StaticNotebook(options);
           const widget = contentFactory.createMarkdownCell(mdOptions, parent);
@@ -595,7 +621,7 @@ describe('@jupyter/notebook', () => {
       describe('#createRawCell()', () => {
         it('should create a `RawCell`', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
-          const model = new RawCellModel({});
+          const model = RawCellModel.createStandaloneModel();
           const rawOptions = { model, contentFactory };
           const parent = new StaticNotebook(options);
           const widget = contentFactory.createRawCell(rawOptions, parent);
@@ -624,8 +650,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#activeCellChanged', () => {
       it('should be emitted when the active cell changes', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         let called = false;
         widget.activeCellChanged.connect((sender, args) => {
           expect(sender).toBe(widget);
@@ -637,8 +662,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should not be emitted when the active cell does not change', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         let called = false;
         widget.activeCellChanged.connect(() => {
           called = true;
@@ -650,8 +674,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#selectionChanged', () => {
       it('should be emitted when the selection changes', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         let called = false;
         widget.selectionChanged.connect((sender, args) => {
           expect(sender).toBe(widget);
@@ -663,8 +686,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should not be emitted when the selection does not change', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         let called = false;
         widget.select(widget.widgets[1]);
         widget.selectionChanged.connect(() => {
@@ -721,8 +743,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should deselect all cells if switching to edit mode', async () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await framePromise();
         widget.extendContiguousSelectionTo(widget.widgets.length - 1);
@@ -737,8 +758,14 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-        const cell = widget.model!.contentFactory.createMarkdownCell({});
-        cell.value.text = '# Hello'; // Should be rendered with content.
+        const tmp = {
+          ...MarkdownCellModel.createStandaloneModel().toJSON(),
+          source: '# Hello' // Should be rendered with content.
+        };
+        const cell = widget.model!.contentFactory.createMarkdownCell(
+          undefined,
+          tmp
+        );
         widget.model!.cells.push(cell);
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         expect(child.rendered).toBe(true);
@@ -755,15 +782,13 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should set the active cell index of the notebook', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
         expect(widget.activeCellIndex).toBe(1);
       });
 
       it('should clamp the index to the bounds of the notebook cells', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = -2;
         expect(widget.activeCellIndex).toBe(0);
         widget.activeCellIndex = 100;
@@ -771,9 +796,8 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should emit the `stateChanged` signal', () => {
-        const widget = createActiveWidget();
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         let called = false;
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         widget.stateChanged.connect((sender, args) => {
           expect(sender).toBe(widget);
           expect(args.name).toBe('activeCellIndex');
@@ -786,9 +810,8 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should be a no-op if the value does not change', () => {
-        const widget = createActiveWidget();
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         let called = false;
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         widget.stateChanged.connect(() => {
           called = true;
         });
@@ -797,8 +820,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should post an update request', async () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         await framePromise();
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onUpdateRequest'])
@@ -807,8 +829,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should update the active cell if necessary', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
         expect(widget.activeCell).toBe(widget.widgets[1]);
       });
@@ -823,16 +844,14 @@ describe('@jupyter/notebook', () => {
 
     describe('#select()', () => {
       it('should select a cell widget', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         const cell = widget.widgets[0];
         widget.select(cell);
         expect(widget.isSelected(cell)).toBe(true);
       });
 
       it('should allow multiple widgets to be selected', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.widgets.forEach(cell => {
           widget.select(cell);
         });
@@ -843,8 +862,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#deselect()', () => {
       it('should deselect a cell', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         for (let i = 0; i < widget.widgets.length; i++) {
           const cell = widget.widgets[i];
           widget.select(cell);
@@ -855,8 +873,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should const the active cell be deselected', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         const cell = widget.activeCell!;
         widget.select(cell);
         expect(widget.isSelected(cell)).toBe(true);
@@ -867,16 +884,14 @@ describe('@jupyter/notebook', () => {
 
     describe('#isSelected()', () => {
       it('should get whether the cell is selected', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.select(widget.widgets[0]);
         widget.select(widget.widgets[2]);
         expect(selected(widget)).toEqual([0, 2]);
       });
 
       it('reports selection whether or not cell is active', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         expect(selected(widget)).toEqual([]);
         widget.select(widget.activeCell!);
         expect(selected(widget)).toEqual([widget.activeCellIndex]);
@@ -885,8 +900,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#deselectAll()', () => {
       it('should deselect all cells', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.select(widget.widgets[0]);
         widget.select(widget.widgets[2]);
         widget.select(widget.widgets[3]);
@@ -1000,8 +1014,7 @@ describe('@jupyter/notebook', () => {
       ];
 
       it('should work in each permutation of anchor, head, and index', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         expect(() => {
           permutations.forEach(p => {
@@ -1011,8 +1024,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should work when we only have an active cell, with no existing selection', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         expect(() => {
           permutations.forEach(p => {
@@ -1024,8 +1036,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should clip when the index is greater than the last index', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         expect(() => {
           permutations.forEach(p => {
@@ -1035,8 +1046,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should clip when the index is greater than the last index with no existing selection', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         expect(() => {
           permutations.forEach(p => {
@@ -1054,8 +1064,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should clip when the index is less than 0', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         expect(() => {
           permutations.forEach(p => {
@@ -1065,8 +1074,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should clip when the index is less than 0 with no existing selection', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         expect(() => {
           permutations.forEach(p => {
@@ -1097,8 +1105,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#getContiguousSelection()', () => {
       it('throws an error when the selection is not contiguous', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[1]);
         widget.select(widget.widgets[3]);
@@ -1110,8 +1117,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('throws an error if the active cell is not at an endpoint', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[1]);
         widget.select(widget.widgets[2]);
@@ -1131,8 +1137,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('returns null values if there is no selection', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         const selection = widget.getContiguousSelection();
         expect(selection).toEqual({ head: null, anchor: null });
@@ -1148,8 +1153,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('works if head is before the anchor', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[1]);
         widget.select(widget.widgets[2]);
@@ -1161,8 +1165,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('works if head is after the anchor', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[1]);
         widget.select(widget.widgets[2]);
@@ -1174,8 +1177,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('works if head and anchor are the same', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[3]);
         widget.activeCellIndex = 3;
@@ -1189,8 +1191,7 @@ describe('@jupyter/notebook', () => {
       let widget: LogNotebook;
 
       beforeEach(async () => {
-        widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        widget = createActiveWidget(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await framePromise();
       });
@@ -1215,8 +1216,14 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should preserve "command" mode if in a markdown cell', () => {
-          const cell = widget.model!.contentFactory.createMarkdownCell({});
-          cell.value.text = '# Hello'; // Should be rendered with content.
+          const tmp = {
+            ...MarkdownCellModel.createStandaloneModel().toJSON(),
+            source: '# Hello' // Should be rendered with content.
+          };
+          const cell = widget.model!.contentFactory.createMarkdownCell(
+            undefined,
+            tmp
+          );
           widget.model!.cells.push(cell);
           const count = widget.widgets.length;
           const child = widget.widgets[count - 1] as MarkdownCell;
@@ -1269,9 +1276,15 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should leave a markdown cell rendered', () => {
-          const code = widget.model!.contentFactory.createCodeCell({});
-          const md = widget.model!.contentFactory.createMarkdownCell({});
-          md.value.text = '# Hello'; // Should be rendered with content.
+          const tmp = {
+            ...MarkdownCellModel.createStandaloneModel().toJSON(),
+            source: '# Hello' // Should be rendered with content.
+          };
+          const code = widget.model!.contentFactory.createCodeCell();
+          const md = widget.model!.contentFactory.createMarkdownCell(
+            undefined,
+            tmp
+          );
           widget.model!.cells.push(code);
           widget.model!.cells.push(md);
           const count = widget.widgets.length;
@@ -1289,8 +1302,8 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should remove selection and switch to command mode', () => {
-          const code = widget.model!.contentFactory.createCodeCell({});
-          const md = widget.model!.contentFactory.createMarkdownCell({});
+          const code = widget.model!.contentFactory.createCodeCell();
+          const md = widget.model!.contentFactory.createMarkdownCell();
           widget.model!.cells.push(code);
           widget.model!.cells.push(md);
           const count = widget.widgets.length;
@@ -1308,8 +1321,8 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should have no effect on shift right click', () => {
-          const code = widget.model!.contentFactory.createCodeCell({});
-          const md = widget.model!.contentFactory.createMarkdownCell({});
+          const code = widget.model!.contentFactory.createCodeCell();
+          const md = widget.model!.contentFactory.createMarkdownCell();
           widget.model!.cells.push(code);
           widget.model!.cells.push(md);
           const count = widget.widgets.length;
@@ -1329,8 +1342,14 @@ describe('@jupyter/notebook', () => {
 
       describe('dblclick', () => {
         it('should unrender a markdown cell', () => {
-          const cell = widget.model!.contentFactory.createMarkdownCell({});
-          cell.value.text = '# Hello'; // Should be rendered with content.
+          const tmp = {
+            ...MarkdownCellModel.createStandaloneModel().toJSON(),
+            source: '# Hello' // Should be rendered with content.
+          };
+          const cell = widget.model!.contentFactory.createMarkdownCell(
+            undefined,
+            tmp
+          );
           widget.model!.cells.push(cell);
           const child = widget.widgets[
             widget.widgets.length - 1
@@ -1389,8 +1408,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#onAfterAttach()', () => {
       it('should add event listeners', async () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         const child = widget.widgets[0];
         await framePromise();
@@ -1407,8 +1425,7 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should post an update request', async () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await framePromise();
         expect(widget.methods).toEqual(
@@ -1424,8 +1441,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#onBeforeDetach()', () => {
       it('should remove event listeners', async () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         const child = widget.widgets[0];
         await framePromise();
@@ -1464,8 +1480,7 @@ describe('@jupyter/notebook', () => {
       let widget: LogNotebook;
 
       beforeEach(async () => {
-        widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        widget = createActiveWidget(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await framePromise();
       });
@@ -1511,8 +1526,7 @@ describe('@jupyter/notebook', () => {
 
     describe('#onCellInserted()', () => {
       it('should post an `update-request', async () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onCellInserted'])
         );
@@ -1523,24 +1537,21 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should update the active cell if necessary', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         expect(widget.activeCell).toBe(widget.widgets[0]);
       });
 
       it('should keep the currently active cell active', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
-        const cell = widget.model!.contentFactory.createCodeCell({});
+        const cell = widget.model!.contentFactory.createCodeCell();
         widget.model!.cells.insert(1, cell);
         expect(widget.activeCell).toBe(widget.widgets[2]);
       });
 
       describe('`edgeRequested` signal', () => {
         it('should activate the previous cell if top is requested', () => {
-          const widget = createActiveWidget();
-          widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+          const widget = createActiveWidget(utils.DEFAULT_CONTENT);
           widget.activeCellIndex = 1;
           const child = widget.widgets[widget.activeCellIndex];
           (child.editor.edgeRequested as any).emit('top');
@@ -1548,8 +1559,7 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should activate the next cell if bottom is requested', () => {
-          const widget = createActiveWidget();
-          widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+          const widget = createActiveWidget(utils.DEFAULT_CONTENT);
           const child = widget.widgets[widget.activeCellIndex];
           (child.editor.edgeRequested as any).emit('bottom');
           expect(widget.activeCellIndex).toBe(1);
@@ -1601,15 +1611,13 @@ describe('@jupyter/notebook', () => {
       });
 
       it('should update the active cell if necessary', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.model!.cells.remove(0);
         expect(widget.activeCell).toBe(widget.widgets[0]);
       });
 
       it('should keep the currently active cell active', () => {
-        const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        const widget = createActiveWidget(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = 2;
         widget.model!.cells.remove(1);
         expect(widget.activeCell).toBe(widget.widgets[1]);
@@ -1620,9 +1628,10 @@ describe('@jupyter/notebook', () => {
     describe('#virtualNotebook()', () => {
       it('should render the last cell widget', () => {
         const model = new NotebookModel();
+        model.fromJSON(utils.DEFAULT_CONTENT);
+        model.initialize();
         const widget = new StaticNotebook(options);
         widget.model = model;
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         const cell = widget.widgets[5];
         expect(
           cell.inputArea.editorWidget.model.value.text.startsWith(

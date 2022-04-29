@@ -3,7 +3,10 @@
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 import { OutputModel } from '@jupyterlab/rendermime';
+import { SharedDoc } from '@jupyterlab/shared-models';
 import { NBTestUtils } from '@jupyterlab/testutils';
+import { each } from '@lumino/algorithm';
+import { JSONObject } from '@lumino/coreutils';
 
 describe('outputarea/model', () => {
   let model: OutputAreaModel;
@@ -24,10 +27,14 @@ describe('outputarea/model', () => {
 
       it('should accept options', () => {
         const contentFactory = new OutputAreaModel.ContentFactory();
+        const sharedList = new SharedDoc().createList<JSONObject>('outputs');
+        each(NBTestUtils.DEFAULT_OUTPUTS, value => {
+          sharedList.push(value as JSONObject);
+        });
         model = new OutputAreaModel({
-          values: NBTestUtils.DEFAULT_OUTPUTS,
           contentFactory,
-          trusted: true
+          trusted: true,
+          sharedList
         });
         expect(model.contentFactory).toBe(contentFactory);
         expect(model.trusted).toBe(true);
@@ -36,16 +43,19 @@ describe('outputarea/model', () => {
 
     describe('#changed', () => {
       it('should be emitted when the model changes', () => {
+        const output = {
+          name: 'stdout',
+          output_type: 'stream',
+          text: 'hello world'
+        };
         let called = false;
         model.changed.connect((sender, args) => {
           expect(sender).toBe(model);
-          expect(args.type).toBe('add');
-          expect(args.oldIndex).toBe(-1);
-          expect(args.newIndex).toBe(0);
-          expect(args.oldValues.length).toBe(0);
+          const tmp = args.delta[0].insert![0].toJSON();
+          expect(tmp).toEqual(output);
           called = true;
         });
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(output);
         expect(called).toBe(true);
       });
     });
@@ -111,7 +121,6 @@ describe('outputarea/model', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         model.dispose();
         expect(model.isDisposed).toBe(true);
-        expect(model.length).toBe(0);
       });
 
       it('should be safe to call more than once', () => {
@@ -190,9 +199,9 @@ describe('outputarea/model', () => {
 
     describe('#set', () => {
       it('should disconnect the replaced output', () => {
-        const model = new OutputAreaModel({
-          values: [NBTestUtils.DEFAULT_OUTPUTS[0]]
-        });
+        const sharedList = new SharedDoc().createList<JSONObject>('outputs');
+        sharedList.push(NBTestUtils.DEFAULT_OUTPUTS[0] as JSONObject);
+        const model = new OutputAreaModel({ sharedList });
 
         const output = model.get(0);
         let called = false;

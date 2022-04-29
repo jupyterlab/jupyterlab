@@ -3,8 +3,9 @@
 
 import { JSONEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
-import { ObservableJSON } from '@jupyterlab/observables';
+import { SharedDoc } from '@jupyterlab/shared-models';
 import { framePromise } from '@jupyterlab/testutils';
+import { JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -99,7 +100,8 @@ describe('codeeditor', () => {
       });
 
       it('should be settable', () => {
-        const source = new ObservableJSON();
+        const sharedDoc = new SharedDoc();
+        const source = sharedDoc.createMap<JSONValue>('source');
         editor.source = source;
         expect(editor.source).toBe(source);
       });
@@ -107,7 +109,8 @@ describe('codeeditor', () => {
       it('should update the text area value', () => {
         const model = editor.model;
         expect(model.value.text).toBe('No data!');
-        editor.source = new ObservableJSON();
+        const sharedDoc = new SharedDoc();
+        editor.source = sharedDoc.createMap<JSONValue>('source');
         expect(model.value.text).toBe('{}');
       });
     });
@@ -121,7 +124,8 @@ describe('codeeditor', () => {
       });
 
       it('should be dirty if the value changes while focused', () => {
-        editor.source = new ObservableJSON();
+        const sharedDoc = new SharedDoc();
+        editor.source = sharedDoc.createMap<JSONValue>('source');
         Widget.attach(editor, document.body);
         editor.editor.focus();
         expect(editor.isDirty).toBe(false);
@@ -130,7 +134,8 @@ describe('codeeditor', () => {
       });
 
       it('should not be set if not focused', () => {
-        editor.source = new ObservableJSON();
+        const sharedDoc = new SharedDoc();
+        editor.source = sharedDoc.createMap<JSONValue>('source');
         Widget.attach(editor, document.body);
         expect(editor.isDirty).toBe(false);
         editor.source.set('foo', 1);
@@ -174,7 +179,8 @@ describe('codeeditor', () => {
         });
 
         it('should revert to current data if there was no change', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.editor.focus();
           editor.source.set('foo', 1);
           const model = editor.model;
@@ -184,7 +190,8 @@ describe('codeeditor', () => {
         });
 
         it('should not revert to current data if there was a change', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           const model = editor.model;
@@ -203,14 +210,16 @@ describe('codeeditor', () => {
         });
 
         it('should revert the current data', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.model.value.text = 'foo';
           simulate(editor.revertButtonNode, 'click');
           expect(editor.model.value.text).toBe('{}');
         });
 
         it('should handle programmatic changes', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           simulate(editor.revertButtonNode, 'click');
@@ -223,7 +232,8 @@ describe('codeeditor', () => {
         });
 
         it('should bail if it is not valid JSON', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
@@ -231,7 +241,8 @@ describe('codeeditor', () => {
         });
 
         it('should override a key that was set programmatically', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.model.value.text = '{"foo": 2}';
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
@@ -239,7 +250,8 @@ describe('codeeditor', () => {
         });
 
         it('should allow a programmatic key to update', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo":1, "bar": 2}';
@@ -250,7 +262,8 @@ describe('codeeditor', () => {
         });
 
         it('should allow a key to be added by the user', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo":1, "bar": 2, "baz": 3}';
@@ -261,7 +274,8 @@ describe('codeeditor', () => {
         });
 
         it('should allow a key to be removed by the user', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 1}';
@@ -270,7 +284,8 @@ describe('codeeditor', () => {
         });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 1, "bar": 3}';
@@ -280,7 +295,8 @@ describe('codeeditor', () => {
         });
 
         it('should keep a key that was removed programmatically that was changed by the user', () => {
-          editor.source = new ObservableJSON();
+          const sharedDoc = new SharedDoc();
+          editor.source = sharedDoc.createMap<JSONValue>('source');
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 2, "bar": 3}';
@@ -335,14 +351,16 @@ describe('codeeditor', () => {
 
     describe('#source.changed', () => {
       it('should update the value', () => {
-        editor.source = new ObservableJSON();
+        const sharedDoc = new SharedDoc();
+        editor.source = sharedDoc.createMap<JSONValue>('source');
         editor.source.set('foo', 1);
         expect(editor.model.value.text).toBe('{\n    "foo": 1\n}');
       });
 
       it('should bail if the input is dirty', () => {
         Widget.attach(editor, document.body);
-        editor.source = new ObservableJSON();
+        const sharedDoc = new SharedDoc();
+        editor.source = sharedDoc.createMap<JSONValue>('source');
         editor.model.value.text = 'ha';
         editor.source.set('foo', 2);
         expect(editor.model.value.text).toBe('ha');
@@ -351,7 +369,8 @@ describe('codeeditor', () => {
       it('should bail if the input is focused', () => {
         Widget.attach(editor, document.body);
         editor.model.value.text = '{}';
-        editor.source = new ObservableJSON();
+        const sharedDoc = new SharedDoc();
+        editor.source = sharedDoc.createMap<JSONValue>('source');
         editor.editor.focus();
         editor.source.set('foo', 2);
         expect(editor.model.value.text).toBe('{}');

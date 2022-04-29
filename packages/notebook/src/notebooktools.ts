@@ -9,7 +9,7 @@ import {
 } from '@jupyterlab/codeeditor';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { ISharedMap, SharedDoc } from '@jupyterlab/shared-models';
+import { ISharedMap } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -510,8 +510,7 @@ export namespace NotebookTools {
     }
 
     private _model = new CodeEditor.Model({
-      isDocument: true,
-      sharedDoc: new SharedDoc()
+      isDocument: true
     });
     private _cellModel: CodeEditor.IModel | null;
   }

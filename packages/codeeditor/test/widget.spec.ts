@@ -65,7 +65,7 @@ describe('CodeEditorWrapper', () => {
   };
 
   beforeEach(() => {
-    const model = new CodeEditor.Model();
+    const model = new CodeEditor.Model({ isDocument: true });
     widget = new LogWidget({ factory: editorFactory, model });
   });
 

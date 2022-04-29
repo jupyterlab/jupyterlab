@@ -278,6 +278,7 @@ describe('docregistry/default', () => {
     describe('#constructor()', () => {
       it('should create a new document model', () => {
         const model = new DocumentModel();
+        model.initialize();
         expect(model).toBeInstanceOf(DocumentModel);
       });
 
@@ -290,6 +291,7 @@ describe('docregistry/default', () => {
     describe('#isDisposed', () => {
       it('should get whether the model has been disposed', () => {
         const model = new DocumentModel();
+        model.initialize();
         expect(model.isDisposed).toBe(false);
         model.dispose();
         expect(model.isDisposed).toBe(true);
@@ -299,6 +301,7 @@ describe('docregistry/default', () => {
     describe('#contentChanged', () => {
       it('should be emitted when the content of the model changes', () => {
         const model = new DocumentModel();
+        model.initialize();
         let called = false;
         model.contentChanged.connect((sender, args) => {
           expect(sender).toBe(model);
@@ -311,6 +314,7 @@ describe('docregistry/default', () => {
 
       it('should not be emitted if the content does not change', () => {
         const model = new DocumentModel();
+        model.initialize();
         let called = false;
         model.contentChanged.connect(() => {
           called = true;
@@ -323,6 +327,7 @@ describe('docregistry/default', () => {
     describe('#stateChanged', () => {
       it('should be emitted when the state of the model changes', () => {
         const model = new DocumentModel();
+        model.initialize();
         let called = false;
         model.stateChanged.connect((sender, args) => {
           expect(sender).toBe(model);
@@ -337,23 +342,28 @@ describe('docregistry/default', () => {
 
       it('should not be emitted if the state does not change', () => {
         const model = new DocumentModel();
+        model.initialize();
         let called = false;
         model.stateChanged.connect(() => {
           called = true;
         });
+        expect(model.dirty).toBe(false);
         model.dirty = false;
         expect(called).toBe(false);
+        expect(model.dirty).toBe(false);
       });
     });
 
     describe('#dirty', () => {
       it('should get the dirty state of the document', () => {
         const model = new DocumentModel();
+        model.initialize();
         expect(model.dirty).toBe(false);
       });
 
       it('should emit `stateChanged` when changed', () => {
         const model = new DocumentModel();
+        model.initialize();
         let called = false;
         model.stateChanged.connect((sender, args) => {
           expect(sender).toBe(model);
@@ -362,29 +372,37 @@ describe('docregistry/default', () => {
           expect(args.newValue).toBe(true);
           called = true;
         });
+        expect(model.dirty).toBe(false);
         model.dirty = true;
         expect(called).toBe(true);
+        expect(model.dirty).toBe(true);
       });
 
       it('should not emit `stateChanged` when not changed', () => {
+        // Not possible anymore
         const model = new DocumentModel();
+        model.initialize();
         let called = false;
         model.stateChanged.connect(() => {
           called = true;
         });
+        expect(model.dirty).toBe(false);
         model.dirty = false;
         expect(called).toBe(false);
+        expect(model.dirty).toBe(false);
       });
     });
 
     describe('#readOnly', () => {
       it('should get the read only state of the document', () => {
         const model = new DocumentModel();
+        model.initialize();
         expect(model.readOnly).toBe(false);
       });
 
       it('should emit `stateChanged` when changed', () => {
         const model = new DocumentModel();
+        model.initialize();
         let called = false;
         model.stateChanged.connect((sender, args) => {
           expect(sender).toBe(model);
@@ -399,6 +417,7 @@ describe('docregistry/default', () => {
 
       it('should not emit `stateChanged` when not changed', () => {
         const model = new DocumentModel();
+        model.initialize();
         let called = false;
         model.stateChanged.connect(() => {
           called = true;
@@ -411,6 +430,7 @@ describe('docregistry/default', () => {
     describe('#defaultKernelName', () => {
       it('should get the default kernel name of the document', () => {
         const model = new DocumentModel();
+        model.initialize();
         expect(model.defaultKernelName).toBe('');
       });
     });
@@ -418,6 +438,7 @@ describe('docregistry/default', () => {
     describe('defaultKernelLanguage', () => {
       it('should get the default kernel language of the document', () => {
         const model = new DocumentModel();
+        model.initialize();
         expect(model.defaultKernelLanguage).toBe('');
       });
 
@@ -430,12 +451,14 @@ describe('docregistry/default', () => {
     describe('#dispose()', () => {
       it('should dispose of the resources held by the document manager', () => {
         const model = new DocumentModel();
+        model.initialize();
         model.dispose();
         expect(model.isDisposed).toBe(true);
       });
 
       it('should be safe to call more than once', () => {
         const model = new DocumentModel();
+        model.initialize();
         model.dispose();
         model.dispose();
         expect(model.isDisposed).toBe(true);
@@ -445,6 +468,7 @@ describe('docregistry/default', () => {
     describe('#toString()', () => {
       it('should serialize the model to a string', () => {
         const model = new DocumentModel();
+        model.initialize();
         expect(model.toString()).toBe('');
       });
     });
@@ -452,6 +476,7 @@ describe('docregistry/default', () => {
     describe('#fromString()', () => {
       it('should deserialize the model from a string', () => {
         const model = new DocumentModel();
+        model.initialize();
         model.fromString('foo');
         expect(model.toString()).toBe('foo');
       });
@@ -460,6 +485,7 @@ describe('docregistry/default', () => {
     describe('#toJSON()', () => {
       it('should serialize the model to JSON', () => {
         const model = new DocumentModel();
+        model.initialize();
         const data = { foo: 1 };
         model.fromJSON(data);
         expect(model.toJSON()).toEqual(data);
@@ -469,6 +495,7 @@ describe('docregistry/default', () => {
     describe('#fromJSON()', () => {
       it('should deserialize the model from JSON', () => {
         const model = new DocumentModel();
+        model.initialize();
         const data: null = null;
         model.fromJSON(data);
         expect(model.toString()).toBe('null');
