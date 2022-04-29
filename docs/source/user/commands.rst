@@ -8,7 +8,7 @@ linked to menu entries, keyboard shortcuts, the launcher and the command palette
 
 A command has an unique id that is used for referencing it or executing it. It could
 also require input arguments. Those arguments are maybe different in the command palette
-and the keyboard shortcuts for example. That can explain varying behavior depending on the 
+and the keyboard shortcuts for example. That can explain varying behavior depending on the
 source of a command trigger.
 
 Command Palette

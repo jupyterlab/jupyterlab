@@ -151,9 +151,7 @@ def copy_code_files(temp_folder: Path):
         if file == "packages/settingregistry/src/plugin-schema.json":
             schema = json.loads(Path(target).read_text())
 
-            partial_schema = ChainMap(
-                schema.get("definitions", {}), schema.get("properties", {})
-            )
+            partial_schema = ChainMap(schema.get("definitions", {}), schema.get("properties", {}))
             for key in partial_schema:
                 fragment = target.parent / f"{key}.json"
                 with fragment.open("w") as f:
@@ -209,9 +207,7 @@ def document_commands_list(temp_folder: Path) -> None:
                 command[key] = command[key].replace("\n", " ")
         shortcuts = command.get("shortcuts", [])
         command["shortcuts"] = (
-            "<kbd>" + "</kbd>, <kbd>".join(shortcuts) + "</kbd>"
-            if len(shortcuts)
-            else ""
+            "<kbd>" + "</kbd>, <kbd>".join(shortcuts) + "</kbd>" if len(shortcuts) else ""
         )
 
         template += "| `{id}` | {label} | {shortcuts} |\n".format(**command)
