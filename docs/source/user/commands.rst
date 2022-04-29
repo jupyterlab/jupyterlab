@@ -36,5 +36,9 @@ Commands List
 The table below display the list of commands and the associated keyboard shortcuts. The
 unique identifier is useful if you want to customize the menus, the toolbars or the keyboard shortcuts.
 
+.. note::
+
+    On Mac OS, the `Ctrl` key should be replaced by `Cmd`.
+
 .. include:: commands_list.md
    :parser: myst_parser.sphinx_

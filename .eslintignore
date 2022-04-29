@@ -23,7 +23,6 @@ jupyterlab/chrome-test.js
 jupyterlab/geckodriver
 packages/extensionmanager-extension/examples/listings
 packages/nbconvert-css/raw.js
-packages/services/dist
 packages/ui-components/src/icon/iconimports.ts
 jupyterlab/staging/yarn.js
 jupyterlab/staging/index.js
