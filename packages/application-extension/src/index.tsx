@@ -366,6 +366,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.setMode, {
+        label: args =>
+          args['mode']
+            ? trans.__('Set %1 mode.', args['mode'])
+            : trans.__('Set the layout `mode`.'),
+        caption: trans.__(
+          'The layout `mode` can be "single-document" or "multiple-document".'
+        ),
         isVisible: args => {
           const mode = args['mode'] as string;
           return mode === 'single-document' || mode === 'multiple-document';

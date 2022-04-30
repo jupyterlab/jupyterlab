@@ -19,7 +19,11 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { TranslationBundle } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import {
   consoleIcon,
   copyIcon,
@@ -867,9 +871,13 @@ export namespace Commands {
   export function addCompleterCommands(
     commands: CommandRegistry,
     editorTracker: IEditorTracker,
-    manager: ICompletionProviderManager
+    manager: ICompletionProviderManager,
+    translator: ITranslator | null
   ): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
     commands.addCommand(CommandIDs.invokeCompleter, {
+      label: trans.__('Display the completion helper.'),
       execute: () => {
         const id =
           editorTracker.currentWidget && editorTracker.currentWidget.id;
@@ -880,6 +888,7 @@ export namespace Commands {
     });
 
     commands.addCommand(CommandIDs.selectCompleter, {
+      label: trans.__('Select the completion suggestion.'),
       execute: () => {
         const id =
           editorTracker.currentWidget && editorTracker.currentWidget.id;

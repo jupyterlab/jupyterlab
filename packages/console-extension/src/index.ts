@@ -33,7 +33,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { consoleIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import {
@@ -524,6 +524,7 @@ async function activateConsole(
 
   let command = CommandIDs.open;
   commands.addCommand(command, {
+    label: trans.__('Open a console for the provided `path`.'),
     execute: (args: IOpenOptions) => {
       const path = args['path'];
       const widget = tracker.find(value => {
@@ -720,6 +721,7 @@ async function activateConsole(
   });
 
   commands.addCommand(CommandIDs.inject, {
+    label: trans.__('Inject some code in a console.'),
     execute: args => {
       const path = args['path'];
       tracker.find(widget => {
@@ -843,7 +845,9 @@ async function activateConsole(
 
   // Add the execute keystroke setting submenu.
   commands.addCommand(CommandIDs.interactionMode, {
-    label: args => runShortcutTitles[args['interactionMode'] as string] || '',
+    label: args =>
+      runShortcutTitles[args['interactionMode'] as string] ??
+      'Set the console interaction mode.',
     execute: async args => {
       const key = 'keyMap';
       try {
@@ -868,13 +872,17 @@ async function activateConsole(
 function activateConsoleCompleterService(
   app: JupyterFrontEnd,
   consoles: IConsoleTracker,
-  manager?: ICompletionProviderManager
+  manager: ICompletionProviderManager | null,
+  translator: ITranslator | null
 ): void {
   if (!manager) {
     return;
   }
 
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
+
   app.commands.addCommand(CommandIDs.invokeCompleter, {
+    label: trans.__('Display the completion helper.'),
     execute: () => {
       const id = consoles.currentWidget && consoles.currentWidget.id;
 
@@ -885,6 +893,7 @@ function activateConsoleCompleterService(
   });
 
   app.commands.addCommand(CommandIDs.selectCompleter, {
+    label: trans.__('Select the completion suggestion.'),
     execute: () => {
       const id = consoles.currentWidget && consoles.currentWidget.id;
 

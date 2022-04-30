@@ -520,6 +520,9 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.exportToFormat, {
       label: args => {
+        if (args.label === undefined) {
+          return trans.__('Save and Export Notebook to the given `format`.');
+        }
         const formatLabel = args['label'] as string;
         return args['isPalette']
           ? trans.__('Save and Export Notebook: %1', formatLabel)
@@ -764,7 +767,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:completer',
   requires: [INotebookTracker],
-  optional: [ICompletionProviderManager],
+  optional: [ICompletionProviderManager, ITranslator],
   activate: activateNotebookCompleterService,
   autoStart: true
 };
@@ -1611,12 +1614,16 @@ function activateNotebookHandler(
 function activateNotebookCompleterService(
   app: JupyterFrontEnd,
   notebooks: INotebookTracker,
-  manager?: ICompletionProviderManager
+  manager: ICompletionProviderManager | null,
+  translator: ITranslator | null
 ): void {
   if (!manager) {
     return;
   }
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
+
   app.commands.addCommand(CommandIDs.invokeCompleter, {
+    label: trans.__('Display the completion helper.'),
     execute: args => {
       const panel = notebooks.currentWidget;
       if (panel && panel.content.activeCell?.model.type === 'code') {
@@ -1626,6 +1633,7 @@ function activateNotebookCompleterService(
   });
 
   app.commands.addCommand(CommandIDs.selectCompleter, {
+    label: trans.__('Select the completion suggestion.'),
     execute: () => {
       const id = notebooks.currentWidget && notebooks.currentWidget.id;
 
