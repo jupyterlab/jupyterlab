@@ -1,4 +1,5 @@
 from typing import Dict, List, Union
+from uuid import uuid4
 
 import y_py as Y
 from ypy_websocket.websocket_server import YDoc
@@ -96,6 +97,19 @@ class YNotebook(YBaseDoc):
     @source.setter
     def source(self, value):
         cast_all(value, int, float)
+        if not value["cells"]:
+            value["cells"] = [
+                {
+                    "cell_type": "code",
+                    "execution_count": None,
+                    "metadata": {},
+                    "outputs": [],
+                    "source": "",
+                    "id": str(uuid4()),
+                }
+            ]
+        # workaround until ypy is fixed: https://github.com/davidbrochart/ypy-websocket/pull/9
+        ytexts_to_clear = []
         with self._ydoc.begin_transaction() as t:
             # clear document
             cells_len = len(self._ycells)
@@ -109,16 +123,26 @@ class YNotebook(YBaseDoc):
             # initialize document
             ycells = []
             for cell in value["cells"]:
-                cell["source"] = Y.YText(cell["source"])
+                cell_source = cell["source"]
+                if cell_source:
+                    ytext = Y.YText(cell_source)
+                else:
+                    ytext = Y.YText(" ")
+                    ytexts_to_clear.append(ytext)
+                cell["source"] = ytext
                 if "outputs" in cell:
                     cell["outputs"] = Y.YArray(cell["outputs"])
                 ycell = Y.YMap(cell)
                 ycells.append(ycell)
 
-            self._ycells.push(t, ycells)
+            if ycells:
+                self._ycells.push(t, ycells)
             self._ymeta.set(t, "metadata", value["metadata"])
             self._ystate.set(t, "nbformat", value["nbformat"])
             self._ystate.set(t, "nbformatMinor", value["nbformat_minor"])
+        with self._ydoc.begin_transaction() as t:
+            for ytext in ytexts_to_clear:
+                ytext.delete(t, 0, 1)
 
     def observe(self, callback):
         self.unobserve()
