@@ -22,7 +22,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { PanelLayout, Widget } from '@lumino/widgets';
+import { Layout, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { ISessionContext, sessionContextDialogs } from '../sessioncontext';
 import { translateKernelStatuses } from '../kernelstatuses';
@@ -188,10 +188,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   /**
    * Construct a new toolbar widget.
    */
-  constructor() {
+  constructor(options: Toolbar.IOptions = {}) {
     super();
     this.addClass(TOOLBAR_CLASS);
-    this.layout = new ToolbarLayout();
+    this.layout = options.layout ?? new ToolbarLayout();
   }
 
   /**
@@ -570,6 +570,16 @@ export class ReactiveToolbar extends Toolbar<Widget> {
  * The namespace for Toolbar class statics.
  */
 export namespace Toolbar {
+  /**
+   * The options used to create a toolbar.
+   */
+  export interface IOptions {
+    /**
+     * Toolbar widget layout.
+     */
+    layout?: Layout;
+  }
+
   /**
    * Widget with associated toolbar
    */
