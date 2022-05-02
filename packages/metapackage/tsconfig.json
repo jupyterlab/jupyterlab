@@ -49,6 +49,9 @@
       "path": "../comments"
     },
     {
+      "path": "../comments-extension"
+    },
+    {
       "path": "../completer"
     },
     {
