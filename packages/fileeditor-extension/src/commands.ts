@@ -1228,7 +1228,7 @@ export namespace Commands {
         );
       }
 
-      const widget = CodeViewerWidget.getCodeViewer({
+      const widget = CodeViewerWidget.createCodeViewer({
         factory,
         content: args.content,
         mimeType: mimetype
@@ -1252,6 +1252,7 @@ export namespace Commands {
     };
 
     app.commands.addCommand(CommandIDs.openCodeViewer, {
+      label: trans.__('Open Code Viewer'),
       execute: (args: any) => {
         return openCodeViewer(args);
       }

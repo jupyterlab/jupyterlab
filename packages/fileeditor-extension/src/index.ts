@@ -360,9 +360,9 @@ function activate(
     void restorer.restore(codeViewerTracker, {
       command: CommandIDs.openCodeViewer,
       args: widget => ({
-        content: widget.content.getContent(),
+        content: widget.content.content,
         label: widget.content.title.label,
-        mimeType: widget.content.getMimeType(),
+        mimeType: widget.content.mimeType,
         widgetId: widget.content.id
       }),
       name: widget => widget.content.id

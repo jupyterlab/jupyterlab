@@ -24,7 +24,7 @@ export class CodeViewerWidget extends Widget {
     layout.addWidget(editorWidget);
   }
 
-  static getCodeViewer(
+  static createCodeViewer(
     options: CodeViewerWidget.INoModelOptions
   ): CodeViewerWidget {
     const model = new CodeEditor.Model({
@@ -34,8 +34,13 @@ export class CodeViewerWidget extends Widget {
     return new CodeViewerWidget({ factory: options.factory, model });
   }
 
-  getContent = (): string => this.model.value.text;
-  getMimeType = (): string => this.model.mimeType;
+  get content(): string {
+    return this.model.value.text;
+  }
+
+  get mimeType(): string {
+    return this.model.mimeType;
+  }
 
   model: CodeEditor.IModel;
   editor: CodeEditor.IEditor;
