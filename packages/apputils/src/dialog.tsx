@@ -249,9 +249,7 @@ export class Dialog<T> extends Widget {
         this._primary = el as HTMLElement;
       }
     }
-    if (this._primary) {
-      this._primary.focus();
-    }
+    this._primary?.focus();
   }
 
   /**
@@ -394,9 +392,7 @@ export class Dialog<T> extends Widget {
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
       event.stopPropagation();
-      if (this._buttonNodes && this._buttonNodes[this._defaultButton]) {
-        this._buttonNodes[this._defaultButton].focus();
-      }
+      this._buttonNodes[this._defaultButton]?.focus();
     }
   }
 
