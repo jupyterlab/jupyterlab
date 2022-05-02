@@ -10,7 +10,8 @@ import {
   classes,
   FilterBox,
   LabIcon,
-  settingsIcon
+  settingsIcon,
+  updateFilterFunction
 } from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
 import { PartialJSONObject } from '@lumino/coreutils';
@@ -53,10 +54,11 @@ export class PluginList extends ReactWidget {
       this.update();
     }, this);
     this.mapPlugins = this.mapPlugins.bind(this);
-    this._filter = (item: ISettingRegistry.IPlugin) => null;
     this.setFilter = this.setFilter.bind(this);
+    this.setFilter(updateFilterFunction(options.query ?? '', false, false));
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
+    this._query = options.query;
 
     this._allPlugins = PluginList.sortPlugins(this.registry).filter(plugin => {
       const { schema } = plugin;
@@ -83,6 +85,7 @@ export class PluginList extends ReactWidget {
         )) as Settings;
         this._settings[plugin.id] = pluginSettings;
       }
+      this.update();
     };
     void loadSettings();
 
@@ -116,6 +119,10 @@ export class PluginList extends ReactWidget {
       }
     }
     return false;
+  }
+
+  get filter(): (item: ISettingRegistry.IPlugin) => string[] | null {
+    return this._filter;
   }
 
   /**
@@ -431,6 +438,7 @@ export class PluginList extends ReactWidget {
           placeholder={trans.__('Search…')}
           forceRefresh={false}
           caseSensitive={false}
+          initialQuery={this._query}
         />
         {modifiedItems.length > 0 && (
           <div>
@@ -502,6 +510,11 @@ export namespace PluginList {
      * The setting registry for the plugin list.
      */
     translator?: ITranslator;
+
+    /**
+     * An optional initial query so the plugin list can filter on start.
+     */
+    query?: string;
   }
 
   /**

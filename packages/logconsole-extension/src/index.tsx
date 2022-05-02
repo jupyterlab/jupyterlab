@@ -233,7 +233,9 @@ function activateLogConsole(
     },
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
     label: args =>
-      trans.__('Set Log Level to %1', toTitleCase(args.level as string))
+      args['level']
+        ? trans.__('Set Log Level to %1', toTitleCase(args.level as string))
+        : trans.__('Set log level to `level`.')
   });
 
   if (palette) {

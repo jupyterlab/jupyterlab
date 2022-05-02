@@ -439,7 +439,9 @@ function activateEditorCommands(
   });
 
   commands.addCommand(CommandIDs.changeMode, {
-    label: args => args['name'] as string,
+    label: args =>
+      (args['name'] as string) ??
+      trans.__('Change editor mode to the provided `name`.'),
     execute: args => {
       const name = args['name'] as string;
       const widget = tracker.currentWidget;

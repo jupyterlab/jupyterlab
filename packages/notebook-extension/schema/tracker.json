@@ -624,18 +624,8 @@
       "selector": ".jp-Notebook:focus"
     },
     {
-      "command": "notebook:toggle-cell-line-numbers",
-      "keys": ["L"],
-      "selector": ".jp-Notebook:focus"
-    },
-    {
       "command": "notebook:undo-cell-action",
       "keys": ["Z"],
-      "selector": ".jp-Notebook:focus"
-    },
-    {
-      "command": "notebook:toggle-render-side-by-side",
-      "keys": ["Ctrl Shift R"],
       "selector": ".jp-Notebook:focus"
     },
     {

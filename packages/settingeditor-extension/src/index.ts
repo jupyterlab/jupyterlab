@@ -109,7 +109,7 @@ function activate(
   }
 
   commands.addCommand(CommandIDs.open, {
-    execute: async () => {
+    execute: async args => {
       if (tracker.currentWidget) {
         shell.activateById(tracker.currentWidget.id);
         return;
@@ -131,7 +131,8 @@ function activate(
             '@jupyterlab/mainmenu-extension:plugin'
           ],
           translator,
-          status
+          status,
+          query: args.query as string
         })
       });
 
@@ -156,7 +157,12 @@ function activate(
       void tracker.add(editor);
       shell.add(editor);
     },
-    label: trans.__('Settings Editor')
+    label: args => {
+      if (args.label) {
+        return args.label as string;
+      }
+      return trans.__('Settings Editor');
+    }
   });
 
   return tracker;

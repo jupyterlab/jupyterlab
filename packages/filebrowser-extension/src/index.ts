@@ -65,6 +65,7 @@ import { ContextMenu } from '@lumino/widgets';
 import { JSONObject } from '@lumino/coreutils';
 
 const FILE_BROWSER_FACTORY = 'FileBrowser';
+const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -133,6 +134,8 @@ namespace CommandIDs {
   export const search = 'filebrowser:search';
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
+
+  export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 }
 
 /**
@@ -144,7 +147,7 @@ const namespace = 'filebrowser';
  * The default file browser extension.
  */
 const browser: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/filebrowser-extension:browser',
+  id: FILE_BROWSER_PLUGIN_ID,
   requires: [IFileBrowserFactory, ITranslator],
   optional: [
     ILayoutRestorer,
@@ -210,41 +213,39 @@ const browser: JupyterFrontEndPlugin<void> = {
       }
 
       if (settingRegistry) {
-        void settingRegistry
-          .load('@jupyterlab/filebrowser-extension:browser')
-          .then(settings => {
-            /**
-             * File browser configuration.
-             */
-            const fileBrowserConfig = {
-              navigateToCurrentDirectory: false,
-              showLastModifiedColumn: true,
-              useFuzzyFilter: true,
-              showHiddenFiles: false
-            };
-            const fileBrowserModelConfig = {
-              filterDirectories: true
-            };
+        void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
+          /**
+           * File browser configuration.
+           */
+          const fileBrowserConfig = {
+            navigateToCurrentDirectory: false,
+            showLastModifiedColumn: true,
+            useFuzzyFilter: true,
+            showHiddenFiles: false,
+            showFileCheckboxes: false
+          };
+          const fileBrowserModelConfig = {
+            filterDirectories: true
+          };
 
-            function onSettingsChanged(
-              settings: ISettingRegistry.ISettings
-            ): void {
-              for (const key in fileBrowserConfig) {
-                const value = settings.get(key).composite as boolean;
-                fileBrowserConfig[
-                  key as keyof typeof fileBrowserConfig
-                ] = value;
-                browser[key as keyof typeof fileBrowserConfig] = value;
-              }
-
-              const value = settings.get('filterDirectories')
-                .composite as boolean;
-              fileBrowserModelConfig.filterDirectories = value;
-              browser.model.filterDirectories = value;
+          function onSettingsChanged(
+            settings: ISettingRegistry.ISettings
+          ): void {
+            let key: keyof typeof fileBrowserConfig;
+            for (key in fileBrowserConfig) {
+              const value = settings.get(key).composite as boolean;
+              fileBrowserConfig[key] = value;
+              browser[key] = value;
             }
-            settings.changed.connect(onSettingsChanged);
-            onSettingsChanged(settings);
-          });
+
+            const value = settings.get('filterDirectories')
+              .composite as boolean;
+            fileBrowserModelConfig.filterDirectories = value;
+            browser.model.filterDirectories = value;
+          }
+          settings.changed.connect(onSettingsChanged);
+          onSettingsChanged(settings);
+        });
       }
     });
   }
@@ -422,6 +423,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     labShell.add(browser, 'left', { rank: 100 });
 
     commands.addCommand(CommandIDs.showBrowser, {
+      label: trans.__('Open the file browser for the provided `path`.'),
       execute: args => {
         const path = (args.path as string) || '';
         const browserForPath = Private.getBrowserForPath(path, factory);
@@ -452,6 +454,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.hideBrowser, {
+      label: trans.__('Hide the file browser.'),
       execute: () => {
         const widget = tracker.currentWidget;
         if (widget && !widget.isHidden) {
@@ -840,6 +843,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.goToPath, {
+    label: trans.__('Update the file browser to display the provided `path`.'),
     execute: async args => {
       const path = (args.path as string) || '';
       const showBrowser = !(args?.dontShowBrowser ?? false);
@@ -1131,7 +1135,7 @@ function addCommands(
         const value = !browser.navigateToCurrentDirectory;
         const key = 'navigateToCurrentDirectory';
         return settingRegistry
-          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set navigateToCurrentDirectory setting`);
           });
@@ -1147,7 +1151,7 @@ function addCommands(
       const key = 'showLastModifiedColumn';
       if (settingRegistry) {
         return settingRegistry
-          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set showLastModifiedColumn setting`);
           });
@@ -1164,9 +1168,25 @@ function addCommands(
       const key = 'showHiddenFiles';
       if (settingRegistry) {
         return settingRegistry
-          .set('@jupyterlab/filebrowser-extension:browser', key, value)
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set showHiddenFiles setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleFileCheckboxes, {
+    label: trans.__('Show File Checkboxes'),
+    isToggled: () => browser.showFileCheckboxes,
+    execute: () => {
+      const value = !browser.showFileCheckboxes;
+      const key = 'showFileCheckboxes';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set showFileCheckboxes setting`);
           });
       }
     }
