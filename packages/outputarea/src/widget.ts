@@ -845,6 +845,27 @@ export interface IStdin extends Widget {
  * The default stdin widget.
  */
 export class Stdin extends Widget implements IStdin {
+  private static _history: string[] = [];
+
+  private static _historyAt(ix: number): string | undefined {
+    const len = Stdin._history.length;
+    // interpret negative ix exactly like Array.at
+    ix = ix < 0 ? len + ix : ix;
+
+    if (ix < len) {
+      return Stdin._history[ix];
+    }
+    // return undefined if ix is out of bounds
+  }
+
+  private static _historyPush(line: string): void {
+    Stdin._history.push(line);
+    if (Stdin._history.length > 1000) {
+      // truncate line history if it's too long
+      Stdin._history.shift();
+    }
+  }
+
   /**
    * Construct a new input widget.
    */
@@ -853,6 +874,7 @@ export class Stdin extends Widget implements IStdin {
       node: Private.createInputWidgetNode(options.prompt, options.password)
     });
     this.addClass(STDIN_CLASS);
+    this._history_ix = 0;
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
     this._future = options.future;
@@ -877,11 +899,32 @@ export class Stdin extends Widget implements IStdin {
    * called in response to events on the dock panel's node. It should
    * not be called directly by user code.
    */
-  handleEvent(event: Event): void {
+  handleEvent(event: KeyboardEvent): void {
     const input = this._input;
     if (event.type === 'keydown') {
-      if ((event as KeyboardEvent).keyCode === 13) {
-        // Enter
+      if (event.key === 'ArrowUp') {
+        const historyLine = Stdin._historyAt(this._history_ix - 1);
+        if (historyLine) {
+          if (this._history_ix === 0) {
+            this._value_cache = input.value;
+          }
+          input.value = historyLine;
+          --this._history_ix;
+        }
+      } else if (event.key === 'ArrowDown') {
+        if (this._history_ix === 0) {
+          // do nothing
+        } else if (this._history_ix === -1) {
+          input.value = this._value_cache;
+          ++this._history_ix;
+        } else {
+          const historyLine = Stdin._historyAt(this._history_ix + 1);
+          if (historyLine) {
+            input.value = historyLine;
+            ++this._history_ix;
+          }
+        }
+      } else if (event.key === 'Enter') {
         this._future.sendInputReply(
           {
             status: 'ok',
@@ -893,6 +936,7 @@ export class Stdin extends Widget implements IStdin {
           this._value += Array(input.value.length + 1).join('·');
         } else {
           this._value += input.value;
+          Stdin._historyPush(input.value);
         }
         this._promise.resolve(void 0);
       }
@@ -921,10 +965,12 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
+  private _history_ix: number;
   private _parent_header: KernelMessage.IInputReplyMsg['parent_header'];
   private _future: Kernel.IShellFuture;
   private _input: HTMLInputElement;
   private _value: string;
+  private _value_cache: string;
   private _promise = new PromiseDelegate<void>();
 }
 
