@@ -28,7 +28,8 @@ export class SettingsEditor extends SplitPanel {
     const list = (this._list = new PluginList({
       registry: options.registry,
       toSkip: options.toSkip,
-      translator: this.translator
+      translator: this.translator,
+      query: options.query
     }));
     this.addWidget(list);
     this.setDirtyState = this.setDirtyState.bind(this);
@@ -64,9 +65,9 @@ export class SettingsEditor extends SplitPanel {
             updateFilterSignal={this._list.updateFilterSignal}
             updateDirtyState={this.setDirtyState}
             translator={this.translator}
+            initialFilter={this._list.filter}
           />
         );
-
         this.addWidget(settingsPanel);
       })
       .catch(reason => {
@@ -198,5 +199,7 @@ export namespace SettingsEditor {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    query?: string;
   }
 }

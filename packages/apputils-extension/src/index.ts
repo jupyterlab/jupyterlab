@@ -410,6 +410,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     db.changed.connect(() => updateTabTitle(workspace, db, name));
 
     commands.addCommand(CommandIDs.loadState, {
+      label: trans.__('Load state for the current workspace.'),
       execute: async (args: IRouter.ILocation) => {
         // Since the command can be executed an arbitrary number of times, make
         // sure it is safe to call multiple times.
@@ -485,6 +486,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     });
 
     commands.addCommand(CommandIDs.resetOnLoad, {
+      label: trans.__('Reset state when loading for the workspace.'),
       execute: (args: IRouter.ILocation) => {
         const { hash, path, search } = args;
         const query = URLExt.queryStringToObject(search || '');

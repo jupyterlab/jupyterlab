@@ -61,6 +61,9 @@ bumped their major version (following semver convention):
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
   Consequently the ``IRendererFactory.createRenderer`` has a new option ``markdownParser``.
+- ``@jupyterlab/rendermime-interfaces`` from 3.x to 4.x
+  Remove ``IRenderMime.IRenderer.translator?`` attribute; the translator object is still passed to
+  the constructor if needed by the renderer factory.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
@@ -89,6 +92,9 @@ Extension Development Changes
   ``private`` package has now been removed in ``4.0``. If you were using this field to develop source extensions against
   a development build of JupyterLab, you should instead switch to the federated extensions system (via the ``--extensions-in-dev-mode`` flag)
   or to using the ``--splice-source`` option. See :ref:`prebuilt_dev_workflow` and :ref:`source_dev_workflow` for more information.
+- The ``webpack`` dependency in ``@jupyterlab/builder`` has been updated to ``5.72`` (or newer). Base rules have been updated to use the
+  `Asset Modules <https://webpack.js.org/guides/asset-modules>`_ instead of the previous ``file-loader``, ``raw-loader`` and ``url-loader``.
+  This might affect third-party extensions if they were relying on specific behaviors from these loaders.
 
 JupyterLab 3.0 to 3.1
 ---------------------

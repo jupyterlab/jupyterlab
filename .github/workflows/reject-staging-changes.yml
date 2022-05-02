@@ -1,0 +1,30 @@
+# This workflow fails in PRs with changes to the jupyterlab/staging directory
+# Won't start unless there is a modification in the staging directory
+
+name: 'Reject changes to staging'
+on:
+  pull_request:
+    paths:
+      - 'jupyterlab/staging/**'
+
+jobs:
+  staging-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Get modified files in the staging directory
+        id: modified-files-in-staging
+        uses: tj-actions/changed-files@v18.6
+        with:
+          # only checks for modified files in this directory
+          files: jupyterlab/staging
+          # ignores modifications to these files
+          files_ignore: |
+            jupyterlab/staging/yarn.js
+            jupyterlab/staging/.yarnrc
+
+      - name: Fail if files in staging are modified
+        if: steps.modified-files-in-staging.outputs.any_changed == 'true'
+        run: exit 1

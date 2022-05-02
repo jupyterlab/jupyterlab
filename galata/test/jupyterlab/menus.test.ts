@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, test } from '@jupyterlab/galata';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 const menuPaths = [
   'File',
@@ -22,9 +23,9 @@ const menuPaths = [
   'Help'
 ];
 
-test.use({ autoGoto: false });
-
 test.describe('General Tests', () => {
+  test.use({ autoGoto: false });
+
   menuPaths.forEach(menuPath => {
     test(`Open menu item ${menuPath}`, async ({ page }) => {
       await page.goto();
@@ -67,3 +68,113 @@ test.describe('General Tests', () => {
     expect(await page.menu.isAnyOpen()).toEqual(false);
   });
 });
+
+const EXPECTED_MISSING_COMMANDS_MAINMENU = ['hub:control-panel', 'hub:logout'];
+
+test('Main menu definition must target an valid command', async ({ page }) => {
+  const [menus, commands] = await page.evaluate(async () => {
+    const settings = await window.galataip.getPlugin(
+      '@jupyterlab/apputils-extension:settings'
+    );
+    const menus = await settings.get(
+      '@jupyterlab/mainmenu-extension:plugin',
+      'menus'
+    );
+    const commandIds = window.jupyterapp.commands.listCommands();
+
+    return Promise.resolve([
+      menus.composite as ISettingRegistry.IMenu[],
+      commandIds
+    ]);
+  });
+
+  commands.push(...EXPECTED_MISSING_COMMANDS_MAINMENU);
+
+  const missingCommands = menus.reduce((agg, current) => {
+    const items =
+      current.items?.reduce((agg, item) => {
+        const testedItem = reduceItem(item, commands);
+        if (testedItem !== null) {
+          agg.push(testedItem);
+        }
+        return agg;
+      }, []) ?? [];
+    if (items.length > 0) {
+      const r = {};
+      r[current.label ?? 'unknown'] = items;
+      agg.push(r);
+    }
+
+    return agg;
+  }, []);
+
+  expect(missingCommands).toEqual([]);
+});
+
+test('Context menu definition must target an valid command', async ({
+  page
+}) => {
+  const [items, commands] = await page.evaluate(async () => {
+    const settings = await window.galataip.getPlugin(
+      '@jupyterlab/apputils-extension:settings'
+    );
+    const items = await settings.get(
+      '@jupyterlab/application-extension:context-menu',
+      'contextMenu'
+    );
+    const commandIds = window.jupyterapp.commands.listCommands();
+
+    return Promise.resolve([
+      items.composite as ISettingRegistry.IMenuItem[],
+      commandIds
+    ]);
+  });
+
+  commands.push(...EXPECTED_MISSING_COMMANDS_MAINMENU);
+
+  const missingCommands = items.reduce((agg, item) => {
+    const testedItem = reduceItem(item, commands);
+    if (testedItem !== null) {
+      agg.push(testedItem);
+    }
+    return agg;
+  }, []);
+
+  expect(missingCommands).toEqual([]);
+});
+
+function reduceItem(
+  item: ISettingRegistry.IMenuItem,
+  commands: string[]
+):
+  | ISettingRegistry.IMenuItem
+  | { [id: string]: ISettingRegistry.IMenuItem[] }
+  | null {
+  switch (item.type ?? 'command') {
+    case 'command':
+      if (!commands.includes(item.command)) {
+        return item;
+      }
+      break;
+    case 'submenu': {
+      const items =
+        item.submenu?.items?.reduce((agg, item) => {
+          const testedItem = reduceItem(item, commands);
+          if (testedItem !== null) {
+            agg.push(testedItem);
+          }
+          return agg;
+        }, []) ?? [];
+      if (items.length === 0) {
+        return null;
+      } else {
+        const r = {};
+        r[item.submenu?.label ?? 'unknown'] = items;
+        return r;
+      }
+    }
+    default:
+      break;
+  }
+  return null;
+}

@@ -669,6 +669,9 @@ export function createTabsMenu(
   // Command to activate a widget by id.
   commands.addCommand(CommandIDs.activateById, {
     label: args => {
+      if (args.id === undefined) {
+        return trans.__('Activate a widget by its `id`.');
+      }
       const id = args['id'] || '';
       const widget = find(app.shell.widgets('main'), w => w.id === id);
       return (widget && widget.title.label) || '';

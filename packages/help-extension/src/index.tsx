@@ -135,7 +135,7 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© 2015-2021 Project Jupyter Contributors')}
+            {trans.__('© 2015-2022 Project Jupyter Contributors')}
           </span>
         );
         const body = (
@@ -262,7 +262,9 @@ const resources: JupyterFrontEndPlugin<void> = {
     }
 
     commands.addCommand(CommandIDs.open, {
-      label: args => args['text'] as string,
+      label: args =>
+        (args['text'] as string) ??
+        trans.__('Open the provided `url` in a tab.'),
       execute: args => {
         const url = args['url'] as string;
         const text = args['text'] as string;

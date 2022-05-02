@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata",
-  "version": "5.0.0-alpha.8",
+  "version": "5.0.0-alpha.9",
   "description": "JupyterLab UI Testing Framework",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -47,14 +47,14 @@
     "test:update": "playwright test --update-snapshots && jlpm test:benchmark:update"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.8",
-    "@jupyterlab/cells": "^4.0.0-alpha.8",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.8",
-    "@jupyterlab/docmanager": "^4.0.0-alpha.8",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.8",
-    "@jupyterlab/notebook": "^4.0.0-alpha.8",
-    "@jupyterlab/services": "^7.0.0-alpha.8",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.8",
+    "@jupyterlab/application": "^4.0.0-alpha.9",
+    "@jupyterlab/cells": "^4.0.0-alpha.9",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
+    "@jupyterlab/docmanager": "^4.0.0-alpha.9",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.9",
+    "@jupyterlab/notebook": "^4.0.0-alpha.9",
+    "@jupyterlab/services": "^7.0.0-alpha.9",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/coreutils": "^1.12.0",
     "@playwright/test": "^1.17.0",
@@ -80,7 +80,7 @@
     "svgo-loader": "^2.2.1",
     "ts-loader": "^6.2.1",
     "typescript": "~4.6.3",
-    "webpack": "^5.71.0",
+    "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2"
   },
   "publishConfig": {

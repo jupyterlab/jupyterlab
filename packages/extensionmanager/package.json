@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager",
-  "version": "4.0.0-alpha.8",
+  "version": "4.0.0-alpha.9",
   "description": "JupyterLab - Extension Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,13 +36,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.8",
-    "@jupyterlab/apputils": "^4.0.0-alpha.8",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.8",
-    "@jupyterlab/services": "^7.0.0-alpha.8",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.8",
-    "@jupyterlab/translation": "^4.0.0-alpha.8",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.23",
+    "@jupyterlab/application": "^4.0.0-alpha.9",
+    "@jupyterlab/apputils": "^4.0.0-alpha.9",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
+    "@jupyterlab/services": "^7.0.0-alpha.9",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/translation": "^4.0.0-alpha.9",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.24",
     "@lumino/messaging": "^1.10.1",
     "@lumino/polling": "^1.10.0",
     "@lumino/signaling": "^1.10.1",
