@@ -48,7 +48,7 @@ class JupyterWebsocketServer(WebsocketServer):
 WEBSOCKET_SERVER = JupyterWebsocketServer(has_internal_ydoc=True, auto_clean_rooms=False)
 
 
-class YjsEchoWebSocket(WebSocketHandler, JupyterHandler):
+class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
 
     saving_document: Optional[asyncio.Task]
 

@@ -48,7 +48,7 @@ from .handlers.extension_manager_handler import (
     ExtensionManager,
     extensions_handler_path,
 )
-from .handlers.yjs_echo_ws import YjsEchoWebSocket
+from .handlers.ydoc_handler import YDocWebSocketHandler
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -666,7 +666,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         handlers.append(build_handler)
 
         # Yjs Echo WebSocket handler
-        yjs_echo_handler = (r"/api/yjs/(.*)", YjsEchoWebSocket)
+        yjs_echo_handler = (r"/api/yjs/(.*)", YDocWebSocketHandler)
         handlers.append(yjs_echo_handler)
 
         errored = False
