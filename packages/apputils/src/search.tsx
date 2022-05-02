@@ -34,6 +34,11 @@ export interface IFilterBoxProps {
    * Whether to use case-sensitive search
    */
   caseSensitive?: boolean;
+
+  /**
+   * An optional initial search value.
+   */
+  initialQuery?: string;
 }
 
 /**
@@ -101,8 +106,36 @@ function fuzzySearch(source: string, query: string): IScore | null {
   };
 }
 
+export const updateFilterFunction = (
+  value: string,
+  useFuzzyFilter: boolean,
+  caseSensitive?: boolean
+) => {
+  return (item: string) => {
+    if (useFuzzyFilter) {
+      // Run the fuzzy search for the item and query.
+      const query = value.toLowerCase();
+      let score = fuzzySearch(item, query);
+      // Ignore the item if it is not a match.
+      if (!score) {
+        return false;
+      }
+      return true;
+    }
+    if (!caseSensitive) {
+      item = item.toLocaleLowerCase();
+      value = value.toLocaleLowerCase();
+    }
+    const i = item.indexOf(value);
+    if (i === -1) {
+      return false;
+    }
+    return true;
+  };
+};
+
 export const FilterBox = (props: IFilterBoxProps) => {
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState(props.initialQuery ?? '');
 
   if (props.forceRefresh) {
     useEffect(() => {
@@ -112,33 +145,34 @@ export const FilterBox = (props: IFilterBoxProps) => {
     }, []);
   }
 
+  useEffect(() => {
+    // If there is an initial search value, pass the parent the initial filter function for that value.
+    if (props.initialQuery !== undefined) {
+      props.updateFilter(
+        updateFilterFunction(
+          props.initialQuery,
+          props.useFuzzyFilter,
+          props.caseSensitive
+        ),
+        props.initialQuery
+      );
+    }
+  }, []);
+
   /**
    * Handler for search input changes.
    */
   const handleChange = (e: React.FormEvent<HTMLElement>) => {
     const target = e.target as HTMLInputElement;
     setFilter(target.value);
-    props.updateFilter((item: string) => {
-      if (props.useFuzzyFilter) {
-        // Run the fuzzy search for the item and query.
-        const query = target.value.toLowerCase();
-        let score = fuzzySearch(item, query);
-        // Ignore the item if it is not a match.
-        if (!score) {
-          return false;
-        }
-        return true;
-      }
-      if (!props.caseSensitive) {
-        item = item.toLocaleLowerCase();
-        target.value = target.value.toLocaleLowerCase();
-      }
-      const i = item.indexOf(target.value);
-      if (i === -1) {
-        return false;
-      }
-      return true;
-    }, target.value);
+    props.updateFilter(
+      updateFilterFunction(
+        target.value,
+        props.useFuzzyFilter,
+        props.caseSensitive
+      ),
+      target.value
+    );
   };
 
   return (

@@ -3,7 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { FilterBox, ReactWidget } from '@jupyterlab/apputils';
+import {
+  FilterBox,
+  ReactWidget,
+  updateFilterFunction
+} from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { classes, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
@@ -48,10 +52,11 @@ export class PluginList extends ReactWidget {
       this.update();
     }, this);
     this.mapPlugins = this.mapPlugins.bind(this);
-    this._filter = (item: ISettingRegistry.IPlugin) => null;
     this.setFilter = this.setFilter.bind(this);
+    this.setFilter(updateFilterFunction(options.query ?? '', false, false));
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
+    this._query = options.query;
 
     this._allPlugins = PluginList.sortPlugins(this.registry).filter(plugin => {
       const { schema } = plugin;
@@ -78,6 +83,7 @@ export class PluginList extends ReactWidget {
         )) as Settings;
         this._settings[plugin.id] = pluginSettings;
       }
+      this.update();
     };
     void loadSettings();
 
@@ -111,6 +117,10 @@ export class PluginList extends ReactWidget {
       }
     }
     return false;
+  }
+
+  get filter(): (item: ISettingRegistry.IPlugin) => string[] | null {
+    return this._filter;
   }
 
   /**
@@ -426,6 +436,7 @@ export class PluginList extends ReactWidget {
           placeholder={trans.__('Search…')}
           forceRefresh={false}
           caseSensitive={false}
+          initialQuery={this._query}
         />
         {modifiedItems.length > 0 && (
           <div>
@@ -497,6 +508,11 @@ export namespace PluginList {
      * The setting registry for the plugin list.
      */
     translator?: ITranslator;
+
+    /**
+     * An optional initial query so the plugin list can filter on start.
+     */
+    query?: string;
   }
 
   /**
