@@ -7,7 +7,7 @@
  * @module settingeditor-extension
  */
 
- import {
+import {
   ILabStatus,
   ILayoutRestorer,
   JupyterFrontEnd,
