@@ -877,6 +877,8 @@ export class Stdin extends Widget implements IStdin {
     this._history_ix = 0;
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
+    // make users aware of the line history feature
+    this._input.placeholder = 'press ⇵ for history';
     this._future = options.future;
     this._parent_header = options.parent_header;
     this._value = options.prompt + ' ';
