@@ -402,7 +402,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     browser.title.icon = folderIcon;
 
     // Toolbar
-    toolbarRegistry.registerFactory(
+    toolbarRegistry.addFactory(
       FILE_BROWSER_FACTORY,
       'uploader',
       (browser: FileBrowser) =>

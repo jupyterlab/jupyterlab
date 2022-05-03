@@ -105,7 +105,7 @@ function activateCsv(
     | undefined;
 
   if (toolbarRegistry) {
-    toolbarRegistry.registerFactory<IDocumentWidget<CSVViewer>>(
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
       FACTORY_CSV,
       'delimiter',
       widget =>
@@ -249,7 +249,7 @@ function activateTsv(
     | undefined;
 
   if (toolbarRegistry) {
-    toolbarRegistry.registerFactory<IDocumentWidget<CSVViewer>>(
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
       FACTORY_TSV,
       'delimiter',
       widget =>
