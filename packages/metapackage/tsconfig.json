@@ -46,9 +46,6 @@
       "path": "../codemirror-extension"
     },
     {
-      "path": "../comments"
-    },
-    {
       "path": "../completer"
     },
     {
