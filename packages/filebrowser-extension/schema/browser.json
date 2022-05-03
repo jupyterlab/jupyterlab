@@ -58,29 +58,9 @@
         "rank": 0
       },
       {
-        "command": "filebrowser:create-new-directory",
-        "selector": ".jp-DirListing-content",
-        "rank": 1
-      },
-      {
         "command": "filebrowser:open",
         "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 1
-      },
-      {
-        "command": "filebrowser:create-new-file",
-        "selector": ".jp-DirListing-content",
-        "rank": 2
-      },
-      {
-        "command": "filebrowser:create-new-markdown-file",
-        "selector": ".jp-DirListing-content",
-        "rank": 3
-      },
-      {
-        "command": "filebrowser:paste",
-        "selector": ".jp-DirListing-content",
-        "rank": 4
       },
       {
         "type": "separator",
@@ -106,6 +86,11 @@
         "command": "filebrowser:copy",
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
         "rank": 8
+      },
+      {
+        "command": "filebrowser:paste",
+        "selector": ".jp-DirListing-content",
+        "rank": 8.5
       },
       {
         "command": "filebrowser:duplicate",
@@ -141,6 +126,21 @@
         "command": "filebrowser:share-main",
         "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 15
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 50
+      },
+      {
+        "command": "filebrowser:create-new-file",
+        "selector": ".jp-DirListing-content",
+        "rank": 51
+      },
+      {
+        "command": "filebrowser:create-new-directory",
+        "selector": ".jp-DirListing-content",
+        "rank": 55
       }
     ]
   },
