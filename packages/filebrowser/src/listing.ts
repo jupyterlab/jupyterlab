@@ -806,7 +806,7 @@ export class DirListing extends Widget {
     const checkAllCheckbox = renderer.getCheckboxNode(this.headerNode);
     if (checkAllCheckbox) {
       const totalSelected = Object.keys(this.selection).length;
-      const allSelected = totalSelected === items.length;
+      const allSelected = items.length > 0 && totalSelected === items.length;
       const someSelected = !allSelected && totalSelected > 0;
       checkAllCheckbox.checked = allSelected;
       checkAllCheckbox.indeterminate = someSelected;

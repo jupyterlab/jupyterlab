@@ -52,10 +52,10 @@ describe('filebrowser/listing', () => {
     beforeEach(async () => {
       const options = createOptionsForConstructor();
 
-      // Start with some files instead of empty before creating the
-      // DirListing. This makes it easier to test checking/unchecking because
-      // after the DirListing is created, if a file is added, the DirListing
-      // will select that file (=checkbox checked).
+      // Start with some files instead of empty before creating the DirListing.
+      // This makes it easier to test checking/unchecking because after the
+      // DirListing is created, whenever a file is added, the DirListing selects
+      // that file, which causes the file's checkbox to be checked.
       await options.model.manager.newUntitled({ type: 'file' });
       await options.model.manager.newUntitled({ type: 'file' });
 
@@ -215,6 +215,19 @@ describe('filebrowser/listing', () => {
     });
 
     describe('check-all checkbox', () => {
+      it('should be unchecked when the current directory is empty', async () => {
+        const { path } = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.model.cd(path);
+        await signalToPromise(dirListing.updated);
+        const headerCheckbox = dirListing.renderer.getCheckboxNode!(
+          dirListing.headerNode
+        ) as HTMLInputElement;
+        expect(headerCheckbox.checked).toBe(false);
+        expect(headerCheckbox!.indeterminate).toBe(false);
+      });
+
       describe('when previously unchecked', () => {
         it('check initial conditions', () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
