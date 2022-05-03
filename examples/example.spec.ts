@@ -33,9 +33,9 @@ test('should load the example', async ({ page }) => {
   // https://stackoverflow.com/q/46948489/425458
   await page.waitForNavigation();
 
-  await expect(page.locator('#jupyter-config-data')).toBeDefined();
+  await expect(page.locator('#jupyter-config-data')).toHaveCount(1);
 
   await waitForTestEnd;
 
-  await expect(errorLogs).toEqual(0);
+  expect(errorLogs).toEqual(0);
 });

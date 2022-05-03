@@ -33,6 +33,20 @@ describe('rendermime/outputmodel', () => {
       });
     });
 
+    describe('#changed', () => {
+      it('should be emitted when the data changes', () => {
+        const value = DEFAULT_EXECUTE;
+        let model = new OutputModel({ value });
+        let called = false;
+        model.changed.connect((sender, args) => {
+          expect(sender).toBe(model);
+          called = true;
+        });
+        model.setData({ ...model.data });
+        expect(called).toBe(true);
+      });
+    });
+
     describe('#type', () => {
       it('should be the output type', () => {
         let model = new OutputModel({ value: DEFAULT_EXECUTE });

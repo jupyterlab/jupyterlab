@@ -45,6 +45,7 @@
     "@jupyterlab/docmanager": "^4.0.0-alpha.9",
     "@jupyterlab/docmanager-extension": "^4.0.0-alpha.9",
     "@jupyterlab/docregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/documentsearch": "^4.0.0-alpha.9",
     "@jupyterlab/filebrowser": "^4.0.0-alpha.9",
     "@jupyterlab/launcher": "^4.0.0-alpha.9",
     "@jupyterlab/logconsole": "^4.0.0-alpha.9",

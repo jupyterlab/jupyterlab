@@ -11,6 +11,7 @@
 @import url('~@jupyterlab/attachments/style/index.css');
 @import url('~@lumino/dragdrop/style/index.css');
 @import url('~@jupyterlab/codeeditor/style/index.css');
+@import url('~@jupyterlab/documentsearch/style/index.css');
 @import url('~@jupyterlab/codemirror/style/index.css');
 @import url('~@jupyterlab/filebrowser/style/index.css');
 @import url('~@jupyterlab/outputarea/style/index.css');

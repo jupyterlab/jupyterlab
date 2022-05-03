@@ -11,6 +11,7 @@ import '@jupyterlab/rendermime/style/index.js';
 import '@jupyterlab/attachments/style/index.js';
 import '@lumino/dragdrop/style/index.js';
 import '@jupyterlab/codeeditor/style/index.js';
+import '@jupyterlab/documentsearch/style/index.js';
 import '@jupyterlab/codemirror/style/index.js';
 import '@jupyterlab/filebrowser/style/index.js';
 import '@jupyterlab/outputarea/style/index.js';

@@ -46,6 +46,7 @@ import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
 import { SetupCommands } from './commands';
 
 function main(): void {

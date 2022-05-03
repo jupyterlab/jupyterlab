@@ -166,7 +166,7 @@ export class OutputModel implements IOutputModel {
       this._updateObservable(this._metadata, options.metadata!);
       this._rawMetadata = options.metadata;
     }
-    this._changed.emit(void 0);
+    this._changed.emit();
   }
 
   /**

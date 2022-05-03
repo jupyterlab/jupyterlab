@@ -5,10 +5,10 @@
  * @module documentsearch
  */
 
-export * from './interfaces';
-export * from './providers/codemirrorsearchprovider';
 export * from './providers/genericsearchprovider';
-export * from './providers/notebooksearchprovider';
-export * from './searchinstance';
+export * from './providers/textprovider';
+export * from './searchmodel';
+export * from './searchview';
+export * from './searchprovider';
 export * from './searchproviderregistry';
 export * from './tokens';

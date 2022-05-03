@@ -56,7 +56,7 @@ describe('outputarea/model', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         model.stateChanged.connect((sender, args) => {
           expect(sender).toBe(model);
-          expect(args).toBeUndefined();
+          expect(args).toEqual(0);
           called = true;
         });
         const output = model.get(0);
@@ -185,6 +185,26 @@ describe('outputarea/model', () => {
         expect(model.length).toBe(1);
         model.add(NBTestUtils.DEFAULT_OUTPUTS[1]);
         expect(model.length).toBe(1);
+      });
+    });
+
+    describe('#set', () => {
+      it('should disconnect the replaced output', () => {
+        const model = new OutputAreaModel({
+          values: [NBTestUtils.DEFAULT_OUTPUTS[0]]
+        });
+
+        const output = model.get(0);
+        let called = false;
+        model.stateChanged.connect((sender, args) => {
+          called = true;
+        });
+
+        model.set(0, NBTestUtils.DEFAULT_OUTPUTS[1]);
+
+        output.setData({ ...output.data });
+
+        expect(called).toEqual(false);
       });
     });
 
