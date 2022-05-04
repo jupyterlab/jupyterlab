@@ -19,6 +19,7 @@ test('All commands must have a default label', async ({ page }, testInfo) => {
       shortcuts?: string[];
     }[] = commandIds
       .filter(id => !id.startsWith('_'))
+      .sort()
       .map(id => {
         try {
           return {
