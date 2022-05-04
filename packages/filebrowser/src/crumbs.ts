@@ -73,8 +73,8 @@ export class BreadCrumbs extends Widget {
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
-    this._hasPreferred =
-      PageConfig.getOption('preferredPath') !== '/' ? true : false;
+    const hasPreferred = PageConfig.getOption('preferredPath');
+    this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     if (this._hasPreferred) {
       this.node.appendChild(this._crumbs[Private.Crumb.Preferred]);
     }
