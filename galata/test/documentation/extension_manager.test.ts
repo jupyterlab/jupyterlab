@@ -63,6 +63,7 @@ test.describe('Extension Manager', () => {
   });
 
   test('Search', async ({ page }) => {
+    // This is flaky because the frontend request npm package with sorting based on popularity
     await page.goto();
 
     await openExtensionSidebar(page);
