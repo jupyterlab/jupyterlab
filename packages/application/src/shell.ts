@@ -118,12 +118,36 @@ export namespace ILabShell {
     hiddenMode: 'display' | 'scale';
   }
 
-  export type IWidgetPosition = {
+  /**
+   * Widget position
+   */
+  export interface IWidgetPosition {
+    /**
+     * Widget area
+     */
     area?: Area;
+    /**
+     * Widget opening options
+     */
     options?: DocumentRegistry.IOpenOptions;
-  };
+  }
 
-  export type IDelayedWidget = { widget: Widget } & IWidgetPosition;
+  /**
+   * To-be-added widget and associated position
+   */
+  export interface IDelayedWidget extends IWidgetPosition {
+    widget: Widget;
+  }
+
+  /**
+   * Mapping of widget type identifier and their user customized position
+   */
+  export interface IUserLayout {
+    /**
+     * Widget customized position
+     */
+    [k: string]: IWidgetPosition;
+  }
 
   /**
    * The args for the current path change signal.
@@ -636,26 +660,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return this._restored.promise;
   }
 
-  get userLayout(): {
-    default: { [type: string]: ILabShell.IWidgetPosition };
-    simpleMode: { [type: string]: ILabShell.IWidgetPosition };
-  } {
-    return this._userLayout;
-  }
-  set userLayout(v: {
-    default: { [type: string]: ILabShell.IWidgetPosition };
-    simpleMode: { [type: string]: ILabShell.IWidgetPosition };
-  }) {
-    if (this._userLayout) {
-      throw new Error('userLayout can only be set once.');
-    }
-    this._userLayout = v;
-    this._delayedWidget.forEach(({ widget, area, options }) => {
-      this.add(widget, area, options);
-    });
-    this._delayedWidget.length = 0;
-  }
-
   /**
    * Activate a widget in its area.
    */
@@ -804,12 +808,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._delayedWidget.push({ widget, area, options });
       return;
     }
-    const mode = this.mode === 'multiple-document' ? 'default' : 'simpleMode';
     let userPosition: ILabShell.IWidgetPosition | undefined;
-    if (options?.type && this._userLayout[mode][options.type]) {
-      userPosition = this._userLayout[mode][options.type];
+    if (options?.type && this._userLayout[this.mode][options.type]) {
+      userPosition = this._userLayout[this.mode][options.type];
     } else {
-      userPosition = this._userLayout[mode][widget.id];
+      userPosition = this._userLayout[this.mode][widget.id];
     }
     area = userPosition?.area ?? area;
     options = {
@@ -953,11 +956,38 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Restore the layout state for the application shell.
+   * Restore the layout state and configuration for the application shell.
+   *
+   * #### Notes
+   * This should only be called once.
    */
-  restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
-    const { mainArea, downArea, leftArea, rightArea, topArea, relativeSizes } =
-      layout;
+  restoreLayout(
+    mode: DockPanel.Mode,
+    layout: ILabShell.ILayout,
+    configuration: {
+      [m: string]: ILabShell.IUserLayout;
+    } = {}
+  ): void {
+    // Set the configuration
+    this._userLayout = {
+      'single-document': configuration['single-document'] ?? {},
+      'multiple-document': configuration['multiple-document'] ?? {}
+    };
+    this._delayedWidget.forEach(({ widget, area, options }) => {
+      this.add(widget, area, options);
+    });
+    this._delayedWidget.length = 0;
+
+    // Reset the layout
+
+    const {
+      mainArea,
+      downArea,
+      leftArea,
+      rightArea,
+      topArea,
+      relativeSizes
+    } = layout;
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
@@ -1585,11 +1615,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _userLayout: {
-    default: { [type: string]: ILabShell.IWidgetPosition };
-    simpleMode: { [type: string]: ILabShell.IWidgetPosition };
+    'single-document': ILabShell.IUserLayout;
+    'multiple-document': ILabShell.IUserLayout;
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
-  // private _userLayoutLoaded = new PromiseDelegate<null>();
+  // private _userLayoutChanged = new Signal<
+  //   LabShell,
+  //   { [m: string]: ILabShell.IUserLayout }
+  // >(this);
 }
 
 namespace Private {

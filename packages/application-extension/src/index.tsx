@@ -37,7 +37,11 @@ import {
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import {
   buildIcon,
   ContextMenuSvg,
@@ -727,41 +731,41 @@ const dirty: JupyterFrontEndPlugin<void> = {
  */
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IStateDB, ILabShell, ISettingRegistry, ITranslator],
+  requires: [IStateDB, ILabShell, ISettingRegistry],
+  optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
     labShell: ILabShell,
     settingRegistry: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator | null
   ) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const first = app.started;
     const registry = app.commands;
 
     const restorer = new LayoutRestorer({ connector: state, first, registry });
 
     settingRegistry
-      .load(layout.id)
+      .load(shell.id)
       .then(settings => {
-        // TODO listen for settings changes to prompt the user to reload
-
         // Add a layer of customization to support app shell mode
         const customizedLayout = settings.composite['layout'] as any;
-        labShell.userLayout = {
-          default: customizedLayout.default ?? {},
-          simpleMode: customizedLayout['simpleMode'] ?? {}
-        };
+
         void restorer.fetch().then(saved => {
-          // restoreLayout needs to be protected to be triggered only
-          // after loading the userLayout... Or maybe not but then
-          // userLayout must be set to empty
           labShell.restoreLayout(
             PageConfig.getOption('mode') as DockPanel.Mode,
-            saved
+            saved,
+            {
+              'multiple-document': customizedLayout.multiple ?? {},
+              'single-document': customizedLayout.single ?? {}
+            }
           );
           labShell.layoutModified.connect(() => {
             void restorer.save(labShell.saveLayout());
           });
+
+          settings.changed.connect(onSettingsChanged);
           // Private.activateSidebarSwitcher(
           //   app,
           //   labShell,
@@ -777,6 +781,23 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
       });
 
     return restorer;
+
+    async function onSettingsChanged(): Promise<void> {
+      const result = await showDialog({
+        title: trans.__('Information'),
+        body: trans.__(
+          'User layout customization has changed. You may need to reload JupyterLab to see the changes.'
+        ),
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.okButton({ label: trans.__('Reload') })
+        ]
+      });
+
+      if (result.button.accept) {
+        location.reload();
+      }
+    }
   },
   autoStart: true,
   provides: ILayoutRestorer
