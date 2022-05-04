@@ -7,7 +7,6 @@ export * from './factory';
 export * from './icons';
 export * from './model';
 export * from './panel';
-export * from './plugin';
 export * from './header';
 export * from './registry';
 export * from './utils';

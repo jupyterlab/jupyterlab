@@ -8,6 +8,33 @@
   "references": [
     {
       "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../comments"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../shared-models"
     }
   ]
 }
