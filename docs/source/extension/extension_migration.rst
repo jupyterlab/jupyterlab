@@ -15,7 +15,8 @@ API breaking changes
 ^^^^^^^^^^^^^^^^^^^^
 
 Here is a list of JupyterLab npm packages that encountered API changes and therefore have
-bumped their major version (following semver convention):
+bumped their major version (following semver convention). We want to point out particularly
+``@jupyterlab/documentsearch`` and ``@jupyterlab/toc`` API that have been fully reworked.
 
 - ``@jupyterlab/application`` from 3.x to 4.x
    Major version bump to allow alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
@@ -24,6 +25,8 @@ bumped their major version (following semver convention):
    given and allow a shell that meets the ``ILabShell`` interface.
    As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
+- ``@jupyterlab/apputils`` from 3.x to 4.x
+   Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
    * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
      should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
@@ -36,6 +39,10 @@ bumped their major version (following semver convention):
    of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
    for JupyterLab, users need to implement the interface ``ICompletionProvider`` and then register
    this provider with ``ICompletionProviderManager`` token.
+- ``@jupyterlab/console`` from 3.x to 4.x
+   The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
+   This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
+   in particular those with the strict null checks enabled.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
    ``acquireLock`` and ``releaseLock`` have been removed from ``IDocumentProvider``.
@@ -43,10 +50,11 @@ bumped their major version (following semver convention):
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    ``@jupyterlab/documentsearch:plugin`` renamed ``@jupyterlab/documentsearch-extension:plugin``
    This may impact application configuration (for instance if the plugin was disabled).
-- ``@jupyterlab/console`` from 3.x to 4.x
-   The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
-   This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
-   in particular those with the strict null checks enabled.
+   The search provider API has been fully reworked. But the logic is similar, for new type of documents
+   you will need to register a ``ISearchProviderFactory`` to the ``ISearchProviderRegistry``. The
+   factory will build a ``ISearchProvider`` for the document widget.
+- ``@jupyterlab/fileeditor`` from 3.x to 4.x
+   Removed the class ``FileEditorCodeWrapper``, instead, you can use ``CodeEditorWrapper`` from ``@jupyterlab/codeeditor``.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
@@ -88,8 +96,6 @@ bumped their major version (following semver convention):
    As a result of the update to TypeScript 4.5+, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
-- ``@jupyterlab/fileeditor`` from 3.x to 4.x
-   Removed the class ``FileEditorCodeWrapper``, instead, you can use ``CodeEditorWrapper`` from ``@jupyterlab/codeeditor``.
 
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -145,7 +151,7 @@ For more information, have a look at :ref:`testing_with_jest`.
 
 .. _extension_migration_2_3:
 
-JupyterLab 2.x to 3.x
+JupyterLab 2.x to 3.x
 ---------------------
 
 Here are some helpful tips for migrating an extension from JupyterLab 2.x to JupyterLab 3.x.
