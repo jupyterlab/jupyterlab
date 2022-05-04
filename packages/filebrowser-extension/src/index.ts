@@ -101,6 +101,9 @@ namespace CommandIDs {
 
   export const openBrowserTab = 'filebrowser:open-browser-tab';
 
+  export const openBrowserTabInSimpleMode =
+    'filebrowser:open-browser-tab-in-simple-mode';
+
   export const paste = 'filebrowser:paste';
 
   export const createNewDirectory = 'filebrowser:create-new-directory';
@@ -635,25 +638,44 @@ const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
     const { tracker } = factory;
 
     commands.addCommand(CommandIDs.openBrowserTab, {
-      execute: () => {
+      execute: args => {
         const widget = tracker.currentWidget;
 
         if (!widget) {
           return;
         }
 
+        const mode = args['mode'] as string | undefined;
+
         return Promise.all(
           toArray(
             map(widget.selectedItems(), item => {
-              return commands.execute('docmanager:open-browser-tab', {
-                path: item.path
-              });
+              if (mode === 'single-document') {
+                const url = PageConfig.getUrl({
+                  mode: 'single-document',
+                  treePath: item.path
+                });
+                const opened = window.open();
+                if (opened) {
+                  opened.opener = null;
+                  opened.location.href = url;
+                } else {
+                  throw new Error('Failed to open new browser tab.');
+                }
+              } else {
+                return commands.execute('docmanager:open-browser-tab', {
+                  path: item.path
+                });
+              }
             })
           )
         );
       },
       icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Open in New Browser Tab'),
+      label: args =>
+        args['mode'] === 'single-document'
+          ? trans.__('Open in Simple Mode')
+          : trans.__('Open in New Browser Tab'),
       mnemonic: 0
     });
   }
