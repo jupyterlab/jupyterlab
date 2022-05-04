@@ -49,6 +49,7 @@
     "@jupyterlab/filebrowser": "^4.0.0-alpha.9",
     "@jupyterlab/fileeditor": "^4.0.0-alpha.9",
     "@jupyterlab/launcher": "^4.0.0-alpha.9",
+    "@jupyterlab/lsp": "^4.0.0-alpha.6",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.9",
     "@jupyterlab/observables": "^5.0.0-alpha.9",
     "@jupyterlab/services": "^7.0.0-alpha.9",

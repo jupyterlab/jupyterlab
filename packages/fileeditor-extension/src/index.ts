@@ -28,6 +28,7 @@ import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
+  FileEditorAdapter,
   FileEditorFactory,
   FileEditorSearchProvider,
   IEditorTracker,
@@ -45,6 +46,11 @@ import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 import { Commands, FACTORY, IFileTypeData } from './commands';
 import { Session } from '@jupyterlab/services';
+import {
+  ILSPCodeExtractorsManager,
+  ILSPDocumentConnectionManager,
+  ILSPFeatureManager
+} from '@jupyterlab/lsp';
 
 export { Commands } from './commands';
 
@@ -188,6 +194,18 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const languageServerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:language-server',
+  requires: [IEditorTracker],
+  optional: [
+    ILSPDocumentConnectionManager,
+    ILSPFeatureManager,
+    ILSPCodeExtractorsManager
+  ],
+  activate: activateFileEditorLanguageServer,
+  autoStart: true
+};
+
 /**
  * Export the plugins as default.
  */
@@ -195,6 +213,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   plugin,
   lineColStatus,
   completerPlugin,
+  languageServerPlugin,
   searchProvider,
   tabSpaceStatus
 ];
@@ -491,5 +510,30 @@ function activateFileEditorCompleterService(
     editorTracker.forEach(editorWidget => {
       updateCompleter(editorTracker, editorWidget).catch(console.error);
     });
+  });
+}
+
+function activateFileEditorLanguageServer(
+  app: JupyterFrontEnd,
+  notebooks: IEditorTracker,
+  connectionManager?: ILSPDocumentConnectionManager,
+  featureManager?: ILSPFeatureManager,
+  extractorManager?: ILSPCodeExtractorsManager
+): void {
+  if (!connectionManager || !featureManager || !extractorManager) {
+    return;
+  }
+
+  notebooks.widgetAdded.connect(async (_, notebook) => {
+    const adapter = new FileEditorAdapter(
+      {
+        app,
+        connectionManager,
+        featureManager,
+        foreignCodeExtractorsManager: extractorManager
+      },
+      notebook
+    );
+    connectionManager.registerAdapter(notebook.context.path, adapter);
   });
 }

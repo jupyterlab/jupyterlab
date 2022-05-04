@@ -1,0 +1,33 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../completer"
+    },
+    {
+      "path": "../lsp"
+    },
+    {
+      "path": "../running"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
+}

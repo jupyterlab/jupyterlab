@@ -1,0 +1,62 @@
+{
+  "jupyter.lab.setting-icon": "lsp:codeCheck",
+  "jupyter.lab.setting-icon-label": "Language integration",
+  "jupyter.lab.transform": true,
+  "title": "Language Server",
+  "description": "Language Server Protocol settings.",
+  "type": "object",
+  "definitions": {
+    "language-server": {
+      "type": "object",
+      "default": {
+        "serverSettings": {},
+        "priority": 50
+      },
+      "properties": {
+        "serverSettings": {
+          "title": "Language Server Configurations",
+          "description": "Configuration to be sent to language server over LSP when initialized: see the specific language server's documentation for more",
+          "type": "object",
+          "default": {},
+          "patternProperties": {
+            ".*": {
+              "type": ["number", "string", "boolean", "object", "array"]
+            }
+          },
+          "additionalProperties": true
+        },
+        "priority": {
+          "title": "Priority of the server",
+          "description": "When multiple servers match specific document/language, the server with the highest priority will be used",
+          "type": "number",
+          "default": 50,
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "properties": {
+    "language_servers": {
+      "title": "Language Server",
+      "description": "Language-server specific configuration, keyed by implementation",
+      "type": "object",
+      "default": {},
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/language-server"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/language-server"
+      }
+    },
+    "setTrace": {
+      "title": "Ask servers to send trace notifications",
+      "type": ["string"],
+      "enum": ["off", "messages", "verbose"],
+      "default": "off",
+      "description": "Whether to ask server to send logs with execution trace (for debugging). To see these messages, set loggingLevel to debug or log. Accepted values are: \"off\", \"messages\", \"verbose\". Servers are allowed to ignore this request."
+    }
+  },
+  "jupyter.lab.shortcuts": []
+}

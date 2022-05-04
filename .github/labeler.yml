@@ -180,6 +180,10 @@ pkg:logconsole:
   - packages/logconsole-extension/**/*
   - packages/logconsole-extension/*
 
+pkg:lsp:
+  - packages/lsp-extension/**/*
+  - packages/lsp-extension/*
+
 pkg:mainmenu:
   - packages/mainmenu/**/*
   - packages/mainmenu/*

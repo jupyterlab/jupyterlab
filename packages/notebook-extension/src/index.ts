@@ -40,6 +40,11 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
+import {
+  ILSPCodeExtractorsManager,
+  ILSPDocumentConnectionManager,
+  ILSPFeatureManager
+} from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
@@ -50,6 +55,7 @@ import {
   INotebookWidgetFactory,
   Notebook,
   NotebookActions,
+  NotebookAdapter,
   NotebookModelFactory,
   NotebookPanel,
   NotebookSearchProvider,
@@ -786,6 +792,18 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const languageServerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:language-server',
+  requires: [INotebookTracker],
+  optional: [
+    ILSPDocumentConnectionManager,
+    ILSPFeatureManager,
+    ILSPCodeExtractorsManager
+  ],
+  activate: activateNotebookLanguageServer,
+  autoStart: true
+};
+
 /**
  * Export the plugins as default.
  */
@@ -805,7 +823,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelStatus,
   lineColStatus,
   completerPlugin,
-  searchProvider
+  searchProvider,
+  languageServerPlugin
 ];
 export default plugins;
 
@@ -1696,6 +1715,34 @@ function activateNotebookCompleterService(
     notebooks.forEach(panel => {
       updateCompleter(undefined, panel).catch(e => console.error(e));
     });
+  });
+}
+
+/**
+ * Activate the language server for notebook.
+ */
+function activateNotebookLanguageServer(
+  app: JupyterFrontEnd,
+  notebooks: INotebookTracker,
+  connectionManager?: ILSPDocumentConnectionManager,
+  featureManager?: ILSPFeatureManager,
+  codeExtractorManager?: ILSPCodeExtractorsManager
+): void {
+  if (!connectionManager || !featureManager || !codeExtractorManager) {
+    return;
+  }
+
+  notebooks.widgetAdded.connect(async (_, notebook) => {
+    const adapter = new NotebookAdapter(
+      {
+        app,
+        connectionManager,
+        featureManager,
+        foreignCodeExtractorsManager: codeExtractorManager
+      },
+      notebook
+    );
+    connectionManager.registerAdapter(notebook.context.path, adapter);
   });
 }
 

@@ -18,6 +18,12 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../lsp"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
       "path": "../statusbar"
     },
     {

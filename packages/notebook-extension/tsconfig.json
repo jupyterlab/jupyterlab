@@ -46,6 +46,9 @@
       "path": "../logconsole"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../mainmenu"
     },
     {
