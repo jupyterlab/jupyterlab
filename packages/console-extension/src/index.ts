@@ -469,6 +469,9 @@ async function activateConsole(
 
     const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
+      // Update future promptCells
+      widget.console.editorConfig = promptCellConfig;
+      // Update promptCell already on screen
       setOption(widget.console.promptCell?.editor, promptCellConfig);
     };
 
