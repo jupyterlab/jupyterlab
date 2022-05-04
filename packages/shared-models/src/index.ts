@@ -7,6 +7,6 @@
  * @module shared-models
  */
 
-export * from './api.js';
-export * from './ymodels.js';
-export * from './utils.js';
+export * from './api';
+export * from './ymodels';
+export * from './utils';
