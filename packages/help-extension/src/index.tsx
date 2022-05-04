@@ -548,7 +548,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
       label: licensesText,
       execute: (args: any) => {
         const licenseMain = createLicenseWidget(args as Licenses.ICreateArgs);
-        shell.add(licenseMain, 'main');
+        shell.add(licenseMain, 'main', { type: 'Licenses' });
 
         // add to tracker so it can be restored, and update when choices change
         void licensesTracker.add(licenseMain);
