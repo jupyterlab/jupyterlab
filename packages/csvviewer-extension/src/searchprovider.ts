@@ -2,18 +2,40 @@
 // Distributed under the terms of the Modified BSD License.
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { ISearchMatch, ISearchProvider } from '@jupyterlab/documentsearch';
-import { ISignal, Signal } from '@lumino/signaling';
+import { ISearchProvider, SearchProvider } from '@jupyterlab/documentsearch';
+import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
-// The type for which canSearchFor returns true
+// The type for which isApplicable returns true
 export type CSVDocumentWidget = DocumentWidget<CSVViewer>;
 
-export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
+/**
+ * CSV viewer search provider
+ */
+export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
+  /**
+   * Instantiate a search provider for the widget.
+   *
+   * #### Notes
+   * The widget provided is always checked using `isApplicable` before calling
+   * this factory.
+   *
+   * @param widget The widget to search on
+   * @param translator [optional] The translator object
+   *
+   * @returns The search provider on the widget
+   */
+  static createNew(
+    widget: CSVDocumentWidget,
+    translator?: ITranslator
+  ): ISearchProvider {
+    return new CSVSearchProvider(widget);
+  }
+
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: Widget): domain is CSVDocumentWidget {
+  static isApplicable(domain: Widget): domain is CSVDocumentWidget {
     // check to see if the CSVSearchProvider can search on the
     // first cell, false indicates another editor is present
     return (
@@ -22,14 +44,67 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
   }
 
   /**
-   * Get an initial query value if applicable so that it can be entered
-   * into the search box as an initial query
-   *
-   * @returns Initial value used to populate the search box.
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
    */
-  getInitialQuery(searchTarget: CSVDocumentWidget): any {
-    // CSV Viewer does not support selection
-    return null;
+  readonly isReadOnly = true;
+
+  /**
+   * Clear currently highlighted match.
+   */
+  clearHighlight(): Promise<void> {
+    // no-op
+    return Promise.resolve();
+  }
+
+  /**
+   * Move the current match indicator to the next match.
+   *
+   * @param loop Whether to loop within the matches list.
+   *
+   * @returns The match is never returned by this provider
+   */
+  highlightNext(loop?: boolean): Promise<undefined> {
+    this.widget.content.searchService.find(this._query);
+    return Promise.resolve(undefined);
+  }
+
+  /**
+   * Move the current match indicator to the previous match.
+   *
+   * @param loop Whether to loop within the matches list.
+   *
+   * @returns The match is never returned by this provider
+   */
+  highlightPrevious(loop?: boolean): Promise<undefined> {
+    this.widget.content.searchService.find(this._query, true);
+    return Promise.resolve(undefined);
+  }
+
+  /**
+   * Replace the currently selected match with the provided text
+   * Not implemented in the CSV viewer as it is read-only.
+   *
+   * @param newText The replacement text
+   * @param loop Whether to loop within the matches list.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   * Not implemented in the CSV viewer as it is read-only.
+   *
+   * @param newText The replacement text
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  replaceAllMatches(newText: string): Promise<boolean> {
+    return Promise.resolve(false);
   }
 
   /**
@@ -37,106 +112,23 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
    * to highlight all matches and "select" whatever the first match should be.
    *
    * @param query A RegExp to be use to perform the search
-   * @param searchTarget The widget to be searched
-   *
-   * @returns A promise that resolves with a list of all matches
    */
-  async startQuery(
-    query: RegExp,
-    searchTarget: CSVDocumentWidget
-  ): Promise<ISearchMatch[]> {
-    this._target = searchTarget;
+  startQuery(query: RegExp): Promise<void> {
     this._query = query;
-    searchTarget.content.searchService.find(query);
-    return this.matches;
+    this.widget.content.searchService.find(query);
+
+    return Promise.resolve();
   }
 
   /**
    * Clears state of a search provider to prepare for startQuery to be called
    * in order to start a new query or refresh an existing one.
-   *
-   * @returns A promise that resolves when the search provider is ready to
-   * begin a new search.
    */
-  async endQuery(): Promise<void> {
-    this._target.content.searchService.clear();
+  endQuery(): Promise<void> {
+    this.widget.content.searchService.clear();
+
+    return Promise.resolve();
   }
 
-  /**
-   * Resets UI state as it was before the search process began.  Cleans up and
-   * disposes of all internal state.
-   *
-   * @returns A promise that resolves when all state has been cleaned up.
-   */
-  async endSearch(): Promise<void> {
-    this._target.content.searchService.clear();
-  }
-
-  /**
-   * Move the current match indicator to the next match.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
-    this._target.content.searchService.find(this._query);
-    return undefined;
-  }
-
-  /**
-   * Move the current match indicator to the previous match.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    this._target.content.searchService.find(this._query, true);
-    return undefined;
-  }
-
-  /**
-   * Replace the currently selected match with the provided text
-   * Not implemented in the CSV viewer as it is read-only.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async replaceCurrentMatch(newText: string): Promise<boolean> {
-    return false;
-  }
-
-  /**
-   * Replace all matches in the notebook with the provided text
-   * Not implemented in the CSV viewer as it is read-only.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async replaceAllMatches(newText: string): Promise<boolean> {
-    return false;
-  }
-
-  /**
-   * Signal indicating that something in the search has changed, so the UI should update
-   */
-  get changed(): ISignal<this, void> {
-    return this._changed;
-  }
-
-  /**
-   * The same list of matches provided by the startQuery promise resolution
-   */
-  readonly matches: ISearchMatch[] = [];
-
-  /**
-   * The current index of the selected match.
-   */
-  readonly currentMatchIndex: number | null = null;
-
-  /**
-   * Set to true if the widget under search is read-only, false
-   * if it is editable.  Will be used to determine whether to show
-   * the replace option.
-   */
-  readonly isReadOnly = true;
-
-  private _target: CSVDocumentWidget;
   private _query: RegExp;
-  private _changed = new Signal<this, void>(this);
 }

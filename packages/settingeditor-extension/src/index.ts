@@ -110,7 +110,10 @@ function activate(
 
   commands.addCommand(CommandIDs.open, {
     execute: async args => {
-      if (tracker.currentWidget) {
+      if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
+        if (!tracker.currentWidget.isAttached) {
+          shell.add(tracker.currentWidget);
+        }
         shell.activateById(tracker.currentWidget.id);
         return;
       }
@@ -221,7 +224,10 @@ function activateJSON(
 
   commands.addCommand(CommandIDs.openJSON, {
     execute: async () => {
-      if (tracker.currentWidget) {
+      if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
+        if (!tracker.currentWidget.isAttached) {
+          shell.add(tracker.currentWidget);
+        }
         shell.activateById(tracker.currentWidget.id);
         return;
       }

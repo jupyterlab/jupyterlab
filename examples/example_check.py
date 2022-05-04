@@ -62,7 +62,7 @@ async def run_browser(url):
         if not target.exists():
             target.mkdir(parents=True, exist_ok=True)
         await run_async_process(["npm", "init", "-y"], cwd=str(target))
-        await run_async_process(["npm", "install", "@playwright/test@^1"], cwd=str(target))
+        await run_async_process(["npm", "install", "-D", "@playwright/test@^1"], cwd=str(target))
         await run_async_process(["npx", "playwright", "install", "chromium"], cwd=str(target))
     test_target = target / TEST_FILE.name
 

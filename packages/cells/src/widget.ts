@@ -239,6 +239,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
 
+    this._isPlaceholder = options.placeholder ?? false;
+
     // Editor settings
     if (options.editorConfig) {
       this.editor.setOptions({ ...options.editorConfig });
@@ -327,6 +329,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       this.saveEditableState();
     }
     this.update();
+  }
+
+  /**
+   * Whether the cell is a placeholder that differ rendering
+   */
+  isPlaceholder(): boolean {
+    return this._isPlaceholder;
   }
 
   /**
@@ -576,6 +585,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _input: InputArea;
   private _inputWrapper: Widget;
   private _inputPlaceholder: InputPlaceholder;
+  private _isPlaceholder = false;
   private _syncCollapse = false;
   private _syncEditable = false;
   private _resizeDebouncer = new Debouncer(() => {
@@ -1477,6 +1487,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       })
     });
 
+    this._renderer = this._rendermime.createRenderer('text/markdown');
+    this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
+
     // Stop codemirror handling paste
     this.editor.setOption('handlePaste', false);
 
@@ -1499,8 +1512,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
-    this.renderCollapseButtons(this._renderer!);
-    this.renderInput(this._renderer!);
+    this.renderCollapseButtons(this._renderer);
+    this.renderInput(this._renderer);
     this._showEditorForReadOnlyMarkdown =
       options.showEditorForReadOnlyMarkdown ??
       MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
@@ -1555,7 +1568,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         collapseButton.classList.remove('jp-mod-collapsed');
       }
     }
-    this.renderCollapseButtons(this._renderer!);
+    this.renderCollapseButtons(this._renderer);
   }
 
   get numberChildNodes(): number {
@@ -1563,7 +1576,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
   set numberChildNodes(value: number) {
     this._numberChildNodes = value;
-    this.renderCollapseButtons(this._renderer!);
+    this.renderCollapseButtons(this._renderer);
   }
 
   get toggleCollapsedSignal(): Signal<this, boolean> {
@@ -1595,6 +1608,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
     // If the rendered state changed, raise an event.
     this._displayChanged.emit();
+    this._renderedChanged.emit(this._rendered);
+  }
+
+  /**
+   * Signal emitted when the markdown cell rendered state changes
+   */
+  get renderedChanged(): ISignal<MarkdownCell, boolean> {
+    return this._renderedChanged;
   }
 
   /*
@@ -1608,6 +1629,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (value === false) {
       this.rendered = true;
     }
+  }
+
+  /**
+   * Renderer
+   */
+  get renderer(): IRenderMime.IRenderer {
+    return this._renderer;
   }
 
   protected maybeCreateCollapseButton(): void {
@@ -1756,7 +1784,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
       void this._updateRenderedInput();
-      this.renderInput(this._renderer!);
+      this.renderInput(this._renderer);
     }
   }
 
@@ -1769,14 +1797,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
-      if (!this._renderer) {
-        this._renderer = this._rendermime.createRenderer('text/markdown');
-        this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
-      }
       this._prevText = text;
       return this._renderer.renderModel(mimeModel);
     }
-    return Promise.resolve(void 0);
+    return Promise.resolve();
   }
 
   /**
@@ -1797,9 +1821,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _numberChildNodes: number;
   private _headingCollapsed: boolean;
   private _toggleCollapsedSignal = new Signal<this, boolean>(this);
-  private _renderer: IRenderMime.IRenderer | null = null;
+  private _renderer: IRenderMime.IRenderer;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
+  private _renderedChanged = new Signal<this, boolean>(this);
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
   private _showEditorForReadOnlyMarkdown = true;

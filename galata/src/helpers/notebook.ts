@@ -751,7 +751,7 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async waitForCellGutter(cellIndex: number) {
+  async waitForCellGutter(cellIndex: number): Promise<void> {
     const cell = await this.getCell(cellIndex);
     if (cell) {
       await this.page.waitForSelector('.CodeMirror-gutter-wrapper', {
@@ -802,7 +802,7 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async waitForCodeGutter() {
+  async waitForCodeGutter(): Promise<void> {
     const panel = await this.activity.getPanel();
     if (panel) {
       await this.page.waitForSelector('.CodeMirror-gutter-wrapper', {

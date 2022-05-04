@@ -68,6 +68,7 @@
       "@jupyterlab/console-extension",
       "@jupyterlab/csvviewer-extension",
       "@jupyterlab/docmanager-extension",
+      "@jupyterlab/documentsearch-extension",
       "@jupyterlab/filebrowser-extension",
       "@jupyterlab/fileeditor-extension",
       "@jupyterlab/help-extension",
