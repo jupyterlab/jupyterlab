@@ -4,24 +4,14 @@
 # Distributed under the terms of the Modified BSD License.
 
 import asyncio
-import sys
 from typing import Optional
 
 from jupyter_server.base.handlers import JupyterHandler
 from jupyter_server.utils import ensure_async
+from jupyter_ydoc import ydocs as YDOCS
 from tornado import web
 from tornado.websocket import WebSocketHandler
 from ypy_websocket.websocket_server import WebsocketServer, YRoom
-
-# See compatibility note on `group` keyword in https://docs.python.org/3/library/importlib.metadata.html#entry-points
-if sys.version_info < (3, 10):
-    from importlib_metadata import entry_points
-else:
-    from importlib.metadata import entry_points
-
-YDOCS = {}
-for ep in entry_points(group="jupyter_ydoc"):
-    YDOCS.update({ep.name: ep.load()})
 
 YFILE = YDOCS["file"]
 
@@ -134,6 +124,8 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             # The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
             # The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
             new_room_name = message[1:].decode("utf-8").split(":", 1)[1]
+            self.path = f"{self.file_type}:{new_room_name}"
+            self.file_path = new_room_name
             WEBSOCKET_SERVER.rename_room(new_room_name, from_room=self.room)
             # send rename acknowledge
             self.write_message(bytes([RENAME_SESSION, 1]), binary=True)
