@@ -13,7 +13,10 @@ export interface IFilterBoxProps {
   /**
    * A function to callback when filter is updated.
    */
-  updateFilter: (filterFn: (item: string) => boolean, query?: string) => void;
+  updateFilter: (
+    filterFn: (item: string) => { match: boolean; indices?: number[] },
+    query?: string
+  ) => void;
 
   /**
    * Whether to use the fuzzy filter.
@@ -53,16 +56,16 @@ interface IScore {
   /**
    * The indices of the text matches.
    */
-  indices: number[] | null;
+  indices?: number[];
 }
 
 /**
  * Perform a fuzzy search on a single item.
  */
-function fuzzySearch(source: string, query: string): IScore | null {
+export function fuzzySearch(source: string, query: string): IScore | null {
   // Set up the match score and indices array.
   let score = Infinity;
-  let indices: number[] | null = null;
+  let indices: number[] | undefined;
 
   // The regex for search word boundaries
   const rgx = /\b\w/g;
@@ -118,9 +121,9 @@ export const updateFilterFunction = (
       let score = fuzzySearch(item, query);
       // Ignore the item if it is not a match.
       if (!score) {
-        return false;
+        return { match: false };
       }
-      return true;
+      return { match: true, indices: score.indices };
     }
     if (!caseSensitive) {
       item = item.toLocaleLowerCase();
@@ -128,9 +131,12 @@ export const updateFilterFunction = (
     }
     const i = item.indexOf(value);
     if (i === -1) {
-      return false;
+      return { match: false };
     }
-    return true;
+    return {
+      match: true,
+      indices: [...Array(item.length).keys()].map(x => x + 1)
+    };
   };
 };
 
@@ -140,7 +146,7 @@ export const FilterBox = (props: IFilterBoxProps) => {
   if (props.forceRefresh) {
     useEffect(() => {
       props.updateFilter((item: string) => {
-        return true;
+        return { match: true };
       });
     }, []);
   }

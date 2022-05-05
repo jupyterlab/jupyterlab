@@ -53,7 +53,7 @@ export namespace FileDialog {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => boolean;
+    filter?: (value: Contents.IModel) => { match: boolean; indices?: number[] };
 
     /**
      * The application language translator.
@@ -108,7 +108,9 @@ export namespace FileDialog {
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
     return getOpenFiles({
       ...options,
-      filter: model => model.type === 'directory'
+      filter: model => {
+        return { match: model.type === 'directory' };
+      }
     });
   }
 }
@@ -121,7 +123,7 @@ class OpenDialog
   implements Dialog.IBodyWidget<Contents.IModel[]> {
   constructor(
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => boolean,
+    filter?: (value: Contents.IModel) => { match: boolean; indices?: number[] },
     translator?: ITranslator,
     filterDirectories?: boolean
   ) {
@@ -230,7 +232,7 @@ namespace Private {
   export const createFilteredFileBrowser = (
     id: string,
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => boolean,
+    filter?: (value: Contents.IModel) => { match: boolean; indices?: number[] },
     options: IFileBrowserFactory.IOptions = {},
     translator?: ITranslator,
     filterDirectories?: boolean

@@ -97,7 +97,10 @@ export class FileBrowser extends SidePanel {
     this.listing.addClass(LISTING_CLASS);
 
     this._filenameSearcher = FilenameSearcher({
-      updateFilter: (filterFn: (item: string) => boolean) => {
+      updateFilter: (
+        filterFn: (item: string) => { match: boolean; indices?: number[] },
+        query?: string
+      ) => {
         this.listing.model.setFilter(value => {
           return filterFn(value.name.toLowerCase());
         });
@@ -161,7 +164,10 @@ export class FileBrowser extends SidePanel {
     this._filenameSearcher.dispose();
 
     this._filenameSearcher = FilenameSearcher({
-      updateFilter: (filterFn: (item: string) => boolean) => {
+      updateFilter: (
+        filterFn: (item: string) => { match: boolean; indices?: number[] },
+        query?: string
+      ) => {
         this.listing.model.setFilter(value => {
           return filterFn(value.name.toLowerCase());
         });

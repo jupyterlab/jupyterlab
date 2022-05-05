@@ -241,7 +241,7 @@ export class PluginList extends ReactWidget {
    * @returns - String array of properties that match the search results.
    */
   getFilterString(
-    filter: (item: string) => boolean,
+    filter: (item: string) => { match: boolean },
     props: ISettingRegistry.IProperty,
     definitions?: any,
     ref?: string
@@ -286,19 +286,19 @@ export class PluginList extends ReactWidget {
       // If this is the base case, check for matching title / description
       const subProps = props[value] as PartialJSONObject;
       if (!subProps) {
-        if (filter((props.title as string) ?? '')) {
+        if (filter((props.title as string) ?? '').match) {
           return props.title;
         }
-        if (filter(value)) {
+        if (filter(value).match) {
           return value;
         }
       }
 
       // If there are properties in the object, check for title / description
-      if (filter((subProps.title as string) ?? '')) {
+      if (filter((subProps.title as string) ?? '').match) {
         acc.push(subProps.title as string);
       }
-      if (filter(value)) {
+      if (filter(value).match) {
         acc.push(value);
       }
 
@@ -319,9 +319,12 @@ export class PluginList extends ReactWidget {
    * Updates the filter when the search bar value changes.
    * @param filter Filter function passed by search bar based on search value.
    */
-  setFilter(filter: (item: string) => boolean, query?: string): void {
+  setFilter(
+    filter: (item: string) => { match: boolean; indices?: number[] },
+    query?: string
+  ): void {
     this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
-      if (filter(plugin.schema.title ?? '')) {
+      if (filter(plugin.schema.title ?? '').match) {
         return null;
       }
       const filtered = this.getFilterString(

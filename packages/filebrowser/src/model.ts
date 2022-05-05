@@ -773,7 +773,11 @@ export namespace TogglableHiddenFileBrowserModel {
 export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   constructor(options: FilterFileBrowserModel.IOptions) {
     super(options);
-    this._filter = options.filter ? options.filter : model => true;
+    this._filter =
+      options.filter ??
+      (model => {
+        return { match: true };
+      });
     this._filterDirectories = options.filterDirectories ?? true;
   }
 
@@ -797,17 +801,23 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
       if (!this._filterDirectories && value.type === 'directory') {
         return true;
       } else {
-        return this._filter(value);
+        const { match, indices } = this._filter(value);
+        value.indices = indices;
+        return match;
       }
     });
   }
 
-  setFilter(filter: (value: Contents.IModel) => boolean): void {
+  setFilter(
+    filter: (value: Contents.IModel) => { match: boolean; indices?: number[] }
+  ): void {
     this._filter = filter;
     void this.refresh();
   }
 
-  private _filter: (value: Contents.IModel) => boolean;
+  private _filter: (
+    value: Contents.IModel
+  ) => { match: boolean; indices?: number[] };
   private _filterDirectories: boolean;
 }
 
@@ -822,7 +832,7 @@ export namespace FilterFileBrowserModel {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => boolean;
+    filter?: (value: Contents.IModel) => { match: boolean; indices?: number[] };
 
     /**
      * Filter directories
