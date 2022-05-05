@@ -1834,7 +1834,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _monitor: ActivityMonitor<ICellModel, void>;
   private _numberChildNodes: number;
   private _headingCollapsed: boolean;
-  private _toggleCollapsedSignal = new Signal<this, boolean>(this);
   private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
   private _renderer: IRenderMime.IRenderer;
   private _rendermime: IRenderMimeRegistry;
