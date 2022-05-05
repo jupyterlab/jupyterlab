@@ -326,6 +326,15 @@ async function activateConsole(
      * to the main area relative to a reference widget.
      */
     insertMode?: DockLayout.InsertMode;
+
+    /**
+     * Type of widget to open
+     *
+     * #### Notes
+     * This is the key used to load user layout customization.
+     * Its typical value is: a factory name or the widget id (if singleton)
+     */
+    type?: string;
   }
 
   /**
@@ -362,7 +371,8 @@ async function activateConsole(
     shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
-      activate: options.activate !== false
+      activate: options.activate !== false,
+      type: options.type ?? 'Console'
     });
     return panel;
   }

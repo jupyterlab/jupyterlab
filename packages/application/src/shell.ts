@@ -10,7 +10,7 @@ import {
   TabPanelSvg
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
-import { PromiseDelegate, Token } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
 import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -505,17 +505,27 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Whether the add buttons for each main area tab bar are enabled.
+   */
+  get addButtonEnabled(): boolean {
+    return this._dockPanel.addButtonEnabled;
+  }
+  set addButtonEnabled(value: boolean) {
+    this._dockPanel.addButtonEnabled = value;
+  }
+
+  /**
+   * A signal emitted when the add button on a main area tab bar is clicked.
+   */
+  get addRequested(): ISignal<DockPanel, TabBar<Widget>> {
+    return this._dockPanel.addRequested;
+  }
+
+  /**
    * A signal emitted when main area's current focus changes.
    */
   get currentChanged(): ISignal<this, ILabShell.IChangedArgs> {
     return this._currentChanged;
-  }
-
-  /**
-   * A signal emitted when the shell/dock panel change modes (single/multiple document).
-   */
-  get modeChanged(): ISignal<this, DockPanel.Mode> {
-    return this._modeChanged;
   }
 
   /**
@@ -562,11 +572,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   get presentationMode(): boolean {
     return this.hasClass('jp-mod-presentationMode');
   }
-
-  /**
-   * Enable/disable presentation mode (`jp-mod-presentationMode` CSS class) with
-   * a boolean.
-   */
   set presentationMode(value: boolean) {
     this.toggleClass('jp-mod-presentationMode', value);
   }
@@ -640,7 +645,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
       // Adjust menu and title
       this.add(this._menuHandler.panel, 'top', { rank: 100 });
-      // this._topHandler.addWidget(this._menuHandler.panel, 100)
       this._titleHandler.hide();
     }
 
@@ -653,11 +657,28 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * A signal emitted when the shell/dock panel change modes (single/multiple document).
+   */
+  get modeChanged(): ISignal<this, DockPanel.Mode> {
+    return this._modeChanged;
+  }
+
+  /**
    * Promise that resolves when state is first restored, returning layout
    * description.
    */
   get restored(): Promise<ILabShell.ILayout> {
     return this._restored.promise;
+  }
+
+  /**
+   * User customized shell layout.
+   */
+  get userLayout(): {
+    'single-document': ILabShell.IUserLayout;
+    'multiple-document': ILabShell.IUserLayout;
+  } {
+    return JSONExt.deepCopy(this._userLayout as any);
   }
 
   /**
@@ -690,7 +711,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
-  /*
+  /**
    * Activate the next Tab in the active TabBar.
    */
   activateNextTab(): void {
@@ -723,25 +744,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
-  /*
-   * Whether the add buttons for each main area tab bar are enabled.
-   */
-  get addButtonEnabled(): boolean {
-    return this._dockPanel.addButtonEnabled;
-  }
-
-  set addButtonEnabled(value: boolean) {
-    this._dockPanel.addButtonEnabled = value;
-  }
-
-  /*
-   * A signal emitted when the add button on a main area tab bar is clicked.
-   */
-  get addRequested(): ISignal<DockPanel, TabBar<Widget>> {
-    return this._dockPanel.addRequested;
-  }
-
-  /*
+  /**
    * Activate the previous Tab in the active TabBar.
    */
   activatePreviousTab(): void {
@@ -775,7 +778,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
-  /*
+  /**
    * Activate the next TabBar.
    */
   activateNextTabBar(): void {
@@ -787,7 +790,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
-  /*
+  /**
    * Activate the next TabBar.
    */
   activatePreviousTabBar(): void {
@@ -799,6 +802,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  /**
+   * Add a widget to the JupyterLab shell
+   *
+   * @param widget Widget
+   * @param area Area
+   * @param options Options
+   */
   add(
     widget: Widget,
     area: ILabShell.Area = 'main',
@@ -808,12 +818,18 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._delayedWidget.push({ widget, area, options });
       return;
     }
+
     let userPosition: ILabShell.IWidgetPosition | undefined;
     if (options?.type && this._userLayout[this.mode][options.type]) {
       userPosition = this._userLayout[this.mode][options.type];
+      this._idTypeMap.set(widget.id, options.type);
     } else {
       userPosition = this._userLayout[this.mode][widget.id];
     }
+    if (options?.type) {
+      this._idTypeMap.set(widget.id, options.type);
+    }
+
     area = userPosition?.area ?? area;
     options = {
       ...options,
@@ -840,6 +856,43 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       default:
         throw new Error(`Invalid area: ${area}`);
     }
+  }
+
+  /**
+   * Move a widget type to a new area.
+   *
+   * The type is determined from the `widget.id` and fallback to `widget.id`.
+   *
+   * #### Notes
+   * If `mode` is undefined, both mode are updated.
+   * The new layout is now persisted.
+   *
+   * @param widget Widget to move
+   * @param area New area
+   * @param mode Mode to change
+   * @returns The new user layout
+   */
+  move(
+    widget: Widget,
+    area: ILabShell.Area,
+    mode?: DockPanel.Mode
+  ): {
+    'single-document': ILabShell.IUserLayout;
+    'multiple-document': ILabShell.IUserLayout;
+  } {
+    const type = this._idTypeMap.get(widget.id) ?? widget.id;
+    for (const m of ['single-document', 'multiple-document'].filter(
+      c => !mode || c === mode
+    )) {
+      this._userLayout[m as DockPanel.Mode][type] = {
+        ...this._userLayout[m as DockPanel.Mode][type],
+        area
+      };
+    }
+
+    this.add(widget, area);
+
+    return this._userLayout;
   }
 
   /**
@@ -1612,6 +1665,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _skipLinkWidget: Private.SkipLinkWidget;
   private _titleHandler: Private.TitleHandler;
   private _bottomPanel: Panel;
+  private _idTypeMap = new Map<string, string>();
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _userLayout: {
@@ -1619,10 +1673,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'multiple-document': ILabShell.IUserLayout;
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
-  // private _userLayoutChanged = new Signal<
-  //   LabShell,
-  //   { [m: string]: ILabShell.IUserLayout }
-  // >(this);
 }
 
 namespace Private {

@@ -49,8 +49,12 @@ import {
   RankedMenu,
   Switch
 } from '@jupyterlab/ui-components';
-import { each, iter, toArray } from '@lumino/algorithm';
-import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
+import { find, iter, toArray } from '@lumino/algorithm';
+import {
+  JSONExt,
+  PromiseDelegate,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
@@ -766,13 +770,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
           });
 
           settings.changed.connect(onSettingsChanged);
-          // Private.activateSidebarSwitcher(
-          //   app,
-          //   labShell,
-          //   settingRegistry,
-          //   translator,
-          //   saved
-          // );
+          Private.activateSidebarSwitcher(app, labShell, settings, trans);
         });
       })
       .catch(reason => {
@@ -782,20 +780,29 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
 
     return restorer;
 
-    async function onSettingsChanged(): Promise<void> {
-      const result = await showDialog({
-        title: trans.__('Information'),
-        body: trans.__(
-          'User layout customization has changed. You may need to reload JupyterLab to see the changes.'
-        ),
-        buttons: [
-          Dialog.cancelButton(),
-          Dialog.okButton({ label: trans.__('Reload') })
-        ]
-      });
+    async function onSettingsChanged(
+      settings: ISettingRegistry.ISettings
+    ): Promise<void> {
+      if (
+        !JSONExt.deepEqual(
+          settings.composite['layout'] as ReadonlyPartialJSONValue,
+          labShell.userLayout as any
+        )
+      ) {
+        const result = await showDialog({
+          title: trans.__('Information'),
+          body: trans.__(
+            'User layout customization has changed. You may need to reload JupyterLab to see the changes.'
+          ),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.okButton({ label: trans.__('Reload') })
+          ]
+        });
 
-      if (result.button.accept) {
-        location.reload();
+        if (result.button.accept) {
+          location.reload();
+        }
       }
     }
   },
@@ -1214,8 +1221,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
 export default plugins;
 
 namespace Private {
-  type SidebarOverrides = { [id: string]: 'left' | 'right' };
-
   async function displayInformation(trans: TranslationBundle): Promise<void> {
     const result = await showDialog({
       title: trans.__('Information'),
@@ -1397,50 +1402,13 @@ namespace Private {
   export function activateSidebarSwitcher(
     app: JupyterFrontEnd,
     labShell: ILabShell,
-    settingRegistry: ISettingRegistry,
-    translator: ITranslator,
-    initial: ILabShell.ILayout
+    settings: ISettingRegistry.ISettings,
+    trans: TranslationBundle
   ): void {
-    const setting = '@jupyterlab/application-extension:sidebar';
-    const trans = translator.load('jupyterlab');
-    let overrides: SidebarOverrides = {};
-    const update = (_: ILabShell, layout: ILabShell.ILayout | void) => {
-      each(labShell.widgets('left'), widget => {
-        if (overrides[widget.id] && overrides[widget.id] === 'right') {
-          labShell.add(widget, 'right');
-          if (layout && layout.rightArea?.currentWidget === widget) {
-            labShell.activateById(widget.id);
-          }
-        }
-      });
-      each(labShell.widgets('right'), widget => {
-        if (overrides[widget.id] && overrides[widget.id] === 'left') {
-          labShell.add(widget, 'left');
-          if (layout && layout.leftArea?.currentWidget === widget) {
-            labShell.activateById(widget.id);
-          }
-        }
-      });
-    };
-    // Fetch overrides from the settings system.
-    void Promise.all([settingRegistry.load(setting), app.restored]).then(
-      ([settings]) => {
-        overrides = (settings.get('overrides').composite ||
-          {}) as SidebarOverrides;
-        settings.changed.connect(settings => {
-          overrides = (settings.get('overrides').composite ||
-            {}) as SidebarOverrides;
-          update(labShell);
-        });
-        labShell.layoutModified.connect(update);
-        update(labShell, initial);
-      }
-    );
-
     // Add a command to switch a side panels's side
     app.commands.addCommand(CommandIDs.switchSidebar, {
       label: trans.__('Switch Sidebar Side'),
-      execute: () => {
+      execute: async () => {
         // First, try to find the correct panel based on the application
         // context menu click. Bail if we don't find a sidebar for the widget.
         const contextNode: HTMLElement | undefined = app.contextMenuHitTest(
@@ -1453,26 +1421,46 @@ namespace Private {
         const id = contextNode.dataset['id']!;
         const leftPanel = document.getElementById('jp-left-stack');
         const node = document.getElementById(id);
-        let side: 'left' | 'right';
 
+        let newLayout: {
+          'single-document': ILabShell.IUserLayout;
+          'multiple-document': ILabShell.IUserLayout;
+        } | null = null;
+        // Move the panel to the other side.
         if (leftPanel && node && leftPanel.contains(node)) {
-          side = 'right';
+          const widget = find(labShell.widgets('left'), w => w.id === id);
+          if (widget) {
+            newLayout = labShell.move(widget, 'right');
+            labShell.activateById(widget.id);
+          }
         } else {
-          side = 'left';
+          const widget = find(labShell.widgets('right'), w => w.id === id);
+          if (widget) {
+            newLayout = labShell.move(widget, 'left');
+            labShell.activateById(widget.id);
+          }
         }
 
-        // Move the panel to the other side.
-        return settingRegistry.set(setting, 'overrides', {
-          ...overrides,
-          [id]: side
-        });
+        if (newLayout) {
+          settings
+            .set('layout', {
+              single: newLayout['single-document'],
+              multiple: newLayout['multiple-document']
+            } as any)
+            .catch(reason => {
+              console.error(
+                'Failed to save user layout customization.',
+                reason
+              );
+            });
+        }
       }
     });
 
     app.commands.commandExecuted.connect((registry, executed) => {
       if (executed.id === CommandIDs.resetLayout) {
-        settingRegistry.set(setting, 'overrides', {}).catch(reason => {
-          console.error('Failed to reset sidebar sides.', reason);
+        settings.remove('layout').catch(reason => {
+          console.error('Failed to remove user layout customization.', reason);
         });
       }
     });

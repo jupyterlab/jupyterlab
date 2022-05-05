@@ -28,15 +28,19 @@
     "layout": {
       "type": "object",
       "title": "Customize shell widget positioning",
-      "description": "Overrides default widget position in the application layout\ne.g. to position terminals in the right sidebar in multiple documents mode and in the down are in single document mode, {\n\t\"single\": { \"Terminal\": { \"area\": \"down\" } },\n\t\"multiple\": { \"Terminal\": { \"area\": \"right\" } }\n}.",
-      "default": {
-        "single": {},
-        "multiple": {}
-      },
+      "description": "Overrides default widget position in the application layout\ne.g. to position terminals in the right sidebar in multiple documents mode and in the down are in single document mode, {\n  \"single\": { \"Terminal\": { \"area\": \"down\" } },\n  \"multiple\": { \"Terminal\": { \"area\": \"right\" } }\n}.",
       "properties": {
-        "single": { "$ref": "#/definitions/layout" },
-        "multiple": { "$ref": "#/definitions/layout" }
+        "single": {
+          "$ref": "#/definitions/layout",
+          "default": {
+            "Linked Console": { "area": "down" },
+            "Inspector": { "area": "down" },
+            "Cloned Output": { "area": "down" }
+          }
+        },
+        "multiple": { "$ref": "#/definitions/layout", "default": {} }
       },
+      "default": { "single": {}, "multiple": {} },
       "additionalProperties": false
     }
   },
@@ -58,8 +62,7 @@
           },
           "additionalProperties": false
         }
-      },
-      "default": {}
+      }
     },
     "options": {
       "type": "object",
