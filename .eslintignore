@@ -43,4 +43,4 @@ typedoc-theme/
 
 # generated LSP interfaces
 packages/lsp/src/_*
- 
+
