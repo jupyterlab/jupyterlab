@@ -378,6 +378,7 @@ export class RenderedText extends RenderedCommon {
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-RenderedText');
+    this.addClass('jp-RenderedHTMLCommon');
   }
 
   /**
