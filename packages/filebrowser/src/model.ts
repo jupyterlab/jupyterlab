@@ -11,6 +11,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { IScore } from '@jupyterlab/ui-components';
 import {
   ArrayExt,
   ArrayIterator,
@@ -776,7 +777,7 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
     this._filter =
       options.filter ??
       (model => {
-        return { match: true };
+        return {};
       });
     this._filterDirectories = options.filterDirectories ?? true;
   }
@@ -801,23 +802,19 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
       if (!this._filterDirectories && value.type === 'directory') {
         return true;
       } else {
-        const { match, indices } = this._filter(value);
-        value.indices = indices;
-        return match;
+        const filtered = this._filter(value);
+        value.indices = filtered?.indices;
+        return !!filtered;
       }
     });
   }
 
-  setFilter(
-    filter: (value: Contents.IModel) => { match: boolean; indices?: number[] }
-  ): void {
+  setFilter(filter: (value: Contents.IModel) => Partial<IScore> | null): void {
     this._filter = filter;
     void this.refresh();
   }
 
-  private _filter: (
-    value: Contents.IModel
-  ) => { match: boolean; indices?: number[] };
+  private _filter: (value: Contents.IModel) => Partial<IScore> | null;
   private _filterDirectories: boolean;
 }
 
@@ -832,7 +829,7 @@ export namespace FilterFileBrowserModel {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => { match: boolean; indices?: number[] };
+    filter?: (value: Contents.IModel) => Partial<IScore> | null;
 
     /**
      * Filter directories

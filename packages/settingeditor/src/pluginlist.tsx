@@ -9,6 +9,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   classes,
   FilterBox,
+  IScore,
   LabIcon,
   settingsIcon,
   updateFilterFunction
@@ -241,7 +242,7 @@ export class PluginList extends ReactWidget {
    * @returns - String array of properties that match the search results.
    */
   getFilterString(
-    filter: (item: string) => { match: boolean },
+    filter: (item: string) => Partial<IScore> | null,
     props: ISettingRegistry.IProperty,
     definitions?: any,
     ref?: string
@@ -286,19 +287,19 @@ export class PluginList extends ReactWidget {
       // If this is the base case, check for matching title / description
       const subProps = props[value] as PartialJSONObject;
       if (!subProps) {
-        if (filter((props.title as string) ?? '').match) {
+        if (filter((props.title as string) ?? '')) {
           return props.title;
         }
-        if (filter(value).match) {
+        if (filter(value)) {
           return value;
         }
       }
 
       // If there are properties in the object, check for title / description
-      if (filter((subProps.title as string) ?? '').match) {
+      if (filter((subProps.title as string) ?? '')) {
         acc.push(subProps.title as string);
       }
-      if (filter(value).match) {
+      if (filter(value)) {
         acc.push(value);
       }
 
@@ -320,11 +321,11 @@ export class PluginList extends ReactWidget {
    * @param filter Filter function passed by search bar based on search value.
    */
   setFilter(
-    filter: (item: string) => { match: boolean; indices?: number[] },
+    filter: (item: string) => Partial<IScore> | null,
     query?: string
   ): void {
     this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
-      if (filter(plugin.schema.title ?? '').match) {
+      if (filter(plugin.schema.title ?? '')) {
         return null;
       }
       const filtered = this.getFilterString(

@@ -14,7 +14,7 @@ export interface IFilterBoxProps {
    * A function to callback when filter is updated.
    */
   updateFilter: (
-    filterFn: (item: string) => { match: boolean; indices?: number[] },
+    filterFn: (item: string) => Partial<IScore> | null,
     query?: string
   ) => void;
 
@@ -47,7 +47,7 @@ export interface IFilterBoxProps {
 /**
  * A text match score with associated content item.
  */
-interface IScore {
+export interface IScore {
   /**
    * The numerical score for the text match.
    */
@@ -114,16 +114,12 @@ export const updateFilterFunction = (
   useFuzzyFilter: boolean,
   caseSensitive?: boolean
 ) => {
-  return (item: string) => {
+  return (item: string): Partial<IScore> | null => {
     if (useFuzzyFilter) {
       // Run the fuzzy search for the item and query.
       const query = value.toLowerCase();
-      let score = fuzzySearch(item, query);
       // Ignore the item if it is not a match.
-      if (!score) {
-        return { match: false };
-      }
-      return { match: true, indices: score.indices };
+      return fuzzySearch(item, query);
     }
     if (!caseSensitive) {
       item = item.toLocaleLowerCase();
@@ -131,10 +127,9 @@ export const updateFilterFunction = (
     }
     const i = item.indexOf(value);
     if (i === -1) {
-      return { match: false };
+      return null;
     }
     return {
-      match: true,
       indices: [...Array(item.length).keys()].map(x => x + 1)
     };
   };
@@ -146,7 +141,7 @@ export const FilterBox = (props: IFilterBoxProps) => {
   if (props.forceRefresh) {
     useEffect(() => {
       props.updateFilter((item: string) => {
-        return { match: true };
+        return {};
       });
     }, []);
   }
