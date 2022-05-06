@@ -77,16 +77,24 @@ export function renameDialog(
 /**
  * Rename a file, asking for confirmation if it is overwriting another.
  */
+type shouldOverwriteType = (
+  path: string,
+  translator?: ITranslator
+) => Promise<boolean>;
 export function renameFile(
   manager: IDocumentManager,
   oldPath: string,
-  newPath: string
+  newPath: string,
+  shouldOverwriteCallback: shouldOverwriteType = shouldOverwrite
 ): Promise<Contents.IModel | null> {
   return manager.rename(oldPath, newPath).catch(error => {
-    if (error.message.indexOf('409') === -1) {
+    if (error.response.status !== 409) {
+      // if it's not caused by an already existing file, rethrow
       throw error;
     }
-    return shouldOverwrite(newPath).then(value => {
+
+    // otherwise, ask for confirmation
+    return shouldOverwriteCallback(newPath).then((value: boolean) => {
       if (value) {
         return manager.overwrite(oldPath, newPath);
       }
