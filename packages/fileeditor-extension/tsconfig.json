@@ -58,6 +58,9 @@
       "path": "../statusbar"
     },
     {
+      "path": "../toc"
+    },
+    {
       "path": "../translation"
     },
     {

@@ -24,6 +24,7 @@ import {
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
@@ -33,20 +34,23 @@ import {
   FileEditorFactory,
   FileEditorSearchProvider,
   IEditorTracker,
+  LaTeXTableOfContentsFactory,
+  MarkdownTableOfContentsFactory,
+  PythonTableOfContentsFactory,
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
+import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
-import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
-import { Session } from '@jupyterlab/services';
 
 export { Commands } from './commands';
 
@@ -69,6 +73,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IMainMenu,
     ILayoutRestorer,
     ISessionContextDialogs,
+    ITableOfContentsRegistry,
     IToolbarWidgetRegistry
   ],
   provides: IEditorTracker,
@@ -217,6 +222,7 @@ function activate(
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
   sessionDialogs: ISessionContextDialogs | null,
+  tocRegistry: ITableOfContentsRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
@@ -429,6 +435,12 @@ function activate(
     .catch((reason: Error) => {
       console.error(reason.message);
     });
+
+  if (tocRegistry) {
+    tocRegistry.add(new LaTeXTableOfContentsFactory(tracker));
+    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker));
+    tocRegistry.add(new PythonTableOfContentsFactory(tracker));
+  }
 
   return tracker;
 }

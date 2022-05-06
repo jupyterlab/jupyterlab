@@ -46,6 +46,9 @@
       "path": "../shared-models"
     },
     {
+      "path": "../toc"
+    },
+    {
       "path": "../translation"
     },
     {

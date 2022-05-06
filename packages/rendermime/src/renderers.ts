@@ -411,6 +411,16 @@ export namespace renderMarkdown {
      */
     translator?: ITranslator;
   }
+
+  /**
+   * Create a normalized id for a header element.
+   *
+   * @param header Header element
+   * @returns Normalized id
+   */
+  export function createHeaderId(header: Element): string {
+    return (header.textContent ?? '').replace(/ /g, '-');
+  }
 }
 
 /**
@@ -832,7 +842,7 @@ namespace Private {
       const headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
-        header.id = (header.textContent ?? '').replace(/ /g, '-');
+        header.id = renderMarkdown.createHeaderId(header);
         const anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';

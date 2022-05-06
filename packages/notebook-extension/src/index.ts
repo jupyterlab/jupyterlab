@@ -17,6 +17,7 @@ import {
   ICommandPalette,
   IKernelStatusModel,
   InputDialog,
+  ISanitizer,
   ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
@@ -53,6 +54,7 @@ import {
   NotebookModelFactory,
   NotebookPanel,
   NotebookSearchProvider,
+  NotebookToCFactory,
   NotebookTools,
   NotebookTracker,
   NotebookTrustStatus,
@@ -65,10 +67,11 @@ import {
   IObservableUndoableList
 } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addAboveIcon,
@@ -282,6 +285,8 @@ namespace CommandIDs {
   export const invokeCompleter = 'completer:invoke-notebook';
 
   export const selectCompleter = 'completer:select-notebook';
+
+  export const tocRunCells = 'toc:run-cells';
 }
 
 /**
@@ -786,6 +791,22 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const tocPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:toc',
+  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
+  optional: [IMarkdownParser],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    tocRegistry: ITableOfContentsRegistry,
+    sanitizer: ISanitizer,
+    mdParser: IMarkdownParser | null
+  ): void => {
+    tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -805,7 +826,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelStatus,
   lineColStatus,
   completerPlugin,
-  searchProvider
+  searchProvider,
+  tocPlugin
 ];
 export default plugins;
 
@@ -826,6 +848,7 @@ function activateNotebookTools(
   const activeCellTool = new NotebookTools.ActiveCellTool();
   const editable = NotebookTools.createEditableToggle(translator);
   const slideShow = NotebookTools.createSlideShowSelector(translator);
+  const tocBaseNumbering = NotebookTools.createToCBaseNumbering(translator);
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
     editorFactory,
@@ -902,6 +925,7 @@ function activateNotebookTools(
   notebookTools.addItem({ tool: activeCellTool, section: 'common', rank: 1 });
   notebookTools.addItem({ tool: editable, section: 'common', rank: 2 });
   notebookTools.addItem({ tool: slideShow, section: 'common', rank: 3 });
+  notebookTools.addItem({ tool: tocBaseNumbering, section: 'common', rank: 4 });
 
   notebookTools.addItem({
     tool: cellMetadataEditor,
@@ -2744,8 +2768,9 @@ function addCommands(
     },
     isEnabled
   });
+
   commands.addCommand(CommandIDs.toggleCollapseCmd, {
-    label: 'Toggle Collapse Notebook Heading',
+    label: trans.__('Toggle Collapse Notebook Heading'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -2755,7 +2780,7 @@ function addCommands(
     isEnabled: isEnabledAndHeadingSelected
   });
   commands.addCommand(CommandIDs.collapseAllCmd, {
-    label: 'Collapse All Headings',
+    label: trans.__('Collapse All Headings'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -2764,12 +2789,49 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.expandAllCmd, {
-    label: 'Expand All Headings',
+    label: trans.__('Expand All Headings'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
         return NotebookActions.expandAllHeadings(current.content);
       }
+    }
+  });
+
+  commands.addCommand(CommandIDs.tocRunCells, {
+    label: trans.__('Select and Run Cell(s) for this Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, { activate: false, ...args });
+      if (current === null) {
+        return;
+      }
+
+      const activeCell = current.content.activeCell;
+      let lastIndex = current.content.activeCellIndex;
+
+      if (activeCell instanceof MarkdownCell) {
+        const cells = current.content.widgets;
+        const level = activeCell.headingInfo.level;
+        for (
+          let i = current.content.activeCellIndex + 1;
+          i < cells.length;
+          i++
+        ) {
+          const cell = cells[i];
+          if (
+            cell instanceof MarkdownCell &&
+            // cell.headingInfo.level === -1 if no heading
+            cell.headingInfo.level >= 0 &&
+            cell.headingInfo.level <= level
+          ) {
+            break;
+          }
+          lastIndex = i;
+        }
+      }
+
+      current.content.extendContiguousSelectionTo(lastIndex);
+      NotebookActions.run(current.content, current.sessionContext);
     }
   });
 }
