@@ -20,7 +20,7 @@ RENAME_SESSION = 127
 
 class JupyterRoom(YRoom):
     def __init__(self, type):
-        super().__init__(has_internal_ydoc=True)
+        super().__init__(ready=False)
         self.type = type
         self.cleaner = None
         self.watcher = None
@@ -30,12 +30,12 @@ class JupyterRoom(YRoom):
 class JupyterWebsocketServer(WebsocketServer):
     def get_room(self, path: str) -> JupyterRoom:
         file_type, file_path = path.split(":", 1)
-        room = self.rooms.get(file_path, JupyterRoom(file_type))
-        self.rooms[file_path] = room
-        return room
+        if file_path not in self.rooms.keys():
+            self.rooms[file_path] = JupyterRoom(file_type)
+        return self.rooms[file_path]
 
 
-WEBSOCKET_SERVER = JupyterWebsocketServer(has_internal_ydoc=True, auto_clean_rooms=False)
+WEBSOCKET_SERVER = JupyterWebsocketServer(rooms_ready=False, auto_clean_rooms=False)
 
 
 class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
@@ -76,15 +76,15 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         if self.room.cleaner is not None:
             self.room.cleaner.cancel()
 
-        if not self.room.ydoc.initialized.is_set():
+        if not self.room.ready:
             model = await ensure_async(
                 self.contents_manager.get(self.file_path, type=self.file_type)
             )
             self.last_modified = model["last_modified"]
-            # check again if initialized, because loading the file can be async
-            if not self.room.ydoc.initialized.is_set():
+            # check again if ready, because loading the file can be async
+            if not self.room.ready:
                 self.room.document.source = model["content"]
-                self.room.document.ydoc.initialized.set()
+                self.room.ready = True
                 self.room.watcher = asyncio.create_task(self.watch_file())
                 # save the document when changed
                 self.room.document.observe(self.on_document_change)
