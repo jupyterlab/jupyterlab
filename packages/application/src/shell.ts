@@ -96,6 +96,13 @@ export namespace ILabShell {
    */
   export type IOptions = {
     /**
+     * Whether the layout should wait to be restored before adding widgets or not.
+     *
+     * #### Notes
+     * It defaults to true
+     */
+    waitForRestore?: boolean;
+    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -291,6 +298,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     super();
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
+    if (options?.waitForRestore === false) {
+      this._userLayout = { 'multiple-document': {}, 'single-document': {} };
+    }
 
     const trans = ((options && options.translator) || nullTranslator).load(
       'jupyterlab'
@@ -831,10 +841,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
 
     area = userPosition?.area ?? area;
-    options = {
-      ...options,
-      ...userPosition?.options
-    };
+    options =
+      options || userPosition?.options
+        ? {
+            ...options,
+            ...userPosition?.options
+          }
+        : undefined;
 
     switch (area || 'main') {
       case 'bottom':

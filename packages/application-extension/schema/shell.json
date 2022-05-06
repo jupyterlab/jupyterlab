@@ -40,7 +40,14 @@
         },
         "multiple": { "$ref": "#/definitions/layout", "default": {} }
       },
-      "default": { "single": {}, "multiple": {} },
+      "default": {
+        "single": {
+          "Linked Console": { "area": "down" },
+          "Inspector": { "area": "down" },
+          "Cloned Output": { "area": "down" }
+        },
+        "multiple": {}
+      },
       "additionalProperties": false
     }
   },

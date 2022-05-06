@@ -786,7 +786,10 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
       if (
         !JSONExt.deepEqual(
           settings.composite['layout'] as ReadonlyPartialJSONValue,
-          labShell.userLayout as any
+          {
+            single: labShell.userLayout['single-document'],
+            multiple: labShell.userLayout['multiple-document']
+          } as any
         )
       ) {
         const result = await showDialog({
