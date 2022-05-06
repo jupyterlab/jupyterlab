@@ -6,7 +6,7 @@ import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+import { IScore, newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { FileBrowser } from './browser';
@@ -53,7 +53,7 @@ export namespace FileDialog {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => { match: boolean; indices?: number[] };
+    filter?: (value: Contents.IModel) => Partial<IScore> | null;
 
     /**
      * The application language translator.
@@ -109,7 +109,7 @@ export namespace FileDialog {
     return getOpenFiles({
       ...options,
       filter: model => {
-        return { match: model.type === 'directory' };
+        return model.type === 'directory' ? {} : null;
       }
     });
   }
@@ -123,7 +123,7 @@ class OpenDialog
   implements Dialog.IBodyWidget<Contents.IModel[]> {
   constructor(
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => { match: boolean; indices?: number[] },
+    filter?: (value: Contents.IModel) => Partial<IScore> | null,
     translator?: ITranslator,
     filterDirectories?: boolean
   ) {
@@ -232,7 +232,7 @@ namespace Private {
   export const createFilteredFileBrowser = (
     id: string,
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => { match: boolean; indices?: number[] },
+    filter?: (value: Contents.IModel) => Partial<IScore> | null,
     options: IFileBrowserFactory.IOptions = {},
     translator?: ITranslator,
     filterDirectories?: boolean
