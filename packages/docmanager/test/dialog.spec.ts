@@ -1,5 +1,5 @@
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 import { Widget } from '@lumino/widgets';
 import * as Mock from '@jupyterlab/testutils/lib/mock';
 import { DocumentManager, renameFile } from '../src';
@@ -35,12 +35,8 @@ describe('docregistry/dialog', () => {
         status: 409
       }
     };
-    manager.rename = (oldPath, newPath) => {
-      const renamePromise = new Promise(function (resolve, reject) {
-        throw alreadyExistsError;
-      }) as Promise<Contents.IModel>;
-      return renamePromise;
-    };
+    const spyRename = jest.spyOn(manager, 'rename');
+    spyRename.mockRejectedValue(alreadyExistsError);
   });
 
   describe('@jupyterlab/docmanager', () => {
