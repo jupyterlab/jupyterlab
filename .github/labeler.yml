@@ -302,6 +302,12 @@ pkg:ui-components:
   - packages/ui-components-extension/**/*
   - packages/ui-components-extension/*
 
+pkg:user:
+  - packages/user/**/*
+  - packages/user/*
+  - packages/user-extension/**/*
+  - packages/user-extension/*
+
 pkg:vdom:
   - packages/vdom/**/*
   - packages/vdom/*
