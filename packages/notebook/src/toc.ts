@@ -154,7 +154,7 @@ export class NotebookToCModel extends TableOfContentsModel<
    * is hidden or not.
    */
   protected get isAlwaysActive(): boolean {
-    return true;
+    return this.configuration.numberHeaders ?? true;
   }
 
   /**
