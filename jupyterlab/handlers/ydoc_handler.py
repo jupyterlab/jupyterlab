@@ -35,12 +35,10 @@ class JupyterWebsocketServer(WebsocketServer):
         return self.rooms[file_path]
 
 
-WEBSOCKET_SERVER = JupyterWebsocketServer(rooms_ready=False, auto_clean_rooms=False)
-
-
 class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
 
     saving_document: Optional[asyncio.Task]
+    websocket_server = JupyterWebsocketServer(rooms_ready=False, auto_clean_rooms=False)
 
     # Override max_message size to 1GB
     @property
@@ -69,8 +67,8 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         self._message_queue = asyncio.Queue()
         self.file_type, self.file_path = path.split(":", 1)
         self.saving_document = None
-        self.room = WEBSOCKET_SERVER.get_room(path)
-        asyncio.create_task(WEBSOCKET_SERVER.serve(self))
+        self.room = self.websocket_server.get_room(path)
+        asyncio.create_task(self.websocket_server.serve(self))
 
         # cancel the deletion of the room if it was scheduled
         if self.room.cleaner is not None:
@@ -126,7 +124,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             new_room_name = message[1:].decode("utf-8").split(":", 1)[1]
             self.path = f"{self.file_type}:{new_room_name}"
             self.file_path = new_room_name
-            WEBSOCKET_SERVER.rename_room(new_room_name, from_room=self.room)
+            self.websocket_server.rename_room(new_room_name, from_room=self.room)
             # send rename acknowledge
             self.write_message(bytes([RENAME_SESSION, 1]), binary=True)
 
@@ -143,7 +141,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         if self.room.watcher:
             self.room.watcher.cancel()
         self.room.document.unobserve()
-        WEBSOCKET_SERVER.delete_room(room=self.room)
+        self.websocket_server.delete_room(room=self.room)
 
     def on_document_change(self, event):
         # unobserve and observe again because the structure of the document may have changed
@@ -159,7 +157,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
     async def maybe_save_document(self):
         # save after 1 second of inactivity to prevent too frequent saving
         await asyncio.sleep(1)
-        path = WEBSOCKET_SERVER.get_room_name(self.room)
+        path = self.websocket_server.get_room_name(self.room)
         model = await ensure_async(
             self.contents_manager.get(path, content=False, type=self.file_type)
         )
