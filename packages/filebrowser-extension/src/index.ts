@@ -101,9 +101,6 @@ namespace CommandIDs {
 
   export const openBrowserTab = 'filebrowser:open-browser-tab';
 
-  export const openBrowserTabInSimpleMode =
-    'filebrowser:open-browser-tab-in-simple-mode';
-
   export const paste = 'filebrowser:paste';
 
   export const createNewDirectory = 'filebrowser:create-new-directory';
