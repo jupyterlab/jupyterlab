@@ -122,6 +122,7 @@ junit.xml
 # ms IDE stuff
 *.code-workspace
 .history
-.vscode/settings.json
+.vscode/*
+!.vscode/extension.json
 
 .jupyter_releaser_checkout

@@ -11,34 +11,42 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  createLatexGenerator,
-  createMarkdownGenerator,
-  createNotebookGenerator,
-  createPythonGenerator,
-  createRenderedMarkdownGenerator,
-  INotebookHeading,
   ITableOfContentsRegistry,
+  ITableOfContentsTracker,
   TableOfContents,
-  TableOfContentsRegistry
+  TableOfContentsPanel,
+  TableOfContentsRegistry,
+  TableOfContentsTracker
 } from '@jupyterlab/toc';
-import { ITranslator } from '@jupyterlab/translation';
-import { tocIcon } from '@jupyterlab/ui-components';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  collapseAllIcon,
+  CommandToolbarButton,
+  ellipsesIcon,
+  expandAllIcon,
+  MenuSvg,
+  numberingIcon,
+  tocIcon,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * A namespace for command IDs of table of contents plugin.
  */
 namespace CommandIDs {
-  export const runCells = 'toc:run-cells';
+  export const displayNumbering = 'toc:display-numbering';
+
+  export const displayH1Numbering = 'toc:display-h1-numbering';
+
+  export const displayOutputNumbering = 'toc:display-outputs-numbering';
 
   export const showPanel = 'toc:show-panel';
+
+  export const toggleCollapse = 'toc:toggle-collapse';
 }
 
 /**
@@ -46,90 +54,74 @@ namespace CommandIDs {
  *
  * @private
  * @param app - Jupyter application
- * @param docmanager - document manager
- * @param rendermime - rendered MIME registry
+ * @param registry - Table of contents registry
  * @param translator - translator
- * @param editorTracker - editor tracker
  * @param restorer - application layout restorer
  * @param labShell - Jupyter lab shell
- * @param markdownViewerTracker - Markdown viewer tracker
- * @param notebookTracker - notebook tracker
  * @param settingRegistry - setting registry
  * @returns table of contents registry
  */
 async function activateTOC(
   app: JupyterFrontEnd,
-  docmanager: IDocumentManager,
-  rendermime: IRenderMimeRegistry,
-  translator: ITranslator,
-  editorTracker?: IEditorTracker,
-  restorer?: ILayoutRestorer,
-  labShell?: ILabShell,
-  markdownViewerTracker?: IMarkdownViewerTracker,
-  notebookTracker?: INotebookTracker,
-  settingRegistry?: ISettingRegistry
-): Promise<ITableOfContentsRegistry> {
-  const trans = translator.load('jupyterlab');
+  tocRegistry: ITableOfContentsRegistry,
+  translator?: ITranslator | null,
+  restorer?: ILayoutRestorer | null,
+  labShell?: ILabShell | null,
+  settingRegistry?: ISettingRegistry | null
+): Promise<ITableOfContentsTracker> {
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
+  let configuration = { ...TableOfContents.defaultConfig };
+
   // Create the ToC widget:
-  const toc = new TableOfContents({
-    docmanager,
-    rendermime,
-    translator
-  });
-
-  // Create the ToC registry:
-  const registry = new TableOfContentsRegistry();
-
-  // Add the ToC to the left area:
+  const toc = new TableOfContentsPanel(translator ?? undefined);
   toc.title.icon = tocIcon;
   toc.title.caption = trans.__('Table of Contents');
   toc.id = 'table-of-contents';
   toc.node.setAttribute('role', 'region');
   toc.node.setAttribute('aria-label', trans.__('Table of Contents section'));
 
-  app.shell.add(toc, 'left', { rank: 400 });
-
-  app.commands.addCommand(CommandIDs.runCells, {
-    execute: args => {
-      if (!notebookTracker) {
-        return null;
-      }
-
-      const panel = notebookTracker.currentWidget;
-      if (panel == null) {
-        return;
-      }
-
-      const cells = panel.content.widgets;
-      if (cells === undefined) {
-        return;
-      }
-
-      const activeCell = (toc.activeEntry as INotebookHeading).cellRef;
-
-      if (activeCell instanceof MarkdownCell) {
-        let level = activeCell.headingInfo.level;
-        for (let i = cells.indexOf(activeCell) + 1; i < cells.length; i++) {
-          const cell = cells[i];
-          if (
-            cell instanceof MarkdownCell &&
-            cell.headingInfo.level <= level &&
-            cell.headingInfo.level > -1
-          ) {
-            break;
-          }
-
-          if (cell instanceof CodeCell) {
-            void CodeCell.execute(cell, panel.sessionContext);
-          }
-        }
-      } else {
-        if (activeCell instanceof CodeCell) {
-          void CodeCell.execute(activeCell, panel.sessionContext);
-        }
+  app.commands.addCommand(CommandIDs.displayH1Numbering, {
+    label: trans.__('Show first-level heading number'),
+    execute: () => {
+      if (toc.model) {
+        toc.model.setConfiguration({
+          numberingH1: !toc.model.configuration.numberingH1
+        });
       }
     },
-    label: trans.__('Run Cell(s)')
+    isEnabled: () =>
+      toc.model?.supportedOptions.includes('numberingH1') ?? false,
+    isToggled: () => toc.model?.configuration.numberingH1 ?? false
+  });
+
+  app.commands.addCommand(CommandIDs.displayNumbering, {
+    label: trans.__('Show heading number in the document'),
+    icon: args => (args.toolbar ? numberingIcon : undefined),
+    execute: () => {
+      if (toc.model) {
+        toc.model.setConfiguration({
+          numberHeaders: !toc.model.configuration.numberHeaders
+        });
+        app.commands.notifyCommandChanged(CommandIDs.displayNumbering);
+      }
+    },
+    isEnabled: () =>
+      toc.model?.supportedOptions.includes('numberHeaders') ?? false,
+    isToggled: () => toc.model?.configuration.numberHeaders ?? false
+  });
+
+  app.commands.addCommand(CommandIDs.displayOutputNumbering, {
+    label: trans.__('Show output headings'),
+    execute: () => {
+      if (toc.model) {
+        toc.model.setConfiguration({
+          includeOutput: !toc.model.configuration.includeOutput
+        });
+      }
+    },
+    isEnabled: () =>
+      toc.model?.supportedOptions.includes('includeOutput') ?? false,
+    isToggled: () => toc.model?.configuration.includeOutput ?? false
   });
 
   app.commands.addCommand(CommandIDs.showPanel, {
@@ -138,6 +130,35 @@ async function activateTOC(
       app.shell.activateById(toc.id);
     }
   });
+
+  function someExpanded(model: TableOfContents.Model): boolean {
+    return model.headings.some(h => !(h.collapsed ?? false));
+  }
+
+  app.commands.addCommand(CommandIDs.toggleCollapse, {
+    label: () =>
+      toc.model && !someExpanded(toc.model)
+        ? trans.__('Expand All Headings')
+        : trans.__('Collapse All Headings'),
+    icon: args =>
+      args.toolbar
+        ? toc.model && !someExpanded(toc.model)
+          ? expandAllIcon
+          : collapseAllIcon
+        : undefined,
+    execute: () => {
+      if (toc.model) {
+        if (someExpanded(toc.model)) {
+          toc.model.toggleCollapse({ collapsed: true });
+        } else {
+          toc.model.toggleCollapse({ collapsed: false });
+        }
+      }
+    },
+    isEnabled: () => toc.model !== null
+  });
+
+  const tracker = new TableOfContentsTracker();
 
   if (restorer) {
     // Add the ToC widget to the application restorer:
@@ -148,7 +169,36 @@ async function activateTOC(
   let settings: ISettingRegistry.ISettings | undefined;
   if (settingRegistry) {
     try {
-      settings = await settingRegistry.load(extension.id);
+      settings = await settingRegistry.load(registry.id);
+      const updateSettings = (plugin: ISettingRegistry.ISettings) => {
+        const composite = plugin.composite;
+        for (const key of [...Object.keys(configuration)]) {
+          const value = composite[key] as any;
+          if (value !== undefined) {
+            configuration[key] = value;
+          }
+        }
+
+        if (labShell) {
+          toArray(labShell.widgets('main')).forEach(widget => {
+            const model = tracker.get(widget);
+            if (model) {
+              model.setConfiguration(configuration);
+            }
+          });
+        } else {
+          if (app.shell.currentWidget) {
+            const model = tracker.get(app.shell.currentWidget);
+            if (model) {
+              model.setConfiguration(configuration);
+            }
+          }
+        }
+      };
+      if (settings) {
+        settings.changed.connect(updateSettings);
+        updateSettings(settings);
+      }
     } catch (error) {
       console.error(
         `Failed to load settings for the Table of Contents extension.\n\n${error}`
@@ -156,56 +206,64 @@ async function activateTOC(
     }
   }
 
-  // Create a notebook generator:
-  if (notebookTracker) {
-    const notebookGenerator = createNotebookGenerator(
-      notebookTracker,
-      toc,
-      rendermime.sanitizer,
-      translator,
-      settings
-    );
-    registry.add(notebookGenerator);
-  }
+  // Set up the panel toolbar
+  const numbering = new CommandToolbarButton({
+    commands: app.commands,
+    id: CommandIDs.displayNumbering,
+    args: {
+      toolbar: true
+    },
+    label: ''
+  });
+  numbering.addClass('jp-toc-numberingButton');
+  toc.toolbar.addItem('display-numbering', numbering);
 
-  // Create a Markdown generator:
-  if (editorTracker) {
-    const markdownGenerator = createMarkdownGenerator(
-      editorTracker,
-      toc,
-      rendermime.sanitizer,
-      translator,
-      settings
-    );
-    registry.add(markdownGenerator);
+  toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
-    // Create a LaTeX generator:
-    const latexGenerator = createLatexGenerator(editorTracker);
-    registry.add(latexGenerator);
+  toc.toolbar.addItem(
+    'collapse-all',
+    new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.toggleCollapse,
+      args: {
+        toolbar: true
+      },
+      label: ''
+    })
+  );
 
-    // Create a Python generator:
-    const pythonGenerator = createPythonGenerator(editorTracker);
-    registry.add(pythonGenerator);
-  }
+  const toolbarMenu = new MenuSvg({ commands: app.commands });
+  toolbarMenu.addItem({
+    command: CommandIDs.displayH1Numbering
+  });
+  toolbarMenu.addItem({
+    command: CommandIDs.displayOutputNumbering
+  });
+  const menuButton = new ToolbarButton({
+    tooltip: trans.__('More actions…'),
+    icon: ellipsesIcon,
+    actualOnClick: true,
+    onClick: () => {
+      const bbox = menuButton.node.getBoundingClientRect();
+      toolbarMenu.open(bbox.x, bbox.bottom);
+    }
+  });
+  toc.toolbar.addItem('submenu', menuButton);
 
-  // Create a rendered Markdown generator:
-  if (markdownViewerTracker) {
-    const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
-      markdownViewerTracker,
-      toc,
-      rendermime.sanitizer,
-      translator,
-      settings
-    );
-    registry.add(renderedMarkdownGenerator);
-  }
+  // Add the ToC to the left area:
+  app.shell.add(toc, 'left', { rank: 400 });
 
   // Update the ToC when the active widget changes:
   if (labShell) {
     labShell.currentChanged.connect(onConnect);
   }
 
-  return registry;
+  // Connect to current widget
+  app.restored.then(() => {
+    onConnect();
+  });
+
+  return tracker;
 
   /**
    * Callback invoked when the active widget changes.
@@ -217,41 +275,63 @@ async function activateTOC(
     if (!widget) {
       return;
     }
-    let generator = registry.find(widget);
-    if (!generator) {
-      // If the previously used widget is still available, stick with it.
-      // Otherwise, set the current ToC widget to null.
-      if (toc.current && toc.current.widget.isDisposed) {
-        toc.current = null;
+    let model = tracker.get(widget);
+    if (!model) {
+      model = tocRegistry.getModel(widget, configuration) ?? null;
+      if (model) {
+        tracker.add(widget, model);
       }
-      return;
+
+      widget.disposed.connect(() => {
+        model?.dispose();
+      });
     }
-    toc.current = { widget, generator };
+
+    if (toc.model) {
+      toc.model.collapseChanged.disconnect(onCollapseChange);
+    }
+
+    toc.model = model;
+    toc.model?.collapseChanged.connect(onCollapseChange);
+    setToolbarButtonsState();
+  }
+
+  function setToolbarButtonsState() {
+    app.commands.notifyCommandChanged(CommandIDs.displayNumbering);
+    app.commands.notifyCommandChanged(CommandIDs.toggleCollapse);
+  }
+
+  function onCollapseChange() {
+    app.commands.notifyCommandChanged(CommandIDs.toggleCollapse);
   }
 }
 
 /**
- * Initialization data for the ToC extension.
- *
- * @private
+ * Table of contents registry plugin.
  */
-const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
+const registry: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc-extension:registry',
   autoStart: true,
   provides: ITableOfContentsRegistry,
-  requires: [IDocumentManager, IRenderMimeRegistry, ITranslator],
-  optional: [
-    IEditorTracker,
-    ILayoutRestorer,
-    ILabShell,
-    IMarkdownViewerTracker,
-    INotebookTracker,
-    ISettingRegistry
-  ],
+  activate: (): ITableOfContentsRegistry => {
+    // Create the ToC registry
+    return new TableOfContentsRegistry();
+  }
+};
+
+/**
+ * Table of contents tracker plugin.
+ */
+const tracker: JupyterFrontEndPlugin<ITableOfContentsTracker> = {
+  id: '@jupyterlab/toc-extension:tracker',
+  autoStart: true,
+  provides: ITableOfContentsTracker,
+  requires: [ITableOfContentsRegistry],
+  optional: [ITranslator, ILayoutRestorer, ILabShell, ISettingRegistry],
   activate: activateTOC
 };
 
 /**
  * Exports.
  */
-export default extension;
+export default [registry, tracker];

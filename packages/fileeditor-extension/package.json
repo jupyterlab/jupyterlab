@@ -54,6 +54,7 @@
     "@jupyterlab/services": "^7.0.0-alpha.9",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
     "@jupyterlab/statusbar": "^4.0.0-alpha.9",
+    "@jupyterlab/toc": "^6.0.0-alpha.9",
     "@jupyterlab/translation": "^4.0.0-alpha.9",
     "@jupyterlab/ui-components": "^4.0.0-alpha.24",
     "@lumino/algorithm": "^1.9.1",

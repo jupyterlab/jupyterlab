@@ -1,13 +1,5 @@
 [
   {
-    "id": "apputils:activate-command-palette",
-    "label": "Activate Command Palette",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl Shift C"
-    ]
-  },
-  {
     "id": "apputils:load-statedb",
     "label": "Load state for the current workspace.",
     "caption": "",
@@ -24,6 +16,14 @@
     "label": "Reset state when loading for the workspace.",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "apputils:activate-command-palette",
+    "label": "Activate Command Palette",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift C"
+    ]
   },
   {
     "id": "apputils:print",
@@ -54,84 +54,8 @@
     ]
   },
   {
-    "id": "docmanager:clone",
-    "label": "New View for ",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:rename",
-    "label": "Rename…",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:delete",
-    "label": "Delete ",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:show-in-file-browser",
-    "label": "Show in File Browser",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:delete-file",
-    "label": "Delete ",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:new-untitled",
-    "label": "New undefined",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:open",
-    "label": "Open the provided `path`.",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:reload",
-    "label": "Reload  from Disk",
-    "caption": "Reload contents from disk",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:restore-checkpoint",
-    "label": "Revert  to Checkpoint…",
-    "caption": "Revert contents to previous checkpoint",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:save",
-    "label": "Save ",
-    "caption": "Save and create checkpoint",
-    "shortcuts": [
-      "Ctrl S"
-    ]
-  },
-  {
-    "id": "docmanager:save-all",
-    "label": "Save All",
-    "caption": "Save all open documents",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:save-as",
-    "label": "Save  As…",
-    "caption": "Save with new path",
-    "shortcuts": [
-      "Ctrl Shift S"
-    ]
-  },
-  {
-    "id": "docmanager:toggle-autosave",
-    "label": "Autosave Documents",
+    "id": "docmanager:open-browser-tab",
+    "label": "Open in New Browser Tab",
     "caption": "",
     "shortcuts": []
   },
@@ -294,14 +218,96 @@
     ]
   },
   {
-    "id": "help:about",
-    "label": "About JupyterLab",
+    "id": "docmanager:clone",
+    "label": "New View for ",
     "caption": "",
     "shortcuts": []
   },
   {
-    "id": "help:launch-classic-notebook",
-    "label": "Launch Classic Notebook",
+    "id": "docmanager:rename",
+    "label": "Rename…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:delete",
+    "label": "Delete ",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:show-in-file-browser",
+    "label": "Show in File Browser",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:delete-file",
+    "label": "Delete ",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:new-untitled",
+    "label": "New undefined",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:open",
+    "label": "Open the provided `path`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:reload",
+    "label": "Reload  from Disk",
+    "caption": "Reload contents from disk",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:restore-checkpoint",
+    "label": "Revert  to Checkpoint…",
+    "caption": "Revert contents to previous checkpoint",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:save",
+    "label": "Save ",
+    "caption": "Save and create checkpoint",
+    "shortcuts": [
+      "Ctrl S"
+    ]
+  },
+  {
+    "id": "docmanager:save-all",
+    "label": "Save All",
+    "caption": "Save all open documents",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:save-as",
+    "label": "Save  As…",
+    "caption": "Save with new path",
+    "shortcuts": [
+      "Ctrl Shift S"
+    ]
+  },
+  {
+    "id": "docmanager:toggle-autosave",
+    "label": "Autosave Documents",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:download",
+    "label": "Download",
+    "caption": "Download the file to your computer",
+    "shortcuts": []
+  },
+  {
+    "id": "help:about",
+    "label": "About JupyterLab",
     "caption": "",
     "shortcuts": []
   },
@@ -313,6 +319,7 @@
   },
   {
     "id": "apputils:change-theme",
+    "label": "Switch to the provided `theme`.",
     "caption": "",
     "shortcuts": []
   },
@@ -341,14 +348,8 @@
     "shortcuts": []
   },
   {
-    "id": "docmanager:download",
-    "label": "Download",
-    "caption": "Download the file to your computer",
-    "shortcuts": []
-  },
-  {
-    "id": "docmanager:open-browser-tab",
-    "label": "Open in New Browser Tab",
+    "id": "rendermime:handle-local-link",
+    "label": "Handle Local Link",
     "caption": "",
     "shortcuts": []
   },
@@ -439,34 +440,6 @@
     ]
   },
   {
-    "id": "rendermime:handle-local-link",
-    "label": "Handle Local Link",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "inspector:open",
-    "label": "Show Contextual Help",
-    "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ]
-  },
-  {
-    "id": "extensionmanager:show-panel",
-    "label": "Extension Manager",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl Shift X"
-    ]
-  },
-  {
-    "id": "extensionmanager:toggle",
-    "label": "Enable Extension Manager",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
     "id": "markdownviewer:open",
     "label": "Markdown Preview",
     "caption": "",
@@ -499,6 +472,42 @@
     ]
   },
   {
+    "id": "inspector:open",
+    "label": "Show Contextual Help",
+    "caption": "Live updating code documentation from the active kernel",
+    "shortcuts": [
+      "Ctrl I"
+    ]
+  },
+  {
+    "id": "inspector:close",
+    "label": "Hide Contextual Help",
+    "caption": "Live updating code documentation from the active kernel",
+    "shortcuts": [
+      "Ctrl I"
+    ]
+  },
+  {
+    "id": "inspector:toggle",
+    "label": "Show Contextual Help",
+    "caption": "Live updating code documentation from the active kernel",
+    "shortcuts": []
+  },
+  {
+    "id": "extensionmanager:show-panel",
+    "label": "Extension Manager",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift X"
+    ]
+  },
+  {
+    "id": "extensionmanager:toggle",
+    "label": "Enable Extension Manager",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "workspace-ui:save-as",
     "label": "Save Current Workspace As…",
     "caption": "",
@@ -525,18 +534,6 @@
   {
     "id": "filebrowser:copy-download-link",
     "label": "Copy Download Link",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:activate",
-    "label": "Open the file browser for the provided `path`.",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "filebrowser:hide-main",
-    "label": "Hide the file browser.",
     "caption": "",
     "shortcuts": []
   },
@@ -645,6 +642,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:refresh",
+    "label": "Refresh File List",
+    "caption": "Refresh the file browser.",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:rename",
     "label": "Rename",
     "caption": "",
@@ -699,8 +702,26 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-file-checkboxes",
+    "label": "Show File Checkboxes",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:search",
     "label": "Search on File Names",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:activate",
+    "label": "Open the file browser for the provided `path`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:hide-main",
+    "label": "Hide the file browser.",
     "caption": "",
     "shortcuts": []
   },
@@ -858,7 +879,7 @@
   },
   {
     "id": "tabsmenu:activate-by-id",
-    "label": "",
+    "label": "Activate a widget by its `id`.",
     "caption": "",
     "shortcuts": []
   },
@@ -1090,6 +1111,12 @@
     "id": "notebook:paste-cell-above",
     "label": "Paste Cells Above",
     "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:duplicate-below",
+    "label": "Duplicate Cells Below",
+    "caption": "Copy the selected cells and paste them below the selection",
     "shortcuts": []
   },
   {
@@ -1561,8 +1588,8 @@
   },
   {
     "id": "terminal:set-theme",
-    "label": "",
-    "caption": "",
+    "label": "Set terminal theme to the provided `theme`.",
+    "caption": "Set the terminal theme",
     "shortcuts": []
   },
   {
@@ -1597,6 +1624,7 @@
   },
   {
     "id": "notebook:export-to-format",
+    "label": "Save and Export Notebook to the given `format`.",
     "caption": "",
     "shortcuts": []
   },
@@ -1747,6 +1775,12 @@
   {
     "id": "console:interaction-mode",
     "label": "Set the console interaction mode.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "@jupyter-widgets/jupyterlab-manager:saveWidgetState",
+    "label": "Save Widget State Automatically",
     "caption": "",
     "shortcuts": []
   },
@@ -2074,6 +2108,12 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "English",
+    "shortcuts": []
+  },
+  {
+    "id": "jupyterlab-translation:zh_CN",
+    "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "caption": "Chinese (Simplified, China) - 中文 (简体, 中国)",
     "shortcuts": []
   },
   {

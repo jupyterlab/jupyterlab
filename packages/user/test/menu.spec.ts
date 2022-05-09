@@ -20,16 +20,15 @@ describe('user/menu', () => {
       const promiseUserChanged = signalToPromise(user.changed);
       const promiseTitleChanged = signalToPromise(menu.title.changed);
 
-      const givenName = 'jovyan';
-      const familyName = '';
-      user.fromJSON({ ...user.toJSON(), givenName, familyName });
+      const name = 'jovyan';
+      user.fromJSON({ ...user.toJSON(), name, displayName: name });
 
       const [senderUserChanged] = await promiseUserChanged;
       const [senderTitleChanged] = await promiseTitleChanged;
 
       expect(senderUserChanged).toBe(user);
       expect(senderTitleChanged).toBe(menu.title);
-      expect(menu.title.label).toBe(givenName);
+      expect(menu.title.label).toBe(name);
     });
   });
 });
