@@ -261,17 +261,18 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean): Promise<void> {
-    // FIXME: revert/save is broken
-    // revert will change with #12306 anyway
     let promise;
-    if (isNew) {
-      promise = this._save();
+    if (PageConfig.getOption('collaborative') == 'true') {
+      promise = this._loadContext();
     } else {
-      if (PageConfig.getOption('collaborative') == 'true') {
-        promise = this._loadContext();
+      if (isNew) {
+        promise = this._save();
       } else {
         promise = this._revert();
       }
+      promise = promise.then(() => {
+        this._model.initialize();
+      });
     }
     return promise;
   }
