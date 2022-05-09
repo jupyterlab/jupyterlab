@@ -46,6 +46,7 @@ jobs:
             js-toc,
             js-translation,
             js-ui-components,
+            js-user,
             js-testutils,
           ]
       fail-fast: false
