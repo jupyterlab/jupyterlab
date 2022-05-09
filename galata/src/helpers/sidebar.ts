@@ -141,7 +141,22 @@ export class SidebarHelper {
           pluginId
         )) as ISettingRegistry;
         const SHELL_ID = '@jupyterlab/application-extension:shell';
-        await settingRegistry.remove(SHELL_ID, 'layout');
+        const sidebars = {
+          Debugger: 'left',
+          'Property Inspector': 'left',
+          'Extension Manager': 'left',
+          'File Browser': 'left',
+          'Sessions and Tabs': 'left',
+          'Table of Contents': 'left'
+        };
+        const currentLayout = (await settingRegistry.get(
+          SHELL_ID,
+          'layout'
+        )) as any;
+        await settingRegistry.set(SHELL_ID, 'layout', {
+          single: { ...currentLayout.single, ...sidebars },
+          multiple: { ...currentLayout.multiple, ...sidebars }
+        });
       },
       { pluginId: PLUGIN_ID_SETTINGS as keyof IPluginNameToInterfaceMap }
     );

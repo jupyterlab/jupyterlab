@@ -48,6 +48,8 @@ test.describe('Default', () => {
 
     await page.waitForSelector('div[role="main"] >> text=Lorenz.ipynb');
 
+    await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+
     expect(
       await page
         .locator('div[role="main"] >> .jp-NotebookPanel-toolbar')
@@ -56,6 +58,7 @@ test.describe('Default', () => {
   });
 
   test('should use default menu bar', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -215,6 +218,8 @@ test.describe('Customized', () => {
 
     await page.waitForSelector('div[role="main"] >> text=Lorenz.ipynb');
 
+    await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+
     expect(
       await page
         .locator('div[role="main"] >> .jp-NotebookPanel-toolbar')
@@ -223,6 +228,7 @@ test.describe('Customized', () => {
   });
 
   test('should use customized menu bar', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
