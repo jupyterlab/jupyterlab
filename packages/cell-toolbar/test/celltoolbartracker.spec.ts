@@ -6,23 +6,20 @@ import {
   createToolbarFactory,
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
-import { CellBarExtension } from '@jupyterlab/cell-toolbar';
+import { CellBarExtension, CellToolbarTracker } from '@jupyterlab/cell-toolbar';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { ITranslator } from '@jupyterlab/translation';
-
 import { CommandRegistry } from '@lumino/commands';
-import { Signal } from '@lumino/signaling';
-
-import { CellToolbarTracker } from '../src/celltoolbartracker';
+import { Widget } from '@lumino/widgets';
 
 function testToolbarFactory() {
   const pluginId = '@jupyterlab/cell-toolbar';
 
   const toolbarRegistry = new ToolbarWidgetRegistry({
-    defaultFactory: jest.fn()
+    defaultFactory: jest.fn().mockImplementation(() => new Widget())
   });
 
   const bar: ISettingRegistry.IPlugin = {
