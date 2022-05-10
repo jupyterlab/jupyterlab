@@ -88,7 +88,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
                 self.room.document.observe(self.on_document_change)
 
     async def watch_file(self):
-        poll_interval = self.settings["collab_file_poll_interval"]
+        poll_interval = self.settings["collaborative_file_poll_interval"]
         if not poll_interval:
             self.room.watcher = None
             return

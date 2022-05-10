@@ -38,7 +38,7 @@ bumped their major version (following semver convention):
    this provider with ``ICompletionProviderManager`` token.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-   ``acquireLock`` and ``releaseLock`` have been removed from ``IDocumentProvider``.
+   ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
    ``renameAck`` is not optional anymore in ``IDocumentProvider``.
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    ``@jupyterlab/documentsearch:plugin`` renamed ``@jupyterlab/documentsearch-extension:plugin``

@@ -537,7 +537,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
-    collab_file_poll_interval = Int(
+    collaborative_file_poll_interval = Int(
         1,
         config=True,
         help="""The period in seconds to check for file changes in the back-end (relevant only when
@@ -719,8 +719,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config
         self.serverapp.web_app.settings[
-            "collab_file_poll_interval"
-        ] = self.collab_file_poll_interval
+            "collaborative_file_poll_interval"
+        ] = self.collaborative_file_poll_interval
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
