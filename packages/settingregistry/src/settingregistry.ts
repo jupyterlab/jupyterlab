@@ -1191,39 +1191,19 @@ export namespace SettingRegistry {
 
     // Merge array element depending on the type
     addition.forEach(item => {
-      switch (item.type) {
-        case 'command':
-          if (item.command) {
-            const refIndex = items.findIndex(
-              ref =>
-                ref.name === item.name &&
-                ref.command === item.command &&
-                JSONExt.deepEqual(ref.args ?? {}, item.args ?? {})
-            );
-            if (refIndex < 0) {
-              items.push({ ...item });
-            } else {
-              if (warn) {
-                console.warn(
-                  `Toolbar item for command '${item.command}' is duplicated.`
-                );
-              }
-              items[refIndex] = { ...items[refIndex], ...item };
-            }
-          }
-          break;
-        case 'spacer':
-        default: {
-          const refIndex = items.findIndex(ref => ref.name === item.name);
-          if (refIndex < 0) {
-            items.push({ ...item });
-          } else {
-            if (warn) {
-              console.warn(`Toolbar item '${item.name}' is duplicated.`);
-            }
-            items[refIndex] = { ...items[refIndex], ...item };
-          }
+      // Name must be unique so it sufficient to only compare it
+      const refIndex = items.findIndex(ref => ref.name === item.name);
+      if (refIndex < 0) {
+        if (item.type === 'command' && !item.command) {
+          // Don't add invalid item
+          return;
         }
+        items.push({ ...item });
+      } else {
+        if (warn) {
+          console.warn(`Toolbar item '${item.name}' is duplicated.`);
+        }
+        items[refIndex] = { ...items[refIndex], ...item };
       }
     });
 
