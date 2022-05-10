@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { UUID } from '@lumino/coreutils';
+
 import { editorServices } from '@jupyterlab/codemirror';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
@@ -9,13 +11,15 @@ import { Clipboard } from '@jupyterlab/apputils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { Context } from '@jupyterlab/docregistry';
+import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
   INotebookModel,
   Notebook,
   NotebookModel,
+  NotebookModelFactory,
   NotebookPanel,
+  NotebookWidgetFactory,
   StaticNotebook
 } from '@jupyterlab/notebook';
 
@@ -24,6 +28,8 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
 
 import { defaultRenderMime as localRendermime } from './rendermime';
+
+import * as Mock from './mock';
 
 /**
  * Stub for the require() function.
@@ -162,5 +168,44 @@ export namespace NBTestUtils {
     const model = new NotebookModel();
     model.fromJSON(DEFAULT_CONTENT);
     notebook.model = model;
+  }
+
+  export function createNotebookWidgetFactory(
+    toolbarFactory?: (widget: NotebookPanel) => DocumentRegistry.IToolbarItem[]
+  ): NotebookWidgetFactory {
+    return new NotebookWidgetFactory({
+      name: 'notebook',
+      fileTypes: ['notebook'],
+      rendermime: defaultRenderMime(),
+      toolbarFactory,
+      contentFactory: createNotebookPanelFactory(),
+      mimeTypeService: mimeTypeService,
+      editorConfig: defaultEditorConfig
+    });
+  }
+
+  /**
+   * Create a context for a file.
+   */
+  export async function createMockContext(
+    startKernel = false
+  ): Promise<Context<INotebookModel>> {
+    const path = UUID.uuid4() + '.txt';
+    const manager = new Mock.ServiceManagerMock();
+    const factory = new NotebookModelFactory({});
+
+    const context = new Context({
+      manager,
+      factory,
+      path,
+      kernelPreference: {
+        shouldStart: startKernel,
+        canStart: startKernel,
+        autoStartDefault: startKernel
+      }
+    });
+    await context.initialize(true);
+    await context.sessionContext.initialize();
+    return context;
   }
 }

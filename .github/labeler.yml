@@ -1,10 +1,12 @@
 Design System CSS:
   - '**/*.css'
   - '*.css'
-  
+
 documentation:
   - docs/**/*
   - docs/*
+  - '*.md'
+  - '**/*.md'
 
 tag:CSS:
   - '**/*.css'
@@ -21,8 +23,8 @@ tag:Examples:
 tag:Testing:
   - tests/**/*
   - tests/*
-  - ui-tests/**/*
-  - ui-tests/*
+  - galata/**/*
+  - galata/*
 
 ######################
 #   Package Labels   #
@@ -43,6 +45,12 @@ pkg:apputils:
 pkg:attachments:
   - packages/attachments/**/*
   - packages/attachments/*
+
+pkg:cell-toolbar:
+  - packages/cell-toolbar/**/*
+  - packages/cell-toolbar/*
+  - packages/cell-toolbar-extension/**/*
+  - packages/cell-toolbar-extension/*
 
 pkg:cells:
   - packages/cells/**/*
@@ -103,7 +111,7 @@ pkg:docprovider:
   - packages/docprovider/*
   - packages/docprovider-extension/**/*
   - packages/docprovider-extension/*
-  
+
 pkg:docregistry:
   - packages/docregistry/**/*
   - packages/docregistry/*
@@ -281,7 +289,7 @@ pkg:toc:
   - packages/toc/*
   - packages/toc-extension/**/*
   - packages/toc-extension/*
-  
+
 pkg:tooltip:
   - packages/tooltip/**/*
   - packages/tooltip/*
@@ -299,6 +307,12 @@ pkg:ui-components:
   - packages/ui-components/*
   - packages/ui-components-extension/**/*
   - packages/ui-components-extension/*
+
+pkg:user:
+  - packages/user/**/*
+  - packages/user/*
+  - packages/user-extension/**/*
+  - packages/user-extension/*
 
 pkg:vdom:
   - packages/vdom/**/*

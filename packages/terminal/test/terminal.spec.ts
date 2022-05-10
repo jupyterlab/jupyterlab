@@ -138,8 +138,8 @@ describe('terminal/index', () => {
     });
 
     describe('#refresh()', () => {
-      it('should refresh the widget', () => {
-        return widget.refresh();
+      it('should refresh the widget', async () => {
+        await expect(widget.refresh()).resolves.not.toThrow();
       });
     });
 

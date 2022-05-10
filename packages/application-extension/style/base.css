@@ -7,3 +7,8 @@
 #jp-MainLogo {
   width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
 }
+
+#jp-topbar-spacer {
+  flex-grow: 1;
+  flex-shrink: 1;
+}

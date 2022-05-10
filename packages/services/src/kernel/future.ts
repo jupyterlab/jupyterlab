@@ -153,8 +153,11 @@ export abstract class KernelFutureHandler<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
-    this._kernel.sendInputReply(content);
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void {
+    this._kernel.sendInputReply(content, parent_header);
   }
 
   /**
@@ -325,7 +328,7 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export const noOp = () => {
+  export const noOp = (): void => {
     /* no-op */
   };
 

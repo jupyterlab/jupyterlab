@@ -1,4 +1,6 @@
+import { Text } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LabIcon } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
 import { ContextMenu, Menu } from '@lumino/widgets';
 
@@ -57,7 +59,18 @@ export namespace MenuFactory {
   ): Menu {
     const menu = menuFactory(item);
     menu.id = item.id;
-    menu.title.label = item.label ?? capitalize(menu.id);
+
+    // Set the label in case the menu factory did not.
+    if (!menu.title.label) {
+      menu.title.label = item.label ?? Text.titleCase(menu.id.trim());
+    }
+
+    if (item.icon) {
+      menu.title.icon = LabIcon.resolve({ icon: item.icon });
+    }
+    if (item.mnemonic !== undefined) {
+      menu.title.mnemonic = item.mnemonic;
+    }
 
     item.items
       ?.filter(item => !item.disabled)
@@ -152,7 +165,7 @@ export namespace MenuFactory {
         const existingItem = menu?.items.find(
           (i, idx) =>
             i.type === entry.type &&
-            i.command === entry.command &&
+            i.command === (entry.command ?? '') &&
             i.submenu?.id === entry.submenu?.id
         );
 
@@ -179,20 +192,5 @@ export namespace MenuFactory {
         }
       });
     }
-  }
-
-  /**
-   * Capitalize a string
-   *
-   * @param s String to capitalize
-   * @returns The capitalized string
-   */
-  function capitalize(s: string): string {
-    return s
-      .trim()
-      .split(' ')
-      .filter(part => part.trim().length > 0)
-      .map(part => part.replace(/^\w/, c => c.toLocaleUpperCase()))
-      .join(' ');
   }
 }

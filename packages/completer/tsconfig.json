@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/*", "src/default/*"],
   "references": [
     {
       "path": "../apputils"
@@ -14,6 +14,12 @@
     },
     {
       "path": "../coreutils"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime"
     },
     {
       "path": "../services"

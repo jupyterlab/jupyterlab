@@ -61,11 +61,13 @@
     "context": [
       {
         "command": "console:clear",
-        "selector": ".jp-CodeConsole-content"
+        "selector": ".jp-CodeConsole-content",
+        "rank": 10
       },
       {
         "command": "console:restart-kernel",
-        "selector": ".jp-CodeConsole"
+        "selector": ".jp-CodeConsole",
+        "rank": 30
       }
     ]
   },
@@ -100,57 +102,72 @@
     "editorConfig": {
       "properties": {
         "autoClosingBrackets": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "Auto Closing Brackets"
         },
         "cursorBlinkRate": {
           "type": "number",
-          "title": "Cursor blinking rate",
+          "title": "Cursor Blinking Rate",
           "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
         },
         "fontFamily": {
-          "type": ["string", "null"]
+          "type": ["string", "null"],
+          "title": "Font Family"
         },
         "fontSize": {
           "type": ["integer", "null"],
+          "title": "Font Size",
           "minimum": 1,
           "maximum": 100
         },
         "lineHeight": {
+          "title": "Line Height",
           "type": ["number", "null"]
         },
         "lineNumbers": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "Show Line Numbers"
         },
         "lineWrap": {
           "type": "string",
-          "enum": ["off", "on", "wordWrapColumn", "bounded"]
+          "enum": ["off", "on", "wordWrapColumn", "bounded"],
+          "title": "Line Wrap"
         },
         "matchBrackets": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "Match Brackets"
         },
         "readOnly": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "Read Only"
         },
         "insertSpaces": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "Insert Spaces"
         },
         "tabSize": {
-          "type": "number"
+          "type": "number",
+          "title": "Tab Size"
         },
         "wordWrapColumn": {
-          "type": "integer"
+          "type": "integer",
+          "title": "Word Wrap Column"
         },
         "rulers": {
           "type": "array",
+          "title": "Rulers",
           "items": {
             "type": "number"
           }
         },
         "codeFolding": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "Code Folding"
         },
         "lineWiseCopyCut": {
-          "type": "boolean"
+          "type": "boolean",
+          "title": "Line-wise Ctrl-C",
+          "description": "When enabled, which is the default, doing copy or cut when there is no selection will copy or cut the whole lines that have cursors on them."
         }
       },
       "additionalProperties": false,

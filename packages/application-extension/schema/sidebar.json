@@ -16,7 +16,7 @@
       "type": "object",
       "title": "Overrides",
       "default": {},
-      "description": "Overrides for where to show sidebar items\ne.g., {\"tab-manager\": \"right\"}",
+      "description": "Overrides for where to show sidebar items\ne.g., {\"jp-debugger-sidebar\": \"left\"}\nYou can also change this by right-clicking the sidebar icons.",
       "properties": {},
       "additionalProperties": {
         "type": "string",

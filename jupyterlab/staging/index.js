@@ -6,24 +6,6 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-// Promise.allSettled polyfill, until our supported browsers implement it
-// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
-if (Promise.allSettled === undefined) {
-  Promise.allSettled = promises =>
-    Promise.all(
-      promises.map(promise =>
-        promise
-          .then(value => ({
-            status: "fulfilled",
-            value,
-          }), reason => ({
-            status: "rejected",
-            reason,
-          }))
-      )
-    );
-}
-
 import './style.js';
 
 async function createModule(scope, module) {
@@ -213,7 +195,9 @@ export async function main() {
   var devMode = (PageConfig.getOption('devMode') || '').toLowerCase() === 'true';
 
   if (exposeAppInBrowser || devMode) {
+    // This is deprecated in favor of more generic window.jupyterapp
     window.jupyterlab = lab;
+    window.jupyterapp = lab;
   }
 
   // Handle a browser test.

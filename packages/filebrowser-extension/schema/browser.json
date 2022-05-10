@@ -17,6 +17,23 @@
           {
             "command": "filebrowser:open-path",
             "rank": 1
+          },
+          {
+            "command": "filebrowser:open-url",
+            "rank": 1
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "command": "filebrowser:toggle-main",
+            "rank": 1
+          },
+          {
+            "command": "filebrowser:toggle-hidden-files",
+            "rank": 9.95
           }
         ]
       },
@@ -45,29 +62,9 @@
         "rank": 0
       },
       {
-        "command": "filebrowser:create-new-directory",
-        "selector": ".jp-DirListing-content",
-        "rank": 1
-      },
-      {
         "command": "filebrowser:open",
         "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 1
-      },
-      {
-        "command": "filebrowser:create-new-file",
-        "selector": ".jp-DirListing-content",
-        "rank": 2
-      },
-      {
-        "command": "filebrowser:create-new-markdown-file",
-        "selector": ".jp-DirListing-content",
-        "rank": 3
-      },
-      {
-        "command": "filebrowser:paste",
-        "selector": ".jp-DirListing-content",
-        "rank": 4
       },
       {
         "type": "separator",
@@ -93,6 +90,11 @@
         "command": "filebrowser:copy",
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
         "rank": 8
+      },
+      {
+        "command": "filebrowser:paste",
+        "selector": ".jp-DirListing-content",
+        "rank": 8.5
       },
       {
         "command": "filebrowser:duplicate",
@@ -125,9 +127,29 @@
         "rank": 14
       },
       {
+        "command": "filebrowser:toggle-file-checkboxes",
+        "selector": ".jp-DirListing-header",
+        "rank": 15
+      },
+      {
         "command": "filebrowser:share-main",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 15
+        "rank": 16
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 50
+      },
+      {
+        "command": "filebrowser:create-new-file",
+        "selector": ".jp-DirListing-content",
+        "rank": 51
+      },
+      {
+        "command": "filebrowser:create-new-directory",
+        "selector": ".jp-DirListing-content",
+        "rank": 55
       }
     ]
   },
@@ -193,11 +215,29 @@
       "description": "Whether to apply fuzzy algorithm while filtering on file names",
       "default": true
     },
+    "filterDirectories": {
+      "type": "boolean",
+      "title": "Filter directories",
+      "description": "Whether to apply the search on directories",
+      "default": true
+    },
     "showLastModifiedColumn": {
       "type": "boolean",
       "title": "Show last modified column",
       "description": "Whether to show the last modified column",
       "default": true
+    },
+    "showHiddenFiles": {
+      "type": "boolean",
+      "title": "Show hidden files",
+      "description": "Whether to show hidden files. The server parameter `ContentsManager.allow_hidden` must be set to `True` to display hidden files.",
+      "default": false
+    },
+    "showFileCheckboxes": {
+      "type": "boolean",
+      "title": "Use checkboxes to select items",
+      "description": "Whether to show checkboxes next to files and folders",
+      "default": false
     }
   },
   "additionalProperties": false,

@@ -3,21 +3,41 @@
   "description": "Debugger settings",
   "jupyter.lab.setting-icon": "ui-components:bug",
   "jupyter.lab.setting-icon-label": "Debugger",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-kernel",
+        "items": [
+          { "type": "separator", "rank": 1.2 },
+          { "command": "debugger:restart-debug", "rank": 1.2 }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "command": "debugger:show-panel",
+            "rank": 5
+          }
+        ]
+      }
+    ],
+    "context": [
+      {
+        "command": "debugger:inspect-variable",
+        "selector": ".jp-DebuggerVariables-body .jp-DebuggerVariables-grid"
+      },
+      {
+        "command": "debugger:render-mime-variable",
+        "selector": ".jp-DebuggerVariables-body"
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
-      "command": "debugger:debug-console",
-      "keys": ["Accel Shift I"],
-      "selector": ".jp-CodeConsole"
-    },
-    {
-      "command": "debugger:debug-file",
-      "keys": ["Accel Shift I"],
-      "selector": ".jp-FileEditor"
-    },
-    {
-      "command": "debugger:debug-notebook",
-      "keys": ["Accel Shift I"],
-      "selector": ".jp-Notebook"
+      "command": "debugger:show-panel",
+      "keys": ["Accel Shift E"],
+      "selector": "body"
     },
     {
       "command": "debugger:continue",
@@ -49,7 +69,10 @@
     "variableFilters": {
       "properties": {
         "xpython": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }
@@ -77,6 +100,12 @@
           "__spec__"
         ]
       }
+    },
+    "defaultKernelSourcesFilter": {
+      "title": "Default kernel sources regexp filter",
+      "description": "A regular expression filter to apply by default when showing the kernel sources",
+      "type": "string",
+      "default": ""
     }
   },
   "additionalProperties": false,

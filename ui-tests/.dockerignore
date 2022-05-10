@@ -1,7 +1,0 @@
-.dockerignore
-Dockerfile
-docker/docker-compose.yml
-
-jlab_root/
-node_modules/
-test-output/

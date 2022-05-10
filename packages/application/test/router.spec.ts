@@ -107,7 +107,7 @@ describe('apputils', () => {
     });
 
     describe('#navigate()', () => {
-      it('cannot be tested since changing location is a security risk', () => {
+      it.skip('cannot be tested since changing location is a security risk', () => {
         // Router#navigate() changes window.location.href but karma tests
         // disallow changing the window location.
       });

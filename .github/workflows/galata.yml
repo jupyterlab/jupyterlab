@@ -1,0 +1,178 @@
+name: UI Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    name: Visual Regression Tests
+    timeout-minutes: 80
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
+
+      - name: Launch JupyterLab
+        run: |
+          cd galata
+          jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+
+      - name: Install browser
+        run: |
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - name: Test
+        run: |
+          cd galata
+          jlpm run test
+          mv galata/test-results galata/test-jupyterlab-results || true
+          # Run once benchmark tests to ensure they have no regression
+          BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-test-assets
+          path: |
+            galata/test-jupyterlab-results
+            galata/test-results
+
+      - name: Upload Galata Test report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-galata-report
+          path: |
+            galata/playwright-report
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log
+
+  test-documentation:
+    name: Visual Regression Documentation
+    # Python version is frozen through strategy.matrix.python-version
+    # Python dependencies are frozen in the installation step
+    # Note: IPython is among the frozen package
+    timeout-minutes: 80
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        # Freeze Python version because it appears in console header
+        python-version: ['3.9.9']
+    steps:
+      - name: Checkout JupyterLab
+        uses: actions/checkout@v2
+        with:
+          path: core
+
+      - name: Checkout demo project
+        uses: actions/checkout@v2
+        with:
+          repository: jupyterlab/jupyterlab-demo
+          ref: master
+          path: demo
+
+      - name: Get demo folder
+        run: |
+          echo "DEMO_DIR=$PWD" >> $GITHUB_ENV
+        working-directory: demo
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          set -ex
+          # Install chinese font
+          sudo apt-get update
+          sudo apt-get install fonts-dejavu fonts-noto
+
+          # Freeze the packages to ensure consistent look and feel
+          # IPython is frozen because its version is displayed in
+          # the console header
+          pip install .[docs-screenshots]
+          bash ./scripts/ci_install.sh
+
+          # Build dev-mode
+          jlpm run build
+        working-directory: core
+
+      - name: Launch JupyterLab
+        env:
+          JUPYTERLAB_GALATA_ROOT_DIR: ${{ env.DEMO_DIR }}
+        run: |
+          set -ex
+          cd galata
+          (jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode > /tmp/jupyterlab_server.log 2>&1) &
+        working-directory: core
+
+      - name: Install browser
+        run: |
+          set -ex
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+        working-directory: core
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - name: Test
+        run: |
+          cd galata
+          jlpm run test:doc
+        working-directory: core
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-documentation-test-assets
+          path: |
+            core/galata/test-results
+
+      - name: Upload Galata Test report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jupyterlab-documentation-report
+          path: |
+            core/galata/playwright-report
+
+      - name: Stop JupyterLab
+        if: always()
+        run: |
+          kill -s SIGTERM $(pgrep jupyter-lab)
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log

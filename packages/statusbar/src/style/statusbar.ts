@@ -60,3 +60,7 @@ export const item = style(
 
 export const clickedItem = style(clicked);
 export const interactiveItem = style(interactiveHover);
+
+export const hoverItem = style({
+  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
+});

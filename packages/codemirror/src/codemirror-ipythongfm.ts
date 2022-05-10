@@ -30,6 +30,35 @@ CodeMirror.defineMode(
 
     return CodeMirror.multiplexingMode(
       gfmMode,
+      // force parsing inline code and code blocks with gfmMode to prevent
+      // parsing them as tex see:
+      // https://github.com/jupyterlab/jupyterlab/issues/6774
+      {
+        open: '<code>',
+        close: '</code>',
+        mode: gfmMode,
+        parseDelimiters: true
+      },
+      {
+        open: '<pre>',
+        close: '</pre>',
+        mode: gfmMode,
+        parseDelimiters: true
+      },
+      {
+        open: '```',
+        close: '```',
+        mode: gfmMode,
+        parseDelimiters: true
+      },
+      {
+        open: '`',
+        close: '`',
+        mode: gfmMode,
+        parseDelimiters: true
+      },
+      // only if we did not match a code element or block,
+      // then try do parse using the tex mode
       {
         open: '$$',
         close: '$$',
@@ -37,7 +66,9 @@ CodeMirror.defineMode(
         delimStyle: 'delimit'
       },
       {
-        open: '$',
+        // `$math mode$` is only matched if both opening
+        // and closing $ are in the same line
+        open: /\$(?=.*\$)/,
         close: '$',
         mode: texMode,
         delimStyle: 'delimit'

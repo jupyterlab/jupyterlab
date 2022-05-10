@@ -3,8 +3,7 @@
   "extends": "./tsconfigbase",
   "exclude": [
     "**/test/**",
-    "**/testutils/**",
-    "**/ui-tests/**"
+    "**/testutils/**"
   ],
   "compilerOptions": {
     "strictNullChecks": false,
@@ -12,7 +11,12 @@
       "@jupyterlab/*": [
         "./packages/*/src"
       ]
-    }
+    },
+    "moduleResolution": "node",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "references": [
     {
@@ -26,6 +30,12 @@
     },
     {
       "path": "./packages/attachments"
+    },
+    {
+      "path": "./packages/cell-toolbar"
+    },
+    {
+      "path": "./packages/cell-toolbar-extension"
     },
     {
       "path": "./packages/cells"
@@ -166,6 +176,9 @@
       "path": "./packages/markdownviewer-extension"
     },
     {
+      "path": "./packages/markedparser-extension"
+    },
+    {
       "path": "./packages/mathjax2"
     },
     {
@@ -269,6 +282,12 @@
     },
     {
       "path": "./packages/ui-components-extension"
+    },
+    {
+      "path": "./packages/user"
+    },
+    {
+      "path": "./packages/user-extension"
     },
     {
       "path": "./packages/vdom"

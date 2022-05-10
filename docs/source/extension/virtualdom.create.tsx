@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Widget } from '@lumino/widgets';
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/ui-components';
 
 function MyComponent() {
   return <div>My Widget</div>;

@@ -5,24 +5,41 @@
 
 import commander from 'commander';
 import * as path from 'path';
+import * as os from 'os';
 import { handlePackage } from './update-dist-tag';
 import * as utils from './utils';
+
+/**
+ * Sleep for a specified period.
+ *
+ * @param wait The time in milliseconds to wait.
+ */
+async function sleep(wait: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, wait));
+}
 
 // Specify the program signature.
 commander
   .description('Publish the JS packages')
   .option(
     '--skip-build',
-    'Skip the clean and build step (if there was a network error during a JS publish'
+    'Skip the build step (if there was a network error during a JS publish'
   )
   .option('--skip-publish', 'Skip publish and only handle tags')
   .option('--skip-tags', 'publish assets but do not handle tags')
   .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
   .action(async (options: any) => {
+    utils.exitOnUncaughtException();
+
+    // No-op if we're in release helper dry run
+    if (process.env.RH_DRY_RUN === 'true') {
+      return;
+    }
+
     if (!options.skipPublish) {
       if (!options.skipBuild) {
-        utils.run('jlpm run build:packages');
+        utils.run('jlpm run build:all');
       }
 
       if (!options.dryRun) {
@@ -35,7 +52,7 @@ commander
 
       // Ensure a clean git environment
       try {
-        utils.run('git commit -am "bump version"');
+        utils.run('git commit -am "[ci skip] bump version"');
       } catch (e) {
         // do nothing
       }
@@ -49,11 +66,12 @@ commander
       if (options.yes) {
         cmd += '  --yes ';
       }
-      if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
-        utils.run(`${cmd} -m "Publish"`);
-      } else {
-        utils.run(`${cmd} --dist-tag=next -m "Publish"`);
+
+      let tag = 'latest';
+      if (!/\d+\.\d+\.\d+$/.test(curr)) {
+        tag = 'next';
       }
+      utils.run(`${cmd} --dist-tag=${tag} -m "Publish"`);
     }
 
     // Fix up any tagging issues.
@@ -70,6 +88,35 @@ commander
           }
         });
       });
+    }
+
+    // Make sure all current JS packages are published.
+    // Try and install them into a temporary local npm package.
+    console.log('Checking for published packages...');
+    const installDir = os.tmpdir();
+    utils.run('npm init -y', { cwd: installDir, stdio: 'pipe' }, true);
+    const specifiers: string[] = [];
+    utils.getCorePaths().forEach(async pkgPath => {
+      const pkgJson = path.join(pkgPath, 'package.json');
+      const pkgData = utils.readJSONFile(pkgJson);
+      specifiers.push(`${pkgData.name}@${pkgData.version}`);
+    });
+
+    let attempt = 0;
+    while (attempt < 10) {
+      try {
+        utils.run(`npm install ${specifiers.join(' ')}`, { cwd: installDir });
+        break;
+      } catch (e) {
+        console.error(e);
+        console.log('Sleeping for one minute...');
+        await sleep(1 * 60 * 1000);
+        attempt += 1;
+      }
+    }
+    if (attempt == 10) {
+      console.error('Could not install packages');
+      process.exit(1);
     }
 
     // Emit a system beep.

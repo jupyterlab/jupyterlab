@@ -1,0 +1,90 @@
+{
+  "name": "@jupyterlab/galata",
+  "version": "5.0.0-alpha.9",
+  "description": "JupyterLab UI Testing Framework",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
+  "files": [
+    "lib/**/*.{js,ts,map}",
+    "!lib/inpage/index.*",
+    "style/index.css",
+    "style/index.js"
+  ],
+  "scripts": {
+    "build": "jlpm run clean && jlpm run build:galata && jlpm run build:inpage",
+    "build:all": "npm run build",
+    "build:galata": "tsc -b",
+    "build:inpage": "webpack --mode=production",
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "start": "jupyter lab --config ./jupyter_server_test_config.py",
+    "start:detached": "(jlpm run start&)",
+    "start:doc": "jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
+    "test": "playwright test",
+    "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
+    "test:benchmark:update": "BENCHMARK_NUMBER_SAMPLES=1 jlpm run test -c playwright-benchmark.config.js --update-snapshots",
+    "test:debug": "PWDEBUG=1 playwright test",
+    "test:doc": "jlpm run test -c playwright-documentation.config.js",
+    "test:doc:update": "jlpm run test -c playwright-documentation.config.js --update-snapshots",
+    "test:report": "playwright show-report",
+    "test:update": "playwright test --update-snapshots && jlpm test:benchmark:update"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^4.0.0-alpha.9",
+    "@jupyterlab/cells": "^4.0.0-alpha.9",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
+    "@jupyterlab/docmanager": "^4.0.0-alpha.9",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.9",
+    "@jupyterlab/notebook": "^4.0.0-alpha.9",
+    "@jupyterlab/services": "^7.0.0-alpha.9",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
+    "@lumino/algorithm": "^1.9.1",
+    "@lumino/coreutils": "^1.12.0",
+    "@playwright/test": "^1.17.0",
+    "@stdlib/stats": "~0.0.13",
+    "canvas": "^2.9.1",
+    "fs-extra": "^9.0.1",
+    "http-server": "^13.0.0",
+    "json5": "^2.1.1",
+    "node-fetch": "^2.6.0",
+    "path": "~0.12.7",
+    "systeminformation": "^5.8.6",
+    "vega": "^5.20.0",
+    "vega-lite": "^5.1.0",
+    "vega-statistics": "^1.7.9"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.4",
+    "css-loader": "^6.7.1",
+    "mini-svg-data-uri": "^1.4.4",
+    "rimraf": "~3.0.0",
+    "source-map-loader": "~1.0.2",
+    "style-loader": "~3.3.1",
+    "svgo-loader": "^2.2.1",
+    "ts-loader": "^6.2.1",
+    "typescript": "~4.6.3",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "styleModule": "style/index.js"
+}

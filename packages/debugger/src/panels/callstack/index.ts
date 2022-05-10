@@ -1,87 +1,87 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandToolbarButton } from '@jupyterlab/apputils';
-
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
+import {
+  CommandToolbarButton,
+  PanelWithToolbar
+} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-
 import { Panel } from '@lumino/widgets';
-
-import { CallstackBody } from './body';
-
-import { CallstackHeader } from './header';
-
 import { IDebugger } from '../../tokens';
+import { CallstackBody } from './body';
 
 /**
  * A Panel to show a callstack.
  */
-export class Callstack extends Panel {
+export class Callstack extends PanelWithToolbar {
   /**
    * Instantiate a new Callstack Panel.
    *
    * @param options The instantiation options for a Callstack Panel.
    */
   constructor(options: Callstack.IOptions) {
-    super();
+    super(options);
     const { commands, model } = options;
-    const translator = options.translator || nullTranslator;
-    const header = new CallstackHeader(translator);
+    const trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this.title.label = trans.__('Callstack');
     const body = new CallstackBody(model);
 
-    header.toolbar.addItem(
+    this.toolbar.addItem(
       'continue',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.continue
+        id: commands.continue,
+        label: ''
       })
     );
 
-    header.toolbar.addItem(
+    this.toolbar.addItem(
       'terminate',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.terminate
+        id: commands.terminate,
+        label: ''
       })
     );
 
-    header.toolbar.addItem(
+    this.toolbar.addItem(
       'step-over',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.next
+        id: commands.next,
+        label: ''
       })
     );
 
-    header.toolbar.addItem(
+    this.toolbar.addItem(
       'step-in',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.stepIn
+        id: commands.stepIn,
+        label: ''
       })
     );
 
-    header.toolbar.addItem(
+    this.toolbar.addItem(
       'step-out',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.stepOut
+        id: commands.stepOut,
+        label: ''
       })
     );
 
-    header.toolbar.addItem(
+    this.toolbar.addItem(
       'evaluate',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.evaluate
+        id: commands.evaluate,
+        label: ''
       })
     );
 
-    this.addWidget(header);
     this.addWidget(body);
-
     this.addClass('jp-DebuggerCallstack');
   }
 }

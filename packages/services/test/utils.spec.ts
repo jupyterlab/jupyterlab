@@ -13,7 +13,7 @@ describe('test/utils', () => {
   describe('testEmission', () => {
     it('should resolve to the given value', async () => {
       const owner = {};
-      const x = new Signal<{}, number>(owner);
+      const x = new Signal<typeof owner, number>(owner);
       const emission = testEmission(x, {
         value: 'done'
       });
@@ -23,7 +23,7 @@ describe('test/utils', () => {
 
     it('should find the given emission', async () => {
       const owner = {};
-      const x = new Signal<{}, number>(owner);
+      const x = new Signal<typeof owner, number>(owner);
       const emission = testEmission(x, {
         find: (a, b) => b === 1,
         value: 'done'
@@ -36,7 +36,7 @@ describe('test/utils', () => {
 
     it('should reject if the test throws an error', async () => {
       const owner = {};
-      const x = new Signal<{}, number>(owner);
+      const x = new Signal<typeof owner, number>(owner);
       const emission = testEmission(x, {
         find: (a, b) => b === 1,
         test: (a, b) => {
@@ -52,7 +52,7 @@ describe('test/utils', () => {
 
     it('should resolve if the test succeeds', async () => {
       const owner = {};
-      const x = new Signal<{}, number>(owner);
+      const x = new Signal<typeof owner, number>(owner);
       const emission = testEmission(x, {
         find: (a, b) => b === 1,
         test: (a, b) => {

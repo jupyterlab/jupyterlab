@@ -10,7 +10,8 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
@@ -18,6 +19,31 @@ import {
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
+import { Platform } from '@lumino/domutils';
+import { Menu } from '@lumino/widgets';
+import { IShortcutUIexternal } from './components';
+import { renderShortCut } from './renderer';
+
+function getExternalForJupyterLab(
+  settingRegistry: ISettingRegistry,
+  app: JupyterFrontEnd,
+  translator: ITranslator
+): IShortcutUIexternal {
+  const { commands } = app;
+  const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
+  return {
+    translator,
+    getAllShortCutSettings: () =>
+      settingRegistry.reload(shortcutPluginLocation),
+    removeShortCut: (key: string) =>
+      settingRegistry.remove(shortcutPluginLocation, key),
+    createMenu: () => new Menu({ commands }),
+    hasCommand: (id: string) => commands.hasCommand(id),
+    addCommand: (id: string, options: CommandRegistry.ICommandOptions) =>
+      commands.addCommand(id, options),
+    getLabel: (id: string) => commands.label(id)
+  };
+}
 
 /**
  * The default shortcuts extension.
@@ -50,16 +76,28 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
  */
 const shortcuts: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
-  requires: [ISettingRegistry, ITranslator],
+  requires: [ISettingRegistry],
+  optional: [ITranslator, IFormComponentRegistry],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator | null,
+    editorRegistry: IFormComponentRegistry | null
   ) => {
-    const trans = translator.load('jupyterlab');
+    const translator_ = translator ?? nullTranslator;
+    const trans = translator_.load('jupyterlab');
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
+
+    if (editorRegistry) {
+      editorRegistry.addRenderer('shortcuts', (props: any) => {
+        return renderShortCut({
+          external: getExternalForJupyterLab(registry, app, translator_),
+          ...props
+        });
+      });
+    }
 
     /**
      * Populate the plugin's schema defaults.
@@ -76,7 +114,23 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           return shortcuts;
         })
         .concat([schema.properties!.shortcuts.default as any[]])
-        .reduce((acc, val) => acc.concat(val), []) // flatten one level
+        .reduce((acc, val) => {
+          if (Platform.IS_MAC) {
+            return acc.concat(val);
+          } else {
+            // If platform is not MacOS, remove all shortcuts containing Cmd
+            // as they will be modified; e.g. `Cmd A` becomes `A`
+            return acc.concat(
+              val.filter(
+                shortcut =>
+                  !shortcut.keys.some(key => {
+                    const { cmd } = CommandRegistry.parseKeystroke(key);
+                    return cmd;
+                  })
+              )
+            );
+          }
+        }, []) // flatten one level
         .sort((a, b) => a.command.localeCompare(b.command));
 
       schema.properties!.shortcuts.description = trans.__(

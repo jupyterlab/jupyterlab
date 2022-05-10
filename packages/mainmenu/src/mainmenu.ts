@@ -234,12 +234,12 @@ export class MainMenu extends MenuBar implements IMainMenu {
    *
    * @param commands The command registry
    * @param options The main menu options.
-   * @param translator - The application language translator.
+   * @param trans - The application language translator.
    */
   static generateMenu(
     commands: CommandRegistry,
     options: IMainMenu.IMenuOptions,
-    translator: TranslationBundle
+    trans: TranslationBundle
   ): RankedMenu {
     let menu: RankedMenu;
     const { id, label, rank } = options;
@@ -309,8 +309,9 @@ export class MainMenu extends MenuBar implements IMainMenu {
     }
 
     if (label) {
-      menu.title.label = translator.__(label);
+      menu.title.label = trans._p('menu', label);
     }
+
     return menu;
   }
 

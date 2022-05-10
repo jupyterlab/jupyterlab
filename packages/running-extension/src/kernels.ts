@@ -16,7 +16,7 @@ export function addKernelRunningSessionManager(
   managers: IRunningSessionManagers,
   translator: ITranslator,
   app: JupyterFrontEnd
-) {
+): void {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.sessions;
   const specsManager = app.serviceManager.kernelspecs;

@@ -14,8 +14,9 @@ import {
   IDocumentProvider,
   IDocumentProviderFactory,
   ProviderMock,
-  WebSocketProviderWithLocks
+  WebSocketProvider
 } from '@jupyterlab/docprovider';
+import { ICurrentUser } from '@jupyterlab/user';
 import { ServerConnection } from '@jupyterlab/services';
 
 /**
@@ -23,8 +24,12 @@ import { ServerConnection } from '@jupyterlab/services';
  */
 const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docprovider-extension:plugin',
+  requires: [ICurrentUser],
   provides: IDocumentProviderFactory,
-  activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
+  activate: (
+    app: JupyterFrontEnd,
+    user: ICurrentUser
+  ): IDocumentProviderFactory => {
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
     const collaborative =
@@ -33,9 +38,10 @@ const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
       options: IDocumentProviderFactory.IOptions
     ): IDocumentProvider => {
       return collaborative
-        ? new WebSocketProviderWithLocks({
+        ? new WebSocketProvider({
             ...options,
-            url
+            url,
+            user
           })
         : new ProviderMock();
     };

@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandToolbarButton, Toolbar } from '@jupyterlab/apputils';
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { CommandToolbarButton, Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';

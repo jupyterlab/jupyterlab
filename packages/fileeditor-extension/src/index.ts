@@ -11,28 +11,46 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   ICommandPalette,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
+  MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  CodeViewerWidget,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
   FileEditorFactory,
+  FileEditorSearchProvider,
   IEditorTracker,
+  LaTeXTableOfContentsFactory,
+  MarkdownTableOfContentsFactory,
+  PythonTableOfContentsFactory,
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IObservableList } from '@jupyterlab/observables';
+import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
+import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
-import { Menu } from '@lumino/widgets';
-import { Commands, FACTORY, IFileTypeData } from './commands';
+import { Menu, Widget } from '@lumino/widgets';
+import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
 
@@ -54,7 +72,9 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILauncher,
     IMainMenu,
     ILayoutRestorer,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    ITableOfContentsRegistry,
+    IToolbarWidgetRegistry
   ],
   provides: IEditorTracker,
   autoStart: true
@@ -136,9 +156,55 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:cursor-position',
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IEditorTracker,
+    positionModel: IPositionModel
+  ) => {
+    positionModel.addEditorProvider((widget: Widget | null) =>
+      widget && tracker.has(widget)
+        ? (widget as IDocumentWidget<FileEditor>).content.editor
+        : null
+    );
+  },
+  requires: [IEditorTracker, IPositionModel],
+  autoStart: true
+};
+
+const completerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:completer',
+  requires: [IEditorTracker],
+  optional: [ICompletionProviderManager],
+  activate: activateFileEditorCompleterService,
+  autoStart: true
+};
+
+/**
+ * A plugin to search file editors
+ */
+const searchProvider: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:search',
+  requires: [ISearchProviderRegistry],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
+    registry.add('jp-fileeditorSearchProvider', FileEditorSearchProvider);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [plugin, tabSpaceStatus];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  plugin,
+  lineColStatus,
+  completerPlugin,
+  searchProvider,
+  tabSpaceStatus
+];
 export default plugins;
 
 /**
@@ -155,17 +221,38 @@ function activate(
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  tocRegistry: ITableOfContentsRegistry | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
+  let toolbarFactory:
+    | ((
+        widget: IDocumentWidget<FileEditor>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
+    | undefined;
+
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      FACTORY,
+      id,
+      translator
+    );
+  }
+
   const factory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
       name: FACTORY,
+      label: trans.__('Editor'),
       fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
-      defaultFor: ['markdown', '*'] // it outranks the defaultRendered viewer.
+      defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
+      toolbarFactory,
+      translator
     }
   });
   const { commands, restored, shell } = app;
@@ -278,7 +365,36 @@ function activate(
     id,
     isEnabled,
     tracker,
-    browserFactory
+    browserFactory,
+    consoleTracker,
+    sessionDialogs
+  );
+
+  const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(
+    {
+      namespace: 'codeviewer'
+    }
+  );
+
+  // Handle state restoration for code viewers
+  if (restorer) {
+    void restorer.restore(codeViewerTracker, {
+      command: CommandIDs.openCodeViewer,
+      args: widget => ({
+        content: widget.content.content,
+        label: widget.content.title.label,
+        mimeType: widget.content.mimeType,
+        widgetId: widget.content.id
+      }),
+      name: widget => widget.content.id
+    });
+  }
+
+  Commands.addOpenCodeViewerCommand(
+    app,
+    editorServices,
+    codeViewerTracker,
+    trans
   );
 
   // Add a launcher item if the launcher is available.
@@ -291,14 +407,7 @@ function activate(
   }
 
   if (menu) {
-    Commands.addMenuItems(
-      menu,
-      commands,
-      tracker,
-      trans,
-      consoleTracker,
-      sessionDialogs
-    );
+    Commands.addMenuItems(menu, tracker, consoleTracker, isEnabled);
   }
 
   getAvailableKernelFileTypes()
@@ -327,5 +436,101 @@ function activate(
       console.error(reason.message);
     });
 
+  if (tocRegistry) {
+    tocRegistry.add(new LaTeXTableOfContentsFactory(tracker));
+    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker));
+    tocRegistry.add(new PythonTableOfContentsFactory(tracker));
+  }
+
   return tracker;
+}
+
+/**
+ * Activate the completer service for file editor.
+ */
+function activateFileEditorCompleterService(
+  app: JupyterFrontEnd,
+  editorTracker: IEditorTracker,
+  manager: ICompletionProviderManager | null,
+  translator: ITranslator | null
+): void {
+  if (!manager) {
+    return;
+  }
+
+  Commands.addCompleterCommands(
+    app.commands,
+    editorTracker,
+    manager,
+    translator
+  );
+  const sessionManager = app.serviceManager.sessions;
+
+  const _activeSessions = new Map<string, Session.ISessionConnection>();
+  const updateCompleter = async (
+    _: IEditorTracker,
+    widget: IDocumentWidget<FileEditor>
+  ) => {
+    const completerContext = {
+      editor: widget.content.editor,
+      widget
+    };
+
+    await manager.updateCompleter(completerContext);
+    const onRunningChanged = (
+      _: Session.IManager,
+      models: Session.IModel[]
+    ) => {
+      const oldSession = _activeSessions.get(widget.id);
+      // Search for a matching path.
+      const model = find(models, m => m.path === widget.context.path);
+      if (model) {
+        // If there is a matching path, but it is the same
+        // session as we previously had, do nothing.
+        if (oldSession && oldSession.id === model.id) {
+          return;
+        }
+        // Otherwise, dispose of the old session and reset to
+        // a new CompletionConnector.
+        if (oldSession) {
+          _activeSessions.delete(widget.id);
+          oldSession.dispose();
+        }
+        const session = sessionManager.connectTo({ model });
+        const newCompleterContext = {
+          editor: widget.content.editor,
+          widget,
+          session
+        };
+        manager.updateCompleter(newCompleterContext).catch(console.error);
+        _activeSessions.set(widget.id, session);
+      } else {
+        // If we didn't find a match, make sure
+        // the connector is the contextConnector and
+        // dispose of any previous connection.
+        if (oldSession) {
+          _activeSessions.delete(widget.id);
+          oldSession.dispose();
+        }
+      }
+    };
+
+    onRunningChanged(sessionManager, toArray(sessionManager.running()));
+    sessionManager.runningChanged.connect(onRunningChanged);
+
+    widget.disposed.connect(() => {
+      sessionManager.runningChanged.disconnect(onRunningChanged);
+      const session = _activeSessions.get(widget.id);
+      if (session) {
+        _activeSessions.delete(widget.id);
+        session.dispose();
+      }
+    });
+  };
+  editorTracker.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    editorTracker.forEach(editorWidget => {
+      updateCompleter(editorTracker, editorWidget).catch(console.error);
+    });
+  });
 }

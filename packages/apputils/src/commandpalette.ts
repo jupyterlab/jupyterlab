@@ -3,49 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import { searchIcon } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { CommandPalette, Panel, Widget } from '@lumino/widgets';
-import { searchIcon } from '@jupyterlab/ui-components';
-
-/* tslint:disable */
-/**
- * The command palette token.
- */
-export const ICommandPalette = new Token<ICommandPalette>(
-  '@jupyterlab/apputils:ICommandPalette'
-);
-/* tslint:enable */
-
-/**
- * The options for creating a command palette item.
- */
-export interface IPaletteItem extends CommandPalette.IItemOptions {}
-
-/**
- * The interface for a Jupyter Lab command palette.
- */
-export interface ICommandPalette {
-  /**
-   * The placeholder text of the command palette's search input.
-   */
-  placeholder: string;
-
-  /**
-   * Activate the command palette for user input.
-   */
-  activate(): void;
-
-  /**
-   * Add a command item to the command palette.
-   *
-   * @param options - The options for creating the command item.
-   *
-   * @returns A disposable that will remove the item from the palette.
-   */
-  addItem(options: IPaletteItem): IDisposable;
-}
 
 /**
  * Class name identifying the input group with search icon.
@@ -66,6 +26,9 @@ export class ModalCommandPalette extends Panel {
         this.hideAndReset();
       }
     });
+    // required to properly receive blur and focus events;
+    // selection of items with mouse may not work without this.
+    this.node.tabIndex = 0;
   }
 
   get palette(): CommandPalette {
@@ -109,10 +72,16 @@ export class ModalCommandPalette extends Panel {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
-      case 'focus': {
+      case 'blur': {
         // if the focus shifted outside of this DOM element, hide and reset.
-        const target = event.target as HTMLElement;
-        if (!this.node.contains(target as HTMLElement)) {
+        if (
+          // focus went away from child element
+          this.node.contains(event.target as HTMLElement) &&
+          // and it did NOT go to another child element but someplace else
+          !this.node.contains(
+            (event as MouseEvent).relatedTarget as HTMLElement
+          )
+        ) {
           event.stopPropagation();
           this.hideAndReset();
         }
@@ -163,11 +132,11 @@ export class ModalCommandPalette extends Panel {
   }
 
   protected onBeforeHide(msg: Message): void {
-    document.removeEventListener('focus', this, true);
+    document.removeEventListener('blur', this, true);
   }
 
   protected onAfterShow(msg: Message): void {
-    document.addEventListener('focus', this, true);
+    document.addEventListener('blur', this, true);
   }
 
   /**

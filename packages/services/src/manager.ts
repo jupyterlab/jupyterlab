@@ -13,7 +13,11 @@ import { NbConvert, NbConvertManager } from './nbconvert';
 
 import { Contents, ContentsManager } from './contents';
 
+import { Kernel, KernelManager } from './kernel';
+
 import { KernelSpec, KernelSpecManager } from './kernelspec';
+
+import { ServerConnection } from './serverconnection';
 
 import { Session, SessionManager } from './session';
 
@@ -21,10 +25,7 @@ import { Setting, SettingManager } from './setting';
 
 import { Terminal, TerminalManager } from './terminal';
 
-import { ServerConnection } from './serverconnection';
-
 import { Workspace, WorkspaceManager } from './workspace';
-import { KernelManager } from './kernel';
 
 /**
  * A Jupyter services manager.
@@ -33,26 +34,28 @@ export class ServiceManager implements ServiceManager.IManager {
   /**
    * Construct a new services provider.
    */
-  constructor(options: ServiceManager.IOptions = {}) {
+  constructor(options: Partial<ServiceManager.IOptions> = {}) {
     const defaultDrive = options.defaultDrive;
     const serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
     const standby = options.standby ?? 'when-hidden';
     const normalized = { defaultDrive, serverSettings, standby };
 
-    const kernelManager = new KernelManager(normalized);
+    const kernelManager = options.kernels || new KernelManager(normalized);
     this.serverSettings = serverSettings;
-    this.contents = new ContentsManager(normalized);
-    this.sessions = new SessionManager({
-      ...normalized,
-      kernelManager: kernelManager
-    });
-    this.settings = new SettingManager(normalized);
-    this.terminals = new TerminalManager(normalized);
-    this.builder = new BuildManager(normalized);
-    this.workspaces = new WorkspaceManager(normalized);
-    this.nbconvert = new NbConvertManager(normalized);
-    this.kernelspecs = new KernelSpecManager(normalized);
+    this.contents = options.contents || new ContentsManager(normalized);
+    this.sessions =
+      options.sessions ||
+      new SessionManager({
+        ...normalized,
+        kernelManager: kernelManager
+      });
+    this.settings = options.settings || new SettingManager(normalized);
+    this.terminals = options.terminals || new TerminalManager(normalized);
+    this.builder = options.builder || new BuildManager(normalized);
+    this.workspaces = options.workspaces || new WorkspaceManager(normalized);
+    this.nbconvert = options.nbconvert || new NbConvertManager(normalized);
+    this.kernelspecs = options.kernelspecs || new KernelSpecManager(normalized);
 
     // Relay connection failures from the service managers that poll
     // the server for current information.
@@ -107,42 +110,42 @@ export class ServiceManager implements ServiceManager.IManager {
   /**
    * Get the session manager instance.
    */
-  readonly sessions: SessionManager;
+  readonly sessions: Session.IManager;
 
   /**
    * Get the session manager instance.
    */
-  readonly kernelspecs: KernelSpecManager;
+  readonly kernelspecs: KernelSpec.IManager;
 
   /**
    * Get the setting manager instance.
    */
-  readonly settings: SettingManager;
+  readonly settings: Setting.IManager;
 
   /**
    * The builder for the manager.
    */
-  readonly builder: BuildManager;
+  readonly builder: Builder.IManager;
 
   /**
    * Get the contents manager instance.
    */
-  readonly contents: ContentsManager;
+  readonly contents: Contents.IManager;
 
   /**
    * Get the terminal manager instance.
    */
-  readonly terminals: TerminalManager;
+  readonly terminals: Terminal.IManager;
 
   /**
    * Get the workspace manager instance.
    */
-  readonly workspaces: WorkspaceManager;
+  readonly workspaces: Workspace.IManager;
 
   /**
    * Get the nbconvert manager instance.
    */
-  readonly nbconvert: NbConvertManager;
+  readonly nbconvert: NbConvert.IManager;
 
   /**
    * Test whether the manager is ready.
@@ -175,7 +178,47 @@ export namespace ServiceManager {
   /**
    * A service manager interface.
    */
-  export interface IManager extends IDisposable {
+  export interface IManager extends IDisposable, IManagers {
+    /**
+     * Test whether the manager is ready.
+     */
+    readonly isReady: boolean;
+
+    /**
+     * A promise that fulfills when the manager is initially ready.
+     */
+    readonly ready: Promise<void>;
+
+    /**
+     * A signal emitted when there is a connection failure with the server.
+     */
+    readonly connectionFailure: ISignal<IManager, Error>;
+  }
+
+  /**
+   * The options used to create a service manager.
+   */
+  export interface IOptions extends IManagers {
+    /**
+     * Kernel manager of the manager.
+     */
+    readonly kernels: Kernel.IManager;
+
+    /**
+     * The default drive for the contents manager.
+     */
+    readonly defaultDrive: Contents.IDrive;
+
+    /**
+     * When the manager stops polling the API. Defaults to `when-hidden`.
+     */
+    standby: Poll.Standby | (() => boolean | Poll.Standby);
+  }
+
+  /**
+   * The managers provided by the service manager.
+   */
+  interface IManagers {
     /**
      * The builder for the manager.
      */
@@ -185,11 +228,6 @@ export namespace ServiceManager {
      * The contents manager for the manager.
      */
     readonly contents: Contents.IManager;
-
-    /**
-     * Test whether the manager is ready.
-     */
-    readonly isReady: boolean;
 
     /**
      * A promise that fulfills when the manager is initially ready.
@@ -230,30 +268,5 @@ export namespace ServiceManager {
      * The nbconvert manager for the manager.
      */
     readonly nbconvert: NbConvert.IManager;
-
-    /**
-     * A signal emitted when there is a connection failure with the server.
-     */
-    readonly connectionFailure: ISignal<IManager, Error>;
-  }
-
-  /**
-   * The options used to create a service manager.
-   */
-  export interface IOptions {
-    /**
-     * The server settings of the manager.
-     */
-    readonly serverSettings?: ServerConnection.ISettings;
-
-    /**
-     * The default drive for the contents manager.
-     */
-    readonly defaultDrive?: Contents.IDrive;
-
-    /**
-     * When the manager stops polling the API. Defaults to `when-hidden`.
-     */
-    standby?: Poll.Standby;
   }
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 
 import { ISignal, Signal } from '@lumino/signaling';
 

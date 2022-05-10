@@ -19,10 +19,20 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CommandToolbarButton,
+  IFormComponentRegistry,
+  launchIcon,
+  Toolbar
+} from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
-  ISettingEditorTracker,
-  SettingEditor
+  IJSONSettingEditorTracker,
+  ISettingEditorTracker
+} from '@jupyterlab/settingeditor/lib/tokens';
+import type {
+  JsonSettingEditor,
+  SettingsEditor
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -36,26 +46,28 @@ import { IDisposable } from '@lumino/disposable';
 namespace CommandIDs {
   export const open = 'settingeditor:open';
 
+  export const openJSON = 'settingeditor:open-json';
+
   export const revert = 'settingeditor:revert';
 
   export const save = 'settingeditor:save';
 }
 
+type SettingEditorType = 'ui' | 'json';
+
 /**
  * The default setting editor extension.
  */
 const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
-  id: '@jupyterlab/settingeditor-extension:plugin',
+  id: '@jupyterlab/settingeditor-extension:form-ui',
   requires: [
-    ILayoutRestorer,
     ISettingRegistry,
-    IEditorServices,
     IStateDB,
-    IRenderMimeRegistry,
-    ILabStatus,
-    ITranslator
+    ITranslator,
+    IFormComponentRegistry,
+    ILabStatus
   ],
-  optional: [ICommandPalette],
+  optional: [ILayoutRestorer, ICommandPalette, IJSONSettingEditorTracker],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
@@ -66,35 +78,172 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
  */
 function activate(
   app: JupyterFrontEnd,
-  restorer: ILayoutRestorer,
+  registry: ISettingRegistry,
+  state: IStateDB,
+  translator: ITranslator,
+  editorRegistry: IFormComponentRegistry,
+  status: ILabStatus,
+  restorer: ILayoutRestorer | null,
+  palette: ICommandPalette | null,
+  jsonEditor: IJSONSettingEditorTracker | null
+): ISettingEditorTracker {
+  const trans = translator.load('jupyterlab');
+  const { commands, shell } = app;
+  const namespace = 'setting-editor';
+  const tracker = new WidgetTracker<MainAreaWidget<SettingsEditor>>({
+    namespace
+  });
+
+  // Handle state restoration.
+  if (restorer) {
+    void restorer.restore(tracker, {
+      command: CommandIDs.open,
+      args: widget => ({}),
+      name: widget => namespace
+    });
+  }
+
+  const openUi = async (args: { query: string }) => {
+    if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
+      if (!tracker.currentWidget.isAttached) {
+        shell.add(tracker.currentWidget);
+      }
+      shell.activateById(tracker.currentWidget.id);
+      return;
+    }
+
+    const key = plugin.id;
+
+    const { SettingsEditor } = await import('@jupyterlab/settingeditor');
+
+    const editor = new MainAreaWidget<SettingsEditor>({
+      content: new SettingsEditor({
+        editorRegistry,
+        key,
+        registry,
+        state,
+        commands,
+        toSkip: [
+          '@jupyterlab/application-extension:context-menu',
+          '@jupyterlab/mainmenu-extension:plugin'
+        ],
+        translator,
+        status,
+        query: args.query as string
+      })
+    });
+
+    if (jsonEditor) {
+      editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+      editor.toolbar.addItem(
+        'open-json-editor',
+        new CommandToolbarButton({
+          commands,
+          id: CommandIDs.openJSON,
+          icon: launchIcon,
+          label: trans.__('JSON Settings Editor')
+        })
+      );
+    }
+
+    editor.id = namespace;
+    editor.title.icon = settingsIcon;
+    editor.title.label = trans.__('Settings');
+    editor.title.closable = true;
+
+    void tracker.add(editor);
+    shell.add(editor);
+  };
+
+  commands.addCommand(CommandIDs.open, {
+    execute: async (args: {
+      query?: string;
+      settingEditorType?: SettingEditorType;
+    }) => {
+      registry.load(plugin.id).then(settings => {
+        args.settingEditorType ??
+        (settings.get('settingEditorType').composite as SettingEditorType) ===
+          'json'
+          ? commands.execute(CommandIDs.openJSON)
+          : openUi({ query: args.query ?? '' });
+      });
+    },
+    label: args => {
+      if (args.label) {
+        return args.label as string;
+      }
+      return trans.__('Settings Editor');
+    }
+  });
+
+  if (palette) {
+    palette.addItem({
+      category: trans.__('Settings'),
+      command: CommandIDs.open,
+      args: { settingEditorType: 'ui' }
+    });
+  }
+
+  return tracker;
+}
+
+/**
+ * The default setting editor extension.
+ */
+const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
+  id: '@jupyterlab/settingeditor-extension:plugin',
+  requires: [
+    ISettingRegistry,
+    IEditorServices,
+    IStateDB,
+    IRenderMimeRegistry,
+    ILabStatus,
+    ITranslator
+  ],
+  optional: [ILayoutRestorer, ICommandPalette],
+  autoStart: true,
+  provides: IJSONSettingEditorTracker,
+  activate: activateJSON
+};
+
+/**
+ * Activate the setting editor extension.
+ */
+function activateJSON(
+  app: JupyterFrontEnd,
   registry: ISettingRegistry,
   editorServices: IEditorServices,
   state: IStateDB,
   rendermime: IRenderMimeRegistry,
   status: ILabStatus,
   translator: ITranslator,
+  restorer: ILayoutRestorer | null,
   palette: ICommandPalette | null
-): ISettingEditorTracker {
+): IJSONSettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
-  const namespace = 'setting-editor';
+  const namespace = 'json-setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
+  const tracker = new WidgetTracker<MainAreaWidget<JsonSettingEditor>>({
     namespace
   });
-  let editor: SettingEditor;
 
   // Handle state restoration.
-  void restorer.restore(tracker, {
-    command: CommandIDs.open,
-    args: widget => ({}),
-    name: widget => namespace
-  });
+  if (restorer) {
+    void restorer.restore(tracker, {
+      command: CommandIDs.openJSON,
+      args: widget => ({}),
+      name: widget => namespace
+    });
+  }
 
-  commands.addCommand(CommandIDs.open, {
-    execute: () => {
-      if (tracker.currentWidget) {
+  commands.addCommand(CommandIDs.openJSON, {
+    execute: async () => {
+      if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
+        if (!tracker.currentWidget.isAttached) {
+          shell.add(tracker.currentWidget);
+        }
         shell.activateById(tracker.currentWidget.id);
         return;
       }
@@ -102,7 +251,9 @@ function activate(
       const key = plugin.id;
       const when = app.restored;
 
-      editor = new SettingEditor({
+      const { JsonSettingEditor } = await import('@jupyterlab/settingeditor');
+
+      const editor = new JsonSettingEditor({
         commands: {
           registry: commands,
           revert: CommandIDs.revert,
@@ -140,20 +291,24 @@ function activate(
         });
       });
 
-      editor.id = namespace;
-      editor.title.icon = settingsIcon;
-      editor.title.label = trans.__('Settings');
+      const container = new MainAreaWidget<JsonSettingEditor>({
+        content: editor
+      });
 
-      const main = new MainAreaWidget({ content: editor });
-      void tracker.add(main);
-      shell.add(main);
+      container.id = namespace;
+      container.title.icon = settingsIcon;
+      container.title.label = trans.__('Advanced Settings Editor');
+      container.title.closable = true;
+
+      void tracker.add(container);
+      shell.add(container);
     },
     label: trans.__('Advanced Settings Editor')
   });
   if (palette) {
     palette.addItem({
       category: trans.__('Settings'),
-      command: CommandIDs.open
+      command: CommandIDs.openJSON
     });
   }
 
@@ -175,4 +330,5 @@ function activate(
 
   return tracker;
 }
-export default plugin;
+
+export default [plugin, jsonPlugin];

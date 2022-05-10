@@ -2,27 +2,26 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
-import { IMenuExtender } from './tokens';
+import { SemanticCommand } from '@jupyterlab/apputils';
 
 /**
  * An interface for an Edit menu.
  */
 export interface IEditMenu extends IRankedMenu {
   /**
-   * A set storing IUndoers for the Edit menu.
+   * Semantic commands IUndoers for the Edit menu.
    */
-  readonly undoers: Set<IEditMenu.IUndoer<Widget>>;
+  readonly undoers: IEditMenu.IUndoer;
 
   /**
-   * A set storing IClearers for the Edit menu.
+   * Semantic commands IClearers for the Edit menu.
    */
-  readonly clearers: Set<IEditMenu.IClearer<Widget>>;
+  readonly clearers: IEditMenu.IClearer;
 
   /**
-   * A set storing IGoToLiners for the Edit menu.
+   * Semantic commands IGoToLiners for the Edit menu.
    */
-  readonly goToLiners: Set<IEditMenu.IGoToLiner<Widget>>;
+  readonly goToLiners: SemanticCommand;
 }
 
 /**
@@ -35,36 +34,33 @@ export class EditMenu extends RankedMenu implements IEditMenu {
   constructor(options: IRankedMenu.IOptions) {
     super(options);
 
-    this.undoers = new Set<IEditMenu.IUndoer<Widget>>();
+    this.undoers = {
+      redo: new SemanticCommand(),
+      undo: new SemanticCommand()
+    };
 
-    this.clearers = new Set<IEditMenu.IClearer<Widget>>();
+    this.clearers = {
+      clearAll: new SemanticCommand(),
+      clearCurrent: new SemanticCommand()
+    };
 
-    this.goToLiners = new Set<IEditMenu.IGoToLiner<Widget>>();
+    this.goToLiners = new SemanticCommand();
   }
 
   /**
-   * A set storing IUndoers for the Edit menu.
+   * Semantic commands IUndoers for the Edit menu.
    */
-  readonly undoers: Set<IEditMenu.IUndoer<Widget>>;
+  readonly undoers: IEditMenu.IUndoer;
 
   /**
-   * A set storing IClearers for the Edit menu.
+   * Semantic commands IClearers for the Edit menu.
    */
-  readonly clearers: Set<IEditMenu.IClearer<Widget>>;
+  readonly clearers: IEditMenu.IClearer;
 
   /**
-   * A set storing IGoToLiners for the Edit menu.
+   * Semantic commands IGoToLiners for the Edit menu.
    */
-  readonly goToLiners: Set<IEditMenu.IGoToLiner<Widget>>;
-
-  /**
-   * Dispose of the resources held by the edit menu.
-   */
-  dispose(): void {
-    this.undoers.clear();
-    this.clearers.clear();
-    super.dispose();
-  }
+  readonly goToLiners: SemanticCommand;
 }
 
 /**
@@ -74,56 +70,30 @@ export namespace IEditMenu {
   /**
    * Interface for an activity that uses Undo/Redo.
    */
-  export interface IUndoer<T extends Widget> extends IMenuExtender<T> {
+  export interface IUndoer {
     /**
-     * Execute an undo command for the activity.
+     * A semantic command to execute an undo command for the activity.
      */
-    undo?: (widget: T) => void;
+    undo: SemanticCommand;
 
     /**
-     * Execute a redo command for the activity.
+     * A semantic command to execute a redo command for the activity.
      */
-    redo?: (widget: T) => void;
+    redo: SemanticCommand;
   }
 
   /**
    * Interface for an activity that wants to register a 'Clear...' menu item
    */
-  export interface IClearer<T extends Widget> extends IMenuExtender<T> {
+  export interface IClearer {
     /**
-     * A function to create the label for the `clearCurrent`action.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
+     * A semantic command to clear the currently portion of activity.
      */
-    clearCurrentLabel?: (n: number) => string;
+    clearCurrent: SemanticCommand;
 
     /**
-     * A function to create the label for the `clearAll`action.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
+     * A semantic command to clear all of an activity.
      */
-    clearAllLabel?: (n: number) => string;
-
-    /**
-     * A function to clear the currently portion of activity.
-     */
-    clearCurrent?: (widget: T) => void;
-
-    /**
-     * A function to clear all of an activity.
-     */
-    clearAll?: (widget: T) => void;
-  }
-
-  /**
-   * Interface for an activity that uses Go to Line.
-   */
-  export interface IGoToLiner<T extends Widget> extends IMenuExtender<T> {
-    /**
-     * Execute a go to line command for the activity.
-     */
-    goToLine?: (widget: T) => void;
+    clearAll: SemanticCommand;
   }
 }

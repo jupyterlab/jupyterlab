@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// import { expect } from 'chai';
-
 import { ModalCommandPalette } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
@@ -66,11 +64,13 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#focus()', () => {
+    describe('#blur()', () => {
       it('should hide and reset when focus is shifted', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
         palette.inputNode.value = 'Search string…';
-        simulate(document.body, 'focus');
+        simulate(modalPalette.node, 'blur', {
+          relatedTarget: document.body
+        });
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
       });

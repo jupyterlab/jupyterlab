@@ -1,0 +1,21 @@
+{
+  "title": "JupyterLab Shell",
+  "description": "JupyterLab Shell layout settings.",
+  "properties": {
+    "hiddenMode": {
+      "type": "string",
+      "title": "Hidden mode of main panel widgets",
+      "description": "The method for hiding widgets in the main dock panel. Using `scale` will often increase performance as most browsers will not trigger style computation for the transform action.",
+      "enum": ["display", "scale"],
+      "default": "scale"
+    },
+    "startMode": {
+      "enum": ["", "single", "multiple"],
+      "title": "Start mode: ``, `single`or `multiple`",
+      "description": "The mode under which JupyterLab should start. If empty, the mode will be imposed by the URL",
+      "default": ""
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

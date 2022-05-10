@@ -23,17 +23,9 @@ export interface IDocumentProvider {
   putInitializedState(): void;
 
   /**
-   * Acquire a lock.
-   * Returns a Promise that resolves to the lock number.
+   * Returns a Promise that resolves when renaming is ackownledged.
    */
-  acquireLock(): Promise<number>;
-
-  /**
-   * Release a lock.
-   *
-   * @param lock The lock to release.
-   */
-  releaseLock(lock: number): void;
+  readonly renameAck: Promise<boolean>;
 
   /**
    * This should be called by the docregistry when the file has been renamed to update the websocket connection url

@@ -25,7 +25,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * @returns the cleaned container
    */
-  static remove(container: HTMLElement) {
+  static remove(container: HTMLElement): HTMLElement {
     // clean up all children
     while (container.firstChild) {
       container.firstChild.remove();
@@ -103,7 +103,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     iconClass,
     fallback,
     ...props
-  }: Partial<LabIcon.IResolverProps> & LabIcon.IProps) {
+  }: Partial<LabIcon.IResolverProps> & LabIcon.IProps): HTMLElement {
     if (!Private.isResolvable(icon)) {
       if (!iconClass && fallback) {
         // if neither icon nor iconClass are defined/resolvable, use fallback
@@ -145,7 +145,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     iconClass,
     fallback,
     ...props
-  }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps) {
+  }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps): JSX.Element {
     if (!Private.isResolvable(icon)) {
       if (!iconClass && fallback) {
         // if neither icon nor iconClass are defined/resolvable, use fallback
@@ -197,7 +197,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * @param debug - optional boolean to force debug on or off
    */
-  static toggleDebug(debug?: boolean) {
+  static toggleDebug(debug?: boolean): void {
     LabIcon._debug = debug ?? !LabIcon._debug;
   }
 
@@ -237,10 +237,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         return icon;
       } else {
         // already loaded icon svg exists; replace it and warn
-        // TODO: need to see if this warning is useful or just noisy
-        console.warn(
-          `Redefining previously loaded icon svgstr. name: ${name}, svgstrOld: ${icon.svgstr}, svgstr: ${svgstr}`
-        );
+        if (LabIcon._debug) {
+          console.warn(
+            `Redefining previously loaded icon svgstr. name: ${name}, svgstrOld: ${icon.svgstr}, svgstr: ${svgstr}`
+          );
+        }
         icon.svgstr = svgstr;
         return icon;
       }
@@ -264,7 +265,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * @returns a view of this LabIcon instance
    */
-  bindprops(props?: LabIcon.IProps) {
+  bindprops(props?: LabIcon.IProps): LabIcon {
     const view = Object.create(this);
     view._props = props;
     view.react = view._initReact(view.name + '_bind');
@@ -404,7 +405,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return this._svgReactAttrs;
   }
 
-  get svgstr() {
+  get svgstr(): string {
     return this._svgstr;
   }
 
@@ -514,7 +515,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   protected _initRender({
     render,
     unrender
-  }: Partial<VirtualElement.IRenderer>) {
+  }: Partial<VirtualElement.IRenderer>): void {
     if (render) {
       this.render = render;
       if (unrender) {
@@ -929,8 +930,10 @@ namespace Private {
         label = undefined;
       }
 
+      const icon = this._icon;
+
       ReactDOM.render(
-        <this._icon.react
+        <icon.react
           container={container}
           label={label}
           {...{ ...this._rendererOptions?.props, ...options?.props }}

@@ -6,9 +6,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../codemirror"
-    },
-    {
       "path": "../coreutils"
     },
     {
@@ -30,34 +27,13 @@
       "path": "."
     },
     {
+      "path": "../markedparser-extension"
+    },
+    {
       "path": "../mathjax2"
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../codemirror"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../nbformat"
-    },
-    {
-      "path": "../observables"
-    },
-    {
-      "path": "../rendermime-interfaces"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../translation"
     }
   ]
 }

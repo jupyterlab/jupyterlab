@@ -21,14 +21,6 @@ import {
 } from '@jupyterlab/translation';
 
 /**
- * A namespace for command IDs.
- */
-export namespace CommandIDs {
-  export const installAdditionalLanguages =
-    'jupyterlab-translation:install-additional-languages';
-}
-
-/**
  * Translation plugins
  */
 const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
@@ -50,9 +42,11 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     const displayStringsPrefix: boolean = setting.get('displayStringsPrefix')
       .composite as boolean;
     stringsPrefix = displayStringsPrefix ? stringsPrefix : '';
+    const serverSettings = app.serviceManager.serverSettings;
     const translationManager = new TranslationManager(
       paths.urls.translations,
-      stringsPrefix
+      stringsPrefix,
+      serverSettings
     );
     await translationManager.fetch(currentLocale);
     return translationManager;
@@ -104,8 +98,9 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 
         let command: string;
 
+        const serverSettings = app.serviceManager.serverSettings;
         // Get list of available locales
-        requestTranslationsAPI<any>('')
+        requestTranslationsAPI<any>('', '', {}, serverSettings)
           .then(data => {
             for (const locale in data['data']) {
               const value = data['data'][locale];
@@ -114,7 +109,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               const toggled = displayName === nativeName;
               const label = toggled
                 ? `${displayName}`
-                : `${displayName} (${nativeName})`;
+                : `${displayName} - ${nativeName}`;
 
               // Add a command per language
               command = `jupyterlab-translation:${locale}`;
@@ -127,10 +122,13 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                 execute: () => {
                   return showDialog({
                     title: trans.__('Change interface language?'),
-                    body: trans.__('Are you sure you want to refresh?'),
+                    body: trans.__(
+                      'After changing the interface language to %1, you will need to reload JupyterLab to see the changes.',
+                      label
+                    ),
                     buttons: [
                       Dialog.cancelButton({ label: trans.__('Cancel') }),
-                      Dialog.okButton({ label: trans.__('Ok') })
+                      Dialog.okButton({ label: trans.__('Change and reload') })
                     ]
                   }).then(result => {
                     if (result.button.accept) {

@@ -105,8 +105,10 @@ describe('Kernel.IShellFuture', () => {
           calls.push('first');
           // Check to make sure we actually got the messages we expected.
           if (msg.header.msg_type === 'stream') {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect((msg as KernelMessage.IStreamMsg).content.text).toBe('foo');
           } else {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(
               (msg as KernelMessage.IStatusMsg).content.execution_state
             ).toBe('idle');

@@ -13,8 +13,7 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
-import { ISplashScreen } from './splash';
-import { IThemeManager } from './tokens';
+import { ISplashScreen, IThemeManager } from './tokens';
 
 /**
  * The number of milliseconds between theme loading attempts.
@@ -81,7 +80,7 @@ export class ThemeManager implements IThemeManager {
    *
    * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
    *
-   * @return value - The current value of the Jupyterlab CSS variable
+   * @returns value - The current value of the Jupyterlab CSS variable
    */
   getCSS(key: string): string {
     return (
@@ -400,6 +399,13 @@ export class ThemeManager implements IThemeManager {
       }
     });
     links.length = 0;
+
+    const themeProps = this._settings.schema.properties?.theme;
+    if (themeProps) {
+      themeProps.enum = Object.keys(themes).map(
+        value => themes[value].displayName ?? value
+      );
+    }
 
     // Unload the previously loaded theme.
     const old = current ? themes[current].unload() : Promise.resolve();

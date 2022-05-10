@@ -162,6 +162,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       downArea: null,
       leftArea: null,
       rightArea: null,
+      topArea: null,
       relativeSizes: null
     };
     const layout = this._connector.fetch(KEY);
@@ -178,7 +179,8 @@ export class LayoutRestorer implements ILayoutRestorer {
         down,
         left,
         right,
-        relativeSizes
+        relativeSizes,
+        top
       } = data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
@@ -202,7 +204,8 @@ export class LayoutRestorer implements ILayoutRestorer {
         downArea,
         leftArea,
         rightArea,
-        relativeSizes: relativeSizes || null
+        relativeSizes: relativeSizes || null,
+        topArea: (top as any) ?? null
       };
     } catch (error) {
       return blank;
@@ -292,6 +295,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     dehydrated.left = this._dehydrateSideArea(data.leftArea);
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
     dehydrated.relativeSizes = data.relativeSizes;
+    dehydrated.top = { ...data.topArea };
 
     return this._connector.save(KEY, dehydrated);
   }
@@ -309,7 +313,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Reydrate a serialized main area description object.
+   * Rehydrate a serialized main area description object.
    *
    * #### Notes
    * This function consumes data that can become corrupted, so it uses type
@@ -355,7 +359,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Reydrate a serialized side area description object.
+   * Rehydrate a serialized side area description object.
    *
    * #### Notes
    * This function consumes data that can become corrupted, so it uses type
@@ -396,7 +400,10 @@ export class LayoutRestorer implements ILayoutRestorer {
     if (!area) {
       return null;
     }
-    const dehydrated: Private.ISideArea = { collapsed: area.collapsed };
+    const dehydrated: Private.ISideArea = {
+      collapsed: area.collapsed,
+      visible: area.visible
+    };
     if (area.currentWidget) {
       const current = Private.nameProperty.get(area.currentWidget);
       if (current) {
@@ -412,7 +419,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Reydrate a serialized side area description object.
+   * Rehydrate a serialized side area description object.
    *
    * #### Notes
    * This function consumes data that can become corrupted, so it uses type
@@ -422,7 +429,12 @@ export class LayoutRestorer implements ILayoutRestorer {
     area?: Private.ISideArea | null
   ): ILabShell.ISideArea {
     if (!area) {
-      return { collapsed: true, currentWidget: null, widgets: null };
+      return {
+        collapsed: true,
+        currentWidget: null,
+        visible: true,
+        widgets: null
+      };
     }
     const internal = this._widgets;
     const collapsed = area.collapsed ?? false;
@@ -440,7 +452,8 @@ export class LayoutRestorer implements ILayoutRestorer {
     return {
       collapsed,
       currentWidget: currentWidget!,
-      widgets: widgets as Widget[] | null
+      widgets: widgets as Widget[] | null,
+      visible: area.visible ?? true
     };
   }
 
@@ -528,6 +541,11 @@ namespace Private {
      * The relatives sizes of the areas of the user interface.
      */
     relativeSizes?: number[] | null;
+
+    /**
+     * The restorable description of the top area in the user interface.
+     */
+    top?: ITopArea | null;
   }
 
   /**
@@ -565,6 +583,11 @@ namespace Private {
     current?: string | null;
 
     /**
+     * A flag denoting whether the side tab bar is visible.
+     */
+    visible?: boolean | null;
+
+    /**
      * The collection of widgets held by the sidebar.
      */
     widgets?: Array<string> | null;
@@ -588,6 +611,16 @@ namespace Private {
      * The index of the selected tab.
      */
     currentIndex: number;
+  }
+
+  /**
+   * The restorable description of the top area in the user interface.
+   */
+  export interface ITopArea extends PartialJSONObject {
+    /**
+     * Top area visibility in simple mode.
+     */
+    readonly simpleVisibility?: boolean;
   }
 
   /**

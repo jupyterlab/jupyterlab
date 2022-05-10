@@ -33,7 +33,9 @@ async function runTest(fn: any): Promise<void> {
  * @param wait The time to wait in milliseconds between retries
  */
 /* eslint-disable jest/no-export */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function flakyIt(name: string, fn: any, retries = 3, wait = 1000): void {
+  // eslint-disable-next-line jest/expect-expect, jest/valid-title
   test(name, async () => {
     let latestError;
     for (let tries = 0; tries < retries; tries++) {

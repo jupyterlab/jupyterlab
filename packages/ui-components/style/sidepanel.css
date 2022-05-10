@@ -1,0 +1,94 @@
+.jp-SidePanel {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--jp-sidebar-min-width);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-SidePanel-header {
+  flex: 0 0 auto;
+  display: flex;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 0;
+  padding: 2px;
+  text-transform: uppercase;
+}
+
+.jp-SidePanel-toolbar {
+  flex: 0 0 auto;
+}
+
+.jp-SidePanel-content {
+  flex: 1 1 auto;
+}
+
+.jp-SidePanel-toolbar,
+.jp-AccordionPanel-toolbar {
+  height: var(--jp-private-toolbar-height);
+}
+
+.jp-SidePanel-toolbar.jp-Toolbar-micro {
+  display: none;
+}
+
+.lm-AccordionPanel .jp-AccordionPanel-title {
+  box-sizing: border-box;
+  line-height: 25px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  background: var(--jp-toolbar-background);
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  font-size: var(--jp-ui-font-size0);
+}
+
+.jp-AccordionPanel-title {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  text-transform: uppercase;
+}
+
+.lm-AccordionPanel[data-orientation='horizontal'] > .jp-AccordionPanel-title {
+  /* Title is rotated for horizontal accordion panel using CSS */
+  display: block;
+  transform-origin: top left;
+  transform: rotate(-90deg) translate(-100%);
+}
+
+.jp-AccordionPanel-title .lm-AccordionPanel-titleLabel {
+  user-select: none;
+}
+
+.jp-AccordionPanel-title .lm-AccordionPanel-titleCollapser {
+  transform: rotate(-90deg);
+  margin: auto 0;
+  height: 16px;
+}
+
+.jp-AccordionPanel-title.lm-mod-expanded .lm-AccordionPanel-titleCollapser {
+  transform: rotate(0deg);
+}
+
+.lm-AccordionPanel .jp-AccordionPanel-toolbar {
+  background: none;
+  box-shadow: none;
+  border: none;
+  margin-left: auto;
+}
+
+.lm-AccordionPanel .lm-SplitPanel-handle:hover {
+  background: var(--jp-layout-color3);
+}
+
+.jp-text-truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

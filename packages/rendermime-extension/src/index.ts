@@ -15,11 +15,12 @@ import { ISanitizer } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import {
   ILatexTypesetter,
+  IMarkdownParser,
   IRenderMimeRegistry,
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 namespace CommandIDs {
   export const handleLink = 'rendermime:handle-local-link';
@@ -30,8 +31,13 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
-  requires: [ITranslator],
-  optional: [IDocumentManager, ILatexTypesetter, ISanitizer],
+  optional: [
+    IDocumentManager,
+    ILatexTypesetter,
+    ISanitizer,
+    IMarkdownParser,
+    ITranslator
+  ],
   provides: IRenderMimeRegistry,
   activate: activate,
   autoStart: true
@@ -47,12 +53,13 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
-  translator: ITranslator,
   docManager: IDocumentManager | null,
   latexTypesetter: ILatexTypesetter | null,
-  sanitizer: ISanitizer | null
+  sanitizer: ISanitizer | null,
+  markdownParser: IMarkdownParser | null,
+  translator: ITranslator | null
 ): RenderMimeRegistry {
-  const trans = translator.load('jupyterlab');
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
   if (docManager) {
     app.commands.addCommand(CommandIDs.handleLink, {
       label: trans.__('Handle Local Link'),
@@ -99,7 +106,8 @@ function activate(
           }
         },
     latexTypesetter: latexTypesetter ?? undefined,
-    translator: translator,
+    markdownParser: markdownParser ?? undefined,
+    translator: translator ?? undefined,
     sanitizer: sanitizer ?? undefined
   });
 }

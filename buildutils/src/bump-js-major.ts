@@ -36,6 +36,7 @@ commander
   .option('--force', 'Force the upgrade')
   .option('--dry-run', 'Show what would be executed')
   .action((pkg: string, others: Array<string>, options: any) => {
+    utils.exitOnUncaughtException();
     others.push(pkg);
     const toBump: Set<string> = new Set();
     const ignoreBump: Set<string> = new Set();

@@ -30,14 +30,4 @@ jupyter server extension enable jupyterlab
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 # TODO: batch script grepping
 
-# TODO: remove when we no longer support classic notebook
-jupyter serverextension enable jupyterlab
-if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
-# TODO: batch script grepping
-
-if ($Env:GROUP -eq "integrity") {
-    pip install notebook==4.3.1
-    if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
-}
-
 if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }

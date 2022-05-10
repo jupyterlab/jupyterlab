@@ -116,8 +116,6 @@ export interface IKernelConnection extends IObservableDisposable {
    * #### Notes
    * This is a guard to avoid deadlock is the user asks input
    * as second time before submitting his first input
-   *
-   * See https://github.com/jupyterlab/jupyterlab/issues/8632
    */
   hasPendingInput: boolean;
 
@@ -369,7 +367,10 @@ export interface IKernelConnection extends IObservableDisposable {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void;
 
   /**
    * Create a new comm.
@@ -466,6 +467,11 @@ export interface IKernelConnection extends IObservableDisposable {
     msgId: string,
     hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
   ): void;
+
+  /**
+   * Remove the input guard, if any.
+   */
+  removeInputGuard(): void;
 
   /**
    * A signal emitted when the kernel status changes.
@@ -772,7 +778,10 @@ export interface IFuture<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void;
 }
 
 export interface IShellFuture<

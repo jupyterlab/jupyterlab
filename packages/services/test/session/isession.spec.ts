@@ -3,7 +3,6 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 import {
-  expectFailure,
   flakyIt as it,
   JupyterServer,
   testEmission
@@ -130,8 +129,17 @@ describe('session', () => {
     });
 
     describe('#unhandledMessage', () => {
+      let tester: SessionTester;
+
+      beforeEach(() => {
+        tester = new SessionTester();
+      });
+
+      afterEach(() => {
+        tester.dispose();
+      });
+
       it('should be emitted for an unhandled message', async () => {
-        const tester = new SessionTester();
         const session = await tester.startSession();
         const msgId = UUID.uuid4();
         const emission = testEmission(session.unhandledMessage, {
@@ -144,11 +152,10 @@ describe('session', () => {
           msgId,
           content: {}
         });
-        msg.parent_header = { session: session.kernel!.clientId };
+        msg.parent_header = { session: session.kernel!.clientId } as any;
         tester.send(msg);
         await emission;
-        await tester.shutdown();
-        tester.dispose();
+        await expect(tester.shutdown()).resolves.not.toThrow();
       });
     });
 
@@ -266,17 +273,17 @@ describe('session', () => {
 
       it('should fail for improper response status', async () => {
         handleRequest(defaultSession, 201, {});
-        await expectFailure(defaultSession.setPath(UUID.uuid4()));
+        await expect(defaultSession.setPath(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        await expectFailure(defaultSession.setPath(UUID.uuid4()), '');
+        await expect(defaultSession.setPath(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for improper model', async () => {
         handleRequest(defaultSession, 200, {});
-        await expectFailure(defaultSession.setPath(UUID.uuid4()));
+        await expect(defaultSession.setPath(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail if the session is disposed', async () => {
@@ -285,7 +292,7 @@ describe('session', () => {
         });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
-        await expectFailure(promise, 'Session is disposed');
+        await expect(promise).rejects.toThrow(/Session is disposed/);
       });
     });
 
@@ -300,17 +307,17 @@ describe('session', () => {
 
       it('should fail for improper response status', async () => {
         handleRequest(defaultSession, 201, {});
-        await expectFailure(defaultSession.setType(UUID.uuid4()));
+        await expect(defaultSession.setType(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        await expectFailure(defaultSession.setType(UUID.uuid4()), '');
+        await expect(defaultSession.setType(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for improper model', async () => {
         handleRequest(defaultSession, 200, {});
-        await expectFailure(defaultSession.setType(UUID.uuid4()));
+        await expect(defaultSession.setType(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail if the session is disposed', async () => {
@@ -319,7 +326,7 @@ describe('session', () => {
         });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
-        await expectFailure(promise, 'Session is disposed');
+        await expect(promise).rejects.toThrow(/Session is disposed/);
       });
     });
 
@@ -332,17 +339,17 @@ describe('session', () => {
 
       it('should fail for improper response status', async () => {
         handleRequest(defaultSession, 201, {});
-        await expectFailure(defaultSession.setName(UUID.uuid4()));
+        await expect(defaultSession.setName(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        await expectFailure(defaultSession.setName(UUID.uuid4()), '');
+        await expect(defaultSession.setName(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for improper model', async () => {
         handleRequest(defaultSession, 200, {});
-        await expectFailure(defaultSession.setName(UUID.uuid4()));
+        await expect(defaultSession.setName(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail if the session is disposed', async () => {
@@ -351,7 +358,7 @@ describe('session', () => {
         });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
-        await expectFailure(promise, 'Session is disposed');
+        await expect(promise).rejects.toThrow(/Session is disposed/);
       });
     });
 
@@ -396,7 +403,7 @@ describe('session', () => {
     describe('#shutdown()', () => {
       it('should shut down properly', async () => {
         session = await startNew();
-        await session.shutdown();
+        await expect(session.shutdown()).resolves.not.toThrow();
       });
 
       it('should emit a disposed signal', async () => {
@@ -411,13 +418,13 @@ describe('session', () => {
 
       it('should fail for an incorrect response status', async () => {
         handleRequest(defaultSession, 200, {});
-        await expectFailure(defaultSession.shutdown());
+        await expect(defaultSession.shutdown()).rejects.toThrow();
       });
 
       it('should handle a 404 status', async () => {
         session = await startNew();
         handleRequest(session, 404, {});
-        await session.shutdown();
+        await expect(session.shutdown()).resolves.not.toThrow();
       });
 
       it('should handle a specific error status', async () => {
@@ -430,7 +437,7 @@ describe('session', () => {
 
       it('should fail for an error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        await expectFailure(defaultSession.shutdown(), '');
+        await expect(defaultSession.shutdown()).rejects.toThrow();
       });
 
       it('should fail if the session is disposed', async () => {
@@ -438,7 +445,7 @@ describe('session', () => {
           model: defaultSession.model
         });
         session.dispose();
-        await expectFailure(session.shutdown(), 'Session is disposed');
+        await expect(session.shutdown()).rejects.toThrow(/Session is disposed/);
       });
     });
   });

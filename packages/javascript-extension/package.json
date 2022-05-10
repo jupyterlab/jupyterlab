@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/javascript-extension",
-  "version": "3.1.0-rc.1",
+  "version": "4.0.0-alpha.9",
   "description": "JupyterLab - Javascript Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,17 +29,16 @@
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime": "^3.1.0-rc.1",
-    "@jupyterlab/rendermime-interfaces": "^3.1.0-rc.1"
+    "@jupyterlab/rendermime": "^4.0.0-alpha.9",
+    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.9"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "~0.21.2",
-    "typescript": "~4.1.3"
+    "typedoc": "~0.22.10",
+    "typescript": "~4.6.3"
   },
   "publishConfig": {
     "access": "public"

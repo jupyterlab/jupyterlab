@@ -106,13 +106,13 @@
 }
 
 .jp-scrollbar-tiny::-webkit-scrollbar-track:horizontal {
-  border-left: 0px solid transparent;
-  border-right: 0px solid transparent;
+  border-left: 0 solid transparent;
+  border-right: 0 solid transparent;
 }
 
 .jp-scrollbar-tiny::-webkit-scrollbar-track:vertical {
-  border-top: 0px solid transparent;
-  border-bottom: 0px solid transparent;
+  border-top: 0 solid transparent;
+  border-bottom: 0 solid transparent;
 }
 
 /*

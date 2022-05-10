@@ -178,14 +178,14 @@ The `metadata` must be a mapping with an `id`
 key that has the same value as the ID of the workspace. This should also be the relative URL path to access the workspace,
 like `/lab/workspaces/foo`.
 
-The `data` key maps to the initial state of the `IStateDB`. Many plugins look in the State DB for the configuration. 
+The `data` key maps to the initial state of the `IStateDB`. Many plugins look in the State DB for the configuration.
 Also any plugins that register with the `ILayoutRestorer` will look up all keys in the State DB
 that start with the `namespace` of their tracker before the first `:`. The values of these keys should have a `data`
 attribute that maps.
 
 For example, if your workspace looks like this:
 
-.. code-block:: bash
+.. code-block:: json
 
   {
     "data": {

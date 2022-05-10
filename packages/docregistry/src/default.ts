@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
+import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IModelDB } from '@jupyterlab/observables';
+import { IModelDB, IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -29,6 +29,9 @@ export class DocumentModel
     const filemodel = new models.YFile() as models.ISharedFile;
     this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
+
+    (this.sharedModel as models.YFile).dirty = false;
+    this.sharedModel.changed.connect(this._onStateChanged, this);
   }
 
   /**
@@ -49,15 +52,13 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
+    if (newValue === this.dirty) {
       return;
     }
-    const oldValue = this._dirty;
-    this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
+    (this.sharedModel as models.YFile).dirty = newValue;
   }
 
   /**
@@ -151,12 +152,24 @@ export class DocumentModel
     this.dirty = true;
   }
 
+  private _onStateChanged(
+    sender: models.ISharedFile,
+    changes: models.NotebookChange
+  ): void {
+    if (changes.stateChange) {
+      changes.stateChange.forEach(value => {
+        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+          this.triggerStateChange(value);
+        }
+      });
+    }
+  }
+
   /**
    * The shared notebook model.
    */
   readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -284,6 +297,7 @@ export abstract class ABCWidgetFactory<
   constructor(options: DocumentRegistry.IWidgetFactoryOptions<T>) {
     this._translator = options.translator || nullTranslator;
     this._name = options.name;
+    this._label = options.label || options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
     this._defaultRendered = (options.defaultRendered || []).slice();
@@ -329,10 +343,18 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The name of the widget to display in dialogs.
+   * A unique name identifying of the widget.
    */
   get name(): string {
     return this._name;
+  }
+
+  /**
+   * The label of the widget to display in dialogs.
+   * If not given, name is used instead.
+   */
+  get label(): string {
+    return this._label;
   }
 
   /**
@@ -405,16 +427,11 @@ export abstract class ABCWidgetFactory<
     // Create the new widget
     const widget = this.createNewWidget(context, source);
 
-    // Add toolbar items
-    let items: DocumentRegistry.IToolbarItem[];
-    if (this._toolbarFactory) {
-      items = this._toolbarFactory(widget);
-    } else {
-      items = this.defaultToolbarFactory(widget);
-    }
-    items.forEach(({ name, widget: item }) => {
-      widget.toolbar.addItem(name, item);
-    });
+    // Add toolbar
+    setToolbar(
+      widget,
+      this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)
+    );
 
     // Emit widget created signal
     this._widgetCreated.emit(widget);
@@ -438,11 +455,16 @@ export abstract class ABCWidgetFactory<
   }
 
   private _toolbarFactory:
-    | ((widget: T) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: T
+      ) =>
+        | DocumentRegistry.IToolbarItem[]
+        | IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
   private _isDisposed = false;
   private _translator: ITranslator;
   private _name: string;
+  private _label: string;
   private _readOnly: boolean;
   private _canStartKernel: boolean;
   private _shutdownOnClose: boolean;
@@ -547,7 +569,10 @@ export class DocumentWidget<
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this.context.model.dirty) {
+    if (
+      this.context.model.dirty &&
+      !this.title.className.includes(DIRTY_CLASS)
+    ) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
@@ -570,6 +595,10 @@ export namespace DocumentWidget {
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   > extends MainAreaWidget.IOptionsOptionalContent<T> {
     context: DocumentRegistry.IContext<U>;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }

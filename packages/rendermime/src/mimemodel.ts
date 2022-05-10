@@ -93,7 +93,7 @@ namespace Private {
   /**
    * A no-op callback function.
    */
-  export function noOp() {
+  export function noOp(): void {
     /* no-op */
   }
 }

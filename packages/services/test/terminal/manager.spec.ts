@@ -21,23 +21,23 @@ afterAll(async () => {
 });
 
 describe('terminal', () => {
-  let manager: Terminal.IManager;
-
-  beforeEach(async () => {
-    manager = new TerminalManager({ standby: 'never' });
-    await manager.ready;
-  });
-
-  afterEach(() => {
-    manager.dispose();
-  });
-
   afterAll(async () => {
     const models = await TerminalAPI.listRunning();
     await Promise.all(models.map(m => TerminalAPI.shutdownTerminal(m.name)));
   });
 
   describe('TerminalManager', () => {
+    let manager: Terminal.IManager;
+
+    beforeEach(async () => {
+      manager = new TerminalManager({ standby: 'never' });
+      await manager.ready;
+    });
+
+    afterEach(() => {
+      manager.dispose();
+    });
+
     describe('#constructor()', () => {
       it('should accept no options', async () => {
         const manager = new TerminalManager({ standby: 'never' });
@@ -80,8 +80,8 @@ describe('terminal', () => {
     });
 
     describe('#ready', () => {
-      it('should resolve when the manager is ready', () => {
-        return manager.ready;
+      it('should resolve when the manager is ready', async () => {
+        await expect(manager.ready).resolves.not.toThrow();
       });
     });
 
@@ -170,6 +170,76 @@ describe('terminal', () => {
           }
         });
         expect(found).toBe(true);
+      });
+    });
+  });
+
+  describe('NoopManager', () => {
+    let manager: TerminalManager.NoopManager;
+
+    beforeEach(async () => {
+      manager = new TerminalManager.NoopManager({ standby: 'never' });
+      await manager.parentReady;
+    });
+
+    afterEach(() => {
+      manager.dispose();
+    });
+
+    describe('#constructor()', () => {
+      it('should take the options as an argument', async () => {
+        manager.dispose();
+        manager = new TerminalManager.NoopManager({
+          standby: 'never'
+        });
+        await manager.parentReady;
+        expect(manager instanceof TerminalManager.NoopManager).toBe(true);
+      });
+    });
+
+    describe('#serverSettings', () => {
+      it('should get the server settings', async () => {
+        manager.dispose();
+        const serverSettings = ServerConnection.makeSettings();
+        const standby = 'never';
+        const token = serverSettings.token;
+        manager = new TerminalManager.NoopManager({ serverSettings, standby });
+        await manager.parentReady;
+        expect(manager.serverSettings.token).toBe(token);
+      });
+    });
+
+    describe('#running()', () => {
+      it('should get the running sessions', async () => {
+        await manager.refreshRunning();
+        expect(toArray(manager.running()).length).toEqual(0);
+      });
+    });
+
+    describe('#refreshRunning()', () => {
+      it('should update the running kernels', async () => {
+        await manager.refreshRunning();
+        expect(toArray(manager.running()).length).toEqual(0);
+      });
+    });
+
+    describe('#startNew()', () => {
+      it('should throw an error', () => {
+        return expect(manager.startNew()).rejects.toThrow();
+      });
+    });
+
+    describe('#connectTo()', () => {
+      it('should throw an error', () => {
+        return expect(() => {
+          manager.connectTo({ model: { name: 'abcd' } });
+        }).toThrow();
+      });
+    });
+
+    describe('shutdown()', () => {
+      it('should throw an error', () => {
+        return expect(manager.shutdown('1234')).rejects.toThrow();
       });
     });
   });

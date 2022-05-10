@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor",
-  "version": "3.1.0-rc.1",
+  "version": "4.0.0-alpha.9",
   "description": "JupyterLab - Editor Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -23,9 +23,7 @@
     "lib": "lib/"
   },
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
+    "lib/**/*.{d.ts,js,js.map}",
     "style/*.css",
     "style/index.js"
   ],
@@ -34,7 +32,6 @@
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "prepublishOnly": "npm run build",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
@@ -42,25 +39,29 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.1.0-rc.1",
-    "@jupyterlab/codeeditor": "^3.1.0-rc.1",
-    "@jupyterlab/docregistry": "^3.1.0-rc.1",
-    "@jupyterlab/statusbar": "^3.1.0-rc.1",
-    "@jupyterlab/translation": "^3.1.0-rc.1",
-    "@jupyterlab/ui-components": "^3.1.0-rc.1",
-    "@lumino/coreutils": "^1.5.3",
-    "@lumino/messaging": "^1.4.3",
-    "@lumino/widgets": "^1.19.0",
-    "react": "^17.0.1"
+    "@jupyterlab/apputils": "^4.0.0-alpha.9",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.9",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.9",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/documentsearch": "^4.0.0-alpha.9",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.9",
+    "@jupyterlab/toc": "^6.0.0-alpha.9",
+    "@jupyterlab/translation": "^4.0.0-alpha.9",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.24",
+    "@lumino/coreutils": "^1.12.0",
+    "@lumino/messaging": "^1.10.1",
+    "@lumino/widgets": "^1.31.1",
+    "react": "^17.0.1",
+    "regexp-match-indices": "^1.0.2"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.1.0-rc.1",
+    "@jupyterlab/testutils": "^4.0.0-alpha.9",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
-    "typedoc": "~0.21.2",
-    "typescript": "~4.1.3"
+    "typedoc": "~0.22.10",
+    "typescript": "~4.6.3"
   },
   "publishConfig": {
     "access": "public"

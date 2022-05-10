@@ -101,7 +101,6 @@ export namespace Palette {
       trans.__('Command Palette Section')
     );
     shell.add(palette, 'left', { rank: 300 });
-
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(PALETTE_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {

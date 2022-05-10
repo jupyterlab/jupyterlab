@@ -17,7 +17,7 @@
 
 .jp-Cell {
   padding: var(--jp-cell-padding);
-  margin: 0px;
+  margin: 0;
   border: none;
   outline: none;
   background: transparent;
@@ -31,8 +31,9 @@
 .jp-Cell-outputWrapper {
   display: flex;
   flex-direction: row;
-  padding: 0px;
-  margin: 0px;
+  padding: 0;
+  margin: 0;
+
   /* Added to reveal the box-shadow on the input and output collapsers. */
   overflow: visible;
 }
@@ -70,17 +71,32 @@
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea {
   overflow-y: auto;
-  max-height: 200px;
-  box-shadow: inset 0 0 6px 2px rgba(0, 0, 0, 0.3);
+  max-height: 24em;
   margin-left: var(--jp-private-cell-scrolling-output-offset);
 }
 
+.jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea::after {
+  content: ' ';
+  box-shadow: inset 0 0 6px 2px rgb(0 0 0 / 30%);
+  width: 100%;
+  height: 100%;
+  position: sticky;
+  bottom: 0;
+  top: 0;
+  margin-top: -50%;
+  float: left;
+  display: block;
+  pointer-events: none;
+}
+
+.jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-child {
+  padding-top: 6px;
+}
+
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-prompt {
-  flex: 0 0
-    calc(
-      var(--jp-cell-prompt-width) -
-        var(--jp-private-cell-scrolling-output-offset)
-    );
+  width: calc(
+    var(--jp-cell-prompt-width) - var(--jp-private-cell-scrolling-output-offset)
+  );
 }
 
 /*-----------------------------------------------------------------------------
@@ -92,7 +108,8 @@
 |----------------------------------------------------------------------------*/
 
 .jp-MarkdownOutput {
-  flex: 1 1 auto;
+  display: table-cell;
+  width: 100%;
   margin-top: 0;
   margin-bottom: 0;
   padding-left: var(--jp-code-padding);
@@ -102,27 +119,110 @@
   overflow: auto;
 }
 
-.jp-showHiddenCellsButton {
+/* collapseHeadingButton (show always if hiddenCellsButton is _not_ shown) */
+.jp-collapseHeadingButton {
+  display: flex;
+  min-height: var(--jp-cell-collapser-min-height);
+  position: absolute;
+  background-color: transparent;
+  background-size: 25px;
+  background-repeat: no-repeat;
+  background-position-x: center;
+  background-position-y: top;
+  background-image: var(--jp-icon-caret-down);
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.jp-collapseHeadingButton.jp-mod-collapsed {
+  background-image: var(--jp-icon-caret-right);
+}
+
+/*
+ set the container font size to match that of content
+ so that the nested collapse buttons have the right size
+*/
+.jp-MarkdownCell .jp-InputPrompt {
+  font-size: var(--jp-content-font-size1);
+}
+
+/*
+  Align collapseHeadingButton with cell top header
+  The font sizes are identical to the ones in packages/rendermime/style/base.css
+*/
+.jp-collapseHeadingButton[data-heading-level='1'] {
+  font-size: var(--jp-content-font-size5);
+  background-position-y: calc(0.3 * var(--jp-content-font-size5));
+}
+
+.jp-collapseHeadingButton[data-heading-level='2'] {
+  font-size: var(--jp-content-font-size4);
+  background-position-y: calc(0.3 * var(--jp-content-font-size4));
+}
+
+.jp-collapseHeadingButton[data-heading-level='3'] {
+  font-size: var(--jp-content-font-size3);
+  background-position-y: calc(0.3 * var(--jp-content-font-size3));
+}
+
+.jp-collapseHeadingButton[data-heading-level='4'] {
+  font-size: var(--jp-content-font-size2);
+  background-position-y: calc(0.3 * var(--jp-content-font-size2));
+}
+
+.jp-collapseHeadingButton[data-heading-level='5'] {
+  font-size: var(--jp-content-font-size1);
+  background-position-y: top;
+}
+
+.jp-collapseHeadingButton[data-heading-level='6'] {
+  font-size: var(--jp-content-font-size0);
+  background-position-y: top;
+}
+
+/* collapseHeadingButton (show only on (hover,active) if hiddenCellsButton is shown) */
+.jp-Notebook.jp-mod-showHiddenCellsButton .jp-collapseHeadingButton {
+  display: none;
+}
+
+.jp-Notebook.jp-mod-showHiddenCellsButton
+  :is(.jp-MarkdownCell:hover, .jp-mod-active)
+  .jp-collapseHeadingButton {
+  display: flex;
+}
+
+/* showHiddenCellsButton (only show if jp-mod-showHiddenCellsButton is set, which
+is a consequence of the showHiddenCellsButton option in Notebook Settings)*/
+.jp-Notebook.jp-mod-showHiddenCellsButton .jp-showHiddenCellsButton {
   margin-left: calc(var(--jp-cell-prompt-width) + 2 * var(--jp-code-padding));
   margin-top: var(--jp-code-padding);
   border: 1px solid var(--jp-border-color2);
   background-color: var(--jp-border-color3) !important;
   color: var(--jp-content-font-color0) !important;
+  display: flex;
 }
 
-.jp-showHiddenCellsButton:hover {
+.jp-Notebook.jp-mod-showHiddenCellsButton .jp-showHiddenCellsButton:hover {
   background-color: var(--jp-border-color2) !important;
 }
 
-.jp-collapseHeadingButton {
+.jp-showHiddenCellsButton {
   display: none;
 }
 
-.jp-MarkdownCell:hover .jp-collapseHeadingButton {
-  display: flex;
-  min-height: var(--jp-cell-collapser-min-height);
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+
+/*
+Using block instead of flex to allow the use of the break-inside CSS property for
+cell outputs.
+*/
+
+@media print {
+  .jp-Cell-inputWrapper,
+  .jp-Cell-outputWrapper {
+    display: block;
+  }
 }

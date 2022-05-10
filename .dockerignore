@@ -21,6 +21,7 @@ examples/
 
 junit.xml
 
+galata
 jupyterlab/geckodriver
 jupyterlab/static
 jupyterlab/schemas
@@ -41,4 +42,3 @@ tests/**/coverage
 tests/**/.cache-loader
 
 **/node_modules
-ui-tests/

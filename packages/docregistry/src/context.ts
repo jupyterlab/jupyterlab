@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -55,6 +56,7 @@ export class Context<
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
+    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
@@ -143,6 +145,17 @@ export class Context<
    */
   get disposed(): ISignal<this, void> {
     return this._disposed;
+  }
+
+  /**
+   * Configurable margin used to detect document modification conflicts, in milliseconds
+   */
+  get lastModifiedCheckMargin(): number {
+    return this._lastModifiedCheckMargin;
+  }
+
+  set lastModifiedCheckMargin(value: number) {
+    this._lastModifiedCheckMargin = value;
   }
 
   /**
@@ -248,7 +261,6 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean): Promise<void> {
-    const lock = await this._provider.acquireLock();
     const contentIsInitialized = await this._provider.requestInitialContent();
     let promise;
     if (isNew || contentIsInitialized) {
@@ -256,17 +268,11 @@ export class Context<
     } else {
       promise = this._revert();
     }
-    // make sure that the lock is released after the above operations are completed.
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
     // if save/revert completed successfully, we set the initialized content in the rtc server.
-    promise
-      .then(() => {
-        this._provider.putInitializedState();
-        this._model.initialize();
-      })
-      .then(finally_, finally_);
+    promise = promise.then(() => {
+      this._provider.putInitializedState();
+      this._model.initialize();
+    });
     return promise;
   }
 
@@ -286,25 +292,14 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  async save(manual?: boolean): Promise<void> {
-    const [lock] = await Promise.all([
-      this._provider.acquireLock(),
-      this.ready
-    ]);
+  async save(): Promise<void> {
+    await this.ready;
     let promise: Promise<void>;
-    if (manual) {
-      promise = this._save(manual);
-    } else {
-      promise = this._save();
-    }
+    promise = this._save();
     // if save completed successfully, we set the initialized content in the rtc server.
     promise = promise.then(() => {
       this._provider.putInitializedState();
     });
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    promise.then(finally_, finally_);
     return await promise;
   }
 
@@ -363,15 +358,8 @@ export class Context<
    * Revert the document contents to disk contents.
    */
   async revert(): Promise<void> {
-    const [lock] = await Promise.all([
-      this._provider.acquireLock(),
-      this.ready
-    ]);
+    await this.ready;
     const promise = this._revert();
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    promise.then(finally_, finally_);
     return await promise;
   }
 
@@ -556,7 +544,7 @@ export class Context<
       // any kernel has started.
       void this.sessionContext.initialize().then(shouldSelect => {
         if (shouldSelect) {
-          void this._dialogs.selectKernel(this.sessionContext);
+          void this._dialogs.selectKernel(this.sessionContext, this.translator);
         }
       });
     });
@@ -583,16 +571,18 @@ export class Context<
   /**
    * Save the document contents to disk.
    */
-  private async _save(manual?: boolean): Promise<void> {
+  private async _save(): Promise<void> {
     this._saveState.emit('started');
     const model = this._model;
-    let content: PartialJSONValue;
-    if (this._factory.fileFormat === 'json') {
-      content = model.toJSON();
-    } else {
-      content = model.toString();
-      if (this._useCRLF) {
-        content = content.replace(/\n/g, '\r\n');
+    let content: PartialJSONValue = null;
+    if (PageConfig.getOption('collaborative') !== 'true') {
+      if (this._factory.fileFormat === 'json') {
+        content = model.toJSON();
+      } else {
+        content = model.toString();
+        if (this._lineEnding) {
+          content = content.replace(/\n/g, this._lineEnding);
+        }
       }
     }
 
@@ -621,16 +611,15 @@ export class Context<
       }
 
       // Emit completion.
-      if (manual) {
-        this._saveState.emit('completed manually');
-      } else {
-        this._saveState.emit('completed');
-      }
+      this._saveState.emit('completed');
     } catch (err) {
       // If the save has been canceled by the user,
       // throw the error so that whoever called save()
       // can decide what to do.
-      if (err.message === 'Cancel') {
+      if (
+        err.message === 'Cancel' ||
+        err.message === 'Modal is already displayed'
+      ) {
         throw err;
       }
 
@@ -656,9 +645,11 @@ export class Context<
    */
   private _revert(initializeModel: boolean = false): Promise<void> {
     const opts: Contents.IFetchOptions = {
-      format: this._factory.fileFormat,
       type: this._factory.contentType,
-      content: this._factory.fileFormat !== null
+      content: this._factory.fileFormat !== null,
+      ...(this._factory.fileFormat !== null
+        ? { format: this._factory.fileFormat }
+        : {})
     };
     const path = this._path;
     const model = this._model;
@@ -670,7 +661,6 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
-        const dirty = false;
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
           if (initializeModel) {
@@ -680,11 +670,14 @@ export class Context<
           let content = contents.content;
           // Convert line endings if necessary, marking the file
           // as dirty.
-          if (content.indexOf('\r') !== -1) {
-            this._useCRLF = true;
+          if (content.indexOf('\r\n') !== -1) {
+            this._lineEnding = '\r\n';
             content = content.replace(/\r\n/g, '\n');
+          } else if (content.indexOf('\r') !== -1) {
+            this._lineEnding = '\r';
+            content = content.replace(/\r/g, '\n');
           } else {
-            this._useCRLF = false;
+            this._lineEnding = null;
           }
           model.fromString(content);
           if (initializeModel) {
@@ -692,7 +685,7 @@ export class Context<
           }
         }
         this._updateContentsModel(contents);
-        model.dirty = dirty;
+        model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();
         }
@@ -724,15 +717,17 @@ export class Context<
         }
         // We want to check last_modified (disk) > last_modified (client)
         // (our last save)
-        // In some cases the filesystem reports an inconsistent time,
-        // so we allow 0.5 seconds difference before complaining.
+        // In some cases the filesystem reports an inconsistent time, so we allow buffer when comparing.
+        const lastModifiedCheckMargin = this._lastModifiedCheckMargin;
         const ycontextModified = this._ycontext.get('last_modified');
         // prefer using the timestamp from ycontext because it is more up to date
         const modified = ycontextModified || this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
-        if (modified && tDisk.getTime() - tClient.getTime() > 500) {
-          // 500 ms
+        if (
+          modified &&
+          tDisk.getTime() - tClient.getTime() > lastModifiedCheckMargin
+        ) {
           return this._timeConflict(tClient, model, options);
         }
         return this._manager.contents.save(path, options);
@@ -798,6 +793,9 @@ export class Context<
         `while the current file seems to have been saved ` +
         `${tDisk}`
     );
+    if (this._timeConflictModalIsOpen) {
+      return Promise.reject(new Error('Modal is already displayed'));
+    }
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
 Do you want to overwrite the file on disk with the version open here,
@@ -808,11 +806,13 @@ or load the version on disk (revert)?`,
     const overwriteBtn = Dialog.warnButton({
       label: this._trans.__('Overwrite')
     });
+    this._timeConflictModalIsOpen = true;
     return showDialog({
       title: this._trans.__('File Changed'),
       body,
       buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
+      this._timeConflictModalIsOpen = false;
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
@@ -864,8 +864,10 @@ or load the version on disk (revert)?`,
     this._path = newPath;
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
-    await this.save();
+    // we must rename the document before saving with the new path
     this._ycontext.set('path', this._path);
+    await this._provider.renameAck;
+    await this.save();
     await this._maybeCheckpoint(true);
   }
 
@@ -879,7 +881,7 @@ or load the version on disk (revert)?`,
   private _model: T;
   private _modelDB: IModelDB;
   private _path = '';
-  private _useCRLF = false;
+  private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
   private _readyPromise: Promise<void>;
@@ -895,6 +897,8 @@ or load the version on disk (revert)?`,
   private _provider: IDocumentProvider;
   private _ydoc: Y.Doc;
   private _ycontext: Y.Map<string>;
+  private _lastModifiedCheckMargin = 500;
+  private _timeConflictModalIsOpen = false;
 }
 
 /**
@@ -959,6 +963,11 @@ export namespace Context {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+     */
+    lastModifiedCheckMargin?: number;
   }
 }
 

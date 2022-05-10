@@ -81,7 +81,7 @@ LabConfig Directories
 ---------------------
 For each config path ``<jupyter_config_path>`` listed in ``jupyter --paths``, the ``<jupyter_config_path>/labconfig`` directory contains configuration data. This configuration data from all of these directories is combined into a single configuration, with priority order given by ``jupyter --paths``.
 
-The primary file used by JupyterLab is ``page_config.json``.  
+The primary file used by JupyterLab is ``page_config.json``.
 The ``page_config.json`` data is used to provide configuration data to the
 application environment.
 
@@ -117,7 +117,7 @@ against the patterns in ``disabledExtensions`` and ``deferredExtensions``.
    ``"@jupyterlab/apputils-extension:set.*$"``),
    then that specific plugin is disabled (or deferred).
 
-An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as follows:
+An example ``<jupyter_config_path>/labconfig/page_config.json`` could look as follows:
 
 .. code:: json
 
@@ -186,7 +186,7 @@ schemas
 ^^^^^^^
 
 The ``schemas`` directory contains `JSON
-Schemas <http://json-schema.org/>`__ that describe the settings used by
+Schemas <https://json-schema.org/>`__ that describe the settings used by
 individual extensions. Users may edit these settings using the
 JupyterLab Advanced Settings Editor.
 
@@ -322,4 +322,3 @@ environments. The location can be modified using the
 
 These files can be imported and exported to create default "profiles", using
 the :ref:`workspace command line tool <url-workspaces-cli>`.
-

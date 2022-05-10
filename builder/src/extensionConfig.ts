@@ -263,7 +263,7 @@ function generateConfig({
           publicPath: staticUrl || 'auto'
         },
         module: {
-          rules: [{ test: /\.html$/, use: 'file-loader' }]
+          rules: [{ test: /\.html$/, type: 'asset/resource' }]
         },
         plugins
       },
@@ -273,7 +273,14 @@ function generateConfig({
 
   if (mode === 'development') {
     const logPath = path.join(outputPath, 'build_log.json');
-    fs.writeFileSync(logPath, JSON.stringify(config, null, '  '));
+    function regExpReplacer(key: any, value: any) {
+      if (value instanceof RegExp) {
+        return value.toString();
+      } else {
+        return value;
+      }
+    }
+    fs.writeFileSync(logPath, JSON.stringify(config, regExpReplacer, '  '));
   }
   return config;
 }

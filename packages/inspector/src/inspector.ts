@@ -61,7 +61,7 @@ export class InspectorPanel
    * Print in iframe
    */
   [Printing.symbol]() {
-    return () => Printing.printWidget(this);
+    return (): Promise<void> => Printing.printWidget(this);
   }
 
   /**

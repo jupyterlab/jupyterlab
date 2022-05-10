@@ -81,7 +81,7 @@ Create a repository
 -------------------
 
 Create a new repository for your extension (see, for example, the
-`GitHub instructions <https://help.github.com/articles/create-a-repo/>`__. This is an
+`GitHub instructions <https://docs.github.com/en/get-started/quickstart/create-a-repo>`__. This is an
 optional step, but highly recommended if you want to share your
 extension.
 
@@ -104,14 +104,19 @@ are using to fetch pictures).
 
 ::
 
+    Select kind:
+    1 - frontend
+    2 - server
+    3 - theme
+    Choose from 1, 2, 3 [1]: 1
     author_name []: Your Name
     author_email []: your@name.org
-    python_name [myextension]: jupyterlab_apod
     labextension_name [myextension]: jupyterlab_apod
+    python_name [myextension]: jupyterlab_apod
     project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
-    has_server_extension [n]: n
+    has_settings [n]: n
     has_binder [n]: y
-    repository [https://github.com/my_name/myextension]: https://github.com/my_name/jupyterlab_apod
+    repository [https://github.com/github_username/myextension]: https://github.com/github_username/jupyterlab_apod
 
 Note: if not using a repository, leave the repository field blank. You can come
 back and edit the repository field in the ``package.json`` file later.
@@ -127,8 +132,8 @@ You should see a list like the following.
 
 ::
 
-    LICENSE          README.md        jupyterlab_apod/ pyproject.toml   src/             tsconfig.json
-    MANIFEST.in      install.json     package.json     setup.py         style/
+    binder          CHANGELOG.md  install.json  jupyterlab_apod  LICENSE   MANIFEST.in   package.json
+    pyproject.toml  README.md     RELEASE.md    setup.py         src       style         tsconfig.json
 
 Commit what you have to git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -451,6 +456,15 @@ And update the ``activate`` method to be ``async`` since we are now using
 .. code-block:: typescript
 
         activate: async (app: JupyterFrontEnd, palette: ICommandPalette) =>
+
+.. note::
+
+    If you are new to JavaScript / TypeScript and want to learn more about ``async``, ``await``,
+    and ``Promises``, you can check out the following `tutorial on MDN <https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises>`_
+
+    Be sure to also refer to the other resources in the
+    `See Also <https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises#see_also>`_
+    section for more materials.
 
 Rebuild your extension if necessary (``jlpm run build``), refresh your browser
 tab, and run the *Random Astronomy Picture* command again. You should now see a
@@ -792,30 +806,43 @@ entire list of import statements looks like the following:
     import { Widget } from '@lumino/widgets';
 
 Then add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
-definition. This addition passes the global ``LayoutRestorer`` as the
+definition as ``optional``. This addition passes the global ``LayoutRestorer`` as the
 third parameter of the ``activate`` function.
 
 .. code-block:: typescript
-    :emphasize-lines: 4
+    :emphasize-lines: 5
 
     const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_apod',
       autoStart: true,
-      requires: [ICommandPalette, ILayoutRestorer],
+      requires: [ICommandPalette],
+      optional: [ILayoutRestorer],
       activate: activate
     };
+
+Here ``ILayoutRestorer`` is specified as an ``optional`` token, as the corresponding service might
+not be available in a customized JupyterLab distribution that does not provide layout restoration
+functionalities. Having it ``optional`` make it a nice to have, and enable your extension to be loaded
+in more JupyterLab based applications.
+
+.. note::
+
+    You can learn more about ``requires`` and ``optional`` in the :ref:`tokens` section
+    of the Extension Developer Guide.
 
 Finally, rewrite the ``activate`` function so that it:
 
 1. Declares a widget variable, but does not create an instance
    immediately.
-2. Constructs a ``WidgetTracker`` and tells the ``ILayoutRestorer``
+2. Adds the global ``LayoutRestorer`` as the third parameter of the ``activate`` function.
+   This parameter is declared as ``ILayoutRestorer | null`` since the token is specified as ``optional``.
+3. Constructs a ``WidgetTracker`` and tells the ``ILayoutRestorer``
    to use it to save/restore panel state.
-3. Creates, tracks, shows, and refreshes the widget panel appropriately.
+4. Creates, tracks, shows, and refreshes the widget panel appropriately.
 
 .. code-block:: typescript
 
-    function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer) {
+    function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer | null) {
       console.log('JupyterLab extension jupyterlab_apod is activated!');
 
       // Declare a widget variable
@@ -857,10 +884,12 @@ Finally, rewrite the ``activate`` function so that it:
       let tracker = new WidgetTracker<MainAreaWidget<APODWidget>>({
         namespace: 'apod'
       });
-      restorer.restore(tracker, {
-        command,
-        name: () => 'apod'
-      });
+      if (restorer) {
+        restorer.restore(tracker, {
+          command,
+          name: () => 'apod'
+        });
+      }
     }
 
 Rebuild your extension one last time and refresh your browser tab.
@@ -897,7 +926,7 @@ Packaging your extension
 
 JupyterLab extensions for JupyterLab 3.0 can be distributed as Python
 packages. The cookiecutter template we used contains all of the Python
-packaging instructions in the ``setup.py`` file to wrap your extension in a
+packaging instructions in the ``pyproject.toml`` file to wrap your extension in a
 Python package. Before generating a package, we first need to install ``build``.
 
 .. code:: bash
@@ -917,9 +946,9 @@ To create a Python wheel package (``.whl``) in the ``dist/`` directory, do:
     python -m build
 
 Both of these commands will build the JavaScript into a bundle in the
-``jupyterlab_apod/static`` directory, which is then distributed with the
+``jupyterlab_apod/labextension/static`` directory, which is then distributed with the
 Python package. This bundle will include any necessary JavaScript dependencies
-as well. You may want to check in the ``jupyterlab_apod/static`` directory to
+as well. You may want to check in the ``jupyterlab_apod/labextension/static`` directory to
 retain a record of what JavaScript is distributed in your package, or you may
 want to keep this "build artifact" out of your source repository history.
 
@@ -965,6 +994,22 @@ You may want to also publish your extension as a JavaScript package to the
    for other extensions to use, you will need to publish your JavaScript
    package to npm so other extensions can depend on it and import and require
    your token.
+
+
+Automated Releases
+^^^^^^^^^^^^^^^^^^
+
+If you used the cookiecutter to bootstrap your extension, the repository should already
+be compatible with the `Jupyter Releaser <https://github.com/jupyter-server/jupyter_releaser>`_.
+
+The Jupyter Releaser provides a set of GitHub Actions Workflows to:
+
+- Generate a new entry in the Changelog
+- Draft a new release
+- Publish the release to ``PyPI`` and ``npm``
+
+For more information on how to run the release workflows,
+check out the documentation: https://github.com/jupyter-server/jupyter_releaser
 
 Learn more
 ----------

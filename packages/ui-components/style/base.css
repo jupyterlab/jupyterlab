@@ -4,12 +4,20 @@
 |----------------------------------------------------------------------------*/
 
 /* Sibling imports */
+@import './collapse.css';
 @import './deprecated.css';
 @import './deprecatedExtra.css';
+@import './tabbar.css';
 @import './icons.css';
 @import './iconsalt.css';
 @import './iconshover.css';
+@import './iframe.css';
+@import './hoverbox.css';
+@import './spinner.css';
+@import './styling.css';
+@import './sidepanel.css';
 @import './switch.css';
+@import './toolbar.css';
 
 /* Override Blueprint's _reset.scss styles */
 html {
@@ -23,8 +31,14 @@ html {
 }
 
 body {
-  color: unset;
-  font-family: var(--jp-ui-font-family);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+
+  /* Blueprint reset rules */
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.28581;
+  text-transform: none;
 }
 
 p {
@@ -40,14 +54,26 @@ strong {
   font-weight: unset;
 }
 
-/* Override Blueprint's _typography.scss styles */
+/* Disable native link decoration styles everywhere outside of dialog boxes */
 a {
   text-decoration: unset;
   color: unset;
 }
+
 a:hover {
   text-decoration: unset;
   color: unset;
+}
+
+/* Accessibility for links inside dialog box text */
+.jp-Dialog-content a {
+  text-decoration: revert;
+  color: revert;
+}
+
+.jp-Dialog-content a:hover {
+  text-decoration: revert;
+  color: revert;
 }
 
 /* Override Blueprint's _accessibility.scss styles */
@@ -59,29 +85,75 @@ a:hover {
 
 /* Styles for ui-components */
 .jp-Button {
+  color: var(--jp-ui-font-color2);
   border-radius: var(--jp-border-radius);
-  padding: 0px 12px;
+  padding: 0 12px;
   font-size: var(--jp-ui-font-size1);
+
+  /* Copy from blueprint 3 */
+  display: inline-flex;
+  flex-direction: row;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+  vertical-align: middle;
+  min-height: 30px;
+  min-width: 30px;
+}
+
+.jp-Button:disabled {
+  cursor: not-allowed;
+}
+
+.jp-Button:empty {
+  padding: 0 !important;
+}
+
+.jp-Button.jp-mod-small {
+  min-height: 24px;
+  min-width: 24px;
+  font-size: 12px;
+  padding: 0 7px;
 }
 
 /* Use our own theme for hover styles */
-button.jp-Button.bp3-button.bp3-minimal:hover {
+.jp-Button.jp-mod-minimal:hover {
   background-color: var(--jp-layout-color2);
 }
-.jp-Button.minimal {
-  color: unset !important;
+
+.jp-Button.jp-mod-minimal {
+  background: none;
 }
 
-.jp-Button.jp-ToolbarButtonComponent {
-  text-transform: none;
+.jp-InputGroup {
+  display: block;
+  position: relative;
 }
 
 .jp-InputGroup input {
   box-sizing: border-box;
+  border: none;
   border-radius: 0;
   background-color: transparent;
   color: var(--jp-ui-font-color0);
   box-shadow: inset 0 0 0 var(--jp-border-width) var(--jp-input-border-color);
+  padding-bottom: 0;
+  padding-top: 0;
+  padding-left: 10px;
+  padding-right: 28px;
+  position: relative;
+  width: 100%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  font-size: 14px;
+  font-weight: 400;
+  height: 30px;
+  line-height: 30px;
+  outline: none;
+  vertical-align: middle;
 }
 
 .jp-InputGroup input:focus {
@@ -90,23 +162,27 @@ button.jp-Button.bp3-button.bp3-minimal:hover {
     inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }
 
+.jp-InputGroup input:disabled {
+  cursor: not-allowed;
+  resize: block;
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-InputGroup input:disabled ~ span {
+  cursor: not-allowed;
+  color: var(--jp-ui-font-color2);
+}
+
 .jp-InputGroup input::placeholder,
 input::placeholder {
-  color: var(--jp-ui-font-color3);
-}
-
-.jp-BPIcon {
-  display: inline-block;
-  vertical-align: middle;
-  margin: auto;
-}
-
-/* Stop blueprint futzing with our icon fills */
-.bp3-icon.jp-BPIcon > svg:not([fill]) {
-  fill: var(--jp-inverse-layout-color3);
+  color: var(--jp-ui-font-color2);
 }
 
 .jp-InputGroupAction {
+  position: absolute;
+  top: 0;
+  right: 0;
   padding: 6px;
 }
 
@@ -126,12 +202,24 @@ input::placeholder {
   -webkit-appearance: none;
 }
 
+.jp-HTMLSelect.jp-DefaultStyle select:disabled {
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color2);
+  cursor: not-allowed;
+  resize: block;
+}
+
+.jp-HTMLSelect.jp-DefaultStyle select:disabled ~ span {
+  cursor: not-allowed;
+}
+
 /* Use our own theme for hover and option styles */
 .jp-HTMLSelect.jp-DefaultStyle select:hover,
 .jp-HTMLSelect.jp-DefaultStyle select > option {
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color0);
 }
+
 select {
   box-sizing: border-box;
 }

@@ -83,6 +83,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => {
+        if (args.theme === undefined) {
+          return trans.__('Switch to the provided `theme`.');
+        }
         const theme = args['theme'] as string;
         const displayName = manager.getDisplayName(theme);
         return args['isPalette']

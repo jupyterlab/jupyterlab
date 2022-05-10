@@ -1,0 +1,16 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-toc-numberingButton:hover button.lm-mod-toggled.jp-Button.jp-mod-minimal {
+  background-color: var(--jp-inverse-layout-color4);
+}
+
+.jp-toc-numberingButton button.lm-mod-toggled .jp-icon3[fill] {
+  fill: var(--jp-layout-color1);
+}
+
+.jp-toc-numberingButton button.lm-mod-toggled.jp-Button.jp-mod-minimal {
+  background-color: var(--jp-inverse-layout-color3);
+}

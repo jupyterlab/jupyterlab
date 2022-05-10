@@ -63,7 +63,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     if (this.isDisposed) {
       return;
     }
@@ -263,7 +263,7 @@ export class CodeEditorWrapper extends Widget {
       y: event.y,
       width: 0,
       height: 0
-    };
+    } as CodeEditor.ICoordinate;
     const position = this.editor.getPositionForCoordinate(coordinate);
     if (position === null) {
       return;

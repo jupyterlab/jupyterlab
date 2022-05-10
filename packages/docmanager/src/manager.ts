@@ -42,6 +42,7 @@ export class DocumentManager implements IDocumentManager {
     this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._docProviderFactory = options.docProviderFactory;
+    this._isConnectedCallback = options.isConnectedCallback || (() => true);
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -113,6 +114,22 @@ export class DocumentManager implements IDocumentManager {
         return;
       }
       handler.saveInterval = value || 120;
+    });
+  }
+
+  /**
+   * Defines max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+   */
+  get lastModifiedCheckMargin(): number {
+    return this._lastModifiedCheckMargin;
+  }
+
+  set lastModifiedCheckMargin(value: number) {
+    this._lastModifiedCheckMargin = value;
+
+    // For each existing context, update the margin value.
+    this._contexts.forEach(context => {
+      context.lastModifiedCheckMargin = value;
     });
   }
 
@@ -473,10 +490,13 @@ export class DocumentManager implements IDocumentManager {
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
-      docProviderFactory: this._docProviderFactory
+      docProviderFactory: this._docProviderFactory,
+      lastModifiedCheckMargin: this._lastModifiedCheckMargin,
+      translator: this.translator
     });
     const handler = new SaveHandler({
       context,
+      isConnectedCallback: this._isConnectedCallback,
       saveInterval: this.autosaveInterval
     });
     Private.saveHandlerProperty.set(context, handler);
@@ -573,6 +593,10 @@ export class DocumentManager implements IDocumentManager {
 
     // If the initial opening of the context fails, dispose of the widget.
     ready.catch(err => {
+      console.error(
+        `Failed to initialize the context with '${factory.name}' for ${path}`,
+        err
+      );
       widget.close();
     });
 
@@ -597,11 +621,13 @@ export class DocumentManager implements IDocumentManager {
   private _isDisposed = false;
   private _autosave = true;
   private _autosaveInterval = 120;
+  private _lastModifiedCheckMargin = 500;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
   private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _collaborative: boolean;
+  private _isConnectedCallback: () => boolean;
 }
 
 /**
@@ -657,6 +683,12 @@ export namespace DocumentManager {
      * If true, the context will connect through yjs_ws_server to share information if possible.
      */
     collaborative?: boolean;
+
+    /**
+     * Autosaving should be paused while this callback function returns `false`.
+     * By default, it always returns `true`.
+     */
+    isConnectedCallback?: () => boolean;
   }
 
   /**

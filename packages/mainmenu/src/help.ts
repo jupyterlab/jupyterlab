@@ -1,21 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel } from '@jupyterlab/services';
 import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
-import { IMenuExtender } from './tokens';
+import { SemanticCommand } from '@jupyterlab/apputils';
 
 /**
  * An interface for a Help menu.
  */
 export interface IHelpMenu extends IRankedMenu {
   /**
-   * A set of kernel users for the help menu.
+   * A semantic command to get the kernel for the help menu.
    * This is used to populate additional help
    * links provided by the kernel of a widget.
+   *
+   * #### Note
+   * The command must return a Kernel.IKernelConnection object
    */
-  readonly kernelUsers: Set<IHelpMenu.IKernelUser<Widget>>;
+  readonly getKernel: SemanticCommand;
 }
 
 /**
@@ -27,29 +28,16 @@ export class HelpMenu extends RankedMenu implements IHelpMenu {
    */
   constructor(options: IRankedMenu.IOptions) {
     super(options);
-    this.kernelUsers = new Set<IHelpMenu.IKernelUser<Widget>>();
+    this.getKernel = new SemanticCommand();
   }
 
   /**
-   * A set of kernel users for the help menu.
+   * A semantic command to get the kernel for the help menu.
    * This is used to populate additional help
    * links provided by the kernel of a widget.
+   *
+   * #### Note
+   * The command must return a Kernel.IKernelConnection object
    */
-  readonly kernelUsers: Set<IHelpMenu.IKernelUser<Widget>>;
-}
-
-/**
- * Namespace for IHelpMenu
- */
-export namespace IHelpMenu {
-  /**
-   * Interface for a Kernel user to register itself
-   * with the IHelpMenu's semantic extension points.
-   */
-  export interface IKernelUser<T extends Widget> extends IMenuExtender<T> {
-    /**
-     * A function to get the kernel for a widget.
-     */
-    getKernel: (widget: T) => Kernel.IKernelConnection | null;
-  }
+  readonly getKernel: SemanticCommand;
 }

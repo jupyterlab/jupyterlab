@@ -5,14 +5,12 @@ import { Token } from '@lumino/coreutils';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-/* tslint:disable */
 /**
  * The inspector panel token.
  */
 export const IInspector = new Token<IInspector>(
   '@jupyterlab/inspector:IInspector'
 );
-/* tslint:enable */
 
 /**
  * An interface for an inspector.

@@ -370,10 +370,10 @@ describe('@jupyterlab/apputils', () => {
         expect(sessionContext.kernelDisplayStatus).toBe('initializing');
       });
 
-      it('should be "idle" if there is no current kernel', async () => {
+      it('should be "unknown" if there is no current kernel', async () => {
         await sessionContext.initialize();
         await sessionContext.shutdown();
-        expect(sessionContext.kernelDisplayStatus).toBe('idle');
+        expect(sessionContext.kernelDisplayStatus).toBe('unknown');
       });
     });
 
@@ -418,7 +418,7 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         sessionContext.dispose();
-        return delegate.promise;
+        await expect(delegate.promise).resolves.not.toThrow();
       });
     });
 
@@ -560,7 +560,7 @@ describe('@jupyterlab/apputils', () => {
         it('should select a kernel for the session', async () => {
           await sessionContext.initialize();
 
-          const { id, name } = sessionContext?.session!.kernel!;
+          const { id, name } = sessionContext!.session!.kernel!;
           const accept = acceptDialog();
 
           await sessionContextDialogs.selectKernel(sessionContext);

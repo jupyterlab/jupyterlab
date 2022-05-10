@@ -14,7 +14,7 @@ import {
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import { each } from '@lumino/algorithm';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
-import { KernelError, Notebook, NotebookActions, NotebookModel } from '../src';
+import { KernelError, Notebook, NotebookActions, NotebookModel } from '..';
 import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';
@@ -62,7 +62,9 @@ describe('@jupyterlab/notebook', () => {
         contentFactory: utils.createNotebookFactory(),
         mimeTypeService: utils.mimeTypeService
       });
-      const model = new NotebookModel();
+      const model = new NotebookModel({
+        disableDocumentWideUndoRedo: true
+      });
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
       model.sharedModel.clearUndoHistory();
@@ -1534,6 +1536,7 @@ describe('@jupyterlab/notebook', () => {
         for (let i = 0; i < widget.widgets.length; i++) {
           const cell = widget.widgets[i];
           if (cell instanceof CodeCell) {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(cell.model.outputs.length).toBe(0);
           }
         }
@@ -1624,7 +1627,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be a no-op if the model is `null`', async () => {
         widget.model = null;
-        await NotebookActions.trust(widget);
+        await expect(NotebookActions.trust(widget)).resolves.not.toThrow();
       });
 
       it('should show a dialog if all cells are trusted', async () => {
@@ -1637,7 +1640,7 @@ describe('@jupyterlab/notebook', () => {
         }
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await promise;
+        await expect(promise).resolves.not.toThrow();
       });
     });
   });

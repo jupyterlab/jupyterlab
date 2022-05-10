@@ -77,6 +77,7 @@ export interface IService {
  * @param status The status code for the response.
  * @param body The body for the response.
  */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;

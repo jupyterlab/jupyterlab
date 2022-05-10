@@ -1,70 +1,43 @@
 name: Check Release
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
 
 jobs:
 
   check_release:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [check_release, link_check]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.9
-
-      # Cache yarn
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Cache yarn
-        uses: actions/cache@v2
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Get pip cache dir
-        id: pip-cache
-        run: |
-          echo "::set-output name=dir::$(pip cache dir)"
-      - name: Cache pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-pip-
-
-      - name: Cache checked links
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/.md') }}-md-links
-          restore-keys: |
-            ${{ runner.os }}-linkcheck-
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Check Release
+        if: ${{ matrix.group == 'check_release' }}
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1
-        env:
-          RH_VERSION_SPEC: build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          version_spec: next
+
+      - name: Run Link Check
+        if: ${{ matrix.group == 'link_check' }}
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-links@v1
 
       - name: Upload Assets
+        if: ${{ matrix.group == 'check_release' }}
         uses: actions/upload-artifact@v2
         with:
-          name: dist-files
+          name: jupyterlab-releaser-dist-${{ github.run_number }}
           path: |
             .jupyter_releaser_checkout/dist/*.*

@@ -13,7 +13,11 @@ if [ $OSTYPE == "Linux" ]; then
 fi
 
 # create jupyter base dir (needed for config retrieval)
-mkdir ~/.jupyter
+mkdir -p ~/.jupyter
+
+# Set up git config
+git config --global user.name foo
+git config --global user.email foo@bar.com
 
 # Install and enable the server extension
 pip install -q --upgrade pip --user
@@ -22,17 +26,6 @@ pip --version
 pip install -e ".[test]" || pip install -v -e ".[test]"
 jlpm versions
 jlpm config current
-
-# TODO: remove when we no longer support classic notebook
-jupyter serverextension enable jupyterlab
-jupyter serverextension list 1>serverextensions 2>&1
-cat serverextensions
-cat serverextensions | grep -i "jupyterlab.*enabled"
-cat serverextensions | grep -i "jupyterlab.*OK"
-
-if [[ $GROUP == integrity ]]; then
-    pip install notebook==4.3.1
-fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
@@ -49,7 +42,3 @@ fi
 if [[ $GROUP == js-debugger ]]; then
     pip install xeus-python">=0.9.0,<0.10.0"
 fi
-
-# Pin the jedi dependency to prevent a temporary breakage
-# See https://github.com/ipython/ipython/issues/12740, https://github.com/ipython/ipython/pull/12751
-pip install 'jedi<0.18'

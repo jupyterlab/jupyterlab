@@ -1,5 +1,5 @@
 [build-system]
-requires=["jupyter_packaging~=0.9,<2"]
+requires=["jupyter_packaging>=0.9,<2", "pre-commit"]
 build-backend = "jupyter_packaging.build_api"
 
 [license]
@@ -22,16 +22,22 @@ addopts="--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
 ignore="tests examples"
 
 [tool.check-manifest]
-ignore = ["binder/**", "builder/**", "buildutils/**", "design/**", "dev_mode/**", "examples/**", "packages/**", "scripts/**", "testutils/**", "*.json", "yarn.lock", "readthedocs.yml", ".bumpversion.cfg", ".*", "clean.py", "lint-staged.config.js", "release/*", "typedoc-theme/**", "typedoc.js", "jupyterlab/schemas/**", "jupyterlab/static/**", "jupyterlab/themes/**", "jupyterlab/style.js"]
+ignore = ["binder/**", "builder/**", "buildutils/**", "design/**", "dev_mode/**", "examples/**", "packages/**", "scripts/**", "testutils/**", "*.json", "yarn.lock", "readthedocs.yml", ".bumpversion.cfg", ".*", "clean.py", "*.config.js", "release/*", "typedoc-theme/**", "typedoc.js", "jupyterlab/schemas/**", "jupyterlab/static/**", "jupyterlab/themes/**", "jupyterlab/style.js"]
+
+[tool.jupyter-releaser]
+skip = ["check-links"]
 
 [tool.jupyter-releaser.options]
-ignore-glob = ["packages/ui-components/docs/source/ui_components.rst"]
-ignore-links = ["../api/*.*"]
+ignore-glob = ["packages/ui-components/docs/source/ui_components.rst", "images"]
+ignore-links = ["../api/*.*", ".*/images/[\\w-]+.png", "https://docs.github.com/en/.*"]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
+npm-cmd = "npm publish --tag next"
+release-message = "[ci skip] Publish {version}"
+tag-message = "[ci skip] Release {tag_name}"
 
 [tool.jupyter-releaser.hooks]
 before-bump-version = ["git checkout .", "pip install bump2version"]
-before-build-npm = ["git commit -am 'Bump version'", "jlpm", "jlpm run build:utils", "jlpm run build:src"]
+before-build-npm = ["git commit -am '[ci skip] Bump version'", "jlpm", "jlpm run build:all"]
 before-build-python = ["node buildutils/lib/local-repository start", "jlpm run before:build:python", "node buildutils/lib/local-repository stop", "node buildutils/lib/local-repository fix-links --path jupyterlab/staging"]
-after-publish-assets = "jlpm run after:publish:assets"
+after-publish-assets = "npm run after:publish:assets"

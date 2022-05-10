@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/testutils",
-  "version": "3.1.0-rc.1",
+  "version": "4.0.0-alpha.9",
   "description": "JupyterLab - Test Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -26,9 +26,9 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:all": "npm run build",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "prepublishOnly": "npm run build",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
@@ -36,21 +36,22 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.1.0-rc.1",
-    "@jupyterlab/cells": "^3.1.0-rc.1",
-    "@jupyterlab/codeeditor": "^3.1.0-rc.1",
-    "@jupyterlab/codemirror": "^3.1.0-rc.1",
-    "@jupyterlab/coreutils": "^5.1.0-rc.1",
-    "@jupyterlab/docregistry": "^3.1.0-rc.1",
-    "@jupyterlab/nbformat": "^3.1.0-rc.1",
-    "@jupyterlab/notebook": "^3.1.0-rc.1",
-    "@jupyterlab/rendermime": "^3.1.0-rc.1",
-    "@jupyterlab/services": "^6.1.0-rc.1",
-    "@lumino/algorithm": "^1.3.3",
-    "@lumino/coreutils": "^1.5.3",
-    "@lumino/properties": "^1.2.3",
-    "@lumino/signaling": "^1.4.3",
+    "@jupyterlab/apputils": "^4.0.0-alpha.9",
+    "@jupyterlab/cells": "^4.0.0-alpha.9",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.9",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.9",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.9",
+    "@jupyterlab/notebook": "^4.0.0-alpha.9",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.9",
+    "@jupyterlab/services": "^7.0.0-alpha.9",
+    "@lumino/algorithm": "^1.9.1",
+    "@lumino/coreutils": "^1.12.0",
+    "@lumino/properties": "^1.8.1",
+    "@lumino/signaling": "^1.10.1",
     "child_process": "~1.0.2",
+    "deepmerge": "^4.2.2",
     "fs-extra": "^9.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.4.2",
@@ -67,8 +68,8 @@
     "@types/jest": "^26.0.10",
     "@types/node-fetch": "^2.5.4",
     "jest-retries": "^1.0.1",
-    "lighthouse": "6.3.0",
-    "typescript": "~4.1.3"
+    "lighthouse": "9.2.0",
+    "typescript": "~4.6.3"
   },
   "publishConfig": {
     "access": "public"

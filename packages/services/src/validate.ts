@@ -6,6 +6,7 @@
  * of a given type and among a given set of values.
  */
 export function validateProperty(
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   object: any,
   name: string,
   typeName?: string,

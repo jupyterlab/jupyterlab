@@ -7,14 +7,12 @@ import { Kernel } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
-/* tslint:disable */
 /**
  * The tooltip manager token.
  */
 export const ITooltipManager = new Token<ITooltipManager>(
   '@jupyterlab/tooltip:ITooltipManager'
 );
-/* tslint:enable */
 
 /**
  * A manager to register tooltips with parent widgets.
@@ -27,7 +25,7 @@ export interface ITooltipManager {
 }
 
 /**
- * A namespace for `ICompletionManager` interface specifications.
+ * A namespace for `ITooltipManager` interface specifications.
  */
 export namespace ITooltipManager {
   /**

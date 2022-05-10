@@ -44,7 +44,7 @@ export class RenderedJSON
   }
 
   [Printing.symbol]() {
-    return () => Printing.printWidget(this);
+    return (): Promise<void> => Printing.printWidget(this);
   }
 
   /**
@@ -97,6 +97,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'JSON',
+      // TODO: how to translate label of the factory?
       primaryFileType: 'json',
       fileTypes: ['json', 'notebook', 'geojson'],
       defaultFor: ['json']

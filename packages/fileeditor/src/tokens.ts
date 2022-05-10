@@ -12,11 +12,9 @@ import { FileEditor } from './widget';
 export interface IEditorTracker
   extends IWidgetTracker<IDocumentWidget<FileEditor>> {}
 
-/* tslint:disable */
 /**
  * The editor tracker token.
  */
 export const IEditorTracker = new Token<IEditorTracker>(
   '@jupyterlab/fileeditor:IEditorTracker'
 );
-/* tslint:enable */

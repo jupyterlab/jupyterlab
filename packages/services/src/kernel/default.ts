@@ -21,7 +21,7 @@ import {
   KernelShellFutureHandler
 } from './future';
 
-import * as serialize from './serialize';
+import { deserialize, serialize } from './serialize';
 
 import * as validate from './validate';
 import { KernelSpec, KernelSpecAPI } from '../kernelspec';
@@ -119,10 +119,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * The kernel model
    */
   get model(): Kernel.IModel {
-    return {
-      id: this.id,
-      name: this.name
-    };
+    return (
+      this._model || {
+        id: this.id,
+        name: this.name,
+        reason: this._reason
+      }
+    );
   }
 
   /**
@@ -404,7 +407,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {
-        this._ws!.send(serialize.serialize(msg));
+        this._ws!.send(serialize(msg, this._ws!.protocol));
         return;
       } else {
         throw new Error('Could not send message: status is not connected');
@@ -422,7 +425,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this.connectionStatus === 'connected' &&
       this._kernelSession !== RESTARTING_KERNEL_SESSION
     ) {
-      this._ws!.send(serialize.serialize(msg));
+      this._ws!.send(serialize(msg, this._ws!.protocol));
     } else if (queue) {
       this._pendingMessages.push(msg);
     } else {
@@ -444,6 +447,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * request fails or the response is invalid.
    */
   async interrupt(): Promise<void> {
+    this.hasPendingInput = false;
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
@@ -479,6 +483,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // Reconnect to the kernel to address cases where kernel ports
     // have changed during the restart.
     await this.reconnect();
+    this.hasPendingInput = false;
   }
 
   /**
@@ -811,7 +816,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void {
     const msg = KernelMessage.createMessage({
       msgType: 'input_reply',
       channel: 'stdin',
@@ -819,6 +827,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
+    msg.parent_header = parent_header;
 
     this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });
@@ -962,6 +971,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (future) {
       future.removeMessageHook(hook);
     }
+  }
+
+  /**
+   * Remove the input guard, if any.
+   */
+  removeInputGuard() {
+    this.hasPendingInput = false;
   }
 
   /**
@@ -1212,7 +1228,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Create the kernel websocket connection and add socket status handlers.
    */
-  private _createSocket = () => {
+  private _createSocket = (useProtocols = true) => {
     this._errorIfDisposed();
 
     // Make sure the socket is clear
@@ -1243,15 +1259,73 @@ export class KernelConnection implements Kernel.IKernelConnection {
       url = url + `&token=${encodeURIComponent(token)}`;
     }
 
-    this._ws = new settings.WebSocket(url);
+    // Try opening the websocket with our list of subprotocols.
+    // If the server doesn't handle subprotocols,
+    // the accepted protocol will be ''.
+    // But we cannot send '' as a subprotocol, so if connection fails,
+    // reconnect without subprotocols.
+    const supportedProtocols = useProtocols ? this._supportedProtocols : [];
+    this._ws = new settings.WebSocket(url, supportedProtocols);
 
     // Ensure incoming binary messages are not Blobs
     this._ws.binaryType = 'arraybuffer';
 
+    let alreadyCalledOnclose = false;
+
+    const getKernelModel = async (evt: Event) => {
+      if (this._isDisposed) {
+        return;
+      }
+      this._reason = '';
+      this._model = undefined;
+      try {
+        const model = await restapi.getKernelModel(this._id, settings);
+        this._model = model;
+        if (model?.execution_state === 'dead') {
+          this._updateStatus('dead');
+        } else {
+          this._onWSClose(evt);
+        }
+      } catch (err) {
+        // Try again, if there is a network failure
+        // Handle network errors, as well as cases where we are on a
+        // JupyterHub and the server is not running. JupyterHub returns a
+        // 503 (<2.0) or 424 (>2.0) in that case.
+        if (
+          err instanceof ServerConnection.NetworkError ||
+          err.response?.status === 503 ||
+          err.response?.status === 424
+        ) {
+          const timeout = Private.getRandomIntInclusive(10, 30) * 1e3;
+          setTimeout(getKernelModel, timeout, evt);
+        } else {
+          this._reason = 'Kernel died unexpectedly';
+          this._updateStatus('dead');
+        }
+      }
+      return;
+    };
+
+    const earlyClose = async (evt: Event) => {
+      // If the websocket was closed early, that could mean
+      // that the kernel is actually dead. Try getting
+      // information about the kernel from the API call,
+      // if that fails, then assume the kernel is dead,
+      // otherwise just follow the typical websocket closed
+      // protocol.
+      if (alreadyCalledOnclose) {
+        return;
+      }
+      alreadyCalledOnclose = true;
+      await getKernelModel(evt);
+
+      return;
+    };
+
     this._ws.onmessage = this._onWSMessage;
     this._ws.onopen = this._onWSOpen;
-    this._ws.onclose = this._onWSClose;
-    this._ws.onerror = this._onWSClose;
+    this._ws.onclose = earlyClose;
+    this._ws.onerror = earlyClose;
   };
 
   /**
@@ -1435,7 +1509,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
           timeout / 1000
         )} seconds.`
       );
-      this._reconnectTimeout = setTimeout(this._createSocket, timeout);
+      // Try reconnection without subprotocols.
+      this._reconnectTimeout = setTimeout(this._createSocket, timeout, false);
       this._reconnectAttempt += 1;
     } else {
       this._updateConnectionStatus('disconnected');
@@ -1460,6 +1535,19 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Handle a websocket open event.
    */
   private _onWSOpen = (evt: Event) => {
+    if (
+      this._ws!.protocol !== '' &&
+      !this._supportedProtocols.includes(this._ws!.protocol)
+    ) {
+      console.log(
+        'Server selected unknown kernel wire protocol:',
+        this._ws!.protocol
+      );
+      this._updateStatus('dead');
+      throw new Error(`Unknown kernel wire protocol:  ${this._ws!.protocol}`);
+    }
+    this._ws!.onclose = this._onWSClose;
+    this._ws!.onerror = this._onWSClose;
     this._updateConnectionStatus('connected');
   };
 
@@ -1470,7 +1558,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // Notify immediately if there is an error with the message.
     let msg: KernelMessage.IMessage;
     try {
-      msg = serialize.deserialize(evt.data);
+      msg = deserialize(evt.data, this._ws!.protocol);
       validate.validateMessage(msg);
     } catch (error) {
       error.message = `Kernel message validation error: ${error.message}`;
@@ -1504,7 +1592,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Handle a websocket close event.
    */
-  private _onWSClose = (evt: CloseEvent) => {
+  private _onWSClose = (evt: Event) => {
     if (!this.isDisposed) {
       this._reconnect();
     }
@@ -1520,6 +1608,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   private _id = '';
   private _name = '';
+  private _model: Kernel.IModel | undefined;
   private _status: KernelMessage.Status = 'unknown';
   private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
@@ -1533,6 +1622,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _reconnectTimeout: any = null;
+  private _supportedProtocols: string[] = Object.values(
+    KernelMessage.supportedKernelWebSocketProtocols
+  );
 
   private _futures = new Map<
     string,
@@ -1564,6 +1656,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _msgIdToDisplayIds = new Map<string, string[]>();
   private _msgChain: Promise<void> = Promise.resolve();
   private _hasPendingInput = false;
+  private _reason = '';
   private _noOp = () => {
     /* no-op */
   };
@@ -1593,7 +1686,10 @@ namespace Private {
    */
   export async function handleShellMessage<
     T extends KernelMessage.ShellMessageType
-  >(kernel: Kernel.IKernelConnection, msg: KernelMessage.IShellMessage<T>) {
+  >(
+    kernel: Kernel.IKernelConnection,
+    msg: KernelMessage.IShellMessage<T>
+  ): Promise<KernelMessage.IShellMessage<KernelMessage.ShellMessageType>> {
     const future = kernel.sendShellMessage(msg, true);
     return future.done;
   }
@@ -1652,7 +1748,7 @@ namespace Private {
    * that, but doing so would cause your random numbers to follow a non-uniform
    * distribution, which may not be acceptable for your needs.
    */
-  export function getRandomIntInclusive(min: number, max: number) {
+  export function getRandomIntInclusive(min: number, max: number): number {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;

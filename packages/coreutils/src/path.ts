@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as posix from 'path';
+import { posix } from 'path';
 
 /**
  * The namespace for path-related functions.

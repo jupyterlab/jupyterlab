@@ -55,24 +55,8 @@ describe('Debugging support', () => {
   let specsManager: TestKernelSpecManager;
   let service: Debugger.Service;
   let config: IDebugger.IConfig;
-  let xpython: Session.ISessionConnection;
-  let ipykernel: Session.ISessionConnection;
 
   beforeAll(async () => {
-    xpython = await createSession({
-      name: '',
-      type: 'test',
-      path: UUID.uuid4()
-    });
-    await xpython.changeKernel({ name: 'xpython' });
-
-    ipykernel = await createSession({
-      name: '',
-      type: 'test',
-      path: UUID.uuid4()
-    });
-    await ipykernel.changeKernel({ name: 'python3' });
-
     specsManager = new TestKernelSpecManager({ standby: 'never' });
     specsManager.intercept = specs;
     await specsManager.refreshSpecs();
@@ -81,19 +65,23 @@ describe('Debugging support', () => {
   });
 
   afterAll(async () => {
-    await Promise.all([xpython.shutdown(), ipykernel.shutdown()]);
     service.dispose();
     specsManager.dispose();
   });
 
   describe('#isAvailable', () => {
     it('should return true for kernels that have support for debugging', async () => {
-      const enabled = await service.isAvailable(xpython);
+      const enabled = await service.isAvailable({
+        kernel: { name: 'xpython' }
+      } as any);
       expect(enabled).toBe(true);
     });
 
     it.skip('should return false for kernels that do not have support for debugging', async () => {
-      const enabled = await service.isAvailable(ipykernel);
+      // The kernel spec are mocked in KERNELSPECS
+      const enabled = await service.isAvailable({
+        kernel: { name: 'python3' }
+      } as any);
       expect(enabled).toBe(false);
     });
   });

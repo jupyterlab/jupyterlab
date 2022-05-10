@@ -28,7 +28,7 @@ import { Dialog, showDialog } from './dialog';
  * #### Notes
  * The current session connection is `.session`, the current session's kernel
  * connection is `.session.kernel`. For convenience, we proxy several kernel
- * connection and and session connection signals up to the session context so
+ * connection and session connection signals up to the session context so
  * that you do not have to manage slots as sessions and kernels change. For
  * example, to act on whatever the current kernel's iopubMessage signal is
  * producing, connect to the session context `.iopubMessage` signal.
@@ -401,17 +401,17 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * A signal emitted when the kernel status changes, proxied from the kernel.
-   */
-  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
-    return this._connectionStatusChanged;
-  }
-
-  /**
    * A flag indicating if the session has ending input, proxied from the kernel.
    */
   get pendingInput(): boolean {
     return this._pendingInput;
+  }
+
+  /**
+   * A signal emitted when the kernel status changes, proxied from the kernel.
+   */
+  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
+    return this._connectionStatusChanged;
   }
 
   /**
@@ -562,7 +562,7 @@ export class SessionContext implements ISessionContext {
     }
 
     if (this._pendingKernelName === this.noKernelName) {
-      return 'idle';
+      return 'unknown';
     }
 
     if (!kernel && this._pendingKernelName) {
@@ -652,12 +652,19 @@ export class SessionContext implements ISessionContext {
    */
   async restartKernel(): Promise<void> {
     const kernel = this.session?.kernel || null;
+    if (this._isRestarting) {
+      return;
+    }
     this._isRestarting = true;
     this._isReady = false;
     this._statusChanged.emit('restarting');
-    await this.session?.kernel?.restart();
+    try {
+      await this.session?.kernel?.restart();
+      this._isReady = true;
+    } catch (e) {
+      console.error(e);
+    }
     this._isRestarting = false;
-    this._isReady = true;
     this._statusChanged.emit(this.session?.kernel?.status || 'unknown');
     this._kernelChanged.emit({
       name: 'kernel',
@@ -756,25 +763,41 @@ export class SessionContext implements ISessionContext {
    */
   private async _shutdownSession(): Promise<void> {
     const session = this._session;
+    // Capture starting values in case an error is raised.
+    const isTerminating = this._isTerminating;
+    const isReady = this._isReady;
     this._isTerminating = true;
     this._isReady = false;
     this._statusChanged.emit('terminating');
-    await session?.shutdown();
-    this._isTerminating = false;
-    session?.dispose();
-    this._session = null;
-    const kernel = session?.kernel || null;
-    this._statusChanged.emit('unknown');
-    this._kernelChanged.emit({
-      name: 'kernel',
-      oldValue: kernel,
-      newValue: null
-    });
-    this._sessionChanged.emit({
-      name: 'session',
-      oldValue: session,
-      newValue: null
-    });
+    try {
+      await session?.shutdown();
+      this._isTerminating = false;
+      session?.dispose();
+      this._session = null;
+      const kernel = session?.kernel || null;
+      this._statusChanged.emit('unknown');
+      this._kernelChanged.emit({
+        name: 'kernel',
+        oldValue: kernel,
+        newValue: null
+      });
+      this._sessionChanged.emit({
+        name: 'session',
+        oldValue: session,
+        newValue: null
+      });
+    } catch (err) {
+      this._isTerminating = isTerminating;
+      this._isReady = isReady;
+      const status = session?.kernel?.status;
+      if (status === undefined) {
+        this._statusChanged.emit('unknown');
+      } else {
+        this._statusChanged.emit(status);
+      }
+      throw err;
+    }
+    return;
   }
 
   /**
@@ -825,16 +848,13 @@ export class SessionContext implements ISessionContext {
    * Change the kernel.
    */
   private async _changeKernel(
-    model: Partial<Kernel.IModel> = {},
-    isInit = false
+    model: Partial<Kernel.IModel> = {}
   ): Promise<Kernel.IKernelConnection | null> {
     if (model.name) {
       this._pendingKernelName = model.name;
     }
 
-    if (this._session && !this._isTerminating) {
-      await this._shutdownSession();
-    } else if (!this._session) {
+    if (!this._session) {
       this._kernelChanged.emit({
         name: 'kernel',
         oldValue: null,
@@ -846,6 +866,17 @@ export class SessionContext implements ISessionContext {
     // will be started first.
     if (!this._pendingSessionRequest) {
       this._initStarted.resolve(void 0);
+    }
+
+    // If we already have a session, just change the kernel.
+    if (this._session && !this._isTerminating) {
+      try {
+        await this._session.changeKernel(model);
+        return this._session.kernel;
+      } catch (err) {
+        void this._handleSessionError(err);
+        throw err;
+      }
     }
 
     // Use a UUID for the path to overcome a race condition on the server
@@ -965,9 +996,15 @@ export class SessionContext implements ISessionContext {
     } catch (err) {
       // no-op
     }
+    await this._displayKernelError(message, traceback);
+  }
+
+  /**
+   * Display kernel error
+   */
+  private async _displayKernelError(message: string, traceback: string) {
     const body = (
       <div>
-        <pre>{err.message}</pre>
         {message && <pre>{message}</pre>}
         {traceback && (
           <details className="jp-mod-wide">
@@ -1038,6 +1075,14 @@ export class SessionContext implements ISessionContext {
     sender: Session.ISessionConnection,
     status: Kernel.Status
   ): void {
+    if (status === 'dead') {
+      const model = sender.kernel?.model;
+      if (model?.reason) {
+        const traceback = (model as any).traceback || '';
+        void this._displayKernelError(model.reason, traceback);
+      }
+    }
+
     // Set that this kernel is busy, if we haven't already
     // If we have already, and now we aren't busy, dispose
     // of the busy disposable.
@@ -1087,6 +1132,9 @@ export class SessionContext implements ISessionContext {
     sender: Session.ISessionConnection,
     message: KernelMessage.IIOPubMessage
   ): void {
+    if (message.header.msg_type === 'shutdown_reply') {
+      this.session!.kernel!.removeInputGuard();
+    }
     this._iopubMessage.emit(message);
   }
 
@@ -1251,7 +1299,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
-      body: new Private.KernelSelector(sessionContext),
+      body: new Private.KernelSelector(sessionContext, translator),
       buttons
     });
 
@@ -1305,7 +1353,8 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     const result = await showDialog({
       title: trans.__('Restart Kernel?'),
       body: trans.__(
-        'Do you want to restart the current kernel? All variables will be lost.'
+        'Do you want to restart the kernel of %1? All variables will be lost.',
+        sessionContext.name
       ),
       buttons: [Dialog.cancelButton(), restartBtn]
     });
@@ -1332,8 +1381,8 @@ namespace Private {
     /**
      * Create a new kernel selector widget.
      */
-    constructor(sessionContext: ISessionContext) {
-      super({ node: createSelectorNode(sessionContext) });
+    constructor(sessionContext: ISessionContext, translator?: ITranslator) {
+      super({ node: createSelectorNode(sessionContext, translator) });
     }
 
     /**
@@ -1510,7 +1559,7 @@ namespace Private {
     }
 
     // Add an option for no kernel
-    node.appendChild(optionForNone());
+    node.appendChild(optionForNone(translator));
 
     const other = document.createElement('optgroup');
     other.label = trans.__('Start Other Kernel');
@@ -1635,7 +1684,7 @@ namespace Private {
     const trans = translator.load('jupyterlab');
 
     const group = document.createElement('optgroup');
-    group.label = 'Use No Kernel';
+    group.label = trans.__('Use No Kernel');
     const option = document.createElement('option');
     option.text = trans.__('No Kernel');
     option.value = 'null';

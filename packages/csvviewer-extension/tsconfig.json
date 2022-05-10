@@ -25,6 +25,12 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../observables"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../translation"
     }
   ]

@@ -50,7 +50,7 @@ describe('terminal', () => {
           }
         });
         session.send({ type: 'stdin', content: ['cd\r'] });
-        await emission;
+        await expect(emission).resolves.not.toThrow();
       });
     });
 
@@ -99,8 +99,10 @@ describe('terminal', () => {
     });
 
     describe('#send()', () => {
-      it('should send a message to the socket', async () => {
-        session.send({ type: 'stdin', content: [1, 2] });
+      it('should send a message to the socket', () => {
+        expect(() => {
+          session.send({ type: 'stdin', content: [1, 2] });
+        }).not.toThrow();
       });
     });
 
@@ -117,12 +119,12 @@ describe('terminal', () => {
     describe('#shutdown()', () => {
       it('should shut down the terminal session', async () => {
         session = await manager.startNew();
-        await session.shutdown();
+        await expect(session.shutdown()).resolves.not.toThrow();
       });
 
-      it('should handle a 404 status', () => {
+      it('should handle a 404 status', async () => {
         handleRequest(defaultSession, 404, {});
-        return defaultSession.shutdown();
+        await expect(defaultSession.shutdown()).resolves.not.toThrow();
       });
     });
   });

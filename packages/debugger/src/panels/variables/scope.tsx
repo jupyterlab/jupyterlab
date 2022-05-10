@@ -1,19 +1,12 @@
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
-
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { HTMLSelect } from '@jupyterlab/ui-components';
-
+import { HTMLSelect, ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 import React, { useState } from 'react';
-
 import { IDebugger } from '../../tokens';
-
 import { VariablesBodyGrid } from './grid';
-
 import { VariablesBodyTree } from './tree';
 
 /**

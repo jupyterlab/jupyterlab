@@ -59,10 +59,6 @@
             "rank": 4
           },
           {
-            "command": "docmanager:toggle-name-file-on-save",
-            "rank": 4
-          },
-          {
             "type": "separator",
             "rank": 4
           }
@@ -73,22 +69,22 @@
       {
         "command": "docmanager:rename",
         "selector": "[data-type=\"document-title\"]",
-        "rank": 1
+        "rank": 20
       },
       {
         "command": "docmanager:delete",
         "selector": "[data-type=\"document-title\"]",
-        "rank": 2
+        "rank": 21
       },
       {
         "command": "docmanager:clone",
         "selector": "[data-type=\"document-title\"]",
-        "rank": 3
+        "rank": 22
       },
       {
         "command": "docmanager:show-in-file-browser",
         "selector": "[data-type=\"document-title\"]",
-        "rank": 4
+        "rank": 23
       }
     ]
   },
@@ -116,6 +112,12 @@
       "title": "Autosave Interval",
       "description": "Length of save interval in seconds",
       "default": 120
+    },
+    "lastModifiedCheckMargin": {
+      "type": "number",
+      "title": "Margin for last modified timestamp check",
+      "description": "Max acceptable difference, in milliseconds, between last modified timestamps on disk and client",
+      "default": 500
     },
     "defaultViewers": {
       "type": "object",

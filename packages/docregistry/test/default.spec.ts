@@ -189,10 +189,18 @@ describe('docregistry/default', () => {
         const context = await Mock.createFileContext();
         const widget = factory.createNew(context);
         const widget2 = factory.createNew(context);
-        expect(toArray(widget.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(widget2.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(widget.toolbar.children()).length).toBe(2);
-        expect(toArray(widget2.toolbar.children()).length).toBe(2);
+        expect(toArray(widget.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(widget2.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(widget.toolbar.children()).length).toBe(3);
+        expect(toArray(widget2.toolbar.children()).length).toBe(3);
       });
     });
 
@@ -571,6 +579,14 @@ describe('docregistry/default', () => {
       it('should add the dirty class when the model is dirty', async () => {
         context.model.fromString('bar');
         expect(widget.title.className).toContain('jp-mod-dirty');
+      });
+
+      it('should remove the dirty class', () => {
+        context.model.dirty = true;
+        context.model.dirty = true;
+        expect(widget.title.className).toContain('jp-mod-dirty');
+        context.model.dirty = false;
+        expect(widget.title.className).not.toContain('jp-mod-dirty');
       });
 
       it('should store the context', () => {

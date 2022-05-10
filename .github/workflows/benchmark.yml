@@ -1,0 +1,223 @@
+name: Benchmark Tests
+
+on:
+  # schedule:
+  #   - cron: '12 1 * * 0'
+  pull_request_review:
+
+jobs:
+  test:
+    name: Execute benchmark tests
+    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.review.state == 'approved' || contains(github.event.review.body, 'please run benchmark')))
+
+    runs-on: ubuntu-20.04
+
+    env:
+      BENCHMARK_NUMBER_SAMPLES: 100
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
+          fetch-depth: 100
+
+      - name: Get hashes for schedule event
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          echo "OLD_REF_SHA=$(git rev-parse 'master@{7 days ago}')" >> $GITHUB_ENV
+          echo "NEW_REF_SHA=$(git rev-parse 'master')" >> $GITHUB_ENV
+
+      - name: Get hashes for PR review event
+        if: ${{ github.event_name == 'pull_request_review' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const child_process = require("child_process");
+            const pull_request = context.payload.pull_request;
+
+            child_process.exec(`git merge-base ${pull_request.head.sha} ${pull_request.base.sha}`, (error, stdout, stderr) => {
+              if (error) {
+                console.log(error);
+                process.exit(1);
+                return;
+              }
+              if (stderr) {
+                console.log(stderr);
+                process.exit(1);
+                return;
+              }
+
+              core.exportVariable('OLD_REF_SHA', stdout.trim());
+              core.exportVariable('NEW_REF_SHA', pull_request.head.sha);
+              core.exportVariable('PULL_REQUEST_ID', pull_request.number);
+            });
+
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: iterative/setup-cml@v1
+
+      - name: Cache pip on Linux
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.8
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Cache yarn
+        uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      # First run the benchmark on the old reference
+      - name: Checkout old reference
+        run: |
+          echo Checking out ${OLD_REF_SHA}...
+          git checkout ${OLD_REF_SHA}
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
+
+      - name: Launch JupyterLab
+        shell: bash
+        run: |
+          # Mount a volume to overwrite the server configuration
+          (jlpm start > /tmp/jupyterlab_server_old.log 2>&1) &
+        working-directory: galata
+
+      - name: Install browser
+        run: |
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+        working-directory: galata
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - name: Execute benchmark tests
+        continue-on-error: true
+        working-directory: galata
+        run: |
+          jlpm run test:benchmark -u
+
+      - name: Kill the server
+        shell: bash
+        run: |
+          kill -s SIGKILL $(pgrep jupyter-lab)
+
+      # Second run the benchmark on the new reference
+      - name: Checkout latest version
+        run: |
+          cp galata/lab-benchmark-expected.json /tmp/
+          git restore galata/lab-benchmark-expected.json || true  # Not versioned any more
+          echo Checking out ${NEW_REF_SHA}...
+          git checkout ${NEW_REF_SHA}
+
+      - name: Install dependencies
+        run: |
+          # Reset installation
+          jlpm run clean:slate
+          jlpm run build
+
+          # Reset the reference after clean:slate as it removes non-versioned files
+          cp /tmp/lab-benchmark-expected.json galata/
+
+      - name: Launch JupyterLab
+        working-directory: galata
+        run: |
+          # Mount a volume to overwrite the server configuration
+          (jlpm start > /tmp/jupyterlab_server_new.log 2>&1) &
+
+      - name: Install browser
+        working-directory: galata
+        run: |
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - name: Execute benchmark tests
+        continue-on-error: true
+        shell: bash
+        working-directory: galata
+        run: |
+          jlpm run test:benchmark
+
+      - name: Stop JupyterLab
+        if: always()
+        run: |
+          kill -s SIGTERM $(pgrep jupyter-lab)
+
+      - name: Generate the report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPORT: ./benchmark-results/lab-benchmark.md
+        shell: bash
+        working-directory: galata
+        run: |
+          # Publish image to cml.dev
+          echo "" >> ${REPORT}
+          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
+          echo "" >> ${REPORT}
+
+          # Test if metadata have changed
+          export METADATA_DIFF="/tmp/metadata.diff"
+          diff -u <(jq --sort-keys .metadata benchmark-results/lab-benchmark.json) <(jq --sort-keys .metadata lab-benchmark-expected.json) > ${METADATA_DIFF} || true
+          if [[ -s ${METADATA_DIFF} ]]; then
+            echo "<details><summary>:exclamation: Test metadata have changed</summary>" >> ${REPORT}
+            echo "" >> ${REPORT}
+            echo "\`\`\`diff" >> ${REPORT}
+            cat ${METADATA_DIFF} >> ${REPORT}
+            echo "\`\`\`" >> ${REPORT}
+            echo "" >> ${REPORT}
+            echo "</details>" >> ${REPORT}
+          fi
+
+          # Copy the reference data to upload it as artifact
+          cp lab-benchmark-expected.json ./benchmark-results/
+
+          # Save PR number for comment publication
+          echo "${PULL_REQUEST_ID}" > ./benchmark-results/NR
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-assets
+          path: |
+            galata/benchmark-results
+            galata/test-results
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server_old.log
+          cat /tmp/jupyterlab_server_new.log

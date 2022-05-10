@@ -10,9 +10,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../statedb"
     }
   ]
 }

@@ -27,18 +27,20 @@
   color: var(--jp-content-font-color1);
   font-size: var(--jp-code-font-size);
   border: none;
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
 }
 
 .jp-RenderedText pre a:link {
   text-decoration: none;
   color: var(--jp-content-link-color);
 }
+
 .jp-RenderedText pre a:hover {
   text-decoration: underline;
   color: var(--jp-content-link-color);
 }
+
 .jp-RenderedText pre a:visited {
   text-decoration: none;
   color: var(--jp-content-link-color);
@@ -48,24 +50,31 @@
 .jp-RenderedText pre .ansi-black-fg {
   color: #3e424d;
 }
+
 .jp-RenderedText pre .ansi-red-fg {
   color: #e75c58;
 }
+
 .jp-RenderedText pre .ansi-green-fg {
   color: #00a250;
 }
+
 .jp-RenderedText pre .ansi-yellow-fg {
   color: #ddb62b;
 }
+
 .jp-RenderedText pre .ansi-blue-fg {
   color: #208ffb;
 }
+
 .jp-RenderedText pre .ansi-magenta-fg {
   color: #d160c4;
 }
+
 .jp-RenderedText pre .ansi-cyan-fg {
   color: #60c6c8;
 }
+
 .jp-RenderedText pre .ansi-white-fg {
   color: #c5c1b4;
 }
@@ -74,30 +83,37 @@
   background-color: #3e424d;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-red-bg {
   background-color: #e75c58;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-green-bg {
   background-color: #00a250;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-yellow-bg {
   background-color: #ddb62b;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-blue-bg {
   background-color: #208ffb;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-magenta-bg {
   background-color: #d160c4;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-cyan-bg {
   background-color: #60c6c8;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-white-bg {
   background-color: #c5c1b4;
   padding: var(--jp-private-code-span-padding) 0;
@@ -106,24 +122,31 @@
 .jp-RenderedText pre .ansi-black-intense-fg {
   color: #282c36;
 }
+
 .jp-RenderedText pre .ansi-red-intense-fg {
   color: #b22b31;
 }
+
 .jp-RenderedText pre .ansi-green-intense-fg {
   color: #007427;
 }
+
 .jp-RenderedText pre .ansi-yellow-intense-fg {
   color: #b27d12;
 }
+
 .jp-RenderedText pre .ansi-blue-intense-fg {
   color: #0065ca;
 }
+
 .jp-RenderedText pre .ansi-magenta-intense-fg {
   color: #a03196;
 }
+
 .jp-RenderedText pre .ansi-cyan-intense-fg {
   color: #258f8f;
 }
+
 .jp-RenderedText pre .ansi-white-intense-fg {
   color: #a1a6b2;
 }
@@ -132,30 +155,37 @@
   background-color: #282c36;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-red-intense-bg {
   background-color: #b22b31;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-green-intense-bg {
   background-color: #007427;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-yellow-intense-bg {
   background-color: #b27d12;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-blue-intense-bg {
   background-color: #0065ca;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-magenta-intense-bg {
   background-color: #a03196;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-cyan-intense-bg {
   background-color: #258f8f;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
 .jp-RenderedText pre .ansi-white-intense-bg {
   background-color: #a1a6b2;
   padding: var(--jp-private-code-span-padding) 0;
@@ -164,6 +194,7 @@
 .jp-RenderedText pre .ansi-default-inverse-fg {
   color: var(--jp-ui-inverse-font-color0);
 }
+
 .jp-RenderedText pre .ansi-default-inverse-bg {
   background-color: var(--jp-inverse-layout-color0);
   padding: var(--jp-private-code-span-padding) 0;
@@ -172,6 +203,7 @@
 .jp-RenderedText pre .ansi-bold {
   font-weight: bold;
 }
+
 .jp-RenderedText pre .ansi-underline {
   text-decoration: underline;
 }
@@ -206,6 +238,7 @@
   font-family: var(--jp-content-font-family);
   font-size: var(--jp-content-font-size1);
   line-height: var(--jp-content-line-height);
+
   /* Give a bit more R padding on Markdown text to keep line lengths reasonable */
   padding-right: 20px;
 }
@@ -342,7 +375,7 @@
 .jp-RenderedHTMLCommon ul ol,
 .jp-RenderedHTMLCommon ol ul,
 .jp-RenderedHTMLCommon ol ol {
-  margin-bottom: 0em;
+  margin-bottom: 0;
 }
 
 .jp-RenderedHTMLCommon hr {
@@ -380,9 +413,10 @@
   border-spacing: 0;
   border: none;
   color: var(--jp-ui-font-color1);
-  font-size: 12px;
+  font-size: var(--jp-ui-font-size1);
   table-layout: fixed;
   margin-left: auto;
+  margin-bottom: 1em;
   margin-right: auto;
 }
 
@@ -395,7 +429,7 @@
 .jp-RenderedHTMLCommon th,
 .jp-RenderedHTMLCommon tr {
   vertical-align: middle;
-  padding: 0.5em 0.5em;
+  padding: 0.5em;
   line-height: normal;
   white-space: normal;
   max-width: none;
@@ -429,16 +463,9 @@
   background: var(--jp-rendermime-table-row-hover-background);
 }
 
-.jp-RenderedHTMLCommon table {
-  margin-bottom: 1em;
-}
-
 .jp-RenderedHTMLCommon p {
   text-align: left;
-  margin: 0px;
-}
-
-.jp-RenderedHTMLCommon p {
+  margin: 0;
   margin-bottom: 1em;
 }
 
@@ -458,13 +485,9 @@
 [data-jp-theme-light='false'] .jp-RenderedImage img.jp-needs-light-background {
   background-color: var(--jp-inverse-layout-color1);
 }
+
 [data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-dark-background {
   background-color: var(--jp-inverse-layout-color1);
-}
-/* ...or leave it untouched if they don't */
-[data-jp-theme-light='false'] .jp-RenderedImage img.jp-needs-dark-background {
-}
-[data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-light-background {
 }
 
 .jp-RenderedHTMLCommon img,
@@ -494,9 +517,11 @@
   background-color: var(--jp-info-color3);
   border-color: var(--jp-info-color2);
 }
+
 .jp-RenderedHTMLCommon .alert-info hr {
   border-color: var(--jp-info-color3);
 }
+
 .jp-RenderedHTMLCommon .alert-info > p:last-child,
 .jp-RenderedHTMLCommon .alert-info > ul:last-child {
   margin-bottom: 0;
@@ -507,9 +532,11 @@
   background-color: var(--jp-warn-color3);
   border-color: var(--jp-warn-color2);
 }
+
 .jp-RenderedHTMLCommon .alert-warning hr {
   border-color: var(--jp-warn-color3);
 }
+
 .jp-RenderedHTMLCommon .alert-warning > p:last-child,
 .jp-RenderedHTMLCommon .alert-warning > ul:last-child {
   margin-bottom: 0;
@@ -520,9 +547,11 @@
   background-color: var(--jp-success-color3);
   border-color: var(--jp-success-color2);
 }
+
 .jp-RenderedHTMLCommon .alert-success hr {
   border-color: var(--jp-success-color3);
 }
+
 .jp-RenderedHTMLCommon .alert-success > p:last-child,
 .jp-RenderedHTMLCommon .alert-success > ul:last-child {
   margin-bottom: 0;
@@ -533,9 +562,11 @@
   background-color: var(--jp-error-color3);
   border-color: var(--jp-error-color2);
 }
+
 .jp-RenderedHTMLCommon .alert-danger hr {
   border-color: var(--jp-error-color3);
 }
+
 .jp-RenderedHTMLCommon .alert-danger > p:last-child,
 .jp-RenderedHTMLCommon .alert-danger > ul:last-child {
   margin-bottom: 0;
@@ -569,7 +600,7 @@ h6:hover .jp-InternalAnchorLink {
   border-radius: 3px;
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
   display: inline-block;
-  font-size: 0.8em;
+  font-size: var(--jp-ui-font-size0);
   line-height: 1em;
   padding: 0.2em 0.5em;
 }
@@ -581,4 +612,16 @@ h6:hover .jp-InternalAnchorLink {
  */
 .jp-RenderedHTMLCommon > *:last-child {
   margin-bottom: 0.5em;
+}
+
+.jp-mimeType-highlight {
+  background-color: var(
+    --jp-search-unselected-match-background-color
+  ) !important;
+  color: var(--jp-search-unselected-match-color) !important;
+}
+
+.jp-mod-selected.jp-mimeType-highlight {
+  background-color: var(--jp-search-selected-match-background-color) !important;
+  color: var(--jp-search-selected-match-color) !important;
 }

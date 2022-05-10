@@ -12,14 +12,12 @@ import { Widget } from '@lumino/widgets';
 export interface ITerminalTracker
   extends IWidgetTracker<MainAreaWidget<ITerminal.ITerminal>> {}
 
-/* tslint:disable */
 /**
  * The editor tracker token.
  */
 export const ITerminalTracker = new Token<ITerminalTracker>(
   '@jupyterlab/terminal:ITerminalTracker'
 );
-/* tslint:enable */
 
 /**
  * The namespace for terminals. Separated from the widget so it can be lazy
@@ -83,6 +81,11 @@ export namespace ITerminal {
     shutdownOnClose: boolean;
 
     /**
+     * Whether to close the widget when exiting a terminal or not.
+     */
+    closeOnExit: boolean;
+
+    /**
      * Whether to blink the cursor.  Can only be set at startup.
      */
     cursorBlink: boolean;
@@ -125,6 +128,7 @@ export namespace ITerminal {
     lineHeight: 1.0,
     scrollback: 1000,
     shutdownOnClose: false,
+    closeOnExit: true,
     cursorBlink: true,
     initialCommand: '',
     screenReaderMode: false, // False by default, can cause scrollbar mouse interaction issues.

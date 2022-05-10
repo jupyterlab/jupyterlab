@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { ServerConnection } from '@jupyterlab/services';
 import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { requestTranslationsAPI } from './server';
@@ -22,58 +24,37 @@ export const ITranslatorConnector = new Token<ITranslatorConnector>(
 export class TranslatorConnector
   extends DataConnector<Language, Language, { language: string }>
   implements ITranslatorConnector {
-  constructor(translationsUrl: string = '') {
+  constructor(
+    translationsUrl: string = '',
+    serverSettings?: ServerConnection.ISettings
+  ) {
     super();
     this._translationsUrl = translationsUrl;
+    this._serverSettings = serverSettings;
   }
 
   async fetch(opts: { language: string }): Promise<Language> {
-    return requestTranslationsAPI(this._translationsUrl, opts.language);
+    return requestTranslationsAPI(
+      this._translationsUrl,
+      opts.language,
+      {},
+      this._serverSettings
+    );
   }
 
+  private _serverSettings: ServerConnection.ISettings | undefined;
   private _translationsUrl: string;
 }
 
-export type TranslationBundle = {
-  __(msgid: string, ...args: any[]): string;
-  _n(msgid: string, msgid_plural: string, n: number, ...args: any[]): string;
-  _p(msgctxt: string, msgid: string, ...args: any[]): string;
-  _np(
-    msgctxt: string,
-    msgid: string,
-    msgid_plural: string,
-    n: number,
-    ...args: any[]
-  ): string;
-  gettext(msgid: string, ...args: any[]): string;
-  ngettext(
-    msgid: string,
-    msgid_plural: string,
-    n: number,
-    ...args: any[]
-  ): string;
-  pgettext(msgctxt: string, msgid: string, ...args: any[]): string;
-  npgettext(
-    msgctxt: string,
-    msgid: string,
-    msgid_plural: string,
-    n: number,
-    ...args: any[]
-  ): string;
-  dcnpgettext(
-    domain: string,
-    msgctxt: string,
-    msgid: string,
-    msgid_plural: string,
-    n: number,
-    ...args: any[]
-  ): string;
-};
+/**
+ * Bundle of gettext-based translation functions for a specific domain.
+ */
+export type TranslationBundle = IRenderMime.TranslationBundle;
 
-export interface ITranslator {
-  load(domain: string): TranslationBundle;
-  // locale(): string;
-}
+/**
+ * Translation provider interface
+ */
+export interface ITranslator extends IRenderMime.ITranslator {}
 
 export const ITranslator = new Token<ITranslator>(
   '@jupyterlab/translation:ITranslator'

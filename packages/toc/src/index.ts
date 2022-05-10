@@ -5,9 +5,14 @@
  * @module toc
  */
 
-// Note: keep in alphabetical order...
-export * from './generators';
+export * from './factory';
+export * from './model';
+export * from './panel';
 export * from './registry';
-export * from './toc';
-export * from './toc_item';
-export * from './utils/headings';
+export * from './treeview';
+export * from './tocitem';
+export * from './toctree';
+export * from './tokens';
+export * from './tracker';
+// Namespace the utils
+export * as TableOfContentsUtils from './utils';

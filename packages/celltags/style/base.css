@@ -3,7 +3,7 @@
   border-radius: 10px;
   margin-right: 5px;
   margin-bottom: 10px;
-  padding: 0px 8px;
+  padding: 0 8px;
   font-size: var(--jp-ui-font-size1);
   display: inline-flex;
   justify-content: center;
@@ -48,12 +48,12 @@
   flex: 0 0 auto;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
-  padding: 0px 12px;
+  padding: 0 12px;
 }
 
 /* Need a more specific selector to override another rule on .jp-NotebookTools children. */
 .jp-NotebookTools .tag-label {
-  margin: 0px;
+  margin: 0;
 }
 
 /* Need a more specific selector to override another rule .jp-NotebookTools children. */

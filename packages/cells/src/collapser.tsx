@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/ui-components';
 import { ElementExt } from '@lumino/domutils';
 
 import * as React from 'react';

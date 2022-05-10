@@ -35,10 +35,17 @@ export function removeMath(text: string): { text: string; math: string[] } {
   // we still have to consider them at this point; the following issue has happened several times:
   //
   //     `$foo` and `$bar` are variables.  -->  <code>$foo ` and `$bar</code> are variables.
-  const hasCodeSpans = /`/.test(text);
+  const hasCodeSpans = text.includes('`') || text.includes('~~~');
   if (hasCodeSpans) {
     text = text
       .replace(/~/g, '~T')
+      // note: the `fence` (three or more consecutive tildes or backticks)
+      // can be followed by an `info string` but this cannot include backticks,
+      // see specification: https://spec.commonmark.org/0.30/#info-string
+      .replace(
+        /^(?<fence>`{3,}|(~T){3,})[^`\n]*\n([\s\S]*?)^\k<fence>`*$/gm,
+        wholematch => wholematch.replace(/\$/g, '~D')
+      )
       .replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, wholematch =>
         wholematch.replace(/\$/g, '~D')
       );

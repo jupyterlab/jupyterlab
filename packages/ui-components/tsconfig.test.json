@@ -6,13 +6,13 @@
       "path": "../coreutils"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "."
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../coreutils"
     }
   ]
 }

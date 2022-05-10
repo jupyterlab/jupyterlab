@@ -11,7 +11,7 @@ running, with the privileges of your user. Thus, if JupyterLab is
 installed on your local machine, the JupyterLab terminals will run
 there.
 
-.. image:: images/terminal_layout.png
+.. image:: ../images/terminal-layout.png
    :align: center
    :class: jp-screenshot
 

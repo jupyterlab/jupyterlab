@@ -1,14 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { ServerConnection } from '@jupyterlab/services';
 import { TranslationBundle } from '@jupyterlab/translation';
 import {
   jsonIcon,
   LabIcon,
   markdownIcon,
-  spreadsheetIcon
+  spreadsheetIcon,
+  VDomModel,
+  VDomRenderer
 } from '@jupyterlab/ui-components';
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';

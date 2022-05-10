@@ -338,7 +338,7 @@ export namespace LabIconStyle {
 
     settingsEditor: {
       container: {
-        display: 'inline-block',
+        display: 'flex',
         flex: '0 0 20px',
         margin: '0 3px 0 0',
         position: 'relative',
@@ -425,7 +425,6 @@ export namespace LabIconStyle {
     toolbarButton: {
       container: {
         display: 'inline-block',
-        margin: 'auto',
         verticalAlign: 'middle'
       },
       element: {

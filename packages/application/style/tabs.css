@@ -51,10 +51,10 @@
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + var(--jp-border-width)
   );
-  min-width: 0px;
+  min-width: 0;
   margin-left: calc(-1 * var(--jp-border-width));
   line-height: var(--jp-private-horizontal-tab-height);
-  padding: 0px 8px;
+  padding: 0 8px;
   background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-bottom: none;
@@ -87,7 +87,7 @@
 }
 
 /* This is the main application level current tab: only 1 exists. */
-.lm-DockPanel-tabBar .lm-TabBar-tab.jp-mod-current:before {
+.lm-DockPanel-tabBar .lm-TabBar-tab.jp-mod-current::before {
   position: absolute;
   top: calc(-1 * var(--jp-border-width) + 1px);
   left: calc(-1 * var(--jp-border-width));
@@ -166,6 +166,6 @@
   line-height: var(--jp-private-horizontal-tab-height);
   min-height: var(--jp-private-horizontal-tab-height);
   min-width: var(--jp-private-horizontal-tab-width);
-  padding: 0px 10px;
+  padding: 0 10px;
   transform: translateX(-40%) translateY(-58%);
 }

@@ -1,0 +1,115 @@
+name: Update Playwright Snapshots
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-galata-snapshots:
+    name: Update Galata References
+    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update galata snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
+    timeout-minutes: 80
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git to use https
+        run: git config --global hub.protocol https
+
+      - name: Checkout the branch from the PR that triggered the job
+        run: hub pr checkout ${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
+
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          server_url: http-get://localhost:8888/lab
+          test_folder: galata
+
+  update-documentation-snapshots:
+    name: Update Documentation Snapshots
+    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update documentation snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
+    timeout-minutes: 80
+    runs-on: ubuntu-20.04
+
+    # Python version is frozen through strategy.matrix.python-version
+    # Python dependencies are frozen in the installation step
+    # Note: IPython is among the frozen package
+    strategy:
+      matrix:
+        # Freeze Python version because it appears in console header
+        python-version: ['3.9.9']
+
+    steps:
+      - name: Checkout JupyterLab
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: core
+
+      - name: Checkout demo project
+        uses: actions/checkout@v2
+        with:
+          repository: jupyterlab/jupyterlab-demo
+          ref: master
+          path: demo
+
+      - name: Get demo folder
+        run: |
+          echo "JUPYTERLAB_GALATA_ROOT_DIR=$PWD" >> $GITHUB_ENV
+        working-directory: demo
+
+      - name: Configure git to use https
+        run: git config --global hub.protocol https
+
+      - name: Checkout the branch from the PR that triggered the job
+        working-directory: core
+        run: hub pr checkout ${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        working-directory: core
+        run: |
+          set -ex
+          # Install chinese font
+          sudo apt-get update
+          sudo apt-get install fonts-dejavu fonts-noto
+
+          # Freeze the packages to ensure consistent look and feel
+          # IPython is frozen because its version is displayed in
+          # the console header
+          pip install .[docs-screenshots]
+          bash ./scripts/ci_install.sh
+
+          # Build dev-mode
+          jlpm run build
+
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          server_url: http-get://localhost:8888/lab
+          test_folder: core/galata
+          start_server_script: start:doc
+          update_script: test:doc:update

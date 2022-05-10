@@ -236,8 +236,8 @@ describe('filebrowser/model', () => {
     });
 
     describe('#refresh()', () => {
-      it('should refresh the contents', () => {
-        return model.refresh();
+      it('should refresh the contents', async () => {
+        await expect(model.refresh()).resolves.not.toThrow();
       });
     });
 
@@ -321,7 +321,7 @@ describe('filebrowser/model', () => {
     });
 
     describe('#download()', () => {
-      it('should download the file without error', () => {
+      it.skip('should download the file without error', () => {
         // TODO: how to test this?
       });
     });

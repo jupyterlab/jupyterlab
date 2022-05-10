@@ -9,52 +9,11 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
-/**
- * Verify that a package specifier is published and available on npm.
- *
- * @param specifier The package specifier to verify.
- */
-function verifyPublished(specifier: string): void {
-  const cmd = `npm info ${specifier}`;
-  const output = utils.run(cmd, { stdio: 'pipe' }, true);
-  console.log(specifier);
-  if (output.indexOf('dist-tags') === -1) {
-    throw new Error(`${specifier} is not yet available`);
-  }
-}
-
-/**
- * Sleep for a specified period.
- *
- * @param wait The time in milliseconds to wait.
- */
-async function sleep(wait: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, wait));
-}
-
 // Specify the program signature.
 commander
   .description('Prepare the Python package for release')
   .action(async (options: any) => {
-    // Make sure all current JS packages are published.
-    console.log('Checking for published packages...');
-    utils.getCorePaths().forEach(async pkgPath => {
-      const pkgJson = path.join(pkgPath, 'package.json');
-      const pkgData = utils.readJSONFile(pkgJson);
-      const specifier = `${pkgData.name}@${pkgData.version}`;
-      let attempt = 0;
-      while (attempt < 10) {
-        try {
-          verifyPublished(specifier);
-          break;
-        } catch (e) {
-          console.error(e);
-          console.log('Sleeping for one minute...');
-          await sleep(1 * 60 * 1000);
-          attempt += 1;
-        }
-      }
-    });
+    utils.exitOnUncaughtException();
 
     const distDir = './dist';
 

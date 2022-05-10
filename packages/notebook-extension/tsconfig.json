@@ -19,10 +19,22 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../completer"
+    },
+    {
       "path": "../coreutils"
     },
     {
       "path": "../docmanager"
+    },
+    {
+      "path": "../docmanager-extension"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../documentsearch"
     },
     {
       "path": "../filebrowser"
@@ -62,6 +74,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

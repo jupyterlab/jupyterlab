@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
+import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -17,7 +17,6 @@ import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import ResizeObserver from 'resize-observer-polyfill';
 import { IOutputAreaModel } from './model';
 
 /**
@@ -95,11 +94,13 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
-    this.trimmedOutputModels = new Array<IOutputModel>();
-    this.maxNumberOutputs = options.maxNumberOutputs || 0;
-    this.headTailNumberOutputs = Math.round(this.maxNumberOutputs / 2);
-    this.headEndIndex = this.headTailNumberOutputs;
-    for (let i = 0; i < model.length; i++) {
+    this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
+
+    for (
+      let i = 0;
+      i < Math.min(model.length, this._maxNumberOutputs + 1);
+      i++
+    ) {
       const output = model.get(i);
       this._insertOutput(i, output);
     }
@@ -123,28 +124,6 @@ export class OutputArea extends Widget {
   readonly rendermime: IRenderMimeRegistry;
 
   /**
-   * The hidden output models.
-   */
-  private trimmedOutputModels: IOutputModel[];
-
-  /*
-   * The maximum outputs to show in the trimmed
-   * output area.
-   */
-  private maxNumberOutputs: number;
-
-  /*
-   * The maximum outputs to show in the trimmed
-   * output head and tail areas.
-   */
-  private headTailNumberOutputs: number;
-
-  /*
-   * The index for the end of the head in case of trim mode.
-   */
-  private headEndIndex: number;
-
-  /**
    * A read-only sequence of the children widgets in the output area.
    */
   get widgets(): ReadonlyArray<Widget> {
@@ -152,7 +131,7 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * A public signal used to indicate the number of outputs has changed.
+   * A public signal used to indicate the number of displayed outputs has changed.
    *
    * #### Notes
    * This is useful for parents who want to apply styling based on the number
@@ -193,7 +172,9 @@ export class OutputArea extends Widget {
     // Make sure there were no input widgets.
     if (this.widgets.length) {
       this._clear();
-      this.outputLengthChanged.emit(this.model.length);
+      this.outputLengthChanged.emit(
+        Math.min(this.model.length, this._maxNumberOutputs)
+      );
     }
 
     // Handle published messages.
@@ -208,6 +189,27 @@ export class OutputArea extends Widget {
         this.onInputRequest(msg, value);
       }
     };
+  }
+
+  /**
+   * The maximum number of output items to display on top and bottom of cell output.
+   *
+   * ### Notes
+   * It is set to Infinity if no trim is applied.
+   */
+  get maxNumberOutputs(): number {
+    return this._maxNumberOutputs;
+  }
+  set maxNumberOutputs(limit: number) {
+    if (limit <= 0) {
+      console.warn(`OutputArea.maxNumberOutputs must be strictly positive.`);
+      return;
+    }
+    const lastShown = this._maxNumberOutputs;
+    this._maxNumberOutputs = limit;
+    if (lastShown < limit) {
+      this._showTrimmedOutputs(lastShown);
+    }
   }
 
   /**
@@ -233,7 +235,6 @@ export class OutputArea extends Widget {
     switch (args.type) {
       case 'add':
         this._insertOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
         break;
       case 'remove':
         if (this.widgets.length) {
@@ -260,21 +261,22 @@ export class OutputArea extends Widget {
             // prevent jitter caused by immediate height change
             this._preventHeightChangeJitter();
           }
-          this.outputLengthChanged.emit(this.model.length);
         }
         break;
       case 'set':
         this._setOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
         break;
       default:
         break;
     }
+    this.outputLengthChanged.emit(
+      Math.min(this.model.length, this._maxNumberOutputs)
+    );
   }
 
   /**
    * Update indices in _displayIdMap in response to element remove from model items
-   * *
+   *
    * @param startIndex - The index of first element removed
    *
    * @param count - The number of elements removed from model items
@@ -301,16 +303,27 @@ export class OutputArea extends Widget {
   /**
    * Follow changes on the output model state.
    */
-  protected onStateChanged(sender: IOutputAreaModel): void {
-    this.trimmedOutputModels = new Array<IOutputModel>();
-    for (let i = 0; i < this.model.length; i++) {
-      this._setOutput(i, this.model.get(i));
+  protected onStateChanged(
+    sender: IOutputAreaModel,
+    change: number | void
+  ): void {
+    const outputLength = Math.min(this.model.length, this._maxNumberOutputs);
+    if (change) {
+      if (change >= this._maxNumberOutputs) {
+        // Bail early
+        return;
+      }
+      this._setOutput(change, this.model.get(change));
+    } else {
+      for (let i = 0; i < outputLength; i++) {
+        this._setOutput(i, this.model.get(i));
+      }
     }
-    this.outputLengthChanged.emit(this.model.length);
+    this.outputLengthChanged.emit(outputLength);
   }
 
   /**
-   * Clear the widget inputs and outputs.
+   * Clear the widget outputs.
    */
   private _clear(): void {
     // Bail if there is no work to do.
@@ -373,6 +386,7 @@ export class OutputArea extends Widget {
     panel.addWidget(prompt);
 
     const input = factory.createStdin({
+      parent_header: msg.header,
       prompt: stdinPrompt,
       password,
       future
@@ -382,40 +396,6 @@ export class OutputArea extends Widget {
 
     const layout = this.layout as PanelLayout;
     layout.addWidget(panel);
-
-    const buttons = [
-      Dialog.cancelButton({ label: 'Cancel' }),
-      Dialog.okButton({ label: 'Select' })
-    ];
-
-    const modalInput = factory.createStdin({
-      prompt: stdinPrompt,
-      password,
-      future
-    });
-
-    const dialog = new Dialog<Promise<string>>({
-      title: 'Your input is requested',
-      body: modalInput,
-      buttons
-    });
-
-    void dialog.launch().then(result => {
-      if (result.button.accept) {
-        const value = result.value;
-        if (value) {
-          void value.then(v => {
-            // Use stdin as the stream so it does not get combined with stdout.
-            this.model.add({
-              output_type: 'stream',
-              name: 'stdin',
-              text: v + '\n'
-            });
-            panel.dispose();
-          });
-        }
-      }
-    });
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
@@ -436,6 +416,10 @@ export class OutputArea extends Widget {
    * Update an output in the layout in place.
    */
   private _setOutput(index: number, model: IOutputModel): void {
+    if (index >= this._maxNumberOutputs) {
+      return;
+    }
+
     const layout = this.layout as PanelLayout;
     const panel = layout.widgets[index] as Panel;
     const renderer = (panel.widgets
@@ -449,7 +433,6 @@ export class OutputArea extends Widget {
       model.trusted ? 'any' : 'ensure'
     );
     if (
-      renderer.renderModel &&
       Private.currentPreferredMimetype.get(renderer) === mimeType &&
       OutputArea.isIsolated(mimeType, model.metadata) ===
         renderer instanceof Private.IsolatedRenderer
@@ -468,56 +451,32 @@ export class OutputArea extends Widget {
    * @param model - The model of the output to be inserted.
    */
   private _insertOutput(index: number, model: IOutputModel): void {
-    if (index === 0) {
-      this.trimmedOutputModels = new Array<IOutputModel>();
+    if (index > this._maxNumberOutputs) {
+      return;
     }
-    if (index === this.maxNumberOutputs && this.maxNumberOutputs !== 0) {
-      // TODO Improve style of the display message.
-      const separatorModel = this.model.contentFactory.createOutputModel({
-        value: {
-          output_type: 'display_data',
-          data: {
-            'text/html': `
-              <a style="margin: 10px; text-decoration: none;">
-                <pre>Output of this cell has been trimmed on the initial display.</pre>
-                <pre>Displaying the first ${this.maxNumberOutputs} top and last bottom outputs.</pre>
-                <pre>Click on this message to get the complete output.</pre>
-              </a>
-              `
-          }
-        }
-      });
-      const onClick = () =>
-        this._showTrimmedOutputs(this.headTailNumberOutputs);
-      const separator = this.createOutputItem(separatorModel);
-      separator!.node.addEventListener('click', onClick);
-      const layout = this.layout as PanelLayout;
-      layout.insertWidget(this.headEndIndex, separator!);
-    }
-    const output = this._createOutput(model);
-    const layout = this.layout as PanelLayout;
-    if (index < this.maxNumberOutputs || this.maxNumberOutputs === 0) {
-      layout.insertWidget(index, output);
-    } else if (index >= this.maxNumberOutputs) {
-      layout.removeWidgetAt(this.headTailNumberOutputs + 1);
-      layout.insertWidget(index, output);
-    }
-    if (index >= this.headTailNumberOutputs && this.maxNumberOutputs !== 0) {
-      this.trimmedOutputModels.push(model);
-    }
-    if (!this._outputTracker.has(output)) {
-      void this._outputTracker.add(output);
-    }
-  }
 
-  private _createOutput(model: IOutputModel): Widget {
-    let output = this.createOutputItem(model);
-    if (output) {
-      output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+    const layout = this.layout as PanelLayout;
+
+    if (index === this._maxNumberOutputs) {
+      const warning = new Private.TrimmedOutputs(this._maxNumberOutputs, () => {
+        const lastShown = this._maxNumberOutputs;
+        this._maxNumberOutputs = Infinity;
+        this._showTrimmedOutputs(lastShown);
+      });
+      layout.insertWidget(index, this._wrappedOutput(warning));
     } else {
-      output = new Widget();
+      let output = this.createOutputItem(model);
+      if (output) {
+        output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+      } else {
+        output = new Widget();
+      }
+
+      if (!this._outputTracker.has(output)) {
+        void this._outputTracker.add(output);
+      }
+      layout.insertWidget(index, output);
     }
-    return output;
   }
 
   /**
@@ -528,20 +487,22 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Remove the information message related to the trimmed output
-   * and show all previously trimmed outputs.
+   * Dispose information message and show output models from the given
+   * index to maxNumberOutputs
+   *
+   * @param lastShown Starting model index to insert.
    */
-  private _showTrimmedOutputs(headTailNumberOutputs: number) {
-    const layout = this.layout as PanelLayout;
-    layout.removeWidgetAt(headTailNumberOutputs);
-    for (
-      let i = 0;
-      i < this.trimmedOutputModels.length - this.headTailNumberOutputs;
-      i++
-    ) {
-      const output = this._createOutput(this.trimmedOutputModels[i]);
-      layout.insertWidget(headTailNumberOutputs + i, output);
+  private _showTrimmedOutputs(lastShown: number) {
+    // Dispose information widget
+    this.widgets[lastShown].dispose();
+
+    for (let idx = lastShown; idx < this.model.length; idx++) {
+      this._insertOutput(idx, this.model.get(idx));
     }
+
+    this.outputLengthChanged.emit(
+      Math.min(this.model.length, this._maxNumberOutputs)
+    );
   }
 
   /**
@@ -557,18 +518,7 @@ export class OutputArea extends Widget {
       return null;
     }
 
-    const panel = new Private.OutputPanel();
-
-    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
-
-    const prompt = this.contentFactory.createOutputPrompt();
-    prompt.executionCount = model.executionCount;
-    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
-    panel.addWidget(prompt);
-
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-    panel.addWidget(output);
-    return panel;
+    return this._wrappedOutput(output, model.executionCount);
   }
 
   /**
@@ -677,6 +627,31 @@ export class OutputArea extends Widget {
     model.add(output);
   };
 
+  /**
+   * Wrap a output widget within a output panel
+   *
+   * @param output Output widget to wrap
+   * @param executionCount Execution count
+   * @returns The output panel
+   */
+  private _wrappedOutput(
+    output: Widget,
+    executionCount: number | null = null
+  ): Panel {
+    const panel = new Private.OutputPanel();
+
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    const prompt = this.contentFactory.createOutputPrompt();
+    prompt.executionCount = executionCount;
+    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
+    panel.addWidget(prompt);
+
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+    return panel;
+  }
+
   private _minHeightTimeout: number | null = null;
   private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
@@ -686,6 +661,12 @@ export class OutputArea extends Widget {
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
+
+  /**
+   * The maximum outputs to show in the trimmed
+   * output area.
+   */
+  private _maxNumberOutputs: number;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -891,6 +872,27 @@ export interface IStdin extends Widget {
  * The default stdin widget.
  */
 export class Stdin extends Widget implements IStdin {
+  private static _history: string[] = [];
+
+  private static _historyAt(ix: number): string | undefined {
+    const len = Stdin._history.length;
+    // interpret negative ix exactly like Array.at
+    ix = ix < 0 ? len + ix : ix;
+
+    if (ix < len) {
+      return Stdin._history[ix];
+    }
+    // return undefined if ix is out of bounds
+  }
+
+  private static _historyPush(line: string): void {
+    Stdin._history.push(line);
+    if (Stdin._history.length > 1000) {
+      // truncate line history if it's too long
+      Stdin._history.shift();
+    }
+  }
+
   /**
    * Construct a new input widget.
    */
@@ -899,9 +901,13 @@ export class Stdin extends Widget implements IStdin {
       node: Private.createInputWidgetNode(options.prompt, options.password)
     });
     this.addClass(STDIN_CLASS);
+    this._history_ix = 0;
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
+    // make users aware of the line history feature
+    this._input.placeholder = '↑↓ for history';
     this._future = options.future;
+    this._parent_header = options.parent_header;
     this._value = options.prompt + ' ';
   }
 
@@ -910,15 +916,6 @@ export class Stdin extends Widget implements IStdin {
    */
   get value(): Promise<string> {
     return this._promise.promise.then(() => this._value);
-  }
-
-  /**
-   * Submit and get the value of the Stdin widget.
-   */
-  getValue(): Promise<string> {
-    console.log('WHAT THE FUCK!');
-    this.submit();
-    return this.value;
   }
 
   /**
@@ -931,30 +928,48 @@ export class Stdin extends Widget implements IStdin {
    * called in response to events on the dock panel's node. It should
    * not be called directly by user code.
    */
-  handleEvent(event: Event): void {
+  handleEvent(event: KeyboardEvent): void {
+    const input = this._input;
     if (event.type === 'keydown') {
-      if ((event as KeyboardEvent).keyCode === 13) {
-        // Enter
-        this.submit();
+      if (event.key === 'ArrowUp') {
+        const historyLine = Stdin._historyAt(this._history_ix - 1);
+        if (historyLine) {
+          if (this._history_ix === 0) {
+            this._value_cache = input.value;
+          }
+          input.value = historyLine;
+          --this._history_ix;
+        }
+      } else if (event.key === 'ArrowDown') {
+        if (this._history_ix === 0) {
+          // do nothing
+        } else if (this._history_ix === -1) {
+          input.value = this._value_cache;
+          ++this._history_ix;
+        } else {
+          const historyLine = Stdin._historyAt(this._history_ix + 1);
+          if (historyLine) {
+            input.value = historyLine;
+            ++this._history_ix;
+          }
+        }
+      } else if (event.key === 'Enter') {
+        this._future.sendInputReply(
+          {
+            status: 'ok',
+            value: input.value
+          },
+          this._parent_header
+        );
+        if (input.type === 'password') {
+          this._value += Array(input.value.length + 1).join('·');
+        } else {
+          this._value += input.value;
+          Stdin._historyPush(input.value);
+        }
+        this._promise.resolve(void 0);
       }
     }
-  }
-
-  /*
-   * Submit input value.
-   */
-  submit() {
-    const input = this._input;
-    this._future.sendInputReply({
-      status: 'ok',
-      value: input.value
-    });
-    if (input.type === 'password') {
-      this._value += Array(input.value.length + 1).join('·');
-    } else {
-      this._value += input.value;
-    }
-    this._promise.resolve(void 0);
   }
 
   /**
@@ -979,9 +994,12 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
+  private _history_ix: number;
+  private _parent_header: KernelMessage.IInputReplyMsg['parent_header'];
   private _future: Kernel.IShellFuture;
   private _input: HTMLInputElement;
   private _value: string;
+  private _value_cache: string;
   private _promise = new PromiseDelegate<void>();
 }
 
@@ -1004,6 +1022,11 @@ export namespace Stdin {
      * The kernel future associated with the request.
      */
     future: Kernel.IShellFuture;
+
+    /**
+     * The header of the input_request message.
+     */
+    parent_header: KernelMessage.IInputReplyMsg['parent_header'];
   }
 }
 
@@ -1142,5 +1165,75 @@ namespace Private {
       super.onAfterDetach(msg);
       this.node.removeEventListener('contextmenu', this._onContext.bind(this));
     }
+  }
+
+  /**
+   * Trimmed outputs information widget.
+   */
+  export class TrimmedOutputs extends Widget {
+    /**
+     * Widget constructor
+     *
+     * ### Notes
+     * The widget will be disposed on click after calling the callback.
+     *
+     * @param maxNumberOutputs Maximal number of outputs to display
+     * @param _onClick Callback on click event on the widget
+     */
+    constructor(
+      maxNumberOutputs: number,
+      onClick: (event: MouseEvent) => void
+    ) {
+      const node = document.createElement('div');
+      node.insertAdjacentHTML(
+        'afterbegin',
+        `<a>
+        <pre>Output of this cell has been trimmed on the initial display.</pre>
+        <pre>Displaying the first ${maxNumberOutputs} top outputs.</pre>
+        <pre>Click on this message to get the complete output.</pre>
+      </a>`
+      );
+      super({
+        node
+      });
+      this._onClick = onClick;
+      this.addClass('jp-TrimmedOutputs');
+      this.addClass('jp-RenderedHTMLCommon');
+    }
+
+    /**
+     * Handle the DOM events for widget.
+     *
+     * @param event - The DOM event sent to the widget.
+     *
+     * #### Notes
+     * This method implements the DOM `EventListener` interface and is
+     * called in response to events on the widget's DOM node. It should
+     * not be called directly by user code.
+     */
+    handleEvent(event: Event): void {
+      if (event.type === 'click') {
+        this._onClick(event as MouseEvent);
+      }
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('click', this);
+    }
+
+    /**
+     * A message handler invoked on a `'before-detach'`
+     * message
+     */
+    protected onBeforeDetach(msg: Message): void {
+      super.onBeforeDetach(msg);
+      this.node.removeEventListener('click', this);
+    }
+
+    private _onClick: (event: MouseEvent) => void;
   }
 }

@@ -2,69 +2,173 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IDataConnector } from '@jupyterlab/statedb';
+import { IObservableString } from '@jupyterlab/observables';
+import { Session } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 
-/* tslint:disable */
 /**
- * The completion manager token.
+ * The context which will be passed to the `fetch` function
+ * of a provider.
  */
-export const ICompletionManager = new Token<ICompletionManager>(
-  '@jupyterlab/completer:ICompletionManager'
-);
-/* tslint:enable */
-
-/**
- * A manager to register completers with parent widgets.
- */
-export interface ICompletionManager {
+export interface ICompletionContext {
   /**
-   * Register a completable object with the completion manager.
-   *
-   * @returns A completable object whose attributes can be updated as necessary.
+   * The widget (notebook, console, code editor) which invoked
+   * the completer
    */
-  register(
-    completable: ICompletionManager.ICompletable,
-    renderer?: Completer.IRenderer
-  ): ICompletionManager.ICompletableAttributes;
+  widget: Widget;
+
+  /**
+   * The current editor.
+   */
+  editor?: CodeEditor.IEditor | null;
+
+  /**
+   * The session extracted from widget for convenience.
+   */
+  session?: Session.ISessionConnection | null;
 }
 
 /**
- * A namespace for `ICompletionManager` interface specifications.
+ * The interface to implement a completer provider.
  */
-export namespace ICompletionManager {
+export interface ICompletionProvider<
+  T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+> {
   /**
-   * The attributes of a completable object that can change and sync at runtime.
+   * Unique identifier of the provider
    */
-  export interface ICompletableAttributes {
-    /**
-     * The host editor for the completer.
-     */
-    editor: CodeEditor.IEditor | null;
-
-    /**
-     * The data connector used to populate the completer.
-     * Use the connector with ICompletionItemsReply for enhanced completions.
-     */
-    connector:
-      | IDataConnector<
-          CompletionHandler.IReply,
-          void,
-          CompletionHandler.IRequest
-        >
-      | CompletionHandler.ICompletionItemsConnector;
-  }
+  readonly identifier: string;
 
   /**
-   * An interface for completer-compatible objects.
+   * Renderer for provider's completions (optional).
    */
-  export interface ICompletable extends ICompletableAttributes {
-    /**
-     * The parent of the completer; the completer resources dispose with parent.
-     */
-    readonly parent: Widget;
-  }
+  readonly renderer?: Completer.IRenderer | null;
+
+  /**
+   * Is completion provider applicable to specified context?
+   * @param request - the completion request text and details
+   * @param context - additional information about context of completion request
+   */
+  isApplicable(context: ICompletionContext): Promise<boolean>;
+
+  /**
+   * Fetch completion requests.
+   *
+   * @param request - the completion request text and details
+   * @param context - additional information about context of completion request
+   */
+  fetch(
+    request: CompletionHandler.IRequest,
+    context: ICompletionContext
+  ): Promise<CompletionHandler.ICompletionItemsReply<T>>;
+
+  /**
+   * This method is called to customize the model of a completer widget.
+   * If it is not provided, the default model will be used.
+   *
+   * @param context - additional information about context of completion request
+   * @returns The completer model
+   */
+  modelFactory?(context: ICompletionContext): Promise<Completer.IModel>;
+
+  /**
+   * Given an incomplete (unresolved) completion item, resolve it by adding
+   * all missing details, such as lazy-fetched documentation.
+   *
+   * @param completion - the completion item to resolve
+   * @param context - The context of the completer
+   * @param patch - The text which will be injected if the completion item is
+   * selected.
+   */
+  resolve?(
+    completionItem: T,
+    context: ICompletionContext,
+    patch?: Completer.IPatch | null
+  ): Promise<T>;
+
+  /**
+   * If users enable `autoCompletion` in setting, this method is
+   * called on text changed event of `CodeMirror` to check if the
+   * completion items should be shown.
+   *
+   * @param  completerIsVisible - Current visibility status of the
+   *  completer widget0
+   * @param  changed - changed text.
+   */
+  shouldShowContinuousHint?(
+    completerIsVisible: boolean,
+    changed: IObservableString.IChangedArgs
+  ): boolean;
+}
+
+/**
+ * The exported token used to register new provider.
+ */
+export const ICompletionProviderManager = new Token<ICompletionProviderManager>(
+  '@jupyterlab/completer:ICompletionProviderManager'
+);
+
+export interface ICompletionProviderManager {
+  /**
+   * Register a completer provider with the manager.
+   *
+   * @param {ICompletionProvider} provider - the provider to be registered.
+   */
+  registerProvider(provider: ICompletionProvider): void;
+
+  /**
+   * Invoke the completer in the widget with provided id.
+   *
+   * @param {string} id - the id of notebook panel, console panel or code editor.
+   */
+  invoke(id: string): void;
+
+  /**
+   * Activate `select` command in the widget with provided id.
+   *
+   * @param {string} id - the id of notebook panel, console panel or code editor.
+   */
+  select(id: string): void;
+
+  /**
+   * Update completer handler of a widget with new context.
+   *
+   * @param newCompleterContext - The completion context.
+   */
+  updateCompleter(newCompleterContext: ICompletionContext): Promise<void>;
+
+  /**
+   * Signal emitted when active providers list is changed.
+   */
+  activeProvidersChanged: ISignal<ICompletionProviderManager, void>;
+}
+
+export interface IConnectorProxy {
+  /**
+   * Fetch response from multiple providers, If a provider can not return
+   * the response for a completer request before timeout,
+   * the result of this provider will be ignore.
+   *
+   * @param {CompletionHandler.IRequest} request - The completion request.
+   */
+  fetch(
+    request: CompletionHandler.IRequest
+  ): Promise<Array<CompletionHandler.ICompletionItemsReply | null>>;
+
+  /**
+   * Check if completer should make request to fetch completion responses
+   * on user typing. If the provider with highest rank does not have
+   * `shouldShowContinuousHint` method, a default one will be used.
+   *
+   * @param completerIsVisible - The visible status of completer widget.
+   * @param changed - CodeMirror changed argument.
+   */
+  shouldShowContinuousHint(
+    completerIsVisible: boolean,
+    changed: IObservableString.IChangedArgs
+  ): boolean;
 }

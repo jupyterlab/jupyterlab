@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showErrorMessage, ToolbarButton } from '@jupyterlab/apputils';
+import { showErrorMessage } from '@jupyterlab/apputils';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { fileUploadIcon } from '@jupyterlab/ui-components';
+import { fileUploadIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { FileBrowserModel } from './model';
 
 /**
@@ -20,6 +20,7 @@ export class Uploader extends ToolbarButton {
   constructor(options: Uploader.IOptions) {
     super({
       icon: fileUploadIcon,
+      label: options.label,
       onClick: () => {
         this._input.click();
       },
@@ -85,6 +86,11 @@ export namespace Uploader {
      * The language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * An optional label.
+     */
+    label?: string;
   }
 }
 
@@ -105,7 +111,7 @@ namespace Private {
   /**
    * Translate upload tooltip.
    */
-  export function translateToolTip(translator?: ITranslator) {
+  export function translateToolTip(translator?: ITranslator): string {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     return trans.__('Upload Files');

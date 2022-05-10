@@ -9,10 +9,6 @@
             "rank": 1
           },
           {
-            "command": "help:launch-classic-notebook",
-            "rank": 1
-          },
-          {
             "type": "separator",
             "rank": 1
           }

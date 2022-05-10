@@ -58,6 +58,7 @@
   max-height: calc(
     var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
   );
+
   /* transform: translateY(var(--jp-border-width)); */
 }
 

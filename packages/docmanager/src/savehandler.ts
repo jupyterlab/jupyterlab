@@ -17,6 +17,7 @@ export class SaveHandler implements IDisposable {
    */
   constructor(options: SaveHandler.IOptions) {
     this._context = options.context;
+    this._isConnectedCallback = options.isConnectedCallback || (() => true);
     const interval = options.saveInterval || 120;
     this._minInterval = interval * 1000;
     this._interval = this._minInterval;
@@ -89,7 +90,9 @@ export class SaveHandler implements IDisposable {
       return;
     }
     this._autosaveTimer = window.setTimeout(() => {
-      this._save();
+      if (this._isConnectedCallback()) {
+        this._save();
+      }
     }, this._interval);
   }
 
@@ -132,7 +135,10 @@ export class SaveHandler implements IDisposable {
       .catch(err => {
         // If the user canceled the save, do nothing.
         // FIXME-TRANS: Is this affected by localization?
-        if (err.message === 'Cancel') {
+        if (
+          err.message === 'Cancel' ||
+          err.message === 'Modal is already displayed'
+        ) {
           return;
         }
         // Otherwise, log the error.
@@ -144,6 +150,7 @@ export class SaveHandler implements IDisposable {
   private _minInterval = -1;
   private _interval = -1;
   private _context: DocumentRegistry.Context;
+  private _isConnectedCallback: () => boolean;
   private _isActive = false;
   private _inDialog = false;
   private _isDisposed = false;
@@ -162,6 +169,12 @@ export namespace SaveHandler {
      * The context associated with the file.
      */
     context: DocumentRegistry.Context;
+
+    /**
+     * Autosaving should be paused while this callback function returns `false`.
+     * By default, it always returns `true`.
+     */
+    isConnectedCallback?: () => boolean;
 
     /**
      * The minimum save interval in seconds (default is two minutes).

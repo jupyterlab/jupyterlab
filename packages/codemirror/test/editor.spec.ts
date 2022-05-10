@@ -350,8 +350,10 @@ describe('CodeMirrorEditor', () => {
       model.value.text = TEXT;
       const coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
       if (typeof process !== 'undefined') {
+        // eslint-disable-next-line jest/no-conditional-expect
         expect(coord.left).toBe(0);
       } else {
+        // eslint-disable-next-line jest/no-conditional-expect
         expect(coord.left).toBeGreaterThan(0);
       }
     });

@@ -24,6 +24,7 @@ const extensions = [
   import('@jupyterlab/console-extension'),
   import('@jupyterlab/csvviewer-extension'),
   import('@jupyterlab/docmanager-extension'),
+  import('@jupyterlab/documentsearch-extension'),
   import('@jupyterlab/filebrowser-extension'),
   import('@jupyterlab/fileeditor-extension'),
   import('@jupyterlab/help-extension'),

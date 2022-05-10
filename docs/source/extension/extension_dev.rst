@@ -1,11 +1,26 @@
 .. _developer_extensions:
 
-Extension Developer Guide
-=========================
+Develop Extensions
+==================
 
 The JupyterLab application is comprised of a core application object and a set of extensions. JupyterLab extensions provide nearly every function in JupyterLab, including notebooks, document editors and viewers, code consoles, terminals, themes, the file browser, contextual help system, debugger, and settings editor. Extensions even provide more fundamental parts of the application, such as the menu system, status bar, and the underlying communication mechanism with the server.
 
 A JupyterLab extension is a package that contains a number of JupyterLab plugins. We will discuss how to write a plugin, then how to package together a set of plugins into a JupyterLab extension.
+
+See the sections below for more detailed information, or browse the rest of this page for an overview.
+
+.. toctree::
+   :maxdepth: 1
+
+   extension_points
+   ui_components
+   documents
+   notebook
+   virtualdom
+   ui_helpers
+   internationalization
+   extension_tutorial
+   extension_migration
 
 Other resources
 ---------------
@@ -30,7 +45,6 @@ We provide several cookiecutters to create JupyterLab extensions:
 - `extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`_: Create a JupyterLab extension in TypeScript
 - `extension-cookiecutter-js <https://github.com/jupyterlab/extension-cookiecutter-js>`_: Create a JupyterLab extension in JavaScript
 - `mimerender-cookiecutter-ts <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`_: Create a MIME Renderer JupyterLab extension in TypeScript
-- `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a theme extension for JupyterLab
 
 API Reference Documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -172,7 +186,7 @@ document can then be saved by the user in the usual manner.
 Theme plugins
 ^^^^^^^^^^^^^
 
-A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. Since CSS files referenced by the ``style`` or ``styleModule`` keys are automatically bundled and loaded on the page, the theme files should not be referenced by these keys. 
+A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. Since CSS files referenced by the ``style`` or ``styleModule`` keys are automatically bundled and loaded on the page, the theme files should not be referenced by these keys.
 
 The extension package containing the theme plugin must include all static assets that are referenced by ``@import`` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or ``url('../foo/bar.css')`` can be used to refer local files in the theme. Absolute URLs (starting with a ``/``) or external URLs (e.g. ``https:``) can be used to refer to external assets.
 
@@ -570,7 +584,56 @@ This ``install.json`` file is used by JupyterLab to help a user know how to mana
 * ``packageName``: This is the package name of the prebuilt extension in the package manager above, which may be different than the package name in ``package.json``.
 * ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
 
+.. _dev_trove_classifiers:
 
+PyPI Trove Classifiers
+""""""""""""""""""""""
+
+Extensions distributed as Python packages may declare additional metadata in the form of
+`trove classifiers <https://pypi.org/classifiers>`__. These improve the browsing
+experience for users on `PyPI <https://pypi.org/search>`__. While including the license,
+development status, Python versions supported, and other topic classifiers are useful
+for many audiences, the following classifiers are specific to Jupyter and JupyterLab.
+
+.. code-block::
+
+    Framework :: Jupyter
+    Framework :: Jupyter :: JupyterLab
+    Framework :: Jupyter :: JupyterLab :: 1
+    Framework :: Jupyter :: JupyterLab :: 2
+    Framework :: Jupyter :: JupyterLab :: 3
+    Framework :: Jupyter :: JupyterLab :: 4
+    Framework :: Jupyter :: JupyterLab :: Extensions
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
+
+Include each relevant classifier (and its parents) to help describe what your package
+provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
+
+.. hint::
+
+    For example, a theme, only compatible with JupyterLab 3, and distributed as
+    a ready-to-run, prebuilt extension might look like:
+
+    .. code-block:: python
+
+        # setup.py
+        setup(
+            # the rest of the package's metadata
+            # ...
+            classifiers=[
+                "Framework :: Jupyter",
+                "Framework :: Jupyter :: JupyterLab",
+                "Framework :: Jupyter :: JupyterLab :: 3",
+                "Framework :: Jupyter :: JupyterLab :: Extensions",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Themes",
+            ]
+        )
+
+    This would be discoverable from, for example, a
+    `PyPI search for theme extensions <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`__.
 
 .. _source_dev_workflow:
 
@@ -651,24 +714,6 @@ not enabled in our build configuration. To build a compatible package set
 ``output.libraryTarget`` to ``"commonjs2"`` in your Webpack configuration.
 (see `this <https://github.com/saulshanabrook/jupyterlab-webpack>`__ example repo).
 
-Another option to try out your extension with a local version of JupyterLab is to add it to the
-list of locally installed packages and to have JupyterLab register your extension when it starts up.
-
-You can do this by adding your extension to the ``jupyterlab.externalExtensions`` key
-in the ``dev_mode/package.json`` file. It should be a mapping
-of extension name to version, just like in ``dependencies``. Then run ``jlpm run integrity``
-and these extensions should be added automatically to the ``dependencies`` and pulled in.
-
-When you then run ``jlpm run build && jupyter lab --dev`` or ``jupyter lab --dev --watch`` this extension
-will be loaded by default. For example, this is how you can add the Jupyter Widgets
-extensions:
-
-::
-
-    "externalExtensions": {
-      "@jupyter-widgets/jupyterlab-manager": "2.0.0"
-    },
-
 If you publish your extension on ``npm.org``, users will be able to install
 it as simply ``jupyter labextension install <foo>``, where ``<foo>`` is
 the name of the published ``npm`` package. You can alternatively provide a
@@ -689,10 +734,7 @@ Testing your extension
 There are a number of helper functions in ``testutils`` in this repo (which
 is a public ``npm`` package called ``@jupyterlab/testutils``) that can be used when
 writing tests for an extension.  See ``tests/test-application`` for an example
-of the infrastructure needed to run tests.  There is a ``karma`` config file
-that points to the parent directory's ``karma`` config, and a test runner,
-``run-test.py`` that starts a Jupyter server.
-
+of the infrastructure needed to run tests.
 
 If you are using `jest <https://jestjs.io/>`__ to test your extension, you will
 need to transpile the jupyterlab packages to ``commonjs`` as they are using ES6 modules

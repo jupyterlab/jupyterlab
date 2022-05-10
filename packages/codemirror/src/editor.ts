@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 // / <reference types="codemirror"/>
@@ -41,6 +42,7 @@ import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/selection/active-line';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/addon/selection/selection-pointer';
+import 'codemirror/addon/edit/trailingspace.js';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import { CodemirrorBinding } from 'y-codemirror';
@@ -163,8 +165,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         this.onKeydown(event);
       }
     });
-    CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    if (!USE_YCODEMIRROR_BINDING) {
+
+    if (USE_YCODEMIRROR_BINDING) {
+      this._yeditorBinding?.on('cursorActivity', () =>
+        this._onCursorActivity()
+      );
+    } else {
+      CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
       CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
         this._beforeDocChanged(instance, change);
       });
@@ -344,14 +351,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions<K extends keyof CodeMirrorEditor.IConfig>(
-    options: CodeMirrorEditor.IConfigOptions<K>[]
-  ): void {
+  setOptions(options: Partial<CodeMirrorEditor.IConfig>): void {
     const editor = this._editor;
     editor.startOperation();
-    for (let key in options) {
+    for (const key in options) {
+      const k = key as keyof CodeMirrorEditor.IConfig;
       editor.operation(() => {
-        this.setOption(key as any, options[key]);
+        this.setOption(k, options[k]);
       });
     }
     editor.endOperation();
@@ -1142,7 +1148,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       )
     });
     console.warn(
-      'Please paste the following to https://github.com/jupyterlab/jupyterlab/issues/2951'
+      'If you are able and willing to publicly share the text or code in your editor, you can help us debug the "Code Editor out of Sync" message by pasting the following to the public issue at https://github.com/jupyterlab/jupyterlab/issues/2951. Please note that the data below includes the text/code in your editor.'
     );
     console.warn(
       JSON.stringify({
@@ -1361,13 +1367,6 @@ export namespace CodeMirrorEditor {
     foldGutter: false,
     handlePaste: true
   };
-
-  /**
-   * The options used to set several options at once with setOptions.
-   */
-  export interface IConfigOptions<K extends keyof IConfig> {
-    K: IConfig[K];
-  }
 
   /**
    * Add a command to CodeMirror.
@@ -1602,6 +1601,9 @@ namespace Private {
       case 'codeFolding':
         (editor.setOption as any)('foldGutter', value);
         editor.setOption('gutters', getActiveGutters(config));
+        break;
+      case 'showTrailingSpace':
+        (editor.setOption as any)(option, value);
         break;
       default:
         (editor.setOption as any)(option, value);

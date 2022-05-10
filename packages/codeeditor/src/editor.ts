@@ -17,6 +17,8 @@ import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
+const globalModelDBMutex = models.createMutex();
+
 /**
  * A namespace for code editors.
  *
@@ -59,7 +61,7 @@ export namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export interface ICoordinate extends JSONObject, ClientRect {}
+  export interface ICoordinate extends DOMRectReadOnly {}
 
   /**
    * A range.
@@ -227,7 +229,6 @@ export namespace CodeEditor {
      */
     constructor(options?: Model.IOptions) {
       options = options || {};
-
       if (options.modelDB) {
         this.modelDB = options.modelDB;
       } else {
@@ -283,7 +284,7 @@ export namespace CodeEditor {
       sender: models.ISharedBaseCell<any>,
       change: models.CellChange<nbformat.IBaseCellMetadata>
     ): void {
-      this._mutex(() => {
+      globalModelDBMutex(() => {
         if (change.sourceChange) {
           const value = this.modelDB.get('value') as IObservableString;
           let currpos = 0;
@@ -308,7 +309,7 @@ export namespace CodeEditor {
       value: IObservableString,
       event: IObservableString.IChangedArgs
     ): void {
-      this._mutex(() => {
+      globalModelDBMutex(() => {
         this.sharedModel.transact(() => {
           switch (event.type) {
             case 'insert':
@@ -337,11 +338,6 @@ export namespace CodeEditor {
      * The shared model for the cell editor.
      */
     sharedModel: models.ISharedText;
-
-    /**
-     * A mutex to update the shared model.
-     */
-    protected readonly _mutex = models.createMutex();
 
     /**
      * The underlying `IModelDB` instance in which model
@@ -551,7 +547,7 @@ export namespace CodeEditor {
     /**
      * Set config options for the editor.
      */
-    setOptions<K extends keyof IConfig>(options: IConfigOptions<K>[]): void;
+    setOptions(options: Partial<IConfig>): void;
 
     /**
      * Returns the content for the given line number.
@@ -791,35 +787,34 @@ export namespace CodeEditor {
      * Whether to allow code folding
      */
     codeFolding: boolean;
+
+    /**
+     * Whether to highlight trailing whitespace
+     */
+    showTrailingSpace: boolean;
   }
 
   /**
    * The default configuration options for an editor.
    */
   export const defaultConfig: IConfig = {
+    autoClosingBrackets: false,
+    codeFolding: false,
     cursorBlinkRate: 530,
     fontFamily: null,
     fontSize: null,
+    handlePaste: true,
+    insertSpaces: true,
     lineHeight: null,
     lineNumbers: false,
     lineWrap: 'on',
-    wordWrapColumn: 80,
+    matchBrackets: true,
     readOnly: false,
     tabSize: 4,
-    insertSpaces: true,
-    matchBrackets: true,
-    autoClosingBrackets: false,
-    handlePaste: true,
     rulers: [],
-    codeFolding: false
+    showTrailingSpace: false,
+    wordWrapColumn: 80
   };
-
-  /**
-   * The options used to set several options at once with setOptions.
-   */
-  export interface IConfigOptions<K extends keyof IConfig> {
-    K: IConfig[K];
-  }
 
   /**
    * The options used to initialize an editor.
@@ -858,7 +853,11 @@ export namespace CodeEditor {
 
   export namespace Model {
     export interface IOptions {
+      /**
+       * A unique identifier for the model.
+       */
       id?: string;
+
       /**
        * The initial value of the model.
        */

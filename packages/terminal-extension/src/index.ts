@@ -17,9 +17,9 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
-import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Terminal } from '@jupyterlab/services';
+import { Terminal, TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal, ITerminalTracker } from '@jupyterlab/terminal';
 // Name-only import so as to not trigger inclusion in main bundle
@@ -27,6 +27,7 @@ import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
 import { ITranslator } from '@jupyterlab/translation';
 import { terminalIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
+import { Menu, Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -43,6 +44,8 @@ namespace CommandIDs {
   export const decreaseFont = 'terminal:decrease-font';
 
   export const setTheme = 'terminal:set-theme';
+
+  export const shutdown = 'terminal:shut-down';
 }
 
 /**
@@ -84,7 +87,7 @@ function activate(
   runningSessionManagers: IRunningSessionManagers | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
-  const { serviceManager } = app;
+  const { serviceManager, commands } = app;
   const category = trans.__('Terminal');
   const namespace = 'terminal';
   const tracker = new WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>({
@@ -171,15 +174,51 @@ function activate(
   addCommands(app, tracker, settingRegistry, translator, options);
 
   if (mainMenu) {
+    // Add "Terminal Theme" menu below "Theme" menu.
+    const themeMenu = new Menu({ commands });
+    themeMenu.title.label = trans._p('menu', 'Terminal Theme');
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: {
+        theme: 'inherit',
+        displayName: trans.__('Inherit'),
+        isPalette: false
+      }
+    });
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: {
+        theme: 'light',
+        displayName: trans.__('Light'),
+        isPalette: false
+      }
+    });
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'dark', displayName: trans.__('Dark'), isPalette: false }
+    });
+
+    // Add some commands to the "View" menu.
+    mainMenu.settingsMenu.addGroup(
+      [
+        { command: CommandIDs.increaseFont },
+        { command: CommandIDs.decreaseFont },
+        { type: 'submenu', submenu: themeMenu }
+      ],
+      40
+    );
+
+    // Add terminal creation to the file menu.
+    mainMenu.fileMenu.newMenu.addItem({
+      command: CommandIDs.createNew,
+      rank: 20
+    });
+
     // Add terminal close-and-shutdown to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
-      tracker,
-      closeAndCleanupLabel: (n: number) => trans.__('Shutdown Terminal'),
-      closeAndCleanup: (current: MainAreaWidget<ITerminal.ITerminal>) => {
-        // The widget is automatically disposed upon session shutdown.
-        return current.content.session.shutdown();
-      }
-    } as IFileMenu.ICloseAndCleaner<MainAreaWidget<ITerminal.ITerminal>>);
+      id: CommandIDs.shutdown,
+      isEnabled: (w: Widget) => tracker.currentWidget !== null && tracker.has(w)
+    });
   }
 
   if (palette) {
@@ -306,10 +345,25 @@ export function addCommands(
       }
 
       const name = args['name'] as string;
+      const cwd = args['cwd'] as string;
 
-      const session = await (name
-        ? serviceManager.terminals.connectTo({ model: { name } })
-        : serviceManager.terminals.startNew());
+      let session;
+      if (name) {
+        const models = await TerminalAPI.listRunning();
+        if (models.map(d => d.name).includes(name)) {
+          // we are restoring a terminal widget and the corresponding terminal exists
+          // let's connect to it
+          session = serviceManager.terminals.connectTo({ model: { name } });
+        } else {
+          // we are restoring a terminal widget but the corresponding terminal was closed
+          // let's start a new terminal with the original name
+          session = await serviceManager.terminals.startNew({ name, cwd });
+        }
+      } else {
+        // we are creating a new terminal widget with a new terminal
+        // let the server choose the terminal name
+        session = await serviceManager.terminals.startNew({ cwd });
+      }
 
       const term = new Terminal(session, options, translator);
 
@@ -325,6 +379,7 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.open, {
+    label: trans.__('Open a terminal by its `name`.'),
     execute: args => {
       const name = args['name'] as string;
       // Check for a running terminal with the given name.
@@ -358,6 +413,20 @@ export function addCommands(
       } catch (err) {
         Private.showErrorMessage(err);
       }
+    },
+    isEnabled: () => tracker.currentWidget !== null
+  });
+
+  commands.addCommand(CommandIDs.shutdown, {
+    label: trans.__('Shutdown Terminal'),
+    execute: () => {
+      const current = tracker.currentWidget;
+      if (!current) {
+        return;
+      }
+
+      // The widget is automatically disposed upon session shutdown.
+      return current.content.session.shutdown();
     },
     isEnabled: () => tracker.currentWidget !== null
   });
@@ -398,6 +467,9 @@ export function addCommands(
 
   commands.addCommand(CommandIDs.setTheme, {
     label: args => {
+      if (args.theme === undefined) {
+        return trans.__('Set terminal theme to the provided `theme`.');
+      }
       const theme = args['theme'] as string;
       const displayName =
         theme in themeDisplayedName

@@ -5,15 +5,17 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { Token } from '@lumino/coreutils';
+import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 
 import { IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@lumino/widgets';
+import { Panel } from '@lumino/widgets';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
+
+import { DebuggerHandler } from './handler';
 
 /**
  * An interface describing an application's visual debugger.
@@ -28,6 +30,11 @@ export interface IDebugger {
    * Whether the current debugger is started.
    */
   readonly isStarted: boolean;
+
+  /**
+   * Whether the session is pausing for exceptions.
+   */
+  readonly isPausingOnExceptions: boolean;
 
   /**
    * The debugger service's model.
@@ -48,6 +55,16 @@ export interface IDebugger {
    * Removes all the breakpoints from the current notebook or console
    */
   clearBreakpoints(): Promise<void>;
+
+  /**
+   * Used to determine if kernel has pause on exception capabilities
+   */
+  pauseOnExceptionsIsValid(): boolean;
+
+  /**
+   * Handles enabling and disabling of Pause on Exception
+   */
+  pauseOnExceptions(enable: boolean): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -88,10 +105,27 @@ export interface IDebugger {
   ): Promise<DebugProtocol.Variable[]>;
 
   /**
+   * Request rich representation of a variable.
+   *
+   * @param variableName The variable name to request
+   * @param frameId The current frame id in which to request the variable
+   * @returns The mime renderer data model
+   */
+  inspectRichVariable(
+    variableName: string,
+    frameId?: number
+  ): Promise<IDebugger.IRichVariable>;
+
+  /**
    * Requests all the defined variables and display them in the
    * table view.
    */
   displayDefinedVariables(): Promise<void>;
+
+  /**
+   * Requests all the loaded modules and display them.
+   */
+  displayModules(): Promise<void>;
 
   /**
    * Request whether debugging is available for the given session connection.
@@ -153,6 +187,21 @@ export interface IDebugger {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void>;
+
+  /**
+   * Get the debugger state
+   *
+   * @returns Debugger state
+   */
+  getDebuggerState(): IDebugger.State;
+
+  /**
+   * Restore the debugger state
+   *
+   * @param state Debugger state
+   * @returns Whether the state has been restored successfully or not
+   */
+  restoreDebuggerState(state: IDebugger.State): Promise<boolean>;
 }
 
 /**
@@ -180,9 +229,39 @@ export namespace IDebugger {
   };
 
   /**
+   * The type for a kernel source file.
+   */
+  export type KernelSource = {
+    /**
+     * The name of the source.
+     */
+    name: string;
+
+    /**
+     * The path of the source.
+     */
+    path: string;
+  };
+
+  /**
    * Single breakpoint in an editor.
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {}
+
+  /*
+   * The state of the debugger, used for restoring a debugging session
+   * after restarting the kernel.
+   */
+  export type State = {
+    /**
+     * List of cells to dump after the kernel has restarted
+     */
+    cells: string[];
+    /**
+     * Map of breakpoints to send back to the kernel after it has restarted
+     */
+    breakpoints: Map<string, IDebugger.IBreakpoint[]>;
+  };
 
   /**
    * Debugger file and hashing configuration.
@@ -209,7 +288,19 @@ export namespace IDebugger {
      * @param params - Temporary file prefix and suffix for a kernel.
      */
     setTmpFileParams(params: IConfig.FileParams): void;
+
+    /**
+     * Gets the parameters used for the temp files (e.e. cells) for a kernel.
+     *
+     * @param kernel - The kernel name from current session.
+     */
+    getTmpFileParams(kernel: string): IConfig.FileParams;
   }
+
+  /**
+   * An interface for debugger handler.
+   */
+  export interface IHandler extends DebuggerHandler.IHandler {}
 
   /**
    * An interface for a scope.
@@ -236,9 +327,31 @@ export namespace IDebugger {
     connection: Session.ISessionConnection | null;
 
     /**
+     * Returns the initialize response .
+     */
+    readonly capabilities: DebugProtocol.Capabilities | undefined;
+
+    /**
      * Whether the debug session is started
      */
     readonly isStarted: boolean;
+
+    /**
+     * Whether the debug session is pausing on exceptions.
+     */
+    pausingOnExceptions: string[];
+
+    /**
+     * Whether the debug session is pausing on exceptions.
+     */
+    exceptionPaths: string[];
+
+    /**
+     * Get exception filters and default values.
+     */
+    exceptionBreakpointFilters:
+      | DebugProtocol.ExceptionBreakpointsFilter[]
+      | undefined;
 
     /**
      * Signal emitted for debug event messages.
@@ -297,6 +410,21 @@ export namespace IDebugger {
    * The type for a stack frame
    */
   export interface IStackFrame extends DebugProtocol.StackFrame {}
+
+  /**
+   * A reply to an rich inspection request.
+   */
+  export interface IRichVariable {
+    /**
+     * The MIME bundle data returned from an rich inspection request.
+     */
+    data: ReadonlyJSONObject;
+
+    /**
+     * Any metadata that accompanies the MIME bundle returning from a rich inspection request.
+     */
+    metadata: ReadonlyJSONObject;
+  }
 
   /**
    * An interface for a variable.
@@ -367,7 +495,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsArguments;
       configurationDone: DebugProtocol.ConfigurationDoneArguments;
       continue: DebugProtocol.ContinueArguments;
-      debugInfo: {};
+      debugInfo: Record<string, never>;
       disconnect: DebugProtocol.DisconnectArguments;
       dumpCell: IDumpCellArguments;
       evaluate: DebugProtocol.EvaluateArguments;
@@ -375,7 +503,7 @@ export namespace IDebugger {
       goto: DebugProtocol.GotoArguments;
       gotoTargets: DebugProtocol.GotoTargetsArguments;
       initialize: DebugProtocol.InitializeRequestArguments;
-      inspectVariables: {};
+      inspectVariables: Record<string, never>;
       launch: DebugProtocol.LaunchRequestArguments;
       loadedSources: DebugProtocol.LoadedSourcesArguments;
       modules: DebugProtocol.ModulesArguments;
@@ -384,6 +512,7 @@ export namespace IDebugger {
       restart: DebugProtocol.RestartArguments;
       restartFrame: DebugProtocol.RestartFrameArguments;
       reverseContinue: DebugProtocol.ReverseContinueArguments;
+      richInspectVariables: IRichVariablesArguments;
       scopes: DebugProtocol.ScopesArguments;
       setBreakpoints: DebugProtocol.SetBreakpointsArguments;
       setExceptionBreakpoints: DebugProtocol.SetExceptionBreakpointsArguments;
@@ -398,7 +527,7 @@ export namespace IDebugger {
       stepOut: DebugProtocol.StepOutArguments;
       terminate: DebugProtocol.TerminateArguments;
       terminateThreads: DebugProtocol.TerminateThreadsArguments;
-      threads: {};
+      threads: Record<string, never>;
       variables: DebugProtocol.VariablesArguments;
     };
 
@@ -427,6 +556,7 @@ export namespace IDebugger {
       restart: DebugProtocol.RestartResponse;
       restartFrame: DebugProtocol.RestartFrameResponse;
       reverseContinue: DebugProtocol.ReverseContinueResponse;
+      richInspectVariables: IRichVariablesResponse;
       scopes: DebugProtocol.ScopesResponse;
       setBreakpoints: DebugProtocol.SetBreakpointsResponse;
       setExceptionBreakpoints: DebugProtocol.SetExceptionBreakpointsResponse;
@@ -460,13 +590,18 @@ export namespace IDebugger {
      */
     export interface IDebugInfoResponse extends DebugProtocol.Response {
       body: {
-        isStarted: boolean;
+        breakpoints: IDebugInfoBreakpoints[];
         hashMethod: string;
         hashSeed: number;
-        breakpoints: IDebugInfoBreakpoints[];
+        isStarted: boolean;
+        /**
+         * Whether the kernel supports variable rich rendering or not.
+         */
+        richRendering?: boolean;
         tmpFilePrefix: string;
         tmpFileSuffix: string;
         stoppedThreads: number[];
+        exceptionPaths: string[];
       };
     }
 
@@ -497,6 +632,36 @@ export namespace IDebugger {
     }
 
     /**
+     * Arguments for 'richVariables' request
+     *
+     * This is an addition to the Debug Adapter Protocol to support
+     * render rich variable representation.
+     */
+    export interface IRichVariablesArguments {
+      /**
+       * Variable name
+       */
+      variableName: string;
+      /**
+       * Frame Id
+       */
+      frameId?: number;
+    }
+
+    /**
+     * Arguments for 'richVariables' request
+     *
+     * This is an addition to the Debug Adapter Protocol to support
+     * rich rendering of variables.
+     */
+    export interface IRichVariablesResponse extends DebugProtocol.Response {
+      /**
+       * Variable mime type data
+       */
+      body: IRichVariable;
+    }
+
+    /**
      * Response to the 'kernel_info_request' request.
      * This interface extends the IInfoReply by adding the `debugger` key
      * that isn't part of the protocol yet.
@@ -508,24 +673,23 @@ export namespace IDebugger {
   }
 
   /**
+   * Select variable in the variables explorer.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * This is experimental API
+   */
+  export interface IVariableSelection
+    extends Pick<
+      DebugProtocol.Variable,
+      'name' | 'type' | 'variablesReference' | 'value'
+    > {}
+
+  /**
    * Debugger sidebar interface.
    */
-  export interface ISidebar extends Widget {
-    /**
-     * Add item at the end of the sidebar.
-     */
-    addItem(widget: Widget): void;
-
-    /**
-     * Insert item at a specified index.
-     */
-    insertItem(index: number, widget: Widget): void;
-
-    /**
-     * Return all items that were added to sidebar.
-     */
-    readonly items: readonly Widget[];
-  }
+  export interface ISidebar extends Panel {}
 
   /**
    * A utility to find text editors used by the debugger.
@@ -635,12 +799,12 @@ export namespace IDebugger {
       /**
        * Signal emitted when the current frame has changed.
        */
-      readonly currentFrameChanged: ISignal<this, IDebugger.IStackFrame>;
+      readonly currentFrameChanged: ISignal<this, IDebugger.IStackFrame | null>;
 
       /**
        * The current frame.
        */
-      frame: IDebugger.IStackFrame;
+      frame: IDebugger.IStackFrame | null;
 
       /**
        * The frames for the callstack.
@@ -668,6 +832,11 @@ export namespace IDebugger {
       readonly callstack: ICallstack;
 
       /**
+       * Whether the kernel support rich variable rendering based on mime type.
+       */
+      hasRichVariableRendering: boolean;
+
+      /**
        * The variables UI model.
        */
       readonly variables: IVariables;
@@ -676,6 +845,11 @@ export namespace IDebugger {
        * The sources UI model.
        */
       readonly sources: ISources;
+
+      /**
+       * The kernel sources UI model.
+       */
+      readonly kernelSources: IKernelSources;
 
       /**
        * The set of threads in stopped state.
@@ -707,7 +881,7 @@ export namespace IDebugger {
        */
       readonly currentFrameChanged: ISignal<
         IDebugger.Model.ICallstack,
-        IDebugger.IStackFrame
+        IDebugger.IStackFrame | null
       >;
 
       /**
@@ -738,6 +912,47 @@ export namespace IDebugger {
     }
 
     /**
+     * The kernel sources UI model.
+     */
+    export interface IKernelSources {
+      /**
+       * The kernel source.
+       */
+      kernelSources: IDebugger.KernelSource[] | null;
+
+      /**
+       * The filter to apply.
+       */
+      filter: string;
+
+      /**
+       * Signal emitted when the kernel sources have changed.
+       */
+      readonly changed: ISignal<
+        IDebugger.Model.IKernelSources,
+        IDebugger.KernelSource[] | null
+      >;
+
+      /**
+       * Signal emitted when the kernel sources filter has changed.
+       */
+      readonly filterChanged: ISignal<IDebugger.Model.IKernelSources, string>;
+
+      /**
+       * Signal emitted when a kernel source has be opened in the main area.
+       */
+      readonly kernelSourceOpened: ISignal<
+        IDebugger.Model.IKernelSources,
+        IDebugger.Source | null
+      >;
+
+      /**
+       * Open a source in the main area.
+       */
+      open(source: IDebugger.Source): void;
+    }
+
+    /**
      * The variables UI model.
      */
     export interface IVariables {
@@ -755,6 +970,11 @@ export namespace IDebugger {
        * Signal emitted when the current variable has been expanded.
        */
       readonly variableExpanded: ISignal<this, IDebugger.IVariable>;
+
+      /**
+       * Selected variable in the variables explorer.
+       */
+      selectedVariable: IVariableSelection | null;
 
       /**
        * Expand a variable.
@@ -790,4 +1010,11 @@ export const IDebuggerSources = new Token<IDebugger.ISources>(
  */
 export const IDebuggerSidebar = new Token<IDebugger.ISidebar>(
   '@jupyterlab/debugger:IDebuggerSidebar'
+);
+
+/**
+ * The debugger handler token.
+ */
+export const IDebuggerHandler = new Token<IDebugger.IHandler>(
+  '@jupyterlab/debugger:IDebuggerHandler'
 );

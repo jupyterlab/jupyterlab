@@ -25,9 +25,6 @@
 .jp-Inspector-content {
   background: var(--jp-layout-color1);
   border: none;
-}
-
-.jp-Inspector-content {
   padding: 8px;
   width: 100%;
   height: 100%;

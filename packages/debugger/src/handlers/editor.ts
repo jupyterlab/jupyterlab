@@ -72,6 +72,13 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
+   * The editor
+   */
+  get editor(): CodeEditor.IEditor {
+    return this._editor;
+  }
+
+  /**
    * Whether the handler is disposed.
    */
   isDisposed: boolean;
@@ -87,6 +94,13 @@ export class EditorHandler implements IDisposable {
     this._clearEditor();
     this.isDisposed = true;
     Signal.clearData(this);
+  }
+
+  /**
+   * Refresh the breakpoints display
+   */
+  refreshBreakpoints(): void {
+    this._addBreakpointsToEditor();
   }
 
   /**

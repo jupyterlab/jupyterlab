@@ -1,4 +1,6 @@
 {
+  "title": "Text Editor",
+  "description": "Text editor settings.",
   "jupyter.lab.setting-icon": "ui-components:text-editor",
   "jupyter.lab.setting-icon-label": "Editor",
   "jupyter.lab.menus": {
@@ -101,14 +103,6 @@
     ],
     "context": [
       {
-        "command": "fileeditor:create-console",
-        "selector": ".jp-FileEditor"
-      },
-      {
-        "command": "fileeditor:markdown-preview",
-        "selector": ".jp-FileEditor"
-      },
-      {
         "command": "fileeditor:undo",
         "selector": ".jp-FileEditor",
         "rank": 1
@@ -137,69 +131,23 @@
         "command": "fileeditor:select-all",
         "selector": ".jp-FileEditor",
         "rank": 6
+      },
+      {
+        "command": "fileeditor:create-console",
+        "selector": ".jp-FileEditor",
+        "rank": 10
+      },
+      {
+        "command": "fileeditor:markdown-preview",
+        "selector": ".jp-FileEditor",
+        "rank": 11
       }
     ]
   },
-  "title": "Text Editor",
-  "description": "Text editor settings.",
-  "definitions": {
-    "editorConfig": {
-      "properties": {
-        "autoClosingBrackets": {
-          "type": "boolean"
-        },
-        "codeFolding": {
-          "type": "boolean"
-        },
-        "cursorBlinkRate": {
-          "type": "number",
-          "title": "Cursor blinking rate",
-          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
-        },
-        "fontFamily": {
-          "type": ["string", "null"]
-        },
-        "fontSize": {
-          "type": ["integer", "null"],
-          "minimum": 1,
-          "maximum": 100
-        },
-        "insertSpaces": {
-          "type": "boolean"
-        },
-        "lineHeight": {
-          "type": ["number", "null"]
-        },
-        "lineNumbers": {
-          "type": "boolean"
-        },
-        "lineWrap": {
-          "type": "string",
-          "enum": ["off", "on", "wordWrapColumn", "bounded"]
-        },
-        "matchBrackets": {
-          "type": "boolean"
-        },
-        "readOnly": {
-          "type": "boolean"
-        },
-        "rulers": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          }
-        },
-        "tabSize": {
-          "type": "number"
-        },
-        "wordWrapColumn": {
-          "type": "integer"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    }
+  "jupyter.lab.toolbars": {
+    "Editor": []
   },
+  "jupyter.lab.transform": true,
   "properties": {
     "editorConfig": {
       "title": "Editor Configuration",
@@ -218,11 +166,158 @@
         "matchBrackets": true,
         "readOnly": false,
         "rulers": [],
+        "showTrailingSpace": false,
         "tabSize": 4,
-        "wordWrapColumn": 80
+        "wordWrapColumn": 80,
+        "showTrailingSpace": false
       }
+    },
+    "toolbar": {
+      "title": "Text editor toolbar items",
+      "description": "Note: To disable a toolbar item,\ncopy it to User Preferences and add the\n\"disabled\" key. Toolbar description:",
+      "items": {
+        "$ref": "#/definitions/toolbarItem"
+      },
+      "type": "array",
+      "default": []
     }
   },
   "additionalProperties": false,
-  "type": "object"
+  "type": "object",
+  "definitions": {
+    "editorConfig": {
+      "properties": {
+        "autoClosingBrackets": {
+          "type": "boolean",
+          "default": false,
+          "title": "Auto Closing Brackets"
+        },
+        "codeFolding": {
+          "type": "boolean",
+          "default": false,
+          "title": "Code Folding"
+        },
+        "cursorBlinkRate": {
+          "type": "number",
+          "title": "Cursor blinking rate",
+          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely.",
+          "cursorBlinkRate": 530
+        },
+        "fontFamily": {
+          "type": ["string", "null"],
+          "title": "Font Family",
+          "default": null
+        },
+        "fontSize": {
+          "type": ["integer", "null"],
+          "title": "Font Size",
+          "minimum": 1,
+          "maximum": 100,
+          "default": null
+        },
+        "insertSpaces": {
+          "type": "boolean",
+          "title": "Insert Spaces",
+          "default": true
+        },
+        "lineHeight": {
+          "type": ["number", "null"],
+          "title": "Line Height",
+          "default": null
+        },
+        "lineNumbers": {
+          "type": "boolean",
+          "title": "Line Numbers",
+          "default": true
+        },
+        "lineWrap": {
+          "type": "string",
+          "title": "Line Wrap",
+          "enum": ["off", "on", "wordWrapColumn", "bounded"],
+          "default": "on"
+        },
+        "matchBrackets": {
+          "type": "boolean",
+          "title": "Match Brackets",
+          "default": true
+        },
+        "readOnly": {
+          "type": "boolean",
+          "title": "Read Only",
+          "default": false
+        },
+        "rulers": {
+          "type": "array",
+          "title": "Rulers",
+          "items": {
+            "type": "number"
+          },
+          "default": []
+        },
+        "showTrailingSpace": {
+          "type": "boolean",
+          "title": "Show Trailing Space",
+          "default": false
+        },
+        "tabSize": {
+          "type": "number",
+          "title": "Tab Size",
+          "default": 4
+        },
+        "wordWrapColumn": {
+          "type": "integer",
+          "title": "Word Wrap Column",
+          "default": 80
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "toolbarItem": {
+      "properties": {
+        "name": {
+          "title": "Unique name",
+          "type": "string"
+        },
+        "args": {
+          "title": "Command arguments",
+          "type": "object"
+        },
+        "command": {
+          "title": "Command id",
+          "type": "string",
+          "default": ""
+        },
+        "disabled": {
+          "title": "Whether the item is ignored or not",
+          "type": "boolean",
+          "default": false
+        },
+        "icon": {
+          "title": "Item icon id",
+          "description": "If defined, it will override the command icon",
+          "type": "string"
+        },
+        "label": {
+          "title": "Item label",
+          "description": "If defined, it will override the command label",
+          "type": "string"
+        },
+        "type": {
+          "title": "Item type",
+          "type": "string",
+          "enum": ["command", "spacer"]
+        },
+        "rank": {
+          "title": "Item rank",
+          "type": "number",
+          "minimum": 0,
+          "default": 50
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
 }

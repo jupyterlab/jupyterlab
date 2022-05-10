@@ -15,7 +15,7 @@ import {
   NotebookPanel,
   NotebookTools,
   NotebookTracker
-} from '../src';
+} from '..';
 import * as utils from './utils';
 
 class LogTool extends NotebookTools.Tool {
@@ -183,13 +183,17 @@ describe('@jupyterlab/notebook', () => {
       describe('#addItem()', () => {
         it('should add a cell tool item', () => {
           const tool = new NotebookTools.Tool();
-          notebookTools.addItem({ tool });
+          expect(() => {
+            notebookTools.addItem({ tool });
+          }).not.toThrow();
           tool.dispose();
         });
 
         it('should accept a rank', () => {
           const tool = new NotebookTools.Tool();
-          notebookTools.addItem({ tool, rank: 100 });
+          expect(() => {
+            notebookTools.addItem({ tool, rank: 100 });
+          }).not.toThrow();
           tool.dispose();
         });
       });
