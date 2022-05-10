@@ -157,20 +157,19 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
     async def maybe_save_document(self):
         # save after 1 second of inactivity to prevent too frequent saving
         await asyncio.sleep(1)
-        model = await ensure_async(
-            self.contents_manager.get(self.file_path, content=False, type=self.file_type)
-        )
+        model = await ensure_async(self.contents_manager.get(self.file_path, type=self.file_type))
         if self.last_modified < model["last_modified"]:
             # file changed on disk, let's revert
-            model = await ensure_async(
-                self.contents_manager.get(self.file_path, type=self.file_type)
-            )
             self.room.document.source = model["content"]
             self.last_modified = model["last_modified"]
             return
-        model["format"] = "text"
-        model["content"] = self.room.document.source
-        model = await ensure_async(self.contents_manager.save(model, self.file_path))
+        if model["content"] != self.room.document.source:
+            # don't save if not needed
+            # this also prevents the dirty flag from bouncing between windows of
+            # the same document opened as different types (e.g. notebook/text editor)
+            model["format"] = "text"
+            model["content"] = self.room.document.source
+            model = await ensure_async(self.contents_manager.save(model, self.file_path))
         self.last_modified = model["last_modified"]
         self.room.document.dirty = False
 
