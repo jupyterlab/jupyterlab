@@ -105,54 +105,58 @@ async function setToolbarItems(
   }
 
   // Transform the plugin object to return different schema than the default.
-  registry.transform(pluginId, {
-    compose: plugin => {
-      // Only override the canonical schema the first time.
-      if (!canonical) {
-        canonical = JSONExt.deepCopy(plugin.schema);
-        populate(canonical);
+  if (!Private.transformedPlugin.includes(pluginId)) {
+    registry.transform(pluginId, {
+      compose: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        const defaults =
+          ((canonical.properties ?? {})[propertyId] ?? {}).default ?? [];
+        // Initialize the settings
+        const user: PartialJSONObject = plugin.data.user;
+        const composite: PartialJSONObject = plugin.data.composite;
+        // Overrides the value with using the aggregated default for the toolbar property
+        user[propertyId] =
+          (plugin.data.user[propertyId] as ISettingRegistry.IToolbarItem[]) ??
+          [];
+        composite[propertyId] = (
+          SettingRegistry.reconcileToolbarItems(
+            defaults as ISettingRegistry.IToolbarItem[],
+            user[propertyId] as ISettingRegistry.IToolbarItem[],
+            false
+          ) ?? []
+        ).sort(
+          (a, b) =>
+            (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
+            (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
+        );
+
+        plugin.data = { composite, user };
+
+        return plugin;
+      },
+      fetch: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        return {
+          data: plugin.data,
+          id: plugin.id,
+          raw: plugin.raw,
+          schema: canonical,
+          version: plugin.version
+        };
       }
-
-      const defaults =
-        ((canonical.properties ?? {})[propertyId] ?? {}).default ?? [];
-      // Initialize the settings
-      const user: PartialJSONObject = plugin.data.user;
-      const composite: PartialJSONObject = plugin.data.composite;
-      // Overrides the value with using the aggregated default for the toolbar property
-      user[propertyId] =
-        (plugin.data.user[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
-      composite[propertyId] = (
-        SettingRegistry.reconcileToolbarItems(
-          defaults as ISettingRegistry.IToolbarItem[],
-          user[propertyId] as ISettingRegistry.IToolbarItem[],
-          false
-        ) ?? []
-      ).sort(
-        (a, b) =>
-          (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
-          (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
-      );
-
-      plugin.data = { composite, user };
-
-      return plugin;
-    },
-    fetch: plugin => {
-      // Only override the canonical schema the first time.
-      if (!canonical) {
-        canonical = JSONExt.deepCopy(plugin.schema);
-        populate(canonical);
-      }
-
-      return {
-        data: plugin.data,
-        id: plugin.id,
-        raw: plugin.raw,
-        schema: canonical,
-        version: plugin.version
-      };
-    }
-  });
+    });
+    Private.transformedPlugin.push(pluginId);
+  }
 
   // Repopulate the canonical variable after the setting registry has
   // preloaded all initial plugins.
@@ -398,4 +402,14 @@ export function setToolbar(
       items.changed.disconnect(updateToolbar);
     });
   }
+}
+
+/**
+ * Local private variables
+ */
+namespace Private {
+  /**
+   * List of plugins that have a transform operator registered.
+   */
+  export const transformedPlugin = new Array<string>();
 }

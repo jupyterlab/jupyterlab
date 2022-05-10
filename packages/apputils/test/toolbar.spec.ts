@@ -425,5 +425,97 @@ describe('@jupyterlab/apputils', () => {
       expect(items.get(0).name).toEqual('cut');
       expect(items.get(1).name).toEqual('insert');
     });
+
+    it('should be callable multiple times', async () => {
+      const factoryName = 'dummyFactory';
+      const pluginId = 'test-plugin:settings';
+      const toolbarRegistry = new ToolbarWidgetRegistry({
+        defaultFactory: jest.fn()
+      });
+
+      const bar: ISettingRegistry.IPlugin = {
+        data: {
+          composite: {},
+          user: {}
+        },
+        id: pluginId,
+        raw: '{}',
+        schema: {
+          'jupyter.lab.toolbars': {
+            dummyFactory: [
+              {
+                name: 'insert',
+                command: 'notebook:insert-cell-below',
+                rank: 20
+              },
+              { name: 'spacer', type: 'spacer', rank: 100 },
+              { name: 'cut', command: 'notebook:cut-cell', rank: 21 },
+              {
+                name: 'clear-all',
+                command: 'notebook:clear-all-cell-outputs',
+                rank: 60,
+                disabled: true
+              }
+            ]
+          },
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array'
+            }
+          },
+          type: 'object'
+        },
+        version: 'test'
+      };
+
+      const connector: IDataConnector<
+        ISettingRegistry.IPlugin,
+        string,
+        string,
+        string
+      > = {
+        fetch: jest.fn().mockImplementation((id: string) => {
+          switch (id) {
+            case bar.id:
+              return bar;
+            default:
+              return {};
+          }
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+
+      const settingRegistry = new SettingRegistry({
+        connector
+      });
+
+      const translator: ITranslator = {
+        load: jest.fn()
+      };
+
+      const factory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        factoryName,
+        pluginId,
+        translator
+      );
+
+      const factory2 = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        factoryName,
+        pluginId,
+        translator
+      );
+
+      await settingRegistry.load(bar.id);
+
+      expect(factory(new Widget())).toHaveLength(3);
+      expect(factory2(new Widget())).toHaveLength(3);
+    });
   });
 });
