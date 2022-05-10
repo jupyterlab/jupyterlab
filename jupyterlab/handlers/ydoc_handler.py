@@ -30,9 +30,9 @@ class JupyterRoom(YRoom):
 class JupyterWebsocketServer(WebsocketServer):
     def get_room(self, path: str) -> JupyterRoom:
         file_type, file_path = path.split(":", 1)
-        if file_path not in self.rooms.keys():
-            self.rooms[file_path] = JupyterRoom(file_type)
-        return self.rooms[file_path]
+        if path not in self.rooms.keys():
+            self.rooms[path] = JupyterRoom(file_type)
+        return self.rooms[path]
 
 
 class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
@@ -157,19 +157,20 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
     async def maybe_save_document(self):
         # save after 1 second of inactivity to prevent too frequent saving
         await asyncio.sleep(1)
-        path = self.websocket_server.get_room_name(self.room)
         model = await ensure_async(
-            self.contents_manager.get(path, content=False, type=self.file_type)
+            self.contents_manager.get(self.file_path, content=False, type=self.file_type)
         )
         if self.last_modified < model["last_modified"]:
             # file changed on disk, let's revert
-            model = await ensure_async(self.contents_manager.get(path, type=self.file_type))
+            model = await ensure_async(
+                self.contents_manager.get(self.file_path, type=self.file_type)
+            )
             self.room.document.source = model["content"]
             self.last_modified = model["last_modified"]
             return
         model["format"] = "text"
         model["content"] = self.room.document.source
-        model = await ensure_async(self.contents_manager.save(model, path))
+        model = await ensure_async(self.contents_manager.save(model, self.file_path))
         self.last_modified = model["last_modified"]
         self.room.document.dirty = False
 
