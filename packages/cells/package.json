@@ -70,6 +70,7 @@
   "devDependencies": {
     "@jupyterlab/testutils": "^3.4.0",
     "@types/jest": "^26.0.10",
+    "@types/marked": "^4.0.1",
     "@types/react": "^17.0.0",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

@@ -62,7 +62,7 @@
     "@jupyterlab/testutils": "^3.4.0",
     "@types/jest": "^26.0.10",
     "@types/lodash.escape": "^4.0.6",
-    "@types/marked": "^1.1.0",
+    "@types/marked": "^4.0.1",
     "jest": "^26.4.2",
     "json2html": "^0.0.8",
     "rimraf": "~3.0.0",
