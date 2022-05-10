@@ -176,9 +176,6 @@
       "path": "./packages/markdownviewer-extension"
     },
     {
-      "path": "./packages/markedparser-extension"
-    },
-    {
       "path": "./packages/mathjax2"
     },
     {
@@ -248,9 +245,6 @@
       "path": "./packages/statusbar-extension"
     },
     {
-      "path": "./packages/tabmanager-extension"
-    },
-    {
       "path": "./packages/terminal"
     },
     {
@@ -285,12 +279,6 @@
     },
     {
       "path": "./packages/ui-components-extension"
-    },
-    {
-      "path": "./packages/user"
-    },
-    {
-      "path": "./packages/user-extension"
     },
     {
       "path": "./packages/vdom"
