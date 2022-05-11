@@ -496,12 +496,14 @@ export class Context<
    * Update our contents model, without the content.
    */
   private _updateContentsModel(model: Contents.IModel): void {
+    const writable =
+      model.writable && PageConfig.getOption('collaborative') != 'true';
     const newModel: Contents.IModel = {
       path: model.path,
       name: model.name,
       type: model.type,
       content: undefined,
-      writable: model.writable,
+      writable,
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
