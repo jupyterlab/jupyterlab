@@ -91,6 +91,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             # check again if ready, because loading the file can be async
             if not self.room.ready:
                 self.room.document.source = model["content"]
+                self.room.document.dirty = False
                 self.room.ready = True
                 self.room.watcher = asyncio.create_task(self.watch_file())
                 # save the document when changed
