@@ -738,9 +738,19 @@ function addCommands(
     }
   });
 
+  const caption = () => {
+    if (isWritable()) {
+      return trans.__('Save and create checkpoint');
+    } else {
+      return trans.__(
+        'In collaborative mode, the document is saved automatically after every change'
+      );
+    }
+  };
+
   commands.addCommand(CommandIDs.save, {
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
-    caption: trans.__('Save and create checkpoint'),
+    caption,
     icon: args => (args.toolbar ? saveIcon : ''),
     isEnabled: isWritable,
     execute: () => {
