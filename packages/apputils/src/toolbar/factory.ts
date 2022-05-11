@@ -60,7 +60,7 @@ async function setToolbarItems(
   propertyId: string = 'toolbar'
 ): Promise<void> {
   const trans = translator.load('jupyterlab');
-  let canonical: ISettingRegistry.ISchema | null;
+  let canonical: ISettingRegistry.ISchema | null = null;
   let loaded: { [name: string]: ISettingRegistry.IToolbarItem[] } = {};
   let gatheredItems = new Array<ISettingRegistry.IToolbarItem>();
 
@@ -161,8 +161,6 @@ async function setToolbarItems(
 
   // Repopulate the canonical variable after the setting registry has
   // preloaded all initial plugins.
-  canonical = null;
-
   const settings = await registry.load(pluginId);
 
   // React to customization by the user
@@ -191,20 +189,9 @@ async function setToolbarItems(
           // The plugin has changed, request the user to reload the UI
           await displayInformation(trans);
         } else {
-          // The plugin was not yet loaded => update the toolbar items list
-          loaded[plugin] = JSONExt.deepCopy(newItems);
-          const newList = (
-            SettingRegistry.reconcileToolbarItems(
-              gatheredItems,
-              newItems,
-              false
-            ) ?? []
-          ).sort(
-            (a, b) =>
-              (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
-              (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
-          );
-          transferSettings(newList);
+          canonical = null;
+          // This will trigger a settings.changed signal that will update the items
+          await registry.reload(pluginId);
         }
       }
     }

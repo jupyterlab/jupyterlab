@@ -1200,7 +1200,7 @@ namespace Private {
   ): Promise<void> {
     const trans = translator.load('jupyterlab');
     const pluginId = contextMenuPlugin.id;
-    let canonical: ISettingRegistry.ISchema | null;
+    let canonical: ISettingRegistry.ISchema | null = null;
     let loaded: { [name: string]: ISettingRegistry.IContextMenuItem[] } = {};
 
     /**
@@ -1286,8 +1286,6 @@ namespace Private {
 
     // Repopulate the canonical variable after the setting registry has
     // preloaded all initial plugins.
-    canonical = null;
-
     const settings = await registry.load(pluginId);
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
