@@ -71,7 +71,11 @@ async function setToolbarItems(
    */
   function populate(schema: ISettingRegistry.ISchema) {
     loaded = {};
+
     const pluginDefaults = Object.keys(registry.plugins)
+      // Filter out the current plugin (will be listed when reloading)
+      // because we control its addition after the mapping step
+      .filter(plugin => plugin !== pluginId)
       .map(plugin => {
         const items =
           (registry.plugins[plugin]!.schema['jupyter.lab.toolbars'] ?? {})[
@@ -105,58 +109,57 @@ async function setToolbarItems(
   }
 
   // Transform the plugin object to return different schema than the default.
-  if (!Private.transformedPlugin.includes(pluginId)) {
-    registry.transform(pluginId, {
-      compose: plugin => {
-        // Only override the canonical schema the first time.
-        if (!canonical) {
-          canonical = JSONExt.deepCopy(plugin.schema);
-          populate(canonical);
-        }
-
-        const defaults =
-          ((canonical.properties ?? {})[propertyId] ?? {}).default ?? [];
-        // Initialize the settings
-        const user: PartialJSONObject = plugin.data.user;
-        const composite: PartialJSONObject = plugin.data.composite;
-        // Overrides the value with using the aggregated default for the toolbar property
-        user[propertyId] =
-          (plugin.data.user[propertyId] as ISettingRegistry.IToolbarItem[]) ??
-          [];
-        composite[propertyId] = (
-          SettingRegistry.reconcileToolbarItems(
-            defaults as ISettingRegistry.IToolbarItem[],
-            user[propertyId] as ISettingRegistry.IToolbarItem[],
-            false
-          ) ?? []
-        ).sort(
-          (a, b) =>
-            (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
-            (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
-        );
-
-        plugin.data = { composite, user };
-
-        return plugin;
-      },
-      fetch: plugin => {
-        // Only override the canonical schema the first time.
-        if (!canonical) {
-          canonical = JSONExt.deepCopy(plugin.schema);
-          populate(canonical);
-        }
-
-        return {
-          data: plugin.data,
-          id: plugin.id,
-          raw: plugin.raw,
-          schema: canonical,
-          version: plugin.version
-        };
+  // if (!Private.transformedPlugins.includes(pluginId)) {
+  registry.transform(pluginId, {
+    compose: plugin => {
+      // Only override the canonical schema the first time.
+      if (!canonical) {
+        canonical = JSONExt.deepCopy(plugin.schema);
+        populate(canonical);
       }
-    });
-    Private.transformedPlugin.push(pluginId);
-  }
+
+      const defaults =
+        ((canonical.properties ?? {})[propertyId] ?? {}).default ?? [];
+      // Initialize the settings
+      const user: PartialJSONObject = plugin.data.user;
+      const composite: PartialJSONObject = plugin.data.composite;
+      // Overrides the value with using the aggregated default for the toolbar property
+      user[propertyId] =
+        (plugin.data.user[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
+      composite[propertyId] = (
+        SettingRegistry.reconcileToolbarItems(
+          defaults as ISettingRegistry.IToolbarItem[],
+          user[propertyId] as ISettingRegistry.IToolbarItem[],
+          false
+        ) ?? []
+      ).sort(
+        (a, b) =>
+          (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
+          (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
+      );
+
+      plugin.data = { composite, user };
+
+      return plugin;
+    },
+    fetch: plugin => {
+      // Only override the canonical schema the first time.
+      if (!canonical) {
+        canonical = JSONExt.deepCopy(plugin.schema);
+        populate(canonical);
+      }
+
+      return {
+        data: plugin.data,
+        id: plugin.id,
+        raw: plugin.raw,
+        schema: canonical,
+        version: plugin.version
+      };
+    }
+  });
+  //   Private.transformedPlugins.push(pluginId);
+  // }
 
   // Repopulate the canonical variable after the setting registry has
   // preloaded all initial plugins.
@@ -188,9 +191,11 @@ async function setToolbarItems(
           // The plugin has changed, request the user to reload the UI
           await displayInformation(trans);
         } else {
-          canonical = null;
-          // This will trigger a settings.changed signal that will update the items
-          await registry.reload(pluginId);
+          if (newItems.length > 0) {
+            canonical = null;
+            // This will trigger a settings.changed signal that will update the items
+            await registry.reload(pluginId);
+          }
         }
       }
     }
@@ -394,9 +399,9 @@ export function setToolbar(
 /**
  * Local private variables
  */
-namespace Private {
-  /**
-   * List of plugins that have a transform operator registered.
-   */
-  export const transformedPlugin = new Array<string>();
-}
+// namespace Private {
+//   /**
+//    * List of plugins that have a transform operator registered.
+//    */
+//   export const transformedPlugins = new Array<string>();
+// }

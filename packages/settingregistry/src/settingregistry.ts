@@ -1194,13 +1194,12 @@ export namespace SettingRegistry {
       // Name must be unique so it sufficient to only compare it
       const refIndex = items.findIndex(ref => ref.name === item.name);
       if (refIndex < 0) {
-        if (item.type === 'command' && !item.command) {
-          // Don't add invalid item
-          return;
-        }
         items.push({ ...item });
       } else {
-        if (warn) {
+        if (
+          warn &&
+          JSONExt.deepEqual(Object.keys(item), Object.keys(items[refIndex]))
+        ) {
           console.warn(`Toolbar item '${item.name}' is duplicated.`);
         }
         items[refIndex] = { ...items[refIndex], ...item };

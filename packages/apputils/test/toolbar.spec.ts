@@ -16,6 +16,7 @@ import {
   JupyterServer
 } from '@jupyterlab/testutils';
 import { ITranslator } from '@jupyterlab/translation';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 const server = new JupyterServer();
@@ -413,12 +414,23 @@ describe('@jupyterlab/apputils', () => {
         translator
       );
 
-      await settingRegistry.load(bar.id);
-      // Trick push this test after all other promise in the hope they get resolve
-      // before going further - in particular we are looking at the update of the items
-      // factory in `createToolbarFactory`
-      await Promise.resolve();
+      const barPlugin = await settingRegistry.load(bar.id);
+      const baseToolbar = JSONExt.deepCopy(
+        barPlugin.composite['toolbar'] as any
+      );
+
+      let waitForChange = new PromiseDelegate<void>();
+      barPlugin.changed.connect(() => {
+        if (
+          !JSONExt.deepEqual(baseToolbar, barPlugin.composite['toolbar'] as any)
+        ) {
+          console.log(baseToolbar);
+          console.log(barPlugin.composite['toolbar']);
+          waitForChange.resolve();
+        }
+      });
       await settingRegistry.load(foo.id);
+      await waitForChange.promise;
 
       const items = factory(new Widget());
       expect(items).toHaveLength(2);
