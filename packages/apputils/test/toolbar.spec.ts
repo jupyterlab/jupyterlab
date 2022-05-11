@@ -12,22 +12,22 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IDataConnector } from '@jupyterlab/statedb';
 import {
   createSessionContext,
-  framePromise
-  // JupyterServer
+  framePromise,
+  JupyterServer
 } from '@jupyterlab/testutils';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
-// const server = new JupyterServer();
+const server = new JupyterServer();
 
-// beforeAll(async () => {
-//   await server.start();
-// });
+beforeAll(async () => {
+  await server.start();
+});
 
-// afterAll(async () => {
-//   await server.shutdown();
-// });
+afterAll(async () => {
+  await server.shutdown();
+});
 
 describe('@jupyterlab/apputils', () => {
   describe('Toolbar', () => {
