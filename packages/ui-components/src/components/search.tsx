@@ -56,7 +56,7 @@ export interface IScore {
   /**
    * The indices of the text matches.
    */
-  indices?: number[];
+  indices: number[] | null;
 }
 
 /**
