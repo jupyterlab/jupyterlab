@@ -78,6 +78,7 @@ export class Context<
       ? docProviderFactory({
           path: this._path,
           contentType: this._factory.contentType,
+          format: this._factory.fileFormat!,
           ymodel
         })
       : new ProviderMock();
@@ -657,7 +658,11 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
-        this._updateContentsModel(contents);
+        const model = {
+          ...contents,
+          format: this._factory.fileFormat
+        };
+        this._updateContentsModel(model);
         this._model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();

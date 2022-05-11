@@ -48,6 +48,7 @@ export namespace IDocumentProviderFactory {
      */
     path: string;
     contentType: string;
+    format: string;
 
     /**
      * The YNotebook.

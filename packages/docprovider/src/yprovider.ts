@@ -31,7 +31,7 @@ export class WebSocketProvider
   constructor(options: WebSocketProvider.IOptions) {
     super(
       options.url,
-      options.contentType + ':' + options.path,
+      options.format + ':' + options.contentType + ':' + options.path,
       options.ymodel.ydoc,
       {
         awareness: options.ymodel.awareness
@@ -39,6 +39,7 @@ export class WebSocketProvider
     );
     this._path = options.path;
     this._contentType = options.contentType;
+    this._format = options.format;
     this._serverUrl = options.url;
 
     // Message handler that receives the rename acknowledge
@@ -79,7 +80,9 @@ export class WebSocketProvider
       encoding.write(encoder, 127);
       // writing a utf8 string to the encoder
       const escapedPath = unescape(
-        encodeURIComponent(this._contentType + ':' + newPath)
+        encodeURIComponent(
+          this._format + ':' + this._contentType + ':' + newPath
+        )
       );
       for (let i = 0; i < escapedPath.length; i++) {
         encoding.write(
@@ -92,7 +95,13 @@ export class WebSocketProvider
       this.disconnectBc();
       // The next time the provider connects, we should connect through a different server url
       this.bcChannel =
-        this._serverUrl + '/' + this._contentType + ':' + this._path;
+        this._serverUrl +
+        '/' +
+        this._format +
+        ':' +
+        this._contentType +
+        ':' +
+        this._path;
       this.url = this.bcChannel;
       this.connectBc();
     }
@@ -119,6 +128,7 @@ export class WebSocketProvider
 
   private _path: string;
   private _contentType: string;
+  private _format: string;
   private _serverUrl: string;
   private _renameAck: PromiseDelegate<boolean>;
 }
