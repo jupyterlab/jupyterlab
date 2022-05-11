@@ -24,7 +24,7 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   IDocumentManager,
@@ -739,12 +739,12 @@ function addCommands(
   });
 
   const caption = () => {
-    if (isWritable()) {
-      return trans.__('Save and create checkpoint');
-    } else {
+    if (PageConfig.getOption('collaborative') == 'true') {
       return trans.__(
         'In collaborative mode, the document is saved automatically after every change'
       );
+    } else {
+      return trans.__('Save and create checkpoint');
     }
   };
 
