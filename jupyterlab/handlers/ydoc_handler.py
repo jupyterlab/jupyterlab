@@ -4,7 +4,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 import asyncio
-from typing import Optional
+from typing import Optional, Tuple
 
 from jupyter_server.base.handlers import JupyterHandler
 from jupyter_server.utils import ensure_async
@@ -56,6 +56,15 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             raise StopAsyncIteration()
         return message
 
+    def get_file(self) -> Tuple[str]:
+        room_name = self.websocket_server.get_room_name(self.room)
+        file_format, file_type, file_path = room_name.split(":", 2)
+        return file_format, file_type, file_path
+
+    def set_file(self, value: str) -> None:
+        self.websocket_server.rename_room(value, from_room=self.room)
+        self.path = value  # needed to be compatible with WebsocketServer (websocket.path)
+
     async def get(self, *args, **kwargs):
         if self.get_current_user() is None:
             self.log.warning("Couldn't authenticate WebSocket connection")
@@ -63,11 +72,10 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         return await super().get(*args, **kwargs)
 
     async def open(self, path):
-        self.path = path  # needed to be compatible with WebsocketServer (websocket.path)
         self._message_queue = asyncio.Queue()
-        self.file_format, self.file_type, self.file_path = path.split(":", 2)
-        self.saving_document = None
         self.room = self.websocket_server.get_room(path)
+        self.set_file(path)
+        self.saving_document = None
         asyncio.create_task(self.websocket_server.serve(self))
 
         # cancel the deletion of the room if it was scheduled
@@ -75,10 +83,9 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             self.room.cleaner.cancel()
 
         if not self.room.ready:
+            file_format, file_type, file_path = self.get_file()
             model = await ensure_async(
-                self.contents_manager.get(
-                    self.file_path, type=self.file_type, format=self.file_format
-                )
+                self.contents_manager.get(file_path, type=file_type, format=file_format)
             )
             self.last_modified = model["last_modified"]
             # check again if ready, because loading the file can be async
@@ -99,17 +106,14 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             await self.maybe_load_document()
 
     async def maybe_load_document(self):
+        file_format, file_type, file_path = self.get_file()
         model = await ensure_async(
-            self.contents_manager.get(
-                self.file_path, content=False, type=self.file_type, format=self.file_format
-            )
+            self.contents_manager.get(file_path, content=False, type=file_type, format=file_format)
         )
         # do nothing if the file was saved by us
         if self.last_modified < model["last_modified"]:
             model = await ensure_async(
-                self.contents_manager.get(
-                    self.file_path, type=self.file_type, format=self.file_format
-                )
+                self.contents_manager.get(file_path, type=file_type, format=file_format)
             )
             self.room.document.source = model["content"]
             self.last_modified = model["last_modified"]
@@ -127,8 +131,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         if message[0] == RENAME_SESSION:
             # The client moved the document to a different location. After receiving this message, we make the current document available under a different url.
             # The other clients are automatically notified of this change because the path is shared through the Yjs document as well.
-            self.path = message[1:].decode("utf-8")
-            self.file_format, self.file_type, self.file_path = self.path.split(":", 2)
+            self.set_file(message[1:].decode("utf-8"))
             self.websocket_server.rename_room(self.path, from_room=self.room)
             # send rename acknowledge
             self.write_message(bytes([RENAME_SESSION, 1]), binary=True)
@@ -162,7 +165,10 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
     async def maybe_save_document(self):
         # save after 1 second of inactivity to prevent too frequent saving
         await asyncio.sleep(1)
-        model = await ensure_async(self.contents_manager.get(self.file_path, type=self.file_type))
+        file_format, file_type, file_path = self.get_file()
+        model = await ensure_async(
+            self.contents_manager.get(file_path, type=file_type, format=file_format)
+        )
         if self.last_modified < model["last_modified"]:
             # file changed on disk, let's revert
             self.room.document.source = model["content"]
@@ -172,9 +178,9 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             # don't save if not needed
             # this also prevents the dirty flag from bouncing between windows of
             # the same document opened as different types (e.g. notebook/text editor)
-            model["format"] = self.file_format
+            model["format"] = file_format
             model["content"] = self.room.document.source
-            model = await ensure_async(self.contents_manager.save(model, self.file_path))
+            model = await ensure_async(self.contents_manager.save(model, file_path))
         self.last_modified = model["last_modified"]
         self.room.document.dirty = False
 
