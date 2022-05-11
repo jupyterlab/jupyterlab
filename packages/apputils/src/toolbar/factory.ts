@@ -62,6 +62,7 @@ async function setToolbarItems(
   const trans = translator.load('jupyterlab');
   let canonical: ISettingRegistry.ISchema | null;
   let loaded: { [name: string]: ISettingRegistry.IToolbarItem[] } = {};
+  let gatheredItems = new Array<ISettingRegistry.IToolbarItem>();
 
   /**
    * Populate the plugin's schema defaults.
@@ -194,7 +195,7 @@ async function setToolbarItems(
           loaded[plugin] = JSONExt.deepCopy(newItems);
           const newList = (
             SettingRegistry.reconcileToolbarItems(
-              toArray(toolbarItems),
+              gatheredItems,
               newItems,
               false
             ) ?? []
@@ -210,11 +211,13 @@ async function setToolbarItems(
   });
 
   const transferSettings = (newItems: ISettingRegistry.IToolbarItem[]) => {
+    // Need to keep the non-filtered items to reconciliate correctly for late plugin registration.
+    gatheredItems = newItems;
     // This is not optimal but safer because a toolbar item with the same
     // name cannot be inserted (it will be a no-op). But that could happen
     // if the settings are changing the items order.
     toolbarItems.clear();
-    toolbarItems.pushAll(newItems.filter(item => !item.disabled));
+    toolbarItems.pushAll(gatheredItems.filter(item => !item.disabled));
   };
 
   // Initialize the toolbar
