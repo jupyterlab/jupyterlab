@@ -1,12 +1,9 @@
+import { DocumentManager, renameFile } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
-import { Widget } from '@lumino/widgets';
+import { dismissDialog } from '@jupyterlab/testutils';
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-import { DocumentManager, renameFile } from '../src';
-
-function shouldOverwriteFalse(path: string): Promise<boolean> {
-  return Promise.resolve(false);
-}
+import { Widget } from '@lumino/widgets';
 
 describe('docregistry/dialog', () => {
   let manager: DocumentManager;
@@ -43,37 +40,30 @@ describe('docregistry/dialog', () => {
     describe('#renameFile()', () => {
       it('should show overwrite dialog when file is already existing', async () => {
         alreadyExistsError.response.status = 409;
-        await renameFile(
-          manager,
-          'foo.ipynb',
-          'bar.ipynb',
-          shouldOverwriteFalse
-        ).catch(error => {
-          // error should be 'File not renamed'
-          expect(error).not.toBe(alreadyExistsError);
-        });
+        await expect(
+          Promise.all([
+            dismissDialog(),
+            renameFile(manager, 'foo.ipynb', 'bar.ipynb')
+          ])
+        ).rejects.toBe('File not renamed');
       });
       it('should throw error on no status', async () => {
         alreadyExistsError.response = {};
-        await renameFile(
-          manager,
-          'foo.ipynb',
-          'bar.ipynb',
-          shouldOverwriteFalse
-        ).catch(error => {
-          expect(error).toBe(alreadyExistsError);
-        });
+        await expect(
+          Promise.all([
+            dismissDialog(),
+            renameFile(manager, 'foo.ipynb', 'bar.ipynb')
+          ])
+        ).rejects.toBe(alreadyExistsError);
       });
       it('should throw error on not 409 status', async () => {
         alreadyExistsError.response.status = 408;
-        await renameFile(
-          manager,
-          'foo.ipynb',
-          'bar.ipynb',
-          shouldOverwriteFalse
-        ).catch(error => {
-          expect(error).toBe(alreadyExistsError);
-        });
+        await expect(
+          Promise.all([
+            dismissDialog(),
+            renameFile(manager, 'foo.ipynb', 'bar.ipynb')
+          ])
+        ).rejects.toBe(alreadyExistsError);
       });
     });
   });

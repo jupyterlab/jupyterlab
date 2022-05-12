@@ -77,15 +77,10 @@ export function renameDialog(
 /**
  * Rename a file, asking for confirmation if it is overwriting another.
  */
-type shouldOverwriteType = (
-  path: string,
-  translator?: ITranslator
-) => Promise<boolean>;
 export function renameFile(
   manager: IDocumentManager,
   oldPath: string,
-  newPath: string,
-  shouldOverwriteCallback: shouldOverwriteType = shouldOverwrite
+  newPath: string
 ): Promise<Contents.IModel | null> {
   return manager.rename(oldPath, newPath).catch(error => {
     if (error.response.status !== 409) {
@@ -94,7 +89,7 @@ export function renameFile(
     }
 
     // otherwise, ask for confirmation
-    return shouldOverwriteCallback(newPath).then((value: boolean) => {
+    return shouldOverwrite(newPath).then((value: boolean) => {
       if (value) {
         return manager.overwrite(oldPath, newPath);
       }
