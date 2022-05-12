@@ -13,6 +13,7 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": true,
+  "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {
