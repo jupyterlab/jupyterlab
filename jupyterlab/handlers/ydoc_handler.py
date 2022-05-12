@@ -153,6 +153,13 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         self.websocket_server.delete_room(room=self.room)
 
     def on_document_change(self, event):
+        try:
+            dirty = event.keys["dirty"]["newValue"]
+            if not dirty:
+                # we cleared the dirty flag, nothing to save
+                return
+        except Exception:
+            pass
         # unobserve and observe again because the structure of the document may have changed
         # e.g. a new cell added to a notebook
         self.room.document.unobserve()
@@ -182,7 +189,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             model["format"] = file_format
             model["content"] = self.room.document.source
             model = await ensure_async(self.contents_manager.save(model, file_path))
-        self.last_modified = model["last_modified"]
+            self.last_modified = model["last_modified"]
         self.room.document.dirty = False
 
     def check_origin(self, origin) -> bool:
