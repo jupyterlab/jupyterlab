@@ -65,7 +65,7 @@ export interface IScore {
 export function fuzzySearch(source: string, query: string): IScore | null {
   // Set up the match score and indices array.
   let score = Infinity;
-  let indices: number[] | undefined;
+  let indices: number[] | null = null;
 
   // The regex for search word boundaries
   const rgx = /\b\w/g;
