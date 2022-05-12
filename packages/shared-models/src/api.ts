@@ -477,6 +477,11 @@ export type NotebookChange = {
     oldValue: nbformat.INotebookMetadata;
     newValue: nbformat.INotebookMetadata | undefined;
   };
+  nbformatChanged?: {
+    key: string;
+    oldValue: number | undefined;
+    newValue: number | undefined;
+  };
   contextChange?: MapChange;
   stateChange?: Array<{
     name: string;
