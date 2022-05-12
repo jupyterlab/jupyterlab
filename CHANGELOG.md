@@ -1150,6 +1150,32 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.4
 
+## 3.4.1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.0...d8d94b351da08181d4d5e0493539c0eb082a1516))
+
+### Enhancements made
+
+- Setting to use the advanced setting editor for the settings [#12466](https://github.com/jupyterlab/jupyterlab/pull/12466) ([@echarles](https://github.com/echarles))
+
+### Bugs fixed
+
+- Allow users to yarn link @jupyterlab/builder [#12533](https://github.com/jupyterlab/jupyterlab/pull/12533) ([@ajbozarth](https://github.com/ajbozarth))
+- Get Auto Close Brackets working consistently in Consoles [#12508](https://github.com/jupyterlab/jupyterlab/pull/12508) ([@Jessie-Newman](https://github.com/Jessie-Newman))
+- Handled new dialog creation with no buttons [#12496](https://github.com/jupyterlab/jupyterlab/pull/12496) ([@Jnnamchi](https://github.com/Jnnamchi))
+- Handle missing `preferredPath` from the page config [#12521](https://github.com/jupyterlab/jupyterlab/pull/12521) ([@jtpio](https://github.com/jtpio))
+
+### Maintenance and upkeep improvements
+
+- Add cell-toolbar to CI and labeler [#12555](https://github.com/jupyterlab/jupyterlab/pull/12555) ([@fcollonval](https://github.com/fcollonval))
+- Allow bot PRs to be automatically labeled [#12509](https://github.com/jupyterlab/jupyterlab/pull/12509) ([@blink1073](https://github.com/blink1073))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-05-03&to=2022-05-12&type=c))
+
+[@ajbozarth](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aajbozarth+updated%3A2022-05-03..2022-05-12&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-05-03..2022-05-12&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-05-03..2022-05-12&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-05-03..2022-05-12&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-05-03..2022-05-12&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-05-03..2022-05-12&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-05-03..2022-05-12&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-05-03..2022-05-12&type=Issues)
+
 ## 3.4.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.3.4...c394aa25d1845144ee7ebdce611ff12f8d962bb8))
