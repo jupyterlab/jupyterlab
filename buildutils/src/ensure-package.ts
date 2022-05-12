@@ -599,6 +599,15 @@ export async function ensurePackage(
     await fs.unlink(licenseFile);
   }
 
+  // Ensure the package has {"type": "module"} if it is not targeting commonjs
+  // Ref: https://nodejs.org/api/packages.html#type
+  if (usesTS && data.name.indexOf('example-') === -1) {
+    const tsConfigData = utils.readJSONFile(tsConfigPath);
+    if (tsConfigData.compilerOptions?.module !== 'commonjs') {
+      data.type = 'module';
+    }
+  }
+
   if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
     messages.push('Updated package.json');
   }
