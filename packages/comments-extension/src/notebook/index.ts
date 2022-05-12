@@ -182,10 +182,17 @@ export const notebookCommentsPlugin: JupyterFrontEndPlugin<void> = {
       lastAwareness = model.awareness;
     });
 
+    // Add a separator above the item.
+    app.contextMenu.addItem({
+      type: 'separator',
+      selector: '.jp-Notebook .jp-Cell',
+      rank: 15
+    });
+
     app.contextMenu.addItem({
       command: CommandIDs.addNotebookComment,
       selector: '.jp-Notebook .jp-Cell',
-      rank: 13
+      rank: 15.1
     });
   }
 };
