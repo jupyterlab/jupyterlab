@@ -46,10 +46,30 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * @param widget - The widget to search over.
    * @returns the search provider, or undefined if none exists.
    */
-  getProvider<T extends Widget = Widget>(
-    widget: T
-  ): ISearchProvider | undefined {
-    return this._findMatchingProvider(this._providerMap, widget);
+  getProvider(widget: Widget): ISearchProvider | undefined {
+    // iterate through all providers and ask each one if it can search on the
+    // widget.
+    for (const P of this._providerMap.values()) {
+      if (P.isApplicable(widget)) {
+        return P.createNew(widget, this.translator);
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Whether the registry as a matching provider for the widget.
+   *
+   * @param widget - The widget to search over.
+   * @returns Provider existence
+   */
+  hasProvider(widget: Widget): boolean {
+    for (const P of this._providerMap.values()) {
+      if (P.isApplicable(widget)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -60,27 +80,6 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     return this._changed;
   }
 
-  private _findMatchingProvider<T extends Widget = Widget>(
-    providerMap: Private.ProviderMap,
-    widget: T
-  ): ISearchProvider | undefined {
-    // iterate through all providers and ask each one if it can search on the
-    // widget.
-    for (const P of providerMap.values()) {
-      if (P.isApplicable(widget)) {
-        return P.createNew(widget, this.translator);
-      }
-    }
-    return undefined;
-  }
-
   private _changed = new Signal<this, void>(this);
-  private _providerMap: Private.ProviderMap = new Map<
-    string,
-    ISearchProviderFactory<Widget>
-  >();
-}
-
-namespace Private {
-  export type ProviderMap = Map<string, ISearchProviderFactory<Widget>>;
+  private _providerMap = new Map<string, ISearchProviderFactory<Widget>>();
 }
