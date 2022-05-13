@@ -413,7 +413,7 @@ export class OutputArea extends Widget {
     void input.value.then(value => {
       // Increase number of outputs to display the result of stdin if needed.
       if (this.model.length >= this.maxNumberOutputs) {
-        this.maxNumberOutputs = this.model.length;
+        this.maxNumberOutputs = this.model.length + 1;
       }
       // Use stdin as the stream so it does not get combined with stdout.
       this.model.add({
