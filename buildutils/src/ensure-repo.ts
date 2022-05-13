@@ -82,7 +82,7 @@ const UNUSED: Dict<string[]> = {
     'webpack-cli',
     'worker-loader'
   ],
-  '@jupyterlab/buildutils': ['verdaccio'],
+  '@jupyterlab/buildutils': ['tsc-esm-fix', 'verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/galata': ['node-fetch', 'http-server'],

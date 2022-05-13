@@ -605,6 +605,16 @@ export async function ensurePackage(
     const tsConfigData = utils.readJSONFile(tsConfigPath);
     if (tsConfigData.compilerOptions?.module !== 'commonjs') {
       data.type = 'module';
+
+      if (process.env.CI || process.env.ESM_FIX) {
+        // Correct import if needed
+        utils.run(
+          `jlpm tsc-esm-fix --src="${
+            tsConfigData.compilerOptions?.rootDir ?? 'src'
+          }" --ext=".js"`,
+          { cwd: pkgPath }
+        );
+      }
     }
   }
 

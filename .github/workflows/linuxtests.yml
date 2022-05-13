@@ -63,6 +63,21 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
 
+      - name: Get modified files in the staging directory
+        if: matrix.group == "integrity"
+        id: modified-files-in-staging
+        uses: tj-actions/changed-files@v19
+        with:
+          # only checks for modified ts files in packages
+          files: |
+            packages/**/*.tsx?
+
+      - name: Fail if files in staging are modified
+        if: steps.modified-files-in-staging.outputs.any_changed == 'true'
+        run: |
+          echo "Integrity test failed; please run locally `ESM_FIX=1 jlpm integrity` and commit the changes"
+          exit 1
+
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
