@@ -23,7 +23,7 @@ import { Terminal, TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal, ITerminalTracker } from '@jupyterlab/terminal';
 // Name-only import so as to not trigger inclusion in main bundle
-import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
+import type * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
 import { ITranslator } from '@jupyterlab/translation';
 import { terminalIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
@@ -514,7 +514,7 @@ namespace Private {
       return widgetReady;
     }
 
-    widgetReady = import('@jupyterlab/terminal/lib/widget');
+    widgetReady = import('@jupyterlab/terminal/lib/widget.js');
 
     return widgetReady;
   }

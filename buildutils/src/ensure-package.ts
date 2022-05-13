@@ -22,7 +22,7 @@ const HEADER_TEMPLATE = `
 `;
 
 const ICON_IMPORTS_TEMPLATE = `
-import { LabIcon } from './labicon';
+import { LabIcon } from './labicon.js';
 
 // icon svg import statements
 {{svgImportStatements}}
