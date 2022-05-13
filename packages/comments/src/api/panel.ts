@@ -34,7 +34,7 @@ export class CommentPanel extends Panel implements ICommentPanel {
 
     this.id = `CommentPanel-${UUID.uuid4()}`;
     this.title.icon = CommentsPanelIcon;
-    this.addClass('jc-CommentPanel');
+    this.addClass('jp-comments-CommentPanel');
 
     const {
       docManager,

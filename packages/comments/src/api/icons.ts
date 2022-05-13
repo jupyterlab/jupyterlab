@@ -102,7 +102,7 @@ export const CommentsPanelIcon = new LabIcon({
 
 export const CreateCommentIcon = new LabIcon({
   name: 'CreateCommentIcon',
-  svgstr: `<svg class="jc-IconShadow" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 18 18" width="18" height="18" style="enable-background:new 0 0 18 18;" xml:space="preserve">
+  svgstr: `<svg class="jp-comments-IconShadow" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 18 18" width="18" height="18" style="enable-background:new 0 0 18 18;" xml:space="preserve">
     <path class="jp-icon3" fill="#616161" d="M0,0v14.4h14.4L18,18V0H0z M13.4,7.3H9.6v3.8H8.4V7.3H4.6V6.1h3.8V2.2h1.2v3.8h3.8V7.3z"/>
     <polygon class="jp-icon-accent0" fill="#616161" points="13.4,6.1 13.4,7.3 9.6,7.3 9.6,11.1 8.4,11.1 8.4,7.3 4.6,7.3 4.6,6.1 8.4,6.1 8.4,2.2 9.6,2.2 9.6,6.1 "/>
   </svg>`
@@ -110,7 +110,7 @@ export const CreateCommentIcon = new LabIcon({
 
 export const OrangeCreateCommentIcon = new LabIcon({
   name: 'OrangeCreateCommentIcon',
-  svgstr: `<svg class="jc-IconShadow" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 18 18" width="18" height="18" style="enable-background:new 0 0 18 18;" xml:space="preserve">
+  svgstr: `<svg class="jp-comments-IconShadow" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 18 18" width="18" height="18" style="enable-background:new 0 0 18 18;" xml:space="preserve">
     <path fill="#F57C00" d="M0,0v14.4h14.4L18,18V0H0z M13.4,7.3H9.6v3.8H8.4V7.3H4.6V6.1h3.8V2.2h1.2v3.8h3.8V7.3z"/>
     <polygon class="jp-icon-accent0" fill="#F57C00" points="13.4,6.1 13.4,7.3 9.6,7.3 9.6,11.1 8.4,11.1 8.4,7.3 4.6,7.3 4.6,6.1 8.4,6.1 8.4,2.2 9.6,2.2 9.6,6.1 "/>
   </svg>`
@@ -118,7 +118,7 @@ export const OrangeCreateCommentIcon = new LabIcon({
 
 export const BlueCreateCommentIcon = new LabIcon({
   name: 'BlueCreateCommentIcon',
-  svgstr: `<svg class="jc-IconShadow" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 18 18" width="18" height="18" style="enable-background:new 0 0 18 18;" xml:space="preserve">
+  svgstr: `<svg class="jp-comments-IconShadow" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 18 18" width="18" height="18" style="enable-background:new 0 0 18 18;" xml:space="preserve">
     <path fill="#1976D2" d="M0,0v14.4h14.4L18,18V0H0z M13.4,7.3H9.6v3.8H8.4V7.3H4.6V6.1h3.8V2.2h1.2v3.8h3.8V7.3z"/>
     <polygon class="jp-icon-accent0" fill="#1976D2" points="13.4,6.1 13.4,7.3 9.6,7.3 9.6,11.1 8.4,11.1 8.4,7.3 4.6,7.3 4.6,6.1 8.4,6.1 8.4,2.2 9.6,2.2 9.6,6.1 "/>
   </svg>`

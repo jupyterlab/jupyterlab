@@ -120,7 +120,7 @@ function ReactMarkdownRenderer(props: ReactMarkdownRendererProps): JSX.Element {
       });
       SetRenderElement(
         <div
-          className="jc-MarkdownBody"
+          className="jp-comments-MarkdownBody"
           dangerouslySetInnerHTML={{
             __html: (node as HTMLElement).innerHTML
           }}
@@ -160,11 +160,19 @@ function JMarkdownRenderer(props: JMarkdownRendererProps): JSX.Element {
 function SubmitButtons(props: SubmitButtonsProps): JSX.Element {
   const { hidden } = props;
   return (
-    <Jdiv hidden={hidden} className="jc-SubmitButtons">
-      <Jdiv hidden={hidden} className="jc-SubmitButton" jcEventArea="submit">
+    <Jdiv hidden={hidden} className="jp-comments-SubmitButtons">
+      <Jdiv
+        hidden={hidden}
+        className="jp-comments-SubmitButton"
+        jcEventArea="submit"
+      >
         Submit
       </Jdiv>
-      <Jdiv hidden={hidden} className="jc-CancelButton" jcEventArea="cancel">
+      <Jdiv
+        hidden={hidden}
+        className="jp-comments-CancelButton"
+        jcEventArea="cancel"
+      >
         Cancel
       </Jdiv>
     </Jdiv>
@@ -191,46 +199,48 @@ function JCComment(props: CommentProps): JSX.Element {
 
   return (
     <Jdiv
-      className={'jc-Comment jc-mod-focus-border' + className}
+      className={'jp-comments-Comment jp-comments-mod-focus-border' + className}
       id={comment.id}
       jcEventArea="other"
       title={getTooltip()}
     >
-      <Jdiv className="jc-CommentProfilePicContainer">
+      <Jdiv className="jp-comments-CommentProfilePicContainer">
         <Jdiv
-          className="jc-CommentProfilePic"
+          className="jp-comments-CommentProfilePic"
           style={{ backgroundColor: comment.identity.color }}
           jcEventArea="user"
         >
-          <icon.react className="jc-MoonIcon" />
+          <icon.react className="jp-comments-MoonIcon" />
         </Jdiv>
       </Jdiv>
-      <span className="jc-Nametag">{comment.identity.name}</span>
+      <span className="jp-comments-Nametag">{comment.identity.name}</span>
 
-      <Jspan className="jc-IconContainer" jcEventArea="dropdown">
-        <ellipsesIcon.react className="jc-Ellipses" />
+      <Jspan className="jp-comments-IconContainer" jcEventArea="dropdown">
+        <ellipsesIcon.react className="jp-comments-Ellipses" />
       </Jspan>
 
       <br />
 
       {!comment.editedTime && (
-        <span className="jc-Time">{renderCommentTimeString(comment.time)}</span>
+        <span className="jp-comments-Time">
+          {renderCommentTimeString(comment.time)}
+        </span>
       )}
       {comment.editedTime && (
-        <span className="jc-Time">
+        <span className="jp-comments-Time">
           <i>{renderCommentTimeString(comment.editedTime)}</i>
         </span>
       )}
 
       {preview != null && (
-        <div className="jc-Preview">
-          <div className="jc-PreviewBar" />
-          <span className="jc-PreviewText">{preview}</span>
+        <div className="jp-comments-Preview">
+          <div className="jp-comments-PreviewBar" />
+          <span className="jp-comments-PreviewText">{preview}</span>
         </div>
       )}
 
       <Jdiv
-        className="jc-Body"
+        className="jp-comments-Body"
         contentEditable={editable}
         suppressContentEditableWarning={true}
         jcEventArea="body"
@@ -261,31 +271,34 @@ function JCReply(props: ReplyProps): JSX.Element {
 
   return (
     <Jdiv
-      className={'jc-Comment jc-Reply jc-mod-focus-border' + className}
+      className={
+        'jp-comments-Comment jp-comments-Reply jp-comments-mod-focus-border' +
+        className
+      }
       id={reply.id}
       jcEventArea="other"
     >
-      <Jdiv className="jc-ReplyPicContainer">
+      <Jdiv className="jp-comments-ReplyPicContainer">
         <Jdiv
-          className="jc-ReplyPic"
+          className="jp-comments-ReplyPic"
           style={{ backgroundColor: reply.identity.color }}
           jcEventArea="user"
         >
-          <icon.react className="jc-MoonIcon" />
+          <icon.react className="jp-comments-MoonIcon" />
         </Jdiv>
       </Jdiv>
-      <span className="jc-Nametag">{reply.identity.name}</span>
+      <span className="jp-comments-Nametag">{reply.identity.name}</span>
 
-      <Jspan className="jc-IconContainer" jcEventArea="dropdown">
-        <ellipsesIcon.react className="jc-Ellipses" />
+      <Jspan className="jp-comments-IconContainer" jcEventArea="dropdown">
+        <ellipsesIcon.react className="jp-comments-Ellipses" />
       </Jspan>
 
       <br />
 
-      <div className="jc-ReplySpacer" />
+      <div className="jp-comments-ReplySpacer" />
 
       <Jdiv
-        className="jc-Body"
+        className="jp-comments-Body"
         contentEditable={editable}
         suppressContentEditableWarning={true}
         jcEventArea="body"
@@ -320,7 +333,7 @@ function JCCommentWithReplies(props: CommentWithRepliesProps): JSX.Element {
             renderer={renderer}
             preview={preview}
           />
-          <div className={'jc-Replies'}>
+          <div className={'jp-comments-Replies'}>
             {comment.replies.map(reply => (
               <JCReply
                 reply={reply}
@@ -343,17 +356,19 @@ function JCCommentWithReplies(props: CommentWithRepliesProps): JSX.Element {
             renderer={renderer}
             preview={preview}
           />
-          <div className={'jc-Replies'}>
+          <div className={'jp-comments-Replies'}>
             <Jdiv
-              className="jc-Replies-breaker jc-mod-focus-border"
+              className="jp-comments-Replies-breaker jp-comments-mod-focus-border"
               jcEventArea="collapser"
             >
-              <div className="jc-Replies-breaker-left">expand thread</div>
-              <div className="jc-RepliesSpacer" />
-              <div className="jc-Replies-breaker-right">
+              <div className="jp-comments-Replies-breaker-left">
+                expand thread
+              </div>
+              <div className="jp-comments-RepliesSpacer" />
+              <div className="jp-comments-Replies-breaker-right">
                 <hr />
                 <hr />
-                <div className="jc-Replies-breaker-number jc-mod-focus-border">
+                <div className="jp-comments-Replies-breaker-number jp-comments-mod-focus-border">
                   {comment.replies.length - 1}
                 </div>
               </div>
@@ -374,7 +389,7 @@ function JCCommentWithReplies(props: CommentWithRepliesProps): JSX.Element {
   };
 
   return (
-    <Jdiv className={'jc-CommentWithReplies ' + className}>
+    <Jdiv className={'jp-comments-CommentWithReplies ' + className}>
       {/* <JCComment
         comment={comment}
         isAttached={isAttached}
@@ -394,7 +409,9 @@ function JCReplyArea(props: ReplyAreaProps): JSX.Element {
   return (
     <div hidden={hidden}>
       <Jdiv
-        className={'jc-ReplyInputArea jc-mod-focus-border' + className}
+        className={
+          'jp-comments-ReplyInputArea jp-comments-mod-focus-border' + className
+        }
         contentEditable={true}
         jcEventArea="reply"
         onFocus={() => document.execCommand('selectAll', false, undefined)}
@@ -413,7 +430,7 @@ function JCCommentWrapper(props: CommentWrapperProps): JSX.Element {
 
   const comment = commentWidget.comment;
   if (comment == null) {
-    return <div className="jc-Error" />;
+    return <div className="jp-comments-Error" />;
   }
 
   return (
@@ -473,7 +490,7 @@ export class CommentWidget<T, C extends IComment = IComment>
     this._comment = comment;
     this._isMock = isMock ?? false;
 
-    this.addClass('jc-CommentWidget');
+    this.addClass('jp-comments-CommentWidget');
     this.node.tabIndex = 0;
   }
 
@@ -616,7 +633,7 @@ export class CommentWidget<T, C extends IComment = IComment>
       return;
     }
 
-    if (element.classList.contains('jc-ReplyInputArea')) {
+    if (element.classList.contains('jp-comments-ReplyInputArea')) {
       //  reply
       if (!/\S/.test(element.innerText)) {
         return;
@@ -668,7 +685,7 @@ export class CommentWidget<T, C extends IComment = IComment>
       return;
     }
 
-    if (element.classList.contains('jc-ReplyInputArea')) {
+    if (element.classList.contains('jp-comments-ReplyInputArea')) {
       this.replyAreaHidden = true;
     }
     this.editID = '';
@@ -901,7 +918,7 @@ export class CommentWidget<T, C extends IComment = IComment>
 
     this.replyAreaHidden = false;
     const nodes = this.node.getElementsByClassName(
-      'jc-ReplyInputArea'
+      'jp-comments-ReplyInputArea'
     ) as HTMLCollectionOf<HTMLDivElement>;
     nodes[0].focus();
   }
@@ -921,7 +938,7 @@ export class CommentWidget<T, C extends IComment = IComment>
     }
 
     const elements = comment.getElementsByClassName(
-      'jc-Body'
+      'jp-comments-Body'
     ) as HTMLCollectionOf<HTMLDivElement>;
     const target = elements[0];
     target.focus();
@@ -1184,7 +1201,7 @@ export class CommentFileWidget extends Panel {
     this._model.widgets = this.widgets as readonly CommentWidget<any>[];
 
     this.id = `Comments-${context.path}`;
-    this.addClass('jc-CommentFileWidget');
+    this.addClass('jp-comments-CommentFileWidget');
 
     this.renderer = renderer;
   }
@@ -1261,7 +1278,7 @@ namespace Private {
    * Get the ID of a comment that a target lies within.
    */
   export function getClickID(target: HTMLElement): string | undefined {
-    const comment = target.closest('.jc-Comment');
+    const comment = target.closest('.jp-comments-Comment');
     if (comment == null) {
       return undefined;
     }

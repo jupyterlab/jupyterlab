@@ -30,7 +30,7 @@ export function markTextSelection(
   const head = toCodeMirrorPosition(forward ? end : start);
 
   return doc.markText(anchor, head, {
-    className: 'jc-Highlight',
+    className: 'jp-comments-Highlight',
     title: `${comment.identity.name}: ${truncate(comment.text, 140)}`,
     css: `background-color: rgba( ${r}, ${g}, ${b}, ${
       theme.theme === 'JupyterLab Light' ? 0.15 : 0.3

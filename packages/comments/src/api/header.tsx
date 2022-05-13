@@ -85,8 +85,8 @@ function FileTitle(props: FileTitleProps): JSX.Element {
 
   return (
     <div title={tooltip}>
-      <span className="jc-panelHeader-filename">{filename}</span>
-      {isDirty && <div className="jc-DirtyIndicator" />}
+      <span className="jp-comments-panelHeader-filename">{filename}</span>
+      {isDirty && <div className="jp-comments-DirtyIndicator" />}
     </div>
   );
 }
@@ -103,7 +103,7 @@ function UserIdentity(props: IdentityProps): JSX.Element {
       return (
         <div
           contentEditable={editable}
-          className={'jc-panelHeader-EditInputArea-' + editable}
+          className={'jp-comments-panelHeader-EditInputArea-' + editable}
           onKeyDown={handleKeydown}
           suppressContentEditableWarning={true}
         >
@@ -139,10 +139,10 @@ function UserIdentity(props: IdentityProps): JSX.Element {
     SetEditable(false);
   };
   return (
-    <div className="jc-panelHeader-identity-container">
+    <div className="jp-comments-panelHeader-identity-container">
       {IdentityDiv()}
       <div onClick={() => handleClick()}>
-        <editIcon.react className="jc-panelHeader-editIcon" />
+        <editIcon.react className="jp-comments-panelHeader-editIcon" />
       </div>
     </div>
   );
@@ -153,7 +153,7 @@ export class PanelHeader extends ReactWidget {
     super();
     const { panel } = options;
     this._panel = panel;
-    this.addClass('jc-panelHeader');
+    this.addClass('jp-comments-panelHeader');
   }
 
   render(): ReactRenderElement {
@@ -178,7 +178,7 @@ export class PanelHeader extends ReactWidget {
 
     return (
       <React.Fragment>
-        <div className="jc-panelHeader-left">
+        <div className="jp-comments-panelHeader-left">
           <UseSignal signal={this._renderNeeded}>
             {() => (
               <UserIdentity awareness={this._awareness} panel={this._panel} />
@@ -187,17 +187,17 @@ export class PanelHeader extends ReactWidget {
           <FileTitle panel={this._panel} />
         </div>
 
-        <div className="jc-panelHeader-right">
+        <div className="jp-comments-panelHeader-right">
           {/* Inline style added to align icons */}
           <div
             title="Save comments"
             onClick={save}
             style={{ position: 'relative', bottom: '2px' }}
           >
-            <saveIcon.react className="jc-Button" />
+            <saveIcon.react className="jp-comments-Button" />
           </div>
           <div title="Refresh comments" onClick={refresh}>
-            <refreshIcon.react className="jc-Button" />
+            <refreshIcon.react className="jp-comments-Button" />
           </div>
         </div>
       </React.Fragment>

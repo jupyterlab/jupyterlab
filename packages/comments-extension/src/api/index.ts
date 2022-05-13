@@ -122,15 +122,15 @@ export const jupyterCommentingPlugin: JupyterFrontEndPlugin<ICommentPanel> = {
 
     app.contextMenu.addItem({
       command: CommandIDs.deleteComment,
-      selector: '.jc-Comment'
+      selector: '.jp-comments-Comment'
     });
     app.contextMenu.addItem({
       command: CommandIDs.editComment,
-      selector: '.jc-Comment'
+      selector: '.jp-comments-Comment'
     });
     app.contextMenu.addItem({
       command: CommandIDs.replyToComment,
-      selector: '.jc-Comment'
+      selector: '.jp-comments-Comment'
     });
 
     const modelFactory = new CommentFileModelFactory({
@@ -195,7 +195,7 @@ export const jupyterCommentingPlugin: JupyterFrontEndPlugin<ICommentPanel> = {
 
     app.contextMenu.addItem({
       command: CommandIDs.save,
-      selector: '.jc-CommentPanel'
+      selector: '.jp-comments-CommentPanel'
     });
 
     return panel;

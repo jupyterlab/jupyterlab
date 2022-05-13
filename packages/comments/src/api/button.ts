@@ -111,7 +111,7 @@ export class NewCommentButton extends Widget {
 namespace Private {
   export function createNode() {
     const node = document.createElement('div');
-    node.className = 'jc-Indicator';
+    node.className = 'jp-comments-Indicator';
     const icon = BlueCreateCommentIcon.element();
     node.appendChild(icon);
     return node;
