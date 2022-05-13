@@ -979,13 +979,13 @@ function activateWidgetFactory(
     | undefined;
 
   // Register notebook toolbar widgets
-  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'save', panel =>
+  toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'save', panel =>
     DocToolbarItems.createSaveButton(commands, panel.context.fileChanged)
   );
-  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
+  toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
     ToolbarItems.createCellTypeItem(panel, translator)
   );
-  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'kernelName', panel =>
+  toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'kernelName', panel =>
     Toolbar.createKernelNameItem(
       panel.sessionContext,
       sessionContextDialogs,
@@ -993,7 +993,7 @@ function activateWidgetFactory(
     )
   );
 
-  toolbarRegistry.registerFactory<NotebookPanel>(
+  toolbarRegistry.addFactory<NotebookPanel>(
     FACTORY,
     'executionProgress',
     panel => {
