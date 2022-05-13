@@ -13,7 +13,44 @@ jobs:
     name: JS
     strategy:
       matrix:
-        group: [js-application, js-apputils, js-cells, js-codeeditor, js-codemirror, js-completer, js-console, js-coreutils, js-csvviewer, js-debugger, js-docmanager, js-docregistry, js-documentsearch, js-filebrowser, js-fileeditor, js-imageviewer, js-inspector, js-logconsole, js-mainmenu, js-nbformat, js-notebook, js-observables, js-outputarea, js-rendermime, js-services, js-settingregistry, js-statedb, js-statusbar, js-terminal, js-toc, js-translation, js-ui-components, js-testutils]
+        group:
+          [
+            js-application,
+            js-apputils,
+            js-cell-toolbar,
+            js-cells,
+            js-codeeditor,
+            js-codemirror,
+            js-completer,
+            js-console,
+            js-coreutils,
+            js-csvviewer,
+            js-debugger,
+            js-docmanager,
+            js-docregistry,
+            js-documentsearch,
+            js-filebrowser,
+            js-fileeditor,
+            js-imageviewer,
+            js-inspector,
+            js-logconsole,
+            js-mainmenu,
+            js-nbformat,
+            js-notebook,
+            js-observables,
+            js-outputarea,
+            js-rendermime,
+            js-services,
+            js-settingregistry,
+            js-statedb,
+            js-statusbar,
+            js-terminal,
+            js-toc,
+            js-translation,
+            js-ui-components,
+            js-user,
+            js-testutils,
+          ]
       fail-fast: false
     runs-on: ubuntu-20.04
     timeout-minutes: 20

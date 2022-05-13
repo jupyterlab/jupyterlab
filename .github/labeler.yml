@@ -46,6 +46,12 @@ pkg:attachments:
   - packages/attachments/**/*
   - packages/attachments/*
 
+pkg:cell-toolbar:
+  - packages/cell-toolbar/**/*
+  - packages/cell-toolbar/*
+  - packages/cell-toolbar-extension/**/*
+  - packages/cell-toolbar-extension/*
+
 pkg:cells:
   - packages/cells/**/*
   - packages/cells/*
@@ -301,6 +307,12 @@ pkg:ui-components:
   - packages/ui-components/*
   - packages/ui-components-extension/**/*
   - packages/ui-components-extension/*
+
+pkg:user:
+  - packages/user/**/*
+  - packages/user/*
+  - packages/user-extension/**/*
+  - packages/user-extension/*
 
 pkg:vdom:
   - packages/vdom/**/*

@@ -18,7 +18,8 @@ test('All commands must have a default label', async ({ page }, testInfo) => {
       caption: string;
       shortcuts?: string[];
     }[] = commandIds
-      .filter(id => !id.startsWith('_'))
+      .filter(id => !id.startsWith('_') && !id.startsWith('@jupyter-widgets'))
+      .sort()
       .map(id => {
         try {
           return {

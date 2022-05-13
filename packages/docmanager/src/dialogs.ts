@@ -83,10 +83,13 @@ export function renameFile(
   newPath: string
 ): Promise<Contents.IModel | null> {
   return manager.rename(oldPath, newPath).catch(error => {
-    if (error.message.indexOf('409') === -1) {
+    if (error.response.status !== 409) {
+      // if it's not caused by an already existing file, rethrow
       throw error;
     }
-    return shouldOverwrite(newPath).then(value => {
+
+    // otherwise, ask for confirmation
+    return shouldOverwrite(newPath).then((value: boolean) => {
       if (value) {
         return manager.overwrite(oldPath, newPath);
       }
