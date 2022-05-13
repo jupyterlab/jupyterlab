@@ -63,6 +63,20 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
 
+      - name: Run test ${{ matrix.group }}
+        env:
+          GROUP: ${{ matrix.group }}
+          JLAB_BROWSER_TYPE: firefox
+        run: |
+          bash ./scripts/ci_script.sh
+
+      - name: Upload ${{ matrix.group }} results
+        if: ${{ matrix.upload-output && always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.group }} ${{ github.run_number }}
+          path: ./build/${{ matrix.group }}_output
+
       - name: Get modified files in the staging directory
         if: matrix.group == 'integrity'
         id: modified-files-in-staging
@@ -77,20 +91,6 @@ jobs:
         run: |
           echo "Integrity test failed; please run locally `ESM_FIX=1 jlpm integrity` and commit the changes"
           exit 1
-
-      - name: Run test ${{ matrix.group }}
-        env:
-          GROUP: ${{ matrix.group }}
-          JLAB_BROWSER_TYPE: firefox
-        run: |
-          bash ./scripts/ci_script.sh
-
-      - name: Upload ${{ matrix.group }} results
-        if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.group }} ${{ github.run_number }}
-          path: ./build/${{ matrix.group }}_output
 
   test_minimum_versions:
     name: Test Minimum Versions
