@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import CodeMirror from 'codemirror';
-import 'codemirror/addon/mode/multiplex';
-import 'codemirror/mode/gfm/gfm';
-import 'codemirror/mode/stex/stex';
+import 'codemirror/addon/mode/multiplex.js';
+import 'codemirror/mode/gfm/gfm.js';
+import 'codemirror/mode/stex/stex.js';
 
 /**
  * Define an IPython GFM (GitHub Flavored Markdown) mode.

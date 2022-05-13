@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { style } from 'typestyle/lib';
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import { style } from 'typestyle';
+import type { NestedCSSProperties } from 'typestyle/lib/types.js';
 import vars from './variables.js';
 
 export const baseText: NestedCSSProperties = {

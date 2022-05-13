@@ -29,7 +29,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   IJSONSettingEditorTracker,
   ISettingEditorTracker
-} from '@jupyterlab/settingeditor/lib/tokens';
+} from '@jupyterlab/settingeditor/lib/tokens.js';
 import type {
   JsonSettingEditor,
   SettingsEditor

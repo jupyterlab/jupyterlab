@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { Notebook, NotebookMode } from './widget';
+import { Notebook, NotebookMode } from './widget.js';
 
 /**
  * A pure function for rendering a Command/Edit mode component.

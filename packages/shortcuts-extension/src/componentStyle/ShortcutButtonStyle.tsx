@@ -1,4 +1,4 @@
-import { style } from 'typestyle/lib';
+import { style } from 'typestyle';
 
 export const shortcutStyle = style({
   margin: '9px 5px 5px 4px',

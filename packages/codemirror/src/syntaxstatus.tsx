@@ -12,7 +12,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu } from '@lumino/widgets';
 import React from 'react';
-import { Mode } from './mode';
+import { Mode } from './mode.js';
 
 /**
  * A namespace for `EditorSyntaxComponentStatics`.

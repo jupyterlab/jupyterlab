@@ -7,7 +7,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
-import { JupyterFrontEnd } from './frontend';
+import { JupyterFrontEnd } from './frontend.js';
 
 /**
  * A token for which a plugin can provide to respond to connection failures

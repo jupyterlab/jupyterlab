@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { style as typestyleClass } from 'typestyle/lib';
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import { style as typestyleClass } from 'typestyle';
+import type { NestedCSSProperties } from 'typestyle/lib/types.js';
 
 export namespace LabIconStyle {
   /**

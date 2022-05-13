@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import CodeMirror from 'codemirror';
-import 'codemirror/mode/meta';
-import 'codemirror/mode/python/python';
+import 'codemirror/mode/meta.js';
+import 'codemirror/mode/python/python.js';
 
 /**
  * Define an IPython codemirror mode.

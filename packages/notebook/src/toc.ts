@@ -16,10 +16,10 @@ import {
   TableOfContentsModel,
   TableOfContentsUtils
 } from '@jupyterlab/toc';
-import { NotebookActions } from './actions';
-import { NotebookPanel } from './panel';
-import { INotebookTracker } from './tokens';
-import { Notebook } from './widget';
+import { NotebookActions } from './actions.js';
+import { NotebookPanel } from './panel.js';
+import { INotebookTracker } from './tokens.js';
+import { Notebook } from './widget.js';
 
 /**
  * Cell running status

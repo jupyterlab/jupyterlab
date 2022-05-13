@@ -13,8 +13,8 @@ import {
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import React from 'react';
-import { FileBrowser } from './browser';
-import { FileBrowserModel, IUploadModel } from './model';
+import { FileBrowser } from './browser.js';
+import { FileBrowserModel, IUploadModel } from './model.js';
 
 /**
  * Half-spacing between items in the overall status item.

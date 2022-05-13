@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { classes } from 'typestyle/lib';
+import { classes } from 'typestyle';
 import { textItem } from '../style/text.js';
 
 /**

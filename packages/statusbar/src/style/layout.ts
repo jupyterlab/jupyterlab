@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import type { NestedCSSProperties } from 'typestyle/lib/types.js';
 
 export const centeredFlex: NestedCSSProperties = {
   display: 'flex',

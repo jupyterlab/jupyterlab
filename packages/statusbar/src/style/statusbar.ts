@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { style } from 'typestyle/lib';
+import { style } from 'typestyle';
 import { centeredFlex, leftToRight, rightToLeft } from './layout.js';
 import { textItem } from './text.js';
 import vars from './variables.js';
