@@ -209,8 +209,7 @@ all of MD as it is not optimized for dense, information rich UIs.
    * theme these would go from dark to light.
    */
 
-  /* Separated rbg values to allow passing into rgba. */
-  --jp-inverse-layout-color0: 155, 155, 155; /* white */
+  --jp-inverse-layout-color0: white;
   --jp-inverse-layout-color1: white;
   --jp-inverse-layout-color2: var(--md-grey-200);
   --jp-inverse-layout-color3: var(--md-grey-400);
@@ -389,8 +388,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-search-toggle-on-opacity: 1;
   --jp-search-selected-match-background-color: rgb(255, 225, 0);
   --jp-search-selected-match-color: black;
-  --jp-search-unselected-match-background-color: rgba(
-    var(--jp-inverse-layout-color0), 0.8
+  --jp-search-unselected-match-background-color: var(
+    --jp-inverse-layout-color0
   );
   --jp-search-unselected-match-color: var(--jp-ui-inverse-font-color0);
 
