@@ -5,9 +5,12 @@ const esModules = ['lib0', 'y\\-protocols', 'y\\-websocket', 'yjs'].join('|');
 module.exports = function (baseDir: string) {
   return {
     preset: 'ts-jest/presets/js-with-babel',
+    // Will be needed for Jest 27+
+    // extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-      '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
+      '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js',
+      '^(\\.{1,2}/.*)\\.js$': '$1'
     },
     transform: {
       '\\.svg$': 'jest-raw-loader',
@@ -33,7 +36,8 @@ module.exports = function (baseDir: string) {
     testRegex: '/test/.*.spec.ts[x]?$',
     globals: {
       'ts-jest': {
-        tsconfig: `./tsconfig.test.json`
+        tsconfig: `./tsconfig.test.json`,
+        useESM: true
       }
     }
   };
