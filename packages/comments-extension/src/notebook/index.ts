@@ -22,14 +22,14 @@ import {
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 export namespace CommandIDs {
-  export const addNotebookComment = 'jl-comments:add-notebook-comment';
+  export const addNotebookComment = 'jupyterlab:add-notebook-comment';
 }
 
 /**
  * A plugin that allows notebooks to be commented on.
  */
 export const notebookCommentsPlugin: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab-comments:notebook',
+  id: 'jupyterlab:comments-notebook',
   autoStart: true,
   requires: [INotebookTracker, ICommentPanel, IThemeManager],
   activate: (

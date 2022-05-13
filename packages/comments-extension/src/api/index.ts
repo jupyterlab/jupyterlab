@@ -24,11 +24,11 @@ import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { Menu } from '@lumino/widgets';
 
 namespace CommandIDs {
-  export const addComment = 'jl-comments:add-comment';
-  export const deleteComment = 'jl-comments:delete-comment';
-  export const editComment = 'jl-comments:edit-comment';
-  export const replyToComment = 'jl-comments:reply-to-comment';
-  export const save = 'jl-comments:save';
+  export const addComment = 'jupyterlab:add-comment';
+  export const deleteComment = 'jupyterlab:delete-comment';
+  export const editComment = 'jupyterlab:edit-comment';
+  export const replyToComment = 'jupyterlab:reply-to-comment';
+  export const save = 'jupyterlab:save';
 }
 
 export type CommentTracker = WidgetTracker<CommentWidget<any>>;
@@ -37,7 +37,7 @@ export type CommentTracker = WidgetTracker<CommentWidget<any>>;
  * A plugin that provides a `CommentRegistry`
  */
 export const commentRegistryPlugin: JupyterFrontEndPlugin<ICommentRegistry> = {
-  id: 'jupyterlab-comments:comment-registry',
+  id: 'jupyterlab:comment-registry',
   autoStart: true,
   provides: ICommentRegistry,
   activate: (app: JupyterFrontEnd) => {
@@ -49,7 +49,7 @@ export const commentRegistryPlugin: JupyterFrontEndPlugin<ICommentRegistry> = {
  * A plugin that provides a `CommentWidgetRegistry`
  */
 export const commentWidgetRegistryPlugin: JupyterFrontEndPlugin<ICommentWidgetRegistry> = {
-  id: 'jupyterlab-comments:comment-widget-registry',
+  id: 'jupyterlab:comment-widget-registry',
   autoStart: true,
   provides: ICommentWidgetRegistry,
   activate: (app: JupyterFrontEnd) => {
@@ -58,7 +58,7 @@ export const commentWidgetRegistryPlugin: JupyterFrontEndPlugin<ICommentWidgetRe
 };
 
 export const jupyterCommentingPlugin: JupyterFrontEndPlugin<ICommentPanel> = {
-  id: 'jupyterlab-comments:commenting-api',
+  id: 'jupyterlab:commenting-api',
   autoStart: true,
   requires: [
     ICommentRegistry,

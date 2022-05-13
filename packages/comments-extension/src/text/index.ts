@@ -22,11 +22,11 @@ import { Widget } from '@lumino/widgets';
 import { IThemeManager } from '@jupyterlab/apputils';
 
 namespace CommandIDs {
-  export const addComment = 'jupyter-comments:add-text-comment';
+  export const addComment = 'jupyterlab:add-text-comment';
 }
 
 export const textCommentingPlugin: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab-comments:text',
+  id: 'jupyterlab:comments-text',
   autoStart: true,
   requires: [ICommentPanel, ILabShell, IThemeManager],
   activate: (

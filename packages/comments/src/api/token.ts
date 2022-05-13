@@ -80,13 +80,13 @@ export interface ICommentPanel extends Panel {
 }
 
 export const ICommentRegistry = new Token<ICommentRegistry>(
-  'jupyterlab-comments:comment-registry'
+  'jupyterlab:comment-registry'
 );
 
 export const ICommentWidgetRegistry = new Token<ICommentWidgetRegistry>(
-  'jupyterlab-comment:comment-widget-registry'
+  'jupyterlab:comment-widget-registry'
 );
 
 export const ICommentPanel = new Token<ICommentPanel>(
-  'jupyterlab-comments:comment-panel'
+  'jupyterlab:comment-panel'
 );
