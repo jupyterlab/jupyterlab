@@ -12,7 +12,7 @@ import { each } from '@lumino/algorithm';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { Dialog, showDialog } from './dialog';
+import { Dialog, showDialog } from './dialog.js';
 import { ISplashScreen, IThemeManager } from './tokens.js';
 
 /**

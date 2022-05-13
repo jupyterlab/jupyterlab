@@ -8,4 +8,4 @@
 export * from './model.js';
 export * from './npm.js';
 export * from './listings.js';
-export * from './widget';
+export * from './widget.js';

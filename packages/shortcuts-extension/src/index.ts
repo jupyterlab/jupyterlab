@@ -22,7 +22,7 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
 import { Menu } from '@lumino/widgets';
 import { IShortcutUIexternal } from './components/index.js';
-import { renderShortCut } from './renderer';
+import { renderShortCut } from './renderer.js';
 
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,

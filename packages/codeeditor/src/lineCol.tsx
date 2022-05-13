@@ -20,7 +20,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import { CodeEditor } from './editor';
+import { CodeEditor } from './editor.js';
 
 /**
  * A namespace for LineFormComponent statics.

@@ -13,7 +13,7 @@ import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { closeAllIcon } from '../../icons.js';
 import { IDebugger } from '../../tokens.js';
-import { BreakpointsBody } from './body';
+import { BreakpointsBody } from './body.js';
 /**
  * A Panel to show a list of breakpoints.
  */

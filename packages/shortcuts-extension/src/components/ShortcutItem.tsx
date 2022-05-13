@@ -20,15 +20,15 @@ import {
   ShortcutKeysStyle,
   SingleShortcutCellStyle,
   SourceCellStyle
-} from '../componentStyle/ShortcutItemStyle';
+} from '../componentStyle/ShortcutItemStyle.js';
 import {
   ErrorObject,
   ShortcutInput,
   ShortcutObject,
   TakenByObject
-} from './ShortcutInput';
-import { UISize } from './ShortcutUI';
-import { IShortcutUIexternal } from './TopNav';
+} from './ShortcutInput.js';
+import { UISize } from './ShortcutUI.js';
+import { IShortcutUIexternal } from './TopNav.js';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {

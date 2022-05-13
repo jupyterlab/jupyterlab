@@ -61,7 +61,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
-import { InputCollapser, OutputCollapser } from './collapser';
+import { InputCollapser, OutputCollapser } from './collapser.js';
 
 import {
   CellFooter,
@@ -80,7 +80,7 @@ import {
   IRawCellModel
 } from './model.js';
 
-import { InputPlaceholder, OutputPlaceholder } from './placeholder';
+import { InputPlaceholder, OutputPlaceholder } from './placeholder.js';
 
 import { ResizeHandle } from './resizeHandle.js';
 

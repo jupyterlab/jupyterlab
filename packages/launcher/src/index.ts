@@ -6,4 +6,4 @@
  */
 
 export * from './tokens.js';
-export * from './widget';
+export * from './widget.js';

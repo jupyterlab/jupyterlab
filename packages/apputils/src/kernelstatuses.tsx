@@ -11,7 +11,7 @@ import {
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt } from '@lumino/coreutils';
 import React from 'react';
-import { ISessionContext } from './sessioncontext';
+import { ISessionContext } from './sessioncontext.js';
 
 /**
  * Helper function to translate kernel statuses mapping by using

@@ -13,8 +13,8 @@ import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDebugger } from '../../tokens.js';
 import { VariablesBodyGrid } from './grid.js';
-import { ScopeSwitcher } from './scope';
-import { VariablesBodyTree } from './tree';
+import { ScopeSwitcher } from './scope.js';
+import { VariablesBodyTree } from './tree.js';
 
 /**
  * A Panel to show a variable explorer.

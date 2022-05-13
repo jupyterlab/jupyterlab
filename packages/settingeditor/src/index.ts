@@ -5,6 +5,6 @@
  * @module settingeditor
  */
 
-export * from './settingseditor';
-export * from './jsonsettingeditor';
+export * from './settingseditor.js';
+export * from './jsonsettingeditor.js';
 export * from './tokens.js';

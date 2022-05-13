@@ -35,7 +35,7 @@ import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { each } from '@lumino/algorithm';
 import { Menu } from '@lumino/widgets';
 import * as React from 'react';
-import { Licenses } from './licenses';
+import { Licenses } from './licenses.js';
 
 /**
  * The command IDs used by the help plugin.

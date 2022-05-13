@@ -1,6 +1,6 @@
 import React from 'react';
-import { LabIcon } from '../icon';
-import { classes } from '../utils';
+import { LabIcon } from '../icon/index.js';
+import { classes } from '../utils.js';
 
 /**
  * InputGroup component properties

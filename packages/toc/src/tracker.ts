@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Widget } from '@lumino/widgets';
-import { ITableOfContentsTracker, TableOfContents } from './tokens';
+import { ITableOfContentsTracker, TableOfContents } from './tokens.js';
 
 /**
  * Table of contents tracker

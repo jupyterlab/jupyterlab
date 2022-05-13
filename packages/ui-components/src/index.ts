@@ -10,4 +10,4 @@ export * from './icon/index.js';
 export * from './hoverbox.js';
 export * from './tokens.js';
 export * from './utils.js';
-export * from './FormComponentRegistry';
+export * from './FormComponentRegistry.js';

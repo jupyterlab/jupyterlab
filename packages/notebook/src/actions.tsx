@@ -26,8 +26,8 @@ import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
-import { INotebookModel } from './model';
-import { Notebook, StaticNotebook } from './widget';
+import { INotebookModel } from './model.js';
+import { Notebook, StaticNotebook } from './widget.js';
 
 /**
  * The mimetype used for Jupyter cell data.

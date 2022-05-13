@@ -12,4 +12,4 @@ export * from './model.js';
 export * from './opendialog.js';
 export * from './tokens.js';
 export * from './upload.js';
-export * from './uploadstatus';
+export * from './uploadstatus.js';

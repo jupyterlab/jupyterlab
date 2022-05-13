@@ -34,9 +34,9 @@ import {
 } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { NotebookActions } from './actions';
-import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
+import { NotebookActions } from './actions.js';
+import { NotebookPanel } from './panel.js';
+import { Notebook } from './widget.js';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.

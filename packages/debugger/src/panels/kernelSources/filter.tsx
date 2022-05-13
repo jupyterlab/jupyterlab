@@ -5,7 +5,7 @@ import { InputGroup, ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 
 import React from 'react';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * The class name added to the filebrowser crumbs node.

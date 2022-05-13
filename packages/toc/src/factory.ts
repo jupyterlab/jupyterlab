@@ -5,8 +5,8 @@ import { IWidgetTracker } from '@jupyterlab/apputils';
 import { ActivityMonitor, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Widget } from '@lumino/widgets';
-import { TableOfContentsModel } from './model';
-import { TableOfContents } from './tokens';
+import { TableOfContentsModel } from './model.js';
+import { TableOfContents } from './tokens.js';
 
 /**
  * Timeout for throttling ToC rendering following model changes.

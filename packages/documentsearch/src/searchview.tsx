@@ -21,8 +21,8 @@ import {
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { SearchDocumentModel } from './searchmodel';
-import { IFilter, IFilters } from './tokens';
+import { SearchDocumentModel } from './searchmodel.js';
+import { IFilter, IFilters } from './tokens.js';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';

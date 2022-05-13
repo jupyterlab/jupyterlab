@@ -6,4 +6,4 @@
  * @packageDocumentation
  * @module cell-toolbar
  */
-export * from './celltoolbartracker';
+export * from './celltoolbartracker.js';

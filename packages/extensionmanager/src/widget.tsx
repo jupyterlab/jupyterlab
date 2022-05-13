@@ -25,8 +25,8 @@ import {
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-import { Action, IEntry, ListModel } from './model';
-import { isJupyterOrg } from './npm';
+import { Action, IEntry, ListModel } from './model.js';
+import { isJupyterOrg } from './npm.js';
 
 // TODO: Replace pagination with lazy loading of lower search results
 

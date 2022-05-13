@@ -35,17 +35,17 @@ export {
 export * from './clipboard.js';
 export * from './commandlinker.js';
 export * from './commandpalette.js';
-export * from './dialog';
+export * from './dialog.js';
 export * from './domutils.js';
 export * from './inputdialog.js';
-export * from './kernelstatuses';
+export * from './kernelstatuses.js';
 export * from './mainareawidget.js';
 export * from './menufactory.js';
 export * from './printing.js';
-export * from './runningSessions';
+export * from './runningSessions.js';
 export * from './sanitizer.js';
 export * from './semanticCommand.js';
-export * from './sessioncontext';
+export * from './sessioncontext.js';
 export * from './thememanager.js';
 export * from './tokens.js';
 export {

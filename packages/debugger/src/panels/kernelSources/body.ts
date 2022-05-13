@@ -11,7 +11,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { KernelSourcesFilter } from './filter';
+import { KernelSourcesFilter } from './filter.js';
 
 import { IDebugger } from '../../tokens.js';
 

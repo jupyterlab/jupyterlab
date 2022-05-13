@@ -6,7 +6,7 @@
  */
 
 export * from './searchprovider.js';
-export * from './tabspacestatus';
-export * from './toc';
-export * from './tokens';
-export * from './widget';
+export * from './tabspacestatus.js';
+export * from './toc/index.js';
+export * from './tokens.js';
+export * from './widget.js';

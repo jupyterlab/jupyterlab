@@ -3,8 +3,8 @@
 
 import { VDomRenderer } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { TableOfContentsTree } from './toctree';
-import { TableOfContents } from './tokens';
+import { TableOfContentsTree } from './toctree.js';
+import { TableOfContents } from './tokens.js';
 
 /**
  * Table of contents widget.

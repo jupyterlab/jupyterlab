@@ -1,8 +1,8 @@
 import { ITranslator } from '@jupyterlab/translation';
 import { SidePanel } from '@jupyterlab/ui-components';
 import { Panel, Widget } from '@lumino/widgets';
-import { TableOfContentsWidget } from './treeview';
-import { TableOfContents } from './tokens';
+import { TableOfContentsWidget } from './treeview.js';
+import { TableOfContents } from './tokens.js';
 import { Message } from '@lumino/messaging';
 
 /**

@@ -9,7 +9,7 @@ import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ITranslator } from '@jupyterlab/translation';
-import { ToolbarItems } from './default-toolbar';
+import { ToolbarItems } from './default-toolbar.js';
 import { INotebookModel } from './model.js';
 import { NotebookPanel } from './panel.js';
 import { StaticNotebook } from './widget.js';

@@ -15,8 +15,8 @@ import { Message } from '@lumino/messaging';
 import { ISignal } from '@lumino/signaling';
 import { SplitPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { PluginEditor } from './plugineditor';
-import { PluginList } from './pluginlist';
+import { PluginEditor } from './plugineditor.js';
+import { PluginList } from './pluginlist.js';
 
 /**
  * The ratio panes in the setting editor.

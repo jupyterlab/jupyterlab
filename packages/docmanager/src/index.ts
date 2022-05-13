@@ -7,8 +7,8 @@
 
 export * from './dialogs.js';
 export * from './manager.js';
-export * from './pathstatus';
+export * from './pathstatus.js';
 export * from './savehandler.js';
-export * from './savingstatus';
+export * from './savingstatus.js';
 export * from './tokens.js';
 export * from './widgetmanager.js';

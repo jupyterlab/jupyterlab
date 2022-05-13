@@ -50,7 +50,7 @@ import { ITranslator } from '@jupyterlab/translation';
 import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
-import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
+import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands.js';
 
 export { Commands } from './commands.js';
 

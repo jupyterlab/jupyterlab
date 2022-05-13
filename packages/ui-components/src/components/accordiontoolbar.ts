@@ -9,7 +9,7 @@ import {
   Widget
 } from '@lumino/widgets';
 import { caretDownIcon } from '../icon/index.js';
-import { Toolbar } from './toolbar';
+import { Toolbar } from './toolbar.js';
 
 /**
  * Accordion panel layout that adds a toolbar in widget title if present.

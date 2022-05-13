@@ -5,7 +5,7 @@ import { Toolbar } from '@jupyterlab/ui-components';
 import { findIndex, toArray } from '@lumino/algorithm';
 import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import { Dialog, showDialog } from '../dialog';
+import { Dialog, showDialog } from '../dialog.js';
 import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens.js';
 
 /**

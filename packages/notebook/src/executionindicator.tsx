@@ -15,13 +15,13 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 
-import { Notebook } from './widget';
+import { Notebook } from './widget.js';
 import { KernelMessage } from '@jupyterlab/services';
 import {
   IAnyMessageArgs,
   IKernelConnection
 } from '@jupyterlab/services/src/kernel/kernel';
-import { NotebookPanel } from './panel';
+import { NotebookPanel } from './panel.js';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Widget } from '@lumino/widgets';
 import { JSONObject } from '@lumino/coreutils';

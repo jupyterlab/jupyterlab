@@ -4,7 +4,7 @@
 import { HoverBox } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { clickedItem, hoverItem, interactiveItem } from '../style/statusbar';
+import { clickedItem, hoverItem, interactiveItem } from '../style/statusbar.js';
 
 /**
  * Create and show a popup component.

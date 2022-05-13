@@ -19,7 +19,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import type { FieldProps } from '@rjsf/core';
 
-import { renderAvailableProviders } from './renderer';
+import { renderAvailableProviders } from './renderer.js';
 
 const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:tracker';
 

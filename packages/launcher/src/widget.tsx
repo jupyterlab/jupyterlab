@@ -26,7 +26,7 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ILauncher } from './tokens';
+import { ILauncher } from './tokens.js';
 
 /**
  * The class name added to Launcher instances.

@@ -5,18 +5,18 @@
  * @module notebook
  */
 
-export * from './actions';
-export * from './default-toolbar';
+export * from './actions.js';
+export * from './default-toolbar.js';
 export * from './model.js';
 export * from './modelfactory.js';
-export * from './modestatus';
-export * from './notebooktools';
-export * from './panel';
-export * from './searchprovider';
-export * from './toc';
-export * from './tokens';
-export * from './tracker';
-export * from './truststatus';
+export * from './modestatus.js';
+export * from './notebooktools.js';
+export * from './panel.js';
+export * from './searchprovider.js';
+export * from './toc.js';
+export * from './tokens.js';
+export * from './tracker.js';
+export * from './truststatus.js';
 export * from './widget.js';
 export * from './widgetfactory.js';
-export * from './executionindicator';
+export * from './executionindicator.js';

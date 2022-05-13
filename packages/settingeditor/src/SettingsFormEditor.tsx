@@ -21,7 +21,7 @@ import Form, {
 } from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
 import React from 'react';
-import { PluginList } from './pluginlist';
+import { PluginList } from './pluginlist.js';
 
 /**
  * Indentation to use when saving the settings as JSON document.

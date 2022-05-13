@@ -5,14 +5,14 @@
  * @module toc
  */
 
-export * from './factory';
-export * from './model';
-export * from './panel';
-export * from './registry';
-export * from './treeview';
-export * from './tocitem';
-export * from './toctree';
-export * from './tokens';
-export * from './tracker';
+export * from './factory.js';
+export * from './model.js';
+export * from './panel.js';
+export * from './registry.js';
+export * from './treeview.js';
+export * from './tocitem.js';
+export * from './toctree.js';
+export * from './tokens.js';
+export * from './tracker.js';
 // Namespace the utils
-export * as TableOfContentsUtils from './utils';
+export * as TableOfContentsUtils from './utils/index.js';

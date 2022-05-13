@@ -14,7 +14,7 @@ export * from './factory.js';
 export * from './mimetype.js';
 export * from './mode.js';
 export * from './searchprovider.js';
-export * from './syntaxstatus';
+export * from './syntaxstatus.js';
 export * from './tokens.js';
 
 /**

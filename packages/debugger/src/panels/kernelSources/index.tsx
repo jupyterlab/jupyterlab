@@ -12,9 +12,9 @@ import {
   ToolbarButton
 } from '@jupyterlab/ui-components';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
-import { KernelSourcesBody } from './body';
+import { KernelSourcesBody } from './body.js';
 
 /**
  * A Panel that shows a preview of the source code while debugging.

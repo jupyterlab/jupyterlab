@@ -7,7 +7,7 @@ import { TextItem } from '@jupyterlab/statusbar';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Title, Widget } from '@lumino/widgets';
 import React from 'react';
-import { IDocumentManager } from './tokens';
+import { IDocumentManager } from './tokens.js';
 
 /**
  * A namespace for PathStatusComponent statics.

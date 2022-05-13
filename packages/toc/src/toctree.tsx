@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { TableOfContentsItem } from './tocitem';
-import { TableOfContents } from './tokens';
+import { TableOfContentsItem } from './tocitem.js';
+import { TableOfContents } from './tokens.js';
 
 /**
  * Interface describing component properties.

@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { classes } from 'typestyle/lib';
-import { textItem } from '../style/text';
+import { textItem } from '../style/text.js';
 
 /**
  * A namespace for TextItem statics.

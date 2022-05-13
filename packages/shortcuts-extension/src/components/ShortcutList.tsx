@@ -2,11 +2,11 @@ import * as React from 'react';
 import {
   ShortcutListContainerStyle,
   ShortcutListStyle
-} from '../componentStyle/ShortcutListStyle';
-import { ShortcutObject, TakenByObject } from './ShortcutInput';
-import { ShortcutItem } from './ShortcutItem';
-import { UISize } from './ShortcutUI';
-import { IShortcutUIexternal } from './TopNav';
+} from '../componentStyle/ShortcutListStyle.js';
+import { ShortcutObject, TakenByObject } from './ShortcutInput.js';
+import { ShortcutItem } from './ShortcutItem.js';
+import { UISize } from './ShortcutUI.js';
+import { IShortcutUIexternal } from './TopNav.js';
 
 const TOPNAV_HEIGHT: number = 115;
 

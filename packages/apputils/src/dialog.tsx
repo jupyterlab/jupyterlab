@@ -13,7 +13,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { WidgetTracker } from './widgettracker';
+import { WidgetTracker } from './widgettracker.js';
 
 /**
  * Create and show a dialog.

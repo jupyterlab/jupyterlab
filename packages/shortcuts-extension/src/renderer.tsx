@@ -1,5 +1,5 @@
 import React from 'react';
-import { IShortcutUIexternal, ShortcutUI } from './components';
+import { IShortcutUIexternal, ShortcutUI } from './components/index.js';
 
 export const renderShortCut = (props: {
   external: IShortcutUIexternal;

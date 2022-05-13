@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { InputGroup } from './inputgroup';
-import { ReactWidget } from './vdom';
+import { InputGroup } from './inputgroup.js';
+import { ReactWidget } from './vdom.js';
 import { StringExt } from '@lumino/algorithm';
 import React, { useEffect, useState } from 'react';
 

@@ -6,10 +6,10 @@
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
-import { viewBreakpointIcon } from '../../icons';
-import { IDebugger } from '../../tokens';
-import { SourcePathComponent } from './sourcepath';
-import { SourcesBody } from './body';
+import { viewBreakpointIcon } from '../../icons.js';
+import { IDebugger } from '../../tokens.js';
+import { SourcePathComponent } from './sourcepath.js';
+import { SourcesBody } from './body.js';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React from 'react';
 

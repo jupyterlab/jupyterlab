@@ -26,7 +26,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { NotebookActions } from './actions';
+import { NotebookActions } from './actions.js';
 import { INotebookModel } from './model.js';
 
 /**

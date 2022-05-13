@@ -3,7 +3,7 @@
 
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
-import { ITableOfContentsRegistry, TableOfContents } from './tokens';
+import { ITableOfContentsRegistry, TableOfContents } from './tokens.js';
 
 /**
  * Class for registering table of contents generators.

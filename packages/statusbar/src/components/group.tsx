@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { classes, style } from 'typestyle/lib';
-import { centeredFlex, leftToRight } from '../style/layout';
+import { centeredFlex, leftToRight } from '../style/layout.js';
 
 const groupItemLayout = style(centeredFlex, leftToRight);
 

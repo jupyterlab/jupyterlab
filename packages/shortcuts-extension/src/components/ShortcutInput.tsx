@@ -16,7 +16,7 @@ import {
   SubmitConflictStyle,
   SubmitNonFunctionalStyle,
   SubmitStyle
-} from '../componentStyle/ShortcutInputStyle';
+} from '../componentStyle/ShortcutInputStyle.js';
 import { ITranslator } from '@jupyterlab/translation';
 
 export interface IShortcutInputProps {

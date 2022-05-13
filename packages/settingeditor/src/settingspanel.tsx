@@ -8,8 +8,8 @@ import { ITranslator } from '@jupyterlab/translation';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
 import React, { useEffect, useState } from 'react';
-import { PluginList } from './pluginlist';
-import { SettingsFormEditor } from './SettingsFormEditor';
+import { PluginList } from './pluginlist.js';
+import { SettingsFormEditor } from './SettingsFormEditor.js';
 
 export interface ISettingsPanelProps {
   /**

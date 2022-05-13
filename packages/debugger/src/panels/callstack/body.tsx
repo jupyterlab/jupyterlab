@@ -4,7 +4,7 @@
 import { PathExt } from '@jupyterlab/coreutils';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useEffect, useState } from 'react';
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * The body for a Callstack Panel.

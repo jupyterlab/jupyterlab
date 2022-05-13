@@ -1,5 +1,5 @@
 import { style } from 'typestyle';
-import { UISize } from '../components/ShortcutUI';
+import { UISize } from '../components/ShortcutUI.js';
 
 export const CellStyle = style({
   padding: '6px 12px',

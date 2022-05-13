@@ -5,6 +5,6 @@
  * @module markdownviewer
  */
 
-export * from './toc';
-export * from './tokens';
-export * from './widget';
+export * from './toc.js';
+export * from './tokens.js';
+export * from './widget.js';

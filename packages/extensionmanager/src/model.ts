@@ -12,13 +12,13 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
-import { doBuild } from './build-helper';
+import { doBuild } from './build-helper.js';
 import {
   IKernelInstallInfo,
   KernelCompanion,
   presentCompanions
-} from './companions';
-import { reportInstallError } from './dialog';
+} from './companions.js';
+import { reportInstallError } from './dialog.js';
 import { IListEntry, Lister, ListResult } from './listings.js';
 import { ISearchResult, isJupyterOrg, Searcher } from './npm.js';
 

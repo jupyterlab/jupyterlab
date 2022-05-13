@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/translation';
 import { AccordionPanel, Panel, PanelLayout, Widget } from '@lumino/widgets';
 import { AccordionToolbar } from './accordiontoolbar.js';
-import { Toolbar } from './toolbar';
+import { Toolbar } from './toolbar.js';
 
 /**
  * A widget meant to be contained in sidebars.

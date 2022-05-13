@@ -8,7 +8,7 @@ import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { CommandPalette, Widget } from '@lumino/widgets';
-import { ISessionContext } from './sessioncontext';
+import { ISessionContext } from './sessioncontext.js';
 
 /**
  * The command palette token.

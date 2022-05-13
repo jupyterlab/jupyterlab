@@ -15,9 +15,9 @@ import { Breakpoints as BreakpointsPanel } from './panels/breakpoints/index.js';
 
 import { Callstack as CallstackPanel } from './panels/callstack/index.js';
 
-import { Sources as SourcesPanel } from './panels/sources';
+import { Sources as SourcesPanel } from './panels/sources/index.js';
 
-import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
+import { KernelSources as KernelSourcesPanel } from './panels/kernelSources/index.js';
 
 import { Variables as VariablesPanel } from './panels/variables/index.js';
 

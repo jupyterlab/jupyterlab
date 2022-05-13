@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { StackedLayout, Widget } from '@lumino/widgets';
-import { CodeEditor } from './editor';
-import { CodeEditorWrapper } from './widget';
+import { CodeEditor } from './editor.js';
+import { CodeEditorWrapper } from './widget.js';
 
 export class CodeViewerWidget extends Widget {
   /**

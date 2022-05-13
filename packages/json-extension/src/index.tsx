@@ -13,7 +13,7 @@ import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Component } from './component';
+import { Component } from './component.js';
 
 /**
  * The CSS class to add to the JSON Widget.

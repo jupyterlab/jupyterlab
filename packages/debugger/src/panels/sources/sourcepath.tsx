@@ -3,7 +3,7 @@
 
 import { UseSignal } from '@jupyterlab/ui-components';
 import React from 'react';
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * A React component to display the path to a source.

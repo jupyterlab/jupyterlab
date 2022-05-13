@@ -9,7 +9,7 @@ import {
   TableOfContentsModel,
   TableOfContentsUtils
 } from '@jupyterlab/toc';
-import { MarkdownDocument } from './widget';
+import { MarkdownDocument } from './widget.js';
 
 /**
  * Interface describing a Markdown viewer heading.

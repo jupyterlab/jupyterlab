@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
-import { TableOfContents } from '../tokens';
-import { getPrefix } from './common';
+import { TableOfContents } from '../tokens.js';
+import { getPrefix } from './common.js';
 
 /**
  * Markdown heading

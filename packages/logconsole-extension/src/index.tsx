@@ -43,7 +43,7 @@ import {
 import { UUID } from '@lumino/coreutils';
 import { DockLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { LogConsoleStatus } from './status';
+import { LogConsoleStatus } from './status.js';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 

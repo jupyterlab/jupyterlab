@@ -5,7 +5,7 @@ import { VDomModel } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { TableOfContents } from './tokens';
+import { TableOfContents } from './tokens.js';
 
 /**
  * Abstract table of contents model.

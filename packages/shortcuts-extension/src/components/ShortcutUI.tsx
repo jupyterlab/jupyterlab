@@ -7,14 +7,14 @@ import { ReadonlyJSONArray } from '@lumino/coreutils';
 import {
   ShortcutUIStyle,
   TopWhitespaceStyle
-} from '../componentStyle/ShortcutUIStyle';
+} from '../componentStyle/ShortcutUIStyle.js';
 
-import { ShortcutList } from './ShortcutList';
+import { ShortcutList } from './ShortcutList.js';
 
-import { IShortcutUIexternal, TopNav } from './TopNav';
+import { IShortcutUIexternal, TopNav } from './TopNav.js';
 
 import * as React from 'react';
-import { ErrorObject, ShortcutObject, TakenByObject } from './ShortcutInput';
+import { ErrorObject, ShortcutObject, TakenByObject } from './ShortcutInput.js';
 
 const enum MatchType {
   Label,

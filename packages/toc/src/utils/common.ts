@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { TableOfContents } from '../tokens';
+import { TableOfContents } from '../tokens.js';
 
 /**
  * Class used to mark numbering prefix for headings in a document.

@@ -7,7 +7,7 @@ import {
   TableOfContentsFactory,
   TableOfContentsModel
 } from '@jupyterlab/toc';
-import { FileEditor } from '../widget';
+import { FileEditor } from '../widget.js';
 
 /**
  * Interface describing a file editor heading.

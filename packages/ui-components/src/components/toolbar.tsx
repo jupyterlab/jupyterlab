@@ -10,10 +10,10 @@ import { AttachedProperty } from '@lumino/properties';
 import { Layout, PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
-import { Button } from './button';
-import { ellipsesIcon, LabIcon } from '../icon';
-import { classes } from '../utils';
-import { ReactWidget, UseSignal } from './vdom';
+import { Button } from './button.js';
+import { ellipsesIcon, LabIcon } from '../icon/index.js';
+import { classes } from '../utils.js';
+import { ReactWidget, UseSignal } from './vdom.js';
 
 /**
  * The class name added to toolbars.

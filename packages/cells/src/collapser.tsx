@@ -8,7 +8,7 @@ import { ElementExt } from '@lumino/domutils';
 
 import * as React from 'react';
 
-import { Cell, CodeCell } from './widget';
+import { Cell, CodeCell } from './widget.js';
 
 /**
  * The CSS class added to all collapsers.

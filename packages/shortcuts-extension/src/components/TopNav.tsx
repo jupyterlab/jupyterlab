@@ -5,7 +5,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Menu } from '@lumino/widgets';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { CellStyle } from '../componentStyle/ShortcutItemStyle';
+import { CellStyle } from '../componentStyle/ShortcutItemStyle.js';
 import {
   AdvancedOptionsContainerStyle,
   AdvancedOptionsLinkStyle,
@@ -23,9 +23,9 @@ import {
   SymbolsStyle,
   TopNavStyle,
   TopStyle
-} from '../componentStyle/TopNavStyle';
-import { ShortcutTitleItem } from './ShortcutTitleItem';
-import { UISize } from './ShortcutUI';
+} from '../componentStyle/TopNavStyle.js';
+import { ShortcutTitleItem } from './ShortcutTitleItem.js';
+import { UISize } from './ShortcutUI.js';
 
 export interface IAdvancedOptionsProps {
   size: UISize;

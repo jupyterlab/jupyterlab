@@ -7,7 +7,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import React from 'react';
-import { IDocumentManager } from './tokens';
+import { IDocumentManager } from './tokens.js';
 
 /**
  * A namespace for SavingStatusComponent statics.

@@ -20,8 +20,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ISessionContext, sessionContextDialogs } from '../sessioncontext';
-import { translateKernelStatuses } from '../kernelstatuses';
+import { ISessionContext, sessionContextDialogs } from '../sessioncontext.js';
+import { translateKernelStatuses } from '../kernelstatuses.js';
 /**
  * The class name added to toolbar kernel name text.
  */

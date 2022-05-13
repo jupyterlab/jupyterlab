@@ -3,7 +3,7 @@
 
 import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { TableOfContents } from './tokens';
+import { TableOfContents } from './tokens.js';
 
 /**
  * Interface describing component properties.

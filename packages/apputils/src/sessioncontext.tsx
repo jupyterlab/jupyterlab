@@ -20,7 +20,7 @@ import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { Dialog, showDialog } from './dialog';
+import { Dialog, showDialog } from './dialog.js';
 
 /**
  * A context object to manage a widget's kernel session connection.

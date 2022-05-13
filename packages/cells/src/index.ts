@@ -8,10 +8,10 @@
  */
 
 export * from './celldragutils.js';
-export * from './collapser';
+export * from './collapser.js';
 export * from './headerfooter.js';
 export * from './inputarea.js';
 export * from './model.js';
-export * from './placeholder';
+export * from './placeholder.js';
 export * from './searchprovider.js';
 export * from './widget.js';

@@ -10,8 +10,8 @@ import ReactDOM from 'react-dom';
 import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
-import { LabIconStyle } from '../style';
-import { classes, getReactAttrs } from '../utils';
+import { LabIconStyle } from '../style/index.js';
+import { classes, getReactAttrs } from '../utils.js';
 
 export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /** *********
