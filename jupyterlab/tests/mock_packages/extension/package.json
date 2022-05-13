@@ -1,12 +1,12 @@
 {
   "name": "@jupyterlab/mock-extension",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "private": true,
   "dependencies": {
-    "@jupyterlab/launcher": "^3.4.1"
+    "@jupyterlab/launcher": "^3.4.2"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.4.1"
+    "@jupyterlab/builder": "^3.4.2"
   },
   "jupyterlab": {
     "extension": true,
