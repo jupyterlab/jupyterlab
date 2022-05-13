@@ -57,7 +57,7 @@
     "@jupyterlab/pdf-extension": "~4.0.0-alpha.9",
     "@jupyterlab/rendermime": "^4.0.0-alpha.2",
     "@jupyterlab/rendermime-extension": "~4.0.0-alpha.9",
-    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.2",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.9",
     "@jupyterlab/services": "^7.0.0-alpha.2",
     "@jupyterlab/settingeditor": "^4.0.0-alpha.2",
     "@jupyterlab/settingeditor-extension": "~4.0.0-alpha.9",
