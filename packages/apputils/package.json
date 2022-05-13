@@ -46,6 +46,7 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^6.0.0-alpha.9",
     "@jupyterlab/observables": "^5.0.0-alpha.9",
+    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.9",
     "@jupyterlab/services": "^7.0.0-alpha.9",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
     "@jupyterlab/statedb": "^4.0.0-alpha.9",
