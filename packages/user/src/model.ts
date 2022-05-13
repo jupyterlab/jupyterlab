@@ -4,8 +4,8 @@
 import { ISignal, Signal } from '@lumino/signaling';
 import { UUID } from '@lumino/coreutils';
 
-import { ICurrentUser, IUser, USER } from './tokens';
-import { getAnonymousUserName } from './utils';
+import { ICurrentUser, IUser, USER } from './tokens.js';
+import { getAnonymousUserName } from './utils.js';
 
 /**
  * Default user implementation.

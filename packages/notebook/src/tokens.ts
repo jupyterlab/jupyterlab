@@ -6,9 +6,9 @@ import { Cell } from '@jupyterlab/cells';
 import { Token } from '@lumino/coreutils';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { NotebookTools } from './notebooktools';
-import { NotebookPanel } from './panel';
-import { NotebookWidgetFactory } from './widgetfactory';
+import { NotebookTools } from './notebooktools.js';
+import { NotebookPanel } from './panel.js';
+import { NotebookWidgetFactory } from './widgetfactory.js';
 
 /**
  * The notebook widget factory token.

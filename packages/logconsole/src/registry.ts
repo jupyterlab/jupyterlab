@@ -3,8 +3,8 @@
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Logger } from './logger';
-import { ILogger, ILoggerRegistry, ILoggerRegistryChange } from './tokens';
+import { Logger } from './logger.js';
+import { ILogger, ILoggerRegistry, ILoggerRegistryChange } from './tokens.js';
 
 /**
  * A concrete implementation of ILoggerRegistry.

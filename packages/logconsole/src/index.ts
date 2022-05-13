@@ -5,7 +5,7 @@
  * @module logconsole
  */
 
-export * from './logger';
-export * from './registry';
-export * from './tokens';
-export * from './widget';
+export * from './logger.js';
+export * from './registry.js';
+export * from './tokens.js';
+export * from './widget.js';

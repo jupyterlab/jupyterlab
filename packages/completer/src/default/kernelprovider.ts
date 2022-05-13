@@ -5,9 +5,9 @@ import { Text } from '@jupyterlab/coreutils';
 import { IObservableString } from '@jupyterlab/observables';
 import { KernelMessage } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
-import { CompletionHandler } from '../handler';
-import { ICompletionContext, ICompletionProvider } from '../tokens';
-import { Completer } from '../widget';
+import { CompletionHandler } from '../handler.js';
+import { ICompletionContext, ICompletionProvider } from '../tokens.js';
+import { Completer } from '../widget.js';
 
 export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
 /**

@@ -3,9 +3,9 @@
 
 import { h, VirtualElement } from '@lumino/virtualdom';
 import { CommandPalette } from '@lumino/widgets';
-import { LabIconStyle } from '../../style';
-import { classes } from '../../utils';
-import { checkIcon, filterListIcon } from '../iconimports';
+import { LabIconStyle } from '../../style/index.js';
+import { classes } from '../../utils.js';
+import { checkIcon, filterListIcon } from '../iconimports.js';
 
 const searchHeaderIcon = filterListIcon.bindprops({
   stylesheet: 'commandPaletteHeader'

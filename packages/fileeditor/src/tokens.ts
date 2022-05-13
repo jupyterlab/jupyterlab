@@ -4,7 +4,7 @@
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Token } from '@lumino/coreutils';
-import { FileEditor } from './widget';
+import { FileEditor } from './widget.js';
 
 /**
  * A class that tracks editor widgets.

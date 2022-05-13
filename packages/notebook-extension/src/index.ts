@@ -99,7 +99,7 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
-import { logNotebookOutput } from './nboutput';
+import { logNotebookOutput } from './nboutput.js';
 
 /**
  * The command IDs used by the notebook plugin.

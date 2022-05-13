@@ -8,7 +8,7 @@ import {
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { IObservableMap, ObservableMap } from './observablemap';
+import { IObservableMap, ObservableMap } from './observablemap.js';
 
 /**
  * An observable JSON value.

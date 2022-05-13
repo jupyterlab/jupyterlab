@@ -7,7 +7,7 @@
  * @module statusbar
  */
 
-export * from './components';
-export * from './statusbar';
-export * from './style/statusbar';
-export * from './tokens';
+export * from './components/index.js';
+export * from './statusbar.js';
+export * from './style/statusbar.js';
+export * from './tokens.js';

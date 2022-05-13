@@ -46,7 +46,7 @@ import 'codemirror/addon/edit/trailingspace.js';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import { CodemirrorBinding } from 'y-codemirror';
-import { Mode } from './mode';
+import { Mode } from './mode.js';
 
 // import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 

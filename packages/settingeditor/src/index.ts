@@ -7,4 +7,4 @@
 
 export * from './settingseditor';
 export * from './jsonsettingeditor';
-export * from './tokens';
+export * from './tokens.js';

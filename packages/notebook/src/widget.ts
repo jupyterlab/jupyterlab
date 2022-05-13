@@ -27,7 +27,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
-import { INotebookModel } from './model';
+import { INotebookModel } from './model.js';
 
 /**
  * The data attribute added to a widget that has an active kernel.

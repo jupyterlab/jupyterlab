@@ -8,8 +8,8 @@ import { UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
-import * as models from './api';
-import { Delta, ISharedNotebook } from './api';
+import * as models from './api.js';
+import { Delta, ISharedNotebook } from './api.js';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 

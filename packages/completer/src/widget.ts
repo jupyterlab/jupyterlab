@@ -13,7 +13,7 @@ import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-import { CompletionHandler } from './handler';
+import { CompletionHandler } from './handler.js';
 
 /**
  * The class name added to completer menu items.

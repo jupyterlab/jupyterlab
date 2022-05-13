@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { caretDownEmptyIcon } from '../icon';
+import { caretDownEmptyIcon } from '../icon/index.js';
 
 /**
  * A namespace for node styling.

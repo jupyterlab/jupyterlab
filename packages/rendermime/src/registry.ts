@@ -12,8 +12,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Session } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { MimeModel } from './mimemodel';
-import { IRenderMimeRegistry } from './tokens';
+import { MimeModel } from './mimemodel.js';
+import { IRenderMimeRegistry } from './tokens.js';
 
 /**
  * An object which manages mime renderer factories.

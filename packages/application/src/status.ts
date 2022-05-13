@@ -3,8 +3,8 @@
 
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import { JupyterFrontEnd } from './frontend';
-import { ILabStatus } from './tokens';
+import { JupyterFrontEnd } from './frontend.js';
+import { ILabStatus } from './tokens.js';
 
 /**
  * The application status signals and flags class.

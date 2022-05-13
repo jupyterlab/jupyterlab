@@ -45,7 +45,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
 import { DockLayout, Widget } from '@lumino/widgets';
-import foreign from './foreign';
+import foreign from './foreign.js';
 
 /**
  * The command IDs used by the console plugin.

@@ -3,15 +3,15 @@
 
 import { codeIcon, runIcon, stopIcon } from '@jupyterlab/ui-components';
 
-import { DebuggerConfig } from './config';
+import { DebuggerConfig } from './config.js';
 
-import { DebuggerEvaluateDialog } from './dialogs/evaluate';
+import { DebuggerEvaluateDialog } from './dialogs/evaluate.js';
 
-import { ReadOnlyEditorFactory as EditorFactory } from './factory';
+import { ReadOnlyEditorFactory as EditorFactory } from './factory.js';
 
-import { DebuggerHandler } from './handler';
+import { DebuggerHandler } from './handler.js';
 
-import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
+import { EditorHandler as DebuggerEditorHandler } from './handlers/editor.js';
 
 import {
   closeAllIcon as closeAll,
@@ -21,21 +21,21 @@ import {
   stepOverIcon as stepOver,
   variableIcon as variable,
   viewBreakpointIcon as viewBreakpoint
-} from './icons';
+} from './icons.js';
 
-import { DebuggerModel } from './model';
+import { DebuggerModel } from './model.js';
 
-import { VariablesBodyGrid } from './panels/variables/grid';
+import { VariablesBodyGrid } from './panels/variables/grid.js';
 
-import { VariableMimeRenderer } from './panels/variables/mimerenderer';
+import { VariableMimeRenderer } from './panels/variables/mimerenderer.js';
 
-import { DebuggerService } from './service';
+import { DebuggerService } from './service.js';
 
-import { DebuggerSession } from './session';
+import { DebuggerSession } from './session.js';
 
-import { DebuggerSidebar } from './sidebar';
+import { DebuggerSidebar } from './sidebar.js';
 
-import { DebuggerSources } from './sources';
+import { DebuggerSources } from './sources.js';
 
 /**
  * A namespace for `Debugger` statics.

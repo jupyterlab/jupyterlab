@@ -9,7 +9,7 @@ import {
 import { ISearchProvider } from '@jupyterlab/documentsearch';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
-import { FileEditor } from './widget';
+import { FileEditor } from './widget.js';
 
 /**
  * Helper type

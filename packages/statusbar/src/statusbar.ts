@@ -15,8 +15,8 @@ import {
   leftSide as leftSideStyle,
   rightSide as rightSideStyle,
   side as sideStyle
-} from './style/statusbar';
-import { IStatusBar } from './tokens';
+} from './style/statusbar.js';
+import { IStatusBar } from './tokens.js';
 
 /**
  * Main status bar object which contains all items.

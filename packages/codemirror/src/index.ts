@@ -6,16 +6,16 @@
  */
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditorFactory } from './factory';
-import { CodeMirrorMimeTypeService } from './mimetype';
+import { CodeMirrorEditorFactory } from './factory.js';
+import { CodeMirrorMimeTypeService } from './mimetype.js';
 
-export * from './editor';
-export * from './factory';
-export * from './mimetype';
-export * from './mode';
-export * from './searchprovider';
+export * from './editor.js';
+export * from './factory.js';
+export * from './mimetype.js';
+export * from './mode.js';
+export * from './searchprovider.js';
 export * from './syntaxstatus';
-export * from './tokens';
+export * from './tokens.js';
 
 /**
  * The default editor services.

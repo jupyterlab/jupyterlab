@@ -11,11 +11,11 @@ import { Signal } from '@lumino/signaling';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { Debugger } from '../..';
+import { Debugger } from '../../index.js';
 
-import { EditorHandler } from '../../handlers/editor';
+import { EditorHandler } from '../../handlers/editor.js';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * The body for a Sources Panel.

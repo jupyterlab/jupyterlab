@@ -5,9 +5,9 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualElement } from '@lumino/virtualdom';
 import { ContextMenu, Menu } from '@lumino/widgets';
-import { LabIconStyle } from '../../style';
-import { classes } from '../../utils';
-import { caretRightIcon, checkIcon } from '../iconimports';
+import { LabIconStyle } from '../../style/index.js';
+import { classes } from '../../utils.js';
+import { caretRightIcon, checkIcon } from '../iconimports.js';
 
 const submenuIcon = caretRightIcon.bindprops({
   stylesheet: 'menuItem'

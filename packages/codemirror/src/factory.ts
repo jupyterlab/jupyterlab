@@ -3,7 +3,7 @@
 
 import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { CodeMirrorEditor } from './editor';
+import { CodeMirrorEditor } from './editor.js';
 
 /**
  * CodeMirror editor factory.

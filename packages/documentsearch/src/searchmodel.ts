@@ -6,7 +6,7 @@ import { JSONExt } from '@lumino/coreutils';
 import { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { IFilter, IFilters, ISearchProvider } from './tokens';
+import { IFilter, IFilters, ISearchProvider } from './tokens.js';
 
 /**
  * Search in a document model.

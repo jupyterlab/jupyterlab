@@ -7,7 +7,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { AccordionPanel, Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { AccordionToolbar } from './accordiontoolbar';
+import { AccordionToolbar } from './accordiontoolbar.js';
 import { Toolbar } from './toolbar';
 
 /**

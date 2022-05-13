@@ -31,7 +31,7 @@ import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { DataGrid } from '@lumino/datagrid';
-import { CSVSearchProvider } from './searchprovider';
+import { CSVSearchProvider } from './searchprovider.js';
 
 /**
  * The name of the factories that creates widgets.

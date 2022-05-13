@@ -3,9 +3,9 @@
 
 import { Token } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import { CodeEditor } from './editor';
-import { IEditorFactoryService } from './factory';
-import { IEditorMimeTypeService } from './mimetype';
+import { CodeEditor } from './editor.js';
+import { IEditorFactoryService } from './factory.js';
+import { IEditorMimeTypeService } from './mimetype.js';
 
 /**
  * Code editor services token.

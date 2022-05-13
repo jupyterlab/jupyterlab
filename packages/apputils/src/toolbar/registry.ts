@@ -5,7 +5,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
-import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
+import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens.js';
 
 /**
  * Concrete implementation of IToolbarWidgetRegistry interface

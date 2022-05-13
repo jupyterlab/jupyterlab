@@ -13,9 +13,9 @@ import {
 } from '@jupyterlab/ui-components';
 import { IIterator } from '@lumino/algorithm';
 import { Panel } from '@lumino/widgets';
-import { BreadCrumbs } from './crumbs';
-import { DirListing } from './listing';
-import { FilterFileBrowserModel } from './model';
+import { BreadCrumbs } from './crumbs.js';
+import { DirListing } from './listing.js';
+import { FilterFileBrowserModel } from './model.js';
 
 /**
  * The class name added to file browsers.

@@ -28,7 +28,7 @@ import {
   Title,
   Widget
 } from '@lumino/widgets';
-import { JupyterFrontEnd } from './frontend';
+import { JupyterFrontEnd } from './frontend.js';
 
 /**
  * The class name added to AppShell instances.

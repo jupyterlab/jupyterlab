@@ -19,8 +19,8 @@ import {
   presentCompanions
 } from './companions';
 import { reportInstallError } from './dialog';
-import { IListEntry, Lister, ListResult } from './listings';
-import { ISearchResult, isJupyterOrg, Searcher } from './npm';
+import { IListEntry, Lister, ListResult } from './listings.js';
+import { ISearchResult, isJupyterOrg, Searcher } from './npm.js';
 
 /**
  * Information about an extension.

@@ -7,7 +7,7 @@ import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ServerConnection } from '@jupyterlab/services';
 import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
-import { requestTranslationsAPI } from './server';
+import { requestTranslationsAPI } from './server.js';
 
 /*
  * Translation

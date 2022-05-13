@@ -8,12 +8,12 @@
  */
 
 export * from '@jupyterlab/rendermime-interfaces';
-export * from './attachmentmodel';
-export * from './factories';
-export * from './latex';
-export * from './mimemodel';
-export * from './outputmodel';
-export * from './registry';
-export * from './renderers';
-export * from './tokens';
-export * from './widgets';
+export * from './attachmentmodel.js';
+export * from './factories.js';
+export * from './latex.js';
+export * from './mimemodel.js';
+export * from './outputmodel.js';
+export * from './registry.js';
+export * from './renderers.js';
+export * from './tokens.js';
+export * from './widgets.js';

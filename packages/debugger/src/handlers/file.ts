@@ -9,9 +9,9 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { EditorHandler } from '../handlers/editor';
+import { EditorHandler } from '../handlers/editor.js';
 
-import { IDebugger } from '../tokens';
+import { IDebugger } from '../tokens.js';
 
 /**
  * A handler for files.

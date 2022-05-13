@@ -4,7 +4,7 @@
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Title, Widget } from '@lumino/widgets';
-import { caretDownIcon, caretUpIcon } from '../icon';
+import { caretDownIcon, caretUpIcon } from '../icon/index.js';
 
 /**
  * A panel that supports a collapsible header made from the widget's title.

@@ -4,7 +4,7 @@
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IConnectionLost } from './tokens';
+import { IConnectionLost } from './tokens.js';
 
 /**
  * A default connection lost handler, which brings up an error dialog.

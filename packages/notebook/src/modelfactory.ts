@@ -5,7 +5,7 @@ import { CodeCellModel } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IModelDB } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import { INotebookModel, NotebookModel } from './model';
+import { INotebookModel, NotebookModel } from './model.js';
 
 /**
  * A model factory for notebooks.

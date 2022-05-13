@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { murmur2 } from './hash';
+import { murmur2 } from './hash.js';
 
-import { IDebugger } from './tokens';
+import { IDebugger } from './tokens.js';
 
 /**
  * A class that holds debugger configuration for all kernels.

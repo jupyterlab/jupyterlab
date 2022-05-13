@@ -14,7 +14,7 @@ import {
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, StackedPanel, Widget } from '@lumino/widgets';
-import { LoggerOutputAreaModel, LogOutputModel } from './logger';
+import { LoggerOutputAreaModel, LogOutputModel } from './logger.js';
 import {
   IContentChange,
   ILogger,
@@ -22,7 +22,7 @@ import {
   ILoggerRegistryChange,
   IStateChange,
   LogLevel
-} from './tokens';
+} from './tokens.js';
 
 function toTitleCase(value: string) {
   return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);

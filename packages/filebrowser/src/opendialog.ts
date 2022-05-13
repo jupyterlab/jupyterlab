@@ -9,9 +9,9 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IScore, newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { FileBrowser } from './browser';
-import { FilterFileBrowserModel } from './model';
-import { IFileBrowserFactory } from './tokens';
+import { FileBrowser } from './browser.js';
+import { FilterFileBrowserModel } from './model.js';
+import { IFileBrowserFactory } from './tokens.js';
 
 /**
  * The class name added to open file dialog

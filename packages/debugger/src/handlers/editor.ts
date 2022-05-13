@@ -15,7 +15,7 @@ import { Signal } from '@lumino/signaling';
 
 import { Editor } from 'codemirror';
 
-import { IDebugger } from '../tokens';
+import { IDebugger } from '../tokens.js';
 
 /**
  * The class name added to the current line.

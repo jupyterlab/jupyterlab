@@ -6,15 +6,15 @@ import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu, MenuBar } from '@lumino/widgets';
-import { EditMenu } from './edit';
-import { FileMenu } from './file';
-import { HelpMenu } from './help';
-import { KernelMenu } from './kernel';
-import { RunMenu } from './run';
-import { SettingsMenu } from './settings';
-import { TabsMenu } from './tabs';
-import { IMainMenu } from './tokens';
-import { ViewMenu } from './view';
+import { EditMenu } from './edit.js';
+import { FileMenu } from './file.js';
+import { HelpMenu } from './help.js';
+import { KernelMenu } from './kernel.js';
+import { RunMenu } from './run.js';
+import { SettingsMenu } from './settings.js';
+import { TabsMenu } from './tabs.js';
+import { IMainMenu } from './tokens.js';
+import { ViewMenu } from './view.js';
 
 /**
  * The main menu class.  It is intended to be used as a singleton.

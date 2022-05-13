@@ -34,12 +34,12 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
-import { Palette } from './palette';
-import { settingsPlugin } from './settingsplugin';
-import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
-import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
-import { toolbarRegistry } from './toolbarregistryplugin';
-import { workspacesPlugin } from './workspacesplugin';
+import { Palette } from './palette.js';
+import { settingsPlugin } from './settingsplugin.js';
+import { kernelStatus, runningSessionsStatus } from './statusbarplugin.js';
+import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins.js';
+import { toolbarRegistry } from './toolbarregistryplugin.js';
+import { workspacesPlugin } from './workspacesplugin.js';
 
 /**
  * The interval in milliseconds before recover options appear during splash.

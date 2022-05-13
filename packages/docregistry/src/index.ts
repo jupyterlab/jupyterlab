@@ -5,7 +5,7 @@
  * @module docregistry
  */
 
-export * from './context';
-export * from './default';
-export * from './mimedocument';
-export * from './registry';
+export * from './context.js';
+export * from './default.js';
+export * from './mimedocument.js';
+export * from './registry.js';

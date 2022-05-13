@@ -1,11 +1,11 @@
 import { IObservableString } from '@jupyterlab/observables';
-import { CompletionHandler } from './handler';
+import { CompletionHandler } from './handler.js';
 import {
   ICompletionContext,
   ICompletionProvider,
   IConnectorProxy
-} from './tokens';
-import { Completer } from './widget';
+} from './tokens.js';
+import { Completer } from './widget.js';
 
 /**
  * The connector which is used to fetch responses from multiple providers.

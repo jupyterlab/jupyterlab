@@ -5,10 +5,10 @@
  * @module docmanager
  */
 
-export * from './dialogs';
-export * from './manager';
+export * from './dialogs.js';
+export * from './manager.js';
 export * from './pathstatus';
-export * from './savehandler';
+export * from './savehandler.js';
 export * from './savingstatus';
-export * from './tokens';
-export * from './widgetmanager';
+export * from './tokens.js';
+export * from './widgetmanager.js';

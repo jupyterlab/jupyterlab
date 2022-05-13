@@ -9,7 +9,7 @@ import {
 } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { SettingConnector } from './settingconnector';
+import { SettingConnector } from './settingconnector.js';
 
 /**
  * The default setting registry provider.

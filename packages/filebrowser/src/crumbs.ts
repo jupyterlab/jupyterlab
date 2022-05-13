@@ -19,7 +19,7 @@ import { ElementExt } from '@lumino/domutils';
 import { IDragEvent } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { FileBrowserModel } from './model';
+import { FileBrowserModel } from './model.js';
 
 /**
  * The class name added to the breadcrumb node.

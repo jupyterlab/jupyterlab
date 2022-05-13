@@ -7,4 +7,4 @@
  * @module attachments
  */
 
-export * from './model';
+export * from './model.js';

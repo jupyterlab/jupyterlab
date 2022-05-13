@@ -11,8 +11,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
-import { IDebugger } from '../../tokens';
-import { VariablesBodyGrid } from './grid';
+import { IDebugger } from '../../tokens.js';
+import { VariablesBodyGrid } from './grid.js';
 import { ScopeSwitcher } from './scope';
 import { VariablesBodyTree } from './tree';
 

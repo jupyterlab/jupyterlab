@@ -5,5 +5,5 @@
  * @module launcher
  */
 
-export * from './tokens';
+export * from './tokens.js';
 export * from './widget';

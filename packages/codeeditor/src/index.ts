@@ -5,9 +5,9 @@
  * @module codeeditor
  */
 
-export * from './editor';
-export * from './factory';
-export * from './jsoneditor';
+export * from './editor.js';
+export * from './factory.js';
+export * from './jsoneditor.js';
 export * from './lineCol';
 export * from './mimetype';
 export * from './tokens';

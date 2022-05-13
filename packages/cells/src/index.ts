@@ -7,11 +7,11 @@
  * @module cells
  */
 
-export * from './celldragutils';
+export * from './celldragutils.js';
 export * from './collapser';
-export * from './headerfooter';
-export * from './inputarea';
-export * from './model';
+export * from './headerfooter.js';
+export * from './inputarea.js';
+export * from './model.js';
 export * from './placeholder';
-export * from './searchprovider';
-export * from './widget';
+export * from './searchprovider.js';
+export * from './widget.js';

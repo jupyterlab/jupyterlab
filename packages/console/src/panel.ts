@@ -20,7 +20,7 @@ import { Token, UUID } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import { Panel } from '@lumino/widgets';
-import { CodeConsole } from './widget';
+import { CodeConsole } from './widget.js';
 
 /**
  * The class name added to console panels.

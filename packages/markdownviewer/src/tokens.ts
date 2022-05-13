@@ -3,7 +3,7 @@
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { MarkdownDocument } from './widget';
+import { MarkdownDocument } from './widget.js';
 
 /**
  * The markdownviewer tracker token.

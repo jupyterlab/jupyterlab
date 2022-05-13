@@ -41,7 +41,7 @@ import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { DockLayout, Widget } from '@lumino/widgets';
-import { TextModelFactory } from './default';
+import { TextModelFactory } from './default.js';
 
 /**
  * The document registry.

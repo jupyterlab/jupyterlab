@@ -1,19 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDebugger } from './tokens';
+import { IDebugger } from './tokens.js';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { BreakpointsModel } from './panels/breakpoints/model';
+import { BreakpointsModel } from './panels/breakpoints/model.js';
 
-import { CallstackModel } from './panels/callstack/model';
+import { CallstackModel } from './panels/callstack/model.js';
 
-import { SourcesModel } from './panels/sources/model';
+import { SourcesModel } from './panels/sources/model.js';
 
-import { KernelSourcesModel } from './panels/kernelSources/model';
+import { KernelSourcesModel } from './panels/kernelSources/model.js';
 
-import { VariablesModel } from './panels/variables/model';
+import { VariablesModel } from './panels/variables/model.js';
 
 /**
  * A model for a debugger.

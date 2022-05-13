@@ -19,7 +19,7 @@ import {
   toArray
 } from '@lumino/algorithm';
 import { ISignal, Signal } from '@lumino/signaling';
-import { NotebookModel } from './model';
+import { NotebookModel } from './model.js';
 
 /**
  * A cell list object that supports undo/redo.

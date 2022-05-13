@@ -11,8 +11,8 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
-import { closeAllIcon } from '../../icons';
-import { IDebugger } from '../../tokens';
+import { closeAllIcon } from '../../icons.js';
+import { IDebugger } from '../../tokens.js';
 import { BreakpointsBody } from './body';
 /**
  * A Panel to show a list of breakpoints.

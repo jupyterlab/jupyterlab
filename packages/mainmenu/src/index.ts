@@ -5,16 +5,16 @@
  * @module mainmenu
  */
 
-export * from './mainmenu';
-export * from './edit';
-export * from './file';
-export * from './help';
-export * from './kernel';
-export * from './run';
-export * from './settings';
-export * from './view';
-export * from './tabs';
-export * from './tokens';
+export * from './mainmenu.js';
+export * from './edit.js';
+export * from './file.js';
+export * from './help.js';
+export * from './kernel.js';
+export * from './run.js';
+export * from './settings.js';
+export * from './view.js';
+export * from './tabs.js';
+export * from './tokens.js';
 
 /**
  * @deprecated since version 3.1

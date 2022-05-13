@@ -15,7 +15,7 @@ import { Panel } from '@lumino/widgets';
 
 import { DebugProtocol } from '@vscode/debugprotocol';
 
-import { DebuggerHandler } from './handler';
+import { DebuggerHandler } from './handler.js';
 
 /**
  * An interface describing an application's visual debugger.

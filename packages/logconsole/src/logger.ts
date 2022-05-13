@@ -16,7 +16,7 @@ import {
   ILogPayload,
   IStateChange,
   LogLevel
-} from './tokens';
+} from './tokens.js';
 
 /**
  * All severity levels, including an internal one for metadata.

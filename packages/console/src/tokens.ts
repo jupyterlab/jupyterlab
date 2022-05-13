@@ -3,7 +3,7 @@
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { ConsolePanel } from './panel';
+import { ConsolePanel } from './panel.js';
 
 /**
  * The console tracker token.

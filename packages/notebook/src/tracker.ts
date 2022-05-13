@@ -4,9 +4,9 @@
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
 import { ISignal, Signal } from '@lumino/signaling';
-import { NotebookPanel } from './panel';
-import { INotebookTracker } from './tokens';
-import { Notebook } from './widget';
+import { NotebookPanel } from './panel.js';
+import { INotebookTracker } from './tokens.js';
+import { Notebook } from './widget.js';
 
 export class NotebookTracker
   extends WidgetTracker<NotebookPanel>

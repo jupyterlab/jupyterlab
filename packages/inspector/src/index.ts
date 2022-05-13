@@ -5,7 +5,7 @@
  * @module inspector
  */
 
-export * from './handler';
-export * from './inspector';
-export * from './kernelconnector';
-export * from './tokens';
+export * from './handler.js';
+export * from './inspector.js';
+export * from './kernelconnector.js';
+export * from './tokens.js';

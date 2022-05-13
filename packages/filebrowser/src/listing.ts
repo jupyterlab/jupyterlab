@@ -43,7 +43,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { Widget } from '@lumino/widgets';
-import { FilterFileBrowserModel } from './model';
+import { FilterFileBrowserModel } from './model.js';
 
 /**
  * The class name added to DirListing widget.

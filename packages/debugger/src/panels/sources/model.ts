@@ -3,7 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * The model to keep track of the current source being displayed.

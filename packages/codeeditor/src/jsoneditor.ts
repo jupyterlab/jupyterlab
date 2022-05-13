@@ -15,7 +15,7 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { CodeEditor } from './editor';
+import { CodeEditor } from './editor.js';
 
 /**
  * The class name added to a JSONEditor instance.

@@ -23,9 +23,9 @@ import {
 import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
 import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { INotebookModel } from './model';
-import { NotebookPanel } from './panel';
-import { INotebookTools, INotebookTracker } from './tokens';
+import { INotebookModel } from './model.js';
+import { NotebookPanel } from './panel.js';
+import { INotebookTools, INotebookTracker } from './tokens.js';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {

@@ -13,8 +13,8 @@ import { ITranslator } from '@jupyterlab/translation';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
-import { ILayoutRestorer } from './layoutrestorer';
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index.js';
+import { ILayoutRestorer } from './layoutrestorer.js';
 
 /**
  * A class that tracks mime documents.

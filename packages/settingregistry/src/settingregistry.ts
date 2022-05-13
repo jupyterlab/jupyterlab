@@ -19,7 +19,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import Ajv from 'ajv';
 import * as json5 from 'json5';
 import SCHEMA from './plugin-schema.json';
-import { ISettingRegistry } from './tokens';
+import { ISettingRegistry } from './tokens.js';
 
 /**
  * An alias for the JSON deep copy function.

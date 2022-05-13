@@ -5,5 +5,5 @@
  * @module outputarea
  */
 
-export * from './model';
-export * from './widget';
+export * from './model.js';
+export * from './widget.js';

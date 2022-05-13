@@ -17,7 +17,7 @@ import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IOutputAreaModel } from './model';
+import { IOutputAreaModel } from './model.js';
 
 /**
  * The class name added to an output area widget.

@@ -31,7 +31,7 @@ import {
 } from '@jupyterlab/translation';
 import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { CellList } from './celllist';
+import { CellList } from './celllist.js';
 
 /**
  * The definition of a model object for a notebook widget.

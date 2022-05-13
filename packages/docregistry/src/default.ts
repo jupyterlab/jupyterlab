@@ -12,7 +12,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Title, Widget } from '@lumino/widgets';
-import { DocumentRegistry, IDocumentWidget } from './index';
+import { DocumentRegistry, IDocumentWidget } from './index.js';
 
 /**
  * The default implementation of a document model.

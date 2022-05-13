@@ -8,8 +8,8 @@ import {
 } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
 import { PanelLayout } from '@lumino/widgets';
-import { AddWidget } from './addwidget';
-import { TagWidget } from './widget';
+import { AddWidget } from './addwidget.js';
+import { TagWidget } from './widget.js';
 
 /**
  * A Tool for tag operations.

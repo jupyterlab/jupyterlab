@@ -11,7 +11,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from '@vscode/debugprotocol';
 
-import { IDebugger } from './tokens';
+import { IDebugger } from './tokens.js';
 
 /**
  * A concrete implementation of IDebugger.ISession.

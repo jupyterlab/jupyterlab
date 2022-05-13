@@ -3,7 +3,7 @@
 
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import { IObservable } from './modeldb';
+import { IObservable } from './modeldb.js';
 
 /**
  * A string which can be observed for changes.

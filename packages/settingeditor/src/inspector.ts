@@ -17,7 +17,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { RawEditor } from './raweditor';
+import { RawEditor } from './raweditor.js';
 
 /**
  * Create a raw editor inspector.

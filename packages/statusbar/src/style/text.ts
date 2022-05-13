@@ -3,7 +3,7 @@
 
 import { style } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
-import vars from './variables';
+import vars from './variables.js';
 
 export const baseText: NestedCSSProperties = {
   fontSize: vars.fontSize,

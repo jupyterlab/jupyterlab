@@ -35,7 +35,7 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as Y from 'yjs';
-import { DocumentRegistry } from './registry';
+import { DocumentRegistry } from './registry.js';
 
 /**
  * An implementation of a document context.

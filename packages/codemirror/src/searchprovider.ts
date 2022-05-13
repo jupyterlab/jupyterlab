@@ -39,7 +39,7 @@ import {
 import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorEditor } from './editor';
+import { CodeMirrorEditor } from './editor.js';
 
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 

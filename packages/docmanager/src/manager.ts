@@ -17,9 +17,9 @@ import { IDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { SaveHandler } from './savehandler';
-import { IDocumentManager } from './tokens';
-import { DocumentWidgetManager } from './widgetmanager';
+import { SaveHandler } from './savehandler.js';
+import { IDocumentManager } from './tokens.js';
+import { DocumentWidgetManager } from './widgetmanager.js';
 
 /**
  * The document manager.

@@ -7,7 +7,7 @@ import { ISanitizer } from '@jupyterlab/apputils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
-import { MimeModel } from './mimemodel';
+import { MimeModel } from './mimemodel.js';
 
 /**
  * The rendermime token.

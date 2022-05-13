@@ -15,7 +15,7 @@ import { ReactWidget } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
 import { FocusTracker, SingletonLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { IPropertyInspector, IPropertyInspectorProvider } from './token';
+import { IPropertyInspector, IPropertyInspectorProvider } from './token.js';
 
 export { IPropertyInspector, IPropertyInspectorProvider };
 

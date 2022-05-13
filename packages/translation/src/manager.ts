@@ -2,9 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '@jupyterlab/services';
-import { Gettext } from './gettext';
-import { ITranslator, TranslationBundle, TranslatorConnector } from './tokens';
-import { normalizeDomain } from './utils';
+import { Gettext } from './gettext.js';
+import {
+  ITranslator,
+  TranslationBundle,
+  TranslatorConnector
+} from './tokens.js';
+import { normalizeDomain } from './utils.js';
 
 /**
  * Translation Manager

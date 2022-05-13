@@ -11,8 +11,8 @@ import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 
-import { IConnectorProxy } from './tokens';
-import { Completer } from './widget';
+import { IConnectorProxy } from './tokens.js';
+import { Completer } from './widget.js';
 
 /**
  * A class added to editors that can host a completer.

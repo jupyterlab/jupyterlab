@@ -7,8 +7,8 @@ import {
 } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
-import { murmur2 } from '../../hash';
-import { IDebugger } from '../../tokens';
+import { murmur2 } from '../../hash.js';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * Debugger variable mime type renderer

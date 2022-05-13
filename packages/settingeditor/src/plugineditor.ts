@@ -17,7 +17,7 @@ import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { StackedLayout, Widget } from '@lumino/widgets';
-import { RawEditor } from './raweditor';
+import { RawEditor } from './raweditor.js';
 import { JsonSettingEditor } from './jsonsettingeditor';
 
 /**

@@ -10,7 +10,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { BoxLayout, SplitPanel, Widget } from '@lumino/widgets';
-import { createInspector } from './inspector';
+import { createInspector } from './inspector.js';
 
 /**
  * A class name added to all raw editors.

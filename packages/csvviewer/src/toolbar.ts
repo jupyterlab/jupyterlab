@@ -7,7 +7,7 @@ import { each } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { CSVViewer } from './widget';
+import { CSVViewer } from './widget.js';
 
 /**
  * The class name added to a csv toolbar widget.

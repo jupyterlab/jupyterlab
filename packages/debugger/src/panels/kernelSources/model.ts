@@ -5,7 +5,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Debouncer } from '@lumino/polling';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * The rate limit for the filter debouncer

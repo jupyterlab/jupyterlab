@@ -10,7 +10,7 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import * as renderers from './renderers';
+import * as renderers from './renderers.js';
 
 /**
  * A common base class for mime renderers.

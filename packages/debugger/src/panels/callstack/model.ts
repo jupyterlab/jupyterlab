@@ -3,7 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * A model for a callstack.

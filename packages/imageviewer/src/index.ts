@@ -5,5 +5,5 @@
  * @module imageviewer
  */
 
-export * from './tokens';
-export * from './widget';
+export * from './tokens.js';
+export * from './widget.js';

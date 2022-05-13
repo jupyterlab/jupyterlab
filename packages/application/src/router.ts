@@ -8,7 +8,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import { IRouter } from './tokens';
+import { IRouter } from './tokens.js';
 
 /**
  * A static class that routes URLs within the application.

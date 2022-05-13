@@ -4,7 +4,7 @@
 import { ISessionContext } from '@jupyterlab/apputils';
 import { KernelMessage } from '@jupyterlab/services';
 import { DataConnector } from '@jupyterlab/statedb';
-import { InspectionHandler } from './handler';
+import { InspectionHandler } from './handler.js';
 
 /**
  * The default connector for making inspection requests from the Jupyter API.

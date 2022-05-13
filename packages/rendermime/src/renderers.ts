@@ -9,7 +9,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { toArray } from '@lumino/algorithm';
 import escape from 'lodash.escape';
-import { removeMath, replaceMath } from './latex';
+import { removeMath, replaceMath } from './latex.js';
 
 /**
  * Render HTML into a host node.

@@ -5,7 +5,7 @@ import { caretDownIcon, userIcon } from '@jupyterlab/ui-components';
 import { Menu, MenuBar } from '@lumino/widgets';
 import { h, VirtualElement } from '@lumino/virtualdom';
 
-import { ICurrentUser } from './tokens';
+import { ICurrentUser } from './tokens.js';
 
 /**
  * Custom renderer for the user menu.

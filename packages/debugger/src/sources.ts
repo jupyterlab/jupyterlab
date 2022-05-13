@@ -21,7 +21,7 @@ import { textEditorIcon } from '@jupyterlab/ui-components';
 
 import { each } from '@lumino/algorithm';
 
-import { IDebugger } from './tokens';
+import { IDebugger } from './tokens.js';
 
 /**
  * The source and editor manager for a debugger instance.

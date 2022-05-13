@@ -5,8 +5,8 @@
  * @module console
  */
 
-export * from './foreign';
-export * from './history';
-export * from './panel';
-export * from './tokens';
-export * from './widget';
+export * from './foreign.js';
+export * from './history.js';
+export * from './panel.js';
+export * from './tokens.js';
+export * from './widget.js';

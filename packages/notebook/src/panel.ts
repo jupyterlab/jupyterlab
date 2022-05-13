@@ -18,8 +18,8 @@ import {
 } from '@jupyterlab/translation';
 import { each } from '@lumino/algorithm';
 import { Token } from '@lumino/coreutils';
-import { INotebookModel } from './model';
-import { Notebook, StaticNotebook } from './widget';
+import { INotebookModel } from './model.js';
+import { Notebook, StaticNotebook } from './widget.js';
 
 /**
  * The class name added to notebook panels.

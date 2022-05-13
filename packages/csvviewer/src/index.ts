@@ -5,7 +5,7 @@
  * @module csvviewer
  */
 
-export * from './model';
-export * from './parse';
-export * from './toolbar';
-export * from './widget';
+export * from './model.js';
+export * from './parse.js';
+export * from './toolbar.js';
+export * from './widget.js';

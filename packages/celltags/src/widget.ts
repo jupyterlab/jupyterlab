@@ -1,6 +1,6 @@
 import { checkIcon } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
-import { TagTool } from './tool';
+import { TagTool } from './tool.js';
 
 /**
  * A widget which hosts a cell tags area.

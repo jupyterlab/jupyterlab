@@ -8,7 +8,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
-import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
+import { IDocumentProvider, IDocumentProviderFactory } from './tokens.js';
 
 /**
  * A class to provide Yjs synchronization over WebSocket.

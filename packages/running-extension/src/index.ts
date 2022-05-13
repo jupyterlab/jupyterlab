@@ -18,8 +18,8 @@ import {
 } from '@jupyterlab/running';
 import { ITranslator } from '@jupyterlab/translation';
 import { runningIcon } from '@jupyterlab/ui-components';
-import { addKernelRunningSessionManager } from './kernels';
-import { addOpenTabsSessionManager } from './opentabs';
+import { addKernelRunningSessionManager } from './kernels.js';
+import { addOpenTabsSessionManager } from './opentabs.js';
 
 /**
  * The command IDs used by the running plugin.

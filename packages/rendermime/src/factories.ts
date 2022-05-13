@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import * as widgets from './widgets';
+import * as widgets from './widgets.js';
 
 /**
  * A mime renderer factory for raw html.

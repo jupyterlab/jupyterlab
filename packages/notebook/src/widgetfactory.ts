@@ -10,9 +10,9 @@ import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ITranslator } from '@jupyterlab/translation';
 import { ToolbarItems } from './default-toolbar';
-import { INotebookModel } from './model';
-import { NotebookPanel } from './panel';
-import { StaticNotebook } from './widget';
+import { INotebookModel } from './model.js';
+import { NotebookPanel } from './panel.js';
+import { StaticNotebook } from './widget.js';
 
 /**
  * A widget factory for notebook panels.

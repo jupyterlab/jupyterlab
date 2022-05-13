@@ -10,8 +10,8 @@
  */
 
 import { each, IterableOrArrayLike } from '@lumino/algorithm';
-import { ICodeCellModel } from './model';
-import { Cell } from './widget';
+import { ICodeCellModel } from './model.js';
+import { Cell } from './widget.js';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import * as nbformat from '@jupyterlab/nbformat';
 

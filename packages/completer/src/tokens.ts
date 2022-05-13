@@ -7,8 +7,8 @@ import { Session } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { CompletionHandler } from './handler';
-import { Completer } from './widget';
+import { CompletionHandler } from './handler.js';
+import { Completer } from './widget.js';
 
 /**
  * The context which will be passed to the `fetch` function

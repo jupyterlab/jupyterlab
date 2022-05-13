@@ -13,7 +13,7 @@ import {
 } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
-import { ISchemaValidator } from './settingregistry';
+import { ISchemaValidator } from './settingregistry.js';
 
 /**
  * The setting registry token.

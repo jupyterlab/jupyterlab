@@ -11,11 +11,11 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { bugDotIcon, bugIcon, ToolbarButton } from '@jupyterlab/ui-components';
-import { Debugger } from './debugger';
-import { ConsoleHandler } from './handlers/console';
-import { FileHandler } from './handlers/file';
-import { NotebookHandler } from './handlers/notebook';
-import { IDebugger } from './tokens';
+import { Debugger } from './debugger.js';
+import { ConsoleHandler } from './handlers/console.js';
+import { FileHandler } from './handlers/file.js';
+import { NotebookHandler } from './handlers/notebook.js';
+import { IDebugger } from './tokens.js';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 

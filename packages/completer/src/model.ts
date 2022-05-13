@@ -11,8 +11,8 @@ import {
 } from '@lumino/algorithm';
 import { JSONExt, ReadonlyPartialJSONArray } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { CompletionHandler } from './handler';
-import { Completer } from './widget';
+import { CompletionHandler } from './handler.js';
+import { Completer } from './widget.js';
 
 /**
  * An implementation of a completer model.

@@ -68,9 +68,9 @@ import {
   CellHeader,
   ICellFooter,
   ICellHeader
-} from './headerfooter';
+} from './headerfooter.js';
 
-import { IInputPrompt, InputArea, InputPrompt } from './inputarea';
+import { IInputPrompt, InputArea, InputPrompt } from './inputarea.js';
 
 import {
   IAttachmentsCellModel,
@@ -78,11 +78,11 @@ import {
   ICodeCellModel,
   IMarkdownCellModel,
   IRawCellModel
-} from './model';
+} from './model.js';
 
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
-import { ResizeHandle } from './resizeHandle';
+import { ResizeHandle } from './resizeHandle.js';
 
 /**
  * The CSS class added to cell widgets.

@@ -24,8 +24,8 @@ import {
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
-import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
+import { NotebookPanel } from './panel.js';
+import { Notebook } from './widget.js';
 
 /**
  * Notebook document search provider

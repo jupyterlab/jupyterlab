@@ -7,7 +7,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { Token } from '@lumino/coreutils';
 
-import { ImageViewer } from './widget';
+import { ImageViewer } from './widget.js';
 
 /**
  * A class that tracks image widgets.

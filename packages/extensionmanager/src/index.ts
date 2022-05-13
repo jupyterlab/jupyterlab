@@ -5,7 +5,7 @@
  * @module extensionmanager
  */
 
-export * from './model';
-export * from './npm';
-export * from './listings';
+export * from './model.js';
+export * from './npm.js';
+export * from './listings.js';
 export * from './widget';

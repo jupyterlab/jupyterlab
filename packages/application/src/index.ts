@@ -5,21 +5,21 @@
  * @module application
  */
 
-export { ConnectionLost } from './connectionlost';
+export { ConnectionLost } from './connectionlost.js';
 export {
   JupyterFrontEnd,
   JupyterFrontEndContextMenu,
   JupyterFrontEndPlugin
-} from './frontend';
-export { JupyterLab } from './lab';
-export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
+} from './frontend.js';
+export { JupyterLab } from './lab.js';
+export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer.js';
 export {
   createRendermimePlugin,
   createRendermimePlugins,
   IMimeDocumentTracker
-} from './mimerenderers';
-export { Router } from './router';
-export { ILabShell, LabShell } from './shell';
-export * from './tokens';
-export { ITreePathUpdater } from './treepathupdater';
-export * from './utils';
+} from './mimerenderers.js';
+export { Router } from './router.js';
+export { ILabShell, LabShell } from './shell.js';
+export * from './tokens.js';
+export { ITreePathUpdater } from './treepathupdater.js';
+export * from './utils.js';

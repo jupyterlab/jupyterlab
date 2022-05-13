@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
-import { IWindowResolver } from './tokens';
+import { IWindowResolver } from './tokens.js';
 
 /**
  * A concrete implementation of a window name resolver.

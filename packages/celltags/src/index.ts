@@ -5,6 +5,6 @@
  * @module celltags
  */
 
-export * from './addwidget';
-export * from './tool';
-export * from './widget';
+export * from './addwidget.js';
+export * from './tool.js';
+export * from './widget.js';

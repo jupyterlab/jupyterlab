@@ -7,6 +7,6 @@
  * @module docprovider
  */
 
-export * from './mock';
-export * from './tokens';
-export * from './yprovider';
+export * from './mock.js';
+export * from './tokens.js';
+export * from './yprovider.js';

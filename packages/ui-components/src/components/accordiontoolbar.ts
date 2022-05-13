@@ -8,7 +8,7 @@ import {
   Title,
   Widget
 } from '@lumino/widgets';
-import { caretDownIcon } from '../icon';
+import { caretDownIcon } from '../icon/index.js';
 import { Toolbar } from './toolbar';
 
 /**

@@ -6,10 +6,10 @@ import { Base64ModelFactory } from '@jupyterlab/docregistry';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ServiceManager } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
-import { createRendermimePlugins } from './mimerenderers';
-import { ILabShell, LabShell } from './shell';
-import { LabStatus } from './status';
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend.js';
+import { createRendermimePlugins } from './mimerenderers.js';
+import { ILabShell, LabShell } from './shell.js';
+import { LabStatus } from './status.js';
 
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.

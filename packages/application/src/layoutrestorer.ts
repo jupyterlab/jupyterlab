@@ -17,7 +17,7 @@ import {
 } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
 import { DockPanel, Widget } from '@lumino/widgets';
-import { ILabShell } from './shell';
+import { ILabShell } from './shell.js';
 
 /**
  * The layout restorer token.

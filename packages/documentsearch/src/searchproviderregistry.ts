@@ -9,7 +9,7 @@ import {
   ISearchProvider,
   ISearchProviderFactory,
   ISearchProviderRegistry
-} from './tokens';
+} from './tokens.js';
 
 /**
  * Search provider registry

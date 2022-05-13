@@ -7,8 +7,8 @@
 
 export * from './actions';
 export * from './default-toolbar';
-export * from './model';
-export * from './modelfactory';
+export * from './model.js';
+export * from './modelfactory.js';
 export * from './modestatus';
 export * from './notebooktools';
 export * from './panel';
@@ -17,6 +17,6 @@ export * from './toc';
 export * from './tokens';
 export * from './tracker';
 export * from './truststatus';
-export * from './widget';
-export * from './widgetfactory';
+export * from './widget.js';
+export * from './widgetfactory.js';
 export * from './executionindicator';

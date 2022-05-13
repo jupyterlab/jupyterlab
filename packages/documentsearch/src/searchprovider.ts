@@ -3,7 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IFilter, IFilters, ISearchMatch, ISearchProvider } from './tokens';
+import { IFilter, IFilters, ISearchMatch, ISearchProvider } from './tokens.js';
 
 /**
  * Abstract class implementing the search provider interface.

@@ -11,7 +11,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
-import { ICellModel } from './model';
+import { ICellModel } from './model.js';
 
 /**
  * The class name added to input area widgets.

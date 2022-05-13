@@ -13,7 +13,7 @@
 | See: https://github.com/DefinitelyTyped/DefinitelyTyped
 |----------------------------------------------------------------------------*/
 
-import { normalizeDomain } from './utils';
+import { normalizeDomain } from './utils.js';
 
 /**
  * A plural form function.

@@ -5,11 +5,11 @@
  * @module filebrowser
  */
 
-export * from './browser';
-export * from './crumbs';
-export * from './listing';
-export * from './model';
-export * from './opendialog';
-export * from './tokens';
-export * from './upload';
+export * from './browser.js';
+export * from './crumbs.js';
+export * from './listing.js';
+export * from './model.js';
+export * from './opendialog.js';
+export * from './tokens.js';
+export * from './upload.js';
 export * from './uploadstatus';

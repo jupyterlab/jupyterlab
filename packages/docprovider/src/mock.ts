@@ -1,4 +1,4 @@
-import { IDocumentProvider } from './index';
+import { IDocumentProvider } from './index.js';
 
 export class ProviderMock implements IDocumentProvider {
   destroy(): void {

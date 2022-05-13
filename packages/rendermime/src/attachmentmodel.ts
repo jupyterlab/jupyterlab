@@ -14,7 +14,7 @@ import {
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { MimeModel } from './mimemodel';
+import { MimeModel } from './mimemodel.js';
 
 /**
  * The interface for an attachment model.

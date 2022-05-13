@@ -3,17 +3,17 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { ConnectorProxy } from './connectorproxy';
-import { CONTEXT_PROVIDER_ID } from './default/contextprovider';
-import { KERNEL_PROVIDER_ID } from './default/kernelprovider';
-import { CompletionHandler } from './handler';
-import { CompleterModel } from './model';
+import { ConnectorProxy } from './connectorproxy.js';
+import { CONTEXT_PROVIDER_ID } from './default/contextprovider.js';
+import { KERNEL_PROVIDER_ID } from './default/kernelprovider.js';
+import { CompletionHandler } from './handler.js';
+import { CompleterModel } from './model.js';
 import {
   ICompletionContext,
   ICompletionProvider,
   ICompletionProviderManager
-} from './tokens';
-import { Completer } from './widget';
+} from './tokens.js';
+import { Completer } from './widget.js';
 
 /**
  * A manager for completer provider.

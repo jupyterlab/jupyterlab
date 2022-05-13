@@ -3,7 +3,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import sanitize from 'sanitize-html';
-import { ISanitizer } from './tokens';
+import { ISanitizer } from './tokens.js';
 
 /**
  * Helper class that contains regular expressions for inline CSS style validation.

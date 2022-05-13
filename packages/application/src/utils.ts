@@ -1,7 +1,7 @@
 import { SemanticCommand } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
-import { JupyterFrontEnd } from './frontend';
+import { JupyterFrontEnd } from './frontend.js';
 
 export interface ISemanticCommandDefault {
   /**

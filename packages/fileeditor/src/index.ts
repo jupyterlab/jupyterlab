@@ -5,7 +5,7 @@
  * @module fileeditor
  */
 
-export * from './searchprovider';
+export * from './searchprovider.js';
 export * from './tabspacestatus';
 export * from './toc';
 export * from './tokens';

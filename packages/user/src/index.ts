@@ -5,7 +5,7 @@
  * @module user
  */
 
-export * from './tokens';
-export * from './model';
-export * from './menu';
-export * from './utils';
+export * from './tokens.js';
+export * from './model.js';
+export * from './menu.js';
+export * from './utils.js';

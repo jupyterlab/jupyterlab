@@ -20,8 +20,8 @@ import {
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { DSVModel } from './model';
-import { CSVDelimiter } from './toolbar';
+import { DSVModel } from './model.js';
+import { CSVDelimiter } from './toolbar.js';
 
 /**
  * The class name added to a CSV viewer.

@@ -5,8 +5,8 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReactiveToolbar, Spinner, Toolbar } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
-import { DOMUtils } from './domutils';
-import { Printing } from './printing';
+import { DOMUtils } from './domutils.js';
+import { Printing } from './printing.js';
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.

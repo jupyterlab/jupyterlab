@@ -25,7 +25,7 @@ import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { ConsoleHistory, IConsoleHistory } from './history';
+import { ConsoleHistory, IConsoleHistory } from './history.js';
 
 /**
  * The data attribute added to a widget that has an active kernel.

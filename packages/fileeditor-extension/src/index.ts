@@ -52,7 +52,7 @@ import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
 
-export { Commands } from './commands';
+export { Commands } from './commands.js';
 
 /**
  * The editor tracker extension.

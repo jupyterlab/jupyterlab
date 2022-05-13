@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { openKernelSourceIcon } from '../../icons';
+import { openKernelSourceIcon } from '../../icons.js';
 
 import { ReactWidget, ToolbarButton } from '@jupyterlab/ui-components';
 
@@ -13,7 +13,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { KernelSourcesFilter } from './filter';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
 /**
  * The class name added to the filterbox node.

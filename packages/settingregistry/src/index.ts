@@ -7,5 +7,5 @@
  * @module settingregistry
  */
 
-export * from './settingregistry';
-export * from './tokens';
+export * from './settingregistry.js';
+export * from './tokens.js';

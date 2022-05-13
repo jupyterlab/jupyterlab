@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from './editor';
+import { CodeEditor } from './editor.js';
 
 /**
  * The editor factory service interface.

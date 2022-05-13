@@ -18,8 +18,8 @@ import 'codemirror/mode/meta';
 import 'codemirror/mode/r/r';
 import 'codemirror/mode/shell/shell';
 import 'codemirror/mode/sql/sql';
-import './codemirror-ipython';
-import './codemirror-ipythongfm';
+import './codemirror-ipython.js';
+import './codemirror-ipythongfm.js';
 
 // Stub for the require function.
 declare let require: any;

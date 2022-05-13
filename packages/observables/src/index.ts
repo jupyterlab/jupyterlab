@@ -7,9 +7,9 @@
  * @module observables
  */
 
-export * from './modeldb';
-export * from './observablejson';
-export * from './observablelist';
-export * from './observablemap';
-export * from './observablestring';
-export * from './undoablelist';
+export * from './modeldb.js';
+export * from './observablejson.js';
+export * from './observablelist.js';
+export * from './observablemap.js';
+export * from './observablestring.js';
+export * from './undoablelist.js';

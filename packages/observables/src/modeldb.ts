@@ -9,13 +9,13 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import { IObservableJSON, ObservableJSON } from './observablejson';
-import { IObservableMap, ObservableMap } from './observablemap';
-import { IObservableString, ObservableString } from './observablestring';
+import { IObservableJSON, ObservableJSON } from './observablejson.js';
+import { IObservableMap, ObservableMap } from './observablemap.js';
+import { IObservableString, ObservableString } from './observablestring.js';
 import {
   IObservableUndoableList,
   ObservableUndoableList
-} from './undoablelist';
+} from './undoablelist.js';
 
 /**
  * String type annotations for Observable objects that can be

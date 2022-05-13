@@ -4,7 +4,7 @@
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { Mode } from './mode';
+import { Mode } from './mode.js';
 
 /**
  * The mime type service for CodeMirror.

@@ -18,11 +18,11 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
 
-import { Debugger } from '../../';
+import { Debugger } from '../..//index.js';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger } from '../../tokens.js';
 
-import { VariablesModel } from './model';
+import { VariablesModel } from './model.js';
 import {
   ITranslator,
   nullTranslator,

@@ -4,7 +4,7 @@
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
-import { FileBrowser } from './browser';
+import { FileBrowser } from './browser.js';
 
 /**
  * The path tracker token.

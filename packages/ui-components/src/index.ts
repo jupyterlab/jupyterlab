@@ -5,9 +5,9 @@
  * @module ui-components
  */
 
-export * from './components';
-export * from './icon';
-export * from './hoverbox';
-export * from './tokens';
-export * from './utils';
+export * from './components/index.js';
+export * from './icon/index.js';
+export * from './hoverbox.js';
+export * from './tokens.js';
+export * from './utils.js';
 export * from './FormComponentRegistry';

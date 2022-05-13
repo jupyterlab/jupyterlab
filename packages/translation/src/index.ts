@@ -6,8 +6,8 @@
  */
 
 // Note: keep in alphabetical order...
-export * from './base';
-export * from './gettext';
-export * from './manager';
-export * from './server';
-export * from './tokens';
+export * from './base.js';
+export * from './gettext.js';
+export * from './manager.js';
+export * from './server.js';
+export * from './tokens.js';

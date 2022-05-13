@@ -3,7 +3,7 @@
 
 import { each } from '@lumino/algorithm';
 import { JSONValue } from '@lumino/coreutils';
-import { IObservableList, ObservableList } from './observablelist';
+import { IObservableList, ObservableList } from './observablelist.js';
 
 /**
  * An object which knows how to serialize and

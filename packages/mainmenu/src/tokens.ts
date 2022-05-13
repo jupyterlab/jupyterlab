@@ -4,14 +4,14 @@
 import { MenuFactory } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
 import { Menu } from '@lumino/widgets';
-import { IEditMenu } from './edit';
-import { IFileMenu } from './file';
-import { IHelpMenu } from './help';
-import { IKernelMenu } from './kernel';
-import { IRunMenu } from './run';
-import { ISettingsMenu } from './settings';
-import { ITabsMenu } from './tabs';
-import { IViewMenu } from './view';
+import { IEditMenu } from './edit.js';
+import { IFileMenu } from './file.js';
+import { IHelpMenu } from './help.js';
+import { IKernelMenu } from './kernel.js';
+import { IRunMenu } from './run.js';
+import { ISettingsMenu } from './settings.js';
+import { ITabsMenu } from './tabs.js';
+import { IViewMenu } from './view.js';
 
 /**
  * The main menu token.
