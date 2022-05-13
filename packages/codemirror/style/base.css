@@ -17,6 +17,10 @@
   padding: 0 var(--jp-code-padding);
 }
 
+.CodeMirror.cm-fat-cursor .cm-overlay.cm-searching {
+  opacity: 0.5;
+}
+
 .jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-dialog {
   background-color: var(--jp-layout-color0);
   color: var(--jp-content-font-color1);
