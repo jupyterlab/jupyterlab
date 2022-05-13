@@ -6,7 +6,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { ModelDB } from '@jupyterlab/observables';
 import { acceptDialog } from '@jupyterlab/testutils';
 import { ArrayExt, toArray } from '@lumino/algorithm';
-import { NotebookModel } from '..';
+import { NotebookModel } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {

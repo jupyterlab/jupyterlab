@@ -2,13 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
-import { NBTestUtils } from '@jupyterlab/testutils';
 import {
   INotebookModel,
   Notebook,
   NotebookPanel,
   NotebookWidgetFactory
-} from '..';
+} from '@jupyterlab/notebook';
+import { NBTestUtils } from '@jupyterlab/testutils';
 
 /**
  * Local versions of the NBTestUtils that import from `src` instead of `lib`.

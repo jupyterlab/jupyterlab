@@ -17,7 +17,7 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 
 import React, { useEffect, useState } from 'react';
 
-import { convertType } from '.';
+import { convertType } from './index';
 
 import { Debugger } from '../../debugger.js';
 

@@ -13,7 +13,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 import * as validate from './validate';
 

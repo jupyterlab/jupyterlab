@@ -15,7 +15,7 @@ import {
   NotebookPanel,
   NotebookTools,
   NotebookTracker
-} from '..';
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 class LogTool extends NotebookTools.Tool {

@@ -8,7 +8,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
 import React from 'react';
-import { INotebookModel, Notebook } from '.';
+import { INotebookModel } from './model';
+import { Notebook } from './widget';
 
 /**
  * Determine the notebook trust status message.

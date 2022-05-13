@@ -6,7 +6,11 @@ import { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import { toArray } from '@lumino/algorithm';
-import { INotebookModel, NotebookPanel, NotebookWidgetFactory } from '..';
+import {
+  INotebookModel,
+  NotebookPanel,
+  NotebookWidgetFactory
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const rendermime = utils.defaultRenderMime();

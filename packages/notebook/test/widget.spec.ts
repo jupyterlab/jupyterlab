@@ -16,7 +16,12 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
 import * as nbformat from '@jupyterlab/nbformat';
-import { INotebookModel, Notebook, NotebookModel, StaticNotebook } from '..';
+import {
+  INotebookModel,
+  Notebook,
+  NotebookModel,
+  StaticNotebook
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const server = new JupyterServer();

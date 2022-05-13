@@ -5,7 +5,7 @@ import { every, IIterator, iter } from '@lumino/algorithm';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
 import {

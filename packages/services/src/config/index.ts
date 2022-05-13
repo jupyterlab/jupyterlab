@@ -5,7 +5,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 /**
  * The url for the config service.

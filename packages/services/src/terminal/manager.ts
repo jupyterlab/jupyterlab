@@ -7,7 +7,7 @@ import { Poll } from '@lumino/polling';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 import * as Terminal from './terminal';
 import { BaseManager } from '../basemanager';

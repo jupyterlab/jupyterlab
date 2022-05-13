@@ -14,7 +14,12 @@ import {
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import { each } from '@lumino/algorithm';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
-import { KernelError, Notebook, NotebookActions, NotebookModel } from '..';
+import {
+  KernelError,
+  Notebook,
+  NotebookActions,
+  NotebookModel
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';

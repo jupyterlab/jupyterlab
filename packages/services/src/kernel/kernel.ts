@@ -9,7 +9,7 @@ import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 import * as KernelMessage from './messages';
 

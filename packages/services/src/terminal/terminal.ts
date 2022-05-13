@@ -9,7 +9,7 @@ import { IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 import { IManager as IBaseManager } from '../basemanager';
 

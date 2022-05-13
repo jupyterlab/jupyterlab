@@ -5,7 +5,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Kernel, KernelMessage } from '../kernel';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 import * as Session from './session';
 

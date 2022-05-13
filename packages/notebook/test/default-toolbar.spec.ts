@@ -18,7 +18,7 @@ import {
   NotebookActions,
   NotebookPanel,
   ToolbarItems
-} from '..';
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';

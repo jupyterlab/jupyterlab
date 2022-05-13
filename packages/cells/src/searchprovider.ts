@@ -16,9 +16,8 @@ import {
 import { IObservableString } from '@jupyterlab/observables';
 import { OutputArea } from '@jupyterlab/outputarea';
 import { ISignal, Signal } from '@lumino/signaling';
-import { CodeCell } from '.';
 import { ICellModel } from './model.js';
-import { Cell, MarkdownCell } from './widget.js';
+import { Cell, CodeCell, MarkdownCell } from './widget.js';
 
 /**
  * Class applied on highlighted search matches

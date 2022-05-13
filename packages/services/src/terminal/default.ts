@@ -7,7 +7,7 @@ import { JSONPrimitive, PromiseDelegate } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 import * as Terminal from './terminal';
 import { shutdownTerminal, TERMINAL_SERVICE_URL } from './restapi';

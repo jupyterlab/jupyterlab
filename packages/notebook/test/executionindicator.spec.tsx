@@ -11,7 +11,7 @@ import {
   Notebook,
   NotebookActions,
   NotebookModel
-} from '..';
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';

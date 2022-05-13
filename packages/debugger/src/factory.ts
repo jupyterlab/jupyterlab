@@ -7,7 +7,7 @@ import {
   IEditorServices
 } from '@jupyterlab/codeeditor';
 
-import { IDebugger } from '.';
+import { IDebugger } from './tokens';
 
 /**
  * A widget factory for read only editors.

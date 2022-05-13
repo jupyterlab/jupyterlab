@@ -5,7 +5,7 @@ import { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import { Toolbar } from '@jupyterlab/ui-components';
-import { INotebookModel, Notebook, NotebookPanel } from '..';
+import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 /**

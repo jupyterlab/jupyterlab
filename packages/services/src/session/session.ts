@@ -9,7 +9,7 @@ import { ISignal } from '@lumino/signaling';
 
 import { Kernel, KernelMessage } from '../kernel';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 

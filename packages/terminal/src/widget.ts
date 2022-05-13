@@ -12,7 +12,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { Terminal as Xterm } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
-import { ITerminal } from '.';
+import { ITerminal } from './tokens.js';
 
 /**
  * The class name added to a terminal widget.
