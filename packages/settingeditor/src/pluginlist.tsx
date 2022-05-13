@@ -9,6 +9,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   classes,
   FilterBox,
+  IScore,
   LabIcon,
   settingsIcon,
   updateFilterFunction
@@ -241,7 +242,7 @@ export class PluginList extends ReactWidget {
    * @returns - String array of properties that match the search results.
    */
   getFilterString(
-    filter: (item: string) => boolean,
+    filter: (item: string) => Partial<IScore> | null,
     props: ISettingRegistry.IProperty,
     definitions?: any,
     ref?: string
@@ -319,7 +320,10 @@ export class PluginList extends ReactWidget {
    * Updates the filter when the search bar value changes.
    * @param filter Filter function passed by search bar based on search value.
    */
-  setFilter(filter: (item: string) => boolean, query?: string): void {
+  setFilter(
+    filter: (item: string) => Partial<IScore> | null,
+    query?: string
+  ): void {
     this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
       if (filter(plugin.schema.title ?? '')) {
         return null;

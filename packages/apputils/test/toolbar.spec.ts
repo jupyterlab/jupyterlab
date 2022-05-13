@@ -195,7 +195,7 @@ describe('@jupyterlab/apputils', () => {
           name: 'test'
         };
 
-        registry.registerFactory('factory', item.name, dummy);
+        registry.addFactory('factory', item.name, dummy);
 
         const widget = registry.createWidget('factory', documentWidget, item);
 
@@ -205,7 +205,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#registerFactory', () => {
+    describe('#addFactory', () => {
       it('should return the previous registered factory', () => {
         const defaultFactory = jest.fn();
         const dummy = jest.fn();
@@ -219,11 +219,9 @@ describe('@jupyterlab/apputils', () => {
         };
 
         expect(
-          registry.registerFactory('factory', item.name, dummy)
+          registry.addFactory('factory', item.name, dummy)
         ).toBeUndefined();
-        expect(registry.registerFactory('factory', item.name, dummy2)).toBe(
-          dummy
-        );
+        expect(registry.addFactory('factory', item.name, dummy2)).toBe(dummy);
       });
     });
   });

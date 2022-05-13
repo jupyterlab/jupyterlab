@@ -43,6 +43,7 @@
     "@jupyterlab/markdownviewer": "^4.0.0-alpha.9",
     "@jupyterlab/rendermime": "^4.0.0-alpha.9",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/toc": "^6.0.0-alpha.9",
     "@jupyterlab/translation": "^4.0.0-alpha.9"
   },
   "devDependencies": {

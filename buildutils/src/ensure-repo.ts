@@ -84,6 +84,7 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
+  '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/galata': ['node-fetch', 'http-server'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],

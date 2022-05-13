@@ -15,6 +15,7 @@ import '@jupyterlab/docregistry/style/index.js';
 import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/docmanager/style/index.js';
 import '@jupyterlab/filebrowser/style/index.js';
+import '@jupyterlab/toc/style/index.js';
 import '@jupyterlab/cells/style/index.js';
 import '@jupyterlab/completer/style/index.js';
 import '@jupyterlab/docmanager-extension/style/index.js';

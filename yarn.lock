@@ -11158,6 +11158,18 @@ regex-not@^1.0.0, regex-not@^1.0.2:
     extend-shallow "^3.0.2"
     safe-regex "^1.1.0"
 
+regexp-match-indices@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/regexp-match-indices/-/regexp-match-indices-1.0.2.tgz#cf20054a6f7d5b3e116a701a7b00f82889d10da6"
+  integrity sha512-DwZuAkt8NF5mKwGGER1EGh2PRqyvhRhhLviH+R8y8dIuaQROlUfXjt4s9ZTXstIsSkptf06BSvwcEmmfheJJWQ==
+  dependencies:
+    regexp-tree "^0.1.11"
+
+regexp-tree@^0.1.11:
+  version "0.1.24"
+  resolved "https://registry.npmjs.org/regexp-tree/-/regexp-tree-0.1.24.tgz#3d6fa238450a4d66e5bc9c4c14bb720e2196829d"
+  integrity sha512-s2aEVuLhvnVJW6s/iPgEGK6R+/xngd2jNQ+xy4bXNDKxZKJH6jpPHY6kVeVv1IeLCHgswRj+Kl3ELaDjG6V1iw==
+
 regexp.prototype.flags@^1.3.1:
   version "1.3.1"
   resolved "https://registry.npmjs.org/regexp.prototype.flags/-/regexp.prototype.flags-1.3.1.tgz"

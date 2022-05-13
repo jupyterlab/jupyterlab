@@ -76,6 +76,8 @@
     "@jupyterlab/translation-extension": "~4.0.0-alpha.9",
     "@jupyterlab/ui-components": "^4.0.0-alpha.17",
     "@jupyterlab/ui-components-extension": "~4.0.0-alpha.9",
+    "@jupyterlab/user": "^4.0.0-alpha.9",
+    "@jupyterlab/user-extension": "~4.0.0-alpha.9",
     "@jupyterlab/vdom-extension": "~4.0.0-alpha.9",
     "@jupyterlab/vega5-extension": "~4.0.0-alpha.9",
     "@lumino/algorithm": "^1.9.1",
@@ -133,6 +135,7 @@
     "@jupyterlab/translation": "^4.0.0-alpha.9",
     "@jupyterlab/translation-extension": "^4.0.0-alpha.9",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.9",
+    "@jupyterlab/user-extension": "^4.0.0-alpha.9",
     "@jupyterlab/vdom-extension": "^4.0.0-alpha.9",
     "@jupyterlab/vega5-extension": "^4.0.0-alpha.9"
   },
@@ -190,6 +193,7 @@
       "@jupyterlab/tooltip",
       "@jupyterlab/translation",
       "@jupyterlab/ui-components",
+      "@jupyterlab/user",
       "@lumino/algorithm",
       "@lumino/application",
       "@lumino/commands",
@@ -242,6 +246,7 @@
       "@jupyterlab/tooltip-extension",
       "@jupyterlab/translation-extension",
       "@jupyterlab/ui-components-extension",
+      "@jupyterlab/user-extension",
       "@jupyterlab/vdom-extension",
       "@jupyterlab/vega5-extension"
     ]

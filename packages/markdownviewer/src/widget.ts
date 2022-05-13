@@ -20,6 +20,7 @@ import {
 } from '@jupyterlab/translation';
 import { JSONObject, PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
 import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -70,6 +71,13 @@ export class MarkdownViewer extends Widget {
    */
   get ready(): Promise<void> {
     return this._ready.promise;
+  }
+
+  /**
+   * Signal emitted when the content has been rendered.
+   */
+  get rendered(): ISignal<MarkdownViewer, void> {
+    return this._rendered;
   }
 
   /**
@@ -191,6 +199,8 @@ export class MarkdownViewer extends Widget {
       // If there is an outstanding request to render, go ahead and render
       if (this._renderRequested) {
         return this._render();
+      } else {
+        this._rendered.emit();
       }
     } catch (reason) {
       // Dispose the document if rendering fails.
@@ -214,6 +224,7 @@ export class MarkdownViewer extends Widget {
   private _ready = new PromiseDelegate<void>();
   private _isRendering = false;
   private _renderRequested = false;
+  private _rendered = new Signal<MarkdownViewer, void>(this);
 }
 
 /**

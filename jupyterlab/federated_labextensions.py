@@ -275,12 +275,6 @@ def _ensure_builder(ext_path, core_path):
     if "/" in depVersion2:
         with open(osp.join(ext_path, depVersion2, "package.json")) as fid:
             depVersion2 = json.load(fid).get("version")
-    overlap = _test_overlap(depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True)
-    if not overlap:
-        raise ValueError(
-            "Extensions require a devDependency on @jupyterlab/builder@%s, you have a dependency on %s"
-            % (depVersion1, depVersion2)
-        )
     if not osp.exists(osp.join(ext_path, "node_modules")):
         subprocess.check_call(["jlpm"], cwd=ext_path)
 
@@ -291,6 +285,22 @@ def _ensure_builder(ext_path, core_path):
         if osp.dirname(target) == target:
             raise ValueError("Could not find @jupyterlab/builder")
         target = osp.dirname(target)
+
+    overlap = _test_overlap(depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True)
+    if not overlap:
+        with open(
+            osp.join(target, "node_modules", "@jupyterlab", "builder", "package.json")
+        ) as fid:
+            depVersion2 = json.load(fid).get("version")
+        overlap = _test_overlap(
+            depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True
+        )
+
+    if not overlap:
+        raise ValueError(
+            "Extensions require a devDependency on @jupyterlab/builder@%s, you have a dependency on %s"
+            % (depVersion1, depVersion2)
+        )
 
     return osp.join(
         target, "node_modules", "@jupyterlab", "builder", "lib", "build-labextension.js"
