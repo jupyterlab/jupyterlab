@@ -64,7 +64,7 @@ jobs:
           bash ./scripts/ci_install.sh
 
       - name: Get modified files in the staging directory
-        if: matrix.group == "integrity"
+        if: matrix.group == 'integrity'
         id: modified-files-in-staging
         uses: tj-actions/changed-files@v19
         with:
