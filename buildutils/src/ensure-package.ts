@@ -606,7 +606,7 @@ export async function ensurePackage(
     if (tsConfigData.compilerOptions?.module !== 'commonjs') {
       data.type = 'module';
 
-      if (process.env.CI || process.env.ESM_FIX) {
+      if (process.env.ESM_FIX) {
         // Correct import if needed
         utils.run(
           `jlpm tsc-esm-fix --src="${

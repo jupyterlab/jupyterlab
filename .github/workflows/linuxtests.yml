@@ -77,20 +77,16 @@ jobs:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
 
-      - name: Get modified files in the staging directory
+      - name: Fail if TS files in packages are modified
         if: matrix.group == 'integrity'
-        id: modified-files-in-staging
-        uses: tj-actions/changed-files@v19
-        with:
-          # only checks for modified ts files in packages
-          files: |
-            packages/**/*.tsx?
-
-      - name: Fail if files in staging are modified
-        if: steps.modified-files-in-staging.outputs.any_changed == 'true'
+        id: modified-files-in-packages
         run: |
-          echo "Integrity test failed; please run locally `ESM_FIX=1 jlpm integrity` and commit the changes"
-          exit 1
+            set -ex
+            if [[ $(git ls-files --exclude-standard -m | wc -l) > 0 ]]
+            then
+              echo "Integrity test failed; please run locally `ESM_FIX=1 jlpm integrity` and commit the changes"
+              exit 1
+            fi
 
   test_minimum_versions:
     name: Test Minimum Versions

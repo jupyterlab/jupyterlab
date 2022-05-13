@@ -12909,10 +12909,10 @@ ts-loader@^6.2.1:
     micromatch "^4.0.0"
     semver "^6.0.0"
 
-tsc-esm-fix@^2.13.0:
-  version "2.13.0"
-  resolved "https://registry.npmjs.org/tsc-esm-fix/-/tsc-esm-fix-2.13.0.tgz#d06d23741ee287bf164619cd0375a78c9b67abcf"
-  integrity sha512-DxBDTEOt6NKJ7cXFb61JbmVXSi/RJAtM4q+9OVDXkGclLCin4TdoGsrumN1qhPTbt6exilLH0mb0gpbWRlETsw==
+tsc-esm-fix@^2.14.0:
+  version "2.14.0"
+  resolved "https://registry.npmjs.org/tsc-esm-fix/-/tsc-esm-fix-2.14.0.tgz#a6095ba2a2b04d4b6e930a4f1a0cfccb08d78366"
+  integrity sha512-kYASiJN7JEpsCsDG32TGzfTKOeWcIsuE40Rf0I/9WIlNzzzWpkLveMf9Bh/QpUxMtc8i0b5TRwOyHOQENiIBAQ==
   dependencies:
     "@types/fs-extra" "^9.0.13"
     fs-extra "^10.1.0"
