@@ -55,7 +55,7 @@ describe('@jupyterlab/filebrowser', () => {
       it('should accept filter option', () => {
         const model = new FilterFileBrowserModel({
           manager,
-          filter: (model: Contents.IModel) => false
+          filter: (model: Contents.IModel) => null
         });
         expect(model).toBeInstanceOf(FilterFileBrowserModel);
       });
@@ -78,7 +78,7 @@ describe('@jupyterlab/filebrowser', () => {
       it('should list all directories whatever the filter', async () => {
         const filteredModel = new FilterFileBrowserModel({
           manager,
-          filter: (model: Contents.IModel) => false
+          filter: (model: Contents.IModel) => null
         });
         await filteredModel.cd();
         const model = new FileBrowserModel({ manager });
@@ -93,7 +93,8 @@ describe('@jupyterlab/filebrowser', () => {
       it('should respect the filter', async () => {
         const filteredModel = new FilterFileBrowserModel({
           manager,
-          filter: (model: Contents.IModel) => model.type === 'notebook'
+          filter: (model: Contents.IModel) =>
+            model.type === 'notebook' ? {} : null
         });
         await filteredModel.cd();
         const model = new FileBrowserModel({ manager });
@@ -138,7 +139,8 @@ describe('@jupyterlab/filebrowser', () => {
         manager,
         title: 'Select a notebook',
         host: node,
-        filter: (value: Contents.IModel) => value.type === 'notebook'
+        filter: (value: Contents.IModel) =>
+          value.type === 'notebook' ? {} : null
       });
 
       await acceptDialog();
@@ -161,7 +163,8 @@ describe('@jupyterlab/filebrowser', () => {
         manager,
         title: 'Select a notebook',
         host: node,
-        filter: (value: Contents.IModel) => value.type === 'notebook'
+        filter: (value: Contents.IModel) =>
+          value.type === 'notebook' ? {} : null
       });
 
       await waitForDialog();

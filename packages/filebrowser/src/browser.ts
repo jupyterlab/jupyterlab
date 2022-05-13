@@ -3,6 +3,7 @@
 
 import {
   FilenameSearcher,
+  IScore,
   ReactWidget,
   showErrorMessage,
   Toolbar
@@ -88,7 +89,10 @@ export class FileBrowser extends Widget {
     });
 
     this._filenameSearcher = FilenameSearcher({
-      updateFilter: (filterFn: (item: string) => boolean) => {
+      updateFilter: (
+        filterFn: (item: string) => boolean | Partial<IScore> | null,
+        query?: string
+      ) => {
         this.listing.model.setFilter(value => {
           return filterFn(value.name.toLowerCase());
         });
@@ -162,7 +166,10 @@ export class FileBrowser extends Widget {
     this._useFuzzyFilter = value;
 
     this._filenameSearcher = FilenameSearcher({
-      updateFilter: (filterFn: (item: string) => boolean) => {
+      updateFilter: (
+        filterFn: (item: string) => boolean | Partial<IScore> | null,
+        query?: string
+      ) => {
         this.listing.model.setFilter(value => {
           return filterFn(value.name.toLowerCase());
         });

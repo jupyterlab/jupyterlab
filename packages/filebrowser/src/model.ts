@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, IScore, showDialog } from '@jupyterlab/apputils';
 import { IChangedArgs, PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 import { Contents, KernelSpec, Session } from '@jupyterlab/services';
@@ -768,7 +768,7 @@ export namespace TogglableHiddenFileBrowserModel {
 export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   constructor(options: FilterFileBrowserModel.IOptions) {
     super(options);
-    this._filter = options.filter ? options.filter : model => true;
+    this._filter = options.filter ? options.filter : model => Object.freeze({});
   }
 
   /**
@@ -781,17 +781,23 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
       if (value.type === 'directory') {
         return true;
       } else {
-        return this._filter(value);
+        const filtered = this._filter(value);
+        if (typeof filtered !== 'boolean') {
+          value.indices = filtered?.indices;
+        }
+        return !!filtered;
       }
     });
   }
 
-  setFilter(filter: (value: Contents.IModel) => boolean) {
+  setFilter(
+    filter: (value: Contents.IModel) => boolean | Partial<IScore> | null
+  ): void {
     this._filter = filter;
     void this.refresh();
   }
 
-  private _filter: (value: Contents.IModel) => boolean;
+  private _filter: (value: Contents.IModel) => boolean | Partial<IScore> | null;
 }
 
 /**
@@ -805,6 +811,6 @@ export namespace FilterFileBrowserModel {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => boolean;
+    filter?: (value: Contents.IModel) => boolean | Partial<IScore> | null;
   }
 }
