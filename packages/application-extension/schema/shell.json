@@ -14,6 +14,12 @@
       "title": "Start mode: ``, `single`or `multiple`",
       "description": "The mode under which JupyterLab should start. If empty, the mode will be imposed by the URL",
       "default": ""
+    },
+    "tabScrolling": {
+      "type": "boolean",
+      "title": "Tab scrolling",
+      "description": "Whether to enable scrolling of tabs when they overflow.",
+      "default": true
     }
   },
   "additionalProperties": false,

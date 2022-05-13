@@ -5,7 +5,12 @@ import { hpass, VirtualElement } from '@lumino/virtualdom';
 import { DockPanel, TabBar, TabPanel, Widget } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
-import { addIcon, closeIcon } from '../iconimports';
+import {
+  addIcon,
+  caretLeftIcon,
+  caretRightIcon,
+  closeIcon
+} from '../iconimports';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
@@ -27,6 +32,15 @@ export class TabBarSvg<T> extends TabBar<T> {
     addIcon.element({
       container: this.addButtonNode,
       title: trans.__('New Launcher')
+    });
+    const isHorizontal = this.orientation == 'horizontal';
+    caretLeftIcon.element({
+      container: this.scrollBeforeButtonNode,
+      title: isHorizontal ? trans.__('Scroll left') : trans.__('Scroll top')
+    });
+    caretRightIcon.element({
+      container: this.scrollAfterButtonNode,
+      title: isHorizontal ? trans.__('Scroll right') : trans.__('Scroll bottom')
     });
   }
 }
