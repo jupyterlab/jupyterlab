@@ -740,9 +740,9 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
       return;
     }
     //const adaptionIncrease = fromIndex < toIndex ? 1 : 0;
-    this.transact(() => {
-      //this.underlyingModel.move(fromIndex, toIndex + adaptionIncrease);
-    });
+    //this.transact(() => {
+    //this.underlyingModel.move(fromIndex, toIndex + adaptionIncrease);
+    //});
   }
 
   /**
@@ -755,10 +755,10 @@ export class SharedList<T extends ISharedType> implements ISharedList<T> {
    * @param toIndex - The index to move the element to.
    */
   moveRange(start: number, end: number, toIndex: number): void {
-    this.transact(() => {
-      //const adaptionIncrease = start < toIndex ? end - start : 0;
-      //this.underlyingModel.moveRange(start, end, toIndex + adaptionIncrease);
-    });
+    //this.transact(() => {
+    //const adaptionIncrease = start < toIndex ? end - start : 0;
+    //this.underlyingModel.moveRange(start, end, toIndex + adaptionIncrease);
+    //});
   }
 
   /**

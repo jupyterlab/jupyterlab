@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CellModel, ICellModel } from '@jupyterlab/cells';
+import * as nbformat from '@jupyterlab/nbformat';
 import {
   Delta,
   ISharedList,
@@ -431,7 +432,17 @@ export class CellList implements ICellList {
    * @param toIndex - The index to move the element to.
    */
   move(fromIndex: number, toIndex: number): void {
-    this._sharedList.move(fromIndex, toIndex);
+    //this._sharedList.move(fromIndex, toIndex);
+    const cellType = this._sharedList.get(fromIndex);
+    const cell = this._cellMap.get(cellType.underlyingModel);
+    const data = cell?.toJSON();
+    const id = data?.id as string;
+    const type = data?.cell_type as nbformat.CellType;
+    const clone = this._factory.createCell(type, id, data);
+    this.transact(() => {
+      this.remove(fromIndex);
+      this.insert(toIndex, clone);
+    });
   }
 
   /**
