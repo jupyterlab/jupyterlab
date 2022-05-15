@@ -19,7 +19,8 @@ const RENDER_TIMEOUT = 1000;
  * Abstract table of contents model factory for IDocumentWidget.
  */
 export abstract class TableOfContentsFactory<W extends IDocumentWidget>
-  implements TableOfContents.IFactory<W> {
+  implements TableOfContents.IFactory<W>
+{
   /**
    * Constructor
    *

@@ -422,9 +422,9 @@ export class OutputArea extends Widget {
 
     const layout = this.layout as PanelLayout;
     const panel = layout.widgets[index] as Panel;
-    const renderer = (panel.widgets
-      ? panel.widgets[1]
-      : panel) as IRenderMime.IRenderer;
+    const renderer = (
+      panel.widgets ? panel.widgets[1] : panel
+    ) as IRenderMime.IRenderer;
     // Check whether it is safe to reuse renderer:
     // - Preferred mime type has not changed
     // - Isolation has not changed
@@ -901,7 +901,7 @@ export class Stdin extends Widget implements IStdin {
       node: Private.createInputWidgetNode(options.prompt, options.password)
     });
     this.addClass(STDIN_CLASS);
-    this._history_ix = 0;
+    this._historyIndex = 0;
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
     // make users aware of the line history feature
@@ -932,25 +932,25 @@ export class Stdin extends Widget implements IStdin {
     const input = this._input;
     if (event.type === 'keydown') {
       if (event.key === 'ArrowUp') {
-        const historyLine = Stdin._historyAt(this._history_ix - 1);
+        const historyLine = Stdin._historyAt(this._historyIndex - 1);
         if (historyLine) {
-          if (this._history_ix === 0) {
-            this._value_cache = input.value;
+          if (this._historyIndex === 0) {
+            this._valueCache = input.value;
           }
           input.value = historyLine;
-          --this._history_ix;
+          --this._historyIndex;
         }
       } else if (event.key === 'ArrowDown') {
-        if (this._history_ix === 0) {
+        if (this._historyIndex === 0) {
           // do nothing
-        } else if (this._history_ix === -1) {
-          input.value = this._value_cache;
-          ++this._history_ix;
+        } else if (this._historyIndex === -1) {
+          input.value = this._valueCache;
+          ++this._historyIndex;
         } else {
-          const historyLine = Stdin._historyAt(this._history_ix + 1);
+          const historyLine = Stdin._historyAt(this._historyIndex + 1);
           if (historyLine) {
             input.value = historyLine;
-            ++this._history_ix;
+            ++this._historyIndex;
           }
         }
       } else if (event.key === 'Enter') {
@@ -994,12 +994,12 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _history_ix: number;
+  private _historyIndex: number;
   private _parent_header: KernelMessage.IInputReplyMsg['parent_header'];
   private _future: Kernel.IShellFuture;
   private _input: HTMLInputElement;
   private _value: string;
-  private _value_cache: string;
+  private _valueCache: string;
   private _promise = new PromiseDelegate<void>();
 }
 
@@ -1064,7 +1064,8 @@ namespace Private {
    */
   export class IsolatedRenderer
     extends Widget
-    implements IRenderMime.IRenderer {
+    implements IRenderMime.IRenderer
+  {
     /**
      * Create an isolated renderer.
      */
