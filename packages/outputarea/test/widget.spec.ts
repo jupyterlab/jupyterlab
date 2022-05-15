@@ -121,16 +121,12 @@ describe('outputarea/widget', () => {
             // eslint-disable-next-line jest/no-conditional-expect
             expect(
               widget.widgets[widget.widgets.length - 1].node.textContent
-            ).toContain(
-              `Show more outputs`
-            );
+            ).toContain('Show more outputs');
           } else {
             // eslint-disable-next-line jest/no-conditional-expect
             expect(
               widget.widgets[widget.widgets.length - 1].node.textContent
-            ).not.toContain(
-              `Show more outputs`
-            );
+            ).not.toContain('Show more outputs');
           }
         }
       );
