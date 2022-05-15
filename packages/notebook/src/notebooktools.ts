@@ -358,11 +358,12 @@ export namespace NotebookTools {
           this.onSelectionChanged(msg);
           break;
         case 'activecell-metadata-changed':
-          this.onActiveCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
+          this.onActiveCellMetadataChanged(msg as any);
           break;
         case 'activenotebookpanel-metadata-changed':
           this.onActiveNotebookPanelMetadataChanged(
-            msg as ObservableJSON.ChangeMessage
+            (msg as ObservableJSON.ChangeMessage)
+              .args as ISharedMap.IChangedArg<JSONObject>
           );
           break;
         default:
@@ -407,7 +408,7 @@ export namespace NotebookTools {
      * The default implementation is a no-op.
      */
     protected onActiveCellMetadataChanged(
-      msg: ObservableJSON.ChangeMessage
+      msg: ISharedMap.IChangedArg<JSONObject>
     ): void {
       /* no-op */
     }
@@ -419,7 +420,7 @@ export namespace NotebookTools {
      * The default implementation is a no-op.
      */
     protected onActiveNotebookPanelMetadataChanged(
-      msg: ObservableJSON.ChangeMessage
+      msg: ISharedMap.IChangedArg<JSONObject>
     ): void {
       /* no-op */
     }
@@ -594,7 +595,9 @@ export namespace NotebookTools {
     /**
      * Handle a change to the notebook metadata.
      */
-    protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
+    protected onActiveNotebookPanelMetadataChanged(
+      msg: ISharedMap.IChangedArg<JSONObject>
+    ): void {
       this._update();
     }
 
@@ -628,7 +631,9 @@ export namespace NotebookTools {
     /**
      * Handle a change to the active cell metadata.
      */
-    protected onActiveCellMetadataChanged(msg: Message): void {
+    protected onActiveCellMetadataChanged(
+      msg: ISharedMap.IChangedArg<JSONObject>
+    ): void {
       this._update();
     }
 
@@ -736,14 +741,14 @@ export namespace NotebookTools {
      * Handle a change to the metadata of the active cell.
      */
     protected onActiveCellMetadataChanged(
-      msg: ObservableJSON.ChangeMessage
+      msg: ISharedMap.IChangedArg<JSONObject>
     ): void {
       if (this._changeGuard) {
         return;
       }
       const select = this.selectNode;
       const cell = this.notebookTools.activeCell;
-      if (msg.args.key === this.key && cell) {
+      if (msg.key === this.key && cell) {
         this._changeGuard = true;
         const getter = this._getter;
         select.value = JSON.stringify(getter(cell));
@@ -872,7 +877,9 @@ export namespace NotebookTools {
     /**
      * Handle a change to the notebook metadata.
      */
-    protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
+    protected onActiveNotebookPanelMetadataChanged(
+      msg: ISharedMap.IChangedArg<JSONObject>
+    ): void {
       this._update();
     }
 

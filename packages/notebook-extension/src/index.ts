@@ -1730,6 +1730,9 @@ function activateNotebookCompleterService(
     };
     await manager.updateCompleter(completerContext);
     notebook.content.activeCellChanged.connect((_, cell) => {
+      if (cell === undefined) {
+        return;
+      }
       const newCompleterContext = {
         editor: cell.editor,
         session: notebook.sessionContext.session,

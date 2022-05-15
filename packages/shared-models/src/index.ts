@@ -11,4 +11,3 @@ export * from './model';
 export * from './sharedString';
 export * from './sharedList';
 export * from './sharedMap';
-export * from './utils';

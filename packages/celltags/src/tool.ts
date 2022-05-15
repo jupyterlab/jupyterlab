@@ -1,6 +1,7 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { Cell } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
+import { ISharedMap } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -8,6 +9,7 @@ import {
 } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
 import { PanelLayout } from '@lumino/widgets';
+import { JSONObject } from '@lumino/coreutils';
 import { AddWidget } from './addwidget';
 import { TagWidget } from './widget';
 
@@ -223,7 +225,12 @@ export class TagTool extends NotebookTools.Tool {
   /**
    * Handle a change to active cell metadata.
    */
-  protected onActiveCellMetadataChanged(): void {
+  protected onActiveCellMetadataChanged(
+    arg: ISharedMap.IChangedArg<JSONObject>
+  ): void {
+    if (arg.key !== 'tags') {
+      return;
+    }
     const tags = this.tracker.activeCell!.model.metadata.get(
       'tags'
     ) as string[];

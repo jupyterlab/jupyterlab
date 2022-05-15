@@ -16,6 +16,9 @@
       "path": "../notebook"
     },
     {
+      "path": "../shared-models"
+    },
+    {
       "path": "../translation"
     },
     {

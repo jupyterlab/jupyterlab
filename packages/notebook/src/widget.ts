@@ -528,6 +528,8 @@ export class StaticNotebook extends Widget {
         currpos += delta.retain;
       } else {
         // TODO: Implement the move feature
+        // at the moment a move deletes and creates
+        // a new cell
         this._moveCell(currpos, currpos);
       }
     });
@@ -1296,7 +1298,7 @@ export class Notebook extends StaticNotebook {
   }
   set activeCellIndex(newValue: number) {
     const oldValue = this._activeCellIndex;
-    if (!this.model || !this.model.cells.length) {
+    if (!this.model || !this.model.cells.length || !this.widgets.length) {
       newValue = -1;
     } else {
       newValue = Math.max(newValue, 0);

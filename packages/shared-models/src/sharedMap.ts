@@ -351,9 +351,11 @@ export class SharedMap<T extends ISharedType> implements ISharedMap<T> {
     if (value === undefined) {
       throw Error('Cannot set an undefined value, use remove');
     }
-    let oldVal;
+    let oldVal = this.underlyingModel.get(key);
+    if (oldVal === value) {
+      return oldVal;
+    }
     this.transact(() => {
-      oldVal = this.underlyingModel.get(key);
       this.underlyingModel.set(key, SharedDoc.sharedTypeToAbstractType(value));
     });
     return oldVal;

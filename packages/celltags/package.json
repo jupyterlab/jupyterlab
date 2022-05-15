@@ -42,9 +42,11 @@
     "@jupyterlab/application": "^4.0.0-alpha.11",
     "@jupyterlab/cells": "^4.0.0-alpha.11",
     "@jupyterlab/notebook": "^4.0.0-alpha.11",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.11",
     "@jupyterlab/translation": "^4.0.0-alpha.11",
     "@jupyterlab/ui-components": "^4.0.0-alpha.26",
     "@lumino/algorithm": "^1.9.1",
+    "@lumino/coreutils": "^1.12.0",
     "@lumino/widgets": "^1.32.0"
   },
   "devDependencies": {

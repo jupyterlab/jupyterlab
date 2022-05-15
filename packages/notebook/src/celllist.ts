@@ -409,12 +409,10 @@ export class CellList implements ICellList {
    *   index is out of range.
    */
   remove(index: number): ICellModel | undefined {
-    const cellType = this._sharedList.remove(index);
-    if (cellType) {
-      return this._cellMap.get(cellType.underlyingModel);
-    } else {
-      return undefined;
-    }
+    const cellType = this._sharedList.get(index);
+    const cell = this._cellMap.get(cellType.underlyingModel);
+    this._sharedList.remove(index);
+    return cell;
   }
 
   /**

@@ -443,20 +443,24 @@ export namespace NotebookActions {
     const widgets = notebook.widgets;
 
     // TODO: Use moveRange for multiple cells
-    cells.transact(() => {
-      for (let i = cells.length - 2; i > -1; i--) {
-        if (notebook.isSelectedOrActive(widgets[i])) {
-          if (!notebook.isSelectedOrActive(widgets[i + 1])) {
-            cells.move(i, i + 1);
-            if (notebook.activeCellIndex === i) {
-              notebook.activeCellIndex++;
-            }
-            notebook.select(widgets[i + 1]);
-            notebook.deselect(widgets[i]);
+    // We can not use a transaction here because we
+    // are accessing to the cell before the operation is completed
+    // notebook.activeCellIndex++;
+    // notebook.select(widgets[i + 1]);
+    // notebook.deselect(widgets[i]);
+    // have to be used after the signal cellChanged is emitted
+    for (let i = cells.length - 2; i > -1; i--) {
+      if (notebook.isSelectedOrActive(widgets[i])) {
+        if (!notebook.isSelectedOrActive(widgets[i + 1])) {
+          cells.move(i, i + 1);
+          if (notebook.activeCellIndex === i) {
+            notebook.activeCellIndex++;
           }
+          notebook.select(widgets[i + 1]);
+          notebook.deselect(widgets[i]);
         }
       }
-    });
+    }
     Private.handleState(notebook, state, true);
   }
 
@@ -478,20 +482,24 @@ export namespace NotebookActions {
     const widgets = notebook.widgets;
 
     // TODO: Use moveRange for multiple cells
-    cells.transact(() => {
-      for (let i = 1; i < cells.length; i++) {
-        if (notebook.isSelectedOrActive(widgets[i])) {
-          if (!notebook.isSelectedOrActive(widgets[i - 1])) {
-            cells.move(i, i - 1);
-            if (notebook.activeCellIndex === i) {
-              notebook.activeCellIndex--;
-            }
-            notebook.select(widgets[i - 1]);
-            notebook.deselect(widgets[i]);
+    // We can not use a transaction here because we
+    // are accessing to the cell before the operation is completed
+    // notebook.activeCellIndex++;
+    // notebook.select(widgets[i + 1]);
+    // notebook.deselect(widgets[i]);
+    // have to be used after the signal cellChanged is emitted
+    for (let i = 1; i < cells.length; i++) {
+      if (notebook.isSelectedOrActive(widgets[i])) {
+        if (!notebook.isSelectedOrActive(widgets[i - 1])) {
+          cells.move(i, i - 1);
+          if (notebook.activeCellIndex === i) {
+            notebook.activeCellIndex--;
           }
+          notebook.select(widgets[i - 1]);
+          notebook.deselect(widgets[i]);
         }
       }
-    });
+    }
     Private.handleState(notebook, state, true);
   }
 
@@ -1130,7 +1138,6 @@ export namespace NotebookActions {
     }
 
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
-
     addCells(notebook, mode, values, true);
   }
 
@@ -1224,37 +1231,44 @@ export namespace NotebookActions {
     });
 
     let index: number;
-    cells.transact(() => {
-      // Set the starting index of the paste operation depending upon the mode.
-      switch (mode) {
-        case 'below':
-          index = notebook.activeCellIndex;
-          break;
-        case 'belowSelected':
-          notebook.widgets.forEach((child, childIndex) => {
-            if (notebook.isSelectedOrActive(child)) {
-              index = childIndex;
-            }
-          });
-          break;
-        case 'above':
-          index = notebook.activeCellIndex - 1;
-          break;
-        case 'replace': {
-          // If cells are not deletable, we may not have anything to delete.
-          if (toDelete.length > 0) {
-            // Delete the cells as one undo event.
-            toDelete.reverse().forEach(i => {
+    // We can not use a transaction here because some other operations
+    // need to be executed after the cells operation is completed
+    // Set the starting index of the paste operation depending upon the mode.
+    switch (mode) {
+      case 'below':
+        index = notebook.activeCellIndex;
+        break;
+      case 'belowSelected':
+        notebook.widgets.forEach((child, childIndex) => {
+          if (notebook.isSelectedOrActive(child)) {
+            index = childIndex;
+          }
+        });
+        break;
+      case 'above':
+        index = notebook.activeCellIndex - 1;
+        break;
+      case 'replace': {
+        // If cells are not deletable, we may not have anything to delete.
+        if (toDelete.length > 0) {
+          // Delete the cells as one undo event.
+          cells.transact(() => {
+            // We don't need the reverse because the cells won't be
+            // removed until the end of the transaction
+            toDelete.forEach(i => {
               cells.remove(i);
             });
-          }
-          index = toDelete[0];
-          break;
+          });
         }
-        default:
-          break;
+        // -1 because the insert is not in the same transaction
+        index = toDelete[0] - 1;
+        break;
       }
+      default:
+        break;
+    }
 
+    cells.transact(() => {
       newCells.forEach(cell => {
         cells.insert(++index, cell);
       });
