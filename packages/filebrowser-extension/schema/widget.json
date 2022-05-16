@@ -4,11 +4,6 @@
   "jupyter.lab.toolbars": {
     "FileBrowser": [
       {
-        "name": "new-launcher",
-        "command": "filebrowser:create-main-launcher",
-        "rank": 1
-      },
-      {
         "name": "new-directory",
         "command": "filebrowser:create-new-directory",
         "rank": 10
