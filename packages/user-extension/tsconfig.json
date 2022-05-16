@@ -14,6 +14,9 @@
     },
     {
       "path": "../user"
+    },
+    {
+      "path": "../apputils"
     }
   ]
 }
