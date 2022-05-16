@@ -59,11 +59,6 @@ export interface ISharedBase extends IDisposable {
  */
 export interface ISharedDocument extends ISharedBase {
   /**
-   * Whether the document is saved to disk or not.
-   */
-  readonly dirty: boolean;
-
-  /**
    * The changed signal.
    */
   readonly changed: ISignal<this, DocumentChange>;
@@ -476,6 +471,11 @@ export type NotebookChange = {
   metadataChange?: {
     oldValue: nbformat.INotebookMetadata;
     newValue: nbformat.INotebookMetadata | undefined;
+  };
+  nbformatChanged?: {
+    key: string;
+    oldValue: number | undefined;
+    newValue: number | undefined;
   };
   contextChange?: MapChange;
   stateChange?: Array<{

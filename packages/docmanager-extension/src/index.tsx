@@ -24,7 +24,7 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   IDocumentManager,
@@ -738,9 +738,19 @@ function addCommands(
     }
   });
 
+  const caption = () => {
+    if (PageConfig.getOption('collaborative') == 'true') {
+      return trans.__(
+        'In collaborative mode, the document is saved automatically after every change'
+      );
+    } else {
+      return trans.__('Save and create checkpoint');
+    }
+  };
+
   commands.addCommand(CommandIDs.save, {
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
-    caption: trans.__('Save and create checkpoint'),
+    caption,
     icon: args => (args.toolbar ? saveIcon : ''),
     isEnabled: isWritable,
     execute: () => {
