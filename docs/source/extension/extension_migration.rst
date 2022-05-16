@@ -45,7 +45,7 @@ bumped their major version (following semver convention). We want to point out p
    in particular those with the strict null checks enabled.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-   ``acquireLock`` and ``releaseLock`` have been removed from ``IDocumentProvider``.
+   ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
    ``renameAck`` is not optional anymore in ``IDocumentProvider``.
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    ``@jupyterlab/documentsearch:plugin`` renamed ``@jupyterlab/documentsearch-extension:plugin``

@@ -42,7 +42,7 @@
     "@lumino/disposable": "^1.10.1",
     "@lumino/signaling": "^1.10.1",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.17"
+    "yjs": "^13.5.34"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.9",
