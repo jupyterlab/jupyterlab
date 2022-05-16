@@ -19,8 +19,7 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from notebook_shim.shim import NotebookConfigShimMixin
-from tornado import web
-from traitlets import Bool, Instance, Unicode, default
+from traitlets import Bool, Instance, Int, Unicode, default
 
 from ._version import __version__
 from .commands import (
@@ -49,7 +48,7 @@ from .handlers.extension_manager_handler import (
     ExtensionManager,
     extensions_handler_path,
 )
-from .handlers.yjs_echo_ws import ROOMS, YjsEchoWebSocket
+from .handlers.ydoc_handler import YDocWebSocketHandler
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -538,6 +537,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
+    collaborative_file_poll_interval = Int(
+        1,
+        config=True,
+        help="""The period in seconds to check for file changes in the back-end (relevant only when
+        in collaborative mode). Defaults to 1s, if 0 then file changes will only be checked when
+        saving changes from the front-end.""",
+    )
+
     @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -627,33 +634,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
-    def initialize_settings(self):
-        def hook(model, path, **kwargs):
-            if "type" in model and model["type"] == "directory":
-                pass
-            elif "content" in model and model["content"] is not None:
-                # content sent through HTTP, it must not be an RTC session
-                if path in ROOMS:
-                    raise web.HTTPError(
-                        409,
-                        "Document content cannot be present both in RTC session and HTTP request",
-                    )
-                # keep the content sent through HTTP
-            else:
-                # no content sent through HTTP, it must be an RTC session
-                if path in ROOMS:
-                    # we found the RTC session as expected
-                    # set the document content from y-py
-                    model["content"] = ROOMS[path].get_source()
-                else:
-                    # RTC session not available, shouldn't happen
-                    raise web.HTTPError(
-                        410, "Could not find an RTC session corresponding to this document"
-                    )
-
-        self.serverapp.contents_manager.register_pre_save_hook(hook)
-        super().initialize_settings()
-
     def initialize_handlers(self):
 
         handlers = []
@@ -686,7 +666,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         handlers.append(build_handler)
 
         # Yjs Echo WebSocket handler
-        yjs_echo_handler = (r"/api/yjs/(.*)", YjsEchoWebSocket)
+        yjs_echo_handler = (r"/api/yjs/(.*)", YDocWebSocketHandler)
         handlers.append(yjs_echo_handler)
 
         errored = False
@@ -738,6 +718,9 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config
+        self.serverapp.web_app.settings[
+            "collaborative_file_poll_interval"
+        ] = self.collaborative_file_poll_interval
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)

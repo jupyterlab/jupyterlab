@@ -132,13 +132,19 @@ export class NotebookModel implements INotebookModel {
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this.sharedModel.dirty;
+    return this._dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this.dirty) {
+    const oldValue = this._dirty;
+    if (newValue === oldValue) {
       return;
     }
-    (this.sharedModel as models.YNotebook).dirty = newValue;
+    this._dirty = newValue;
+    this.triggerStateChange({
+      name: 'dirty',
+      oldValue,
+      newValue
+    });
   }
 
   /**
@@ -418,16 +424,21 @@ close the notebook without saving it.`,
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name === 'nbformat') {
-          this._nbformat = value.newValue;
-        }
-        if (value.name === 'nbformatMinor') {
-          this._nbformatMinor = value.newValue;
-        }
-        if (value.name !== 'dirty' || value.oldValue !== value.newValue) {
+        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
+          this._dirty = value.newValue;
           this.triggerStateChange(value);
         }
       });
+    }
+
+    if (changes.nbformatChanged) {
+      const change = changes.nbformatChanged;
+      if (change.key === 'nbformat' && change.newValue !== undefined) {
+        this._nbformat = change.newValue;
+      }
+      if (change.key === 'nbformat_minor' && change.newValue !== undefined) {
+        this._nbformatMinor = change.newValue;
+      }
     }
 
     if (changes.metadataChange) {
@@ -506,6 +517,7 @@ close the notebook without saving it.`,
    */
   readonly modelDB: IModelDB;
 
+  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
