@@ -95,7 +95,7 @@ export class CommentFileModel implements DocumentRegistry.IModel {
     this.fromJSON(JSON.parse(value !== '' ? value : '[]'));
   }
 
-  private _commentsObserver = (events: Y.YEvent[]): void => {
+  private _commentsObserver = (events: Y.YEvent<any>[]): void => {
     for (let event of events) {
       const delta = event.delta as CommentFileModel.IChange[];
 
