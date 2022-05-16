@@ -311,24 +311,33 @@ export function createToolbarFactory(
  *
  * @param widget Widget with the toolbar to set
  * @param factory Toolbar items factory
+ * @param toolbar Separated toolbar if widget is a raw widget
  */
 export function setToolbar(
-  widget: Toolbar.IWidgetToolbar,
+  widget: Toolbar.IWidgetToolbar | Widget,
   factory: (
     widget: Widget
   ) =>
     | IObservableList<ToolbarRegistry.IToolbarItem>
-    | ToolbarRegistry.IToolbarItem[]
+    | ToolbarRegistry.IToolbarItem[],
+  toolbar?: Toolbar
 ): void {
-  if (!widget.toolbar) {
-    console.log(`Widget ${widget.id} has no 'toolbar'.`);
+  // @ts-expect-error Widget has no toolbar
+  if (!widget.toolbar && !toolbar) {
+    console.log(
+      `Widget ${widget.id} has no 'toolbar' and no explicit toolbar was provided.`
+    );
     return;
   }
+
+  // @ts-expect-error Widget has no toolbar
+  const toolbar_ = (widget.toolbar as Toolbar) ?? toolbar;
+
   const items = factory(widget);
 
   if (Array.isArray(items)) {
     items.forEach(({ name, widget: item }) => {
-      widget.toolbar!.addItem(name, item);
+      toolbar_.addItem(name, item);
     });
   } else {
     const updateToolbar = (
@@ -338,7 +347,7 @@ export function setToolbar(
       switch (changes.type) {
         case 'add':
           changes.newValues.forEach((item, index) => {
-            widget.toolbar!.insertItem(
+            toolbar_.insertItem(
               changes.newIndex + index,
               item.name,
               item.widget
@@ -350,7 +359,7 @@ export function setToolbar(
             item.widget.parent = null;
           });
           changes.newValues.forEach((item, index) => {
-            widget.toolbar!.insertItem(
+            toolbar_.insertItem(
               changes.newIndex + index,
               item.name,
               item.widget
@@ -369,14 +378,14 @@ export function setToolbar(
 
           changes.newValues.forEach((item, index) => {
             const existingIndex = findIndex(
-              widget.toolbar!.names(),
+              toolbar_.names(),
               name => item.name === name
             );
             if (existingIndex >= 0) {
-              toArray(widget.toolbar!.children())[existingIndex].parent = null;
+              toArray(toolbar_.children())[existingIndex].parent = null;
             }
 
-            widget.toolbar!.insertItem(
+            toolbar_.insertItem(
               changes.newIndex + index,
               item.name,
               item.widget
