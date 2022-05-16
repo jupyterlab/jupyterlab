@@ -20,6 +20,7 @@ import {
   ICommentPanel
 } from '@jupyterlab/comments';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 export namespace CommandIDs {
   export const addNotebookComment = 'jupyterlab:add-notebook-comment';
@@ -29,14 +30,16 @@ export namespace CommandIDs {
  * A plugin that allows notebooks to be commented on.
  */
 export const notebookCommentsPlugin: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab:comments-notebook',
+  id: '@jupyterlab/comments-extension:notebook',
   autoStart: true,
   requires: [INotebookTracker, ICommentPanel, IThemeManager],
+  optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     nbTracker: INotebookTracker,
     panel: ICommentPanel,
-    manager: IThemeManager
+    manager: IThemeManager,
+    settingRegistry: ISettingRegistry | null
   ) => {
     const commentRegistry = panel.commentRegistry;
     const commentWidgetRegistry = panel.commentWidgetRegistry;
@@ -56,6 +59,11 @@ export const notebookCommentsPlugin: JupyterFrontEndPlugin<void> = {
         manager
       )
     );
+
+    // Try to read the settings so that the cell toolbar updates
+    if (settingRegistry) {
+      void settingRegistry.load('@jupyterlab/comments-extension:notebook');
+    }
 
     app.commands.addCommand(CommandIDs.addNotebookComment, {
       label: 'Add Comment',

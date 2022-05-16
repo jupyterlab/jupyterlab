@@ -26,7 +26,7 @@ namespace CommandIDs {
 }
 
 export const textCommentingPlugin: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab:comments-text',
+  id: '@jupyterlab/comments-extension:text',
   autoStart: true,
   requires: [ICommentPanel, ILabShell, IThemeManager],
   activate: (

@@ -37,7 +37,7 @@ export type CommentTracker = WidgetTracker<CommentWidget<any>>;
  * A plugin that provides a `CommentRegistry`
  */
 export const commentRegistryPlugin: JupyterFrontEndPlugin<ICommentRegistry> = {
-  id: 'jupyterlab:comment-registry',
+  id: '@jupyterlab/comments-extension:registry',
   autoStart: true,
   provides: ICommentRegistry,
   activate: (app: JupyterFrontEnd) => {
@@ -49,7 +49,7 @@ export const commentRegistryPlugin: JupyterFrontEndPlugin<ICommentRegistry> = {
  * A plugin that provides a `CommentWidgetRegistry`
  */
 export const commentWidgetRegistryPlugin: JupyterFrontEndPlugin<ICommentWidgetRegistry> = {
-  id: 'jupyterlab:comment-widget-registry',
+  id: '@jupyterlab/comments-extension:widget-registry',
   autoStart: true,
   provides: ICommentWidgetRegistry,
   activate: (app: JupyterFrontEnd) => {
@@ -58,7 +58,7 @@ export const commentWidgetRegistryPlugin: JupyterFrontEndPlugin<ICommentWidgetRe
 };
 
 export const jupyterCommentingPlugin: JupyterFrontEndPlugin<ICommentPanel> = {
-  id: 'jupyterlab:commenting-api',
+  id: '@jupyterlab/comments-extension:api',
   autoStart: true,
   requires: [
     ICommentRegistry,
