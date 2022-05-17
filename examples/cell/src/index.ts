@@ -72,7 +72,7 @@ function main(): void {
 
   const cellWidget = new CodeCell({
     rendermime,
-    model: new CodeCellModel({})
+    model: CodeCellModel.createStandaloneModel()
   }).initializeState();
 
   // Handle the mimeType for the current kernel asynchronously.

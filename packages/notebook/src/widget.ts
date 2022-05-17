@@ -513,25 +513,47 @@ export class StaticNotebook extends Widget {
    */
   private _onCellsChanged(sender: ICellList, args: ICellList.IChangedArgs) {
     let currpos = 0;
+    const moved = new Map<string, any>();
+    args.deleted.forEach(oldCell => {
+      args.added.forEach(newCell => {
+        if (oldCell.id === newCell.id) {
+          moved.set(newCell.id, {});
+        }
+      });
+    });
+
     args.delta.forEach(delta => {
       if (delta.insert != null) {
         const insertType: InsertType =
           currpos + delta.insert.length == sender.length ? 'push' : 'insert';
         delta.insert.forEach(value => {
-          this._insertCell(currpos++, value, insertType);
+          if (moved.has(value.id)) {
+            moved.set(value.id, { ...moved.get(value.id), to: currpos });
+            this._insertCell(currpos++, value, insertType, true);
+          } else {
+            this._insertCell(currpos++, value, insertType);
+          }
         });
       } else if (delta.delete != null) {
         for (let i = currpos; i < currpos + delta.delete; i++) {
-          this._removeCell(currpos);
+          const id = this.widgets[currpos].model.id;
+          if (moved.has(id)) {
+            const move = moved.get(id);
+            const from = move.to !== undefined ? currpos - 1 : currpos;
+            moved.set(id, { ...move, from });
+            this._removeCell(currpos, true);
+          } else {
+            this._removeCell(currpos);
+          }
         }
       } else if (delta.retain != null) {
         currpos += delta.retain;
-      } else {
-        // TODO: Implement the move feature
-        // at the moment a move deletes and creates
-        // a new cell
-        this._moveCell(currpos, currpos);
       }
+    });
+
+    // Move the activeCellIndex if needed
+    moved.forEach((pos, id) => {
+      this.onCellMoved(pos.from, pos.to);
     });
 
     // Add default cell if there are no cells remaining.
@@ -555,7 +577,8 @@ export class StaticNotebook extends Widget {
   private _insertCell(
     index: number,
     cell: ICellModel,
-    insertType: InsertType
+    insertType: InsertType,
+    move: boolean = false
   ): void {
     let widget: Cell;
     switch (cell.type) {
@@ -594,14 +617,18 @@ export class StaticNotebook extends Widget {
       );
       placeholder.node.id = widget.model.id;
       layout.insertWidget(index, placeholder);
-      this.onCellInserted(index, placeholder);
+      if (!move) {
+        this.onCellInserted(index, placeholder);
+      }
       this._fullyRendered.emit(false);
       this._observer.observe(placeholder.node);
     } else {
       // We have no intersection observer, or we insert, or we are below
       // the number of cells to render directly, so we render directly.
       layout.insertWidget(index, widget);
-      this.onCellInserted(index, widget);
+      if (!move) {
+        this.onCellInserted(index, widget);
+      }
       this._incrementRenderedCount();
     }
     this._scheduleCellRenderOnIdle();
@@ -767,21 +794,26 @@ export class StaticNotebook extends Widget {
 
   /**
    * Move a cell widget.
+   * Not used anymore because we are deleting an inserting a
+   * new cell.
+   * Waiting for the move feature to land in y-py
    */
-  private _moveCell(fromIndex: number, toIndex: number): void {
+  /* private _moveCell(fromIndex: number, toIndex: number): void {
     const layout = this.layout as PanelLayout;
     layout.insertWidget(toIndex, layout.widgets[fromIndex]);
     this.onCellMoved(fromIndex, toIndex);
-  }
+  } */
 
   /**
    * Remove a cell widget.
    */
-  private _removeCell(index: number): void {
+  private _removeCell(index: number, move: boolean = false): void {
     const layout = this.layout as PanelLayout;
     const widget = layout.widgets[index] as Cell;
     widget.parent = null;
-    this.onCellRemoved(index, widget);
+    if (!move) {
+      this.onCellRemoved(index, widget);
+    }
     widget.dispose();
   }
 

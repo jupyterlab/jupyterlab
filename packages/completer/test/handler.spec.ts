@@ -283,8 +283,9 @@ describe('@jupyterlab/completer', () => {
         handler.editor = editor;
         handler.editor.model.value.text = text;
         // Stop grouping insertions before adding the completion.
-        (handler.editor.model
-          .value as SharedString).undoManager!.stopCapturing();
+        (
+          handler.editor.model.value as SharedString
+        ).undoManager!.stopCapturing();
         handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
         model.cursor = { start: column, end: column + 3 };

@@ -233,6 +233,7 @@ export class NotebookTools extends Widget implements INotebookTools {
     sender: ISharedMap<JSONObject>,
     args: ISharedMap.IChangedArgs<JSONObject>
   ): void {
+    console.warn('Metadata changed:', args);
     args.forEach(arg => {
       const message = new ObservableJSON.ChangeMessage(
         'activecell-metadata-changed',
@@ -358,7 +359,10 @@ export namespace NotebookTools {
           this.onSelectionChanged(msg);
           break;
         case 'activecell-metadata-changed':
-          this.onActiveCellMetadataChanged(msg as any);
+          this.onActiveCellMetadataChanged(
+            (msg as ObservableJSON.ChangeMessage)
+              .args as ISharedMap.IChangedArg<JSONObject>
+          );
           break;
         case 'activenotebookpanel-metadata-changed':
           this.onActiveNotebookPanelMetadataChanged(

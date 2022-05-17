@@ -383,8 +383,12 @@ describe('@jupyter/notebook', () => {
 
         it('should handle a move', () => {
           const child = widget.widgets[1];
+          // Extracting the id before removing the cell
+          const id = child.model.id;
           widget.model!.cells.move(1, 2);
-          expect(widget.widgets[2]).toBe(child);
+          // Moving a cell, removes and adds a new one
+          // the children wil never be the same.
+          expect(widget.widgets[2].model.id).toEqual(id);
         });
 
         it('should handle a clear', () => {
@@ -1588,10 +1592,15 @@ describe('@jupyter/notebook', () => {
           const [fromIndex, toIndex, activeIndex] = m;
           widget.model!.fromJSON(utils.DEFAULT_CONTENT);
           const cell = widget.widgets[3];
+          // Extracting the id before removing the cell
+          const id = cell.model.id;
           widget.activeCellIndex = 3;
           widget.model!.cells.move(fromIndex, toIndex);
           expect(widget.activeCellIndex).toBe(activeIndex);
-          expect(widget.widgets[activeIndex]).toBe(cell);
+          // Moving a cell, removes and adds a new one
+          // the children wil never be the same.
+          //expect(widget.widgets[activeIndex]).toBe(cell);
+          expect(widget.widgets[activeIndex].model.id).toEqual(id);
         });
       });
     });

@@ -441,26 +441,28 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
+    const activeIndex = notebook.activeCellIndex;
 
     // TODO: Use moveRange for multiple cells
-    // We can not use a transaction here because we
-    // are accessing to the cell before the operation is completed
-    // notebook.activeCellIndex++;
-    // notebook.select(widgets[i + 1]);
-    // notebook.deselect(widgets[i]);
-    // have to be used after the signal cellChanged is emitted
-    for (let i = cells.length - 2; i > -1; i--) {
+    const indexes: number[] = [];
+    for (let i = 0; i < cells.length; i++) {
       if (notebook.isSelectedOrActive(widgets[i])) {
-        if (!notebook.isSelectedOrActive(widgets[i + 1])) {
-          cells.move(i, i + 1);
-          if (notebook.activeCellIndex === i) {
-            notebook.activeCellIndex++;
-          }
-          notebook.select(widgets[i + 1]);
-          notebook.deselect(widgets[i]);
-        }
+        if (i === cells.length - 1) return;
+        indexes.push(i);
       }
     }
+    cells.transact(() => {
+      indexes.reverse().forEach(i => {
+        cells.move(i, i + 1);
+      });
+    });
+    notebook.activeCellIndex = activeIndex + 1;
+    indexes.forEach(i => {
+      notebook.deselect(widgets[i]);
+      if (i <= widgets.length - 1) {
+        notebook.select(widgets[i + 1]);
+      }
+    });
     Private.handleState(notebook, state, true);
   }
 
@@ -480,26 +482,28 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
+    const activeIndex = notebook.activeCellIndex;
 
     // TODO: Use moveRange for multiple cells
-    // We can not use a transaction here because we
-    // are accessing to the cell before the operation is completed
-    // notebook.activeCellIndex++;
-    // notebook.select(widgets[i + 1]);
-    // notebook.deselect(widgets[i]);
-    // have to be used after the signal cellChanged is emitted
-    for (let i = 1; i < cells.length; i++) {
+    const indexes: number[] = [];
+    for (let i = 0; i < cells.length; i++) {
       if (notebook.isSelectedOrActive(widgets[i])) {
-        if (!notebook.isSelectedOrActive(widgets[i - 1])) {
-          cells.move(i, i - 1);
-          if (notebook.activeCellIndex === i) {
-            notebook.activeCellIndex--;
-          }
-          notebook.select(widgets[i - 1]);
-          notebook.deselect(widgets[i]);
-        }
+        if (i === 0) return;
+        indexes.push(i);
       }
     }
+    cells.transact(() => {
+      indexes.forEach(i => {
+        cells.move(i, i - 1);
+      });
+    });
+    notebook.activeCellIndex = activeIndex - 1;
+    indexes.forEach(i => {
+      notebook.deselect(widgets[i]);
+      if (i >= 1) {
+        notebook.select(widgets[i - 1]);
+      }
+    });
     Private.handleState(notebook, state, true);
   }
 
@@ -2399,10 +2403,9 @@ Please wait for the complete rendering before invoking that action.`,
     clipboard.clear();
 
     const data = Private.selectedCells(notebook);
-
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
-      deleteCells(notebook, false);
+      deleteCells(notebook);
     } else {
       notebook.deselectAll();
     }
@@ -2467,7 +2470,7 @@ Please wait for the complete rendering before invoking that action.`,
    * It will add a code cell if all cells are deleted.
    * This action can be undone.
    */
-  export function deleteCells(notebook: Notebook, del: boolean = true): void {
+  export function deleteCells(notebook: Notebook): void {
     const model = notebook.model!;
     const cells = model.cells as CellList;
     const toDelete: number[] = [];

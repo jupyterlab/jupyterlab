@@ -96,9 +96,8 @@ export class NotebookModel implements INotebookModel {
       });
     }
 
-    const sharedList = this._sharedDoc.createList<ISharedMap<ISharedType>>(
-      'cells'
-    );
+    const sharedList =
+      this._sharedDoc.createList<ISharedMap<ISharedType>>('cells');
     sharedList.undoManager = SharedDoc.createUndoManager(
       sharedList.underlyingModel,
       []

@@ -3,9 +3,10 @@
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 import { Context } from '@jupyterlab/docregistry';
-import { ObservableJSON } from '@jupyterlab/observables';
+import { ISharedMap } from '@jupyterlab/shared-models';
 import { initNotebookContext, sleep } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import { JSONObject } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { TabPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -37,14 +38,14 @@ class LogTool extends NotebookTools.Tool {
   }
 
   protected onActiveCellMetadataChanged(
-    msg: ObservableJSON.ChangeMessage
+    msg: ISharedMap.IChangedArg<JSONObject>
   ): void {
     super.onActiveCellMetadataChanged(msg);
     this.methods.push('onActiveCellMetadataChanged');
   }
 
   protected onActiveNotebookPanelMetadataChanged(
-    msg: ObservableJSON.ChangeMessage
+    msg: ISharedMap.IChangedArg<JSONObject>
   ): void {
     super.onActiveNotebookPanelMetadataChanged(msg);
     this.methods.push('onActiveNotebookPanelMetadataChanged');
@@ -76,7 +77,7 @@ class LogKeySelector extends NotebookTools.KeySelector {
   }
 
   protected onActiveCellMetadataChanged(
-    message: ObservableJSON.ChangeMessage
+    message: ISharedMap.IChangedArg<JSONObject>
   ): void {
     super.onActiveCellMetadataChanged(message);
     this.methods.push('onActiveCellMetadataChanged');

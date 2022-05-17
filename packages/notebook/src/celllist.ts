@@ -430,6 +430,14 @@ export class CellList implements ICellList {
    * @param toIndex - The index to move the element to.
    */
   move(fromIndex: number, toIndex: number): void {
+    if (
+      this.length <= 1 ||
+      fromIndex === toIndex ||
+      toIndex < 0 ||
+      toIndex >= this.length
+    ) {
+      return;
+    }
     //this._sharedList.move(fromIndex, toIndex);
     const cellType = this._sharedList.get(fromIndex);
     const cell = this._cellMap.get(cellType.underlyingModel);

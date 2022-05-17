@@ -71,11 +71,13 @@ describe('@jupyterlab/notebook', () => {
       it('should allow undoing a change', () => {
         const model = new NotebookModel();
         model.initialize();
+        model.cells.clear();
         const cell = model.contentFactory.createCodeCell();
         model.cells.push(cell);
         cell.value.text = 'foo';
         const cellJSON = cell.toJSON();
         model.cells.clearUndo();
+        expect(model.cells.length).toBe(1);
         model.cells.remove(model.cells.length - 1);
         model.cells.undo();
         expect(model.cells.length).toBe(1);
