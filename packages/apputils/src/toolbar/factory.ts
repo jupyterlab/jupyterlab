@@ -189,7 +189,7 @@ async function setToolbarItems(
     registry.pluginChanged.connect(async (sender, plugin) => {
       // As the plugin storing the toolbar definition is transformed using
       // the above definition, if it changes, this means that a request to
-      // reloaded was triggered. Hence the toolbar definitions from the other
+      // reload was triggered. Hence the toolbar definitions from the other
       // plugins has been automatically reset during the transform step.
       if (plugin !== pluginId) {
         // If a plugin changed its toolbar items
