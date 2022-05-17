@@ -1855,14 +1855,14 @@
   resolved "https://registry.npmjs.org/@lumino/algorithm/-/algorithm-1.9.1.tgz"
   integrity sha512-d0rj7IYRzYj6WbWSrbJbKvrfO4H0NUnXT2yjSWS/sCklpTpSp0IGmndK/X4r6gG+ev5lb5+wBg9ofUDBvoAlAw==
 
-"@lumino/application@^1.28.1":
-  version "1.28.1"
-  resolved "https://registry.npmjs.org/@lumino/application/-/application-1.28.1.tgz"
-  integrity sha512-BRRtWJ3mG2abZ9XwB/olGJWXeJjtflDGB/uW6ZsG53Pfu7ekyXKv0wUcijvW+HM9o3bMR+PwM7ELyXtHKkodig==
+"@lumino/application@^1.29.0":
+  version "1.29.0"
+  resolved "https://registry.yarnpkg.com/@lumino/application/-/application-1.29.0.tgz#41d644b54db862ba0b549e55c73d8fb1be951daf"
+  integrity sha512-Ld2eWUjZMUn/y9tMMTfuBB1kZxIoVQtlZy8B7q53NiAfOdZ1cthfu2C7MUIeDMKLU7gZBSJqPSeuOxRFzv4wFA==
   dependencies:
     "@lumino/commands" "^1.20.0"
     "@lumino/coreutils" "^1.12.0"
-    "@lumino/widgets" "^1.31.1"
+    "@lumino/widgets" "^1.32.0"
 
 "@lumino/collections@^1.9.1":
   version "1.9.1"
@@ -1889,10 +1889,10 @@
   resolved "https://registry.npmjs.org/@lumino/coreutils/-/coreutils-1.12.0.tgz"
   integrity sha512-DSglh4ylmLi820CNx9soJmDJCpUgymckdWeGWuN0Ash5g60oQvrQDfosVxEhzmNvtvXv45WZEqSBzDP6E5SEmQ==
 
-"@lumino/datagrid@^0.35.1":
-  version "0.35.1"
-  resolved "https://registry.npmjs.org/@lumino/datagrid/-/datagrid-0.35.1.tgz"
-  integrity sha512-bLDyRr2K2NdBuHwnEirnn+IigWseQslGP05Jko/wpseDo4jp3eeLjU7wtpSikJvtB0DH+FRpINZge1aWQpDk3A==
+"@lumino/datagrid@^0.36.0":
+  version "0.36.0"
+  resolved "https://registry.yarnpkg.com/@lumino/datagrid/-/datagrid-0.36.0.tgz#e46d36a7266f71a8ef57953230a105a37bc7ecec"
+  integrity sha512-jSBvA+xANkVvTFpCsRQXNYgTfhrLmF/mpcv4kuPifsAqkgQ49uzd/5bKKvXtQzMJq+modGyrmTyeu8kQ31Uxdw==
   dependencies:
     "@lumino/algorithm" "^1.9.1"
     "@lumino/coreutils" "^1.12.0"
@@ -1902,7 +1902,7 @@
     "@lumino/keyboard" "^1.8.1"
     "@lumino/messaging" "^1.10.1"
     "@lumino/signaling" "^1.10.1"
-    "@lumino/widgets" "^1.31.1"
+    "@lumino/widgets" "^1.32.0"
 
 "@lumino/disposable@^1.10.1":
   version "1.10.1"
@@ -1965,23 +1965,6 @@
   integrity sha512-imIJd/wtRkoR1onEiG5nxPEaIrf70nn4PgD/56ri3/Lo6AJEX2CusF6iIA27GVB8yl/7CxgTHUnzzCwTFPypcA==
   dependencies:
     "@lumino/algorithm" "^1.9.1"
-
-"@lumino/widgets@^1.31.1":
-  version "1.31.1"
-  resolved "https://registry.npmjs.org/@lumino/widgets/-/widgets-1.31.1.tgz"
-  integrity sha512-4RzAMqWwWHa5IiaQaeIbiZdIBm/FOg6ub0w8dG3km0k+zIQyA4LFq2dbB1w6SHT1d06N+L/ebYfgvMFswPENag==
-  dependencies:
-    "@lumino/algorithm" "^1.9.1"
-    "@lumino/commands" "^1.20.0"
-    "@lumino/coreutils" "^1.12.0"
-    "@lumino/disposable" "^1.10.1"
-    "@lumino/domutils" "^1.8.1"
-    "@lumino/dragdrop" "^1.14.0"
-    "@lumino/keyboard" "^1.8.1"
-    "@lumino/messaging" "^1.10.1"
-    "@lumino/properties" "^1.8.1"
-    "@lumino/signaling" "^1.10.1"
-    "@lumino/virtualdom" "^1.14.1"
 
 "@lumino/widgets@^1.32.0":
   version "1.32.0"
