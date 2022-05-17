@@ -461,7 +461,9 @@ export class SettingRegistry implements ISettingRegistry {
     const transformers = this._transformers;
 
     if (plugin in transformers) {
-      throw new Error(`${plugin} already has a transformer.`);
+      const error = new Error(`${plugin} already has a transformer.`);
+      error.name = 'TransformError';
+      throw error;
     }
 
     transformers[plugin] = {
