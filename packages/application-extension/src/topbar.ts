@@ -14,7 +14,7 @@ import { Toolbar } from '@jupyterlab/ui-components';
 const TOPBAR_FACTORY = 'TopBar';
 
 /**
- * The default JupyterLab application shell.
+ * A plugin adding a toolbar to the top area.
  */
 export const topbar: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:top-bar',
