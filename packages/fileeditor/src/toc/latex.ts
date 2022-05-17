@@ -71,9 +71,9 @@ export class LaTeXTableOfContentsModel extends TableOfContentsModel<
     }
 
     // Split the text into lines:
-    const lines = this.widget.content.model.value.text.split('\n') as Array<
-      string
-    >;
+    const lines = this.widget.content.model.value.text.split(
+      '\n'
+    ) as Array<string>;
 
     const levels = new Array<number>();
     let previousLevel = levels.length;

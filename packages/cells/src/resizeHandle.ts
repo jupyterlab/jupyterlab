@@ -73,7 +73,7 @@ export class ResizeHandle extends Widget {
         const inputWidth =
           (event as MouseEvent).clientX - targetRect.x - this._mouseOffset;
 
-        const resized_ratio =
+        const resizedRatio =
           1 -
           Math.min(
             Math.max(inputWidth, this._protectedWidth),
@@ -82,10 +82,10 @@ export class ResizeHandle extends Widget {
             (targetRect.width - this._protectedWidth);
 
         // Added friction to the dragging interaction
-        if (Math.round(resized_ratio * 100) % 10 == 0) {
+        if (Math.round(resizedRatio * 100) % 10 == 0) {
           document.documentElement.style.setProperty(
             '--jp-side-by-side-resized-cell',
-            resized_ratio + 'fr'
+            resizedRatio + 'fr'
           );
         }
 

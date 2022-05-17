@@ -164,15 +164,8 @@ export function renderImage(
   options: renderImage.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const {
-    host,
-    mimeType,
-    source,
-    width,
-    height,
-    needsBackground,
-    unconfined
-  } = options;
+  const { host, mimeType, source, width, height, needsBackground, unconfined } =
+    options;
 
   // Clear the content in the host.
   host.textContent = '';

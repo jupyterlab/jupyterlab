@@ -34,9 +34,7 @@ export interface ITableOfContentsTreeProps {
 /**
  * React component for a table of contents tree.
  */
-export class TableOfContentsTree extends React.PureComponent<
-  ITableOfContentsTreeProps
-> {
+export class TableOfContentsTree extends React.PureComponent<ITableOfContentsTreeProps> {
   /**
    * Renders a table of contents tree.
    */

@@ -22,7 +22,8 @@ import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
  */
 export class WebSocketProvider
   extends YWebsocketProvider
-  implements IDocumentProvider {
+  implements IDocumentProvider
+{
   /**
    * Construct a new WebSocketProvider
    *

@@ -118,12 +118,14 @@ describe('outputarea/widget', () => {
           );
 
           if (widget.widgets.length > maxNumberOutputs) {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(
               widget.widgets[widget.widgets.length - 1].node.textContent
             ).toContain(
               `Displaying the first ${maxNumberOutputs} top outputs.`
             );
           } else {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(
               widget.widgets[widget.widgets.length - 1].node.textContent
             ).not.toContain(

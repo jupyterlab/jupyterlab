@@ -59,7 +59,7 @@ export namespace CommandIDs {
   export const resetAll = 'shortcutui:resetAll';
 }
 
-class Symbols extends React.Component<ISymbolsProps, {}> {
+class Symbols extends React.Component<ISymbolsProps> {
   getRegularSymbols() {
     return (
       <div className={SymbolsStyle}>

@@ -14,7 +14,8 @@ import { IObjectPool, IRestorable } from './interfaces';
  */
 export class RestorablePool<
   T extends IObservableDisposable = IObservableDisposable
-> implements IObjectPool<T>, IRestorable<T> {
+> implements IObjectPool<T>, IRestorable<T>
+{
   /**
    * Create a new restorable pool.
    *

@@ -9,9 +9,7 @@ import { TableOfContents } from './tokens';
 /**
  * Table of contents widget.
  */
-export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<
-  TableOfContents.IHeading
-> | null> {
+export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<TableOfContents.IHeading> | null> {
   /**
    * Constructor
    *

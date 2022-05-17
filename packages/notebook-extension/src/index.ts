@@ -659,21 +659,22 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
 /**
  * The notebook widget factory provider.
  */
-const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> = {
-  id: '@jupyterlab/notebook-extension:widget-factory',
-  provides: INotebookWidgetFactory,
-  requires: [
-    NotebookPanel.IContentFactory,
-    IEditorServices,
-    IRenderMimeRegistry,
-    ISessionContextDialogs,
-    IToolbarWidgetRegistry,
-    ITranslator
-  ],
-  optional: [ISettingRegistry],
-  activate: activateWidgetFactory,
-  autoStart: true
-};
+const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> =
+  {
+    id: '@jupyterlab/notebook-extension:widget-factory',
+    provides: INotebookWidgetFactory,
+    requires: [
+      NotebookPanel.IContentFactory,
+      IEditorServices,
+      IRenderMimeRegistry,
+      ISessionContextDialogs,
+      IToolbarWidgetRegistry,
+      ITranslator
+    ],
+    optional: [ISettingRegistry],
+    activate: activateWidgetFactory,
+    autoStart: true
+  };
 
 /**
  * The cloned output provider.
@@ -1211,12 +1212,13 @@ function activateCodeConsole(
         // eslint-disable-next-line
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          const reply = await current.context.sessionContext.session?.kernel?.requestIsComplete(
-            {
-              // ipython needs an empty line at the end to correctly identify completeness of indented code
-              code: code + '\n\n'
-            }
-          );
+          const reply =
+            await current.context.sessionContext.session?.kernel?.requestIsComplete(
+              {
+                // ipython needs an empty line at the end to correctly identify completeness of indented code
+                code: code + '\n\n'
+              }
+            );
           if (reply?.content.status === 'complete') {
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
@@ -3122,9 +3124,9 @@ namespace Private {
   /**
    * The default Export To ... formats and their human readable labels.
    */
-  export function getFormatLabels(
-    translator: ITranslator
-  ): { [k: string]: string } {
+  export function getFormatLabels(translator: ITranslator): {
+    [k: string]: string;
+  } {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     return {

@@ -84,9 +84,7 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
 /**
  * Table of content model factory for Markdown viewer files.
  */
-export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory<
-  MarkdownDocument
-> {
+export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory<MarkdownDocument> {
   /**
    * Constructor
    *

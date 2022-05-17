@@ -44,7 +44,8 @@ import { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T> {
+> implements DocumentRegistry.IContext<T>
+{
   /**
    * Construct a new document context.
    */
