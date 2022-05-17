@@ -6,6 +6,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../rendermime-interfaces"
+    },
+    {
       "path": "../translation"
     },
     {

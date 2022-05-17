@@ -45,7 +45,7 @@
     "@jupyterlab/nbformat": "^4.0.0-alpha.9",
     "@jupyterlab/observables": "^5.0.0-alpha.9",
     "@jupyterlab/rendermime": "^4.0.0-alpha.9",
-    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.9",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.9",
     "@jupyterlab/services": "^7.0.0-alpha.9",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/coreutils": "^1.12.0",

@@ -7,8 +7,8 @@
  * @module rendermime-interfaces
  */
 
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * A namespace for rendermime associated interfaces.
@@ -72,7 +72,7 @@ export namespace IRenderMime {
    */
   export interface IToolbarItem {
     /**
-     * Item name
+     * Unique item name
      */
     name: string;
     /**
@@ -92,6 +92,12 @@ export namespace IRenderMime {
      * The name of the widget to display in dialogs.
      */
     readonly name: string;
+
+    /**
+     * The label of the widget to display in dialogs.
+     * If not given, name is used instead.
+     */
+    readonly label?: string;
 
     /**
      * The name of the document model type.
@@ -121,9 +127,14 @@ export namespace IRenderMime {
     readonly defaultRendered?: ReadonlyArray<string>;
 
     /**
+     * The application language translator.
+     */
+    readonly translator?: ITranslator;
+
+    /**
      * A function returning a list of toolbar items to add to the toolbar.
      */
-    readonly toolbarFactory?: (widget?: IRenderer) => IToolbarItem[];
+    readonly toolbarFactory?: (widget?: Widget) => IToolbarItem[];
   }
 
   export namespace LabIcon {
@@ -150,8 +161,7 @@ export namespace IRenderMime {
      */
     export interface IRenderer {
       readonly render: (container: HTMLElement, options?: any) => void;
-      // TODO: make unrenderer optional once @lumino/virtualdom > 1.4.1 is used
-      readonly unrender: (container: HTMLElement) => void;
+      readonly unrender?: (container: HTMLElement, options?: any) => void;
     }
 
     /**
@@ -210,7 +220,7 @@ export namespace IRenderMime {
     /**
      * The file format for the file type ('text', 'base64', or 'json').
      */
-    readonly fileFormat?: string;
+    readonly fileFormat?: string | null;
   }
 
   /**
