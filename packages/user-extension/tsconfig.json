@@ -10,13 +10,13 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
     },
     {
       "path": "../user"
-    },
-    {
-      "path": "../apputils"
     }
   ]
 }
