@@ -1191,7 +1191,7 @@ export namespace SettingRegistry {
 
     // Merge array element depending on the type
     addition.forEach(item => {
-      // Name must be unique so it sufficient to only compare it
+      // Name must be unique so it's sufficient to only compare it
       const refIndex = items.findIndex(ref => ref.name === item.name);
       if (refIndex < 0) {
         items.push({ ...item });
