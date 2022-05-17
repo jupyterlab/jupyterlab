@@ -492,19 +492,18 @@ Top Area
 ^^^^^^^^
 
 The top area is intended to host most persistent user interface elements that span the whole session of a user.
-JupyterLab adds a user dropdown to that area when started in ``collaborative`` mode.
+A toolbar named **TopBar** is available on the right of the main menu bar. For example, JupyterLab adds a user
+dropdown to that toolbar when started in ``collaborative`` mode.
 
-You can use a numeric rank to control the ordering of top area widgets:
+See :ref:`generic toolbars generic-toolbar` to see how to add a toolbar or a custom widget to a toolbar.
 
-.. code:: typescript
+You can use a numeric rank to control the ordering of top bar items in the settings; see :ref:`Toolbar definitions toolbar-settings-definition`.
 
-  app.shell.add(widget, 'top', { rank: 100 });
-
-JupyterLab adds a spacer widget to the top area at rank ``900`` by default.
+JupyterLab adds a spacer widget to the top bar at rank ``50`` by default.
 You can then use the following guidelines to place your items:
 
-* ``rank <= 900`` to place items to the left side of the top area
-* ``rank > 900`` to place items to the right side of the top area
+* ``rank <= 50`` to place items to the left side in the top bar
+* ``rank > 50`` to place items to the right side in the top bar
 
 Left/Right Areas
 ^^^^^^^^^^^^^^^^
@@ -845,6 +844,8 @@ toolbar definition from the settings and build the factory to pass to the widget
 The default toolbar items can be defined across multiple extensions by providing an entry in the ``"jupyter.lab.toolbars"``
 mapping. For example for the notebook panel:
 
+.. _toolbar-settings-definition:
+
 .. code:: js
 
    "jupyter.lab.toolbars": {
@@ -914,6 +915,8 @@ And the toolbar item must follow this definition:
 .. literalinclude:: ../snippets/packages/settingregistry/src/toolbarItem.json
    :language: json
 
+.. _generic-toolbar:
+
 Generic Widget with Toolbar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -921,9 +924,11 @@ The logic detailed in the previous section can be used to customize any widgets 
 
 The additional keys used in ``jupyter.lab.toolbars`` settings attributes are:
 
+- ``Cell``: Cell toolbar
 - ``FileBrowser``: Default file browser panel toolbar items
+- ``TopBar``: Top area toolbar (right of the main menu bar)
 
-Here is an example for enabling that definition on a widget:
+Here is an example for enabling a toolbar on a widget:
 
 .. code:: typescript
 
@@ -947,15 +952,20 @@ Here is an example for enabling that definition on a widget:
 
      // - Link the widget toolbar and its definition from the settings
      setToolbar(
-       browser,
+       browser, // This widget is the one passed to the toolbar item factory
        createToolbarFactory(
          toolbarRegistry,
          settings,
          'FileBrowser', // Factory name
          plugin.id,
          translator
-       )
+       ),
+       // You can explicitly pass the toolbar widget if it is not accessible as `toolbar` attribute
+       // toolbar,
      );
+
+See :ref:`Toolbar definitions toolbar-settings-definition` example on how to define the toolbar
+items in the settings.
 
 .. _widget-tracker:
 
