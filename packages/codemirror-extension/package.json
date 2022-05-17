@@ -46,7 +46,7 @@
     "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
     "@jupyterlab/statusbar": "^4.0.0-alpha.9",
     "@jupyterlab/translation": "^4.0.0-alpha.9",
-    "@lumino/widgets": "^1.31.1",
+    "@lumino/widgets": "^1.32.0",
     "codemirror": "~5.61.0"
   },
   "devDependencies": {

@@ -45,7 +45,7 @@
     "@jupyterlab/translation": "^4.0.0-alpha.9",
     "@jupyterlab/ui-components": "^4.0.0-alpha.24",
     "@lumino/algorithm": "^1.9.1",
-    "@lumino/widgets": "^1.31.1"
+    "@lumino/widgets": "^1.32.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
