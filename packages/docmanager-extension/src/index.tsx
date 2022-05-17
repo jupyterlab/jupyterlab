@@ -782,8 +782,7 @@ function addCommands(
             })
             .catch(err => {
               // If the save was canceled by user-action, do nothing.
-              // FIXME-TRANS: Is this using the text on the button or?
-              if (err.message === 'Cancel') {
+              if (err.name === 'ModalCancelError') {
                 return;
               }
               throw err;
