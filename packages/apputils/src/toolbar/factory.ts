@@ -16,6 +16,8 @@ import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
  */
 const DEFAULT_TOOLBAR_ITEM_RANK = 50;
 
+const TOOLBAR_KEY = 'jupyter.lab.toolbars';
+
 /**
  * Display warning when the toolbar definition have been modified.
  *
@@ -81,24 +83,21 @@ async function setToolbarItems(
         .filter(plugin => plugin !== pluginId)
         .map(plugin => {
           const items =
-            (registry.plugins[plugin]!.schema['jupyter.lab.toolbars'] ?? {})[
+            (registry.plugins[plugin]!.schema[TOOLBAR_KEY] ?? {})[
               factoryName
             ] ?? [];
           loaded[plugin] = items;
           return items;
         })
-        .concat([(schema['jupyter.lab.toolbars'] ?? {})[factoryName] ?? []])
+        .concat([(schema[TOOLBAR_KEY] ?? {})[factoryName] ?? []])
         .reduceRight(
-          (
-            acc: ISettingRegistry.IToolbarItem[],
-            val: ISettingRegistry.IToolbarItem[]
-          ) => SettingRegistry.reconcileToolbarItems(acc, val, true),
+          (acc, val) => SettingRegistry.reconcileToolbarItems(acc, val, true),
           []
         )!;
 
       // Apply default value as last step to take into account overrides.json
-      // The standard default being [] as the plugin must use `jupyter.lab.toolbars.<factory>`
-      // to define their default value.
+      // The standard toolbars default is [] as the plugin must use
+      // `jupyter.lab.toolbars.<factory>` to define its default value.
       schema.properties![
         propertyId
       ].default = SettingRegistry.reconcileToolbarItems(
@@ -184,36 +183,6 @@ async function setToolbarItems(
     transferSettings(newItems);
   });
 
-  // React to plugin changes
-  if (listenPlugin) {
-    registry.pluginChanged.connect(async (sender, plugin) => {
-      // As the plugin storing the toolbar definition is transformed using
-      // the above definition, if it changes, this means that a request to
-      // reload was triggered. Hence the toolbar definitions from the other
-      // plugins have been automatically reset during the transform step.
-      if (plugin !== pluginId) {
-        // If a plugin changed its toolbar items
-        const oldItems = loaded[plugin] ?? [];
-        const newItems =
-          (registry.plugins[plugin]!.schema['jupyter.lab.toolbars'] ?? {})[
-            factoryName
-          ] ?? [];
-        if (!JSONExt.deepEqual(oldItems, newItems)) {
-          if (loaded[plugin]) {
-            // The plugin has changed, request the user to reload the UI
-            await displayInformation(trans);
-          } else {
-            if (newItems.length > 0) {
-              canonical = null;
-              // This will trigger a settings.changed signal that will update the items
-              await registry.reload(pluginId);
-            }
-          }
-        }
-      }
-    });
-  }
-
   const transferSettings = (newItems: ISettingRegistry.IToolbarItem[]) => {
     // This is not optimal but safer because a toolbar item with the same
     // name cannot be inserted (it will be a no-op). But that could happen
@@ -224,6 +193,36 @@ async function setToolbarItems(
 
   // Initialize the toolbar
   transferSettings((settings.composite[propertyId] as any) ?? []);
+
+  // React to plugin changes if no other transformer exists, otherwise bail.
+  if (!listenPlugin) {
+    return;
+  }
+  registry.pluginChanged.connect(async (sender, plugin) => {
+    // Since the plugin storing the toolbar definition is transformed above,
+    // if it has changed, it means that a request to reload was triggered.
+    // Hence the toolbar definitions from the other plugins have been
+    // automatically reset during the transform step.
+    if (plugin === pluginId) {
+      return;
+    }
+    // If a plugin changed its toolbar items
+    const oldItems = loaded[plugin] ?? [];
+    const newItems =
+      (registry.plugins[plugin]!.schema[TOOLBAR_KEY] ?? {})[factoryName] ?? [];
+    if (!JSONExt.deepEqual(oldItems, newItems)) {
+      if (loaded[plugin]) {
+        // The plugin has changed, request the user to reload the UI
+        await displayInformation(trans);
+      } else {
+        if (newItems.length > 0) {
+          canonical = null;
+          // This will trigger a settings.changed signal that will update the items
+          await registry.reload(pluginId);
+        }
+      }
+    }
+  });
 }
 
 /**
