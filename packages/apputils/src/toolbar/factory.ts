@@ -190,7 +190,7 @@ async function setToolbarItems(
       // As the plugin storing the toolbar definition is transformed using
       // the above definition, if it changes, this means that a request to
       // reload was triggered. Hence the toolbar definitions from the other
-      // plugins has been automatically reset during the transform step.
+      // plugins have been automatically reset during the transform step.
       if (plugin !== pluginId) {
         // If a plugin changed its toolbar items
         const oldItems = loaded[plugin] ?? [];
