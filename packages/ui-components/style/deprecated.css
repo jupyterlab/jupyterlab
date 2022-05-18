@@ -36,6 +36,7 @@
   --jp-icon-console: url('icons/filetype/console.svg');
   --jp-icon-copy: url('icons/toolbar/copy.svg');
   --jp-icon-copyright: url('icons/licenses/copyright.svg');
+  --jp-icon-create-comment: url('icons/toolbar/create-comment.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
   --jp-icon-delete: url('icons/toolbar/delete.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
@@ -202,6 +203,10 @@
 
 .jp-CopyrightIcon {
   background-image: var(--jp-icon-copyright);
+}
+
+.jp-CreateCommentIcon {
+  background-image: var(--jp-icon-create-comment);
 }
 
 .jp-CutIcon {

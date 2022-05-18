@@ -7,7 +7,7 @@
       {
         "name": "add-comment",
         "command": "jupyterlab:add-notebook-comment",
-        "icon": "ui-components:keyboard",
+        "icon": "ui-components:create-comment",
         "rank": 100
       }
     ]
