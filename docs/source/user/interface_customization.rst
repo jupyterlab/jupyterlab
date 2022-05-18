@@ -71,7 +71,7 @@ Log Console         down      down
       }
     }
 
-The above example, will results in the following changes:
+The above example will result in the following changes:
 
 .. figure:: ../images/default-terminal-position-single.png
     :alt: Default terminal position in simple mode
@@ -155,7 +155,7 @@ The top menu bar definition can be customized through the *Advanced Settings Edi
 access it by opening the *Settings Editor* from the *Settings* menu, then click on the
 *JSON Settings Editor* in the top right corner.
 
-In the *Advanced Settings Editor*, you will need to the select the *Main Menu* section in
+In the *Advanced Settings Editor*, you will need to select the *Main Menu* section in
 the left panel. Your ``menus`` customization will be merged with the default menu bar definition (this
 is a different behavior as the other settings that are overriding the default settings).
 So to remove a default entry, you will need to disable it. To do that, you will need
