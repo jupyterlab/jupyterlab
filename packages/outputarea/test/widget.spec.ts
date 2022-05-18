@@ -102,6 +102,83 @@ describe('outputarea/widget', () => {
       });
     });
 
+    describe('#maxNumberOutputs', () => {
+      test.each([20, 6, 5, 2])(
+        'should control the list of visible outputs',
+        maxNumberOutputs => {
+          const widget = new OutputArea({
+            rendermime,
+            model,
+            maxNumberOutputs
+          });
+
+          expect(widget.widgets.length).toBeLessThanOrEqual(
+            maxNumberOutputs + 1
+          );
+
+          if (widget.widgets.length > maxNumberOutputs) {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(
+              widget.widgets[widget.widgets.length - 1].node.textContent
+            ).toContain('Show more outputs');
+          } else {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(
+              widget.widgets[widget.widgets.length - 1].node.textContent
+            ).not.toContain('Show more outputs');
+          }
+        }
+      );
+
+      test('should display all widgets when clicked', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+
+        expect(widget.widgets.length).toBeLessThan(model.length);
+        Widget.attach(widget, document.body);
+        simulate(
+          widget.widgets[widget.widgets.length - 1].node.querySelector('a')!,
+          'click'
+        );
+        Widget.detach(widget);
+
+        expect(widget.widgets.length).toEqual(model.length);
+      });
+
+      test('should display new widgets if increased', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+        expect(widget.widgets.length).toBeLessThan(model.length);
+
+        widget.maxNumberOutputs += 1;
+
+        expect(widget.widgets.length).toEqual(widget.maxNumberOutputs + 1);
+        expect(widget.widgets.length).toBeLessThan(model.length);
+      });
+
+      test('should not change displayed widgets if reduced', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+        expect(widget.widgets.length).toBeLessThan(model.length);
+
+        widget.maxNumberOutputs -= 1;
+
+        expect(widget.widgets.length).toBeGreaterThan(
+          widget.maxNumberOutputs + 1
+        );
+        expect(widget.widgets.length).toBeLessThan(model.length);
+      });
+    });
+
     describe('#widgets', () => {
       it('should get the child widget at the specified index', () => {
         expect(widget.widgets[0]).toBeInstanceOf(Widget);

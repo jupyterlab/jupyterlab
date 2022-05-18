@@ -151,6 +151,12 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   margin: 0;
 }
 
+.jp-TrimmedOutputs pre {
+  background: var(--jp-layout-color3);
+  font-size: calc(var(--jp-code-font-size) * 1.4);
+  text-align: center;
+}
+
 /* Hide the gutter in case of
  *  - nested output areas (e.g. in the case of output widgets)
  *  - mirrored output areas
