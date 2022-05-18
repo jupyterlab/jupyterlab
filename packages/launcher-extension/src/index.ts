@@ -14,7 +14,7 @@ import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
 import { ITranslator } from '@jupyterlab/translation';
 import { launcherIcon } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
+import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
@@ -61,7 +61,11 @@ function activate(
       const cwd = args['cwd'] ? String(args['cwd']) : '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
-        shell.add(item, 'main', { ref: id });
+        // If widget is attached to the main area replace the launcher
+        if (find(shell.widgets('main'), w => w === item)) {
+          shell.add(item, 'main', { ref: id });
+          launcher.dispose();
+        }
       };
       const launcher = new Launcher({
         model,

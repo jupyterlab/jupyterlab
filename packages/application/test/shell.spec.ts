@@ -26,7 +26,7 @@ describe('LabShell', () => {
   });
 
   beforeEach(() => {
-    shell = new LabShell();
+    shell = new LabShell({ waitForRestore: false });
     Widget.attach(shell, document.body);
   });
 

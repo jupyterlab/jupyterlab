@@ -218,6 +218,7 @@
 #jp-left-stack > .lm-Widget,
 #jp-right-stack > .lm-Widget {
   min-width: var(--jp-sidebar-min-width);
+  background-color: var(--jp-layout-color1);
 }
 
 #jp-right-stack {

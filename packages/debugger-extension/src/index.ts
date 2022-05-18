@@ -396,7 +396,8 @@ const variables: JupyterFrontEndPlugin<void> = {
         model.changed.connect(disposeWidget);
         shell.add(widget, 'main', {
           mode: tracker.currentWidget ? 'split-right' : 'split-bottom',
-          activate: false
+          activate: false,
+          type: 'Debugger Variables'
         });
       }
     });
@@ -473,7 +474,8 @@ const variables: JupyterFrontEndPlugin<void> = {
 
         shell.add(widget, 'main', {
           mode: trackerMime.currentWidget ? 'split-right' : 'split-bottom',
-          activate: false
+          activate: false,
+          type: 'Debugger Variables'
         });
       }
     });
@@ -739,7 +741,7 @@ const main: JupyterFrontEndPlugin<void> = {
     sidebar.node.setAttribute('role', 'region');
     sidebar.node.setAttribute('aria-label', trans.__('Debugger section'));
 
-    shell.add(sidebar, 'right');
+    shell.add(sidebar, 'right', { type: 'Debugger' });
 
     commands.addCommand(CommandIDs.showPanel, {
       label: translator.load('jupyterlab').__('Debugger Panel'),

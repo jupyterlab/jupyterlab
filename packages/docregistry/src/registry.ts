@@ -1116,6 +1116,15 @@ export namespace DocumentRegistry {
      * This field may be used or ignored depending on shell implementation.
      */
     rank?: number;
+
+    /**
+     * Type of widget to open
+     *
+     * #### Notes
+     * This is the key used to load user customization.
+     * Its typical value is: a factory name or the widget id (if singleton)
+     */
+    type?: string;
   }
 
   /**

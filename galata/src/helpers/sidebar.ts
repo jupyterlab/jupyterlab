@@ -140,16 +140,23 @@ export class SidebarHelper {
         const settingRegistry = (await window.galataip.getPlugin(
           pluginId
         )) as ISettingRegistry;
-        const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
-        const overrides = (await settingRegistry.get(SIDEBAR_ID, 'overrides'))
-          .composite as any as { [index: string]: any };
-        for (const widgetId of Object.keys(overrides)) {
-          overrides[widgetId] = 'left';
-        }
-        // default location of the property inspector and debugger is right, move it to left during tests
-        overrides['jp-property-inspector'] = 'left';
-        overrides['jp-debugger-sidebar'] = 'left';
-        await settingRegistry.set(SIDEBAR_ID, 'overrides', overrides as any);
+        const SHELL_ID = '@jupyterlab/application-extension:shell';
+        const sidebars = {
+          Debugger: 'left',
+          'Property Inspector': 'left',
+          'Extension Manager': 'left',
+          'File Browser': 'left',
+          'Sessions and Tabs': 'left',
+          'Table of Contents': 'left'
+        };
+        const currentLayout = (await settingRegistry.get(
+          SHELL_ID,
+          'layout'
+        )) as any;
+        await settingRegistry.set(SHELL_ID, 'layout', {
+          single: { ...currentLayout.single, ...sidebars },
+          multiple: { ...currentLayout.multiple, ...sidebars }
+        });
       },
       { pluginId: PLUGIN_ID_SETTINGS as keyof IPluginNameToInterfaceMap }
     );

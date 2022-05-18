@@ -910,6 +910,8 @@ The current widget factories supporting the toolbar customization are:
 - ``CSVTable``: CSV (Comma Separated Value) Viewer toolbar
 - ``TSVTable``: TSV (Tabulation Separated Value) Viewer toolbar
 
+.. _toolbar-item:
+
 And the toolbar item must follow this definition:
 
 .. literalinclude:: ../snippets/packages/settingregistry/src/toolbarItem.json

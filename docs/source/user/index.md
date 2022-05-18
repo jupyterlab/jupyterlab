@@ -22,6 +22,6 @@ jupyterhub
 export
 language
 rtc
+interface_customization
 directories
-ui_customization
 ```

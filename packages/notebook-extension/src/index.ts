@@ -1107,7 +1107,8 @@ function activateClonedOutputs(
       const widget = new MainAreaWidget({ content });
       current.context.addSibling(widget, {
         ref: current.id,
-        mode: 'split-bottom'
+        mode: 'split-bottom',
+        type: 'Cloned Output'
       });
 
       const updateCloned = () => {
@@ -3055,7 +3056,8 @@ namespace Private {
       preferredLanguage: widget.context.model.defaultKernelLanguage,
       activate: activate,
       ref: widget.id,
-      insertMode: 'split-bottom'
+      insertMode: 'split-bottom',
+      type: 'Linked Console'
     };
 
     return commands.execute('console:create', options);

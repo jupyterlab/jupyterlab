@@ -178,7 +178,8 @@ function activateLogConsole(
 
     app.shell.add(logConsoleWidget, 'down', {
       ref: options.ref,
-      mode: options.insertMode
+      mode: options.insertMode,
+      type: 'Log Console'
     });
     void tracker.add(logConsoleWidget);
     app.shell.activateById(logConsoleWidget.id);

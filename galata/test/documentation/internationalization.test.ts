@@ -44,8 +44,6 @@ test.describe('Internationalization', () => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
 
-    await setSidebarWidth(page);
-
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
     await page.click('#jp-mainmenu-settings-language >> text=Chinese');
@@ -68,6 +66,8 @@ test.describe('Internationalization', () => {
 
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
+
+    await setSidebarWidth(page);
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
