@@ -495,9 +495,9 @@ The top area is intended to host most persistent user interface elements that sp
 A toolbar named **TopBar** is available on the right of the main menu bar. For example, JupyterLab adds a user
 dropdown to that toolbar when started in ``collaborative`` mode.
 
-See :ref:`generic toolbars generic-toolbar` to see how to add a toolbar or a custom widget to a toolbar.
+See :ref:`generic toolbars <generic-toolbar>` to see how to add a toolbar or a custom widget to a toolbar.
 
-You can use a numeric rank to control the ordering of top bar items in the settings; see :ref:`Toolbar definitions toolbar-settings-definition`.
+You can use a numeric rank to control the ordering of top bar items in the settings; see :ref:`Toolbar definitions <toolbar-settings-definition>`.
 
 JupyterLab adds a spacer widget to the top bar at rank ``50`` by default.
 You can then use the following guidelines to place your items:
@@ -964,7 +964,7 @@ Here is an example for enabling a toolbar on a widget:
        // toolbar,
      );
 
-See :ref:`Toolbar definitions toolbar-settings-definition` example on how to define the toolbar
+See :ref:`Toolbar definitions <toolbar-settings-definition>` example on how to define the toolbar
 items in the settings.
 
 .. _widget-tracker:
