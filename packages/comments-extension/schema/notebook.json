@@ -13,15 +13,6 @@
     ]
   },
   "properties": {
-    "toolbar": {
-      "title": "List of toolbar items",
-      "description": "An item is defined by a 'name', a 'command' name, and an 'icon' name",
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/toolbarItem"
-      },
-      "default": []
-    }
   },
   "additionalProperties": false,
   "type": "object",
