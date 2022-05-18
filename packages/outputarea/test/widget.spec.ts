@@ -121,16 +121,12 @@ describe('outputarea/widget', () => {
             // eslint-disable-next-line jest/no-conditional-expect
             expect(
               widget.widgets[widget.widgets.length - 1].node.textContent
-            ).toContain(
-              `Displaying the first ${maxNumberOutputs} top outputs.`
-            );
+            ).toContain('Show more outputs');
           } else {
             // eslint-disable-next-line jest/no-conditional-expect
             expect(
               widget.widgets[widget.widgets.length - 1].node.textContent
-            ).not.toContain(
-              `Displaying the first ${maxNumberOutputs} top outputs.`
-            );
+            ).not.toContain('Show more outputs');
           }
         }
       );
