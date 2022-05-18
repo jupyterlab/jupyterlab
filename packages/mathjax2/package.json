@@ -33,7 +33,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.9",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.9",
     "@lumino/coreutils": "^1.12.0"
   },
   "devDependencies": {

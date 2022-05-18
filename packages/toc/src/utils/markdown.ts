@@ -263,4 +263,5 @@ function cleanTitle(heading: string): string {
 /**
  * Ignore title with html tag with a class name equal to `jp-toc-ignore` or `tocSkip`
  */
-const skipHeading = /<\w+\s(.*?\s)?class="(.*?\s)?(jp-toc-ignore|tocSkip)(\s.*?)?"(\s.*?)?>/;
+const skipHeading =
+  /<\w+\s(.*?\s)?class="(.*?\s)?(jp-toc-ignore|tocSkip)(\s.*?)?"(\s.*?)?>/;

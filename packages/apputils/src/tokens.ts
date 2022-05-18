@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -277,16 +278,7 @@ export namespace ToolbarRegistry {
   /**
    * Interface of item to be inserted in a toolbar
    */
-  export interface IToolbarItem {
-    /**
-     * Unique item name
-     */
-    name: string;
-    /**
-     * Toolbar widget
-     */
-    widget: Widget;
-  }
+  export interface IToolbarItem extends IRenderMime.IToolbarItem {}
 
   /**
    * Interface describing a toolbar item widget

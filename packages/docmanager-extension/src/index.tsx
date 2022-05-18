@@ -616,7 +616,7 @@ function addCommands(
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
       const factory = (args['factory'] as string) || void 0;
-      const kernel = (args?.kernel as unknown) as Kernel.IModel | undefined;
+      const kernel = args?.kernel as unknown as Kernel.IModel | undefined;
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       return docManager.services.contents
@@ -782,8 +782,7 @@ function addCommands(
             })
             .catch(err => {
               // If the save was canceled by user-action, do nothing.
-              // FIXME-TRANS: Is this using the text on the button or?
-              if (err.message === 'Cancel') {
+              if (err.name === 'ModalCancelError') {
                 return;
               }
               throw err;

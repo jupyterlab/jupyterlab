@@ -46,13 +46,13 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.9",
     "@jupyterlab/docregistry": "^4.0.0-alpha.9",
     "@jupyterlab/rendermime": "^4.0.0-alpha.9",
-    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.9",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.9",
     "@jupyterlab/services": "^7.0.0-alpha.9",
     "@jupyterlab/statedb": "^4.0.0-alpha.9",
     "@jupyterlab/translation": "^4.0.0-alpha.9",
     "@jupyterlab/ui-components": "^4.0.0-alpha.24",
     "@lumino/algorithm": "^1.9.1",
-    "@lumino/application": "^1.28.1",
+    "@lumino/application": "^1.29.0",
     "@lumino/commands": "^1.20.0",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
@@ -60,7 +60,7 @@
     "@lumino/polling": "^1.10.0",
     "@lumino/properties": "^1.8.1",
     "@lumino/signaling": "^1.10.1",
-    "@lumino/widgets": "^1.31.1"
+    "@lumino/widgets": "^1.32.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.9",

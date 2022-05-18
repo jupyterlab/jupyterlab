@@ -39,9 +39,9 @@ export namespace DOMUtils {
     parent: HTMLElement,
     className: string
   ): HTMLCollectionOf<HTMLElement> {
-    return parent.getElementsByClassName(className) as HTMLCollectionOf<
-      HTMLElement
-    >;
+    return parent.getElementsByClassName(
+      className
+    ) as HTMLCollectionOf<HTMLElement>;
   }
 
   /**

@@ -52,9 +52,8 @@ export class KernelCompleterProvider implements ICompletionProvider {
     }
 
     const items = new Array<CompletionHandler.ICompletionItem>();
-    const metadata = response.metadata._jupyter_types_experimental as Array<
-      JSONObject
-    >;
+    const metadata = response.metadata
+      ._jupyter_types_experimental as Array<JSONObject>;
     response.matches.forEach((label, index) => {
       if (metadata[index]) {
         items.push({

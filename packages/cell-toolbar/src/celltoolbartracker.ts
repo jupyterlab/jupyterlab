@@ -133,8 +133,8 @@ export class CellToolbarTracker implements IDisposable {
    */
   private _onToolbarChanged(): void {
     // Reset toolbar when settings changes
-    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content
-      .activeCell;
+    const activeCell: Cell<ICellModel> | null | undefined =
+      this._panel?.content.activeCell;
     if (activeCell) {
       this._removeToolbar(activeCell.model);
       this._addToolbar(activeCell.model);
@@ -210,7 +210,8 @@ export class CellToolbarTracker implements IDisposable {
     const markdownOutputWidget = markdownOutput.renderedInput;
     const markdownOutputElement = markdownOutputWidget.node;
 
-    const firstOutputElementChild = markdownOutputElement.firstElementChild as HTMLElement;
+    const firstOutputElementChild =
+      markdownOutputElement.firstElementChild as HTMLElement;
     if (firstOutputElementChild === null) {
       return false;
     }
@@ -236,9 +237,8 @@ export class CellToolbarTracker implements IDisposable {
       return false; // Nothing in the editor
     }
 
-    const codeMirrorLines = editorWidget.node.getElementsByClassName(
-      'CodeMirror-line'
-    );
+    const codeMirrorLines =
+      editorWidget.node.getElementsByClassName('CodeMirror-line');
     if (codeMirrorLines.length < 1) {
       return false; // No lines present
     }

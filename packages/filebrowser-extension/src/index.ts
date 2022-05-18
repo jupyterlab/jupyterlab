@@ -420,7 +420,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
       )
     );
 
-    labShell.add(browser, 'left', { rank: 100 });
+    labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
     commands.addCommand(CommandIDs.showBrowser, {
       label: trans.__('Open the file browser for the provided `path`.'),

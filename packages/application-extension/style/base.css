@@ -8,7 +8,12 @@
   width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
 }
 
-#jp-topbar-spacer {
-  flex-grow: 1;
-  flex-shrink: 1;
+#jp-top-bar {
+  --jp-private-toolbar-height: var(--jp-private-menu-panel-height);
+
+  flex: 1 1 auto;
+  padding: 0 2px;
+  box-shadow: none;
+  border: none;
+  align-items: center;
 }

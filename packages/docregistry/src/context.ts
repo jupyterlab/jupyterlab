@@ -44,7 +44,8 @@ import { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T> {
+> implements DocumentRegistry.IContext<T>
+{
   /**
    * Construct a new document context.
    */
@@ -616,22 +617,19 @@ export class Context<
       // Emit completion.
       this._saveState.emit('completed');
     } catch (err) {
-      // If the save has been canceled by the user,
-      // throw the error so that whoever called save()
-      // can decide what to do.
-      if (
-        err.message === 'Cancel' ||
-        err.message === 'Modal is already displayed'
-      ) {
+      // If the save has been canceled by the user, throw the error
+      // so that whoever called save() can decide what to do.
+      const { name } = err;
+      if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
         throw err;
       }
 
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
-      const name = PathExt.basename(localPath);
+      const file = PathExt.basename(localPath);
       void this._handleError(
         err,
-        this._trans.__('File Save Error for %1', name)
+        this._trans.__('File Save Error for %1', file)
       );
 
       // Emit failure.
@@ -838,7 +836,9 @@ export class Context<
         `${tDisk}`
     );
     if (this._timeConflictModalIsOpen) {
-      return Promise.reject(new Error('Modal is already displayed'));
+      const error = new Error('Modal is already displayed');
+      error.name = 'ModalDuplicateError';
+      return Promise.reject(error);
     }
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
@@ -869,7 +869,9 @@ or load the version on disk (revert)?`,
           return model;
         });
       }
-      return Promise.reject(new Error('Cancel')); // Otherwise cancel the save.
+      const error = new Error('Cancel');
+      error.name = 'ModalCancelError';
+      return Promise.reject(error); // Otherwise cancel the save.
     });
   }
 

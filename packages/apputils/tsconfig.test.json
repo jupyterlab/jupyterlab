@@ -9,6 +9,9 @@
       "path": "../observables"
     },
     {
+      "path": "../rendermime-interfaces"
+    },
+    {
       "path": "../services"
     },
     {

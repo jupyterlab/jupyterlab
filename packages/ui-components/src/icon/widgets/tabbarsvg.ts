@@ -53,11 +53,11 @@ export namespace TabBarSvg {
         })
       );
 
-      return (hpass(
+      return hpass(
         'div',
         { className },
         closeIcon
-      ) as unknown) as VirtualElement;
+      ) as unknown as VirtualElement;
     }
   }
 

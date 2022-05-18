@@ -16,7 +16,7 @@
     "@jupyterlab/theme-light-extension": "^4.0.0-alpha.9",
     "@jupyterlab/translation": "^4.0.0-alpha.9",
     "@lumino/commands": "^1.20.0",
-    "@lumino/widgets": "^1.31.1",
+    "@lumino/widgets": "^1.32.0",
     "es6-promise": "~4.2.8"
   },
   "devDependencies": {

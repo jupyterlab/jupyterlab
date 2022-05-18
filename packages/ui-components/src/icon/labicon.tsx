@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
@@ -622,20 +623,7 @@ export namespace LabIcon {
   /**
    * The simplest possible interface for defining a generic icon.
    */
-  export interface IIcon {
-    /**
-     * The name of the icon. By convention, the icon name will be namespaced
-     * as so:
-     *
-     *     "pkg-name:icon-name"
-     */
-    readonly name: string;
-
-    /**
-     * A string containing the raw contents of an svg file.
-     */
-    svgstr: string;
-  }
+  export interface IIcon extends IRenderMime.LabIcon.IIcon {}
 
   export interface IRendererOptions {
     attrs?: ElementAttrs;
@@ -702,9 +690,7 @@ export namespace LabIcon {
   /**
    * A type that can be resolved to a LabIcon instance.
    */
-  export type IResolvable =
-    | string
-    | (IIcon & Partial<VirtualElement.IRenderer>);
+  export type IResolvable = IRenderMime.LabIcon.IResolvable;
 
   /**
    * A type that maybe can be resolved to a LabIcon instance.

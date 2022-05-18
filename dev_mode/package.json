@@ -85,7 +85,7 @@
     "@jupyterlab/property-inspector": "~4.0.0-alpha.9",
     "@jupyterlab/rendermime": "~4.0.0-alpha.9",
     "@jupyterlab/rendermime-extension": "~4.0.0-alpha.9",
-    "@jupyterlab/rendermime-interfaces": "~4.0.0-alpha.9",
+    "@jupyterlab/rendermime-interfaces": "~3.8.0-alpha.9",
     "@jupyterlab/running": "~4.0.0-alpha.9",
     "@jupyterlab/running-extension": "~4.0.0-alpha.9",
     "@jupyterlab/services": "~7.0.0-alpha.9",
@@ -125,7 +125,7 @@
     "@lumino/properties": "^1.8.1",
     "@lumino/signaling": "^1.10.1",
     "@lumino/virtualdom": "^1.14.1",
-    "@lumino/widgets": "^1.31.1",
+    "@lumino/widgets": "^1.32.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "yjs": "^13.5.34"

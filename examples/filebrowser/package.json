@@ -21,7 +21,7 @@
     "@jupyterlab/ui-components": "^4.0.0-alpha.24",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",
-    "@lumino/widgets": "^1.31.1",
+    "@lumino/widgets": "^1.32.0",
     "es6-promise": "~4.2.8"
   },
   "devDependencies": {
