@@ -51,6 +51,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { topbar } from './topbar';
 
 /**
  * Default context menu item rank
@@ -1057,19 +1058,6 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin that adds a spacer widget to the top area.
- */
-const topSpacer: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:top-spacer',
-  autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
-    const spacer = new Widget();
-    spacer.id = 'jp-topbar-spacer';
-    app.shell.add(spacer, 'top', { rank: 900 });
-  }
-};
-
-/**
  * The simple interface mode switch in the status bar.
  */
 const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
@@ -1167,7 +1155,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   paths,
   propertyInspector,
   JupyterLogo,
-  topSpacer
+  topbar
 ];
 
 export default plugins;
