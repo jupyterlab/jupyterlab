@@ -106,7 +106,7 @@ on *JSON Settings Editor* button in the top right corner of the *Settings Editor
 Your ``toolbar`` customization will be merged with the default menu bar definition (this
 is a different behavior as the other settings that are overriding the default settings).
 So to remove a default item, you will need to disable it. To do that, you will need
-to set the toolbar item ``disabled`` attribute to ``true``; a item is uniquely identified
+to set the toolbar item ``disabled`` attribute to ``true``; an item is uniquely identified
 by its ``name`` attribute.
 
 .. code-block:: js
