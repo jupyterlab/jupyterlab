@@ -19,6 +19,9 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../comments"
+    },
+    {
       "path": "../completer"
     },
     {
@@ -68,6 +71,9 @@
     },
     {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "../statedb"

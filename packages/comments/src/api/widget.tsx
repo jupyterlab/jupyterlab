@@ -477,7 +477,8 @@ export interface ICommentWidget<T, C extends IComment = IComment> {
  */
 export class CommentWidget<T, C extends IComment = IComment>
   extends ReactWidget
-  implements ICommentWidget<T> {
+  implements ICommentWidget<T>
+{
   constructor(options: CommentWidget.IOptions<T, C>) {
     super();
 
@@ -502,7 +503,7 @@ export class CommentWidget<T, C extends IComment = IComment>
   }
 
   toJSON(): PartialJSONValue {
-    return (this.comment as unknown) as PartialJSONValue;
+    return this.comment as unknown as PartialJSONValue;
   }
 
   getPreview(): string | undefined {

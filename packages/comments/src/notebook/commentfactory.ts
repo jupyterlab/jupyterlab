@@ -16,9 +16,7 @@ export class CellCommentFactory extends CommentFactory<ICellComment> {
   readonly type = 'cell';
 }
 
-export class CellSelectionCommentFactory extends CommentFactory<
-  ICellSelectionComment
-> {
+export class CellSelectionCommentFactory extends CommentFactory<ICellSelectionComment> {
   createComment(
     options: CommentFactory.ICommentOptions<Cell>
   ): ICellSelectionComment {

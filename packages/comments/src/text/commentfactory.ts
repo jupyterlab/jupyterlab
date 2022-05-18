@@ -5,9 +5,7 @@ import { ITextSelectionComment } from './commentformat';
 import { CommentFactory } from '../api';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-export class TextSelectionCommentFactory extends CommentFactory<
-  ITextSelectionComment
-> {
+export class TextSelectionCommentFactory extends CommentFactory<ITextSelectionComment> {
   createComment(
     options: CommentFactory.ICommentOptions<CodeEditorWrapper>
   ): ITextSelectionComment {

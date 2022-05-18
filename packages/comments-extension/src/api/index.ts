@@ -48,14 +48,15 @@ export const commentRegistryPlugin: JupyterFrontEndPlugin<ICommentRegistry> = {
 /**
  * A plugin that provides a `CommentWidgetRegistry`
  */
-export const commentWidgetRegistryPlugin: JupyterFrontEndPlugin<ICommentWidgetRegistry> = {
-  id: '@jupyterlab/comments-extension:widget-registry',
-  autoStart: true,
-  provides: ICommentWidgetRegistry,
-  activate: (app: JupyterFrontEnd) => {
-    return new CommentWidgetRegistry();
-  }
-};
+export const commentWidgetRegistryPlugin: JupyterFrontEndPlugin<ICommentWidgetRegistry> =
+  {
+    id: '@jupyterlab/comments-extension:widget-registry',
+    autoStart: true,
+    provides: ICommentWidgetRegistry,
+    activate: (app: JupyterFrontEnd) => {
+      return new CommentWidgetRegistry();
+    }
+  };
 
 export const jupyterCommentingPlugin: JupyterFrontEndPlugin<ICommentPanel> = {
   id: '@jupyterlab/comments-extension:api',

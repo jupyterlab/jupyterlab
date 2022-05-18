@@ -75,7 +75,7 @@ export class CommentFileModel implements DocumentRegistry.IModel {
     this.ymodel.transact(() => {
       const comments = this.comments;
       comments.delete(0, comments.length);
-      comments.push((value as any) as IComment[]);
+      comments.push(value as any as IComment[]);
     });
 
     this._signalContentChange();
@@ -508,7 +508,8 @@ export namespace CommentFileModel {
 }
 
 export class CommentFileModelFactory
-  implements DocumentRegistry.IModelFactory<CommentFileModel> {
+  implements DocumentRegistry.IModelFactory<CommentFileModel>
+{
   constructor(options: CommentFileModelFactory.IOptions) {
     const { commentRegistry, commentWidgetRegistry, commentMenu } = options;
 
