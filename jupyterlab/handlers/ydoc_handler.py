@@ -140,13 +140,17 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
     def on_close(self) -> bool:
         # stop serving this client
         self._message_queue.put_nowait(b"")
-        if not self.room.clients:
-            # keep the document for a while after every client disconnects
+        if self.room.clients == [self]:
+            # no client in this room after we disconnect
+            # keep the document for a while in case someone reconnects
             self.room.cleaner = asyncio.create_task(self.clean_room())
         return True
 
     async def clean_room(self) -> None:
-        await asyncio.sleep(60)
+        seconds = self.settings["collaborative_document_cleanup_delay"]
+        if seconds is None:
+            return
+        await asyncio.sleep(seconds)
         if self.room.watcher:
             self.room.watcher.cancel()
         self.room.document.unobserve()

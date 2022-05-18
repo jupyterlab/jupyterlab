@@ -545,6 +545,15 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         saving changes from the front-end.""",
     )
 
+    collaborative_document_cleanup_delay = Int(
+        60,
+        allow_none=True,
+        config=True,
+        help="""The delay in seconds to keep a document in memory in the back-end after all clients
+        disconnect (relevant only when in collaborative mode). Defaults to 60s, if None then the
+        document will be kept in memory forever.""",
+    )
+
     @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -721,6 +730,9 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         self.serverapp.web_app.settings[
             "collaborative_file_poll_interval"
         ] = self.collaborative_file_poll_interval
+        self.serverapp.web_app.settings[
+            "collaborative_document_cleanup_delay"
+        ] = self.collaborative_document_cleanup_delay
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
