@@ -1411,7 +1411,7 @@ namespace Private {
     // Add a command to switch a side panels's side
     app.commands.addCommand(CommandIDs.switchSidebar, {
       label: trans.__('Switch Sidebar Side'),
-      execute: async () => {
+      execute: () => {
         // First, try to find the correct panel based on the application
         // context menu click. Bail if we don't find a sidebar for the widget.
         const contextNode: HTMLElement | undefined = app.contextMenuHitTest(
