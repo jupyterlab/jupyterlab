@@ -296,3 +296,17 @@ And the entries are sorted by their ranks.
 
     If you want to more advanced customization (e.g. changing the separators or sub-menus),
     please refer to the :ref:`Context Menu settings definition <context_menu>`.
+
+File Browser
+^^^^^^^^^^^^
+
+Users can add a "Open in Simple Mode" context menu option by adding the following to *Settings* -> *Application Context Menu* -> ``contextMenu``
+
+.. code:: json
+
+    {
+        "command": "filebrowser:open-browser-tab",
+        "args": { "mode": "single-document" },
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "rank": 1.6
+    }
