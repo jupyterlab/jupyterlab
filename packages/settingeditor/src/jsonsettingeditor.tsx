@@ -13,11 +13,10 @@ import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import { SplitPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
-import { SplitPanel } from './splitpanel';
 
 /**
  * The ratio panes in the setting editor.
