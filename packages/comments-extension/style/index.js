@@ -11,8 +11,6 @@ import '@jupyterlab/rendermime/style/index.js';
 import '@jupyterlab/docregistry/style/index.js';
 import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/docmanager/style/index.js';
-import '@jupyterlab/cells/style/index.js';
-import '@jupyterlab/notebook/style/index.js';
 import '@jupyterlab/comments/style/index.js';
 
 import './base.css';

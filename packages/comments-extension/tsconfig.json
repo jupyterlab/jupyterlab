@@ -13,9 +13,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
-    },
-    {
       "path": "../codeeditor"
     },
     {
@@ -28,13 +25,7 @@
       "path": "../docregistry"
     },
     {
-      "path": "../notebook"
-    },
-    {
       "path": "../rendermime"
-    },
-    {
-      "path": "../settingregistry"
     },
     {
       "path": "../shared-models"
