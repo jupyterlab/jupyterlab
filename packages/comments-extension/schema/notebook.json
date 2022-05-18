@@ -12,8 +12,7 @@
       }
     ]
   },
-  "properties": {
-  },
+  "properties": {},
   "additionalProperties": false,
-  "type": "object",
+  "type": "object"
 }
