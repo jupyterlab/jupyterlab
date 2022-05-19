@@ -16,8 +16,6 @@ import { Toolbar } from './widget';
  */
 const DEFAULT_TOOLBAR_ITEM_RANK = 50;
 
-const TOOLBAR_KEY = 'jupyter.lab.toolbars';
-
 /**
  * Display warning when the toolbar definition have been modified.
  *
@@ -62,117 +60,105 @@ async function setToolbarItems(
   propertyId: string = 'toolbar'
 ): Promise<void> {
   const trans = translator.load('jupyterlab');
-
-  let canonical: ISettingRegistry.ISchema | null = null;
+  let canonical: ISettingRegistry.ISchema | null;
   let loaded: { [name: string]: ISettingRegistry.IToolbarItem[] } = {};
-  let listenPlugin = true;
 
-  try {
-    /**
-     * Populate the plugin's schema defaults.
-     *
-     * We keep track of disabled entries in case the plugin is loaded
-     * after the toolbar initialization.
-     */
-    function populate(schema: ISettingRegistry.ISchema) {
-      loaded = {};
+  /**
+   * Populate the plugin's schema defaults.
+   *
+   * We keep track of disabled entries in case the plugin is loaded
+   * after the toolbar initialization.
+   */
+  function populate(schema: ISettingRegistry.ISchema) {
+    loaded = {};
+    const pluginDefaults = Object.keys(registry.plugins)
+      .map(plugin => {
+        const items =
+          (registry.plugins[plugin]!.schema['jupyter.lab.toolbars'] ?? {})[
+            factoryName
+          ] ?? [];
+        loaded[plugin] = items;
+        return items;
+      })
+      .concat([(schema['jupyter.lab.toolbars'] ?? {})[factoryName] ?? []])
+      .reduceRight(
+        (
+          acc: ISettingRegistry.IToolbarItem[],
+          val: ISettingRegistry.IToolbarItem[]
+        ) => SettingRegistry.reconcileToolbarItems(acc, val, true),
+        []
+      )!;
 
-      const pluginDefaults = Object.keys(registry.plugins)
-        // Filter out the current plugin (will be listed when reloading)
-        // because we control its addition after the mapping step
-        .filter(plugin => plugin !== pluginId)
-        .map(plugin => {
-          const items =
-            (registry.plugins[plugin]!.schema[TOOLBAR_KEY] ?? {})[
-              factoryName
-            ] ?? [];
-          loaded[plugin] = items;
-          return items;
-        })
-        .concat([(schema[TOOLBAR_KEY] ?? {})[factoryName] ?? []])
-        .reduceRight(
-          (acc, val) => SettingRegistry.reconcileToolbarItems(acc, val, true),
-          []
-        )!;
+    // Apply default value as last step to take into account overrides.json
+    // The standard default being [] as the plugin must use `jupyter.lab.toolbars.<factory>`
+    // to define their default value.
+    schema.properties![
+      propertyId
+    ].default = SettingRegistry.reconcileToolbarItems(
+      pluginDefaults,
+      schema.properties![propertyId].default as any[],
+      true
+    )!.sort(
+      (a, b) =>
+        (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
+        (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
+    );
+  }
 
-      // Apply default value as last step to take into account overrides.json
-      // The standard toolbars default is [] as the plugin must use
-      // `jupyter.lab.toolbars.<factory>` to define its default value.
-      schema.properties![
-        propertyId
-      ].default = SettingRegistry.reconcileToolbarItems(
-        pluginDefaults,
-        schema.properties![propertyId].default as any[],
-        true
-      )!.sort(
+  // Transform the plugin object to return different schema than the default.
+  registry.transform(pluginId, {
+    compose: plugin => {
+      // Only override the canonical schema the first time.
+      if (!canonical) {
+        canonical = JSONExt.deepCopy(plugin.schema);
+        populate(canonical);
+      }
+
+      const defaults =
+        ((canonical.properties ?? {})[propertyId] ?? {}).default ?? [];
+      // Initialize the settings
+      const user: PartialJSONObject = plugin.data.user;
+      const composite: PartialJSONObject = plugin.data.composite;
+      // Overrides the value with using the aggregated default for the toolbar property
+      user[propertyId] =
+        (plugin.data.user[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
+      composite[propertyId] = (
+        SettingRegistry.reconcileToolbarItems(
+          defaults as ISettingRegistry.IToolbarItem[],
+          user[propertyId] as ISettingRegistry.IToolbarItem[],
+          false
+        ) ?? []
+      ).sort(
         (a, b) =>
           (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
           (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
       );
-    }
 
-    // Transform the plugin object to return different schema than the default.
-    registry.transform(pluginId, {
-      compose: plugin => {
-        // Only override the canonical schema the first time.
-        if (!canonical) {
-          canonical = JSONExt.deepCopy(plugin.schema);
-          populate(canonical);
-        }
+      plugin.data = { composite, user };
 
-        const defaults =
-          ((canonical.properties ?? {})[propertyId] ?? {}).default ?? [];
-        // Initialize the settings
-        const user: PartialJSONObject = plugin.data.user;
-        const composite: PartialJSONObject = plugin.data.composite;
-        // Overrides the value with using the aggregated default for the toolbar property
-        user[propertyId] =
-          (plugin.data.user[propertyId] as ISettingRegistry.IToolbarItem[]) ??
-          [];
-        composite[propertyId] = (
-          SettingRegistry.reconcileToolbarItems(
-            defaults as ISettingRegistry.IToolbarItem[],
-            user[propertyId] as ISettingRegistry.IToolbarItem[],
-            false
-          ) ?? []
-        ).sort(
-          (a, b) =>
-            (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
-            (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
-        );
-
-        plugin.data = { composite, user };
-
-        return plugin;
-      },
-      fetch: plugin => {
-        // Only override the canonical schema the first time.
-        if (!canonical) {
-          canonical = JSONExt.deepCopy(plugin.schema);
-          populate(canonical);
-        }
-
-        return {
-          data: plugin.data,
-          id: plugin.id,
-          raw: plugin.raw,
-          schema: canonical,
-          version: plugin.version
-        };
+      return plugin;
+    },
+    fetch: plugin => {
+      // Only override the canonical schema the first time.
+      if (!canonical) {
+        canonical = JSONExt.deepCopy(plugin.schema);
+        populate(canonical);
       }
-    });
-  } catch (error) {
-    if (error.name === 'TransformError') {
-      // Assume the existing transformer is the toolbar builder transformer
-      // from another factory set up.
-      listenPlugin = false;
-    } else {
-      throw error;
+
+      return {
+        data: plugin.data,
+        id: plugin.id,
+        raw: plugin.raw,
+        schema: canonical,
+        version: plugin.version
+      };
     }
-  }
+  });
 
   // Repopulate the canonical variable after the setting registry has
   // preloaded all initial plugins.
+  canonical = null;
+
   const settings = await registry.load(pluginId);
 
   // React to customization by the user
@@ -181,6 +167,43 @@ async function setToolbarItems(
       (settings.composite[propertyId] as any) ?? [];
 
     transferSettings(newItems);
+  });
+
+  // React to plugin changes
+  registry.pluginChanged.connect(async (sender, plugin) => {
+    // As the plugin storing the toolbar definition is transformed using
+    // the above definition, if it changes, this means that a request to
+    // reloaded was triggered. Hence the toolbar definitions from the other
+    // plugins has been automatically reset during the transform step.
+    if (plugin !== pluginId) {
+      // If a plugin changed its toolbar items
+      const oldItems = loaded[plugin] ?? [];
+      const newItems =
+        (registry.plugins[plugin]!.schema['jupyter.lab.toolbars'] ?? {})[
+          factoryName
+        ] ?? [];
+      if (!JSONExt.deepEqual(oldItems, newItems)) {
+        if (loaded[plugin]) {
+          // The plugin has changed, request the user to reload the UI
+          await displayInformation(trans);
+        } else {
+          // The plugin was not yet loaded => update the toolbar items list
+          loaded[plugin] = JSONExt.deepCopy(newItems);
+          const newList = (
+            SettingRegistry.reconcileToolbarItems(
+              toArray(toolbarItems),
+              newItems,
+              false
+            ) ?? []
+          ).sort(
+            (a, b) =>
+              (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
+              (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
+          );
+          transferSettings(newList);
+        }
+      }
+    }
   });
 
   const transferSettings = (newItems: ISettingRegistry.IToolbarItem[]) => {
@@ -193,36 +216,6 @@ async function setToolbarItems(
 
   // Initialize the toolbar
   transferSettings((settings.composite[propertyId] as any) ?? []);
-
-  // React to plugin changes if no other transformer exists, otherwise bail.
-  if (!listenPlugin) {
-    return;
-  }
-  registry.pluginChanged.connect(async (sender, plugin) => {
-    // Since the plugin storing the toolbar definition is transformed above,
-    // if it has changed, it means that a request to reload was triggered.
-    // Hence the toolbar definitions from the other plugins have been
-    // automatically reset during the transform step.
-    if (plugin === pluginId) {
-      return;
-    }
-    // If a plugin changed its toolbar items
-    const oldItems = loaded[plugin] ?? [];
-    const newItems =
-      (registry.plugins[plugin]!.schema[TOOLBAR_KEY] ?? {})[factoryName] ?? [];
-    if (!JSONExt.deepEqual(oldItems, newItems)) {
-      if (loaded[plugin]) {
-        // The plugin has changed, request the user to reload the UI
-        await displayInformation(trans);
-      } else {
-        if (newItems.length > 0) {
-          canonical = null;
-          // This will trigger a settings.changed signal that will update the items
-          await registry.reload(pluginId);
-        }
-      }
-    }
-  });
 }
 
 /**

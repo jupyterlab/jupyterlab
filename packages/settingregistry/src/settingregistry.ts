@@ -461,9 +461,7 @@ export class SettingRegistry implements ISettingRegistry {
     const transformers = this._transformers;
 
     if (plugin in transformers) {
-      const error = new Error(`${plugin} already has a transformer.`);
-      error.name = 'TransformError';
-      throw error;
+      throw new Error(`${plugin} already has a transformer.`);
     }
 
     transformers[plugin] = {
@@ -1197,18 +1195,39 @@ export namespace SettingRegistry {
 
     // Merge array element depending on the type
     addition.forEach(item => {
-      // Name must be unique so it's sufficient to only compare it
-      const refIndex = items.findIndex(ref => ref.name === item.name);
-      if (refIndex < 0) {
-        items.push({ ...item });
-      } else {
-        if (
-          warn &&
-          JSONExt.deepEqual(Object.keys(item), Object.keys(items[refIndex]))
-        ) {
-          console.warn(`Toolbar item '${item.name}' is duplicated.`);
+      switch (item.type) {
+        case 'command':
+          if (item.command) {
+            const refIndex = items.findIndex(
+              ref =>
+                ref.name === item.name &&
+                ref.command === item.command &&
+                JSONExt.deepEqual(ref.args ?? {}, item.args ?? {})
+            );
+            if (refIndex < 0) {
+              items.push({ ...item });
+            } else {
+              if (warn) {
+                console.warn(
+                  `Toolbar item for command '${item.command}' is duplicated.`
+                );
+              }
+              items[refIndex] = { ...items[refIndex], ...item };
+            }
+          }
+          break;
+        case 'spacer':
+        default: {
+          const refIndex = items.findIndex(ref => ref.name === item.name);
+          if (refIndex < 0) {
+            items.push({ ...item });
+          } else {
+            if (warn) {
+              console.warn(`Toolbar item '${item.name}' is duplicated.`);
+            }
+            items[refIndex] = { ...items[refIndex], ...item };
+          }
         }
-        items[refIndex] = { ...items[refIndex], ...item };
       }
     });
 

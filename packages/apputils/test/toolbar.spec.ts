@@ -27,11 +27,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
-  PromiseDelegate,
-  ReadonlyPartialJSONObject
-} from '@lumino/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
@@ -1030,118 +1026,17 @@ describe('@jupyterlab/apputils', () => {
         translator
       );
 
-      const barPlugin = await settingRegistry.load(bar.id);
-      const baseToolbar = JSONExt.deepCopy(
-        barPlugin.composite['toolbar'] as any
-      );
-
-      let waitForChange = new PromiseDelegate<void>();
-      barPlugin.changed.connect(() => {
-        if (
-          !JSONExt.deepEqual(baseToolbar, barPlugin.composite['toolbar'] as any)
-        ) {
-          waitForChange.resolve();
-        }
-      });
+      await settingRegistry.load(bar.id);
+      // Trick push this test after all other promise in the hope they get resolve
+      // before going further - in particular we are looking at the update of the items
+      // factory in `createToolbarFactory`
+      await Promise.resolve();
       await settingRegistry.load(foo.id);
-      await waitForChange.promise;
 
       const items = factory(new Widget());
       expect(items).toHaveLength(2);
       expect(items.get(0).name).toEqual('cut');
       expect(items.get(1).name).toEqual('insert');
-    });
-
-    it('should be callable multiple times', async () => {
-      const factoryName = 'dummyFactory';
-      const pluginId = 'test-plugin:settings';
-      const toolbarRegistry = new ToolbarWidgetRegistry({
-        defaultFactory: jest.fn()
-      });
-
-      const bar: ISettingRegistry.IPlugin = {
-        data: {
-          composite: {},
-          user: {}
-        },
-        id: pluginId,
-        raw: '{}',
-        schema: {
-          'jupyter.lab.toolbars': {
-            dummyFactory: [
-              {
-                name: 'insert',
-                command: 'notebook:insert-cell-below',
-                rank: 20
-              },
-              { name: 'spacer', type: 'spacer', rank: 100 },
-              { name: 'cut', command: 'notebook:cut-cell', rank: 21 },
-              {
-                name: 'clear-all',
-                command: 'notebook:clear-all-cell-outputs',
-                rank: 60,
-                disabled: true
-              }
-            ]
-          },
-          'jupyter.lab.transform': true,
-          properties: {
-            toolbar: {
-              type: 'array'
-            }
-          },
-          type: 'object'
-        },
-        version: 'test'
-      };
-
-      const connector: IDataConnector<
-        ISettingRegistry.IPlugin,
-        string,
-        string,
-        string
-      > = {
-        fetch: jest.fn().mockImplementation((id: string) => {
-          switch (id) {
-            case bar.id:
-              return bar;
-            default:
-              return {};
-          }
-        }),
-        list: jest.fn(),
-        save: jest.fn(),
-        remove: jest.fn()
-      };
-
-      const settingRegistry = new SettingRegistry({
-        connector
-      });
-
-      const translator: ITranslator = {
-        load: jest.fn()
-      };
-
-      const factory = createToolbarFactory(
-        toolbarRegistry,
-        settingRegistry,
-        factoryName,
-        pluginId,
-        translator
-      );
-
-      const factory2 = createToolbarFactory(
-        toolbarRegistry,
-        settingRegistry,
-        factoryName,
-        pluginId,
-        translator
-      );
-
-      await settingRegistry.load(bar.id);
-
-      expect(factory(new Widget())).toHaveLength(3);
-      expect(factory2(new Widget())).toHaveLength(3);
     });
   });
 });
