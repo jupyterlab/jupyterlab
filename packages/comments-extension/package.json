@@ -43,14 +43,11 @@
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.9",
     "@jupyterlab/apputils": "^4.0.0-alpha.9",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.9",
     "@jupyterlab/comments": "^4.0.0-alpha.9",
     "@jupyterlab/docmanager": "^4.0.0-alpha.9",
     "@jupyterlab/docregistry": "^4.0.0-alpha.9",
     "@jupyterlab/rendermime": "^4.0.0-alpha.9",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.9",
-    "@lumino/widgets": "^1.32.0",
-    "y-protocols": "^1.0.5"
+    "@lumino/widgets": "^1.32.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.9",

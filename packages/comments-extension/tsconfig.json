@@ -13,9 +13,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../codeeditor"
-    },
-    {
       "path": "../comments"
     },
     {
@@ -26,9 +23,6 @@
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../shared-models"
     }
   ]
 }

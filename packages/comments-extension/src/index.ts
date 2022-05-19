@@ -8,13 +8,9 @@
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 
 import apiPlugins from './api';
-import textCommentingPlugin from './text';
 
 export * from './api';
-export * from './text';
 
-const plugins: JupyterFrontEndPlugin<any>[] = [
-  ...apiPlugins,
-  textCommentingPlugin
-];
+const plugins: JupyterFrontEndPlugin<any>[] = apiPlugins;
+
 export default plugins;
