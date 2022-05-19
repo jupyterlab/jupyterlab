@@ -197,6 +197,14 @@ export interface ISearchProviderRegistry {
   getProvider(widget: Widget): ISearchProvider | undefined;
 
   /**
+   * Whether the registry as a matching provider for the widget.
+   *
+   * @param widget - The widget to search over.
+   * @returns Provider existence
+   */
+  hasProvider(widget: Widget): boolean;
+
+  /**
    * Signal that emits when a new search provider has been registered
    * or removed.
    */
