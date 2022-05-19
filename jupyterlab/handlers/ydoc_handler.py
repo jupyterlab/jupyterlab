@@ -4,8 +4,11 @@
 # Distributed under the terms of the Modified BSD License.
 
 import asyncio
+import os
+from pathlib import Path
 from typing import Optional, Tuple
 
+import aiofiles
 from jupyter_server.base.handlers import JupyterHandler
 from jupyter_server.utils import ensure_async
 from jupyter_ydoc import ydocs as YDOCS
@@ -19,8 +22,10 @@ RENAME_SESSION = 127
 
 
 class JupyterRoom(YRoom):
-    def __init__(self, type):
-        super().__init__(ready=False)
+    def __init__(self, type, path):
+        p = Path(path)
+        updates_file_path = str(p.parent / f".{type}:{p.name}.y")
+        super().__init__(ready=False, updates_file_path=updates_file_path)
         self.type = type
         self.cleaner = None
         self.watcher = None
@@ -31,7 +36,7 @@ class JupyterWebsocketServer(WebsocketServer):
     def get_room(self, path: str) -> JupyterRoom:
         file_format, file_type, file_path = path.split(":", 2)
         if path not in self.rooms.keys():
-            self.rooms[path] = JupyterRoom(file_type)
+            self.rooms[path] = JupyterRoom(file_type, file_path)
         return self.rooms[path]
 
 
@@ -39,6 +44,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
 
     saving_document: Optional[asyncio.Task]
     websocket_server = JupyterWebsocketServer(rooms_ready=False, auto_clean_rooms=False)
+    updates_file_paths = []
 
     # Override max_message size to 1GB
     @property
@@ -90,7 +96,16 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             self.last_modified = model["last_modified"]
             # check again if ready, because loading the file can be async
             if not self.room.ready:
-                self.room.document.source = model["content"]
+                # we have a Y updates file for this document and it's not the first time this document is opened
+                # let's create our document by applying the updates, this way it will work if the document is already in the front-end
+                if self.room.updates_file_path in self.updates_file_paths:
+                    await self.room.apply_updates_from_file(self.room.updates_file_path + ".back")
+                else:
+                    # first time this document is opened, create it from the source file
+                    self.room.document.source = model["content"]
+                    await self.room.encode_state_as_update_to_file()
+                    if os.path.exists(self.room.updates_file_path + ".back"):
+                        os.remove(self.room.updates_file_path + ".back")
                 self.room.document.dirty = False
                 self.room.ready = True
                 self.room.watcher = asyncio.create_task(self.watch_file())
@@ -154,6 +169,13 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         if self.room.watcher:
             self.room.watcher.cancel()
         self.room.document.unobserve()
+        # add this file to the opened files, so that next time it's opened we apply Y updates
+        self.updates_file_paths.append(self.room.updates_file_path)
+        # concatenate Y updates to a ".back" file
+        async with aiofiles.open(self.room.updates_file_path, "rb") as f:
+            updates = await f.read()
+        async with aiofiles.open(self.room.updates_file_path + ".back", "ab") as f:
+            await f.write(updates)
         self.websocket_server.delete_room(room=self.room)
 
     def on_document_change(self, event):
