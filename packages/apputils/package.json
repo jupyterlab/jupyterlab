@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "4.0.0-alpha.9",
+  "version": "4.0.0-alpha.10",
   "description": "JupyterLab - Application Utilities",
   "keywords": [
     "jupyter",
@@ -44,15 +44,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
-    "@jupyterlab/observables": "^5.0.0-alpha.9",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.9",
-    "@jupyterlab/services": "^7.0.0-alpha.9",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
-    "@jupyterlab/statedb": "^4.0.0-alpha.9",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.9",
-    "@jupyterlab/translation": "^4.0.0-alpha.9",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.24",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.10",
+    "@jupyterlab/observables": "^5.0.0-alpha.10",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.10",
+    "@jupyterlab/services": "^7.0.0-alpha.10",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.10",
+    "@jupyterlab/statedb": "^4.0.0-alpha.10",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.10",
+    "@jupyterlab/translation": "^4.0.0-alpha.10",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.25",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",
     "@lumino/coreutils": "^1.12.0",
@@ -67,7 +67,7 @@
     "sanitize-html": "~2.5.3"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.9",
+    "@jupyterlab/testutils": "^4.0.0-alpha.10",
     "@types/jest": "^26.0.10",
     "@types/sanitize-html": "^2.3.1",
     "jest": "^26.4.2",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.9",
+  "version": "7.0.0-alpha.10",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -46,11 +46,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.9",
-    "@jupyterlab/observables": "^5.0.0-alpha.9",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
-    "@jupyterlab/statedb": "^4.0.0-alpha.9",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.10",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.10",
+    "@jupyterlab/observables": "^5.0.0-alpha.10",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.10",
+    "@jupyterlab/statedb": "^4.0.0-alpha.10",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
@@ -60,7 +60,7 @@
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.9",
+    "@jupyterlab/testutils": "^4.0.0-alpha.10",
     "@types/jest": "^26.0.10",
     "@types/node-fetch": "^2.5.4",
     "@types/text-encoding": "^0.0.35",
