@@ -1,0 +1,55 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*", "src/api/*", "src/notebook/*", "src/text/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../shared-models"
+    },
+    {
+      "path": "../ui-components"
+    },
+    {
+      "path": "../user"
+    }
+  ]
+}

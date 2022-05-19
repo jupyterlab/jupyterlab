@@ -1,0 +1,412 @@
+:root {
+  /* comment */
+  --jp-comments-comment-profile-pic-size: 32px;
+  --jp-comments-comment-color: var(--jp-ui-font-color0);
+  --jp-comments-comment-background-color: var(--jp-layout-color1);
+  --jp-comments-comment-border-color: var(--md-grey-300);
+  --jp-comments-comment-border: 1px solid
+    var(--jp-comments-comment-border-color);
+  --jp-comments-timestamp-color: var(--jp-ui-font-color2);
+  --jp-comments-timestamp-font-size: smaller;
+  --jp-comments-timestamp-font-weight: regular;
+  --jp-comments-nametag-font-size: var(--jp-ui-font-size1);
+  --jp-comments-nametag-font-weight: 450;
+  --var-jp-comments-linesep: 2px;
+
+  /* panelHeader */
+
+  /* reply */
+  --jp-comments-dropdown-size: 25px;
+  --jp-comments-reply-pic-size: 24px;
+  --jp-comments-panel-background-color: var(--jp-layout-color0);
+}
+
+/* TODO: replace with highlight colors in theme? */
+.jp-comments-Highlight {
+  background-color: rgba(255, 165, 0, 0.25);
+}
+
+.jp-comments-HighlightFocus {
+  background-color: rgba(255, 165, 0, 0.65);
+}
+
+.jp-comments-IconShadow {
+  filter: drop-shadow(0 2px 1px var(--jp-shadow-umbra-color));
+  cursor: pointer;
+}
+
+/* comment */
+
+.jp-comments-CommentFileWidget {
+  overflow: auto;
+  flex-grow: 1;
+  padding-top: 6px;
+}
+
+.jp-comments-Comment {
+  background-color: var(--jp-comments-comment-background-color);
+  padding: 10px 10px 7px;
+}
+
+.jp-comments-Nametag {
+  font-size: var(--jp-comments-nametag-font-size);
+  font-weight: var(--jp-comments-nametag-font-weight);
+  margin-left: 10px;
+}
+
+.jp-comments-Time {
+  font-size: var(--jp-comments-timestamp-font-size);
+  font-weight: var(--jp-comments-timestamp-font-weight);
+  color: var(--jp-comments-timestamp-color);
+  vertical-align: top;
+  margin-left: 10px;
+}
+
+/* comment */
+.jp-comments-MarkdownBody {
+  margin: 0;
+  padding: 0;
+}
+
+/* replies */
+.jp-comments-MarkdownBody > * {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-comments-Body {
+  font-size: 0.833rem;
+  outline: none;
+  border: none;
+  background-color: transparent;
+  white-space: pre-wrap;
+  margin-top: var(--var-jp-comments-linesep);
+  line-height: 1.2em;
+  padding: 3px 1px;
+  min-height: 1.2em;
+}
+
+.jp-comments-Body strong {
+  font-weight: bold;
+}
+
+.jp-comments-Body a {
+  color: revert;
+}
+
+.jp-comments-Body * {
+  margin: 0;
+}
+
+.jp-comments-Body:focus {
+  outline: 1px solid var(--jp-ui-font-color3);
+}
+
+.jp-comments-SubmitButtons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+}
+
+.jp-comments-SubmitButtons > * {
+  padding: 2px;
+  border: 1px solid #64b5f6;
+  border-radius: 8px;
+  font-size: small;
+  width: 66px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.jp-comments-SubmitButton {
+  background-color: #64b5f6;
+}
+
+/* .jp-comments-SubmitButtonInactive {
+  background-color:  #adafb0;
+} */
+
+.jp-comments-CommentProfilePic {
+  border-radius: 50%;
+  top: 0;
+  left: 0;
+  height: var(--jp-comments-comment-profile-pic-size);
+  width: var(--jp-comments-comment-profile-pic-size);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.jp-comments-CommentProfilePicContainer {
+  float: left;
+  width: var(--jp-comments-comment-profile-pic-size);
+}
+
+.jp-comments-Ellipses {
+  float: right;
+  width: var(--jp-comments-dropdown-size);
+  height: var(--jp-comments-dropdown-size);
+  display: none;
+}
+
+.jp-comments-Comment:hover .jp-comments-Ellipses {
+  display: inline-block;
+}
+
+.jp-comments-Ellipses > svg {
+  width: var(--jp-comments-dropdown-size);
+}
+
+.jp-comments-Error {
+  height: 120px;
+  width: 120px;
+  background-color: red;
+}
+
+.jp-comments-MoonIcon {
+  width: 80%;
+  height: 80%;
+}
+
+.jp-comments-Preview {
+  display: grid;
+  grid-template-columns: 6px calc(100% - 6px);
+  padding-left: 10px;
+  margin-top: var(--var-jp-comments-linesep);
+}
+
+.jp-comments-PreviewBar {
+  width: 2px;
+  height: 100%;
+  background-color: var(--jp-warn-color0);
+}
+
+.jp-comments-PreviewText {
+  color: var(--jp-comments-timestamp-color);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-left: 10px;
+}
+
+.jp-comments-CommentWidget:focus-within .jp-comments-mod-focus-border {
+  border-color: var(--jp-brand-color1);
+}
+
+.jp-comments-CommentWidget:focus-within {
+  border-color: var(--jp-brand-color1);
+}
+
+.jp-comments-CommentPanel {
+  background-color: var(--jp-comments-panel-background-color);
+  color: var(--jp-comments-comment-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-comments-CommentWidget {
+  margin: 0 8px 6px;
+  border: var(--jp-comments-comment-border);
+  border-radius: 5px;
+}
+
+/* panelHeader */
+.jp-comments-panelHeader {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  z-index: 2;
+}
+
+.jp-comments-panelHeader-identity-container {
+  color: var(--jp-ui-font-color2);
+  font-size: var(--jp-ui-font-size0);
+  display: flex;
+  justify-content: start;
+}
+
+.jp-comments-panelHeader-editIcon {
+  transform: scale(0.72);
+  float: right;
+  display: block;
+  opacity: 0;
+}
+
+.jp-comments-panelHeader-identity-container:hover
+  .jp-comments-panelHeader-editIcon {
+  opacity: 1;
+}
+
+.jp-comments-panelHeader-filename {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+  margin-top: -3px;
+}
+
+.jp-comments-panelHeader-left {
+  color: black;
+}
+
+.jp-comments-panelHeader-right {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: auto;
+  align-items: start;
+  margin-top: 5px;
+  gap: 1em;
+}
+
+.jp-comments-panelHeader-dropdown {
+  color: var(--jp-comments-timestamp-color);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  margin-right: -5px;
+}
+
+.jp-comments-panelHeader-EditInputArea-false {
+  color: var(--jp-ui-font-color3);
+  word-break: break-word;
+}
+
+.jp-comments-panelHeader-EditInputArea-true {
+  border: var(--jp-comments-comment-border);
+  color: var(--jp-ui-font-color3);
+  word-break: break-word;
+}
+
+.jp-comments-Button {
+  cursor: pointer;
+}
+
+.jp-comments-Button > svg {
+  width: 20px;
+}
+
+.jp-comments-DirtyIndicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--jp-ui-font-color2);
+  margin-left: 8px;
+}
+
+/* reply */
+
+.jp-comments-ReplySpacer {
+  margin-top: 8px;
+}
+
+.jp-comments-ReplyInputArea:empty::before {
+  content: attr(data-placeholder);
+  color: var(--jp-ui-font-color3);
+}
+
+.jp-comments-ReplyInputArea {
+  border-top: var(--jp-comments-comment-border);
+  padding: 10px;
+  word-break: break-word;
+}
+
+.jp-comments-Reply {
+  white-space: pre-wrap;
+  border-top: var(--jp-comments-comment-border);
+}
+
+.jp-comments-Replies-breaker:focus {
+  outline: 1px solid var(--jp-ui-font-color3);
+}
+
+.jp-comments-Replies-breaker {
+  height: 24px;
+  z-index: 2;
+  border-top: var(--jp-comments-comment-border);
+  position: relative;
+  cursor: pointer;
+}
+
+.jp-comments-Replies-breaker-right {
+  overflow: hidden;
+}
+
+.jp-comments-Replies-breaker-left {
+  float: left;
+  padding-left: 10px;
+  padding-right: 10px;
+  color: var(--jp-ui-font-color2);
+  font-family: var(--jp-content-font-family);
+  font-size: var(--jp-content-font-size1);
+  line-height: var(--jp-content-line-height);
+}
+
+.jp-comments-RepliesSpacer {
+  float: right;
+  width: 10px;
+  height: 1px;
+}
+
+.jp-comments-Replies-breaker-right > hr {
+  border: 0.5px solid var(--jp-ui-font-color3);
+  width: 100%;
+  z-index: 1;
+}
+
+.jp-comments-Replies-breaker-number {
+  /* 32px circle */
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+
+  /* Color */
+  border: 1px solid var(--jp-ui-font-color3);
+  background-color: var(--jp-comments-panel-background-color);
+
+  /* Center text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+
+  /* Pixel-pushing circle */
+  float: right;
+  position: absolute;
+  right: 20px;
+  bottom: -5px;
+}
+
+.jp-comments-CommentInput {
+  width: 100%;
+  min-height: 44px;
+  padding: 5px 4px;
+}
+
+.jp-comments-Indicator {
+  cursor: pointer;
+  position: absolute;
+  text-align: center;
+  z-index: 5;
+}
+
+.jp-comments-ReplyPic {
+  border-radius: 50%;
+  top: 0;
+  left: 0;
+  height: var(--jp-comments-reply-pic-size);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.jp-comments-ReplyPicContainer {
+  float: left;
+  width: var(--jp-comments-reply-pic-size);
+  height: var(--jp-comments-reply-pic-size);
+}

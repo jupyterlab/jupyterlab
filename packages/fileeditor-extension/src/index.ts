@@ -53,6 +53,7 @@ import { Menu, Widget } from '@lumino/widgets';
 import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
+export { textCommentingPlugin } from './comments';
 
 /**
  * The editor tracker extension.

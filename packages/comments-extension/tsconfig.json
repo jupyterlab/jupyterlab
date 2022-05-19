@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*", "src/api/*", "src/notebook/*", "src/text/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../comments"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../rendermime"
+    }
+  ]
+}

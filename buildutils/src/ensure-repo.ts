@@ -164,6 +164,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/cell-toolbar-extension',
     '@jupyterlab/celltags',
     '@jupyterlab/celltags-extension',
+    '@jupyterlab/comments',
+    '@jupyterlab/comments-extension',
     '@jupyterlab/fileeditor',
     '@jupyterlab/codemirror-extension',
     '@jupyterlab/completer',

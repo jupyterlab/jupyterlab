@@ -40,6 +40,7 @@
     "@jupyterlab/apputils": "^4.0.0-alpha.9",
     "@jupyterlab/cells": "^4.0.0-alpha.9",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.9",
+    "@jupyterlab/comments": "^4.0.0-alpha.9",
     "@jupyterlab/completer": "^4.0.0-alpha.9",
     "@jupyterlab/coreutils": "^6.0.0-alpha.9",
     "@jupyterlab/docmanager": "^4.0.0-alpha.9",
@@ -57,6 +58,7 @@
     "@jupyterlab/rendermime": "^4.0.0-alpha.9",
     "@jupyterlab/services": "^7.0.0-alpha.9",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.9",
     "@jupyterlab/statedb": "^4.0.0-alpha.9",
     "@jupyterlab/statusbar": "^4.0.0-alpha.9",
     "@jupyterlab/toc": "^6.0.0-alpha.9",
@@ -67,7 +69,8 @@
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
     "@lumino/messaging": "^1.10.1",
-    "@lumino/widgets": "^1.32.0"
+    "@lumino/widgets": "^1.32.0",
+    "y-protocols": "^1.0.5"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

@@ -1,0 +1,77 @@
+{
+  "name": "@jupyterlab/comments-extension",
+  "version": "4.0.0-alpha.9",
+  "description": "Extension code for comments module",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/**/*"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/*.json",
+    "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "build:all": "npm run build",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^4.0.0-alpha.9",
+    "@jupyterlab/apputils": "^4.0.0-alpha.9",
+    "@jupyterlab/comments": "^4.0.0-alpha.9",
+    "@jupyterlab/docmanager": "^4.0.0-alpha.9",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.9",
+    "@lumino/widgets": "^1.32.0"
+  },
+  "devDependencies": {
+    "@jupyterlab/builder": "^4.0.0-alpha.9",
+    "@typescript-eslint/eslint-plugin": "^4.8.1",
+    "@typescript-eslint/parser": "^4.8.1",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "npm-run-all": "^4.1.5",
+    "prettier": "~2.6.0",
+    "rimraf": "~3.0.0",
+    "stylelint": "^14.3.0",
+    "stylelint-config-prettier": "^9.0.3",
+    "stylelint-config-recommended": "^6.0.0",
+    "stylelint-config-standard": "~24.0.0",
+    "stylelint-prettier": "^2.0.0",
+    "typescript": "~4.6.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "schemaDir": "schema"
+  },
+  "styleModule": "style/index.js"
+}
