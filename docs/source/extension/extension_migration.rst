@@ -57,7 +57,7 @@ bumped their major version (following semver convention). We want to point out p
    Remove the class ``FileEditorCodeWrapper``, instead, you can use ``CodeEditorWrapper`` from ``@jupyterlab/codeeditor``.
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
-   All launcher creation actions are moved in ``@jupyterlab/launcher-extension``.
+   All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
