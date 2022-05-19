@@ -1221,7 +1221,9 @@
     "id": "launcher:create",
     "label": "New Launcher",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl Shift L"
+    ]
   },
   {
     "id": "logconsole:add-checkpoint",
