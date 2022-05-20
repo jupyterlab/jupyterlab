@@ -27,7 +27,11 @@ for i in range(10):
 
   await expect(page.locator('.jp-RenderedMarkdown')).toHaveCount(5);
   await expect(page.locator('.jp-TrimmedOutputs')).toHaveText(
-    'Show more outputs'
+    `
+          Output of this cell has been trimmed on the initial display.
+          Displaying the first 5 top outputs.
+          Click on this message to get the complete output.
+`
   );
 });
 
