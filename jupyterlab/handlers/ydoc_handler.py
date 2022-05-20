@@ -5,8 +5,9 @@
 
 import asyncio
 import os
+import tempfile
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import aiofiles
 from jupyter_server.base.handlers import JupyterHandler
@@ -17,15 +18,15 @@ from tornado.websocket import WebSocketHandler
 from ypy_websocket.websocket_server import WebsocketServer, YRoom
 
 YFILE = YDOCS["file"]
-
 RENAME_SESSION = 127
 
 
 class JupyterRoom(YRoom):
-    def __init__(self, type, path):
+    def __init__(self, type: str, path: str, updates_dir: str):
         p = Path(path)
-        updates_file_path = str(p.parent / f".{type}:{p.name}.y")
-        super().__init__(ready=False, updates_file_path=updates_file_path)
+        updates_file_path = updates_dir / p.parent / f".{type}:{p.name}.y"
+        os.makedirs(updates_file_path.parent, exist_ok=True)
+        super().__init__(ready=False, updates_file_path=str(updates_file_path))
         self.type = type
         self.cleaner = None
         self.watcher = None
@@ -36,7 +37,7 @@ class JupyterWebsocketServer(WebsocketServer):
     def get_room(self, path: str) -> JupyterRoom:
         file_format, file_type, file_path = path.split(":", 2)
         if path not in self.rooms.keys():
-            self.rooms[path] = JupyterRoom(file_type, file_path)
+            self.rooms[path] = JupyterRoom(file_type, file_path, YDocWebSocketHandler.updates_dir)
         return self.rooms[path]
 
 
@@ -44,7 +45,8 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
 
     saving_document: Optional[asyncio.Task]
     websocket_server = JupyterWebsocketServer(rooms_ready=False, auto_clean_rooms=False)
-    updates_file_paths = []
+    updates_file_paths: List[str] = []
+    updates_dir: str = ""
 
     # Override max_message size to 1GB
     @property
@@ -78,6 +80,8 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         return await super().get(*args, **kwargs)
 
     async def open(self, path):
+        if not YDocWebSocketHandler.updates_dir:
+            YDocWebSocketHandler.updates_dir = tempfile.mkdtemp(prefix="jupyter_yupdates_")
         self._message_queue = asyncio.Queue()
         self.room = self.websocket_server.get_room(path)
         self.set_file_info(path)
