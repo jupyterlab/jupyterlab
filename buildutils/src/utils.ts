@@ -191,7 +191,7 @@ export function checkStatus(cmd: string): number | null {
  * Get the current version of JupyterLab
  */
 export function getPythonVersion(): string {
-  const cmd = 'python setup.py --version';
+  const cmd = 'hatchling version';
   const lines = run(cmd, { stdio: 'pipe' }, true).split('\n');
   return lines[lines.length - 1];
 }
