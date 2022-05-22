@@ -18,7 +18,8 @@ import {
   ISharedDoc,
   ISharedMap,
   ISharedType,
-  SharedDoc
+  SharedDoc,
+  SharedList
 } from '@jupyterlab/shared-models';
 import {
   ITranslator,
@@ -96,8 +97,9 @@ export class NotebookModel implements INotebookModel {
       });
     }
 
-    const sharedList =
-      this._sharedDoc.createList<ISharedMap<ISharedType>>('cells');
+    const sharedList = this._sharedDoc.createList<ISharedMap<ISharedType>>(
+      'cells'
+    ) as SharedList<any>;
     sharedList.undoManager = SharedDoc.createUndoManager(
       sharedList.underlyingModel,
       []

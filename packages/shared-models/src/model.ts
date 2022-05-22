@@ -25,15 +25,6 @@ export interface IShared extends IDisposable {
   readonly type: Type;
 
   /**
-   * The specific model behind the IShared abstraction.
-   *
-   * #### Notes
-   * The default implementation is based on Yjs so the underlying
-   * model is a YText, YArray or YMap.
-   */
-  readonly underlyingModel: any;
-
-  /**
    * The specific undo manager class behind the IShared abstraction.
    *
    * #### Notes
@@ -93,15 +84,6 @@ export interface ISharedDoc extends IDisposable {
    * Whether the database is collaborative.
    */
   readonly isCollaborative: boolean;
-
-  /**
-   * The specific document behind the ISharedDoc abstraction.
-   *
-   * #### Notes
-   * The default implementation is based on Yjs so the underlying
-   * model is a YDoc.
-   */
-  readonly underlyingDoc: any;
 
   /**
    * The specific awareness class behind the ISharedDoc abstraction.

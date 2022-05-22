@@ -21,15 +21,6 @@ export interface ISharedList<T extends ISharedType> extends IShared {
   readonly type: 'List';
 
   /**
-   * The specific model behind the ISharedList abstraction.
-   *
-   * #### Notes
-   * The default implementation is based on Yjs so the underlying
-   * model is a YList.
-   */
-  readonly underlyingModel: any;
-
-  /**
    * A signal emitted when the list has changed.
    */
   readonly changed: ISignal<this, ISharedList.IChangedArgs<T>>;

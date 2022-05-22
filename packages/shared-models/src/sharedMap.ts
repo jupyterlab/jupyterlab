@@ -15,15 +15,6 @@ export interface ISharedMap<T extends ISharedType> extends IShared {
   readonly type: 'Map';
 
   /**
-   * The specific model behind the ISharedMap abstraction.
-   *
-   * #### Notes
-   * The default implementation is based on Yjs so the underlying
-   * model is a YMap.
-   */
-  readonly underlyingModel: any;
-
-  /**
    * A signal emitted when the map has changed.
    */
   readonly changed: ISignal<this, ISharedMap.IChangedArgs<T>>;

@@ -284,7 +284,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     this._value = this._sharedModel.get('source') as SharedString;
     this._value.undoManager = SharedDoc.createUndoManager(
-      this._value.underlyingModel,
+      (this._value as SharedString).underlyingModel,
       []
     );
     this._value.changed.connect(this._onValueChanged, this);

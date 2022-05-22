@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { SharedDoc } from '@jupyterlab/shared-models';
 import { ICurrentUser } from '@jupyterlab/user';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
@@ -33,7 +34,7 @@ export class WebSocketProvider
     super(
       options.url,
       options.format + ':' + options.contentType + ':' + options.path,
-      options.sharedDoc.underlyingDoc,
+      (options.sharedDoc as SharedDoc).underlyingDoc,
       {
         awareness: options.sharedDoc.awareness
       }

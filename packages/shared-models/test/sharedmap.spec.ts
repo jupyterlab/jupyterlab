@@ -33,7 +33,7 @@ describe('@jupyterlab/shared-models', () => {
     });
     it('should create a SharedMap', () => {
       expect(foo).toBeInstanceOf(SharedMap);
-      expect(foo.underlyingModel).toBeInstanceOf(Y.Map);
+      expect((foo as SharedMap<any>).underlyingModel).toBeInstanceOf(Y.Map);
     });
 
     it('should set an string', () => {

@@ -6,7 +6,8 @@ import {
   ISharedList,
   ISharedMap,
   ISharedType,
-  SharedDoc
+  SharedDoc,
+  SharedList
 } from '@jupyterlab/shared-models';
 
 import { CellList, NotebookModel } from '../src';
@@ -22,7 +23,7 @@ describe('@jupyterlab/notebook', () => {
       sharedDoc = new SharedDoc();
       sharedList = sharedDoc.createList<ISharedMap<ISharedType>>('cells');
       sharedList.undoManager = SharedDoc.createUndoManager(
-        sharedList.underlyingModel,
+        (sharedList as SharedList<any>).underlyingModel,
         []
       );
       contentFactory = new NotebookModel.ContentFactory({ sharedDoc });

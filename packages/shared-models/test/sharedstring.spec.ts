@@ -26,7 +26,7 @@ describe('@jupyterlab/shared-models', () => {
     });
     it('should create a SharedString', () => {
       expect(foo).toBeInstanceOf(SharedString);
-      expect(foo.underlyingModel).toBeInstanceOf(Y.Text);
+      expect((foo as SharedString).underlyingModel).toBeInstanceOf(Y.Text);
     });
 
     it('should set the text "foo"', () => {

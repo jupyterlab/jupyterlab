@@ -7,7 +7,8 @@ import {
   Delta,
   ISharedList,
   ISharedMap,
-  ISharedType
+  ISharedType,
+  SharedMap
 } from '@jupyterlab/shared-models';
 import {
   ArrayExt,
@@ -277,7 +278,7 @@ export class CellList implements ICellList {
    */
   iter(): IIterator<ICellModel> {
     const arr: ICellModel[] = [];
-    each(this._sharedList, (cellType: ISharedMap<ISharedType>, i: number) => {
+    each(this._sharedList, (cellType: SharedMap<ISharedType>, i: number) => {
       arr.push(this._cellMap.get(cellType.underlyingModel)!);
     });
     return new ArrayIterator<ICellModel>(arr);
@@ -337,7 +338,7 @@ export class CellList implements ICellList {
    * @returns The cell at the specified index.
    */
   get(index: number): ICellModel {
-    const cellType = this._sharedList.get(index);
+    const cellType = this._sharedList.get(index) as SharedMap<any>;
     return this._cellMap.get(cellType.underlyingModel)!;
   }
 
@@ -349,7 +350,7 @@ export class CellList implements ICellList {
    * @param cell - The cell to set at the specified index.
    */
   set(index: number, cell: ICellModel): void {
-    const cellType = (cell as CellModel).sharedModel;
+    const cellType = (cell as CellModel).sharedModel as SharedMap<any>;
     this._cellMap.set(cellType.underlyingModel, cell);
     this._sharedList.set(index, cellType);
   }
@@ -362,7 +363,7 @@ export class CellList implements ICellList {
    * @returns The new length of the cell list.
    */
   push(cell: ICellModel): number {
-    const cellType = (cell as CellModel).sharedModel;
+    const cellType = (cell as CellModel).sharedModel as SharedMap<any>;
     this._cellMap.set(cellType.underlyingModel, cell);
     this._sharedList.push(cellType);
     return this.length;
@@ -378,7 +379,7 @@ export class CellList implements ICellList {
    * @returns The new length of the cell list.
    */
   insert(index: number, cell: ICellModel): void {
-    const cellType = (cell as CellModel).sharedModel;
+    const cellType = (cell as CellModel).sharedModel as SharedMap<any>;
     this._cellMap.set(cellType.underlyingModel, cell);
     this._sharedList.insert(index, cellType);
   }
@@ -394,7 +395,8 @@ export class CellList implements ICellList {
   removeValue(cell: ICellModel): number {
     const index = ArrayExt.findFirstIndex(
       toArray(this._sharedList),
-      cellType => this._cellMap.get(cellType.underlyingModel) === cell
+      (cellType: SharedMap<any>) =>
+        this._cellMap.get(cellType.underlyingModel) === cell
     );
     this.remove(index);
     return index;
@@ -409,7 +411,7 @@ export class CellList implements ICellList {
    *   index is out of range.
    */
   remove(index: number): ICellModel | undefined {
-    const cellType = this._sharedList.get(index);
+    const cellType = this._sharedList.get(index) as SharedMap<any>;
     const cell = this._cellMap.get(cellType.underlyingModel);
     this._sharedList.remove(index);
     return cell;
@@ -439,7 +441,7 @@ export class CellList implements ICellList {
       return;
     }
     //this._sharedList.move(fromIndex, toIndex);
-    const cellType = this._sharedList.get(fromIndex);
+    const cellType = this._sharedList.get(fromIndex) as SharedMap<any>;
     const cell = this._cellMap.get(cellType.underlyingModel);
     const data = cell?.toJSON();
     const id = data?.id as string;
@@ -461,7 +463,7 @@ export class CellList implements ICellList {
   pushAll(cells: IterableOrArrayLike<ICellModel>): number {
     const order: ISharedMap<ISharedType>[] = [];
     each(cells, cell => {
-      const cellType = (cell as CellModel).sharedModel;
+      const cellType = (cell as CellModel).sharedModel as SharedMap<any>;
       order.push(cellType);
       this._cellMap.set(cellType.underlyingModel, cell);
     });
@@ -481,7 +483,7 @@ export class CellList implements ICellList {
   insertAll(index: number, cells: IterableOrArrayLike<ICellModel>): number {
     const order: ISharedMap<ISharedType>[] = [];
     each(cells, cell => {
-      const cellType = (cell as CellModel).sharedModel;
+      const cellType = (cell as CellModel).sharedModel as SharedMap<any>;
       order.push(cellType);
       this._cellMap.set(cellType.underlyingModel, cell);
     });
@@ -508,7 +510,7 @@ export class CellList implements ICellList {
     args: ISharedList.IChangedArgs<ISharedMap<ISharedType>>
   ): void {
     const added = new Set<ICellModel>();
-    args.added.forEach(cellType => {
+    args.added.forEach((cellType: SharedMap<any>) => {
       if (this._cellMap.has(cellType.underlyingModel)) {
         const cell = this._cellMap.get(cellType.underlyingModel)!;
         cell.initialize();
@@ -523,7 +525,7 @@ export class CellList implements ICellList {
 
     // Get the old values before removing them
     const deleted = new Set<ICellModel>();
-    args.deleted.forEach(cellType => {
+    args.deleted.forEach((cellType: SharedMap<any>) => {
       if (this._cellMap.has(cellType.underlyingModel)) {
         const cell = this._cellMap.get(cellType.underlyingModel)!;
         this._cellMap.delete(cellType.underlyingModel);
@@ -539,7 +541,7 @@ export class CellList implements ICellList {
     args.delta.forEach(delta => {
       if (delta.insert != null) {
         const insertedCells = new Array<ICellModel>();
-        delta.insert.forEach(cellType => {
+        delta.insert.forEach((cellType: SharedMap<any>) => {
           insertedCells.push(this._cellMap.get(cellType.underlyingModel)!);
         });
         changes.delta.push({ insert: insertedCells });

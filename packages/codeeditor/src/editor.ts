@@ -243,7 +243,7 @@ export namespace CodeEditor {
         this._sharedDoc = options.sharedDoc || new SharedDoc();
         this._value = this._sharedDoc.createString('source') as SharedString;
         this._value.undoManager = SharedDoc.createUndoManager(
-          this._value.underlyingModel,
+          (this._value as SharedString).underlyingModel,
           []
         );
         this._value.changed.connect(this._onValueChanged, this);

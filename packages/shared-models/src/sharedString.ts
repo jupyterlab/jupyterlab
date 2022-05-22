@@ -15,15 +15,6 @@ export interface ISharedString extends IShared {
   readonly type: 'String';
 
   /**
-   * The specific model behind the ISharedString abstraction.
-   *
-   * #### Notes
-   * The default implementation is based on Yjs so the underlying
-   * model is a Y.Text.
-   */
-  readonly underlyingModel: any;
-
-  /**
    * A signal emitted when the string has changed.
    */
   readonly changed: ISignal<this, ISharedString.IChangedArgs>;

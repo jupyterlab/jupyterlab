@@ -7,7 +7,7 @@
 import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
-import { ISharedString } from '@jupyterlab/shared-models';
+import { ISharedString, SharedString } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -207,7 +207,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ? { yUndoManager: this.model.value.undoManager }
       : {};
     this._yeditorBinding = new CodemirrorBinding(
-      this.model.value.underlyingModel,
+      (this.model.value as SharedString).underlyingModel,
       this.editor,
       this.model.awareness,
       opts

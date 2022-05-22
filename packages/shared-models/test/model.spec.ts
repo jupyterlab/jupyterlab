@@ -13,7 +13,7 @@ describe('@jupyterlab/shared-models', () => {
     });
 
     it('should create a string named "fooText"', () => {
-      const text = doc.createString('fooText');
+      const text = doc.createString('fooText') as SharedString;
       expect(text).toBeInstanceOf(SharedString);
       expect(text.underlyingModel).toBeInstanceOf(Y.Text);
     });
@@ -21,14 +21,14 @@ describe('@jupyterlab/shared-models', () => {
       expect(doc.has('fooText')).toBe(true);
     });
     it('should return the string named "fooText"', () => {
-      const text = doc.get('fooText');
+      const text = doc.get('fooText') as SharedString;
       expect(text).toBeTruthy();
       expect(text).toBeInstanceOf(SharedString);
       expect(text?.underlyingModel).toBeInstanceOf(Y.Text);
     });
 
     it('should create a map named "fooMap"', () => {
-      const map = doc.createMap('fooMap');
+      const map = doc.createMap('fooMap') as SharedMap<any>;
       expect(map).toBeInstanceOf(SharedMap);
       expect(map.underlyingModel).toBeInstanceOf(Y.Map);
     });
@@ -36,14 +36,14 @@ describe('@jupyterlab/shared-models', () => {
       expect(doc.has('fooMap')).toBe(true);
     });
     it('should return the map named "fooMap"', () => {
-      const map = doc.get('fooMap');
+      const map = doc.get('fooMap') as SharedMap<any>;
       expect(map).toBeTruthy();
       expect(map).toBeInstanceOf(SharedMap);
       expect(map?.underlyingModel).toBeInstanceOf(Y.Map);
     });
 
     it('should create a list named "fooList"', () => {
-      const list = doc.createList('fooList');
+      const list = doc.createList('fooList') as SharedList<any>;
       expect(list).toBeInstanceOf(SharedList);
       expect(list.underlyingModel).toBeInstanceOf(Y.Array);
     });
@@ -51,19 +51,19 @@ describe('@jupyterlab/shared-models', () => {
       expect(doc.has('fooList')).toBe(true);
     });
     it('should return the list named "fooList"', () => {
-      const list = doc.get('fooList');
+      const list = doc.get('fooList') as SharedList<any>;
       expect(list).toBeTruthy();
       expect(list).toBeInstanceOf(SharedList);
       expect(list?.underlyingModel).toBeInstanceOf(Y.Array);
     });
 
     it('should return a string with the same underlying model', () => {
-      const foo = doc.createString('foo');
+      const foo = doc.createString('foo') as SharedString;
       expect(foo).toBeTruthy();
       expect(foo).toBeInstanceOf(SharedString);
       expect(foo.underlyingModel).toBeInstanceOf(Y.Text);
 
-      const copy = doc.createString('foo');
+      const copy = doc.createString('foo') as SharedString;
       expect(copy).toBeTruthy();
       expect(copy).toBeInstanceOf(SharedString);
       expect(copy.underlyingModel).toBeInstanceOf(Y.Text);

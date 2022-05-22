@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { SharedList } from '../lib';
 import { ISharedDoc, ISharedList, SharedDoc } from '../src';
 
 class TestMapping {
@@ -11,7 +12,7 @@ class TestMapping {
     this._doc = doc;
     this._list = list;
     this._list.undoManager = SharedDoc.createUndoManager(
-      list.underlyingModel,
+      (list as SharedList<any>).underlyingModel,
       []
     );
   }
@@ -61,7 +62,10 @@ describe('@jupyterlab/shared-models', () => {
     beforeEach(() => {
       doc = new SharedDoc();
       list = doc.createList<string>('foo');
-      list.undoManager = SharedDoc.createUndoManager(list.underlyingModel, []);
+      list.undoManager = SharedDoc.createUndoManager(
+        (list as SharedList<any>).underlyingModel,
+        []
+      );
     });
 
     afterEach(() => {

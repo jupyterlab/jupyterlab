@@ -33,7 +33,7 @@ describe('@jupyterlab/shared-models', () => {
     });
     it('should create a sharedList', () => {
       expect(foo).toBeInstanceOf(SharedList);
-      expect(foo.underlyingModel).toBeInstanceOf(Y.Array);
+      expect((foo as SharedList<any>).underlyingModel).toBeInstanceOf(Y.Array);
     });
 
     it('should push an element', () => {
