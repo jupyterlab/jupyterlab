@@ -4,29 +4,28 @@
 # Distributed under the terms of the Modified BSD License.
 
 import asyncio
-import os
-import tempfile
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-import aiofiles
 from jupyter_server.base.handlers import JupyterHandler
 from jupyter_server.utils import ensure_async
 from jupyter_ydoc import ydocs as YDOCS
 from tornado import web
 from tornado.websocket import WebSocketHandler
 from ypy_websocket.websocket_server import WebsocketServer, YRoom
+from ypy_websocket.ystore import BaseYStore, TempFileYStore
 
 YFILE = YDOCS["file"]
 RENAME_SESSION = 127
 
 
+class JupyterTempFileYStore(TempFileYStore):
+    prefix_dir = "jupyter_ydoc_"
+
+
 class JupyterRoom(YRoom):
-    def __init__(self, type: str, path: str, updates_dir: str):
-        p = Path(path)
-        updates_file_path = updates_dir / p.parent / f".{type}:{p.name}.y"
-        os.makedirs(updates_file_path.parent, exist_ok=True)
-        super().__init__(ready=False, updates_file_path=str(updates_file_path))
+    def __init__(self, type: str, path: str, ystore: BaseYStore):
+        super().__init__(ready=False, ystore=ystore)
         self.type = type
         self.cleaner = None
         self.watcher = None
@@ -34,19 +33,25 @@ class JupyterRoom(YRoom):
 
 
 class JupyterWebsocketServer(WebsocketServer):
+    def __init__(self, *args, **kwargs):
+        self.ystore_class = kwargs.pop("ystore_class")
+        super().__init__(*args, **kwargs)
+
     def get_room(self, path: str) -> JupyterRoom:
         file_format, file_type, file_path = path.split(":", 2)
         if path not in self.rooms.keys():
-            self.rooms[path] = JupyterRoom(file_type, file_path, YDocWebSocketHandler.updates_dir)
+            p = Path(file_path)
+            updates_file_path = str(p.parent / f".{file_type}:{p.name}.y")
+            ystore = self.ystore_class(path=updates_file_path, init=True)
+            self.rooms[path] = JupyterRoom(file_type, file_path, ystore)
         return self.rooms[path]
 
 
 class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
 
     saving_document: Optional[asyncio.Task]
-    websocket_server = JupyterWebsocketServer(rooms_ready=False, auto_clean_rooms=False)
+    websocket_server = None
     updates_file_paths: List[str] = []
-    updates_dir: str = ""
 
     # Override max_message size to 1GB
     @property
@@ -80,8 +85,11 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         return await super().get(*args, **kwargs)
 
     async def open(self, path):
-        if not YDocWebSocketHandler.updates_dir:
-            YDocWebSocketHandler.updates_dir = tempfile.mkdtemp(prefix="jupyter_yupdates_")
+        self.ystore_class = self.settings["collaborative_ystore_class"]
+        if not YDocWebSocketHandler.websocket_server:
+            YDocWebSocketHandler.websocket_server = JupyterWebsocketServer(
+                rooms_ready=False, auto_clean_rooms=False, ystore_class=self.ystore_class
+            )
         self._message_queue = asyncio.Queue()
         self.room = self.websocket_server.get_room(path)
         self.set_file_info(path)
@@ -101,15 +109,14 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             # check again if ready, because loading the file can be async
             if not self.room.ready:
                 # we have a Y updates file for this document and it's not the first time this document is opened
-                # let's create our document by applying the updates, this way it will work if the document is already in the front-end
-                if self.room.updates_file_path in self.updates_file_paths:
-                    await self.room.apply_updates_from_file(self.room.updates_file_path + ".back")
+                # let's create our document by re-applying the updates,
+                # this way it will work if the document is already present in the front-end
+                if self.room.ystore.path in self.updates_file_paths:
+                    await self.room.ystore.apply_updates(self.room.ydoc)
                 else:
                     # first time this document is opened, create it from the source file
                     self.room.document.source = model["content"]
-                    await self.room.encode_state_as_update_to_file()
-                    if os.path.exists(self.room.updates_file_path + ".back"):
-                        os.remove(self.room.updates_file_path + ".back")
+                    await self.room.ystore.encode_state_as_update(self.room.ydoc)
                 self.room.document.dirty = False
                 self.room.ready = True
                 self.room.watcher = asyncio.create_task(self.watch_file())
@@ -174,12 +181,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             self.room.watcher.cancel()
         self.room.document.unobserve()
         # add this file to the opened files, so that next time it's opened we apply Y updates
-        self.updates_file_paths.append(self.room.updates_file_path)
-        # concatenate Y updates to a ".back" file
-        async with aiofiles.open(self.room.updates_file_path, "rb") as f:
-            updates = await f.read()
-        async with aiofiles.open(self.room.updates_file_path + ".back", "ab") as f:
-            await f.write(updates)
+        self.updates_file_paths.append(self.room.ystore.path)
         self.websocket_server.delete_room(room=self.room)
 
     def on_document_change(self, event):
@@ -203,7 +205,11 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
     async def maybe_save_document(self):
         # save after 1 second of inactivity to prevent too frequent saving
         await asyncio.sleep(1)
-        file_format, file_type, file_path = self.get_file_info()
+        # if the room cannot be found, don't save
+        try:
+            file_format, file_type, file_path = self.get_file_info()
+        except Exception:
+            return
         model = await ensure_async(
             self.contents_manager.get(file_path, type=file_type, format=file_format)
         )
