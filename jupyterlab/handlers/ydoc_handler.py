@@ -42,7 +42,7 @@ class JupyterWebsocketServer(WebsocketServer):
         if path not in self.rooms.keys():
             p = Path(file_path)
             updates_file_path = str(p.parent / f".{file_type}:{p.name}.y")
-            ystore = self.ystore_class(path=updates_file_path, init=True)
+            ystore = self.ystore_class(path=updates_file_path)
             self.rooms[path] = JupyterRoom(file_type, file_path, ystore)
         return self.rooms[path]
 
