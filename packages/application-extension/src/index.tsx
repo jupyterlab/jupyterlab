@@ -59,7 +59,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { topbar } from './topbar';
+import { topbar } from './topbar.js';
 
 /**
  * Default context menu item rank
