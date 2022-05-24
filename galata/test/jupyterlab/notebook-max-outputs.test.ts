@@ -16,6 +16,8 @@ test.use({
 test('Limit cell outputs', async ({ page }) => {
   await page.notebook.createNew();
 
+  await page.waitForSelector('text=| Idle');
+
   await page.locator('div[role="main"] >> textarea')
     .fill(`from IPython.display import display, Markdown
 
@@ -38,6 +40,8 @@ for i in range(10):
 test("Don't limit cell outputs if input is requested", async ({ page }) => {
   await page.notebook.createNew();
 
+  await page.waitForSelector('text=| Idle');
+
   await page.locator('div[role="main"] >> textarea')
     .fill(`from IPython.display import display, Markdown
 
@@ -55,6 +59,8 @@ input('Your age:')
 
 test('Display input value', async ({ page }) => {
   await page.notebook.createNew();
+
+  await page.waitForSelector('text=| Idle');
 
   await page.locator('div[role="main"] >> textarea')
     .fill(`from IPython.display import display, Markdown
