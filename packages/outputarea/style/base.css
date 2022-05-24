@@ -151,10 +151,10 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   margin: 0;
 }
 
-.jp-TrimmedOutputs pre {
-  background: var(--jp-layout-color3);
-  font-size: calc(var(--jp-code-font-size) * 1.4);
-  text-align: center;
+.jp-TrimmedOutputs a {
+  margin: 10px;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 /* Hide the gutter in case of
