@@ -107,7 +107,7 @@ export class NotebookModel implements INotebookModel {
     this._cells = new CellList(this.contentFactory, sharedList);
     this._cells.changed.connect(this._onCellsChanged, this);
 
-    this._metadata = this._sharedDoc.createMap<JSONObject>('metadata');
+    this._metadata = this._sharedDoc.createMap<JSONValue>('metadata');
     this._metadata.changed.connect(this._onMetadataChanged, this);
 
     this._state = this._sharedDoc.createMap<JSONValue>('state');

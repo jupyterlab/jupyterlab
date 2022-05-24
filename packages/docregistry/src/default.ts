@@ -150,7 +150,7 @@ export class DocumentModel
    * Initialize the model with its current state.
    */
   initialize(): void {
-    this._state.set('dirty', false);
+    this.dirty = false;
     return;
   }
 

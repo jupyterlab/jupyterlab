@@ -7,6 +7,8 @@ export { defaultRenderMime } from './rendermime';
 
 export { JupyterServer } from './start_jupyter_server';
 
+export * from './rtc';
+
 export {
   testEmission,
   expectFailure,

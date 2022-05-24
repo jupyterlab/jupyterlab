@@ -15,7 +15,8 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {
-    "lib": "lib/"
+    "lib": "lib/",
+    "scripts": "scripts/"
   },
   "files": [
     "lib/*.d.ts",
