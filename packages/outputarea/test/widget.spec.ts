@@ -17,6 +17,7 @@ import {
 } from '@jupyterlab/testutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 
 /**
  * The default rendermime instance to use for testing.
@@ -118,14 +119,20 @@ describe('outputarea/widget', () => {
 
           if (widget.widgets.length > maxNumberOutputs) {
             // eslint-disable-next-line jest/no-conditional-expect
-            expect(
-              widget.widgets[widget.widgets.length - 1].node.textContent
-            ).toContain('Show more outputs');
+            expect(widget.widgets[widget.widgets.length - 1].node.textContent)
+              .toContain(`
+          Output of this cell has been trimmed on the initial display.
+          Displaying the first 2 top outputs.
+          Click on this message to get the complete output.
+        `);
           } else {
             // eslint-disable-next-line jest/no-conditional-expect
-            expect(
-              widget.widgets[widget.widgets.length - 1].node.textContent
-            ).not.toContain('Show more outputs');
+            expect(widget.widgets[widget.widgets.length - 1].node.textContent)
+              .not.toContain(`
+          Output of this cell has been trimmed on the initial display.
+          Displaying the first 2 top outputs.
+          Click on this message to get the complete output.
+        `);
           }
         }
       );
