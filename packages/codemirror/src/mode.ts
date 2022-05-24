@@ -39,7 +39,7 @@ export namespace Mode {
   // and a class with the same fields but all mandatory. Maybe adopting the same
   // pattern would be less confusing (although far more verbose)
   function makeSpec(spec: ISpec): ISpec {
-    let res = (LanguageDescription.of(spec) as unknown) as ISpec;
+    let res = LanguageDescription.of(spec) as unknown as ISpec;
     res.mime = spec.mime;
     return res;
   }

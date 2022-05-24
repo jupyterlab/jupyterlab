@@ -57,7 +57,7 @@
     "@codemirror/lang-sql": "~0.19.1",
     "@codemirror/lang-wast": "~0.19.0",
     "@codemirror/lang-xml": "~0.19.1",
-    "@codemirror/language": "~0.19.7",
+    "@codemirror/language": "~0.19.2",
     "@codemirror/legacy-modes": "~0.19.0",
     "@codemirror/search": "~0.19.4",
     "@codemirror/state": "~0.19.6",
@@ -85,7 +85,7 @@
     "style-mod": "~4.0.0",
     "y-codemirror.next": "~0.1.1",
     "y-protocols": "^1.0.5",
-    "yjs": "^13.5.17"
+    "yjs": "^13.5.34"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.11",

@@ -45,30 +45,6 @@ import { Mode } from './mode';
 import { Configuration } from './editorconfiguration';
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
-/*import CodeMirror from 'codemirror';
-import 'codemirror/addon/comment/comment.js';
-import 'codemirror/addon/display/rulers.js';
-import 'codemirror/addon/edit/closebrackets.js';
-import 'codemirror/addon/edit/matchbrackets.js';
-import 'codemirror/addon/fold/brace-fold.js';
-import 'codemirror/addon/fold/comment-fold.js';
-import 'codemirror/addon/fold/foldcode.js';
-import 'codemirror/addon/fold/foldgutter.js';
-import 'codemirror/addon/fold/indent-fold.js';
-import 'codemirror/addon/fold/markdown-fold.js';
-import 'codemirror/addon/fold/xml-fold.js';
-import 'codemirror/addon/mode/simple';
-import 'codemirror/addon/scroll/scrollpastend.js';
-import 'codemirror/addon/search/jump-to-line';
-import 'codemirror/addon/search/search';
-import 'codemirror/addon/search/searchcursor';
-import 'codemirror/addon/selection/active-line';
-import 'codemirror/addon/selection/mark-selection';
-import 'codemirror/addon/selection/selection-pointer';
-import 'codemirror/addon/edit/trailingspace.js';
-import 'codemirror/keymap/emacs.js';
-import 'codemirror/keymap/sublime.js';
-import { CodemirrorBinding } from 'y-codemirror';
 
 // import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
@@ -529,11 +505,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     return this._editor.state;
   }
 
-  // TODO: CM6 migration
-  /*operation<T>(fn: () => T): T {
-    return this._editor.operation(fn);
-  }*/
-
   firstLine(): number {
     // TODO: return 1 when CM6 first line number has propagated
     return 0;
@@ -578,9 +549,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     to: { line: number; ch: number },
     separator?: string
   ): string {
-    const from_offset = this.getOffsetAt(this._toPosition(from));
-    const to_offset = this.getOffsetAt(this._toPosition(to));
-    return this.state.sliceDoc(from_offset, to_offset);
+    const fromOffset = this.getOffsetAt(this._toPosition(from));
+    const toOffset = this.getOffsetAt(this._toPosition(to));
+    return this.state.sliceDoc(fromOffset, toOffset);
     //return this._editor.getDoc().getRange(from, to, separator);
   }
 

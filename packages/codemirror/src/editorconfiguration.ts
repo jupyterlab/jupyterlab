@@ -400,13 +400,8 @@ export namespace Configuration {
     private updateEditorTheme(
       config: Partial<IConfig> | Record<string, any>
     ): Extension | null {
-      const {
-        fontFamily,
-        fontSize,
-        lineHeight,
-        lineWrap,
-        wordWrapColumn
-      } = config;
+      const { fontFamily, fontSize, lineHeight, lineWrap, wordWrapColumn } =
+        config;
 
       let needUpdate = false;
 

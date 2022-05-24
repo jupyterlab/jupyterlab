@@ -30,7 +30,7 @@
   THE SOFTWARE.
 */
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+//import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IBaseSearchProvider,
   ISearchMatch,
@@ -38,8 +38,10 @@ import {
 } from '@jupyterlab/documentsearch';
 import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import * as CodeMirror from 'codemirror';
 import { CodeMirrorEditor } from './editor';
+import { StringStream } from '@codemirror/stream-parser';
+import { RegExpCursor } from '@codemirror/search';
+import { ChangeSpec } from '@codemirror/state';
 
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
@@ -94,7 +96,8 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
 
     this._query = query;
 
-    CodeMirror.on(this.editor.doc, 'change', this._onDocChanged.bind(this));
+    // TODO: CM6 migration
+    //CodeMirror.on(this.editor.doc, 'change', this._onDocChanged.bind(this));
     if (refreshOverlay) {
       this._refreshOverlay();
     }
@@ -126,17 +129,20 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     if (removeOverlay) {
       this.editor.removeOverlay(this._overlay);
     }
-    const from = this.editor.getCursor('from');
-    const to = this.editor.getCursor('to');
+    const from = this.editor.getPositionAt(
+      this.editor.state.selection.main.from
+    );
+    const to = this.editor.getPositionAt(this.editor.state.selection.main.to);
     // Setting a reverse selection to allow search-as-you-type to maintain the
     // current selected match.  See comment in _findNext for more details.
     if (from !== to) {
       this.editor.setSelection({
-        start: this._toEditorPos(to),
-        end: this._toEditorPos(from)
+        start: to,
+        end: from
       });
     }
-    CodeMirror.off(this.editor.doc, 'change', this._onDocChanged.bind(this));
+    // TODO: CM6 migration
+    //CodeMirror.off(this.editor.doc, 'change', this._onDocChanged.bind(this));
   }
 
   /**
@@ -198,16 +204,20 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     // replace it.  Otherwise, just select the next match after the cursor.
     let replaceOccurred = false;
     if (this._currentMatchIsSelected()) {
-      const cursor = this.editor.getSearchCursor(
-        this._query,
-        this.editor.getCursor('from'),
-        !this._query.ignoreCase
-      );
-      if (!cursor.findNext()) {
+      const cursor = new RegExpCursor(
+        this.editor.doc,
+        this._query.toString(),
+        { ignoreCase: !this._query.ignoreCase },
+        this.editor.state.selection.main.from
+      ).next();
+      if (cursor.done) {
         return replaceOccurred;
       }
+      const value = cursor.value;
       replaceOccurred = true;
-      cursor.replace(newText);
+      this.editor.editor.dispatch({
+        changes: { from: value.from, to: value.to, insert: newText }
+      });
     }
     await this.highlightNext();
     return replaceOccurred;
@@ -223,20 +233,23 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   async replaceAllMatches(newText: string): Promise<boolean> {
     let replaceOccurred = false;
     return new Promise((resolve, _) => {
-      this.editor.operation(() => {
-        const cursor = this.editor.getSearchCursor(
-          this._query,
-          undefined,
-          !this._query.ignoreCase
-        );
-        while (cursor.findNext()) {
-          replaceOccurred = true;
-          cursor.replace(newText);
-        }
-        this._matchState = {};
-        this._currentMatch = null;
-        resolve(replaceOccurred);
-      });
+      let cursor = new RegExpCursor(this.editor.doc, this._query.toString(), {
+        ignoreCase: !this._query.ignoreCase
+      }).next();
+      let changeSpec: ChangeSpec[] = [];
+      while (!cursor.done) {
+        replaceOccurred = true;
+        changeSpec.push({
+          from: cursor.value.from,
+          to: cursor.value.to,
+          insert: newText
+        });
+        cursor = cursor.next();
+      }
+      this.editor.editor.dispatch({ changes: changeSpec });
+      this._matchState = {};
+      this._currentMatch = null;
+      resolve(replaceOccurred);
     });
   }
 
@@ -291,7 +304,8 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    */
   readonly isReadOnly = false;
 
-  private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange): void {
+  // TODO: CM6 migration
+  /*private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange): void {
     // If we get newlines added/removed, the line numbers across the
     // match state are all shifted, so here we need to recalculate it
     if (changeObj.text.length > 1 || (changeObj.removed?.length ?? 0) > 1) {
@@ -305,16 +319,17 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
           );
         });
     }
-  }
+  }*/
 
   private _refreshOverlay() {
-    this.editor.operation(() => {
+    // TODO: CM6 migration
+    /*this.editor.operation(() => {
       // clear search first
       this.editor.removeOverlay(this._overlay);
       this._overlay = this._getSearchOverlay();
       this.editor.addOverlay(this._overlay);
       this._changed.emit(undefined);
-    });
+    });*/
   }
 
   /**
@@ -333,31 +348,32 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   private async _setInitialMatches(query: RegExp) {
     this._matchState = {};
 
-    const content = this.editor.doc.getValue();
+    const content = this.editor.doc.toString();
     const matches = await TextSearchEngine.search(query, content);
 
     matches.forEach(match => {
-      const { line, ch } = this.editor.doc.posFromIndex(match.position);
+      const { line, column } = this.editor.getPositionAt(match.position);
       if (!this._matchState[line]) {
         this._matchState[line] = {};
       }
-      this._matchState[line][ch] = match;
+      this._matchState[line][column] = match;
     });
   }
 
-  private _getSearchOverlay() {
-    return {
-      /**
-       * Token function is called when a line needs to be processed -
-       * when the overlay is initially created, it's called on all lines;
-       * when a line is modified and needs to be re-evaluated, it's called
-       * on just that line.
-       *
-       * This implementation of the token function both constructs/maintains
-       * the overlay and keeps track of the match state as the document is
-       * updated while a search is active.
-       */
-      token: (stream: CodeMirror.StringStream) => {
+  // TODO: CM6 migration
+  //private _getSearchOverlay() {
+  //  return {
+  /**
+   * Token function is called when a line needs to be processed -
+   * when the overlay is initially created, it's called on all lines;
+   * when a line is modified and needs to be re-evaluated, it's called
+   * on just that line.
+   *
+   * This implementation of the token function both constructs/maintains
+   * the overlay and keeps track of the match state as the document is
+   * updated while a search is active.
+   */
+  /*    token: (stream: CodeMirror.StringStream) => {
         const currentPos = stream.pos;
         this._query.lastIndex = currentPos;
         const lineText = stream.string;
@@ -406,71 +422,63 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
         }
       }
     };
-  }
+  }*/
 
   private _findNext(reverse: boolean): Private.ICodeMirrorMatch | null {
-    return this.editor.operation(() => {
-      const caseSensitive = this._query.ignoreCase;
+    const caseSensitive = this._query.ignoreCase;
+    const state = this.editor.state;
 
-      // In order to support search-as-you-type, we needed a way to allow the first
-      // match to be selected when a search is started, but prevent the selected
-      // search to move for each new keypress.  To do this, when a search is ended,
-      // the cursor is reversed, putting the head at the 'from' position.  When a new
-      // search is started, the cursor we want is at the 'from' position, so that the same
-      // match is selected when the next key is entered (if it is still a match).
-      //
-      // When toggling through a search normally, the cursor is always set in the forward
-      // direction, so head is always at the 'to' position.  That way, if reverse = false,
-      // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
-      // the search always proceeds from the 'anchor' position, which is at the 'from'.
+    // In order to support search-as-you-type, we needed a way to allow the first
+    // match to be selected when a search is started, but prevent the selected
+    // search to move for each new keypress.  To do this, when a search is ended,
+    // the cursor is reversed, putting the head at the 'from' position.  When a new
+    // search is started, the cursor we want is at the 'from' position, so that the same
+    // match is selected when the next key is entered (if it is still a match).
+    //
+    // When toggling through a search normally, the cursor is always set in the forward
+    // direction, so head is always at the 'to' position.  That way, if reverse = false,
+    // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
+    // the search always proceeds from the 'anchor' position, which is at the 'from'.
 
-      const cursorToGet = reverse ? 'anchor' : 'head';
-      const lastPosition = this.editor.getCursor(cursorToGet);
-      let cursor: CodeMirror.SearchCursor = this.editor.getSearchCursor(
-        this._query,
-        lastPosition,
-        !caseSensitive
-      );
-      if (!cursor.find(reverse)) {
-        // if we do want to loop, try searching from the bottom/top
-        const startOrEnd = reverse
-          ? CodeMirror.Pos(this.editor.lastLine())
-          : CodeMirror.Pos(this.editor.firstLine(), 0);
-        cursor = this.editor.getSearchCursor(
-          this._query,
-          startOrEnd,
-          !caseSensitive
-        );
-        if (!cursor.find(reverse)) {
-          return null;
-        }
+    const lastPosition = reverse
+      ? state.selection.main.anchor
+      : state.selection.main.head;
+    let cursor = new RegExpCursor(
+      this.editor.doc,
+      this._query.toString(),
+      { ignoreCase: !caseSensitive },
+      lastPosition
+    ).next();
+    if (cursor.done) {
+      const startOrEnd = reverse ? this.editor.doc.length : 0;
+      cursor = new RegExpCursor(
+        this.editor.doc,
+        this._query.toString(),
+        { ignoreCase: !caseSensitive },
+        startOrEnd
+      ).next();
+      if (cursor.done) {
+        return null;
       }
-      const fromPos: CodeMirror.Position = cursor.from();
-      const toPos: CodeMirror.Position = cursor.to();
-      const selRange: CodeEditor.IRange = {
-        start: {
-          line: fromPos.line,
-          column: fromPos.ch
-        },
-        end: {
-          line: toPos.line,
-          column: toPos.ch
-        }
-      };
-
-      this.editor.setSelection(selRange);
-      this.editor.scrollIntoView(
-        {
-          from: fromPos,
-          to: toPos
-        },
-        100
-      );
-      return {
-        from: fromPos,
-        to: toPos
-      };
+    }
+    const value = cursor.value;
+    this.editor.editor.dispatch({
+      selection: { anchor: value.from, head: value.to },
+      scrollIntoView: true
     });
+
+    return {
+      from: this._getPosition(value.from),
+      to: this._getPosition(value.to)
+    };
+  }
+
+  // TODO: remove this when Position API are removed and we work with
+  // offsets only. Contrary to the functions in CodeMirrorEditor,
+  // these functions work with CM6 position (i.e. line number starting at 1).
+  private _getPosition(offset: number): { line: number; ch: number } {
+    const line = this.editor.doc.lineAt(offset);
+    return { line: line.number, ch: offset - line.from };
   }
 
   private _parseMatchesFromState(): ISearchMatch[] {
@@ -487,12 +495,12 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     return matches;
   }
 
-  private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
+  /*private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
     return {
       line: posIn.line,
       column: posIn.ch
     };
-  }
+  }*/
 
   private _currentMatchIsSelected(): boolean {
     if (!this._currentMatch) {
@@ -507,10 +515,8 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       selectionIsOneLine &&
       this._currentMatch.text.length === currentSelectionLength &&
       this._currentMatch.position ===
-        this.editor.doc.indexFromPos({
-          line: currentSelection.start.line,
-          ch: currentSelection.start.column
-        })
+        this.editor.doc.line(currentSelection.start.line).from +
+          currentSelection.start.column
     );
   }
 
@@ -586,15 +592,13 @@ export class CodeMirrorSearchHighlighter {
     this._cm.removeOverlay('jp-searching');
     this._overlay = null;
 
-    const from = this._cm.getCursor('from');
-    const to = this._cm.getCursor('to');
+    const selection = this._cm.state.selection.main;
+    const from = selection.from;
+    const to = selection.to;
     // Setting a reverse selection to allow search-as-you-type to maintain the
     // current selected match. See comment in _findNext for more details.
     if (from !== to) {
-      this._cm.setSelection({
-        start: this._toEditorPos(to),
-        end: this._toEditorPos(from)
-      });
+      this._cm.editor.dispatch({ selection: { anchor: to, head: from } });
     }
 
     return Promise.resolve();
@@ -634,26 +638,12 @@ export class CodeMirrorSearchHighlighter {
     // Highlight the current index
     if (this._currentIndex !== null) {
       const match = this.matches[this._currentIndex];
-      this._cm.operation(() => {
-        const start = this._cm.doc.posFromIndex(match.position);
-        const from = {
-          line: start.line,
-          column: start.ch
-        };
-        const to = {
-          // Matches is on the same line
-          line: start.line,
-          column: start.ch + match.text.length
-        };
-        // No need to scroll into view this is the default behavior
-        this._cm.setSelection({
-          start: from,
-          end: to
-        });
+      this._cm.editor.dispatch({
+        selection: { anchor: match.position, head: match.text.length }
       });
     } else {
       // Set cursor to remove any selection
-      this._cm.setCursorPosition({ line: 0, column: 0 });
+      this._cm.editor.dispatch({ selection: { anchor: 0 } });
     }
   }
 
@@ -665,11 +655,8 @@ export class CodeMirrorSearchHighlighter {
   }
 
   private _getSearchOverlay() {
-    const token = (stream: CodeMirror.StringStream) => {
-      const position = this._cm.doc.indexFromPos({
-        line: stream.lineOracle.line,
-        ch: stream.pos
-      });
+    const token = (stream: StringStream) => {
+      const position = stream.start;
 
       let found =
         this._matches.length > 0
@@ -738,22 +725,14 @@ export class CodeMirrorSearchHighlighter {
     // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
     // the search always proceeds from the 'anchor' position, which is at the 'from'.
 
-    const cursorToGet = reverse ? 'anchor' : 'head';
-    let lastPosition = this._cm.getCursor(cursorToGet);
-    if (
-      lastPosition.line === 0 &&
-      lastPosition.ch === 0 &&
-      reverse &&
-      this.currentIndex === null
-    ) {
+    const cursor = this._cm.state.selection.main;
+    let lastPosition = reverse ? cursor.anchor : cursor.head;
+    if (lastPosition === 0 && reverse && this.currentIndex === null) {
       // The default position is (0, 0) but we want to start from the end in that case
-      lastPosition = {
-        // Go to virtual next line so position got clamp to end
-        line: this._cm.lineCount,
-        ch: 0
-      };
+      lastPosition = this._cm.doc.length;
     }
-    const position = this._cm.doc.indexFromPos(lastPosition);
+
+    const position = lastPosition;
 
     let found = Utils.findNext(
       this._matches,
@@ -778,13 +757,6 @@ export class CodeMirrorSearchHighlighter {
     return found;
   }
 
-  private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
-    return {
-      line: posIn.line,
-      column: posIn.ch
-    };
-  }
-
   private _cm: CodeMirrorEditor;
   private _currentIndex: number | null;
   private _matches: ISearchMatch[];
@@ -793,8 +765,8 @@ export class CodeMirrorSearchHighlighter {
 
 namespace Private {
   export interface ICodeMirrorMatch {
-    from: CodeMirror.Position;
-    to: CodeMirror.Position;
+    from: { line: number; ch: number };
+    to: { line: number; ch: number };
   }
 }
 

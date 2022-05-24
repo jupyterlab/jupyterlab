@@ -98,9 +98,9 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
       if (current && tracker.has(current) && item.model) {
-        item.model.editor = (current as IDocumentWidget<
-          FileEditor
-        >).content.editor;
+        item.model.editor = (
+          current as IDocumentWidget<FileEditor>
+        ).content.editor;
       }
     });
     statusBar.registerStatusItem(

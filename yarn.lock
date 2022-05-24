@@ -1237,7 +1237,7 @@
     "@lezer/common" "^0.15.5"
     "@lezer/lr" "^0.15.0"
 
-"@codemirror/language@~0.19.7":
+"@codemirror/language@~0.19.2":
   version "0.19.10"
   resolved "https://registry.npmjs.org/@codemirror/language/-/language-0.19.10.tgz#c3d1330fa5de778c6b6b5177af5572a3d9d596b5"
   integrity sha512-yA0DZ3RYn2CqAAGW62VrU8c4YxscMQn45y/I9sjBlqB1e2OTQLg4CCkMBuMSLXk4xaqjlsgazeOQWaJQOKfV8Q==
@@ -14804,13 +14804,6 @@ yazl@2.5.1:
   integrity sha512-phENi2PLiHnHb6QBVot+dJnaAZ0xosj7p3fWl+znIjBDlnMI2PsZCJZ306BPTFOaHf5qdDEI8x5qFrSOBN5vrw==
   dependencies:
     buffer-crc32 "~0.2.3"
-
-yjs@^13.5.17:
-  version "13.5.38"
-  resolved "https://registry.npmjs.org/yjs/-/yjs-13.5.38.tgz#58dc8d679c69bddaf7c62e74c909ca08a8e592c9"
-  integrity sha512-YCHj6DkgxhIRqdxqTI+htGAhvfmgkS974pz+/OOiuLOj0EgGfUKvtp4yYyQGg1Wf3m4oLet9x7gEvCrxaGiVZQ==
-  dependencies:
-    lib0 "^0.2.49"
 
 yjs@^13.5.34:
   version "13.5.34"

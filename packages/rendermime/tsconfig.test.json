@@ -6,9 +6,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../codemirror"
-    },
-    {
       "path": "../coreutils"
     },
     {

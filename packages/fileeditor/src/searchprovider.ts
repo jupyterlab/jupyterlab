@@ -70,7 +70,10 @@ export class FileEditorSearchProvider
    */
   getInitialQuery(): string {
     const cm = this.editor as CodeMirrorEditor;
-    const selection = cm.doc.getSelection();
+    const selection = cm.state.sliceDoc(
+      cm.state.selection.main.from,
+      cm.state.selection.main.to
+    );
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
