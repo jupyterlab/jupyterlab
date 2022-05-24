@@ -122,23 +122,6 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   /**
-   * Current active entry.
-   *
-   * @returns table of contents active entry
-   */
-  get activeHeading(): INotebookHeading | null {
-    return super.activeHeading;
-  }
-  set activeHeading(heading: INotebookHeading | null) {
-    super.activeHeading = heading;
-    if (this.activeHeading && !this._activeCellLock) {
-      const cells = this.widget.content.widgets;
-      const idx = cells.indexOf(this.activeHeading.cellRef);
-      this.widget.content.activeCellIndex = idx;
-    }
-  }
-
-  /**
    * Type of document supported by the model.
    *
    * #### Notes
@@ -418,11 +401,9 @@ export class NotebookToCModel extends TableOfContentsModel<
       ) {
         activeHeadingIndex--;
       }
-      this._activeCellLock = true;
-      this.activeHeading = this.headings[activeHeadingIndex];
-      this._activeCellLock = false;
+      this.setActiveHeading(this.headings[activeHeadingIndex], false);
     } else {
-      this.activeHeading = null;
+      this.setActiveHeading(null, false);
     }
   }
 
@@ -555,7 +536,6 @@ export class NotebookToCModel extends TableOfContentsModel<
     baseNumbering: ['toc/base_numbering']
   };
 
-  private _activeCellLock: boolean;
   private _runningCells: Cell[];
   private _cellToHeadingIndex: WeakMap<Cell, number>;
 }
@@ -606,6 +586,12 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       heading: INotebookHeading | null
     ) => {
       if (heading) {
+        // Set active cell
+        const cells = widget.content.widgets;
+        const idx = cells.indexOf(heading.cellRef);
+        widget.content.activeCellIndex = idx;
+
+        // Scroll to heading
         const el = headingToElement.get(heading);
 
         if (el) {

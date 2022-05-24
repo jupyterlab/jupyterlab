@@ -175,7 +175,7 @@ export namespace TableOfContents {
     /**
      * Active heading
      */
-    activeHeading: H | null;
+    readonly activeHeading: H | null;
 
     /**
      * Signal emitted when the active heading changes.
@@ -224,6 +224,14 @@ export namespace TableOfContents {
      * to be always active; e.g. to add numbering in the document.
      */
     isActive: boolean;
+
+    /**
+     * Set a new active heading.
+     *
+     * @param heading The new active heading
+     * @param emitSignal Whether to emit the activeHeadingChanged signal or not.
+     */
+    setActiveHeading(heading: H | null, emitSignal?: boolean): void;
 
     /**
      * Model configuration setter.
