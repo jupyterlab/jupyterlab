@@ -1,11 +1,5 @@
 [
   {
-    "id": "@jupyter-widgets/jupyterlab-manager:saveWidgetState",
-    "label": "Save Widget State Automatically",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
     "id": "application:activate-next-tab",
     "label": "Activate Next Tab",
     "caption": "",
@@ -678,14 +672,6 @@
     "shortcuts": []
   },
   {
-    "id": "filebrowser:create-main-launcher",
-    "label": "New Launcher",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl Shift L"
-    ]
-  },
-  {
     "id": "filebrowser:create-new-directory",
     "label": "New Folder",
     "caption": "",
@@ -1235,7 +1221,9 @@
     "id": "launcher:create",
     "label": "New Launcher",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl Shift L"
+    ]
   },
   {
     "id": "logconsole:add-checkpoint",

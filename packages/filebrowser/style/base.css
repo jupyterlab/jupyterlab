@@ -76,23 +76,6 @@
   width: 40px;
 }
 
-.jp-FileBrowser-toolbar
-  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher'] {
-  width: 72px;
-  background: var(--jp-brand-color1);
-}
-
-.jp-FileBrowser-toolbar
-  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']:focus-visible {
-  background-color: var(--jp-accept-color-active, var(--jp-brand-color0));
-}
-
-.jp-FileBrowser-toolbar
-  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']
-  .jp-icon3 {
-  fill: var(--jp-layout-color1);
-}
-
 /*-----------------------------------------------------------------------------
 | Other styles
 |----------------------------------------------------------------------------*/
