@@ -928,7 +928,7 @@
       "description": "For the side-by-side rendering, the side-by-side output ratio defines the width of the output vs the input. Set 1 for same size, > 1 for larger output, < 1 for smaller output.",
       "type": "number",
       "default": 1,
-      "exclusiveMinimum": 0
+      "exclusiveMinimum": false
     }
   },
   "additionalProperties": false,
