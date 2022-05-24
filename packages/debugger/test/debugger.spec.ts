@@ -364,7 +364,7 @@ describe('Debugger', () => {
       const body = sidebar.sources.widgets[0] as SourcesBody;
       const children = Array.from(body.children());
       const editor = children[0] as CodeEditorWrapper;
-      expect(editor.model.value.text).toEqual(code);
+      expect(editor.model.sharedModel.getSource()).toEqual(code);
     });
   });
 });

@@ -3,11 +3,9 @@
 
 import * as nbformat from '@jupyterlab/nbformat';
 import {
-  IModelDB,
   IObservableMap,
   IObservableValue,
-  ObservableMap,
-  ObservableValue
+  ObservableMap
 } from '@jupyterlab/observables';
 import {
   AttachmentModel,
@@ -17,6 +15,7 @@ import {
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
+import { ISharedMarkdownCell, ISharedRawCell } from '@jupyterlab/shared-models';
 
 /**
  * The model for attachments.
@@ -96,21 +95,13 @@ export namespace IAttachmentsModel {
    */
   export interface IOptions {
     /**
-     * The initial values for the model.
-     */
-    values?: nbformat.IAttachments;
-
-    /**
      * The attachment content factory used by the model.
      *
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
 
-    /**
-     * An optional IModelDB to store the attachments model.
-     */
-    modelDB?: IModelDB;
+    sharedModel: ISharedMarkdownCell | ISharedRawCell;
   }
 
   /**
@@ -136,30 +127,18 @@ export class AttachmentsModel implements IAttachmentsModel {
   /**
    * Construct a new observable outputs instance.
    */
-  constructor(options: IAttachmentsModel.IOptions = {}) {
+  constructor(options: IAttachmentsModel.IOptions) {
     this.contentFactory =
       options.contentFactory || AttachmentsModel.defaultContentFactory;
-    if (options.values) {
-      for (const key of Object.keys(options.values)) {
-        if (options.values[key] !== undefined) {
-          this.set(key, options.values[key]!);
+    const values = options.sharedModel.getAttachments();
+    if (values) {
+      for (const key of Object.keys(values)) {
+        if (values[key] !== undefined) {
+          this.set(key, values[key]!);
         }
       }
     }
     this._map.changed.connect(this._onMapChanged, this);
-
-    // If we are given a IModelDB, keep an up-to-date
-    // serialized copy of the AttachmentsModel in it.
-    if (options.modelDB) {
-      this._modelDB = options.modelDB;
-      this._serialized = this._modelDB.createValue('attachments');
-      if (this._serialized.get()) {
-        this.fromJSON(this._serialized.get() as nbformat.IAttachments);
-      } else {
-        this._serialized.set(this.toJSON());
-      }
-      this._serialized.changed.connect(this._onSerializedChanged, this);
-    }
   }
 
   /**
@@ -307,21 +286,6 @@ export class AttachmentsModel implements IAttachmentsModel {
   }
 
   /**
-   * If the serialized version of the outputs have changed due to a remote
-   * action, then update the model accordingly.
-   */
-  private _onSerializedChanged(
-    sender: IObservableValue,
-    args: ObservableValue.IChangedArgs
-  ) {
-    if (!this._changeGuard) {
-      this._changeGuard = true;
-      this.fromJSON(args.newValue as nbformat.IAttachments);
-      this._changeGuard = false;
-    }
-  }
-
-  /**
    * Handle a change to an item.
    */
   private _onGenericChange(): void {
@@ -332,7 +296,6 @@ export class AttachmentsModel implements IAttachmentsModel {
   private _isDisposed = false;
   private _stateChanged = new Signal<IAttachmentsModel, void>(this);
   private _changed = new Signal<this, IAttachmentsModel.ChangedArgs>(this);
-  private _modelDB: IModelDB | null = null;
   private _serialized: IObservableValue | null = null;
   private _changeGuard = false;
 }

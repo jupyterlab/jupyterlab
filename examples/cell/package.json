@@ -15,6 +15,7 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.13",
     "@jupyterlab/rendermime": "^4.0.0-alpha.13",
     "@jupyterlab/services": "^7.0.0-alpha.13",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.13",
     "@jupyterlab/theme-light-extension": "^4.0.0-alpha.13",
     "@jupyterlab/ui-components": "^4.0.0-alpha.28",
     "@lumino/commands": "^2.0.0-alpha.6",

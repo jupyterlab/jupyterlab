@@ -3,7 +3,6 @@
 
 import {
   Cell,
-  // CellModel,
   CodeCell,
   ICellModel,
   ICodeCellModel,
@@ -15,7 +14,7 @@ import {
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList, IObservableMap } from '@jupyterlab/observables';
+import { IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -32,6 +31,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
+import * as sharedModels from '@jupyterlab/shared-models';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 
 /**
@@ -294,24 +294,6 @@ export class StaticNotebook extends WindowedList {
     }
     const oldValue = this._notebookModel;
     this._notebookModel = newValue;
-
-    if (oldValue && oldValue.modelDB.isCollaborative) {
-      void oldValue.modelDB.connected.then(() => {
-        oldValue!.modelDB.collaborators!.changed.disconnect(
-          this._onCollaboratorsChanged,
-          this
-        );
-      });
-    }
-    if (newValue && newValue.modelDB.isCollaborative) {
-      void newValue.modelDB.connected.then(() => {
-        newValue!.modelDB.collaborators!.changed.connect(
-          this._onCollaboratorsChanged,
-          this
-        );
-      });
-    }
-
     // Trigger private, protected, and public changes.
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
@@ -499,7 +481,7 @@ export class StaticNotebook extends WindowedList {
     newValue: INotebookModel | null
   ): void {
     if (oldValue) {
-      oldValue.cells.changed.disconnect(this._onCellsChanged, this);
+      oldValue.sharedModel.changed.disconnect(this._onCellsChanged, this);
       oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible. Remember to initially
@@ -514,9 +496,10 @@ export class StaticNotebook extends WindowedList {
     }
     this._updateMimetype();
     const cells = newValue.cells;
-    if (!cells.length && newValue.isInitialized) {
-      cells.push(
-        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+    if (!cells.length) {
+      newValue.sharedModel.insertCell(
+        0,
+        sharedModels.createCell({ cell_type: this.notebookConfig.defaultCell })
       );
     }
 
@@ -524,7 +507,7 @@ export class StaticNotebook extends WindowedList {
     for (const cell of cells) {
       this._insertCell(++index, cell, 'set');
     }
-    cells.changed.connect(this._onCellsChanged, this);
+    newValue.sharedModel.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
     newValue.metadata.changed.connect(this.onMetadataChanged, this);
   }
@@ -532,88 +515,65 @@ export class StaticNotebook extends WindowedList {
   /**
    * Handle a change cells event.
    */
-  private _onCellsChanged(
-    sender: IObservableList<ICellModel>,
-    args: IObservableList.IChangedArgs<ICellModel>
-  ) {
-    let index = 0;
-    switch (args.type) {
-      case 'add':
-        index = args.newIndex;
-        // eslint-disable-next-line no-case-declarations
-        const insertType: InsertType = args.oldIndex == -1 ? 'push' : 'insert';
-        for (const value of args.newValues) {
-          this._insertCell(index++, value, insertType);
-        }
-        this._updateDataWindowedListIndex(
-          args.newIndex,
-          this.model!.cells.length,
-          args.newValues.length
-        );
-        break;
-      case 'move':
-        {
-          this._moveCell(args.oldIndex, args.newIndex);
-          if (args.newIndex > args.oldIndex) {
+  protected _onCellsChanged(
+    sender: sharedModels.ISharedNotebook,
+    args: sharedModels.NotebookChange
+  ): void {
+    if (args.cellsChange) {
+      let index = 0;
+      args.cellsChange.forEach(delta => {
+        if (delta.retain != null) {
+          index += delta.retain;
+        } else if (delta.insert) {
+          const insertType: InsertType =
+            index === this.widgets.length ? 'push' : 'insert';
+          delta.insert.forEach((val, offset) => {
+            this._insertCell(
+              index + offset,
+              this.model!.cells.get(index + offset),
+              insertType
+            );          
+          });
             this._updateDataWindowedListIndex(
-              args.oldIndex,
-              args.newIndex + 1,
-              -1
+              index,
+              this.model!.cells.length,
+              delta.insert.length
             );
-          } else {
-            this._updateDataWindowedListIndex(
-              args.newIndex,
-              args.oldIndex + 1,
-              1
-            );
+            index += delta.insert.length;
+
+        } else if (delta.delete != null) {
+          for (let i = 0; i < delta.delete; i++) {
+            this._removeCell(index);
           }
-          args.newValues.forEach((m, modelIdx) => {
-            const index = args.newIndex + modelIdx;
-            this.widgets[index].node.dataset.windowedListIndex = `${index}`;
-          });
+          this._updateDataWindowedListIndex(
+            index,
+            this.model!.cells.length + delta.delete,
+            -1 * delta.delete
+          );
+          // Add default cell if there are no cells remaining.
+          // @todo this should probably be handled by shared-notebook
+          // @todo this is duplicatively implemented (see other occurrences of notebookconfig.defaultCell)
+          if (!sender.cells.length) {
+            const model = this.model;
+            // Add the cell in a new context to avoid triggering another
+            // cell changed event during the handling of this signal.
+            requestAnimationFrame(() => {
+              if (
+                model &&
+                !model.isDisposed &&
+                !model.sharedModel.cells.length
+              ) {
+                model.sharedModel.insertCell(
+                  0,
+                  sharedModels.createCell({
+                    cell_type: this.notebookConfig.defaultCell
+                  })
+                );
+              }
+            });
+          }
         }
-        break;
-      case 'remove':
-        for (let length = args.oldValues.length; length > 0; length--) {
-          this._removeCell(args.oldIndex);
-        }
-        this._updateDataWindowedListIndex(
-          args.oldIndex,
-          this.model!.cells.length + args.oldValues.length,
-          -1 * args.oldValues.length
-        );
-        // Add default cell if there are no cells remaining.
-        if (!sender.length) {
-          const model = this.model;
-          // Add the cell in a new context to avoid triggering another
-          // cell changed event during the handling of this signal.
-          requestAnimationFrame(() => {
-            if (model && !model.isDisposed && !model.cells.length) {
-              model.cells.push(
-                model.contentFactory.createCell(
-                  this.notebookConfig.defaultCell,
-                  {}
-                )
-              );
-            }
-          });
-        }
-        break;
-      case 'set':
-        // TODO: reuse existing widgets if possible.
-        index = args.newIndex;
-        for (const value of args.newValues) {
-          // Note: this ordering (insert then remove)
-          // is important for getting the active cell
-          // index for the editable notebook correct.
-          this._insertCell(index, value, 'set');
-          this._removeCell(index + 1);
-          this.widgets[index].node.dataset.windowedListIndex = `${index}`;
-          index++;
-        }
-        break;
-      default:
-        return;
+      });
     }
 
     this.update();
@@ -635,7 +595,7 @@ export class StaticNotebook extends WindowedList {
         break;
       case 'markdown':
         widget = this._createMarkdownCell(cell as IMarkdownCellModel);
-        if (cell.value.text === '') {
+        if (cell.sharedModel.getSource() === '') {
           (widget as MarkdownCell).rendered = false;
         }
         break;
@@ -722,18 +682,6 @@ export class StaticNotebook extends WindowedList {
   }
 
   /**
-   * Move a cell widget.
-   */
-  private _moveCell(fromIndex: number, toIndex: number): void {
-    ArrayExt.move(this.cellsArray, fromIndex, toIndex);
-    if (this.notebookConfig.windowingMode === 'defer') {
-      // Move the widget to its new position
-      this.layout.insertWidget(toIndex, this.cellsArray[toIndex]);
-    }
-    this.onCellMoved(fromIndex, toIndex);
-  }
-
-  /**
    * Remove a cell widget.
    */
   private _removeCell(index: number): void {
@@ -758,22 +706,6 @@ export class StaticNotebook extends WindowedList {
     for (const widget of this.widgets) {
       if (widget.model.type === 'code') {
         widget.model.mimeType = this._mimetype;
-      }
-    }
-  }
-
-  /**
-   * Handle an update to the collaborators.
-   */
-  private _onCollaboratorsChanged(): void {
-    // If there are selections corresponding to non-collaborators,
-    // they are stale and should be removed.
-    for (let i = 0; i < this.widgets.length; i++) {
-      const cell = this.widgets[i];
-      for (const key of cell.model.selections.keys()) {
-        if (false === this._notebookModel?.modelDB?.collaborators?.has(key)) {
-          cell.model.selections.delete(key);
-        }
       }
     }
   }
@@ -1252,6 +1184,25 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Handle a change cells event.
+   */
+  protected _onCellsChanged(
+    sender: sharedModels.ISharedNotebook,
+    args: sharedModels.NotebookChange
+   ):void {
+    const activeCellId = args.cellsChange && this.activeCell?.model.id;
+    super._onCellsChanged(sender, args);
+    if (activeCellId) {
+      const newActiveCellIndex = this.model?.sharedModel.cells.findIndex(
+        cell => cell.getId() === activeCellId
+      );
+      if (newActiveCellIndex != null) {
+        this.activeCellIndex = newActiveCellIndex;
+      }
+    }
+  }
+
+  /**
    * A signal emitted when the active cell changes.
    *
    * #### Notes
@@ -1324,15 +1275,15 @@ export class Notebook extends StaticNotebook {
     if (!this.model) {
       return -1;
     }
-    return this.model.cells.length ? this._activeCellIndex : -1;
+    return this.widgets.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
     const oldValue = this._activeCellIndex;
-    if (!this.model || !this.model.cells.length) {
+    if (!this.model || !this.widgets.length) {
       newValue = -1;
     } else {
       newValue = Math.max(newValue, 0);
-      newValue = Math.min(newValue, this.model.cells.length - 1);
+      newValue = Math.min(newValue, this.widgets.length - 1);
     }
 
     this._activeCellIndex = newValue;
@@ -1889,22 +1840,6 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
-    if (this.model && this.model.modelDB.isCollaborative) {
-      const modelDB = this.model.modelDB;
-      void modelDB.connected.then(() => {
-        if (!cell.isDisposed) {
-          // Setup the selection style for collaborators.
-          const localCollaborator = modelDB.collaborators!.localCollaborator;
-          void cell.ready.then(() => {
-            cell.editor!.uuid = localCollaborator.sessionId;
-            cell.editor!.selectionStyle = {
-              ...CodeEditor.defaultSelectionStyle,
-              color: localCollaborator.color
-            };
-          });
-        }
-      });
-    }
     void cell.ready.then(() => {
       if (!cell.isDisposed) {
         cell.editor!.edgeRequested.connect(this._onEdgeRequest, this);
@@ -2396,17 +2331,17 @@ export class Notebook extends StaticNotebook {
       }
 
       // Move the cells one by one
-      model.cells.beginCompoundOperation();
-      if (fromIndex < toIndex) {
+      model.sharedModel.transact(() => {
+        if (fromIndex < toIndex) {
         for (let length = toMove.length; length > 0; length--) {
-          model.cells.move(fromIndex, toIndex);
+            model.sharedModel.moveCell(fromIndex, toIndex);
         }
-      } else if (fromIndex > toIndex) {
+        } else if (fromIndex > toIndex) {
         for (let length = toMove.length; length > 0; length--) {
-          model.cells.move(fromIndex++, toIndex++);
+            model.sharedModel.moveCell(fromIndex++, toIndex++);
         }
-      }
-      model.cells.endCompoundOperation();
+        }
+      });
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -2418,26 +2353,11 @@ export class Notebook extends StaticNotebook {
       }
       const start = index;
       const values = event.mimeData.getData(JUPYTER_CELL_MIME);
-      const factory = model.contentFactory;
-
       // Insert the copies of the original cells.
-      model.cells.beginCompoundOperation();
-      for (const cell of values) {
-        let value: ICellModel;
-        switch (cell.cell_type) {
-          case 'code':
-            value = factory.createCodeCell({ cell });
-            break;
-          case 'markdown':
-            value = factory.createMarkdownCell({ cell });
-            break;
-          default:
-            value = factory.createRawCell({ cell });
-            break;
-        }
-        model.cells.insert(index++, value);
-      }
-      model.cells.endCompoundOperation();
+      const ycells = values.map((value: nbformat.ICell) =>
+        sharedModels.createCell(value)
+      );
+      model.sharedModel.insertCells(index, ycells);
       // Select the inserted cells.
       this.deselectAll();
       this.activeCellIndex = start;
@@ -2479,7 +2399,8 @@ export class Notebook extends StaticNotebook {
     dragImage = Private.createDragImage(
       selected.length,
       countString,
-      activeCell?.model.value.text.split('\n')[0].slice(0, 26) ?? ''
+      activeCell?.model.sharedModel.getSource().split('\n')[0].slice(0, 26) ??
+        ''
     );
 
     // Set up the drag event.
@@ -2497,7 +2418,9 @@ export class Notebook extends StaticNotebook {
     this._drag.mimeData.setData('internal:cells', toMove);
     // Add mimeData for the text content of the selected cells,
     // allowing for drag/drop into plain text fields.
-    const textContent = toMove.map(cell => cell.model.value.text).join('\n');
+    const textContent = toMove
+      .map(cell => cell.model.sharedModel.getSource())
+      .join('\n');
     this._drag.mimeData.setData('text/plain', textContent);
 
     // Remove mousemove and mouseup listeners and start the drag.

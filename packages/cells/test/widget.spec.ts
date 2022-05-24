@@ -19,6 +19,7 @@ import {
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
+import { createStandaloneCell } from '@jupyterlab/shared-models';
 import {
   createSessionContext,
   framePromise,
@@ -26,8 +27,6 @@ import {
   NBTestUtils,
   signalToPromise
 } from '@jupyterlab/testutils';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { Widget } from '@lumino/widgets';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
 const rendermime = NBTestUtils.defaultRenderMime();
@@ -37,8 +36,9 @@ class LogBaseCell extends Cell {
 
   constructor() {
     super({
-      model: new CellModel({}),
-      contentFactory: NBTestUtils.createBaseCellFactory(),
+      model: new CellModel({
+        sharedModel: createStandaloneCell({ cell_type: 'code' })
+      }),
       placeholder: false
     });
   }
@@ -64,8 +64,7 @@ class LogCodeCell extends CodeCell {
 
   constructor() {
     super({
-      model: new CodeCellModel({}),
-      contentFactory: NBTestUtils.createCodeCellFactory(),
+      model: new CodeCellModel(),
       rendermime,
       placeholder: false
     });
@@ -105,12 +104,13 @@ describe('cells/widget', () => {
   const editorFactory = NBTestUtils.editorFactory;
 
   describe('Cell', () => {
-    const contentFactory = NBTestUtils.createBaseCellFactory();
-    const model = new CellModel({});
+    const model = new CellModel({
+      sharedModel: createStandaloneCell({ cell_type: 'code' })
+    });
 
     describe('#constructor()', () => {
       it('should create a base cell widget', () => {
-        const widget = new Cell({ model, contentFactory }).initializeState();
+        const widget = new Cell({ model }).initializeState();
         expect(widget).toBeInstanceOf(Cell);
       });
 
@@ -128,7 +128,6 @@ describe('cells/widget', () => {
         const widget = new Cell({
           editorConfig,
           model,
-          contentFactory,
           placeholder: false
         }).initializeState();
         expect(widget.editor!.getOption('insertSpaces')).toEqual(false);
@@ -141,35 +140,28 @@ describe('cells/widget', () => {
 
     describe('#model', () => {
       it('should be the model used by the widget', () => {
-        const model = new CellModel({});
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(widget.model).toEqual(model);
       });
     });
 
     describe('#editorWidget', () => {
       it('should be a code editor widget', () => {
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(widget.editorWidget).toBeInstanceOf(CodeEditorWrapper);
       });
     });
 
     describe('#editor', () => {
       it('should be a cell editor', () => {
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
-        expect(widget.editor!.uuid).toBeTruthy();
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
+        expect(widget.editor.uuid).toBeTruthy();
       });
     });
 
@@ -185,27 +177,20 @@ describe('cells/widget', () => {
 
     describe('#readOnly', () => {
       it('should be a boolean', () => {
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(typeof widget.readOnly).toEqual('boolean');
       });
 
       it('should default to false', () => {
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(widget.readOnly).toEqual(false);
       });
 
       it('should be settable', () => {
         const widget = new Cell({
-          model,
-          contentFactory
+          model
         }).initializeState();
         widget.readOnly = true;
         expect(widget.readOnly).toEqual(true);
@@ -224,7 +209,6 @@ describe('cells/widget', () => {
 
         const widget = new Cell({
           model,
-          contentFactory,
           placeholder: false
         }).initializeState();
         expect(widget.readOnly).toEqual(true);
@@ -242,8 +226,10 @@ describe('cells/widget', () => {
 
     describe('#loadEditableState()', () => {
       it('should load the editable state from the model', () => {
-        const model = new CellModel({});
-        const widget = new Cell({ model, contentFactory }).initializeState();
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
+        const widget = new Cell({ model }).initializeState();
         expect(widget.readOnly).toEqual(false);
 
         model.metadata.set('editable', false);
@@ -258,12 +244,11 @@ describe('cells/widget', () => {
 
     describe('#saveEditableState()', () => {
       it('should save the editable state to the model', () => {
-        const model = new CellModel({});
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(widget.readOnly).toEqual(false);
 
         widget.readOnly = true;
@@ -279,12 +264,11 @@ describe('cells/widget', () => {
 
     describe('#syncEditable', () => {
       it('should control automatic syncing of editable state with model', () => {
-        const model = new CellModel({});
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(widget.syncEditable).toEqual(false);
         expect(widget.readOnly).toEqual(false);
 
@@ -315,12 +299,11 @@ describe('cells/widget', () => {
 
     describe('#loadCollapseState()', () => {
       it('should load the input collapse state from the model', () => {
-        const model = new CellModel({});
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(widget.inputHidden).toEqual(false);
 
         model.metadata.set('jupyter', { source_hidden: true });
@@ -335,12 +318,11 @@ describe('cells/widget', () => {
 
     describe('#saveCollapseState()', () => {
       it('should save the collapse state to the model', () => {
-        const model = new CellModel({});
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(widget.inputHidden).toEqual(false);
 
         widget.inputHidden = true;
@@ -358,12 +340,11 @@ describe('cells/widget', () => {
 
     describe('#syncCollapse', () => {
       it('should control automatic syncing of collapse state with model', () => {
-        const model = new CellModel({});
-        const widget = new Cell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
+        const widget = new Cell({ model,
+          placeholder: false }).initializeState();
         expect(widget.syncCollapse).toEqual(false);
         expect(widget.inputHidden).toEqual(false);
 
@@ -409,7 +390,7 @@ describe('cells/widget', () => {
 
     describe('#setPrompt()', () => {
       it('should not throw an error (full test in input area)', () => {
-        const widget = new Cell({ model, contentFactory }).initializeState();
+        const widget = new Cell({ model }).initializeState();
         expect(() => {
           widget.setPrompt('');
         }).not.toThrow();
@@ -424,13 +405,13 @@ describe('cells/widget', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
-        const widget = new Cell({ model, contentFactory }).initializeState();
+        const widget = new Cell({ model }).initializeState();
         widget.dispose();
         expect(widget.isDisposed).toEqual(true);
       });
 
       it('should be safe to call multiple times', () => {
-        const widget = new Cell({ model, contentFactory }).initializeState();
+        const widget = new Cell({ model }).initializeState();
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).toEqual(true);
@@ -509,7 +490,7 @@ describe('cells/widget', () => {
 
   describe('CodeCell', () => {
     const contentFactory = NBTestUtils.createCodeCellFactory();
-    const model = new CodeCellModel({});
+    const model = new CodeCellModel();
 
     describe('#constructor()', () => {
       it('should create a code cell widget', () => {
@@ -536,7 +517,7 @@ describe('cells/widget', () => {
 
     describe('#outputCollapsed', () => {
       it('should initialize from the model', () => {
-        const collapsedModel = new CodeCellModel({});
+        const collapsedModel = new CodeCellModel();
         let widget = new CodeCell({ model: collapsedModel, rendermime });
         widget.initializeState();
         expect(widget.outputHidden).toEqual(false);
@@ -564,7 +545,7 @@ describe('cells/widget', () => {
 
     describe('#outputsScrolled', () => {
       it('should initialize from the model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         let widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).toEqual(false);
@@ -588,7 +569,7 @@ describe('cells/widget', () => {
 
     describe('#loadScrolledState()', () => {
       it('should load the output scrolled state from the model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).toEqual(false);
@@ -605,7 +586,7 @@ describe('cells/widget', () => {
 
     describe('#saveScrolledState()', () => {
       it('should save the collapse state to the model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).toEqual(false);
@@ -623,7 +604,7 @@ describe('cells/widget', () => {
 
     describe('#syncScrolled', () => {
       it('should control automatic syncing of scrolled state with model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.syncScrolled).toEqual(false);
@@ -656,7 +637,7 @@ describe('cells/widget', () => {
 
     describe('#loadCollapseState()', () => {
       it('should load the output collapse state from the model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         widget.loadCollapseState();
@@ -674,7 +655,7 @@ describe('cells/widget', () => {
 
     describe('#saveCollapseState()', () => {
       it('should save the collapse state to the model `collapsed` metadata', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputHidden).toEqual(false);
@@ -698,7 +679,7 @@ describe('cells/widget', () => {
 
     describe('#syncCollapse', () => {
       it('should control automatic syncing of collapse state with model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.syncCollapse).toEqual(false);
@@ -805,7 +786,7 @@ describe('cells/widget', () => {
         });
         widget.initializeState();
         let originalCount: number;
-        widget.model.value.text = 'foo';
+        widget.model.sharedModel.setSource('foo');
         originalCount = widget.model.executionCount!;
         await CodeCell.execute(widget, sessionContext);
         const executionCount = widget.model.executionCount;
@@ -853,7 +834,7 @@ describe('cells/widget', () => {
           placeholder: false
         });
         widget.initializeState();
-        widget.model.value.text = 'foo';
+        widget.model.sharedModel.setSource('foo');
         const future1 = CodeCell.execute(widget, sessionContext);
         expect(widget.promptNode!.textContent).toEqual('[*]:');
         const future2 = CodeCell.execute(widget, sessionContext);
@@ -872,8 +853,7 @@ describe('cells/widget', () => {
 
   describe('MarkdownCell', () => {
     const contentFactory = NBTestUtils.createBaseCellFactory();
-    const model = new MarkdownCellModel({});
-
+    const model = new MarkdownCellModel();
     describe('#constructor()', () => {
       it('should create a markdown cell widget', () => {
         const widget = new MarkdownCell({
@@ -987,12 +967,9 @@ describe('cells/widget', () => {
 
     describe('#constructor()', () => {
       it('should create a raw cell widget', () => {
-        const model = new RawCellModel({});
-        const widget = new RawCell({
-          model,
-          contentFactory,
-          placeholder: false
-        }).initializeState();
+        const model = new RawCellModel();
+        const widget = new RawCell({ model, contentFactory,
+          placeholder: false }).initializeState();
         expect(widget).toBeInstanceOf(RawCell);
       });
     });

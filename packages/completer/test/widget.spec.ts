@@ -8,6 +8,7 @@ import {
   CompleterModel,
   CompletionHandler
 } from '@jupyterlab/completer';
+import { YFile } from '@jupyterlab/shared-models';
 import { framePromise, sleep } from '@jupyterlab/testutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
@@ -24,7 +25,7 @@ const DOC_PANEL_CLASS = 'jp-Completer-docpanel';
 const ACTIVE_CLASS = 'jp-mod-active';
 
 function createEditorWidget(): CodeEditorWrapper {
-  const model = new CodeEditor.Model();
+  const model = new CodeEditor.Model({ sharedModel: new YFile() });
   const factory = (options: CodeEditor.IOptions) => {
     return new CodeMirrorEditor(options);
   };
@@ -286,7 +287,7 @@ describe('completer/widget', () => {
         const model = new CompleterModel();
         let called = false;
 
-        editor.model.value.text = 'a';
+        editor.model.sharedModel.setSource('a');
         panel.node.style.position = 'absolute';
         panel.node.style.top = '0px';
         panel.node.style.left = '0px';
@@ -336,7 +337,7 @@ describe('completer/widget', () => {
         let model = new CompleterModel();
         let called = false;
 
-        editor.model.value.text = 'a';
+        editor.model.sharedModel.setSource('a');
         panel.node.style.position = 'absolute';
         panel.node.style.top = '0px';
         panel.node.style.left = '0px';
@@ -1529,7 +1530,7 @@ describe('completer/widget', () => {
           code.node.style.height = '5000px';
           code.node.style.width = '400px';
           code.node.style.background = 'yellow';
-          editor.model.value.text = text;
+          editor.model.sharedModel.setSource(text);
 
           panel.node.style.background = 'red';
           panel.node.style.height = '2000px';

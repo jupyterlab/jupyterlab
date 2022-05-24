@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { createStandaloneCell } from '@jupyterlab/shared-models';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';
 import { CodeEditorWrapper } from './widget';
@@ -28,14 +29,15 @@ export class CodeViewerWidget extends Widget {
     options: CodeViewerWidget.INoModelOptions
   ): CodeViewerWidget {
     const model = new CodeEditor.Model({
-      value: options.content,
-      mimeType: options.mimeType
+      mimeType: options.mimeType,
+      sharedModel: createStandaloneCell({ cell_type: 'code' })
     });
+    model.sharedModel.setSource(options.content);
     return new CodeViewerWidget({ factory: options.factory, model });
   }
 
   get content(): string {
-    return this.model.value.text;
+    return this.model.sharedModel.getSource();
   }
 
   get mimeType(): string {

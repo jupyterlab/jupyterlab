@@ -10,7 +10,7 @@ import { CodeCellModel, InputArea, InputPrompt } from '@jupyterlab/cells';
 const PROMPT_CLASS = 'jp-InputArea-prompt';
 
 describe('@jupyterlab/cells', () => {
-  const model = new CodeCellModel({});
+  const model = new CodeCellModel();
 
   describe('InputArea', () => {
     describe('#constructor()', () => {

@@ -5,9 +5,15 @@ import { YCodeCell, YNotebook } from '../src';
 
 describe('@jupyterlab/shared-models', () => {
   describe('ynotebook', () => {
-    it('should create a notebook', () => {
-      const notebook = YNotebook.create(false);
-      expect(notebook.cells.length).toBe(0);
+    it('should create an initialized notebook', () => {
+      ['code', 'markdown', 'raw'].forEach(cellType => {
+        const notebook = YNotebook.create(
+          false,
+          cellType as 'code' | 'markdown' | 'raw'
+        );
+        expect(notebook.cells.length).toBe(1);
+        expect(notebook.cells[0].cell_type).toBe(cellType);
+      });
     });
   });
 
@@ -43,7 +49,7 @@ describe('@jupyterlab/shared-models', () => {
       const notebook = YNotebook.create(false);
       const codeCell = YCodeCell.create();
       notebook.insertCell(0, codeCell);
-      expect(notebook.cells.length).toBe(1);
+      expect(notebook.cells.length).toBe(2);
     });
     it('should set cell source', () => {
       const notebook = YNotebook.create(false);

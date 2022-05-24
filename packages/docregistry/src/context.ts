@@ -16,7 +16,6 @@ import {
   IDocumentProviderFactory,
   ProviderMock
 } from '@jupyterlab/docprovider';
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
@@ -60,16 +59,7 @@ export class Context<
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
-
-    const dbFactory = options.modelDBFactory;
-    if (dbFactory) {
-      const localPath = manager.contents.localPath(this._path);
-      this._modelDB = dbFactory.createNew(localPath);
-      this._model = this._factory.createNew(lang, this._modelDB, false);
-    } else {
-      this._model = this._factory.createNew(lang, undefined, false);
-    }
-
+    this._model = this._factory.createNew(lang);
     const ymodel = this._model.sharedModel as ymodels.YDocument<any>; // translate to the concrete Yjs implementation
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
@@ -225,9 +215,6 @@ export class Context<
     }
     this._isDisposed = true;
     this.sessionContext.dispose();
-    if (this._modelDB) {
-      this._modelDB.dispose();
-    }
     this._model.dispose();
     this._provider.destroy();
     this._model.sharedModel.dispose();
@@ -262,21 +249,17 @@ export class Context<
    *
    * @returns a promise that resolves upon initialization.
    */
-  async initialize(isNew: boolean): Promise<void> {
-    let promise;
+  async initialize(isNew: boolean) {
     if (PageConfig.getOption('collaborative') == 'true') {
-      promise = this._loadContext();
+      await this._loadContext();
     } else {
       if (isNew) {
-        promise = this._save();
+        await this._save();
       } else {
-        promise = this._revert();
+        await this._revert();
       }
-      promise = promise.then(() => {
-        this._model.initialize();
-      });
     }
-    return promise;
+    this.model.sharedModel.clearUndoHistory();
   }
 
   /**
@@ -297,9 +280,7 @@ export class Context<
    */
   async save(): Promise<void> {
     await this.ready;
-    let promise: Promise<void>;
-    promise = this._save();
-    return await promise;
+    await this._save();
   }
 
   /**
@@ -358,8 +339,7 @@ export class Context<
    */
   async revert(): Promise<void> {
     await this.ready;
-    const promise = this._revert();
-    return await promise;
+    await this._revert();
   }
 
   /**
@@ -602,11 +582,7 @@ export class Context<
     try {
       let value: Contents.IModel;
       await this._manager.ready;
-      if (!model.modelDB.isCollaborative) {
-        value = await this._maybeSave(options);
-      } else {
-        value = await this._manager.contents.save(this._path, options);
-      }
+      value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
       }
@@ -709,9 +685,6 @@ export class Context<
         }
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
-          if (initializeModel) {
-            model.initialize();
-          }
         } else {
           let content = contents.content;
           // Convert line endings if necessary, marking the file
@@ -726,9 +699,6 @@ export class Context<
             this._lineEnding = null;
           }
           model.fromString(content);
-          if (initializeModel) {
-            model.initialize();
-          }
         }
         this._updateContentsModel(contents);
         model.dirty = false;
@@ -933,7 +903,6 @@ or load the version on disk (revert)?`,
     options?: DocumentRegistry.IOpenOptions
   ) => void;
   private _model: T;
-  private _modelDB: IModelDB;
   private _path = '';
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
@@ -992,11 +961,6 @@ export namespace Context {
      * An factory method for the document provider.
      */
     docProviderFactory?: IDocumentProviderFactory;
-
-    /**
-     * An IModelDB factory method which may be used for the document.
-     */
-    modelDBFactory?: ModelDB.IFactory;
 
     /**
      * An optional callback for opening sibling widgets.

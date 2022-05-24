@@ -6,18 +6,16 @@ import * as nbformat from '@jupyterlab/nbformat';
 import {
   IModelDB,
   IObservableMap,
-  IObservableString,
   IObservableValue,
   ModelDB,
   ObservableValue
 } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
+import { ISharedText } from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-
-const globalModelDBMutex = models.createMutex();
 
 /**
  * A namespace for code editors.
@@ -182,11 +180,6 @@ export namespace CodeEditor {
     sharedModelSwitched: ISignal<IModel, boolean>;
 
     /**
-     * The text stored in the model.
-     */
-    readonly value: IObservableString;
-
-    /**
      * A mime type of the model.
      *
      * #### Notes
@@ -200,8 +193,7 @@ export namespace CodeEditor {
     readonly selections: IObservableMap<ITextSelection[]>;
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
+     * The underlying `IModelDB` instance in which the selection and mime-type is stored.
      */
     readonly modelDB: IModelDB;
 
@@ -209,15 +201,6 @@ export namespace CodeEditor {
      * The shared model for the cell editor.
      */
     readonly sharedModel: models.ISharedText;
-
-    /**
-     * When we initialize a cell model, we create a standalone cell model that cannot be shared in a YNotebook.
-     * Call this function to re-initialize the local representation based on a fresh shared model (e.g. models.YFile or models.YCodeCell).
-     */
-    switchSharedModel(
-      sharedModel: models.ISharedText,
-      reinitialize: boolean
-    ): void;
   }
 
   /**
@@ -227,108 +210,19 @@ export namespace CodeEditor {
     /**
      * Construct a new Model.
      */
-    constructor(options?: Model.IOptions) {
-      options = options || {};
-      if (options.modelDB) {
-        this.modelDB = options.modelDB;
-      } else {
-        this.modelDB = new ModelDB();
-      }
-      this.sharedModel = models.createStandaloneCell(
-        this.type,
-        options.id
-      ) as models.ISharedText;
-      this.sharedModel.changed.connect(this._onSharedModelChanged, this);
-
-      const value = this.modelDB.createString('value');
-      value.changed.connect(this._onModelDBValueChanged, this);
-      value.text = value.text || options.value || '';
-
+    constructor(options: Model.IOptions) {
+      this.modelDB = new ModelDB();
+      this.sharedModel =
+        options?.sharedModel ||
+        (models.createStandaloneCell({
+          cell_type: this.type,
+          id: options?.id
+        }) as models.ISharedText);
       const mimeType = this.modelDB.createValue('mimeType');
       mimeType.changed.connect(this._onModelDBMimeTypeChanged, this);
-      mimeType.set(options.mimeType || 'text/plain');
+      mimeType.set(options?.mimeType || 'text/plain');
 
       this.modelDB.createMap('selections');
-    }
-
-    /**
-     * When we initialize a cell model, we create a standalone model that cannot be shared in a YNotebook.
-     * Call this function to re-initialize the local representation based on a fresh shared model (e.g. models.YFile or models.YCodeCell).
-     *
-     * @param sharedModel
-     * @param reinitialize Whether to reinitialize the shared model.
-     */
-    public switchSharedModel(
-      sharedModel: models.ISharedText,
-      reinitialize?: boolean
-    ): void {
-      if (reinitialize) {
-        // update local modeldb
-        // @todo also change metadata
-        this.value.text = sharedModel.getSource();
-      }
-      this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
-      this.sharedModel.dispose();
-      // clone model retrieve a shared (not standalone) model
-      this.sharedModel = sharedModel;
-      this.sharedModel.changed.connect(this._onSharedModelChanged, this);
-      this._sharedModelSwitched.emit(true);
-    }
-
-    /**
-     * We update the modeldb store when the shared model changes.
-     * To ensure that we don't run into infinite loops, we wrap this call in a "mutex".
-     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged handler
-     * or the modelDB change handler.
-     */
-    protected _onSharedModelChanged(
-      sender: models.ISharedBaseCell<any>,
-      change: models.CellChange<nbformat.IBaseCellMetadata>
-    ): void {
-      globalModelDBMutex(() => {
-        if (change.sourceChange) {
-          const value = this.modelDB.get('value') as IObservableString;
-          let currpos = 0;
-          change.sourceChange.forEach(delta => {
-            if (delta.insert != null) {
-              value.insert(currpos, delta.insert);
-              currpos += delta.insert.length;
-            } else if (delta.delete != null) {
-              value.remove(currpos, currpos + delta.delete);
-            } else if (delta.retain != null) {
-              currpos += delta.retain;
-            }
-          });
-        }
-      });
-    }
-
-    /**
-     * Handle a change to the modelDB value.
-     */
-    private _onModelDBValueChanged(
-      value: IObservableString,
-      event: IObservableString.IChangedArgs
-    ): void {
-      globalModelDBMutex(() => {
-        this.sharedModel.transact(() => {
-          switch (event.type) {
-            case 'insert':
-              this.sharedModel.updateSource(
-                event.start,
-                event.start,
-                event.value
-              );
-              break;
-            case 'remove':
-              this.sharedModel.updateSource(event.start, event.end);
-              break;
-            default:
-              this.sharedModel.setSource(value.text);
-              break;
-          }
-        });
-      });
     }
 
     get type(): nbformat.CellType {
@@ -341,8 +235,8 @@ export namespace CodeEditor {
     sharedModel: models.ISharedText;
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
+     * The underlying `IModelDB` instance in which state is
+     * stored in an observable manner.
      */
     readonly modelDB: IModelDB;
 
@@ -358,13 +252,6 @@ export namespace CodeEditor {
      */
     get sharedModelSwitched(): ISignal<this, boolean> {
       return this._sharedModelSwitched;
-    }
-
-    /**
-     * Get the value of the model.
-     */
-    get value(): IObservableString {
-      return this.modelDB.get('value') as IObservableString;
     }
 
     /**
@@ -849,19 +736,11 @@ export namespace CodeEditor {
       id?: string;
 
       /**
-       * The initial value of the model.
-       */
-      value?: string;
-
-      /**
        * The mimetype of the model.
        */
       mimeType?: string;
 
-      /**
-       * An optional modelDB for storing model state.
-       */
-      modelDB?: IModelDB;
+      sharedModel: ISharedText;
     }
   }
 }

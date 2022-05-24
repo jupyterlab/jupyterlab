@@ -122,7 +122,7 @@ export namespace NBTestUtils {
    */
   export function createCellEditor(model?: CodeCellModel): CodeEditorWrapper {
     return new CodeEditorWrapper({
-      model: model || new CodeCellModel({}),
+      model: model || new CodeCellModel(),
       factory: editorFactory
     });
   }

@@ -22,6 +22,7 @@ import {
   StaticNotebook
 } from '@jupyterlab/notebook';
 import * as utils from './utils';
+import { createCell } from '@jupyterlab/shared-models';
 
 const server = new JupyterServer();
 
@@ -205,8 +206,10 @@ describe('@jupyter/notebook', () => {
         widget.modelContentChanged.connect(() => {
           called = true;
         });
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        widget.model!.cells.push(cell);
+        widget.model!.sharedModel.insertCell(
+          0,
+          createCell({ cell_type: 'code' })
+        );
         expect(called).toBe(true);
       });
 
@@ -270,8 +273,6 @@ describe('@jupyter/notebook', () => {
       it('should add a default cell if the notebook model is empty', () => {
         const widget = new LogStaticNotebook(options);
         const model1 = new NotebookModel();
-        expect(model1.cells.length).toBe(0);
-        widget.model = model1;
         expect(model1.cells.length).toBe(1);
         expect(model1.cells.get(0).type).toBe('code');
 
@@ -279,9 +280,9 @@ describe('@jupyter/notebook', () => {
           ...widget.notebookConfig,
           defaultCell: 'markdown'
         };
-        const model2 = new NotebookModel();
-        expect(model2.cells.length).toBe(0);
-        widget.model = model2;
+        const model2 = new NotebookModel({
+          defaultCell: 'markdown'
+        });
         expect(model2.cells.length).toBe(1);
         expect(model2.cells.get(0).type).toBe('markdown');
       });
@@ -310,7 +311,10 @@ describe('@jupyter/notebook', () => {
 
         it('should handle changes to the model cell list', async () => {
           widget = createWidget();
-          widget.model!.cells.clear();
+          widget.model!.sharedModel.deleteCellRange(
+            0,
+            widget.model!.sharedModel.cells.length
+          );
           await framePromise();
           expect(widget.widgets.length).toBe(1);
         });
@@ -318,46 +322,48 @@ describe('@jupyter/notebook', () => {
         it('should handle a remove', () => {
           const cell = widget.model!.cells.get(1);
           const child = widget.widgets[1];
-          widget.model!.cells.removeValue(cell);
+          widget.model!.sharedModel.deleteCell(1);
           expect(cell.isDisposed).toBe(false);
           expect(child.isDisposed).toBe(true);
         });
 
         it('should handle an add', () => {
-          const cell = widget.model!.contentFactory.createCodeCell({});
-          widget.model!.cells.push(cell);
+          widget.model!.sharedModel.insertCell(
+            0,
+            createCell({ cell_type: 'code' })
+          );
           expect(widget.widgets.length).toBe(widget.model!.cells.length);
           const child = widget.widgets[0];
           expect(child.hasClass('jp-Notebook-cell')).toBe(true);
         });
 
         it('should initially render markdown cells with content', () => {
-          const cell1 = widget.model!.contentFactory.createMarkdownCell({});
-          const cell2 = widget.model!.contentFactory.createMarkdownCell({});
-          cell1.value.text = '# Hello';
-          widget.model!.cells.push(cell1);
-          widget.model!.cells.push(cell2);
+          widget.model!.sharedModel.insertCells(0, [
+            createCell({ cell_type: 'markdown', source: '# Hello' }),
+            createCell({ cell_type: 'markdown' })
+          ]);
           expect(widget.widgets.length).toBe(widget.model!.cells.length);
-          const child1 = widget.widgets[
-            widget.model!.cells.length - 2
-          ] as MarkdownCell;
-          const child2 = widget.widgets[
-            widget.model!.cells.length - 1
-          ] as MarkdownCell;
+          const child1 = widget.widgets[0] as MarkdownCell;
+          const child2 = widget.widgets[1] as MarkdownCell;
           expect(child1.rendered).toBe(true);
           expect(child2.rendered).toBe(false);
         });
 
         it('should handle a move', () => {
           const child = widget.widgets[1];
-          widget.model!.cells.move(1, 2);
-          expect(widget.widgets[2]).toBe(child);
+          widget.model!.sharedModel.moveCell(1, 2);
+          expect(widget.widgets[2].id).toBe(child.id);
         });
 
         it('should handle a clear', () => {
-          const cell = widget.model!.contentFactory.createCodeCell({});
-          widget.model!.cells.push(cell);
-          widget.model!.cells.clear();
+          widget.model!.sharedModel.insertCell(
+            0,
+            createCell({ cell_type: 'code' })
+          );
+          widget.model!.sharedModel.deleteCellRange(
+            0,
+            widget.model!.sharedModel.cells.length
+          );
           expect(widget.widgets.length).toBe(0);
         });
 
@@ -368,7 +374,7 @@ describe('@jupyter/notebook', () => {
             defaultCell: 'raw'
           };
           const promise = signalToPromise(model.cells.changed);
-          model.cells.clear();
+          model.sharedModel.deleteCellRange(0, model.sharedModel.cells.length);
           await promise;
           expect(model.cells.length).toBe(0);
           await signalToPromise(model.cells.changed);
@@ -532,20 +538,10 @@ describe('@jupyter/notebook', () => {
       });
     });
 
-    describe('#onCellMoved()', () => {
-      it('should be called when a cell is moved', () => {
-        const widget = createWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
-        widget.model!.cells.move(0, 1);
-        expect(widget.methods).toEqual(expect.arrayContaining(['onCellMoved']));
-      });
-    });
-
     describe('#onCellRemoved()', () => {
       it('should be called when a cell is removed', () => {
         const widget = createWidget();
-        const cell = widget.model!.cells.get(0);
-        widget.model!.cells.removeValue(cell);
+        widget.model!.sharedModel.deleteCell(0);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onCellRemoved'])
         );
@@ -564,7 +560,7 @@ describe('@jupyter/notebook', () => {
       describe('#createCodeCell({})', () => {
         it('should create a `CodeCell`', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
-          const model = new CodeCellModel({});
+          const model = new CodeCellModel();
           const codeOptions = { model, rendermime, contentFactory };
           const widget = contentFactory.createCodeCell(codeOptions);
           expect(widget).toBeInstanceOf(CodeCell);
@@ -574,7 +570,7 @@ describe('@jupyter/notebook', () => {
       describe('#createMarkdownCell({})', () => {
         it('should create a `MarkdownCell`', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
-          const model = new MarkdownCellModel({});
+          const model = new MarkdownCellModel();
           const mdOptions = { model, rendermime, contentFactory };
           const widget = contentFactory.createMarkdownCell(mdOptions);
           expect(widget).toBeInstanceOf(MarkdownCell);
@@ -584,7 +580,7 @@ describe('@jupyter/notebook', () => {
       describe('#createRawCell()', () => {
         it('should create a `RawCell`', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
-          const model = new RawCellModel({});
+          const model = new RawCellModel();
           const rawOptions = { model, contentFactory };
           const widget = contentFactory.createRawCell(rawOptions);
           expect(widget).toBeInstanceOf(RawCell);
@@ -725,12 +721,13 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-        const cell = widget.model!.contentFactory.createMarkdownCell({});
-        cell.value.text = '# Hello'; // Should be rendered with content.
-        widget.model!.cells.push(cell);
-        const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
+        widget.model!.sharedModel.insertCell(
+          0,
+          createCell({ cell_type: 'markdown', source: '# Hello' })
+        ); // Should be rendered with content.
+        const child = widget.widgets[0] as MarkdownCell;
         expect(child.rendered).toBe(true);
-        widget.activeCellIndex = widget.widgets.length - 1;
+        widget.activeCellIndex = 0;
         widget.mode = 'edit';
         expect(child.rendered).toBe(false);
       });
@@ -1067,7 +1064,10 @@ describe('@jupyter/notebook', () => {
 
       it('handles the case of no cells', () => {
         const widget = createActiveWidget();
-        widget.model!.cells.clear();
+        widget.model!.sharedModel.deleteCellRange(
+          0,
+          widget.model!.sharedModel.cells.length
+        );
         expect(widget.widgets.length).toBe(0);
 
         // Set up a selection event listener.
@@ -1128,7 +1128,10 @@ describe('@jupyter/notebook', () => {
 
       it('handles the case of no cells', () => {
         const widget = createActiveWidget();
-        widget.model!.cells.clear();
+        widget.model!.sharedModel.deleteCellRange(
+          0,
+          widget.model!.sharedModel.cells.length
+        );
         expect(widget.widgets.length).toBe(0);
 
         const selection = widget.getContiguousSelection();
@@ -1203,11 +1206,11 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should preserve "command" mode if in a markdown cell', async () => {
-          const cell = widget.model!.contentFactory.createMarkdownCell({});
-          cell.value.text = '# Hello'; // Should be rendered with content.
-          widget.model!.cells.push(cell);
-          const count = widget.widgets.length;
-          const child = widget.widgets[count - 1] as MarkdownCell;
+          widget.model!.sharedModel.insertCell(
+            0,
+            createCell({ cell_type: 'markdown', source: '# Hello' })
+          );
+          const child = widget.widgets[0] as MarkdownCell;
           if (!child.inViewport) {
             await signalToPromise(child.inViewportChanged);
           }
@@ -1260,14 +1263,12 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should leave a markdown cell rendered', async () => {
-          const code = widget.model!.contentFactory.createCodeCell({});
-          const md = widget.model!.contentFactory.createMarkdownCell({});
-          md.value.text = '# Hello'; // Should be rendered with content.
-          widget.model!.cells.push(code);
-          widget.model!.cells.push(md);
-          const count = widget.widgets.length;
-          const codeChild = widget.widgets[count - 2];
-          const mdChild = widget.widgets[count - 1] as MarkdownCell;
+          widget.model!.sharedModel.insertCells(0, [
+            createCell({ cell_type: 'code' }),
+            createCell({ cell_type: 'markdown', source: '# Hello' })
+          ]);
+          const codeChild = widget.widgets[0];
+          const mdChild = widget.widgets[1] as MarkdownCell;
           if (!codeChild.inViewport) {
             await signalToPromise(codeChild.inViewportChanged);
           }
@@ -1276,7 +1277,7 @@ describe('@jupyter/notebook', () => {
           }
           widget.select(codeChild);
           widget.select(mdChild);
-          widget.activeCellIndex = count - 2;
+          widget.activeCellIndex = 0;
           expect(mdChild.rendered).toBe(true);
           simulate(codeChild.editorWidget!.node, 'mousedown');
           simulate(codeChild.editorWidget!.node, 'focusin');
@@ -1285,14 +1286,13 @@ describe('@jupyter/notebook', () => {
           expect(widget.mode).toBe('edit');
         });
 
-        it('should remove selection and switch to command mode', async () => {
-          const code = widget.model!.contentFactory.createCodeCell({});
-          const md = widget.model!.contentFactory.createMarkdownCell({});
-          widget.model!.cells.push(code);
-          widget.model!.cells.push(md);
-          const count = widget.widgets.length;
-          const codeChild = widget.widgets[count - 2];
-          const mdChild = widget.widgets[count - 1] as MarkdownCell;
+        it('should remove selection and switch to command mode',async () => {
+          widget.model!.sharedModel.insertCells(0, [
+            createCell({ cell_type: 'code' }),
+            createCell({ cell_type: 'markdown', source: '# Hello' })
+          ]);
+          const codeChild = widget.widgets[0];
+          const mdChild = widget.widgets[1] as MarkdownCell;
           if (!codeChild.inViewport) {
             await signalToPromise(codeChild.inViewportChanged);
           }
@@ -1301,7 +1301,7 @@ describe('@jupyter/notebook', () => {
           }
           widget.select(codeChild);
           widget.select(mdChild);
-          widget.activeCellIndex = count - 2;
+          widget.activeCellIndex = 0;
           simulate(codeChild.editorWidget!.node, 'mousedown');
           simulate(codeChild.editorWidget!.node, 'focusin');
           expect(widget.mode).toBe('edit');
@@ -1311,16 +1311,15 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should have no effect on shift right click', () => {
-          const code = widget.model!.contentFactory.createCodeCell({});
-          const md = widget.model!.contentFactory.createMarkdownCell({});
-          widget.model!.cells.push(code);
-          widget.model!.cells.push(md);
-          const count = widget.widgets.length;
-          const codeChild = widget.widgets[count - 2];
-          const mdChild = widget.widgets[count - 1] as MarkdownCell;
+          widget.model!.sharedModel.insertCells(0, [
+            createCell({ cell_type: 'code' }),
+            createCell({ cell_type: 'markdown', source: '# Hello' })
+          ]);
+          const codeChild = widget.widgets[0];
+          const mdChild = widget.widgets[1] as MarkdownCell;
           widget.select(codeChild);
           widget.select(mdChild);
-          widget.activeCellIndex = count - 2;
+          widget.activeCellIndex = 0;
           simulate(codeChild.editorWidget!.node, 'mousedown', {
             shiftKey: true,
             button: 2
@@ -1332,12 +1331,11 @@ describe('@jupyter/notebook', () => {
 
       describe('dblclick', () => {
         it('should unrender a markdown cell', async () => {
-          const cell = widget.model!.contentFactory.createMarkdownCell({});
-          cell.value.text = '# Hello'; // Should be rendered with content.
-          widget.model!.cells.push(cell);
-          const child = widget.widgets[
-            widget.widgets.length - 1
-          ] as MarkdownCell;
+          widget.model!.sharedModel.insertCell(
+            0,
+            createCell({ cell_type: 'markdown', source: '# Hello' })
+          );
+          const child = widget.widgets[0] as MarkdownCell;
           if (!child.inViewport) {
             await signalToPromise(child.inViewportChanged);
           }
@@ -1538,8 +1536,10 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        widget.model!.cells.insert(1, cell);
+        widget.model!.sharedModel.insertCell(
+          0,
+          createCell({ cell_type: 'code' })
+        );
         expect(widget.activeCell).toBe(widget.widgets[2]);
       });
 
@@ -1567,40 +1567,10 @@ describe('@jupyter/notebook', () => {
       });
     });
 
-    describe('#onCellMoved()', () => {
-      it('should update the active cell index if necessary', () => {
-        const widget = createActiveWidget();
-
-        // [fromIndex, toIndex, activeIndex], starting with activeIndex=3.
-        const moves = [
-          [0, 2, 3],
-          [0, 3, 2],
-          [0, 4, 2],
-          [3, 2, 2],
-          [3, 3, 3],
-          [3, 4, 4],
-          [4, 2, 4],
-          [4, 3, 4],
-          [4, 5, 3]
-        ];
-
-        moves.forEach(m => {
-          const [fromIndex, toIndex, activeIndex] = m;
-          widget.model!.fromJSON(utils.DEFAULT_CONTENT);
-          const cell = widget.widgets[3];
-          widget.activeCellIndex = 3;
-          widget.model!.cells.move(fromIndex, toIndex);
-          expect(widget.activeCellIndex).toBe(activeIndex);
-          expect(widget.widgets[activeIndex]).toBe(cell);
-        });
-      });
-    });
-
     describe('#onCellRemoved()', () => {
       it('should post an `update-request', async () => {
         const widget = createActiveWidget();
-        const cell = widget.model!.cells.get(0);
-        widget.model!.cells.removeValue(cell);
+        widget.model!.sharedModel.deleteCell(0);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onCellRemoved'])
         );
@@ -1613,7 +1583,7 @@ describe('@jupyter/notebook', () => {
       it('should update the active cell if necessary', () => {
         const widget = createActiveWidget();
         widget.model!.fromJSON(utils.DEFAULT_CONTENT);
-        widget.model!.cells.remove(0);
+        widget.model!.sharedModel.deleteCell(0);
         expect(widget.activeCell).toBe(widget.widgets[0]);
       });
 
@@ -1621,7 +1591,7 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = 2;
-        widget.model!.cells.remove(1);
+        widget.model!.sharedModel.deleteCell(1);
         expect(widget.activeCell).toBe(widget.widgets[1]);
       });
     });

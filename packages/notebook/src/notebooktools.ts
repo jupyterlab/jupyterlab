@@ -28,6 +28,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { INotebookTools, INotebookTracker } from './tokens';
+import { createStandaloneCell, ISharedText } from '@jupyterlab/shared-models';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
@@ -452,16 +453,28 @@ export namespace NotebookTools {
       const activeCell = this.notebookTools.activeCell;
 
       if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.value.changed.disconnect(this.refresh, this);
-        this._cellModel.mimeTypeChanged.disconnect(this.refresh, this);
+        this._cellModel.sharedModel.changed.disconnect(
+          this.refresh,
+          this
+        );
+        this._cellModel.mimeTypeChanged.disconnect(
+          this.refresh,
+          this
+        );
       }
       if (!activeCell) {
         this._cellModel = null;
         return;
       }
       const cellModel = (this._cellModel = activeCell.model);
-      cellModel.value.changed.connect(this.refresh, this);
-      cellModel.mimeTypeChanged.connect(this.refresh, this);
+      (cellModel.sharedModel as ISharedText).changed.connect(
+        this._onValueChanged,
+        this
+      );
+      cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
+      this._model.sharedModel.setSource(
+        cellModel.sharedModel.getSource().split('\n')[0]
+      );
       await this.refresh();
     }
 

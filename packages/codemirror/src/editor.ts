@@ -4,20 +4,13 @@
 // / <reference types="codemirror"/>
 // / <reference types="codemirror/searchcursor"/>
 
-import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { SyntaxNodeRef } from '@lezer/common';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { Poll } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 
 import {
@@ -56,6 +49,8 @@ import { Mode } from './mode';
 import { Configuration } from './editorconfiguration';
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
+import { SyntaxNodeRef } from '@lezer/common';
+import { Poll } from '@lumino/polling';
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -109,7 +104,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._editorConfig = new Configuration.EditorConfiguration();
     const host = (this.host = options.host);
     this.translator = options.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab');
 
     host.classList.add(EDITOR_CLASS);
     host.classList.add('jp-Editor');
@@ -258,7 +252,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._onCursorActivity();
     this._poll = new Poll({
       factory: async () => {
-        this._checkSync();
+        // nop
       },
       frequency: { interval: 3000, backoff: false },
       standby: () => {
@@ -1053,43 +1047,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
   }
 
-  /**
-   * Check for an out of sync editor.
-   */
-  private _checkSync(): void {
-    const change = this._lastChange;
-    if (!change) {
-      return;
-    }
-    this._lastChange = null;
-    const doc = this.doc;
-    if (doc.toString() === this._model.value.text) {
-      return;
-    }
-
-    void showDialog({
-      title: this._trans.__('Code Editor out of Sync'),
-      body: this._trans.__(
-        'Please open your browser JavaScript console for bug report instructions'
-      )
-    });
-    console.warn(
-      'If you are able and willing to publicly share the text or code in your editor, you can help us debug the "Code Editor out of Sync" message by pasting the following to the public issue at https://github.com/jupyterlab/jupyterlab/issues/2951. Please note that the data below includes the text/code in your editor.'
-    );
-    console.warn(
-      JSON.stringify({
-        model: this._model.value.text,
-        view: doc.toString(),
-        selections: this.getSelections(),
-        cursor: this.getCursorPosition(),
-        lineSep: this.state.facet(EditorState.lineSeparator),
-        change
-      })
-    );
-  }
-
   protected translator: ITranslator;
-  private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
   private _editor: EditorView;
   private _selectionMarkers: {

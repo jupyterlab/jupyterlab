@@ -109,10 +109,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   /**
    * Items list to be rendered
    */
-  get itemsList(): IObservableList<any> | null {
+  get itemsList(): { length: number; changed: ISignal<any, IObservableList.IChangedArgs<any>> } | null {
     return this._itemsList;
   }
-  set itemsList(v: IObservableList<any> | null) {
+  set itemsList(v: { length: number; changed: ISignal<any, IObservableList.IChangedArgs<any>> } | null) {
     if (this._itemsList !== v) {
       if (this._itemsList) {
         this._itemsList.changed.disconnect(this.onListChanged, this);
@@ -631,7 +631,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   private _currentWindow: WindowedList.WindowIndex = [-1, -1, -1, -1];
   private _height: number = 0;
   private _isDisposed = false;
-  private _itemsList: IObservableList<any> | null = null;
+  private _itemsList: { length: number; changed: ISignal<any, IObservableList.IChangedArgs<any>> } | null = null;
   private _lastMeasuredIndex: number = -1;
   private _overscanCount = 1;
   private _scrollOffset: number = 0;
@@ -1265,7 +1265,7 @@ export namespace WindowedList {
     /**
      * Items list to be rendered
      */
-    itemsList: IObservableList<any> | null;
+    itemsList: { length: number; changed: ISignal<any, IObservableList.IChangedArgs<any>> } | null;
 
     /**
      * Number of widgets to render in addition to those

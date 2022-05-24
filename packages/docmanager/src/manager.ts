@@ -505,15 +505,12 @@ export class DocumentManager implements IDocumentManager {
       // TODO should we pass the type for layout customization
       this._opener.open(widget, options);
     };
-    const modelDBFactory =
-      this.services.contents.getModelDBFactory(path) || undefined;
     const context = new Context({
       opener: adopter,
       manager: this.services,
       factory,
       path,
       kernelPreference,
-      modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,

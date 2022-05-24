@@ -6,6 +6,7 @@ import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import type { Cell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
+import { createCell } from '@jupyterlab/shared-models';
 import { findIndex } from '@lumino/algorithm';
 import { Signal } from '@lumino/signaling';
 import {
@@ -244,21 +245,12 @@ export class GalataInpage implements IGalataInpage {
     if (nb !== null) {
       void this._app.commands.execute('notebook:insert-cell-below');
 
-      const numCells = nb.widgets.length;
-
       if (nb.model) {
-        nb.model.cells.beginCompoundOperation();
-        nb.model.cells.set(
-          numCells - 1,
-          nb.model.contentFactory.createCell(cellType, {
-            cell: {
-              cell_type: cellType,
-              source: source,
-              metadata: {}
-            }
-          })
+        const sharedModel = nb.model.sharedModel;
+        sharedModel.insertCell(
+          sharedModel.cells.length,
+          createCell({ cell_type: cellType, source })
         );
-        nb.model.cells.endCompoundOperation();
       }
       nb.update();
     } else {
@@ -318,18 +310,14 @@ export class GalataInpage implements IGalataInpage {
       }
 
       if (nb.model) {
-        nb.model.cells.beginCompoundOperation();
-        nb.model.cells.set(
-          cellIndex,
-          nb.model.contentFactory.createCell(cellType, {
-            cell: {
-              cell_type: cellType,
-              source: source,
-              metadata: {}
-            }
-          })
-        );
-        nb.model.cells.endCompoundOperation();
+        const sharedModel = nb.model.sharedModel;
+        sharedModel.transact(() => {
+          sharedModel.deleteCell(cellIndex);
+          sharedModel.insertCell(
+            cellIndex,
+            createCell({ cell_type: cellType, source })
+          );
+        });
       }
       nb.update();
     } else {
@@ -404,7 +392,7 @@ export class GalataInpage implements IGalataInpage {
    */
   async waitForCellRun(cell: Cell, timeout = 2000): Promise<void> {
     const model = cell.model;
-    const code = model.value.text;
+    const code = model.sharedModel.getSource();
     if (!code.trim()) {
       return;
     }

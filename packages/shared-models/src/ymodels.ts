@@ -4,11 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { UUID } from '@lumino/coreutils';
+import { JSONExt, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import * as models from './api';
+import * as buffer from 'lib0/buffer';
 import { Delta, ISharedNotebook } from './api';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
@@ -37,8 +38,10 @@ export class YDocument<T> implements models.ISharedDocument {
    * Dispose of the resources.
    */
   dispose(): void {
+    if (this.isDisposed) return;
     this.isDisposed = true;
     this.ydoc.destroy();
+    Signal.clearData(this);
   }
 
   /**
@@ -85,10 +88,10 @@ export class YDocument<T> implements models.ISharedDocument {
 
   public isDisposed = false;
   public ydoc = new Y.Doc();
-  public source = this.ydoc.getText('source');
   public ystate: Y.Map<any> = this.ydoc.getMap('state');
-  public undoManager = new Y.UndoManager([this.source], {
-    trackedOrigins: new Set([this])
+  public undoManager = new Y.UndoManager([], {
+    trackedOrigins: new Set([this]),
+    doc: this.ydoc
   });
   public awareness = new Awareness(this.ydoc);
   protected _changed = new Signal<this, T>(this);
@@ -100,6 +103,7 @@ export class YFile
 {
   constructor() {
     super();
+    this.undoManager.addToScope(this.ysource);
     this.ysource.observe(this._modelObserver);
     this.ystate.observe(this._onStateChanged);
   }
@@ -108,8 +112,10 @@ export class YFile
    * Dispose of the resources.
    */
   dispose(): void {
+    if (this.isDisposed) return;
     this.ysource.unobserve(this._modelObserver);
     this.ystate.unobserve(this._onStateChanged);
+    super.dispose();
   }
 
   /**
@@ -191,6 +197,42 @@ export class YFile
 }
 
 /**
+ * These are "templates" that can be used as initial content. All clients will start with the same template which prevents that every joining client will create another "initial" cell.
+ *
+ * Note that initialization must not be done dynamically. Hence you need to create a static update message that doesn't change.
+ *
+ * You may creates templates by creating an empty shared notebook model, insert some content (e.g. an intial code cell), and then encoding the update to base64:
+ *
+ * ```js
+ * const ynotebook = new YNotebook({ defaultCell: 'none' })
+ * const ycell = createCell({ cell_type: 'code' })
+ * ynotebook.insertCell(0, ycell)
+ * template = buffer.toBase64(Y.encodeStateAsUpdateV2(ynotebook.ydoc))
+ * ```
+ *
+ * The JSON-representation of the generated Y.Doc would look like this:
+ *
+ * ```json
+ * cells: [
+ *   {
+ *     source: '',
+ *     metadata: {},
+ *     cell_type: 'code',
+ *     id: 'e513e796-386b-487f-a4ac-4926d572dbb5',
+ *     execution_count: 0,
+ *     outputs: []
+ *   }
+ * ],
+ * ```
+ */
+const yCodeCellTemplate =
+  'AAAGyKjKnwUFAgEEAAcHACcAKAMnPDRjZWxsc3NvdXJjZW1ldGFkYXRhY2VsbF90eXBlaWRleGVjdXRpb25fY291bnRvdXRwdXRzBQYICQIPBwMBAAADAQIAAkECAQcAdgB3BGNvZGV3JGU1MTNlNzk2LTM4NmItNDg3Zi1hNGFjLTQ5MjZkNTcyZGJiNX0AAA==';
+const yMdCellTemplate =
+  'AAAF+8KuWAMCAQIABQcAJwAoJB5jZWxsc3NvdXJjZW1ldGFkYXRhY2VsbF90eXBlaWQFBggJAgMBAAACAQICQQEBBQB2AHcIbWFya2Rvd253JDE2MWUyNDFjLTI3ZWEtNDQ3NC1hMTljLWI5NzZkZDJhN2YxZQA=';
+const yRawCellTemplate =
+  'AAAGyp/SnR8DAgECAAUHACcAKCQeY2VsbHNzb3VyY2VtZXRhZGF0YWNlbGxfdHlwZWlkBQYICQIDAQAAAgECAkEBAQUAdgB3A3Jhd3ckN2M4MGMyMWYtNjIxZi00MWFlLTg5YTAtZGE2YzAzOGE2NjQzAA==';
+
+/**
  * Shared implementation of the Shared Document types.
  *
  * Shared cells can be inserted into a SharedNotebook.
@@ -207,6 +249,8 @@ export class YNotebook
   constructor(options: ISharedNotebook.IOptions) {
     super();
     this._disableDocumentWideUndoRedo = options.disableDocumentWideUndoRedo;
+    this._defaultCell = options.defaultCell || 'code';
+    this.undoManager.addToScope(this.ycells);
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
@@ -217,6 +261,22 @@ export class YNotebook
 
     this.ymeta.observe(this._onMetaChanged);
     this.ystate.observe(this._onStateChanged);
+    // Initialize the document with a template
+    let template: string | null = null;
+    switch (this._defaultCell) {
+      case 'raw':
+        template = yRawCellTemplate;
+        break;
+      case 'markdown':
+        template = yMdCellTemplate;
+        break;
+      case 'code':
+        template = yCodeCellTemplate;
+        break;
+    }
+    if (template) {
+      Y.applyUpdateV2(this.ydoc, buffer.fromBase64(template));
+    }
   }
 
   get nbformat(): number {
@@ -243,9 +303,11 @@ export class YNotebook
    * Dispose of the resources.
    */
   dispose(): void {
+    if (this.isDisposed) return;
     this.ycells.unobserve(this._onYCellsChanged);
     this.ymeta.unobserve(this._onMetaChanged);
     this.ystate.unobserve(this._onStateChanged);
+    super.dispose();
   }
 
   /**
@@ -362,10 +424,10 @@ export class YNotebook
    * Create a new YNotebook.
    */
   public static create(
-    disableDocumentWideUndoRedo: boolean
+    disableDocumentWideUndoRedo: boolean,
+    defaultCell: 'code' | 'markdown' | 'raw' = 'code'
   ): models.ISharedNotebook {
-    const model = new YNotebook({ disableDocumentWideUndoRedo });
-    return model;
+    return new YNotebook({ disableDocumentWideUndoRedo, defaultCell });
   }
 
   /**
@@ -485,10 +547,8 @@ export class YNotebook
   public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
   public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
   public ymodel: Y.Map<any> = this.ydoc.getMap('model');
-  public undoManager = new Y.UndoManager([this.ycells], {
-    trackedOrigins: new Set([this])
-  });
   private _disableDocumentWideUndoRedo: boolean;
+  private _defaultCell: string;
   private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
   public cells: YCellType[];
 }
@@ -499,47 +559,138 @@ export class YNotebook
 export const createCellModelFromSharedType = (type: Y.Map<any>): YCellType => {
   switch (type.get('cell_type')) {
     case 'code':
-      return new YCodeCell(type);
+      return new YCodeCell(type, type.get('source'));
     case 'markdown':
-      return new YMarkdownCell(type);
+      return new YMarkdownCell(type, type.get('source'));
     case 'raw':
-      return new YRawCell(type);
+      return new YRawCell(type, type.get('source'));
     default:
       throw new Error('Found unknown cell type');
   }
 };
 
 /**
- * Create a new standalone cell given the type.
+ * Create a new cell that can be inserted in an existing shared model.
  */
-export const createStandaloneCell = (
-  cellType: 'raw' | 'code' | 'markdown',
-  id?: string
-): YCellType => {
-  switch (cellType) {
-    case 'markdown':
-      return YMarkdownCell.createStandalone(id);
-    case 'code':
-      return YCodeCell.createStandalone(id);
-    default:
+export const createCell = (
+  cell: (
+    | Partial<nbformat.IRawCell>
+    | Partial<nbformat.ICodeCell>
+    | Partial<nbformat.IMarkdownCell>
+    | Partial<nbformat.IBaseCell>
+  ) & { cell_type: 'markdown' | 'code' | 'raw' | string },
+  factory = BoundCellFactory
+): YCodeCell | YMarkdownCell | YRawCell => {
+  switch (cell.cell_type) {
+    case 'markdown': {
+      const mCell = cell as Partial<nbformat.IMarkdownCell>;
+      const ycell = factory.createMarkdownCell(mCell.id);
+      if (mCell.source != null) {
+        ycell.setSource(
+          typeof mCell.source === 'string'
+            ? mCell.source
+            : mCell.source.join('\n')
+        );
+      }
+      if (mCell.metadata != null) {
+        ycell.setMetadata(mCell.metadata);
+      }
+      if (mCell.attachments != null) {
+        ycell.setAttachments(mCell.attachments);
+      }
+      return ycell;
+    }
+    case 'code': {
+      const cCell = cell as Partial<nbformat.ICodeCell>;
+      const ycell = factory.createCodeCell(cCell.id);
+      if (cCell.source != null) {
+        ycell.setSource(
+          typeof cCell.source === 'string'
+            ? cCell.source
+            : cCell.source.join('\n')
+        );
+      }
+      if (cCell.metadata != null) {
+        ycell.setMetadata(cCell.metadata);
+      }
+      if (cCell.execution_count != null) {
+        ycell.execution_count = cCell.execution_count;
+      }
+      if (cCell.outputs) {
+        ycell.setOutputs(cCell.outputs);
+      }
+      return ycell;
+    }
+    default: {
       // raw
-      return YRawCell.createStandalone(id);
+      const rCell = cell as Partial<nbformat.IRawCell>;
+      const ycell = factory.createRawCell(rCell.id);
+      if (rCell.source != null) {
+        ycell.setSource(
+          typeof rCell.source === 'string'
+            ? rCell.source
+            : rCell.source.join('\n')
+        );
+      }
+      if (rCell.metadata != null) {
+        ycell.setMetadata(rCell.metadata);
+      }
+      if (rCell.attachments) {
+        ycell.setAttachments(rCell.attachments);
+      }
+      return ycell;
+    }
   }
 };
+
+/**
+ * Create a new cell that can be inserted in an existing shared model.
+ */
+export const createStandaloneCell = (
+  cell: (
+    | Partial<nbformat.IRawCell>
+    | Partial<nbformat.ICodeCell>
+    | Partial<nbformat.IMarkdownCell>
+  ) & { cell_type: 'markdown' | 'code' | 'raw' }
+) => createCell(cell, StandaloneCellFactory);
+
+class StandaloneCellFactory {
+  static createMarkdownCell(id?: string) {
+    return YMarkdownCell.createStandalone(id);
+  }
+  static createCodeCell(id?: string) {
+    return YCodeCell.createStandalone(id);
+  }
+  static createRawCell(id?: string) {
+    return YRawCell.createStandalone(id);
+  }
+}
+
+class BoundCellFactory {
+  static createMarkdownCell(id?: string) {
+    return YMarkdownCell.create(id);
+  }
+  static createCodeCell(id?: string) {
+    return YCodeCell.create(id);
+  }
+  static createRawCell(id?: string) {
+    return YRawCell.create(id);
+  }
+}
 
 export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   implements models.ISharedBaseCell<Metadata>, IYText
 {
-  constructor(ymodel: Y.Map<any>) {
+  constructor(ymodel: Y.Map<any>, ysource: Y.Text) {
     this.ymodel = ymodel;
-    const ysource = ymodel.get('source');
+    this._ysource = ysource;
     this._prevSourceLength = ysource ? ysource.length : 0;
     this.ymodel.observeDeep(this._modelObserver);
     this._awareness = null;
   }
 
   get ysource(): Y.Text {
-    return this.ymodel.get('source');
+    return this._ysource;
   }
 
   get awareness(): Awareness | null {
@@ -553,7 +704,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   transact(f: () => void, undoable = true): void {
     this.notebook && undoable
       ? this.notebook.transact(f)
-      : this.ymodel.doc!.transact(f, this);
+      : this.ymodel.doc == null
+      ? f()
+      : this.ymodel.doc.transact(f, this);
   }
 
   /**
@@ -641,7 +794,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     ymodel.set('metadata', {});
     ymodel.set('cell_type', this.prototype.cell_type);
     ymodel.set('id', id);
-    return new this(ymodel);
+    return new this(ymodel, ysource);
   }
 
   /**
@@ -663,8 +816,6 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
 
   /**
    * Clone the cell.
-   *
-   * @todo clone should only be available in the specific implementations i.e. ISharedCodeCell
    */
   public clone(): YBaseCell<any> {
     const ymodel = new Y.Map();
@@ -672,9 +823,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     ymodel.set('source', ysource);
     ymodel.set('metadata', this.getMetadata());
     ymodel.set('cell_type', this.cell_type);
-    ymodel.set('id', this.getId());
+    ymodel.set('id', UUID.uuid4());
     const Self: any = this.constructor;
-    const clone = new Self(ymodel);
+    const clone = new Self(ymodel, ysource);
     // TODO The assignment of the undoManager does not work for a clone.
     // See https://github.com/jupyterlab/jupyterlab/issues/11035
     clone._undoManager = this.undoManager;
@@ -743,6 +894,8 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    * Dispose of the resources.
    */
   dispose(): void {
+    if (this.isDisposed) return;
+    this.isDisposed = true;
     this.ymodel.unobserveDeep(this._modelObserver);
     if (this._awareness) {
       this._awareness.destroy();
@@ -750,6 +903,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     if (!this.notebook && this._undoManager) {
       this._undoManager.destroy();
     }
+    Signal.clearData(this);
   }
 
   /**
@@ -791,7 +945,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    * @returns Cell's source.
    */
   public getSource(): string {
-    return this.ymodel.get('source').toString();
+    return this.ysource.toString();
   }
 
   /**
@@ -800,10 +954,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    * @param value: New source.
    */
   public setSource(value: string): void {
-    const ytext = this.ymodel.get('source');
     this.transact(() => {
-      ytext.delete(0, ytext.length);
-      ytext.insert(0, value);
+      this.ysource.delete(0, this.ysource.length);
+      this.ysource.insert(0, value);
     });
     // @todo Do we need proper replace semantic? This leads to issues in editor bindings because they don't switch source.
     // this.ymodel.set('source', new Y.Text(value));
@@ -850,9 +1003,21 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    * @param metadata: Notebook's metadata.
    */
   setMetadata(value: Partial<Metadata>): void {
-    this.transact(() => {
-      this.ymodel.set('metadata', deepCopy(value));
-    });
+    const clone = deepCopy(value) as any;
+    if (clone.collapsed != null) {
+      clone.jupyter = clone.jupyter || {};
+      (clone as any).jupyter.outputs_hidden = clone.collapsed;
+    } else if (clone?.jupyter?.outputs_hidden != null) {
+      clone.collapsed = clone.jupyter.outputs_hidden;
+    }
+    if (
+      this.ymodel.doc == null ||
+      !JSONExt.deepEqual(clone, this.getMetadata())
+    ) {
+      this.transact(() => {
+        this.ymodel.set('metadata', clone);
+      });
+    }
   }
 
   /**
@@ -869,6 +1034,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
 
   public isDisposed = false;
   public ymodel: Y.Map<any>;
+  private _ysource: Y.Text;
   private _undoManager: Y.UndoManager | null = null;
   private _changed = new Signal<this, models.CellChange<Metadata>>(this);
   private _prevSourceLength: number;
@@ -879,6 +1045,11 @@ export class YCodeCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
   implements models.ISharedCodeCell
 {
+  constructor(ymodel: Y.Map<any>, ysource: Y.Text) {
+    super(ymodel, ysource);
+    this._youtputs = new Y.Array();
+  }
+
   /**
    * The type of the cell.
    */
@@ -890,33 +1061,34 @@ export class YCodeCell
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   get execution_count(): number | null {
-    return this.ymodel.get('execution_count');
+    return this.ymodel.get('execution_count') || null;
   }
 
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   set execution_count(count: number | null) {
-    this.transact(() => {
-      this.ymodel.set('execution_count', count);
-    });
+    if (this.execution_count !== count) {
+      this.transact(() => {
+        this.ymodel.set('execution_count', count);
+      });
+    }
   }
 
   /**
    * Execution, display, or stream outputs.
    */
   getOutputs(): Array<nbformat.IOutput> {
-    return deepCopy(this.ymodel.get('outputs').toArray());
+    return deepCopy(this._youtputs.toArray());
   }
 
   /**
    * Replace all outputs.
    */
   setOutputs(outputs: Array<nbformat.IOutput>): void {
-    const youtputs = this.ymodel.get('outputs') as Y.Array<nbformat.IOutput>;
     this.transact(() => {
-      youtputs.delete(0, youtputs.length);
-      youtputs.insert(0, outputs);
+      this._youtputs.delete(0, this._youtputs.length);
+      this._youtputs.insert(0, outputs);
     }, false);
   }
 
@@ -934,11 +1106,11 @@ export class YCodeCell
     end: number,
     outputs: Array<nbformat.IOutput> = []
   ): void {
-    const youtputs = this.ymodel.get('outputs') as Y.Array<nbformat.IOutput>;
-    const fin = end < youtputs.length ? end - start : youtputs.length - start;
+    const fin =
+      end < this._youtputs.length ? end - start : this._youtputs.length - start;
     this.transact(() => {
-      youtputs.delete(start, fin);
-      youtputs.insert(start, outputs);
+      this._youtputs.delete(start, fin);
+      this._youtputs.insert(start, outputs);
     }, false);
   }
 
@@ -946,10 +1118,10 @@ export class YCodeCell
    * Create a new YCodeCell that can be inserted into a YNotebook
    */
   public static create(id?: string): YCodeCell {
-    const cell = super.create(id);
+    const cell = super.create(id) as YCodeCell;
     cell.ymodel.set('execution_count', 0); // for some default value
-    cell.ymodel.set('outputs', new Y.Array<nbformat.IOutput>());
-    return cell as any;
+    cell.ymodel.set('outputs', cell._youtputs);
+    return cell;
   }
 
   /**
@@ -958,23 +1130,17 @@ export class YCodeCell
    * attached to an anonymous Y.Doc instance.
    */
   public static createStandalone(id?: string): YCodeCell {
-    const cell = super.createStandalone(id);
-    cell.ymodel.set('execution_count', null); // for some default value
-    cell.ymodel.set('outputs', new Y.Array<nbformat.IOutput>());
-    return cell as any;
+    return super.createStandalone(id) as YCodeCell;
   }
 
   /**
    * Create a new YCodeCell that can be inserted into a YNotebook
-   *
-   * @todo clone should only be available in the specific implementations i.e. ISharedCodeCell
    */
   public clone(): YCodeCell {
-    const cell = super.clone();
-    const youtputs = new Y.Array<nbformat.IOutput>();
-    youtputs.insert(0, this.getOutputs());
+    const cell = super.clone() as YCodeCell;
+    cell._youtputs.insert(0, this.getOutputs());
     cell.ymodel.set('execution_count', this.execution_count); // for some default value
-    cell.ymodel.set('outputs', youtputs);
+    cell.ymodel.set('outputs', cell._youtputs);
     return cell as any;
   }
 
@@ -991,6 +1157,8 @@ export class YCodeCell
       execution_count: this.execution_count
     };
   }
+
+  private _youtputs: Y.Array<nbformat.IOutput>;
 }
 
 export class YRawCell
@@ -1010,7 +1178,7 @@ export class YRawCell
    * attached to an anonymous Y.Doc instance.
    */
   public static createStandalone(id?: string): YRawCell {
-    return super.createStandalone(id) as any;
+    return super.createStandalone(id) as YRawCell;
   }
 
   /**
@@ -1051,7 +1219,7 @@ export class YMarkdownCell
    * attached to an anonymous Y.Doc instance.
    */
   public static createStandalone(id?: string): YMarkdownCell {
-    return super.createStandalone(id) as any;
+    return super.createStandalone(id) as YMarkdownCell;
   }
 
   /**

@@ -71,7 +71,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         const cellModel = this.content.widgets[0].model;
-        if (cellModel.type === 'code' && cellModel.value.text === '') {
+        if (
+          cellModel.type === 'code' &&
+          cellModel.sharedModel.getSource() === ''
+        ) {
           this.content.mode = 'edit';
         }
       }
@@ -93,7 +96,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       for (const cell of this.model.cells) {
         if (isMarkdownCellModel(cell)) {
           for (const key of cell.attachments.keys) {
-            if (!cell.value.text.includes(key)) {
+            if (!cell.sharedModel.getSource().includes(key)) {
               cell.attachments.remove(key);
             }
           }

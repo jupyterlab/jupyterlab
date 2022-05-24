@@ -17,13 +17,11 @@ import {
   ISearchProvider,
   SearchProvider
 } from '@jupyterlab/documentsearch';
-import {
-  IObservableList,
-  IObservableUndoableList
-} from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
+import { CellList } from './celllist';
 import { NotebookPanel } from './panel';
 
 /**
@@ -433,7 +431,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   private async _onCellsChanged(
-    cells: IObservableUndoableList<ICellModel>,
+    cells: CellList,
     changes: IObservableList.IChangedArgs<ICellModel>
   ): Promise<void> {
     await this.clearHighlight();
