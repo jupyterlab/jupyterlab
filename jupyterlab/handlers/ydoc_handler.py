@@ -13,14 +13,18 @@ from jupyter_ydoc import ydocs as YDOCS
 from tornado import web
 from tornado.websocket import WebSocketHandler
 from ypy_websocket.websocket_server import WebsocketServer, YRoom
-from ypy_websocket.ystore import BaseYStore, TempFileYStore
+from ypy_websocket.ystore import BaseYStore, SQLiteYStore, TempFileYStore
 
 YFILE = YDOCS["file"]
 RENAME_SESSION = 127
 
 
 class JupyterTempFileYStore(TempFileYStore):
-    prefix_dir = "jupyter_ydoc_"
+    prefix_dir = "jupyter_ystore_"
+
+
+class JupyterSQLiteYStore(SQLiteYStore):
+    db_path = ".jupyter_ystore.db"
 
 
 class JupyterRoom(YRoom):

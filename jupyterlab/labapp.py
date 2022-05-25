@@ -49,7 +49,7 @@ from .handlers.extension_manager_handler import (
     ExtensionManager,
     extensions_handler_path,
 )
-from .handlers.ydoc_handler import JupyterTempFileYStore, YDocWebSocketHandler
+from .handlers.ydoc_handler import JupyterSQLiteYStore, YDocWebSocketHandler
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -556,11 +556,12 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
 
     collaborative_ystore_class = Type(
-        default_value=JupyterTempFileYStore,
+        default_value=JupyterSQLiteYStore,
         klass=BaseYStore,
         config=True,
-        help="""The YStore class to use for storing Y updates. Defaults to JupyterTempFileYStore,
-        which stores Y updates in temporary files (relevant only in collaborative mode).""",
+        help="""The YStore class to use for storing Y updates (relevant only in collaborative mode).
+        Defaults to JupyterSQLiteYStore, which stores Y updates in a '.jupyter_ystore.db' SQLite
+        database in the current directory.""",
     )
 
     @default("app_dir")
