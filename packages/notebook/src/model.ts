@@ -534,11 +534,6 @@ export namespace NotebookModel {
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
-     * The ISharedDoc in which to put data for the notebook model.
-     */
-    readonly sharedDoc: ISharedDoc | undefined;
-
-    /**
      * Create a new cell by cell type.
      *
      * @param type:  the type of the cell to create.
@@ -637,15 +632,10 @@ export namespace NotebookModel {
      * Create a new cell model factory.
      */
     constructor(options: ContentFactory.IOptions) {
-      this.sharedDoc = options.sharedDoc;
+      this._sharedDoc = options.sharedDoc;
       this.codeCellContentFactory =
         options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
     }
-
-    /**
-     * The ISharedDoc in which to put the notebook data.
-     */
-    readonly sharedDoc: ISharedDoc;
 
     /**
      * The factory for code cell content.
@@ -707,7 +697,7 @@ export namespace NotebookModel {
         case 'code':
           codeCell = new CodeCellModel({
             id,
-            sharedDoc: this.sharedDoc,
+            sharedDoc: this._sharedDoc,
             sharedModel,
             contentFactory: this.codeCellContentFactory
           });
@@ -715,7 +705,7 @@ export namespace NotebookModel {
         case 'markdown':
           codeCell = new MarkdownCellModel({
             id,
-            sharedDoc: this.sharedDoc,
+            sharedDoc: this._sharedDoc,
             sharedModel
           });
           break;
@@ -723,7 +713,7 @@ export namespace NotebookModel {
         default:
           codeCell = new RawCellModel({
             id,
-            sharedDoc: this.sharedDoc,
+            sharedDoc: this._sharedDoc,
             sharedModel
           });
           break;
@@ -756,12 +746,12 @@ export namespace NotebookModel {
       const sharedModel = CodeCellModel.createSharedModel(
         id,
         false,
-        this.sharedDoc,
+        this._sharedDoc,
         cell
       );
       return new CodeCellModel({
         id,
-        sharedDoc: this.sharedDoc,
+        sharedDoc: this._sharedDoc,
         sharedModel,
         contentFactory
       });
@@ -785,12 +775,12 @@ export namespace NotebookModel {
       const sharedModel = MarkdownCellModel.createSharedModel(
         id,
         false,
-        this.sharedDoc,
+        this._sharedDoc,
         cell
       );
       const cellModel = new MarkdownCellModel({
         id,
-        sharedDoc: this.sharedDoc,
+        sharedDoc: this._sharedDoc,
         sharedModel
       });
       return cellModel;
@@ -811,10 +801,10 @@ export namespace NotebookModel {
       const sharedModel = RawCellModel.createSharedModel(
         id,
         false,
-        this.sharedDoc,
+        this._sharedDoc,
         cell
       );
-      return new RawCellModel({ id, sharedDoc: this.sharedDoc, sharedModel });
+      return new RawCellModel({ id, sharedDoc: this._sharedDoc, sharedModel });
     }
 
     /**
@@ -828,6 +818,8 @@ export namespace NotebookModel {
         codeCellContentFactory: this.codeCellContentFactory
       });
     }
+
+    protected _sharedDoc: ISharedDoc;
   }
 
   /**

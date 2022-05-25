@@ -559,10 +559,12 @@ describe('@jupyterlab/notebook', () => {
         it('should create a new content factory with a new ISharedDoc', () => {
           const sharedDoc = new SharedDoc();
           const factory = new NotebookModel.ContentFactory({ sharedDoc });
-          expect(factory.sharedDoc).toBe(sharedDoc);
+          //@ts-ignore
+          expect(factory._sharedDoc).toBe(sharedDoc);
           const newsharedDoc = new SharedDoc();
           const newFactory = factory.clone(newsharedDoc);
-          expect(newFactory.sharedDoc).toBe(newsharedDoc);
+          //@ts-ignore
+          expect(newFactory._sharedDoc).toBe(newsharedDoc);
           expect(newFactory.codeCellContentFactory).toBe(
             factory.codeCellContentFactory
           );
