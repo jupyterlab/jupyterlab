@@ -13,7 +13,7 @@ from jupyter_ydoc import ydocs as YDOCS
 from tornado import web
 from tornado.websocket import WebSocketHandler
 from ypy_websocket.websocket_server import WebsocketServer, YRoom
-from ypy_websocket.ystore import BaseYStore, SQLiteYStore, TempFileYStore
+from ypy_websocket.ystore import BaseYStore, SQLiteYStore, TempFileYStore, YDocNotFound
 
 YFILE = YDOCS["file"]
 RENAME_SESSION = 127
@@ -111,12 +111,12 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             self.last_modified = model["last_modified"]
             # check again if ready, because loading the file can be async
             if not self.room.ready:
-                # try to open the YStore for this document
+                # try to apply Y updates from the YStore for this document
                 try:
                     await self.room.ystore.apply_updates(self.room.ydoc)
                     read_from_source = False
-                except Exception:
-                    # no YStore found, create the document from the source file (no change history)
+                except YDocNotFound:
+                    # YDoc not found in the YStore, create the document from the source file (no change history)
                     read_from_source = True
                 if not read_from_source:
                     # if YStore updates and source file are out-of-sync, resync updates with source
