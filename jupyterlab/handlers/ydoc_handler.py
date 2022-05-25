@@ -5,7 +5,7 @@
 
 import asyncio
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 from jupyter_server.base.handlers import JupyterHandler
 from jupyter_server.utils import ensure_async
@@ -51,7 +51,6 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
 
     saving_document: Optional[asyncio.Task]
     websocket_server = None
-    updates_file_paths: List[str] = []
 
     # Override max_message size to 1GB
     @property
@@ -108,13 +107,18 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
             self.last_modified = model["last_modified"]
             # check again if ready, because loading the file can be async
             if not self.room.ready:
-                # we have a Y updates file for this document and it's not the first time this document is opened
-                # let's create our document by re-applying the updates,
-                # this way it will work if the document is already present in the front-end
-                if self.room.ystore.path in self.updates_file_paths:
+                # try to open the YStore for this document
+                try:
                     await self.room.ystore.apply_updates(self.room.ydoc)
-                else:
-                    # first time this document is opened, create it from the source file
+                    read_from_source = False
+                except Exception:
+                    # no YStore found, create the document from the source file (no change history)
+                    read_from_source = True
+                if not read_from_source:
+                    # if YStore updates and source file are out-of-sync, resync updates with source
+                    if self.room.document.source != model["content"]:
+                        read_from_source = True
+                if read_from_source:
                     self.room.document.source = model["content"]
                     await self.room.ystore.encode_state_as_update(self.room.ydoc)
                 self.room.document.dirty = False
@@ -180,8 +184,6 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
         if self.room.watcher:
             self.room.watcher.cancel()
         self.room.document.unobserve()
-        # add this file to the opened files, so that next time it's opened we apply Y updates
-        self.updates_file_paths.append(self.room.ystore.path)
         self.websocket_server.delete_room(room=self.room)
 
     def on_document_change(self, event):
