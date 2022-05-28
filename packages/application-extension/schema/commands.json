@@ -145,6 +145,11 @@
         "rank": 4
       },
       {
+        "command": "application:close-all",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab",
+        "rank": 4
+      },
+      {
         "command": "application:close-right-tabs",
         "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab",
         "rank": 5
