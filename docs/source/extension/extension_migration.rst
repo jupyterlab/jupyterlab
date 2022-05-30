@@ -48,7 +48,8 @@ bumped their major version (following semver convention). We want to point out p
    ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
    ``renameAck`` is not optional anymore in ``IDocumentProvider``.
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
-   ``@jupyterlab/documentsearch:plugin`` renamed ``@jupyterlab/documentsearch-extension:plugin``
+   * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
+   * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
    This may impact application configuration (for instance if the plugin was disabled).
    The search provider API has been fully reworked. But the logic is similar, for new type of documents
    you will need to register a ``ISearchProviderFactory`` to the ``ISearchProviderRegistry``. The
