@@ -4,14 +4,17 @@
 # Distributed under the terms of the Modified BSD License.
 
 from ._version import __version__  # noqa
-from .serverextension import load_jupyter_server_extension  # noqa
 
+try:
+    from .serverextension import load_jupyter_server_extension  # noqa
 
-def _jupyter_server_extension_paths():
-    return [{"module": "jupyterlab"}]
+    def _jupyter_server_extension_paths():
+        return [{"module": "jupyterlab"}]
 
+    def _jupyter_server_extension_points():
+        from .labapp import LabApp
 
-def _jupyter_server_extension_points():
-    from .labapp import LabApp
+        return [{"module": "jupyterlab", "app": LabApp}]
 
-    return [{"module": "jupyterlab", "app": LabApp}]
+except BaseException:
+    pass
