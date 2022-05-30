@@ -43,7 +43,7 @@ namespace CommandIDs {
 }
 
 const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/documentsearch:labShellWidgetListener',
+  id: '@jupyterlab/documentsearch-extension:labShellWidgetListener',
   requires: [ILabShell, ISearchProviderRegistry],
   autoStart: true,
   activate: (
