@@ -39,7 +39,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
           this.model!.toggleCollapse({ heading });
         }}
         setActiveHeading={(heading: TableOfContents.IHeading) => {
-          this.model!.activeHeading = heading;
+          this.model!.setActiveHeading(heading);
         }}
       ></TableOfContentsTree>
     );

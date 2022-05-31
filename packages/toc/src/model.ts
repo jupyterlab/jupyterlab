@@ -47,13 +47,6 @@ export abstract class TableOfContentsModel<
   get activeHeading(): H | null {
     return this._activeHeading;
   }
-  set activeHeading(heading: H | null) {
-    if (this._activeHeading !== heading) {
-      this._activeHeading = heading;
-      this.stateChanged.emit();
-      this._activeHeadingChanged.emit(heading);
-    }
-  }
 
   /**
    * Signal emitted when the active heading changes.
@@ -135,21 +128,6 @@ export abstract class TableOfContentsModel<
   }
 
   /**
-   * Model configuration setter.
-   *
-   * @param c New configuration
-   */
-  setConfiguration(c: Partial<TableOfContents.IConfig>): void {
-    const newConfiguration = { ...this._configuration, ...c };
-    if (!JSONExt.deepEqual(this._configuration, newConfiguration)) {
-      this._configuration = newConfiguration as TableOfContents.IConfig;
-      this.refresh().catch(reason => {
-        console.error('Failed to update the table of contents.', reason);
-      });
-    }
-  }
-
-  /**
    * List of configuration options supported by the model.
    */
   get supportedOptions(): (keyof TableOfContents.IConfig)[] {
@@ -206,6 +184,37 @@ export abstract class TableOfContentsModel<
       }
     } finally {
       this._isRefreshing = false;
+    }
+  }
+
+  /**
+   * Set a new active heading.
+   *
+   * @param heading The new active heading
+   * @param emitSignal Whether to emit the activeHeadingChanged signal or not.
+   */
+  setActiveHeading(heading: H | null, emitSignal = true): void {
+    if (this._activeHeading !== heading) {
+      this._activeHeading = heading;
+      this.stateChanged.emit();
+      if (emitSignal) {
+        this._activeHeadingChanged.emit(heading);
+      }
+    }
+  }
+
+  /**
+   * Model configuration setter.
+   *
+   * @param c New configuration
+   */
+  setConfiguration(c: Partial<TableOfContents.IConfig>): void {
+    const newConfiguration = { ...this._configuration, ...c };
+    if (!JSONExt.deepEqual(this._configuration, newConfiguration)) {
+      this._configuration = newConfiguration as TableOfContents.IConfig;
+      this.refresh().catch(reason => {
+        console.error('Failed to update the table of contents.', reason);
+      });
     }
   }
 
