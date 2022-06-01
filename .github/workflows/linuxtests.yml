@@ -148,4 +148,4 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Install Jupyterlab
         run: pip install -e .
-      - uses: pre-commit/action@v2.0.0
+      - uses: pre-commit/action@v2.0.3
