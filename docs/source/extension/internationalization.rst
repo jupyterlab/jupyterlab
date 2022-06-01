@@ -52,7 +52,7 @@ or you can create a python package to distribute your extension translation (see
 Create translation python package
 ---------------------------------
 
-Jupyter Lab follows Gettext's approach for translation. Gettext extracts strings from source code, and compiles them with provided translation. This `document <https://www.labri.fr/perso/fleury/posts/programming/a-quick-gettext-tutorial.html>`_ briefly explains how Gettext works.
+Jupyter Lab follows Gettext's approach for translation. Gettext extracts strings from source code, and compiles them with provided translation. This `article <https://www.labri.fr/perso/fleury/posts/programming/a-quick-gettext-tutorial.html>`_ briefly explains how Gettext works.
 
 By using `jupyterlab-translate <https://github.com/jupyterlab/jupyterlab-translate>`_, you can easily extract, update, and compile your translation.
 
