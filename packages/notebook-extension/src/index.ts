@@ -1381,6 +1381,12 @@ function activateNotebookHandler(
     return Private.isEnabled(shell, tracker);
   };
 
+  const setSideBySideOutputRatio = (sideBySideOutputRatio: number) =>
+    document.documentElement.style.setProperty(
+      '--jp-side-by-side-output-size',
+      `${sideBySideOutputRatio}fr`
+    );
+
   // Fetch settings if possible.
   const fetchSettings = settingRegistry
     ? settingRegistry.load(trackerPlugin.id)
@@ -1421,6 +1427,22 @@ function activateNotebookHandler(
           ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
             x => (settings.get(x).composite as JSONObject).autoClosingBrackets
           )
+      });
+      commands.addCommand(CommandIDs.setSideBySideRatio, {
+        label: trans.__('Set side-by-side ratio'),
+        execute: args => {
+          InputDialog.getNumber({
+            title: trans.__('Width of the output in side-by-side mode'),
+            value: settings.get('sideBySideOutputRatio').composite as number
+          })
+            .then(result => {
+              setSideBySideOutputRatio(result.value!);
+              if (result.value) {
+                settings.set('sideBySideOutputRatio', result.value);
+              }
+            })
+            .catch(console.error);
+        }
       });
     })
     .catch((reason: Error) => {
@@ -1534,8 +1556,11 @@ function activateNotebookHandler(
         .composite as string,
       sideBySideRightMarginOverride: settings.get(
         'sideBySideRightMarginOverride'
-      ).composite as string
+      ).composite as string,
+      sideBySideOutputRatio: settings.get('sideBySideOutputRatio')
+        .composite as number
     };
+    setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
       margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
@@ -2698,24 +2723,6 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.setSideBySideRatio, {
-    label: trans.__('Set side-by-side ratio'),
-    execute: args => {
-      InputDialog.getNumber({
-        title: trans.__('Width of the output in side-by-side mode'),
-        value: 1
-      })
-        .then(result => {
-          if (result.value) {
-            document.documentElement.style.setProperty(
-              '--jp-side-by-side-output-size',
-              `${result.value}fr`
-            );
-          }
-        })
-        .catch(console.error);
-    }
-  });
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: trans.__('Expand All Outputs'),
     execute: args => {
