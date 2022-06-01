@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -85,12 +85,12 @@ jobs:
         python-version: ['3.9.9']
     steps:
       - name: Checkout JupyterLab
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: core
 
       - name: Checkout demo project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
