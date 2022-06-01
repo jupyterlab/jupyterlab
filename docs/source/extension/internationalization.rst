@@ -49,6 +49,34 @@ You could also look at the following pull requests on the
 There are two options: you can either add your extension to the JupyterLab `language packs <https://github.com/jupyterlab/language-packs/#adding-a-new-extension>`_
 or you can create a python package to distribute your extension translation (see `test example <https://github.com/jupyterlab/jupyterlab_server/tree/main/tests/translations/jupyterlab-some-package>`_).
 
+Create translation python package
+---------------------------------
+
+Jupyter Lab follows Gettext's approach for translation. Gettext extracts strings from source code, and compiles them with provided translation. This `document <https://www.labri.fr/perso/fleury/posts/programming/a-quick-gettext-tutorial.html>`_ briefly explains how Gettext works.
+
+By using `jupyterlab-translate <https://github.com/jupyterlab/jupyterlab-translate>`_, you can easily extract, update, and compile your translation.
+
+After that, you must include your compiled translation(.json, .mo) to your python package. This can be done by editing these two files.
+
+setup.py:
+
+.. code:: python
+
+    from setuptools import setup
+
+    setup(
+        # ...
+        entry_points={"jupyterlab.locale": ["jupyterlab_some_package = jupyterlab_some_package"]},
+    )
+
+
+MANIFEST.in:
+
+.. code:: text
+
+    recursive-include jupyterlab_some_package *.json
+    recursive-include jupyterlab_some_package *.mo
+
 
 Settings translation
 --------------------
