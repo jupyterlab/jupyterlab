@@ -12,6 +12,3 @@ paths-ignore:
   - examples/federated/core_package/index.js
   - jupyterlab/staging/index.js
   - dev_mode/index.js
-  # TODO: remove when fixed upstream
-  # see https://github.com/jupyterlab/jupyterlab/issues/10522 for more info
-  - packages/services/src/kernel/messages.ts
