@@ -132,7 +132,7 @@ jobs:
           mkdir test
           tar --strip-components=1 -zxvf *.tar.gz -C ./test
           cd test
-          pip install -e .[test]
+          pip install -e .[jupyter-server, test]
           pip install pytest-github-actions-annotate-failures
       - name: Run Test
         run: |
@@ -147,5 +147,5 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Install Jupyterlab
-        run: pip install -e .
+        run: pip install -e .[jupyter-server]
       - uses: pre-commit/action@v2.0.0

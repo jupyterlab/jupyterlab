@@ -23,7 +23,7 @@ git config --global user.email foo@bar.com
 pip install -q --upgrade pip --user
 pip --version
 # Show a verbose install if the install fails, for debugging
-pip install -e ".[test]" || pip install -v -e ".[test]"
+pip install -e ".[jupyter-server, test]" || pip install -v -e ".[jupyter-server, test]"
 jlpm versions
 jlpm config current
 

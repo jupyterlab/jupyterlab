@@ -100,7 +100,7 @@ jobs:
           # Freeze the packages to ensure consistent look and feel
           # IPython is frozen because its version is displayed in
           # the console header
-          pip install .[docs-screenshots]
+          pip install .[jupyter-server, docs-screenshots]
           bash ./scripts/ci_install.sh
 
           # Build dev-mode

@@ -39,7 +39,7 @@ fi
 
 if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
-    pip install .[docs]
+    pip install .[jupyter-server, docs]
     pushd docs
     make html
     popd
