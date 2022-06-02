@@ -1080,6 +1080,11 @@ export namespace StaticNotebook {
      * Override the side-by-side right margin.
      */
     sideBySideRightMarginOverride: string;
+
+    /**
+     * Side-by-side output ratio.
+     */
+    sideBySideOutputRatio: number;
   }
 
   /**
@@ -1099,7 +1104,8 @@ export namespace StaticNotebook {
     disableDocumentWideUndoRedo: false,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
-    sideBySideRightMarginOverride: '10px'
+    sideBySideRightMarginOverride: '10px',
+    sideBySideOutputRatio: 1
   };
 
   /**
