@@ -79,7 +79,6 @@ MANIFEST.in:
 
 .. note::
    An example is available in the `server test <https://github.com/jupyterlab/jupyterlab_server/tree/main/tests/translations/jupyterlab-some-package>`_
-   
 Settings translation
 --------------------
 
