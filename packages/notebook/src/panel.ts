@@ -57,7 +57,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     this.content.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
     // Set up things related to the context
-    this.content.model = this.context.model;
+    this.context.ready.then(() => (this.content.model = this.context.model));
     this.context.sessionContext.kernelChanged.connect(
       this._onKernelChanged,
       this

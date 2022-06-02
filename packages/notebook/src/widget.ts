@@ -477,6 +477,7 @@ export class StaticNotebook extends Widget {
     oldValue: INotebookModel | null,
     newValue: INotebookModel | null
   ): void {
+    console.debug('StaticNotebook._onModelChanged:', newValue);
     const layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);

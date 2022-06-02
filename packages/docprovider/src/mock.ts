@@ -7,6 +7,9 @@ export class ProviderMock implements IDocumentProvider {
   setPath(path: string): void {
     /* nop */
   }
+  get ready(): Promise<boolean> {
+    return Promise.resolve(false);
+  }
   get renameAck(): Promise<boolean> {
     return Promise.resolve(false);
   }

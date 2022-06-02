@@ -1728,6 +1728,7 @@ function activateNotebookCompleterService(
       session: notebook.sessionContext.session,
       widget: notebook
     };
+    await notebook.context.ready;
     await manager.updateCompleter(completerContext);
     notebook.content.activeCellChanged.connect((_, cell) => {
       if (cell === undefined) {

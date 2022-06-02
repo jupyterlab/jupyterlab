@@ -10,7 +10,9 @@ import { Contents } from '@jupyterlab/services';
 import {
   ISharedDoc,
   ISharedMap,
-  ISharedString
+  ISharedString,
+  SharedDoc,
+  SharedString
 } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONValue, PartialJSONValue } from '@lumino/coreutils';
@@ -37,8 +39,15 @@ export class DocumentModel
    * is not recommended, and may produce unpredictable results.
    */
   constructor(languagePreference?: string, sharedDoc?: ISharedDoc) {
-    super({ isDocument: true, sharedDoc: sharedDoc });
+    super({ isDocument: false, sharedDoc: sharedDoc });
     this._defaultLang = languagePreference || '';
+
+    this._value = this._sharedDoc.createString('source') as SharedString;
+    this._value.undoManager = SharedDoc.createUndoManager(
+      (this._value as SharedString).underlyingModel,
+      []
+    );
+    this._value.changed.connect(this._onValueChanged, this);
 
     this._state = this._sharedDoc.createMap<JSONValue>('state');
     this._state.changed.connect(this._onStateChanged, this);
@@ -151,7 +160,7 @@ export class DocumentModel
    */
   initialize(): void {
     this.dirty = false;
-    return;
+    this._triggerModelReady();
   }
 
   /**

@@ -35,6 +35,30 @@ import { CellList, ICellList } from './celllist';
  */
 export interface INotebookModel extends DocumentRegistry.IModel {
   /**
+   * A signal emitted when the model is ready.
+   *
+   * #### Notes
+   * With RTC, the IModel may be initialized by a remote client.
+   * In this case, we need to instantiate the IModel without
+   * initializing it, because the data will come from the remote
+   * client. For that reason we now need to wait until the IModel
+   * is initialized to be able to access the data.
+   */
+  readonly ready: ISignal<this, void>;
+
+  /**
+   * Whether the model is ready or not.
+   *
+   * #### Notes
+   * With RTC, the IModel may be initialized by a remote client.
+   * In this case, we need to instantiate the IModel without
+   * initializing it, because the data will come from the remote
+   * client. For that reason we now need to wait until the IModel
+   * is initialized to be able to access the data.
+   */
+  readonly isReady: boolean;
+
+  /**
    * The list of cells in the notebook.
    */
   readonly cells: ICellList;
@@ -122,6 +146,20 @@ export class NotebookModel implements INotebookModel {
   }
 
   /**
+   * A signal emitted when the model is ready.
+   *
+   * #### Notes
+   * With RTC, the IModel may be initialized by a remote client.
+   * In this case, we need to instantiate the IModel without
+   * initializing it, because the data will come from the remote
+   * client. For that reason we now need to wait until the IModel
+   * is initialized to be able to access the data.
+   */
+  get ready(): ISignal<this, void> {
+    return this._ready;
+  }
+
+  /**
    * A signal emitted when the document content changes.
    */
   get contentChanged(): ISignal<this, void> {
@@ -133,6 +171,10 @@ export class NotebookModel implements INotebookModel {
    */
   get stateChanged(): ISignal<this, IChangedArgs<any>> {
     return this._stateChanged;
+  }
+
+  get isReady(): boolean {
+    return this._isReady;
   }
 
   /**
@@ -178,6 +220,9 @@ export class NotebookModel implements INotebookModel {
    * Get the observable list of notebook cells.
    */
   get cells(): ICellList {
+    if (!this._isReady) {
+      throw Error('The model is not ready');
+    }
     return this._cells;
   }
 
@@ -185,6 +230,9 @@ export class NotebookModel implements INotebookModel {
    * The metadata associated with the notebook.
    */
   get metadata(): ISharedMap<JSONValue> {
+    if (!this._isReady) {
+      throw Error('The model is not ready');
+    }
     return this._metadata;
   }
 
@@ -385,6 +433,7 @@ close the notebook without saving it.`,
    * and clears undo state.
    */
   initialize(): void {
+    this._triggerModelReady();
     if (!this.cells.length) {
       const factory = this.contentFactory;
       this.cells.push(factory.createCodeCell());
@@ -393,6 +442,18 @@ close the notebook without saving it.`,
     this.cells.clearUndo();
     this._ensureMetadata();
     this._state.set('dirty', false);
+  }
+
+  /**
+   * Trigger the signal ready.
+   *
+   * #### Notes
+   * This is a convenience method to trigger the signal
+   * from child classes.
+   */
+  protected _triggerModelReady(): void {
+    this._isReady = true;
+    this._ready.emit();
   }
 
   /**
@@ -462,6 +523,7 @@ close the notebook without saving it.`,
   }
 
   private _dirty = false;
+  private _isReady = false;
   private _readOnly = false;
   private _isDisposed = false;
   private _isInitialized: boolean;
@@ -475,6 +537,7 @@ close the notebook without saving it.`,
   private _metadata: ISharedMap<JSONValue>;
   private _state: ISharedMap<JSONValue>;
 
+  private _ready = new Signal<this, void>(this);
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 }

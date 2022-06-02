@@ -265,7 +265,13 @@ export class Context<
   async initialize(isNew: boolean): Promise<void> {
     let promise;
     if (PageConfig.getOption('collaborative') == 'true') {
-      promise = this._loadContext();
+      this._loadContext();
+      promise = this._provider.ready.then(isReady => {
+        if (isReady) {
+          this._model.initialize();
+          return this._populate();
+        }
+      });
     } else {
       if (isNew) {
         promise = this._save();
@@ -676,10 +682,6 @@ export class Context<
           format: this._factory.fileFormat
         };
         this._updateContentsModel(model);
-        this._model.dirty = false;
-        if (!this._isPopulated) {
-          return this._populate();
-        }
       })
       .catch(async err => {
         const localPath = this._manager.contents.localPath(this.path);

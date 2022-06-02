@@ -13,6 +13,11 @@ export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
  */
 export interface IDocumentProvider {
   /**
+   * Returns a Promise that resolves when the client is synced.
+   */
+  readonly ready: Promise<boolean>;
+
+  /**
    * Returns a Promise that resolves when renaming is ackownledged.
    */
   readonly renameAck: Promise<boolean>;

@@ -43,6 +43,9 @@ export class WebSocketProvider
     this._contentType = options.contentType;
     this._format = options.format;
     this._serverUrl = options.url;
+    this._ready = new PromiseDelegate();
+
+    this.on('sync', (isSync: boolean) => this._ready.resolve(isSync));
 
     // Message handler that receives the rename acknowledge
     this.messageHandlers[127] = (
@@ -68,6 +71,10 @@ export class WebSocketProvider
     }
     user.ready.connect(userChanged);
     user.changed.connect(userChanged);
+  }
+
+  get ready(): Promise<boolean> {
+    return this._ready.promise;
   }
 
   get renameAck(): Promise<boolean> {
@@ -132,6 +139,7 @@ export class WebSocketProvider
   private _contentType: string;
   private _format: string;
   private _serverUrl: string;
+  private _ready: PromiseDelegate<boolean>;
   private _renameAck: PromiseDelegate<boolean>;
 }
 

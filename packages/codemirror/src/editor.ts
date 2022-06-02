@@ -119,7 +119,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
     const editor = (this._editor = Private.createEditor(host, fullConfig));
-    this._initializeEditorBinding();
+    if (model.isReady) {
+      this._initializeEditorBinding();
+    } else {
+      model.ready.connect(this._initializeEditorBinding, this);
+    }
 
     const doc = editor.getDoc();
 
@@ -199,6 +203,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Initialize the editor binding.
    */
   private _initializeEditorBinding(): void {
+    this.model.ready.disconnect(this._initializeEditorBinding, this);
     if (!USE_YCODEMIRROR_BINDING) {
       return;
     }

@@ -551,6 +551,7 @@ export class CellList implements ICellList {
         changes.delta.push({ retain: delta.retain });
       }
     });
+    console.debug('CellsChanged:', changes);
     this._changed.emit(changes);
   }
 

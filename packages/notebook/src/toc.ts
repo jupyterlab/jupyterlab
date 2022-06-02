@@ -106,12 +106,13 @@ export class NotebookToCModel extends TableOfContentsModel<
     void widget.context.ready.then(() => {
       // Load configuration from metadata
       this.setConfiguration({});
+
+      this.widget.context.model.metadata.changed.connect(
+        this.onMetadataChanged,
+        this
+      );
     });
 
-    this.widget.context.model.metadata.changed.connect(
-      this.onMetadataChanged,
-      this
-    );
     this.widget.content.activeCellChanged.connect(
       this.onActiveCellChanged,
       this
@@ -189,10 +190,13 @@ export class NotebookToCModel extends TableOfContentsModel<
     }
 
     this.headingsChanged.disconnect(this.onHeadingsChanged, this);
-    this.widget.context.model.metadata.changed.disconnect(
-      this.onMetadataChanged,
-      this
-    );
+    if (this.widget.context.isReady) {
+      this.widget.context.model.metadata.changed.disconnect(
+        this.onMetadataChanged,
+        this
+      );
+    }
+
     this.widget.content.activeCellChanged.disconnect(
       this.onActiveCellChanged,
       this

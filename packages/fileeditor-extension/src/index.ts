@@ -476,6 +476,7 @@ function activateFileEditorCompleterService(
       widget
     };
 
+    await widget.context.ready;
     await manager.updateCompleter(completerContext);
     const onRunningChanged = (
       _: Session.IManager,
