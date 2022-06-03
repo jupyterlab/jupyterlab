@@ -28,8 +28,9 @@ import {
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
-const globalModelDBMutex = models.createMutex();
 
+const globalModelDBMutex = models.createMutex();
+const DISPLAY_DATA_TYPE = 'display_data';
 /**
  * The definition of a model object for a cell.
  */
@@ -123,6 +124,16 @@ export interface ICodeCellModel extends ICellModel {
    * The code cell shared model
    */
   sharedModel: models.ISharedCodeCell;
+
+  /**
+   * A signal emitted when a `display_data` message is processed.
+   */
+  readonly displayModelRequested: ISignal<ICodeCellModel, void>;
+
+  /**
+   * A flag used to request a trust button on cell output widget.
+   */
+  needTrustButton: boolean;
 }
 
 /**
@@ -705,10 +716,27 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (reinitialize) {
       this.executionCount = sharedModel.execution_count;
       this.outputs.clear();
-      sharedModel.getOutputs().forEach(output => this._outputs.add(output));
+      sharedModel.getOutputs().forEach(output => {
+        if (output.output_type === DISPLAY_DATA_TYPE) {
+          this._needTrustButton = true;
+        }
+        this._outputs.add(output);
+      });
     }
     super.switchSharedModel(sharedModel, reinitialize);
     this._setDirty(false);
+  }
+
+  get needTrustButton(): boolean {
+    return this._needTrustButton;
+  }
+
+  set needTrustButton(value: boolean) {
+    this._needTrustButton = value;
+  }
+
+  get displayModelRequested(): ISignal<ICodeCellModel, void> {
+    return this._displayModelRequested;
   }
 
   /**
@@ -880,7 +908,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     globalModelDBMutex(() => {
       if (change.outputsChange) {
         this.clearExecution();
-        sender.getOutputs().forEach(output => this._outputs.add(output));
+        sender.getOutputs().forEach(output => {
+          if (output.output_type === DISPLAY_DATA_TYPE) {
+            this._displayModelRequested.emit();
+          }
+          this._outputs.add(output);
+        });
       }
 
       if (change.executionCountChange) {
@@ -920,6 +953,16 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   private _executedCode: string = '';
   private _isDirty = false;
   private _outputs: IOutputAreaModel;
+
+  /**
+   * A flag used to request a trust button on cell output widget.
+   */
+  private _needTrustButton = false;
+
+  /**
+   * A signal emitted when a `display_data` message is processed.
+   */
+  private _displayModelRequested = new Signal<this, void>(this);
 }
 
 /**

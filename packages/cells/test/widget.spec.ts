@@ -83,6 +83,11 @@ class LogCodeCell extends CodeCell {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
   }
+
+  protected onStateChanged(model: any, args: any): void {
+    super.onStateChanged(model, args);
+    this.methods.push('onStateChanged');
+  }
 }
 
 class LogMarkdownCell extends MarkdownCell {
@@ -482,6 +487,14 @@ describe('cells/widget', () => {
         widget.initializeState();
         expect(widget).toBeInstanceOf(CodeCell);
       });
+
+      it('should add a trust button', () => {
+        const contentFactory = NBTestUtils.createCodeCellFactory();
+        model.needTrustButton = true;
+        const widget = new CodeCell({ model, contentFactory, rendermime });
+        widget.initializeState();
+        expect(widget['_outputWrapper'].layout.widgets.length).toEqual(3);
+      });
     });
 
     describe('#outputArea', () => {
@@ -725,6 +738,42 @@ describe('cells/widget', () => {
         expect(widget.methods).not.toContain(method);
         widget.model.metadata.set('foo', 1);
         expect(widget.methods).toContain(method);
+      });
+    });
+
+    describe('#onStateChanged()', () => {
+      it('should fire when model state changes', () => {
+        const method = 'onStateChanged';
+        const widget = new LogCodeCell().initializeState();
+        expect(widget.methods).not.toContain(method);
+        widget.model.trusted = true;
+        expect(widget.methods).toContain(method);
+      });
+
+      it('should remove the trust button on trust status change', () => {
+        const contentFactory = NBTestUtils.createCodeCellFactory();
+        const model = new CodeCellModel({});
+        model.needTrustButton = true;
+        const widget = new CodeCell({ model, contentFactory, rendermime });
+        widget.initializeState();
+        expect(widget['_trustButton']).toBeDefined();
+        widget.model.trusted = true;
+        expect(widget['_trustButton']).toBeUndefined();
+      });
+    });
+
+    describe('#addTrustButton()', () => {
+      it('should add a button to the output widget', () => {
+        const contentFactory = NBTestUtils.createCodeCellFactory();
+        const model = new CodeCellModel({});
+        model.needTrustButton = true;
+        const widget = new CodeCell({ model, contentFactory, rendermime });
+        widget.initializeState();
+        widget.addTrustButton();
+        expect(widget['_trustButton']).toBeDefined();
+        expect(widget['_trustButton'].hasClass('jp-Cell-trustButton')).toBe(
+          true
+        );
       });
     });
 

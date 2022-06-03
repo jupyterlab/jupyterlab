@@ -39,7 +39,12 @@ import { TableOfContentsUtils } from '@jupyterlab/toc';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { addIcon } from '@jupyterlab/ui-components';
+import {
+  addIcon,
+  notTrustedIcon,
+  ToolbarButton,
+  trustedIcon
+} from '@jupyterlab/ui-components';
 
 import {
   JSONObject,
@@ -799,6 +804,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
       });
     }
     model.stateChanged.connect(this.onStateChanged, this);
+    model.displayModelRequested.connect(this.addTrustButton, this);
+    if (model.needTrustButton) {
+      this.addTrustButton();
+    }
     this.node.setAttribute('aria-label', ariaLabel);
   }
 
@@ -1039,8 +1048,35 @@ export class CodeCell extends Cell<ICodeCellModel> {
           this.removeClass(DIRTY_CLASS);
         }
         break;
+      case 'trusted':
+        if (this._trustButton && !args.oldValue && args.newValue) {
+          if (this._outputWrapper.layout) {
+            this._outputWrapper.layout.removeWidget(this._trustButton);
+          }
+          this._trustButton = undefined;
+        }
+        break;
       default:
         break;
+    }
+  }
+
+  /**
+   * Add a button to the output area of the cell widget.
+   * This button is used to trust the cell model.
+   */
+  addTrustButton(): void {
+    if (!this._trustButton && !this.model.trusted) {
+      const onClick = () => {
+        this.model.trusted = true;
+      };
+      this._trustButton = new ToolbarButton({
+        onClick,
+        icon: this.model.trusted ? trustedIcon : notTrustedIcon,
+        tooltip: 'Click to render widget.'
+      });
+      this._trustButton.addClass('jp-Cell-trustButton');
+      this._outputWrapper.addWidget(this._trustButton);
     }
   }
 
@@ -1076,6 +1112,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Handle changes in the number of outputs in the output area.
    */
   private _outputLengthHandler(sender: OutputArea, args: number) {
+    if (args === 0 && this._trustButton) {
+      if (this._outputWrapper.layout) {
+        this._outputWrapper.layout.removeWidget(this._trustButton);
+      }
+      this._trustButton = undefined;
+    }
     const force = args === 0 ? true : false;
     this.toggleClass(NO_OUTPUTS_CLASS, force);
     const trans = this.translator.load('jupyterlab');
@@ -1088,11 +1130,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _rendermime: IRenderMimeRegistry;
   private _outputHidden = false;
   private _outputsScrolled: boolean;
-  private _outputWrapper: Widget;
+  private _outputWrapper: Panel;
   private _outputPlaceholder: OutputPlaceholder;
   private _output: OutputArea;
   private _syncScrolled = false;
   private _savingMetadata = false;
+  private _trustButton?: Widget;
 }
 
 /**

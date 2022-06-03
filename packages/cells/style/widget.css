@@ -23,6 +23,23 @@
   background: transparent;
 }
 
+.jp-Cell-trustButton {
+  position: absolute;
+  left: calc(
+    0.5 * var(--jp-cell-collapser-width) + 0.5 * var(--jp-cell-prompt-width)
+  );
+  top: calc(50% - 9px);
+}
+
+.jp-Cell-trustButton > button {
+  height: 14px;
+}
+
+.jp-Cell-trustButton > button svg {
+  width: 14px;
+  height: 14px;
+}
+
 /*-----------------------------------------------------------------------------
 | Common input/output
 |----------------------------------------------------------------------------*/

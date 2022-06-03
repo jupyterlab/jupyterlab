@@ -1,24 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
-import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import {
   CellModel,
   CodeCellModel,
   MarkdownCellModel,
   RawCellModel
 } from '@jupyterlab/cells';
-
+import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { OutputAreaModel } from '@jupyterlab/outputarea';
-
-import { NBTestUtils } from '@jupyterlab/testutils';
-import { JSONObject } from '@lumino/coreutils';
 import { YCodeCell } from '@jupyterlab/shared-models';
+import { NBTestUtils } from '@jupyterlab/testutils';
+import { toArray } from '@lumino/algorithm';
+import { JSONObject } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -644,6 +640,24 @@ describe('cells/model', () => {
         } as any;
         model['onModelDBOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(0);
+      });
+    });
+
+    describe('#switchSharedModel', () => {
+      it('should request for a trust button on `display_data` output', () => {
+        const model = new CodeCellModel({});
+        expect(model.needTrustButton).toEqual(false);
+        const sharedModel = {
+          getOutputs: jest
+            .fn()
+            .mockReturnValue([{ output_type: 'display_data' }]),
+          getSource: jest.fn().mockReturnValue(''),
+          getMetadata: jest.fn(),
+          changed: new Signal<any, any>(this)
+        } as any;
+        model.switchSharedModel(sharedModel, true);
+        expect(model.needTrustButton).toEqual(true);
+        expect(model.outputs.length).toEqual(1);
       });
     });
 

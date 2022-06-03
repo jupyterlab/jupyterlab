@@ -644,7 +644,7 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
     // Keep the status item up-to-date with the current notebook.
     tracker.currentChanged.connect(() => {
       const current = tracker.currentWidget;
-      item.model.notebook = current && current.content;
+      item.model.notebook = current;
     });
 
     statusBar.registerStatusItem(

@@ -3,7 +3,15 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Cell } from '@jupyterlab/cells';
+import React from 'react';
+
+import { Dialog } from '@jupyterlab/apputils';
+import { Cell, ICellModel } from '@jupyterlab/cells';
+import {
+  IObservableList,
+  IObservableUndoableList
+} from '@jupyterlab/observables';
+import { interactiveItem } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   notTrustedIcon,
@@ -12,8 +20,10 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
-import React from 'react';
-import { INotebookModel, Notebook } from '.';
+
+import { INotebookModel } from './model';
+import { NotebookPanel } from './panel';
+import { Notebook } from './widget';
 
 /**
  * Determine the notebook trust status message.
@@ -112,6 +122,30 @@ export class NotebookTrustStatus extends VDomRenderer<NotebookTrustStatus.Model>
   constructor(translator?: ITranslator) {
     super(new NotebookTrustStatus.Model());
     this.translator = translator || nullTranslator;
+    this.addClass(interactiveItem);
+  }
+
+  /**
+   * Open a dialog on NotebookTrust status item click event.
+   * Users can choose to untrust, trust or always trust the contents of
+   * the notebook.
+   */
+  async trustIconOnClick(): Promise<void> {
+    const dialog = NotebookTrustStatus.trustDialog(this.translator);
+    const result = await dialog.launch();
+    let action = result.button.actions[0] as
+      | 'no'
+      | 'yes'
+      | 'always'
+      | undefined;
+    if (!action) {
+      return;
+    }
+    this.model.toggleTrustNotebook(action !== 'no');
+    if (action === 'always') {
+      this.model.alwaysTrustNotebook();
+    }
+    this.update();
   }
 
   /**
@@ -123,7 +157,7 @@ export class NotebookTrustStatus extends VDomRenderer<NotebookTrustStatus.Model>
     }
     this.node.title = cellTrust(this.model, this.translator)[0];
     return (
-      <div>
+      <div onClick={this.trustIconOnClick.bind(this)}>
         <NotebookTrustComponent
           allCellsTrusted={this.model.trustedCells === this.model.totalCells}
           activeCellTrusted={this.model.activeCellTrusted}
@@ -169,37 +203,37 @@ export namespace NotebookTrustStatus {
     /**
      * The current notebook for the model.
      */
-    get notebook(): Notebook | null {
+    get notebook(): NotebookPanel | null {
       return this._notebook;
     }
-    set notebook(model: Notebook | null) {
-      const oldNotebook = this._notebook;
-      if (oldNotebook !== null) {
+    set notebook(model: NotebookPanel | null) {
+      const oldNotebook = this._notebook?.content;
+      if (oldNotebook) {
         oldNotebook.activeCellChanged.disconnect(
           this._onActiveCellChanged,
           this
         );
-
+        if (oldNotebook.model) {
+          oldNotebook.model.cells.changed.disconnect(this.trustCell);
+        }
         oldNotebook.modelContentChanged.disconnect(this._onModelChanged, this);
       }
 
       const oldState = this._getAllState();
       this._notebook = model;
-      if (this._notebook === null) {
+      const newNotebook = this._notebook?.content;
+      if (this._notebook === null || !newNotebook) {
         this._trustedCells = 0;
         this._totalCells = 0;
         this._activeCellTrusted = false;
       } else {
         // Add listeners
-        this._notebook.activeCellChanged.connect(
-          this._onActiveCellChanged,
-          this
-        );
-        this._notebook.modelContentChanged.connect(this._onModelChanged, this);
+        newNotebook.activeCellChanged.connect(this._onActiveCellChanged, this);
+        newNotebook.modelContentChanged.connect(this._onModelChanged, this);
 
         // Derive values
-        if (this._notebook.activeCell !== undefined) {
-          this._activeCellTrusted = this._notebook!.activeCell!.model.trusted;
+        if (newNotebook.activeCell) {
+          this._activeCellTrusted = newNotebook.activeCell.model.trusted;
         } else {
           this._activeCellTrusted = false;
         }
@@ -210,9 +244,62 @@ export namespace NotebookTrustStatus {
 
         this._totalCells = total;
         this._trustedCells = trusted;
+        newNotebook.disposed.connect(() => {
+          if (newNotebook.model) {
+            newNotebook.model.cells.changed.disconnect(this.trustCell);
+          }
+        });
       }
 
       this._triggerChange(oldState, this._getAllState());
+    }
+
+    /**
+     * When the cell list is changed, trust the added cell.
+     */
+    trustCell(
+      _: IObservableUndoableList<ICellModel>,
+      args: IObservableList.IChangedArgs<ICellModel>
+    ): void {
+      if (args.type === 'add') {
+        args.newValues.forEach(cell => {
+          cell.trusted = true;
+        });
+      }
+    }
+
+    /**
+     * Toggle the trust status of all cells in notebook
+     */
+    toggleTrustNotebook(trust: boolean): void {
+      if (this._notebook) {
+        const { context, content } = this._notebook;
+        if (!content.model) {
+          return;
+        }
+        const cells = toArray(content.model.cells);
+        cells.forEach(cell => (cell.trusted = trust));
+        context.save();
+        if (!trust) {
+          content.model.cells.changed.disconnect(this.trustCell);
+        }
+        this._onModelChanged(content);
+      }
+    }
+
+    /**
+     * Trust all current cells and any new cell added to the
+     * notebook automatically.
+     */
+    alwaysTrustNotebook(): void {
+      if (this._notebook) {
+        const { content } = this._notebook;
+        if (!content.model) {
+          return;
+        }
+        this.toggleTrustNotebook(true);
+        content.model.cells.changed.connect(this.trustCell);
+      }
     }
 
     /**
@@ -294,6 +381,58 @@ export namespace NotebookTrustStatus {
     private _trustedCells: number = 0;
     private _totalCells: number = 0;
     private _activeCellTrusted: boolean = false;
-    private _notebook: Notebook | null = null;
+    private _notebook: NotebookPanel | null = null;
+  }
+
+  /**
+   * Create the trust dialog asking users for the trust status of notebook.
+   */
+  export function trustDialog(translator?: ITranslator): Dialog<any> {
+    const trans =
+      translator?.load('jupyterlab') || nullTranslator.load('jupyterlab');
+    const yesButton = Dialog.okButton({
+      label: trans.__('Yes'),
+      actions: ['yes']
+    });
+    const alwaysButton = Dialog.okButton({
+      label: trans.__('Always'),
+      actions: ['always']
+    });
+    const noButton = Dialog.warnButton({
+      label: trans.__('No'),
+      actions: ['no']
+    });
+    const trustMessage = (
+      <p>
+        {trans.__(
+          'A trusted Jupyter notebook may execute hidden malicious code when you open it or from other users in a collaborative session.'
+        )}
+        <br />
+        {trans.__(
+          'Selecting "Yes" will re-render this notebook in a trusted state.'
+        )}
+        <br />
+        {trans.__(
+          'Selecting "Always" will trust all current contents and new contents coming from other users.'
+        )}
+        <br />
+        {trans.__('For more information, see')}{' '}
+        <a
+          href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {trans.__('the Jupyter security documentation')}
+        </a>
+        .
+      </p>
+    );
+    const options = {
+      title: trans.__('Trust notebook content?'),
+      body: trustMessage,
+      buttons: [noButton, yesButton, alwaysButton]
+    };
+    const dialog = new Dialog(options);
+    return dialog;
   }
 }
