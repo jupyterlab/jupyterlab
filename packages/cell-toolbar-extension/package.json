@@ -29,7 +29,6 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -b --watch"
   },
