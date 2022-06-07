@@ -25,9 +25,7 @@
 
 .jp-Cell-trustButton {
   position: absolute;
-  left: calc(
-    0.5 * var(--jp-cell-collapser-width) + 0.5 * var(--jp-cell-prompt-width)
-  );
+  right: 5px;
   top: calc(50% - 9px);
 }
 

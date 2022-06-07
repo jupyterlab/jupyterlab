@@ -30,7 +30,7 @@ import {
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
 const globalModelDBMutex = models.createMutex();
-const DISPLAY_DATA_TYPE = 'display_data';
+
 /**
  * The definition of a model object for a cell.
  */
@@ -717,7 +717,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       this.executionCount = sharedModel.execution_count;
       this.outputs.clear();
       sharedModel.getOutputs().forEach(output => {
-        if (output.output_type === DISPLAY_DATA_TYPE) {
+        if (Private.checkOutputMimeType(output)) {
           this._needTrustButton = true;
         }
         this._outputs.add(output);
@@ -913,7 +913,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         this.clearExecution();
         sender.getOutputs().forEach(output => {
           this._outputs.add(output);
-          if (output.output_type === DISPLAY_DATA_TYPE) {
+          if (Private.checkOutputMimeType(output)) {
             this._displayModelRequested.emit();
           }
         });
@@ -1011,6 +1011,31 @@ export namespace CodeCellModel {
 }
 
 namespace Private {
+  /**
+   * Check the output message for its type and data content. If the message type
+   * is one of `execute_result`, `display_data`, or `update_display_data` and its
+   * data contains  at least one `application/*` key, returns `true`.
+   * Otherwise, returns `false`.
+   *
+   * @param out - the output message to be checked.
+   *
+   */
+  export function checkOutputMimeType(out: nbformat.IOutput): boolean {
+    if (
+      (nbformat.isExecuteResult(out) ||
+        nbformat.isDisplayData(out) ||
+        nbformat.isDisplayUpdate(out)) &&
+      out.data
+    ) {
+      for (const key in out.data as nbformat.IMimeBundle) {
+        if (key.startsWith('application/')) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   export function collapseChanged(
     metadata: IObservableJSON,
     args: IObservableMap.IChangedArgs<JSONValue>

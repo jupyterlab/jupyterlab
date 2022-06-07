@@ -644,21 +644,47 @@ describe('cells/model', () => {
     });
 
     describe('#switchSharedModel', () => {
-      it('should request for a trust button on `display_data` output', () => {
-        const model = new CodeCellModel({});
-        expect(model.needTrustButton).toEqual(false);
-        const sharedModel = {
-          getOutputs: jest
-            .fn()
-            .mockReturnValue([{ output_type: 'display_data' }]),
-          getSource: jest.fn().mockReturnValue(''),
-          getMetadata: jest.fn(),
-          changed: new Signal<any, any>(this)
-        } as any;
-        model.switchSharedModel(sharedModel, true);
-        expect(model.needTrustButton).toEqual(true);
-        expect(model.outputs.length).toEqual(1);
-      });
+      it.each([['display_data'], ['update_display_data'], ['execute_result']])(
+        'should request for a trust button on %s output with application data',
+        (output_type: string) => {
+          const model = new CodeCellModel({});
+          expect(model.needTrustButton).toEqual(false);
+          const sharedModel = {
+            getOutputs: jest.fn().mockReturnValue([
+              {
+                output_type,
+                data: { 'application/vnd.jupyter.widget-view+json': null }
+              }
+            ]),
+            getSource: jest.fn().mockReturnValue(''),
+            getMetadata: jest.fn(),
+            changed: new Signal<any, any>(this)
+          } as any;
+          model.switchSharedModel(sharedModel, true);
+          expect(model.needTrustButton).toEqual(true);
+          expect(model.outputs.length).toEqual(1);
+        }
+      );
+      it.each([['display_data'], ['update_display_data'], ['execute_result']])(
+        'should not request for a trust button on %s output without application data',
+        (output_type: string) => {
+          const model = new CodeCellModel({});
+          expect(model.needTrustButton).toEqual(false);
+          const sharedModel = {
+            getOutputs: jest.fn().mockReturnValue([
+              {
+                output_type,
+                data: { 'plain/text': null }
+              }
+            ]),
+            getSource: jest.fn().mockReturnValue(''),
+            getMetadata: jest.fn(),
+            changed: new Signal<any, any>(this)
+          } as any;
+          model.switchSharedModel(sharedModel, true);
+          expect(model.needTrustButton).toEqual(false);
+        }
+      );
     });
 
     describe('.metadata', () => {
