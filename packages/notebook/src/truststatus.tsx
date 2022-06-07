@@ -279,7 +279,7 @@ export namespace NotebookTrustStatus {
         }
         const cells = toArray(content.model.cells);
         cells.forEach(cell => (cell.trusted = trust));
-        context.save();
+        context.save().catch(console.error);
         if (!trust) {
           content.model.cells.changed.disconnect(this.trustCell);
         }

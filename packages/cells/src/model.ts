@@ -727,6 +727,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this._setDirty(false);
   }
 
+  /**
+   * A flag that indicates the cell output widget need to have a trust button.
+   */
   get needTrustButton(): boolean {
     return this._needTrustButton;
   }
@@ -909,10 +912,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       if (change.outputsChange) {
         this.clearExecution();
         sender.getOutputs().forEach(output => {
+          this._outputs.add(output);
           if (output.output_type === DISPLAY_DATA_TYPE) {
             this._displayModelRequested.emit();
           }
-          this._outputs.add(output);
         });
       }
 
