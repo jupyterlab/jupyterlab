@@ -12,6 +12,48 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.4.x/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.4.3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.2...b05da6fae42dcf5a5ad0dd9b46a8b75d64804799))
+
+### New features added
+
+- Persistent side-by-side ratio setting [#12633](https://github.com/jupyterlab/jupyterlab/pull/12633) ([@echarles](https://github.com/echarles))
+
+### Enhancements made
+
+- Persistent side-by-side ratio setting [#12633](https://github.com/jupyterlab/jupyterlab/pull/12633) ([@echarles](https://github.com/echarles))
+- Add "Open in Simple Mode" contextMenu option [#12577](https://github.com/jupyterlab/jupyterlab/pull/12577) ([@fcollonval](https://github.com/fcollonval))
+
+### Bugs fixed
+
+- Always check local packages against abspath [#10662](https://github.com/jupyterlab/jupyterlab/pull/10662) ([@mlucool](https://github.com/mlucool))
+- Fix arrow position on unrendered markdown cell [#12660](https://github.com/jupyterlab/jupyterlab/pull/12660) ([@fcollonval](https://github.com/fcollonval))
+- Fix the side-by-side cell resize handle [#12611](https://github.com/jupyterlab/jupyterlab/pull/12611) ([@echarles](https://github.com/echarles))
+- Fix loading toolbar factory twice [#12599](https://github.com/jupyterlab/jupyterlab/pull/12599) ([@fcollonval](https://github.com/fcollonval))
+- Fixes behavior of `maxNumberOutputs` [#12598](https://github.com/jupyterlab/jupyterlab/pull/12598) ([@fcollonval](https://github.com/fcollonval))
+- Focus not set when clicking on cell margin [#12447](https://github.com/jupyterlab/jupyterlab/pull/12447) ([@fcollonval](https://github.com/fcollonval))
+- Make selected text translucent so the cursor is visible in vim mode [#12520](https://github.com/jupyterlab/jupyterlab/pull/12520) ([@Jessie-Newman](https://github.com/Jessie-Newman))
+- Fix file browser search highlighting bug [#12578](https://github.com/jupyterlab/jupyterlab/pull/12578) ([@fcollonval](https://github.com/fcollonval))
+
+### Maintenance and upkeep improvements
+
+- Fix failing check links [#12627](https://github.com/jupyterlab/jupyterlab/pull/12627) ([@jtpio](https://github.com/jtpio))
+- Force crypto resolution [#12576](https://github.com/jupyterlab/jupyterlab/pull/12576) ([@fcollonval](https://github.com/fcollonval))
+
+### Documentation improvements
+
+- Add more explanation for internationalization (translation python package) [#12635](https://github.com/jupyterlab/jupyterlab/pull/12635) ([@a3626a](https://github.com/a3626a))
+- Add "Open in Simple Mode" contextMenu option [#12577](https://github.com/jupyterlab/jupyterlab/pull/12577) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-05-13&to=2022-06-07&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2022-05-13..2022-06-07&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2022-05-13..2022-06-07&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2022-05-13..2022-06-07&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2022-05-13..2022-06-07&type=Issues) | [@dmonad](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Admonad+updated%3A2022-05-13..2022-06-07&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-05-13..2022-06-07&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2022-05-13..2022-06-07&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-05-13..2022-06-07&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-05-13..2022-06-07&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2022-05-13..2022-06-07&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-05-13..2022-06-07&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2022-05-13..2022-06-07&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-05-13..2022-06-07&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2022-05-13..2022-06-07&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-05-13..2022-06-07&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-05-13..2022-06-07&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.4.2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.1...1c8f008679c49e74d8a4ee3c6aa0782dfa6a1d35))
@@ -30,8 +72,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.4.x/CHANGELOG.md'
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-05-12&to=2022-05-12&type=c))
 
 [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-05-12..2022-05-12&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-05-12..2022-05-12&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-05-12..2022-05-12&type=Issues) | [@karlaspuldaro](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akarlaspuldaro+updated%3A2022-05-12..2022-05-12&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-05-12..2022-05-12&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-05-12..2022-05-12&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 3.4.1
 
