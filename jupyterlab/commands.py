@@ -1359,7 +1359,7 @@ class _AppHandler(object):
         jlab = data["jupyterlab"]
 
         def format_path(path):
-            path = osp.abspath(osp.relpath(path, pjoin(self.app_dir, "staging")))
+            path = osp.relpath(path, osp.abspath(osp.realpath(pjoin(self.app_dir, "staging"))))
             path = "file:" + path.replace(os.sep, "/")
             if os.name == "nt":
                 path = path.lower()
