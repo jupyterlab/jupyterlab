@@ -28,7 +28,7 @@ class JupyterSQLiteYStore(SQLiteYStore):
 
 
 class JupyterRoom(YRoom):
-    def __init__(self, type: str, path: str, ystore: BaseYStore):
+    def __init__(self, type: str, ystore: BaseYStore):
         super().__init__(ready=False, ystore=ystore)
         self.type = type
         self.cleaner = None
@@ -47,7 +47,7 @@ class JupyterWebsocketServer(WebsocketServer):
             p = Path(file_path)
             updates_file_path = str(p.parent / f".{file_type}:{p.name}.y")
             ystore = self.ystore_class(path=updates_file_path)
-            self.rooms[path] = JupyterRoom(file_type, file_path, ystore)
+            self.rooms[path] = JupyterRoom(file_type, ystore)
         return self.rooms[path]
 
 
