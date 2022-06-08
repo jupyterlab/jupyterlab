@@ -7,6 +7,59 @@
  * Support for icons as inline SVG HTMLElements
  */
 
+/* Action icons */
+
+.jp-icon-mono[fill] {
+  fill: var(--jp-icon-mono);
+}
+
+.jp-icon-mono[stroke] {
+  stroke: var(--jp-icon-mono);
+}
+
+.jp-icon-mono-inverse[fill] {
+  fill: var(--jp-icon-mono-inverse);
+}
+
+.jp-icon-mono-inverse[stroke] {
+  stroke: var(--jp-icon-mono-inverse);
+}
+
+/* set the color of an icon to transparent */
+.jp-icon-none[fill] {
+  fill: none;
+}
+
+.jp-icon-none[stroke] {
+  stroke: none;
+}
+
+/* Document icons */
+
+/* Python icon */
+body .jp-icon-python .jp-icon-python0[fill] {
+  fill: #366a96;
+}
+
+body .jp-icon-python .jp-icon-python1[fill] {
+  fill: #ffc836;
+}
+
+/* Markdown icon */
+body .jp-icon-markdown .jp-icon-markdown0[fill] {
+  fill: #03a9f4;
+}
+
+/* CSS for icons in selected filebrowser listing items */
+.jp-DirListing-item.jp-mod-selected .jp-icon-mono.jp-icon-selectable[fill] {
+  fill: #fff;
+}
+
+.jp-DirListing-item.jp-mod-selected
+  .jp-icon-mono-inverse.jp-icon-selectable-inverse[fill] {
+  fill: var(--jp-brand-color1);
+}
+
 /* recolor the primary elements of an icon */
 .jp-icon0[fill] {
   fill: var(--jp-inverse-layout-color0);
@@ -87,15 +140,6 @@
 
 .jp-icon-accent4[stroke] {
   stroke: var(--jp-layout-color4);
-}
-
-/* set the color of an icon to transparent */
-.jp-icon-none[fill] {
-  fill: none;
-}
-
-.jp-icon-none[stroke] {
-  stroke: none;
 }
 
 /* brand icon colors. Same for light and dark */
@@ -211,7 +255,7 @@
 }
 
 .jp-DirListing-item.jp-mod-selected .jp-icon-selectable-inverse[fill] {
-  fill: var(--jp-brand-color1);
+  fill: var(--jp-icon-mono);
 }
 
 /* CSS for icons in selected tabs in the sidebar tab manager */
@@ -220,7 +264,7 @@
 }
 
 #tab-manager .lm-TabBar-tab.jp-mod-active .jp-icon-selectable-inverse[fill] {
-  fill: var(--jp-brand-color1);
+  fill: var(--jp-icon-mono);
 }
 
 #tab-manager
@@ -228,7 +272,7 @@
   .jp-icon-hover
   :hover
   .jp-icon-selectable[fill] {
-  fill: var(--jp-brand-color1);
+  fill: var(--jp-icon-mono);
 }
 
 #tab-manager
