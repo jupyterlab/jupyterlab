@@ -483,6 +483,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     //this._editor.addOverlay(mode, options);
   }
 
+  // TODO: CM6 remove this function
   removeOverlay(mode: string | object): void {
     // TODO: CM6 migration
     //this._editor.removeOverlay(mode);

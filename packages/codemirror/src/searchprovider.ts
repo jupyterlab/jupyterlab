@@ -39,9 +39,18 @@ import {
 import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CodeMirrorEditor } from './editor';
-import { StringStream } from '@codemirror/stream-parser';
 import { RegExpCursor } from '@codemirror/search';
-import { ChangeSpec } from '@codemirror/state';
+import {
+  ChangeSpec,
+  StateEffect,
+  StateEffectType,
+  StateField
+} from '@codemirror/state';
+import {
+  Decoration,
+  DecorationSet,
+  EditorView
+} from '@codemirror/view';
 
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
@@ -49,6 +58,39 @@ type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
  * CodeMirror search provider for file editor
  */
 export class CodeMirrorSearchProvider implements IBaseSearchProvider {
+
+  constructor() {
+    this._highlightEffect = StateEffect.define<{matches: ISearchMatch[]}>({
+      map: (value, mapping) => ({matches: value.matches.map(v => ({text: v.text, position: mapping.mapPos(v.position)}))})
+    });
+    this._highlightMark = Decoration.mark({class: "cm-searching"});
+
+    this._highlightField = StateField.define<DecorationSet>({
+      create: () => {
+        return Decoration.none;
+      },
+      update: (highlights, transaction) => {
+        highlights = highlights.map(transaction.changes);
+        for (let ef of transaction.effects) {
+          if (ef.is(this._highlightEffect)) {
+            const e = ef as StateEffect<{matches: ISearchMatch[]}>;
+            if (e.value.matches.length) {
+              console.log("updating highlights");
+              highlights = highlights.update({
+                add: e.value.matches.map(m => this._highlightMark.range(m.position, m.position + m.text.length))
+              });
+            }
+            else {
+              highlights = Decoration.none;
+            }
+          }
+        }
+        return highlights;
+      },
+      provide: f => EditorView.decorations.from(f)
+    });
+  }
+
   /**
    * Whether the search provider is disposed or not.
    */
@@ -126,9 +168,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     this._matchState = {};
     this._currentMatch = null;
 
-    if (removeOverlay) {
-      this.editor.removeOverlay(this._overlay);
-    }
     const from = this.editor.getPositionAt(
       this.editor.state.selection.main.from
     );
@@ -165,13 +204,14 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(loop?: boolean): Promise<ISearchMatch | undefined> {
-    const cursorMatch = this._findNext(false);
+    return this._highlightCurrentMatch(this._findNext(false));
+    /*const cursorMatch = this._findNext(false);
     if (!cursorMatch) {
       return;
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._currentMatch = match;
-    return match;
+    return match;*/
   }
 
   /**
@@ -182,14 +222,34 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined> {
-    const cursorMatch = this._findNext(true);
+    return this._highlightCurrentMatch(this._findNext(true));
+    /*const cursorMatch = this._findNext(true);
     if (!cursorMatch) {
       return;
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._currentMatch = match;
+    return match;*/
+  }
+
+  private async _highlightCurrentMatch(cursorMatch: Private.ICodeMirrorMatch | null): Promise<ISearchMatch | undefined> {
+    // Highlight the current index
+    if (!cursorMatch) {
+      // Set cursor to remove any selection
+      this.editor.editor.dispatch({ selection: { anchor: 0 } });
+      return;
+    }
+
+    const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
+    this._currentMatch = match;
+    this.editor.editor.focus();
+    this.editor.editor.dispatch({
+      selection: { anchor: match.position, head: match.position + match.text.length },
+      scrollIntoView: true
+    });
     return match;
   }
+
 
   /**
    * Replace the currently selected match with the provided text
@@ -322,14 +382,12 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   }*/
 
   private _refreshOverlay() {
-    // TODO: CM6 migration
-    /*this.editor.operation(() => {
-      // clear search first
-      this.editor.removeOverlay(this._overlay);
-      this._overlay = this._getSearchOverlay();
-      this.editor.addOverlay(this._overlay);
-      this._changed.emit(undefined);
-    });*/
+    let effects: StateEffect<unknown>[] = [this._highlightEffect.of({matches: this.matches})];
+    if (!this.editor.state.field(this._highlightField, false)) {
+      effects.push(StateEffect.appendConfig.of([this._highlightField]));
+    }
+    this.editor.editor.dispatch({effects});
+    this._changed.emit(undefined);
   }
 
   /**
@@ -359,70 +417,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       this._matchState[line][column] = match;
     });
   }
-
-  // TODO: CM6 migration
-  //private _getSearchOverlay() {
-  //  return {
-  /**
-   * Token function is called when a line needs to be processed -
-   * when the overlay is initially created, it's called on all lines;
-   * when a line is modified and needs to be re-evaluated, it's called
-   * on just that line.
-   *
-   * This implementation of the token function both constructs/maintains
-   * the overlay and keeps track of the match state as the document is
-   * updated while a search is active.
-   */
-  /*    token: (stream: CodeMirror.StringStream) => {
-        const currentPos = stream.pos;
-        this._query.lastIndex = currentPos;
-        const lineText = stream.string;
-        const match = this._query.exec(lineText);
-        const line = (stream as any).lineOracle.line;
-
-        // If starting at position 0, the tokenization of this line has just started.
-        // Blow away everything on this line in the state so it can be updated.
-        if (
-          stream.start === currentPos &&
-          currentPos === 0 &&
-          !!this._matchState[line]
-        ) {
-          this._matchState[line] = {};
-        }
-        if (match && match.index === currentPos) {
-          // found match, add it to state
-          const matchLength = match[0].length;
-          const matchObj: ISearchMatch = {
-            text: lineText.slice(currentPos, currentPos + matchLength),
-            position: this.editor.doc.indexFromPos({
-              line,
-              ch: currentPos
-            })
-          };
-          if (!this._matchState[line]) {
-            this._matchState[line] = {};
-          }
-          this._matchState[line][currentPos] = matchObj;
-          // move the stream along and return searching style for the token
-          stream.pos += matchLength || 1;
-
-          // if the last thing on the line was a match, make sure we still
-          // emit the changed signal so the display can pick up the updates
-          if (stream.eol()) {
-            this._changed.emit(undefined);
-          }
-          return 'searching';
-        } else if (match) {
-          // there's a match in the stream, advance the stream to its position
-          stream.pos = match.index;
-        } else {
-          // no matches, consume the rest of the stream
-          this._changed.emit(undefined);
-          stream.skipToEnd();
-        }
-      }
-    };
-  }*/
 
   private _findNext(reverse: boolean): Private.ICodeMirrorMatch | null {
     const caseSensitive = this._query.ignoreCase;
@@ -495,13 +489,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     return matches;
   }
 
-  /*private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
-    return {
-      line: posIn.line,
-      column: posIn.ch
-    };
-  }*/
-
   private _currentMatchIsSelected(): boolean {
     if (!this._currentMatch) {
       return false;
@@ -526,7 +513,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
   private _disposed = false;
-  private _overlay: any;
+  private _highlightEffect: StateEffectType<{matches: ISearchMatch[]}>;
+  private _highlightMark: Decoration;
+  private _highlightField: StateField<DecorationSet>;
 }
 
 /**
@@ -536,6 +525,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
  * the `matches` attributes.
  */
 export class CodeMirrorSearchHighlighter {
+
   /**
    * Constructor
    *
@@ -545,6 +535,36 @@ export class CodeMirrorSearchHighlighter {
     this._cm = editor;
     this._matches = new Array<ISearchMatch>();
     this._currentIndex = null;
+    
+    this._highlightEffect = StateEffect.define<{matches: ISearchMatch[]}>({
+      map: (value, mapping) => ({matches: value.matches.map(v => ({text: v.text, position: mapping.mapPos(v.position)}))})
+    });
+    this._highlightMark = Decoration.mark({class: "cm-searching"});
+
+    this._highlightField = StateField.define<DecorationSet>({
+      create: () => {
+        return Decoration.none;
+      },
+      update: (highlights, transaction) => {
+        highlights = highlights.map(transaction.changes);
+        for (let ef of transaction.effects) {
+          if (ef.is(this._highlightEffect)) {
+            const e = ef as StateEffect<{matches: ISearchMatch[]}>;
+            if (e.value.matches.length) {
+              console.log("updating highlights");
+              highlights = highlights.update({
+                add: e.value.matches.map(m => this._highlightMark.range(m.position, m.position + m.text.length))
+              });
+            }
+            else {
+              highlights = Decoration.none;
+            }
+          }
+        }
+        return highlights;
+      },
+      provide: f => EditorView.decorations.from(f)
+    });
   }
 
   /**
@@ -564,7 +584,7 @@ export class CodeMirrorSearchHighlighter {
     if (!JSONExt.deepEqual(this._matches as any, v as any)) {
       this._matches = v;
     }
-    this.refresh();
+    this._refresh();
   }
 
   /**
@@ -576,21 +596,15 @@ export class CodeMirrorSearchHighlighter {
   }
 
   /**
-   * Refresh the highlight matches overlay
-   */
-  refresh(): void {
-    this._refreshOverlay();
-  }
-
-  /**
    * Clear the highlighted matches.
    */
   endQuery(): Promise<void> {
     this._currentIndex = null;
     this._matches = [];
 
-    this._cm.removeOverlay('jp-searching');
-    this._overlay = null;
+    this._cm.editor.dispatch({
+      effects: this._highlightEffect.of({matches: []})
+    });
 
     const selection = this._cm.state.selection.main;
     const from = selection.from;
@@ -633,13 +647,15 @@ export class CodeMirrorSearchHighlighter {
         : undefined
     );
   }
-
+  
   private _highlightCurrentMatch(): void {
     // Highlight the current index
     if (this._currentIndex !== null) {
       const match = this.matches[this._currentIndex];
+      this._cm.editor.focus();
       this._cm.editor.dispatch({
-        selection: { anchor: match.position, head: match.text.length }
+        selection: { anchor: match.position, head: match.position + match.text.length },
+        scrollIntoView: true
       });
     } else {
       // Set cursor to remove any selection
@@ -647,65 +663,12 @@ export class CodeMirrorSearchHighlighter {
     }
   }
 
-  private _refreshOverlay() {
-    // clear search first
-    this._cm.removeOverlay('jp-searching');
-    this._overlay = this._getSearchOverlay();
-    this._cm.addOverlay(this._overlay);
-  }
-
-  private _getSearchOverlay() {
-    const token = (stream: StringStream) => {
-      const position = stream.start;
-
-      let found =
-        this._matches.length > 0
-          ? Utils.findNext(
-              this._matches,
-              position,
-              0, // lastMatchIndex,
-              this._matches.length - 1
-            )
-          : null;
-
-      if (found !== null) {
-        // lastMatchIndex = found;
-        const match = this._matches[found];
-        if (match.position > position + stream.string.length) {
-          // next match not in this stream, consume the rest of the stream
-          stream.skipToEnd();
-          return null;
-        }
-
-        if (position === match.position) {
-          // move the stream along and return searching style for the token
-          stream.pos += match.text.length || 1;
-          return 'searching';
-        } else {
-          // Move to the next match
-          stream.pos += match.position - position;
-        }
-      } else {
-        // no matches, consume the rest of the stream
-        stream.skipToEnd();
-      }
-      return null;
-    };
-
-    return {
-      name: 'jp-searching',
-      /**
-       * Token function is called when a line needs to be processed -
-       * when the overlay is initially created, it's called on all lines;
-       * when a line is modified and needs to be re-evaluated, it's called
-       * on just that line.
-       *
-       * This implementation of the token function both constructs/maintains
-       * the overlay and keeps track of the match state as the document is
-       * updated while a search is active.
-       */
-      token: token.bind(this)
-    };
+  private _refresh(): void {
+    let effects: StateEffect<unknown>[] = [this._highlightEffect.of({matches: this.matches})];
+    if (!this._cm.state.field(this._highlightField, false)) {
+      effects.push(StateEffect.appendConfig.of([this._highlightField]));
+    }
+    this._cm.editor.dispatch({effects});
   }
 
   private _findNext(reverse: boolean): number | null {
@@ -760,7 +723,9 @@ export class CodeMirrorSearchHighlighter {
   private _cm: CodeMirrorEditor;
   private _currentIndex: number | null;
   private _matches: ISearchMatch[];
-  private _overlay: any;
+  private _highlightEffect: StateEffectType<{matches: ISearchMatch[]}>;
+  private _highlightMark: Decoration;
+  private _highlightField: StateField<DecorationSet>;
 }
 
 namespace Private {
