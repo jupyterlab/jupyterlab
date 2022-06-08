@@ -78,6 +78,10 @@ export abstract class ReactWidget extends Widget {
         ReactDOM.render(vnode, this.node, resolve);
       } else if (vnode) {
         ReactDOM.render(vnode, this.node, resolve);
+      } else {
+        // If the virtual node is null, unmount the node content
+        ReactDOM.unmountComponentAtNode(this.node);
+        resolve();
       }
     });
   }
@@ -95,9 +99,9 @@ export abstract class VDomRenderer<
   /**
    * Create a new VDomRenderer
    */
-  constructor(model: T extends null ? void : T) {
+  constructor(model?: T) {
     super();
-    this.model = ((model ?? null) as unknown) as T;
+    this.model = (model ?? null) as unknown as T;
   }
   /**
    * A signal emitted when the model changes.

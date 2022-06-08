@@ -196,9 +196,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    */
   getInitialQuery(): string {
     const activeCell = this.widget.content.activeCell;
-    const selection = (activeCell?.editor as
-      | CodeMirrorEditor
-      | undefined)?.doc.getSelection();
+    const selection = (
+      activeCell?.editor as CodeMirrorEditor | undefined
+    )?.doc.getSelection();
     // if there are newlines, just return empty string
     return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
   }

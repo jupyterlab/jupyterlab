@@ -174,14 +174,8 @@ export class LayoutRestorer implements ILayoutRestorer {
         return blank;
       }
 
-      const {
-        main,
-        down,
-        left,
-        right,
-        relativeSizes,
-        top
-      } = data as Private.ILayout;
+      const { main, down, left, right, relativeSizes, top } =
+        data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
       const fresh = false;

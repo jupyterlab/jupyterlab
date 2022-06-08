@@ -187,7 +187,7 @@ namespace Private {
     const title = document.createElement('h2');
 
     title.textContent = '-';
-    title.classList.add('jp-left-truncated');
+    title.classList.add('jp-text-truncated');
 
     return title;
   }

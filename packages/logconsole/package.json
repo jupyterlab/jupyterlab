@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole",
-  "version": "4.0.0-alpha.9",
+  "version": "4.0.0-alpha.10",
   "description": "JupyterLab - Log Console",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,20 +37,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.9",
-    "@jupyterlab/outputarea": "^4.0.0-alpha.9",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.9",
-    "@jupyterlab/services": "^7.0.0-alpha.9",
-    "@jupyterlab/translation": "^4.0.0-alpha.9",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.10",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.10",
+    "@jupyterlab/outputarea": "^4.0.0-alpha.10",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.10",
+    "@jupyterlab/services": "^7.0.0-alpha.10",
+    "@jupyterlab/translation": "^4.0.0-alpha.10",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
     "@lumino/messaging": "^1.10.1",
     "@lumino/signaling": "^1.10.1",
-    "@lumino/widgets": "^1.31.1"
+    "@lumino/widgets": "^1.32.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.9",
+    "@jupyterlab/testutils": "^4.0.0-alpha.10",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

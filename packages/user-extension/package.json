@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/user-extension",
-  "version": "4.0.0-alpha.9",
+  "version": "4.0.0-alpha.10",
   "description": "JupyterLab - User Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -26,25 +26,22 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
+    "schema/*.json",
     "style/*.css",
     "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "test": "jest",
-    "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.9",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
-    "@jupyterlab/user": "^4.0.0-alpha.9",
-    "@lumino/widgets": "^1.31.1"
+    "@jupyterlab/application": "^4.0.0-alpha.10",
+    "@jupyterlab/apputils": "^4.0.0-alpha.10",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.10",
+    "@jupyterlab/user": "^4.0.0-alpha.10",
+    "@lumino/widgets": "^1.32.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -55,7 +52,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }

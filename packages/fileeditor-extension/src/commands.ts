@@ -1,14 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
   ISessionContextDialogs,
+  MainAreaWidget,
   sessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  CodeViewerWidget,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
@@ -35,6 +41,7 @@ import {
   textEditorIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
+import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONObject,
@@ -103,6 +110,8 @@ export namespace CommandIDs {
   export const invokeCompleter = 'completer:invoke-file';
 
   export const selectCompleter = 'completer:select-file';
+
+  export const openCodeViewer = 'code-viewer:open';
 }
 
 export interface IFileTypeData extends ReadonlyJSONObject {
@@ -254,7 +263,7 @@ export namespace Commands {
         const currentSize = config.fontSize || cssSize;
         config.fontSize = currentSize + delta;
         return settingRegistry
-          .set(id, 'editorConfig', (config as unknown) as JSONObject)
+          .set(id, 'editorConfig', config as unknown as JSONObject)
           .catch((reason: Error) => {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
@@ -279,7 +288,7 @@ export namespace Commands {
       execute: () => {
         config.lineNumbers = !config.lineNumbers;
         return settingRegistry
-          .set(id, 'editorConfig', (config as unknown) as JSONObject)
+          .set(id, 'editorConfig', config as unknown as JSONObject)
           .catch((reason: Error) => {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
@@ -313,7 +322,7 @@ export namespace Commands {
       execute: args => {
         config.lineWrap = (args['mode'] as wrappingMode) || 'off';
         return settingRegistry
-          .set(id, 'editorConfig', (config as unknown) as JSONObject)
+          .set(id, 'editorConfig', config as unknown as JSONObject)
           .catch((reason: Error) => {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
@@ -364,7 +373,7 @@ export namespace Commands {
         config.tabSize = (args['size'] as number) || 4;
         config.insertSpaces = !!args['insertSpaces'];
         return settingRegistry
-          .set(id, 'editorConfig', (config as unknown) as JSONObject)
+          .set(id, 'editorConfig', config as unknown as JSONObject)
           .catch((reason: Error) => {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
@@ -383,7 +392,7 @@ export namespace Commands {
       execute: () => {
         config.matchBrackets = !config.matchBrackets;
         return settingRegistry
-          .set(id, 'editorConfig', (config as unknown) as JSONObject)
+          .set(id, 'editorConfig', config as unknown as JSONObject)
           .catch((reason: Error) => {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
@@ -419,7 +428,7 @@ export namespace Commands {
           args['force'] ?? !config.autoClosingBrackets
         );
         return settingRegistry
-          .set(id, 'editorConfig', (config as unknown) as JSONObject)
+          .set(id, 'editorConfig', config as unknown as JSONObject)
           .catch((reason: Error) => {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
@@ -1199,6 +1208,63 @@ export namespace Commands {
     menu.runMenu.codeRunners.runAll.add({
       id: CommandIDs.runAllCode,
       isEnabled
+    });
+  }
+
+  export function addOpenCodeViewerCommand(
+    app: JupyterFrontEnd,
+    editorServices: IEditorServices,
+    tracker: WidgetTracker<MainAreaWidget<CodeViewerWidget>>,
+    trans: TranslationBundle
+  ) {
+    const openCodeViewer = async (args: {
+      content: string;
+      label?: string;
+      mimeType?: string;
+      extension?: string;
+      widgetId?: string;
+    }): Promise<CodeViewerWidget> => {
+      const func = editorServices.factoryService.newDocumentEditor;
+      const factory: CodeEditor.Factory = options => {
+        return func(options);
+      };
+
+      // Derive mimetype from extension
+      let mimetype = args.mimeType;
+      if (!mimetype && args.extension) {
+        mimetype = editorServices.mimeTypeService.getMimeTypeByFilePath(
+          `temp.${args.extension.replace(/\\.$/, '')}`
+        );
+      }
+
+      const widget = CodeViewerWidget.createCodeViewer({
+        factory,
+        content: args.content,
+        mimeType: mimetype
+      });
+      widget.title.label = args.label || trans.__('Code Viewer');
+      widget.title.caption = widget.title.label;
+
+      // Get the fileType based on the mimetype to determine the icon
+      const fileType = toArray(app.docRegistry.fileTypes()).find(fileType => {
+        return mimetype ? fileType.mimeTypes.includes(mimetype) : undefined;
+      });
+      widget.title.icon = fileType?.icon ?? textEditorIcon;
+
+      if (args.widgetId) {
+        widget.id = args.widgetId;
+      }
+      const main = new MainAreaWidget({ content: widget });
+      await tracker.add(main);
+      app.shell.add(main, 'main');
+      return widget;
+    };
+
+    app.commands.addCommand(CommandIDs.openCodeViewer, {
+      label: trans.__('Open Code Viewer'),
+      execute: (args: any) => {
+        return openCodeViewer(args);
+      }
     });
   }
 }

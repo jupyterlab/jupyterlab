@@ -1,0 +1,15 @@
+{
+  "title": "User Menu Bar",
+  "description": "User Menu Bar settings.",
+  "jupyter.lab.toolbars": {
+    "TopBar": [
+      {
+        "name": "user-menu",
+        "rank": 100
+      }
+    ]
+  },
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

@@ -7,6 +7,7 @@ import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
+  IScore,
   ReactWidget,
   SidePanel
 } from '@jupyterlab/ui-components';
@@ -97,7 +98,10 @@ export class FileBrowser extends SidePanel {
     this.listing.addClass(LISTING_CLASS);
 
     this._filenameSearcher = FilenameSearcher({
-      updateFilter: (filterFn: (item: string) => boolean) => {
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
         this.listing.model.setFilter(value => {
           return filterFn(value.name.toLowerCase());
         });
@@ -161,7 +165,10 @@ export class FileBrowser extends SidePanel {
     this._filenameSearcher.dispose();
 
     this._filenameSearcher = FilenameSearcher({
-      updateFilter: (filterFn: (item: string) => boolean) => {
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
         this.listing.model.setFilter(value => {
           return filterFn(value.name.toLowerCase());
         });

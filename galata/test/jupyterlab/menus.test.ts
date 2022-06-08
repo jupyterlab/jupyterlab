@@ -43,8 +43,7 @@ test.describe('General Tests', () => {
       if (request.method() === 'GET') {
         return route.fulfill({
           status: 200,
-          body:
-            '{"data": {"en": {"displayName": "English", "nativeName": "English"}}, "message": ""}'
+          body: '{"data": {"en": {"displayName": "English", "nativeName": "English"}}, "message": ""}'
         });
       } else {
         return route.continue();

@@ -156,9 +156,8 @@ export class FileEditor extends Widget {
     const editor = this.editor;
     const localPath = this._context.localPath;
 
-    editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(
-      localPath
-    );
+    editor.model.mimeType =
+      this._mimeTypeService.getMimeTypeByFilePath(localPath);
   }
 
   model: CodeEditor.IModel;

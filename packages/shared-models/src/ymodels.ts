@@ -26,16 +26,6 @@ export interface IYText extends models.ISharedText {
 export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
 
 export class YDocument<T> implements models.ISharedDocument {
-  get dirty(): boolean {
-    return this.ystate.get('dirty');
-  }
-
-  set dirty(value: boolean) {
-    this.transact(() => {
-      this.ystate.set('dirty', value);
-    }, false);
-  }
-
   /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
@@ -106,7 +96,8 @@ export class YDocument<T> implements models.ISharedDocument {
 
 export class YFile
   extends YDocument<models.FileChange>
-  implements models.ISharedFile, models.ISharedText, IYText {
+  implements models.ISharedFile, models.ISharedText, IYText
+{
   constructor() {
     super();
     this.ysource.observe(this._modelObserver);
@@ -152,7 +143,6 @@ export class YFile
 
   public static create(): YFile {
     const model = new YFile();
-    model.dirty = false;
     return model;
   }
 
@@ -212,7 +202,8 @@ export class YFile
  */
 export class YNotebook
   extends YDocument<models.NotebookChange>
-  implements models.ISharedNotebook {
+  implements models.ISharedNotebook
+{
   constructor(options: ISharedNotebook.IOptions) {
     super();
     this._disableDocumentWideUndoRedo = options.disableDocumentWideUndoRedo;
@@ -224,27 +215,27 @@ export class YNotebook
       return this._ycellMapping.get(ycell) as YCellType;
     });
 
-    this.ymeta.observe(this._onMetadataChanged);
+    this.ymeta.observe(this._onMetaChanged);
     this.ystate.observe(this._onStateChanged);
   }
 
   get nbformat(): number {
-    return this.ystate.get('nbformat');
+    return this.ymeta.get('nbformat');
   }
 
   set nbformat(value: number) {
     this.transact(() => {
-      this.ystate.set('nbformat', value);
+      this.ymeta.set('nbformat', value);
     }, false);
   }
 
   get nbformat_minor(): number {
-    return this.ystate.get('nbformatMinor');
+    return this.ymeta.get('nbformat_minor');
   }
 
   set nbformat_minor(value: number) {
     this.transact(() => {
-      this.ystate.set('nbformatMinor', value);
+      this.ymeta.set('nbformat_minor', value);
     }, false);
   }
 
@@ -253,7 +244,7 @@ export class YNotebook
    */
   dispose(): void {
     this.ycells.unobserve(this._onYCellsChanged);
-    this.ymeta.unobserve(this._onMetadataChanged);
+    this.ymeta.unobserve(this._onMetaChanged);
     this.ystate.unobserve(this._onStateChanged);
   }
 
@@ -374,7 +365,6 @@ export class YNotebook
     disableDocumentWideUndoRedo: boolean
   ): models.ISharedNotebook {
     const model = new YNotebook({ disableDocumentWideUndoRedo });
-    model.dirty = false;
     return model;
   }
 
@@ -442,7 +432,7 @@ export class YNotebook
   /**
    * Handle a change to the ystate.
    */
-  private _onMetadataChanged = (event: Y.YMapEvent<any>) => {
+  private _onMetaChanged = (event: Y.YMapEvent<any>) => {
     if (event.keysChanged.has('metadata')) {
       const change = event.changes.keys.get('metadata');
       const metadataChange = {
@@ -450,6 +440,26 @@ export class YNotebook
         newValue: this.getMetadata()
       };
       this._changed.emit({ metadataChange });
+    }
+
+    if (event.keysChanged.has('nbformat')) {
+      const change = event.changes.keys.get('nbformat');
+      const nbformatChanged = {
+        key: 'nbformat',
+        oldValue: change?.oldValue ? change!.oldValue : undefined,
+        newValue: this.nbformat
+      };
+      this._changed.emit({ nbformatChanged });
+    }
+
+    if (event.keysChanged.has('nbformat_minor')) {
+      const change = event.changes.keys.get('nbformat_minor');
+      const nbformatChanged = {
+        key: 'nbformat_minor',
+        oldValue: change?.oldValue ? change!.oldValue : undefined,
+        newValue: this.nbformat_minor
+      };
+      this._changed.emit({ nbformatChanged });
     }
   };
 
@@ -518,7 +528,8 @@ export const createStandaloneCell = (
 };
 
 export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
-  implements models.ISharedBaseCell<Metadata>, IYText {
+  implements models.ISharedBaseCell<Metadata>, IYText
+{
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
     const ysource = ymodel.get('source');
@@ -673,7 +684,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   /**
    * Handle a change to the ymodel.
    */
-  private _modelObserver = (events: Y.YEvent[]) => {
+  private _modelObserver = (events: Y.YEvent<any>[]) => {
     const changes: models.CellChange<Metadata> = {};
     const sourceEvent = events.find(
       event => event.target === this.ymodel.get('source')
@@ -860,7 +871,8 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
 
 export class YCodeCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedCodeCell {
+  implements models.ISharedCodeCell
+{
   /**
    * The type of the cell.
    */
@@ -977,7 +989,8 @@ export class YCodeCell
 
 export class YRawCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedRawCell {
+  implements models.ISharedRawCell
+{
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
@@ -1017,7 +1030,8 @@ export class YRawCell
 
 export class YMarkdownCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedMarkdownCell {
+  implements models.ISharedMarkdownCell
+{
   /**
    * Create a new YMarkdownCell that can be inserted into a YNotebook
    */

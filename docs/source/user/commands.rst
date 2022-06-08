@@ -30,6 +30,8 @@ The command palette can be accessed from the View menu or using the keyboard sho
 
 The command palette can be displayed in the sidebar by adding ``'modal': false`` to the Settings.
 
+.. _commands-list:
+
 Commands List
 ^^^^^^^^^^^^^
 

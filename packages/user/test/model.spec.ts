@@ -23,12 +23,13 @@ describe('user/model', () => {
       const newName = 'jovyan';
       user.fromJSON({
         ...user.toJSON(),
-        givenName: newName
+        name: newName,
+        displayName: newName
       });
 
       const [sender] = await promise;
       expect(sender).toBe(user);
-      expect(user.givenName).toBe(newName);
+      expect(user.name).toBe(newName);
     });
 
     it('Should change the name', async () => {
@@ -36,15 +37,15 @@ describe('user/model', () => {
       const newName = 'jovyan';
       user.fromJSON({
         username: user.username,
-        givenName: newName,
-        familyName: user.familyName,
+        name: newName,
+        displayName: newName,
         initials: user.initials,
         color: user.color,
         anonymous: user.anonymous
       });
       const [sender] = await promise;
       expect(sender).toBe(user);
-      expect(user.givenName).toBe(newName);
+      expect(user.name).toBe(newName);
     });
   });
 });

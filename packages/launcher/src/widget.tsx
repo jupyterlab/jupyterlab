@@ -273,7 +273,6 @@ function Card(
         launcher.pending = false;
         if (value instanceof Widget) {
           launcherCallback(value);
-          launcher.dispose();
         }
       })
       .catch(err => {

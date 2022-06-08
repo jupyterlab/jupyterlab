@@ -7,10 +7,6 @@
         "id": "jp-mainmenu-file",
         "items": [
           {
-            "command": "filebrowser:create-main-launcher",
-            "rank": 1
-          },
-          {
             "type": "separator",
             "rank": 1
           },
@@ -156,11 +152,6 @@
   "title": "File Browser",
   "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [
-    {
-      "command": "filebrowser:create-main-launcher",
-      "keys": ["Accel Shift L"],
-      "selector": "body"
-    },
     {
       "command": "filebrowser:toggle-main",
       "keys": ["Accel Shift F"],

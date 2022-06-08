@@ -15,5 +15,6 @@ import '@jupyterlab/documentsearch/style/index.js';
 import '@jupyterlab/codemirror/style/index.js';
 import '@jupyterlab/filebrowser/style/index.js';
 import '@jupyterlab/outputarea/style/index.js';
+import '@jupyterlab/toc/style/index.js';
 
 import './base.css';

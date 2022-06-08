@@ -14,9 +14,7 @@ export interface IShortcutTitleItemProps {
   active: string;
 }
 
-export class ShortcutTitleItem extends React.Component<
-  IShortcutTitleItemProps
-> {
+export class ShortcutTitleItem extends React.Component<IShortcutTitleItemProps> {
   render(): JSX.Element {
     return (
       <div
