@@ -40,20 +40,19 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.9",
-    "@jupyterlab/completer": "^4.0.0-alpha.9",
+    "@jupyterlab/application": "^4.0.0-alpha.10",
     "@jupyterlab/lsp": "^4.0.0-alpha.6",
-    "@jupyterlab/running": "^4.0.0-alpha.9",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.9",
-    "@jupyterlab/translation": "^4.0.0-alpha.9",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.24",
+    "@jupyterlab/running": "^4.0.0-alpha.10",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.10",
+    "@jupyterlab/translation": "^4.0.0-alpha.10",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.25",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/signaling": "^1.10.1",
     "@rjsf/core": "^3.1.0",
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.9",
+    "@jupyterlab/testutils": "^4.0.0-alpha.10",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

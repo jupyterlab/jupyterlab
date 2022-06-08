@@ -10,9 +10,6 @@
       "path": "../application"
     },
     {
-      "path": "../completer"
-    },
-    {
       "path": "../lsp"
     },
     {

@@ -45,19 +45,16 @@ function BuildSettingForm(props: {
   settings: TDict;
   schema: TDict;
 }): JSX.Element {
-  const {
-    [SERVER_SETTINGS]: serverSettingsSchema,
-    ...otherSettingsSchema
-  } = props.schema;
+  const { [SERVER_SETTINGS]: serverSettingsSchema, ...otherSettingsSchema } =
+    props.schema;
   const {
     [SERVER_SETTINGS]: serverSettings,
     serverName,
     ...otherSettings
   } = props.settings;
 
-  const [currentServerName, setCurrentServerName] = useState<string>(
-    serverName
-  );
+  const [currentServerName, setCurrentServerName] =
+    useState<string>(serverName);
   const onServerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     props.updateSetting(props.serverHash, { serverName: e.target.value });
     setCurrentServerName(e.target.value);
@@ -84,9 +81,8 @@ function BuildSettingForm(props: {
       defaultOtherSettings[key] = value['default'];
     }
   });
-  const [otherSettingsComposite, setOtherSettingsComposite] = useState<TDict>(
-    defaultOtherSettings
-  );
+  const [otherSettingsComposite, setOtherSettingsComposite] =
+    useState<TDict>(defaultOtherSettings);
   const onOtherSettingsChange = (
     property: string,
     value: any,

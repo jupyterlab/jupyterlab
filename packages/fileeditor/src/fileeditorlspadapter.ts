@@ -32,9 +32,8 @@ export class FileEditorAdapter extends WidgetAdapter<
       // registry (and this is arguably easier to extend), so let's check it
       // just in case; this is also how the "Klingon" language for testing
       // gets registered, so we need it for tests too.
-      let fileType = this.options.app.docRegistry.getFileTypeForModel(
-        contentsModel
-      );
+      let fileType =
+        this.options.app.docRegistry.getFileTypeForModel(contentsModel);
       return fileType.mimeTypes[0];
     } else {
       // "text/plain" this is

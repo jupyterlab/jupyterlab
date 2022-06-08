@@ -181,47 +181,41 @@ describe('@jupyterlab/lsp', () => {
     });
     describe('#extractForeignCode', () => {
       it('should prepare a code block', () => {
-        const {
-          cellCodeKept,
-          foreignDocumentsMap
-        } = document.extractForeignCode(
-          {
-            value: 'new line',
-            ceEditor: {} as CodeEditor.IEditor,
-            type: 'code'
-          },
-          { line: 0, column: 0 }
-        );
+        const { cellCodeKept, foreignDocumentsMap } =
+          document.extractForeignCode(
+            {
+              value: 'new line',
+              ceEditor: {} as CodeEditor.IEditor,
+              type: 'code'
+            },
+            { line: 0, column: 0 }
+          );
         expect(cellCodeKept).toEqual('new line');
         expect(foreignDocumentsMap.size).toEqual(0);
       });
       it('should prepare a markdown block', () => {
-        const {
-          cellCodeKept,
-          foreignDocumentsMap
-        } = document.extractForeignCode(
-          {
-            value: 'new line',
-            ceEditor: {} as CodeEditor.IEditor,
-            type: 'markdown'
-          },
-          { line: 0, column: 0 }
-        );
+        const { cellCodeKept, foreignDocumentsMap } =
+          document.extractForeignCode(
+            {
+              value: 'new line',
+              ceEditor: {} as CodeEditor.IEditor,
+              type: 'markdown'
+            },
+            { line: 0, column: 0 }
+          );
         expect(cellCodeKept).toEqual('');
         expect(foreignDocumentsMap.size).toEqual(1);
       });
       it('should prepare a raw text block', () => {
-        const {
-          cellCodeKept,
-          foreignDocumentsMap
-        } = document.extractForeignCode(
-          {
-            value: 'new line',
-            ceEditor: {} as CodeEditor.IEditor,
-            type: 'raw'
-          },
-          { line: 0, column: 0 }
-        );
+        const { cellCodeKept, foreignDocumentsMap } =
+          document.extractForeignCode(
+            {
+              value: 'new line',
+              ceEditor: {} as CodeEditor.IEditor,
+              type: 'raw'
+            },
+            { line: 0, column: 0 }
+          );
         expect(cellCodeKept).toEqual('');
         expect(foreignDocumentsMap.size).toEqual(1);
       });
@@ -234,9 +228,8 @@ describe('@jupyterlab/lsp', () => {
         expect(md.uri).toBe('test.ipynb.python-markdown.md');
       });
       it('should select the foreign document for raw cell', () => {
-        const md: VirtualDocument = document['chooseForeignDocument'](
-          rawCellExtractor
-        );
+        const md: VirtualDocument =
+          document['chooseForeignDocument'](rawCellExtractor);
         expect(md.uri).toBe('test.ipynb.python-text.txt');
       });
     });

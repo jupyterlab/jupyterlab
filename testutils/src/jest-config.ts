@@ -1,6 +1,12 @@
 import path from 'path';
 
-const esModules = ['lib0', 'y\\-protocols', 'y\\-websocket', 'yjs'].join('|');
+const esModules = [
+  'lib0',
+  'y\\-protocols',
+  'y\\-websocket',
+  'yjs',
+  'lsp-ws-connection'
+].join('|');
 
 module.exports = function (baseDir: string) {
   return {

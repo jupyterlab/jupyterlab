@@ -2,9 +2,9 @@ const childProcess = require('child_process');
 const json2ts = require('json-schema-to-typescript');
 const fs = require('fs');
 
-const package = 'jupyterlab_server';
-const schemaLocalPath = 'lsp_handler/schema/schema.json';
-const cmd = `python -c 'import pkg_resources;print(pkg_resources.resource_filename("${package}", "${schemaLocalPath}"))'`;
+const serverPackage = 'jupyter_lsp';
+const schemaLocalPath = 'schema/schema.json';
+const cmd = `python -c 'import pkg_resources;print(pkg_resources.resource_filename("${serverPackage}", "${schemaLocalPath}"))'`;
 let value;
 try {
   value = childProcess.execSync(cmd, {});

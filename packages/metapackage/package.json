@@ -80,6 +80,8 @@
     "@jupyterlab/launcher-extension": "^4.0.0-alpha.10",
     "@jupyterlab/logconsole": "^4.0.0-alpha.10",
     "@jupyterlab/logconsole-extension": "^4.0.0-alpha.10",
+    "@jupyterlab/lsp": "^4.0.0-alpha.6",
+    "@jupyterlab/lsp-extension": "^4.0.0-alpha.6",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.10",
     "@jupyterlab/mainmenu-extension": "^4.0.0-alpha.10",
     "@jupyterlab/markdownviewer": "^4.0.0-alpha.10",
@@ -125,9 +127,7 @@
     "@jupyterlab/user-extension": "^4.0.0-alpha.10",
     "@jupyterlab/vdom": "^4.0.0-alpha.10",
     "@jupyterlab/vdom-extension": "^4.0.0-alpha.10",
-    "@jupyterlab/vega5-extension": "^4.0.0-alpha.10",
-    "@jupyterlab/lsp": "^4.0.0-alpha.6",
-    "@jupyterlab/lsp-extension": "^4.0.0-alpha.6"
+    "@jupyterlab/vega5-extension": "^4.0.0-alpha.10"
   },
   "devDependencies": {
     "fs-extra": "^9.0.1",

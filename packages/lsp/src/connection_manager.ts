@@ -25,7 +25,8 @@ import type * as protocol from 'vscode-languageserver-protocol';
  * as two identical id_paths could be created for two different notebooks.
  */
 export class DocumentConnectionManager
-  implements ILSPDocumentConnectionManager {
+  implements ILSPDocumentConnectionManager
+{
   connections: Map<VirtualDocument.uri, LSPConnection>;
   adapters: Map<string, WidgetAdapter<IDocumentWidget>>;
   documents: Map<VirtualDocument.uri, VirtualDocument>;
@@ -389,11 +390,10 @@ export namespace DocumentConnectionManager {
       : virtualDocumentsUri;
 
     // for now take the best match only
-    const matchingServers = Private.getLanguageServerManager().getMatchingServers(
-      {
+    const matchingServers =
+      Private.getLanguageServerManager().getMatchingServers({
         language
-      }
-    );
+      });
     const languageServerId =
       matchingServers.length === 0 ? null : matchingServers[0];
 

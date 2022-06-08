@@ -28,6 +28,7 @@ if [[ $GROUP == js* ]]; then
         pushd packages/${PKG}
     fi
 
+    lerna run build:schema
     jlpm run build:test; true
 
     export FORCE_COLOR=1

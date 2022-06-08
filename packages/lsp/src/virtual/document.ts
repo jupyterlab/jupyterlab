@@ -656,9 +656,8 @@ export class VirtualDocument {
   }
 
   get lastLine(): string {
-    const linesInLastBlock = this.lineBlocks[this.lineBlocks.length - 1].split(
-      '\n'
-    );
+    const linesInLastBlock =
+      this.lineBlocks[this.lineBlocks.length - 1].split('\n');
     return linesInLastBlock[linesInLastBlock.length - 1];
   }
 

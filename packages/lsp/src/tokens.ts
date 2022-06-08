@@ -304,9 +304,10 @@ export interface ILSPCodeExtractorsManager {
   ): void;
 }
 
-export const ILSPDocumentConnectionManager = new Token<
-  ILSPDocumentConnectionManager
->('@jupyterlab/lsp:ILSPDocumentConnectionManager');
+export const ILSPDocumentConnectionManager =
+  new Token<ILSPDocumentConnectionManager>(
+    '@jupyterlab/lsp:ILSPDocumentConnectionManager'
+  );
 
 export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
   '@jupyterlab/lsp:ILSPFeatureManager'

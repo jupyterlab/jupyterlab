@@ -50,11 +50,11 @@ export const expandPath = (
   path: string[],
   value: ReadonlyJSONValue
 ): ReadonlyJSONObject => {
-  const obj: any = {};
+  const obj: any = Object.create(null);
 
   let curr = obj;
   path.forEach((prop: string, i: any) => {
-    curr[prop] = {};
+    curr[prop] = Object.create(null);
 
     if (i === path.length - 1) {
       curr[prop] = value;

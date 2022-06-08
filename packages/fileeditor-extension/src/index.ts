@@ -41,6 +41,11 @@ import {
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
+import {
+  ILSPCodeExtractorsManager,
+  ILSPDocumentConnectionManager,
+  ILSPFeatureManager
+} from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
 import { Session } from '@jupyterlab/services';
@@ -51,13 +56,8 @@ import { ITranslator } from '@jupyterlab/translation';
 import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
+
 import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
-import { Session } from '@jupyterlab/services';
-import {
-  ILSPCodeExtractorsManager,
-  ILSPDocumentConnectionManager,
-  ILSPFeatureManager
-} from '@jupyterlab/lsp';
 
 export { Commands } from './commands';
 

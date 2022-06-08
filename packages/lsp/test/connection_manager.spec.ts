@@ -9,6 +9,7 @@ jest.mock('@jupyterlab/notebook');
 
 const spy = jest.spyOn(ServerConnection, 'makeRequest');
 const specs = {
+  /* eslint-disable */
   pyls: {
     argv: [''],
     display_name: 'pyls',
@@ -17,8 +18,10 @@ const specs = {
     mime_types: ['text/python', 'text/x-ipython'],
     version: 2
   }
+  /* eslint-enable  */
 };
 const sessions = {
+  /* eslint-disable */
   pyls: {
     handler_count: 0,
     last_handler_message_at: null,
@@ -26,6 +29,7 @@ const sessions = {
     spec: specs.pyls,
     status: 'not_started'
   }
+  /* eslint-enable  */
 };
 spy.mockImplementation((status, method, setting) => {
   return Promise.resolve({

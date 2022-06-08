@@ -54,31 +54,32 @@ const featurePlugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
   autoStart: true
 };
 
-const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> = {
-  id: ILSPCodeExtractorsManager.name,
-  requires: [],
-  activate: app => {
-    const extractorManager = new CodeExtractorsManager();
+const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> =
+  {
+    id: ILSPCodeExtractorsManager.name,
+    requires: [],
+    activate: app => {
+      const extractorManager = new CodeExtractorsManager();
 
-    const markdownCellExtractor = new TextForeignCodeExtractor({
-      language: 'markdown',
-      isStandalone: false,
-      file_extension: 'md',
-      cellType: ['markdown']
-    });
-    extractorManager.register(markdownCellExtractor, null);
-    const rawCellExtractor = new TextForeignCodeExtractor({
-      language: 'text',
-      isStandalone: false,
-      file_extension: 'txt',
-      cellType: ['raw']
-    });
-    extractorManager.register(rawCellExtractor, null);
-    return extractorManager;
-  },
-  provides: ILSPCodeExtractorsManager,
-  autoStart: true
-};
+      const markdownCellExtractor = new TextForeignCodeExtractor({
+        language: 'markdown',
+        isStandalone: false,
+        file_extension: 'md',
+        cellType: ['markdown']
+      });
+      extractorManager.register(markdownCellExtractor, null);
+      const rawCellExtractor = new TextForeignCodeExtractor({
+        language: 'text',
+        isStandalone: false,
+        file_extension: 'txt',
+        cellType: ['raw']
+      });
+      extractorManager.register(rawCellExtractor, null);
+      return extractorManager;
+    },
+    provides: ILSPCodeExtractorsManager,
+    autoStart: true
+  };
 
 /**
  * Activate the lsp plugin.
