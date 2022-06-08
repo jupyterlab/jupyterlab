@@ -884,6 +884,7 @@ export class Stdin extends Widget implements IStdin {
     this._future = options.future;
     this._parentHeader = options.parent_header;
     this._value = options.prompt + ' ';
+    this._password = options.password;
   }
 
   /**
@@ -915,8 +916,8 @@ export class Stdin extends Widget implements IStdin {
           },
           this._parentHeader
         );
-        if (input.type === 'password') {
-          this._value += Array(input.value.length + 1).join('·');
+        if (this._password) {
+          this._value += '········';
         } else {
           this._value += input.value;
         }
@@ -952,6 +953,7 @@ export class Stdin extends Widget implements IStdin {
   private _input: HTMLInputElement;
   private _value: string;
   private _promise = new PromiseDelegate<void>();
+  private _password: boolean;
 }
 
 export namespace Stdin {
