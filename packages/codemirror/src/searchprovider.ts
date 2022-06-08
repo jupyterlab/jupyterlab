@@ -535,7 +535,7 @@ export class CodeMirrorSearchHighlighter {
     this._cm = editor;
     this._matches = new Array<ISearchMatch>();
     this._currentIndex = null;
-    
+
     this._highlightEffect = StateEffect.define<{matches: ISearchMatch[]}>({
       map: (value, mapping) => ({matches: value.matches.map(v => ({text: v.text, position: mapping.mapPos(v.position)}))})
     });
@@ -647,7 +647,7 @@ export class CodeMirrorSearchHighlighter {
         : undefined
     );
   }
-  
+
   private _highlightCurrentMatch(): void {
     // Highlight the current index
     if (this._currentIndex !== null) {

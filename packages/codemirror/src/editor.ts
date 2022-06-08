@@ -444,8 +444,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Test whether the editor has keyboard focus.
    */
   hasFocus(): boolean {
-    return this._editor.dom.contains(document.activeElement);
-    //return this._editor.getWrapperElement().contains(document.activeElement);
+    return this._editor.hasFocus;
   }
 
   /**
@@ -453,7 +452,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   blur(): void {
     this._editor.contentDOM.blur();
-    //this._editor.getInputField().blur();
   }
 
   /**
@@ -477,31 +475,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._clearHover();
   }
 
-  // todo: docs, maybe define overlay options as a type?
-  addOverlay(mode: string | object, options?: object): void {
-    // TODO: CM6 migration
-    //this._editor.addOverlay(mode, options);
-  }
-
-  // TODO: CM6 remove this function
-  removeOverlay(mode: string | object): void {
-    // TODO: CM6 migration
-    //this._editor.removeOverlay(mode);
-  }
-
-  // TODO: CM6 migration
-  /*getSearchCursor(
-    query: string | RegExp,
-    start?: CodeMirror.Position,
-    caseFold?: boolean
-  ): CodeMirror.SearchCursor {
-    return this._editor.getDoc().getSearchCursor(query, start, caseFold);
-  }
-
-  getCursor(start?: string): CodeMirror.Position {
-    return this._editor.getDoc().getCursor(start);
-  }*/
-
   get state(): EditorState {
     return this._editor.state;
   }
@@ -515,25 +488,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     return this.doc.lines - 1;
   }
 
-  // TODO: CM6 migration (see scrollTo)
-  /*scrollIntoView(
-    pos: { from: CodeMirror.Position; to: CodeMirror.Position },
-    margin: number
-  ): void {
-    this._editor.scrollIntoView(pos, margin);
-  }
-
-  scrollIntoViewCentered(pos: CodeMirror.Position): void {
-    const top = this._editor.charCoords(pos, 'local').top;
-    const height = this._editor.getWrapperElement().offsetHeight;
-    this.host.scrollIntoView?.({
-      behavior: 'auto',
-      block: 'center',
-      inline: 'center'
-    });
-    this._editor.scrollTo(null, top - height / 2);
-  }*/
-
   cursorCoords(
     where: boolean,
     mode?: 'window' | 'page' | 'local'
@@ -542,7 +496,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const pos = where ? selection.from : selection.to;
     const rect = this.editor.coordsAtPos(pos);
     return rect as { left: number; top: number; bottom: number };
-    //return this._editor.cursorCoords(where, mode);
   }
 
   getRange(
@@ -553,7 +506,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const fromOffset = this.getOffsetAt(this._toPosition(from));
     const toOffset = this.getOffsetAt(this._toPosition(to));
     return this.state.sliceDoc(fromOffset, toOffset);
-    //return this._editor.getDoc().getRange(from, to, separator);
   }
 
   /**
@@ -587,21 +539,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given position in the editor.
    */
   revealPosition(position: CodeEditor.IPosition): void {
-    // TODO: CM6
-    //const cmPosition = this._toCodeMirrorPosition(position);
-    //this._editor.scrollIntoView(cmPosition);
+    const offset = this.getOffsetAt(position);
+    this._editor.dispatch({
+      effects: EditorView.scrollIntoView(offset)
+    });
   }
 
   /**
    * Reveal the given selection in the editor.
    */
   revealSelection(selection: CodeEditor.IRange): void {
-    // TODO: CM6
-    /*const range = {
-      from: this._toCodeMirrorPosition(selection.start),
-      to: this._toCodeMirrorPosition(selection.end)
-    };
-    this._editor.scrollIntoView(range);*/
+    const start = this.getOffsetAt(selection.start);
+    const end = this.getOffsetAt(selection.end);
+    this._editor.dispatch({
+      effects: EditorView.scrollIntoView(EditorSelection.range(start, end))
+    });
   }
 
   /**
@@ -679,7 +631,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Gets the selections for all the cursors, never `null` or empty.
    */
   getSelections(): CodeEditor.ITextSelection[] {
-    //const selections = this.doc.listSelections();
     const selections = this.state.selection.ranges; //= [{anchor: number, head: number}]
     if (selections.length > 0) {
       const sel = selections.map(r => ({
@@ -687,12 +638,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         head: this._toCodeMirrorPosition(this.getPositionAt(r.to))
       }));
       return sel.map(selection => this._toSelection(selection));
-      //return selections.map(selection => this._toSelection(selection));
     }
     const cursor = this._toCodeMirrorPosition(
       this.getPositionAt(this.state.selection.main.head)
     );
-    //const cursor = this.doc.getCursor();
     const selection = this._toSelection({ anchor: cursor, head: cursor });
     return [selection];
   }
@@ -757,7 +706,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       state: this.state,
       dispatch: this.editor.dispatch
     });
-    //this.execCommand('newlineAndIndent');
   }
 
   /**
@@ -768,9 +716,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   execCommand(command: Command | StateCommand): void {
     command(this.editor);
   }
-  /*execCommand(command: string): void {
-    this._editor.execCommand(command);
-  }*/
 
   /**
    * Handle keydown events from the editor.
