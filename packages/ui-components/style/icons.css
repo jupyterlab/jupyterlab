@@ -251,7 +251,7 @@ body .jp-icon-markdown .jp-icon-markdown0[fill] {
 
 /* CSS for icons in selected filebrowser listing items */
 .jp-DirListing-item.jp-mod-selected .jp-icon-selectable[fill] {
-  fill: #fff;
+  fill: var(--jp-icon-mono-inverse);
 }
 
 .jp-DirListing-item.jp-mod-selected .jp-icon-selectable-inverse[fill] {
@@ -260,7 +260,7 @@ body .jp-icon-markdown .jp-icon-markdown0[fill] {
 
 /* CSS for icons in selected tabs in the sidebar tab manager */
 #tab-manager .lm-TabBar-tab.jp-mod-active .jp-icon-selectable[fill] {
-  fill: #fff;
+  fill: var(--jp-icon-mono-inverse);
 }
 
 #tab-manager .lm-TabBar-tab.jp-mod-active .jp-icon-selectable-inverse[fill] {
@@ -292,7 +292,7 @@ body .jp-icon-markdown .jp-icon-markdown0[fill] {
   .lm-TabBar-tab.jp-mod-dirty
   > .lm-TabBar-tabCloseIcon
   > :not(:hover)
-  > .jp-icon3[fill] {
+  > .jp-icon-mono[fill] {
   fill: none;
 }
 
@@ -321,7 +321,7 @@ body .jp-icon-markdown .jp-icon-markdown0[fill] {
   .lm-TabBar-tab.lm-mod-closable.jp-mod-dirty
   > .lm-TabBar-tabCloseIcon
   > :not(:hover)
-  > .jp-icon3[fill] {
+  > .jp-icon-mono[fill] {
   fill: none;
 }
 

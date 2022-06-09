@@ -7,7 +7,7 @@
   background-color: var(--jp-inverse-layout-color4);
 }
 
-.jp-toc-numberingButton button.lm-mod-toggled .jp-icon3[fill] {
+.jp-toc-numberingButton button.lm-mod-toggled .jp-icon-mono[fill] {
   fill: var(--jp-layout-color1);
 }
 

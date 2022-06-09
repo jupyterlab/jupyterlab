@@ -102,7 +102,7 @@
   width: 20px;
 }
 
-.jp-SearchIconGroup .jp-icon3[fill] {
+.jp-SearchIconGroup .jp-icon-mono[fill] {
   fill: var(--jp-layout-color0);
 }
 
