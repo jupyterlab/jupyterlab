@@ -30,7 +30,6 @@
   THE SOFTWARE.
 */
 
-//import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IBaseSearchProvider,
   ISearchMatch,
@@ -42,6 +41,7 @@ import { CodeMirrorEditor } from './editor';
 import { RegExpCursor } from '@codemirror/search';
 import {
   ChangeSpec,
+  Compartment,
   StateEffect,
   StateEffectType,
   StateField
@@ -49,7 +49,8 @@ import {
 import {
   Decoration,
   DecorationSet,
-  EditorView
+  EditorView,
+  ViewUpdate
 } from '@codemirror/view';
 
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
@@ -58,12 +59,17 @@ type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
  * CodeMirror search provider for file editor
  */
 export class CodeMirrorSearchProvider implements IBaseSearchProvider {
-
-  constructor() {
-    this._highlightEffect = StateEffect.define<{matches: ISearchMatch[]}>({
-      map: (value, mapping) => ({matches: value.matches.map(v => ({text: v.text, position: mapping.mapPos(v.position)}))})
+  constructor(editor: CodeMirrorEditor) {
+    this.editor = editor;
+    this._highlightEffect = StateEffect.define<{ matches: ISearchMatch[] }>({
+      map: (value, mapping) => ({
+        matches: value.matches.map(v => ({
+          text: v.text,
+          position: mapping.mapPos(v.position)
+        }))
+      })
     });
-    this._highlightMark = Decoration.mark({class: "cm-searching"});
+    this._highlightMark = Decoration.mark({ class: 'cm-searching' });
 
     this._highlightField = StateField.define<DecorationSet>({
       create: () => {
@@ -73,14 +79,18 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
         highlights = highlights.map(transaction.changes);
         for (let ef of transaction.effects) {
           if (ef.is(this._highlightEffect)) {
-            const e = ef as StateEffect<{matches: ISearchMatch[]}>;
+            const e = ef as StateEffect<{ matches: ISearchMatch[] }>;
             if (e.value.matches.length) {
-              console.log("updating highlights");
+              console.log('updating highlights');
               highlights = highlights.update({
-                add: e.value.matches.map(m => this._highlightMark.range(m.position, m.position + m.text.length))
+                add: e.value.matches.map(m =>
+                  this._highlightMark.range(
+                    m.position,
+                    m.position + m.text.length
+                  )
+                )
               });
-            }
-            else {
+            } else {
               highlights = Decoration.none;
             }
           }
@@ -89,6 +99,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       },
       provide: f => EditorView.decorations.from(f)
     });
+
+    this._listener = new Compartment();
+    this.editor.injectExtension(this._listener.of([]));
   }
 
   /**
@@ -138,8 +151,16 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
 
     this._query = query;
 
-    // TODO: CM6 migration
-    //CodeMirror.on(this.editor.doc, 'change', this._onDocChanged.bind(this));
+    this.editor.editor.dispatch({
+      effects: this._listener.reconfigure(
+        EditorView.updateListener.of((v: ViewUpdate) => {
+          if (v.docChanged) {
+            this._onDocChanged(v);
+          }
+        })
+      )
+    });
+
     if (refreshOverlay) {
       this._refreshOverlay();
     }
@@ -180,8 +201,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
         end: from
       });
     }
-    // TODO: CM6 migration
-    //CodeMirror.off(this.editor.doc, 'change', this._onDocChanged.bind(this));
+    this.editor.editor.dispatch({
+      effects: this._listener.reconfigure([])
+    });
   }
 
   /**
@@ -232,7 +254,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     return match;*/
   }
 
-  private async _highlightCurrentMatch(cursorMatch: Private.ICodeMirrorMatch | null): Promise<ISearchMatch | undefined> {
+  private async _highlightCurrentMatch(
+    cursorMatch: Private.ICodeMirrorMatch | null
+  ): Promise<ISearchMatch | undefined> {
     // Highlight the current index
     if (!cursorMatch) {
       // Set cursor to remove any selection
@@ -244,12 +268,14 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     this._currentMatch = match;
     this.editor.editor.focus();
     this.editor.editor.dispatch({
-      selection: { anchor: match.position, head: match.position + match.text.length },
+      selection: {
+        anchor: match.position,
+        head: match.position + match.text.length
+      },
       scrollIntoView: true
     });
     return match;
   }
-
 
   /**
    * Replace the currently selected match with the provided text
@@ -364,11 +390,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    */
   readonly isReadOnly = false;
 
-  // TODO: CM6 migration
-  /*private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange): void {
-    // If we get newlines added/removed, the line numbers across the
-    // match state are all shifted, so here we need to recalculate it
-    if (changeObj.text.length > 1 || (changeObj.removed?.length ?? 0) > 1) {
+  private _onDocChanged(view: ViewUpdate): void {
+    // TODO: CM6 migration
+    /*if (changeObj.text.length > 1 || (changeObj.removed?.length ?? 0) > 1) {
       this._setInitialMatches(this._query)
         .then(() => {
           this._changed.emit(undefined);
@@ -378,15 +402,17 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
             `Fail to reapply search on CodeMirror document change:\n${reason}`
           );
         });
-    }
-  }*/
+    }*/
+  }
 
   private _refreshOverlay() {
-    let effects: StateEffect<unknown>[] = [this._highlightEffect.of({matches: this.matches})];
+    let effects: StateEffect<unknown>[] = [
+      this._highlightEffect.of({ matches: this.matches })
+    ];
     if (!this.editor.state.field(this._highlightField, false)) {
       effects.push(StateEffect.appendConfig.of([this._highlightField]));
     }
-    this.editor.editor.dispatch({effects});
+    this.editor.editor.dispatch({ effects });
     this._changed.emit(undefined);
   }
 
@@ -513,9 +539,10 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
   private _disposed = false;
-  private _highlightEffect: StateEffectType<{matches: ISearchMatch[]}>;
+  private _highlightEffect: StateEffectType<{ matches: ISearchMatch[] }>;
   private _highlightMark: Decoration;
   private _highlightField: StateField<DecorationSet>;
+  private _listener: Compartment;
 }
 
 /**
@@ -525,7 +552,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
  * the `matches` attributes.
  */
 export class CodeMirrorSearchHighlighter {
-
   /**
    * Constructor
    *
@@ -536,10 +562,15 @@ export class CodeMirrorSearchHighlighter {
     this._matches = new Array<ISearchMatch>();
     this._currentIndex = null;
 
-    this._highlightEffect = StateEffect.define<{matches: ISearchMatch[]}>({
-      map: (value, mapping) => ({matches: value.matches.map(v => ({text: v.text, position: mapping.mapPos(v.position)}))})
+    this._highlightEffect = StateEffect.define<{ matches: ISearchMatch[] }>({
+      map: (value, mapping) => ({
+        matches: value.matches.map(v => ({
+          text: v.text,
+          position: mapping.mapPos(v.position)
+        }))
+      })
     });
-    this._highlightMark = Decoration.mark({class: "cm-searching"});
+    this._highlightMark = Decoration.mark({ class: 'cm-searching' });
 
     this._highlightField = StateField.define<DecorationSet>({
       create: () => {
@@ -549,14 +580,18 @@ export class CodeMirrorSearchHighlighter {
         highlights = highlights.map(transaction.changes);
         for (let ef of transaction.effects) {
           if (ef.is(this._highlightEffect)) {
-            const e = ef as StateEffect<{matches: ISearchMatch[]}>;
+            const e = ef as StateEffect<{ matches: ISearchMatch[] }>;
             if (e.value.matches.length) {
-              console.log("updating highlights");
+              console.log('updating highlights');
               highlights = highlights.update({
-                add: e.value.matches.map(m => this._highlightMark.range(m.position, m.position + m.text.length))
+                add: e.value.matches.map(m =>
+                  this._highlightMark.range(
+                    m.position,
+                    m.position + m.text.length
+                  )
+                )
               });
-            }
-            else {
+            } else {
               highlights = Decoration.none;
             }
           }
@@ -603,7 +638,7 @@ export class CodeMirrorSearchHighlighter {
     this._matches = [];
 
     this._cm.editor.dispatch({
-      effects: this._highlightEffect.of({matches: []})
+      effects: this._highlightEffect.of({ matches: [] })
     });
 
     const selection = this._cm.state.selection.main;
@@ -654,7 +689,10 @@ export class CodeMirrorSearchHighlighter {
       const match = this.matches[this._currentIndex];
       this._cm.editor.focus();
       this._cm.editor.dispatch({
-        selection: { anchor: match.position, head: match.position + match.text.length },
+        selection: {
+          anchor: match.position,
+          head: match.position + match.text.length
+        },
         scrollIntoView: true
       });
     } else {
@@ -664,11 +702,13 @@ export class CodeMirrorSearchHighlighter {
   }
 
   private _refresh(): void {
-    let effects: StateEffect<unknown>[] = [this._highlightEffect.of({matches: this.matches})];
+    let effects: StateEffect<unknown>[] = [
+      this._highlightEffect.of({ matches: this.matches })
+    ];
     if (!this._cm.state.field(this._highlightField, false)) {
       effects.push(StateEffect.appendConfig.of([this._highlightField]));
     }
-    this._cm.editor.dispatch({effects});
+    this._cm.editor.dispatch({ effects });
   }
 
   private _findNext(reverse: boolean): number | null {
@@ -723,7 +763,7 @@ export class CodeMirrorSearchHighlighter {
   private _cm: CodeMirrorEditor;
   private _currentIndex: number | null;
   private _matches: ISearchMatch[];
-  private _highlightEffect: StateEffectType<{matches: ISearchMatch[]}>;
+  private _highlightEffect: StateEffectType<{ matches: ISearchMatch[] }>;
   private _highlightMark: Decoration;
   private _highlightField: StateField<DecorationSet>;
 }

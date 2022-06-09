@@ -40,7 +40,7 @@ export class FileEditor extends Widget {
     this.addClass('jp-FileEditor');
 
     const context = (this._context = options.context);
-    //this._mimeTypeService = options.mimeTypeService;
+    this._mimeTypeService = options.mimeTypeService;
 
     const editorWidget = (this._editorWidget = new CodeEditorWrapper({
       factory: options.factory,
@@ -184,8 +184,7 @@ export namespace FileEditor {
     /**
      * The mime type service for the editor.
      */
-    // TODO: CM6 migration
-    //mimeTypeService: IEditorMimeTypeService;
+    mimeTypeService: IEditorMimeTypeService;
 
     /**
      * The document context associated with the editor.
@@ -221,9 +220,8 @@ export class FileEditorFactory extends ABCWidgetFactory<
     };
     const content = new FileEditor({
       factory,
-      context /*,
-    // TODO: CM6 migration
-      mimeTypeService: this._services.mimeTypeService*/
+      context,
+      mimeTypeService: this._services.mimeTypeService
     });
 
     content.title.icon = textEditorIcon;
