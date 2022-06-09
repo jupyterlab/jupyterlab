@@ -2,15 +2,26 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { CellType } from '@jupyterlab/nbformat';
 import { ServerConnection } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
+import {
+  AnyCompletion,
+  AnyLocation,
+  IDocumentInfo,
+  ILspConnection,
+  ILspOptions,
+  IPosition,
+  ITokenInfo
+} from 'lsp-ws-connection';
 
-import { LanguageServer2 as LSPLanguageServerSettings } from './_plugin';
-import * as SCHEMA from './_schema';
 import { WidgetAdapter } from './adapters/adapter';
-import { ILSPConnection } from './connection';
 import { IForeignCodeExtractor } from './extractors/types';
 import { ClientCapabilities, LanguageIdentifier } from './lsp';
+import { LanguageServer2 as LSPLanguageServerSettings } from './plugin';
+import * as SCHEMA from './schema';
 import { VirtualDocument } from './virtual/document';
+
+import type * as rpc from 'vscode-jsonrpc';
+import type * as lsp from 'vscode-languageserver-protocol';
 
 export type TLanguageServerId =
   | 'pylsp'
@@ -316,3 +327,185 @@ export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
 export const ILSPCodeExtractorsManager = new Token<ILSPCodeExtractorsManager>(
   '@jupyterlab/lsp:ILSPCodeExtractorsManager'
 );
+
+export interface ILSPOptions extends ILspOptions {
+  capabilities: ClientCapabilities;
+  serverIdentifier?: string;
+}
+
+/**
+ * Method strings are reproduced here because a non-typing import of
+ * `vscode-languageserver-protocol` is ridiculously expensive.
+ */
+export namespace Method {
+  /** Server notifications */
+  export enum ServerNotification {
+    PUBLISH_DIAGNOSTICS = 'textDocument/publishDiagnostics',
+    SHOW_MESSAGE = 'window/showMessage',
+    LOG_TRACE = '$/logTrace',
+    LOG_MESSAGE = 'window/logMessage'
+  }
+
+  /** Client notifications */
+  export enum ClientNotification {
+    DID_CHANGE = 'textDocument/didChange',
+    DID_CHANGE_CONFIGURATION = 'workspace/didChangeConfiguration',
+    DID_OPEN = 'textDocument/didOpen',
+    DID_SAVE = 'textDocument/didSave',
+    INITIALIZED = 'initialized',
+    SET_TRACE = '$/setTrace'
+  }
+
+  /** Server requests */
+  export enum ServerRequest {
+    REGISTER_CAPABILITY = 'client/registerCapability',
+    SHOW_MESSAGE_REQUEST = 'window/showMessageRequest',
+    UNREGISTER_CAPABILITY = 'client/unregisterCapability',
+    WORKSPACE_CONFIGURATION = 'workspace/configuration'
+  }
+
+  /** Client requests */
+  export enum ClientRequest {
+    COMPLETION = 'textDocument/completion',
+    COMPLETION_ITEM_RESOLVE = 'completionItem/resolve',
+    DEFINITION = 'textDocument/definition',
+    DOCUMENT_HIGHLIGHT = 'textDocument/documentHighlight',
+    DOCUMENT_SYMBOL = 'textDocument/documentSymbol',
+    HOVER = 'textDocument/hover',
+    IMPLEMENTATION = 'textDocument/implementation',
+    INITIALIZE = 'initialize',
+    REFERENCES = 'textDocument/references',
+    RENAME = 'textDocument/rename',
+    SIGNATURE_HELP = 'textDocument/signatureHelp',
+    TYPE_DEFINITION = 'textDocument/typeDefinition'
+  }
+}
+
+export interface IServerNotifyParams {
+  [Method.ServerNotification.LOG_MESSAGE]: lsp.LogMessageParams;
+  [Method.ServerNotification.LOG_TRACE]: rpc.LogTraceParams;
+  [Method.ServerNotification.PUBLISH_DIAGNOSTICS]: lsp.PublishDiagnosticsParams;
+  [Method.ServerNotification.SHOW_MESSAGE]: lsp.ShowMessageParams;
+}
+
+export interface IClientNotifyParams {
+  [Method.ClientNotification
+    .DID_CHANGE_CONFIGURATION]: lsp.DidChangeConfigurationParams;
+  [Method.ClientNotification.DID_CHANGE]: lsp.DidChangeTextDocumentParams;
+  [Method.ClientNotification.DID_OPEN]: lsp.DidOpenTextDocumentParams;
+  [Method.ClientNotification.DID_SAVE]: lsp.DidSaveTextDocumentParams;
+  [Method.ClientNotification.INITIALIZED]: lsp.InitializedParams;
+  [Method.ClientNotification.SET_TRACE]: rpc.SetTraceParams;
+}
+
+export interface IServerRequestParams {
+  [Method.ServerRequest.REGISTER_CAPABILITY]: lsp.RegistrationParams;
+  [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.ShowMessageRequestParams;
+  [Method.ServerRequest.UNREGISTER_CAPABILITY]: lsp.UnregistrationParams;
+  [Method.ServerRequest.WORKSPACE_CONFIGURATION]: lsp.ConfigurationParams;
+}
+
+export interface IServerResult {
+  [Method.ServerRequest.REGISTER_CAPABILITY]: void;
+  [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.MessageActionItem | null;
+  [Method.ServerRequest.UNREGISTER_CAPABILITY]: void;
+  [Method.ServerRequest.WORKSPACE_CONFIGURATION]: any[];
+}
+
+export interface IClientRequestParams {
+  [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
+  [Method.ClientRequest.COMPLETION]: lsp.CompletionParams;
+  [Method.ClientRequest.DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbolParams;
+  [Method.ClientRequest.HOVER]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.IMPLEMENTATION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.INITIALIZE]: lsp.InitializeParams;
+  [Method.ClientRequest.REFERENCES]: lsp.ReferenceParams;
+  [Method.ClientRequest.RENAME]: lsp.RenameParams;
+  [Method.ClientRequest.SIGNATURE_HELP]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.TYPE_DEFINITION]: lsp.TextDocumentPositionParams;
+}
+
+export interface IClientResult {
+  [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
+  [Method.ClientRequest.COMPLETION]: AnyCompletion;
+  [Method.ClientRequest.DEFINITION]: AnyLocation;
+  [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.DocumentHighlight[];
+  [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbol[];
+  [Method.ClientRequest.HOVER]: lsp.Hover | null;
+  [Method.ClientRequest.IMPLEMENTATION]: AnyLocation;
+  [Method.ClientRequest.INITIALIZE]: lsp.InitializeResult;
+  [Method.ClientRequest.REFERENCES]: lsp.Location[] | null;
+  [Method.ClientRequest.RENAME]: lsp.WorkspaceEdit;
+  [Method.ClientRequest.SIGNATURE_HELP]: lsp.SignatureHelp;
+  [Method.ClientRequest.TYPE_DEFINITION]: AnyLocation;
+}
+
+export type ServerNotifications<
+  T extends keyof IServerNotifyParams = keyof IServerNotifyParams
+> = {
+  readonly // ISignal does not have emit, which is intended - client cannot emit server notifications.
+  [key in T]: ISignal<ILSPConnection, IServerNotifyParams[key]>;
+};
+
+export type ClientNotifications<
+  T extends keyof IClientNotifyParams = keyof IClientNotifyParams
+> = {
+  readonly // Signal has emit.
+  [key in T]: Signal<ILSPConnection, IClientNotifyParams[key]>;
+};
+
+export interface IClientRequestHandler<
+  T extends keyof IClientRequestParams = keyof IClientRequestParams
+> {
+  request(params: IClientRequestParams[T]): Promise<IClientResult[T]>;
+}
+
+export interface IServerRequestHandler<
+  T extends keyof IServerRequestParams = keyof IServerRequestParams
+> {
+  setHandler(
+    handler: (
+      params: IServerRequestParams[T],
+      connection?: ILSPConnection
+    ) => Promise<IServerResult[T]>
+  ): void;
+  clearHandler(): void;
+}
+
+export type ClientRequests<
+  T extends keyof IClientRequestParams = keyof IClientRequestParams
+> = {
+  readonly // has async request(params) returning a promise with result.
+  [key in T]: IClientRequestHandler<key>;
+};
+
+export type ServerRequests<
+  T extends keyof IServerRequestParams = keyof IServerRequestParams
+> = {
+  readonly // has async request(params) returning a promise with result.
+  [key in T]: IServerRequestHandler<key>;
+};
+
+export interface ILSPConnection extends ILspConnection {
+  serverIdentifier?: string;
+  serverLanguage?: string;
+  logAllCommunication: boolean;
+  isReady: boolean;
+  clientNotifications: ClientNotifications;
+  serverNotifications: ServerNotifications;
+  clientRequests: ClientRequests;
+  serverRequests: ServerRequests;
+  sendSaved(documentInfo: IDocumentInfo): void;
+  sendOpenWhenReady(documentInfo: IDocumentInfo): void;
+  sendFullTextChange(text: string, documentInfo: IDocumentInfo): void;
+  getCompletion(
+    location: IPosition,
+    token: ITokenInfo,
+    documentInfo: IDocumentInfo,
+    emit?: boolean,
+    triggerCharacter?: string,
+    triggerKind?: lsp.CompletionTriggerKind
+  ): Promise<lsp.CompletionItem[] | undefined>;
+}

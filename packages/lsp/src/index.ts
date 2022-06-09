@@ -19,4 +19,4 @@ export * from './feature';
 export * from './extractors/manager';
 export * from './extractors/text_extractor';
 export * from './extractors/types';
-export * from './_plugin';
+export * from './plugin';

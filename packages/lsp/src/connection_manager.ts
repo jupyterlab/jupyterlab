@@ -2,13 +2,14 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Signal } from '@lumino/signaling';
 
-import { AskServersToSendTraceNotifications } from './_plugin';
 import { WidgetAdapter } from './adapters/adapter';
-import { ILSPConnection, LSPConnection } from './connection';
+import { LSPConnection } from './connection';
 import { ClientCapabilities } from './lsp';
+import { AskServersToSendTraceNotifications } from './plugin';
 import {
   IDocumentConnectionData,
   ILanguageServerManager,
+  ILSPConnection,
   ILSPDocumentConnectionManager,
   ISocketConnectionOptions,
   TLanguageServerConfigurations,

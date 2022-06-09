@@ -1,20 +1,20 @@
 {
   "name": "@jupyterlab/example-console",
-  "version": "4.0.0-alpha.10",
+  "version": "4.0.0-alpha.11",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.10",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.10",
-    "@jupyterlab/console": "^4.0.0-alpha.10",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.10",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.10",
-    "@jupyterlab/services": "^7.0.0-alpha.10",
-    "@jupyterlab/theme-light-extension": "^4.0.0-alpha.10",
-    "@jupyterlab/translation": "^4.0.0-alpha.10",
+    "@jupyterlab/application": "^4.0.0-alpha.11",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.11",
+    "@jupyterlab/console": "^4.0.0-alpha.11",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.11",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.11",
+    "@jupyterlab/services": "^7.0.0-alpha.11",
+    "@jupyterlab/theme-light-extension": "^4.0.0-alpha.11",
+    "@jupyterlab/translation": "^4.0.0-alpha.11",
     "@lumino/commands": "^1.20.0",
     "@lumino/widgets": "^1.32.0",
     "es6-promise": "~4.2.8"

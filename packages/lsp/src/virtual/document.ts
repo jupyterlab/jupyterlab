@@ -894,39 +894,41 @@ export class UpdateManager {
     let update = new Promise<void>((resolve, reject) => {
       // defer the update by up to 50 ms (10 retrials * 5 ms break),
       // awaiting for the previous update to complete.
-      untilReady(() => this.canUpdate(), 10, 5).then(() => {
-        if (this.isDisposed || !this.virtualDocument) {
-          resolve();
-        }
-        try {
-          this.isUpdateInProgress = true;
-          this.updateBegan.emit(blocks);
-
-          this.virtualDocument.clear();
-
-          for (let codeBlock of blocks) {
-            this.blockAdded.emit({
-              block: codeBlock,
-              virtualDocument: this.virtualDocument
-            });
-            this.virtualDocument.appendCodeBlock(codeBlock);
+      untilReady(() => this.canUpdate(), 10, 5)
+        .then(() => {
+          if (this.isDisposed || !this.virtualDocument) {
+            resolve();
           }
+          try {
+            this.isUpdateInProgress = true;
+            this.updateBegan.emit(blocks);
 
-          this.updateFinished.emit(blocks);
+            this.virtualDocument.clear();
 
-          if (this.virtualDocument) {
-            this.documentUpdated.emit(this.virtualDocument);
-            this.virtualDocument.maybeEmitChanged();
+            for (let codeBlock of blocks) {
+              this.blockAdded.emit({
+                block: codeBlock,
+                virtualDocument: this.virtualDocument
+              });
+              this.virtualDocument.appendCodeBlock(codeBlock);
+            }
+
+            this.updateFinished.emit(blocks);
+
+            if (this.virtualDocument) {
+              this.documentUpdated.emit(this.virtualDocument);
+              this.virtualDocument.maybeEmitChanged();
+            }
+
+            resolve();
+          } catch (e) {
+            console.warn('Documents update failed:', e);
+            reject(e);
+          } finally {
+            this.isUpdateInProgress = false;
           }
-
-          resolve();
-        } catch (e) {
-          console.warn('Documents update failed:', e);
-          reject(e);
-        } finally {
-          this.isUpdateInProgress = false;
-        }
-      });
+        })
+        .catch(console.error);
     });
     this.updateDone = update;
     return update;

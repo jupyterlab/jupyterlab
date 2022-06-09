@@ -45,3 +45,4 @@ typedoc-theme/
 
 # generated LSP interfaces
 packages/lsp/src/_*
+packages/lsp/schema.js

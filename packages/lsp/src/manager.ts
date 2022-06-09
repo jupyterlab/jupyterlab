@@ -9,7 +9,7 @@ import {
   TSessionMap,
   TSpecsMap
 } from './tokens';
-import { ServerSpecProperties } from './_schema';
+import { ServerSpecProperties } from './schema';
 
 export class LanguageServerManager implements ILanguageServerManager {
   protected _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal<
