@@ -1,8 +1,10 @@
-<svg class="jp-icon-console" xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 200 200">
-  <g class="jp-icon-mono jp-icon-selectable" fill="#0288D1">
-    <path d="M20 19.8h160v159.9H20z"/>
-  </g>
-  <g class="jp-icon-mono-inverse jp-icon-selectable-inverse" fill="#fff">
-    <path d="M105 127.3h40v12.8h-40zM51.1 77L74 99.9l-23.3 23.3 10.5 10.5 23.3-23.3L95 99.9 84.5 89.4 61.6 66.5z"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 200 200">
+  <g class="jp-icon-console">
+    <g class="jp-icon-mono jp-icon-selectable" fill="#0288D1">
+      <path d="M20 19.8h160v159.9H20z"/>
+    </g>
+    <g class="jp-icon-mono-inverse jp-icon-selectable-inverse" fill="#fff">
+      <path d="M105 127.3h40v12.8h-40zM51.1 77L74 99.9l-23.3 23.3 10.5 10.5 23.3-23.3L95 99.9 84.5 89.4 61.6 66.5z"/>
+    </g>
   </g>
 </svg>

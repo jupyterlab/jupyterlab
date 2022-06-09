@@ -1,3 +1,5 @@
-<svg class="jp-icon-markdown" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 208 128">
-  <path class="jp-icon-markdown0 jp-icon-selectable" d="M193 128H15a15 15 0 0 1-15-15V15A15 15 0 0 1 15 0h178a15 15 0 0 1 15 15v98a15 15 0 0 1-15 15zM50 98V59l20 25 20-25v39h20V30H90L70 55 50 30H30v68zm134-34h-20V30h-20v34h-20l30 35z" fill="#03a9f4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 208 128">
+  <g class="jp-icon-markdown">
+    <path class="jp-icon-markdown0 jp-icon-selectable" d="M193 128H15a15 15 0 0 1-15-15V15A15 15 0 0 1 15 0h178a15 15 0 0 1 15 15v98a15 15 0 0 1-15 15zM50 98V59l20 25 20-25v39h20V30H90L70 55 50 30H30v68zm134-34h-20V30h-20v34h-20l30 35z" fill="#03a9f4"/>
+  </g>
 </svg>
