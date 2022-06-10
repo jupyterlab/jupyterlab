@@ -62,12 +62,21 @@ try:
         def post_develop(*args, **kwargs):
             builder(*args, **kwargs)
             try:
-                subprocess.run([sys.executable, "-m", "pre_commit", "install"])
-                subprocess.run(
-                    [sys.executable, "-m", "pre_commit", "install", "--hook-type", "pre-push"]
-                )
-            except Exception:
-                pass
+                import pre_commit
+            except ImportError:
+                print("Please install pre-commit and the associated hooks; using the following commands:")
+                print("pip install pre-commit")
+                print("python -m pre_commit install")
+                print("python -m pre_commit install --hook-type pre-push")
+
+            else:
+                try:
+                    subprocess.run([sys.executable, "-m", "pre_commit", "install"])
+                    subprocess.run(
+                        [sys.executable, "-m", "pre_commit", "install", "--hook-type", "pre-push"]
+                    )
+                except Exception:
+                    pass
 
         cmdclass = wrap_installers(
             post_develop=post_develop, post_dist=post_dist, ensured_targets=ensured_targets
