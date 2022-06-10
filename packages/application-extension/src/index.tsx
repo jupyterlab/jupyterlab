@@ -723,11 +723,13 @@ const dirty: JupyterFrontEndPlugin<void> = {
     // attribute needs to set in addition to a return value being returned.
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
-    window.addEventListener('beforeunload', event => {
-      if (app.status.isDirty) {
-        return ((event as any).returnValue = message);
-      }
-    });
+    if (PageConfig.getOption('collaborative') !== 'true') {
+      window.addEventListener('beforeunload', event => {
+        if (app.status.isDirty) {
+          return ((event as any).returnValue = message);
+        }
+      });
+    }
   }
 };
 
