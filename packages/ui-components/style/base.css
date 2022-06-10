@@ -35,6 +35,13 @@ a:hover {
   color: unset;
 }
 
+/* Disable default focus outline */
+:focus {
+  outline: unset;
+  outline-offset: unset;
+  -moz-outline-radius: unset;
+}
+
 /* Accessibility for links inside dialog box text */
 .jp-Dialog-content a {
   text-decoration: revert;
