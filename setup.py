@@ -64,7 +64,9 @@ try:
             try:
                 import pre_commit
             except ImportError:
-                print("Please install pre-commit and the associated hooks; using the following commands:")
+                print(
+                    "Please install pre-commit and the associated hooks; using the following commands:"
+                )
                 print("pip install pre-commit")
                 print("python -m pre_commit install")
                 print("python -m pre_commit install --hook-type pre-push")
