@@ -178,6 +178,27 @@ export function isRawCellModel(model: ICellModel): model is IRawCellModel {
 export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * Construct a cell model from optional cell content.
+   *
+   * #### Notes
+   * The CellModel IS NOT A DOCUMENT because the "source" comes
+   * from a dictionary called "model" instead of the root of the document.
+   *
+   * Schema Document:
+   * {
+   *    source: "",
+   *    state: {...}
+   * }
+   * Schema Cell:
+   * {
+   *    model: {
+   *      id: ""
+   *      cell_type: ""
+   *      source: ""
+   *      metadata: {...},
+   *      attachments: {...},
+   *      outputs: [{...}]
+   *    }
+   * }
    */
   constructor(options: CellModel.IOptions) {
     super({ isDocument: false, sharedDoc: options.sharedDoc });

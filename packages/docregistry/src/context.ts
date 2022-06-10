@@ -462,7 +462,6 @@ export class Context<
 
       if (oldPath !== this.path) {
         newPath = this.path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = this.path;
 
         // Update client file model from folder change
         changeModel = {

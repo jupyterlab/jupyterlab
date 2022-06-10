@@ -2160,7 +2160,9 @@ Please wait for the complete rendering before invoking that action.`,
     model: INotebookModel,
     cell: ICellModel
   ): ICellModel {
-    return model.contentFactory.createCell(cell.type, cell.id, cell.toJSON());
+    const data = cell.toJSON();
+    delete data.id;
+    return model.contentFactory.createCell(cell.type, undefined, data);
   }
 
   /**

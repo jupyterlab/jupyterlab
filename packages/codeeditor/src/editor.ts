@@ -854,6 +854,26 @@ export namespace CodeEditor {
        * When the IModel is a document we create the source from the
        * root of the datastore but when the IModel is part of a document,
        * the source comes from an ISharedList or ISharedMap.
+       *
+       * The CellModel IS NOT A DOCUMENT because the "source" comes
+       * from a dictionary called "model" instead of the root of the document.
+       *
+       * Schema Document:
+       * {
+       *    source: "",
+       *    state: {...}
+       * }
+       * Schema standalone Cell:
+       * {
+       *    model: {
+       *      id: ""
+       *      cell_type: ""
+       *      source: ""
+       *      metadata: {...},
+       *      attachments: {...},
+       *      outputs: [{...}]
+       *    }
+       * }
        */
       isDocument: boolean;
 
