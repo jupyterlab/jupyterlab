@@ -30,7 +30,7 @@ jobs:
 
       - name: Get hashes for PR review event
         if: ${{ github.event_name == 'pull_request_review' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const child_process = require("child_process");
