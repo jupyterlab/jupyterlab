@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
@@ -110,7 +110,7 @@ jobs:
         run: |
           pip install build
           python -m build --sdist
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: "sdist"
           path: dist/*.tar.gz
