@@ -52,7 +52,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-galata-test-assets
           path: |
@@ -61,7 +61,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-galata-report
           path: |
@@ -153,7 +153,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-documentation-test-assets
           path: |
@@ -161,7 +161,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-documentation-report
           path: |
