@@ -5,7 +5,6 @@ on:
     branches:
       - master
   pull_request:
-    branches: '*'
 
 jobs:
   test:
@@ -14,7 +13,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -53,7 +52,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-galata-test-assets
           path: |
@@ -62,7 +61,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-galata-report
           path: |
@@ -86,12 +85,12 @@ jobs:
         python-version: ['3.9.9']
     steps:
       - name: Checkout JupyterLab
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: core
 
       - name: Checkout demo project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
@@ -128,7 +127,7 @@ jobs:
         run: |
           set -ex
           cd galata
-          jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode 2>&1 > /tmp/jupyterlab_server.log &
+          (jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode > /tmp/jupyterlab_server.log 2>&1) &
         working-directory: core
 
       - name: Install browser
@@ -154,7 +153,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-documentation-test-assets
           path: |
@@ -162,11 +161,16 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-documentation-report
           path: |
             core/galata/playwright-report
+
+      - name: Stop JupyterLab
+        if: always()
+        run: |
+          kill -s SIGTERM $(pgrep jupyter-lab)
 
       - name: Print JupyterLab logs
         if: always()

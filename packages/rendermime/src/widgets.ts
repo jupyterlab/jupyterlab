@@ -17,7 +17,8 @@ import * as renderers from './renderers';
  */
 export abstract class RenderedCommon
   extends Widget
-  implements IRenderMime.IRenderer {
+  implements IRenderMime.IRenderer
+{
   /**
    * Construct a new rendered common widget.
    *
@@ -29,8 +30,9 @@ export abstract class RenderedCommon
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
-    this.translator = options.translator || nullTranslator;
+    this.translator = options.translator ?? nullTranslator;
     this.latexTypesetter = options.latexTypesetter;
+    this.markdownParser = options.markdownParser ?? null;
     this.node.dataset['mimeType'] = this.mimeType;
   }
 
@@ -58,6 +60,11 @@ export abstract class RenderedCommon
    * The latexTypesetter.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+  /**
+   * The markdownParser.
+   */
+  readonly markdownParser: IRenderMime.IMarkdownParser | null;
 
   /**
    * The translator.
@@ -301,6 +308,7 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
       linkHandler: this.linkHandler,
       shouldTypeset: this.isAttached,
       latexTypesetter: this.latexTypesetter,
+      markdownParser: this.markdownParser,
       translator: this.translator
     });
   }

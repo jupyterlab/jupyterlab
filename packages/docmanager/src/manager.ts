@@ -385,10 +385,13 @@ export class DocumentManager implements IDocumentManager {
   ): IDocumentWidget | undefined {
     const widget = this.findWidget(path, widgetName);
     if (widget) {
-      this._opener.open(widget, options || {});
+      this._opener.open(widget, {
+        type: widgetName,
+        ...options
+      });
       return widget;
     }
-    return this.open(path, widgetName, kernel, options || {});
+    return this.open(path, widgetName, kernel, options ?? {});
   }
 
   /**
@@ -476,6 +479,7 @@ export class DocumentManager implements IDocumentManager {
       options?: DocumentRegistry.IOpenOptions
     ) => {
       this._widgetManager.adoptWidget(context, widget);
+      // TODO should we pass the type for layout customization
       this._opener.open(widget, options);
     };
     const modelDBFactory =
@@ -491,7 +495,8 @@ export class DocumentManager implements IDocumentManager {
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
       docProviderFactory: this._docProviderFactory,
-      lastModifiedCheckMargin: this._lastModifiedCheckMargin
+      lastModifiedCheckMargin: this._lastModifiedCheckMargin,
+      translator: this.translator
     });
     const handler = new SaveHandler({
       context,
@@ -588,10 +593,14 @@ export class DocumentManager implements IDocumentManager {
     }
 
     const widget = this._widgetManager.createWidget(widgetFactory, context);
-    this._opener.open(widget, options || {});
+    this._opener.open(widget, { type: widgetFactory.name, ...options });
 
     // If the initial opening of the context fails, dispose of the widget.
     ready.catch(err => {
+      console.error(
+        `Failed to initialize the context with '${factory.name}' for ${path}`,
+        err
+      );
       widget.close();
     });
 

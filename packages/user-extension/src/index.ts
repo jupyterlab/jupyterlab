@@ -9,6 +9,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { IToolbarWidgetRegistry } from '@jupyterlab/apputils';
 import { PageConfig } from '@jupyterlab/coreutils';
 import {
   ICurrentUser,
@@ -35,7 +36,7 @@ const userPlugin: JupyterFrontEndPlugin<ICurrentUser> = {
  * Jupyter plugin providing the IUserMenu.
  */
 const userMenuPlugin: JupyterFrontEndPlugin<IUserMenu> = {
-  id: '@jupyterlab/user-extension:userMenu',
+  id: '@jupyterlab/user-extension:user-menu',
   autoStart: true,
   requires: [ICurrentUser],
   provides: IUserMenu,
@@ -49,31 +50,35 @@ const userMenuPlugin: JupyterFrontEndPlugin<IUserMenu> = {
  * Jupyter plugin adding the IUserMenu to the menu bar if collaborative flag enabled.
  */
 const menuBarPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/user-extension:userMenuBar',
+  id: '@jupyterlab/user-extension:user-menu-bar',
   autoStart: true,
-  requires: [ICurrentUser, IUserMenu],
+  requires: [ICurrentUser, IUserMenu, IToolbarWidgetRegistry],
   activate: (
     app: JupyterFrontEnd,
     user: ICurrentUser,
-    menu: IUserMenu
+    menu: IUserMenu,
+    toolbarRegistry: IToolbarWidgetRegistry
   ): void => {
-    const { shell } = app;
-
     if (PageConfig.getOption('collaborative') !== 'true') {
       return;
     }
 
-    const menuBar = new MenuBar({
-      forceItemsPosition: {
-        forceX: false,
-        forceY: false
-      },
-      renderer: new RendererUserMenu(user)
+    toolbarRegistry.addFactory('TopBar', 'user-menu', () => {
+      const menuBar = new MenuBar({
+        forceItemsPosition: {
+          forceX: false,
+          forceY: false
+        },
+        renderer: new RendererUserMenu(user)
+      });
+      menuBar.id = 'jp-UserMenu';
+      user.changed.connect(() => {
+        menuBar.update();
+      });
+      menuBar.addMenu(menu as Menu);
+
+      return menuBar;
     });
-    menuBar.id = 'jp-UserMenu';
-    user.changed.connect(() => menuBar.update());
-    menuBar.addMenu(menu as Menu);
-    shell.add(menuBar, 'top', { rank: 1000 });
   }
 };
 

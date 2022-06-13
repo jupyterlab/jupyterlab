@@ -16,6 +16,7 @@ import {
   JupyterServer
 } from '@jupyterlab/testutils';
 import { ITranslator } from '@jupyterlab/translation';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 const server = new JupyterServer();
@@ -195,7 +196,7 @@ describe('@jupyterlab/apputils', () => {
           name: 'test'
         };
 
-        registry.registerFactory('factory', item.name, dummy);
+        registry.addFactory('factory', item.name, dummy);
 
         const widget = registry.createWidget('factory', documentWidget, item);
 
@@ -205,7 +206,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#registerFactory', () => {
+    describe('#addFactory', () => {
       it('should return the previous registered factory', () => {
         const defaultFactory = jest.fn();
         const dummy = jest.fn();
@@ -219,11 +220,9 @@ describe('@jupyterlab/apputils', () => {
         };
 
         expect(
-          registry.registerFactory('factory', item.name, dummy)
+          registry.addFactory('factory', item.name, dummy)
         ).toBeUndefined();
-        expect(registry.registerFactory('factory', item.name, dummy2)).toBe(
-          dummy
-        );
+        expect(registry.addFactory('factory', item.name, dummy2)).toBe(dummy);
       });
     });
   });
@@ -308,10 +307,6 @@ describe('@jupyterlab/apputils', () => {
       );
 
       await settingRegistry.load(bar.id);
-      // Trick push this test after all other promise in the hope they get resolve
-      // before going further - in particular we are looking at the update of the items
-      // factory in `createToolbarFactory`
-      await Promise.resolve();
 
       const items = factory(new Widget());
       expect(items).toHaveLength(3);
@@ -419,17 +414,118 @@ describe('@jupyterlab/apputils', () => {
         translator
       );
 
-      await settingRegistry.load(bar.id);
-      // Trick push this test after all other promise in the hope they get resolve
-      // before going further - in particular we are looking at the update of the items
-      // factory in `createToolbarFactory`
-      await Promise.resolve();
+      const barPlugin = await settingRegistry.load(bar.id);
+      const baseToolbar = JSONExt.deepCopy(
+        barPlugin.composite['toolbar'] as any
+      );
+
+      let waitForChange = new PromiseDelegate<void>();
+      barPlugin.changed.connect(() => {
+        if (
+          !JSONExt.deepEqual(baseToolbar, barPlugin.composite['toolbar'] as any)
+        ) {
+          waitForChange.resolve();
+        }
+      });
       await settingRegistry.load(foo.id);
+      await waitForChange.promise;
 
       const items = factory(new Widget());
       expect(items).toHaveLength(2);
       expect(items.get(0).name).toEqual('cut');
       expect(items.get(1).name).toEqual('insert');
+    });
+
+    it('should be callable multiple times', async () => {
+      const factoryName = 'dummyFactory';
+      const pluginId = 'test-plugin:settings';
+      const toolbarRegistry = new ToolbarWidgetRegistry({
+        defaultFactory: jest.fn()
+      });
+
+      const bar: ISettingRegistry.IPlugin = {
+        data: {
+          composite: {},
+          user: {}
+        },
+        id: pluginId,
+        raw: '{}',
+        schema: {
+          'jupyter.lab.toolbars': {
+            dummyFactory: [
+              {
+                name: 'insert',
+                command: 'notebook:insert-cell-below',
+                rank: 20
+              },
+              { name: 'spacer', type: 'spacer', rank: 100 },
+              { name: 'cut', command: 'notebook:cut-cell', rank: 21 },
+              {
+                name: 'clear-all',
+                command: 'notebook:clear-all-cell-outputs',
+                rank: 60,
+                disabled: true
+              }
+            ]
+          },
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array'
+            }
+          },
+          type: 'object'
+        },
+        version: 'test'
+      };
+
+      const connector: IDataConnector<
+        ISettingRegistry.IPlugin,
+        string,
+        string,
+        string
+      > = {
+        fetch: jest.fn().mockImplementation((id: string) => {
+          switch (id) {
+            case bar.id:
+              return bar;
+            default:
+              return {};
+          }
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+
+      const settingRegistry = new SettingRegistry({
+        connector
+      });
+
+      const translator: ITranslator = {
+        load: jest.fn()
+      };
+
+      const factory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        factoryName,
+        pluginId,
+        translator
+      );
+
+      const factory2 = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        factoryName,
+        pluginId,
+        translator
+      );
+
+      await settingRegistry.load(bar.id);
+
+      expect(factory(new Widget())).toHaveLength(3);
+      expect(factory2(new Widget())).toHaveLength(3);
     });
   });
 });

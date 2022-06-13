@@ -27,7 +27,7 @@
 
 .jp-Completer-docpanel {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
-  width: 300px;
+  width: 400px;
   overflow: scroll;
   padding: 8px;
   max-height: calc((10 * var(--jp-private-completer-item-height)) - 16px);
@@ -178,4 +178,33 @@
 
 .jp-Completer-type[data-color-index='10'] {
   background: #17becf;
+}
+
+.jp-Completer-loading-bar-container {
+  height: 2px;
+  width: 100%;
+  background-color: var(--jp-layout-color2);
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  margin-left: -8px;
+}
+
+.jp-Completer-loading-bar {
+  height: 100%;
+  width: 50%;
+  background-color: var(--jp-layout-color4);
+  position: absolute;
+  left: -50%;
+  animation: jp-Completer-loading 2s ease-in 0.5s infinite;
+}
+
+@keyframes jp-Completer-loading {
+  0% {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(400%);
+  }
 }

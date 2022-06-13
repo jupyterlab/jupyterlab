@@ -61,8 +61,8 @@
   margin: 2px;
 }
 
-.jp-DocumentSearch-focused-input {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+.jp-DocumentSearch-input-wrapper:focus-within {
+  border-color: var(--jp-cell-editor-active-border-color);
 }
 
 .jp-DocumentSearch-input-wrapper * {

@@ -1256,3 +1256,14 @@ export interface IInputReplyMsg extends IStdinMessage<'input_reply'> {
 export function isInputReplyMsg(msg: IMessage): msg is IInputReplyMsg {
   return msg.header.msg_type === 'input_reply';
 }
+
+// ///////////////////////////////////////////////
+// Message (de)serialization
+// ///////////////////////////////////////////////
+
+/**
+ * The list of supported kernel wire protocols over websocket.
+ */
+export enum supportedKernelWebSocketProtocols {
+  v1KernelWebsocketJupyterOrg = 'v1.kernel.websocket.jupyter.org'
+}

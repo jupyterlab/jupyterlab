@@ -59,9 +59,9 @@ enum ShortCutLocation {
 }
 
 /** Describe commands that are used by shortcuts */
-function getCommands(
-  trans: TranslationBundle
-): { [key: string]: { commandId: string; label: string; caption: string } } {
+function getCommands(trans: TranslationBundle): {
+  [key: string]: { commandId: string; label: string; caption: string };
+} {
   return {
     shortcutEditLeft: {
       commandId: 'shortcutui:EditLeft',
@@ -76,7 +76,7 @@ function getCommands(
     shortcutEdit: {
       commandId: 'shortcutui:Edit',
       label: trans.__('Edit'),
-      caption: trans.__('Edit existing sortcut')
+      caption: trans.__('Edit existing shortcut')
     },
     shortcutAddNew: {
       commandId: 'shortcutui:AddNew',

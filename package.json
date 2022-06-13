@@ -68,6 +68,7 @@
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --cache --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx --cache .",
     "eslint:check:typed": "eslint --config .eslintrc.typecheck.js --ext .js,.jsx,.ts,.tsx .",
+    "eslint:files": "eslint --fix",
     "eslint:typed": "eslint --config .eslintrc.typecheck.js --cache --ext .js,.jsx,.ts,.tsx --fix .",
     "get:dependency": "node buildutils/lib/get-dependency.js",
     "postinstall": "node scripts/ensure-buildutils.js",
@@ -83,12 +84,14 @@
     "prepublish:check": "node buildutils/lib/prepublish-check.js",
     "prettier": "prettier --write \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
     "prettier:check": "prettier --check \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
+    "prettier:files": "prettier --write",
     "publish:js": "node buildutils/lib/publish.js",
     "remove:dependency": "node buildutils/lib/remove-dependency.js",
     "remove:package": "node buildutils/lib/remove-package.js",
     "remove:sibling": "node buildutils/lib/remove-package.js",
     "stylelint": "jlpm stylelint:check --fix",
     "stylelint:check": "stylelint --cache \"{packages/*,galata}/style/**/*.css\" \"{examples/*,docs/**}/*.css\"",
+    "stylelint:files": "stylelint --fix",
     "test": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream",
     "test:all": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream --no-bail",
     "test:examples": "python examples/test_examples.py",
@@ -100,35 +103,26 @@
     "watch:main": "jlpm run watch",
     "watch:packages": "python scripts/watch_packages.py"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "jlpm run integrity --force"
-    }
-  },
   "resolutions": {
-    "@types/node": "^14.6.1",
     "react": "^17.0.1"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "~4.8.1",
-    "@typescript-eslint/parser": "~4.8.1",
-    "eslint": "~7.14.0",
-    "eslint-config-prettier": "~6.15.0",
-    "eslint-plugin-jest": "~24.1.3",
-    "eslint-plugin-prettier": "~3.1.4",
-    "eslint-plugin-react": "~7.21.5",
-    "husky": "^4.2.5",
-    "lerna": "^4.0.0",
-    "lint-staged": "^10.2.13",
-    "prettier": "~2.1.1",
-    "shell-quote": "^1.7.2",
-    "stylelint": "^14.3.0",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "~5.14.0",
+    "@typescript-eslint/parser": "~5.14.0",
+    "eslint": "~8.0.0",
+    "eslint-config-prettier": "~8.5.0",
+    "eslint-plugin-jest": "~26.2.2",
+    "eslint-plugin-prettier": "~4.0.0",
+    "eslint-plugin-react": "~7.29.4",
+    "prettier": "~2.6.0",
+    "stylelint": "^14.4.0",
     "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-recommended": "^6.0.0",
-    "stylelint-config-standard": "~24.0.0",
-    "stylelint-prettier": "^2.0.0",
+    "stylelint-config-standard": "^25.0.0",
+    "stylelint-prettier": "^2.0.0"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0",
     "typedoc": "~0.22.10",
     "yarn": "1.22.17"
   }

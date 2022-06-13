@@ -21,7 +21,7 @@ import {
   KernelShellFutureHandler
 } from './future';
 
-import * as serialize from './serialize';
+import { deserialize, serialize } from './serialize';
 
 import * as validate from './validate';
 import { KernelSpec, KernelSpecAPI } from '../kernelspec';
@@ -407,7 +407,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {
-        this._ws!.send(serialize.serialize(msg));
+        this._ws!.send(serialize(msg, this._ws!.protocol));
         return;
       } else {
         throw new Error('Could not send message: status is not connected');
@@ -425,7 +425,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this.connectionStatus === 'connected' &&
       this._kernelSession !== RESTARTING_KERNEL_SESSION
     ) {
-      this._ws!.send(serialize.serialize(msg));
+      this._ws!.send(serialize(msg, this._ws!.protocol));
     } else if (queue) {
       this._pendingMessages.push(msg);
     } else {
@@ -629,9 +629,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.ICompleteReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.ICompleteReplyMsg>;
   }
 
   /**
@@ -653,9 +654,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content: content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.IInspectReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.IInspectReplyMsg>;
   }
 
   /**
@@ -677,9 +679,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.IHistoryReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.IHistoryReplyMsg>;
   }
 
   /**
@@ -783,9 +786,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.IIsCompleteReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.IIsCompleteReplyMsg>;
   }
 
   /**
@@ -805,9 +809,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.ICommInfoReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.ICommInfoReplyMsg>;
   }
 
   /**
@@ -816,7 +821,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void {
     const msg = KernelMessage.createMessage({
       msgType: 'input_reply',
       channel: 'stdin',
@@ -824,6 +832,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
+    msg.parent_header = parent_header;
 
     this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });
@@ -991,12 +1000,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
       // We've seen it before, update existing outputs with same display_id
       // by handling display_data as update_display_data.
       const updateMsg: KernelMessage.IMessage = {
-        header: (JSONExt.deepCopy(
-          (msg.header as unknown) as JSONObject
-        ) as unknown) as KernelMessage.IHeader,
-        parent_header: (JSONExt.deepCopy(
-          (msg.parent_header as unknown) as JSONObject
-        ) as unknown) as KernelMessage.IHeader,
+        header: JSONExt.deepCopy(
+          msg.header as unknown as JSONObject
+        ) as unknown as KernelMessage.IHeader,
+        parent_header: JSONExt.deepCopy(
+          msg.parent_header as unknown as JSONObject
+        ) as unknown as KernelMessage.IHeader,
         metadata: JSONExt.deepCopy(msg.metadata),
         content: JSONExt.deepCopy(msg.content as JSONObject),
         channel: msg.channel,
@@ -1224,7 +1233,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Create the kernel websocket connection and add socket status handlers.
    */
-  private _createSocket = () => {
+  private _createSocket = (useProtocols = true) => {
     this._errorIfDisposed();
 
     // Make sure the socket is clear
@@ -1255,7 +1264,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
       url = url + `&token=${encodeURIComponent(token)}`;
     }
 
-    this._ws = new settings.WebSocket(url);
+    // Try opening the websocket with our list of subprotocols.
+    // If the server doesn't handle subprotocols,
+    // the accepted protocol will be ''.
+    // But we cannot send '' as a subprotocol, so if connection fails,
+    // reconnect without subprotocols.
+    const supportedProtocols = useProtocols ? this._supportedProtocols : [];
+    this._ws = new settings.WebSocket(url, supportedProtocols);
 
     // Ensure incoming binary messages are not Blobs
     this._ws.binaryType = 'arraybuffer';
@@ -1499,7 +1514,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
           timeout / 1000
         )} seconds.`
       );
-      this._reconnectTimeout = setTimeout(this._createSocket, timeout);
+      // Try reconnection without subprotocols.
+      this._reconnectTimeout = setTimeout(this._createSocket, timeout, false);
       this._reconnectAttempt += 1;
     } else {
       this._updateConnectionStatus('disconnected');
@@ -1524,6 +1540,17 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Handle a websocket open event.
    */
   private _onWSOpen = (evt: Event) => {
+    if (
+      this._ws!.protocol !== '' &&
+      !this._supportedProtocols.includes(this._ws!.protocol)
+    ) {
+      console.log(
+        'Server selected unknown kernel wire protocol:',
+        this._ws!.protocol
+      );
+      this._updateStatus('dead');
+      throw new Error(`Unknown kernel wire protocol:  ${this._ws!.protocol}`);
+    }
     this._ws!.onclose = this._onWSClose;
     this._ws!.onerror = this._onWSClose;
     this._updateConnectionStatus('connected');
@@ -1536,7 +1563,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // Notify immediately if there is an error with the message.
     let msg: KernelMessage.IMessage;
     try {
-      msg = serialize.deserialize(evt.data);
+      msg = deserialize(evt.data, this._ws!.protocol);
       validate.validateMessage(msg);
     } catch (error) {
       error.message = `Kernel message validation error: ${error.message}`;
@@ -1600,6 +1627,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _reconnectTimeout: any = null;
+  private _supportedProtocols: string[] = Object.values(
+    KernelMessage.supportedKernelWebSocketProtocols
+  );
 
   private _futures = new Map<
     string,

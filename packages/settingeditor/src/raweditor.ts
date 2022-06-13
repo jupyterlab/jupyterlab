@@ -9,9 +9,8 @@ import { CommandToolbarButton, Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { BoxLayout, Widget } from '@lumino/widgets';
+import { BoxLayout, SplitPanel, Widget } from '@lumino/widgets';
 import { createInspector } from './inspector';
-import { SplitPanel } from './splitpanel';
 
 /**
  * A class name added to all raw editors.

@@ -13,6 +13,7 @@ export * from './editor';
 export * from './factory';
 export * from './mimetype';
 export * from './mode';
+export * from './searchprovider';
 export * from './syntaxstatus';
 export * from './tokens';
 

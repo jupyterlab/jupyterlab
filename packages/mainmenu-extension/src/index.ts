@@ -669,6 +669,9 @@ export function createTabsMenu(
   // Command to activate a widget by id.
   commands.addCommand(CommandIDs.activateById, {
     label: args => {
+      if (args.id === undefined) {
+        return trans.__('Activate a widget by its `id`.');
+      }
       const id = args['id'] || '';
       const widget = find(app.shell.widgets('main'), w => w.id === id);
       return (widget && widget.title.label) || '';
@@ -782,7 +785,7 @@ namespace Private {
     translator: ITranslator
   ): Promise<void> {
     const trans = translator.load('jupyterlab');
-    let canonical: ISettingRegistry.ISchema | null;
+    let canonical: ISettingRegistry.ISchema | null = null;
     let loaded: { [name: string]: ISettingRegistry.IMenu[] } = {};
 
     /**
@@ -860,8 +863,6 @@ namespace Private {
 
     // Repopulate the canonical variable after the setting registry has
     // preloaded all initial plugins.
-    canonical = null;
-
     const settings = await registry.load(PLUGIN_ID);
 
     const currentMenus: ISettingRegistry.IMenu[] =

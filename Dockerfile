@@ -6,7 +6,7 @@ RUN micromamba install -qy -c conda-forge python nodejs yarn \
     && chown jovyan $HOME
 
 # Install npm packages - faster build thanks to caching
-## package_json.tar.gz contains all package.json files using 
+## package_json.tar.gz contains all package.json files using
 ## `tar cvf package_json.tar.gz package.json packages/*/package.package_json`
 ADD ./package_json.tar.gz /tmp/jupyterlab-dev
 COPY yarn.lock /tmp/jupyterlab-dev

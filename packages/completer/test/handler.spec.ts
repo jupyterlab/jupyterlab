@@ -10,6 +10,7 @@ import {
   CompletionHandler,
   ConnectorProxy
 } from '@jupyterlab/completer';
+import { IObservableString } from '@jupyterlab/observables';
 import { createSessionContext } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
@@ -37,8 +38,11 @@ class TestCompleterModel extends CompleterModel {
 class TestCompletionHandler extends CompletionHandler {
   methods: string[] = [];
 
-  onTextChanged(): void {
-    super.onTextChanged();
+  onTextChanged(
+    str: IObservableString,
+    changed: IObservableString.IChangedArgs
+  ): void {
+    super.onTextChanged(str, changed);
     this.methods.push('onTextChanged');
   }
 

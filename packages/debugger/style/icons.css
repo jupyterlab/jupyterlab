@@ -12,26 +12,17 @@ button.jp-Button.jp-mod-minimal.jp-TreeView.jp-TableView {
   width: 35px;
 }
 
-button.jp-Button.jp-mod-minimal.jp-TreeView:hover {
-  cursor: pointer;
-  background-color: var(--jp-layout-color2);
+.jp-ViewModeSelected .jp-Button,
+.jp-PauseOnExceptions.lm-mod-toggled {
+  background-color: var(--jp-inverse-layout-color3);
 }
 
-button.jp-Button.jp-mod-minimal.jp-TableView:hover {
-  cursor: pointer;
-  background-color: var(--jp-layout-color2);
+.jp-ViewModeSelected .jp-Button:hover,
+.jp-PauseOnExceptions.lm-mod-toggled:hover {
+  background-color: var(--jp-inverse-layout-color4);
 }
 
-.jp-ViewModeSelected {
-  background-color: var(--jp-layout-color2);
-}
-
-/* Pause on exceptions */
-button.jp-Button.jp-mod-minimal.jp-PauseOnExceptions:hover {
-  cursor: pointer;
-  background-color: var(--jp-layout-color2);
-}
-
-button.jp-Button.jp-PauseOnExceptions.lm-mod-toggled {
-  background-color: var(--jp-layout-color2);
+.jp-ViewModeSelected .jp-Button .jp-icon3[fill],
+.jp-PauseOnExceptions.lm-mod-toggled .jp-icon3[fill] {
+  fill: var(--jp-layout-color1);
 }

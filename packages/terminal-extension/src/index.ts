@@ -345,6 +345,7 @@ export function addCommands(
       }
 
       const name = args['name'] as string;
+      const cwd = args['cwd'] as string;
 
       let session;
       if (name) {
@@ -356,12 +357,12 @@ export function addCommands(
         } else {
           // we are restoring a terminal widget but the corresponding terminal was closed
           // let's start a new terminal with the original name
-          session = await serviceManager.terminals.startNew({ name });
+          session = await serviceManager.terminals.startNew({ name, cwd });
         }
       } else {
         // we are creating a new terminal widget with a new terminal
         // let the server choose the terminal name
-        session = await serviceManager.terminals.startNew();
+        session = await serviceManager.terminals.startNew({ cwd });
       }
 
       const term = new Terminal(session, options, translator);
@@ -370,7 +371,7 @@ export function addCommands(
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term });
-      app.shell.add(main);
+      app.shell.add(main, 'main', { type: 'Terminal' });
       void tracker.add(main);
       app.shell.activateById(main.id);
       return main;
@@ -378,6 +379,7 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.open, {
+    label: trans.__('Open a terminal by its `name`.'),
     execute: args => {
       const name = args['name'] as string;
       // Check for a running terminal with the given name.
@@ -465,6 +467,9 @@ export function addCommands(
 
   commands.addCommand(CommandIDs.setTheme, {
     label: args => {
+      if (args.theme === undefined) {
+        return trans.__('Set terminal theme to the provided `theme`.');
+      }
       const theme = args['theme'] as string;
       const displayName =
         theme in themeDisplayedName

@@ -97,9 +97,9 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
       if (current && tracker.has(current) && item.model) {
-        item.model.editor = (current as IDocumentWidget<
-          FileEditor
-        >).content.editor;
+        item.model.editor = (
+          current as IDocumentWidget<FileEditor>
+        ).content.editor;
       }
     });
     statusBar.registerStatusItem(
@@ -123,14 +123,14 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
 export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
   id: '@jupyterlab/codemirror-extension:line-col-status',
   autoStart: true,
-  requires: [IStatusBar, ITranslator],
-  optional: [ILabShell],
+  requires: [ITranslator],
+  optional: [ILabShell, IStatusBar],
   provides: IPositionModel,
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
     translator: ITranslator,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    statusBar: IStatusBar | null
   ): IPositionModel => {
     const item = new LineCol(translator);
 
@@ -138,13 +138,15 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
       (widget: Widget | null) => CodeEditor.IEditor | null
     >();
 
-    // Add the status item to the status bar.
-    statusBar.registerStatusItem(lineColItem.id, {
-      item,
-      align: 'right',
-      rank: 2,
-      isActive: () => !!item.model.editor
-    });
+    if (statusBar) {
+      // Add the status item to the status bar.
+      statusBar.registerStatusItem(lineColItem.id, {
+        item,
+        align: 'right',
+        rank: 2,
+        isActive: () => !!item.model.editor
+      });
+    }
 
     const addEditorProvider = (
       provider: (widget: Widget | null) => CodeEditor.IEditor | null
@@ -414,19 +416,32 @@ function activateEditorCommands(
 
   commands.addCommand(CommandIDs.goToLine, {
     label: trans.__('Go to Line…'),
-    execute: () => {
+    execute: args => {
       const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
+      const line = args['line'] as number | undefined;
+      const column = args['column'] as number | undefined;
+
       const editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('jumpToLine');
+      if (line !== undefined || column !== undefined) {
+        editor.setCursorPosition({
+          line: (line ?? 1) - 1,
+          column: (column ?? 1) - 1
+        });
+      } else {
+        editor.execCommand('jumpToLine');
+      }
+      editor.focus();
     },
     isEnabled
   });
 
   commands.addCommand(CommandIDs.changeMode, {
-    label: args => args['name'] as string,
+    label: args =>
+      (args['name'] as string) ??
+      trans.__('Change editor mode to the provided `name`.'),
     execute: args => {
       const name = args['name'] as string;
       const widget = tracker.currentWidget;

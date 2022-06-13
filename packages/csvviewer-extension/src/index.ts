@@ -93,7 +93,7 @@ function activateCsv(
   restorer: ILayoutRestorer | null,
   themeManager: IThemeManager | null,
   mainMenu: IMainMenu | null,
-  searchregistry: ISearchProviderRegistry | null,
+  searchRegistry: ISearchProviderRegistry | null,
   settingRegistry: ISettingRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null
 ): void {
@@ -105,7 +105,7 @@ function activateCsv(
     | undefined;
 
   if (toolbarRegistry) {
-    toolbarRegistry.registerFactory<IDocumentWidget<CSVViewer>>(
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
       FACTORY_CSV,
       'delimiter',
       widget =>
@@ -223,8 +223,8 @@ function activateCsv(
       isEnabled
     });
   }
-  if (searchregistry) {
-    searchregistry.register('csv', CSVSearchProvider);
+  if (searchRegistry) {
+    searchRegistry.add('csv', CSVSearchProvider);
   }
 }
 
@@ -237,7 +237,7 @@ function activateTsv(
   restorer: ILayoutRestorer | null,
   themeManager: IThemeManager | null,
   mainMenu: IMainMenu | null,
-  searchregistry: ISearchProviderRegistry | null,
+  searchRegistry: ISearchProviderRegistry | null,
   settingRegistry: ISettingRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null
 ): void {
@@ -249,7 +249,7 @@ function activateTsv(
     | undefined;
 
   if (toolbarRegistry) {
-    toolbarRegistry.registerFactory<IDocumentWidget<CSVViewer>>(
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
       FACTORY_TSV,
       'delimiter',
       widget =>
@@ -367,8 +367,8 @@ function activateTsv(
       isEnabled
     });
   }
-  if (searchregistry) {
-    searchregistry.register('tsv', CSVSearchProvider);
+  if (searchRegistry) {
+    searchRegistry.add('tsv', CSVSearchProvider);
   }
 }
 

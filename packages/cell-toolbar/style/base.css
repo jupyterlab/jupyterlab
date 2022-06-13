@@ -1,0 +1,77 @@
+.jp-cell-button .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color4);
+}
+
+.jp-cell-button:hover .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color2);
+}
+
+.jp-toolbar-overlap .jp-cell-toolbar {
+  display: none;
+}
+
+.jp-cell-toolbar {
+  display: flex;
+  flex-direction: row;
+  padding: 2px 0;
+  min-height: 25px;
+  z-index: 6;
+  position: absolute;
+  top: 5px;
+  right: 8px;
+
+  /* Override .jp-Toolbar */
+  background-color: inherit;
+  border-bottom: inherit;
+  box-shadow: inherit;
+}
+
+/* Overrides for mobile view: Move cell toolbar up, don't hide it if it overlaps */
+@media only screen and (max-width: 760px) {
+  .jp-toolbar-overlap .jp-cell-toolbar {
+    display: block;
+  }
+
+  .jp-cell-toolbar {
+    top: -5px;
+  }
+}
+
+.jp-cell-menu {
+  display: flex;
+  flex-direction: row;
+}
+
+.jp-cell-menu button.jp-ToolbarButtonComponent {
+  cursor: pointer;
+}
+
+.jp-cell-menu .jp-ToolbarButton button {
+  display: none;
+}
+
+.jp-cell-menu .jp-ToolbarButton .jp-cell-all,
+.jp-CodeCell .jp-ToolbarButton .jp-cell-code,
+.jp-MarkdownCell .jp-ToolbarButton .jp-cell-markdown,
+.jp-RawCell .jp-ToolbarButton .jp-cell-raw {
+  display: block;
+}
+
+.jp-cell-toolbar .jp-Toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.jp-cell-mod-click {
+  cursor: pointer;
+}
+
+/* Custom styling for rendered markdown cells so that cell toolbar is visible */
+.jp-MarkdownOutput {
+  border-width: var(--jp-border-width);
+  border-color: transparent;
+  border-style: solid;
+}
+
+.jp-mod-active .jp-MarkdownOutput {
+  border-color: var(--jp-cell-editor-border-color);
+}

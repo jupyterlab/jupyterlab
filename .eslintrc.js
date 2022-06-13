@@ -7,19 +7,40 @@ module.exports = {
     'jest/globals': true
   },
   globals: {
-    JSX: 'readonly'
+    BigInt: 'readonly',
+    HTMLCollectionOf: 'readonly',
+    JSX: 'readonly',
+    NodeJS: 'readonly',
+    RequestInit: 'readonly',
+    RequestInfo: 'readonly'
   },
   root: true,
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'prettier/@typescript-eslint',
-    'plugin:react/recommended',
-    'plugin:jest/recommended'
+    'prettier',
+    'plugin:react/recommended'
   ],
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'jest'],
+  plugins: ['@typescript-eslint'],
+  overrides: [
+    {
+      files: ['packages/**/*.spec.ts', 'testutils/**/*.spec.ts'],
+      plugins: ['jest'],
+      extends: ['plugin:jest/recommended'],
+      rules: {
+        'jest/no-conditional-expect': 'warn',
+        'jest/valid-title': 'warn',
+        'jest/no-standalone-expect': [
+          'error',
+          {
+            additionalTestBlockFunctions: ['it']
+          }
+        ]
+      }
+    }
+  ],
   rules: {
     '@typescript-eslint/naming-convention': [
       'error',
@@ -46,10 +67,8 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/triple-slash-reference': 'warn',
     '@typescript-eslint/no-inferrable-types': 'off',
-    'jest/no-conditional-expect': 'warn',
-    'jest/valid-title': 'warn',
     camelcase: [
-      'warn',
+      'error',
       {
         allow: [
           '__webpack_public_path__',

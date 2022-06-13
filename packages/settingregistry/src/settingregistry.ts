@@ -461,7 +461,9 @@ export class SettingRegistry implements ISettingRegistry {
     const transformers = this._transformers;
 
     if (plugin in transformers) {
-      throw new Error(`${plugin} already has a transformer.`);
+      const error = new Error(`${plugin} already has a transformer.`);
+      error.name = 'TransformError';
+      throw error;
     }
 
     transformers[plugin] = {
@@ -728,9 +730,7 @@ export class Settings implements ISettingRegistry.ISettings {
       const defaultValue = this.default(key);
       if (
         value === undefined ||
-        value === null ||
         defaultValue === undefined ||
-        defaultValue === null ||
         JSONExt.deepEqual(value, JSONExt.emptyObject) ||
         JSONExt.deepEqual(value, JSONExt.emptyArray)
       ) {
@@ -802,9 +802,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(
-    key: string
-  ): {
+  get(key: string): {
     composite: ReadonlyPartialJSONValue | undefined;
     user: ReadonlyPartialJSONValue | undefined;
   } {
@@ -1096,9 +1094,8 @@ export namespace SettingRegistry {
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
-      const keys = CommandRegistry.normalizeKeys(shortcut).join(
-        RECORD_SEPARATOR
-      );
+      const keys =
+        CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
       if (!keys) {
         console.warn(
           'Skipping this shortcut because there are no actionable keys on this platform',
@@ -1132,9 +1129,8 @@ export namespace SettingRegistry {
       ...defaults.filter(s => !!s.disabled),
       ...defaults.filter(s => !s.disabled)
     ].filter(shortcut => {
-      const keys = CommandRegistry.normalizeKeys(shortcut).join(
-        RECORD_SEPARATOR
-      );
+      const keys =
+        CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
 
       if (!keys) {
         return false;
@@ -1162,7 +1158,15 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return user.concat(defaults).filter(shortcut => !shortcut.disabled);
+    return (
+      user
+        .concat(defaults)
+        .filter(shortcut => !shortcut.disabled)
+        // Fix shortcuts comparison in rjsf Form to avoid polluting the user settings
+        .map(shortcut => {
+          return { args: {}, ...shortcut };
+        })
+    );
   }
 
   /**
@@ -1189,39 +1193,18 @@ export namespace SettingRegistry {
 
     // Merge array element depending on the type
     addition.forEach(item => {
-      switch (item.type) {
-        case 'command':
-          if (item.command) {
-            const refIndex = items.findIndex(
-              ref =>
-                ref.name === item.name &&
-                ref.command === item.command &&
-                JSONExt.deepEqual(ref.args ?? {}, item.args ?? {})
-            );
-            if (refIndex < 0) {
-              items.push({ ...item });
-            } else {
-              if (warn) {
-                console.warn(
-                  `Toolbar item for command '${item.command}' is duplicated.`
-                );
-              }
-              items[refIndex] = { ...items[refIndex], ...item };
-            }
-          }
-          break;
-        case 'spacer':
-        default: {
-          const refIndex = items.findIndex(ref => ref.name === item.name);
-          if (refIndex < 0) {
-            items.push({ ...item });
-          } else {
-            if (warn) {
-              console.warn(`Toolbar item '${item.name}' is duplicated.`);
-            }
-            items[refIndex] = { ...items[refIndex], ...item };
-          }
+      // Name must be unique so it's sufficient to only compare it
+      const refIndex = items.findIndex(ref => ref.name === item.name);
+      if (refIndex < 0) {
+        items.push({ ...item });
+      } else {
+        if (
+          warn &&
+          JSONExt.deepEqual(Object.keys(item), Object.keys(items[refIndex]))
+        ) {
+          console.warn(`Toolbar item '${item.name}' is duplicated.`);
         }
+        items[refIndex] = { ...items[refIndex], ...item };
       }
     });
 

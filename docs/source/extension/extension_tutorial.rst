@@ -81,7 +81,7 @@ Create a repository
 -------------------
 
 Create a new repository for your extension (see, for example, the
-`GitHub instructions <https://help.github.com/articles/create-a-repo/>`__. This is an
+`GitHub instructions <https://docs.github.com/en/get-started/quickstart/create-a-repo>`__. This is an
 optional step, but highly recommended if you want to share your
 extension.
 
@@ -456,6 +456,15 @@ And update the ``activate`` method to be ``async`` since we are now using
 .. code-block:: typescript
 
         activate: async (app: JupyterFrontEnd, palette: ICommandPalette) =>
+
+.. note::
+
+    If you are new to JavaScript / TypeScript and want to learn more about ``async``, ``await``,
+    and ``Promises``, you can check out the following `tutorial on MDN <https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises>`_
+
+    Be sure to also refer to the other resources in the
+    `See Also <https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises#see_also>`_
+    section for more materials.
 
 Rebuild your extension if necessary (``jlpm run build``), refresh your browser
 tab, and run the *Random Astronomy Picture* command again. You should now see a

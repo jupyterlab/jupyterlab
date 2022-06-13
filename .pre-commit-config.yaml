@@ -1,0 +1,80 @@
+ci:
+  # skip any check that needs internet access
+  skip: [check-jsonschema, prettier, eslint, stylelint, integrity]
+
+default_language_version:
+  node: system
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+      - id: forbid-new-submodules
+      - id: end-of-file-fixer
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: requirements-txt-fixer
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: check-builtin-literals
+      - id: trailing-whitespace
+        exclude: .bumpversion.cfg
+
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        args: ['--line-length', '100']
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        files: \.py$
+        args: [--profile=black]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          [
+            'flake8-bugbear==20.1.4',
+            'flake8-logging-format==0.6.0',
+            'flake8-implicit-str-concat==0.2.0'
+          ]
+
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.16.0
+    hooks:
+      - id: check-jsonschema
+        name: 'Check GitHub Workflows'
+        files: ^\.github/workflows/
+        types: [yaml]
+        args: ['--schemafile', 'https://json.schemastore.org/github-workflow']
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: 'npm run prettier:files'
+        language: node
+        types_or: [json, markdown, ts, tsx, javascript, jsx, css]
+      - id: eslint
+        name: eslint
+        entry: 'npm run eslint:files'
+        language: node
+        types_or: [ts, tsx, javascript, jsx]
+      - id: stylelint
+        name: stylelint
+        entry: 'npm run stylelint:files'
+        language: node
+        types: [css]
+      - id: integrity
+        name: integrity
+        entry: 'npm run integrity --force'
+        language: node
+        stages: [push]

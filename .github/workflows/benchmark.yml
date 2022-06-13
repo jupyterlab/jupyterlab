@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
           fetch-depth: 100
@@ -54,12 +54,12 @@ jobs:
             });
 
       - name: Install node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '14.x'
 
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
@@ -101,7 +101,7 @@ jobs:
         shell: bash
         run: |
           # Mount a volume to overwrite the server configuration
-          jlpm start 2>&1 > /tmp/jupyterlab_server_old.log &
+          (jlpm start > /tmp/jupyterlab_server_old.log 2>&1) &
         working-directory: galata
 
       - name: Install browser
@@ -149,7 +149,7 @@ jobs:
         working-directory: galata
         run: |
           # Mount a volume to overwrite the server configuration
-          jlpm start 2>&1 > /tmp/jupyterlab_server_new.log &
+          (jlpm start > /tmp/jupyterlab_server_new.log 2>&1) &
 
       - name: Install browser
         working-directory: galata
@@ -170,6 +170,11 @@ jobs:
         working-directory: galata
         run: |
           jlpm run test:benchmark
+
+      - name: Stop JupyterLab
+        if: always()
+        run: |
+          kill -s SIGTERM $(pgrep jupyter-lab)
 
       - name: Generate the report
         env:
@@ -204,7 +209,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: benchmark-assets
           path: |

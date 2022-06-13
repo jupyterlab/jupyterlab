@@ -10,7 +10,6 @@
 .jp-SidePanel-header {
   flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
@@ -31,6 +30,10 @@
 .jp-SidePanel-toolbar,
 .jp-AccordionPanel-toolbar {
   height: var(--jp-private-toolbar-height);
+}
+
+.jp-SidePanel-toolbar.jp-Toolbar-micro {
+  display: none;
 }
 
 .lm-AccordionPanel .jp-AccordionPanel-title {
@@ -82,4 +85,10 @@
 
 .lm-AccordionPanel .lm-SplitPanel-handle:hover {
   background: var(--jp-layout-color3);
+}
+
+.jp-text-truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

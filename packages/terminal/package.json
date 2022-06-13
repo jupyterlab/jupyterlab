@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal",
-  "version": "4.0.0-alpha.4",
+  "version": "4.0.0-alpha.11",
   "description": "JupyterLab - Terminal Emulator Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,25 +41,25 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.4",
-    "@jupyterlab/services": "^7.0.0-alpha.4",
-    "@jupyterlab/translation": "^4.0.0-alpha.4",
+    "@jupyterlab/apputils": "^4.0.0-alpha.11",
+    "@jupyterlab/services": "^7.0.0-alpha.11",
+    "@jupyterlab/translation": "^4.0.0-alpha.11",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/domutils": "^1.8.1",
     "@lumino/messaging": "^1.10.1",
-    "@lumino/widgets": "^1.31.1",
+    "@lumino/widgets": "^1.32.0",
     "xterm": "~4.8.1",
     "xterm-addon-fit": "~0.4.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.4",
+    "@jupyterlab/testutils": "^4.0.0-alpha.11",
     "@types/jest": "^26.0.10",
-    "canvas": "^2.6.1",
+    "canvas": "^2.9.1",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.5.2"
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

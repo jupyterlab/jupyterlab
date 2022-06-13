@@ -185,11 +185,11 @@ Adding a button to the toolbar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Since JupyterLab 3.2, adding toolbar item can be done using a :ref:`toolbar-registry` and settings. In particular
-for the notebook, if the button is linked to a new command, you can add a button in the toolbar using the 
+for the notebook, if the button is linked to a new command, you can add a button in the toolbar using the
 following JSON snippet in your extension settings file:
 
 .. code:: js
- 
+
    "jupyter.lab.toolbars": {
      "Notebook": [ // Widget factory name for which you want to add a toolbar item.
        // Item with default button widget triggering a command

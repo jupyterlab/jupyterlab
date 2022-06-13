@@ -11,6 +11,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { IScore } from '@jupyterlab/ui-components';
 import {
   ArrayExt,
   ArrayIterator,
@@ -378,6 +379,10 @@ export class FileBrowserModel implements IDisposable {
       }
 
       const path = (value as ReadonlyJSONObject)['path'] as string;
+      // need to return to root path if preferred dir is set
+      if (path) {
+        await this.cd('/');
+      }
       const localPath = manager.services.contents.localPath(path);
 
       await manager.services.contents.get(path);
@@ -769,7 +774,22 @@ export namespace TogglableHiddenFileBrowserModel {
 export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   constructor(options: FilterFileBrowserModel.IOptions) {
     super(options);
-    this._filter = options.filter ? options.filter : model => true;
+    this._filter =
+      options.filter ??
+      (model => {
+        return {};
+      });
+    this._filterDirectories = options.filterDirectories ?? true;
+  }
+
+  /**
+   * Whether to filter directories.
+   */
+  get filterDirectories(): boolean {
+    return this._filterDirectories;
+  }
+  set filterDirectories(value: boolean) {
+    this._filterDirectories = value;
   }
 
   /**
@@ -779,20 +799,23 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
    */
   items(): IIterator<Contents.IModel> {
     return filter(super.items(), (value, index) => {
-      if (value.type === 'directory') {
+      if (!this._filterDirectories && value.type === 'directory') {
         return true;
       } else {
-        return this._filter(value);
+        const filtered = this._filter(value);
+        value.indices = filtered?.indices;
+        return !!filtered;
       }
     });
   }
 
-  setFilter(filter: (value: Contents.IModel) => boolean): void {
+  setFilter(filter: (value: Contents.IModel) => Partial<IScore> | null): void {
     this._filter = filter;
     void this.refresh();
   }
 
-  private _filter: (value: Contents.IModel) => boolean;
+  private _filter: (value: Contents.IModel) => Partial<IScore> | null;
+  private _filterDirectories: boolean;
 }
 
 /**
@@ -806,6 +829,11 @@ export namespace FilterFileBrowserModel {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => boolean;
+    filter?: (value: Contents.IModel) => Partial<IScore> | null;
+
+    /**
+     * Filter directories
+     */
+    filterDirectories?: boolean;
   }
 }

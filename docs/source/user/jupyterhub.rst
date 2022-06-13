@@ -21,10 +21,6 @@ JupyterLab, set the following configuration option in your
 
     c.Spawner.cmd=["jupyter-labhub"]
 
-In this configuration, users can still access the classic Notebook at ``/tree``,
-by either typing that URL into the browser, or by using the "Launch Classic
-Notebook" item in JupyterLab's Help menu.
-
 Example Configuration
 ---------------------
 

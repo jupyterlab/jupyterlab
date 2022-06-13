@@ -13,16 +13,10 @@
       "path": "../completer"
     },
     {
-      "path": "../console"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../notebook"
-    },
-    {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

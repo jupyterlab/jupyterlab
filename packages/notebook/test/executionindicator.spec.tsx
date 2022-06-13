@@ -211,7 +211,7 @@ describe('@jupyterlab/notebook', () => {
       );
       const htmlElement = ReactDOMServer.renderToString(element);
       expect(htmlElement).toContain(FILLED_CIRCLE);
-      expect(htmlElement).toContain(`Executed 0/2 requests`);
+      expect(htmlElement).toContain(`Executed 0/2 cells`);
     });
 
     it('Should render a half filled circle with 1/2 cell executed message', () => {
@@ -228,10 +228,10 @@ describe('@jupyterlab/notebook', () => {
       );
       const htmlElement = ReactDOMServer.renderToString(element);
       expect(htmlElement).toContain(HALF_FILLED_CIRCLE);
-      expect(htmlElement).toContain(`Executed 1/2 requests`);
+      expect(htmlElement).toContain(`Executed 1/2 cells`);
     });
 
-    it('Should render an empty circle with 2 requests executed message', () => {
+    it('Should render an empty circle with 2 cells executed message', () => {
       defaultState.scheduledCellNumber = 2;
       defaultState.executionStatus = 'idle';
       defaultState.totalTime = 1;
@@ -244,7 +244,7 @@ describe('@jupyterlab/notebook', () => {
       );
       const htmlElement = ReactDOMServer.renderToString(element);
       expect(htmlElement).toContain(EMPTY_CIRCLE);
-      expect(htmlElement).toContain(`Executed 2 requests`);
+      expect(htmlElement).toContain(`Executed 2 cells`);
     });
   });
 });

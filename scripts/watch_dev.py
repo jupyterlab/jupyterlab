@@ -5,6 +5,6 @@
 
 from jupyterlab.commands import watch_dev
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     procs = watch_dev()
     procs[0].wait()

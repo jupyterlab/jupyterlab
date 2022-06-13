@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Prep a fresh conda environment in a temporary folder for a release
 if [[ $# -ne 1 ]]; then
     echo "Specify branch"

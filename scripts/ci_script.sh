@@ -14,7 +14,7 @@ fi
 if [[ $GROUP == python ]]; then
     jupyter lab build --debug
     # Run the python tests
-    py.test
+    python -m pytest
 fi
 
 
@@ -236,9 +236,6 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension enable -h
     jupyter labextension disable -h
 
-    # Make sure we can run JupyterLab under classic notebook
-    python -m jupyterlab.browser_check --notebook
-
     # Test cli tools
     jlpm run get:dependency mocha
     jlpm run update:dependency mocha
@@ -286,12 +283,6 @@ if [[ $GROUP == usage2 ]]; then
     ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
 
     ./test_install/bin/jupyter server extension list 1>serverextensions 2>&1
-    cat serverextensions
-    cat serverextensions | grep -i "jupyterlab.*enabled"
-    cat serverextensions | grep -i "jupyterlab.*OK"
-
-    # TODO: remove when we no longer support classic notebook
-    ./test_install/bin/jupyter serverextension list 1>serverextensions 2>&1
     cat serverextensions
     cat serverextensions | grep -i "jupyterlab.*enabled"
     cat serverextensions | grep -i "jupyterlab.*OK"

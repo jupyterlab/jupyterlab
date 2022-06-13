@@ -19,6 +19,9 @@
       "path": "../codemirror"
     },
     {
+      "path": "../completer"
+    },
+    {
       "path": "../console"
     },
     {
@@ -26,6 +29,9 @@
     },
     {
       "path": "../docregistry"
+    },
+    {
+      "path": "../documentsearch"
     },
     {
       "path": "../filebrowser"
@@ -43,10 +49,16 @@
       "path": "../observables"
     },
     {
+      "path": "../services"
+    },
+    {
       "path": "../settingregistry"
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

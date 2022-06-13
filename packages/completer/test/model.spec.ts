@@ -508,5 +508,39 @@ describe('completer/model', () => {
         expect(model.createPatch(patch)).toEqual(want);
       });
     });
+    describe('#resolveItem()', () => {
+      it('should return `undefined` if the completion item list is empty.', () => {
+        const model = new CompleterModel();
+        expect(model.resolveItem(0)).toBeUndefined();
+      });
+
+      it('should return undefined if item index is out of range.', () => {
+        const model = new CompleterModel();
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+        expect(model.resolveItem(3)).toBeUndefined();
+      });
+      it('should return the original item if `resolve` is missing.', async () => {
+        const model = new CompleterModel();
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+        const resolved = await model.resolveItem(0);
+        expect(resolved).toEqual({ label: 'foo' });
+      });
+      it('should resolve missing fields and remove the `resolve` function itself', async () => {
+        const model = new CompleterModel();
+        const item = {
+          label: 'foo',
+          resolve: () =>
+            Promise.resolve({ label: 'foo', documentation: 'Foo docs' })
+        };
+        model.setCompletionItems!([item]);
+        const resolved = await model.resolveItem(0);
+        expect(resolved).toEqual({ label: 'foo', documentation: 'Foo docs' });
+        expect(item).toEqual({
+          label: 'foo',
+          documentation: 'Foo docs',
+          resolve: undefined
+        });
+      });
+    });
   });
 });

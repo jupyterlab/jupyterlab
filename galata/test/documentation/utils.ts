@@ -1,3 +1,5 @@
+import { Page } from '@playwright/test';
+
 /**
  * Generate a SVG arrow to inject in a HTML document.
  *
@@ -22,29 +24,6 @@ export function generateArrow(
 }
 
 /**
- * Generate a capture area
- *
- * @param position Absolute position of the area
- * @param id HTML element id (default: "capture-screenshot")
- * @returns The div element to inject in the page
- */
-export function generateCaptureArea(
-  position: {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  },
-  id = 'capture-screenshot'
-): string {
-  const { top, left, width, height } = position;
-  return `<div 
-    id="${id}"
-    style="position: absolute; top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px; pointer-events: none;">
-  </div>`;
-}
-
-/**
  * Generate a SVG mouse pointer to inject in a HTML document.
  *
  * @param position Absolute position
@@ -55,4 +34,37 @@ export function positionMouse(position: { x: number; y: number }): string {
   <path d="m3.6043 1.0103 0.28628 12.757 2.7215-3.3091 2.5607 5.7514 2.0005-0.89067-2.5607-5.7514 4.2802 0.19174z"
       stroke="#ffffff" stroke-width=".54745" style="paint-order:markers fill stroke" />
 </svg>`;
+}
+
+/**
+ * Set the sidebar width
+ *
+ * @param page Page object
+ * @param width Sidebar width in pixels
+ * @param side Which sidebar to set: 'left' or 'right'
+ */
+export async function setSidebarWidth(
+  page: Page,
+  width = 251,
+  side: 'left' | 'right' = 'left'
+): Promise<void> {
+  const handles = page.locator(
+    '#jp-main-split-panel > .lm-SplitPanel-handle:not(.lm-mod-hidden)'
+  );
+  const splitHandle =
+    side === 'left'
+      ? await handles.first().elementHandle()
+      : await handles.last().elementHandle();
+  const handleBBox = await splitHandle.boundingBox();
+
+  await page.mouse.move(
+    handleBBox.x + 0.5 * handleBBox.width,
+    handleBBox.y + 0.5 * handleBBox.height
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    side === 'left' ? 33 + width : page.viewportSize().width - 33 - width,
+    handleBBox.y + 0.5 * handleBBox.height
+  );
+  await page.mouse.up();
 }

@@ -18,6 +18,7 @@ import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { JSONObject } from '@lumino/coreutils';
+import { YCodeCell } from '@jupyterlab/shared-models';
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -538,6 +539,111 @@ describe('cells/model', () => {
         expect(serialized).toEqual(cell);
         const output = serialized.outputs[0] as any;
         expect(output.data['application/json']['bar']).toBe(1);
+      });
+    });
+
+    describe('#onModelDBOutputsChange()', () => {
+      const output0 = {
+        output_type: 'display_data',
+        data: {
+          'text/plain': 'foo',
+          'application/json': { foo: 1 }
+        },
+        metadata: {}
+      } as nbformat.IDisplayData;
+      const output1 = {
+        output_type: 'display_data',
+        data: {
+          'text/plain': 'bar',
+          'application/json': { bar: 2 }
+        },
+        metadata: {}
+      } as nbformat.IDisplayData;
+      const output2 = {
+        output_type: 'display_data',
+        data: {
+          'text/plain': 'foobar',
+          'application/json': { foobar: 2 }
+        },
+        metadata: {}
+      } as nbformat.IDisplayData;
+      const cell: nbformat.ICodeCell = {
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: [output0, output1],
+        source: 'foo',
+        metadata: { trusted: false },
+        id: 'cell_id'
+      };
+      it('should add new items correctly', () => {
+        const model = new CodeCellModel({});
+        const sharedModel = model.sharedModel as YCodeCell;
+        expect(sharedModel.ymodel.get('outputs').length).toBe(0);
+
+        const newEvent0 = {
+          type: 'add',
+          newValues: [{ toJSON: () => output0 }],
+          oldValues: [],
+          oldIndex: -1,
+          newIndex: 0
+        } as any;
+        model['onModelDBOutputsChange'](null as any, newEvent0);
+        expect(sharedModel.ymodel.get('outputs').length).toBe(1);
+        expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output0);
+
+        const newEvent1 = {
+          type: 'add',
+          newValues: [{ toJSON: () => output1 }],
+          oldValues: [],
+          oldIndex: -1,
+          newIndex: 1
+        } as any;
+        model['onModelDBOutputsChange'](null as any, newEvent1);
+        expect(sharedModel.ymodel.get('outputs').length).toBe(2);
+        expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output1);
+      });
+
+      it('should set new items correctly', () => {
+        const model = new CodeCellModel({ cell });
+        const sharedModel = model.sharedModel as YCodeCell;
+        expect(sharedModel.ymodel.get('outputs').length).toBe(2);
+
+        const newEvent0 = {
+          type: 'set',
+          newValues: [{ toJSON: () => output2 }],
+          oldValues: [output0],
+          oldIndex: 0,
+          newIndex: 0
+        } as any;
+        model['onModelDBOutputsChange'](null as any, newEvent0);
+        expect(sharedModel.ymodel.get('outputs').length).toBe(2);
+        expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output2);
+        const newEvent1 = {
+          type: 'set',
+          newValues: [{ toJSON: () => output2 }],
+          oldValues: [output1],
+          oldIndex: 1,
+          newIndex: 1
+        } as any;
+        model['onModelDBOutputsChange'](null as any, newEvent1);
+        expect(sharedModel.ymodel.get('outputs').length).toBe(2);
+        expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output2);
+      });
+
+      it('should remove items correctly', () => {
+        const model = new CodeCellModel({ cell });
+        const sharedModel = model.sharedModel as YCodeCell;
+        expect(sharedModel.ymodel.get('outputs').length).toBe(2);
+
+        const newEvent0 = {
+          type: 'remove',
+          newValues: [],
+          oldValues: [output0, output1],
+          oldIndex: 0,
+          newIndex: 0
+        } as any;
+        model['onModelDBOutputsChange'](null as any, newEvent0);
+        expect(sharedModel.ymodel.get('outputs').length).toBe(0);
       });
     });
 

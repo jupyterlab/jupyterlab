@@ -279,6 +279,9 @@ export namespace ISettingRegistry {
     disabled?: boolean;
   }
 
+  /**
+   * An interface describing a context menu item
+   */
   export interface IContextMenuItem extends IMenuItem {
     /**
      * The CSS selector for the context menu item.
@@ -524,9 +527,7 @@ export namespace ISettingRegistry {
      *
      * @returns The setting value.
      */
-    get(
-      key: string
-    ): {
+    get(key: string): {
       composite: ReadonlyPartialJSONValue | undefined;
       user: ReadonlyPartialJSONValue | undefined;
     };
@@ -592,7 +593,12 @@ export namespace ISettingRegistry {
     disabled?: boolean;
 
     /**
-     * The key combination of the shortcut.
+     * The key sequence of the shortcut.
+     *
+     * ### Notes
+     *
+     * If this is a list like `['Ctrl A', 'B']`, the user needs to press
+     * `Ctrl A` followed by `B` to trigger the shortcuts.
      */
     keys: string[];
 

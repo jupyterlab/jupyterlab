@@ -17,15 +17,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser {
+.jp-FileBrowser .jp-SidePanel-content {
   display: flex;
   flex-direction: column;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-
-  /* This is needed so that all font sizing of children done in ems is
-   * relative to this base size */
-  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
@@ -35,6 +29,12 @@
   box-shadow: none;
   padding: 0;
   justify-content: flex-start;
+}
+
+.jp-FileBrowser-Panel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .jp-BreadCrumbs {
@@ -66,34 +66,14 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
   padding-right: 2px;
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
   width: 40px;
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent {
-  width: 72px;
-  background: var(--jp-brand-color1);
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent:focus-visible {
-  background-color: var(--jp-accept-color-active, var(--jp-brand-color0));
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent
-  .jp-icon3 {
-  fill: var(--jp-layout-color1);
 }
 
 /*-----------------------------------------------------------------------------
@@ -118,6 +98,10 @@
   margin: 8px 12px 0;
 }
 
+.jp-FileBrowser .lm-AccordionPanel > h3:first-child {
+  display: none;
+}
+
 /*-----------------------------------------------------------------------------
 | DirListing
 |----------------------------------------------------------------------------*/
@@ -137,6 +121,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
+  align-items: center;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -215,11 +200,46 @@
 .jp-DirListing-item {
   display: flex;
   flex-direction: row;
+  align-items: center;
   padding: 4px 12px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.jp-DirListing-checkboxWrapper {
+  /* Increases hit area of checkbox. */
+  padding: 4px;
+}
+
+.jp-DirListing-header
+  .jp-DirListing-checkboxWrapper
+  + .jp-DirListing-headerItem {
+  padding-left: 4px;
+}
+
+.jp-DirListing-content .jp-DirListing-checkboxWrapper {
+  position: relative;
+  left: -4px;
+  margin: -4px 0 -4px -8px;
+}
+
+.jp-DirListing-checkboxWrapper.jp-mod-visible {
+  visibility: visible;
+}
+
+/* For devices that support hovering, hide checkboxes until hovered, selected...
+*/
+@media (hover: hover) {
+  .jp-DirListing-checkboxWrapper {
+    visibility: hidden;
+  }
+
+  .jp-DirListing-item:hover .jp-DirListing-checkboxWrapper,
+  .jp-DirListing-item.jp-mod-selected .jp-DirListing-checkboxWrapper {
+    visibility: visible;
+  }
 }
 
 .jp-DirListing-item[data-is-dot] {

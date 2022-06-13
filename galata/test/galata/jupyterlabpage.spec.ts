@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
-import { expect, test as playwrightTest } from '@playwright/test';
+import { expect, test } from '@jupyterlab/galata';
+import { test as playwrightTest } from '@playwright/test';
 
 test.describe('appPath', () => {
   const APP_PATH = '/retro';
@@ -47,8 +47,6 @@ test('should toggle simple mode', async ({ page }) => {
 
 // test that stock playwright test is accessible with page not being JupyterLabPage
 playwrightTest('should not be loading galata helper', async ({ page }) => {
-  // eslint-disable-next-line jest/no-standalone-expect
   expect(page['notebook']).toBeUndefined(); // no helper
-  // eslint-disable-next-line jest/no-standalone-expect
   expect(page.url()).toEqual('about:blank');
 });

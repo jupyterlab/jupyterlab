@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -277,16 +278,7 @@ export namespace ToolbarRegistry {
   /**
    * Interface of item to be inserted in a toolbar
    */
-  export interface IToolbarItem {
-    /**
-     * Unique item name
-     */
-    name: string;
-    /**
-     * Toolbar widget
-     */
-    widget: Widget;
-  }
+  export interface IToolbarItem extends IRenderMime.IToolbarItem {}
 
   /**
    * Interface describing a toolbar item widget
@@ -319,6 +311,20 @@ export namespace ToolbarRegistry {
  */
 export interface IToolbarWidgetRegistry {
   /**
+   * Add a new toolbar item factory
+   *
+   * @param widgetFactory The widget factory name that creates the toolbar
+   * @param toolbarItemName The unique toolbar item
+   * @param factory The factory function that receives the widget containing the toolbar and returns the toolbar widget.
+   * @returns The previously defined factory
+   */
+  addFactory<T extends Widget = Widget>(
+    widgetFactory: string,
+    toolbarItemName: string,
+    factory: (main: T) => Widget
+  ): ((main: T) => Widget) | undefined;
+
+  /**
    * Default toolbar item factory
    */
   defaultFactory: (
@@ -348,6 +354,8 @@ export interface IToolbarWidgetRegistry {
    * @param toolbarItemName The unique toolbar item
    * @param factory The factory function that receives the widget containing the toolbar and returns the toolbar widget.
    * @returns The previously defined factory
+   *
+   * @deprecated since v4 use `addFactory` instead
    */
   registerFactory<T extends Widget = Widget>(
     widgetFactory: string,

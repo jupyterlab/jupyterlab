@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -43,7 +44,8 @@ import { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T> {
+> implements DocumentRegistry.IContext<T>
+{
   /**
    * Construct a new document context.
    */
@@ -77,6 +79,7 @@ export class Context<
       ? docProviderFactory({
           path: this._path,
           contentType: this._factory.contentType,
+          format: this._factory.fileFormat!,
           ymodel
         })
       : new ProviderMock();
@@ -260,25 +263,19 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean): Promise<void> {
-    const lock = await this._provider.acquireLock();
-    const contentIsInitialized = await this._provider.requestInitialContent();
     let promise;
-    if (isNew || contentIsInitialized) {
-      promise = this._save();
+    if (PageConfig.getOption('collaborative') == 'true') {
+      promise = this._loadContext();
     } else {
-      promise = this._revert();
-    }
-    // make sure that the lock is released after the above operations are completed.
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    // if save/revert completed successfully, we set the initialized content in the rtc server.
-    promise
-      .then(() => {
-        this._provider.putInitializedState();
+      if (isNew) {
+        promise = this._save();
+      } else {
+        promise = this._revert();
+      }
+      promise = promise.then(() => {
         this._model.initialize();
-      })
-      .then(finally_, finally_);
+      });
+    }
     return promise;
   }
 
@@ -299,20 +296,9 @@ export class Context<
    * Save the document contents to disk.
    */
   async save(): Promise<void> {
-    const [lock] = await Promise.all([
-      this._provider.acquireLock(),
-      this.ready
-    ]);
+    await this.ready;
     let promise: Promise<void>;
     promise = this._save();
-    // if save completed successfully, we set the initialized content in the rtc server.
-    promise = promise.then(() => {
-      this._provider.putInitializedState();
-    });
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    promise.then(finally_, finally_);
     return await promise;
   }
 
@@ -371,15 +357,8 @@ export class Context<
    * Revert the document contents to disk contents.
    */
   async revert(): Promise<void> {
-    const [lock] = await Promise.all([
-      this._provider.acquireLock(),
-      this.ready
-    ]);
+    await this.ready;
     const promise = this._revert();
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    promise.then(finally_, finally_);
     return await promise;
   }
 
@@ -518,12 +497,14 @@ export class Context<
    * Update our contents model, without the content.
    */
   private _updateContentsModel(model: Contents.IModel): void {
+    const writable =
+      model.writable && PageConfig.getOption('collaborative') != 'true';
     const newModel: Contents.IModel = {
       path: model.path,
       name: model.name,
       type: model.type,
       content: undefined,
-      writable: model.writable,
+      writable,
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
@@ -564,7 +545,7 @@ export class Context<
       // any kernel has started.
       void this.sessionContext.initialize().then(shouldSelect => {
         if (shouldSelect) {
-          void this._dialogs.selectKernel(this.sessionContext);
+          void this._dialogs.selectKernel(this.sessionContext, this.translator);
         }
       });
     });
@@ -592,9 +573,14 @@ export class Context<
    * Save the document contents to disk.
    */
   private async _save(): Promise<void> {
+    // if collaborative mode is enabled, saving happens in the back-end
+    // after each change to the document
+    if (PageConfig.getOption('collaborative') === 'true') {
+      return;
+    }
     this._saveState.emit('started');
     const model = this._model;
-    let content: PartialJSONValue;
+    let content: PartialJSONValue = null;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
     } else {
@@ -631,28 +617,66 @@ export class Context<
       // Emit completion.
       this._saveState.emit('completed');
     } catch (err) {
-      // If the save has been canceled by the user,
-      // throw the error so that whoever called save()
-      // can decide what to do.
-      if (
-        err.message === 'Cancel' ||
-        err.message === 'Modal is already displayed'
-      ) {
+      // If the save has been canceled by the user, throw the error
+      // so that whoever called save() can decide what to do.
+      const { name } = err;
+      if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
         throw err;
       }
 
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
-      const name = PathExt.basename(localPath);
+      const file = PathExt.basename(localPath);
       void this._handleError(
         err,
-        this._trans.__('File Save Error for %1', name)
+        this._trans.__('File Save Error for %1', file)
       );
 
       // Emit failure.
       this._saveState.emit('failed');
       throw err;
     }
+  }
+
+  /**
+   * Load the metadata of the document without the content.
+   */
+  private _loadContext(): Promise<void> {
+    const opts: Contents.IFetchOptions = {
+      type: this._factory.contentType,
+      content: false,
+      ...(this._factory.fileFormat !== null
+        ? { format: this._factory.fileFormat }
+        : {})
+    };
+    const path = this._path;
+    return this._manager.ready
+      .then(() => {
+        return this._manager.contents.get(path, opts);
+      })
+      .then(contents => {
+        if (this.isDisposed) {
+          return;
+        }
+        const model = {
+          ...contents,
+          format: this._factory.fileFormat
+        };
+        this._updateContentsModel(model);
+        this._model.dirty = false;
+        if (!this._isPopulated) {
+          return this._populate();
+        }
+      })
+      .catch(async err => {
+        const localPath = this._manager.contents.localPath(this._path);
+        const name = PathExt.basename(localPath);
+        void this._handleError(
+          err,
+          this._trans.__('File Load Error for %1', name)
+        );
+        throw err;
+      });
   }
 
   /**
@@ -812,7 +836,9 @@ export class Context<
         `${tDisk}`
     );
     if (this._timeConflictModalIsOpen) {
-      return Promise.reject(new Error('Modal is already displayed'));
+      const error = new Error('Modal is already displayed');
+      error.name = 'ModalDuplicateError';
+      return Promise.reject(error);
     }
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
@@ -843,7 +869,9 @@ or load the version on disk (revert)?`,
           return model;
         });
       }
-      return Promise.reject(new Error('Cancel')); // Otherwise cancel the save.
+      const error = new Error('Cancel');
+      error.name = 'ModalCancelError';
+      return Promise.reject(error); // Otherwise cancel the save.
     });
   }
 
@@ -882,8 +910,10 @@ or load the version on disk (revert)?`,
     this._path = newPath;
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
-    await this.save();
+    // we must rename the document before saving with the new path
     this._ycontext.set('path', this._path);
+    await this._provider.renameAck;
+    await this.save();
     await this._maybeCheckpoint(true);
   }
 

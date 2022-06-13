@@ -370,10 +370,10 @@ describe('@jupyterlab/apputils', () => {
         expect(sessionContext.kernelDisplayStatus).toBe('initializing');
       });
 
-      it('should be "idle" if there is no current kernel', async () => {
+      it('should be "unknown" if there is no current kernel', async () => {
         await sessionContext.initialize();
         await sessionContext.shutdown();
-        expect(sessionContext.kernelDisplayStatus).toBe('idle');
+        expect(sessionContext.kernelDisplayStatus).toBe('unknown');
       });
     });
 
@@ -496,9 +496,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching name', () => {
-        const spec = specsManager.specs!.kernelspecs[
-          specsManager.specs!.default
-        ]!;
+        const spec =
+          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
 
         expect(
           SessionContext.getDefaultKernel({
@@ -518,9 +517,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching language', () => {
-        const spec = specsManager.specs!.kernelspecs[
-          specsManager.specs!.default
-        ]!;
+        const spec =
+          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
         const kernelspecs: any = {};
 
         kernelspecs[spec.name] = spec;
@@ -536,9 +534,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return null if a language matches twice', () => {
-        const spec = specsManager.specs!.kernelspecs[
-          specsManager.specs!.default
-        ]!;
+        const spec =
+          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
         const kernelspecs: any = {};
 
         kernelspecs['foo'] = spec;

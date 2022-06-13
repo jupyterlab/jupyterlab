@@ -20,6 +20,7 @@ export class Uploader extends ToolbarButton {
   constructor(options: Uploader.IOptions) {
     super({
       icon: fileUploadIcon,
+      label: options.label,
       onClick: () => {
         this._input.click();
       },
@@ -85,6 +86,11 @@ export namespace Uploader {
      * The language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * An optional label.
+     */
+    label?: string;
   }
 }
 

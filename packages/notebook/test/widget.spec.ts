@@ -38,7 +38,8 @@ const notebookConfig = {
   scrollPastEnd: true,
   defaultCell: 'code' as nbformat.CellType,
   recordTiming: false,
-  numberCellsToRenderDirectly: 2,
+  numberCellsToRenderDirectly: 9999,
+  remainingTimeBeforeRescheduling: 50,
   renderCellOnIdle: true,
   observedTopMargin: '1000px',
   observedBottomMargin: '1000px',
@@ -46,7 +47,8 @@ const notebookConfig = {
   disableDocumentWideUndoRedo: true,
   renderingLayout: 'default' as 'default' | 'side-by-side',
   sideBySideLeftMarginOverride: '10px',
-  sideBySideRightMarginOverride: '10px'
+  sideBySideRightMarginOverride: '10px',
+  sideBySideOutputRatio: 1
 };
 
 const options: Notebook.IOptions = {

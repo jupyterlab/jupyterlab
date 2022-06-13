@@ -32,6 +32,12 @@
       "path": "./packages/attachments"
     },
     {
+      "path": "./packages/cell-toolbar"
+    },
+    {
+      "path": "./packages/cell-toolbar-extension"
+    },
+    {
       "path": "./packages/cells"
     },
     {
@@ -168,6 +174,9 @@
     },
     {
       "path": "./packages/markdownviewer-extension"
+    },
+    {
+      "path": "./packages/markedparser-extension"
     },
     {
       "path": "./packages/mathjax2"

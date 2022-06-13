@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog } from '@jupyterlab/apputils';
+import { Dialog, setToolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { IScore, newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { FileBrowser } from './browser';
@@ -52,7 +53,7 @@ export namespace FileDialog {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => boolean;
+    filter?: (value: Contents.IModel) => Partial<IScore> | null;
 
     /**
      * The application language translator.
@@ -107,7 +108,9 @@ export namespace FileDialog {
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
     return getOpenFiles({
       ...options,
-      filter: model => false
+      filter: model => {
+        return model.type === 'directory' ? {} : null;
+      }
     });
   }
 }
@@ -117,14 +120,17 @@ export namespace FileDialog {
  */
 class OpenDialog
   extends Widget
-  implements Dialog.IBodyWidget<Contents.IModel[]> {
+  implements Dialog.IBodyWidget<Contents.IModel[]>
+{
   constructor(
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => boolean,
-    translator?: ITranslator
+    filter?: (value: Contents.IModel) => Partial<IScore> | null,
+    translator?: ITranslator,
+    filterDirectories?: boolean
   ) {
     super();
-    translator = translator || nullTranslator;
+    translator = translator ?? nullTranslator;
+    const trans = translator.load('jupyterlab');
     this.addClass(OPEN_DIALOG_CLASS);
 
     this._browser = Private.createFilteredFileBrowser(
@@ -132,8 +138,38 @@ class OpenDialog
       manager,
       filter,
       {},
-      translator
+      translator,
+      filterDirectories
     );
+
+    // Add toolbar items
+    setToolbar(this._browser, (browser: FileBrowser) => [
+      {
+        name: 'new-folder',
+        widget: new ToolbarButton({
+          icon: newFolderIcon,
+          onClick: () => {
+            browser.createNewDirectory();
+          },
+          tooltip: trans.__('New Folder')
+        })
+      },
+      {
+        name: 'refresher',
+        widget: new ToolbarButton({
+          icon: refreshIcon,
+          onClick: () => {
+            browser.model.refresh().catch(reason => {
+              console.error(
+                'Failed to refresh file browser in open dialog.',
+                reason
+              );
+            });
+          },
+          tooltip: trans.__('Refresh File List')
+        })
+      }
+    ]);
 
     // Build the sub widgets
     const layout = new PanelLayout();
@@ -197,9 +233,10 @@ namespace Private {
   export const createFilteredFileBrowser = (
     id: string,
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => boolean,
+    filter?: (value: Contents.IModel) => Partial<IScore> | null,
     options: IFileBrowserFactory.IOptions = {},
-    translator?: ITranslator
+    translator?: ITranslator,
+    filterDirectories?: boolean
   ): FileBrowser => {
     translator = translator || nullTranslator;
     const model = new FilterFileBrowserModel({
@@ -207,7 +244,8 @@ namespace Private {
       filter,
       translator,
       driveName: options.driveName,
-      refreshInterval: options.refreshInterval
+      refreshInterval: options.refreshInterval,
+      filterDirectories
     });
     const widget = new FileBrowser({
       id,

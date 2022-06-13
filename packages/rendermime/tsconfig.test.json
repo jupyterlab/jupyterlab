@@ -6,9 +6,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../codemirror"
-    },
-    {
       "path": "../coreutils"
     },
     {
@@ -28,6 +25,9 @@
     },
     {
       "path": "."
+    },
+    {
+      "path": "../markedparser-extension"
     },
     {
       "path": "../mathjax2"

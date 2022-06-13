@@ -35,6 +35,14 @@ export namespace galata {
     }
   };
 
+  export const DEFAULT_DOCUMENTATION_STATE: Record<string, any> = {
+    data: {
+      'layout-restorer:data': {
+        relativeSizes: [0, 1, 0]
+      }
+    }
+  };
+
   /**
    * Sidebar position
    */
@@ -247,6 +255,11 @@ export namespace galata {
      * The path will be undefined for the root folder.
      */
     export const contents = /.*\/api\/contents(?<path>\/.+)?\?/;
+
+    /**
+     * Extensions API
+     */
+    export const extensions = /.*\/lab\/api\/extensions/;
 
     /**
      * Sessions API

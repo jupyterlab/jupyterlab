@@ -178,7 +178,8 @@ function activateLogConsole(
 
     app.shell.add(logConsoleWidget, 'down', {
       ref: options.ref,
-      mode: options.insertMode
+      mode: options.insertMode,
+      type: 'Log Console'
     });
     void tracker.add(logConsoleWidget);
     app.shell.activateById(logConsoleWidget.id);
@@ -233,7 +234,9 @@ function activateLogConsole(
     },
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
     label: args =>
-      trans.__('Set Log Level to %1', toTitleCase(args.level as string))
+      args['level']
+        ? trans.__('Set Log Level to %1', toTitleCase(args.level as string))
+        : trans.__('Set log level to `level`.')
   });
 
   if (palette) {

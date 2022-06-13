@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/json-extension",
-  "version": "4.0.0-alpha.4",
+  "version": "4.0.0-alpha.11",
   "description": "JupyterLab - JSON Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,13 +32,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.4",
-    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.4",
-    "@jupyterlab/translation": "^4.0.0-alpha.4",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.19",
+    "@jupyterlab/apputils": "^4.0.0-alpha.11",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.11",
+    "@jupyterlab/translation": "^4.0.0-alpha.11",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/messaging": "^1.10.1",
-    "@lumino/widgets": "^1.31.1",
+    "@lumino/widgets": "^1.32.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-highlighter": "^0.4.3",
@@ -50,7 +50,7 @@
     "@types/react-highlighter": "^0.3.4",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.5.2"
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

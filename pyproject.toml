@@ -1,5 +1,5 @@
 [build-system]
-requires=["jupyter_packaging>=0.9,<2"]
+requires=["jupyter_packaging>=0.9,<2", "pre-commit"]
 build-backend = "jupyter_packaging.build_api"
 
 [license]
@@ -29,7 +29,7 @@ skip = ["check-links"]
 
 [tool.jupyter-releaser.options]
 ignore-glob = ["packages/ui-components/docs/source/ui_components.rst", "images"]
-ignore-links = ["../api/*.*", ".*/images/[\\w-]+.png"]
+ignore-links = ["../api/*.*", ".*/images/[\\w-]+.png", "https://docs.github.com/en/.*"]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 npm-cmd = "npm publish --tag next"

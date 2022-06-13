@@ -10,24 +10,6 @@
       "path": "../application"
     },
     {
-      "path": "../cells"
-    },
-    {
-      "path": "../docmanager"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../markdownviewer"
-    },
-    {
-      "path": "../notebook"
-    },
-    {
-      "path": "../rendermime"
-    },
-    {
       "path": "../settingregistry"
     },
     {

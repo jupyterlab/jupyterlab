@@ -27,18 +27,6 @@ pip install -e ".[test]" || pip install -v -e ".[test]"
 jlpm versions
 jlpm config current
 
-# TODO: remove when we no longer support classic notebook
-jupyter serverextension enable jupyterlab
-jupyter serverextension list 1>serverextensions 2>&1
-cat serverextensions
-cat serverextensions | grep -i "jupyterlab.*enabled"
-cat serverextensions | grep -i "jupyterlab.*OK"
-rm serverextensions
-
-if [[ $GROUP == integrity ]]; then
-    pip install notebook==4.3.1
-fi
-
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
     pip install build
@@ -54,4 +42,3 @@ fi
 if [[ $GROUP == js-debugger ]]; then
     pip install xeus-python">=0.9.0,<0.10.0"
 fi
-

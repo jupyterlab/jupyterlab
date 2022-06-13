@@ -35,8 +35,7 @@ module.exports = require('@jupyterlab/galata/lib/playwright-config');
 Create `ui-tests/foo.spec.ts` to define your test.
 
 ```typescript
-import { test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, test } from '@jupyterlab/galata';
 
 test.describe('Notebook Tests', () => {
   test('Create New Notebook', async ({ page, tmpPath }) => {
@@ -168,8 +167,7 @@ test('Open language menu', async ({ page }) => {
     if (request.method() === 'GET') {
       return route.fulfill({
         status: 200,
-        body:
-          '{"data": {"en": {"displayName": "English", "nativeName": "English"}}, "message": ""}'
+        body: '{"data": {"en": {"displayName": "English", "nativeName": "English"}}, "message": ""}'
       });
     } else {
       return route.continue();
@@ -396,7 +394,7 @@ Benchmark of JupyterLab is done using Playwright. The actions measured are:
 Two files are tested: a notebook with many code cells and another with many markdown cells.
 
 The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
-the same CI job to ensure using the same hardware.  
+the same CI job to ensure using the same hardware.
 The benchmark job is triggered on:
 
 - Approved PR review

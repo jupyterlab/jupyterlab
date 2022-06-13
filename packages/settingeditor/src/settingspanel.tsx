@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Settings } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
@@ -50,6 +50,20 @@ export interface ISettingsPanelProps {
    * Sends the updated dirty state to the parent class.
    */
   updateDirtyState: (dirty: boolean) => void;
+
+  /**
+   * Signal that sends updated filter when search value changes.
+   */
+  updateFilterSignal: ISignal<
+    PluginList,
+    (plugin: ISettingRegistry.IPlugin) => string[] | null
+  >;
+
+  /**
+   * If the settings editor is created with an initial search query, an initial
+   * filter function is passed to the settings panel.
+   */
+  initialFilter: (item: ISettingRegistry.IPlugin) => string[] | null;
 }
 
 /**
@@ -63,9 +77,14 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   handleSelectSignal,
   hasError,
   updateDirtyState,
-  translator
+  updateFilterSignal,
+  translator,
+  initialFilter
 }: ISettingsPanelProps): JSX.Element => {
   const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
+  const [filterPlugin, setFilter] = useState<
+    (plugin: ISettingRegistry.IPlugin) => string[] | null
+  >(() => initialFilter);
 
   // Refs used to keep track of "selected" plugin based on scroll location
   const editorRefs: {
@@ -80,14 +99,41 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   }> = React.useRef({});
 
   useEffect(() => {
+    const onFilterUpdate = (
+      list: PluginList,
+      newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | null
+    ) => {
+      setFilter(() => newFilter);
+      for (const pluginSettings of settings) {
+        const filtered = newFilter(pluginSettings.plugin);
+        if (filtered === null || filtered.length > 0) {
+          setExpandedPlugin(pluginSettings.id);
+          break;
+        }
+      }
+    };
+
+    // Set first visible plugin as expanded plugin on initial load.
+    for (const pluginSettings of settings) {
+      const filtered = filterPlugin(pluginSettings.plugin);
+      if (filtered === null || filtered.length > 0) {
+        setExpandedPlugin(pluginSettings.id);
+        break;
+      }
+    }
+
+    // When filter updates, only show plugins that match search.
+    updateFilterSignal.connect(onFilterUpdate);
+
     const onSelectChange = (list: PluginList, pluginId: string) => {
       setExpandedPlugin(expandedPlugin !== pluginId ? pluginId : null);
       // Scroll to the plugin when a selection is made in the left panel.
-      editorRefs[pluginId].current?.scrollIntoView(true);
+      editorRefs[pluginId]?.current?.scrollIntoView(true);
     };
     handleSelectSignal?.connect?.(onSelectChange);
 
     return () => {
+      updateFilterSignal.disconnect(onFilterUpdate);
       handleSelectSignal?.disconnect?.(onSelectChange);
     };
   }, []);
@@ -108,6 +154,12 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
       {settings.map(pluginSettings => {
+        // Pass filtered results to SettingsFormEditor to only display filtered fields.
+        const filtered = filterPlugin(pluginSettings.plugin);
+        // If filtered results are an array, only show if the array is non-empty.
+        if (filtered !== null && filtered.length === 0) {
+          return undefined;
+        }
         return (
           <div
             ref={editorRefs[pluginSettings.id]}
@@ -123,6 +175,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
                   setExpandedPlugin(null);
                 }
               }}
+              filteredValues={filtered}
               settings={pluginSettings}
               renderers={editorRegistry.renderers}
               hasError={(error: boolean) => {

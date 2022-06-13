@@ -7,7 +7,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { PanelLayout, Widget } from '@lumino/widgets';
+import { Layout, PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
 import { Button } from './button';
@@ -164,10 +164,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   /**
    * Construct a new toolbar widget.
    */
-  constructor() {
+  constructor(options: Toolbar.IOptions = {}) {
     super();
     this.addClass(TOOLBAR_CLASS);
-    this.layout = new ToolbarLayout();
+    this.layout = options.layout ?? new ToolbarLayout();
   }
 
   /**
@@ -547,6 +547,16 @@ export class ReactiveToolbar extends Toolbar<Widget> {
  */
 export namespace Toolbar {
   /**
+   * The options used to create a toolbar.
+   */
+  export interface IOptions {
+    /**
+     * Toolbar widget layout.
+     */
+    layout?: Layout;
+  }
+
+  /**
    * Widget with associated toolbar
    */
   export interface IWidgetToolbar extends Widget {
@@ -577,6 +587,10 @@ export namespace ToolbarButtonComponent {
    */
   export interface IProps {
     className?: string;
+    /**
+     * Data set of the button
+     */
+    dataset?: DOMStringMap;
     label?: string;
     icon?: LabIcon.IMaybeResolvable;
     iconClass?: string;
@@ -656,6 +670,7 @@ export function ToolbarButtonComponent(
       }
       aria-pressed={props.pressed}
       aria-disabled={props.enabled === false}
+      {...props.dataset}
       disabled={props.enabled === false}
       onClick={props.actualOnClick ?? false ? handleClick : undefined}
       onMouseDown={
@@ -1071,6 +1086,7 @@ namespace Private {
 
     return {
       className,
+      dataset: { 'data-command': options.id },
       icon,
       iconClass,
       tooltip,

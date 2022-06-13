@@ -1,48 +1,42 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, galata, test } from '@jupyterlab/galata';
+import { setSidebarWidth } from './utils';
 
-test.use({ autoGoto: false, viewport: { height: 720, width: 1280 } });
+test.use({
+  autoGoto: false,
+  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  viewport: { height: 720, width: 1280 }
+});
 
 test.describe('Internationalization', () => {
   test('Menu', async ({ page }) => {
     await page.goto();
 
+    await setSidebarWidth(page);
+
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
 
-    // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 5px; left: 250px; width: 800px; height: 600px;"></div>'
-      );
-    });
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 5, x: 250, width: 800, height: 600 } })
     ).toMatchSnapshot('language_settings.png');
   });
 
   test('Confirm language', async ({ page }) => {
     await page.goto();
 
+    await setSidebarWidth(page);
+
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
     await page.click('#jp-mainmenu-settings-language >> text=Chinese');
 
-    // Inject capture zone
-    await page.evaluate(() => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        '<div id="capture-screenshot" style="position: absolute; top: 200px; left: 350px; width: 600px; height: 300px;"></div>'
-      );
-    });
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({
+        clip: { y: 200, x: 350, width: 600, height: 300 }
+      })
     ).toMatchSnapshot('language_change.png');
   });
 
@@ -72,6 +66,8 @@ test.describe('Internationalization', () => {
 
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
+
+    await setSidebarWidth(page);
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
