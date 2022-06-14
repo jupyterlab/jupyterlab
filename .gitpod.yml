@@ -1,3 +1,4 @@
+
 github:
   prebuilds:
     # enable for the master/default branch (defaults to true)
@@ -45,3 +46,7 @@ tasks:
 ports:
   - port: 8888
   - port: 8000
+
+vscode:
+  extensions:
+    - esbenp.prettier-vscode
