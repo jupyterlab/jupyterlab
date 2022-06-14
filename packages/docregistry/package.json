@@ -43,7 +43,6 @@
   "dependencies": {
     "@jupyterlab/apputils": "^4.0.0-alpha.11",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.11",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.11",
     "@jupyterlab/coreutils": "^6.0.0-alpha.11",
     "@jupyterlab/docprovider": "^4.0.0-alpha.11",
     "@jupyterlab/observables": "^5.0.0-alpha.11",
