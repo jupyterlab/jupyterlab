@@ -92,9 +92,7 @@
     --jp-search-unselected-match-background-color
   ) !important;
   color: var(--jp-search-unselected-match-color) !important;*/
-  background-color: var(
-    --jp-search-unselected-match-background-color
-  );
+  background-color: var(--jp-search-unselected-match-background-color);
   color: var(--jp-search-unselected-match-color);
 }
 
@@ -102,6 +100,7 @@
   background-color: var(--jp-search-selected-match-background-color) !important;
   color: var(--jp-search-selected-match-color) !important;
 }
+
 .cm-trailingspace {
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAsElEQVQIHQGlAFr/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA7+r3zKmT0/+pk9P/7+r3zAAAAAAAAAAABAAAAAAAAAAA6OPzM+/q9wAAAAAA6OPzMwAAAAAAAAAAAgAAAAAAAAAAGR8NiRQaCgAZIA0AGR8NiQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQyoYJ/SY80UAAAAASUVORK5CYII=);
   background-position: center left;
