@@ -19,7 +19,7 @@ github:
 tasks:
   - name: dev-mode
     init: >
-      pip3 install -e ".[docs,dev]" &&
+      pip3 install -e ".[docs,test]" &&
       yarn install &&
       yarn run build &&
       gp sync-done setup
@@ -27,7 +27,7 @@ tasks:
     # Set no token and allow any origin, so that you can open it in a new tab
     # Disable iframe security so can load in the editor as well
     command: >
-      pip3 install -e ".[docs,dev]" &&
+      pip3 install -e ".[docs,test]" &&
       jupyter lab
       --dev-mode
       --watch
@@ -40,7 +40,7 @@ tasks:
       cd docs &&
       make html
     command: >
-      cd docs/build/html &&
+      cd build/html &&
       python -m http.server -p 8000
 ports:
   - port: 8888
