@@ -81,7 +81,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
           if (ef.is(this._highlightEffect)) {
             const e = ef as StateEffect<{ matches: ISearchMatch[] }>;
             if (e.value.matches.length) {
-              console.log('updating highlights');
               highlights = highlights.update({
                 add: e.value.matches.map(m =>
                   this._highlightMark.range(
@@ -161,10 +160,11 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       )
     });
 
+    await this._setInitialMatches(query);
+
     if (refreshOverlay) {
       this._refreshOverlay();
     }
-    await this._setInitialMatches(query);
 
     const matches = this._parseMatchesFromState();
     if (matches.length === 0) {
@@ -176,6 +176,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._currentMatch = match;
 
+    this._highlightCurrentMatch(cursorMatch);
     return Promise.resolve();
   }
 
@@ -227,13 +228,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    */
   async highlightNext(loop?: boolean): Promise<ISearchMatch | undefined> {
     return this._highlightCurrentMatch(this._findNext(false));
-    /*const cursorMatch = this._findNext(false);
-    if (!cursorMatch) {
-      return;
-    }
-    const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._currentMatch = match;
-    return match;*/
   }
 
   /**
@@ -245,13 +239,6 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    */
   async highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined> {
     return this._highlightCurrentMatch(this._findNext(true));
-    /*const cursorMatch = this._findNext(true);
-    if (!cursorMatch) {
-      return;
-    }
-    const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._currentMatch = match;
-    return match;*/
   }
 
   private async _highlightCurrentMatch(
@@ -292,7 +279,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     if (this._currentMatchIsSelected()) {
       const cursor = new RegExpCursor(
         this.editor.doc,
-        this._query.toString(),
+        this._query.source,
         { ignoreCase: !this._query.ignoreCase },
         this.editor.state.selection.main.from
       ).next();
@@ -319,7 +306,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
   async replaceAllMatches(newText: string): Promise<boolean> {
     let replaceOccurred = false;
     return new Promise((resolve, _) => {
-      let cursor = new RegExpCursor(this.editor.doc, this._query.toString(), {
+      let cursor = new RegExpCursor(this.editor.doc, this._query.source, {
         ignoreCase: !this._query.ignoreCase
       }).next();
       let changeSpec: ChangeSpec[] = [];
@@ -436,11 +423,11 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
     const matches = await TextSearchEngine.search(query, content);
 
     matches.forEach(match => {
-      const { line, column } = this.editor.getPositionAt(match.position);
+      const { line, ch } = this._getPosition(match.position);
       if (!this._matchState[line]) {
         this._matchState[line] = {};
       }
-      this._matchState[line][column] = match;
+      this._matchState[line][ch] = match;
     });
   }
 
@@ -465,7 +452,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       : state.selection.main.head;
     let cursor = new RegExpCursor(
       this.editor.doc,
-      this._query.toString(),
+      this._query.source,
       { ignoreCase: !caseSensitive },
       lastPosition
     ).next();
@@ -473,7 +460,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       const startOrEnd = reverse ? this.editor.doc.length : 0;
       cursor = new RegExpCursor(
         this.editor.doc,
-        this._query.toString(),
+        this._query.source,
         { ignoreCase: !caseSensitive },
         startOrEnd
       ).next();
@@ -481,15 +468,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
         return null;
       }
     }
-    const value = cursor.value;
-    this.editor.editor.dispatch({
-      selection: { anchor: value.from, head: value.to },
-      scrollIntoView: true
-    });
-
     return {
-      from: this._getPosition(value.from),
-      to: this._getPosition(value.to)
+      from: this._getPosition(cursor.value.from),
+      to: this._getPosition(cursor.value.to)
     };
   }
 
@@ -582,7 +563,6 @@ export class CodeMirrorSearchHighlighter {
           if (ef.is(this._highlightEffect)) {
             const e = ef as StateEffect<{ matches: ISearchMatch[] }>;
             if (e.value.matches.length) {
-              console.log('updating highlights');
               highlights = highlights.update({
                 add: e.value.matches.map(m =>
                   this._highlightMark.range(
