@@ -41,7 +41,7 @@ tasks:
       make html
     command: >
       cd build/html &&
-      python -m http.server -p 8000
+      python -m http.server 8000
 ports:
   - port: 8888
   - port: 8000
