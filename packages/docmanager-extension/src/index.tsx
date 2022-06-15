@@ -97,6 +97,7 @@ const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
 const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
   id: '@jupyterlab/docmanager-extension:opener',
+  autoStart: true,
   provides: IDocumentWidgetOpener,
   activate: (app: JupyterFrontEnd) => {
     const { shell } = app;
@@ -104,8 +105,9 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
   }
 };
 
-const dirtyPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/docmanager-extension:opener',
+const contextsPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:contexts',
+  autoStart: true,
   requires: [IDocumentManager, IDocumentWidgetOpener],
   optional: [ILabStatus],
   activate: (
@@ -182,11 +184,12 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
 const docManagerPlugin: JupyterFrontEndPlugin<void> = {
   id: docManagerPluginId,
   autoStart: true,
-  requires: [IDocumentManager, ISettingRegistry],
+  requires: [IDocumentManager, IDocumentWidgetOpener, ISettingRegistry],
   optional: [ITranslator, ICommandPalette, ILabShell],
   activate: (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
+    widgetOpener: IDocumentWidgetOpener,
     settingRegistry: ISettingRegistry,
     translator: ITranslator | null,
     palette: ICommandPalette | null,
@@ -200,7 +203,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
     addCommands(
       app,
       docManager,
-      opener,
+      widgetOpener,
       settingRegistry,
       translator,
       labShell,
@@ -489,7 +492,7 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   manager,
   docManagerPlugin,
-  dirtyPlugin,
+  contextsPlugin,
   pathStatusPlugin,
   savingStatusPlugin,
   downloadPlugin,
@@ -562,7 +565,7 @@ function fileType(widget: Widget | null, docManager: IDocumentManager): string {
 function addCommands(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
-  opener: IDocumentWidgetOpener,
+  widgetOpener: IDocumentWidgetOpener,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
@@ -591,7 +594,7 @@ function addCommands(
 
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, opener, translator);
+    addLabCommands(app, docManager, labShell, widgetOpener, translator);
   }
 
   commands.addCommand(CommandIDs.deleteFile, {
@@ -948,7 +951,7 @@ function addLabCommands(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
   labShell: ILabShell,
-  opener: IDocumentWidgetOpener,
+  widgetOpener: IDocumentWidgetOpener,
   translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');
@@ -989,7 +992,7 @@ function addLabCommands(
       // Clone the widget.
       const child = docManager.cloneWidget(widget);
       if (child) {
-        opener.open(child, options);
+        widgetOpener.open(child, options);
       }
     }
   });
