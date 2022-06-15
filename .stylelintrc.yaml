@@ -6,7 +6,7 @@ extends:
   - stylelint-prettier/recommended
 
 rules:
-  import-notation: url
+  import-notation: null
   # TODO: fix all of these rules violated in stylelint-config-recommended
   no-descending-specificity: null
   # this fixer is incompatible with the copyright headers
