@@ -27,7 +27,9 @@ import {
 import { IChangedArgs, PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
+  DocumentWidgetOpener,
   IDocumentManager,
+  IDocumentWidgetOpener,
   PathStatus,
   renameDialog,
   SavingStatus
@@ -93,12 +95,46 @@ namespace CommandIDs {
  */
 const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
+const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
+  id: '@jupyterlab/docmanager-extension:opener',
+  provides: IDocumentWidgetOpener,
+  activate: (app: JupyterFrontEnd) => {
+    const { shell } = app;
+    return new DocumentWidgetOpener({ shell });
+  }
+};
+
+const dirtyPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:opener',
+  requires: [IDocumentManager, IDocumentWidgetOpener],
+  optional: [ILabStatus],
+  activate: (
+    app: JupyterFrontEnd,
+    docManager: IDocumentManager,
+    widgetOpener: IDocumentWidgetOpener,
+    status: ILabStatus
+  ) => {
+    const contexts = new WeakSet<DocumentRegistry.Context>();
+    widgetOpener.opened.connect((_, widget) => {
+      // Handle dirty state for open documents.
+      const context = docManager.contextForWidget(widget);
+      if (context && !contexts.has(context)) {
+        if (status) {
+          handleContext(status, context);
+        }
+        contexts.add(context);
+      }
+    });
+  }
+};
+
 /**
  * A plugin providing the default document manager.
  */
 const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   id: '@jupyterlab/docmanager-extension:manager',
   provides: IDocumentManager,
+  requires: [IDocumentWidgetOpener],
   optional: [
     ITranslator,
     ILabStatus,
@@ -108,6 +144,7 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   ],
   activate: (
     app: JupyterFrontEnd,
+    widgetOpener: IDocumentWidgetOpener,
     translator: ITranslator | null,
     status: ILabStatus | null,
     sessionDialogs: ISessionContextDialogs | null,
@@ -115,38 +152,12 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     info: JupyterLab.IInfo | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
-    const contexts = new WeakSet<DocumentRegistry.Context>();
     const when = app.restored.then(() => void 0);
-
-    const opener: DocumentManager.IWidgetOpener = {
-      open: (widget, options) => {
-        if (!widget.id) {
-          widget.id = `document-manager-${++Private.id}`;
-        }
-        widget.title.dataset = {
-          type: 'document-title',
-          ...widget.title.dataset
-        };
-        if (!widget.isAttached) {
-          app.shell.add(widget, 'main', options || {});
-        }
-        app.shell.activateById(widget.id);
-
-        // Handle dirty state for open documents.
-        const context = docManager.contextForWidget(widget);
-        if (context && !contexts.has(context)) {
-          if (status) {
-            handleContext(status, context);
-          }
-          contexts.add(context);
-        }
-      }
-    };
 
     const docManager = new DocumentManager({
       registry,
       manager,
-      opener,
+      opener: widgetOpener,
       when,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       sessionDialogs: sessionDialogs || undefined,
@@ -478,10 +489,12 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   manager,
   docManagerPlugin,
+  dirtyPlugin,
   pathStatusPlugin,
   savingStatusPlugin,
   downloadPlugin,
-  openBrowserTabPlugin
+  openBrowserTabPlugin,
+  openerPlugin
 ];
 export default plugins;
 
@@ -549,7 +562,7 @@ function fileType(widget: Widget | null, docManager: IDocumentManager): string {
 function addCommands(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
-  opener: DocumentManager.IWidgetOpener,
+  opener: IDocumentWidgetOpener,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
@@ -935,7 +948,7 @@ function addLabCommands(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
   labShell: ILabShell,
-  opener: DocumentManager.IWidgetOpener,
+  opener: IDocumentWidgetOpener,
   translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');
