@@ -259,5 +259,8 @@ export interface IDocumentWidgetOpener {
    */
   open(widget: IDocumentWidget, options?: DocumentRegistry.IOpenOptions): void;
 
-  opened: ISignal<IDocumentWidgetOpener, Widget>;
+  /**
+   * A signal emitted when a widget is opened
+   */
+  readonly opened: ISignal<IDocumentWidgetOpener, IDocumentWidget>;
 }

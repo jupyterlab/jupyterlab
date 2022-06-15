@@ -27,7 +27,6 @@ import {
 import { IChangedArgs, PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
-  DocumentWidgetOpener,
   IDocumentManager,
   IDocumentWidgetOpener,
   PathStatus,
@@ -49,7 +48,7 @@ import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
@@ -101,7 +100,29 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
   provides: IDocumentWidgetOpener,
   activate: (app: JupyterFrontEnd) => {
     const { shell } = app;
-    return new DocumentWidgetOpener({ shell });
+    return {
+      open(widget: IDocumentWidget, options?: DocumentRegistry.IOpenOptions) {
+        if (!widget.id) {
+          widget.id = `document-manager-${++Private.id}`;
+        }
+        widget.title.dataset = {
+          type: 'document-title',
+          ...widget.title.dataset
+        };
+        if (!widget.isAttached) {
+          shell.add(widget, 'main', options || {});
+        }
+        shell.activateById(widget.id);
+        this.opened.emit(widget);
+      },
+      get opened() {
+        if (this._signal) {
+          return this._signal;
+        }
+        this._signal = new Signal<IDocumentWidgetOpener, IDocumentWidget>(this);
+        return this._signal;
+      }
+    };
   }
 };
 
