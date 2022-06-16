@@ -78,6 +78,7 @@ try:
                         [sys.executable, "-m", "pre_commit", "install", "--hook-type", "pre-push"]
                     )
                 except Exception:
+                    # no-op
                     pass
 
         cmdclass = wrap_installers(
