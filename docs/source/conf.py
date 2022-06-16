@@ -87,7 +87,7 @@ release = version_ns["__version__"]
 # for a list of supported languages.
 #
 # This is also used if you do content translation via gettext catalogs.
-language = 'en' # Must be set from the command line to generate various languages
+language = "en" # Must be set from the command line to generate various languages
 
 locale_dirs = ["locale/"]
 gettext_compact = False
