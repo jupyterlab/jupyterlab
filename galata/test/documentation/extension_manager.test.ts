@@ -7,7 +7,11 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { setSidebarWidth } from './utils';
+import {
+  setSidebarWidth,
+  stubExtensionsSearch,
+  unstubExtensionsSearch
+} from './utils';
 import { default as extensionsList } from './data/extensions.json';
 
 test.use({
@@ -63,7 +67,8 @@ test.describe('Extension Manager', () => {
   });
 
   test('Search', async ({ page }) => {
-    // This is flaky because the frontend request npm package with sorting based on popularity
+    await stubExtensionsSearch(page);
+
     await page.goto();
 
     await openExtensionSidebar(page);
@@ -81,6 +86,8 @@ test.describe('Extension Manager', () => {
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_search.png');
+
+    await unstubExtensionsSearch(page);
   });
 
   test('With allowed and blocked list', async ({ page }) => {
