@@ -32,7 +32,9 @@ export class WebSocketProvider
   constructor(options: WebSocketProvider.IOptions) {
     super(
       options.url,
-      options.format + ':' + options.contentType + ':' + options.path,
+      `${options.format}:${options.contentType}:${options.path}:${
+        options.yDocumentType || options.contentType
+      }`,
       options.ymodel.ydoc,
       {
         awareness: options.ymodel.awareness
@@ -40,6 +42,7 @@ export class WebSocketProvider
     );
     this._path = options.path;
     this._contentType = options.contentType;
+    this._yDocType = options.yDocumentType || options.contentType;
     this._format = options.format;
     this._serverUrl = options.url;
 
@@ -82,7 +85,7 @@ export class WebSocketProvider
       // writing a utf8 string to the encoder
       const escapedPath = unescape(
         encodeURIComponent(
-          this._format + ':' + this._contentType + ':' + newPath
+          `${this._format}:${this._contentType}:${newPath}:${this._yDocType}`
         )
       );
       for (let i = 0; i < escapedPath.length; i++) {
@@ -129,6 +132,7 @@ export class WebSocketProvider
 
   private _path: string;
   private _contentType: string;
+  private _yDocType: string;
   private _format: string;
   private _serverUrl: string;
   private _renameAck: PromiseDelegate<boolean>;

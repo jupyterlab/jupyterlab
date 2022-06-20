@@ -29,9 +29,9 @@ class JupyterRoom(YRoom):
 
 class JupyterWebsocketServer(WebsocketServer):
     def get_room(self, path: str) -> JupyterRoom:
-        file_format, file_type, file_path = path.split(":", 2)
+        file_format, file_type, file_path, ydoc_type = path.split(":", 3)
         if path not in self.rooms.keys():
-            self.rooms[path] = JupyterRoom(file_type)
+            self.rooms[path] = JupyterRoom(ydoc_type)
         return self.rooms[path]
 
 
@@ -58,7 +58,7 @@ class YDocWebSocketHandler(WebSocketHandler, JupyterHandler):
 
     def get_file_info(self) -> Tuple[str]:
         room_name = self.websocket_server.get_room_name(self.room)
-        file_format, file_type, file_path = room_name.split(":", 2)
+        file_format, file_type, file_path, ydoc_type = room_name.split(":", 3)
         return file_format, file_type, file_path
 
     def set_file_info(self, value: str) -> None:

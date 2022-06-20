@@ -80,6 +80,7 @@ export class Context<
           path: this._path,
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
+          yDocumentType: this._factory.yDocumentType,
           ymodel
         })
       : new ProviderMock();

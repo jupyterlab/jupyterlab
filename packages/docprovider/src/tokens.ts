@@ -47,8 +47,22 @@ export namespace IDocumentProviderFactory {
      * The name (id) of the room
      */
     path: string;
+
+    /**
+     * The content type of the file.
+     */
     contentType: string;
+
+    /**
+     * The format of the file.
+     */
     format: string;
+
+    /**
+     * The type of the y-document associated with this model. Fall back
+     * to `contentType` if it is not defined.
+     */
+    yDocumentType?: string;
 
     /**
      * The YNotebook.

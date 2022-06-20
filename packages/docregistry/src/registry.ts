@@ -1189,6 +1189,12 @@ export namespace DocumentRegistry {
     readonly fileFormat: Contents.FileFormat;
 
     /**
+     * The type of the y-document associated with this model. Fall back
+     * to `contentType` if it is not defined.
+     */
+    readonly yDocumentType?: string;
+
+    /**
      * Create a new model for a given path.
      *
      * @param languagePreference - An optional kernel language preference.
