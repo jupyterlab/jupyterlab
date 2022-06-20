@@ -32,6 +32,9 @@ export interface LanguageServer1 {
 /**
  * This interface was referenced by `LanguageServer1`'s JSON-Schema definition
  * via the `patternProperty` ".*".
+ *
+ * This interface was referenced by `LanguageServer`'s JSON-Schema
+ * via the `definition` "language-server".
  */
 export interface LanguageServer2 {
   serverSettings?: LanguageServerConfigurations;
