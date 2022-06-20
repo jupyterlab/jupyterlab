@@ -24,11 +24,9 @@ tasks:
       jlpm install
       jlpm run build
       gp sync-done setup
-    # for some reason,have to re-install on start, or else it doesn't find the python package
     # Set no token and allow any origin, so that you can open it in a new tab
     # Disable iframe security so can load in the editor as well
     command: |
-      pip3 install -e ".[docs,test]"
       jupyter lab --dev-mode --watch --LabApp.token='' --LabApp.allow_origin=* --LabApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
   - name: documentation
     init: |
