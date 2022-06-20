@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
@@ -110,7 +110,7 @@ jobs:
         run: |
           pip install build
           python -m build --sdist
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: "sdist"
           path: dist/*.tar.gz
@@ -148,4 +148,4 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Install Jupyterlab
         run: pip install -e .
-      - uses: pre-commit/action@v2.0.3
+      - uses: pre-commit/action@v3.0.0

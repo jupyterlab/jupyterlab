@@ -30,7 +30,7 @@ jobs:
 
       - name: Get hashes for PR review event
         if: ${{ github.event_name == 'pull_request_review' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const child_process = require("child_process");
@@ -59,7 +59,7 @@ jobs:
           node-version: '14.x'
 
       - name: Install Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: benchmark-assets
           path: |

@@ -78,7 +78,7 @@ describe('@jupyterlab/lsp', () => {
           language: 'python',
           mimeType: 'text/python'
         });
-        expect(match.has('pyls')).toEqual(true);
+        expect(match.has('pyls' as any)).toEqual(true);
       });
     });
   });
