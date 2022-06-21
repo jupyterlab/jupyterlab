@@ -17,17 +17,28 @@ github:
     # add a label once the prebuild is ready to pull requests (defaults to false)
     addLabel: false
 tasks:
-  - init: pip3 install -e . && yarn install && yarn run build
-    # for some reason,have to re-install on start, or else it doesn't find the python package
+  - name: dev-mode
+    init: |
+      pip3 install -e ".[docs,test]"
+      jlpm install
+      jlpm run build
+      gp sync-done setup
     # Set no token and allow any origin, so that you can open it in a new tab
     # Disable iframe security so can load in the editor as well
-    command: >
-      pip3 install -e . &&
-      jupyter lab
-      --dev-mode
-      --watch
-      --LabApp.token=''
-      --LabApp.allow_origin=*
-      --LabApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
+    command: |
+      jupyter lab --dev-mode --watch --LabApp.token='' --LabApp.allow_origin=* --LabApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
+  - name: documentation
+    init: |
+      gp sync-await setup
+      cd docs
+      make html
+    command: |
+      cd build/html
+      python -m http.server 8000
 ports:
   - port: 8888
+  - port: 8000
+
+vscode:
+  extensions:
+    - esbenp.prettier-vscode
