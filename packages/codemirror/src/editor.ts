@@ -862,7 +862,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
   }
 
-  private _buildMarkDecoration( 
+  private _buildMarkDecoration(
     uuid: string,
     selections: Private.ISelectionText[]
   ) {
