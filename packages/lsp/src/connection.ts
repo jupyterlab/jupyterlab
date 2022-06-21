@@ -29,10 +29,6 @@ import { untilReady } from './utils';
 import type * as lsp from 'vscode-languageserver-protocol';
 
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
-// import { ClientCapabilities } from './lsp';
-// import { ILSPLogConsole } from './tokens';
-
-type ILSPLogConsole = any;
 
 class ClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
@@ -188,7 +184,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   public logAllCommunication: boolean;
 
   protected documentsToOpen: IDocumentInfo[];
-  protected console: ILSPLogConsole;
 
   private _options: ILSPOptions;
 

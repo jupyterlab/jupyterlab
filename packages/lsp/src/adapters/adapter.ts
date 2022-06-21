@@ -414,9 +414,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
           virtualDocument.documentInfo
         );
       }
-    } else {
-      console.log(`Connection for ${virtualDocument.uri} was not opened`);
-    }
+    } 
   }
 
   protected initVirtual(): void {
