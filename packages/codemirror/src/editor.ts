@@ -860,13 +860,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.editor.dispatch({
       effects: this._removeMark.of({uuid: uuid, decorations: this._selectionMarkers[uuid]})
     });
-    /*const markers = this.selectionMarkers[uuid];
-    if (markers) {
-      markers.forEach(marker => {
-        marker.clear();
-      });
-    }
-    delete this.selectionMarkers[uuid];*/
   }
 
   private _buildMarkDecoration( 
@@ -911,6 +904,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     return decorations;
   }
 
+  /**
+   * Converts the selection style to a text marker options.
+   */
   private _toMarkSpec(
     style: CodeEditor.ISelectionStyle
   ) {
@@ -925,6 +921,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     };
   }
 
+  /**
+   * Construct a caret element representing the position
+   * of a collaborator's cursor.
+   */
   private _getCaret(collaborator: ICollaborator): Private.CaretWidget {
     return new Private.CaretWidget(
       collaborator,
@@ -960,59 +960,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.editor.dispatch({
       effects: this._addMark.of({uuid: uuid, selections: sel})
     });
-    // TODO: CM6 migration, see Mark Text section of the igration guide
-    /*const markers: CodeMirror.TextMarker[] = [];
-
-    // If we are marking selections corresponding to an active hover,
-    // remove it.
-    if (uuid === this._hoverId) {
-      this._clearHover();
-    }
-    // If we can id the selection to a specific collaborator,
-    // use that information.
-    let collaborator: ICollaborator | undefined;
-    if (this._model.modelDB.collaborators) {
-      collaborator = this._model.modelDB.collaborators.get(uuid);
-    }
-
-    // Style each selection for the uuid.
-    selections.forEach(selection => {
-      // Only render selections if the start is not equal to the end.
-      // In that case, we don't need to render the cursor.
-      if (!JSONExt.deepEqual(selection.start, selection.end)) {
-        // Selections only appear to render correctly if the anchor
-        // is before the head in the document. That is, reverse selections
-        // do not appear as intended.
-        const forward: boolean =
-          selection.start.line < selection.end.line ||
-          (selection.start.line === selection.end.line &&
-            selection.start.column <= selection.end.column);
-        const anchor = this._toCodeMirrorPosition(
-          forward ? selection.start : selection.end
-        );
-        const head = this._toCodeMirrorPosition(
-          forward ? selection.end : selection.start
-        );
-        let markerOptions: CodeMirror.TextMarkerOptions;
-        if (collaborator) {
-          markerOptions = this._toTextMarkerOptions({
-            ...selection.style,
-            color: collaborator.color
-          });
-        } else {
-          markerOptions = this._toTextMarkerOptions(selection.style);
-        }
-        markers.push(this.doc.markText(anchor, head, markerOptions));
-      } else if (collaborator) {
-        const caret = this._getCaret(collaborator);
-        markers.push(
-          this.doc.setBookmark(this._toCodeMirrorPosition(selection.end), {
-            widget: caret
-          })
-        );
-      }
-    });
-    this.selectionMarkers[uuid] = markers;*/
   }
 
   /**
@@ -1041,24 +988,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       style: this.selectionStyle
     };
   }
-
-  /**
-   * Converts the selection style to a text marker options.
-   */
-  // TODO: CM6 migration see Mark text section of the migration guide
-  /*private _toTextMarkerOptions(
-    style: CodeEditor.ISelectionStyle
-  ): CodeMirror.TextMarkerOptions {
-    const r = parseInt(style.color.slice(1, 3), 16);
-    const g = parseInt(style.color.slice(3, 5), 16);
-    const b = parseInt(style.color.slice(5, 7), 16);
-    const css = `background-color: rgba( ${r}, ${g}, ${b}, 0.15)`;
-    return {
-      className: style.className,
-      title: style.displayName,
-      css
-    };
-  }*/
 
   /**
    * Convert a code mirror position to an editor position.
@@ -1216,51 +1145,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
   }
 
-  /**
-   * Construct a caret element representing the position
-   * of a collaborator's cursor.
-   */
-  // TODO: CM6 migration, see Marked Text section of migration guide
-  /*private _getCaret(collaborator: ICollaborator): HTMLElement {
-    // FIXME-TRANS: Is this localizable?
-    const name = collaborator ? collaborator.displayName : 'Anonymous';
-    const color = collaborator
-      ? collaborator.color
-      : this._selectionStyle.color;
-    const caret: HTMLElement = document.createElement('span');
-    caret.className = COLLABORATOR_CURSOR_CLASS;
-    caret.style.borderBottomColor = color;
-    caret.onmouseenter = () => {
-      this._clearHover();
-      this._hoverId = collaborator.sessionId;
-      const rect = caret.getBoundingClientRect();
-      // Construct and place the hover box.
-      const hover = document.createElement('div');
-      hover.className = COLLABORATOR_HOVER_CLASS;
-      hover.style.left = String(rect.left) + 'px';
-      hover.style.top = String(rect.bottom) + 'px';
-      hover.textContent = name;
-      hover.style.backgroundColor = color;
-
-      // If the user mouses over the hover, take over the timer.
-      hover.onmouseenter = () => {
-        window.clearTimeout(this._hoverTimeout);
-      };
-      hover.onmouseleave = () => {
-        this._hoverTimeout = window.setTimeout(() => {
-          this._clearHover();
-        }, HOVER_TIMEOUT);
-      };
-      this._caretHover = hover;
-      document.body.appendChild(hover);
-    };
-    caret.onmouseleave = () => {
-      this._hoverTimeout = window.setTimeout(() => {
-        this._clearHover();
-      }, HOVER_TIMEOUT);
-    };
-    return caret;
-  }*/
 
   /**
    * Check for an out of sync editor.
@@ -1302,9 +1186,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
   private _editor: EditorView;
-  /*protected selectionMarkers: {
-    [key: string]: CodeMirror.TextMarker[] | undefined;
-  } = {};*/
   private _selectionMarkers: {
     [key: string]: Range<Decoration>[];
   } = {};
@@ -1514,6 +1395,8 @@ namespace Private {
       caret.className = COLLABORATOR_CURSOR_CLASS;
       caret.style.borderBottomColor = this.collaborator.color;
 
+      // TODO: check if this should be replaced with
+      // a global event handler
       caret.onmouseenter = () => {
         this.callbacks.setHoverId(this.collaborator.sessionId);
         const rect = caret.getBoundingClientRect();
@@ -1602,128 +1485,6 @@ namespace Private {
       }
     }
   }*/
-
-  /**
-   * Test whether two CodeMirror positions are equal.
-   */
-  /*export function posEq(
-    a: CodeMirror.Position,
-    b: CodeMirror.Position
-  ): boolean {
-    return a.line === b.line && a.ch === b.ch;
-  }*/
-
-  /**
-   * Get the list of active gutters
-   *
-   * @param config Editor configuration
-   */
-  // TODO: CM6 migration
-  /*function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
-    // The order of the classes will be the gutters order
-    const classToSwitch: { [val: string]: keyof CodeMirrorEditor.IConfig } = {
-      'CodeMirror-linenumbers': 'lineNumbers',
-      'CodeMirror-foldgutter': 'codeFolding'
-    };
-    return Object.keys(classToSwitch).filter(
-      gutter => config[classToSwitch[gutter]]
-    );
-  }*/
-
-  /**
-   * Set a config option for the editor.
-   */
-  // TODO: CM6 migration, set the new option/config system based on Facets
-  export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
-    editor: EditorView,
-    option: K,
-    value: CodeMirrorEditor.IConfig[K],
-    config: CodeMirrorEditor.IConfig
-  ): void {
-    /*
-    const el = editor.getWrapperElement();
-    switch (option) {
-      case 'cursorBlinkRate':
-        (editor.setOption as any)(option, value);
-        break;
-      case 'lineWrap': {
-        const lineWrapping = value === 'off' ? false : true;
-        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
-        const maxWidth =
-          value === 'bounded' ? `${config.wordWrapColumn}ch` : null;
-        const width =
-          value === 'wordWrapColumn' ? `${config.wordWrapColumn}ch` : null;
-        lines.style.setProperty('max-width', maxWidth);
-        lines.style.setProperty('width', width);
-        editor.setOption('lineWrapping', lineWrapping);
-        break;
-      }
-      case 'wordWrapColumn': {
-        const { lineWrap } = config;
-        if (lineWrap === 'wordWrapColumn' || lineWrap === 'bounded') {
-          const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
-          const prop = lineWrap === 'wordWrapColumn' ? 'width' : 'maxWidth';
-          lines.style[prop] = `${value}ch`;
-        }
-        break;
-      }
-      case 'tabSize':
-        editor.setOption(
-          'indentUnit',
-          value as CodeMirror.EditorConfiguration['tabSize']
-        );
-        break;
-      case 'insertSpaces':
-        editor.setOption('indentWithTabs', !value);
-        break;
-      case 'autoClosingBrackets':
-        editor.setOption('autoCloseBrackets', value as any);
-        break;
-      case 'rulers': {
-        const rulers = value as Array<number>;
-        (editor.setOption as any)(
-          'rulers',
-          rulers.map(column => {
-            return {
-              column,
-              className: 'jp-CodeMirror-ruler'
-            };
-          })
-        );
-        break;
-      }
-      case 'readOnly':
-        el.classList.toggle(READ_ONLY_CLASS, value as boolean);
-        (editor.setOption as any)(option, value);
-        break;
-      case 'fontFamily':
-        el.style.fontFamily = value as string;
-        break;
-      case 'fontSize':
-        el.style.setProperty('font-size', value ? value + 'px' : null);
-        break;
-      case 'lineHeight':
-        el.style.lineHeight = (value ? value.toString() : null) as any;
-        break;
-      case 'gutters':
-        (editor.setOption as any)(option, getActiveGutters(config));
-        break;
-      case 'lineNumbers':
-        (editor.setOption as any)(option, value);
-        editor.setOption('gutters', getActiveGutters(config));
-        break;
-      case 'codeFolding':
-        (editor.setOption as any)('foldGutter', value);
-        editor.setOption('gutters', getActiveGutters(config));
-        break;
-      case 'showTrailingSpace':
-        (editor.setOption as any)(option, value);
-        break;
-      default:
-        (editor.setOption as any)(option, value);
-        break;
-    }*/
-  }
 }
 
 // TODO: no more central registry of named commands in CM6,
