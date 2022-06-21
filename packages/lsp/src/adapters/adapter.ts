@@ -414,7 +414,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
           virtualDocument.documentInfo
         );
       }
-    } 
+    }
   }
 
   protected initVirtual(): void {
