@@ -127,28 +127,37 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
 
     this._uuid = options.uuid || UUID.uuid4();
 
+    // State and effects for handling the selection marks
     this._addMark = StateEffect.define<Private.ICollabSelectionText>();
     this._removeMark = StateEffect.define<Private.ICollabDecorationSet>();
 
     this._markField = StateField.define<DecorationSet>({
       create: () => {
-        return Decoration.none
+        return Decoration.none;
       },
       update: (marks, transaction) => {
         marks = marks.map(transaction.changes);
         for (let ef of transaction.effects) {
           if (ef.is(this._addMark)) {
             let e = ef as StateEffect<Private.ICollabSelectionText>;
-            const decorations = this._buildMarkDecoration(e.value.uuid, e.value.selections);
-            marks = marks.update({add: decorations});
+            const decorations = this._buildMarkDecoration(
+              e.value.uuid,
+              e.value.selections
+            );
+            marks = marks.update({ add: decorations });
             this._selectionMarkers[e.value.uuid] = decorations;
-          }
-          else if (ef.is(this._removeMark)) {
+          } else if (ef.is(this._removeMark)) {
             let e = ef as StateEffect<Private.ICollabDecorationSet>;
             for (let rd of ef.value.decorations) {
-              marks = marks.update({filter: (from, to, value) => {
-                return !(from === rd.from && to === rd.to && value === rd.value)
-              }})
+              marks = marks.update({
+                filter: (from, to, value) => {
+                  return !(
+                    from === rd.from &&
+                    to === rd.to &&
+                    value === rd.value
+                  );
+                }
+              });
             }
             delete this._selectionMarkers[e.value.uuid];
           }
@@ -176,13 +185,33 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // editor should be created alltogether.
     this._initializeEditorBinding();
 
-    const editor = (this._editor = Private.createEditor(
+    // Extension for handling DOM events
+    const domEventHandlers = EditorView.domEventHandlers({
+      keydown: (event: KeyboardEvent, view: EditorView) => {
+        const index = ArrayExt.findFirstIndex(
+          this._keydownHandlers,
+          handler => {
+            if (handler(this, event) === true) {
+              event.preventDefault();
+              return true;
+            }
+            return false;
+          }
+        );
+        if (index === -1) {
+          return this.onKeydown(event);
+        }
+        return false;
+      }
+    });
+
+    this._editor = Private.createEditor(
       host,
       fullConfig,
       this._yeditorBinding,
       this._editorConfig,
-      [this._markField]
-    ));
+      [this._markField, domEventHandlers]
+    );
 
     // every time the model is switched, we need to re-initialize the editor binding
     this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
@@ -218,19 +247,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
     // TODO: CM6 migration
-    /*CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
-      const index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
-        if (handler(this, event) === true) {
-          event.preventDefault();
-          return true;
-        }
-        return false;
-      });
-      if (index === -1) {
-        this.onKeydown(event);
-      }
-    });
-
+    /*
     if (USE_YCODEMIRROR_BINDING) {
       this._yeditorBinding?.on('cursorActivity', () =>
         this._onCursorActivity()
@@ -259,11 +276,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });*/
 
     // Manually refresh on paste to make sure editor is properly sized.
-    editor.dom.addEventListener('paste', () => {
+    /*editor.dom.addEventListener('paste', () => {
       if (this.hasFocus()) {
         this.refresh();
       }
-    });
+    });*/
   }
 
   /**
@@ -766,35 +783,31 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handle keydown events from the editor.
    */
   protected onKeydown(event: KeyboardEvent): boolean {
-    const position = this.getCursorPosition();
-    const { line, column } = position;
+    const position = this.state.selection.main.head;
 
-    if (line === 0 && column === 0 && event.keyCode === UP_ARROW) {
+    if (position === 0 && event.keyCode === UP_ARROW) {
       if (!event.shiftKey) {
         this.edgeRequested.emit('top');
       }
       return false;
     }
 
-    if (line === 0 && event.keyCode === UP_ARROW) {
+    const line = this.doc.lineAt(position).number;
+    if (line === 1 && event.keyCode === UP_ARROW) {
       if (!event.shiftKey) {
         this.edgeRequested.emit('topLine');
       }
       return false;
     }
 
-    const lastLine = this.lineCount - 1;
-    const lastCh = this.getLine(lastLine)!.length;
-    if (
-      line === lastLine &&
-      column === lastCh &&
-      event.keyCode === DOWN_ARROW
-    ) {
+    const length = this.doc.length;
+    if (position === length && event.keyCode === DOWN_ARROW) {
       if (!event.shiftKey) {
         this.edgeRequested.emit('bottom');
       }
       return false;
     }
+
     return false;
   }
 
@@ -858,7 +871,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   // TODO: CM6 migration see Mark Text section of the migration guide
   private _cleanSelections(uuid: string) {
     this.editor.dispatch({
-      effects: this._removeMark.of({uuid: uuid, decorations: this._selectionMarkers[uuid]})
+      effects: this._removeMark.of({
+        uuid: uuid,
+        decorations: this._selectionMarkers[uuid]
+      })
     });
   }
 
@@ -887,13 +903,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       // Only render selections if the start is not equal to the end.
       // In that case, we don't need to render the cursor.
       if (from !== to) {
-        const style = collaborator ? { ...selection.style, color: collaborator.color} : selection.style;
+        const style = collaborator
+          ? { ...selection.style, color: collaborator.color }
+          : selection.style;
         const decoration = Decoration.mark({
           attributes: this._toMarkSpec(style)
         });
-        decorations.push(from > to ? decoration.range(to, from) : decoration.range(to, from));
-      }
-      else if (collaborator) {
+        decorations.push(
+          from > to ? decoration.range(to, from) : decoration.range(to, from)
+        );
+      } else if (collaborator) {
         const caret = Decoration.widget({
           widget: this._getCaret(collaborator)
         });
@@ -907,9 +926,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Converts the selection style to a text marker options.
    */
-  private _toMarkSpec(
-    style: CodeEditor.ISelectionStyle
-  ) {
+  private _toMarkSpec(style: CodeEditor.ISelectionStyle) {
     const r = parseInt(style.color.slice(1, 3), 16);
     const g = parseInt(style.color.slice(3, 5), 16);
     const b = parseInt(style.color.slice(5, 7), 16);
@@ -926,23 +943,20 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * of a collaborator's cursor.
    */
   private _getCaret(collaborator: ICollaborator): Private.CaretWidget {
-    return new Private.CaretWidget(
-      collaborator,
-      {
-        setHoverId: (sessionId: string) => {
+    return new Private.CaretWidget(collaborator, {
+      setHoverId: (sessionId: string) => {
+        this._clearHover();
+        this._hoverId = sessionId;
+      },
+      setHoverTimeout: () => {
+        this._hoverTimeout = window.setTimeout(() => {
           this._clearHover();
-          this._hoverId = sessionId;
-        },
-        setHoverTimeout: () => {
-          this._hoverTimeout = window.setTimeout(() => {
-            this._clearHover();
-          }, HOVER_TIMEOUT);
-        },
-        clearHoverTimeout: () => {
-          window.clearTimeout(this._hoverTimeout);
-        }
+        }, HOVER_TIMEOUT);
+      },
+      clearHoverTimeout: () => {
+        window.clearTimeout(this._hoverTimeout);
       }
-    );
+    });
   }
 
   /**
@@ -958,7 +972,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       style: selection.style
     }));
     this.editor.dispatch({
-      effects: this._addMark.of({uuid: uuid, selections: sel})
+      effects: this._addMark.of({ uuid: uuid, selections: sel })
     });
   }
 
@@ -1144,7 +1158,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this._caretHover = null;
     }
   }
-
 
   /**
    * Check for an out of sync editor.
@@ -1360,23 +1373,23 @@ namespace Private {
     from: number;
     to: number;
     style: CodeEditor.ISelectionStyle;
-  };
+  }
 
   export interface ICollabSelectionText {
     uuid: string;
     selections: ISelectionText[];
-  };
+  }
 
   export interface ICollabDecorationSet {
     uuid: string;
     decorations: Range<Decoration>[];
-  };
+  }
 
   export interface CaretWidgetCallbacks {
     setHoverId: (sessionId: string) => void;
     setHoverTimeout: () => void;
     clearHoverTimeout: () => void;
-  };
+  }
 
   export class CaretWidget extends WidgetType {
     constructor(
@@ -1427,7 +1440,7 @@ namespace Private {
     ignoreEvent() {
       return false;
     }
-  };
+  }
 
   /**
    * Indent or insert a tab as appropriate.
