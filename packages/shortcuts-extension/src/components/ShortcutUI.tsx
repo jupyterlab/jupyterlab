@@ -277,7 +277,8 @@ export class ShortcutUI extends React.Component<
   }
   /** Fetch shortcut list from SettingRegistry  */
   private async _refreshShortcutList(): Promise<void> {
-    const shortcuts: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
+    const shortcuts: ISettingRegistry.ISettings =
+      await this.props.external.getAllShortCutSettings();
     const shortcutObjects = getShortcutObjects(this.props.external, shortcuts);
     this.setState(
       {
@@ -335,7 +336,8 @@ export class ShortcutUI extends React.Component<
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
-    const settings: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
+    const settings: ISettingRegistry.ISettings =
+      await this.props.external.getAllShortCutSettings();
     const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
     let found = false;
@@ -376,7 +378,8 @@ export class ShortcutUI extends React.Component<
 
   /** Reset a specific shortcut to its default settings */
   resetShortcut = async (shortcutObject: ShortcutObject) => {
-    const settings: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
+    const settings: ISettingRegistry.ISettings =
+      await this.props.external.getAllShortCutSettings();
     const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
     for (let shortcut of userShortcuts as any) {

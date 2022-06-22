@@ -24,7 +24,8 @@ export { IPropertyInspector, IPropertyInspectorProvider };
  */
 abstract class PropertyInspectorProvider
   extends Widget
-  implements IPropertyInspectorProvider {
+  implements IPropertyInspectorProvider
+{
   /**
    * Construct a new Property Inspector.
    */

@@ -183,8 +183,8 @@ export class CompleterModel implements Completer.IModel {
   setCompletionItems?(newValue: CompletionHandler.ICompletionItems): void {
     if (
       JSONExt.deepEqual(
-        (newValue as unknown) as ReadonlyPartialJSONArray,
-        (this._completionItems as unknown) as ReadonlyPartialJSONArray
+        newValue as unknown as ReadonlyPartialJSONArray,
+        this._completionItems as unknown as ReadonlyPartialJSONArray
       )
     ) {
       return;

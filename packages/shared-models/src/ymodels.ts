@@ -106,7 +106,8 @@ export class YDocument<T> implements models.ISharedDocument {
 
 export class YFile
   extends YDocument<models.FileChange>
-  implements models.ISharedFile, models.ISharedText, IYText {
+  implements models.ISharedFile, models.ISharedText, IYText
+{
   constructor() {
     super();
     this.ysource.observe(this._modelObserver);
@@ -210,7 +211,8 @@ export class YFile
  */
 export class YNotebook
   extends YDocument<models.NotebookChange>
-  implements models.ISharedNotebook {
+  implements models.ISharedNotebook
+{
   constructor(options: ISharedNotebook.IOptions) {
     super();
     this._disableDocumentWideUndoRedo = options.disableDocumentWideUndoRedo;
@@ -514,7 +516,8 @@ export const createStandaloneCell = (
 };
 
 export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
-  implements models.ISharedBaseCell<Metadata>, IYText {
+  implements models.ISharedBaseCell<Metadata>, IYText
+{
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
     const ysource = ymodel.get('source');
@@ -856,7 +859,8 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
 
 export class YCodeCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedCodeCell {
+  implements models.ISharedCodeCell
+{
   /**
    * The type of the cell.
    */
@@ -973,7 +977,8 @@ export class YCodeCell
 
 export class YRawCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedRawCell {
+  implements models.ISharedRawCell
+{
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
@@ -1013,7 +1018,8 @@ export class YRawCell
 
 export class YMarkdownCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedMarkdownCell {
+  implements models.ISharedMarkdownCell
+{
   /**
    * Create a new YMarkdownCell that can be inserted into a YNotebook
    */

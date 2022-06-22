@@ -14,7 +14,8 @@ import { BaseManager } from '../basemanager';
  */
 export class KernelSpecManager
   extends BaseManager
-  implements KernelSpec.IManager {
+  implements KernelSpec.IManager
+{
   /**
    * Construct a new kernel spec manager.
    *

@@ -46,7 +46,8 @@ export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider
-  implements ISearchProvider<CMMainAreaWidget> {
+  implements ISearchProvider<CMMainAreaWidget>
+{
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
@@ -509,9 +510,8 @@ export class CodeMirrorSearchProvider
     const matches: ISearchMatch[] = Object.keys(this._matchState).reduce(
       (result: ISearchMatch[], lineNumber: string) => {
         const lineKey = parseInt(lineNumber, 10);
-        const lineMatches: { [key: number]: ISearchMatch } = this._matchState[
-          lineKey
-        ];
+        const lineMatches: { [key: number]: ISearchMatch } =
+          this._matchState[lineKey];
         Object.keys(lineMatches).forEach((pos: string) => {
           const posKey = parseInt(pos, 10);
           const match: ISearchMatch = lineMatches[posKey];

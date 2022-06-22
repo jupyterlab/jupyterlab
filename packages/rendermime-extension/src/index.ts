@@ -68,9 +68,8 @@ function activate(
           .then(() => {
             // Open the link with the default rendered widget factory,
             // if applicable.
-            const factory = docManager.registry.defaultRenderedWidgetFactory(
-              path
-            );
+            const factory =
+              docManager.registry.defaultRenderedWidgetFactory(path);
             const widget = docManager.openOrReveal(path, factory.name);
 
             // Handle the hash if one has been provided.

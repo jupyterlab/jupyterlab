@@ -1431,13 +1431,8 @@ namespace Private {
     options: SessionContext.IKernelSearch
   ): string | null {
     const { specs, preference } = options;
-    const {
-      name,
-      language,
-      shouldStart,
-      canStart,
-      autoStartDefault
-    } = preference;
+    const { name, language, shouldStart, canStart, autoStartDefault } =
+      preference;
 
     if (!specs || shouldStart === false || canStart === false) {
       return null;

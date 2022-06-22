@@ -25,7 +25,8 @@ const USE_CAPTURE = true;
  */
 export class MainAreaWidget<T extends Widget = Widget>
   extends Widget
-  implements Printing.IPrintable {
+  implements Printing.IPrintable
+{
   /**
    * Construct a new main area widget.
    *

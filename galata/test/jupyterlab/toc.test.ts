@@ -221,7 +221,9 @@ test.describe.serial('Table of Contents', () => {
       await page.sidebar.getTabPosition('table-of-contents')
     );
 
-    await (await tocPanel.$('li > .toc-level-size-1')).click({
+    await (
+      await tocPanel.$('li > .toc-level-size-1')
+    ).click({
       button: 'right'
     });
 

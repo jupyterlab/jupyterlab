@@ -38,7 +38,7 @@ export function delegateExecute<E extends IMenuExtender<Widget>>(
   // Coerce the result to be a function. When Typedoc is updated to use
   // Typescript 2.8, we can possibly use conditional types to get Typescript
   // to recognize this is a function.
-  const f = (extender[executor] as any) as (w: Widget) => Promise<any>;
+  const f = extender[executor] as any as (w: Widget) => Promise<any>;
   return f(widget);
 }
 
@@ -56,7 +56,7 @@ export function delegateToggled<E extends IMenuExtender<Widget>>(
     // Coerce the result to be a function. When Typedoc is updated to use
     // Typescript 2.8, we can possibly use conditional types to get Typescript
     // to recognize this is a function.
-    const f = (extender[toggled] as any) as (w: Widget) => boolean;
+    const f = extender[toggled] as any as (w: Widget) => boolean;
     return f(widget);
   }
   return false;

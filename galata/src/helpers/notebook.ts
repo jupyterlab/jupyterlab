@@ -778,11 +778,9 @@ export class NotebookHelper {
 
     await this.selectCells(numCells - 1);
     await this.clickToolbarItem('insert');
-    await Utils.waitForCondition(
-      async (): Promise<boolean> => {
-        return (await this.getCellCount()) === numCells + 1;
-      }
-    );
+    await Utils.waitForCondition(async (): Promise<boolean> => {
+      return (await this.getCellCount()) === numCells + 1;
+    });
 
     return await this.setCell(numCells, cellType, source);
   }

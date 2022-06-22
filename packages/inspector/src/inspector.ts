@@ -30,7 +30,8 @@ const DEFAULT_CONTENT_CLASS = 'jp-Inspector-default-content';
  */
 export class InspectorPanel
   extends Panel
-  implements IInspector, Printing.IPrintable {
+  implements IInspector, Printing.IPrintable
+{
   /**
    * Construct an inspector.
    */

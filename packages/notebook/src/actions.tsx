@@ -1824,9 +1824,11 @@ export namespace NotebookActions {
    *
    * @param cell - The target cell widget.
    */
-  export function getHeadingInfo(
-    cell: Cell
-  ): { isHeading: boolean; headingLevel: number; collapsed?: boolean } {
+  export function getHeadingInfo(cell: Cell): {
+    isHeading: boolean;
+    headingLevel: number;
+    collapsed?: boolean;
+  } {
     if (!(cell instanceof MarkdownCell)) {
       return { isHeading: false, headingLevel: 7 };
     }

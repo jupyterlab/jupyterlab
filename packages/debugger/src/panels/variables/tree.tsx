@@ -123,14 +123,8 @@ interface IVariablesComponentProps {
  * @param props.filter Optional variable filter list.
  */
 const VariablesComponent = (props: IVariablesComponentProps): JSX.Element => {
-  const {
-    commands,
-    data,
-    service,
-    filter,
-    translator,
-    handleSelectVariable
-  } = props;
+  const { commands, data, service, filter, translator, handleSelectVariable } =
+    props;
   const [variables, setVariables] = useState(data);
 
   useEffect(() => {

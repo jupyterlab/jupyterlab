@@ -23,7 +23,8 @@ import { getAnonymousUserName, getRandomColor } from './awareness';
  */
 export class WebSocketProviderWithLocks
   extends WebsocketProvider
-  implements IDocumentProvider {
+  implements IDocumentProvider
+{
   /**
    * Construct a new WebSocketProviderWithLocks
    *

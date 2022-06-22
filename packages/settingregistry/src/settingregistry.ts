@@ -800,9 +800,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(
-    key: string
-  ): {
+  get(key: string): {
     composite: ReadonlyPartialJSONValue | undefined;
     user: ReadonlyPartialJSONValue | undefined;
   } {
@@ -1094,9 +1092,8 @@ export namespace SettingRegistry {
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
-      const keys = CommandRegistry.normalizeKeys(shortcut).join(
-        RECORD_SEPARATOR
-      );
+      const keys =
+        CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
       if (!keys) {
         console.warn(
           'Skipping this shortcut because there are no actionable keys on this platform',
@@ -1130,9 +1127,8 @@ export namespace SettingRegistry {
       ...defaults.filter(s => !!s.disabled),
       ...defaults.filter(s => !s.disabled)
     ].filter(shortcut => {
-      const keys = CommandRegistry.normalizeKeys(shortcut).join(
-        RECORD_SEPARATOR
-      );
+      const keys =
+        CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
 
       if (!keys) {
         return false;

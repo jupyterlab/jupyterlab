@@ -560,9 +560,10 @@ export namespace ExecutionIndicator {
     return toolbarItem;
   }
 
-  export function getSettingValue(
-    settings: ISettingRegistry.ISettings
-  ): { showOnToolBar: boolean; showProgress: boolean } {
+  export function getSettingValue(settings: ISettingRegistry.ISettings): {
+    showOnToolBar: boolean;
+    showProgress: boolean;
+  } {
     let showOnToolBar = true;
     let showProgress = true;
     const configValues = settings.get('kernelStatus').composite as JSONObject;

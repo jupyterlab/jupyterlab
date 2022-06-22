@@ -92,17 +92,16 @@ async function setToolbarItems(
     // Apply default value as last step to take into account overrides.json
     // The standard default being [] as the plugin must use `jupyter.lab.toolbars.<factory>`
     // to define their default value.
-    schema.properties![
-      propertyId
-    ].default = SettingRegistry.reconcileToolbarItems(
-      pluginDefaults,
-      schema.properties![propertyId].default as any[],
-      true
-    )!.sort(
-      (a, b) =>
-        (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
-        (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
-    );
+    schema.properties![propertyId].default =
+      SettingRegistry.reconcileToolbarItems(
+        pluginDefaults,
+        schema.properties![propertyId].default as any[],
+        true
+      )!.sort(
+        (a, b) =>
+          (a.rank ?? DEFAULT_TOOLBAR_ITEM_RANK) -
+          (b.rank ?? DEFAULT_TOOLBAR_ITEM_RANK)
+      );
   }
 
   // Transform the plugin object to return different schema than the default.

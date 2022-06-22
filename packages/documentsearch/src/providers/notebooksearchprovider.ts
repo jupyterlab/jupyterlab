@@ -37,9 +37,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    */
   getInitialQuery(searchTarget: NotebookPanel): unknown {
     const activeCell = searchTarget.content.activeCell;
-    const selection = (activeCell?.editor as
-      | CodeMirrorEditor
-      | undefined)?.doc.getSelection();
+    const selection = (
+      activeCell?.editor as CodeMirrorEditor | undefined
+    )?.doc.getSelection();
     // if there are newlines, just return empty string
     return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
   }

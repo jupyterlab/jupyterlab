@@ -423,10 +423,8 @@ export class CodeConsole extends Widget {
 
     const cell = this._cells.get(cellIndex);
 
-    const targetArea: CellDragUtils.ICellTargetArea = CellDragUtils.detectTargetArea(
-      cell,
-      event.target as HTMLElement
-    );
+    const targetArea: CellDragUtils.ICellTargetArea =
+      CellDragUtils.detectTargetArea(cell, event.target as HTMLElement);
 
     if (targetArea === 'prompt') {
       this._dragData = {
@@ -882,7 +880,8 @@ export namespace CodeConsole {
    */
   export class ContentFactory
     extends Cell.ContentFactory
-    implements IContentFactory {
+    implements IContentFactory
+  {
     /**
      * Create a new code cell widget.
      *

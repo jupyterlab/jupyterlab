@@ -20,17 +20,15 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('.findMarkdownCodeBlocks()', () => {
       it('should find a simple block', () => {
-        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(
-          MULTI_LINE_BLOCK
-        );
+        const codeblocks =
+          MarkdownCodeBlocks.findMarkdownCodeBlocks(MULTI_LINE_BLOCK);
         expect(codeblocks.length).toBe(1);
         expect(codeblocks[0].code).toBe('a = 10\nb = 20\n');
       });
 
       it('should find a single line block', () => {
-        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(
-          SINGLE_LINE_BLOCK
-        );
+        const codeblocks =
+          MarkdownCodeBlocks.findMarkdownCodeBlocks(SINGLE_LINE_BLOCK);
         expect(codeblocks.length).toBe(1);
         expect(codeblocks[0].code).toBe('a = 10');
       });
