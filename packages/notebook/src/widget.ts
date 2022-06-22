@@ -273,6 +273,13 @@ export class StaticNotebook extends Widget {
   }
 
   /**
+   * A signal emitted when the rendering layout of the notebook changes.
+   */
+  get renderingLayoutChanged(): ISignal<this, RenderingLayout> {
+    return this._renderingLayoutChanged;
+  }
+
+  /**
    * The cell factory used by the widget.
    */
   readonly contentFactory: StaticNotebook.IContentFactory;
@@ -370,6 +377,7 @@ export class StaticNotebook extends Widget {
     } else {
       this.node.classList.remove(SIDE_BY_SIDE_CLASS);
     }
+    this._renderingLayoutChanged.emit(this._renderingLayout ?? 'default');
   }
 
   /**
@@ -901,6 +909,7 @@ export class StaticNotebook extends Widget {
   private _idleCallBack: any;
   private _cellsArray: Array<Cell>;
   private _renderingLayout: RenderingLayout | undefined;
+  private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
 }
 
 /**
