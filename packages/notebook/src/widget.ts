@@ -1090,6 +1090,11 @@ export namespace StaticNotebook {
      * Override the side-by-side right margin.
      */
     sideBySideRightMarginOverride: string;
+
+    /**
+     * Side-by-side output ratio.
+     */
+    sideBySideOutputRatio: number;
   }
 
   /**
@@ -1109,7 +1114,8 @@ export namespace StaticNotebook {
     disableDocumentWideUndoRedo: false,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
-    sideBySideRightMarginOverride: '10px'
+    sideBySideRightMarginOverride: '10px',
+    sideBySideOutputRatio: 1
   };
 
   /**
@@ -1910,7 +1916,11 @@ export class Notebook extends StaticNotebook {
         activeCell.editor.focus();
       }
     }
-    if (force && !this.node.contains(document.activeElement)) {
+    if (
+      (force && !this.node.contains(document.activeElement)) ||
+      // Focus notebook if active cell changes but does not have focus.
+      (activeCell && !activeCell.node.contains(document.activeElement))
+    ) {
       this.node.focus();
     }
   }

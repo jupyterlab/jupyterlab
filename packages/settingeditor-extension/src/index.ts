@@ -50,6 +50,8 @@ namespace CommandIDs {
   export const save = 'settingeditor:save';
 }
 
+type SettingEditorType = 'ui' | 'json';
+
 /**
  * The default setting editor extension.
  */
@@ -98,63 +100,86 @@ function activate(
     });
   }
 
+  const openUi = async (args: { query: string }) => {
+    if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
+      if (!tracker.currentWidget.isAttached) {
+        shell.add(tracker.currentWidget);
+      }
+      shell.activateById(tracker.currentWidget.id);
+      return;
+    }
+
+    const key = plugin.id;
+
+    const { SettingsEditor } = await import('@jupyterlab/settingeditor');
+
+    const editor = new MainAreaWidget<SettingsEditor>({
+      content: new SettingsEditor({
+        editorRegistry,
+        key,
+        registry,
+        state,
+        commands,
+        toSkip: [
+          '@jupyterlab/application-extension:context-menu',
+          '@jupyterlab/mainmenu-extension:plugin'
+        ],
+        translator,
+        status,
+        query: args.query as string
+      })
+    });
+
+    if (jsonEditor) {
+      editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+      editor.toolbar.addItem(
+        'open-json-editor',
+        new CommandToolbarButton({
+          commands,
+          id: CommandIDs.openJSON,
+          icon: launchIcon,
+          label: trans.__('JSON Settings Editor')
+        })
+      );
+    }
+
+    editor.id = namespace;
+    editor.title.icon = settingsIcon;
+    editor.title.label = trans.__('Settings');
+    editor.title.closable = true;
+
+    void tracker.add(editor);
+    shell.add(editor);
+  };
+
+  commands.addCommand(CommandIDs.open, {
+    execute: async (args: {
+      query?: string;
+      settingEditorType?: SettingEditorType;
+    }) => {
+      registry.load(plugin.id).then(settings => {
+        args.settingEditorType ??
+        (settings.get('settingEditorType').composite as SettingEditorType) ===
+          'json'
+          ? commands.execute(CommandIDs.openJSON)
+          : openUi({ query: args.query ?? '' });
+      });
+    },
+    label: args => {
+      if (args.label) {
+        return args.label as string;
+      }
+      return trans.__('Advanced Settings Editor');
+    }
+  });
+
   if (palette) {
     palette.addItem({
       category: trans.__('Settings'),
-      command: CommandIDs.open
+      command: CommandIDs.open,
+      args: { settingEditorType: 'ui' }
     });
   }
-
-  commands.addCommand(CommandIDs.open, {
-    execute: async () => {
-      if (tracker.currentWidget) {
-        shell.activateById(tracker.currentWidget.id);
-        return;
-      }
-
-      const key = plugin.id;
-
-      const { SettingsEditor } = await import('@jupyterlab/settingeditor');
-
-      const editor = new MainAreaWidget<SettingsEditor>({
-        content: new SettingsEditor({
-          editorRegistry,
-          key,
-          registry,
-          state,
-          commands,
-          toSkip: [
-            '@jupyterlab/application-extension:context-menu',
-            '@jupyterlab/mainmenu-extension:plugin'
-          ],
-          translator,
-          status
-        })
-      });
-
-      if (jsonEditor) {
-        editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
-        editor.toolbar.addItem(
-          'open-json-editor',
-          new CommandToolbarButton({
-            commands,
-            id: CommandIDs.openJSON,
-            icon: launchIcon,
-            label: trans.__('JSON Settings Editor')
-          })
-        );
-      }
-
-      editor.id = namespace;
-      editor.title.icon = settingsIcon;
-      editor.title.label = trans.__('Settings');
-      editor.title.closable = true;
-
-      void tracker.add(editor);
-      shell.add(editor);
-    },
-    label: trans.__('Advanced Settings Editor')
-  });
 
   return tracker;
 }
@@ -212,7 +237,10 @@ function activateJSON(
 
   commands.addCommand(CommandIDs.openJSON, {
     execute: async () => {
-      if (tracker.currentWidget) {
+      if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
+        if (!tracker.currentWidget.isAttached) {
+          shell.add(tracker.currentWidget);
+        }
         shell.activateById(tracker.currentWidget.id);
         return;
       }

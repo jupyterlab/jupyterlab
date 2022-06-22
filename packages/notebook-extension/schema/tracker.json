@@ -308,52 +308,60 @@
       {
         "command": "notebook:clear-all-cell-outputs",
         "selector": ".jp-Notebook",
-        "rank": 0
+        "rank": 13
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "rank": 1
+        "rank": 20
       },
       {
         "command": "notebook:enable-output-scrolling",
         "selector": ".jp-Notebook",
-        "rank": 2
+        "rank": 21
       },
       {
         "command": "notebook:disable-output-scrolling",
         "selector": ".jp-Notebook",
-        "rank": 3
+        "rank": 22
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "rank": 4
+        "rank": 30
       },
       {
         "command": "notebook:undo-cell-action",
         "selector": ".jp-Notebook",
-        "rank": 5
+        "rank": 31
       },
       {
         "command": "notebook:redo-cell-action",
         "selector": ".jp-Notebook",
-        "rank": 6
+        "rank": 32
       },
       {
         "command": "notebook:restart-kernel",
         "selector": ".jp-Notebook",
-        "rank": 7
+        "rank": 33
       },
       {
         "type": "separator",
         "selector": ".jp-Notebook",
-        "rank": 8
+        "rank": 40
       },
       {
         "command": "notebook:create-console",
         "selector": ".jp-Notebook",
-        "rank": 9
+        "rank": 41
+      },
+      {
+        "command": "notebook:create-new",
+        "selector": ".jp-DirListing-content",
+        "rank": 52,
+        "args": {
+          "isContextMenu": true
+        }
       }
     ]
   },
@@ -888,6 +896,13 @@
       "description": "Side-by-side right margin override.",
       "type": "string",
       "default": "10px"
+    },
+    "sideBySideOutputRatio": {
+      "title": "Side-by-side output ratio",
+      "description": "For the side-by-side rendering, the side-by-side output ratio defines the width of the output vs the input. Set 1 for same size, > 1 for larger output, < 1 for smaller output.",
+      "type": "number",
+      "default": 1,
+      "minimum": 0
     }
   },
   "additionalProperties": false,

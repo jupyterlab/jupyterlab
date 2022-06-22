@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, setToolbar, ToolbarButton } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  IScore,
+  setToolbar,
+  ToolbarButton
+} from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
@@ -53,7 +58,7 @@ export namespace FileDialog {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => boolean;
+    filter?: (value: Contents.IModel) => boolean | Partial<IScore> | null;
 
     /**
      * The application language translator.
@@ -108,7 +113,7 @@ export namespace FileDialog {
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
     return getOpenFiles({
       ...options,
-      filter: model => false
+      filter: model => null
     });
   }
 }
@@ -122,7 +127,7 @@ class OpenDialog
 {
   constructor(
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => boolean,
+    filter?: (value: Contents.IModel) => boolean | Partial<IScore> | null,
     translator?: ITranslator
   ) {
     super();
@@ -229,7 +234,7 @@ namespace Private {
   export const createFilteredFileBrowser = (
     id: string,
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => boolean,
+    filter?: (value: Contents.IModel) => boolean | Partial<IScore> | null,
     options: IFileBrowserFactory.IOptions = {},
     translator?: ITranslator
   ) => {

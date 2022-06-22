@@ -164,6 +164,11 @@ export class CodeConsole extends Widget {
   readonly sessionContext: ISessionContext;
 
   /**
+   * The configuration options for the text editor widget.
+   */
+  editorConfig?: Partial<CodeEditor.IConfig>;
+
+  /**
    * The list of content cells in the console.
    *
    * #### Notes
@@ -717,7 +722,14 @@ export class CodeConsole extends Widget {
     const modelFactory = this.modelFactory;
     const model = modelFactory.createCodeCell({});
     const rendermime = this.rendermime;
-    return { model, rendermime, contentFactory, placeholder: false };
+    const editorConfig = this.editorConfig;
+    return {
+      model,
+      rendermime,
+      contentFactory,
+      editorConfig,
+      placeholder: false
+    };
   }
 
   /**

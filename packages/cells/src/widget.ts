@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import marked from 'marked';
+import { marked } from 'marked';
 
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
@@ -37,6 +37,8 @@ import {
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
+import { addIcon } from '@jupyterlab/ui-components';
+
 import {
   JSONObject,
   JSONValue,
@@ -52,6 +54,8 @@ import { IDragEvent } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 
 import { Debouncer } from '@lumino/polling';
+
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
@@ -77,9 +81,6 @@ import {
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
 import { ResizeHandle } from './resizeHandle';
-
-import { Signal } from '@lumino/signaling';
-import { addIcon } from '@jupyterlab/ui-components';
 
 /**
  * The CSS class added to cell widgets.
@@ -262,7 +263,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Signal to indicate that widget has changed visibly (in size, in type, etc)
    */
-  readonly displayChanged = new Signal<this, void>(this);
+  get displayChanged(): ISignal<this, void> {
+    return this._displayChanged;
+  }
 
   /**
    * Get the prompt node used by the cell.
@@ -558,6 +561,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
   }
 
+  protected _displayChanged = new Signal<this, void>(this);
   private _readOnly = false;
   private _model: T;
   private _inputHidden = false;
@@ -567,7 +571,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _syncCollapse = false;
   private _syncEditable = false;
   private _resizeDebouncer = new Debouncer(() => {
-    this.displayChanged.emit();
+    this._displayChanged.emit();
   }, 0);
 }
 
@@ -1543,8 +1547,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._rendered;
   }
   set rendered(value: boolean) {
-    const oldValue = this._rendered;
-
     // Show cell as rendered when cell is not editable
     if (this.readOnly && this._showEditorForReadOnlyMarkdown === false) {
       value = true;
@@ -1562,9 +1564,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
 
     // If the rendered state changed, raise an event.
-    if (oldValue !== value) {
-      this.displayChanged.emit();
-    }
+    this._displayChanged.emit();
   }
 
   /*

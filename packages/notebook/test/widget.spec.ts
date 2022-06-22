@@ -46,7 +46,8 @@ const notebookConfig = {
   disableDocumentWideUndoRedo: true,
   renderingLayout: 'default' as 'default' | 'side-by-side',
   sideBySideLeftMarginOverride: '10px',
-  sideBySideRightMarginOverride: '10px'
+  sideBySideRightMarginOverride: '10px',
+  sideBySideOutputRatio: 1
 };
 
 const options: Notebook.IOptions = {

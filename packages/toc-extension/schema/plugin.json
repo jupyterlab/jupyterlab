@@ -3,6 +3,14 @@
   "jupyter.lab.setting-icon-label": "Table of Contents",
   "title": "Table of Contents",
   "description": "Table of contents settings.",
+  "jupyter.lab.menus": {
+    "context": [
+      {
+        "command": "toc:run-cells",
+        "selector": ".jp-tocItem"
+      }
+    ]
+  },
   "properties": {
     "numberingH1": {
       "title": "Enable h1 numbering",
