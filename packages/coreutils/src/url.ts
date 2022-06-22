@@ -114,7 +114,9 @@ export namespace URLExt {
    */
   export function queryStringToObject(
     value: string
-  ): { [key: string]: string | undefined } {
+  ): {
+    [key: string]: string | undefined;
+  } {
     return value
       .replace(/^\?/, '')
       .split('&')

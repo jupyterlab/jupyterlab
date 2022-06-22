@@ -61,7 +61,9 @@ enum ShortCutLocation {
 /** Describe commands that are used by shortcuts */
 function getCommands(
   trans: TranslationBundle
-): { [key: string]: { commandId: string; label: string; caption: string } } {
+): {
+  [key: string]: { commandId: string; label: string; caption: string };
+} {
   return {
     shortcutEditLeft: {
       commandId: 'shortcutui:EditLeft',

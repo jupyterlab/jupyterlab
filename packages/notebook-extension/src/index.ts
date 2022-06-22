@@ -2845,7 +2845,9 @@ namespace Private {
    */
   export function getFormatLabels(
     translator: ITranslator
-  ): { [k: string]: string } {
+  ): {
+    [k: string]: string;
+  } {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     return {

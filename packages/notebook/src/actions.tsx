@@ -1826,7 +1826,11 @@ export namespace NotebookActions {
    */
   export function getHeadingInfo(
     cell: Cell
-  ): { isHeading: boolean; headingLevel: number; collapsed?: boolean } {
+  ): {
+    isHeading: boolean;
+    headingLevel: number;
+    collapsed?: boolean;
+  } {
     if (!(cell instanceof MarkdownCell)) {
       return { isHeading: false, headingLevel: 7 };
     }

@@ -238,7 +238,10 @@ export namespace NotebookTrustStatus {
      */
     private _deriveCellTrustState(
       model: INotebookModel | null
-    ): { total: number; trusted: number } {
+    ): {
+      total: number;
+      trusted: number;
+    } {
       if (model === null) {
         return { total: 0, trusted: 0 };
       }
