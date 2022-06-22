@@ -209,12 +209,12 @@ export class EditorHandler implements IDisposable {
   private _uglyCM6Workaround(): void {
     const editor = this._editor as CodeMirrorEditor;
     const lines = editor.doc.lines;
-    const breakpoint_pos = Array.from(Array(lines).keys()).map(
+    const breakpointPos = Array.from(Array(lines).keys()).map(
       i => editor.doc.line(i + 1).from
     );
 
     editor.editor.dispatch({
-      effects: this._breakpointEffect.of({ pos: breakpoint_pos })
+      effects: this._breakpointEffect.of({ pos: breakpointPos })
     });
 
     editor.editor.dispatch({
@@ -312,12 +312,12 @@ export class EditorHandler implements IDisposable {
     const breakpoints = this._getBreakpoints();
 
     this._clearGutter(editor);
-    const breakpoint_pos = breakpoints.map(b => {
+    const breakpointPos = breakpoints.map(b => {
       return editor.state.doc.line(b.line!).from;
     });
 
     editor.editor.dispatch({
-      effects: this._breakpointEffect.of({ pos: breakpoint_pos })
+      effects: this._breakpointEffect.of({ pos: breakpointPos })
     });
   }
 
@@ -413,9 +413,9 @@ export namespace EditorHandler {
   ): void {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
-    const line_pos = cmEditor.doc.line(line).from;
+    const linePos = cmEditor.doc.line(line).from;
     cmEditor.editor.dispatch({
-      effects: _highlightEffect.of({ pos: [line_pos] })
+      effects: _highlightEffect.of({ pos: [linePos] })
     });
   }
 

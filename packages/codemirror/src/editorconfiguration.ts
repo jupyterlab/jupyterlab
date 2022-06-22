@@ -317,10 +317,10 @@ export namespace Configuration {
       } else {
         const config: Record<string, any> = {};
         config[key] = value;
-        const theme_extension = this.updateEditorTheme(config);
-        if (theme_extension) {
+        const themeExtension = this.updateEditorTheme(config);
+        if (themeExtension) {
           view.dispatch({
-            effects: this._theme.reconfigure(theme_extension)
+            effects: this._theme.reconfigure(themeExtension)
           });
         }
       }
@@ -335,9 +335,9 @@ export namespace Configuration {
         }
       }
 
-      const theme_extension = this.updateEditorTheme(config);
-      if (theme_extension) {
-        eff.push(this._theme.reconfigure(theme_extension));
+      const themeExtension = this.updateEditorTheme(config);
+      if (themeExtension) {
+        eff.push(this._theme.reconfigure(themeExtension));
       }
 
       view.dispatch({
@@ -365,34 +365,39 @@ export namespace Configuration {
       }
 
       const builder = this.get('keymap');
-      const keymap_ext = builder!.of(
+      const keymapExt = builder!.of(
         config.extraKeys
           ? [...defaultKeymap, ...config.extraKeys!]
           : [...defaultKeymap]
       );
       // TODO: replace this with indentUnit in the IConfig object
-      const indent_builder = this.get('indentUnit');
-      const insert_ext = indent_builder!.of(
+      const indentBuilder = this.get('indentUnit');
+      const insertExt = indentBuilder!.of(
         config.insertSpaces ? ' '.repeat(config.tabSize) : '\t'
       );
 
-      let theme_extension = this.updateEditorTheme(config);
-      if (!theme_extension) {
-        theme_extension = EditorView.baseTheme({});
+      let themeExtension = this.updateEditorTheme(config);
+      if (!themeExtension) {
+        themeExtension = EditorView.baseTheme({});
       }
 
       extensions.push(
-        //this._theme.of(theme_extension),
-        insert_ext,
+        this._theme.of(themeExtension),
+        insertExt,
         defaultHighlightStyle.fallback,
-        keymap_ext
+        keymapExt
       );
 
-      Mode.ensure('text/x-python').then(spec => {
-        if (spec) {
-          extensions.push(this.get('language')!.of(spec.support!));
-        }
-      });
+      Mode.ensure('text/x-python')
+        .then(spec => {
+          if (spec) {
+            extensions.push(this.get('language')!.of(spec.support!));
+          }
+        })
+        .catch(error => {
+          console.error('Could not load language parser:');
+          console.error(error);
+        });
 
       return extensions;
     }

@@ -176,7 +176,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._currentMatch = match;
 
-    this._highlightCurrentMatch(cursorMatch);
+    await this._highlightCurrentMatch(cursorMatch);
     return Promise.resolve();
   }
 

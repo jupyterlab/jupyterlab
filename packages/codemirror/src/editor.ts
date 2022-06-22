@@ -1350,13 +1350,13 @@ namespace Private {
     config: CodeMirrorEditor.IConfig,
     ybinding: IYCodeMirrorBinding | null,
     editorConfig: Configuration.EditorConfiguration,
-    additional_extensions: Extension[]
+    additionalExtensions: Extension[]
   ): EditorView {
     let extensions = editorConfig.getInitialExtensions(config);
     if (ybinding) {
       extensions.push(yCollab(ybinding.text, ybinding.awareness));
     }
-    extensions.push(...additional_extensions);
+    extensions.push(...additionalExtensions);
     const doc = ybinding?.text.toString();
     const view = new EditorView({
       state: EditorState.create({
@@ -1385,7 +1385,7 @@ namespace Private {
     decorations: Range<Decoration>[];
   }
 
-  export interface CaretWidgetCallbacks {
+  export interface ICaretWidgetCallbacks {
     setHoverId: (sessionId: string) => void;
     setHoverTimeout: () => void;
     clearHoverTimeout: () => void;
@@ -1394,7 +1394,7 @@ namespace Private {
   export class CaretWidget extends WidgetType {
     constructor(
       readonly collaborator: ICollaborator,
-      readonly callbacks: CaretWidgetCallbacks
+      readonly callbacks: ICaretWidgetCallbacks
     ) {
       super();
     }
