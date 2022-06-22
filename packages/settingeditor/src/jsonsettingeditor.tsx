@@ -336,8 +336,9 @@ export class JsonSettingEditor extends SplitPanel {
   private _instructions: Widget;
   private _list: PluginList;
   private _saving = false;
-  private _state: JsonSettingEditor.ILayoutState =
-    JSONExt.deepCopy(DEFAULT_LAYOUT);
+  private _state: JsonSettingEditor.ILayoutState = JSONExt.deepCopy(
+    DEFAULT_LAYOUT
+  );
   private _when: Promise<any>;
 }
 

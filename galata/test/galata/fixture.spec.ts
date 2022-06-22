@@ -16,7 +16,7 @@ test.describe('page', () => {
 
   test('should have playwright Page interface', async ({ page }) => {
     expect(page.waitForSelector).toBe(
-      (page as any as JupyterLabPage).page.waitForSelector
+      ((page as any) as JupyterLabPage).page.waitForSelector
     );
   });
 });

@@ -21,8 +21,7 @@ export abstract class KernelFutureHandler<
     REPLY extends KernelMessage.IShellControlMessage
   >
   extends DisposableDelegate
-  implements Kernel.IFuture<REQUEST, REPLY>
-{
+  implements Kernel.IFuture<REQUEST, REPLY> {
   /**
    * Construct a new KernelFutureHandler.
    */
@@ -210,9 +209,9 @@ export abstract class KernelFutureHandler<
       case 'shell':
         if (
           msg.channel === this.msg.channel &&
-          (
-            msg.parent_header as KernelMessage.IHeader<KernelMessage.MessageType>
-          ).msg_id === this.msg.header.msg_id
+          (msg.parent_header as KernelMessage.IHeader<
+            KernelMessage.MessageType
+          >).msg_id === this.msg.header.msg_id
         ) {
           await this._handleReply(msg as REPLY);
         }
@@ -464,8 +463,10 @@ namespace Private {
       this._hooks.length -= numNulls;
     }
 
-    private _hooks: (((msg: T) => boolean | PromiseLike<boolean>) | null)[] =
-      [];
+    private _hooks: (
+      | ((msg: T) => boolean | PromiseLike<boolean>)
+      | null
+    )[] = [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }

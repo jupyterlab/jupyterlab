@@ -983,8 +983,7 @@ describe('Kernel.IKernel', () => {
               status: 'ok',
               user_expressions: {}
             },
-            parentHeader:
-              msg.header as KernelMessage.IExecuteRequestMsg['header']
+            parentHeader: msg.header as KernelMessage.IExecuteRequestMsg['header']
           })
         );
 

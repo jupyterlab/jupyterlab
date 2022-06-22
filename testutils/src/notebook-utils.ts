@@ -80,17 +80,14 @@ export namespace NBTestUtils {
     }
   ];
 
-  export const DEFAULT_CONTENT: nbformat.INotebookContent =
-    require('../default.json') as nbformat.INotebookContent;
-  export const DEFAULT_CONTENT_45: nbformat.INotebookContent =
-    require('../default-45.json') as nbformat.INotebookContent;
+  export const DEFAULT_CONTENT: nbformat.INotebookContent = require('../default.json') as nbformat.INotebookContent;
+  export const DEFAULT_CONTENT_45: nbformat.INotebookContent = require('../default-45.json') as nbformat.INotebookContent;
 
   export const defaultEditorConfig = { ...StaticNotebook.defaultEditorConfig };
 
-  export const editorFactory =
-    editorServices.factoryService.newInlineEditor.bind(
-      editorServices.factoryService
-    );
+  export const editorFactory = editorServices.factoryService.newInlineEditor.bind(
+    editorServices.factoryService
+  );
 
   export const mimeTypeService = editorServices.mimeTypeService;
 

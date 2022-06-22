@@ -526,7 +526,9 @@ export namespace ISettingRegistry {
      *
      * @returns The setting value.
      */
-    get(key: string): {
+    get(
+      key: string
+    ): {
       composite: ReadonlyPartialJSONValue | undefined;
       user: ReadonlyPartialJSONValue | undefined;
     };

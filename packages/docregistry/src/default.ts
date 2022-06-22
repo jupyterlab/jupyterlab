@@ -19,8 +19,7 @@ import { DocumentRegistry, IDocumentWidget } from './index';
  */
 export class DocumentModel
   extends CodeEditor.Model
-  implements DocumentRegistry.ICodeModel
-{
+  implements DocumentRegistry.ICodeModel {
   /**
    * Construct a new document model.
    */
@@ -291,8 +290,7 @@ export class Base64ModelFactory extends TextModelFactory {
 export abstract class ABCWidgetFactory<
   T extends IDocumentWidget,
   U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IWidgetFactory<T, U>
-{
+> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -483,8 +481,7 @@ export class DocumentWidget<
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   >
   extends MainAreaWidget<T>
-  implements IDocumentWidget<T, U>
-{
+  implements IDocumentWidget<T, U> {
   constructor(options: DocumentWidget.IOptions<T, U>) {
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);

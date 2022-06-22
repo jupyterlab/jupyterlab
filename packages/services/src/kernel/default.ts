@@ -629,10 +629,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(
-      this,
-      msg
-    ) as Promise<KernelMessage.ICompleteReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.ICompleteReplyMsg
+    >;
   }
 
   /**
@@ -654,10 +653,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content: content
     });
-    return Private.handleShellMessage(
-      this,
-      msg
-    ) as Promise<KernelMessage.IInspectReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.IInspectReplyMsg
+    >;
   }
 
   /**
@@ -679,10 +677,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(
-      this,
-      msg
-    ) as Promise<KernelMessage.IHistoryReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.IHistoryReplyMsg
+    >;
   }
 
   /**
@@ -786,10 +783,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(
-      this,
-      msg
-    ) as Promise<KernelMessage.IIsCompleteReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.IIsCompleteReplyMsg
+    >;
   }
 
   /**
@@ -809,10 +805,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(
-      this,
-      msg
-    ) as Promise<KernelMessage.ICommInfoReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.ICommInfoReplyMsg
+    >;
   }
 
   /**
@@ -1002,12 +997,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
       // We've seen it before, update existing outputs with same display_id
       // by handling display_data as update_display_data.
       const updateMsg: KernelMessage.IMessage = {
-        header: JSONExt.deepCopy(
-          msg.header as unknown as JSONObject
-        ) as unknown as KernelMessage.IHeader,
-        parent_header: JSONExt.deepCopy(
-          msg.parent_header as unknown as JSONObject
-        ) as unknown as KernelMessage.IHeader,
+        header: (JSONExt.deepCopy(
+          (msg.header as unknown) as JSONObject
+        ) as unknown) as KernelMessage.IHeader,
+        parent_header: (JSONExt.deepCopy(
+          (msg.parent_header as unknown) as JSONObject
+        ) as unknown) as KernelMessage.IHeader,
         metadata: JSONExt.deepCopy(msg.metadata),
         content: JSONExt.deepCopy(msg.content as JSONObject),
         channel: msg.channel,

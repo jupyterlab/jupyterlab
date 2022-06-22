@@ -252,8 +252,7 @@ export namespace ConsolePanel {
    */
   export class ContentFactory
     extends CodeConsole.ContentFactory
-    implements IContentFactory
-  {
+    implements IContentFactory {
     /**
      * Create a new console panel.
      */

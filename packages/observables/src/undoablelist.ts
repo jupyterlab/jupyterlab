@@ -69,8 +69,7 @@ export interface IObservableUndoableList<T> extends IObservableList<T> {
  */
 export class ObservableUndoableList<T>
   extends ObservableList<T>
-  implements IObservableUndoableList<T>
-{
+  implements IObservableUndoableList<T> {
   /**
    * Construct a new undoable observable list.
    */
@@ -290,8 +289,7 @@ export namespace ObservableUndoableList {
    * A default, identity serializer.
    */
   export class IdentitySerializer<T extends JSONValue>
-    implements ISerializer<T>
-  {
+    implements ISerializer<T> {
     /**
      * Identity serialize.
      */

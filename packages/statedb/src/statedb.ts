@@ -11,8 +11,7 @@ import { IStateDB } from './tokens';
  */
 export class StateDB<
   T extends ReadonlyPartialJSONValue = ReadonlyPartialJSONValue
-> implements IStateDB<T>
-{
+> implements IStateDB<T> {
   /**
    * Create a new state database.
    *

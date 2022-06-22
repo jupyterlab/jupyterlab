@@ -381,8 +381,9 @@ export class CSVViewer extends Widget {
     const renderer = new TextRenderer({
       textColor: rendererConfig.textColor,
       horizontalAlignment: rendererConfig.horizontalAlignment,
-      backgroundColor:
-        this._searchService.cellBackgroundColorRendererFunc(rendererConfig)
+      backgroundColor: this._searchService.cellBackgroundColorRendererFunc(
+        rendererConfig
+      )
     });
     this._grid.cellRenderers.update({
       body: renderer,
@@ -395,8 +396,10 @@ export class CSVViewer extends Widget {
   private _context: DocumentRegistry.Context;
   private _grid: DataGrid;
   private _searchService: GridSearchService;
-  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
-    null;
+  private _monitor: ActivityMonitor<
+    DocumentRegistry.IModel,
+    void
+  > | null = null;
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();
   private _baseRenderer: TextRenderConfig | null = null;

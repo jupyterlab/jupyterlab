@@ -452,8 +452,9 @@ describe('rendermime/registry', () => {
         });
 
         it('should resolve escapes correctly', async () => {
-          const contextPromise =
-            resolverPath.getDownloadUrl('foo%20%23%2520test');
+          const contextPromise = resolverPath.getDownloadUrl(
+            'foo%20%23%2520test'
+          );
           const contentsPromise = contents.getDownloadUrl('foo #%20test');
           const values = await Promise.all([contextPromise, contentsPromise]);
           expect(values[0]).toBe(values[1]);

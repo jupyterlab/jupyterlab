@@ -97,7 +97,7 @@ export abstract class VDomRenderer<
    */
   constructor(model: T extends null ? void : T) {
     super();
-    this.model = (model ?? null) as unknown as T;
+    this.model = ((model ?? null) as unknown) as T;
   }
   /**
    * A signal emitted when the model changes.

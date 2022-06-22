@@ -1019,8 +1019,7 @@ namespace Private {
    */
   export class IsolatedRenderer
     extends Widget
-    implements IRenderMime.IRenderer
-  {
+    implements IRenderMime.IRenderer {
     /**
      * Create an isolated renderer.
      */

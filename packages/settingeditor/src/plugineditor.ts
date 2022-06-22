@@ -38,8 +38,13 @@ export class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    const { commands, editorFactory, registry, rendermime, translator } =
-      options;
+    const {
+      commands,
+      editorFactory,
+      registry,
+      rendermime,
+      translator
+    } = options;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 

@@ -727,6 +727,7 @@ export class TerminalTester extends SocketTester {
  * type B = MakeOptional<A, 'a'>
  * const x: B = {b: 'test'}
  */
-type MakeOptional<T, K> = Pick<T, Exclude<keyof T, K>> & {
-  [P in Extract<keyof T, K>]?: T[P];
-};
+type MakeOptional<T, K> = Pick<T, Exclude<keyof T, K>> &
+  {
+    [P in Extract<keyof T, K>]?: T[P];
+  };

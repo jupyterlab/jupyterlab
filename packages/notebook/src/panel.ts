@@ -297,8 +297,7 @@ export namespace NotebookPanel {
    */
   export class ContentFactory
     extends Notebook.ContentFactory
-    implements IContentFactory
-  {
+    implements IContentFactory {
     /**
      * Create a new content area for the panel.
      */

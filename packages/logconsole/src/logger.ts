@@ -106,8 +106,7 @@ class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
  */
 export class LoggerOutputAreaModel
   extends OutputAreaModel
-  implements ILoggerOutputAreaModel
-{
+  implements ILoggerOutputAreaModel {
   constructor({ maxLength, ...options }: LoggerOutputAreaModel.IOptions) {
     super(options);
     this.maxLength = maxLength;

@@ -26,8 +26,7 @@ import { IDataConnector } from './interfaces';
  * class is a convenience superclass for connectors that only need to `fetch`.
  */
 export abstract class DataConnector<T, U = T, V = string, W = string>
-  implements IDataConnector<T, U, V, W>
-{
+  implements IDataConnector<T, U, V, W> {
   /**
    * Retrieve an item from the data connector.
    *

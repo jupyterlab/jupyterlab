@@ -141,8 +141,8 @@ export class SidebarHelper {
           pluginId
         )) as ISettingRegistry;
         const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
-        const overrides = (await settingRegistry.get(SIDEBAR_ID, 'overrides'))
-          .composite as any as { [index: string]: any };
+        const overrides = ((await settingRegistry.get(SIDEBAR_ID, 'overrides'))
+          .composite as any) as { [index: string]: any };
         for (const widgetId of Object.keys(overrides)) {
           overrides[widgetId] = 'left';
         }

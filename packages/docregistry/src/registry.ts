@@ -318,8 +318,9 @@ export class DocumentRegistry implements IDisposable {
           }
         });
       if (!this._defaultWidgetFactories[fileTypeName]) {
-        this._defaultWidgetFactories[fileTypeName] =
-          this._widgetFactoriesForFileType[fileTypeName][0];
+        this._defaultWidgetFactories[
+          fileTypeName
+        ] = this._widgetFactoriesForFileType[fileTypeName][0];
       }
     }
 
@@ -457,8 +458,9 @@ export class DocumentRegistry implements IDisposable {
     // Find if a there is a default rendered factory for this type.
     for (const ft of fts) {
       if (ft.name in this._defaultRenderedWidgetFactories) {
-        factory =
-          this._widgetFactories[this._defaultRenderedWidgetFactories[ft.name]];
+        factory = this._widgetFactories[
+          this._defaultRenderedWidgetFactories[ft.name]
+        ];
         break;
       }
     }
@@ -729,8 +731,9 @@ export class DocumentRegistry implements IDisposable {
   private _defaultWidgetFactoryOverrides: {
     [key: string]: string;
   } = Object.create(null);
-  private _defaultWidgetFactories: { [key: string]: string } =
-    Object.create(null);
+  private _defaultWidgetFactories: { [key: string]: string } = Object.create(
+    null
+  );
   private _defaultRenderedWidgetFactories: {
     [key: string]: string;
   } = Object.create(null);

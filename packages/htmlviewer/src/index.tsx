@@ -65,8 +65,7 @@ const CSS_CLASS = 'jp-HTMLViewer';
  */
 export class HTMLViewer
   extends DocumentWidget<IFrame>
-  implements IDocumentWidget<IFrame>
-{
+  implements IDocumentWidget<IFrame> {
   /**
    * Create a new widget for rendering HTML.
    */
@@ -192,8 +191,10 @@ export class HTMLViewer
   protected translator: ITranslator;
   private _renderPending = false;
   private _parser = new DOMParser();
-  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
-    null;
+  private _monitor: ActivityMonitor<
+    DocumentRegistry.IModel,
+    void
+  > | null = null;
   private _objectUrl: string = '';
   private _trustedChanged = new Signal<this, boolean>(this);
 }

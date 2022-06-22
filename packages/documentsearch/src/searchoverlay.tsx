@@ -377,8 +377,9 @@ class SearchOverlay extends React.Component<
       this._executeSearch(true, this.state.searchText);
     }, props.searchDebounceTime ?? 500);
     this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
-    this._toggleSearchSelectedCells =
-      this._toggleSearchSelectedCells.bind(this);
+    this._toggleSearchSelectedCells = this._toggleSearchSelectedCells.bind(
+      this
+    );
   }
 
   componentDidMount() {

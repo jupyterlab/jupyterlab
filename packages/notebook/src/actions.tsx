@@ -1824,7 +1824,9 @@ export namespace NotebookActions {
    *
    * @param cell - The target cell widget.
    */
-  export function getHeadingInfo(cell: Cell): {
+  export function getHeadingInfo(
+    cell: Cell
+  ): {
     isHeading: boolean;
     headingLevel: number;
     collapsed?: boolean;

@@ -207,7 +207,7 @@ namespace Private {
       // Save a file's contents as a workspace and navigate to that workspace.
       void context.ready.then(async () => {
         const file = context.model;
-        const workspace = file.toJSON() as unknown as Workspace.IWorkspace;
+        const workspace = (file.toJSON() as unknown) as Workspace.IWorkspace;
         const path = context.path;
         const id = workspace.metadata.id;
 

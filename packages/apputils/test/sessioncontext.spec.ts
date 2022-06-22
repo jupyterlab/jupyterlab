@@ -496,8 +496,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching name', () => {
-        const spec =
-          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
+        const spec = specsManager.specs!.kernelspecs[
+          specsManager.specs!.default
+        ]!;
 
         expect(
           SessionContext.getDefaultKernel({
@@ -517,8 +518,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching language', () => {
-        const spec =
-          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
+        const spec = specsManager.specs!.kernelspecs[
+          specsManager.specs!.default
+        ]!;
         const kernelspecs: any = {};
 
         kernelspecs[spec.name] = spec;
@@ -534,8 +536,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return null if a language matches twice', () => {
-        const spec =
-          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
+        const spec = specsManager.specs!.kernelspecs[
+          specsManager.specs!.default
+        ]!;
         const kernelspecs: any = {};
 
         kernelspecs['foo'] = spec;

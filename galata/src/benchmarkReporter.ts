@@ -382,9 +382,9 @@ class BenchmarkReporter implements Reporter {
         ...result.attachments
           .filter(a => a.name === benchmark.DEFAULT_NAME_ATTACHMENT)
           .map(raw => {
-            const json = JSON.parse(
+            const json = (JSON.parse(
               raw.body?.toString() ?? '{}'
-            ) as any as benchmark.IRecord;
+            ) as any) as benchmark.IRecord;
             return { ...json, reference: this._reference };
           })
       );
@@ -451,8 +451,10 @@ class BenchmarkReporter implements Reporter {
       }
 
       // - Create report
-      const [reportContentString, reportExtension] =
-        await this._buildTextReport(allData);
+      const [
+        reportContentString,
+        reportExtension
+      ] = await this._buildTextReport(allData);
       const reportFile = path.resolve(
         outputDir,
         `${baseName}.${reportExtension}`
@@ -468,7 +470,7 @@ class BenchmarkReporter implements Reporter {
       const view = new vega.View(vega.parse(vegaSpec), {
         renderer: 'canvas'
       }).initialize();
-      const canvas = (await view.toCanvas()) as any as canvas.Canvas;
+      const canvas = ((await view.toCanvas()) as any) as canvas.Canvas;
       const graphFile = path.resolve(outputDir, `${baseName}.png`);
       const fileStream = fs.createWriteStream(graphFile);
 
@@ -552,12 +554,10 @@ class BenchmarkReporter implements Reporter {
     }
 
     const compare =
-      (
-        groups.values().next().value?.values().next().value as Map<
-          string,
-          Map<string, number[]>
-        >
-      ).size === 2;
+      (groups.values().next().value?.values().next().value as Map<
+        string,
+        Map<string, number[]>
+      >).size === 2;
 
     // - Create report
     const reportContent = new Array<string>(
@@ -578,13 +578,10 @@ class BenchmarkReporter implements Reporter {
 
     let header = '| Test file |';
     let nFiles = 0;
-    for (const [file] of groups
-      .values()
-      .next()
-      .value.values()
-      .next()
-      .value.values()
-      .next().value) {
+    for (const [
+      file
+    ] of groups.values().next().value.values().next().value.values().next()
+      .value) {
       header += ` ${file} |`;
       nFiles++;
     }

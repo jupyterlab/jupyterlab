@@ -151,9 +151,9 @@ describe('@jupyterlab/toc', () => {
 
     describe('Markdown Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let markdownTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<
-        IDocumentWidget<FileEditor>
-      >;
+      let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+        FileEditor
+      >>;
       let markdownWidget: IDocumentWidget<FileEditor>;
 
       it('should create a markdown generator', () => {
@@ -231,9 +231,9 @@ describe('@jupyterlab/toc', () => {
 
     describe('Latex Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let latexTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let latexGenerator: ToC.TableOfContentsRegistry.IGenerator<
-        IDocumentWidget<FileEditor>
-      >;
+      let latexGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+        FileEditor
+      >>;
       let latexWidget: IDocumentWidget<FileEditor>;
 
       it('should create a latex generator', () => {
@@ -268,9 +268,9 @@ describe('@jupyterlab/toc', () => {
 
     describe('Python Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let pythonTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
-      let pythonGenerator: ToC.TableOfContentsRegistry.IGenerator<
-        IDocumentWidget<FileEditor>
-      >;
+      let pythonGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+        FileEditor
+      >>;
       let pythonWidget: IDocumentWidget<FileEditor>;
 
       it('should create a python generator', () => {
