@@ -54,7 +54,7 @@ describe('CodeMirrorEditor', () => {
       };
       editor.edgeRequested.connect(listener);
       expect(edge).toBeNull();
-      editor.editor.triggerOnKeyDown(event);
+      editor.editor.contentDOM.dispatchEvent(event);
       expect(edge).toBe('top');
     });
 
@@ -66,7 +66,7 @@ describe('CodeMirrorEditor', () => {
       };
       editor.edgeRequested.connect(listener);
       expect(edge).toBeNull();
-      editor.editor.triggerOnKeyDown(event);
+      editor.editor.contentDOM.dispatchEvent(event);
       expect(edge).toBe('bottom');
     });
   });
@@ -99,14 +99,7 @@ describe('CodeMirrorEditor', () => {
   describe('#editor', () => {
     it('should be the codemirror editor wrapped by the editor', () => {
       const cm = editor.editor;
-      expect(cm.getDoc()).toBe(editor.doc);
-    });
-  });
-
-  describe('#doc', () => {
-    it('should be the codemirror doc wrapped by the editor', () => {
-      const doc = editor.doc;
-      expect(doc.getEditor()).toBe(editor.editor);
+      expect(cm.state.doc).toBe(editor.doc);
     });
   });
 
@@ -206,7 +199,7 @@ describe('CodeMirrorEditor', () => {
         column: 2,
         line: 5
       };
-      expect(editor.getOffsetAt(pos)).toBe(7);
+      expect(() => {editor.getOffsetAt(pos)}).toThrow(RangeError);
     });
   });
 
@@ -216,9 +209,7 @@ describe('CodeMirrorEditor', () => {
       let pos = editor.getPositionAt(6);
       expect(pos.column).toBe(2);
       expect(pos.line).toBe(1);
-      pos = editor.getPositionAt(101);
-      expect(pos.column).toBe(3);
-      expect(pos.line).toBe(1);
+      expect(() => { pos = editor.getPositionAt(101); }).toThrow(RangeError);
     });
   });
 
@@ -276,16 +267,16 @@ describe('CodeMirrorEditor', () => {
   describe('#handleEvent', () => {
     describe('focus', () => {
       it('should add the focus class to the host', () => {
-        simulate(editor.editor.getInputField(), 'focus');
+        simulate(editor.editor.contentDOM, 'focus');
         expect(host.classList.contains('jp-mod-focused')).toBe(true);
       });
     });
 
     describe('blur', () => {
       it('should remove the focus class from the host', () => {
-        simulate(editor.editor.getInputField(), 'focus');
+        simulate(editor.editor.contentDOM, 'focus');
         expect(host.classList.contains('jp-mod-focused')).toBe(true);
-        simulate(editor.editor.getInputField(), 'blur');
+        simulate(editor.editor.contentDOM, 'blur');
         expect(host.classList.contains('jp-mod-focused')).toBe(false);
       });
     });
@@ -307,13 +298,13 @@ describe('CodeMirrorEditor', () => {
       };
       const disposable = editor.addKeydownHandler(handler);
       let evt = generate('keydown', { keyCode: ENTER });
-      editor.editor.triggerOnKeyDown(evt);
+      editor.editor.contentDOM.dispatchEvent(evt);
       expect(called).toBe(1);
       disposable.dispose();
       expect(disposable.isDisposed).toBe(true);
 
       evt = generate('keydown', { keyCode: ENTER });
-      editor.editor.triggerOnKeyDown(evt);
+      editor.editor.contentDOM.dispatchEvent(evt);
       expect(called).toBe(1);
     });
   });
@@ -362,10 +353,15 @@ describe('CodeMirrorEditor', () => {
   describe('#getPositionForCoordinate()', () => {
     it('should get the window coordinates given a cursor position', () => {
       model.value.text = TEXT;
-      const coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
+      const coord = editor.getCoordinateForPosition({ line: 10, column: 2 });
       const newPos = editor.getPositionForCoordinate(coord)!;
-      expect(newPos.line).toBeTruthy();
-      expect(newPos.column).toBeTruthy();
+      if (typeof process !== 'undefined') {
+        expect(newPos.line).toBe(0);
+        expect(newPos.column).toBe(0);
+      } else {
+        expect(newPos.line).toBeTruthy();
+        expect(newPos.column).toBeTruthy();
+      }
     });
   });
 
@@ -475,7 +471,7 @@ describe('CodeMirrorEditor', () => {
     it('should run when there is a keydown event on the editor', () => {
       const event = generate('keydown', { keyCode: UP_ARROW });
       expect(editor.methods).toEqual(expect.not.arrayContaining(['onKeydown']));
-      editor.editor.triggerOnKeyDown(event);
+      editor.editor.contentDOM.dispatchEvent(event);
       expect(editor.methods).toEqual(expect.arrayContaining(['onKeydown']));
     });
   });

@@ -104,6 +104,7 @@ interface IYCodeMirrorBinding {
   text: Y.Text;
   // TODO: remove | null when we remove shareModel
   awareness: Awareness | null;
+  undoManager: Y.UndoManager | null;
 }
 
 /**
@@ -293,7 +294,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const sharedModel = this.model.sharedModel as models.IYText;
     this._yeditorBinding = {
       text: sharedModel.ysource,
-      awareness: sharedModel.awareness
+      awareness: sharedModel.awareness,
+      undoManager: sharedModel.undoManager
     };
     // TODO: CM6 migration
     /*this._yeditorBinding?.destroy();
@@ -453,7 +455,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   getLine(line: number): string | undefined {
     // TODO: CM6 remove +1 when CM6 first line number has propagated
-    return this.doc.line(line + 1).text;
+    line = line + 1;
+    return line <= this.doc.lines ? this.doc.line(line).text : undefined;
   }
 
   /**
@@ -492,7 +495,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   clearHistory(): void {
     //TODO
-    //this._yeditorBinding?.yUndoManager?.clear();
+    this._yeditorBinding?.undoManager?.clear();
   }
 
   /**
@@ -714,9 +717,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Passing an empty array resets a cursor position to the start of a document.
    */
   setSelections(selections: CodeEditor.IRange[]): void {
-    const sel = selections.map(r =>
-      EditorSelection.range(this.getOffsetAt(r.start), this.getOffsetAt(r.end))
-    );
+    const sel = selections.length ?
+      selections.map(r =>
+        EditorSelection.range(this.getOffsetAt(r.start), this.getOffsetAt(r.end))
+      ) :
+      [EditorSelection.range(0, 0)];
     this.editor.dispatch({ selection: EditorSelection.create(sel) });
   }
 
@@ -1354,7 +1359,7 @@ namespace Private {
   ): EditorView {
     let extensions = editorConfig.getInitialExtensions(config);
     if (ybinding) {
-      extensions.push(yCollab(ybinding.text, ybinding.awareness));
+      extensions.push(yCollab(ybinding.text, ybinding.awareness, { undoManager: ybinding.undoManager ?? false }));
     }
     extensions.push(...additionalExtensions);
     const doc = ybinding?.text.toString();
