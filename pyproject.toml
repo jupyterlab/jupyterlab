@@ -101,10 +101,10 @@ path = "jupyterlab/_version.py"
 source = "code"
 
 [tool.hatch.build.targets.wheel.shared-data]
-"/jupyterlab/static" = "share/jupyter/lab/static"
-"/jupyterlab/schemas" = "share/jupyter/lab/schemas"
-"/jupyterlab/themes" = "share/jupyter/lab/themes"
-"/jupyter-config" = "etc/jupyter"
+"jupyterlab/static" = "share/jupyter/lab/static"
+"jupyterlab/schemas" = "share/jupyter/lab/schemas"
+"jupyterlab/themes" = "share/jupyter/lab/themes"
+"jupyter-config" = "etc/jupyter"
 
 [tool.hatch.build]
 ignore-vcs = true
@@ -185,7 +185,7 @@ addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
 ignore = "tests examples"
 
 [tool.jupyter-releaser]
-skip = ["check-links"]
+skip = ["check-links", "check-manifest"]
 
 [tool.jupyter-releaser.options]
 ignore-glob = [
