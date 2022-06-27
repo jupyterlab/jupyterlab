@@ -73,6 +73,11 @@
   overflow-y: auto;
   max-height: 24em;
   margin-left: var(--jp-private-cell-scrolling-output-offset);
+  resize: vertical;
+}
+
+.jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea[style*='height'] {
+  max-height: unset;
 }
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea::after {
