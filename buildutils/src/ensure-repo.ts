@@ -862,5 +862,8 @@ export async function ensureIntegrity(): Promise<boolean> {
 }
 
 if (require.main === module) {
-  void ensureIntegrity();
+  void ensureIntegrity().catch(e => {
+    process.exitCode = 1
+    console.error(e);
+  });
 }
