@@ -68,7 +68,7 @@
     "@types/jest": "^26.0.10",
     "@types/node-fetch": "^2.5.4",
     "jest-retries": "^1.0.1",
-    "lighthouse": "9.2.0",
+    "lighthouse": "9.3.0",
     "typescript": "~4.7.3"
   },
   "publishConfig": {
