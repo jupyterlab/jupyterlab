@@ -801,7 +801,7 @@ export async function ensureIntegrity(): Promise<boolean> {
     .getCorePaths()
     .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
     .map(pth => {
-      return { path: './' + path.relative('.', pth).replace('\\/g', '/') };
+      return { path: './' + path.relative('.', pth).replace(/\\/g, '/') };
     });
   utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
