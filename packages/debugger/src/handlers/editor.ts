@@ -95,7 +95,8 @@ export class EditorHandler implements IDisposable {
             let e = ef as StateEffect<{ pos: number[] }>;
             if (e.value.pos.length) {
               breakpoints = breakpoints.update({
-                add: e.value.pos.map(v => Private.breakpointMarker.range(v))
+                add: e.value.pos.map(v => Private.breakpointMarker.range(v)),
+                sort: true
               });
             } else {
               breakpoints = RangeSet.empty;
