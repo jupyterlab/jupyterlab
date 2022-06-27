@@ -7,11 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import {
-  setSidebarWidth,
-  stubExtensionsSearch,
-  unstubExtensionsSearch
-} from './utils';
+import { setSidebarWidth, stubExtensionsSearch } from './utils';
 import { default as extensionsList } from './data/extensions.json';
 
 test.use({
@@ -86,8 +82,6 @@ test.describe('Extension Manager', () => {
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_search.png');
-
-    await unstubExtensionsSearch(page);
   });
 
   test('With allowed and blocked list', async ({ page }) => {
