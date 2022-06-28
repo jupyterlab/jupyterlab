@@ -49,10 +49,12 @@ import {
   editIcon,
   fileIcon,
   folderIcon,
+  IDisposableMenuItem,
   linkIcon,
   markdownIcon,
   newFolderIcon,
   pasteIcon,
+  RankedMenu,
   refreshIcon,
   stopIcon,
   textEditorIcon
@@ -551,19 +553,24 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
     const { docRegistry } = app;
     const { tracker } = factory;
 
+    let items: IDisposableMenuItem[] = [];
+
     function updateOpenWithMenu(contextMenu: ContextMenu) {
       const openWith =
-        contextMenu.menu.items.find(
+        (contextMenu.menu.items.find(
           item =>
             item.type === 'submenu' &&
             item.submenu?.id === 'jp-contextmenu-open-with'
-        )?.submenu ?? null;
+        )?.submenu as RankedMenu) ?? null;
 
       if (!openWith) {
         return; // Bail early if the open with menu is not displayed
       }
 
       // clear the current menu items
+      items.forEach(item => item.dispose());
+      items.length = 0;
+      // Ensure that the menu is empty
       openWith.clearItems();
 
       // get the widget factories that could be used to open all of the items
@@ -577,12 +584,12 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
         : new Set<DocumentRegistry.WidgetFactory>();
 
       // make new menu items from the widget factories
-      factories.forEach(factory => {
+      items = [...factories].map(factory =>
         openWith.addItem({
           args: { factory: factory.name, label: factory.label || factory.name },
           command: CommandIDs.open
-        });
-      });
+        })
+      );
     }
 
     app.contextMenu.opened.connect(updateOpenWithMenu);
