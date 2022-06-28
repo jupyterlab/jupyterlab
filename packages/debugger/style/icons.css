@@ -22,7 +22,7 @@ button.jp-Button.jp-mod-minimal.jp-TreeView.jp-TableView {
   background-color: var(--jp-inverse-layout-color4);
 }
 
-.jp-ViewModeSelected .jp-Button .jp-icon3[fill],
-.jp-PauseOnExceptions.lm-mod-toggled .jp-icon3[fill] {
+.jp-ViewModeSelected .jp-Button .jp-icon-mono[fill],
+.jp-PauseOnExceptions.lm-mod-toggled .jp-icon-mono[fill] {
   fill: var(--jp-layout-color1);
 }

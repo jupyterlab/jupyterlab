@@ -4,7 +4,7 @@
     <circle cx="12" cy="12" r="8" fill="black"/>
   </mask>
 
-  <g class="jp-icon3" fill="#616161">
+  <g class="jp-icon-mono" fill="#616161">
     <rect height="18" width="2" x="11" y="3" transform="rotate(315, 12, 12)"/>
     <circle cx="12" cy="12" r="10" mask="url(#donutHole)"/>
   </g>

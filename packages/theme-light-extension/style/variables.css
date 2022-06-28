@@ -407,4 +407,20 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-reject-color-normal: var(--md-grey-600);
   --jp-reject-color-hover: var(--md-grey-700);
   --jp-reject-color-active: var(--md-grey-800);
+
+  /* Icon colors */
+
+  /* Default color for the icon */
+  --jp-icon-mono: var(--md-grey-700);
+
+  /* Icon color when it is part of a widget that is selected  */
+
+  /* e.g., in file browser icons in selected row are white */
+  --jp-icon-mono-selected: #fff;
+
+  /* Some paths within the icon have inverse colors */
+
+  /* e.g., terminal icon inside path needs white color */
+  --jp-icon-mono-inverse: #fff;
+  --jp-icon-mono-inverse-selected: var(--md-grey-700);
 }

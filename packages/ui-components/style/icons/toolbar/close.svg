@@ -1,9 +1,9 @@
 <svg viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-  <g class="jp-icon-none jp-icon-selectable-inverse jp-icon3-hover" fill="none">
+  <g class="jp-icon-none jp-icon-selectable-inverse jp-icon-hover" fill="none">
     <circle cx="12" cy="12" r="11"/>
   </g>
 
-  <g class="jp-icon3 jp-icon-selectable jp-icon-accent2-hover" fill="#616161">
+  <g class="jp-icon-mono jp-icon-selectable jp-icon-hover" fill="#616161">
     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
   </g>
 

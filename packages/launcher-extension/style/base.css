@@ -11,6 +11,6 @@
 
 .jp-FileBrowser-toolbar
   .jp-ToolbarButtonComponent[data-command='launcher:create']
-  .jp-icon3 {
+  .jp-icon-mono {
   fill: var(--jp-layout-color1);
 }

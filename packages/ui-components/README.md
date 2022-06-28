@@ -8,7 +8,7 @@ then run "jlpm docs:init" to refresh the built docs
 # @jupyterlab/ui-components
 
 The
-[@jupyterlab/ui-components](https://jupyterlab.github.io/jupyterlab/modules/_ui_components_src_index_.html)
+[@jupyterlab/ui-components](https://jupyterlab.readthedocs.io/en/latest/api/modules/ui_components.html)
 package provides UI elements that are widely used in JupyterLab core,
 and that can be reused in your own extensions.
 
@@ -68,7 +68,7 @@ any React component, `icon.react` can be used in various ways.
 For example, here is how you would add the Jupyter icon to the render
 tree of another React component:
 
-```jsx
+```
 public render() {
   return (
     <div className="outer">
@@ -161,6 +161,15 @@ property.
 All colors shown are for the standard light/dark theme, mouse over for
 hex values.
 
+#### `jp-icon-mono`: contrast for monochromatic icons
+
+<ul>
+<li>jp-icon-mono: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#616161"/><title>#616161</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#fff"/><title>#fff</title></svg></li>
+</ul>
+
+Most monochromatic icons in JupyterLab (including the sidebar and
+toolbar icons) are colored using the `jp-icon-mono` class.
+
 #### `jp-iconX`: contrast to theme background
 
 <ul>
@@ -170,9 +179,6 @@ hex values.
 <li>jp-icon3: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#616161"/><title>#616161</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#bdbdbd"/><title>#bdbdbd</title></svg></li>
 <li>jp-icon4: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#757575"/><title>#757575</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#757575"/><title>#757575</title></svg></li>
 </ul>
-
-Most one-color icons in JupyterLab (including the sidebar and toolbar
-icons) are colored using the `jp-icon3` class.
 
 For light/dark themes, `jp-icon0` corresponds to the darkest/lightest
 background color, while `jp-icon1` is somewhat lighter/darker, and so
@@ -196,7 +202,7 @@ darker/lighter, and so forth.
 
 For most simple, one-color icons, it is desirable for the icon's color
 to strongly contrast with that of the application's background. You can
-achieve this using one of the `jp-iconX` classes.
+achieve this using one of the `jp-icon-mono` classes.
 
 **Example: check icon**
 
@@ -205,7 +211,7 @@ _svg source:_
 ```html
 <svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 24 24">
   <path
-    class="jp-icon3"
+    class="jp-icon-mono"
     fill="#616161"
     d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
   />
@@ -215,7 +221,7 @@ _svg source:_
 _rendered icon:_
 
 <svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 24 24">
-  <path class="jp-icon3" fill="#616161" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+  <path class="jp-icon-mono" fill="#616161" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
 </svg>
 
 ### Adding classes to a multi-colored icon
@@ -327,6 +333,6 @@ inline svg node as a child.
 The big limitation of the old icon-as-css-background pattern is that svg
 images rendered as `background-image` are invisible to CSS. On the other
 hand, an icon rendered as an inline svg node is fully exposed to the
-CSS. This allows us to dynamically change icon styling as needed simply by
-modifying our CSS. Most importantly, this allows us to recolor icons
+CSS. This allows us to dynamically change icon styling as needed simply
+by modifying our CSS. Most importantly, this allows us to recolor icons
 according to Jupyterlab’s current theme.
