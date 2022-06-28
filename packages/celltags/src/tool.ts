@@ -7,6 +7,8 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
+import { Message } from '@lumino/messaging';
+import { Signal } from '@lumino/signaling';
 import { PanelLayout } from '@lumino/widgets';
 import { AddWidget } from './addwidget';
 import { TagWidget } from './widget';
@@ -192,7 +194,7 @@ export class TagTool extends NotebookTools.Tool {
    * Upon attach, add label if it doesn't already exist and listen for changes
    * from the notebook tracker.
    */
-  protected onAfterAttach(): void {
+  protected onAfterAttach(msg: Message): void {
     if (!this.label) {
       const label = document.createElement('label');
       label.textContent = this._trans.__('Cell Tags');
@@ -200,24 +202,16 @@ export class TagTool extends NotebookTools.Tool {
       this.parent!.node.insertBefore(label, this.node);
       this.label = true;
     }
-    if (this.tracker.currentWidget) {
-      void this.tracker.currentWidget.context.ready.then(() => {
-        this.refreshTags();
-        this.loadActiveTags();
-      });
-      this.tracker.currentWidget.model!.cells.changed.connect(() => {
-        this.refreshTags();
-        this.loadActiveTags();
-      });
-      this.tracker.currentWidget.content.activeCellChanged.connect(() => {
-        this.refreshTags();
-        this.loadActiveTags();
-      });
-    }
-    this.tracker.currentChanged.connect(() => {
-      this.refreshTags();
-      this.loadActiveTags();
-    });
+    this.onCurrentChanged();
+    super.onAfterAttach(msg);
+  }
+
+  /**
+   * Clear signal connections before detaching
+   */
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    Signal.disconnectReceiver(this);
   }
 
   /**
@@ -236,6 +230,36 @@ export class TagTool extends NotebookTools.Tool {
       }
     }
     this.validateTags(this.tracker.activeCell!, taglist);
+  }
+
+  /**
+   * Callback on current widget changes
+   */
+  protected onCurrentChanged(): void {
+    Signal.disconnectReceiver(this);
+    this.tracker.currentChanged.connect(this.onCurrentChanged, this);
+    if (this.tracker.currentWidget) {
+      void this.tracker.currentWidget.context.ready.then(() => {
+        this.refresh();
+      });
+      this.tracker.currentWidget.model!.cells.changed.connect(
+        this.refresh,
+        this
+      );
+      this.tracker.currentWidget.content.activeCellChanged.connect(
+        this.refresh,
+        this
+      );
+    }
+    this.refresh();
+  }
+
+  /**
+   * Refresh tags and active status
+   */
+  protected refresh(): void {
+    this.refreshTags();
+    this.loadActiveTags();
   }
 
   public tracker: INotebookTracker;
