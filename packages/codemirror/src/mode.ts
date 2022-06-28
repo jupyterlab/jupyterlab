@@ -3,9 +3,21 @@
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
-import { defaultHighlightStyle, highlightTree } from '@codemirror/highlight';
-import { LanguageDescription, LanguageSupport } from '@codemirror/language';
-import { StreamParser } from '@codemirror/stream-parser';
+import {
+  defaultHighlightStyle,
+  LanguageDescription,
+  LanguageSupport,
+  StreamLanguage,
+  StreamParser
+} from '@codemirror/language';
+
+import { highlightTree } from '@lezer/highlight';
+
+// This ensures the language spec for python will be loaded when
+// we instantiate a new editor instance, which is required since
+// python is the default language and we don't want to split
+// the editor constructor because of asynchronous loading.
+import { python } from '@codemirror/lang-python';
 
 export namespace Mode {
   /**
@@ -21,12 +33,8 @@ export namespace Mode {
     support?: LanguageSupport;
   }
 
-  export function legacy(
-    parser: StreamParser<unknown>
-  ): Promise<LanguageSupport> {
-    return import('@codemirror/stream-parser').then(
-      m => new LanguageSupport(m.StreamLanguage.define(parser))
-    );
+  export function legacy(parser: StreamParser<unknown>): LanguageSupport {
+    return new LanguageSupport(StreamLanguage.define(parser));
   }
 
   function sql(dialectName: keyof typeof import('@codemirror/lang-sql')) {
@@ -190,7 +198,7 @@ export namespace Mode {
       extensions: ['BUILD', 'bzl', 'py', 'pyw'],
       filename: /^(BUCK|BUILD)$/,
       load() {
-        return import('@codemirror/lang-python').then(m => m.python());
+        return Promise.resolve(python());
       }
     }),
     makeSpec({
@@ -1583,7 +1591,7 @@ export namespace Mode {
     // position state required because unstyled tokens are not emitted
     // in highlightTree
     let pos = 0;
-    highlightTree(tree, defaultHighlightStyle.match, (from, to, classes) => {
+    highlightTree(tree, defaultHighlightStyle, (from, to, classes) => {
       if (from > pos) {
         // No style applied to the token between pos and from
         el.appendChild(document.createTextNode(code.slice(pos, from)));

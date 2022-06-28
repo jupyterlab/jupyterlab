@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { indentLess } from '@codemirror/commands';
-import { commentKeymap } from '@codemirror/comment';
 import { searchKeymap } from '@codemirror/search';
 import { EditorView } from '@codemirror/view';
 import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
@@ -29,7 +28,6 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
           run: CodeMirrorEditor.indentMoreOrInsertTab,
           shift: indentLess
         },
-        ...commentKeymap,
         ...searchKeymap
       ],
       /*extraKeys: {
@@ -53,7 +51,6 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
           run: CodeMirrorEditor.indentMoreOrInsertTab,
           shift: indentLess
         },
-        ...commentKeymap,
         {
           key: 'Shift-Enter',
           run: (target: EditorView) => {

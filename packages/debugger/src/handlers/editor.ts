@@ -13,19 +13,22 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { gutter, GutterMarker } from '@codemirror/gutter';
-
-import { RangeSet } from '@codemirror/rangeset';
-
 import {
   Compartment,
   Prec,
+  RangeSet,
   StateEffect,
   StateEffectType,
   StateField
 } from '@codemirror/state';
 
-import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
+import {
+  Decoration,
+  DecorationSet,
+  EditorView,
+  gutter,
+  GutterMarker
+} from '@codemirror/view';
 
 import { IDebugger } from '../tokens';
 

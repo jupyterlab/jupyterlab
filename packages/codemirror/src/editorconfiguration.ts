@@ -1,11 +1,13 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { closeBrackets } from '@codemirror/closebrackets';
+import { closeBrackets } from '@codemirror/autocomplete';
 import { defaultKeymap } from '@codemirror/commands';
-import * as gutter from '@codemirror/gutter';
-import { defaultHighlightStyle } from '@codemirror/highlight';
-import { LanguageSupport } from '@codemirror/language';
-import { indentUnit } from '@codemirror/language';
+import {
+  defaultHighlightStyle,
+  indentUnit,
+  LanguageSupport,
+  syntaxHighlighting
+} from '@codemirror/language';
 
 import {
   Compartment,
@@ -15,7 +17,12 @@ import {
   StateEffect
 } from '@codemirror/state';
 
-import { EditorView, KeyBinding, keymap } from '@codemirror/view';
+import {
+  EditorView,
+  KeyBinding,
+  keymap,
+  lineNumbers
+} from '@codemirror/view';
 
 import { StyleSpec } from 'style-mod';
 
@@ -294,7 +301,7 @@ export namespace Configuration {
         ['keymap', createConfigurableBuilder(keymap)],
         ['indentUnit', createConfigurableBuilder(indentUnit)],
         ['autoClosingBrackets', createConditionalBuilder(closeBrackets())],
-        ['lineNumbers', createConditionalBuilder(gutter.lineNumbers())],
+        ['lineNumbers', createConditionalBuilder(lineNumbers())],
         [
           'lineWrap',
           createGenConditionalBuilder(
@@ -384,7 +391,7 @@ export namespace Configuration {
       extensions.push(
         this._theme.of(themeExtension),
         insertExt,
-        defaultHighlightStyle.fallback,
+        syntaxHighlighting(defaultHighlightStyle),
         keymapExt
       );
 

@@ -29,18 +29,18 @@ import {
   insertTab
 } from '@codemirror/commands';
 import { getIndentUnit } from '@codemirror/language';
-import { Range } from '@codemirror/rangeset';
 import {
   EditorSelection,
   EditorState,
   Extension,
+  Range,
   StateCommand,
   StateEffect,
   StateEffectType,
   StateField,
+  Text,
   Transaction
 } from '@codemirror/state';
-import { Text } from '@codemirror/text';
 import {
   Command,
   Decoration,

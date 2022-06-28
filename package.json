@@ -100,6 +100,7 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
+    "@types/react": "^17.0.0",
     "react": "^17.0.1"
   },
   "dependencies": {

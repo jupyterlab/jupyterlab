@@ -8,6 +8,6 @@ Mode.registerModeInfo({
   name: 'ipython',
   mime: 'text/x-ipython',
   load: () => {
-    return Mode.legacy(mkPython({ singleOperators: /\?/ }));
+    return Promise.resolve(Mode.legacy(mkPython({ singleOperators: /\?/ })));
   }
 });
