@@ -838,6 +838,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     if (options?.type) {
       this._idTypeMap.set(widget.id, options.type);
+      widget.disposed.connect(() => {
+        this._idTypeMap.delete(widget.id);
+      });
     }
 
     area = userPosition?.area ?? area;

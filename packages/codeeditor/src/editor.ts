@@ -402,6 +402,7 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this.modelDB.dispose();
       Signal.clearData(this);
     }
 

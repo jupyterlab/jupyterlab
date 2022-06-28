@@ -5,6 +5,7 @@ import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { Signal } from '@lumino/signaling';
 import { VirtualElement } from '@lumino/virtualdom';
 import { Menu } from '@lumino/widgets';
 
@@ -293,10 +294,10 @@ class DisposableMenuItem implements IDisposableMenuItem {
 
     // dispose this item if the parent menu is disposed
     const dispose = (menu: Menu): void => {
-      menu.disposed.disconnect(dispose);
+      menu.disposed.disconnect(dispose, this);
       this.dispose();
     };
-    this._menu.disposed.connect(dispose);
+    this._menu.disposed.connect(dispose, this);
   }
 
   /**
@@ -426,12 +427,14 @@ class DisposableMenuItem implements IDisposableMenuItem {
    * Dispose the menu item by removing it from its menu.
    */
   dispose(): void {
-    this._isDisposed = true;
-    if (this._menu.isDisposed) {
-      // Bail early
+    if (this._isDisposed) {
       return;
     }
-    this._menu.removeItem(this._item);
+    this._isDisposed = true;
+    if (!this._menu.isDisposed) {
+      this._menu.removeItem(this._item);
+    }
+    Signal.clearData(this);
   }
 
   private _isDisposed: boolean;
