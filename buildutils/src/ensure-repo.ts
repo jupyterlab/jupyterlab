@@ -641,16 +641,20 @@ function ensureLockfile(): string[] {
   const lockFile = path.join(staging, 'yarn.lock');
   const content = fs.readFileSync(lockFile, { encoding: 'utf-8' });
   let newContent = content;
-  const messages = []
+  const messages = [];
 
   // Verify that all packages have resolved to the correct (default) registry
-  const resolvedPattern = /^\s*resolved "((?!https:\/\/registry.yarnpkg.com\/).*)"\s*$/gm;
+  const resolvedPattern =
+    /^\s*resolved "((?!https:\/\/registry\.yarnpkg\.com\/).*)"\s*$/gm;
   let badRegistry;
   while ((badRegistry = resolvedPattern.exec(content)) !== null) {
     messages.push(`Fixing bad npm/yarn registry: ${badRegistry[1]}`);
-    const parsed =  new URL(badRegistry[1]);
-    const newUrl = badRegistry[1].replace(parsed.origin, "https://registry.yarnpkg.com");
-    newContent = newContent.replace(badRegistry[1], newUrl)
+    const parsed = new URL(badRegistry[1]);
+    const newUrl = badRegistry[1].replace(
+      parsed.origin,
+      'https://registry.yarnpkg.com'
+    );
+    newContent = newContent.replace(badRegistry[1], newUrl);
   }
 
   if (content !== newContent) {
@@ -896,7 +900,7 @@ export async function ensureIntegrity(): Promise<boolean> {
 
 if (require.main === module) {
   void ensureIntegrity().catch(e => {
-    process.exitCode = 1
+    process.exitCode = 1;
     console.error(e);
   });
 }
