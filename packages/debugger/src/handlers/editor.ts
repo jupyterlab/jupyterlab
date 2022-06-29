@@ -298,8 +298,10 @@ export namespace EditorHandler {
       return;
     }
     const cmEditor = editor as CodeMirrorEditor;
-    cmEditor.doc.eachLine(line => {
-      cmEditor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
+    cmEditor.editor.operation(() => {
+      cmEditor.doc.eachLine(line => {
+        cmEditor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
+      });
     });
   }
 
@@ -313,11 +315,7 @@ export namespace EditorHandler {
       return;
     }
     const cmEditor = editor as CodeMirrorEditor;
-    cmEditor.doc.eachLine(line => {
-      if ((line as Private.ILineInfo).gutterMarkers) {
-        cmEditor.editor.setGutterMarker(line, 'breakpoints', null);
-      }
-    });
+    cmEditor.editor.clearGutter('breakpoints');
   }
 }
 
