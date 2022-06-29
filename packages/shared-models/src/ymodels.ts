@@ -747,7 +747,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     if (this._awareness) {
       this._awareness.destroy();
     }
-    if (this._undoManager) {
+    if (!this.notebook && this._undoManager) {
       this._undoManager.destroy();
     }
   }
