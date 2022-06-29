@@ -561,6 +561,36 @@ function ensureBuildUtils() {
 }
 
 /**
+ * Ensure lockfile structure
+ */
+function ensureLockfile(): string[] {
+  const staging = './jupyterlab/staging';
+  const lockFile = path.join(staging, 'yarn.lock');
+  const content = fs.readFileSync(lockFile, { encoding: 'utf-8' });
+  let newContent = content;
+  const messages = [];
+
+  // Verify that all packages have resolved to the correct (default) registry
+  const resolvedPattern = /^\s*resolved "((?!https:\/\/registry\.yarnpkg\.com\/).*)"\s*$/gm;
+  let badRegistry;
+  while ((badRegistry = resolvedPattern.exec(content)) !== null) {
+    messages.push(`Fixing bad npm/yarn registry: ${badRegistry[1]}`);
+    const parsed = new URL(badRegistry[1]);
+    const newUrl = badRegistry[1].replace(
+      parsed.origin,
+      'https://registry.yarnpkg.com'
+    );
+    newContent = newContent.replace(badRegistry[1], newUrl);
+  }
+
+  if (content !== newContent) {
+    // Write the updated lockfile data back
+    fs.writeFileSync(lockFile, newContent, 'utf-8');
+  }
+  return messages;
+}
+
+/**
  * Ensure the repo integrity.
  */
 export async function ensureIntegrity(): Promise<boolean> {
@@ -709,6 +739,12 @@ export async function ensureIntegrity(): Promise<boolean> {
     messages[pkgName] = messages[pkgName].concat(pkgMessages);
   }
 
+  // Ensure the staging area lockfile
+  const lockFileMessages = ensureLockfile();
+  if (lockFileMessages.length > 0) {
+    messages['lockfile'] = lockFileMessages;
+  }
+
   // Handle the top level package.
   const corePath = path.resolve('.', 'package.json');
   const coreData: any = utils.readJSONFile(corePath);
@@ -728,7 +764,7 @@ export async function ensureIntegrity(): Promise<boolean> {
     .getCorePaths()
     .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
     .map(pth => {
-      return { path: './' + path.relative('.', pth).replace('\\/g', '/') };
+      return { path: './' + path.relative('.', pth).replace(/\\/g, '/') };
     });
   utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
@@ -783,5 +819,8 @@ export async function ensureIntegrity(): Promise<boolean> {
 }
 
 if (require.main === module) {
-  void ensureIntegrity();
+  void ensureIntegrity().catch(e => {
+    process.exitCode = 1;
+    console.error(e);
+  });
 }
