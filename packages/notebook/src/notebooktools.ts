@@ -79,11 +79,14 @@ export class NotebookTools extends Widget implements INotebookTools {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._commonTools = new RankedPanel<NotebookTools.Tool>();
+    this._commonTools.title.label = this._trans.__('Common Tools');
     this._advancedTools = new RankedPanel<NotebookTools.Tool>();
     this._advancedTools.title.label = this._trans.__('Advanced Tools');
 
+    this._extendedTools = [];
+
     const layout = (this.layout = new PanelLayout());
-    layout.addWidget(this._commonTools);
+    layout.addWidget(new Collapser({ widget: this._commonTools }));
     layout.addWidget(new Collapser({ widget: this._advancedTools }));
 
     this._tracker = options.tracker;
@@ -134,8 +137,16 @@ export class NotebookTools extends Widget implements INotebookTools {
     let section: RankedPanel<NotebookTools.Tool>;
     if (options.section === 'advanced') {
       section = this._advancedTools;
-    } else {
+    } else if (options.section == null || options.section === 'common') {
       section = this._commonTools;
+    } else {
+      const extendedTool = this._extendedTools.find(
+        extendedTool => extendedTool.section === options.section
+      );
+      if (extendedTool) section = extendedTool.panel;
+      else {
+        throw new Error(`The section ${options.section} does not exist`);
+      }
     }
 
     tool.addClass('jp-NotebookTools-tool');
@@ -147,6 +158,36 @@ export class NotebookTools extends Widget implements INotebookTools {
     // Trigger the tool to update its active notebook and cell.
     MessageLoop.sendMessage(tool, NotebookTools.ActiveNotebookPanelMessage);
     MessageLoop.sendMessage(tool, NotebookTools.ActiveCellMessage);
+  }
+
+  /*
+   * Add a section to the notebook tool with its widget
+   */
+  addSection(options: NotebookTools.IAddSectionOptions): void {
+    const sectionName = options.sectionName;
+    const label = options.label || options.sectionName;
+    const widget = options.tool;
+    const rank = options.rank ?? null;
+
+    const newSection = new RankedPanel<NotebookTools.Tool>();
+    newSection.title.label = label;
+
+    if (widget) newSection.addWidget(widget, 0);
+
+    this._extendedTools.push({
+      section: sectionName,
+      panel: newSection,
+      rank: rank
+    });
+    if (rank != null)
+      (this.layout as PanelLayout).insertWidget(
+        rank,
+        new Collapser({ widget: newSection })
+      );
+    else
+      (this.layout as PanelLayout).addWidget(
+        new Collapser({ widget: newSection })
+      );
   }
 
   /**
@@ -251,6 +292,7 @@ export class NotebookTools extends Widget implements INotebookTools {
   private _trans: TranslationBundle;
   private _commonTools: RankedPanel<NotebookTools.Tool>;
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
+  private _extendedTools: Array<NotebookTools.IExtendedToolsPanel>;
   private _tracker: INotebookTracker;
   private _prevActiveCell: ICellModel | null;
   private _prevActiveNotebookModel: INotebookModel | null;
@@ -270,6 +312,26 @@ export namespace NotebookTools {
     ReadonlyPartialJSONValue | undefined,
     ReadonlyPartialJSONValue
   ][];
+
+  /**
+   * Interface for an extended panel section.
+   */
+  export interface IExtendedToolsPanel {
+    /**
+     * The name of the section.
+     */
+    section: string;
+
+    /**
+     * The associated panel, only one for a section.
+     */
+    panel: RankedPanel<NotebookTools.Tool>;
+
+    /**
+     * The rank of the section on the notebooktools panel.
+     */
+    rank?: number | null;
+  }
 
   /**
    * The options used to create a NotebookTools object.
@@ -298,10 +360,35 @@ export namespace NotebookTools {
     /**
      * The section to which the tool should be added.
      */
-    section?: 'common' | 'advanced';
+    section?: 'common' | 'advanced' | string;
 
     /**
      * The rank order of the widget among its siblings.
+     */
+    rank?: number;
+  }
+
+  /**
+   * The options used to add a section to the notebook tools.
+   */
+  export interface IAddSectionOptions {
+    /**
+     * The name of the new section.
+     */
+    sectionName: string;
+
+    /**
+     * The tool to add to the notebook tools area.
+     */
+    tool?: INotebookTools.ITool;
+
+    /**
+     * The label of the new section.
+     */
+    label?: string;
+
+    /**
+     * The rank order of the section among its siblings.
      */
     rank?: number;
   }
