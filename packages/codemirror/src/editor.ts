@@ -6,11 +6,7 @@
 
 import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
-  ICollaborator,
-  IObservableMap,
-  IObservableString
-} from '@jupyterlab/observables';
+import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
 import {
   ITranslator,
@@ -29,6 +25,7 @@ import {
   insertTab
 } from '@codemirror/commands';
 import {
+  ChangeSet,
   EditorSelection,
   EditorState,
   Extension,
@@ -46,6 +43,7 @@ import {
   Decoration,
   DecorationSet,
   EditorView,
+  ViewUpdate,
   WidgetType
 } from '@codemirror/view';
 
@@ -93,10 +91,6 @@ const DOWN_ARROW = 40;
  * The time that a collaborator name hover persists.
  */
 const HOVER_TIMEOUT = 1000;
-
-// @todo Remove the duality of having a modeldb and a y-codemirror
-// binding as it just introduces a lot of additional complexity without gaining anything.
-const USE_YCODEMIRROR_BINDING = true;
 
 interface IYCodeMirrorBinding {
   text: Y.Text;
@@ -180,8 +174,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...config
     });
 
-    // TODO: refactor this when we decide to ALWAYS use YJS. Different parts of the
-    // editor should be created alltogether.
     this._initializeEditorBinding();
 
     // Extension for handling DOM events
@@ -204,27 +196,23 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
 
+    const updateListener = EditorView.updateListener.of(
+      (update: ViewUpdate) => {
+        this._onDocChanged(update);
+      }
+    );
+
     this._editor = Private.createEditor(
       host,
       fullConfig,
       this._yeditorBinding,
       this._editorConfig,
-      [this._markField, Prec.high(domEventHandlers)]
+      [this._markField, Prec.high(domEventHandlers), updateListener]
     );
 
     // every time the model is switched, we need to re-initialize the editor binding
     this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
 
-    // Handle initial values for text, mimetype, and selections.
-    if (!USE_YCODEMIRROR_BINDING) {
-      this.editor.dispatch({
-        changes: {
-          from: 0,
-          to: this.editor.state.doc.length,
-          insert: model.value.text
-        }
-      });
-    }
     this._onMimeTypeChanged();
     this._onCursorActivity();
     this._poll = new Poll({
@@ -238,57 +226,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
 
-    // Connect to changes.
-    if (!USE_YCODEMIRROR_BINDING) {
-      model.value.changed.connect(this._onValueChanged, this);
-    }
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
-
-    // TODO: CM6 migration
-    /*
-    if (USE_YCODEMIRROR_BINDING) {
-      this._yeditorBinding?.on('cursorActivity', () =>
-        this._onCursorActivity()
-      );
-    } else {
-      CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-      CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
-        this._beforeDocChanged(instance, change);
-      });
-    }
-    CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
-      // Manually refresh after setValue to make sure editor is properly sized.
-      if (change.origin === 'setValue' && this.hasFocus()) {
-        this.refresh();
-      }
-      this._lastChange = change;
-    });
-
-    // Turn off paste handling in codemirror since sometimes we want to
-    // replace it with our own.
-    editor.on('paste', (instance: CodeMirror.Editor, event: any) => {
-      const handlePaste = this._config['handlePaste'] ?? true;
-      if (!handlePaste) {
-        event.codemirrorIgnore = true;
-      }
-    });*/
-
-    // Manually refresh on paste to make sure editor is properly sized.
-    /*editor.dom.addEventListener('paste', () => {
-      if (this.hasFocus()) {
-        this.refresh();
-      }
-    });*/
   }
 
   /**
    * Initialize the editor binding.
    */
   private _initializeEditorBinding(): void {
-    if (!USE_YCODEMIRROR_BINDING) {
-      return;
-    }
     const sharedModel = this.model.sharedModel as models.IYText;
     this._yeditorBinding = {
       text: sharedModel.ysource,
@@ -968,71 +913,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Handle model value changes.
-   */
-  private _onValueChanged(
-    value: IObservableString,
-    args: IObservableString.IChangedArgs
-  ): void {
-    if (this._changeGuard) {
-      return;
-    }
-    this._changeGuard = true;
-    switch (args.type) {
-      case 'insert': {
-        // Replace the range, including a '+input' origin,
-        // which indicates that CodeMirror may merge changes
-        // for undo/redo purposes.
-        this.editor.dispatch({
-          changes: { from: args.start, to: args.start, insert: args.value }
-        });
-        break;
-      }
-      case 'remove': {
-        const from = args.start;
-        const to = args.end;
-        // Replace the range, including a '+input' origin,
-        // which indicates that CodeMirror may merge changes
-        // for undo/redo purposes.
-        this.editor.dispatch({ changes: { from, to, insert: '' } });
-        break;
-      }
-      case 'set':
-        this.editor.dispatch({
-          changes: { from: 0, to: this.doc.length, insert: args.value }
-        });
-        break;
-      default:
-        break;
-    }
-    this._changeGuard = false;
-  }
-
-  /**
    * Handles document changes.
    */
-  // TODO: CM6 migration
-  /*private _beforeDocChanged(
-    doc: CodeMirror.Doc,
-    change: CodeMirror.EditorChange
-  ) {
-    if (this._changeGuard) {
-      return;
+  private _onDocChanged(update: ViewUpdate) {
+    if (update.transactions.length && update.transactions[0].selection) {
+      this._onCursorActivity();
     }
-    this._changeGuard = true;
-    const value = this._model.value;
-    const start = doc.indexFromPos(change.from);
-    const end = doc.indexFromPos(change.to);
-    const inserted = change.text.join('\n');
 
-    if (end !== start) {
-      value.remove(start, end);
+    if (update.docChanged) {
+      this._lastChange = update.changes;
     }
-    if (inserted) {
-      value.insert(start, inserted);
-    }
-    this._changeGuard = false;
-  }*/
+  }
 
   /**
    * Handle the DOM events for the editor.
@@ -1151,12 +1042,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _hoverTimeout: number;
   private _hoverId: string;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
-  private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
   private _needsRefresh = false;
   private _isDisposed = false;
-  private _lastChange: Transaction | null = null;
+  private _lastChange: ChangeSet | null = null;
   private _poll: Poll;
   private _yeditorBinding: IYCodeMirrorBinding | null;
   private _editorConfig: Configuration.EditorConfiguration;
