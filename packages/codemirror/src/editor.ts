@@ -28,11 +28,11 @@ import {
   insertNewlineAndIndent,
   insertTab
 } from '@codemirror/commands';
-import { getIndentUnit } from '@codemirror/language';
 import {
   EditorSelection,
   EditorState,
   Extension,
+  Prec,
   Range,
   StateCommand,
   StateEffect,
@@ -46,8 +46,6 @@ import {
   Decoration,
   DecorationSet,
   EditorView,
-  KeyBinding,
-  keymap,
   WidgetType
 } from '@codemirror/view';
 
@@ -211,7 +209,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       fullConfig,
       this._yeditorBinding,
       this._editorConfig,
-      [this._markField, domEventHandlers]
+      [this._markField, Prec.high(domEventHandlers)]
     );
 
     // every time the model is switched, we need to re-initialize the editor binding
@@ -297,18 +295,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       awareness: sharedModel.awareness,
       undoManager: sharedModel.undoManager
     };
-    // TODO: CM6 migration
-    /*this._yeditorBinding?.destroy();
-    const opts = sharedModel.undoManager
-      ? { yUndoManager: sharedModel.undoManager }
-      : {};
-    const awareness = sharedModel.awareness;
-    this._yeditorBinding = new CodemirrorBinding(
-      sharedModel.ysource,
-      this.editor,
-      awareness,
-      opts
-    );*/
   }
 
   /**
@@ -591,7 +577,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Set the size of the editor in pixels.
    */
   setSize(dimension: CodeEditor.IDimension | null): void {
-    // TODO: CM6
+    // TODO: CM6 : there is no equivalent of setSize in CM6
+    // this has to be set via css
     /*if (dimension) {
       this._editor.setSize(dimension.width, dimension.height);
     } else {
@@ -717,11 +704,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Passing an empty array resets a cursor position to the start of a document.
    */
   setSelections(selections: CodeEditor.IRange[]): void {
-    const sel = selections.length ?
-      selections.map(r =>
-        EditorSelection.range(this.getOffsetAt(r.start), this.getOffsetAt(r.end))
-      ) :
-      [EditorSelection.range(0, 0)];
+    const sel = selections.length
+      ? selections.map(r =>
+          EditorSelection.range(
+            this.getOffsetAt(r.start),
+            this.getOffsetAt(r.end)
+          )
+        )
+      : [EditorSelection.range(0, 0)];
     this.editor.dispatch({ selection: EditorSelection.create(sel) });
   }
 
@@ -733,37 +723,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   replaceSelection(text: string): void {
     this.editor.dispatch(this.state.replaceSelection(text));
   }
-
-  /**
-   * Get a list of tokens for the current editor text content.
-   */
-  // TODO: CM6
-  /*getTokens(): CodeEditor.IToken[] {
-    let tokens: CodeEditor.IToken[] = [];
-    for (let i = 0; i < this.lineCount; ++i) {
-      const lineTokens = this.editor.getLineTokens(i).map(t => ({
-        offset: this.getOffsetAt({ column: t.start, line: i }),
-        value: t.string,
-        type: t.type || ''
-      }));
-      tokens = tokens.concat(lineTokens);
-    }
-    return tokens;
-  }*/
-
-  /**
-   * Get the token at a given editor position.
-   */
-  // TODO: CM6
-  /*getTokenForPosition(position: CodeEditor.IPosition): CodeEditor.IToken {
-    const cursor = this._toCodeMirrorPosition(position);
-    const token = this.editor.getTokenAt(cursor);
-    return {
-      offset: this.getOffsetAt({ column: token.start, line: cursor.line }),
-      value: token.string,
-      type: token.type ?? undefined
-    };
-  }*/
 
   /**
    * Insert a new indented line at the current cursor position.
@@ -821,26 +780,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
-    const keybindings = this._editor.state.facet<KeyBinding[]>(keymap);
-    const isCode = mime !== 'text/plain' && mime !== 'text/x-ipythongfm';
-    if (isCode) {
-      keybindings.push({
-        key: 'Backspace',
-        run: CodeMirrorEditor.delSpaceToPrevTabStop
-      });
-    } else {
-      keybindings.splice(
-        keybindings.findIndex(el => {
-          return el.key === 'Backspace';
-        }),
-        1
-      );
-    }
-    this._editorConfig.reconfigureExtension(
-      this._editor,
-      'keymap',
-      keybindings
-    );
 
     // TODO: should we provide a hook for when the mode is done being set?
     void Mode.ensure(mime).then(spec => {
@@ -1277,23 +1216,6 @@ export namespace CodeMirrorEditor {
   };
 
   /**
-   * Add a command to CodeMirror.
-   *
-   * @param name - The name of the command to add.
-   *
-   * @param command - The command function.
-   */
-  // TODO: There is no longer a central registry of named commands in CM6,
-  // the question is should we expose Commands and StateCommands, or recreate
-  // the central registry internally
-  /*export function addCommand(
-    name: string,
-    command: (cm: CodeMirror.Editor) => void
-  ): void {
-    (CodeMirror.commands as any)[name] = command;
-  }*/
-
-  /**
    * Indent or insert a tab as appropriate.
    */
   export function indentMoreOrInsertTab(target: {
@@ -1314,36 +1236,6 @@ export namespace CodeMirrorEditor {
       return insertTab(arg);
     }
   }
-
-  /**
-   * Delete spaces to the previous tab stop in a codemirror editor.
-   */
-  export function delSpaceToPrevTabStop(target: EditorView): boolean {
-    const indentUnit = getIndentUnit(target.state);
-    const ranges = target.state.selection.ranges; // handle multicursor
-    for (let i = ranges.length - 1; i >= 0; i--) {
-      // iterate reverse so any deletions don't overlap
-      const head = ranges[i].head;
-      const anchor = ranges[i].anchor;
-      if (head != anchor) {
-        target.dispatch({ changes: { from: anchor, to: head, insert: '' } });
-      } else {
-        const line = target.state.doc.lineAt(head);
-        const text = line.text.substring(0, head - line.from);
-        if (text.match(/^\ +$/) !== null) {
-          // delete tabs
-          const prevTabStop =
-            (Math.ceil((head - line.from) / indentUnit) - 1) * indentUnit;
-          const from = line.from + prevTabStop;
-          target.dispatch({ changes: { from: from, to: head, insert: '' } });
-        } else {
-          // delete non-tabs
-          target.dispatch({ changes: { from: head - 1, to: head } });
-        }
-      }
-    }
-    return true;
-  }
 }
 
 /**
@@ -1359,7 +1251,11 @@ namespace Private {
   ): EditorView {
     let extensions = editorConfig.getInitialExtensions(config);
     if (ybinding) {
-      extensions.push(yCollab(ybinding.text, ybinding.awareness, { undoManager: ybinding.undoManager ?? false }));
+      extensions.push(
+        yCollab(ybinding.text, ybinding.awareness, {
+          undoManager: ybinding.undoManager ?? false
+        })
+      );
     }
     extensions.push(...additionalExtensions);
     const doc = ybinding?.text.toString();
@@ -1446,80 +1342,4 @@ namespace Private {
       return false;
     }
   }
-
-  /**
-   * Indent or insert a tab as appropriate.
-   */
-  /*export function indentMoreOrinsertTab(cm: CodeMirror.Editor): void {
-    const doc = cm.getDoc();
-    const from = doc.getCursor('from');
-    const to = doc.getCursor('to');
-    const sel = !posEq(from, to);
-    if (sel) {
-      CodeMirror.commands['indentMore'](cm);
-      return;
-    }
-    // Check for start of line.
-    const line = doc.getLine(from.line);
-    const before = line.slice(0, from.ch);
-    if (/^\s*$/.test(before)) {
-      CodeMirror.commands['indentMore'](cm);
-    } else {
-      if (cm.getOption('indentWithTabs')) {
-        CodeMirror.commands['insertTab'](cm);
-      } else {
-        CodeMirror.commands['insertSoftTab'](cm);
-      }
-    }
-  }*/
-
-  /**
-   * Delete spaces to the previous tab stop in a codemirror editor.
-   */
-  /*export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
-    const doc = cm.getDoc();
-    // default tabsize is 2, according to codemirror docs: https://codemirror.net/doc/manual.html#config
-    const tabSize = cm.getOption('indentUnit') ?? 2;
-    const ranges = doc.listSelections(); // handle multicursor
-    for (let i = ranges.length - 1; i >= 0; i--) {
-      // iterate reverse so any deletions don't overlap
-      const head = ranges[i].head;
-      const anchor = ranges[i].anchor;
-      const isSelection = !posEq(head, anchor);
-      if (isSelection) {
-        doc.replaceRange('', anchor, head);
-      } else {
-        const line = doc.getLine(head.line).substring(0, head.ch);
-        if (line.match(/^\ +$/) !== null) {
-          // delete tabs
-          const prevTabStop = (Math.ceil(head.ch / tabSize) - 1) * tabSize;
-          const from = CodeMirror.Pos(head.line, prevTabStop);
-          doc.replaceRange('', from, head);
-        } else {
-          // delete non-tabs
-          const from = cm.findPosH(head, -1, 'char', false);
-          doc.replaceRange('', from, head);
-        }
-      }
-    }
-  }*/
 }
-
-// TODO: no more central registry of named commands in CM6,
-// let's remove that for now
-/**
- * Add a CodeMirror command to delete until previous non blanking space
- * character or first multiple of tabsize tabstop.
- */
-/*CodeMirrorEditor.addCommand(
-  'delSpaceToPrevTabStop',
-  Private.delSpaceToPrevTabStop
-);*/
-
-/**
- * Add a CodeMirror command to indent or insert a tab as appropriate.
- */
-/*CodeMirrorEditor.addCommand(
-  'indentMoreOrinsertTab',
-  Private.indentMoreOrinsertTab
-);*/
