@@ -7,7 +7,7 @@ import {
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
 
-import { indentSelection } from '@codemirror/commands';
+import { indentSelection } from '@codemirror/commands';
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {
   public inlineCodeMirrorConfig: CodeMirrorEditor.IConfig;
@@ -21,10 +21,12 @@ describe('CodeMirrorEditorFactory', () => {
   const options: Partial<CodeMirrorEditor.IConfig> = {
     lineNumbers: false,
     lineWrap: 'on',
-    extraKeys: [{
-      key: 'Ctrl-Tab',
-      run: indentSelection
-    }]
+    extraKeys: [
+      {
+        key: 'Ctrl-Tab',
+        run: indentSelection
+      }
+    ]
   };
 
   beforeEach(() => {

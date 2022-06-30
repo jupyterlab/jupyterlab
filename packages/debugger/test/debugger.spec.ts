@@ -346,7 +346,7 @@ describe('Debugger', () => {
       items.forEach(item => {
         // TODO: replace by toEqual when there is an alternative to the rtl
         // breakpoint display
-        console.log(item.innerHTML)
+        console.log(item.innerHTML);
         expect(item.innerHTML).toContain(path.slice(1));
       });
     });

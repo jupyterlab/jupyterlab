@@ -17,12 +17,7 @@ import {
   StateEffect
 } from '@codemirror/state';
 
-import {
-  EditorView,
-  KeyBinding,
-  keymap,
-  lineNumbers
-} from '@codemirror/view';
+import { EditorView, KeyBinding, keymap, lineNumbers } from '@codemirror/view';
 
 import { StyleSpec } from 'style-mod';
 

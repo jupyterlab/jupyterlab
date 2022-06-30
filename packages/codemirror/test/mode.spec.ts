@@ -102,9 +102,9 @@ import { Mode } from '@jupyterlab/codemirror';
 
 describe('Mode', () => {
   describe('#ensure', () => {
-   it('should get a non-empty list of spec', () => {
-     const specs = Mode.getModeInfo();
-     expect(specs.length).toBeTruthy();
+    it('should get a non-empty list of spec', () => {
+      const specs = Mode.getModeInfo();
+      expect(specs.length).toBeTruthy();
     });
   });
 });

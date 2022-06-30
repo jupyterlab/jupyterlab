@@ -199,7 +199,9 @@ describe('CodeMirrorEditor', () => {
         column: 2,
         line: 5
       };
-      expect(() => {editor.getOffsetAt(pos)}).toThrow(RangeError);
+      expect(() => {
+        editor.getOffsetAt(pos);
+      }).toThrow(RangeError);
     });
   });
 
@@ -209,7 +211,9 @@ describe('CodeMirrorEditor', () => {
       let pos = editor.getPositionAt(6);
       expect(pos.column).toBe(2);
       expect(pos.line).toBe(1);
-      expect(() => { pos = editor.getPositionAt(101); }).toThrow(RangeError);
+      expect(() => {
+        pos = editor.getPositionAt(101);
+      }).toThrow(RangeError);
     });
   });
 
