@@ -43,10 +43,11 @@ export function renameDialog(
 ): Promise<Contents.IModel | null> {
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
+  const localPath = manager.services.contents.localPath(oldPath);
 
   return showDialog({
     title: trans.__('Rename File'),
-    body: new RenameHandler(oldPath),
+    body: new RenameHandler(localPath),
     focusNodeSelector: 'input',
     buttons: [
       Dialog.cancelButton({ label: trans.__('Cancel') }),
@@ -68,8 +69,10 @@ export function renameDialog(
       );
       return null;
     }
+    const driveName = manager.services.contents.driveName(oldPath);
+    const drivePrefix = driveName ? driveName + ':' : '';
     const basePath = PathExt.dirname(oldPath);
-    const newPath = PathExt.join(basePath, result.value);
+    const newPath = drivePrefix + PathExt.join(basePath, result.value);
     return renameFile(manager, oldPath, newPath);
   });
 }
