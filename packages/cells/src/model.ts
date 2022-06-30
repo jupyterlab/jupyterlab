@@ -436,6 +436,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
           break;
         case 'trusted':
           this.metadata.set('trusted', metadata.trusted);
+          this.trusted = metadata.trusted as boolean;
           break;
         default:
           // The default is applied for custom metadata that are not
@@ -809,6 +810,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     if (this._outputs) {
       this._outputs.trusted = args.newValue as boolean;
+    }
+    if (args.newValue as boolean) {
+      const codeCell = this.sharedModel as models.YCodeCell;
+      const metadata = codeCell.getMetadata();
+      metadata.trusted = true;
+      codeCell.setMetadata(metadata);
     }
     this.stateChanged.emit({
       name: 'trusted',
