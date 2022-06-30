@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { UseSignal } from '@jupyterlab/apputils';
 
 import { InputGroup } from '@jupyterlab/ui-components';
 
@@ -34,8 +34,8 @@ const FilterBox = (props: IFilterBoxProps) => {
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
-export const KernelSourcesFilter = (props: IFilterBoxProps): ReactWidget => {
-  return ReactWidget.create(
+export const KernelSourcesFilter = (props: IFilterBoxProps): JSX.Element => {
+  return (
     <UseSignal
       signal={props.model.filterChanged}
       initialArgs={props.model.filter}
