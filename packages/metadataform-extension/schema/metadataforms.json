@@ -1,0 +1,95 @@
+{
+  "type": "object",
+  "title": "Metadata Form",
+  "description": "Settings of the metadata form extension.",
+  "jupyter.lab.metadataforms": [
+    {
+      "mainKey": "my-extension",
+      "subKeys": {
+        "properties": {
+          "active": {
+            "title": "is-active",
+            "description": "Active status",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "name",
+            "description": "Unique name",
+            "type": "string"
+          }
+        }
+      },
+      "_origin": "@jupyterlab/metadataform-extension:metadataforms"
+    },
+    {
+      "mainKey": "my-extension2",
+      "subKeys": {
+        "properties": {
+          "active": {
+            "title": "is-active 2",
+            "description": "Active status",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "name 2",
+            "description": "Unique name",
+            "type": "string"
+          }
+        }
+      },
+      "_origin": "@jupyterlab/metadataform-extension:metadataforms"
+    }
+  ],
+  "jupyter.lab.transform": true,
+  "additionalProperties": false,
+  "properties": {
+    "metadataforms": {
+      "items": {
+        "$ref": "#/definitions/metadataform"
+      },
+      "type": "array",
+      "default": []
+    }
+  },
+  "definitions": {
+    "metadataform": {
+      "type": "object",
+      "properties": {
+        "mainKey": {
+          "type": "string",
+          "description": "the main metadata key"
+        },
+        "label": {
+          "type": "string",
+          "description": "The section label"
+        },
+        "rank": {
+          "type": "integer",
+          "description": "The rank of the form in the right panel"
+        },
+        "subKeys": {
+          "properties": {
+            "properties": {
+              "type": "object",
+              "description": "The property set up by extension",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": ["properties"],
+          "type": "object"
+        }
+      },
+      "required": ["mainKey"]
+    }
+  }
+}

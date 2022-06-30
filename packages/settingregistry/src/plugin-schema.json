@@ -95,6 +95,13 @@
     "jupyter.lab.transform": {
       "type": "boolean",
       "default": false
+    },
+    "jupyter.lab.metadataforms": {
+      "items": {
+        "$ref": "#/definitions/metadataform"
+      },
+      "type": "array",
+      "default": []
     }
   },
   "definitions": {
@@ -295,6 +302,45 @@
       "required": ["name"],
       "additionalProperties": false,
       "type": "object"
+    },
+    "metadataform": {
+      "type": "object",
+      "properties": {
+        "mainKey": {
+          "type": "string",
+          "description": "The main metadata key"
+        },
+        "label": {
+          "type": "string",
+          "description": "The section label"
+        },
+        "rank": {
+          "type": "integer",
+          "description": "The rank of the section in the right panel"
+        },
+        "subKeys": {
+          "properties": {
+            "properties": {
+              "type": "object",
+              "description": "The property set up by extension",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": ["properties"],
+          "type": "object"
+        }
+      },
+      "required": ["mainKey"]
     }
   }
 }

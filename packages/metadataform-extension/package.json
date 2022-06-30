@@ -1,0 +1,65 @@
+{
+  "name": "@jupyterlab/metadataform-extension",
+  "version": "4.0.0-alpha.11",
+  "description": "A helper to build form for metadata",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/**/*"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/*.json",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "watch": "tsc -w --listEmittedFiles"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^4.0.0-alpha.11",
+    "@jupyterlab/apputils": "^4.0.0-alpha.11",
+    "@jupyterlab/notebook": "^4.0.0-alpha.11",
+    "@jupyterlab/property-inspector": "^4.0.0-alpha.11",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.11",
+    "@jupyterlab/translation": "^4.0.0-alpha.11",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
+    "@lumino/coreutils": "^1.12.0",
+    "@lumino/disposable": "^1.10.1",
+    "@lumino/messaging": "^1.10.1",
+    "@lumino/signaling": "^1.10.1",
+    "@lumino/widgets": "^1.32.0",
+    "@rjsf/core": "^3.1.0",
+    "json-schema": "^0.4.0",
+    "react": "^17.0.1",
+    "typescript": "~4.7.3"
+  },
+  "devDependencies": {
+    "rimraf": "~3.0.0",
+    "typescript": "~4.7.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "schemaDir": "schema"
+  },
+  "styleModule": "style/index.js"
+}

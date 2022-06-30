@@ -439,6 +439,11 @@ export namespace ISettingRegistry {
     'jupyter.lab.shortcuts'?: IShortcut[];
 
     /**
+     * The JupyterLab metadata-form schema
+     */
+    'jupyter.lab.metadataforms'?: IMetadataForm[];
+
+    /**
      * The root schema is always an object.
      */
     type: 'object';
@@ -606,6 +611,37 @@ export namespace ISettingRegistry {
      * The CSS selector applicable to the shortcut.
      */
     selector: string;
+  }
+
+  /**
+   * An interface describing the metadata form.
+   */
+  export interface IMetadataForm extends PartialJSONObject {
+    /**
+     * The main metadata key.
+     */
+    mainKey: string;
+
+    /**
+     * The section label.
+     */
+    label?: string;
+
+    /**
+     * The section rank in notebooktools panel.
+     */
+    rank?: number;
+
+    /**
+     * The sub keys to add in form.
+     * TODO: add an interface on sub keys (or maybe a sub key can be a form as well...).
+     */
+    subKeys?: PartialJSONObject;
+
+    /**
+     * Keep the plugin at origin of the metadata form.
+     */
+    _origin?: string;
   }
 
   /**

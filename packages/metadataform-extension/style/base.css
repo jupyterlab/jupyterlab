@@ -1,0 +1,72 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2019, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-MetadataForm {
+  display: flex;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+}
+
+.jp-MetadataForm-content {
+  flex-grow: 1;
+}
+
+.jp-MetadataForm-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-MetadataForm-placeholderContent {
+  padding: 8px;
+}
+
+.jp-MetadataForm fieldset input,
+.jp-MetadataForm fieldset select,
+.jp-MetadataForm fieldset textarea {
+  font-size: var(--jp-content-font-size2);
+  border-color: var(--jp-input-border-color);
+  border-style: solid;
+  border-radius: 5px;
+  border-width: 1px;
+  padding: 6px 8px;
+  background: none;
+  color: var(--jp-content-font-color0);
+  height: inherit;
+}
+
+.jp-MetadataForm fieldset input[type='checkbox'] {
+  position: relative;
+  top: 2px;
+  margin-left: 0;
+}
+
+/** copy of `input.jp-mod-styled:focus` style */
+.jp-MetadataForm fieldset input:focus {
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+.jp-MetadataForm .checkbox label {
+  cursor: pointer;
+}
+
+.jp-MetadataForm .checkbox .field-description {
+  /* Disable default description field for checkbox:
+   because other widgets do not have description fields,
+   we add descriptions to each widget on the field level.
+  */
+  display: none;
+}
+
+.jp-MetadataForm button[type='submit'] {
+  display: none;
+}
+
+.jp-MetadataForm fieldset {
+  border: none;
+  padding: 0;
+}
