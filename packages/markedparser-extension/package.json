@@ -37,10 +37,10 @@
     "@jupyterlab/application": "^4.0.0-alpha.11",
     "@jupyterlab/codemirror": "^4.0.0-alpha.11",
     "@jupyterlab/rendermime": "^4.0.0-alpha.11",
-    "marked": "^4.0.10"
+    "marked": "^4.0.17"
   },
   "devDependencies": {
-    "@types/marked": "^4.0.1",
+    "@types/marked": "^4.0.3",
     "rimraf": "~3.0.0",
     "typescript": "~4.7.3"
   },
