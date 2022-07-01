@@ -1941,11 +1941,7 @@ export class Notebook extends StaticNotebook {
         activeCell.editor.focus();
       }
     }
-    if (
-      (force && !this.node.contains(document.activeElement)) ||
-      // Focus notebook if active cell changes but does not have focus.
-      (activeCell && !activeCell.node.contains(document.activeElement))
-    ) {
+    if (force && !this.node.contains(document.activeElement)) {
       this.node.focus();
     }
   }
@@ -2164,6 +2160,10 @@ export class Notebook extends StaticNotebook {
 
       this.deselectAll();
       this.activeCellIndex = index;
+      // Focus notebook if active cell changes but does not have focus.
+      if (!this.activeCell!.node.contains(document.activeElement)) {
+        this.node.focus();
+      }
     }
 
     this._mouseMode = null;
