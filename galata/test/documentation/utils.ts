@@ -100,8 +100,3 @@ export async function stubExtensionsSearch(page: Page): Promise<void> {
     });
   });
 }
-
-export async function unstubExtensionsSearch(page: Page): Promise<void> {
-  await page.unroute('https://registry.npmjs.org/-/v1/search*');
-  await page.unroute('https://github.com/*.png*');
-}
