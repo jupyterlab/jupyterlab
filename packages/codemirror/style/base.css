@@ -66,11 +66,6 @@
   display: none;
 }
 
-.CodeMirror-gutters {
-  border-right: 1px solid var(--jp-border-color2);
-  background-color: var(--jp-layout-color0);
-}
-
 .jp-CollaboratorCursor {
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
@@ -84,6 +79,11 @@
 .CodeMirror-selectedtext.cm-searching {
   background-color: var(--jp-search-selected-match-background-color) !important;
   color: var(--jp-search-selected-match-color) !important;
+}
+
+.cm-gutters {
+  border-right: 1px solid var(--jp-border-color2);
+  background-color: var(--jp-layout-color0) !important;
 }
 
 .cm-searching,
