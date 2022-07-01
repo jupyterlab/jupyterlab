@@ -34,7 +34,10 @@
 .jp-DebuggerKernelSource-filterBox {
   padding: 0px;
   flex: 0 0 auto;
-  margin: 0px 0px 0px 0px;
+  margin: 0;
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color1);
 }
 
 .jp-DebuggerKernelSource-filterBox-hidden {
