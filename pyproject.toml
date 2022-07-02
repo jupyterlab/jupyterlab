@@ -168,7 +168,7 @@ install-pre-commit-hook = true
 [tool.hatch.build.hooks.jupyter-builder.editable-build-kwargs]
 build_cmd = "build"
 source_dir = "packages"
-build_dir = "dev_mode"
+build_dir = "dev_mode/static"
 npm = ["node", "jupyterlab/staging/yarn.js"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]

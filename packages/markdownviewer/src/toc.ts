@@ -176,7 +176,7 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
       });
     };
 
-    widget.content.ready.then(() => {
+    void widget.content.ready.then(() => {
       onHeadingsChanged();
 
       widget.content.rendered.connect(onHeadingsChanged);

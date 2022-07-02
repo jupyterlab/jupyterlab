@@ -259,7 +259,7 @@ async function activateTOC(
   }
 
   // Connect to current widget
-  app.restored.then(() => {
+  void app.restored.then(() => {
     onConnect();
   });
 

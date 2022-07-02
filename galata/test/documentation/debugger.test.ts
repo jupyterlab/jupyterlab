@@ -90,7 +90,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -139,7 +139,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -165,7 +165,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -196,7 +196,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -228,7 +228,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();

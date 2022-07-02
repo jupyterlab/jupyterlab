@@ -118,7 +118,7 @@ export class SettingsEditor extends SplitPanel {
   protected onCloseRequest(msg: Message): void {
     const trans = this.translator.load('jupyterlab');
     if (this._list.hasErrors) {
-      showDialog({
+      void showDialog({
         title: trans.__('Warning'),
         body: trans.__(
           'Unsaved changes due to validation error. Continue without saving?'
@@ -130,7 +130,7 @@ export class SettingsEditor extends SplitPanel {
         }
       });
     } else if (this._dirty) {
-      showDialog({
+      void showDialog({
         title: trans.__('Warning'),
         body: trans.__(
           'Some changes have not been saved. Continue without saving?'

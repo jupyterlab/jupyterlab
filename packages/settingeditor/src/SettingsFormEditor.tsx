@@ -438,7 +438,7 @@ export class SettingsFormEditor extends React.Component<
       .catch((reason: string) => {
         this.props.updateDirtyState(false);
         const trans = this.props.translator.load('jupyterlab');
-        showErrorMessage(trans.__('Error saving settings.'), reason);
+        void showErrorMessage(trans.__('Error saving settings.'), reason);
       });
   }
 

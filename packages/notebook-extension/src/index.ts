@@ -1457,7 +1457,7 @@ function activateNotebookHandler(
             .then(result => {
               setSideBySideOutputRatio(result.value!);
               if (result.value) {
-                settings.set('sideBySideOutputRatio', result.value);
+                void settings.set('sideBySideOutputRatio', result.value);
               }
             })
             .catch(console.error);
@@ -2880,7 +2880,7 @@ function addCommands(
       }
 
       current.content.extendContiguousSelectionTo(lastIndex);
-      NotebookActions.run(current.content, current.sessionContext);
+      void NotebookActions.run(current.content, current.sessionContext);
     }
   });
 }

@@ -67,7 +67,7 @@
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --cache --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx --cache .",
-    "eslint:check:typed": "eslint --config .eslintrc.typecheck.js --ext .js,.jsx,.ts,.tsx .",
+    "eslint:check:typed": "eslint --config .eslintrc.typecheck.js --ext .js,.jsx,.ts,.tsx --cache .",
     "eslint:files": "eslint --fix",
     "eslint:typed": "eslint --config .eslintrc.typecheck.js --cache --ext .js,.jsx,.ts,.tsx --fix .",
     "get:dependency": "node buildutils/lib/get-dependency.js",
