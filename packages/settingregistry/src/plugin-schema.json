@@ -98,7 +98,7 @@
     },
     "jupyter.lab.metadataforms": {
       "items": {
-        "$ref": "#/definitions/metadataform"
+        "$ref": "#/definitions/metadataForm"
       },
       "type": "array",
       "default": []
@@ -303,7 +303,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "metadataform": {
+    "metadataForm": {
       "type": "object",
       "properties": {
         "mainKey": {
@@ -318,29 +318,41 @@
           "type": "integer",
           "description": "The rank of the section in the right panel"
         },
-        "subKeys": {
-          "properties": {
-            "properties": {
-              "type": "object",
-              "description": "The property set up by extension",
-              "properties": {
-                "title": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "required": ["properties"],
-          "type": "object"
+        "metadataKeys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/userProperties"
+          }
         }
       },
-      "required": ["mainKey"]
+      "required": ["label", "metadataKeys"]
+    },
+    "userProperties": {
+      "properties": {
+        "properties": {
+          "type": "object",
+          "description": "The property set up by extension",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "metadataKey": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "type": "object",
+      "required": ["metadataKey", "properties"]
     }
   }
 }

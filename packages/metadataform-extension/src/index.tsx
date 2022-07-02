@@ -23,8 +23,10 @@ import {
 import {
   JSONExt,
   PartialJSONArray,
+  PartialJSONObject,
   PartialJSONValue,
-  ReadonlyPartialJSONObject
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ReactWidget } from '@jupyterlab/ui-components';
@@ -46,12 +48,12 @@ export class MetadataFormWidget extends NotebookTools.Tool {
    * Construct an empty widget.
    */
   constructor(
-    metadataKey: string,
+    builtProperties: Private.IProperties,
     pluginId?: string,
     translator?: ITranslator
   ) {
     super();
-    this.metadataKey = metadataKey;
+    this.builtProperties = builtProperties;
     this._pluginId = pluginId;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
@@ -87,19 +89,14 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   /**
    * Build widget
    */
-  buildWidget(
-    formSchema: ReadonlyPartialJSONObject,
-    formData?: ReadonlyPartialJSONObject
-  ): void {
-    this.formSchema = formSchema;
-
+  buildWidget(formData?: ReadonlyPartialJSONObject): void {
     const form = (
       <Form
-        schema={this.formSchema as JSONSchema7}
+        schema={this.builtProperties as JSONSchema7}
         formData={formData}
         idPrefix={`jp-MetadataForm-${this._pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this.updateMetadata(e.formData);
+          this.updateMetadata(this.builtProperties.metadataKeys, e.formData);
         }}
       />
     );
@@ -127,22 +124,43 @@ export class MetadataFormWidget extends NotebookTools.Tool {
    * Update the form with current cell metadata.
    */
   private _update(): void {
+    const formData = {} as PartialJSONObject;
+
     const cell = this.notebookTools.activeCell;
+
     if (cell == undefined) return;
-    const currentCellMetadata = cell.model.metadata.get(this.metadataKey);
-    if (currentCellMetadata != undefined) {
-      this.buildWidget(
-        this.formSchema,
-        currentCellMetadata as ReadonlyPartialJSONObject
-      );
-    } else this.buildWidget(this.formSchema);
+
+    for (let [key, nestedKeys] of Object.entries(
+      this.builtProperties.metadataKeys
+    )) {
+      let workingObject: PartialJSONObject = cell.model.metadata.toJSON();
+      let hasValue = true;
+      // Navigate to the value
+      for (let nested of nestedKeys.slice(0, -1)) {
+        if (nested in workingObject)
+          workingObject = workingObject[nested] as PartialJSONObject;
+        else {
+          hasValue = false;
+          break;
+        }
+      }
+
+      // Fill the formData with the current metadata value
+      if (hasValue)
+        formData[key] = workingObject[nestedKeys[nestedKeys.length - 1]];
+    }
+
+    this.buildWidget(formData);
   }
 
   /**
    * Update the metadata of the current cell.
    * @param formData: the cell metadata set in the form.
    */
-  public updateMetadata(formData: ReadonlyPartialJSONObject) {
+  public updateMetadata(
+    metadataKeys: Private.IProperties['metadataKeys'],
+    formData: ReadonlyPartialJSONObject
+  ) {
     if (this.notebookTools == undefined) {
       console.log('NO notebook tool');
       return;
@@ -153,21 +171,63 @@ export class MetadataFormWidget extends NotebookTools.Tool {
       return;
     }
     this._updatingMetadata = true;
-    cell.model.metadata.set(this.metadataKey, formData);
+
+    // Build the list of metadata to modify
+    const metadataList: {
+      [metadata: string]: PartialJSONObject | PartialJSONValue;
+    } = {};
+    for (let [key, value] of Object.entries(formData)) {
+      let baseMetadata = metadataKeys[key][0];
+      if (baseMetadata == undefined) continue;
+
+      if (metadataKeys[key].length == 1) {
+        metadataList[baseMetadata] = value as PartialJSONValue;
+        continue;
+      }
+
+      let intermediateKeys = metadataKeys[key].slice(1, -1);
+
+      if (!(baseMetadata in metadataList)) {
+        metadataList[baseMetadata] = cell.model.metadata.toJSON()[
+          baseMetadata
+        ] as PartialJSONObject;
+      }
+
+      let workingObject: PartialJSONObject = metadataList[
+        baseMetadata
+      ] as PartialJSONObject;
+      for (let nested of intermediateKeys) {
+        if (!(nested in workingObject)) workingObject[nested] = {};
+        workingObject = workingObject[nested] as PartialJSONObject;
+      }
+
+      workingObject[metadataKeys[key][metadataKeys[key].length - 1]] =
+        value as PartialJSONValue;
+    }
+
+    // Set the metadata or delete it if value is undefined
+    for (let [key, value] of Object.entries(metadataList)) {
+      if (value === undefined) cell.model.metadata.delete(key);
+      else cell.model.metadata.set(key, value as ReadonlyPartialJSONValue);
+    }
     this._updatingMetadata = false;
   }
 
   public tracker: INotebookTracker;
   protected translator: ITranslator;
   private _trans: TranslationBundle;
-  private metadataKey: string;
+  private builtProperties: Private.IProperties;
   private _placeholder: Widget;
-  private formSchema: ReadonlyPartialJSONObject;
   private _updatingMetadata: boolean;
   private _pluginId: PartialJSONValue | undefined;
 }
 
 namespace Private {
+  export interface IProperties {
+    metadataKeys: { [metadataKey: string]: Array<string> };
+    properties: { [metadataKey: string]: PartialJSONObject };
+  }
+
   export async function loadSettingsMetadataForm(
     app: JupyterFrontEnd,
     tools: MetadataFormWidget[],
@@ -246,32 +306,40 @@ namespace Private {
 
     const settings = await registry.load(PLUGIN_ID);
 
+    console.log(settings);
+
     // Create menu for non-disabled element
     for (let schema of settings.composite
       .metadataforms as ISettingRegistry.IMetadataForm[]) {
-      console.log(schema);
+      let builtProperties: IProperties = { metadataKeys: {}, properties: {} };
+      for (let metadataKey of schema.metadataKeys) {
+        builtProperties.metadataKeys[metadataKey.metadataKey.join('.')] =
+          metadataKey.metadataKey;
+        builtProperties.properties[metadataKey.metadataKey.join('.')] =
+          metadataKey.properties;
+      }
+
       const tool = new MetadataFormWidget(
-        schema.mainKey,
+        builtProperties,
         schema._origin,
         translator
       );
 
       notebookTools.addSection({
-        sectionName: schema.mainKey,
+        sectionName: schema.label,
         rank: schema.rank,
         label: schema.label ?? schema.mainKey
       });
 
-      if (schema.subKeys != undefined) {
-        tool.buildWidget(schema.subKeys);
-      }
+      tool.buildWidget();
 
-      notebookTools.addItem({ section: schema.mainKey, tool: tool });
+      notebookTools.addItem({ section: schema.label, tool: tool });
 
       tools.push(tool);
     }
   }
 }
+
 /**
  * The metadata form plugin.
  */

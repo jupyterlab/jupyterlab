@@ -618,14 +618,19 @@ export namespace ISettingRegistry {
    */
   export interface IMetadataForm extends PartialJSONObject {
     /**
-     * The main metadata key.
-     */
-    mainKey: string;
-
-    /**
      * The section label.
      */
-    label?: string;
+    label: string;
+
+    /**
+     * The metadataKeys array
+     */
+    metadataKeys: IMetadataKey[];
+
+    /**
+     * The main metadata key.
+     */
+    mainKey?: string;
 
     /**
      * The section rank in notebooktools panel.
@@ -633,15 +638,21 @@ export namespace ISettingRegistry {
     rank?: number;
 
     /**
-     * The sub keys to add in form.
-     * TODO: add an interface on sub keys (or maybe a sub key can be a form as well...).
-     */
-    subKeys?: PartialJSONObject;
-
-    /**
      * Keep the plugin at origin of the metadata form.
      */
     _origin?: string;
+  }
+
+  export interface IMetadataKey extends PartialJSONObject {
+    /**
+     * List of key to reach a sub metadata.
+     */
+    metadataKey: string[];
+
+    /**
+     * Property associated to that metadata, formatted as React JSON schema.
+     */
+    properties: PartialJSONObject;
   }
 
   /**

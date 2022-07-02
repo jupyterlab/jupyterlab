@@ -4,39 +4,42 @@
   "description": "Settings of the metadata form extension.",
   "jupyter.lab.metadataforms": [
     {
-      "mainKey": "my-extension",
-      "subKeys": {
-        "properties": {
-          "active": {
+      "label": "NEW_extension",
+      "metadataKeys": [
+        {
+          "metadataKey": ["my-extension", "active"],
+          "properties": {
             "title": "is-active",
             "description": "Active status",
             "type": "boolean"
-          },
-          "name": {
+          }
+        },
+        {
+          "metadataKey": ["my-extension", "name"],
+          "properties": {
             "title": "name",
             "description": "Unique name",
             "type": "string"
           }
-        }
-      },
-      "_origin": "@jupyterlab/metadataform-extension:metadataforms"
-    },
-    {
-      "mainKey": "my-extension2",
-      "subKeys": {
-        "properties": {
-          "active": {
-            "title": "is-active 2",
-            "description": "Active status",
-            "type": "boolean"
-          },
-          "name": {
-            "title": "name 2",
-            "description": "Unique name",
+        },
+        {
+          "metadataKey": ["my-extension", "sub", "other_sub", "test"],
+          "properties": {
+            "title": "subsub",
+            "description": "test on subsub",
             "type": "string"
           }
+        },
+        {
+          "metadataKey": ["root-value"],
+          "properties": {
+            "title": "root",
+            "description": "test on root",
+            "type": "integer"
+          }
         }
-      },
+      ],
+      "mainKey": "my-extension",
       "_origin": "@jupyterlab/metadataform-extension:metadataforms"
     }
   ],
@@ -45,19 +48,19 @@
   "properties": {
     "metadataforms": {
       "items": {
-        "$ref": "#/definitions/metadataform"
+        "$ref": "#/definitions/metadataForm"
       },
       "type": "array",
       "default": []
     }
   },
   "definitions": {
-    "metadataform": {
+    "metadataForm": {
       "type": "object",
       "properties": {
         "mainKey": {
           "type": "string",
-          "description": "the main metadata key"
+          "description": "The main metadata key"
         },
         "label": {
           "type": "string",
@@ -65,31 +68,43 @@
         },
         "rank": {
           "type": "integer",
-          "description": "The rank of the form in the right panel"
+          "description": "The rank of the section in the right panel"
         },
-        "subKeys": {
-          "properties": {
-            "properties": {
-              "type": "object",
-              "description": "The property set up by extension",
-              "properties": {
-                "title": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "required": ["properties"],
-          "type": "object"
+        "metadataKeys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/userProperties"
+          }
         }
       },
-      "required": ["mainKey"]
+      "required": ["label", "metadataKeys"]
+    },
+    "userProperties": {
+      "properties": {
+        "properties": {
+          "type": "object",
+          "description": "The property set up by extension",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "metadataKey": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "type": "object",
+      "required": ["metadataKey", "properties"]
     }
   }
 }
