@@ -52,6 +52,13 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   }
 
   /**
+   * Whether the kernel sources model is disposed or not.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
    * Get the kernel sources.
    */
   get kernelSources(): IDebugger.KernelSource[] | null {
@@ -88,6 +95,18 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   }
 
   /**
+   * Dispose the kernel sources model
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._refreshDebouncer.dispose();
+    Signal.clearData(this);
+  }
+
+  /**
    * Open a source in the main area.
    */
   open(kernelSource: IDebugger.Source): void {
@@ -112,9 +131,10 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._changed.emit(this._filteredKernelSources);
   }
 
-  private _kernelSources: IDebugger.KernelSource[] | null = null;
   private _filteredKernelSources: IDebugger.KernelSource[] | null = null;
   private _filter = '';
+  private _isDisposed = false;
+  private _kernelSources: IDebugger.KernelSource[] | null = null;
   private _refreshDebouncer: Debouncer;
   private _changed = new Signal<this, IDebugger.KernelSource[] | null>(this);
   private _filterChanged = new Signal<this, string>(this);

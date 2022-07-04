@@ -503,6 +503,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._resizeDebouncer.dispose();
     this._input = null!;
     this._model = null!;
     this._inputWrapper = null!;
@@ -1652,6 +1653,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   get renderer(): IRenderMime.IRenderer {
     return this._renderer;
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._monitor.dispose();
+    super.dispose();
   }
 
   protected maybeCreateCollapseButton(): void {
