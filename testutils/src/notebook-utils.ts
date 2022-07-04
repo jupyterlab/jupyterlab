@@ -170,6 +170,7 @@ export namespace NBTestUtils {
   export function populateNotebook(notebook: Notebook): void {
     const model = new NotebookModel();
     model.fromJSON(DEFAULT_CONTENT);
+    model.initialize();
     notebook.model = model;
   }
 

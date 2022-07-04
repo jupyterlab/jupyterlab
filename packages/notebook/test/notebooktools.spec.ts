@@ -13,6 +13,7 @@ import { simulate } from 'simulate-event';
 import {
   INotebookModel,
   NotebookActions,
+  NotebookModel,
   NotebookPanel,
   NotebookTools,
   NotebookTracker
@@ -113,10 +114,12 @@ describe('@jupyterlab/notebook', () => {
     beforeEach(async () => {
       context0 = await initNotebookContext();
       panel0 = utils.createNotebookPanel(context0);
-      utils.populateNotebook(panel0.content);
+      utils.initializeNotebook(context0.model as NotebookModel);
+
       context1 = await initNotebookContext();
       panel1 = utils.createNotebookPanel(context1);
-      utils.populateNotebook(panel1.content);
+      utils.initializeNotebook(context1.model as NotebookModel);
+
       tracker = new NotebookTracker({ namespace: 'notebook' });
       await tracker.add(panel0);
       await tracker.add(panel1);

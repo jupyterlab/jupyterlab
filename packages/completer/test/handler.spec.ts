@@ -14,7 +14,7 @@ import { ISharedString, SharedString } from '@jupyterlab/shared-models';
 import { createSessionContext } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
-  const model = new CodeEditor.Model({ isDocument: true });
+  const model = new CodeEditor.Model({ isStandalone: true });
   const factory = (options: CodeEditor.IOptions) => {
     return new CodeMirrorEditor(options);
   };

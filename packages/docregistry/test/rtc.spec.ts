@@ -44,10 +44,11 @@ describe('docregistry/rtc', () => {
   });
 
   it('Should initialize the document from the backend', async () => {
+    await docProvider.ready;
+    document.initialize();
     const changed = signalToPromise(document.value.changed);
     const nbClient = new PythonClient();
     await nbClient.run('file', 'ws://localhost:12345/::test_room');
-    document.initialize();
 
     const [sender, args] = await changed;
     expect(sender).toBe(document.value);
@@ -56,6 +57,8 @@ describe('docregistry/rtc', () => {
   });
 
   it('Should receive updates from another client', async () => {
+    await docProvider.ready;
+    document.initialize();
     expect(document.value.text).toBe('');
 
     const sharedDoc = new SharedDoc();

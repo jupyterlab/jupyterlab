@@ -235,11 +235,12 @@ export namespace CodeEditor {
      * Construct a new Model.
      */
     constructor(options: Model.IOptions) {
-      this._isDocument = options.isDocument;
+      this._isStandalone = options.isStandalone;
 
-      if (this._isDocument) {
-        // The IModel is a document, so we create the
+      if (this._isStandalone) {
+        // The IModel is standalone, so we create the
         // `source` from the root of the ISharedDoc
+        // and handle the life cycle of the model.
         this._sharedDoc = options.sharedDoc || new SharedDoc();
         this._value = this._sharedDoc.createString('source') as SharedString;
         this._value.undoManager = SharedDoc.createUndoManager(
@@ -355,7 +356,7 @@ export namespace CodeEditor {
       }
       this._isDisposed = true;
       this._value.dispose();
-      if (this._isDocument) {
+      if (this._isStandalone) {
         this._sharedDoc.dispose();
       }
       Signal.clearData(this);
@@ -404,7 +405,7 @@ export namespace CodeEditor {
 
     private _isReady = false;
     private _isDisposed = false;
-    private _isDocument = false;
+    private _isStandalone = false;
     private _mimeType: string;
     private _selections: IObservableMap<ITextSelection[]>;
     private _ready = new Signal<this, void>(this);
@@ -844,9 +845,22 @@ export namespace CodeEditor {
   export namespace Model {
     export interface IOptions {
       /**
-       * Whether the model is a document or part of a document.
+       * Whether the model is a standalone model or part of a document.
        *
        * #### Notes
+       * The IModel is the model used by the CodeEditor to hold the data.
+       * There is two cases for this class, the first one is as a standalone
+       * model for small editor (e.g the advance settings, debugger, metadata
+       * editor, etc.), in those cases the model should have everything it
+       * needs to work.
+       * The second use case, is when we need to extend this class. Sometimes
+       * we inherit from this model to create a more advance schema (e.g the
+       * DocumentModel, CellModel, etc) where we need more attributes like `state`,
+       * `outputs`, etc but still conforming tho the IModel interface so the
+       * CodeEditor understands the schema. In this second case, the IModel
+       * IS NOT STANDALONE and the child class is responsible for handling
+       * its schema as well as the life cycle.
+       *
        * The IModel is the base class used in documents to store
        * the source. In some cases like the Notebook, there is multiple
        * sources since each cell contains its own source. In this case
@@ -858,12 +872,16 @@ export namespace CodeEditor {
        * The CellModel IS NOT A DOCUMENT because the "source" comes
        * from a dictionary called "model" instead of the root of the document.
        *
-       * Schema Document:
+       * Schema standalone model:
+       * {
+       *    source: ""
+       * }
+       * Schema DocumentModel:
        * {
        *    source: "",
-       *    state: {...}
+       *    state: {}
        * }
-       * Schema standalone Cell:
+       * Schema CellModel:
        * {
        *    model: {
        *      id: ""
@@ -875,13 +893,13 @@ export namespace CodeEditor {
        *    }
        * }
        */
-      isDocument: boolean;
+      isStandalone: boolean;
 
       /**
        * The underlying `ISharedDoc` instance where model's data is stored.
        *
        * #### Notes
-       * If the IModel is not a document, this parameter is mandatory.
+       * If the IModel is not standalone, this parameter is mandatory.
        *
        * Making direct edits to the values stored in the`ISharedDoc`
        * is not recommended, and may produce unpredictable results.

@@ -161,7 +161,7 @@ describe('console/history', () => {
         expect(history.methods).toEqual(
           expect.not.arrayContaining(['onTextChange'])
         );
-        const model = new CodeEditor.Model({ isDocument: true });
+        const model = new CodeEditor.Model({ isStandalone: true });
         const host = document.createElement('div');
         const editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
@@ -179,7 +179,7 @@ describe('console/history', () => {
           expect.not.arrayContaining(['onEdgeRequest'])
         );
         const host = document.createElement('div');
-        const model = new CodeEditor.Model({ isDocument: true });
+        const model = new CodeEditor.Model({ isStandalone: true });
         const editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
         history.push('foo');

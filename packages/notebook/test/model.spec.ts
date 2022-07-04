@@ -13,14 +13,14 @@ describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {
     describe('#constructor()', () => {
       it('should create a notebook model', () => {
-        const model = new NotebookModel({});
-        model.initialize();
+        const model = new NotebookModel({}).initialize();
         expect(model).toBeInstanceOf(NotebookModel);
       });
 
       it('should accept an optional language preference', () => {
-        const model = new NotebookModel({ languagePreference: 'python' });
-        model.initialize();
+        const model = new NotebookModel({
+          languagePreference: 'python'
+        }).initialize();
         const lang = model.metadata.get(
           'language_info'
         ) as nbformat.ILanguageInfoMetadata;
@@ -31,8 +31,7 @@ describe('@jupyterlab/notebook', () => {
         const contentFactory = new NotebookModel.ContentFactory({
           sharedDoc: new SharedDoc()
         });
-        const model = new NotebookModel({ contentFactory });
-        model.initialize();
+        const model = new NotebookModel({ contentFactory }).initialize();
         expect(model.contentFactory.codeCellContentFactory).toBe(
           contentFactory.codeCellContentFactory
         );
@@ -41,8 +40,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#metadataChanged', () => {
       it('should be emitted when a metadata field changes', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         let called = false;
         model.metadata.changed.connect((sender, args) => {
           expect(sender).toBe(model.metadata);
@@ -58,8 +56,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#cells', () => {
       it('should be reset when loading from disk', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         const cell = model.contentFactory.createCodeCell();
         model.cells.push(cell);
         model.fromJSON(utils.DEFAULT_CONTENT);
@@ -69,8 +66,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should allow undoing a change', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         model.cells.clear();
         const cell = model.contentFactory.createCodeCell();
         model.cells.push(cell);
@@ -88,8 +84,7 @@ describe('@jupyterlab/notebook', () => {
 
       describe('cells `changed` signal', () => {
         it('should emit a `contentChanged` signal upon cell addition', () => {
-          const model = new NotebookModel();
-          model.initialize();
+          const model = new NotebookModel().initialize();
           const cell = model.contentFactory.createCodeCell();
           let called = false;
           model.contentChanged.connect(() => {
@@ -100,8 +95,7 @@ describe('@jupyterlab/notebook', () => {
         });
 
         it('should emit a `contentChanged` signal upon cell removal', () => {
-          const model = new NotebookModel();
-          model.initialize();
+          const model = new NotebookModel().initialize();
           const cell = model.contentFactory.createCodeCell();
           model.cells.push(cell);
           let called = false;
@@ -113,8 +107,7 @@ describe('@jupyterlab/notebook', () => {
         });
 
         it('should emit a `contentChanged` signal upon cell move', () => {
-          const model = new NotebookModel();
-          model.initialize();
+          const model = new NotebookModel().initialize();
           const cell0 = model.contentFactory.createCodeCell();
           const cell1 = model.contentFactory.createCodeCell();
           model.cells.push(cell0);
@@ -128,8 +121,7 @@ describe('@jupyterlab/notebook', () => {
         });
 
         it('should set the dirty flag', () => {
-          const model = new NotebookModel();
-          model.initialize();
+          const model = new NotebookModel().initialize();
           const cell = model.contentFactory.createCodeCell();
           model.cells.push(cell);
           expect(model.dirty).toBe(true);
@@ -138,8 +130,7 @@ describe('@jupyterlab/notebook', () => {
 
       describe('cell `changed` signal', () => {
         it('should be called when a cell content changes', () => {
-          const model = new NotebookModel();
-          model.initialize();
+          const model = new NotebookModel().initialize();
           const cell = model.contentFactory.createCodeCell();
           model.cells.push(cell);
           expect(() => {
@@ -148,8 +139,7 @@ describe('@jupyterlab/notebook', () => {
         });
 
         it('should emit the `contentChanged` signal', () => {
-          const model = new NotebookModel();
-          model.initialize();
+          const model = new NotebookModel().initialize();
           const cell = model.contentFactory.createCodeCell();
           model.cells.push(cell);
           let called = false;
@@ -161,8 +151,7 @@ describe('@jupyterlab/notebook', () => {
         });
 
         it('should set the dirty flag', () => {
-          const model = new NotebookModel();
-          model.initialize();
+          const model = new NotebookModel().initialize();
           const cell = model.contentFactory.createCodeCell();
           model.cells.push(cell);
           model.dirty = false;
@@ -174,8 +163,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#contentFactory', () => {
       it('should be the cell model factory used by the model', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         expect(model.contentFactory.codeCellContentFactory).toBe(
           NotebookModel.defaultContentFactory.codeCellContentFactory
         );
@@ -217,35 +205,33 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#defaultKernelName()', () => {
       it('should get the default kernel name of the document', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         model.metadata.set('kernelspec', { name: 'python3' });
         expect(model.defaultKernelName).toBe('python3');
       });
 
       it('should default to an empty string', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         expect(model.defaultKernelName).toBe('');
       });
     });
 
     describe('#defaultKernelLanguage', () => {
       it('should get the default kernel language of the document', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         model.metadata.set('language_info', { name: 'python' });
         expect(model.defaultKernelLanguage).toBe('python');
       });
 
       it('should default to an empty string', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         expect(model.defaultKernelLanguage).toBe('');
       });
 
       it('should be set from the constructor arg', () => {
-        const model = new NotebookModel({ languagePreference: 'foo' });
+        const model = new NotebookModel({
+          languagePreference: 'foo'
+        }).initialize();
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });
@@ -261,8 +247,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         model.dispose();
         model.dispose();
         expect(model.isDisposed).toBe(true);
@@ -289,8 +274,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should set the dirty flag', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         model.dirty = false;
         model.fromString(JSON.stringify(utils.DEFAULT_CONTENT));
         expect(model.dirty).toBe(true);
@@ -347,8 +331,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should set the dirty flag', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         model.dirty = false;
         model.fromJSON(utils.DEFAULT_CONTENT);
         expect(model.dirty).toBe(true);
@@ -357,8 +340,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#metadata', () => {
       it('should have default values', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         const metadata = model.metadata;
         expect(metadata.has('kernelspec')).toBeTruthy();
         expect(metadata.has('language_info')).toBeTruthy();
@@ -366,16 +348,14 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should set the dirty flag when changed', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         expect(model.dirty).toBe(false);
         model.metadata.set('foo', 'bar');
         expect(model.dirty).toBe(true);
       });
 
       it('should emit the `contentChanged` signal', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         let called = false;
         model.contentChanged.connect(() => {
           called = true;
@@ -385,8 +365,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should emit the `metadataChanged` signal', () => {
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         let called = false;
         model.metadata.changed.connect((sender, args) => {
           expect(sender).toBe(model.metadata);
@@ -403,6 +382,9 @@ describe('@jupyterlab/notebook', () => {
     describe('#initialize()', () => {
       it('should add one code cell if the model is empty', () => {
         const model = new NotebookModel();
+        // Small hack just for tests. We should not access the data before is ready
+        // @ts-ignore
+        model._isReady = true;
         expect(model.cells.length).toBe(0);
         model.initialize();
         expect(model.cells.length).toBe(1);
@@ -412,6 +394,9 @@ describe('@jupyterlab/notebook', () => {
       it('should clear undo state', () => {
         const model = new NotebookModel();
         const cell = model.contentFactory.createCodeCell();
+        // Small hack just for tests. We should not access the data before is ready
+        // @ts-ignore
+        model._isReady = true;
         model.cells.push(cell);
         cell.value.text = 'foo';
         expect(model.cells.canUndo).toBe(true);
@@ -421,8 +406,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('.ContentFactory', () => {
-      const model = new NotebookModel();
-      model.initialize();
+      const model = new NotebookModel().initialize();
       const factory = model.contentFactory;
 
       describe('#codeCellContentFactory', () => {

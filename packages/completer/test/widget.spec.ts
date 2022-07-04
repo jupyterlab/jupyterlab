@@ -24,7 +24,7 @@ const DOC_PANEL_CLASS = 'jp-Completer-docpanel';
 const ACTIVE_CLASS = 'jp-mod-active';
 
 function createEditorWidget(): CodeEditorWrapper {
-  const model = new CodeEditor.Model({ isDocument: true });
+  const model = new CodeEditor.Model({ isStandalone: true });
   const factory = (options: CodeEditor.IOptions) => {
     return new CodeMirrorEditor(options);
   };

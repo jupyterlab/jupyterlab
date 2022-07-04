@@ -180,7 +180,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * Construct a cell model from optional cell content.
    *
    * #### Notes
-   * The CellModel IS NOT A DOCUMENT because the "source" comes
+   * The CellModel IS NOT STANDALONE because the "source" comes
    * from a dictionary called "model" instead of the root of the document.
    *
    * Schema Document:
@@ -201,7 +201,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * }
    */
   constructor(options: CellModel.IOptions) {
-    super({ isDocument: false, sharedDoc: options.sharedDoc });
+    super({ isStandalone: false, sharedDoc: options.sharedDoc });
     this.id = options.id;
     this._sharedModel = options.sharedModel as SharedMap<ISharedType>;
   }
@@ -381,7 +381,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * @param id Unique identifier.
    *
-   * @param isDocument: Whether the cell is a document or part of one.
+   * @param isStandalone: Whether the cell is standalone or part of a document.
    *
    * @param sharedDoc: The underlying `ISharedDoc` of the document.
    *
@@ -403,12 +403,12 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    */
   static createSharedModel(
     id: string,
-    isDocument: boolean,
+    isStandalone: boolean,
     sharedDoc: ISharedDoc,
     cell?: nbformat.IBaseCell
   ): ISharedMap<ISharedType> {
     let sharedModel;
-    if (isDocument) {
+    if (isStandalone) {
       sharedModel = sharedDoc.createMap('model');
     } else {
       sharedModel = new SharedMap({ sharedDoc: sharedDoc as SharedDoc });
@@ -614,7 +614,7 @@ export class AttachmentsCellModel extends CellModel {
    *
    * @param id Unique identifier.
    *
-   * @param isDocument: Whether the cell is a document or part of one.
+   * @param isStandalone: Whether the cell is standalone or part of a document.
    *
    * @param sharedDoc: The underlying `ISharedDoc` of the document.
    *
@@ -636,13 +636,13 @@ export class AttachmentsCellModel extends CellModel {
    */
   static createSharedModel(
     id: string,
-    isDocument: boolean,
+    isStandalone: boolean,
     sharedDoc: ISharedDoc,
     cell?: nbformat.IRawCell | nbformat.IMarkdownCell
   ): ISharedMap<ISharedType> {
     const sharedModel = super.createSharedModel(
       id,
-      isDocument,
+      isStandalone,
       sharedDoc,
       cell
     );
@@ -782,7 +782,7 @@ export class RawCellModel extends AttachmentsCellModel {
    *
    * @param id Unique identifier.
    *
-   * @param isDocument: Whether the cell is a document or part of one.
+   * @param isStandalone: Whether the cell is standalone or part of a document.
    *
    * @param sharedDoc: The underlying `ISharedDoc` of the document.
    *
@@ -805,11 +805,11 @@ export class RawCellModel extends AttachmentsCellModel {
    */
   static createSharedModel(
     id: string,
-    isDocument: boolean,
+    isStandalone: boolean,
     sharedDoc: ISharedDoc,
     cell?: nbformat.IRawCell
   ): ISharedMap<ISharedType> {
-    return super.createSharedModel(id, isDocument, sharedDoc, cell);
+    return super.createSharedModel(id, isStandalone, sharedDoc, cell);
   }
 
   /**
@@ -886,7 +886,7 @@ export class MarkdownCellModel extends AttachmentsCellModel {
    *
    * @param id Unique identifier.
    *
-   * @param isDocument: Whether the cell is a document or part of one.
+   * @param isStandalone: Whether the cell is standalone or part of a document.
    *
    * @param sharedDoc: The underlying `ISharedDoc` of the document.
    *
@@ -908,11 +908,11 @@ export class MarkdownCellModel extends AttachmentsCellModel {
    */
   static createSharedModel(
     id: string,
-    isDocument: boolean,
+    isStandalone: boolean,
     sharedDoc: ISharedDoc,
     cell?: nbformat.IMarkdownCell
   ): ISharedMap<ISharedType> {
-    return super.createSharedModel(id, isDocument, sharedDoc, cell);
+    return super.createSharedModel(id, isStandalone, sharedDoc, cell);
   }
 
   /**
@@ -1202,7 +1202,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    *
    * @param id Unique identifier.
    *
-   * @param isDocument: Whether the cell is a document or part of one.
+   * @param isStandalone: Whether the cell is standalone or part of a document.
    *
    * @param sharedDoc: The underlying `ISharedDoc` of the document.
    *
@@ -1226,13 +1226,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   static createSharedModel(
     id: string,
-    isDocument: boolean,
+    isStandalone: boolean,
     sharedDoc: ISharedDoc,
     cell?: nbformat.ICodeCell
   ): ISharedMap<ISharedType> {
     const sharedModel = super.createSharedModel(
       id,
-      isDocument,
+      isStandalone,
       sharedDoc,
       cell
     );

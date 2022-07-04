@@ -28,7 +28,7 @@ export class CodeViewerWidget extends Widget {
     options: CodeViewerWidget.INoModelOptions
   ): CodeViewerWidget {
     const model = new CodeEditor.Model({
-      isDocument: true,
+      isStandalone: true,
       mimeType: options.mimeType
     });
     model.value.text = options.content;

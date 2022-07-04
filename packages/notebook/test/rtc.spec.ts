@@ -53,6 +53,8 @@ describe('notebook/rtc', () => {
   });
 
   it('Should receive updates from another client', async () => {
+    await docProvider.ready;
+    notebook.initialize();
     const sharedDoc = new SharedDoc();
     docProvider = new WebSocketProvider({
       format: '',

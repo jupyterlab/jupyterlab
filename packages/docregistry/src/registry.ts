@@ -852,11 +852,14 @@ export namespace DocumentRegistry {
     /**
      * Initialize model state after initial data load.
      *
+     * @returns IModel for convenience to instantiate and
+     * initialize in one line.
+     *
      * #### Notes
      * This function must be called after the initial data is loaded to set up
      * initial model state, such as an initial undo stack, etc.
      */
-    initialize(): void;
+    initialize(): IModel;
   }
 
   /**

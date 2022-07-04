@@ -76,7 +76,7 @@ export class JSONEditor extends Widget {
     this.node.appendChild(this.editorHostNode);
 
     const model = new CodeEditor.Model({
-      isDocument: true,
+      isStandalone: true,
       mimeType: 'application/json'
     });
 

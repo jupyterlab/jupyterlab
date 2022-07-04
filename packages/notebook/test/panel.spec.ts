@@ -30,6 +30,7 @@ describe('@jupyterlab/notebook', () => {
 
     beforeEach(async () => {
       context = await initNotebookContext();
+      await context.ready;
     });
 
     afterEach(() => {

@@ -39,7 +39,7 @@ export class DocumentModel
    * is not recommended, and may produce unpredictable results.
    */
   constructor(languagePreference?: string, sharedDoc?: ISharedDoc) {
-    super({ isDocument: false, sharedDoc: sharedDoc });
+    super({ isStandalone: false, sharedDoc: sharedDoc || new SharedDoc() });
     this._defaultLang = languagePreference || '';
 
     this._value = this._sharedDoc.createString('source') as SharedString;
@@ -125,7 +125,7 @@ export class DocumentModel
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.value.text;
+    return this._value.text;
   }
 
   /**
@@ -135,14 +135,14 @@ export class DocumentModel
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.value.text = value;
+    this._value.text = value;
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): PartialJSONValue {
-    return JSON.parse(this.value.text || 'null');
+    return JSON.parse(this.toString() || 'null');
   }
 
   /**
@@ -157,10 +157,14 @@ export class DocumentModel
 
   /**
    * Initialize the model with its current state.
+   *
+   * @returns DocumentModel for convenience to instantiate and
+   * initialize in one line.
    */
-  initialize(): void {
+  initialize(): DocumentModel {
     this.dirty = false;
     this._triggerModelReady();
+    return this;
   }
 
   /**

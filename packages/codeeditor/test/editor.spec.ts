@@ -8,7 +8,7 @@ describe('CodeEditor.Model', () => {
   let model: CodeEditor.Model;
 
   beforeEach(() => {
-    model = new CodeEditor.Model({ isDocument: true });
+    model = new CodeEditor.Model({ isStandalone: true });
   });
 
   afterEach(() => {
@@ -25,7 +25,7 @@ describe('CodeEditor.Model', () => {
       const sharedDoc = new SharedDoc();
       const value = sharedDoc.createString('source');
       value.text = 'Initial text here';
-      const other = new CodeEditor.Model({ isDocument: true, sharedDoc });
+      const other = new CodeEditor.Model({ isStandalone: true, sharedDoc });
       expect(other).toBeInstanceOf(CodeEditor.Model);
       expect(other.value.text).toBe('Initial text here');
       other.dispose();
@@ -33,7 +33,7 @@ describe('CodeEditor.Model', () => {
 
     it('should create a CodeEditor Model with an initial mimetype', () => {
       const other = new CodeEditor.Model({
-        isDocument: true,
+        isStandalone: true,
         mimeType: 'text/x-python'
       });
       expect(other).toBeInstanceOf(CodeEditor.Model);

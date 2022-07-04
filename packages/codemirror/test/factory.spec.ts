@@ -27,7 +27,7 @@ describe('CodeMirrorEditorFactory', () => {
   beforeEach(() => {
     host = document.createElement('div');
     document.body.appendChild(host);
-    model = new CodeEditor.Model({ isDocument: true });
+    model = new CodeEditor.Model({ isStandalone: true });
   });
 
   afterEach(() => {

@@ -6,6 +6,7 @@ import { NBTestUtils } from '@jupyterlab/testutils';
 import {
   INotebookModel,
   Notebook,
+  NotebookModel,
   NotebookPanel,
   NotebookWidgetFactory
 } from '..';
@@ -49,6 +50,14 @@ export function createNotebookPanel(
  */
 export function populateNotebook(notebook: Notebook): void {
   NBTestUtils.populateNotebook(notebook);
+}
+
+/**
+ * Initialize a notebook with default content.
+ */
+export function initializeNotebook(model: NotebookModel): void {
+  model.fromJSON(DEFAULT_CONTENT);
+  model.initialize();
 }
 
 export const DEFAULT_CONTENT = NBTestUtils.DEFAULT_CONTENT;

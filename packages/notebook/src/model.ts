@@ -326,7 +326,7 @@ export class NotebookModel implements INotebookModel {
    */
   toJSON(): nbformat.INotebookContent {
     const cells: nbformat.ICell[] = [];
-    for (let i = 0; i < (this.cells?.length ?? 0); i++) {
+    for (let i = 0; i < (this._cells?.length ?? 0); i++) {
       const cell = this.cells.get(i).toJSON();
       if (this.nbformat === 4 && this.nbformatMinor <= 4) {
         // strip cell ids if we have notebook format 4.0-4.4
@@ -364,9 +364,9 @@ export class NotebookModel implements INotebookModel {
       cells.push(factory.createCell(type, id, cell));
     }
 
-    this.cells.transact(() => {
-      this.cells.clear();
-      this.cells.pushAll(cells);
+    this._cells.transact(() => {
+      this._cells.clear();
+      this._cells.pushAll(cells);
     });
 
     const nbformatMajor =
@@ -428,11 +428,14 @@ close the notebook without saving it.`,
   /**
    * Initialize the model with its current state.
    *
+   * @returns NotebookModel for convenience to instantiate and
+   * initialize in one line.
+   *
    * #### Notes
    * Adds an empty code cell if the model is empty
    * and clears undo state.
    */
-  initialize(): void {
+  initialize(): NotebookModel {
     this._triggerModelReady();
     if (!this.cells.length) {
       const factory = this.contentFactory;
@@ -442,6 +445,7 @@ close the notebook without saving it.`,
     this.cells.clearUndo();
     this._ensureMetadata();
     this._state.set('dirty', false);
+    return this;
   }
 
   /**

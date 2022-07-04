@@ -514,7 +514,7 @@ export namespace NotebookTools {
     }
 
     private _model = new CodeEditor.Model({
-      isDocument: true
+      isStandalone: true
     });
     private _cellModel: CodeEditor.IModel | null;
   }

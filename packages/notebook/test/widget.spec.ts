@@ -198,8 +198,7 @@ describe('@jupyter/notebook', () => {
     describe('#modelChanged', () => {
       it('should be emitted when the model changes', () => {
         const widget = new StaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         let called = false;
         widget.modelChanged.connect((sender, args) => {
           expect(sender).toBe(widget);
@@ -214,8 +213,7 @@ describe('@jupyter/notebook', () => {
     describe('#modelContentChanged', () => {
       it('should be emitted when a cell is added', () => {
         const widget = new StaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         widget.model = model;
         let called = false;
         widget.modelContentChanged.connect(() => {
@@ -228,8 +226,7 @@ describe('@jupyter/notebook', () => {
 
       it('should be emitted when metadata is set', () => {
         const widget = new StaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         widget.model = model;
         let called = false;
         widget.modelContentChanged.connect(() => {
@@ -248,31 +245,27 @@ describe('@jupyter/notebook', () => {
 
       it('should set the model for the widget', () => {
         const widget = new StaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         widget.model = model;
         expect(widget.model).toBe(model);
       });
 
       it('should emit the `modelChanged` signal', () => {
         const widget = new StaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         widget.model = model;
         let called = false;
         widget.modelChanged.connect(() => {
           called = true;
         });
-        const model2 = new NotebookModel();
-        model2.initialize();
+        const model2 = new NotebookModel().initialize();
         widget.model = model2;
         expect(called).toBe(true);
       });
 
       it('should be a no-op if the value does not change', () => {
         const widget = new StaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         widget.model = model;
         let called = false;
         widget.modelChanged.connect(() => {
@@ -294,6 +287,9 @@ describe('@jupyter/notebook', () => {
       it('should add a default cell if the notebook model is empty', () => {
         const widget = new LogStaticNotebook(options);
         const model1 = new NotebookModel();
+        // Small hack just for tests. We should not access the data before is ready
+        // @ts-ignore
+        model1._isReady = true;
         expect(model1.cells.length).toBe(0);
         model1.initialize();
         widget.model = model1;
@@ -305,6 +301,9 @@ describe('@jupyter/notebook', () => {
           defaultCell: 'markdown'
         };
         const model2 = new NotebookModel();
+        // Small hack just for tests. We should not access the data before is ready
+        // @ts-ignore
+        model2._isReady = true;
         expect(model2.cells.length).toBe(0);
         widget.model = model2;
         expect(model2.cells.length).toBe(1);
@@ -313,8 +312,7 @@ describe('@jupyter/notebook', () => {
 
       it('should set the mime types of the cell widgets', () => {
         const widget = new LogStaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         const value = { name: 'python', codemirror_mode: 'python' };
         model.metadata.set('language_info', value);
         widget.model = model;
@@ -465,8 +463,7 @@ describe('@jupyter/notebook', () => {
 
       it('should be set from language metadata', () => {
         const widget = new LogStaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         const value = { name: 'python', codemirror_mode: 'python' };
         model.metadata.set('language_info', value);
         widget.model = model;
@@ -513,8 +510,7 @@ describe('@jupyter/notebook', () => {
     describe('#onModelChanged()', () => {
       it('should be called when the model changes', () => {
         const widget = new LogStaticNotebook(options);
-        const model = new NotebookModel();
-        model.initialize();
+        const model = new NotebookModel().initialize();
         widget.model = model;
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onModelChanged'])
