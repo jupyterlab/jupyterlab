@@ -204,12 +204,13 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 
 const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:language-server',
-  requires: [IEditorTracker],
-  optional: [
+  requires: [
+    IEditorTracker,
     ILSPDocumentConnectionManager,
     ILSPFeatureManager,
     ILSPCodeExtractorsManager
   ],
+
   activate: activateFileEditorLanguageServer,
   autoStart: true
 };
@@ -558,14 +559,10 @@ function activateFileEditorCompleterService(
 function activateFileEditorLanguageServer(
   app: JupyterFrontEnd,
   notebooks: IEditorTracker,
-  connectionManager?: ILSPDocumentConnectionManager,
-  featureManager?: ILSPFeatureManager,
-  extractorManager?: ILSPCodeExtractorsManager
+  connectionManager: ILSPDocumentConnectionManager,
+  featureManager: ILSPFeatureManager,
+  extractorManager: ILSPCodeExtractorsManager
 ): void {
-  if (!connectionManager || !featureManager || !extractorManager) {
-    return;
-  }
-
   notebooks.widgetAdded.connect(async (_, notebook) => {
     const adapter = new FileEditorAdapter(
       {

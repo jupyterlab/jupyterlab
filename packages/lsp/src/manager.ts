@@ -10,6 +10,7 @@ import {
   TSpecsMap
 } from './tokens';
 import { ServerSpecProperties } from './schema';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 export class LanguageServerManager implements ILanguageServerManager {
   protected _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal<
@@ -26,6 +27,7 @@ export class LanguageServerManager implements ILanguageServerManager {
   private _retriesInterval: number;
   private _configuration: TLanguageServerConfigurations;
   private _warningsEmitted = new Set<string>();
+  private _ready = new PromiseDelegate<void>();
 
   constructor(options: ILanguageServerManager.IOptions) {
     this._settings = options.settings || ServerConnection.makeSettings();
@@ -34,7 +36,8 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._retriesInterval = options.retriesInterval || 10000;
     this._statusCode = -1;
     this._configuration = {};
-    this.fetchSessions().catch(e => console.error(e));
+
+    this.fetchSessions().catch(e => console.log(e));
   }
 
   get specs(): TSpecsMap {
@@ -53,6 +56,9 @@ export class LanguageServerManager implements ILanguageServerManager {
     return this._sessions;
   }
 
+  get ready(): Promise<void> {
+    return this._ready.promise;
+  }
   setConfiguration(configuration: TLanguageServerConfigurations): void {
     this._configuration = configuration;
   }
@@ -140,12 +146,16 @@ export class LanguageServerManager implements ILanguageServerManager {
     );
 
     this._statusCode = response.status;
-
     if (!response.ok) {
-      console.error('Could not fetch sessions', response);
+      // if(response.status === 404){
+      //   this._retries = -1
+      // }
       if (this._retries > 0) {
         this._retries -= 1;
         setTimeout(this.fetchSessions.bind(this), this._retriesInterval);
+      } else {
+        this._ready.resolve(undefined);
+        console.log('Missing jupyter_lsp server extension, skipping.');
       }
       return;
     }
@@ -163,6 +173,7 @@ export class LanguageServerManager implements ILanguageServerManager {
       }
     } catch (err) {
       console.warn(err);
+      this._ready.resolve(undefined);
       return;
     }
 
@@ -183,7 +194,7 @@ export class LanguageServerManager implements ILanguageServerManager {
         this._sessions.delete(oldId);
       }
     }
-
     this._sessionsChanged.emit(void 0);
+    this._ready.resolve(undefined);
   }
 }

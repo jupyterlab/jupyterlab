@@ -58,6 +58,11 @@ export interface ILanguageServerManager {
   sessions: TSessionMap;
 
   /**
+   * A promise that is fulfilled when the connection manager is ready.
+   */
+  readonly ready: Promise<void>;
+
+  /**
    * An ordered list of matching >running< sessions, with servers of higher priority higher in the list
    */
   getMatchingServers(
@@ -200,6 +205,11 @@ export interface ILSPDocumentConnectionManager {
    * The language server manager instance.
    */
   languageServerManager: ILanguageServerManager;
+
+  /**
+   * A promise that is fulfilled when the connection manager is ready.
+   */
+  readonly ready: Promise<void>;
 
   /**
    * Handles the settings that do not require an existing connection

@@ -23,6 +23,7 @@
     "@jupyterlab/imageviewer-extension": "^4.0.0-alpha.11",
     "@jupyterlab/inspector-extension": "^4.0.0-alpha.11",
     "@jupyterlab/launcher-extension": "^4.0.0-alpha.11",
+    "@jupyterlab/lsp-extension": "^4.0.0-alpha.11",
     "@jupyterlab/mainmenu-extension": "^4.0.0-alpha.11",
     "@jupyterlab/markdownviewer-extension": "^4.0.0-alpha.11",
     "@jupyterlab/mathjax2-extension": "^4.0.0-alpha.11",

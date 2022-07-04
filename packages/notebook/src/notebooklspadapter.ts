@@ -150,6 +150,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
 
   protected async initOnceReady(): Promise<void> {
     await this.widget.context.sessionContext.ready;
+    await this.connectionManager.ready;
     await untilReady(this.isReady.bind(this), -1);
     await this.updateLanguageInfo();
     this.initVirtual();

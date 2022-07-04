@@ -66,6 +66,10 @@ export class DocumentConnectionManager
     Private.setLanguageServerManager(options.languageServerManager);
   }
 
+  get ready(): Promise<void> {
+    return Private.getLanguageServerManager().ready;
+  }
+
   connectDocumentSignals(virtualDocument: VirtualDocument): void {
     virtualDocument.foreignDocumentOpened.connect(
       this.onForeignDocumentOpened,
@@ -107,10 +111,7 @@ export class DocumentConnectionManager
     _host: VirtualDocument,
     context: IForeignContext
   ): void {
-    console.log(
-      'ConnectionManager received foreign document: ',
-      context.foreignDocument.uri
-    );
+    /** no-op */
   }
 
   onForeignDocumentClosed(
@@ -124,7 +125,7 @@ export class DocumentConnectionManager
 
   private async connectSocket(
     options: ISocketConnectionOptions
-  ): Promise<LSPConnection> {
+  ): Promise<LSPConnection | undefined> {
     let { language, capabilities, virtualDocument } = options;
     this.connectDocumentSignals(virtualDocument);
 
@@ -142,6 +143,9 @@ export class DocumentConnectionManager
     // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
     // like connection: either already connected or potentially in the process
     // of connecting.
+    if (!uris) {
+      return;
+    }
     const connection = await Private.connection(
       language,
       languageServerId!,
@@ -290,7 +294,9 @@ export class DocumentConnectionManager
   ): Promise<ILSPConnection | undefined> {
     let connection = await this.connectSocket(options);
     let { virtualDocument } = options;
-
+    if (!connection) {
+      return;
+    }
     if (!connection.isReady) {
       try {
         // user feedback hinted that 40 seconds was too short and some users are willing to wait more;
@@ -298,7 +304,7 @@ export class DocumentConnectionManager
         // 30 seconds, and show the warning early in case if something is wrong; we then continue retrying
         // for another 5 minutes, but only once per second.
         await untilReady(
-          () => connection.isReady,
+          () => connection!.isReady,
           Math.round((firstTimeoutSeconds * 1000) / 150),
           150
         );
@@ -308,7 +314,7 @@ export class DocumentConnectionManager
         );
         try {
           await untilReady(
-            () => connection.isReady,
+            () => connection!.isReady,
             60 * secondTimeoutMinutes,
             1000
           );
@@ -379,7 +385,7 @@ export namespace DocumentConnectionManager {
   export function solveUris(
     virtualDocument: VirtualDocument,
     language: string
-  ): IURIs {
+  ): IURIs | undefined {
     const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
     const rootUri = PageConfig.getOption('rootUri');
     const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
@@ -397,7 +403,7 @@ export namespace DocumentConnectionManager {
       matchingServers.length === 0 ? null : matchingServers[0];
 
     if (languageServerId === null) {
-      throw `No language server installed for language ${language}`;
+      return;
     }
 
     // workaround url-parse bug(s) (see https://github.com/jupyter-lsp/jupyterlab-lsp/issues/595)

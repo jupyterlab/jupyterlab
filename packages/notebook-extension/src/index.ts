@@ -816,8 +816,8 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
 
 const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:language-server',
-  requires: [INotebookTracker],
-  optional: [
+  requires: [
+    INotebookTracker,
     ILSPDocumentConnectionManager,
     ILSPFeatureManager,
     ILSPCodeExtractorsManager
@@ -1776,14 +1776,10 @@ function activateNotebookCompleterService(
 function activateNotebookLanguageServer(
   app: JupyterFrontEnd,
   notebooks: INotebookTracker,
-  connectionManager?: ILSPDocumentConnectionManager,
-  featureManager?: ILSPFeatureManager,
-  codeExtractorManager?: ILSPCodeExtractorsManager
+  connectionManager: ILSPDocumentConnectionManager,
+  featureManager: ILSPFeatureManager,
+  codeExtractorManager: ILSPCodeExtractorsManager
 ): void {
-  if (!connectionManager || !featureManager || !codeExtractorManager) {
-    return;
-  }
-
   notebooks.widgetAdded.connect(async (_, notebook) => {
     const adapter = new NotebookAdapter(
       {

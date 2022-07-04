@@ -112,11 +112,20 @@ export class VirtualDocumentInfo implements IDocumentInfo {
     return this._document.value;
   }
 
+  /**
+   * Get the uri of the virtual document, if the document is not available,
+   * it returns an empty string, users need to check for the length of returned
+   * value before using it.
+   *
+   */
   get uri(): string {
     const uris = DocumentConnectionManager.solveUris(
       this._document,
       this.languageId
     );
+    if (!uris) {
+      return '';
+    }
     return uris.document;
   }
 

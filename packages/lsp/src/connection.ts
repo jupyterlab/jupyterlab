@@ -395,7 +395,9 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     if (!this.isReady || !this.isRenameSupported()) {
       return null;
     }
-
+    if (documentInfo.uri.length === 0) {
+      return null;
+    }
     const params: lsp.RenameParams = {
       textDocument: {
         uri: documentInfo.uri
@@ -452,6 +454,9 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     documentInfo: IDocumentInfo
   ) {
     if (!this.isReady) {
+      return;
+    }
+    if (documentInfo.uri.length === 0) {
       return;
     }
     if (!this.openedUris.get(documentInfo.uri)) {

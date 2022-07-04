@@ -78,7 +78,7 @@ export class FileEditorAdapter extends WidgetAdapter<
     if (!this.editor.context.isReady) {
       await this.editor.context.ready;
     }
-
+    await this.connectionManager.ready;
     this.initVirtual();
 
     // connect the document, but do not open it as the adapter will handle this
