@@ -2,18 +2,18 @@
   "jupyter.lab.setting-icon": "lsp:codeCheck",
   "jupyter.lab.setting-icon-label": "Language integration",
   "jupyter.lab.transform": true,
-  "title": "Language Server",
+  "title": "Language Servers",
   "description": "Language Server Protocol settings.",
   "type": "object",
   "definitions": {
-    "language-server": {
+    "languageServer": {
       "type": "object",
       "default": {
-        "serverSettings": {},
+        "configuration": {},
         "priority": 50
       },
       "properties": {
-        "serverSettings": {
+        "configuration": {
           "title": "Language Server Configurations",
           "description": "Configuration to be sent to language server over LSP when initialized: see the specific language server's documentation for more",
           "type": "object",
@@ -36,18 +36,18 @@
     }
   },
   "properties": {
-    "language_servers": {
+    "languageServers": {
       "title": "Language Server",
       "description": "Language-server specific configuration, keyed by implementation",
       "type": "object",
       "default": {},
       "patternProperties": {
         ".*": {
-          "$ref": "#/definitions/language-server"
+          "$ref": "#/definitions/languageServer"
         }
       },
       "additionalProperties": {
-        "$ref": "#/definitions/language-server"
+        "$ref": "#/definitions/languageServer"
       }
     },
     "setTrace": {

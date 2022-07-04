@@ -22,8 +22,8 @@ interface ISettingProperty {
   type: 'boolean' | 'string' | 'number';
   value: any;
 }
-const SETTING_NAME = 'language_servers';
-const SERVER_SETTINGS = 'serverSettings';
+const SETTING_NAME = 'languageServers';
+const SERVER_SETTINGS = 'configuration';
 function debounce<Params extends any[]>(
   func: (...args: Params) => any,
   timeout: number = 500
@@ -343,8 +343,9 @@ class SettingRenderer extends React.Component<IProps, IState> {
     this._trans = props.translator.load('jupyterlab');
 
     const schema = this._setting.schema['definitions'] as TDict;
-    this._defaultSetting = schema['language-server']['default'];
-    this._schema = schema['language-server']['properties'];
+
+    this._defaultSetting = schema['languageServer']['default'];
+    this._schema = schema['languageServer']['properties'];
     const title = props.schema.title;
     const desc = props.schema.description;
     const settings: ISettingRegistry.ISettings = props.formContext.settings;

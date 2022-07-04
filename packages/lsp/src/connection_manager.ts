@@ -181,9 +181,7 @@ export class DocumentConnectionManager
       }
       const rawSettings = allServerSettings[languageServerId]!;
 
-      const parsedSettings = expandDottedPaths(
-        rawSettings.serverSettings || {}
-      );
+      const parsedSettings = expandDottedPaths(rawSettings.configuration || {});
 
       const serverSettings: protocol.DidChangeConfigurationParams = {
         settings: parsedSettings

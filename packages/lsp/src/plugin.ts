@@ -18,26 +18,26 @@ export type AskServersToSendTraceNotifications = 'off' | 'messages' | 'verbose';
 /**
  * Language Server Protocol settings.
  */
-export interface LanguageServer {
-  language_servers?: LanguageServer1;
+export interface LanguageServers {
+  languageServers?: LanguageServer;
   setTrace?: AskServersToSendTraceNotifications;
   [k: string]: any;
 }
 /**
  * Language-server specific configuration, keyed by implementation
  */
-export interface LanguageServer1 {
-  [k: string]: LanguageServer2;
+export interface LanguageServer {
+  [k: string]: LanguageServer1;
 }
 /**
- * This interface was referenced by `LanguageServer1`'s JSON-Schema definition
+ * This interface was referenced by `LanguageServer`'s JSON-Schema definition
  * via the `patternProperty` ".*".
  *
- * This interface was referenced by `LanguageServer`'s JSON-Schema
- * via the `definition` "language-server".
+ * This interface was referenced by `LanguageServers`'s JSON-Schema
+ * via the `definition` "languageServer".
  */
-export interface LanguageServer2 {
-  serverSettings?: LanguageServerConfigurations;
+export interface LanguageServer1 {
+  configuration?: LanguageServerConfigurations;
   priority?: PriorityOfTheServer;
   [k: string]: any;
 }

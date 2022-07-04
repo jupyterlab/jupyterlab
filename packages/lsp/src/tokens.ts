@@ -16,7 +16,7 @@ import {
 import { WidgetAdapter } from './adapters/adapter';
 import { IForeignCodeExtractor } from './extractors/types';
 import { ClientCapabilities, LanguageIdentifier } from './lsp';
-import { LanguageServer2 as LSPLanguageServerSettings } from './plugin';
+import { LanguageServer1 as LSPLanguageServerSettings } from './plugin';
 import * as SCHEMA from './schema';
 import { VirtualDocument } from './virtual/document';
 

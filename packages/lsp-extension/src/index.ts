@@ -19,8 +19,8 @@ import {
   ILSPConnection,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
-  LanguageServer,
   LanguageServerManager,
+  LanguageServers,
   TextForeignCodeExtractor,
   TLanguageServerConfigurations,
   TLanguageServerId
@@ -33,10 +33,12 @@ import {
   LabIcon,
   pythonIcon
 } from '@jupyterlab/ui-components';
-import { Signal } from '@lumino/signaling';
-import type { FieldProps } from '@rjsf/core';
-import { renderServerSetting } from './renderer';
 import { PartialJSONObject } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
+
+import { renderServerSetting } from './renderer';
+
+import type { FieldProps } from '@rjsf/core';
 const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
   id: '@jupyterlab/lsp-extension:plugin',
@@ -91,15 +93,16 @@ function activate(
   runningSessionManagers: IRunningSessionManagers | null,
   settingRendererRegistry: IFormComponentRegistry | null
 ): ILSPDocumentConnectionManager {
-  const LANGUAGE_SERVERS = 'language_servers';
+  const LANGUAGE_SERVERS = 'languageServers';
   const languageServerManager = new LanguageServerManager({});
   const connectionManager = new DocumentConnectionManager({
     languageServerManager
   });
 
   const updateOptions = (settings: ISettingRegistry.ISettings) => {
-    const options = settings.composite as Required<LanguageServer>;
-    const languageServerSettings = (options.language_servers ||
+    const options = settings.composite as Required<LanguageServers>;
+
+    const languageServerSettings = (options.languageServers ||
       {}) as TLanguageServerConfigurations;
 
     connectionManager.initialConfigurations = languageServerSettings;
@@ -117,7 +120,7 @@ function activate(
         const schema = plugin.schema.properties!;
         const defaultValue: { [key: string]: any } = {};
         languageServerManager.sessions.forEach((_, key) => {
-          defaultValue[key] = { priority: 50, serverSettings: {} };
+          defaultValue[key] = { priority: 50, configuration: {} };
         });
 
         schema[LANGUAGE_SERVERS]['default'] = defaultValue;
