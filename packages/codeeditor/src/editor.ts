@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 import {
   ISharedDoc,
@@ -255,13 +254,6 @@ export namespace CodeEditor {
 
       this._mimeType = options.mimeType || 'text/plain';
       this._selections = new ObservableMap<ITextSelection[]>();
-    }
-
-    /**
-     * The type of the IModel
-     */
-    get type(): nbformat.CellType {
-      return 'code';
     }
 
     /**
