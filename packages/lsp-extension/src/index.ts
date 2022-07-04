@@ -49,9 +49,8 @@ const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
 };
 
 const featurePlugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
-  activate: activateFeature,
   id: '@jupyterlab/lsp-extension:feature',
-  requires: [ISettingRegistry, ITranslator],
+  activate: () => new FeatureManager(),
   provides: ILSPFeatureManager,
   autoStart: true
 };
@@ -59,7 +58,6 @@ const featurePlugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
 const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> =
   {
     id: ILSPCodeExtractorsManager.name,
-    requires: [],
     activate: app => {
       const extractorManager = new CodeExtractorsManager();
 
@@ -188,16 +186,6 @@ function activate(
   }
 
   return connectionManager;
-}
-
-function activateFeature(
-  app: JupyterFrontEnd,
-  settingRegistry: ISettingRegistry,
-  translator: ITranslator
-): ILSPFeatureManager {
-  const featureManager = new FeatureManager();
-
-  return featureManager;
 }
 
 export class RunningLanguageServers implements IRunningSessions.IRunningItem {

@@ -1,4 +1,7 @@
 import { Page } from '@playwright/test';
+import { default as extensionsSearchStub } from './data/extensions-search.json';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Generate a SVG arrow to inject in a HTML document.
@@ -67,4 +70,33 @@ export async function setSidebarWidth(
     handleBBox.y + 0.5 * handleBBox.height
   );
   await page.mouse.up();
+}
+
+export async function stubExtensionsSearch(page: Page): Promise<void> {
+  await page.route(
+    'https://registry.npmjs.org/-/v1/search*',
+    async (route, request) => {
+      switch (request.method()) {
+        case 'GET':
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(extensionsSearchStub)
+          });
+        default:
+          return route.continue();
+      }
+    }
+  );
+
+  // stub out github user icons
+  // only first and last icon for now
+  // logic in @jupyterlab/extensionmanager/src/models::ListEntry#translateSearchResult
+  await page.route('https://github.com/*.png*', async (route, request) => {
+    return route.fulfill({
+      status: 200,
+      contentType: 'image/png',
+      body: fs.readFileSync(path.resolve(__dirname, './data/jupyter.png'))
+    });
+  });
 }

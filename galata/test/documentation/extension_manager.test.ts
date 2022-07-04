@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { setSidebarWidth } from './utils';
+import { setSidebarWidth, stubExtensionsSearch } from './utils';
 import { default as extensionsList } from './data/extensions.json';
 
 test.use({
@@ -63,7 +63,8 @@ test.describe('Extension Manager', () => {
   });
 
   test('Search', async ({ page }) => {
-    // This is flaky because the frontend request npm package with sorting based on popularity
+    await stubExtensionsSearch(page);
+
     await page.goto();
 
     await openExtensionSidebar(page);
