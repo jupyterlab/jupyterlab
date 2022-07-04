@@ -229,7 +229,7 @@ performs a free-text search of JupyterLab extensions on the NPM registry.
 .. image:: ../images/extensions-search.png
    :align: center
    :class: jp-screenshot
-   :alt: Screenshot showing an example search result
+   :alt: Screenshot showing an example search result 
 
 
 Installing an Extension

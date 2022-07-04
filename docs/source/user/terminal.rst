@@ -14,6 +14,7 @@ there.
 .. image:: ../images/terminal-layout.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 .. _open-terminal:
 

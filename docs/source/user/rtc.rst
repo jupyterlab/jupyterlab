@@ -25,6 +25,7 @@ for what is essential, the document's content.
 .. image:: images/rtc_shared_cursors.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 Something you need to be aware of is that not all editors in JupyterLab support sync.
 Additionally, opening the same underlying document using different editor types may result
@@ -41,3 +42,4 @@ information, you can read the section of
 .. image:: images/rtc_sync_editors.png
    :align: center
    :class: jp-screenshot
+   :alt:

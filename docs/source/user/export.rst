@@ -20,6 +20,7 @@ To access these options, while a notebook is open, browse the File menu:
 .. image:: ../images/exporting-menu.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 Note: The exporting options depend on your nbconvert configuration. For more
 information visit the
@@ -41,6 +42,7 @@ slides, follow these steps:
 .. image:: ../images/exporting-slide-type.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 4. Activate another cell.
 5. Repeat 3 and 4 until you selected the slide type for all of your cells.

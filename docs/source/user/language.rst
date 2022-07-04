@@ -46,12 +46,14 @@ packs.
 .. image:: ../images/language-settings.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 Selecting the new language will prompt for confirmation.
 
 .. image:: ../images/language-change.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 Once you accept, the browser will refresh and the interface will
 now be shown, for this example in Simplified Chinese.
@@ -59,3 +61,4 @@ now be shown, for this example in Simplified Chinese.
 .. image:: ../images/language-chinese.png
    :align: center
    :class: jp-screenshot
+   :alt:

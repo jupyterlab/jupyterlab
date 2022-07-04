@@ -488,6 +488,7 @@ Now run Lighthouse against this local server and show the results:
    jlpm run lighthouse --view
 
 .. image:: ../images/lighthouse.png
+   :alt: 
 
 Using throttling
 ^^^^^^^^^^^^^^^^
@@ -758,6 +759,7 @@ The Debugger Adapter Protocol
 The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
 
 .. image:: ./debugger_protocol_diagram.png
+   :alt: 
 
 Inspecting Debug Messages in VS Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -767,6 +769,7 @@ Inspecting the debug messages in VS Code can be useful to understand when debug 
 The first step is to create a test file and a debug configuration (``launch.json``):
 
 .. image:: ./debugger_launch_configuration.png
+   :alt: 
 
 .. code:: json
 
@@ -787,6 +790,7 @@ The first step is to create a test file and a debug configuration (``launch.json
 Then start the debugger:
 
 .. image:: ./debugger_vscode_start.png
+   :alt:
 
 The content of the log file looks like this:
 

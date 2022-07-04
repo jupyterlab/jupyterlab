@@ -14,6 +14,7 @@ In the sidebar panel, you can number headings, collapse sections, and navigate i
 Here is an animation showing the table of content use with a notebook:
 
 .. image:: ./images/toc/toc.gif
+    :alt:
 
 The table of contents will be automatically generated for your notebook by taking all the
 headings from your markdown cells. Each listed section will be linked to the actual section
@@ -36,6 +37,7 @@ option via the *More actions* button in the table of contents toolbar. Here is a
 showing its use:
 
 .. image:: ./images/toc/numberingH1.gif
+    :alt:
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -44,6 +46,7 @@ containing runnable code cells, and clicking the *Select and Run Cell(s) for thi
 option will make the cells run in notebook. Here is an animation showing its use:
 
 .. image:: ./images/toc/runcell.gif
+    :alt:
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -53,6 +56,7 @@ option will make the cells run in notebook. Here is an animation showing its use
  Editor and then go to Table of Contents section and in User Preferences check the ``syncCollapseState`` box. Here is an animation showing its use:
 
 .. image:: ./images/toc/syncCollapseState.gif
+    :alt:
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -61,6 +65,7 @@ This can be tuned by changing the settings ``includeOutput`` to ``false``. To pe
 Editor and then go to Table of Contents section and in User Preferences add unchecked ``includeOutput`` box. Here is an animation showing its use
 
 .. image:: ./images/toc/includeOutput.gif
+    :alt:
 
 
 .. _Settings:

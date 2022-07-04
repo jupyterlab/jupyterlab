@@ -223,6 +223,6 @@ a user-friendly kernel name and status.
 
 Here is a diagram that provides an overview of the different components:
 
-![architecture-diagram](./architecture.png)
+![architecture-diagram ](./architecture.png)
 
 _The diagram can be edited on [diagrams.net](https://diagrams.net) by importing the [source](./architecture.xml)_.

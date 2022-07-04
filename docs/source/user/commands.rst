@@ -22,6 +22,7 @@ keyboard-driven way to search for and run JupyterLab commands:
 .. image:: ../images/command-palette.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 .. _access-palette:
 

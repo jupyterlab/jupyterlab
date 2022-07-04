@@ -10,6 +10,7 @@ directories:
 .. image:: ../images/running-layout.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 .. _reopen-document:
 

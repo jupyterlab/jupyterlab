@@ -38,6 +38,7 @@ Usage
 Here is a screencast to enable the debugger and set up breakpoints. The various steps are described more in depth below.
 
 .. image:: ./images/debugger/step.gif
+   :alt:
 
 Use a kernel supporting debugger
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -46,6 +47,7 @@ First, you will need to check that the kernel supports debugging. If so, the *bu
 notebook will be enabled.
 
 .. image:: ../images/debugger-kernel.png
+   :alt:
 
 Debug code in notebook
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -53,6 +55,7 @@ Debug code in notebook
 Now let's enable the debugger for this notebook. The debugger can be enabled by toggling the *bug* button on in the upper-right corner of the notebook:
 
 .. image:: ../images/debugger-activate.png
+   :alt:
 
 Once debugging has been enabled, we can set breakpoints and step into the code.
 
@@ -74,14 +77,17 @@ We can call the function and print the result:
 Now let's go back to the first code cell and click on the gutter on line number 2 to add a breakpoint:
 
 .. image:: ../images/debugger-breakpoint.png
+   :alt:
 
 Then let's execute the second code cell by clicking on the _Run_ button:
 
 .. image:: ../images/debugger-run.png
+   :alt:
 
 The execution stops where the breakpoint is set:
 
 .. image:: ../images/debugger-stop-on-breakpoint.png
+   :alt:
 
 Explore the code state
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -90,18 +96,21 @@ Exploring the code state is done with the debugger sidebar. It shows a variable 
 a list of breakpoints, a source preview and the possibility to navigate the call stack.
 
 .. image:: ../images/debugger-sidebar.png
+   :alt:
 
 **Variables**
 
 Variables can be explored using a tree view and a table view:
 
 .. image:: ../images/debugger-variables.png
+   :alt:
 
 **Call stack**
 
 You can step into the code, and continue the execution using the debug actions:
 
 .. image:: ../images/debugger-callstack.png
+   :alt:
 
 **Breakpoints**
 
@@ -109,12 +118,14 @@ New breakpoints can be added and removed while the execution is stopped, and
 they will be shown in the list of breakpoints:
 
 .. image:: ../images/debugger-breakpoints.png
+   :alt:
 
 **Source**
 
 The source panel shows the source of the current file being debugged:
 
 .. image:: ../images/debugger-source.png
+   :alt:
 
 If the source corresponds to a cell that has been deleted, clicking on the
 *Open in Main Area* button will open a read-only view of the source.

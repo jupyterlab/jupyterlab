@@ -9,6 +9,7 @@ JupyterLab:
 .. image:: ../images/file-editor-overview.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 The text editor includes syntax highlighting, configurable indentation
 (tabs or spaces), :ref:`key maps <editor-keymaps>` and
@@ -17,6 +18,7 @@ basic theming. These settings can be found in the Settings menu:
 .. image:: ../images/file-editor-settings.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 .. _edit-existing-file:
 

@@ -10,6 +10,7 @@ visualizations and other rich output:
 .. image:: ../images/notebook-ui.png
    :align: center
    :class: jp-screenshot
+   :alt:
 
 **Jupyter notebooks (.ipynb files) are fully supported in JupyterLab.** The
 `notebook document format <https://nbformat.readthedocs.io/en/latest/>`__ used in
