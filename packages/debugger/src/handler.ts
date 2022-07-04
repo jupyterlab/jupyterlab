@@ -342,7 +342,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     addToolbarButton(false);
 
     // listen to the disposed signals
-    widget.disposed.connect(() => {
+    widget.disposed.connect(async () => {
+      if (isDebuggerOn()) {
+        await stopDebugger();
+      }
       removeHandlers();
       delete this._iconButtons[widget.id];
       delete this._contextKernelChangedHandlers[widget.id];
