@@ -29,12 +29,10 @@ import {
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { ReactWidget } from '@jupyterlab/ui-components';
 import { SingletonLayout, Widget } from '@lumino/widgets';
-import Form, { IChangeEvent } from '@rjsf/core';
-import { JSONSchema7 } from 'json-schema';
-import React from 'react';
 import { IMetadataForm, IMetadataFormProvider } from './token';
+
+import { FormWidget, MetadataForm } from './form';
 
 export { IMetadataForm, IMetadataFormProvider };
 
@@ -53,6 +51,13 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     translator?: ITranslator
   ) {
     super();
+    this._props = {
+      properties: builtProperties,
+      translator: translator || null,
+      formData: null,
+      parent: this
+    };
+
     this.builtProperties = builtProperties;
     this._pluginId = pluginId;
     this.translator = translator || nullTranslator;
@@ -89,21 +94,11 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   /**
    * Build widget
    */
-  buildWidget(formData?: ReadonlyPartialJSONObject): void {
-    const form = (
-      <Form
-        schema={this.builtProperties as JSONSchema7}
-        formData={formData}
-        idPrefix={`jp-MetadataForm-${this._pluginId}`}
-        onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this.updateMetadata(this.builtProperties.metadataKeys, e.formData);
-        }}
-      />
-    );
-    const widget = ReactWidget.create(form);
-    Widget.attach(widget, document.body);
-    widget.addClass('jp-MetadataForm');
-    this.setContent(widget);
+  buildWidget(): void {
+    const formWidget = new FormWidget(this._props, this._pluginId);
+    Widget.attach(formWidget, document.body);
+    formWidget.addClass('jp-MetadataForm');
+    this.setContent(formWidget);
   }
 
   /**
@@ -150,7 +145,8 @@ export class MetadataFormWidget extends NotebookTools.Tool {
         formData[key] = workingObject[nestedKeys[nestedKeys.length - 1]];
     }
 
-    this.buildWidget(formData);
+    this._props.formData = formData;
+    this.buildWidget();
   }
 
   /**
@@ -219,7 +215,8 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   private builtProperties: Private.IProperties;
   private _placeholder: Widget;
   private _updatingMetadata: boolean;
-  private _pluginId: PartialJSONValue | undefined;
+  private _pluginId: string | undefined;
+  private _props: MetadataForm.IProps;
 }
 
 namespace Private {
