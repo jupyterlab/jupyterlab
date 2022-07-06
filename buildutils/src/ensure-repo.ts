@@ -92,7 +92,6 @@ const UNUSED: Dict<string[]> = {
     'node-fetch',
     'identity-obj-proxy',
     'jest-raw-loader',
-    'markdown-loader-jest',
     'jest-junit',
     'jest-summary-reporter'
   ],
