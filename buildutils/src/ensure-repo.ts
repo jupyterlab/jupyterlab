@@ -89,6 +89,7 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
+    'fs-extra',
     'node-fetch',
     'identity-obj-proxy',
     'jest-raw-loader',
