@@ -19,6 +19,7 @@ export {
   IMimeDocumentTracker
 } from './mimerenderers';
 export { Router } from './router';
+export { Shared } from './shared';
 export { ILabShell, LabShell } from './shell';
 export * from './tokens';
 export { ITreePathUpdater } from './treepathupdater';
