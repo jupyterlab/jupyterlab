@@ -233,6 +233,7 @@ export class NotebookModel implements INotebookModel {
     this._cells = null!;
     cells.dispose();
     this._isDisposed = true;
+    this.modelDB.dispose();
     Signal.clearData(this);
   }
 

@@ -1,10 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+/* global WeakRef */
+
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { Signal } from '@lumino/signaling';
 import { VirtualElement } from '@lumino/virtualdom';
 import { Menu } from '@lumino/widgets';
 
@@ -297,15 +300,15 @@ class DisposableMenuItem implements IDisposableMenuItem {
    * @param menu Menu
    */
   constructor(item: Menu.IItem, menu: Menu) {
-    this._item = item;
+    this._item = new WeakRef(item);
     this._menu = menu;
 
     // dispose this item if the parent menu is disposed
     const dispose = (menu: Menu): void => {
-      menu.disposed.disconnect(dispose);
+      menu.disposed.disconnect(dispose, this);
       this.dispose();
     };
-    this._menu.disposed.connect(dispose);
+    this._menu.disposed.connect(dispose, this);
   }
 
   /**
@@ -319,42 +322,42 @@ class DisposableMenuItem implements IDisposableMenuItem {
    * The type of the menu item.
    */
   get type(): Menu.ItemType {
-    return this._item.type;
+    return this._item.deref()!.type;
   }
 
   /**
    * The command to execute when the item is triggered.
    */
   get command(): string {
-    return this._item.command;
+    return this._item.deref()!.command;
   }
 
   /**
    * The arguments for the command.
    */
   get args(): ReadonlyJSONObject {
-    return this._item.args;
+    return this._item.deref()!.args;
   }
 
   /**
    * The submenu for a `'submenu'` type item.
    */
   get submenu(): Menu | null {
-    return this._item.submenu;
+    return this._item.deref()!.submenu;
   }
 
   /**
    * The display label for the menu item.
    */
   get label(): string {
-    return this._item.label;
+    return this._item.deref()!.label;
   }
 
   /**
    * The mnemonic index for the menu item.
    */
   get mnemonic(): number {
-    return this._item.mnemonic;
+    return this._item.deref()!.mnemonic;
   }
 
   /**
@@ -365,85 +368,88 @@ class DisposableMenuItem implements IDisposableMenuItem {
     | undefined
     /* <DEPRECATED> */
     | string /* </DEPRECATED> */ {
-    return this._item.icon;
+    return this._item.deref()!.icon;
   }
 
   /**
    * The icon class for the menu item.
    */
   get iconClass(): string {
-    return this._item.iconClass;
+    return this._item.deref()!.iconClass;
   }
 
   /**
    * The icon label for the menu item.
    */
   get iconLabel(): string {
-    return this._item.iconLabel;
+    return this._item.deref()!.iconLabel;
   }
 
   /**
    * The display caption for the menu item.
    */
   get caption(): string {
-    return this._item.caption;
+    return this._item.deref()!.caption;
   }
 
   /**
    * The extra class name for the menu item.
    */
   get className(): string {
-    return this._item.className;
+    return this._item.deref()!.className;
   }
 
   /**
    * The dataset for the menu item.
    */
   get dataset(): CommandRegistry.Dataset {
-    return this._item.dataset;
+    return this._item.deref()!.dataset;
   }
 
   /**
    * Whether the menu item is enabled.
    */
   get isEnabled(): boolean {
-    return this._item.isEnabled;
+    return this._item.deref()!.isEnabled;
   }
 
   /**
    * Whether the menu item is toggled.
    */
   get isToggled(): boolean {
-    return this._item.isToggled;
+    return this._item.deref()!.isToggled;
   }
 
   /**
    * Whether the menu item is visible.
    */
   get isVisible(): boolean {
-    return this.isVisible;
+    return this._item.deref()!.isVisible;
   }
 
   /**
    * The key binding for the menu item.
    */
   get keyBinding(): CommandRegistry.IKeyBinding | null {
-    return this._item.keyBinding;
+    return this._item.deref()!.keyBinding;
   }
 
   /**
    * Dispose the menu item by removing it from its menu.
    */
   dispose(): void {
-    this._isDisposed = true;
-    if (this._menu.isDisposed) {
-      // Bail early
+    if (this._isDisposed) {
       return;
     }
-    this._menu.removeItem(this._item);
+    this._isDisposed = true;
+    const item = this._item.deref();
+    if (item && !this._menu.isDisposed) {
+      this._menu.removeItem(item);
+    }
+    Signal.clearData(this);
   }
 
   private _isDisposed: boolean;
-  private _item: Menu.IItem;
+  private _item: WeakRef<Menu.IItem>;
   private _menu: Menu;
 }

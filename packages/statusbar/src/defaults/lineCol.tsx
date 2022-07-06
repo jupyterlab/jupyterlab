@@ -317,7 +317,7 @@ export namespace LineCol {
     }
     set editor(editor: CodeEditor.IEditor | null) {
       const oldEditor = this._editor;
-      if (oldEditor) {
+      if (oldEditor?.model?.selections) {
         oldEditor.model.selections.changed.disconnect(this._onSelectionChanged);
       }
 
