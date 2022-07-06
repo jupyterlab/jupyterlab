@@ -744,6 +744,12 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    */
   dispose(): void {
     this.ymodel.unobserveDeep(this._modelObserver);
+    if (this._awareness) {
+      this._awareness.destroy();
+    }
+    if (!this.notebook && this._undoManager) {
+      this._undoManager.destroy();
+    }
   }
 
   /**

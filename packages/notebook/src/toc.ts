@@ -189,11 +189,11 @@ export class NotebookToCModel extends TableOfContentsModel<
     }
 
     this.headingsChanged.disconnect(this.onHeadingsChanged, this);
-    this.widget.context.model.metadata.changed.disconnect(
+    this.widget.context?.model?.metadata?.changed.disconnect(
       this.onMetadataChanged,
       this
     );
-    this.widget.content.activeCellChanged.disconnect(
+    this.widget.content?.activeCellChanged.disconnect(
       this.onActiveCellChanged,
       this
     );
