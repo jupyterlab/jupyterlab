@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "lib": ["DOM", "ES2021.WeakRef"],
+    "lib": ["DOM", "ESnext.WeakRef"],
     "outDir": "lib",
     "rootDir": "src",
     "types": ["webpack-env", "node"]
