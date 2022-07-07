@@ -142,8 +142,8 @@ export class CellToolbarTracker implements IDisposable {
       this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
       // Attempt to remove the resize and changed event handlers.
       cell.displayChanged.disconnect(this._resizeEventCallback, this);
-      cell.model.contentChanged.disconnect(this._changedEventCallback, this);
     }
+    model.contentChanged.disconnect(this._changedEventCallback, this);
   }
 
   /**

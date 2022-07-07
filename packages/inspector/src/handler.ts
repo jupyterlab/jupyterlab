@@ -102,6 +102,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       return;
     }
     this._isDisposed = true;
+    this._debouncer.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
