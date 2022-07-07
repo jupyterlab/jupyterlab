@@ -2,12 +2,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { closeBrackets } from '@codemirror/autocomplete';
 import { defaultKeymap } from '@codemirror/commands';
-import {
-  defaultHighlightStyle,
-  indentUnit,
-  LanguageSupport,
-  syntaxHighlighting
-} from '@codemirror/language';
+import { indentUnit, LanguageSupport } from '@codemirror/language';
 
 import {
   Compartment,
@@ -23,6 +18,8 @@ import { StyleSpec } from 'style-mod';
 
 import { Mode } from './mode';
 
+import { jupyterTheme } from './editortheme';
+
 export namespace Configuration {
   /**
    * The configuration options for a codemirror editor.
@@ -34,11 +31,10 @@ export namespace Configuration {
     mode?: string;
 
     /**
-     * The theme to style the editor with.
-     * You must make sure the CSS file defining the corresponding
-     * .cm-s-[name] styles is loaded.
+     * The theme to style the editor with. see editortheme.ts for an example
+     * of how to design a theme for CodeMirror 6.
      */
-    theme?: string;
+    theme?: Extension;
 
     // FIXME-TRANS: Handle theme localizable names
     // themeDisplayName?: string
@@ -304,10 +300,11 @@ export namespace Configuration {
             EditorView.lineWrapping
           )
         ],
-        ['language', createForwarderBuilder<LanguageSupport>()]
+        ['language', createForwarderBuilder<LanguageSupport>()],
+        ['theme', createForwarderBuilder()]
       ]);
-      this._themeSpec = { '&': {}, '.cm-line': {} };
-      this._theme = new Compartment();
+      this._themeOverloaderSpec = { '&': {}, '.cm-line': {} };
+      this._themeOverloader = new Compartment();
     }
 
     reconfigureExtension<T>(view: EditorView, key: string, value: T): void {
@@ -319,12 +316,10 @@ export namespace Configuration {
       } else {
         const config: Record<string, any> = {};
         config[key] = value;
-        const themeExtension = this.updateEditorTheme(config);
-        if (themeExtension) {
-          view.dispatch({
-            effects: this._theme.reconfigure(themeExtension)
-          });
-        }
+        const themeOverload = this.updateThemeOverload(config);
+        view.dispatch({
+          effects: this._themeOverloader.reconfigure(themeOverload)
+        });
       }
     }
 
@@ -337,10 +332,8 @@ export namespace Configuration {
         }
       }
 
-      const themeExtension = this.updateEditorTheme(config);
-      if (themeExtension) {
-        eff.push(this._theme.reconfigure(themeExtension));
-      }
+      const themeOverload = this.updateThemeOverload(config);
+      eff.push(this._themeOverloader.reconfigure(themeOverload));
 
       view.dispatch({
         effects: eff
@@ -366,6 +359,10 @@ export namespace Configuration {
         }
       }
 
+      if (!config.theme) {
+        extensions.push(jupyterTheme);
+      }
+
       const builder = this.get('keymap');
       const keymapExt = builder!.of(
         config.extraKeys
@@ -378,15 +375,10 @@ export namespace Configuration {
         config.insertSpaces ? ' '.repeat(config.tabSize) : '\t'
       );
 
-      let themeExtension = this.updateEditorTheme(config);
-      if (!themeExtension) {
-        themeExtension = EditorView.baseTheme({});
-      }
-
+      let themeOverload = this.updateThemeOverload(config);
       extensions.push(
-        this._theme.of(themeExtension),
+        this._themeOverloader.of(themeOverload),
         insertExt,
-        syntaxHighlighting(defaultHighlightStyle),
         keymapExt
       );
 
@@ -404,9 +396,9 @@ export namespace Configuration {
       return extensions;
     }
 
-    private updateEditorTheme(
+    private updateThemeOverload(
       config: Partial<IConfig> | Record<string, any>
-    ): Extension | null {
+    ): Extension {
       const { fontFamily, fontSize, lineHeight, lineWrap, wordWrapColumn } =
         config;
 
@@ -440,12 +432,13 @@ export namespace Configuration {
           '&': parentStyle,
           '.cm-line': lineStyle
         };
-
-        this._themeSpec = { ...this._themeSpec, ...newThemeSpec };
-        return EditorView.baseTheme(this._themeSpec);
-      } else {
-        return null;
+        this._themeOverloaderSpec = {
+          ...this._themeOverloaderSpec,
+          ...newThemeSpec
+        };
       }
+
+      return EditorView.theme(this._themeOverloaderSpec);
     }
 
     private get(key: string): IConfigurableBuilder | undefined {
@@ -453,7 +446,7 @@ export namespace Configuration {
     }
 
     private _configurableBuilderMap: Map<string, IConfigurableBuilder>;
-    private _themeSpec: Record<string, StyleSpec>;
-    private _theme: Compartment;
+    private _themeOverloaderSpec: Record<string, StyleSpec>;
+    private _themeOverloader: Compartment;
   }
 }
