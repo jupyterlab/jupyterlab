@@ -10,8 +10,7 @@ module.exports = function (baseDir: string) {
       '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
     },
     transform: {
-      '\\.svg$': 'jest-raw-loader',
-      '^.+\\.md?$': 'markdown-loader-jest'
+      '\\.svg$': 'jest-raw-loader'
     },
     testTimeout: 10000,
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
