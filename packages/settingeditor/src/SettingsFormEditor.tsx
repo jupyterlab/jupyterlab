@@ -412,6 +412,10 @@ export class SettingsFormEditor extends React.Component<
     }
   }
 
+  componentWillUnmount(): void {
+    this._debouncer.dispose();
+  }
+
   /**
    * Handler for edits made in the form editor.
    * @param data - Form data sent from the form editor

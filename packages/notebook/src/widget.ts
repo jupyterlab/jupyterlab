@@ -213,7 +213,6 @@ export class StaticNotebook extends Widget {
     // Section for the virtual-notebook behavior.
     this._idleCallBack = null;
     this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
-    this._cellsArray = new Array<Cell>();
     if ('IntersectionObserver' in window) {
       this._observer = new IntersectionObserver(
         (entries, observer) => {
@@ -586,7 +585,6 @@ export class StaticNotebook extends Widget {
     widget.addClass(NB_CELL_CLASS);
 
     const layout = this.layout as PanelLayout;
-    this._cellsArray.push(widget);
     if (
       this._observer &&
       insertType === 'push' &&
@@ -654,7 +652,7 @@ export class StaticNotebook extends Widget {
     }
 
     if (
-      this._renderedCellsCount < this._cellsArray.length &&
+      this._renderedCellsCount < (this.model?.cells.length ?? 0) &&
       this._renderedCellsCount >=
         this.notebookConfig.numberCellsToRenderDirectly
     ) {
@@ -870,10 +868,8 @@ export class StaticNotebook extends Widget {
     // Control editor visibility for read-only Markdown cells
     const showEditorForReadOnlyMarkdown =
       this._notebookConfig.showEditorForReadOnlyMarkdown;
-    // 'this._cellsArray' check is here as '_updateNotebookConfig()'
-    // can be called before 'this._cellsArray' is defined
-    if (showEditorForReadOnlyMarkdown !== undefined && this._cellsArray) {
-      for (const cell of this._cellsArray) {
+    if (showEditorForReadOnlyMarkdown !== undefined) {
+      for (const cell of this.widgets) {
         if (cell.model.type === 'markdown') {
           (cell as MarkdownCell).showEditorForReadOnly =
             showEditorForReadOnlyMarkdown;
@@ -907,7 +903,6 @@ export class StaticNotebook extends Widget {
   private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
   private _idleCallBack: any;
-  private _cellsArray: Array<Cell>;
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
 }
