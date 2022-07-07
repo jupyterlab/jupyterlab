@@ -34,7 +34,7 @@
   "dependencies": {
     "@jupyterlab/rendermime-interfaces": "^3.4.3",
     "@lumino/coreutils": "^1.11.0",
-    "@lumino/widgets": "^1.30.0",
+    "@lumino/widgets": "^1.33.0",
     "vega": "^5.20.0",
     "vega-embed": "^6.2.1",
     "vega-lite": "^5.1.0"

@@ -53,7 +53,7 @@
     "@lumino/messaging": "^1.10.0",
     "@lumino/properties": "^1.8.0",
     "@lumino/signaling": "^1.10.0",
-    "@lumino/widgets": "^1.30.0",
+    "@lumino/widgets": "^1.33.0",
     "resize-observer-polyfill": "^1.5.1"
   },
   "devDependencies": {

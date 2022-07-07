@@ -55,7 +55,7 @@
     "@jupyterlab/ui-components": "^3.4.3",
     "@lumino/commands": "^1.19.0",
     "@lumino/coreutils": "^1.11.0",
-    "@lumino/widgets": "^1.30.0"
+    "@lumino/widgets": "^1.33.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
