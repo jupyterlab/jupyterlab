@@ -81,6 +81,7 @@ export class NotebookTools extends Widget implements INotebookTools {
     this._commonTools = new RankedPanel<NotebookTools.Tool>();
     this._commonTools.title.label = this._trans.__('Common Tools');
     this._advancedTools = new RankedPanel<NotebookTools.Tool>();
+    this._advancedTools.id = 'advancedToolsSection';
     this._advancedTools.title.label = this._trans.__('Advanced Tools');
 
     this._extendedTools = [];
@@ -167,7 +168,7 @@ export class NotebookTools extends Widget implements INotebookTools {
     const sectionName = options.sectionName;
     const label = options.label || options.sectionName;
     const widget = options.tool;
-    const rank = options.rank ?? null;
+    let rank = options.rank ?? null;
 
     const newSection = new RankedPanel<NotebookTools.Tool>();
     newSection.title.label = label;
@@ -179,15 +180,36 @@ export class NotebookTools extends Widget implements INotebookTools {
       panel: newSection,
       rank: rank
     });
+
     if (rank != null)
       (this.layout as PanelLayout).insertWidget(
         rank,
         new Collapser({ widget: newSection })
       );
-    else
-      (this.layout as PanelLayout).addWidget(
-        new Collapser({ widget: newSection })
-      );
+    else {
+      // If no rank is provided, try to add the new section before the AdvancedTools.
+      let advancedToolsRank = null;
+      const layout = this.layout as PanelLayout;
+      for (let i = 0; i < layout.widgets.length; i++) {
+        let w = layout.widgets[i];
+        if (w instanceof Collapser) {
+          if (w.widget.id == 'advancedToolsSection') {
+            advancedToolsRank = i;
+            break;
+          }
+        }
+      }
+
+      if (advancedToolsRank != null)
+        (this.layout as PanelLayout).insertWidget(
+          advancedToolsRank,
+          new Collapser({ widget: newSection })
+        );
+      else
+        (this.layout as PanelLayout).addWidget(
+          new Collapser({ widget: newSection })
+        );
+    }
   }
 
   /**

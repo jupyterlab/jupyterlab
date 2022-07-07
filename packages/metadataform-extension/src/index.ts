@@ -97,7 +97,6 @@ export class MetadataFormWidget extends NotebookTools.Tool {
    */
   buildWidget(): void {
     const formWidget = new FormWidget(this._props, this._pluginId);
-    Widget.attach(formWidget, document.body);
     formWidget.addClass('jp-MetadataForm');
     this.setContent(formWidget);
   }
