@@ -30,8 +30,8 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { SingletonLayout, Widget } from '@lumino/widgets';
-import { IMetadataForm, IMetadataFormProvider } from './token';
 
+import { IMetadataForm, IMetadataFormProvider } from './token';
 import { FormWidget, MetadataForm } from './form';
 
 export { IMetadataForm, IMetadataFormProvider };
@@ -46,19 +46,22 @@ export class MetadataFormWidget extends NotebookTools.Tool {
    * Construct an empty widget.
    */
   constructor(
-    builtProperties: Private.IProperties,
+    builtProperties: MetadataForm.IProperties,
+    metadataKeys: MetadataForm.IMetadataKeys,
     pluginId?: string,
     translator?: ITranslator
   ) {
     super();
     this._props = {
       properties: builtProperties,
+      metadataKeys: metadataKeys,
       translator: translator || null,
       formData: null,
       parent: this
     };
 
     this.builtProperties = builtProperties;
+    this.metadataKeys = metadataKeys;
     this._pluginId = pluginId;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
@@ -125,9 +128,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
 
     if (cell == undefined) return;
 
-    for (let [key, nestedKeys] of Object.entries(
-      this.builtProperties.metadataKeys
-    )) {
+    for (let [key, nestedKeys] of Object.entries(this.metadataKeys)) {
       let workingObject: PartialJSONObject = cell.model.metadata.toJSON();
       let hasValue = true;
       // Navigate to the value
@@ -154,7 +155,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
    * @param formData: the cell metadata set in the form.
    */
   public updateMetadata(
-    metadataKeys: Private.IProperties['metadataKeys'],
+    metadataKeys: MetadataForm.IMetadataKeys,
     formData: ReadonlyPartialJSONObject
   ) {
     if (this.notebookTools == undefined) {
@@ -166,6 +167,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
       console.log('NO CELL');
       return;
     }
+
     this._updatingMetadata = true;
 
     // Build the list of metadata to modify
@@ -212,7 +214,8 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   public tracker: INotebookTracker;
   protected translator: ITranslator;
   private _trans: TranslationBundle;
-  private builtProperties: Private.IProperties;
+  private builtProperties: MetadataForm.IProperties;
+  private metadataKeys: MetadataForm.IMetadataKeys;
   private _placeholder: Widget;
   private _updatingMetadata: boolean;
   private _pluginId: string | undefined;
@@ -242,14 +245,14 @@ namespace Private {
       loaded = {};
       schema.properties!.metadataforms.default = Object.keys(registry.plugins)
         .map(plugin => {
-          const metadataforms =
+          const metadataForms =
             registry.plugins[plugin]!.schema['jupyter.lab.metadataforms'] ?? [];
 
-          metadataforms.forEach(metadataform => {
-            metadataform._origin = plugin;
+          metadataForms.forEach(metadataForm => {
+            metadataForm._origin = plugin;
           });
-          loaded[plugin] = metadataforms;
-          return metadataforms;
+          loaded[plugin] = metadataForms;
+          return metadataForms;
         })
         .concat([schema['jupyter.lab.metadataforms'] as any[]])
         .reduce((acc, val) => {
@@ -308,9 +311,13 @@ namespace Private {
     // Create menu for non-disabled element
     for (let schema of settings.composite
       .metadataforms as ISettingRegistry.IMetadataForm[]) {
-      let builtProperties: IProperties = { metadataKeys: {}, properties: {} };
+      let builtProperties: MetadataForm.IProperties = {
+        type: 'object',
+        properties: {}
+      };
+      let metadataKeys: MetadataForm.IMetadataKeys = {};
       for (let metadataKey of schema.metadataKeys) {
-        builtProperties.metadataKeys[metadataKey.metadataKey.join('.')] =
+        metadataKeys[metadataKey.metadataKey.join('.')] =
           metadataKey.metadataKey;
         builtProperties.properties[metadataKey.metadataKey.join('.')] =
           metadataKey.properties;
@@ -318,6 +325,7 @@ namespace Private {
 
       const tool = new MetadataFormWidget(
         builtProperties,
+        metadataKeys,
         schema._origin,
         translator
       );

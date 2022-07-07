@@ -14,8 +14,12 @@ import { MetadataFormWidget } from './index';
 
 export namespace MetadataForm {
   export interface IProperties {
-    metadataKeys: { [metadataKey: string]: Array<string> };
+    type: string;
     properties: { [metadataKey: string]: PartialJSONObject };
+  }
+
+  export interface IMetadataKeys {
+    [metadataKey: string]: Array<string>;
   }
 
   /**
@@ -23,14 +27,24 @@ export namespace MetadataForm {
    */
   export interface IProps {
     /**
-     * Properties and associated metadata keys defined from the settings.
+     * Properties defined from the settings.
      */
     properties: IProperties;
+
+    /**
+     *  Metadata keys associated to properties.
+     */
+    metadataKeys: IMetadataKeys;
 
     /**
      * Current data of the form.
      */
     formData: ReadonlyPartialJSONObject | null;
+
+    // /**
+    //  *  Errors on the form.
+    //  */
+    // errors?: {[keyError: string]: {__errors: string}};
 
     /**
      * Translator object
@@ -54,19 +68,36 @@ export class FormWidget extends ReactWidget {
   constructor(props: MetadataForm.IProps, pluginId?: string) {
     super();
     this.addClass('jp-ReactWidget');
-    this.props = props;
+    this._props = props;
     this.pluginId = pluginId;
+  }
+
+  public set props(newProps: MetadataForm.IProps) {
+    this._props = newProps;
   }
 
   render(): JSX.Element {
     return (
       <Form
-        schema={this.props.properties as JSONSchema7}
-        formData={this.props.formData}
+        schema={this._props.properties as JSONSchema7}
+        formData={this._props.formData}
+        // FieldTemplate={CustomTemplate}
+        // ArrayFieldTemplate={CustomArrayTemplateFactory(
+        //   this.props.translator
+        // )}
+        // ObjectFieldTemplate={CustomObjectTemplateFactory(
+        //   this.props.translator
+        // )}
+        // uiSchema={uiSchema}
+        // fields={this.props.renderers}
+        // formContext={{ settings: this.props.settings }}
+        // extraErrors={this._props.errors}
+        // liveValidate
         idPrefix={`jp-MetadataForm-${this.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this.props.parent.updateMetadata(
-            this.props.properties.metadataKeys,
+          console.log(e);
+          this._props.parent.updateMetadata(
+            this._props.metadataKeys,
             e.formData
           );
         }}
@@ -74,6 +105,6 @@ export class FormWidget extends ReactWidget {
     );
   }
 
-  private props: MetadataForm.IProps;
+  private _props: MetadataForm.IProps;
   private pluginId?: PartialJSONValue;
 }
