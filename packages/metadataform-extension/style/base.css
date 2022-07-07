@@ -70,3 +70,14 @@
   border: none;
   padding: 0;
 }
+
+/* RJSF form validation error */
+
+/* Hide panel level error as duplicated the field level error */
+.panel-danger.errors {
+  display: none;
+}
+
+.error-detail .text-danger {
+  color: red;
+}

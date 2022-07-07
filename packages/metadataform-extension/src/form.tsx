@@ -92,7 +92,7 @@ export class FormWidget extends ReactWidget {
         // fields={this.props.renderers}
         // formContext={{ settings: this.props.settings }}
         // extraErrors={this._props.errors}
-        // liveValidate
+        liveValidate
         idPrefix={`jp-MetadataForm-${this.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
           console.log(e);

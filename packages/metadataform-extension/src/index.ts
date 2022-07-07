@@ -60,8 +60,6 @@ export class MetadataFormWidget extends NotebookTools.Tool {
       parent: this
     };
 
-    this.builtProperties = builtProperties;
-    this.metadataKeys = metadataKeys;
     this._pluginId = pluginId;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
@@ -128,7 +126,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
 
     if (cell == undefined) return;
 
-    for (let [key, nestedKeys] of Object.entries(this.metadataKeys)) {
+    for (let [key, nestedKeys] of Object.entries(this._props.metadataKeys)) {
       let workingObject: PartialJSONObject = cell.model.metadata.toJSON();
       let hasValue = true;
       // Navigate to the value
@@ -214,8 +212,6 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   public tracker: INotebookTracker;
   protected translator: ITranslator;
   private _trans: TranslationBundle;
-  private builtProperties: MetadataForm.IProperties;
-  private metadataKeys: MetadataForm.IMetadataKeys;
   private _placeholder: Widget;
   private _updatingMetadata: boolean;
   private _pluginId: string | undefined;
