@@ -31,7 +31,7 @@
 }
 
 .cm-lineNumbers {
-  padding: 0 8px;
+  padding: 0 5px 0 0;
 }
 
 .jp-CodeMirrorEditor {

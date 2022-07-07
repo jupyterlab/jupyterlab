@@ -34,7 +34,7 @@ export namespace Configuration {
      * The theme to style the editor with. see editortheme.ts for an example
      * of how to design a theme for CodeMirror 6.
      */
-    theme?: Extension;
+    theme?: string;
 
     // FIXME-TRANS: Handle theme localizable names
     // themeDisplayName?: string
@@ -257,6 +257,42 @@ export namespace Configuration {
     private _builder: IExtensionBuilder;
   }
 
+  class ThemeBuilder implements IConfigurableBuilder {
+    constructor() {
+      this._compartment = new Compartment();
+      this._themeMap = new Map<string, Extension>([['jupyter', jupyterTheme]]);
+    }
+
+    of<T>(value: T): Extension {
+      const v = value as unknown as string;
+      return this._compartment.of(this._getTheme(v));
+    }
+
+    reconfigure<T>(value: T): StateEffect<unknown> {
+      const v = value as unknown as string;
+      return this._compartment.reconfigure(this._getTheme(v));
+    }
+
+    defaultTheme(): Extension {
+      return this._themeMap.get('jupyter')!;
+    }
+
+    registerTheme(name: string, theme: Extension) {
+      this._themeMap.set(name, theme);
+    }
+
+    private _getTheme(value: string): Extension {
+      let ext = this._themeMap.get(value);
+      if (!ext) {
+        ext = this.defaultTheme();
+      }
+      return ext!;
+    }
+
+    private _compartment: Compartment;
+    private _themeMap: Map<string, Extension>;
+  }
+
   function createForwarderBuilder<T extends Extension>(): IConfigurableBuilder {
     return new ConfigurableBuilder(new ExtensionForwarder<T>());
   }
@@ -284,6 +320,10 @@ export namespace Configuration {
     );
   }
 
+  function createThemeBuilder() {
+    return new ThemeBuilder();
+  }
+
   export class EditorConfiguration {
     constructor() {
       this._configurableBuilderMap = new Map<string, IConfigurableBuilder>([
@@ -301,7 +341,7 @@ export namespace Configuration {
           )
         ],
         ['language', createForwarderBuilder<LanguageSupport>()],
-        ['theme', createForwarderBuilder()]
+        ['theme', createThemeBuilder()]
       ]);
       this._themeOverloaderSpec = { '&': {}, '.cm-line': {} };
       this._themeOverloader = new Compartment();
@@ -360,7 +400,8 @@ export namespace Configuration {
       }
 
       if (!config.theme) {
-        extensions.push(jupyterTheme);
+        const themeBuilder = this.get('theme') as ThemeBuilder;
+        extensions.push(themeBuilder.defaultTheme());
       }
 
       const builder = this.get('keymap');
@@ -369,7 +410,6 @@ export namespace Configuration {
           ? [...defaultKeymap, ...config.extraKeys!]
           : [...defaultKeymap]
       );
-      // TODO: replace this with indentUnit in the IConfig object
       const indentBuilder = this.get('indentUnit');
       const insertExt = indentBuilder!.of(
         config.insertSpaces ? ' '.repeat(config.tabSize) : '\t'
@@ -394,6 +434,11 @@ export namespace Configuration {
         });
 
       return extensions;
+    }
+
+    registerTheme(name: string, theme: Extension) {
+      const builder = this.get('theme') as ThemeBuilder;
+      builder.registerTheme(name, theme);
     }
 
     private updateThemeOverload(

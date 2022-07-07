@@ -52,7 +52,6 @@ import { yCollab } from 'y-codemirror.next';
 import { Awareness } from 'y-protocols/awareness';
 import { Mode } from './mode';
 import { Configuration } from './editorconfiguration';
-import { jupyterTheme } from './editortheme';
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
 
@@ -1084,7 +1083,7 @@ export namespace CodeMirrorEditor {
   export const defaultConfig: Required<IConfig> = {
     ...CodeEditor.defaultConfig,
     mode: 'null',
-    theme: jupyterTheme,
+    theme: 'jupyter',
     smartIndent: true,
     electricChars: true,
     keyMap: 'default',

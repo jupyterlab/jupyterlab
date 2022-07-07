@@ -273,17 +273,7 @@ function activateEditorCommands(
       await codeMirror.ensureVimKeymap();
     }*/
 
-    //theme = (settings.get('theme').composite as string | null) || theme;
-
-    // Lazy loading of theme stylesheets
-    /*if (theme !== 'jupyter' && theme !== 'default') {
-      const filename =
-        theme === 'solarized light' || theme === 'solarized dark'
-          ? 'solarized'
-          : theme;
-
-      await import(`codemirror/theme/${filename}.css`);
-    }*/
+    theme = (settings.get('theme').composite as string | null) || theme;
 
     scrollPastEnd =
       (settings.get('scrollPastEnd').composite as boolean | null) ??
@@ -367,8 +357,7 @@ function activateEditorCommands(
   /**
    * Create a menu for the editor.
    */
-  // TODO: CM6
-  /*commands.addCommand(CommandIDs.changeTheme, {
+  commands.addCommand(CommandIDs.changeTheme, {
     label: args =>
       args.theme === 'default'
         ? trans.__('codemirror')
@@ -382,7 +371,7 @@ function activateEditorCommands(
       });
     },
     isToggled: args => args['theme'] === theme
-  });*/
+  });
 
   commands.addCommand(CommandIDs.changeKeyMap, {
     label: args => {
