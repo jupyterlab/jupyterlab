@@ -268,6 +268,7 @@ export namespace CodeEditor {
         this.value.text = sharedModel.getSource();
       }
       this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
+      this.sharedModel.dispose();
       // clone model retrieve a shared (not standalone) model
       this.sharedModel = sharedModel;
       this.sharedModel.changed.connect(this._onSharedModelChanged, this);
@@ -402,6 +403,7 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this.modelDB.dispose();
       Signal.clearData(this);
     }
 
