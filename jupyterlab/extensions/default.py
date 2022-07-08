@@ -3,7 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from jupyterlab_server.translation_utils import translator
 
@@ -32,13 +32,20 @@ class ReadOnlyExtensionsManager(ExtensionsManager):
         """
         return None
 
-    async def list_packages(self) -> Dict[str, ExtensionPackage]:
+    async def list_packages(
+        self, query: str, page: int, per_page: int
+    ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
         """List the available extensions.
 
+        Args:
+            query: The search extension query
+            page: The result page
+            per_page: The number of results per page
         Returns:
             The available extensions in a mapping {name: metadata}
+            The results last page; None if the manager does not support pagination
         """
-        return {}
+        return {}, None
 
     async def install(self, extension: str, version: Optional[str] = None) -> ActionResult:
         """Install the required extension.

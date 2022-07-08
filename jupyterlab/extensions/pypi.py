@@ -8,7 +8,7 @@ import xmlrpc.client
 from functools import partial
 from itertools import groupby
 from subprocess import run
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 import tornado
 
@@ -73,27 +73,38 @@ class PyPiExtensionsManager(ExtensionsManager):
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
 
-    async def list_packages(self) -> Dict[str, ExtensionPackage]:
+    async def list_packages(
+        self, query: str, page: int, per_page: int
+    ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
         """List the available extensions.
 
         Note:
             This will list the packages based on the classifier
                 Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
 
+            Then it filters it with the query
+
             We do not try to check if they are compatible (version wise)
 
+        Args:
+            query: The search extension query
+            page: The result page
+            per_page: The number of results per page
         Returns:
             The available extensions in a mapping {name: metadata}
+            The results last page; None if the manager does not support pagination
         """
         current_loop = tornado.ioloop.IOLoop.current()
         matches = await current_loop.run_in_executor(
             None,
-            self.rpcClient.browse["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
+            self.rpcClient.browse(["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"]),
         )
 
         extensions = {}
 
         for name, group in groupby(matches, lambda e: e[0]):
+            if query not in name:
+                continue
             _, latest_version = list(group)[-1]
             data = await current_loop.run_in_executor(
                 None, self.rpcClient.release_data, name, latest_version
@@ -107,7 +118,7 @@ class PyPiExtensionsManager(ExtensionsManager):
                 pkg_type="prebuilt",
             )
 
-        return extensions
+        return extensions, None
 
     async def install(self, name: str, version: Optional[str] = None) -> ActionResult:
         """Install the required extension.
@@ -124,7 +135,15 @@ class PyPiExtensionsManager(ExtensionsManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
-        cmdline = [sys.executable, "-m", "pip", "install", "--no-input", "--progress-bar", "off"]
+        cmdline = [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--no-input",
+            "--progress-bar",
+            "off",
+        ]
         if version is not None:
             cmdline.append(f"{name}=={version}")
         else:
@@ -159,7 +178,15 @@ class PyPiExtensionsManager(ExtensionsManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
-        cmdline = [sys.executable, "-m", "pip", "uninstall", "--yes", "--no-input", extension]
+        cmdline = [
+            sys.executable,
+            "-m",
+            "pip",
+            "uninstall",
+            "--yes",
+            "--no-input",
+            extension,
+        ]
         self.log.debug(f"Executing '{' '.join(cmdline)}'")
 
         result = await current_loop.run_in_executor(

@@ -6,9 +6,9 @@
 import abc
 import json
 import re
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional, Set
+from typing import Dict, Optional, Set, Tuple
 
 import requests
 from tornado import ioloop
@@ -114,6 +114,19 @@ class ExtensionsOption:
     listings_request_options: dict = field(default_factory=dict)
 
 
+@dataclass
+class ExtensionsCache:
+    """Extensions cache
+
+    Attributes:
+        cache: Extension list per page
+        last_page: Last available page result
+    """
+
+    cache: Dict[int, Optional[Dict[str, ExtensionPackage]]] = field(default_factory=dict)
+    last_page: int = 1
+
+
 class ExtensionsManager(abc.ABC):
     """Base abstract extensions manager.
 
@@ -150,7 +163,7 @@ class ExtensionsManager(abc.ABC):
         self.core_config = app_options.core_config
         self.app_options = app_options
         self.options = ExtensionsOption(**(ext_options or {}))
-        self._extensions_cache: Optional[Dict[str, ExtensionPackage]] = None
+        self._extensions_cache: Dict[Optional[str], ExtensionsCache] = {}
         self._listings_cache: Optional[dict] = None
         self._listings_block_mode = True
 
@@ -191,11 +204,18 @@ class ExtensionsManager(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    async def list_packages(self) -> Dict[str, ExtensionPackage]:
+    async def list_packages(
+        self, query: str, page: int, per_page: int
+    ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
         """List the available extensions.
 
+        Args:
+            query: The search extension query
+            page: The result page
+            per_page: The number of results per page
         Returns:
             The available extensions in a mapping {name: metadata}
+            The results last page; None if the manager does not support pagination
         """
         raise NotImplementedError()
 
@@ -273,7 +293,9 @@ class ExtensionsManager(abc.ABC):
         """
         return extension.name
 
-    async def list_extensions(self, query: str = "") -> Set[ExtensionPackage]:
+    async def list_extensions(
+        self, query: str = "", page: int = 1, per_page: int = 30
+    ) -> Tuple[Set[ExtensionPackage], Optional[int]]:
         """List extensions for a given ``query`` search term.
 
         This will return the extensions installed or available if
@@ -284,20 +306,22 @@ class ExtensionsManager(abc.ABC):
 
         Returns:
             The extensions
+            Last page of results
         """
-        if self._extensions_cache is None:
-            await self.refresh()
+        if query not in self._extensions_cache or page not in self._extensions_cache[query]:
+            await self.refresh(query, page, per_page)
 
         # filter using listings settings
         if self._listings_cache is None and self._listing_fetch is not None:
             self._listing_fetch.callback()
 
-        extensions = set(self._extensions_cache.values())
+        cache = self._extensions_cache[query].cache[page]
+        extensions = set(cache.values())
         if self._listings_cache is not None:
             listing = list(self._listings_cache)
             extensions = set()
             if self._listings_block_mode:
-                for name, ext in self._extensions_cache.items():
+                for name, ext in cache.items():
                     if name not in listing:
                         ext.is_allowed = True
                         extensions.add(ext)
@@ -306,7 +330,7 @@ class ExtensionsManager(abc.ABC):
                         ext.is_allowed = False
                         extensions.add(ext)
             else:
-                for name, ext in self._extensions_cache.items():
+                for name, ext in cache.items():
                     if name in listing:
                         ext.is_allowed = True
                         extensions.add(ext)
@@ -317,10 +341,11 @@ class ExtensionsManager(abc.ABC):
 
         return extensions
 
-    async def refresh(self) -> None:
+    async def refresh(self, query: Optional[str], page: int, per_page: int) -> None:
         """Refresh the list of extensions."""
-        self._extensions_cache = None
-        await self._update_extensions_list()
+        if query in self._extensions_cache:
+            self._extensions_cache[query].cache[page] = None
+        await self._update_extensions_list(query, page, per_page)
 
     def _fetch_listings(self) -> None:
         """Fetch the listings for the extension manager."""
@@ -459,12 +484,20 @@ class ExtensionsManager(abc.ABC):
         else:
             return None
 
-    async def _update_extensions_list(self) -> None:
+    async def _update_extensions_list(
+        self, query: Optional[str] = None, page: int = 1, per_page: int = 30
+    ) -> None:
         """Update the list of extensions"""
-        # Get the available extensions
-        extensions = await self.list_packages()
+        last_page = None
+        if query is not None:
+            # Get the available extensions
+            extensions, last_page = await self.list_packages(query, page, per_page)
+        else:
+            # Get the installed extensions
+            extensions = await self._get_installed_extensions()
 
-        # Get the installed extensions
-        extensions.update(await self._get_installed_extensions())
-
-        self._extensions_cache = extensions
+        if query in self._extensions_cache:
+            self._extensions_cache[query].cache[page] = extensions
+            self._extensions_cache[query].last_page = last_page or 1
+        else:
+            self._extensions_cache[query] = ExtensionsCache({page: extensions}, last_page or 1)
