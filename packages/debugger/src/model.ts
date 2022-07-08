@@ -128,6 +128,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
       return;
     }
     this._isDisposed = true;
+    this.kernelSources.dispose();
     this._disposed.emit();
   }
 
