@@ -53,37 +53,10 @@ jobs:
               core.exportVariable('PULL_REQUEST_ID', pull_request.number);
             });
 
-      - name: Install node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14.x'
-
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.8
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - uses: iterative/setup-cml@v1
-
-      - name: Cache pip on Linux
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-3.8
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Cache yarn
-        uses: actions/cache@v3
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
 
       # First run the benchmark on the old reference
       - name: Checkout old reference
@@ -205,6 +178,9 @@ jobs:
             echo "</details>" >> ${REPORT}
           fi
 
+          # Set the report as summary
+          cat ${REPORT} >> ${GITHUB_STEP_SUMMARY}
+
           # Copy the reference data to upload it as artifact
           cp lab-benchmark-expected.json ./benchmark-results/
 
@@ -225,3 +201,57 @@ jobs:
         run: |
           cat /tmp/jupyterlab_server_old.log
           cat /tmp/jupyterlab_server_new.log
+
+  memory-leak:
+    name: Execute memory-leak tests
+    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.review.state == 'approved' || contains(github.event.review.body, 'please run benchmark')))
+
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get hashes for PR review event
+        if: ${{ github.event_name == 'pull_request_review' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const child_process = require("child_process");
+            const pull_request = context.payload.pull_request;
+            core.exportVariable('PULL_REQUEST_ID', pull_request.number);
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
+
+      - name: Launch JupyterLab
+        shell: bash
+        run: |
+          # Mount a volume to overwrite the server configuration
+          jlpm start > /tmp/jupyterlab_server.log 2>&1 &
+        working-directory: galata
+
+      - name: Execute memory leak tests
+        uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          server_url: http-get://localhost:8888/lab
+
+      - name: Kill the server
+        if: always()
+        shell: bash
+        run: |
+          kill -s SIGKILL $(pgrep jupyter-lab)
+
+      - name: Print JupyterLab logs
+        if: always()
+        shell: bash
+        run: |
+          cat /tmp/jupyterlab_server.log
