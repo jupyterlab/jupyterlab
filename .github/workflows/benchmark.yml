@@ -185,7 +185,7 @@ jobs:
         run: |
           # Publish image to cml.dev
           echo "" >> ${REPORT}
-          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
+          cml-publish ./benchmark-results/lab-benchmark.svg --md >> ${REPORT}
           echo "" >> ${REPORT}
 
           # Test if metadata have changed
