@@ -95,9 +95,9 @@ test.describe('BenchmarkReporter', () => {
     const mdData = fs.readFileSync(outputMd, 'utf-8');
     expect(mdData).toContain('## Benchmark report');
 
-    const outputPng = path.resolve('.', `benchmark-results`, 'test.svg');
-    const pngData = fs.readFileSync(outputPng);
-    expect(pngData).toMatchSnapshot('test.svg');
+    const outputFigure = path.resolve('.', `benchmark-results`, 'test.svg');
+    const figureData = fs.readFileSync(outputFigure);
+    expect(figureData).toMatchSnapshot('test.svg');
   });
 
   test('should generate report with user defined builders', async () => {
@@ -112,9 +112,9 @@ test.describe('BenchmarkReporter', () => {
     const mdData = fs.readFileSync(outputMd, 'utf-8');
     expect(mdData).toContain('## This is a custom table');
 
-    const outputPng = path.resolve('.', 'benchmark-results', 'test.svg');
-    const pngData = fs.readFileSync(outputPng);
-    expect(pngData).toMatchSnapshot('customized_test.svg');
+    const outputFigure = path.resolve('.', 'benchmark-results', 'test.svg');
+    const figureData = fs.readFileSync(outputFigure);
+    expect(figureData).toMatchSnapshot('customized_test.svg');
   });
 });
 
