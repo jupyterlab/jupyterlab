@@ -30,17 +30,6 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
         },
         ...searchKeymap
       ],
-      /*extraKeys: {
-        'Cmd-Right': 'goLineRight',
-        End: 'goLineRight',
-        'Cmd-Left': 'goLineLeft',
-        Tab: 'indentMoreOrinsertTab',
-        'Shift-Tab': 'indentLess',
-        'Cmd-/': cm => cm.toggleComment({ indent: true }),
-        'Ctrl-/': cm => cm.toggleComment({ indent: true }),
-        'Ctrl-G': 'find',
-        'Cmd-G': 'find'
-      },*/
       ...defaults
     };
     this.documentCodeMirrorConfig = {
@@ -58,15 +47,6 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
           }
         }
       ],
-      /*extraKeys: {
-        Tab: 'indentMoreOrinsertTab',
-        'Shift-Tab': 'indentLess',
-        'Cmd-/': cm => cm.toggleComment({ indent: true }),
-        'Ctrl-/': cm => cm.toggleComment({ indent: true }),
-        'Shift-Enter': () => {
-          /* no-op */
-      /*}
-      },*/
       lineNumbers: true,
       scrollPastEnd: true,
       ...defaults

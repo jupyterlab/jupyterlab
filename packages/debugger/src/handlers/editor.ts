@@ -202,28 +202,7 @@ export class EditorHandler implements IDisposable {
     ];
     editor.injectExtension(this._gutter.of(breakpointGutter));
 
-    this._uglyCM6Workaround();
     this._addBreakpointsToEditor();
-  }
-
-  // There is currently a bug in the gutter of CM6, gutter
-  // elements without any marker don't get a DOM class assigned.
-  // The bug is fixed in the master branch, we can remove this
-  // when it is released.
-  private _uglyCM6Workaround(): void {
-    const editor = this._editor as CodeMirrorEditor;
-    const lines = editor.doc.lines;
-    const breakpointPos = Array.from(Array(lines).keys()).map(
-      i => editor.doc.line(i + 1).from
-    );
-
-    editor.editor.dispatch({
-      effects: this._breakpointEffect.of({ pos: breakpointPos })
-    });
-
-    editor.editor.dispatch({
-      effects: this._breakpointEffect.of({ pos: [] })
-    });
   }
 
   /**

@@ -19,7 +19,6 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
@@ -807,18 +806,10 @@ const main: JupyterFrontEndPlugin<void> = {
         if (results.length > 0) {
           if (breakpoint && typeof breakpoint.line !== 'undefined') {
             results.forEach(editor => {
-              if (editor instanceof CodeMirrorEditor) {
-                // TODO: CM6
-                /*(editor as CodeMirrorEditor).scrollIntoViewCentered({
-                  line: (breakpoint.line as number) - 1,
-                  ch: breakpoint.column || 0
-                });*/
-              } else {
-                editor.revealPosition({
-                  line: (breakpoint.line as number) - 1,
-                  column: breakpoint.column || 0
-                });
-              }
+              editor.revealPosition({
+                line: (breakpoint.line as number) - 1,
+                column: breakpoint.column || 0
+              });
             });
           }
           return;

@@ -20,7 +20,6 @@ import {
   CodeMirrorEditor,
   editorServices,
   EditorSyntaxStatus,
-  //ICodeMirror,
   Mode
 } from '@jupyterlab/codemirror';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
@@ -47,13 +46,6 @@ namespace CommandIDs {
   export const goToLine = 'codemirror:go-to-line';
 }
 
-/** The CodeMirror singleton. */
-/*const codemirrorSingleton: JupyterFrontEndPlugin<ICodeMirror> = {
-  id: '@jupyterlab/codemirror-extension:codemirror',
-  provides: ICodeMirror,
-  activate: activateCodeMirror
-};*/
-
 /**
  * The editor services.
  */
@@ -68,7 +60,7 @@ const services: JupyterFrontEndPlugin<IEditorServices> = {
  */
 const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, ISettingRegistry, ITranslator /*, ICodeMirror*/],
+  requires: [IEditorTracker, ISettingRegistry, ITranslator],
   optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
@@ -93,7 +85,6 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
       // Automatically disable if statusbar missing
       return;
     }
-    // TODO: CM6 migration
     const item = new EditorSyntaxStatus({ commands: app.commands, translator });
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
@@ -194,8 +185,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus,
-  lineColItem /*,
-  codemirrorSingleton*/
+  lineColItem
 ];
 export default plugins;
 
@@ -208,34 +198,11 @@ const id = commands.id;
  * Set up the editor services.
  */
 function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
-  /*CodeMirror.prototype.save = () => {
+  CodeMirrorEditor.prototype.save = () => {
     void app.commands.execute('docmanager:save');
-  };*/
+  };
   return editorServices;
 }
-
-/**
- * Simplest implementation of the CodeMirror singleton provider.
- */
-/*class CodeMirrorSingleton implements ICodeMirror {
-  get CodeMirror() {
-    return CodeMirror;
-  }
-
-  async ensureVimKeymap() {
-    if (!('Vim' in (CodeMirror as any))) {
-      // @ts-expect-error Import non typed package
-      await import('codemirror/keymap/vim.js');
-    }
-  }
-}*/
-
-/**
- * Set up the CodeMirror singleton.
- */
-/*function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
-  return new CodeMirrorSingleton();
-}*/
 
 /**
  * Set up the editor widget menu and commands.
@@ -245,7 +212,6 @@ function activateEditorCommands(
   tracker: IEditorTracker,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
-  //codeMirror: ICodeMirror,
   mainMenu: IMainMenu | null
 ): void {
   const trans = translator.load('jupyterlab');
@@ -266,12 +232,7 @@ function activateEditorCommands(
   async function updateSettings(
     settings: ISettingRegistry.ISettings
   ): Promise<void> {
-    //keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
-
-    // Lazy loading of vim mode
-    /*if (keyMap === 'vim') {
-      await codeMirror.ensureVimKeymap();
-    }*/
+    keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
 
     theme = (settings.get('theme').composite as string | null) || theme;
 
@@ -279,8 +240,7 @@ function activateEditorCommands(
       (settings.get('scrollPastEnd').composite as boolean | null) ??
       scrollPastEnd;
     styleActiveLine =
-      (settings.get('styleActiveLine').composite as boolean) ??
-      /*| CodeMirror.StyleActiveLine*/ styleActiveLine;
+      (settings.get('styleActiveLine').composite as boolean) ?? styleActiveLine;
     styleSelectedText =
       (settings.get('styleSelectedText').composite as boolean) ??
       styleSelectedText;
@@ -445,7 +405,6 @@ function activateEditorCommands(
   });
 
   if (mainMenu) {
-    // TODO: CM6 migration
     const modeMenu = mainMenu.viewMenu.items.find(
       item =>
         item.type === 'submenu' &&

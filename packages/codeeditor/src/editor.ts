@@ -637,16 +637,6 @@ export namespace CodeEditor {
     addKeydownHandler(handler: KeydownHandler): IDisposable;
 
     /**
-     * Set the size of the editor.
-     *
-     * @param size - The desired size.
-     *
-     * #### Notes
-     * Use `null` if the size is unknown.
-     */
-    setSize(size: IDimension | null): void;
-
-    /**
      * Reveals the given position in the editor.
      *
      * @param position - The desired position to reveal.
@@ -683,16 +673,6 @@ export namespace CodeEditor {
      * Inserts a new line at the cursor position and indents it.
      */
     newIndentedLine(): void;
-
-    /**
-     * Gets the token at a given position.
-     */
-    //getTokenForPosition(position: IPosition): IToken;
-
-    /**
-     * Gets the list of tokens for the editor model.
-     */
-    //getTokens(): IToken[];
 
     /**
      * Replaces selection with the given text.

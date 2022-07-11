@@ -29,7 +29,6 @@ export class FileEditorSearchProvider
    */
   constructor(widget: FileEditorPanel) {
     super(widget.content.editor as CodeMirrorEditor);
-    //this.editor = widget.content.editor as CodeMirrorEditor;
   }
 
   /**

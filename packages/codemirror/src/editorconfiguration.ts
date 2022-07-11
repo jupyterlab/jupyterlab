@@ -12,7 +12,13 @@ import {
   StateEffect
 } from '@codemirror/state';
 
-import { EditorView, KeyBinding, keymap, lineNumbers } from '@codemirror/view';
+import {
+  EditorView,
+  highlightActiveLine,
+  KeyBinding,
+  keymap,
+  lineNumbers
+} from '@codemirror/view';
 
 import { StyleSpec } from 'style-mod';
 
@@ -140,11 +146,9 @@ export namespace Configuration {
 
     /**
      * Whether to give the wrapper of the line that contains the cursor the class
-     * CodeMirror-activeline, adds a background with the class
-     * CodeMirror-activeline-background, and adds the class
-     * CodeMirror-activeline-gutter to the line's gutter space is enabled.
+     * cm-activeLine.
      */
-    styleActiveLine: boolean; //| CodeMirror.StyleActiveLine;
+    styleActiveLine: boolean;
 
     /**
      * Whether to causes the selected text to be marked with the CSS class
@@ -332,6 +336,7 @@ export namespace Configuration {
         ['keymap', createConfigurableBuilder(keymap)],
         ['indentUnit', createConfigurableBuilder(indentUnit)],
         ['autoClosingBrackets', createConditionalBuilder(closeBrackets())],
+        ['styleActiveLine', createConditionalBuilder(highlightActiveLine())],
         ['lineNumbers', createConditionalBuilder(lineNumbers())],
         [
           'lineWrap',

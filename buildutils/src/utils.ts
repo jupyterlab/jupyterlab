@@ -367,16 +367,6 @@ function requirePackage(parentModule: string, module: string): NodeRequire {
       paths: [parentModulePath]
     });
     return findPackageJson(base, [parentModulePath]);
-    /*const { root } = path.parse(base);
-    let current = base;
-
-    while (current !== root && !isModuleDir(current, [parentModulePath])) {
-      const pkgJsonPath = path.join(current, 'package.json');
-      if (fs.existsSync(pkgJsonPath)) {
-        return require(pkgJsonPath);
-      }
-      current = path.resolve(current, '..');
-    }*/
   }
 
   throw new Error(`Unable to find package.json for '${module}'.`);

@@ -52,7 +52,7 @@ export namespace Mode {
     return res;
   }
 
-  const goldorak = [
+  const modeList = [
     makeSpec({
       name: 'C',
       mime: 'text/x-csrc',
@@ -1443,7 +1443,7 @@ export namespace Mode {
    * Get the raw list of available modes specs.
    */
   export function getModeInfo(): ISpec[] {
-    return goldorak as ISpec[];
+    return modeList as ISpec[];
   }
 
   /**
@@ -1458,8 +1458,8 @@ export namespace Mode {
       return null;
     }
     mime = (mime as string).toLowerCase();
-    for (let i = 0; i < goldorak.length; i++) {
-      let info = goldorak[i];
+    for (let i = 0; i < modeList.length; i++) {
+      let info = modeList[i];
       if (Array.isArray(info.mime)) {
         for (let j = 0; j < info.mime.length; j++) {
           if (info.mime[j] == mime) {
@@ -1480,8 +1480,8 @@ export namespace Mode {
    */
   export function findByName(name: string): ISpec | null {
     name = name.toLowerCase();
-    for (let i = 0; i < goldorak.length; i++) {
-      let info = goldorak[i];
+    for (let i = 0; i < modeList.length; i++) {
+      let info = modeList[i];
       if (info.name.toLowerCase() == name) return info;
       if (info.alias) {
         for (let j = 0; j < info.alias.length; j++) {
@@ -1508,8 +1508,8 @@ export namespace Mode {
       return null;
     }
     ext = (ext as string).toLowerCase();
-    for (let i = 0; i < goldorak.length; i++) {
-      let info = goldorak[i];
+    for (let i = 0; i < modeList.length; i++) {
+      let info = modeList[i];
       for (let j = 0; j < info.extensions!.length; j++) {
         if (info.extensions![j].toLowerCase() == ext) {
           return info;
@@ -1524,8 +1524,8 @@ export namespace Mode {
    */
   export function findByFileName(name: string): ISpec | null {
     const basename = PathExt.basename(name);
-    for (let i = 0; i < goldorak.length; i++) {
-      let info = goldorak[i];
+    for (let i = 0; i < modeList.length; i++) {
+      let info = modeList[i];
       if (info.filename && info.filename.test(basename)) {
         return info;
       }
@@ -1580,7 +1580,7 @@ export namespace Mode {
     if (info) {
       throw new Error(`$"mode.mime" already registered`);
     }
-    goldorak.push(makeSpec(mode));
+    modeList.push(makeSpec(mode));
   }
 
   export function run(code: string, mode: ISpec, el: HTMLElement): void {

@@ -377,9 +377,9 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    */
   readonly isReadOnly = false;
 
-  private _onDocChanged(view: ViewUpdate): void {
+  private _onDocChanged(update: ViewUpdate): void {
     // TODO: CM6 migration
-    /*if (changeObj.text.length > 1 || (changeObj.removed?.length ?? 0) > 1) {
+    if (update.changes.length) {
       this._setInitialMatches(this._query)
         .then(() => {
           this._changed.emit(undefined);
@@ -389,7 +389,7 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
             `Fail to reapply search on CodeMirror document change:\n${reason}`
           );
         });
-    }*/
+    }
   }
 
   private _refreshOverlay() {

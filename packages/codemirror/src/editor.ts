@@ -14,7 +14,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
-import { /*JSONExt,*/ UUID } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
@@ -55,8 +55,6 @@ import { Configuration } from './editorconfiguration';
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
 
-// import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
-
 /**
  * The class name added to CodeMirrorWidget instances.
  */
@@ -65,7 +63,7 @@ const EDITOR_CLASS = 'jp-CodeMirrorEditor';
 /**
  * The class name added to read only cell editor widgets.
  */
-//const READ_ONLY_CLASS = 'jp-mod-readOnly';
+const READ_ONLY_CLASS = 'jp-mod-readOnly';
 
 /**
  * The class name for the hover box for collaborator cursors.
@@ -242,6 +240,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     };
   }
 
+  save: () => void;
+
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
@@ -332,9 +332,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
-    /*if (this._yeditorBinding) {
-      this._yeditorBinding.destroy();
-    }*/
     this._keydownHandlers.length = 0;
     this._poll.dispose();
     Signal.clearData(this);
@@ -425,7 +422,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Clear the undo history.
    */
   clearHistory(): void {
-    //TODO
     this._yeditorBinding?.undoManager?.clear();
   }
 
@@ -516,20 +512,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     return new DisposableDelegate(() => {
       ArrayExt.removeAllWhere(this._keydownHandlers, val => val === handler);
     });
-  }
-
-  /**
-   * Set the size of the editor in pixels.
-   */
-  setSize(dimension: CodeEditor.IDimension | null): void {
-    // TODO: CM6 : there is no equivalent of setSize in CM6
-    // this has to be set via css
-    /*if (dimension) {
-      this._editor.setSize(dimension.width, dimension.height);
-    } else {
-      this._editor.setSize(null, null);
-    }*/
-    this._needsRefresh = false;
   }
 
   /**
@@ -757,7 +739,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Clean selections for the given uuid.
    */
-  // TODO: CM6 migration see Mark Text section of the migration guide
   private _cleanSelections(uuid: string) {
     this.editor.dispatch({
       effects: this._removeMark.of({
@@ -1139,7 +1120,7 @@ namespace Private {
     editorConfig: Configuration.EditorConfiguration,
     additionalExtensions: Extension[]
   ): EditorView {
-    let extensions = editorConfig.getInitialExtensions(config);
+    const extensions = editorConfig.getInitialExtensions(config);
     if (ybinding) {
       extensions.push(
         yCollab(ybinding.text, ybinding.awareness, {
@@ -1156,6 +1137,10 @@ namespace Private {
       }),
       parent: host
     });
+
+    if (config.readOnly) {
+      view.dom.classList.add(READ_ONLY_CLASS);
+    }
 
     return view;
   }
@@ -1191,7 +1176,7 @@ namespace Private {
     }
 
     eq(other: CaretWidget) {
-      return other.collaborator.sessionId == other.collaborator.sessionId;
+      return this.collaborator.sessionId == other.collaborator.sessionId;
     }
 
     toDOM() {
@@ -1207,8 +1192,8 @@ namespace Private {
         // Construct and place the hover box.
         const hover = document.createElement('div');
         hover.className = COLLABORATOR_HOVER_CLASS;
-        hover.style.left = String(rect.left) + 'px';
-        hover.style.top = String(rect.bottom) + 'px';
+        hover.style.left = `${rect.left}px`;
+        hover.style.top = `${rect.bottom}px`;
         hover.textContent = this.collaborator.displayName;
         hover.style.backgroundColor = this.collaborator.color;
 
