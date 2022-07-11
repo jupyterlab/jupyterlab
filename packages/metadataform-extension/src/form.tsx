@@ -1,7 +1,7 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import React from 'react';
-import Form, { IChangeEvent } from '@rjsf/core';
+import Form, { IChangeEvent, Widget as RjsfWidget } from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
 import {
   PartialJSONObject,
@@ -20,6 +20,10 @@ export namespace MetadataForm {
 
   export interface IMetadataKeys {
     [metadataKey: string]: Array<string>;
+  }
+
+  export interface IUiSchema {
+    [metadataKey: string]: { 'ui:widget': RjsfWidget };
   }
 
   /**
@@ -55,6 +59,11 @@ export namespace MetadataForm {
      * The parent object of the form.
      */
     parent: MetadataFormWidget;
+
+    /**
+     * The uiSchema built when loading schemas.
+     */
+    uiSchema: IUiSchema;
   }
 }
 
@@ -88,14 +97,13 @@ export class FormWidget extends ReactWidget {
         // ObjectFieldTemplate={CustomObjectTemplateFactory(
         //   this.props.translator
         // )}
-        // uiSchema={uiSchema}
+        uiSchema={this._props.uiSchema}
         // fields={this.props.renderers}
         // formContext={{ settings: this.props.settings }}
         // extraErrors={this._props.errors}
         liveValidate
         idPrefix={`jp-MetadataForm-${this.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          console.log(e);
           this._props.parent.updateMetadata(
             this._props.metadataKeys,
             e.formData

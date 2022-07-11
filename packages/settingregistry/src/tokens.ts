@@ -653,6 +653,11 @@ export namespace ISettingRegistry {
      * Property associated to that metadata, formatted as React JSON schema.
      */
     properties: PartialJSONObject;
+
+    /**
+     * Name of a registered react widget.
+     */
+    'ui:widget'?: string;
   }
 
   /**

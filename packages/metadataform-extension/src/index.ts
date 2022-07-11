@@ -20,6 +20,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { IFormWidgetRegistry } from '@jupyterlab/ui-components';
 import {
   JSONExt,
   PartialJSONArray,
@@ -48,6 +49,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   constructor(
     builtProperties: MetadataForm.IProperties,
     metadataKeys: MetadataForm.IMetadataKeys,
+    uiSchema: MetadataForm.IUiSchema,
     pluginId?: string,
     translator?: ITranslator
   ) {
@@ -55,6 +57,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     this._props = {
       properties: builtProperties,
       metadataKeys: metadataKeys,
+      uiSchema: uiSchema,
       translator: translator || null,
       formData: null,
       parent: this
@@ -228,7 +231,8 @@ namespace Private {
     tools: MetadataFormWidget[],
     registry: ISettingRegistry,
     notebookTools: INotebookTools,
-    translator: ITranslator
+    translator: ITranslator,
+    editorRegistry: IFormWidgetRegistry
   ): Promise<void> {
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IMetadataForm[] } = {};
@@ -301,9 +305,7 @@ namespace Private {
 
     const settings = await registry.load(PLUGIN_ID);
 
-    console.log(settings);
-
-    // Create menu for non-disabled element
+    // Creates all the form from extensions settings.
     for (let schema of settings.composite
       .metadataforms as ISettingRegistry.IMetadataForm[]) {
       let builtProperties: MetadataForm.IProperties = {
@@ -311,28 +313,53 @@ namespace Private {
         properties: {}
       };
       let metadataKeys: MetadataForm.IMetadataKeys = {};
+      let uiSchema: MetadataForm.IUiSchema = {};
+
       for (let metadataKey of schema.metadataKeys) {
-        metadataKeys[metadataKey.metadataKey.join('.')] =
-          metadataKey.metadataKey;
-        builtProperties.properties[metadataKey.metadataKey.join('.')] =
-          metadataKey.properties;
+        // Name of the key in RJSF schema.
+        const joinedMetadataKey = metadataKey.metadataKey.join('.');
+
+        // Links the key to the metadata path of the data.
+        metadataKeys[joinedMetadataKey] = metadataKey.metadataKey;
+
+        // Links the key to its singular property.
+        builtProperties.properties[joinedMetadataKey] = metadataKey.properties;
+
+        // Optionally links key to a custom widget.
+        if (metadataKey['ui:widget']) {
+          const renderer = editorRegistry.getRenderer(
+            metadataKey['ui:widget'] as string
+          );
+          if (renderer === undefined)
+            console.error(
+              `The custom widget ${
+                metadataKey['ui:widget'] as string
+              } has not been registered.`
+            );
+          else uiSchema[joinedMetadataKey] = { 'ui:widget': renderer };
+        }
       }
 
+      // Creates the tool.
       const tool = new MetadataFormWidget(
         builtProperties,
         metadataKeys,
+        uiSchema,
         schema._origin,
         translator
       );
 
+      // Adds a section to notebookTools.
       notebookTools.addSection({
         sectionName: schema.label,
         rank: schema.rank,
         label: schema.label ?? schema.mainKey
       });
 
+      // Builds the form.
       tool.buildWidget();
 
+      // Adds the form to the section.
       notebookTools.addItem({ section: schema.label, tool: tool });
 
       tools.push(tool);
@@ -346,13 +373,14 @@ namespace Private {
 const metadataForm: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
-  requires: [INotebookTools, ITranslator],
+  requires: [INotebookTools, ITranslator, IFormWidgetRegistry],
   optional: [ISettingRegistry],
   provides: IMetadataFormProvider,
   activate: async (
     app: JupyterFrontEnd,
     notebookTools: INotebookTools,
     translator: ITranslator,
+    editorRegistry: IFormWidgetRegistry,
     settings: ISettingRegistry | null
   ) => {
     console.log('Activating Metadata form');
@@ -364,7 +392,8 @@ const metadataForm: JupyterFrontEndPlugin<void> = {
         tools,
         settings,
         notebookTools,
-        translator
+        translator,
+        editorRegistry
       );
     }
 

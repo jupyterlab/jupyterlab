@@ -187,6 +187,9 @@
       "path": "../mathjax2-extension"
     },
     {
+      "path": "../metadataform-extension"
+    },
+    {
       "path": "../nbformat"
     },
     {
