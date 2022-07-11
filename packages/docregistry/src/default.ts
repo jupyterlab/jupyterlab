@@ -315,6 +315,7 @@ export abstract class ABCWidgetFactory<
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
     this._shutdownOnClose = !!options.shutdownOnClose;
+    this._autoStartDefault = !!options.autoStartDefault;
     this._toolbarFactory = options.toolbarFactory;
   }
 
@@ -410,6 +411,14 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
+   * Automatically start the default kernel if no other matching kernel is
+   * found.
+   */
+  get autoStartDefault(): boolean {
+    return this._autoStartDefault;
+  }
+  
+  /**
    * The application language translator.
    */
   get translator(): ITranslator {
@@ -478,6 +487,7 @@ export abstract class ABCWidgetFactory<
   private _canStartKernel: boolean;
   private _shutdownOnClose: boolean;
   private _preferKernel: boolean;
+  private _autoStartDefault: boolean;
   private _modelName: string;
   private _fileTypes: string[];
   private _defaultFor: string[];
