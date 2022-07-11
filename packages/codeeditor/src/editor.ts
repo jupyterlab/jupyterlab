@@ -670,6 +670,21 @@ export namespace CodeEditor {
     getPositionForCoordinate(coordinate: ICoordinate): IPosition | null;
 
     /**
+     * Get a list of tokens for the current editor text content.
+     */
+    getTokens(): CodeEditor.IToken[];
+
+    /**
+     * Get the token at a given editor position.
+     */
+    getTokenAt(offset: number): CodeEditor.IToken;
+
+    /**
+     * Get the token a the cursor position.
+     */
+    getTokenAtCursor(): CodeEditor.IToken;
+
+    /**
      * Inserts a new line at the cursor position and indents it.
      */
     newIndentedLine(): void;

@@ -69,6 +69,7 @@
     "@jupyterlab/statusbar": "^4.0.0-alpha.11",
     "@jupyterlab/translation": "^4.0.0-alpha.11",
     "@jupyterlab/ui-components": "^4.0.0-alpha.26",
+    "@lezer/common": "~1.0.0",
     "@lezer/highlight": "^1.0.0",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",

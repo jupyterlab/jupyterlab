@@ -52,13 +52,11 @@ namespace Private {
   export function contextHint(
     editor: CodeEditor.IEditor
   ): CompletionHandler.ICompletionItemsReply {
-    // TODO: CM6
     // Find the token at the cursor
-    //const cursor = editor.getCursorPosition();
-    //const token = editor.getTokenForPosition(cursor);
+    const token = editor.getTokenAtCursor();
 
     // Get the list of matching tokens.
-    const tokenList = getCompletionTokens(/*token,*/ editor);
+    const tokenList = getCompletionTokens(token, editor);
 
     // Only choose the ones that have a non-empty type
     // field, which are likely to be of interest.
@@ -69,8 +67,8 @@ namespace Private {
     matches.forEach(label => items.push({ label }));
 
     return {
-      start: 0, //token.offset,
-      end: 0, //token.offset + token.value.length,
+      start: token.offset,
+      end: token.offset + token.value.length,
       items
     };
   }
@@ -80,15 +78,14 @@ namespace Private {
    * but are not identical to the completion request.
    */
   function getCompletionTokens(
-    //token: CodeEditor.IToken,
+    token: CodeEditor.IToken,
     editor: CodeEditor.IEditor
   ): CodeEditor.IToken[] {
-    /*const candidates = editor.getTokens();
+    const candidates = editor.getTokens();
     // Only get the tokens that have a common start, but
     // are not identical.
     return candidates.filter(
       t => t.value.indexOf(token.value) === 0 && t.value !== token.value
-    );*/
-    return [] as CodeEditor.IToken[];
+    );
   }
 }

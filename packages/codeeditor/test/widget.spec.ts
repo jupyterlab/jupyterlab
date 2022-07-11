@@ -21,11 +21,6 @@ class LogEditor extends CodeMirrorEditor {
     super.refresh();
     this.methods.push('refresh');
   }
-
-  setSize(dims: CodeEditor.IDimension | null): void {
-    super.setSize(dims);
-    this.methods.push('setSize');
-  }
 }
 
 class LogWidget extends CodeEditorWrapper {
@@ -168,13 +163,6 @@ describe('CodeEditorWrapper', () => {
   });
 
   describe('#onResize()', () => {
-    it('should set the size of the editor', () => {
-      const msg = new Widget.ResizeMessage(10, 10);
-      const editor = widget.editor as LogEditor;
-      MessageLoop.sendMessage(widget, msg);
-      expect(editor.methods).toEqual(expect.arrayContaining(['setSize']));
-    });
-
     it('should refresh the editor', () => {
       const editor = widget.editor as LogEditor;
       Widget.attach(widget, document.body);

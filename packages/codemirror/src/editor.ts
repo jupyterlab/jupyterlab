@@ -13,6 +13,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { SyntaxNodeRef } from '@lezer/common';
 import { ArrayExt } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
@@ -24,6 +25,7 @@ import {
   insertNewlineAndIndent,
   insertTab
 } from '@codemirror/commands';
+import { ensureSyntaxTree } from '@codemirror/language';
 import {
   ChangeSet,
   EditorSelection,
@@ -649,6 +651,54 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   replaceSelection(text: string): void {
     this.editor.dispatch(this.state.replaceSelection(text));
+  }
+
+  /**
+   * Get a list of tokens for the current editor text content.
+   */
+  getTokens(): CodeEditor.IToken[] {
+    const tokens: CodeEditor.IToken[] = [];
+    const tree = ensureSyntaxTree(this.state, this.doc.length);
+    if (tree) {
+      tree.iterate({
+        enter: (node: SyntaxNodeRef) => {
+          tokens.push({
+            value: this.state.sliceDoc(node.from, node.to),
+            offset: node.from,
+            type: node.name
+          });
+          return true;
+        }
+      });
+    }
+    return tokens;
+  }
+
+  /**
+   * Get the token at a given editor position.
+   */
+  getTokenAt(offset: number): CodeEditor.IToken {
+    const tree = ensureSyntaxTree(this.state, offset);
+    if (tree) {
+      const node = tree.resolveInner(offset);
+      return {
+        value: this.state.sliceDoc(node.from, node.to),
+        offset: node.from,
+        type: node.name
+      };
+    } else {
+      return {
+        value: '',
+        offset: offset
+      };
+    }
+  }
+
+  /**
+   * Get the token a the cursor position.
+   */
+  getTokenAtCursor(): CodeEditor.IToken {
+    return this.getTokenAt(this.state.selection.main.head);
   }
 
   /**

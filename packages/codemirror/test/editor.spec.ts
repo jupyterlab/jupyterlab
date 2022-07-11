@@ -313,14 +313,6 @@ describe('CodeMirrorEditor', () => {
     });
   });
 
-  describe('#setSize()', () => {
-    it('should set the size of the editor in pixels', () => {
-      editor.setSize({ width: 100, height: 100 });
-      editor.setSize(null);
-      expect(editor).toBeTruthy();
-    });
-  });
-
   describe('#revealPosition()', () => {
     it('should reveal the given position in the editor', () => {
       model.value.text = TEXT;
