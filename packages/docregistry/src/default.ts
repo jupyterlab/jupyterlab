@@ -417,7 +417,7 @@ export abstract class ABCWidgetFactory<
   get autoStartDefault(): boolean {
     return this._autoStartDefault;
   }
-  
+
   /**
    * The application language translator.
    */
