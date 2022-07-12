@@ -724,12 +724,12 @@ export class NotebookHelper {
 
     const cell = await this.getCell(cellIndex);
     const gutters = await cell!.$$(
-      '.CodeMirror-gutter-wrapper > .CodeMirror-linenumber'
+      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
     );
     if (gutters.length < lineNumber) {
       return false;
     }
-    await gutters[lineNumber - 1].click();
+    await gutters[lineNumber].click();
     return true;
   }
 
@@ -743,7 +743,7 @@ export class NotebookHelper {
     if (!cell) {
       return false;
     }
-    return (await cell.$('.CodeMirror-gutter-wrapper')) !== null;
+    return (await cell.$('.cm-gutters')) !== null;
   }
 
   /**
@@ -754,7 +754,7 @@ export class NotebookHelper {
   async waitForCellGutter(cellIndex: number): Promise<void> {
     const cell = await this.getCell(cellIndex);
     if (cell) {
-      await this.page.waitForSelector('.CodeMirror-gutter-wrapper', {
+      await this.page.waitForSelector('.cm-gutters', {
         state: 'attached'
       });
     }
@@ -776,12 +776,12 @@ export class NotebookHelper {
 
     const panel = await this.activity.getPanel();
     const gutters = await panel!.$$(
-      '.CodeMirror-gutter-wrapper > .CodeMirror-linenumber'
+      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
     );
     if (gutters.length < lineNumber) {
       return false;
     }
-    await gutters[lineNumber - 1].click();
+    await gutters[lineNumber].click();
     return true;
   }
 
@@ -794,7 +794,7 @@ export class NotebookHelper {
     if (!panel) {
       return false;
     }
-    return (await panel.$('.CodeMirror-gutter-wrapper')) !== null;
+    return (await panel.$('.cm-gutters')) !== null;
   }
 
   /**
@@ -805,7 +805,7 @@ export class NotebookHelper {
   async waitForCodeGutter(): Promise<void> {
     const panel = await this.activity.getPanel();
     if (panel) {
-      await this.page.waitForSelector('.CodeMirror-gutter-wrapper', {
+      await this.page.waitForSelector('.cm-gutters', {
         state: 'attached'
       });
     }

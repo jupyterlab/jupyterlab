@@ -16,8 +16,9 @@ test.use({
 test('Limit cell outputs', async ({ page }) => {
   await page.notebook.createNew();
 
-  await page.locator('div[role="main"] >> textarea')
-    .fill(`from IPython.display import display, Markdown
+  await page.locator(
+    '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
+  ).type(`from IPython.display import display, Markdown
 
 for i in range(10):
     display(Markdown('_Markdown_ **text**'))
@@ -34,8 +35,9 @@ for i in range(10):
 test("Don't limit cell outputs if input is requested", async ({ page }) => {
   await page.notebook.createNew();
 
-  await page.locator('div[role="main"] >> textarea')
-    .fill(`from IPython.display import display, Markdown
+  await page.locator(
+    '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
+  ).type(`from IPython.display import display, Markdown
 
 for i in range(10):
     display(Markdown('_Markdown_ **text**'))
@@ -52,8 +54,9 @@ input('Your age:')
 test('Display input value', async ({ page }) => {
   await page.notebook.createNew();
 
-  await page.locator('div[role="main"] >> textarea')
-    .fill(`from IPython.display import display, Markdown
+  await page.locator(
+    '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
+  ).type(`from IPython.display import display, Markdown
 
 for i in range(10):
     display(Markdown('_Markdown_ **text**'))

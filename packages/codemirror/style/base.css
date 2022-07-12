@@ -74,7 +74,7 @@
 
 .cm-gutters {
   border-right: 1px solid var(--jp-border-color2);
-  background-color: var(--jp-layout-color0) !important;
+  background-color: var(--jp-layout-color2) !important;
 }
 
 .cm-searching,
