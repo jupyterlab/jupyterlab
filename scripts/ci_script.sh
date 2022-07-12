@@ -143,12 +143,6 @@ if [[ $GROUP == release_test ]]; then
     jlpm run prepare:python-release
     cat jupyterlab/staging/package.json
 
-    # debug
-    npm config list
-    yarn config list
-
-    # make sure the local repository is started
-    node buildutils/lib/local-repository.js start
     ./scripts/release_test.sh
     node buildutils/lib/local-repository.js stop
 fi
