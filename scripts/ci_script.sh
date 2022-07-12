@@ -147,6 +147,8 @@ if [[ $GROUP == release_test ]]; then
     npm config list
     yarn config list
 
+    # make sure the local repository is started
+    node buildutils/lib/local-repository.js start
     ./scripts/release_test.sh
     node buildutils/lib/local-repository.js stop
 fi
