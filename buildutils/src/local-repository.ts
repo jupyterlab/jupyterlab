@@ -152,25 +152,26 @@ packages:
     loginPs.stdout.on('data', (chunk: string) => {
       const data = Buffer.from(chunk, 'utf-8').toString().trim();
       console.log('stdout:', data);
-      switch (data) {
-        case 'Username:':
-          console.log('Passing username...');
-          loginPs.stdin.write(user + '\n');
-          break;
-        case 'Password:':
-          console.log('Passing password...');
-          loginPs.stdin.write(pass + '\n');
-          break;
-        case 'Email: (this IS public)':
-          console.log('Passing email...');
-          loginPs.stdin.write(email + '\n');
-          break;
-        default:
-          reject(`Unexpected prompt: "${data}"`);
-      }
       if (data.indexOf('Logged in as') !== -1) {
         loginPs.stdin.end();
         // do not accept here yet, the token may not have been written
+      } else {
+        switch (data) {
+          case 'Username:':
+            console.log('Passing username...');
+            loginPs.stdin.write(user + '\n');
+            break;
+          case 'Password:':
+            console.log('Passing password...');
+            loginPs.stdin.write(pass + '\n');
+            break;
+          case 'Email: (this IS public)':
+            console.log('Passing email...');
+            loginPs.stdin.write(email + '\n');
+            break;
+          default:
+            reject(`Unexpected prompt: "${data}"`);
+        }
       }
       loginPs.stderr.on('data', (chunk: string) => {
         const data = Buffer.from(chunk, 'utf-8').toString().trim();
