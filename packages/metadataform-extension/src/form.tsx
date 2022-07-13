@@ -36,6 +36,13 @@ export namespace MetadataForm {
   }
 
   /**
+   * Default values
+   */
+  export interface IDefaultValues {
+    [metadataKey: string]: any;
+  }
+
+  /**
    * Props passed to the FormWidget component
    */
   export interface IProps {
@@ -73,6 +80,11 @@ export namespace MetadataForm {
      * The uiSchema built when loading schemas.
      */
     uiSchema: IUiSchema;
+
+    /**
+     * The default values for each key.
+     */
+    defaultValues: IDefaultValues;
   }
 }
 
@@ -115,7 +127,8 @@ export class FormWidget extends ReactWidget {
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
           this._props.parent.updateMetadata(
             this._props.metadataKeys,
-            e.formData
+            e.formData,
+            this._props.defaultValues
           );
         }}
       />

@@ -52,6 +52,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     builtProperties: MetadataForm.IProperties,
     metadataKeys: MetadataForm.IMetadataKeys,
     uiSchema: MetadataForm.IUiSchema,
+    defaultValues?: any,
     pluginId?: string,
     translator?: ITranslator
   ) {
@@ -60,6 +61,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
       properties: builtProperties,
       metadataKeys: metadataKeys,
       uiSchema: uiSchema,
+      defaultValues: defaultValues,
       translator: translator || null,
       formData: null,
       parent: this
@@ -155,58 +157,98 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   /**
    * Update the metadata of the current cell.
    * @param formData: the cell metadata set in the form.
+   *
+   * Metadata are updated from root only. If some metadata is nested,
+   * the whole root object must be updated.
+   * This function build an object with all the root object to update
+   * in metadata before performing update.
    */
   public updateMetadata(
     metadataKeys: MetadataForm.IMetadataKeys,
-    formData: ReadonlyPartialJSONObject
+    formData: ReadonlyPartialJSONObject,
+    defaultValues: MetadataForm.IDefaultValues
   ) {
-    if (this.notebookTools == undefined) {
-      console.log('NO notebook tool');
-      return;
-    }
+    if (this.notebookTools == undefined) return;
+
     const cell = this.notebookTools.activeCell;
-    if (cell == undefined) {
-      console.log('NO CELL');
-      return;
-    }
+    if (cell == undefined) return;
 
     this._updatingMetadata = true;
 
-    // Build the list of metadata to modify
-    const metadataList: {
-      [metadata: string]: PartialJSONObject | PartialJSONValue;
+    // Build the object of metadata to modify.
+    const metadataObject: {
+      [metadata: string]: PartialJSONObject | PartialJSONValue | undefined;
     } = {};
-    for (let [key, value] of Object.entries(formData)) {
-      let baseMetadata = metadataKeys[key][0];
-      if (baseMetadata == undefined) continue;
 
+    for (let [key, value] of Object.entries(formData)) {
+      let baseMetadataKey = metadataKeys[key][0];
+      if (baseMetadataKey == undefined) continue;
+
+      let writeFinalData = value !== undefined && value !== defaultValues[key];
+
+      // If metadata key is at root of metadata no need to go further.
       if (metadataKeys[key].length == 1) {
-        metadataList[baseMetadata] = value as PartialJSONValue;
+        if (writeFinalData)
+          metadataObject[baseMetadataKey] = value as PartialJSONValue;
+        else metadataObject[baseMetadataKey] = undefined;
         continue;
       }
 
-      let intermediateKeys = metadataKeys[key].slice(1, -1);
+      let intermediateMetadataKeys = metadataKeys[key].slice(1, -1);
+      let finalMetadataKey = metadataKeys[key][metadataKeys[key].length - 1];
 
-      if (!(baseMetadata in metadataList)) {
-        metadataList[baseMetadata] = cell.model.metadata.toJSON()[
-          baseMetadata
+      // Deep copy of the metadata if not already done.
+      if (!(baseMetadataKey in metadataObject))
+        metadataObject[baseMetadataKey] = cell.model.metadata.toJSON()[
+          baseMetadataKey
         ] as PartialJSONObject;
-      }
 
-      let workingObject: PartialJSONObject = metadataList[
-        baseMetadata
+      if (metadataObject[baseMetadataKey] === undefined)
+        metadataObject[baseMetadataKey] = {};
+
+      // Let's have an object which points to the nested key.
+      let workingObject: PartialJSONObject = metadataObject[
+        baseMetadataKey
       ] as PartialJSONObject;
-      for (let nested of intermediateKeys) {
-        if (!(nested in workingObject)) workingObject[nested] = {};
+
+      let finalObjectReached = true;
+
+      for (let nested of intermediateMetadataKeys) {
+        // If one of the nested object does not exist, this object is created only
+        // if the aim is to write data at the end.
+        if (!(nested in workingObject)) {
+          if (!writeFinalData) {
+            finalObjectReached = false;
+            break;
+          } else workingObject[nested] = {};
+        }
         workingObject = workingObject[nested] as PartialJSONObject;
       }
 
-      workingObject[metadataKeys[key][metadataKeys[key].length - 1]] =
-        value as PartialJSONValue;
+      // Write the value to the nested key or remove all empty object before the nested key,
+      // only if the final object has been reached.
+      if (finalObjectReached) {
+        if (!writeFinalData) delete workingObject[finalMetadataKey];
+        else workingObject[finalMetadataKey] = value as PartialJSONValue;
+      }
+
+      // If the final nested data has been deleted, let see if there is not remaining
+      // empty objects to remove.
+      if (!writeFinalData) {
+        metadataObject[baseMetadataKey] = Private.deleteEmptyNested(
+          metadataObject[baseMetadataKey] as PartialJSONObject,
+          metadataKeys[key].slice(1)
+        );
+        if (
+          !Object.keys(metadataObject[baseMetadataKey] as PartialJSONObject)
+            .length
+        )
+          metadataObject[baseMetadataKey] = undefined;
+      }
     }
 
-    // Set the metadata or delete it if value is undefined
-    for (let [key, value] of Object.entries(metadataList)) {
+    // Set the metadata or delete it if value is undefined or empty object.
+    for (let [key, value] of Object.entries(metadataObject)) {
       if (value === undefined) cell.model.metadata.delete(key);
       else cell.model.metadata.set(key, value as ReadonlyPartialJSONValue);
     }
@@ -307,7 +349,7 @@ namespace Private {
 
     const settings = await registry.load(PLUGIN_ID);
 
-    // Creates all the form from extensions settings.
+    // Creates all the forms from extensions settings.
     for (let schema of settings.composite
       .metadataforms as ISettingRegistry.IMetadataForm[]) {
       let builtProperties: MetadataForm.IProperties = {
@@ -316,30 +358,35 @@ namespace Private {
       };
       let metadataKeys: MetadataForm.IMetadataKeys = {};
       let uiSchema: MetadataForm.IUiSchema = {};
+      let defaultValues: MetadataForm.IDefaultValues = {};
 
-      for (let metadataKey of schema.metadataKeys) {
+      for (let metadataSchema of schema.metadataKeys) {
         // Name of the key in RJSF schema.
-        const joinedMetadataKey = metadataKey.metadataKey.join('.');
+        const joinedMetadataKey = metadataSchema.metadataKey.join('.');
 
         // Links the key to the metadata path of the data.
-        metadataKeys[joinedMetadataKey] = metadataKey.metadataKey;
+        metadataKeys[joinedMetadataKey] = metadataSchema.metadataKey;
 
         // Links the key to its singular property.
-        builtProperties.properties[joinedMetadataKey] = metadataKey.properties;
+        builtProperties.properties[joinedMetadataKey] =
+          metadataSchema.properties;
+
+        // Set the default value.
+        defaultValues[joinedMetadataKey] = metadataSchema.properties.default;
 
         // Initialize an uiSchema for that key.
         uiSchema[joinedMetadataKey] = {};
 
         // Get all ui:schema properties from the JSON file.
-        for (let key in metadataKey) {
+        for (let key in metadataSchema) {
           if (UI_SCHEMA_PATTERN.test(key))
-            uiSchema[joinedMetadataKey][key] = metadataKey[key];
+            uiSchema[joinedMetadataKey][key] = metadataSchema[key];
         }
 
         // Optionally links key to a custom widget.
-        if (metadataKey['customWidget']) {
+        if (metadataSchema['customWidget']) {
           const renderer = editorRegistry.getRenderer(
-            metadataKey['customWidget'] as string
+            metadataSchema['customWidget'] as string
           );
 
           // If renderer is defined (custom widget has been registered), set it as used widget.
@@ -353,6 +400,7 @@ namespace Private {
         builtProperties,
         metadataKeys,
         uiSchema,
+        defaultValues,
         schema._origin,
         translator
       );
@@ -372,6 +420,31 @@ namespace Private {
 
       tools.push(tool);
     }
+  }
+
+  /**
+   * Recursive function to clean the empty nested metadata before updating real metadata.
+   * this function is called when a nested metadata is undefined (or default), so maybe some
+   * object are now empty.
+   * @param metadataObject: PartialJSONObject representing the metadata to update.
+   * @param metadataKeysList: Array<string> of the undefined nested metadata.
+   * @returns PartialJSONObject without empty object.
+   */
+  export function deleteEmptyNested(
+    metadataObject: PartialJSONObject,
+    metadataKeysList: Array<string>
+  ): PartialJSONObject {
+    let metadataKey = metadataKeysList.shift();
+    if (metadataKey !== undefined && metadataKey in metadataObject) {
+      if (Object.keys(metadataObject[metadataKey] as PartialJSONObject).length)
+        metadataObject[metadataKey] = deleteEmptyNested(
+          metadataObject[metadataKey] as PartialJSONObject,
+          metadataKeysList
+        );
+      if (!Object.keys(metadataObject[metadataKey] as PartialJSONObject).length)
+        delete metadataObject[metadataKey];
+    }
+    return metadataObject;
   }
 }
 

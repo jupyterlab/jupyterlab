@@ -2,47 +2,7 @@
   "type": "object",
   "title": "Metadata Form",
   "description": "Settings of the metadata form extension.",
-  "jupyter.lab.metadataforms": [
-    {
-      "label": "NEW_extension",
-      "metadataKeys": [
-        {
-          "metadataKey": ["my-extension", "active"],
-          "properties": {
-            "title": "is-active",
-            "description": "Active status",
-            "type": "boolean"
-          }
-        },
-        {
-          "metadataKey": ["my-extension", "name"],
-          "properties": {
-            "title": "name",
-            "description": "Unique name",
-            "type": "string"
-          }
-        },
-        {
-          "metadataKey": ["my-extension", "sub", "other_sub", "test"],
-          "properties": {
-            "title": "subsub",
-            "description": "test on subsub",
-            "type": "string"
-          }
-        },
-        {
-          "metadataKey": ["root-value"],
-          "properties": {
-            "title": "root",
-            "description": "test on root",
-            "type": "integer"
-          }
-        }
-      ],
-      "mainKey": "my-extension",
-      "_origin": "@jupyterlab/metadataform-extension:metadataforms"
-    }
-  ],
+  "jupyter.lab.metadataforms": [],
   "jupyter.lab.transform": true,
   "additionalProperties": false,
   "properties": {
