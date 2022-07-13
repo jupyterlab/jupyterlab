@@ -655,9 +655,14 @@ export namespace ISettingRegistry {
     properties: PartialJSONObject;
 
     /**
-     * Name of a registered react widget.
+     * Name of a custom registered react widget.
      */
-    'ui:widget'?: string;
+    customWidget: string;
+
+    /**
+     * ui:schema options.
+     */
+    [option: string]: any;
   }
 
   /**

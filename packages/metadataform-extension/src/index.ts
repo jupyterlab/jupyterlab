@@ -39,6 +39,8 @@ export { IMetadataForm, IMetadataFormProvider };
 
 const PLUGIN_ID = '@jupyterlab/metadataform-extension:metadataforms';
 
+const UI_SCHEMA_PATTERN = /^ui\:.*/;
+
 /**
  * A class that create a metadata form widget
  */
@@ -325,18 +327,24 @@ namespace Private {
         // Links the key to its singular property.
         builtProperties.properties[joinedMetadataKey] = metadataKey.properties;
 
+        // Initialize an uiSchema for that key.
+        uiSchema[joinedMetadataKey] = {};
+
+        // Get all ui:schema properties from the JSON file.
+        for (let key in metadataKey) {
+          if (UI_SCHEMA_PATTERN.test(key))
+            uiSchema[joinedMetadataKey][key] = metadataKey[key];
+        }
+
         // Optionally links key to a custom widget.
-        if (metadataKey['ui:widget']) {
+        if (metadataKey['customWidget']) {
           const renderer = editorRegistry.getRenderer(
-            metadataKey['ui:widget'] as string
+            metadataKey['customWidget'] as string
           );
-          if (renderer === undefined)
-            console.error(
-              `The custom widget ${
-                metadataKey['ui:widget'] as string
-              } has not been registered.`
-            );
-          else uiSchema[joinedMetadataKey] = { 'ui:widget': renderer };
+
+          // If renderer is defined (custom widget has been registered), set it as used widget.
+          if (renderer !== undefined)
+            uiSchema[joinedMetadataKey]['ui:widget'] = renderer;
         }
       }
 

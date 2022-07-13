@@ -1,7 +1,7 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import React from 'react';
-import Form, { IChangeEvent, Widget as RjsfWidget } from '@rjsf/core';
+import Form, { IChangeEvent } from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
 import {
   PartialJSONObject,
@@ -9,7 +9,6 @@ import {
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
 import { ITranslator } from '@jupyterlab/translation';
-
 import { MetadataFormWidget } from './index';
 
 export namespace MetadataForm {
@@ -22,8 +21,18 @@ export namespace MetadataForm {
     [metadataKey: string]: Array<string>;
   }
 
+  /**
+   * RJSF ui:schema.
+   */
   export interface IUiSchema {
-    [metadataKey: string]: { 'ui:widget': RjsfWidget };
+    [metadataKey: string]: IUiSchemaOption;
+  }
+
+  /**
+   * RJSF ui:schema options.
+   */
+  export interface IUiSchemaOption {
+    [option: string]: any;
   }
 
   /**
