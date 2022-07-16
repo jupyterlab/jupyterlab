@@ -769,7 +769,7 @@ Inspecting the debug messages in VS Code can be useful to understand when debug 
 The first step is to create a test file and a debug configuration (``launch.json``):
 
 .. image:: ./debugger_launch_configuration.png
-   :alt: 
+   :alt: Small screenshot of the GUI showing the menu for creating a debug configuration.
 
 .. code:: json
 
