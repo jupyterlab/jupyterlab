@@ -759,7 +759,7 @@ The Debugger Adapter Protocol
 The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
 
 .. image:: ./debugger_protocol_diagram.png
-   :alt: 
+   :alt: UML sequence diagram illustrating the interaction between a user, JupyterLab, and the kernel. From top to bottom, the timeline starts with opening the notebook and includes annotations where the debugger is started and stopped. Specific interactions and message types are discussed in the subsequent text.
 
 Inspecting Debug Messages in VS Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
