@@ -488,7 +488,7 @@ Now run Lighthouse against this local server and show the results:
    jlpm run lighthouse --view
 
 .. image:: ../images/lighthouse.png
-   :alt: 
+   :alt: Screenshot of Lighthouse tool used for benchmarking performance.
 
 Using throttling
 ^^^^^^^^^^^^^^^^
