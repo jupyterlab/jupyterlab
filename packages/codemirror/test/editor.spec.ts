@@ -286,13 +286,6 @@ describe('CodeMirrorEditor', () => {
     });
   });
 
-  describe('#refresh()', () => {
-    it('should repaint the editor', () => {
-      editor.refresh();
-      expect(editor).toBeTruthy();
-    });
-  });
-
   describe('#addKeydownHandler()', () => {
     it('should add a keydown handler to the editor', () => {
       let called = 0;
@@ -329,35 +322,6 @@ describe('CodeMirrorEditor', () => {
       editor.setSelection({ start, end });
       editor.revealSelection(editor.getSelection());
       expect(editor).toBeTruthy();
-    });
-  });
-
-  describe('#getCoordinateForPosition()', () => {
-    it('should get the window coordinates given a cursor position', () => {
-      model.value.text = TEXT;
-      const coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
-      if (typeof process !== 'undefined') {
-        // eslint-disable-next-line jest/no-conditional-expect
-        expect(coord.left).toBe(0);
-      } else {
-        // eslint-disable-next-line jest/no-conditional-expect
-        expect(coord.left).toBeGreaterThan(0);
-      }
-    });
-  });
-
-  describe('#getPositionForCoordinate()', () => {
-    it('should get the window coordinates given a cursor position', () => {
-      model.value.text = TEXT;
-      const coord = editor.getCoordinateForPosition({ line: 10, column: 2 });
-      const newPos = editor.getPositionForCoordinate(coord)!;
-      if (typeof process !== 'undefined') {
-        expect(newPos.line).toBe(0);
-        expect(newPos.column).toBe(0);
-      } else {
-        expect(newPos.line).toBeTruthy();
-        expect(newPos.column).toBeTruthy();
-      }
     });
   });
 

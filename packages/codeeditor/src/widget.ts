@@ -160,7 +160,6 @@ export class CodeEditorWrapper extends Widget {
   protected onUpdateRequest(msg: Message): void {
     if (this.isVisible) {
       this._hasRefreshedSinceAttach = true;
-      this.editor.refresh();
     }
   }
 

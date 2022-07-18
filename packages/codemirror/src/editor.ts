@@ -94,7 +94,6 @@ const HOVER_TIMEOUT = 1000;
 
 interface IYCodeMirrorBinding {
   text: Y.Text;
-  // TODO: remove | null when we remove shareModel
   awareness: Awareness | null;
   undoManager: Y.UndoManager | null;
 }
@@ -449,23 +448,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Repaint editor.
-   */
-  refresh(): void {
-    //this._editor.refresh();
-    this._needsRefresh = false;
-  }
-
-  /**
    * Refresh the editor if it is focused;
    * otherwise postpone refreshing till focusing.
    */
   resizeToFit(): void {
-    if (this.hasFocus()) {
-      this.refresh();
-    } else {
-      this._needsRefresh = true;
-    }
     this._clearHover();
   }
 
@@ -585,7 +571,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     options?: { bias?: number; origin?: string; scroll?: boolean }
   ): void {
     const offset = this.getOffsetAt(position);
-    this.editor.dispatch({ selection: { anchor: offset } });
+    this.editor.dispatch({
+      selection: { anchor: offset },
+      scrollIntoView: true
+    });
     // If the editor does not have focus, this cursor change
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.
@@ -986,9 +975,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handle `focus` events for the editor.
    */
   private _evtFocus(event: FocusEvent): void {
-    if (this._needsRefresh) {
-      this.refresh();
-    }
     this.host.classList.add('jp-mod-focused');
 
     // Update the selections on editor gaining focus because
@@ -1055,7 +1041,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         selections: this.getSelections(),
         cursor: this.getCursorPosition(),
         lineSep: this.state.facet(EditorState.lineSeparator),
-        //mode: editor.getOption('mode'),
         change
       })
     );
@@ -1075,7 +1060,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
-  private _needsRefresh = false;
   private _isDisposed = false;
   private _lastChange: ChangeSet | null = null;
   private _poll: Poll;

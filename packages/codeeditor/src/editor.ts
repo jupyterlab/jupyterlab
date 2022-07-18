@@ -615,14 +615,6 @@ export namespace CodeEditor {
     blur(): void;
 
     /**
-     * Repaint the editor.
-     *
-     * #### Notes
-     * A repainted editor should fit to its host node.
-     */
-    refresh(): void;
-
-    /**
      * Resize the editor to fit its host node.
      */
     resizeToFit(): void;

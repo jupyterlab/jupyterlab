@@ -187,13 +187,6 @@ export class JSONEditor extends Widget {
   }
 
   /**
-   * Handle `update-request` messages for the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    this.editor.refresh();
-  }
-
-  /**
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
@@ -319,7 +312,6 @@ export class JSONEditor extends Widget {
         this.editor.setCursorPosition({ line: 0, column: 1 });
       }
     }
-    this.editor.refresh();
     this._changeGuard = false;
     this.commitButtonNode.hidden = true;
     this.revertButtonNode.hidden = true;

@@ -366,13 +366,23 @@ function activateEditorCommands(
 
   commands.addCommand(CommandIDs.goToLine, {
     label: trans.__('Go to Line…'),
-    execute: () => {
+    execute: args => {
       const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
       const editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand(gotoLine);
+
+      const line = args['line'] as number | undefined;
+      const column = args['column'] as number | undefined;
+      if (line !== undefined || column !== undefined) {
+        editor.setCursorPosition({
+          line: (line ?? 1) - 1,
+          column: (column ?? 1) - 1
+        });
+      } else {
+        editor.execCommand(gotoLine);
+      }
     },
     isEnabled
   });

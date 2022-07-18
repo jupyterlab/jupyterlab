@@ -165,10 +165,17 @@ export namespace Configuration {
     selectionPointer: boolean | string;
   }
 
+  /**
+   * Extension builder (we use the same trick as in CM Extension
+   * to emulate empty interface)
+   */
   interface IExtensionBuilder {
     extensionBuilder: IExtensionBuilder;
   }
 
+  /**
+   * Builder for extensions from value of type T
+   */
   abstract class ExtensionBuilder<T> implements IExtensionBuilder {
     abstract of(value: T): Extension;
 
@@ -177,6 +184,9 @@ export namespace Configuration {
     }
   }
 
+  /**
+   * Extension builder that simply forwards a value as an extension.
+   */
   class ExtensionForwarder<T extends Extension> extends ExtensionBuilder<T> {
     constructor() {
       super();
@@ -187,6 +197,9 @@ export namespace Configuration {
     }
   }
 
+  /**
+   * Extension builder that builds an extension from a facet.
+   */
   class FacetWrapper<T, U> extends ExtensionBuilder<T> {
     constructor(facet: Facet<T, U>) {
       super();
@@ -200,6 +213,10 @@ export namespace Configuration {
     private _facet: Facet<T, U>;
   }
 
+  /**
+   * Extension builder that provides an extension depending
+   * on a boolean value.
+   */
   class ConditionalExtension extends ExtensionBuilder<boolean> {
     constructor(truthy: Extension, falsy: Extension = []) {
       super();
@@ -215,6 +232,10 @@ export namespace Configuration {
     private _falsy: Extension;
   }
 
+  /**
+   * Extension builds that provides an extension depending on
+   * conditional function operating on a value.
+   */
   class GenConditionalExtension<T> extends ExtensionBuilder<T> {
     constructor(
       fn: (a: T) => boolean,
@@ -234,11 +255,18 @@ export namespace Configuration {
     private _builder: ConditionalExtension;
   }
 
+  /**
+   * Builds an extension in a compartment that can
+   * be reconfigured.
+   */
   interface IConfigurableBuilder {
     of<T>(value: T): Extension;
     reconfigure<T>(value: T): StateEffect<unknown>;
   }
 
+  /**
+   * IConfigurableBuilder implementation *
+   */
   class ConfigurableBuilder implements IConfigurableBuilder {
     constructor(builder: IExtensionBuilder) {
       this._compartment = new Compartment();
@@ -261,6 +289,10 @@ export namespace Configuration {
     private _builder: IExtensionBuilder;
   }
 
+  /*
+   * Specific builder for themes. Provide a default theme and
+   * allows to register new themes.
+   */
   class ThemeBuilder implements IConfigurableBuilder {
     constructor() {
       this._compartment = new Compartment();
@@ -297,16 +329,25 @@ export namespace Configuration {
     private _themeMap: Map<string, Extension>;
   }
 
+  /**
+   * Creates a ConfigurableBuilder based on an ExtensionForwarder.
+   */
   function createForwarderBuilder<T extends Extension>(): IConfigurableBuilder {
     return new ConfigurableBuilder(new ExtensionForwarder<T>());
   }
 
+  /**
+   * Creates a ConfigurableBuilder based on a Facet.
+   */
   function createConfigurableBuilder<T, U>(
     facet: Facet<T, U>
   ): IConfigurableBuilder {
     return new ConfigurableBuilder(new FacetWrapper<T, U>(facet));
   }
 
+  /**
+   * Creates a ConditionalBuilder from two extensions.
+   */
   function createConditionalBuilder(
     truthy: Extension,
     falsy: Extension = []
@@ -314,6 +355,10 @@ export namespace Configuration {
     return new ConfigurableBuilder(new ConditionalExtension(truthy, falsy));
   }
 
+  /**
+   * Creates a ConditionalBuilder based on two extensions and a
+   * conditional function.
+   */
   function createGenConditionalBuilder<T>(
     fn: (value: T) => boolean,
     truthy: Extension,
@@ -324,10 +369,18 @@ export namespace Configuration {
     );
   }
 
+  /**
+   * Creates a theme builder.
+   */
   function createThemeBuilder() {
     return new ThemeBuilder();
   }
 
+  /**
+   * Editor configuration: provides APIs to get and reconfigure CodeMirror 6
+   * extensions from option names. Also allows to register new themes and
+   * inject ne extensions in already configured editor instances.
+   */
   export class EditorConfiguration {
     constructor() {
       this._configurableBuilderMap = new Map<string, IConfigurableBuilder>([
@@ -352,6 +405,9 @@ export namespace Configuration {
       this._themeOverloader = new Compartment();
     }
 
+    /**
+     * Reconfigures the extension mapped with key with the provided value.
+     */
     reconfigureExtension<T>(view: EditorView, key: string, value: T): void {
       const builder = this.get(key);
       if (builder) {
@@ -368,6 +424,10 @@ export namespace Configuration {
       }
     }
 
+    /**
+     * Reconfigures all the extensions mapped with the options from the
+     * provided partial configuration.
+     */
     reconfigureExtensions(view: EditorView, config: Partial<IConfig>): void {
       const eff = [];
       for (const [key, value] of Object.entries(config)) {
@@ -385,12 +445,20 @@ export namespace Configuration {
       });
     }
 
+    /**
+     * Appends extensions to the top-level configuration of the
+     * editor.
+     */
     injectExtension(view: EditorView, ext: Extension): void {
       view.dispatch({
         effects: StateEffect.appendConfig.of(ext)
       });
     }
 
+    /**
+     * Returns the list of initial extensions of an editor
+     * based on the provided configuration.
+     */
     getInitialExtensions(config: IConfig): Extension[] {
       const keys = Object.keys(config).filter(
         v => v !== 'insertSpaces' && v !== 'extraKeys'
