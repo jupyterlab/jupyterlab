@@ -40,6 +40,7 @@ function mockTestResult(
   }[]
 ): TestResult {
   return {
+    errors: [],
     retry: 0,
     workerIndex: 0,
     startTime: new Date(),
@@ -57,7 +58,7 @@ function createReporter(options?: {
   comparison?: 'snapshot' | 'project';
   vegaLiteConfigFactory?: (
     allData: Array<IReportRecord>,
-    comparison: 'snapshot' | 'project'
+    comparison?: 'snapshot' | 'project'
   ) => JSONObject;
   textReportFactory?: (
     allData: Array<IReportRecord>
@@ -94,9 +95,9 @@ test.describe('BenchmarkReporter', () => {
     const mdData = fs.readFileSync(outputMd, 'utf-8');
     expect(mdData).toContain('## Benchmark report');
 
-    const outputPng = path.resolve('.', `benchmark-results`, 'test.png');
-    const pngData = fs.readFileSync(outputPng);
-    expect(pngData).toMatchSnapshot('test.png');
+    const outputFigure = path.resolve('.', `benchmark-results`, 'test.svg');
+    const figureData = fs.readFileSync(outputFigure);
+    expect(figureData).toMatchSnapshot('test.svg');
   });
 
   test('should generate report with user defined builders', async () => {
@@ -111,8 +112,8 @@ test.describe('BenchmarkReporter', () => {
     const mdData = fs.readFileSync(outputMd, 'utf-8');
     expect(mdData).toContain('## This is a custom table');
 
-    const outputPng = path.resolve('.', 'benchmark-results', 'test.png');
-    const pngData = fs.readFileSync(outputPng);
-    expect(pngData).toMatchSnapshot('customized_test.png');
+    const outputFigure = path.resolve('.', 'benchmark-results', 'test.svg');
+    const figureData = fs.readFileSync(outputFigure);
+    expect(figureData).toMatchSnapshot('customized_test.svg');
   });
 });

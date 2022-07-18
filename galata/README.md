@@ -412,8 +412,8 @@ A special report will be generated in the folder `benchmark-results` that will c
 
 - `lab-benchmark.json`: The execution time of the tests and some metadata.
 - `lab-benchmark.md`: A report in Markdown
-- `lab-benchmark.png`: A comparison of execution time distribution
-- `lab-benchmark.vl.json`: The [_Vega-Lite_](https://vega.github.io/vega-lite) description used to produce the PNG file.
+- `lab-benchmark.svg`: A comparison of execution time distribution
+- `lab-benchmark.vl.json`: The [_Vega-Lite_](https://vega.github.io/vega-lite) description used to produce the figure.
 
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
 updated using the `-u` option of Playwright; i.e. `jlpm run test:benchmark -u`.
