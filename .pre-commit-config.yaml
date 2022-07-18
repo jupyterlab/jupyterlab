@@ -11,6 +11,7 @@ repos:
     hooks:
       - id: forbid-new-submodules
       - id: end-of-file-fixer
+        exclude: galata/.*-snapshots
       - id: check-case-conflict
       - id: check-executables-have-shebangs
       - id: requirements-txt-fixer
