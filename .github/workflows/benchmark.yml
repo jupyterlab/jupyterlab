@@ -242,7 +242,7 @@ jobs:
         uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          server_url: http-get://localhost:8888/lab
+          server_url: localhost:8888
 
       - name: Kill the server
         if: always()
