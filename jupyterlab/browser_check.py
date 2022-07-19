@@ -26,14 +26,8 @@ from .tests.test_app import TestEnv
 
 here = osp.abspath(osp.dirname(__file__))
 test_flags = dict(flags)
-test_flags["core-mode"] = (
-    {"BrowserApp": {"core_mode": True}},
-    "Start the app in core mode.",
-)
-test_flags["dev-mode"] = (
-    {"BrowserApp": {"dev_mode": True}},
-    "Start the app in dev mode.",
-)
+test_flags["core-mode"] = ({"BrowserApp": {"core_mode": True}}, "Start the app in core mode.")
+test_flags["dev-mode"] = ({"BrowserApp": {"dev_mode": True}}, "Start the app in dev mode.")
 test_flags["watch"] = ({"BrowserApp": {"watch": True}}, "Start the app in watch mode.")
 
 test_aliases = dict(aliases)
@@ -149,13 +143,7 @@ async def run_browser(url):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(
-            ["jlpm", "config", "set", "network-timeout", "1000000000"], cwd=target
-        )
-        await run_async_process(
-            ["jlpm", "add", "playwright", "--registry", "https://registry.npmjs.org/"],
-            cwd=target,
-        )
+        await run_async_process(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
@@ -166,11 +154,7 @@ def run_browser_sync(url):
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
         subprocess.call(["jlpm", "init", "-y"], cwd=target)
-        subprocess.call(["jlpm", "config", "set", "network-timeout", "1000000000"], cwd=target)
-        subprocess.call(
-            ["jlpm", "add", "playwright", "--registry", "https://registry.npmjs.org/"],
-            cwd=target,
-        )
+        subprocess.call(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     return subprocess.check_call(["node", "browser-test.js", url], cwd=target)
 
