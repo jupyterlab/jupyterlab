@@ -505,6 +505,15 @@ export class DocumentWidget<
   constructor(options: DocumentWidget.IOptions<T, U>) {
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);
+    // Expose the readonly status of the doc in the widget header elem
+
+    // options.contentHeader = new BoxPanel({
+    //   direction: 'top-to-bottom',
+    //   spacing: 0,
+
+    // });
+    // options.contentHeader.dataset.readonly =
+
     super(options);
 
     this.context = options.context;
@@ -561,6 +570,9 @@ export class DocumentWidget<
     path: string
   ): void {
     this.title.label = PathExt.basename(sender.localPath);
+    this.contentHeader.dataset.readonly = this.context.contentsModel?.writable
+      ? 'false'
+      : 'true';
   }
 
   /**
