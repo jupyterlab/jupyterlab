@@ -26,6 +26,12 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
     fs.mkdirSync(out_dir);
   }
 
+  // Increase timeouts
+  utils.run('npm config set fetch-retries="5"');
+  utils.run('npm config set fetch-retry-factor="50"');
+  utils.run('npm config set fetch-retry-mintimeout="20000"');
+  utils.run('npm config set fetch-retry-maxtimeout="80000"');
+
   // Get current registry values
   let prev_npm = utils.run('npm config get registry', { stdio: 'pipe' }, true);
   let prev_yarn = '';

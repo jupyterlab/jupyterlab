@@ -143,11 +143,7 @@ async def run_browser(url):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
         await run_async_process(["npm", "init", "-y"], cwd=target)
-        os.environ["NPM_CONFIG_REGISTRY"] = "https://registry.npmjs.org/"
-        try:
-            await run_async_process(["npm", "add", "playwright"], cwd=target)
-        finally:
-            del os.environ["NPM_CONFIG_REGISTRY"]
+        await run_async_process(["npm", "add", "playwright"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
