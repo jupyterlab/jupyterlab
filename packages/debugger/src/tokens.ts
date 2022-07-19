@@ -7,7 +7,7 @@ import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 
-import { IObservableDisposable } from '@lumino/disposable';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -914,7 +914,7 @@ export namespace IDebugger {
     /**
      * The kernel sources UI model.
      */
-    export interface IKernelSources {
+    export interface IKernelSources extends IDisposable {
       /**
        * The kernel source.
        */

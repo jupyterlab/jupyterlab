@@ -38,7 +38,7 @@
     "@jupyterlab/documentsearch": "^4.0.0-alpha.11",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.11",
     "@jupyterlab/translation": "^4.0.0-alpha.11",
-    "@lumino/widgets": "^1.32.0"
+    "@lumino/widgets": "^1.33.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
