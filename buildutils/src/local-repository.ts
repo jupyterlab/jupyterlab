@@ -37,8 +37,8 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   if (!prev_npm || prev_npm.indexOf('localhost') !== -1) {
     prev_npm = 'https://registry.npmjs.org/';
   }
-  if (!prev_yarn || prev_yarn.indexOf('localhost') !== -1) {
-    prev_yarn = 'https://registry.yarnpkg.com';
+  if (prev_yarn.indexOf('localhost') !== -1) {
+    prev_yarn = '';
   }
 
   // write the config file
@@ -51,19 +51,17 @@ auth:
 uplinks:
     npmjs:
         url: ${prev_npm}
-    yarnpkg:
-        url: ${prev_yarn}
 packages:
   '@*/*':
     access: $all
     publish: $authenticated
     unpublish: $authenticated
-    proxy: yarnpkg
+    proxy: npmjs
   '**':
     access: $all
     publish: $authenticated
     unpublish: $authenticated
-    proxy: yarnpkg`;
+    proxy: npmjs`;
   fs.writeFileSync(config, config_text, { encoding: 'utf-8' });
 
   const log_file = path.join(out_dir, 'verdaccio.log');
