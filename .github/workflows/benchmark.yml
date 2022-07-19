@@ -244,6 +244,20 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: localhost:8888
 
+      - name: Save report to file
+        if: always()
+        shell: bash
+        run: |
+          echo ${GITHUB_STEP_SUMMARY} > lab-memory-leak-report.md
+
+      - name: Upload Memory Leak Tests report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-assets
+          path: |
+            lab-memory-leak-report.md
+
       - name: Kill the server
         if: always()
         shell: bash

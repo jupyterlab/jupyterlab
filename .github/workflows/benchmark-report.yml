@@ -53,7 +53,8 @@ jobs:
           script: |
             var fs = require('fs');
             var issue_number = Number(fs.readFileSync('./benchmark-results/NR'));
-            var report = String(fs.readFileSync('./benchmark-results/lab-benchmark.md'))
+            var report = String(fs.readFileSync('./benchmark-results/lab-benchmark.md'));
+            var memory-report = String(fs.readFileSync('./lab-memory-leak-report.md'));
 
             // Get the existing comments.
             const {data: comments} = await github.issues.listComments({
@@ -69,13 +70,13 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: botComment.id,
-                body: report
+                body: [report, memory-report].join('\n')
               })
             } else {
               await github.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue_number,
-                body: report
+                body: [report, memory-report].join('\n')
               });
             }
