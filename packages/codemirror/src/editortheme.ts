@@ -30,7 +30,7 @@ export const jupyterEditorTheme = EditorView.theme({
 });
 
 // The list of available tags for syntax highlighting is available at
-// https://lezer.codemirror.net/docs/ref/#highlight.t
+// https://lezer.codemirror.net/docs/ref/#highlight.tags
 export const jupyterHighlightStyle = HighlightStyle.define([
   {
     tag: t.keyword,

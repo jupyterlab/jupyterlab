@@ -4,7 +4,6 @@
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
 import {
-  defaultHighlightStyle,
   LanguageDescription,
   LanguageSupport,
   StreamLanguage,
@@ -17,6 +16,7 @@ import { highlightTree } from '@lezer/highlight';
 // python is the default language and we don't want to split
 // the editor constructor because of asynchronous loading.
 import { python } from '@codemirror/lang-python';
+import { jupyterHighlightStyle } from './editortheme';
 
 export namespace Mode {
   /**
@@ -1488,13 +1488,13 @@ export namespace Mode {
     // position state required because unstyled tokens are not emitted
     // in highlightTree
     let pos = 0;
-    highlightTree(tree, defaultHighlightStyle, (from, to, classes) => {
+    highlightTree(tree, jupyterHighlightStyle, (from, to, classes) => {
       if (from > pos) {
         // No style applied to the token between pos and from
         el.appendChild(document.createTextNode(code.slice(pos, from)));
       }
       const sp = el.appendChild(document.createElement('span'));
-      sp.className = 'cm-' + classes.replace(/ +/g, ' cm-');
+      sp.className = classes;
       sp.appendChild(document.createTextNode(code.slice(from, to)));
       pos = to;
     });
