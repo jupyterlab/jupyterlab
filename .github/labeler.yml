@@ -187,6 +187,8 @@ pkg:logconsole:
   - packages/logconsole-extension/*
 
 pkg:lsp:
+  - packages/lsp/**/*
+  - packages/lsp/*
   - packages/lsp-extension/**/*
   - packages/lsp-extension/*
 

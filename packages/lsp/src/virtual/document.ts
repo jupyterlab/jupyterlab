@@ -1,8 +1,9 @@
+import { IDisposable } from '@lumino/disposable';
 import { IDocumentInfo } from 'lsp-ws-connection';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CellType } from '@jupyterlab/nbformat';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { ILSPCodeExtractorsManager } from '../';
 import { DocumentConnectionManager } from '../connection_manager';
@@ -12,8 +13,7 @@ import {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,
-  IVirtualPosition,
-  PositionError
+  IVirtualPosition
 } from '../positioning';
 import { DefaultMap, untilReady } from '../utils';
 
@@ -27,16 +27,32 @@ interface IVirtualLine {
    * Inspections for which document should be skipped for this virtual line?
    */
   skipInspect: Array<VirtualDocument.idPath>;
+
   /**
    * Where does the virtual line belongs to in the source document?
    */
   sourceLine: number | null;
+
+  /**
+   * The editor holding this virtual line
+   */
   editor: CodeEditor.IEditor;
 }
 
 export interface ICodeBlockOptions {
+  /**
+   * The editor holding this code block
+   */
   ceEditor: CodeEditor.IEditor;
+
+  /**
+   * The value of code block
+   */
   value: string;
+
+  /**
+   * Type of the cell holding this block
+   */
   type: CellType;
 }
 
@@ -45,18 +61,39 @@ export interface IVirtualDocumentBlock {
    * Line corresponding to the block in the entire foreign document
    */
   virtualLine: number;
+
+  /**
+   * The virtual document holding this virtual line.
+   */
   virtualDocument: VirtualDocument;
+
+  /**
+   * The CM editor associated with this virtual line.
+   */
   editor: CodeEditor.IEditor;
 }
 
 export type ForeignDocumentsMap = Map<IRange, IVirtualDocumentBlock>;
 
 interface ISourceLine {
+  /**
+   * Line corresponding to the block in the entire foreign document
+   */
   virtualLine: number;
+  /**
+   * The CM editor associated with this virtual line.
+   */
   editor: CodeEditor.IEditor;
-  // shift
+  /**
+   * Line in the CM editor corresponding to the virtual line.
+   */
   editorLine: number;
+
+  /**
+   * Shift of the virtual line
+   */
   editorShift: CodeEditor.IPosition;
+
   /**
    * Everything which is not in the range of foreign documents belongs to the host.
    */
@@ -64,7 +101,14 @@ interface ISourceLine {
 }
 
 export interface IForeignContext {
+  /**
+   * The virtual document
+   */
   foreignDocument: VirtualDocument;
+
+  /**
+   * The document holding the virtual document.
+   */
   parentHost: VirtualDocument;
 }
 
@@ -98,16 +142,26 @@ export function isWithinRange(
 }
 
 /**
- * a virtual implementation of IDocumentInfo
+ * A virtual implementation of IDocumentInfo
  */
 export class VirtualDocumentInfo implements IDocumentInfo {
-  private _document: VirtualDocument;
-  version = 0;
-
+  /**
+   * Creates an instance of VirtualDocumentInfo.
+   * @param {VirtualDocument} document - the virtual document need to
+   * be wrapped.
+   */
   constructor(document: VirtualDocument) {
     this._document = document;
   }
 
+  /**
+   * Current version of the virtual document.
+   */
+  version = 0;
+
+  /**
+   * Get the text content of the virtual document.
+   */
   get text(): string {
     return this._document.value;
   }
@@ -129,17 +183,41 @@ export class VirtualDocumentInfo implements IDocumentInfo {
     return uris.document;
   }
 
+  /**
+   * Get the language identifier of the document.
+   */
   get languageId(): string {
     return this._document.language;
   }
+
+  /**
+   * The wrapped virtual document.
+   */
+  private _document: VirtualDocument;
 }
 
 export namespace VirtualDocument {
   export interface IOptions {
+    /**
+     * The language identifier of the document.
+     */
     language: LanguageIdentifier;
+
+    /**
+     * The foreign code extractor manager token.
+     */
     foreignCodeExtractors: ILSPCodeExtractorsManager;
+
+    /**
+     * Path to the document.
+     */
     path: string;
+
+    /**
+     * File extension of the document.
+     */
     fileExtension: string | undefined;
+
     /**
      * Notebooks or any other aggregates of documents are not supported
      * by the LSP specification, and we need to make appropriate
@@ -147,6 +225,7 @@ export namespace VirtualDocument {
      * so that the LSP servers do not refuse to cooperate.
      */
     hasLspSupportedFile: boolean;
+
     /**
      * Being standalone is relevant to foreign documents
      * and defines whether following chunks of code in the same
@@ -155,6 +234,10 @@ export namespace VirtualDocument {
      *
      */
     standalone?: boolean;
+
+    /**
+     * Parent of the current virtual document.
+     */
     parent?: VirtualDocument;
   }
 }
@@ -179,52 +262,7 @@ export namespace VirtualDocument {
  * No dependency on editor implementation (such as CodeMirrorEditor)
  * is allowed for VirtualEditor.
  */
-export class VirtualDocument {
-  language: string;
-  standalone: boolean;
-  isDisposed = false;
-  blankLinesBetweenCells: number = 2;
-  lastSourceLine: number;
-
-  public foreignDocumentClosed: Signal<VirtualDocument, IForeignContext>;
-  public foreignDocumentOpened: Signal<VirtualDocument, IForeignContext>;
-
-  public lastVirtualLine: number;
-  /**
-   * the remote document uri, version and other server-related info
-   */
-  public documentInfo: IDocumentInfo;
-  /**
-   * Virtual lines keep all the lines present in the document AND extracted to the foreign document.
-   */
-  public virtualLines: Map<number, IVirtualLine>; // probably should go protected
-  public changed: Signal<VirtualDocument, VirtualDocument>;
-  public path: string;
-  public fileExtension: string | undefined;
-  public hasLspSupportedFile: boolean;
-  public parent?: VirtualDocument | null;
-  public updateManager: UpdateManager;
-  public foreignDocuments: Map<VirtualDocument.virtualId, VirtualDocument>;
-  public readonly instanceId: number;
-
-  protected sourceLines: Map<number, ISourceLine>;
-  protected lineBlocks: Array<string>;
-
-  // TODO: merge into unused documents {standalone: Map, continuous: Map} ?
-  protected unusedDocuments: Set<VirtualDocument>;
-  protected unusedStandaloneDocuments: DefaultMap<
-    language,
-    Array<VirtualDocument>
-  >;
-
-  private _remainingLifetime: number;
-  private _editorToSourceLine: Map<CodeEditor.IEditor, number>;
-  private _editorToSourceLineNew: Map<CodeEditor.IEditor, number>;
-  private _foreignCodeExtractors: ILSPCodeExtractorsManager;
-  private previousValue: string;
-  private static instancesCount = 0;
-  private readonly options: VirtualDocument.IOptions;
-
+export class VirtualDocument implements IDisposable {
   constructor(options: VirtualDocument.IOptions) {
     this.options = options;
     this.path = this.options.path;
@@ -245,9 +283,7 @@ export class VirtualDocument {
       () => new Array<VirtualDocument>()
     );
     this._remainingLifetime = 6;
-    this.foreignDocumentClosed = new Signal(this);
-    this.foreignDocumentOpened = new Signal(this);
-    this.changed = new Signal(this);
+
     this.unusedDocuments = new Set();
     this.documentInfo = new VirtualDocumentInfo(this);
     this.updateManager = new UpdateManager(this);
@@ -269,11 +305,190 @@ export class VirtualDocument {
     this.clear();
   }
 
+  /**
+   * Convert from code editor position into code mirror position.
+   */
+  static ceToCm(position: CodeEditor.IPosition): CodeMirror.Position {
+    return { line: position.line, ch: position.column };
+  }
+
+  /**
+   * Test whether the document is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * The language identifier of the document.
+   */
+  language: string;
+
+  /**
+   * Being standalone is relevant to foreign documents
+   * and defines whether following chunks of code in the same
+   * language should be appended to this document (false, not standalone)
+   * or should be considered separate documents (true, standalone)
+   *
+   */
+  standalone: boolean;
+
+  /**
+   * Number of blank lines appended to the virtual document between
+   * each cell.
+   */
+  blankLinesBetweenCells: number = 2;
+
+  /**
+   * Line number of the last line in the real document.
+   */
+  lastSourceLine: number;
+
+  /**
+   * Line number of the last line in the virtual document.
+   */
+  lastVirtualLine: number;
+
+  /**
+   * the remote document uri, version and other server-related info
+   */
+  documentInfo: IDocumentInfo;
+
+  /**
+   * Path to the document.
+   */
+  path: string;
+
+  /**
+   * File extension of the document.
+   */
+  fileExtension: string | undefined;
+
+  /**
+   * Notebooks or any other aggregates of documents are not supported
+   * by the LSP specification, and we need to make appropriate
+   * adjustments for them, pretending they are simple files
+   * so that the LSP servers do not refuse to cooperate.
+   */
+  hasLspSupportedFile: boolean;
+
+  /**
+   * Parent of the current virtual document.
+   */
+  parent?: VirtualDocument | null;
+
+  /**
+   * Map holding the children `VirtualDocument` .
+   */
+  foreignDocuments: Map<VirtualDocument.virtualId, VirtualDocument>;
+
+  /**
+   * The update manager object.
+   */
+  readonly updateManager: UpdateManager;
+
+  /**
+   * Unique id of the virtual document.
+   */
+  readonly instanceId: number;
+
+  /**
+   * Signal emitted when the foreign document is closed
+   */
+  get foreignDocumentClosed(): ISignal<VirtualDocument, IForeignContext> {
+    return this._foreignDocumentClosed;
+  }
+
+  /**
+   * Signal emitted when the foreign document is opened
+   */
+  get foreignDocumentOpened(): ISignal<VirtualDocument, IForeignContext> {
+    return this._foreignDocumentOpened;
+  }
+
+  /**
+   * Signal emitted when the foreign document is changed
+   */
+  get changed(): ISignal<VirtualDocument, VirtualDocument> {
+    return this._changed;
+  }
+
+  /**
+   * Id of the virtual document.
+   */
+  get virtualId(): VirtualDocument.virtualId {
+    // for easier debugging, the language information is included in the ID:
+    return this.standalone
+      ? this.instanceId + '(' + this.language + ')'
+      : this.language;
+  }
+
+  /**
+   * Return the ancestry to this document.
+   */
+  get ancestry(): Array<VirtualDocument> {
+    if (!this.parent) {
+      return [this];
+    }
+    return this.parent.ancestry.concat([this]);
+  }
+
+  /**
+   * Return the id path to the virtual document.
+   */
+  get idPath(): VirtualDocument.idPath {
+    if (!this.parent) {
+      return this.virtualId;
+    }
+    return this.parent.idPath + '-' + this.virtualId;
+  }
+
+  /**
+   * Get the uri of the virtual document.
+   */
+  get uri(): VirtualDocument.uri {
+    const encodedPath = encodeURI(this.path);
+    if (!this.parent) {
+      return encodedPath;
+    }
+    return encodedPath + '.' + this.idPath + '.' + this.fileExtension;
+  }
+
+  /**
+   * Get the text value of the document
+   */
+  get value(): string {
+    let linesPadding = '\n'.repeat(this.blankLinesBetweenCells);
+    return this.lineBlocks.join(linesPadding);
+  }
+
+  /**
+   * Get the last line in the virtual document
+   */
+  get lastLine(): string {
+    const linesInLastBlock =
+      this.lineBlocks[this.lineBlocks.length - 1].split('\n');
+    return linesInLastBlock[linesInLastBlock.length - 1];
+  }
+
+  /**
+   * Get the root document of current virtual document.
+   */
+  get root(): VirtualDocument {
+    if (this.parent == null) {
+      return this;
+    }
+    return this.parent.root;
+  }
+
+  /**
+   * Dispose the virtual document.
+   */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       return;
     }
-    this.isDisposed = true;
+    this._isDisposed = true;
 
     this.parent = null;
 
@@ -290,32 +505,15 @@ export class VirtualDocument {
     this.virtualLines.clear();
 
     // just to be sure - if anything is accessed after disposal (it should not) we
-    // will get alterted by errors in the console AND this will limit memory leaks
+    // will get altered by errors in the console AND this will limit memory leaks
 
     this.documentInfo = null as any;
     this.lineBlocks = null as any;
   }
 
   /**
-   * When this counter goes down to 0, the document will be destroyed and the associated connection will be closed;
-   * This is meant to reduce the number of open connections when a a foreign code snippet was removed from the document.
-   *
-   * Note: top level virtual documents are currently immortal (unless killed by other means); it might be worth
-   * implementing culling of unused documents, but if and only if JupyterLab will also implement culling of
-   * idle kernels - otherwise the user experience could be a bit inconsistent, and we would need to invent our own rules.
+   * Clear the virtual document and all related stuffs
    */
-  protected get remainingLifetime(): number {
-    if (!this.parent) {
-      return Infinity;
-    }
-    return this._remainingLifetime;
-  }
-  protected set remainingLifetime(value: number) {
-    if (this.parent) {
-      this._remainingLifetime = value;
-    }
-  }
-
   clear(): void {
     for (let document of this.foreignDocuments.values()) {
       document.clear();
@@ -332,6 +530,11 @@ export class VirtualDocument {
     this.lineBlocks = [];
   }
 
+  /**
+   * Get the virtual document from the cursor position of the source
+   * document
+   * @param {ISourcePosition} position - position in source document
+   */
   documentAtSourcePosition(position: ISourcePosition): VirtualDocument {
     let sourceLine = this.sourceLines.get(position.line);
 
@@ -363,6 +566,12 @@ export class VirtualDocument {
     return this;
   }
 
+  /**
+   * Detect if the input source position is belong to the current
+   * virtual document.
+   *
+   * @param {ISourcePosition} sourcePosition - position in the source document
+   */
   isWithinForeign(sourcePosition: ISourcePosition): boolean {
     let sourceLine = this.sourceLines.get(sourcePosition.line)!;
 
@@ -378,6 +587,13 @@ export class VirtualDocument {
     return false;
   }
 
+  /**
+   * Compute the position in root document from the position of
+   * a child editor.
+   *
+   * @param {CodeEditor.IEditor} editor - the active editor.
+   * @param {IEditorPosition} position - position in the active editor.
+   */
   transformFromEditorToRoot(
     editor: CodeEditor.IEditor,
     position: IEditorPosition
@@ -393,10 +609,16 @@ export class VirtualDocument {
     } as IRootPosition;
   }
 
+  /**
+   * Compute the position in the virtual document from the position
+   * if the source document.
+   *
+   * @param {ISourcePosition} sourcePosition - position in source document
+   */
   virtualPositionAtDocument(sourcePosition: ISourcePosition): IVirtualPosition {
     let sourceLine = this.sourceLines.get(sourcePosition.line);
     if (sourceLine == null) {
-      throw new PositionError('Source line not mapped to virtual position');
+      throw new Error('Source line not mapped to virtual position');
     }
     let virtualLine = sourceLine.virtualLine;
 
@@ -432,6 +654,15 @@ export class VirtualDocument {
     } as IVirtualPosition;
   }
 
+  /**
+   * Append a code block to the end of the virtual document.
+   *
+   * @param  block - block to be appended
+   * @param  editorShift - position shift in source
+   * document
+   * @param  [virtualShift] - position shift in
+   * virtual document.
+   */
   appendCodeBlock(
     block: ICodeBlockOptions,
     editorShift: CodeEditor.IPosition = { line: 0, column: 0 },
@@ -493,6 +724,13 @@ export class VirtualDocument {
     this.lastSourceLine += sourceCellLines.length;
   }
 
+  /**
+   * Extract a code block into list of string in supported language and
+   * a map of foreign document if any.
+   * @param  block - block to be appended
+   * @param  editorShift - position shift in source document
+   *
+   */
   prepareCodeBlock(
     block: ICodeBlockOptions,
     editorShift: CodeEditor.IPosition = { line: 0, column: 0 }
@@ -508,6 +746,13 @@ export class VirtualDocument {
     return { lines, foreignDocumentsMap };
   }
 
+  /**
+   * Extract the foreign code from input block by using the registered
+   * extractors.
+   * @param  block - block to be appended
+   * @param  editorShift - position shift in source document
+   *
+   */
   extractForeignCode(
     block: ICodeBlockOptions,
     editorShift: CodeEditor.IPosition
@@ -584,6 +829,180 @@ export class VirtualDocument {
     return { cellCodeKept: cellCode, foreignDocumentsMap };
   }
 
+  /**
+   * Close a foreign document and disconnect all associated signals
+   */
+  closeForeign(document: VirtualDocument): void {
+    this._foreignDocumentClosed.emit({
+      foreignDocument: document,
+      parentHost: this
+    });
+    // remove it from foreign documents list
+    this.foreignDocuments.delete(document.virtualId);
+    // and delete the documents within it
+    document.closeAllForeignDocuments();
+
+    document.foreignDocumentClosed.disconnect(this.forwardClosedSignal, this);
+    document.foreignDocumentOpened.disconnect(this.forwardOpenedSignal, this);
+    document.dispose();
+  }
+
+  /**
+   * Close all foreign documents.
+   */
+  closeAllForeignDocuments(): void {
+    for (let document of this.foreignDocuments.values()) {
+      this.closeForeign(document);
+    }
+  }
+
+  /**
+   * Close all expired documents.
+   */
+  closeExpiredDocuments(): void {
+    for (let document of this.unusedDocuments.values()) {
+      document.remainingLifetime -= 1;
+      if (document.remainingLifetime <= 0) {
+        document.dispose();
+      }
+    }
+  }
+
+  /**
+   * Transform the position of the source to the editor
+   * position.
+   *
+   * @param  pos - position in the source document
+   * @return position in the editor.
+   */
+  transformSourceToEditor(pos: ISourcePosition): IEditorPosition {
+    let sourceLine = this.sourceLines.get(pos.line)!;
+    let editorLine = sourceLine.editorLine;
+    let editorShift = sourceLine.editorShift;
+    return {
+      // only shift column in the line beginning the virtual document (first list of the editor in cell magics, but might be any line of editor in line magics!)
+      ch: pos.ch + (editorLine === 0 ? editorShift.column : 0),
+      line: editorLine + editorShift.line
+      // TODO or:
+      //  line: pos.line + editor_shift.line - this.first_line_of_the_block(editor)
+    } as IEditorPosition;
+  }
+
+  /**
+   * Transform the position in the virtual document to the
+   * editor position.
+   * Can be null because some lines are added as padding/anchors
+   * to the virtual document and those do not exist in the source document
+   * and thus they are absent in the editor.
+   *
+   */
+  transformVirtualToEditor(
+    virtualPosition: IVirtualPosition
+  ): IEditorPosition | null {
+    let sourcePosition = this.transformVirtualToSource(virtualPosition);
+    if (sourcePosition == null) {
+      return null;
+    }
+    return this.transformSourceToEditor(sourcePosition);
+  }
+
+  /**
+   * Transform the position in the virtual document to the source.
+   * Can be null because some lines are added as padding/anchors
+   * to the virtual document and those do not exist in the source document.
+   *
+   */
+  transformVirtualToSource(position: IVirtualPosition): ISourcePosition | null {
+    const line = this.virtualLines.get(position.line)!.sourceLine;
+    if (line == null) {
+      return null;
+    }
+    return {
+      ch: position.ch,
+      line: line
+    } as ISourcePosition;
+  }
+
+  /**
+   * Get the corresponding editor of the virtual line.
+   *
+   */
+  getEditorAtVirtualLine(pos: IVirtualPosition): CodeEditor.IEditor {
+    let line = pos.line;
+    // tolerate overshot by one (the hanging blank line at the end)
+    if (!this.virtualLines.has(line)) {
+      line -= 1;
+    }
+    return this.virtualLines.get(line)!.editor;
+  }
+
+  /**
+   * Get the corresponding editor of the source line
+   */
+  getEditorAtSourceLine(pos: ISourcePosition): CodeEditor.IEditor {
+    return this.sourceLines.get(pos.line)!.editor;
+  }
+
+  /**
+   * Recursively emits changed signal from the document or any descendant foreign document.
+   */
+  maybeEmitChanged(): void {
+    if (this.value !== this.previousValue) {
+      this._changed.emit(this);
+    }
+    this.previousValue = this.value;
+    for (let document of this.foreignDocuments.values()) {
+      document.maybeEmitChanged();
+    }
+  }
+
+  /**
+   * When this counter goes down to 0, the document will be destroyed and the associated connection will be closed;
+   * This is meant to reduce the number of open connections when a a foreign code snippet was removed from the document.
+   *
+   * Note: top level virtual documents are currently immortal (unless killed by other means); it might be worth
+   * implementing culling of unused documents, but if and only if JupyterLab will also implement culling of
+   * idle kernels - otherwise the user experience could be a bit inconsistent, and we would need to invent our own rules.
+   */
+  protected get remainingLifetime(): number {
+    if (!this.parent) {
+      return Infinity;
+    }
+    return this._remainingLifetime;
+  }
+
+  protected set remainingLifetime(value: number) {
+    if (this.parent) {
+      this._remainingLifetime = value;
+    }
+  }
+
+  /**
+   * Virtual lines keep all the lines present in the document AND extracted to the foreign document.
+   */
+  protected virtualLines: Map<number, IVirtualLine>;
+  protected sourceLines: Map<number, ISourceLine>;
+  protected lineBlocks: Array<string>;
+
+  protected unusedDocuments: Set<VirtualDocument>;
+  protected unusedStandaloneDocuments: DefaultMap<
+    language,
+    Array<VirtualDocument>
+  >;
+
+  private _isDisposed = false;
+  private _remainingLifetime: number;
+  private _editorToSourceLine: Map<CodeEditor.IEditor, number>;
+  private _editorToSourceLineNew: Map<CodeEditor.IEditor, number>;
+  private _foreignCodeExtractors: ILSPCodeExtractorsManager;
+  private previousValue: string;
+  private static instancesCount = 0;
+  private readonly options: VirtualDocument.IOptions;
+
+  /**
+   * Get the foreign document that can be opened with the input extractor.
+   *
+   */
   private chooseForeignDocument(
     extractor: IForeignCodeExtractor
   ): VirtualDocument {
@@ -604,6 +1023,13 @@ export class VirtualDocument {
     return foreignDocument;
   }
 
+  /**
+   * Create a foreign document from input language and file extension.
+   *
+   * @param  language - the required language
+   * @param  standalone - the document type is supported natively by LSP?
+   * @param  fileExtension - File extension.
+   */
   private openForeign(
     language: language,
     standalone: boolean,
@@ -620,7 +1046,7 @@ export class VirtualDocument {
       foreignDocument: document,
       parentHost: this
     };
-    this.foreignDocumentOpened.emit(context);
+    this._foreignDocumentOpened.emit(context);
     // pass through any future signals
     document.foreignDocumentClosed.connect(this.forwardClosedSignal, this);
     document.foreignDocumentOpened.connect(this.forwardOpenedSignal, this);
@@ -630,163 +1056,29 @@ export class VirtualDocument {
     return document;
   }
 
-  private forwardClosedSignal(host: VirtualDocument, context: IForeignContext) {
-    this.foreignDocumentClosed.emit(context);
-  }
-
-  private forwardOpenedSignal(host: VirtualDocument, context: IForeignContext) {
-    this.foreignDocumentOpened.emit(context);
-  }
-
-  closeForeign(document: VirtualDocument): void {
-    this.foreignDocumentClosed.emit({
-      foreignDocument: document,
-      parentHost: this
-    });
-    // remove it from foreign documents list
-    this.foreignDocuments.delete(document.virtualId);
-    // and delete the documents within it
-    document.closeAllForeignDocuments();
-
-    document.foreignDocumentClosed.disconnect(this.forwardClosedSignal, this);
-    document.foreignDocumentOpened.disconnect(this.forwardOpenedSignal, this);
-    document.dispose();
-  }
-
-  closeAllForeignDocuments(): void {
-    for (let document of this.foreignDocuments.values()) {
-      this.closeForeign(document);
-    }
-  }
-
-  get value(): string {
-    let linesPadding = '\n'.repeat(this.blankLinesBetweenCells);
-    return this.lineBlocks.join(linesPadding);
-  }
-
-  get lastLine(): string {
-    const linesInLastBlock =
-      this.lineBlocks[this.lineBlocks.length - 1].split('\n');
-    return linesInLastBlock[linesInLastBlock.length - 1];
-  }
-
-  closeExpiredDocuments(): void {
-    for (let document of this.unusedDocuments.values()) {
-      document.remainingLifetime -= 1;
-      if (document.remainingLifetime <= 0) {
-        /** TODO */
-      }
-    }
-  }
-
-  get virtualId(): VirtualDocument.virtualId {
-    // for easier debugging, the language information is included in the ID:
-    return this.standalone
-      ? this.instanceId + '(' + this.language + ')'
-      : this.language;
-  }
-
-  get ancestry(): Array<VirtualDocument> {
-    if (!this.parent) {
-      return [this];
-    }
-    return this.parent.ancestry.concat([this]);
-  }
-
-  get idPath(): VirtualDocument.idPath {
-    if (!this.parent) {
-      return this.virtualId;
-    }
-    return this.parent.idPath + '-' + this.virtualId;
-  }
-
-  get uri(): VirtualDocument.uri {
-    const encodedPath = encodeURI(this.path);
-    if (!this.parent) {
-      return encodedPath;
-    }
-    return encodedPath + '.' + this.idPath + '.' + this.fileExtension;
-  }
-
-  transformSourceToEditor(pos: ISourcePosition): IEditorPosition {
-    let sourceLine = this.sourceLines.get(pos.line)!;
-    let editorLine = sourceLine.editorLine;
-    let editorShift = sourceLine.editorShift;
-    return {
-      // only shift column in the line beginning the virtual document (first list of the editor in cell magics, but might be any line of editor in line magics!)
-      ch: pos.ch + (editorLine === 0 ? editorShift.column : 0),
-      line: editorLine + editorShift.line
-      // TODO or:
-      //  line: pos.line + editor_shift.line - this.first_line_of_the_block(editor)
-    } as IEditorPosition;
-  }
-
   /**
-  Can be null because some lines are added as padding/anchors
-  to the virtual document and those do not exist in the source document
-  and thus they are absent in the editor.
-  */
-  transformVirtualToEditor(
-    virtualPosition: IVirtualPosition
-  ): IEditorPosition | null {
-    let sourcePosition = this.transformVirtualToSource(virtualPosition);
-    if (sourcePosition == null) {
-      return null;
-    }
-    return this.transformSourceToEditor(sourcePosition);
-  }
-
-  /**
-  Can be null because some lines are added as padding/anchors
-  to the virtual document and those do not exist in the source document.
-  */
-  transformVirtualToSource(position: IVirtualPosition): ISourcePosition | null {
-    const line = this.virtualLines.get(position.line)!.sourceLine;
-    if (line == null) {
-      return null;
-    }
-    return {
-      ch: position.ch,
-      line: line
-    } as ISourcePosition;
-  }
-
-  get root(): VirtualDocument {
-    if (this.parent == null) {
-      return this;
-    }
-    return this.parent.root;
-  }
-
-  getEditorAtVirtualLine(pos: IVirtualPosition): CodeEditor.IEditor {
-    let line = pos.line;
-    // tolerate overshot by one (the hanging blank line at the end)
-    if (!this.virtualLines.has(line)) {
-      line -= 1;
-    }
-    return this.virtualLines.get(line)!.editor;
-  }
-
-  getEditorAtSourceLine(pos: ISourcePosition): CodeEditor.IEditor {
-    return this.sourceLines.get(pos.line)!.editor;
-  }
-
-  /**
-   * Recursively emits changed signal from the document or any descendant foreign document.
+   * Forward the closed signal from the foreign document to the host document's
+   * signal
    */
-  maybeEmitChanged(): void {
-    if (this.value !== this.previousValue) {
-      this.changed.emit(this);
-    }
-    this.previousValue = this.value;
-    for (let document of this.foreignDocuments.values()) {
-      document.maybeEmitChanged();
-    }
+  private forwardClosedSignal(host: VirtualDocument, context: IForeignContext) {
+    this._foreignDocumentClosed.emit(context);
   }
 
-  static ceToCm(position: CodeEditor.IPosition): CodeMirror.Position {
-    return { line: position.line, ch: position.column };
+  /**
+   * Forward the opened signal from the foreign document to the host document's
+   * signal
+   */
+  private forwardOpenedSignal(host: VirtualDocument, context: IForeignContext) {
+    this._foreignDocumentOpened.emit(context);
   }
+
+  private _foreignDocumentClosed = new Signal<VirtualDocument, IForeignContext>(
+    this
+  );
+  private _foreignDocumentOpened = new Signal<VirtualDocument, IForeignContext>(
+    this
+  );
+  private _changed = new Signal<VirtualDocument, VirtualDocument>(this);
 }
 
 export namespace VirtualDocument {
@@ -808,6 +1100,11 @@ export namespace VirtualDocument {
   export type uri = string;
 }
 
+/**
+ * Create foreign documents if available from input virtual documents.
+ * @param virtualDocument - the virtual document to be collected
+ * @return {*}  - Set of generated foreign documents
+ */
 export function collectDocuments(
   virtualDocument: VirtualDocument
 ): Set<VirtualDocument> {
@@ -821,60 +1118,79 @@ export function collectDocuments(
 }
 
 export interface IBlockAddedInfo {
+  /**
+   * The virtual document.
+   */
   virtualDocument: VirtualDocument;
+
+  /**
+   * Option of the code block.
+   */
   block: ICodeBlockOptions;
 }
 
-export class UpdateManager {
-  /**
-   * Virtual documents update guard.
-   */
-  private isUpdateInProgress: boolean = false;
-
-  private updateLock: boolean = false;
-
-  protected isDisposed = false;
+export class UpdateManager implements IDisposable {
+  constructor(private virtualDocument: VirtualDocument) {
+    this._blockAdded = new Signal<UpdateManager, IBlockAddedInfo>(this);
+    this._documentUpdated = new Signal<UpdateManager, VirtualDocument>(this);
+    this._updateBegan = new Signal<UpdateManager, ICodeBlockOptions[]>(this);
+    this._updateFinished = new Signal<UpdateManager, ICodeBlockOptions[]>(this);
+    this.documentUpdated.connect(this._onUpdated, this);
+  }
 
   /**
    * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
    */
-  private documentUpdated: Signal<UpdateManager, VirtualDocument>;
-  public blockAdded: Signal<UpdateManager, IBlockAddedInfo>;
   updateDone: Promise<void> = new Promise<void>(resolve => {
     resolve();
   });
-  updateBegan: Signal<UpdateManager, ICodeBlockOptions[]>;
-  updateFinished: Signal<UpdateManager, ICodeBlockOptions[]>;
 
-  constructor(private virtualDocument: VirtualDocument) {
-    this.documentUpdated = new Signal(this);
-    this.blockAdded = new Signal(this);
-    this.updateBegan = new Signal(this);
-    this.updateFinished = new Signal(this);
-    this.documentUpdated.connect(this.onUpdated, this);
-  }
-
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this.documentUpdated.disconnect(this.onUpdated, this);
+  /**
+   * Test whether the document is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   /**
-   * Once all the foreign documents were refreshed, the unused documents (and their connections)
-   * should be terminated if their lifetime has expired.
+   * Signal emitted when a code block is added to the document.
    */
-  private onUpdated(manager: UpdateManager, rootDocument: VirtualDocument) {
-    try {
-      rootDocument.closeExpiredDocuments();
-    } catch (e) {
-      console.warn('Failed to close expired documents');
-    }
+  get blockAdded(): ISignal<UpdateManager, IBlockAddedInfo> {
+    return this._blockAdded;
   }
 
-  private canUpdate() {
-    return !this.isDisposed && !this.isUpdateInProgress && !this.updateLock;
+  /**
+   * Signal emitted by the editor that triggered the update,
+   * providing the root document of the updated documents.
+   */
+  get documentUpdated(): ISignal<UpdateManager, VirtualDocument> {
+    return this._documentUpdated;
+  }
+
+  /**
+   * Signal emitted when the update is started
+   */
+  get updateBegan(): ISignal<UpdateManager, ICodeBlockOptions[]> {
+    return this._updateBegan;
+  }
+
+  /**
+   * Signal emitted when the update is finished
+   */
+  get updateFinished(): ISignal<UpdateManager, ICodeBlockOptions[]> {
+    return this._updateFinished;
+  }
+
+  /**
+   * Dispose the class
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
+    this.documentUpdated.disconnect(this._onUpdated, this);
   }
 
   /**
@@ -883,13 +1199,13 @@ export class UpdateManager {
    *  - no update will happen when executing the callback
    * @param fn - the callback to execute in update lock
    */
-  public async withUpdateLock(fn: () => void): Promise<void> {
-    await untilReady(() => this.canUpdate(), 12, 10).then(() => {
+  async withUpdateLock(fn: () => void): Promise<void> {
+    await untilReady(() => this._canUpdate(), 12, 10).then(() => {
       try {
-        this.updateLock = true;
+        this._updateLock = true;
         fn();
       } finally {
-        this.updateLock = false;
+        this._updateLock = false;
       }
     });
   }
@@ -899,33 +1215,33 @@ export class UpdateManager {
    * and resolve a void promise. The promise does not contain the text value of the root document,
    * as to avoid an easy trap of ignoring the changes in the virtual documents.
    */
-  public async updateDocuments(blocks: ICodeBlockOptions[]): Promise<void> {
+  async updateDocuments(blocks: ICodeBlockOptions[]): Promise<void> {
     let update = new Promise<void>((resolve, reject) => {
       // defer the update by up to 50 ms (10 retrials * 5 ms break),
       // awaiting for the previous update to complete.
-      untilReady(() => this.canUpdate(), 10, 5)
+      untilReady(() => this._canUpdate(), 10, 5)
         .then(() => {
           if (this.isDisposed || !this.virtualDocument) {
             resolve();
           }
           try {
-            this.isUpdateInProgress = true;
-            this.updateBegan.emit(blocks);
+            this._isUpdateInProgress = true;
+            this._updateBegan.emit(blocks);
 
             this.virtualDocument.clear();
 
             for (let codeBlock of blocks) {
-              this.blockAdded.emit({
+              this._blockAdded.emit({
                 block: codeBlock,
                 virtualDocument: this.virtualDocument
               });
               this.virtualDocument.appendCodeBlock(codeBlock);
             }
 
-            this.updateFinished.emit(blocks);
+            this._updateFinished.emit(blocks);
 
             if (this.virtualDocument) {
-              this.documentUpdated.emit(this.virtualDocument);
+              this._documentUpdated.emit(this.virtualDocument);
               this.virtualDocument.maybeEmitChanged();
             }
 
@@ -934,12 +1250,47 @@ export class UpdateManager {
             console.warn('Documents update failed:', e);
             reject(e);
           } finally {
-            this.isUpdateInProgress = false;
+            this._isUpdateInProgress = false;
           }
         })
         .catch(console.error);
     });
     this.updateDone = update;
     return update;
+  }
+
+  private _isDisposed = false;
+  /**
+   * Virtual documents update guard.
+   */
+  private _isUpdateInProgress: boolean = false;
+
+  /**
+   * Update lock to prevent multiple updates are applied at the same time.
+   */
+  private _updateLock: boolean = false;
+
+  private _blockAdded: Signal<UpdateManager, IBlockAddedInfo>;
+  private _documentUpdated: Signal<UpdateManager, VirtualDocument>;
+  private _updateBegan: Signal<UpdateManager, ICodeBlockOptions[]>;
+  private _updateFinished: Signal<UpdateManager, ICodeBlockOptions[]>;
+
+  /**
+   * Once all the foreign documents were refreshed, the unused documents (and their connections)
+   * should be terminated if their lifetime has expired.
+   */
+  private _onUpdated(manager: UpdateManager, rootDocument: VirtualDocument) {
+    try {
+      rootDocument.closeExpiredDocuments();
+    } catch (e) {
+      console.warn('Failed to close expired documents');
+    }
+  }
+
+  /**
+   * Check if the document can be updated.
+   */
+  private _canUpdate() {
+    return !this.isDisposed && !this._isUpdateInProgress && !this._updateLock;
   }
 }

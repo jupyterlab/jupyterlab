@@ -4,13 +4,29 @@ import mergeWith from 'lodash.mergewith';
 import { ClientCapabilities } from './lsp';
 import { IFeature, ILSPFeatureManager } from './tokens';
 
+/**
+ * Class to manager the registered features of the language servers.
+ */
 export class FeatureManager implements ILSPFeatureManager {
-  public readonly features: Array<IFeature> = [];
-  private _featuresRegistered: Signal<ILSPFeatureManager, IFeature>;
   constructor() {
     this._featuresRegistered = new Signal(this);
   }
+  /**
+   * List of registered features
+   */
+  readonly features: Array<IFeature> = [];
 
+  /**
+   * Signal emitted when a new feature is registered.
+   */
+  get featuresRegistered(): ISignal<ILSPFeatureManager, IFeature> {
+    return this._featuresRegistered;
+  }
+
+  /**
+   * Register a new feature, skip if it is already registered.
+   *
+   */
   register(feature: IFeature): void {
     if (this.features.some(ft => ft.id === feature.id)) {
       console.warn(
@@ -22,10 +38,10 @@ export class FeatureManager implements ILSPFeatureManager {
     }
   }
 
-  get featuresRegistered(): ISignal<ILSPFeatureManager, IFeature> {
-    return this._featuresRegistered;
-  }
-
+  /**
+   * Get the capabilities of all clients.
+   *
+   */
   clientCapabilities(): ClientCapabilities {
     let capabilities: ClientCapabilities = {};
     for (const feature of this.features) {
@@ -36,4 +52,6 @@ export class FeatureManager implements ILSPFeatureManager {
     }
     return capabilities;
   }
+
+  private _featuresRegistered: Signal<ILSPFeatureManager, IFeature>;
 }

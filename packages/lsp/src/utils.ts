@@ -1,5 +1,11 @@
 import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 import mergeWith from 'lodash.mergewith';
+
+/**
+ * Helper to wait for timeout.
+ *
+ * @param  timeout - time out in ms
+ */
 export async function sleep(timeout: number): Promise<void> {
   return new Promise<void>(resolve => {
     setTimeout(() => {
@@ -8,6 +14,9 @@ export async function sleep(timeout: number): Promise<void> {
   });
 }
 
+/**
+ * Wait for an event by pooling the `isReady` function.
+ */
 export function untilReady(
   isReady: CallableFunction,
   maxRetrials: number = 35,
@@ -28,16 +37,18 @@ export function untilReady(
   })();
 }
 
-export const expandDottedPaths = (
-  obj: ReadonlyJSONObject
-): ReadonlyJSONObject => {
+/**
+ * Convert dotted path into dictionary.
+ *
+ */
+export function expandDottedPaths(obj: ReadonlyJSONObject): ReadonlyJSONObject {
   const settings: any = [];
   for (let key in obj) {
     const parsed = expandPath(key.split('.'), obj[key]);
     settings.push(parsed);
   }
   return mergeWith({}, ...settings);
-};
+}
 
 /**
  * The docs for many language servers show settings in the
@@ -66,6 +77,9 @@ export const expandPath = (
   return obj;
 };
 
+/**
+ * An extended map which will create value for key on the fly.
+ */
 export class DefaultMap<K, V> extends Map<K, V> {
   constructor(
     private defaultFactory: (...args: any[]) => V,

@@ -558,12 +558,12 @@ function activateFileEditorCompleterService(
 
 function activateFileEditorLanguageServer(
   app: JupyterFrontEnd,
-  notebooks: IEditorTracker,
+  editors: IEditorTracker,
   connectionManager: ILSPDocumentConnectionManager,
   featureManager: ILSPFeatureManager,
   extractorManager: ILSPCodeExtractorsManager
 ): void {
-  notebooks.widgetAdded.connect(async (_, notebook) => {
+  editors.widgetAdded.connect(async (_, editor) => {
     const adapter = new FileEditorAdapter(
       {
         app,
@@ -571,8 +571,8 @@ function activateFileEditorLanguageServer(
         featureManager,
         foreignCodeExtractorsManager: extractorManager
       },
-      notebook
+      editor
     );
-    connectionManager.registerAdapter(notebook.context.path, adapter);
+    connectionManager.registerAdapter(editor.context.path, adapter);
   });
 }

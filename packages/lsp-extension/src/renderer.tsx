@@ -5,25 +5,27 @@ import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { UUID } from '@lumino/coreutils';
 import { closeIcon } from '@jupyterlab/ui-components';
 type TDict = { [key: string]: any };
-interface IState {
-  title?: string;
-  desc?: string;
-  items: TDict;
-}
-interface IProps extends FieldProps {
-  translator: ITranslator;
-}
 
 interface ISettingPropertyMap {
   [key: string]: ISettingProperty;
 }
 interface ISettingProperty {
+  /**
+   * Name of setting property
+   */
   property: string;
+  /**
+   * Type of setting property
+   */
   type: 'boolean' | 'string' | 'number';
+  /**
+   * Value of setting property
+   */
   value: any;
 }
 const SETTING_NAME = 'languageServers';
 const SERVER_SETTINGS = 'configuration';
+
 function debounce<Params extends any[]>(
   func: (...args: Params) => any,
   timeout: number = 500
@@ -37,14 +39,42 @@ function debounce<Params extends any[]>(
   };
 }
 
-function BuildSettingForm(props: {
+interface ISettingFormProps {
+  /**
+   * The translation bundle.
+   */
   trans: TranslationBundle;
+
+  /**
+   * Callback to remove setting item.
+   */
   removeSetting: (key: string) => void;
+
+  /**
+   * Callback to update the setting item.
+   */
   updateSetting: (hash: string, newSetting: TDict) => void;
+
+  /**
+   * Hash to differentiate the setting fields.
+   */
   serverHash: string;
+
+  /**
+   *  Setting value.
+   */
   settings: TDict;
+
+  /**
+   * Setting schema.
+   */
   schema: TDict;
-}): JSX.Element {
+}
+
+/**
+ * The React component of the setting field
+ */
+function BuildSettingForm(props: ISettingFormProps): JSX.Element {
   const { [SERVER_SETTINGS]: serverSettingsSchema, ...otherSettingsSchema } =
     props.schema;
   const {
@@ -69,9 +99,11 @@ function BuildSettingForm(props: {
     };
     serverSettingWithType[UUID.uuid4()] = newProps;
   });
+
   const [propertyMap, setPropertyMap] = useState<ISettingPropertyMap>(
     serverSettingWithType
   );
+
   const defaultOtherSettings: TDict = {};
 
   Object.entries(otherSettingsSchema).forEach(([key, value]) => {
@@ -81,8 +113,10 @@ function BuildSettingForm(props: {
       defaultOtherSettings[key] = value['default'];
     }
   });
+
   const [otherSettingsComposite, setOtherSettingsComposite] =
     useState<TDict>(defaultOtherSettings);
+
   const onOtherSettingsChange = (
     property: string,
     value: any,
@@ -113,6 +147,7 @@ function BuildSettingForm(props: {
     props.updateSetting(props.serverHash, { [SERVER_SETTINGS]: payload });
     setPropertyMap(newMap);
   };
+
   const removeProperty = (entryHash: string) => {
     const newMap: ISettingPropertyMap = {};
     Object.entries(propertyMap).forEach(([hash, value]) => {
@@ -127,6 +162,7 @@ function BuildSettingForm(props: {
       setPropertyMap(newMap);
     });
   };
+
   const setProperty = (hash: string, property: ISettingProperty): void => {
     if (hash in propertyMap) {
       const newMap: ISettingPropertyMap = { ...propertyMap, [hash]: property };
@@ -138,6 +174,7 @@ function BuildSettingForm(props: {
       props.updateSetting(props.serverHash, { [SERVER_SETTINGS]: payload });
     }
   };
+
   return (
     <div className="array-item">
       <div className="form-group ">
@@ -332,11 +369,31 @@ function PropertyFrom(props: {
   );
 }
 
+/**
+ * Internal state of the setting component
+ */
+interface IState {
+  /**
+   * Title of the setting section
+   */
+  title?: string;
+  /**
+   * Description of the setting section
+   */
+  desc?: string;
+  /**
+   * Items of setting section
+   */
+  items: TDict;
+}
+interface IProps extends FieldProps {
+  translator: ITranslator;
+}
+
+/**
+ * React setting component
+ */
 class SettingRenderer extends React.Component<IProps, IState> {
-  private _setting: ISettingRegistry.ISettings;
-  private _trans: TranslationBundle;
-  private _defaultSetting: TDict;
-  private _schema: TDict;
   constructor(props: IProps) {
     super(props);
     this._setting = props.formContext.settings;
@@ -363,6 +420,11 @@ class SettingRenderer extends React.Component<IProps, IState> {
     this.state = { title, desc, items };
   }
 
+  /**
+   * Remove a setting item by its hash
+   *
+   * @param hash - hash of the item to be removed.
+   */
   removeSetting = (hash: string): void => {
     if (hash in this.state.items) {
       const items: TDict = {};
@@ -382,6 +444,12 @@ class SettingRenderer extends React.Component<IProps, IState> {
     }
   };
 
+  /**
+   * Update a setting item by its hash
+   *
+   * @param hash - hash of the item to be updated.
+   * @param newSetting - new setting value.
+   */
   updateSetting = (hash: string, newSetting: TDict): void => {
     if (hash in this.state.items) {
       const items: TDict = {};
@@ -403,6 +471,10 @@ class SettingRenderer extends React.Component<IProps, IState> {
     }
   };
 
+  /**
+   * Add setting item to the setting component.
+   *
+   */
   addServerSetting = (): void => {
     let index = 0;
     let key = 'newKey';
@@ -428,6 +500,9 @@ class SettingRenderer extends React.Component<IProps, IState> {
     );
   };
 
+  /**
+   * Save the value of setting items to the setting registry.
+   */
   saveServerSetting = () => {
     const settings: TDict = {};
     Object.values(this.state.items).forEach(item => {
@@ -470,6 +545,26 @@ class SettingRenderer extends React.Component<IProps, IState> {
       </div>
     );
   }
+
+  /**
+   * The setting registry.
+   */
+  private _setting: ISettingRegistry.ISettings;
+
+  /**
+   * The translation bundle.
+   */
+  private _trans: TranslationBundle;
+
+  /**
+   * Default setting value.
+   */
+  private _defaultSetting: TDict;
+
+  /**
+   * The setting schema.
+   */
+  private _schema: TDict;
 }
 
 /**

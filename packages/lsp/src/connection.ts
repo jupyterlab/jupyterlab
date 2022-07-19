@@ -3,7 +3,7 @@
 // but without language deemed unnecessary following the Berne Convention." (Wikipedia).
 // Introduced modifications are BSD licenced, copyright JupyterLab development team.
 import { Signal } from '@lumino/signaling';
-import { IDocumentInfo, IPosition, LspWsConnection } from 'lsp-ws-connection';
+import { IDocumentInfo, LspWsConnection } from 'lsp-ws-connection';
 import {
   registerServerCapability,
   unregisterServerCapability
@@ -30,6 +30,9 @@ import type * as lsp from 'vscode-languageserver-protocol';
 
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 
+/**
+ * Helper class to handle client request
+ */
 class ClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > implements IClientRequestHandler
@@ -57,10 +60,36 @@ class ClientRequestHandler<
   }
 }
 
+/**
+ * Helper class to handle server responses
+ */
 class ServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > implements IServerRequestHandler
 {
+  constructor(
+    protected connection: MessageConnection,
+    protected method: T,
+    protected emitter: LSPConnection
+  ) {
+    // on request accepts "thenable"
+    this.connection.onRequest(method, this._handle.bind(this));
+    this._handler = null;
+  }
+
+  setHandler(
+    handler: (
+      params: IServerRequestParams[T],
+      connection?: LSPConnection
+    ) => Promise<IServerResult[T]>
+  ) {
+    this._handler = handler;
+  }
+
+  clearHandler() {
+    this._handler = null;
+  }
+
   private _handler:
     | ((
         params: IServerRequestParams[T],
@@ -68,17 +97,7 @@ class ServerRequestHandler<
       ) => Promise<IServerResult[T]>)
     | null;
 
-  constructor(
-    protected connection: MessageConnection,
-    protected method: T,
-    protected emitter: LSPConnection
-  ) {
-    // on request accepts "thenable"
-    this.connection.onRequest(method, this.handle.bind(this));
-    this._handler = null;
-  }
-
-  private handle(
+  private _handle(
     request: IServerRequestParams[T]
   ): Promise<IServerResult[T] | undefined> {
     this.emitter.log(MessageKind.serverRequested, {
@@ -95,19 +114,6 @@ class ServerRequestHandler<
       });
       return result;
     });
-  }
-
-  setHandler(
-    handler: (
-      params: IServerRequestParams[T],
-      connection?: LSPConnection
-    ) => Promise<IServerResult[T]>
-  ) {
-    this._handler = handler;
-  }
-
-  clearHandler() {
-    this._handler = null;
   }
 }
 
@@ -149,6 +155,9 @@ type AnyMethod =
   | Method.ClientRequest
   | Method.ServerRequest;
 
+/**
+ * Create a ma[ between the request method and its handler
+ */
 function createMethodMap<T, H, U extends keyof T = keyof T>(
   methods: AnyMethodType,
   handlerFactory: (method: U) => H
@@ -175,18 +184,6 @@ interface IMessageLog<T extends AnyMethod = AnyMethod> {
 }
 
 export class LSPConnection extends LspWsConnection implements ILSPConnection {
-  public serverIdentifier?: string;
-  public serverLanguage?: string;
-  public clientNotifications: ClientNotifications;
-  public serverNotifications: ServerNotifications;
-  public clientRequests: ClientRequests;
-  public serverRequests: ServerRequests;
-  public logAllCommunication: boolean;
-
-  protected documentsToOpen: IDocumentInfo[];
-
-  private _options: ILSPOptions;
-
   constructor(options: ILSPOptions) {
     super(options);
     this._options = options;
@@ -204,12 +201,157 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
       );
   }
 
-  public log(kind: MessageKind, message: IMessageLog): void {
+  /**
+   * Identifier of the language server
+   */
+  readonly serverIdentifier?: string;
+
+  /**
+   * Language of the language server
+   */
+  readonly serverLanguage?: string;
+
+  /**
+   * Notifications comes from the client.
+   */
+  readonly clientNotifications: ClientNotifications;
+
+  /**
+   * Notifications comes from the server.
+   */
+  readonly serverNotifications: ServerNotifications;
+
+  /**
+   * Requests comes from the client.
+   */
+  clientRequests: ClientRequests;
+
+  /**
+   * Responses comes from the server.
+   */
+  serverRequests: ServerRequests;
+
+  /**
+   * Should log all communication?
+   */
+  logAllCommunication: boolean;
+
+  /**
+   * Helper to print the logs to logger, for now we are using
+   * directly the browser's console.
+   */
+  log(kind: MessageKind, message: IMessageLog): void {
     if (this.logAllCommunication) {
       console.log(kind, message);
     }
   }
 
+  /**
+   * Send the open request to the backend when the server is
+   * ready.
+   */
+  sendOpenWhenReady(documentInfo: IDocumentInfo): void {
+    if (this.isReady) {
+      this.sendOpen(documentInfo);
+    } else {
+      this.documentsToOpen.push(documentInfo);
+    }
+  }
+
+  /**
+   * Send the document changes to the server.
+   */
+  sendSelectiveChange(
+    changeEvent: lsp.TextDocumentContentChangeEvent,
+    documentInfo: IDocumentInfo
+  ): void {
+    this._sendChange([changeEvent], documentInfo);
+  }
+
+  /**
+   * Send all changes to the server.
+   */
+  sendFullTextChange(text: string, documentInfo: IDocumentInfo): void {
+    this._sendChange([{ text }], documentInfo);
+  }
+
+  /**
+   * @deprecated The method should not be used in new code. Use provides() instead.
+   */
+  isRenameSupported(): boolean {
+    return !!(
+      this.serverCapabilities && this.serverCapabilities.renameProvider
+    );
+  }
+
+  /**
+   * Check if a provider is available in the registered capabilities.
+   */
+  provides(provider: keyof lsp.ServerCapabilities): boolean {
+    return !!(this.serverCapabilities && this.serverCapabilities[provider]);
+  }
+
+  /**
+   * Close the connection to the server.
+   *
+   */
+  close(): void {
+    try {
+      this._closingManually = true;
+      super.close();
+    } catch (e) {
+      this._closingManually = false;
+    }
+  }
+
+  /**
+   * initialize a connection over a web socket that speaks the LSP
+   *
+   */
+  connect(socket: WebSocket): this {
+    super.connect(socket);
+    untilReady(() => {
+      return this.isConnected;
+    }, -1)
+      .then(() => {
+        this.connection.onClose(() => {
+          this.isConnected = false;
+          this.emit('close', this._closingManually);
+        });
+      })
+      .catch(() => {
+        console.error('Could not connect onClose signal');
+      });
+    return this;
+  }
+
+  /**
+   * Get send request to the server to get completion results
+   * from a completion item
+   *
+   */
+  async getCompletionResolve(
+    completionItem: lsp.CompletionItem
+  ): Promise<lsp.CompletionItem | undefined> {
+    if (!this.isReady) {
+      return;
+    }
+    return this.connection.sendRequest<lsp.CompletionItem>(
+      'completionItem/resolve',
+      completionItem
+    );
+  }
+
+  /**
+   * List of documents waiting to be opened once the connection
+   * is ready.
+   */
+  protected documentsToOpen: IDocumentInfo[];
+
+  /**
+   * Generate the notification handlers
+   *
+   */
   protected constructNotificationHandlers<
     T extends ServerNotifications | ClientNotifications
   >(
@@ -221,6 +363,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     );
   }
 
+  /**
+   * Generate the client request handler
+   *
+   */
   protected constructClientRequestHandler<
     T extends ClientRequests,
     U extends keyof T = keyof T
@@ -232,6 +378,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     );
   }
 
+  /**
+   * Generate the server response handler
+   *
+   */
   protected constructServerRequestHandler<
     T extends ServerRequests,
     U extends keyof T = keyof T
@@ -260,14 +410,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     };
   }
 
-  sendOpenWhenReady(documentInfo: IDocumentInfo): void {
-    if (this.isReady) {
-      this.sendOpen(documentInfo);
-    } else {
-      this.documentsToOpen.push(documentInfo);
-    }
-  }
-
+  /**
+   * Callback called when the server is initialized.
+   *
+   */
   protected onServerInitialized(params: lsp.InitializeResult): void {
     this.afterInitialized();
     super.onServerInitialized(params);
@@ -276,6 +422,11 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     }
   }
 
+  /**
+   * Once the server is initialized, this method generates the
+   * client and server handlers
+   *
+   */
   protected afterInitialized(): void {
     for (const method of Object.values(
       Method.ServerNotification
@@ -359,96 +510,17 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     });
   }
 
-  public sendSelectiveChange(
-    changeEvent: lsp.TextDocumentContentChangeEvent,
-    documentInfo: IDocumentInfo
-  ): void {
-    this._sendChange([changeEvent], documentInfo);
-  }
+  /**
+   * Is the connection is closed manually?
+   */
+  private _closingManually = false;
 
-  public sendFullTextChange(text: string, documentInfo: IDocumentInfo): void {
-    this._sendChange([{ text }], documentInfo);
-  }
+  private _options: ILSPOptions;
 
   /**
-   * @deprecated The method should not be used in new code. Use provides() instead.
+   * Send the document changed data to the server.
+   *
    */
-  public isRenameSupported(): boolean {
-    return !!(
-      this.serverCapabilities && this.serverCapabilities.renameProvider
-    );
-  }
-
-  provides(provider: keyof lsp.ServerCapabilities): boolean {
-    return !!(this.serverCapabilities && this.serverCapabilities[provider]);
-  }
-
-  /**
-   * @deprecated The method should not be used in new code
-   */
-  async rename(
-    location: IPosition,
-    documentInfo: IDocumentInfo,
-    newName: string,
-    emit = true
-  ): Promise<lsp.WorkspaceEdit | null> {
-    if (!this.isReady || !this.isRenameSupported()) {
-      return null;
-    }
-    if (documentInfo.uri.length === 0) {
-      return null;
-    }
-    const params: lsp.RenameParams = {
-      textDocument: {
-        uri: documentInfo.uri
-      },
-      position: {
-        line: location.line,
-        character: location.ch
-      },
-      newName
-    };
-
-    const edit: lsp.WorkspaceEdit = await this.connection.sendRequest(
-      'textDocument/rename',
-      params
-    );
-
-    if (emit) {
-      this.emit('renamed', edit);
-    }
-
-    return edit;
-  }
-
-  public connect(socket: WebSocket): this {
-    super.connect(socket);
-    untilReady(() => {
-      return this.isConnected;
-    }, -1)
-      .then(() => {
-        this.connection.onClose(() => {
-          this.isConnected = false;
-          this.emit('close', this.closingManually);
-        });
-      })
-      .catch(() => {
-        console.error('Could not connect onClose signal');
-      });
-    return this;
-  }
-
-  private closingManually = false;
-
-  public close(): void {
-    try {
-      this.closingManually = true;
-      super.close();
-    } catch (e) {
-      this.closingManually = false;
-    }
-  }
-
   private _sendChange(
     changeEvents: lsp.TextDocumentContentChangeEvent[],
     documentInfo: IDocumentInfo
@@ -474,27 +546,5 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
       textDocumentChange
     );
     documentInfo.version++;
-  }
-
-  async getCompletionResolve(
-    completionItem: lsp.CompletionItem
-  ): Promise<lsp.CompletionItem | undefined> {
-    if (!this.isReady || !this.isCompletionResolveProvider()) {
-      return;
-    }
-    return this.connection.sendRequest<lsp.CompletionItem>(
-      'completionItem/resolve',
-      completionItem
-    );
-  }
-
-  /**
-   * Does support completionItem/resolve?
-   * @deprecated The method should not be used in new code
-   */
-  public isCompletionResolveProvider(): boolean {
-    return (
-      this.serverCapabilities?.completionProvider?.resolveProvider || false
-    );
   }
 }

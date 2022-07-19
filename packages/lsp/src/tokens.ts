@@ -499,17 +499,67 @@ export type ServerRequests<
 };
 
 export interface ILSPConnection extends ILspConnection {
+  /**
+   * Identifier of the language server
+   */
   serverIdentifier?: string;
+
+  /**
+   * Language of the language server
+   */
   serverLanguage?: string;
+
+  /**
+   * Should log all communication?
+   */
   logAllCommunication: boolean;
+
+  /**
+   * Is the language server is ready?
+   */
   isReady: boolean;
+
+  /**
+   * Notifications comes from the client.
+   */
   clientNotifications: ClientNotifications;
+
+  /**
+   * Notifications comes from the server.
+   */
   serverNotifications: ServerNotifications;
+
+  /**
+   * Requests comes from the client.
+   */
   clientRequests: ClientRequests;
+
+  /**
+   * Responses comes from the server.
+   */
   serverRequests: ServerRequests;
+
+  /**
+   * Send save notification to the server.
+   */
   sendSaved(documentInfo: IDocumentInfo): void;
+
+  /**
+   * Send the open request to the backend when the server is
+   * ready.
+   */
   sendOpenWhenReady(documentInfo: IDocumentInfo): void;
+
+  /**
+   * Send all changes to the server.
+   */
   sendFullTextChange(text: string, documentInfo: IDocumentInfo): void;
+
+  /**
+   * Get send request to the server to get completion results
+   * from a completion item
+   *
+   */
   getCompletion(
     location: IPosition,
     token: ITokenInfo,

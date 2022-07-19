@@ -7,10 +7,6 @@ import type * as lsp from 'vscode-languageserver-protocol';
  */
 export interface IPosition extends CodeMirror.Position {}
 
-export function isEqual(self: IPosition, other: IPosition): boolean {
-  return other && self.line === other.line && self.ch === other.ch;
-}
-
 export interface ISourcePosition extends IPosition {
   isSource: true;
 }
@@ -27,6 +23,22 @@ export interface IRootPosition extends ISourcePosition {
   isRoot: true;
 }
 
+/**
+ * Compare two `IPosition` variable.
+ *
+ */
+export function isEqual(self: IPosition, other: IPosition): boolean {
+  return other && self.line === other.line && self.ch === other.ch;
+}
+
+/**
+ * Given a list of line and an offset from the start, compute the corresponding
+ * position in form of line and column number
+ *
+ * @param offset - number of spaces counted from the start of first line
+ * @param  lines - list of lines to compute the position
+ * @return  - the position of cursor
+ */
 export function positionAtOffset(
   offset: number,
   lines: string[]
@@ -46,6 +58,14 @@ export function positionAtOffset(
   return { line, column };
 }
 
+/**
+ * Given a list of line and position in form of line and column number,
+ * compute the offset from the start of first line.
+ * @param position - postion of cursor
+ * @param  lines - list of lines to compute the position
+ * @param linesIncludeBreaks - should count the line break as space?
+ * return - offset number
+ */
 export function offsetAtPosition(
   position: CodeEditor.IPosition,
   lines: string[],
@@ -65,11 +85,13 @@ export function offsetAtPosition(
   return offset;
 }
 
-export class PositionError extends Error {
-  // no-op
-}
-
 export namespace ProtocolCoordinates {
+  /**
+   * Check if the position is in the input range
+   *
+   * @param position - position in form of line and character number.
+   * @param  range - range in from of start and end position.
+   */
   export function isWithinRange(
     position: lsp.Position,
     range: lsp.Range

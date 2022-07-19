@@ -3,9 +3,10 @@ import { CellType } from '@jupyterlab/nbformat';
 import { ILSPCodeExtractorsManager } from '../tokens';
 import { IForeignCodeExtractor } from './types';
 
+/**
+ * Manager for the code extractors
+ */
 export class CodeExtractorsManager implements ILSPCodeExtractorsManager {
-  private _extractorMap: Map<CellType, Map<string, IForeignCodeExtractor[]>>;
-  private _extractorMapAnyLanguage: Map<CellType, IForeignCodeExtractor[]>;
   constructor() {
     this._extractorMap = new Map<
       CellType,
@@ -23,6 +24,13 @@ export class CodeExtractorsManager implements ILSPCodeExtractorsManager {
     });
   }
 
+  /**
+   * Get the extractors for the input cell type and the main language of
+   * the document
+   *
+   * @param {CellType} cellType
+   * @param {(string | null)} hostLanguage
+   */
   getExtractors(
     cellType: CellType,
     hostLanguage: string | null
@@ -59,4 +67,16 @@ export class CodeExtractorsManager implements ILSPCodeExtractorsManager {
       });
     }
   }
+
+  /**
+   * The map with key is the type of cell, value is another map between
+   * the language of cell and its code extractor.
+   */
+  private _extractorMap: Map<CellType, Map<string, IForeignCodeExtractor[]>>;
+
+  /**
+   * The map with key is the cell type, value is the code extractor associated
+   * with this cell type, this is used for the non-code cell types.
+   */
+  private _extractorMapAnyLanguage: Map<CellType, IForeignCodeExtractor[]>;
 }

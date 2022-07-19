@@ -22,39 +22,136 @@ type IEditor = CodeEditor.IEditor;
 type ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 
 export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
-  editor: Notebook;
-  private ceEditorToCell: Map<IEditor, Cell>;
-  private knownEditorsIds: Set<string>;
-
-  private _languageInfo: ILanguageInfoMetadata;
-  private type: nbformat.CellType = 'code';
-
   constructor(
     protected options: IAdapterOptions,
     public editorWidget: NotebookPanel
   ) {
     super(options, editorWidget);
-    this.ceEditorToCell = new Map();
+    this._ceEditorToCell = new Map();
     this.editor = editorWidget.content;
-    this.knownEditorsIds = new Set();
+    this._knownEditorsIds = new Set();
     this.initialized = new Promise<void>((resolve, reject) => {
       this.initOnceReady().then(resolve).catch(reject);
     });
   }
 
-  private async updateLanguageInfo(): Promise<void> {
-    const language_info = (
-      await this.widget.context.sessionContext?.session?.kernel?.info
-    )?.language_info;
-    if (language_info) {
-      this._languageInfo = language_info;
-    } else {
-      throw new Error(
-        'Language info update failed (no session, kernel, or info available)'
-      );
-    }
+  /**
+   * The wrapped `Notebook` widget.
+   *
+   */
+  readonly editor: Notebook;
+
+  /**
+   * Get current path of the document.
+   */
+  get documentPath(): string {
+    return this.widget.context.path;
   }
 
+  /**
+   * Get the mime type of the document.
+   */
+  get mimeType(): string {
+    let languageMetadata = this.language_info();
+    if (!languageMetadata || !languageMetadata.mimetype) {
+      // fallback to the code cell mime type if no kernel in use
+      return this.widget.content.codeMimetype;
+    }
+    return languageMetadata.mimetype;
+  }
+
+  /**
+   * Get the file extension of the document.
+   */
+  get languageFileExtension(): string | undefined {
+    let languageMetadata = this.language_info();
+    if (!languageMetadata || !languageMetadata.file_extension) {
+      return;
+    }
+    return languageMetadata.file_extension.replace('.', '');
+  }
+
+  /**
+   * Get the inner HTMLElement of the document widget.
+   */
+  get wrapperElement(): HTMLElement {
+    return this.widget.node;
+  }
+
+  /**
+   *  Get the list of CM editor with its type in the document,
+   */
+  get editors(): { ceEditor: CodeEditor.IEditor; type: nbformat.CellType }[] {
+    if (this.isDisposed) {
+      return [];
+    }
+
+    let notebook = this.widget.content;
+
+    this._ceEditorToCell.clear();
+
+    if (notebook.isDisposed) {
+      return [];
+    }
+
+    return notebook.widgets.map(cell => {
+      this._ceEditorToCell.set(cell.editor, cell);
+      return { ceEditor: cell.editor, type: cell.model.type };
+    });
+  }
+
+  /**
+   * Get the activated CM editor.
+   */
+  get activeEditor(): CodeEditor.IEditor | undefined {
+    return this.widget.content.activeCell?.editor;
+  }
+
+  /**
+   * Get the index of editor from the cursor position in the virtual
+   * document.
+   *
+   * @param position - the position of cursor in the virtual document.
+   */
+  getEditorIndexAt(position: IVirtualPosition): number {
+    let cell = this._getCellAt(position);
+    let notebook = this.widget.content;
+    return notebook.widgets.findIndex(otherCell => {
+      return cell === otherCell;
+    });
+  }
+
+  /**
+   * Get the index of input editor
+   *
+   * @param {CodeEditor.IEditor} ceEditor - instance of the code editor
+   *
+   */
+  getEditorIndex(ceEditor: CodeEditor.IEditor): number {
+    let cell = this._ceEditorToCell.get(ceEditor)!;
+    let notebook = this.widget.content;
+    return notebook.widgets.findIndex(otherCell => {
+      return cell === otherCell;
+    });
+  }
+
+  /**
+   * Get the wrapper of input editor.
+   *
+   * @param {CodeEditor.IEditor} ceEditor
+   */
+  getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement {
+    let cell = this._ceEditorToCell.get(ceEditor)!;
+    return cell.node;
+  }
+
+  /**
+   * Callback on kernel changed event, it will disconnect the
+   * document with the language server and then reconnect.
+   *
+   * @param {SessionContext} _session
+   * @param {Session.ISessionConnection.IKernelChangedArgs} change
+   */
   async onKernelChanged(
     _session: SessionContext,
     change: Session.ISessionConnection.IKernelChangedArgs
@@ -66,7 +163,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       // note: we need to wait until ready before updating language info
       const oldLanguageInfo = this._languageInfo;
       await untilReady(this.isReady, -1);
-      await this.updateLanguageInfo();
+      await this._updateLanguageInfo();
       const newLanguageInfo = this._languageInfo;
       if (
         oldLanguageInfo?.name != newLanguageInfo.name ||
@@ -89,26 +186,32 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     }
   }
 
+  /**
+   * Dispose the widget.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-
+    this.isDisposed = true;
     this.widget.context.sessionContext.kernelChanged.disconnect(
       this.onKernelChanged,
       this
     );
     this.widget.content.activeCellChanged.disconnect(
-      this.activeCellChanged,
+      this._activeCellChanged,
       this
     );
 
     super.dispose();
 
     // editors are needed for the parent dispose() to unbind signals, so they are the last to go
-    this.ceEditorToCell.clear();
+    this._ceEditorToCell.clear();
   }
 
+  /**
+   * Method to check if the notebook context is ready.
+   */
   isReady(): boolean {
     return (
       !this.widget.isDisposed &&
@@ -119,82 +222,19 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     );
   }
 
-  get documentPath(): string {
-    return this.widget.context.path;
-  }
-
-  protected language_info(): ILanguageInfoMetadata {
-    return this._languageInfo;
-  }
-
-  get mimeType(): string {
-    let languageMetadata = this.language_info();
-    if (!languageMetadata || !languageMetadata.mimetype) {
-      // fallback to the code cell mime type if no kernel in use
-      return this.widget.content.codeMimetype;
-    }
-    return languageMetadata.mimetype;
-  }
-
-  get languageFileExtension(): string | undefined {
-    let languageMetadata = this.language_info();
-    if (!languageMetadata || !languageMetadata.file_extension) {
-      return;
-    }
-    return languageMetadata.file_extension.replace('.', '');
-  }
-
-  get wrapperElement(): HTMLElement {
-    return this.widget.node;
-  }
-
-  protected async initOnceReady(): Promise<void> {
-    await this.widget.context.sessionContext.ready;
-    await this.connectionManager.ready;
-    await untilReady(this.isReady.bind(this), -1);
-    await this.updateLanguageInfo();
-    this.initVirtual();
-
-    // connect the document, but do not open it as the adapter will handle this
-    // after registering all features
-    this.connectDocument(this.virtualDocument, false).catch(console.warn);
-
-    this.widget.context.sessionContext.kernelChanged.connect(
-      this.onKernelChanged,
-      this
-    );
-
-    this.widget.content.activeCellChanged.connect(this.activeCellChanged, this);
-    this._connectModelSignals(this.widget);
-    this.editor.modelChanged.connect(notebook => {
-      // note: this should not usually happen;
-      // there is no default action that would trigger this,
-      // its just a failsafe in case if another extension decides
-      // to swap the notebook model
-      console.warn(
-        'Model changed, connecting cell change handler; this is not something we were expecting'
-      );
-      this._connectModelSignals(notebook);
-    });
-  }
-
-  private _connectModelSignals(notebook: NotebookPanel | Notebook) {
-    if (notebook.model === null) {
-      console.warn(
-        `Model is missing for notebook ${notebook}, cannot connet cell changed signal!`
-      );
-    } else {
-      notebook.model.cells.changed.connect(this.handleCellChange, this);
-    }
-  }
-
+  /**
+   * Update the virtual document on cell changing event.
+   *
+   * @param {IObservableUndoableList<ICellModel>} cells
+   * @param {IObservableList.IChangedArgs<ICellModel>} change
+   */
   async handleCellChange(
     cells: IObservableUndoableList<ICellModel>,
     change: IObservableList.IChangedArgs<ICellModel>
   ): Promise<void> {
     let cellsAdded: ICellModel[] = [];
     let cellsRemoved: ICellModel[] = [];
-    const type = this.type;
+    const type = this._type;
     if (change.type === 'set') {
       // handling of conversions is important, because the editors get re-used and their handlers inherited,
       // so we need to clear our handlers from editors of e.g. markdown cells which previously were code cells.
@@ -252,13 +292,13 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
         );
         continue;
       }
-      this.knownEditorsIds.delete(cellWidget.editor.uuid);
+      this._knownEditorsIds.delete(cellWidget.editor.uuid);
 
       // for practical purposes this editor got removed from our consideration;
       // it might seem that we should instead look for the editor indicated by
       // the oldValues[i] cellModel, but this one got already transferred to the
       // markdown cell in newValues[i]
-      this.editorRemoved.emit({
+      this._editorRemoved.emit({
         editor: cellWidget.editor
       });
     }
@@ -273,33 +313,17 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
         );
         continue;
       }
-      this.knownEditorsIds.add(cellWidget.editor.uuid);
+      this._knownEditorsIds.add(cellWidget.editor.uuid);
 
-      this.editorAdded.emit({
+      this._editorAdded.emit({
         editor: cellWidget.editor
       });
     }
   }
 
-  get editors(): { ceEditor: CodeEditor.IEditor; type: nbformat.CellType }[] {
-    if (this.isDisposed) {
-      return [];
-    }
-
-    let notebook = this.widget.content;
-
-    this.ceEditorToCell.clear();
-
-    if (notebook.isDisposed) {
-      return [];
-    }
-
-    return notebook.widgets.map(cell => {
-      this.ceEditorToCell.set(cell.editor, cell);
-      return { ceEditor: cell.editor, type: cell.model.type };
-    });
-  }
-
+  /**
+   * Generate the virtual document associated with the document.
+   */
   createVirtualDocument(): VirtualDocument {
     return new VirtualDocument({
       language: this.language,
@@ -313,48 +337,126 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     });
   }
 
-  get activeEditor(): CodeEditor.IEditor | undefined {
-    return this.widget.content.activeCell?.editor;
+  /**
+   * Get the metadata of notebook.
+   */
+  protected language_info(): ILanguageInfoMetadata {
+    return this._languageInfo;
+  }
+  /**
+   * Initialization function called once the editor and the LSP connection
+   * manager is ready. This function will create the virtual document and
+   * connect various signals.
+   *
+   */
+  protected async initOnceReady(): Promise<void> {
+    await this.widget.context.sessionContext.ready;
+    await this.connectionManager.ready;
+    await untilReady(this.isReady.bind(this), -1);
+    await this._updateLanguageInfo();
+    this.initVirtual();
+
+    // connect the document, but do not open it as the adapter will handle this
+    // after registering all features
+    this.connectDocument(this.virtualDocument, false).catch(console.warn);
+
+    this.widget.context.sessionContext.kernelChanged.connect(
+      this.onKernelChanged,
+      this
+    );
+
+    this.widget.content.activeCellChanged.connect(
+      this._activeCellChanged,
+      this
+    );
+    this._connectModelSignals(this.widget);
+    this.editor.modelChanged.connect(notebook => {
+      // note: this should not usually happen;
+      // there is no default action that would trigger this,
+      // its just a failsafe in case if another extension decides
+      // to swap the notebook model
+      console.warn(
+        'Model changed, connecting cell change handler; this is not something we were expecting'
+      );
+      this._connectModelSignals(notebook);
+    });
   }
 
-  private activeCellChanged(notebook: Notebook, cell: Cell) {
-    if (cell.model.type !== this.type) {
+  /**
+   * Connect the cell changed event to its handler
+   *
+   * @param {(NotebookPanel | Notebook)} notebook
+   */
+  private _connectModelSignals(notebook: NotebookPanel | Notebook) {
+    if (notebook.model === null) {
+      console.warn(
+        `Model is missing for notebook ${notebook}, cannot connet cell changed signal!`
+      );
+    } else {
+      notebook.model.cells.changed.connect(this.handleCellChange, this);
+    }
+  }
+
+  /**
+   * Update the stored language info with the one from the notebook.
+   */
+  private async _updateLanguageInfo(): Promise<void> {
+    const language_info = (
+      await this.widget.context.sessionContext?.session?.kernel?.info
+    )?.language_info;
+    if (language_info) {
+      this._languageInfo = language_info;
+    } else {
+      throw new Error(
+        'Language info update failed (no session, kernel, or info available)'
+      );
+    }
+  }
+
+  /**
+   * Handle the cell changed event
+   * @param {Notebook} notebook
+   * @param {Cell} cell
+   */
+  private _activeCellChanged(notebook: Notebook, cell: Cell) {
+    if (cell.model.type !== this._type) {
       return;
     }
-    if (!this.knownEditorsIds.has(cell.editor.uuid)) {
-      this.knownEditorsIds.add(cell.editor.uuid);
-      this.editorAdded.emit({
+    if (!this._knownEditorsIds.has(cell.editor.uuid)) {
+      this._knownEditorsIds.add(cell.editor.uuid);
+      this._editorAdded.emit({
         editor: cell.editor
       });
     }
-    this.activeEditorChanged.emit({
+    this._activeEditorChanged.emit({
       editor: cell.editor
     });
   }
 
-  getEditorIndexAt(position: IVirtualPosition): number {
-    let cell = this.getCellAt(position);
-    let notebook = this.widget.content;
-    return notebook.widgets.findIndex(otherCell => {
-      return cell === otherCell;
-    });
-  }
-
-  getEditorIndex(ceEditor: CodeEditor.IEditor): number {
-    let cell = this.ceEditorToCell.get(ceEditor)!;
-    let notebook = this.widget.content;
-    return notebook.widgets.findIndex(otherCell => {
-      return cell === otherCell;
-    });
-  }
-
-  getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement {
-    let cell = this.ceEditorToCell.get(ceEditor)!;
-    return cell.node;
-  }
-
-  private getCellAt(pos: IVirtualPosition): Cell {
+  /**
+   * Get the cell at the cursor position of the virtual document.
+   * @param {IVirtualPosition} pos
+   */
+  private _getCellAt(pos: IVirtualPosition): Cell {
     let ceEditor = this.virtualDocument.getEditorAtVirtualLine(pos);
-    return this.ceEditorToCell.get(ceEditor)!;
+    return this._ceEditorToCell.get(ceEditor)!;
   }
+
+  /**
+   * A map between the CM editor and the containing cell
+   *
+   */
+  private _ceEditorToCell: Map<IEditor, Cell>;
+
+  /**
+   * Set of known editor ids, used to keep track of added editors.
+   */
+  private _knownEditorsIds: Set<string>;
+
+  /**
+   * Metadata of the notebook
+   */
+  private _languageInfo: ILanguageInfoMetadata;
+
+  private _type: nbformat.CellType = 'code';
 }

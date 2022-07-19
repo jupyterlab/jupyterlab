@@ -4,23 +4,47 @@ import { positionAtOffset } from '../positioning';
 
 import { IExtractedCode, IForeignCodeExtractor } from './types';
 
+/**
+ * The code extractor for the raw and markdown text.
+ */
 export class TextForeignCodeExtractor implements IForeignCodeExtractor {
-  language: LanguageIdentifier;
-  standalone: boolean;
-  fileExtension: string;
-  cellType: CellType[];
-
   constructor(options: TextForeignCodeExtractor.IOptions) {
     this.language = options.language;
     this.standalone = options.isStandalone;
     this.fileExtension = options.file_extension;
     this.cellType = options.cellType;
   }
+  /**
+   * The foreign language.
+   */
+  language: LanguageIdentifier;
 
+  /**
+   * Should the foreign code be appended (False) to the previously established virtual document of the same language,
+   * or is it standalone snippet which requires separate connection?
+   */
+  standalone: boolean;
+
+  /**
+   * Extension of the virtual document (some servers check extensions of files), e.g. 'py' or 'R'.
+   */
+  fileExtension: string;
+
+  /**
+   * The supported cell types.
+   */
+  cellType: CellType[];
+
+  /**
+   * Test if there is any foreign code in provided code snippet.
+   */
   hasForeignCode(code: string, cellType: CellType): boolean {
     return this.cellType.includes(cellType);
   }
 
+  /**
+   * Split the code into the host and foreign code (if any foreign code was detected)
+   */
   extractForeignCode(code: string): IExtractedCode[] {
     let lines = code.split('\n');
 
@@ -55,8 +79,14 @@ namespace TextForeignCodeExtractor {
      */
     isStandalone: boolean;
 
+    /**
+     * Extension of the virtual document (some servers check extensions of files), e.g. 'py' or 'R'.
+     */
     file_extension: string;
 
+    /**
+     * The supported cell types.
+     */
     cellType: CellType[];
   }
 }

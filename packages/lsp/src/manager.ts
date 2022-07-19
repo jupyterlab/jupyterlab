@@ -13,22 +13,6 @@ import { ServerSpecProperties } from './schema';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 export class LanguageServerManager implements ILanguageServerManager {
-  protected _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal<
-    ILanguageServerManager,
-    void
-  >(this);
-  protected _sessions: TSessionMap = new Map();
-  protected _specs: TSpecsMap = new Map();
-  protected _version: number;
-  private _settings: ServerConnection.ISettings;
-  private _baseUrl: string;
-  private _statusCode: number;
-  private _retries: number;
-  private _retriesInterval: number;
-  private _configuration: TLanguageServerConfigurations;
-  private _warningsEmitted = new Set<string>();
-  private _ready = new PromiseDelegate<void>();
-
   constructor(options: ILanguageServerManager.IOptions) {
     this._settings = options.settings || ServerConnection.makeSettings();
     this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
@@ -40,29 +24,58 @@ export class LanguageServerManager implements ILanguageServerManager {
     this.fetchSessions().catch(e => console.log(e));
   }
 
+  /**
+   * Get the language server specs.
+   */
   get specs(): TSpecsMap {
     return this._specs;
   }
 
+  /**
+   * Get the status end point.
+   */
   get statusUrl(): string {
     return URLExt.join(this._baseUrl, ILanguageServerManager.URL_NS, 'status');
   }
 
+  /**
+   * Signal emitted when a  language server session is changed
+   */
   get sessionsChanged(): ISignal<ILanguageServerManager, void> {
     return this._sessionsChanged;
   }
 
+  /**
+   * Get the map of language server sessions.
+   */
   get sessions(): TSessionMap {
     return this._sessions;
   }
 
+  /**
+   * A promise resolved when this server manager is ready.
+   */
   get ready(): Promise<void> {
     return this._ready.promise;
   }
+
+  /**
+   * Get the status code of server's responses.
+   */
+  get statusCode(): number {
+    return this._statusCode;
+  }
+
+  /**
+   * Update the language server configuration.
+   */
   setConfiguration(configuration: TLanguageServerConfigurations): void {
     this._configuration = configuration;
   }
 
+  /**
+   * Helper function to warn a message only once.
+   */
   protected warnOnce(arg: string): void {
     if (!this._warningsEmitted.has(arg)) {
       this._warningsEmitted.add(arg);
@@ -70,6 +83,9 @@ export class LanguageServerManager implements ILanguageServerManager {
     }
   }
 
+  /**
+   * Compare the rank of two servers with the same language.
+   */
   protected _comparePriorities(
     a: TLanguageServerId,
     b: TLanguageServerId
@@ -87,6 +103,9 @@ export class LanguageServerManager implements ILanguageServerManager {
     return bPriority - aPriority;
   }
 
+  /**
+   * Check if input language option maths the language server spec.
+   */
   protected isMatchingSpec(
     options: ILanguageServerManager.IGetServerIdOptions,
     spec: ServerSpecProperties
@@ -100,6 +119,10 @@ export class LanguageServerManager implements ILanguageServerManager {
     );
   }
 
+  /**
+   * Get matching language server for input language option.
+   *
+   */
   getMatchingServers(
     options: ILanguageServerManager.IGetServerIdOptions
   ): TLanguageServerId[] {
@@ -121,6 +144,10 @@ export class LanguageServerManager implements ILanguageServerManager {
     return matchingSessionsKeys.sort(this._comparePriorities.bind(this));
   }
 
+  /**
+   * Get matching language server spec for input language option.
+   *
+   */
   getMatchingSpecs(
     options: ILanguageServerManager.IGetServerIdOptions
   ): TSpecsMap {
@@ -134,10 +161,10 @@ export class LanguageServerManager implements ILanguageServerManager {
     return result;
   }
 
-  get statusCode(): number {
-    return this._statusCode;
-  }
-
+  /**
+   * Fetch the server session list from the status endpoint. The server
+   * manager is ready once this method finishes.
+   */
   async fetchSessions(): Promise<void> {
     let response = await ServerConnection.makeRequest(
       this.statusUrl,
@@ -197,4 +224,63 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._sessionsChanged.emit(void 0);
     this._ready.resolve(undefined);
   }
+
+  protected _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal(
+    this
+  );
+
+  /**
+   * map of language server sessions.
+   */
+  protected _sessions: TSessionMap = new Map();
+
+  /**
+   * Map of language server specs.
+   */
+  protected _specs: TSpecsMap = new Map();
+
+  /**
+   * Version number of sever session.
+   */
+  protected _version: number;
+
+  /**
+   * Server connection setting.
+   */
+  private _settings: ServerConnection.ISettings;
+
+  /**
+   * Base URL to connect to the language server handler.
+   */
+  private _baseUrl: string;
+
+  /**
+   * Status code of server response
+   */
+  private _statusCode: number;
+
+  /**
+   * Number of connection retry, default to 2.
+   */
+  private _retries: number;
+
+  /**
+   * Interval between each retry, default to 10s.
+   */
+  private _retriesInterval: number;
+
+  /**
+   * Language server configuration.
+   */
+  private _configuration: TLanguageServerConfigurations;
+
+  /**
+   * Set of emitted warning message, message in this set will not be warned again.
+   */
+  private _warningsEmitted = new Set<string>();
+
+  /**
+   * A promise resolved when this server manager is ready.
+   */
+  private _ready = new PromiseDelegate<void>();
 }
