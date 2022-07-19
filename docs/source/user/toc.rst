@@ -14,7 +14,7 @@ In the sidebar panel, you can number headings, collapse sections, and navigate i
 Here is an animation showing the table of content use with a notebook:
 
 .. image:: ./images/toc/toc.gif
-    :alt:
+    :alt: A .gif file displaying how to use the table of contents feature within a notebook.
 
 The table of contents will be automatically generated for your notebook by taking all the
 headings from your markdown cells. Each listed section will be linked to the actual section
@@ -37,7 +37,7 @@ option via the *More actions* button in the table of contents toolbar. Here is a
 showing its use:
 
 .. image:: ./images/toc/numberingH1.gif
-    :alt:
+    :alt:A .gif file showing how to toggle the "Automatic section numbering" feature for the first-level headings (h1) within a notebook.
 
 ------------------------------------------------------------------------------------------------------------
 
