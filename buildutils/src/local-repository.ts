@@ -34,10 +34,10 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   } catch (e) {
     // Do nothing
   }
-  if (!prev_npm || prev_npm.indexOf('localhost') !== -1) {
+  if (!prev_npm || prev_npm.indexOf('0.0.0.0') !== -1) {
     prev_npm = 'https://registry.npmjs.org/';
   }
-  if (prev_yarn.indexOf('localhost') !== -1) {
+  if (prev_yarn.indexOf('0.0.0.0') !== -1) {
     prev_yarn = '';
   }
 
@@ -68,7 +68,7 @@ packages:
   const log_file = path.join(out_dir, 'verdaccio.log');
 
   // Start local registry
-  const args = `-c verdaccio.yml -l localhost:${port}`;
+  const args = `-c verdaccio.yml -l 0.0.0.0:${port}`;
   console.log(`Starting verdaccio on port ${port} in ${out_dir}`);
 
   // Ensure a clean log file
@@ -121,7 +121,7 @@ packages:
   utils.writeJSONFile(info_file, data);
 
   // Set registry to local registry
-  const local_registry = `http://localhost:${port}`;
+  const local_registry = `http://0.0.0.0:${port}`;
   child_process.execFileSync('npm', [
     'config',
     'set',
@@ -248,7 +248,7 @@ function fixLinks(package_dir: string) {
   let hash = shasum.update(content);
   console.log('Prior hash', hash.digest('hex'));
 
-  const regex = /http\:\/\/localhost\:\d+/g;
+  const regex = /http\:\/\/0\.0\.0\.0\:\d+/g;
   const new_content = content.replace(regex, yarn_reg);
 
   shasum = crypto.createHash('sha256');
