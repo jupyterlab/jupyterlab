@@ -55,9 +55,7 @@ class LogErrorHandler(logging.Handler):
         if (
             hasattr(record, "exc_info")
             and record.exc_info is not None
-            and isinstance(
-                record.exc_info[1], (StreamClosedError, WebSocketClosedError)
-            )
+            and isinstance(record.exc_info[1], (StreamClosedError, WebSocketClosedError))
         ):
             return
         return super().filter(record)
@@ -168,9 +166,7 @@ def run_browser_sync(url):
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
         subprocess.call(["jlpm", "init", "-y"], cwd=target)
-        subprocess.call(
-            ["jlpm", "config", "set", "network-timeout", "1000000000"], cwd=target
-        )
+        subprocess.call(["jlpm", "config", "set", "network-timeout", "1000000000"], cwd=target)
         subprocess.call(
             ["jlpm", "add", "playwright", "--registry", "https://registry.npmjs.org/"],
             cwd=target,
