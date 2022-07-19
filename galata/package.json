@@ -59,7 +59,6 @@
     "@lumino/coreutils": "^1.11.0",
     "@playwright/test": "^1.16.2",
     "@stdlib/stats": "^0.0.13",
-    "canvas": "^2.6.1",
     "fs-extra": "^9.0.1",
     "http-server": "^13.0.0",
     "json5": "^2.1.1",
