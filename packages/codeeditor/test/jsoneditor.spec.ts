@@ -306,18 +306,6 @@ describe('codeeditor', () => {
       });
     });
 
-    describe('#onAfterShow()', () => {
-      it('should update the editor', async () => {
-        editor.hide();
-        Widget.attach(editor, document.body);
-        editor.show();
-        await framePromise();
-        expect(editor.methods).toEqual(
-          expect.arrayContaining(['onUpdateRequest'])
-        );
-      });
-    });
-
     describe('#onBeforeDetach()', () => {
       it('should remove event listeners', () => {
         Widget.attach(editor, document.body);

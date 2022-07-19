@@ -36,10 +36,9 @@ export namespace Mode {
     return new LanguageSupport(StreamLanguage.define(parser));
   }
 
-  function sql(dialectName: keyof typeof import('@codemirror/lang-sql')) {
-    return import('@codemirror/lang-sql').then(m =>
-      m.sql({ dialect: (m as any)[dialectName] })
-    );
+  async function sql(dialectName: keyof typeof import('@codemirror/lang-sql')) {
+    const m = await import('@codemirror/lang-sql');
+    return m.sql({ dialect: (m as any)[dialectName] });
   }
 
   // Code mirror uses two similar structures, a plain object with optional fields,
@@ -56,16 +55,18 @@ export namespace Mode {
       name: 'C',
       mime: 'text/x-csrc',
       extensions: ['c', 'h', 'ino'],
-      load() {
-        return import('@codemirror/lang-cpp').then(m => m.cpp());
+      async load() {
+        const m = await import('@codemirror/lang-cpp');
+        return m.cpp();
       }
     }),
     makeSpec({
       name: 'C++',
       mime: 'text/x-c++src',
       extensions: ['cpp', 'c++', 'cc', 'cxx', 'hpp', 'h++', 'hh', 'hxx'],
-      load() {
-        return import('@codemirror/lang-cpp').then(m => m.cpp());
+      async load() {
+        const m = await import('@codemirror/lang-cpp');
+        return m.cpp();
       }
     }),
     makeSpec({
@@ -80,8 +81,9 @@ export namespace Mode {
       name: 'CSS',
       mime: 'text/css',
       extensions: ['css'],
-      load() {
-        return import('@codemirror/lang-css').then(m => m.css());
+      async load() {
+        const m = await import('@codemirror/lang-css');
+        return m.css();
       }
     }),
     makeSpec({
@@ -89,16 +91,18 @@ export namespace Mode {
       alias: ['xhtml'],
       mime: 'text/html',
       extensions: ['html', 'htm', 'handlebars', 'hbs'],
-      load() {
-        return import('@codemirror/lang-html').then(m => m.html());
+      async load() {
+        const m = await import('@codemirror/lang-html');
+        return m.html();
       }
     }),
     makeSpec({
       name: 'Java',
       mime: 'text/x-java',
       extensions: ['java'],
-      load() {
-        return import('@codemirror/lang-java').then(m => m.java());
+      async load() {
+        const m = await import('@codemirror/lang-java');
+        return m.java();
       }
     }),
     makeSpec({
@@ -112,8 +116,9 @@ export namespace Mode {
         'application/ecmascript'
       ],
       extensions: ['js', 'mjs', 'cjs'],
-      load() {
-        return import('@codemirror/lang-javascript').then(m => m.javascript());
+      async load() {
+        const m = await import('@codemirror/lang-javascript');
+        return m.javascript();
       }
     }),
     makeSpec({
@@ -121,18 +126,18 @@ export namespace Mode {
       alias: ['json5'],
       mime: ['application/json', 'application/x-json'],
       extensions: ['json', 'map'],
-      load() {
-        return import('@codemirror/lang-json').then(m => m.json());
+      async load() {
+        const m = await import('@codemirror/lang-json');
+        return m.json();
       }
     }),
     makeSpec({
       name: 'JSX',
       mime: 'text/jsx',
       extensions: ['jsx'],
-      load() {
-        return import('@codemirror/lang-javascript').then(m =>
-          m.javascript({ jsx: true })
-        );
+      async load() {
+        const m = await import('@codemirror/lang-javascript');
+        return m.javascript({ jsx: true });
       }
     }),
     makeSpec({
@@ -146,10 +151,9 @@ export namespace Mode {
       name: 'Markdown',
       mime: 'text/x-markdown',
       extensions: ['md', 'markdown', 'mkd'],
-      load() {
-        return import('@codemirror/lang-markdown').then(m =>
-          m.markdown({ codeLanguages: modeList as any })
-        );
+      async load() {
+        const m = await import('@codemirror/lang-markdown');
+        return m.markdown({ codeLanguages: modeList as any });
       }
     }),
     makeSpec({
@@ -174,8 +178,9 @@ export namespace Mode {
         'application/x-httpd-php-open'
       ],
       extensions: ['php', 'php3', 'php4', 'php5', 'php7', 'phtml'],
-      load() {
-        return import('@codemirror/lang-php').then(m => m.php());
+      async load() {
+        const m = await import('@codemirror/lang-php');
+        return m.php();
       }
     }),
     makeSpec({
@@ -206,8 +211,9 @@ export namespace Mode {
       name: 'Rust',
       mime: 'text/x-rustsrc',
       extensions: ['rs'],
-      load() {
-        return import('@codemirror/lang-rust').then(m => m.rust());
+      async load() {
+        const m = await import('@codemirror/lang-rust');
+        return m.rust();
       }
     }),
     makeSpec({
@@ -230,10 +236,9 @@ export namespace Mode {
       alias: ['TypeScript-JSX'],
       mime: 'text/typescript-jsx',
       extensions: ['tsx'],
-      load() {
-        return import('@codemirror/lang-javascript').then(m =>
-          m.javascript({ jsx: true, typescript: true })
-        );
+      async load() {
+        const m = await import('@codemirror/lang-javascript');
+        return m.javascript({ jsx: true, typescript: true });
       }
     }),
     makeSpec({
@@ -241,18 +246,18 @@ export namespace Mode {
       alias: ['ts'],
       mime: 'application/typescript',
       extensions: ['ts'],
-      load() {
-        return import('@codemirror/lang-javascript').then(m =>
-          m.javascript({ typescript: true })
-        );
+      async load() {
+        const m = await import('@codemirror/lang-javascript');
+        return m.javascript({ typescript: true });
       }
     }),
     makeSpec({
       name: 'WebAssembly',
       mime: 'text/webassembly',
       extensions: ['wat', 'wast'],
-      load() {
-        return import('@codemirror/lang-wast').then(m => m.wast());
+      async load() {
+        const m = await import('@codemirror/lang-wast');
+        return m.wast();
       }
     }),
     makeSpec({
@@ -260,8 +265,9 @@ export namespace Mode {
       alias: ['rss', 'wsdl', 'xsd'],
       mime: ['application/xml', 'text/xml'],
       extensions: ['xml', 'xsl', 'xsd', 'svg'],
-      load() {
-        return import('@codemirror/lang-xml').then(m => m.xml());
+      async load() {
+        const m = await import('@codemirror/lang-xml');
+        return m.xml();
       }
     }),
 
@@ -271,10 +277,9 @@ export namespace Mode {
       name: 'APL',
       mime: 'text/apl',
       extensions: ['dyalog', 'apl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/apl').then(m =>
-          legacy(m.apl)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/apl');
+        return legacy(m.apl);
       }
     }),
     makeSpec({
@@ -287,50 +292,45 @@ export namespace Mode {
         'application/pgp-signature'
       ],
       extensions: ['asc', 'pgp', 'sig'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/asciiarmor').then(m =>
-          legacy(m.asciiArmor)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/asciiarmor');
+        return legacy(m.asciiArmor);
       }
     }),
     makeSpec({
       name: 'ASN.1',
       mime: 'text/x-ttcn-asn',
       extensions: ['asn', 'asn1'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/asn1').then(m =>
-          legacy(m.asn1({}))
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/asn1');
+        return legacy(m.asn1({}));
       }
     }),
     makeSpec({
       name: 'Asterisk',
       mime: 'text/x-asterisk',
       filename: /^extensions\.conf$/i,
-      load() {
-        return import('@codemirror/legacy-modes/mode/asterisk').then(m =>
-          legacy(m.asterisk)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/asterisk');
+        return legacy(m.asterisk);
       }
     }),
-    makeSpec({
-      name: 'Brainfuck',
-      mime: 'text/x-brainfuck',
-      extensions: ['b', 'bf'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/brainfuck').then(m =>
-          legacy(m.brainfuck)
-        );
-      }
-    }),
+    // makeSpec({
+    //   name: 'Brainfuck',
+    //   mime: 'text/x-brainfuck',
+    //   extensions: ['b', 'bf'],
+    //   async load() {
+    //     const m = await import('@codemirror/legacy-modes/mode/brainfuck');
+    //     return legacy(m.brainfuck);
+    //   }
+    // }),
     makeSpec({
       name: 'Cobol',
       mime: 'text/x-cobol',
       extensions: ['cob', 'cpy'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/cobol').then(m =>
-          legacy(m.cobol)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/cobol');
+        return legacy(m.cobol);
       }
     }),
     makeSpec({
@@ -338,40 +338,36 @@ export namespace Mode {
       alias: ['csharp', 'cs'],
       mime: 'text/x-csharp',
       extensions: ['cs'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clike').then(m =>
-          legacy(m.csharp)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clike');
+        return legacy(m.csharp);
       }
     }),
     makeSpec({
       name: 'Clojure',
       mime: 'text/x-clojure',
       extensions: ['clj', 'cljc', 'cljx'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clojure').then(m =>
-          legacy(m.clojure)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clojure');
+        return legacy(m.clojure);
       }
     }),
     makeSpec({
       name: 'ClojureScript',
       mime: 'text/x-clojurescript',
       extensions: ['cljs'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clojure').then(m =>
-          legacy(m.clojure)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clojure');
+        return legacy(m.clojure);
       }
     }),
     makeSpec({
       name: 'Closure Stylesheets (GSS)',
       mime: 'text/x-gss',
       extensions: ['gss'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/css').then(m =>
-          legacy(m.gss)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/css');
+        return legacy(m.gss);
       }
     }),
     makeSpec({
@@ -379,10 +375,9 @@ export namespace Mode {
       mime: 'text/x-cmake',
       extensions: ['cmake', 'cmake.in'],
       filename: /^CMakeLists\.txt$/,
-      load() {
-        return import('@codemirror/legacy-modes/mode/cmake').then(m =>
-          legacy(m.cmake)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/cmake');
+        return legacy(m.cmake);
       }
     }),
     makeSpec({
@@ -394,10 +389,9 @@ export namespace Mode {
         'text/x-coffeescript'
       ],
       extensions: ['coffee'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/coffeescript').then(m =>
-          legacy(m.coffeeScript)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/coffeescript');
+        return legacy(m.coffeeScript);
       }
     }),
     makeSpec({
@@ -405,205 +399,186 @@ export namespace Mode {
       alias: ['lisp'],
       mime: 'text/x-common-lisp',
       extensions: ['cl', 'lisp', 'el'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/commonlisp').then(m =>
-          legacy(m.commonLisp)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/commonlisp');
+        return legacy(m.commonLisp);
       }
     }),
     makeSpec({
       name: 'Cypher',
       mime: 'application/x-cypher-query',
       extensions: ['cyp', 'cypher'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/cypher').then(m =>
-          legacy(m.cypher)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/cypher');
+        return legacy(m.cypher);
       }
     }),
     makeSpec({
       name: 'Cython',
       mime: 'text/x-cython',
       extensions: ['pyx', 'pxd', 'pxi'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/python').then(m =>
-          legacy(m.cython)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/python');
+        return legacy(m.cython);
       }
     }),
     makeSpec({
       name: 'Crystal',
       mime: 'text/x-crystal',
       extensions: ['cr'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/crystal').then(m =>
-          legacy(m.crystal)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/crystal');
+        return legacy(m.crystal);
       }
     }),
     makeSpec({
       name: 'D',
       mime: 'text/x-d',
       extensions: ['d'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/d').then(m => legacy(m.d));
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/d');
+        return legacy(m.d);
       }
     }),
     makeSpec({
       name: 'Dart',
       mime: ['application/dart', 'text/x-dart'],
       extensions: ['dart'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clike').then(m =>
-          legacy(m.dart)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clike');
+        return legacy(m.dart);
       }
     }),
     makeSpec({
       name: 'diff',
       mime: 'text/x-diff',
       extensions: ['diff', 'patch'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/diff').then(m =>
-          legacy(m.diff)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/diff');
+        return legacy(m.diff);
       }
     }),
     makeSpec({
       name: 'Dockerfile',
       mime: 'text/x-dockerfile',
       filename: /^Dockerfile$/,
-      load() {
-        return import('@codemirror/legacy-modes/mode/dockerfile').then(m =>
-          legacy(m.dockerFile)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/dockerfile');
+        return legacy(m.dockerFile);
       }
     }),
     makeSpec({
       name: 'DTD',
       mime: 'application/xml-dtd',
       extensions: ['dtd'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/dtd').then(m =>
-          legacy(m.dtd)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/dtd');
+        return legacy(m.dtd);
       }
     }),
     makeSpec({
       name: 'Dylan',
       mime: 'text/x-dylan',
       extensions: ['dylan', 'dyl', 'intr'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/dylan').then(m =>
-          legacy(m.dylan)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/dylan');
+        return legacy(m.dylan);
       }
     }),
     makeSpec({
       name: 'EBNF',
       mime: 'text/x-ebnf',
-      load() {
-        return import('@codemirror/legacy-modes/mode/ebnf').then(m =>
-          legacy(m.ebnf)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/ebnf');
+        return legacy(m.ebnf);
       }
     }),
     makeSpec({
       name: 'ECL',
       mime: 'text/x-ecl',
       extensions: ['ecl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/ecl').then(m =>
-          legacy(m.ecl)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/ecl');
+        return legacy(m.ecl);
       }
     }),
     makeSpec({
       name: 'edn',
       mime: 'application/edn',
       extensions: ['edn'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clojure').then(m =>
-          legacy(m.clojure)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clojure');
+        return legacy(m.clojure);
       }
     }),
     makeSpec({
       name: 'Eiffel',
       mime: 'text/x-eiffel',
       extensions: ['e'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/eiffel').then(m =>
-          legacy(m.eiffel)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/eiffel');
+        return legacy(m.eiffel);
       }
     }),
     makeSpec({
       name: 'Elm',
       mime: 'text/x-elm',
       extensions: ['elm'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/elm').then(m =>
-          legacy(m.elm)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/elm');
+        return legacy(m.elm);
       }
     }),
     makeSpec({
       name: 'Erlang',
       mime: 'text/x-erlang',
       extensions: ['erl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/erlang').then(m =>
-          legacy(m.erlang)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/erlang');
+        return legacy(m.erlang);
       }
     }),
     makeSpec({
       name: 'Esper',
       mime: 'text/x-esper',
-      load() {
-        return import('@codemirror/legacy-modes/mode/sql').then(m =>
-          legacy(m.esper)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/sql');
+        return legacy(m.esper);
       }
     }),
     makeSpec({
       name: 'Factor',
       mime: 'text/x-factor',
       extensions: ['factor'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/factor').then(m =>
-          legacy(m.factor)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/factor');
+        return legacy(m.factor);
       }
     }),
     makeSpec({
       name: 'FCL',
       mime: 'text/x-fcl',
-      load() {
-        return import('@codemirror/legacy-modes/mode/fcl').then(m =>
-          legacy(m.fcl)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/fcl');
+        return legacy(m.fcl);
       }
     }),
     makeSpec({
       name: 'Forth',
       mime: 'text/x-forth',
       extensions: ['forth', 'fth', '4th'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/forth').then(m =>
-          legacy(m.forth)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/forth');
+        return legacy(m.forth);
       }
     }),
     makeSpec({
       name: 'Fortran',
       mime: 'text/x-fortran',
       extensions: ['f', 'for', 'f77', 'f90', 'f95'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/fortran').then(m =>
-          legacy(m.fortran)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/fortran');
+        return legacy(m.fortran);
       }
     }),
     makeSpec({
@@ -611,40 +586,36 @@ export namespace Mode {
       alias: ['fsharp'],
       mime: 'text/x-fsharp',
       extensions: ['fs'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mllike').then(m =>
-          legacy(m.fSharp)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mllike');
+        return legacy(m.fSharp);
       }
     }),
     makeSpec({
       name: 'Gas',
       mime: 'text/x-gas',
       extensions: ['s'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/gas').then(m =>
-          legacy(m.gas)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/gas');
+        return legacy(m.gas);
       }
     }),
     makeSpec({
       name: 'Gherkin',
       mime: 'text/x-feature',
       extensions: ['feature'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/gherkin').then(m =>
-          legacy(m.gherkin)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/gherkin');
+        return legacy(m.gherkin);
       }
     }),
     makeSpec({
       name: 'Go',
       mime: 'text/x-go',
       extensions: ['go'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/go').then(m =>
-          legacy(m.go)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/go');
+        return legacy(m.go);
       }
     }),
     makeSpec({
@@ -652,59 +623,53 @@ export namespace Mode {
       mime: 'text/x-groovy',
       extensions: ['groovy', 'gradle'],
       filename: /^Jenkinsfile$/,
-      load() {
-        return import('@codemirror/legacy-modes/mode/groovy').then(m =>
-          legacy(m.groovy)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/groovy');
+        return legacy(m.groovy);
       }
     }),
     makeSpec({
       name: 'Haskell',
       mime: 'text/x-haskell',
       extensions: ['hs'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/haskell').then(m =>
-          legacy(m.haskell)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/haskell');
+        return legacy(m.haskell);
       }
     }),
     makeSpec({
       name: 'Haxe',
       mime: 'text/x-haxe',
       extensions: ['hx'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/haxe').then(m =>
-          legacy(m.haxe)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/haxe');
+        return legacy(m.haxe);
       }
     }),
     makeSpec({
       name: 'HXML',
       mime: 'text/x-hxml',
       extensions: ['hxml'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/haxe').then(m =>
-          legacy(m.hxml)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/haxe');
+        return legacy(m.hxml);
       }
     }),
     makeSpec({
       name: 'HTTP',
       mime: 'message/http',
-      load() {
-        return import('@codemirror/legacy-modes/mode/http').then(m =>
-          legacy(m.http)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/http');
+        return legacy(m.http);
       }
     }),
     makeSpec({
       name: 'IDL',
       mime: 'text/x-idl',
       extensions: ['pro'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/idl').then(m =>
-          legacy(m.idl)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/idl');
+        return legacy(m.idl);
       }
     }),
     makeSpec({
@@ -712,50 +677,45 @@ export namespace Mode {
       alias: ['jsonld'],
       mime: 'application/ld+json',
       extensions: ['jsonld'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/javascript').then(m =>
-          legacy(m.jsonld)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/javascript');
+        return legacy(m.jsonld);
       }
     }),
     makeSpec({
       name: 'Jinja2',
       mime: 'text/jinja2',
       extensions: ['j2', 'jinja', 'jinja2'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/jinja2').then(m =>
-          legacy(m.jinja2)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/jinja2');
+        return legacy(m.jinja2);
       }
     }),
     makeSpec({
       name: 'Julia',
       mime: 'text/x-julia',
       extensions: ['jl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/julia').then(m =>
-          legacy(m.julia)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/julia');
+        return legacy(m.julia);
       }
     }),
     makeSpec({
       name: 'Kotlin',
       mime: 'text/x-kotlin',
       extensions: ['kt'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clike').then(m =>
-          legacy(m.kotlin)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clike');
+        return legacy(m.kotlin);
       }
     }),
     makeSpec({
       name: 'LESS',
       mime: 'text/x-less',
       extensions: ['less'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/css').then(m =>
-          legacy(m.less)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/css');
+        return legacy(m.less);
       }
     }),
     makeSpec({
@@ -763,99 +723,89 @@ export namespace Mode {
       alias: ['ls'],
       mime: 'text/x-livescript',
       extensions: ['ls'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/livescript').then(m =>
-          legacy(m.liveScript)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/livescript');
+        return legacy(m.liveScript);
       }
     }),
     makeSpec({
       name: 'Lua',
       mime: 'text/x-lua',
       extensions: ['lua'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/lua').then(m =>
-          legacy(m.lua)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/lua');
+        return legacy(m.lua);
       }
     }),
     makeSpec({
       name: 'mIRC',
       mime: 'text/mirc',
-      load() {
-        return import('@codemirror/legacy-modes/mode/mirc').then(m =>
-          legacy(m.mirc)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mirc');
+        return legacy(m.mirc);
       }
     }),
     makeSpec({
       name: 'Mathematica',
       mime: 'text/x-mathematica',
       extensions: ['m', 'nb', 'wl', 'wls'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mathematica').then(m =>
-          legacy(m.mathematica)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mathematica');
+        return legacy(m.mathematica);
       }
     }),
     makeSpec({
       name: 'Modelica',
       mime: 'text/x-modelica',
       extensions: ['mo'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/modelica').then(m =>
-          legacy(m.modelica)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/modelica');
+        return legacy(m.modelica);
       }
     }),
     makeSpec({
       name: 'MUMPS',
       mime: 'text/x-mumps',
       extensions: ['mps'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mumps').then(m =>
-          legacy(m.mumps)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mumps');
+        return legacy(m.mumps);
       }
     }),
     makeSpec({
       name: 'mbox',
       mime: 'application/mbox',
       extensions: ['mbox'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mbox').then(m =>
-          legacy(m.mbox)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mbox');
+        return legacy(m.mbox);
       }
     }),
     makeSpec({
       name: 'Nginx',
       mime: 'text/x-nginx-conf',
       filename: /nginx.*\.conf$/i,
-      load() {
-        return import('@codemirror/legacy-modes/mode/nginx').then(m =>
-          legacy(m.nginx)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/nginx');
+        return legacy(m.nginx);
       }
     }),
     makeSpec({
       name: 'NSIS',
       mime: 'text/x-nsis',
       extensions: ['nsh', 'nsi'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/nsis').then(m =>
-          legacy(m.nsis)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/nsis');
+        return legacy(m.nsis);
       }
     }),
     makeSpec({
       name: 'NTriples',
       mime: ['application/n-triples', 'application/n-quads', 'text/n-triples'],
       extensions: ['nt', 'nq'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/ntriples').then(m =>
-          legacy(m.ntriples)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/ntriples');
+        return legacy(m.ntriples);
       }
     }),
     makeSpec({
@@ -863,10 +813,9 @@ export namespace Mode {
       alias: ['objective-c', 'objc'],
       mime: 'text/x-objectivec',
       extensions: ['m'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clike').then(m =>
-          legacy(m.objectiveC)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clike');
+        return legacy(m.objectiveC);
       }
     }),
     makeSpec({
@@ -874,80 +823,72 @@ export namespace Mode {
       alias: ['objective-c++', 'objc++'],
       mime: 'text/x-objectivec++',
       extensions: ['mm'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clike').then(m =>
-          legacy(m.objectiveCpp)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clike');
+        return legacy(m.objectiveCpp);
       }
     }),
     makeSpec({
       name: 'OCaml',
       mime: 'text/x-ocaml',
       extensions: ['ml', 'mli', 'mll', 'mly'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mllike').then(m =>
-          legacy(m.oCaml)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mllike');
+        return legacy(m.oCaml);
       }
     }),
     makeSpec({
       name: 'Octave',
       mime: 'text/x-octave',
       extensions: ['m'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/octave').then(m =>
-          legacy(m.octave)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/octave');
+        return legacy(m.octave);
       }
     }),
     makeSpec({
       name: 'Oz',
       mime: 'text/x-oz',
       extensions: ['oz'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/oz').then(m =>
-          legacy(m.oz)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/oz');
+        return legacy(m.oz);
       }
     }),
     makeSpec({
       name: 'Pascal',
       mime: 'text/x-pascal',
       extensions: ['p', 'pas'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/pascal').then(m =>
-          legacy(m.pascal)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/pascal');
+        return legacy(m.pascal);
       }
     }),
     makeSpec({
       name: 'Perl',
       mime: 'text/x-perl',
       extensions: ['pl', 'pm'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/perl').then(m =>
-          legacy(m.perl)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/perl');
+        return legacy(m.perl);
       }
     }),
     makeSpec({
       name: 'Pig',
       mime: 'text/x-pig',
       extensions: ['pig'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/pig').then(m =>
-          legacy(m.pig)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/pig');
+        return legacy(m.pig);
       }
     }),
     makeSpec({
       name: 'PowerShell',
       mime: 'application/x-powershell',
       extensions: ['ps1', 'psd1', 'psm1'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/powershell').then(m =>
-          legacy(m.powerShell)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/powershell');
+        return legacy(m.powerShell);
       }
     }),
     makeSpec({
@@ -955,38 +896,36 @@ export namespace Mode {
       alias: ['ini', 'properties'],
       mime: 'text/x-properties',
       extensions: ['properties', 'ini', 'in'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/properties').then(m =>
-          legacy(m.properties)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/properties');
+        return legacy(m.properties);
       }
     }),
     makeSpec({
       name: 'ProtoBuf',
       mime: 'text/x-protobuf',
       extensions: ['proto'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/protobuf').then(m =>
-          legacy(m.protobuf)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/protobuf');
+        return legacy(m.protobuf);
       }
     }),
     makeSpec({
       name: 'Puppet',
       mime: 'text/x-puppet',
       extensions: ['pp'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/puppet').then(m =>
-          legacy(m.puppet)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/puppet');
+        return legacy(m.puppet);
       }
     }),
     makeSpec({
       name: 'Q',
       mime: 'text/x-q',
       extensions: ['q'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/q').then(m => legacy(m.q));
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/q');
+        return legacy(m.q);
       }
     }),
     makeSpec({
@@ -994,27 +933,26 @@ export namespace Mode {
       alias: ['rscript'],
       mime: 'text/x-rsrc',
       extensions: ['r', 'R'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/r').then(m => legacy(m.r));
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/r');
+        return legacy(m.r);
       }
     }),
     makeSpec({
       name: 'RPM Changes',
       mime: 'text/x-rpm-changes',
-      load() {
-        return import('@codemirror/legacy-modes/mode/rpm').then(m =>
-          legacy(m.rpmChanges)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/rpm');
+        return legacy(m.rpmChanges);
       }
     }),
     makeSpec({
       name: 'RPM Spec',
       mime: 'text/x-rpm-spec',
       extensions: ['spec'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/rpm').then(m =>
-          legacy(m.rpmSpec)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/rpm');
+        return legacy(m.rpmSpec);
       }
     }),
     makeSpec({
@@ -1022,50 +960,45 @@ export namespace Mode {
       alias: ['jruby', 'macruby', 'rake', 'rb', 'rbx'],
       mime: 'text/x-ruby',
       extensions: ['rb'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/ruby').then(m =>
-          legacy(m.ruby)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/ruby');
+        return legacy(m.ruby);
       }
     }),
     makeSpec({
       name: 'SAS',
       mime: 'text/x-sas',
       extensions: ['sas'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/sas').then(m =>
-          legacy(m.sas)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/sas');
+        return legacy(m.sas);
       }
     }),
     makeSpec({
       name: 'Scala',
       mime: 'text/x-scala',
       extensions: ['scala'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clike').then(m =>
-          legacy(m.scala)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clike');
+        return legacy(m.scala);
       }
     }),
     makeSpec({
       name: 'Scheme',
       mime: 'text/x-scheme',
       extensions: ['scm', 'ss'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/scheme').then(m =>
-          legacy(m.scheme)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/scheme');
+        return legacy(m.scheme);
       }
     }),
     makeSpec({
       name: 'SCSS',
       mime: 'text/x-scss',
       extensions: ['scss'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/css').then(m =>
-          legacy(m.sCSS)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/css');
+        return legacy(m.sCSS);
       }
     }),
     makeSpec({
@@ -1074,49 +1007,44 @@ export namespace Mode {
       mime: ['text/x-sh', 'application/x-sh'],
       extensions: ['sh', 'ksh', 'bash'],
       filename: /^PKGBUILD$/,
-      load() {
-        return import('@codemirror/legacy-modes/mode/shell').then(m =>
-          legacy(m.shell)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/shell');
+        return legacy(m.shell);
       }
     }),
     makeSpec({
       name: 'Sieve',
       mime: 'application/sieve',
       extensions: ['siv', 'sieve'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/sieve').then(m =>
-          legacy(m.sieve)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/sieve');
+        return legacy(m.sieve);
       }
     }),
     makeSpec({
       name: 'Smalltalk',
       mime: 'text/x-stsrc',
       extensions: ['st'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/smalltalk').then(m =>
-          legacy(m.smalltalk)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/smalltalk');
+        return legacy(m.smalltalk);
       }
     }),
     makeSpec({
       name: 'Solr',
       mime: 'text/x-solr',
-      load() {
-        return import('@codemirror/legacy-modes/mode/solr').then(m =>
-          legacy(m.solr)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/solr');
+        return legacy(m.solr);
       }
     }),
     makeSpec({
       name: 'SML',
       mime: 'text/x-sml',
       extensions: ['sml', 'sig', 'fun', 'smackspec'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mllike').then(m =>
-          legacy(m.sml)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mllike');
+        return legacy(m.sml);
       }
     }),
     makeSpec({
@@ -1124,78 +1052,70 @@ export namespace Mode {
       alias: ['sparul'],
       mime: 'application/sparql-query',
       extensions: ['rq', 'sparql'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/sparql').then(m =>
-          legacy(m.sparql)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/sparql');
+        return legacy(m.sparql);
       }
     }),
     makeSpec({
       name: 'Spreadsheet',
       alias: ['excel', 'formula'],
       mime: 'text/x-spreadsheet',
-      load() {
-        return import('@codemirror/legacy-modes/mode/spreadsheet').then(m =>
-          legacy(m.spreadsheet)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/spreadsheet');
+        return legacy(m.spreadsheet);
       }
     }),
     makeSpec({
       name: 'SQL',
       mime: 'text/x-sql',
       extensions: ['sql'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/sql').then(m =>
-          legacy(m.standardSQL)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/sql');
+        return legacy(m.standardSQL);
       }
     }),
     makeSpec({
       name: 'SQLite',
       mime: 'text/x-sqlite',
-      load() {
-        return import('@codemirror/legacy-modes/mode/sql').then(m =>
-          legacy(m.sqlite)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/sql');
+        return legacy(m.sqlite);
       }
     }),
     makeSpec({
       name: 'Squirrel',
       mime: 'text/x-squirrel',
       extensions: ['nut'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/clike').then(m =>
-          legacy(m.squirrel)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/clike');
+        return legacy(m.squirrel);
       }
     }),
     makeSpec({
       name: 'Stylus',
       mime: 'text/x-styl',
       extensions: ['styl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/stylus').then(m =>
-          legacy(m.stylus)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/stylus');
+        return legacy(m.stylus);
       }
     }),
     makeSpec({
       name: 'Swift',
       mime: 'text/x-swift',
       extensions: ['swift'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/swift').then(m =>
-          legacy(m.swift)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/swift');
+        return legacy(m.swift);
       }
     }),
     makeSpec({
       name: 'sTeX',
       mime: 'text/x-stex',
-      load() {
-        return import('@codemirror/legacy-modes/mode/stex').then(m =>
-          legacy(m.stex)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/stex');
+        return legacy(m.stex);
       }
     }),
     makeSpec({
@@ -1203,188 +1123,169 @@ export namespace Mode {
       alias: ['tex'],
       mime: 'text/x-latex',
       extensions: ['text', 'ltx', 'tex'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/stex').then(m =>
-          legacy(m.stex)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/stex');
+        return legacy(m.stex);
       }
     }),
     makeSpec({
       name: 'SystemVerilog',
       mime: 'text/x-systemverilog',
       extensions: ['v', 'sv', 'svh'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/verilog').then(m =>
-          legacy(m.verilog)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/verilog');
+        return legacy(m.verilog);
       }
     }),
     makeSpec({
       name: 'Tcl',
       mime: 'text/x-tcl',
       extensions: ['tcl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/tcl').then(m =>
-          legacy(m.tcl)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/tcl');
+        return legacy(m.tcl);
       }
     }),
     makeSpec({
       name: 'Textile',
       mime: 'text/x-textile',
       extensions: ['textile'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/textile').then(m =>
-          legacy(m.textile)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/textile');
+        return legacy(m.textile);
       }
     }),
     makeSpec({
       name: 'TiddlyWiki',
       mime: 'text/x-tiddlywiki',
-      load() {
-        return import('@codemirror/legacy-modes/mode/tiddlywiki').then(m =>
-          legacy(m.tiddlyWiki)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/tiddlywiki');
+        return legacy(m.tiddlyWiki);
       }
     }),
     makeSpec({
       name: 'Tiki wiki',
       mime: 'text/tiki',
-      load() {
-        return import('@codemirror/legacy-modes/mode/tiki').then(m =>
-          legacy(m.tiki)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/tiki');
+        return legacy(m.tiki);
       }
     }),
     makeSpec({
       name: 'TOML',
       mime: 'text/x-toml',
       extensions: ['toml'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/toml').then(m =>
-          legacy(m.toml)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/toml');
+        return legacy(m.toml);
       }
     }),
     makeSpec({
       name: 'troff',
       mime: 'text/troff',
       extensions: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/troff').then(m =>
-          legacy(m.troff)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/troff');
+        return legacy(m.troff);
       }
     }),
     makeSpec({
       name: 'TTCN',
       mime: 'text/x-ttcn',
       extensions: ['ttcn', 'ttcn3', 'ttcnpp'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/ttcn').then(m =>
-          legacy(m.ttcn)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/ttcn');
+        return legacy(m.ttcn);
       }
     }),
     makeSpec({
       name: 'TTCN_CFG',
       mime: 'text/x-ttcn-cfg',
       extensions: ['cfg'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/ttcn-cfg').then(m =>
-          legacy(m.ttcnCfg)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/ttcn-cfg');
+        return legacy(m.ttcnCfg);
       }
     }),
     makeSpec({
       name: 'Turtle',
       mime: 'text/turtle',
       extensions: ['ttl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/turtle').then(m =>
-          legacy(m.turtle)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/turtle');
+        return legacy(m.turtle);
       }
     }),
     makeSpec({
       name: 'Web IDL',
       mime: 'text/x-webidl',
       extensions: ['webidl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/webidl').then(m =>
-          legacy(m.webIDL)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/webidl');
+        return legacy(m.webIDL);
       }
     }),
     makeSpec({
       name: 'VB.NET',
       mime: 'text/x-vb',
       extensions: ['vb'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/vb').then(m =>
-          legacy(m.vb)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/vb');
+        return legacy(m.vb);
       }
     }),
     makeSpec({
       name: 'VBScript',
       mime: 'text/vbscript',
       extensions: ['vbs'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/vbscript').then(m =>
-          legacy(m.vbScript)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/vbscript');
+        return legacy(m.vbScript);
       }
     }),
     makeSpec({
       name: 'Velocity',
       mime: 'text/velocity',
       extensions: ['vtl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/velocity').then(m =>
-          legacy(m.velocity)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/velocity');
+        return legacy(m.velocity);
       }
     }),
     makeSpec({
       name: 'Verilog',
       mime: 'text/x-verilog',
       extensions: ['v'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/verilog').then(m =>
-          legacy(m.verilog)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/verilog');
+        return legacy(m.verilog);
       }
     }),
     makeSpec({
       name: 'VHDL',
       mime: 'text/x-vhdl',
       extensions: ['vhd', 'vhdl'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/vhdl').then(m =>
-          legacy(m.vhdl)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/vhdl');
+        return legacy(m.vhdl);
       }
     }),
     makeSpec({
       name: 'XQuery',
       mime: 'application/xquery',
       extensions: ['xy', 'xquery'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/xquery').then(m =>
-          legacy(m.xQuery)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/xquery');
+        return legacy(m.xQuery);
       }
     }),
     makeSpec({
       name: 'Yacas',
       mime: 'text/x-yacas',
       extensions: ['ys'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/yacas').then(m =>
-          legacy(m.yacas)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/yacas');
+        return legacy(m.yacas);
       }
     }),
     makeSpec({
@@ -1392,50 +1293,45 @@ export namespace Mode {
       alias: ['yml'],
       mime: ['text/x-yaml', 'text/yaml'],
       extensions: ['yaml', 'yml'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/yaml').then(m =>
-          legacy(m.yaml)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/yaml');
+        return legacy(m.yaml);
       }
     }),
     makeSpec({
       name: 'Z80',
       mime: 'text/x-z80',
       extensions: ['z80'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/z80').then(m =>
-          legacy(m.z80)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/z80');
+        return legacy(m.z80);
       }
     }),
     makeSpec({
       name: 'mscgen',
       mime: 'text/x-mscgen',
       extensions: ['mscgen', 'mscin', 'msc'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mscgen').then(m =>
-          legacy(m.mscgen)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mscgen');
+        return legacy(m.mscgen);
       }
     }),
     makeSpec({
       name: 'xu',
       mime: 'text/x-xu',
       extensions: ['xu'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mscgen').then(m =>
-          legacy(m.xu)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mscgen');
+        return legacy(m.xu);
       }
     }),
     makeSpec({
       name: 'msgenny',
       mime: 'text/x-msgenny',
       extensions: ['msgenny'],
-      load() {
-        return import('@codemirror/legacy-modes/mode/mscgen').then(m =>
-          legacy(m.msgenny)
-        );
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/mscgen');
+        return legacy(m.msgenny);
       }
     })
   ];
@@ -1602,5 +1498,10 @@ export namespace Mode {
       sp.appendChild(document.createTextNode(code.slice(from, to)));
       pos = to;
     });
+
+    if (pos < tree.length - 1) {
+      // No style applied on the trailing text
+      el.appendChild(document.createTextNode(code.slice(pos, tree.length)));
+    }
   }
 }
