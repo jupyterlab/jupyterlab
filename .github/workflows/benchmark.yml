@@ -252,7 +252,7 @@ jobs:
         run: |
           echo "# Memory leaks report" > ${REPORT}
           echo "" >> ${REPORT}
-          cat ${GITHUB_STEP_SUMMARY} >> ${REPORT} 
+          cat ${GITHUB_STEP_SUMMARY} >> ${REPORT}
 
       - name: Upload Memory Leak Tests report
         if: always()
