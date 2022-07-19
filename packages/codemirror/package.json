@@ -55,7 +55,6 @@
     "@codemirror/lang-wast": "^6.0.0",
     "@codemirror/lang-xml": "^6.0.0",
     "@codemirror/language": "^6.0.0",
-    "@codemirror/language-data": "~6.1.0",
     "@codemirror/legacy-modes": "^6.0.0",
     "@codemirror/search": "^6.0.0",
     "@codemirror/state": "^6.0.0",
