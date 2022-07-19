@@ -49,7 +49,7 @@ repos:
           ]
 
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.17.0
+    rev: 0.17.1
     hooks:
       - id: check-jsonschema
         name: 'Check GitHub Workflows'
