@@ -97,7 +97,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
         return aName.localeCompare(bName);
       })
       .forEach(spec => {
-        if (spec.name.indexOf('brainf') === 0) {
+        if (spec.name.toLowerCase().indexOf('brainf') === 0) {
           return;
         }
 

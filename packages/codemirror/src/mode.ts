@@ -315,15 +315,15 @@ export namespace Mode {
         return legacy(m.asterisk);
       }
     }),
-    // makeSpec({
-    //   name: 'Brainfuck',
-    //   mime: 'text/x-brainfuck',
-    //   extensions: ['b', 'bf'],
-    //   async load() {
-    //     const m = await import('@codemirror/legacy-modes/mode/brainfuck');
-    //     return legacy(m.brainfuck);
-    //   }
-    // }),
+    makeSpec({
+      name: 'Brainfuck',
+      mime: 'text/x-brainfuck',
+      extensions: ['b', 'bf'],
+      async load() {
+        const m = await import('@codemirror/legacy-modes/mode/brainfuck');
+        return legacy(m.brainfuck);
+      }
+    }),
     makeSpec({
       name: 'Cobol',
       mime: 'text/x-cobol',
