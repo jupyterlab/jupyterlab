@@ -174,16 +174,6 @@ export class JSONEditor extends Widget {
     this.revertButtonNode.hidden = true;
     this.commitButtonNode.hidden = true;
     this.headerNode.addEventListener('click', this);
-    if (this.isVisible) {
-      this.update();
-    }
-  }
-
-  /**
-   * Handle `after-show` messages for the widget.
-   */
-  protected onAfterShow(msg: Message): void {
-    this.update();
   }
 
   /**

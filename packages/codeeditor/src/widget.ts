@@ -45,7 +45,6 @@ export class CodeEditorWrapper extends Widget {
       selectionStyle: options.selectionStyle
     }));
     editor.model.selections.changed.connect(this._onSelectionsChanged, this);
-    this._updateOnShow = options.updateOnShow !== false;
   }
 
   /**
@@ -117,12 +116,6 @@ export class CodeEditorWrapper extends Widget {
     node.addEventListener('lm-dragleave', this);
     node.addEventListener('lm-dragover', this);
     node.addEventListener('lm-drop', this);
-    // We have to refresh at least once after attaching,
-    // while visible.
-    this._hasRefreshedSinceAttach = false;
-    if (this.isVisible) {
-      this.update();
-    }
   }
 
   /**
@@ -137,29 +130,11 @@ export class CodeEditorWrapper extends Widget {
   }
 
   /**
-   * A message handler invoked on an `'after-show'` message.
-   */
-  protected onAfterShow(msg: Message): void {
-    if (this._updateOnShow || !this._hasRefreshedSinceAttach) {
-      this.update();
-    }
-  }
-
-  /**
    * A message handler invoked on a `'resize'` message.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
     if (this.isVisible) {
       this.editor.resizeToFit();
-    }
-  }
-
-  /**
-   * A message handler invoked on an `'update-request'` message.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    if (this.isVisible) {
-      this._hasRefreshedSinceAttach = true;
     }
   }
 
@@ -275,9 +250,6 @@ export class CodeEditorWrapper extends Widget {
     const offset = this.editor.getOffsetAt(position);
     this.model.value.insert(offset, data);
   }
-
-  private _updateOnShow: boolean;
-  private _hasRefreshedSinceAttach = false;
 }
 
 /**
@@ -316,11 +288,6 @@ export namespace CodeEditorWrapper {
      * The default selection style for the editor.
      */
     selectionStyle?: CodeEditor.ISelectionStyle;
-
-    /**
-     * Whether to send an update request to the editor when it is shown.
-     */
-    updateOnShow?: boolean;
   }
 }
 
