@@ -72,90 +72,6 @@
                   "args": {
                     "theme": "jupyter"
                   }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "default"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "abcdef"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "base16-dark"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "base16-light"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "hopscotch"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "material"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "mbo"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "mdn-like"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "seti"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "solarized dark"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "solarized light"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "the-matrix"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "xq-light"
-                  }
-                },
-                {
-                  "command": "codemirror:change-theme",
-                  "args": {
-                    "theme": "zenburn"
-                  }
                 }
               ]
             },
@@ -181,7 +97,7 @@
     "theme": {
       "type": "string",
       "title": "Theme",
-      "description": "CSS file defining the corresponding\n.cm-s-[name] styles is loaded",
+      "description": "CodeMirror theme",
       "default": "jupyter"
     },
     "scrollPastEnd": {
