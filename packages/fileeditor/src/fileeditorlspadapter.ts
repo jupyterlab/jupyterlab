@@ -7,7 +7,6 @@ import {
   VirtualDocument,
   WidgetAdapter
 } from '@jupyterlab/lsp';
-import * as nbformat from '@jupyterlab/nbformat';
 import { FileEditor } from './widget';
 
 export class FileEditorAdapter extends WidgetAdapter<
@@ -103,7 +102,7 @@ export class FileEditorAdapter extends WidgetAdapter<
    *  Get the list of CM editors in the document, there is only one editor
    * in the case of file editor.
    */
-  get editors(): { ceEditor: CodeEditor.IEditor; type: nbformat.CellType }[] {
+  get editors(): { ceEditor: CodeEditor.IEditor; type: string }[] {
     return [{ ceEditor: this.editor.editor, type: 'code' }];
   }
 

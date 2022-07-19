@@ -1,4 +1,3 @@
-import { CellType } from '@jupyterlab/nbformat';
 import { LanguageIdentifier } from '../lsp';
 import { positionAtOffset } from '../positioning';
 
@@ -33,12 +32,12 @@ export class TextForeignCodeExtractor implements IForeignCodeExtractor {
   /**
    * The supported cell types.
    */
-  cellType: CellType[];
+  cellType: string[];
 
   /**
    * Test if there is any foreign code in provided code snippet.
    */
-  hasForeignCode(code: string, cellType: CellType): boolean {
+  hasForeignCode(code: string, cellType: string): boolean {
     return this.cellType.includes(cellType);
   }
 
@@ -87,6 +86,6 @@ namespace TextForeignCodeExtractor {
     /**
      * The supported cell types.
      */
-    cellType: CellType[];
+    cellType: string[];
   }
 }

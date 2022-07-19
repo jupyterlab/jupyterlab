@@ -1,5 +1,4 @@
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { CellType } from '@jupyterlab/nbformat';
 import { ServerConnection } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -312,7 +311,7 @@ export interface ILSPCodeExtractorsManager {
    * Get the foreign code extractors.
    */
   getExtractors(
-    cellType: CellType,
+    cellType: string,
     hostLanguage: string | null
   ): IForeignCodeExtractor[];
 

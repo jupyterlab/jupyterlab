@@ -2,7 +2,6 @@ import { IDisposable } from '@lumino/disposable';
 import { IDocumentInfo } from 'lsp-ws-connection';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CellType } from '@jupyterlab/nbformat';
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { ILSPCodeExtractorsManager } from '../';
@@ -53,7 +52,7 @@ export interface ICodeBlockOptions {
   /**
    * Type of the cell holding this block
    */
-  type: CellType;
+  type: string;
 }
 
 export interface IVirtualDocumentBlock {

@@ -2,7 +2,6 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import * as nbformat from '@jupyterlab/nbformat';
 import {
   ITranslator,
   nullTranslator,
@@ -197,7 +196,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
    */
   abstract get editors(): {
     ceEditor: CodeEditor.IEditor;
-    type: nbformat.CellType;
+    type: string;
   }[];
 
   /**

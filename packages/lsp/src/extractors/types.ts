@@ -1,5 +1,4 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CellType } from '@jupyterlab/nbformat';
 
 import { LanguageIdentifier } from '../lsp';
 
@@ -51,7 +50,7 @@ export interface IForeignCodeExtractor {
   /**
    * The supported cell types.
    */
-  cellType: CellType[];
+  cellType: string[];
 
   /**
    * Split the code into the host and foreign code (if any foreign code was detected)
@@ -67,7 +66,7 @@ export interface IForeignCodeExtractor {
   /**
    * Test if there is any foreign code in provided code snippet.
    */
-  hasForeignCode(code: string, cellType: CellType): boolean;
+  hasForeignCode(code: string, cellType: string): boolean;
 
   /**
    * Extension of the virtual document (some servers check extensions of files), e.g. 'py' or 'R'.
