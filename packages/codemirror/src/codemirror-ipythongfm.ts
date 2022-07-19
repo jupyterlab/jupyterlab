@@ -7,7 +7,9 @@ Mode.registerModeInfo({
   name: 'ipythongfm',
   mime: 'text/x-ipythongfm',
   load: () => {
-    return import('@codemirror/lang-markdown').then(m => m.markdown());
+    return import('@codemirror/lang-markdown').then(m =>
+      m.markdown({ codeLanguages: Mode.modeList as any })
+    );
   }
 });
 

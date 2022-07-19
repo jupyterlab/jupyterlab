@@ -10,7 +10,6 @@ import {
   StreamLanguage,
   StreamParser
 } from '@codemirror/language';
-import { languages } from '@codemirror/language-data';
 import { highlightTree } from '@lezer/highlight';
 
 // This ensures the language spec for python will be loaded when
@@ -52,7 +51,7 @@ export namespace Mode {
     return res;
   }
 
-  const modeList = [
+  export const modeList: ISpec[] = [
     makeSpec({
       name: 'C',
       mime: 'text/x-csrc',
@@ -149,7 +148,7 @@ export namespace Mode {
       extensions: ['md', 'markdown', 'mkd'],
       load() {
         return import('@codemirror/lang-markdown').then(m =>
-          m.markdown({ codeLanguages: languages })
+          m.markdown({ codeLanguages: modeList as any })
         );
       }
     }),
