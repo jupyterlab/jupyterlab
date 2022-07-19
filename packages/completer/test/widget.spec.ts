@@ -1543,7 +1543,6 @@ describe('completer/widget', () => {
 
           panel.addWidget(code);
           Widget.attach(panel, document.body);
-          editor.refresh();
 
           const position = code.editor.getPositionAt(text.length)!;
           const coords = code.editor.getCoordinateForPosition(position);

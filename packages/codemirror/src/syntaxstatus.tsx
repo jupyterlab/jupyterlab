@@ -97,7 +97,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
         return aName.localeCompare(bName);
       })
       .forEach(spec => {
-        if (spec.mode.indexOf('brainf') === 0) {
+        if (spec.name.toLowerCase().indexOf('brainf') === 0) {
           return;
         }
 
@@ -156,7 +156,7 @@ export namespace EditorSyntaxStatus {
         this._mode = '';
       } else {
         const spec = Mode.findByMIME(this._editor.model.mimeType);
-        this._mode = spec.name || spec.mode;
+        this._mode = spec?.name ?? 'text/plain';
 
         this._editor.model.mimeTypeChanged.connect(this._onMIMETypeChange);
       }
@@ -173,7 +173,7 @@ export namespace EditorSyntaxStatus {
     ) => {
       const oldMode = this._mode;
       const spec = Mode.findByMIME(change.newValue);
-      this._mode = spec.name || spec.mode;
+      this._mode = spec?.name ?? 'text/plain';
 
       this._triggerChange(oldMode, this._mode);
     };

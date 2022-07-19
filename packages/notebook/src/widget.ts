@@ -847,7 +847,6 @@ export class StaticNotebook extends Widget {
           break;
       }
       cell.editor.setOptions({ ...config });
-      cell.editor.refresh();
     }
   }
 

@@ -48,6 +48,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0",
     "@jupyterlab/application": "^4.0.0-alpha.11",
     "@jupyterlab/apputils": "^4.0.0-alpha.11",
     "@jupyterlab/cells": "^4.0.0-alpha.11",
@@ -73,14 +75,12 @@
     "@lumino/signaling": "^1.10.1",
     "@lumino/widgets": "^1.33.0",
     "@vscode/debugprotocol": "^1.51.0",
-    "codemirror": "~5.61.0",
     "react": "^17.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
     "@jupyterlab/testutils": "^4.0.0-alpha.11",
-    "@types/codemirror": "^0.0.109",
     "@types/jest": "^26.0.10",
     "@types/react-dom": "^17.0.0",
     "@types/text-encoding": "^0.0.35",

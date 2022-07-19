@@ -83,6 +83,21 @@ const UNUSED: Dict<string[]> = {
     'worker-loader'
   ],
   '@jupyterlab/buildutils': ['verdaccio'],
+  '@jupyterlab/codemirror': [
+    '@codemirror/lang-cpp',
+    '@codemirror/lang-css',
+    '@codemirror/lang-html',
+    '@codemirror/lang-java',
+    '@codemirror/lang-javascript',
+    '@codemirror/lang-json',
+    '@codemirror/lang-markdown',
+    '@codemirror/lang-php',
+    '@codemirror/lang-python',
+    '@codemirror/lang-rust',
+    '@codemirror/lang-sql',
+    '@codemirror/lang-wast',
+    '@codemirror/lang-xml'
+  ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/galata': ['node-fetch', 'http-server'],
@@ -120,9 +135,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@lumino/virtualdom',
     '@lumino/widgets'
   ],
-  '@jupyterlab/codemirror-extension': ['codemirror'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
-  '@jupyterlab/debugger': ['codemirror'],
   '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
     '@jupyterlab/codeeditor', // Only used for model
@@ -134,8 +147,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/codeeditor',
     '@jupyterlab/codemirror',
     '@jupyterlab/fileeditor',
-    '@jupyterlab/notebook',
-    'codemirror'
+    '@jupyterlab/notebook'
   ],
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],

@@ -447,7 +447,7 @@ test.describe('General', () => {
     await page.click('text=File');
     await page.click('ul[role="menu"] >> text=New Console for Notebook');
 
-    await page.click('.jp-CodeConsole-input >> pre[role="presentation"]');
+    await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
       "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
     );

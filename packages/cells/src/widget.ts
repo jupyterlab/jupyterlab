@@ -526,14 +526,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
-   * Handle `fit-request` messages.
-   */
-  protected onFitRequest(msg: Message): void {
-    // need this for for when a theme changes font size
-    this.editor.refresh();
-  }
-
-  /**
    * Handle `resize` messages.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
@@ -1616,12 +1608,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
     this._rendered = value;
     this._handleRendered();
-    // Refreshing an editor can be really expensive, so we don't call it from
-    // _handleRendered, since _handledRendered is also called on every update
-    // request.
-    if (!this._rendered) {
-      this.editor.refresh();
-    }
 
     // If the rendered state changed, raise an event.
     this._displayChanged.emit();

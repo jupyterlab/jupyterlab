@@ -220,7 +220,10 @@ export class CellSearchProvider implements IBaseSearchProvider {
       this.currentIndex < this.cmHandler.matches.length
     ) {
       const editor = this.cell.editor as CodeMirrorEditor;
-      const selection = editor.doc.getSelection();
+      const selection = editor.state.sliceDoc(
+        editor.state.selection.main.from,
+        editor.state.selection.main.to
+      );
       const match = this.getCurrentMatch();
       // If cursor is not on a selection, highlight the next match
       if (selection !== match?.text) {
