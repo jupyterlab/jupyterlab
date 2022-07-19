@@ -26,12 +26,6 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
     fs.mkdirSync(out_dir);
   }
 
-  // Increase timeouts
-  utils.run('npm config set fetch-retries="5"');
-  utils.run('npm config set fetch-retry-factor="50"');
-  utils.run('npm config set fetch-retry-mintimeout="20000"');
-  utils.run('npm config set fetch-retry-maxtimeout="80000"');
-
   // Get current registry values
   let prev_npm = utils.run('npm config get registry', { stdio: 'pipe' }, true);
   let prev_yarn = '';
@@ -48,7 +42,7 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   }
 
   // write the config file
-  const config = path.join(out_dir, 'verdaccio.yml');
+  const config = path.join(out_dir, ' .yml');
   const config_text = `
 storage: ${out_dir}/storage
 auth:
@@ -57,6 +51,7 @@ auth:
 uplinks:
     npmjs:
         url: ${prev_npm}
+        timeout: 600s
 packages:
   '@*/*':
     access: $all
