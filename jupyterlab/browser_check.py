@@ -143,7 +143,9 @@ async def run_browser(url):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "config", "set", "network-timeout", "1000000000"], cwd=target)
+        await run_async_process(
+            ["jlpm", "config", "set", "network-timeout", "1000000000"], cwd=target
+        )
         await run_async_process(["jlpm", "add", "playwright"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
