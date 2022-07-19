@@ -42,7 +42,7 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   }
 
   // write the config file
-  const config = path.join(out_dir, ' .yml');
+  const config = path.join(out_dir, 'verdaccio.yml');
   const config_text = `
 storage: ${out_dir}/storage
 auth:
