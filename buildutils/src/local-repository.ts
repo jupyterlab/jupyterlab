@@ -51,7 +51,6 @@ auth:
 uplinks:
     npmjs:
       url: ${prev_npm}
-      timeout: 10m
 packages:
   '@*/*':
     access: $all
