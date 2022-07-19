@@ -247,8 +247,12 @@ jobs:
       - name: Save report to file
         if: always()
         shell: bash
+        env:
+          REPORT: lab-memory-leak-report.md
         run: |
-          echo ${GITHUB_STEP_SUMMARY} > lab-memory-leak-report.md
+          echo "# Memory leaks report" > ${REPORT}
+          echo "" >> ${REPORT}
+          cat ${GITHUB_STEP_SUMMARY} >> ${REPORT} 
 
       - name: Upload Memory Leak Tests report
         if: always()
