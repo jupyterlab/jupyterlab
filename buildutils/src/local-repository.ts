@@ -50,8 +50,8 @@ auth:
     file: ${out_dir}/htpasswd
 uplinks:
     npmjs:
-        url: ${prev_npm}
-        timeout: 600s
+      timeout: 10m
+      url: ${prev_npm}
 packages:
   '@*/*':
     access: $all
