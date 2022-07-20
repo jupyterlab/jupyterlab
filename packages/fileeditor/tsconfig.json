@@ -25,9 +25,6 @@
       "path": "../lsp"
     },
     {
-      "path": "../nbformat"
-    },
-    {
       "path": "../statusbar"
     },
     {
