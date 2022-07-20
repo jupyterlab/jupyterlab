@@ -6,3 +6,14 @@
 .jp-MimeDocument {
   outline: none;
 }
+
+.jp-Document {
+  min-width: 120px;
+  min-height: 120px;
+  outline: none;
+}
+
+.jp-MainAreaWidget.jp-Document {
+  display: flex;
+  flex-direction: column;
+}

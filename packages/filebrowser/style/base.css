@@ -317,9 +317,3 @@
   overflow: auto;
   background-color: var(--jp-layout-color1);
 }
-
-.jp-Document {
-  min-width: 120px;
-  min-height: 120px;
-  outline: none;
-}

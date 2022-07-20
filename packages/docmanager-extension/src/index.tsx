@@ -13,8 +13,6 @@ import {
   JupyterLab
 } from '@jupyterlab/application';
 import {
-  addCommandToolbarButtonClass,
-  CommandToolbarButtonComponent,
   Dialog,
   ICommandPalette,
   InputDialog,
@@ -33,7 +31,7 @@ import {
   SavingStatus
 } from '@jupyterlab/docmanager';
 import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -42,7 +40,12 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { saveIcon } from '@jupyterlab/ui-components';
+import {
+  addCommandToolbarButtonClass,
+  CommandToolbarButtonComponent,
+  readonlyIcon,
+  saveIcon
+} from '@jupyterlab/ui-components';
 import { each, map, some, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
@@ -484,8 +487,38 @@ export default plugins;
  */
 export namespace ToolbarItems {
   /**
+   * create readonly label toolbar item
+   */
+  export function createReadonlyLabel(
+    panel: DocumentWidget,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
+    return addCommandToolbarButtonClass(
+      ReactWidget.create(
+        <UseSignal signal={panel.context.fileChanged}>
+          {() =>
+            !panel.context.contentsModel?.writable ? (
+              <readonlyIcon.react
+                className="jp-ToolbarLabelComponent-icon"
+                label="readonly document"
+                stylesheet="toolbarButton"
+                tag="span"
+                title={trans.__(
+                  `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+                )}
+              />
+            ) : (
+              <></>
+            )
+          }
+        </UseSignal>
+      )
+    );
+  }
+
+  /**
    * Create save button toolbar item.
-   *
    */
   export function createSaveButton(
     commands: CommandRegistry,
