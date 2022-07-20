@@ -8,7 +8,7 @@
  */
 
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
-import { CodeMirrorEditor, Mode } from '@jupyterlab/codemirror';
+import { Mode } from '@jupyterlab/codemirror';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
 import { marked } from 'marked';
 
@@ -54,7 +54,7 @@ namespace Private {
       gfm: true,
       sanitize: false,
       // breaks: true; We can't use GFM breaks as it causes problems with tables
-      langPrefix: `cm-s-${CodeMirrorEditor.defaultConfig.theme} language-`,
+      langPrefix: `language-`,
       highlight: (code, lang, callback) => {
         const cb = (err: Error | null, code: string) => {
           if (callback) {
@@ -74,7 +74,7 @@ namespace Private {
               return cb(null, code);
             }
             try {
-              Mode.run(code, spec.mime, el);
+              Mode.run(code, spec, el);
               return cb(null, el.innerHTML);
             } catch (err) {
               console.error(`Failed to highlight ${lang} code`, err);

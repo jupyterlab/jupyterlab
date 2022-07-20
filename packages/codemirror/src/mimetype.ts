@@ -18,13 +18,16 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     const ext = info.file_extension || '';
-    return Mode.findBest(
+    const mode = Mode.findBest(
       (info.codemirror_mode as any) || {
         mimetype: info.mimetype,
         name: info.name,
         ext: [ext.split('.').slice(-1)[0]]
       }
-    ).mime as string;
+    );
+    return mode
+      ? (mode.mime as string)
+      : IEditorMimeTypeService.defaultMimeType;
   }
 
   /**
@@ -41,6 +44,8 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
       return 'text/x-ipythongfm';
     }
     const mode = Mode.findByFileName(path) || Mode.findBest('');
-    return mode.mime as string;
+    return mode
+      ? (mode.mime as string)
+      : IEditorMimeTypeService.defaultMimeType;
   }
 }

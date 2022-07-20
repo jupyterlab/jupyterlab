@@ -1,6 +1,7 @@
 import path from 'path';
 
 const esModules = [
+  '@codemirror',
   'lib0',
   'y\\-protocols',
   'y\\-websocket',
