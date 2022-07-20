@@ -53,7 +53,8 @@ and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
 We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v2 and JupyterLab v3. When JupyterLab v4 is released, v2 will leave support.
+JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no 
+longer maintain v2.
 All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
 
 All source code is written in
