@@ -133,19 +133,19 @@ describe('@jupyterlab/lsp', () => {
         expect(document['sourceLines'].size).toEqual(0);
         expect(document['unusedDocuments'].size).toEqual(0);
         expect(document['unusedStandaloneDocuments'].size).toEqual(0);
-        expect(document.virtualLines.size).toEqual(0);
+        expect(document['virtualLines'].size).toEqual(0);
       });
     });
 
     describe('#appendCodeBlock', () => {
       it('should set the `virtualLines` map', () => {
-        expect(document.virtualLines.size).toEqual(10);
+        expect(document['virtualLines'].size).toEqual(10);
         document.appendCodeBlock({
           value: 'new line',
           ceEditor: {} as CodeEditor.IEditor,
           type: 'code'
         });
-        expect(document.virtualLines.size).toEqual(13);
+        expect(document['virtualLines'].size).toEqual(13);
         expect(document.lastSourceLine).toEqual(7);
         expect(document.lastVirtualLine).toEqual(13);
       });
@@ -247,12 +247,13 @@ describe('@jupyterlab/lsp', () => {
     });
     describe('#closeForeign', () => {
       it('should emit the `foreignDocumentClosed` signal', () => {
-        document.foreignDocumentClosed.emit = jest.fn();
+        const cb = jest.fn();
+        document.foreignDocumentClosed.connect(cb);
         const md: VirtualDocument = document['chooseForeignDocument'](
           markdownCellExtractor
         );
         document.closeForeign(md);
-        expect(document.foreignDocumentClosed.emit).toBeCalled();
+        expect(cb).toBeCalled();
       });
       it('should close correctly foreign documents', () => {
         const md: VirtualDocument = document['chooseForeignDocument'](

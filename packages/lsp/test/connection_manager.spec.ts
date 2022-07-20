@@ -62,10 +62,11 @@ describe('@jupyterlab/lsp', () => {
     });
     describe('#connectDocumentSignals', () => {
       it('should connect virtual document signals', () => {
-        manager.documentsChanged.emit = jest.fn();
+        const cb = jest.fn();
+        manager.documentsChanged.connect(cb);
         manager.connectDocumentSignals(document);
         expect(manager.documents.has(document.uri)).toEqual(true);
-        expect(manager.documentsChanged.emit).toBeCalled();
+        expect(cb).toBeCalled();
       });
     });
     describe('#disconnectDocumentSignals', () => {
