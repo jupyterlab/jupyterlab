@@ -47,7 +47,6 @@
     "@jupyterlab/translation": "^4.0.0-alpha.11",
     "@jupyterlab/ui-components": "^4.0.0-alpha.26",
     "@lumino/coreutils": "^1.12.0",
-    "@lumino/disposable": "^1.10.1",
     "@lumino/signaling": "^1.10.1",
     "@rjsf/core": "^3.1.0",
     "react": "^17.0.1"

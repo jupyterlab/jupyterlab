@@ -197,7 +197,7 @@ export class RunningLanguageServers implements IRunningSessions.IRunningItem {
     this._manager = manager;
   }
   /**
-   * This i no-op because we do not do anything on server click event
+   * This is no-op because we do not do anything on server click event
    */
   open(): void {
     /** no-op */
