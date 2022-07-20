@@ -239,7 +239,8 @@ jobs:
         working-directory: galata
 
       - name: Execute memory leak tests
-        uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1
+        id: memory_leaks
+        uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: localhost:8888
@@ -252,7 +253,7 @@ jobs:
         run: |
           echo "# Memory leaks report" > ${REPORT}
           echo "" >> ${REPORT}
-          cat ${GITHUB_STEP_SUMMARY} >> ${REPORT}
+          echo ${{ steps.memory_leaks.outputs.report }} >> ${REPORT}
 
       - name: Upload Memory Leak Tests report
         if: always()
