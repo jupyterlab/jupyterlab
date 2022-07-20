@@ -1,3 +1,4 @@
+import { Signal } from '@lumino/signaling';
 import { SessionContext } from '@jupyterlab/apputils';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -6,7 +7,7 @@ import {
   IVirtualPosition,
   untilReady,
   VirtualDocument,
-  WidgetAdapter
+  WidgetLSPAdapter
 } from '@jupyterlab/lsp';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
@@ -21,18 +22,21 @@ import { Notebook } from './widget';
 type IEditor = CodeEditor.IEditor;
 type ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 
-export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
+export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   constructor(
-    protected options: IAdapterOptions,
-    public editorWidget: NotebookPanel
+    public editorWidget: NotebookPanel,
+    protected options: IAdapterOptions
   ) {
-    super(options, editorWidget);
+    super(editorWidget, options);
     this._ceEditorToCell = new Map();
     this.editor = editorWidget.content;
     this._knownEditorsIds = new Set();
     this.initialized = new Promise<void>((resolve, reject) => {
       this.initOnceReady().then(resolve).catch(reject);
     });
+
+    // Dispose the adapter when the notebook is disposed.
+    editorWidget.disposed.connect(() => this.dispose());
   }
 
   /**
@@ -207,6 +211,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
 
     // editors are needed for the parent dispose() to unbind signals, so they are the last to go
     this._ceEditorToCell.clear();
+    Signal.clearData(this);
   }
 
   /**
@@ -293,7 +298,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
         continue;
       }
       this._knownEditorsIds.delete(cellWidget.editor.uuid);
-
+      this._ceEditorToCell.delete(cellWidget.editor);
       // for practical purposes this editor got removed from our consideration;
       // it might seem that we should instead look for the editor indicated by
       // the oldValues[i] cellModel, but this one got already transferred to the

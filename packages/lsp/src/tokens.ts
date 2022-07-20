@@ -12,7 +12,7 @@ import {
   ITokenInfo
 } from 'lsp-ws-connection';
 
-import { WidgetAdapter } from './adapters/adapter';
+import { WidgetLSPAdapter } from './adapters/adapter';
 import { IForeignCodeExtractor } from './extractors/types';
 import { ClientCapabilities, LanguageIdentifier } from './lsp';
 import { LanguageServer1 as LSPLanguageServerSettings } from './plugin';
@@ -21,6 +21,7 @@ import { VirtualDocument } from './virtual/document';
 
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
+import { IDisposable } from '@lumino/disposable';
 
 export type TLanguageServerId =
   | 'pylsp'
@@ -44,7 +45,7 @@ export type TSpecsMap = Map<TServerKeys, SCHEMA.LanguageServerSpec>;
 
 export type TLanguageId = string;
 
-export interface ILanguageServerManager {
+export interface ILanguageServerManager extends IDisposable {
   /**
    * Signal emitted when the language server sessions are changed.
    *
@@ -54,7 +55,7 @@ export interface ILanguageServerManager {
   /**
    * The current session information of running language servers.
    */
-  sessions: TSessionMap;
+  readonly sessions: TSessionMap;
 
   /**
    * A promise that is fulfilled when the connection manager is ready.
@@ -62,7 +63,18 @@ export interface ILanguageServerManager {
   readonly ready: Promise<void>;
 
   /**
-   * An ordered list of matching >running< sessions, with servers of higher priority higher in the list
+   * Current endpoint to get the status of running language servers
+   */
+  readonly statusUrl: string;
+
+  /**
+   *
+   * Status code of the `fetchSession` request.
+   */
+  readonly statusCode: number;
+
+  /**
+   * An ordered list of matching >running< sessions, with servers of higher rank higher in the list
    */
   getMatchingServers(
     options: ILanguageServerManager.IGetServerIdOptions
@@ -86,17 +98,6 @@ export interface ILanguageServerManager {
    *
    */
   fetchSessions(): Promise<void>;
-
-  /**
-   * Current endpoint to get the status of running language servers
-   */
-  statusUrl: string;
-
-  /**
-   *
-   * Status code of the `fetchSession` request.
-   */
-  statusCode: number;
 }
 
 export namespace ILanguageServerManager {
@@ -170,7 +171,7 @@ export interface ILSPDocumentConnectionManager {
   /**
    * The mapping of document uri to the widget adapter.
    */
-  adapters: Map<string, WidgetAdapter<IDocumentWidget>>;
+  adapters: Map<string, WidgetLSPAdapter<IDocumentWidget>>;
 
   /**
    * Signal emitted when a connection is connected.
@@ -213,7 +214,7 @@ export interface ILSPDocumentConnectionManager {
   /**
    * Handles the settings that do not require an existing connection
    * with a language server (or can influence to which server the
-   * connection will be created, e.g. `priority`).
+   * connection will be created, e.g. `rank`).
    *
    * This function should be called **before** initialization of servers.
    */
@@ -271,7 +272,10 @@ export interface ILSPDocumentConnectionManager {
    * @param  path - path to current document widget of input adapter
    * @param  adapter - the adapter need to be registered
    */
-  registerAdapter(path: string, adapter: WidgetAdapter<IDocumentWidget>): void;
+  registerAdapter(
+    path: string,
+    adapter: WidgetLSPAdapter<IDocumentWidget>
+  ): void;
 }
 
 export interface IFeature {

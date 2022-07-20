@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { UUID } from '@lumino/coreutils';
 import { closeIcon } from '@jupyterlab/ui-components';
+
 type TDict = { [key: string]: any };
 
 interface ISettingPropertyMap {
@@ -26,6 +27,9 @@ interface ISettingProperty {
 const SETTING_NAME = 'languageServers';
 const SERVER_SETTINGS = 'configuration';
 
+/**
+ * Debouncer with support for function with arguments.
+ */
 function debounce<Params extends any[]>(
   func: (...args: Params) => any,
   timeout: number = 500
@@ -85,6 +89,10 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
 
   const [currentServerName, setCurrentServerName] =
     useState<string>(serverName);
+
+  /**
+   * Callback on server name field change event
+   */
   const onServerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     props.updateSetting(props.serverHash, { serverName: e.target.value });
     setCurrentServerName(e.target.value);
@@ -117,6 +125,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
   const [otherSettingsComposite, setOtherSettingsComposite] =
     useState<TDict>(defaultOtherSettings);
 
+  /**
+   * Callback on additional setting field change event
+   */
   const onOtherSettingsChange = (
     property: string,
     value: any,
@@ -134,6 +145,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     setOtherSettingsComposite(newProps);
   };
 
+  /**
+   * Callback on `Add property` button click event.
+   */
   const addProperty = () => {
     const hash = UUID.uuid4();
     const newMap: ISettingPropertyMap = {
@@ -148,6 +162,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     setPropertyMap(newMap);
   };
 
+  /**
+   * Callback on `Remove property` button click event.
+   */
   const removeProperty = (entryHash: string) => {
     const newMap: ISettingPropertyMap = {};
     Object.entries(propertyMap).forEach(([hash, value]) => {
@@ -163,6 +180,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     });
   };
 
+  /**
+   * Save setting to the setting registry on field change event.
+   */
   const setProperty = (hash: string, property: ISettingProperty): void => {
     if (hash in propertyMap) {
       const newMap: ISettingPropertyMap = { ...propertyMap, [hash]: property };
@@ -185,7 +205,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                 <div className="jp-modifiedIndicator jp-errorIndicator"></div>
                 <div className="jp-FormGroup-content">
                   <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
-                    Server name:
+                    {props.trans.__('Server name:')}
                   </h3>
                   <div className="jp-inputFieldWrapper jp-FormGroup-contentItem">
                     <input
@@ -201,7 +221,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                   <div className="validationErrors">
                     <div>
                       <ul className="error-detail bs-callout bs-callout-info">
-                        <li className="text-danger">is a required property</li>
+                        <li className="text-danger">
+                          {props.trans.__('is a required property')}
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -288,14 +310,17 @@ function PropertyFrom(props: {
     value: any;
   }>({ ...props.property });
   const TYPE_MAP = { string: 'text', number: 'number', boolean: 'checkbox' };
+
   const removeItem = () => {
     props.removeProperty(props.hash);
   };
+
   const changeName = (newName: string) => {
     const newState = { ...state, property: newName };
     props.setProperty(props.hash, newState);
     setState(newState);
   };
+
   const changeValue = (
     newValue: any,
     type: 'string' | 'boolean' | 'number'
@@ -308,6 +333,7 @@ function PropertyFrom(props: {
     props.setProperty(props.hash, newState);
     setState(newState);
   };
+
   const changeType = (newType: 'boolean' | 'string' | 'number') => {
     let value: string | boolean | number;
     if (newType === 'boolean') {
@@ -321,11 +347,11 @@ function PropertyFrom(props: {
     setState(newState);
     props.setProperty(props.hash, newState);
   };
+
   return (
     <div key={props.hash} className="form-group small-field">
-      <div className="jp-FormGroup-content">
+      <div className="jp-FormGroup-content jp-LSPExtension-FormGroup-content">
         <input
-          style={{ marginRight: '25px' }}
           className="form-control"
           type="text"
           required={true}
@@ -336,7 +362,6 @@ function PropertyFrom(props: {
           }}
         />
         <select
-          style={{ marginRight: '25px' }}
           className="form-control"
           value={state.type}
           onChange={e =>
@@ -348,7 +373,6 @@ function PropertyFrom(props: {
           <option value="boolean">Boolean</option>
         </select>
         <input
-          style={{ marginRight: '25px' }}
           className="form-control"
           type={TYPE_MAP[state.type]}
           required={false}
@@ -568,7 +592,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
 }
 
 /**
- * Custom setting renderer for language server.
+ * Custom setting renderer for language server extension.
  */
 export function renderServerSetting(
   props: FieldProps,

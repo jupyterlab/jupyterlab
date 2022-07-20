@@ -276,15 +276,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   }
 
   /**
-   * @deprecated The method should not be used in new code. Use provides() instead.
-   */
-  isRenameSupported(): boolean {
-    return !!(
-      this.serverCapabilities && this.serverCapabilities.renameProvider
-    );
-  }
-
-  /**
    * Check if a provider is available in the registered capabilities.
    */
   provides(provider: keyof lsp.ServerCapabilities): boolean {

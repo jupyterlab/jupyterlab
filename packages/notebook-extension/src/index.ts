@@ -1781,15 +1781,12 @@ function activateNotebookLanguageServer(
   codeExtractorManager: ILSPCodeExtractorsManager
 ): void {
   notebooks.widgetAdded.connect(async (_, notebook) => {
-    const adapter = new NotebookAdapter(
-      {
-        app,
-        connectionManager,
-        featureManager,
-        foreignCodeExtractorsManager: codeExtractorManager
-      },
-      notebook
-    );
+    const adapter = new NotebookAdapter(notebook, {
+      app,
+      connectionManager,
+      featureManager,
+      foreignCodeExtractorsManager: codeExtractorManager
+    });
     connectionManager.registerAdapter(notebook.context.path, adapter);
   });
 }

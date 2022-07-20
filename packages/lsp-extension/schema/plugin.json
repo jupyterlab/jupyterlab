@@ -10,7 +10,7 @@
       "type": "object",
       "default": {
         "configuration": {},
-        "priority": 50
+        "rank": 50
       },
       "properties": {
         "configuration": {
@@ -25,9 +25,9 @@
           },
           "additionalProperties": true
         },
-        "priority": {
-          "title": "Priority of the server",
-          "description": "When multiple servers match specific document/language, the server with the highest priority will be used",
+        "rank": {
+          "title": "Rank of the server",
+          "description": "When multiple servers match specific document/language, the server with the highest rank will be used",
           "type": "number",
           "default": 50,
           "minimum": 1
@@ -45,18 +45,13 @@
         ".*": {
           "$ref": "#/definitions/languageServer"
         }
-      },
-      "additionalProperties": {
-        "$ref": "#/definitions/languageServer"
       }
     },
     "setTrace": {
       "title": "Ask servers to send trace notifications",
-      "type": ["string"],
       "enum": ["off", "messages", "verbose"],
       "default": "off",
       "description": "Whether to ask server to send logs with execution trace (for debugging). To see these messages, set loggingLevel to debug or log. Accepted values are: \"off\", \"messages\", \"verbose\". Servers are allowed to ignore this request."
     }
-  },
-  "jupyter.lab.shortcuts": []
+  }
 }

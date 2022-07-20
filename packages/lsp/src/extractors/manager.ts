@@ -26,8 +26,11 @@ export class CodeExtractorsManager implements ILSPCodeExtractorsManager {
     hostLanguage: string | null
   ): IForeignCodeExtractor[] {
     if (hostLanguage) {
-      const currentMap = this._extractorMap.get(cellType)!;
-      return currentMap.get(hostLanguage) ?? [];
+      const currentMap = this._extractorMap.get(cellType);
+      if (!currentMap) {
+        return [];
+      }
+      return currentMap!.get(hostLanguage) ?? [];
     } else {
       return this._extractorMapAnyLanguage.get(cellType) ?? [];
     }

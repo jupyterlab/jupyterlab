@@ -2,7 +2,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { WidgetAdapter } from './adapters/adapter';
+import { WidgetLSPAdapter } from './adapters/adapter';
 import { LSPConnection } from './connection';
 import { ClientCapabilities } from './lsp';
 import { AskServersToSendTraceNotifications } from './plugin';
@@ -48,7 +48,7 @@ export class DocumentConnectionManager
    * Map between the path of the document and its adapter
    *
    */
-  readonly adapters: Map<string, WidgetAdapter<IDocumentWidget>>;
+  readonly adapters: Map<string, WidgetLSPAdapter<IDocumentWidget>>;
 
   /**
    * Map between the URI of the virtual document and the document itself.
@@ -201,7 +201,10 @@ export class DocumentConnectionManager
    * @param  path - path to the inner document of the adapter
    * @param  adapter - the adapter to be registered
    */
-  registerAdapter(path: string, adapter: WidgetAdapter<IDocumentWidget>): void {
+  registerAdapter(
+    path: string,
+    adapter: WidgetLSPAdapter<IDocumentWidget>
+  ): void {
     this.adapters.set(path, adapter);
     adapter.widget.disposed.connect(() => {
       this.adapters.delete(path);
@@ -211,7 +214,7 @@ export class DocumentConnectionManager
   /**
    * Handles the settings that do not require an existing connection
    * with a language server (or can influence to which server the
-   * connection will be created, e.g. `priority`).
+   * connection will be created, e.g. `rank`).
    *
    * This function should be called **before** initialization of servers.
    */
@@ -450,7 +453,7 @@ export class DocumentConnectionManager
     });
     console.debug('Matching servers: ', matchingServers);
 
-    // for now use only the server with the highest priority.
+    // for now use only the server with the highest rank.
     const languageServerId =
       matchingServers.length === 0 ? null : matchingServers[0];
 

@@ -312,27 +312,6 @@ export class VirtualDocument implements IDisposable {
   }
 
   /**
-   * Test whether the document is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * The language identifier of the document.
-   */
-  language: string;
-
-  /**
-   * Being standalone is relevant to foreign documents
-   * and defines whether following chunks of code in the same
-   * language should be appended to this document (false, not standalone)
-   * or should be considered separate documents (true, standalone)
-   *
-   */
-  standalone: boolean;
-
-  /**
    * Number of blank lines appended to the virtual document between
    * each cell.
    */
@@ -354,14 +333,33 @@ export class VirtualDocument implements IDisposable {
   documentInfo: IDocumentInfo;
 
   /**
+   * Parent of the current virtual document.
+   */
+  parent?: VirtualDocument | null;
+
+  /**
+   * The language identifier of the document.
+   */
+  readonly language: string;
+
+  /**
+   * Being standalone is relevant to foreign documents
+   * and defines whether following chunks of code in the same
+   * language should be appended to this document (false, not standalone)
+   * or should be considered separate documents (true, standalone)
+   *
+   */
+  readonly standalone: boolean;
+
+  /**
    * Path to the document.
    */
-  path: string;
+  readonly path: string;
 
   /**
    * File extension of the document.
    */
-  fileExtension: string | undefined;
+  readonly fileExtension: string | undefined;
 
   /**
    * Notebooks or any other aggregates of documents are not supported
@@ -369,17 +367,12 @@ export class VirtualDocument implements IDisposable {
    * adjustments for them, pretending they are simple files
    * so that the LSP servers do not refuse to cooperate.
    */
-  hasLspSupportedFile: boolean;
-
-  /**
-   * Parent of the current virtual document.
-   */
-  parent?: VirtualDocument | null;
+  readonly hasLspSupportedFile: boolean;
 
   /**
    * Map holding the children `VirtualDocument` .
    */
-  foreignDocuments: Map<VirtualDocument.virtualId, VirtualDocument>;
+  readonly foreignDocuments: Map<VirtualDocument.virtualId, VirtualDocument>;
 
   /**
    * The update manager object.
@@ -390,6 +383,13 @@ export class VirtualDocument implements IDisposable {
    * Unique id of the virtual document.
    */
   readonly instanceId: number;
+
+  /**
+   * Test whether the document is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
 
   /**
    * Signal emitted when the foreign document is closed
@@ -508,6 +508,8 @@ export class VirtualDocument implements IDisposable {
 
     this.documentInfo = null as any;
     this.lineBlocks = null as any;
+
+    Signal.clearData(this);
   }
 
   /**
@@ -1138,12 +1140,11 @@ export class UpdateManager implements IDisposable {
   }
 
   /**
-   * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
+   * Promise resolved when the updating process finishes.
    */
-  updateDone: Promise<void> = new Promise<void>(resolve => {
-    resolve();
-  });
-
+  get updateDone(): Promise<void> {
+    return this._updateDone;
+  }
   /**
    * Test whether the document is disposed.
    */
@@ -1254,11 +1255,19 @@ export class UpdateManager implements IDisposable {
         })
         .catch(console.error);
     });
-    this.updateDone = update;
+    this._updateDone = update;
     return update;
   }
 
   private _isDisposed = false;
+
+  /**
+   * Promise resolved when the updating process finishes.
+   */
+  private _updateDone: Promise<void> = new Promise<void>(resolve => {
+    resolve();
+  });
+
   /**
    * Virtual documents update guard.
    */

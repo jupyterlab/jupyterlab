@@ -25,6 +25,13 @@ export class LanguageServerManager implements ILanguageServerManager {
   }
 
   /**
+   * Check if the manager is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
    * Get the language server specs.
    */
   get specs(): TSpecsMap {
@@ -67,56 +74,21 @@ export class LanguageServerManager implements ILanguageServerManager {
   }
 
   /**
+   * Dispose the manager.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+
+    Signal.clearData(this);
+  }
+  /**
    * Update the language server configuration.
    */
   setConfiguration(configuration: TLanguageServerConfigurations): void {
     this._configuration = configuration;
-  }
-
-  /**
-   * Helper function to warn a message only once.
-   */
-  protected warnOnce(arg: string): void {
-    if (!this._warningsEmitted.has(arg)) {
-      this._warningsEmitted.add(arg);
-      console.warn(arg);
-    }
-  }
-
-  /**
-   * Compare the rank of two servers with the same language.
-   */
-  protected _comparePriorities(
-    a: TLanguageServerId,
-    b: TLanguageServerId
-  ): number {
-    const DEFAULT_PRIORITY = 50;
-    const aPriority = this._configuration[a]?.priority ?? DEFAULT_PRIORITY;
-    const bPriority = this._configuration[b]?.priority ?? DEFAULT_PRIORITY;
-    if (aPriority == bPriority) {
-      this.warnOnce(
-        `Two matching servers: ${a} and ${b} have the same priority; choose which one to use by changing the priority in Advanced Settings Editor`
-      );
-      return a.localeCompare(b);
-    }
-    // higher priority = higher in the list (descending order)
-    return bPriority - aPriority;
-  }
-
-  /**
-   * Check if input language option maths the language server spec.
-   */
-  protected isMatchingSpec(
-    options: ILanguageServerManager.IGetServerIdOptions,
-    spec: ServerSpecProperties
-  ): boolean {
-    // most things speak language
-    // if language is not known, it is guessed based on MIME type earlier
-    // so some language should be available by now (which can be not so obvious, e.g. "plain" for txt documents)
-    const lowerCaseLanguage = options.language!.toLocaleLowerCase();
-    return spec.languages!.some(
-      (language: string) => language.toLocaleLowerCase() == lowerCaseLanguage
-    );
   }
 
   /**
@@ -141,7 +113,7 @@ export class LanguageServerManager implements ILanguageServerManager {
       }
     }
 
-    return matchingSessionsKeys.sort(this._comparePriorities.bind(this));
+    return matchingSessionsKeys.sort(this.compareRanks.bind(this));
   }
 
   /**
@@ -193,7 +165,7 @@ export class LanguageServerManager implements ILanguageServerManager {
       const data = await response.json();
       sessions = data.sessions;
       try {
-        this._version = data.version;
+        this.version = data.version;
         this._specs = new Map(Object.entries(data.specs)) as TSpecsMap;
       } catch (err) {
         console.warn(err);
@@ -225,24 +197,63 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._ready.resolve(undefined);
   }
 
-  protected _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal(
-    this
-  );
+  /**
+   * Version number of sever session.
+   */
+  protected version: number;
+
+  /**
+   * Check if input language option maths the language server spec.
+   */
+  protected isMatchingSpec(
+    options: ILanguageServerManager.IGetServerIdOptions,
+    spec: ServerSpecProperties
+  ): boolean {
+    // most things speak language
+    // if language is not known, it is guessed based on MIME type earlier
+    // so some language should be available by now (which can be not so obvious, e.g. "plain" for txt documents)
+    const lowerCaseLanguage = options.language!.toLocaleLowerCase();
+    return spec.languages!.some(
+      (language: string) => language.toLocaleLowerCase() == lowerCaseLanguage
+    );
+  }
+
+  /**
+   * Helper function to warn a message only once.
+   */
+  protected warnOnce(arg: string): void {
+    if (!this._warningsEmitted.has(arg)) {
+      this._warningsEmitted.add(arg);
+      console.warn(arg);
+    }
+  }
+
+  /**
+   * Compare the rank of two servers with the same language.
+   */
+  protected compareRanks(a: TLanguageServerId, b: TLanguageServerId): number {
+    const DEFAULT_RANK = 50;
+    const aRank = this._configuration[a]?.rank ?? DEFAULT_RANK;
+    const bRank = this._configuration[b]?.rank ?? DEFAULT_RANK;
+    if (aRank == bRank) {
+      this.warnOnce(
+        `Two matching servers: ${a} and ${b} have the same rank; choose which one to use by changing the rank in Advanced Settings Editor`
+      );
+      return a.localeCompare(b);
+    }
+    // higher rank = higher in the list (descending order)
+    return bRank - aRank;
+  }
 
   /**
    * map of language server sessions.
    */
-  protected _sessions: TSessionMap = new Map();
+  private _sessions: TSessionMap = new Map();
 
   /**
    * Map of language server specs.
    */
-  protected _specs: TSpecsMap = new Map();
-
-  /**
-   * Version number of sever session.
-   */
-  protected _version: number;
+  private _specs: TSpecsMap = new Map();
 
   /**
    * Server connection setting.
@@ -283,4 +294,13 @@ export class LanguageServerManager implements ILanguageServerManager {
    * A promise resolved when this server manager is ready.
    */
   private _ready = new PromiseDelegate<void>();
+
+  /**
+   * Signal emitted when a  language server session is changed
+   */
+  private _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal(
+    this
+  );
+
+  private _isDisposed = false;
 }

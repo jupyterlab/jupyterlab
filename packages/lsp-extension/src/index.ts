@@ -6,7 +6,6 @@
  * @packageDocumentation
  * @module lsp-extension
  */
-
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -34,6 +33,7 @@ import {
   pythonIcon
 } from '@jupyterlab/ui-components';
 import { PartialJSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 import { renderServerSetting } from './renderer';
@@ -99,7 +99,6 @@ function activate(
 
   const updateOptions = (settings: ISettingRegistry.ISettings) => {
     const options = settings.composite as Required<LanguageServers>;
-
     const languageServerSettings = (options.languageServers ||
       {}) as TLanguageServerConfigurations;
 
@@ -112,13 +111,17 @@ function activate(
       options.setTrace
     );
   };
+  let transformDisposable: IDisposable | undefined;
   languageServerManager.sessionsChanged.connect(() => {
-    settingRegistry.transform(plugin.id, {
+    if (transformDisposable) {
+      transformDisposable.dispose();
+    }
+    transformDisposable = settingRegistry.transform(plugin.id, {
       fetch: plugin => {
         const schema = plugin.schema.properties!;
         const defaultValue: { [key: string]: any } = {};
         languageServerManager.sessions.forEach((_, key) => {
-          defaultValue[key] = { priority: 50, configuration: {} };
+          defaultValue[key] = { rank: 50, configuration: {} };
         });
 
         schema[LANGUAGE_SERVERS]['default'] = defaultValue;
@@ -154,19 +157,18 @@ function activate(
         return plugin;
       }
     });
-    settingRegistry
-      .load(plugin.id)
-      .then(settings => {
-        updateOptions(settings);
-        settings.changed.connect(() => {
-          updateOptions(settings);
-        });
-      })
-      .catch((reason: Error) => {
-        console.error(reason.message);
-      });
   });
-
+  settingRegistry
+    .load(plugin.id)
+    .then(settings => {
+      updateOptions(settings);
+      settings.changed.connect(() => {
+        updateOptions(settings);
+      });
+    })
+    .catch((reason: Error) => {
+      console.error(reason.message);
+    });
   // Add a sessions manager if the running extension is available
   if (runningSessionManagers) {
     addRunningSessionManager(
@@ -196,8 +198,11 @@ export class RunningLanguageServers implements IRunningSessions.IRunningItem {
     this._connection = connection;
     this._manager = manager;
   }
+  /**
+   * This i no-op because we do not do anything on server click event
+   */
   open(): void {
-    /** */
+    /** no-op */
   }
   icon(): LabIcon {
     return pythonIcon;
@@ -236,20 +241,23 @@ function addRunningSessionManager(
   lsManager.disconnected.connect(() => signal.emit(lsManager));
   lsManager.closed.connect(() => signal.emit(lsManager));
   lsManager.documentsChanged.connect(() => signal.emit(lsManager));
-
+  let currentRunning: RunningLanguageServers[] = [];
   managers.add({
     name: trans.__('Language servers'),
     running: () => {
       const connections = new Set([...lsManager.connections.values()]);
-      return [...connections].map(
+      currentRunning = [...connections].map(
         conn => new RunningLanguageServers(conn, lsManager)
       );
+      return currentRunning;
     },
     shutdownAll: () => {
-      /** */
+      currentRunning.forEach(item => {
+        item.shutdown();
+      });
     },
     refreshRunning: () => {
-      /** */
+      return void 0;
     },
     runningChanged: signal,
     shutdownLabel: trans.__('Shut Down'),

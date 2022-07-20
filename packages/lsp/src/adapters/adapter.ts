@@ -75,27 +75,15 @@ export interface IAdapterOptions {
  * as this would make the logic of inspections caching impossible to maintain, thus the WidgetAdapter
  * has to handle that, keeping multiple connections and multiple virtual documents.
  */
-export abstract class WidgetAdapter<T extends IDocumentWidget> {
+export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
-  constructor(protected options: IAdapterOptions, public widget: T) {
+  constructor(public widget: T, protected options: IAdapterOptions) {
     this.app = options.app;
     this.connectionManager = options.connectionManager;
     this.isConnected = false;
     this.trans = (options.translator || nullTranslator).load('jupyterlab-lsp');
-    this._adapterConnected = new Signal<
-      WidgetAdapter<T>,
-      IDocumentConnectionData
-    >(this);
-    this._activeEditorChanged = new Signal<
-      WidgetAdapter<T>,
-      IEditorChangedData
-    >(this);
-    this._editorAdded = new Signal<WidgetAdapter<T>, IEditorChangedData>(this);
-    this._editorRemoved = new Signal<WidgetAdapter<T>, IEditorChangedData>(
-      this
-    );
     // set up signal connections
     this.widget.context.saveState.connect(this.onSaveState, this);
     this.connectionManager.closed.connect(this.onConnectionClosed, this);
@@ -141,27 +129,31 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   /**
    * Signal emitted when the adapter is connected.
    */
-  get adapterConnected(): ISignal<WidgetAdapter<T>, IDocumentConnectionData> {
+  get adapterConnected(): ISignal<
+    WidgetLSPAdapter<T>,
+    IDocumentConnectionData
+  > {
     return this._adapterConnected;
   }
+
   /**
    * Signal emitted when the active editor have changed.
    */
-  get activeEditorChanged(): ISignal<WidgetAdapter<T>, IEditorChangedData> {
+  get activeEditorChanged(): ISignal<WidgetLSPAdapter<T>, IEditorChangedData> {
     return this._activeEditorChanged;
   }
 
   /**
    * Signal emitted when the an editor is changed.
    */
-  get editorAdded(): ISignal<WidgetAdapter<T>, IEditorChangedData> {
+  get editorAdded(): ISignal<WidgetLSPAdapter<T>, IEditorChangedData> {
     return this._editorAdded;
   }
 
   /**
    * Signal emitted when the an editor is removed.
    */
-  get editorRemoved(): ISignal<WidgetAdapter<T>, IEditorChangedData> {
+  get editorRemoved(): ISignal<WidgetLSPAdapter<T>, IEditorChangedData> {
     return this._editorRemoved;
   }
 
@@ -287,10 +279,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   /**
    * Update the virtual document.
    */
-  updateDocuments(): Promise<void> | undefined {
+  updateDocuments(): Promise<void> {
     if (this.isDisposed) {
       console.warn('Cannot update documents: adapter disposed');
-      return;
+      return Promise.reject('Cannot update documents: adapter disposed');
     }
     return this.virtualDocument.updateManager.updateDocuments(
       this.editors.map(({ ceEditor, type }) => {
@@ -408,16 +400,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       return;
     }
 
-    // TODO: remove workaround no later than with 3.2 release of JupyterLab
-    // workaround for https://github.com/jupyterlab/jupyterlab/issues/10721
-    // while already reverted in https://github.com/jupyterlab/jupyterlab/pull/10741,
-    // it was not released yet and many users will continue to run 3.1.0 and 3.1.1
-    // so lets workaround it for now
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const completedManually = state === 'completed manually';
-
-    if (state === 'completed' || completedManually) {
+    if (state === 'completed') {
       // note: must only be send to the appropriate connections as
       // some servers (Julia) break if they receive save notification
       // for a document that was not opened before, see:
@@ -454,16 +437,15 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this._adapterConnected.emit(data);
     this.isConnected = true;
 
-    const promise = this.updateDocuments();
-
-    if (!promise) {
-      console.warn('Could not update documents');
+    try {
+      await this.updateDocuments();
+    } catch (reason) {
+      console.warn('Could not update documents', reason);
       return;
     }
-    await promise.then(() => {
-      // refresh the document on the LSP server
-      this.documentChanged(virtualDocument, virtualDocument, true);
-    });
+
+    // refresh the document on the LSP server
+    this.documentChanged(virtualDocument, virtualDocument, true);
 
     // Note: the logger extension behaves badly with non-default names
     // as it changes the source to the active file afterwards anyways
@@ -598,24 +580,29 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
    * Signal emitted when the adapter is connected.
    */
   protected _adapterConnected: Signal<
-    WidgetAdapter<T>,
+    WidgetLSPAdapter<T>,
     IDocumentConnectionData
-  >;
+  > = new Signal(this);
 
   /**
    * Signal emitted when the active editor have changed.
    */
-  protected _activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>;
+  protected _activeEditorChanged: Signal<
+    WidgetLSPAdapter<T>,
+    IEditorChangedData
+  > = new Signal(this);
 
   /**
    * Signal emitted when the an editor is changed.
    */
-  protected _editorAdded: Signal<WidgetAdapter<T>, IEditorChangedData>;
+  protected _editorAdded: Signal<WidgetLSPAdapter<T>, IEditorChangedData> =
+    new Signal(this);
 
   /**
    * Signal emitted when the an editor is removed.
    */
-  protected _editorRemoved: Signal<WidgetAdapter<T>, IEditorChangedData>;
+  protected _editorRemoved: Signal<WidgetLSPAdapter<T>, IEditorChangedData> =
+    new Signal(this);
 
   /**
    * Callback called when a foreign document is closed,

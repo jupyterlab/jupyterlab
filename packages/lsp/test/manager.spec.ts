@@ -50,15 +50,15 @@ describe('@jupyterlab/lsp', () => {
       });
     });
 
-    describe('#_comparePriorities', () => {
-      it('should raise warning if two server have the same priority', async () => {
+    describe('#compareRanks', () => {
+      it('should raise warning if two server have the same rank', async () => {
         console.warn = jest.fn();
-        const value = manager['_comparePriorities'](
+        const value = manager['compareRanks'](
           'pylsp',
           'unified-language-server'
         );
         expect((console.warn as jest.Mock).mock.calls[0][0]).toEqual(
-          'Two matching servers: pylsp and unified-language-server have the same priority; choose which one to use by changing the priority in Advanced Settings Editor'
+          'Two matching servers: pylsp and unified-language-server have the same rank; choose which one to use by changing the rank in Advanced Settings Editor'
         );
         expect(value).toEqual(-1);
       });

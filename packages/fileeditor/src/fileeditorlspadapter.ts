@@ -5,22 +5,25 @@ import {
   IAdapterOptions,
   IVirtualPosition,
   VirtualDocument,
-  WidgetAdapter
+  WidgetLSPAdapter
 } from '@jupyterlab/lsp';
 import { FileEditor } from './widget';
 
-export class FileEditorAdapter extends WidgetAdapter<
+export class FileEditorAdapter extends WidgetLSPAdapter<
   IDocumentWidget<FileEditor>
 > {
   constructor(
-    options: IAdapterOptions,
-    editorWidget: IDocumentWidget<FileEditor>
+    editorWidget: IDocumentWidget<FileEditor>,
+    options: IAdapterOptions
   ) {
-    super(options, editorWidget);
+    super(editorWidget, options);
     this.editor = editorWidget.content;
     this.initialized = new Promise<void>((resolve, reject) => {
       this.initOnceReady().then(resolve).catch(reject);
     });
+
+    // Dispose the adapter when the editor is disposed.
+    editorWidget.disposed.connect(() => this.dispose());
   }
 
   /**

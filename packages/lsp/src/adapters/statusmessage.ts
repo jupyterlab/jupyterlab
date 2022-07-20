@@ -39,6 +39,7 @@ export class StatusMessage implements IDisposable {
     }
     Signal.clearData(this);
   }
+
   /**
    * Set the text message and (optionally) the timeout to remove it.
    * @param message

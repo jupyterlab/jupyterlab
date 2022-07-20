@@ -8,3 +8,5 @@
 @import url('~@jupyterlab/application/style/index.css');
 @import url('~@jupyterlab/lsp/style/index.css');
 @import url('~@jupyterlab/running/style/index.css');
+
+@import url('./base.css');

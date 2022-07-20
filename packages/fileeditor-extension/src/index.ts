@@ -564,15 +564,12 @@ function activateFileEditorLanguageServer(
   extractorManager: ILSPCodeExtractorsManager
 ): void {
   editors.widgetAdded.connect(async (_, editor) => {
-    const adapter = new FileEditorAdapter(
-      {
-        app,
-        connectionManager,
-        featureManager,
-        foreignCodeExtractorsManager: extractorManager
-      },
-      editor
-    );
+    const adapter = new FileEditorAdapter(editor, {
+      app,
+      connectionManager,
+      featureManager,
+      foreignCodeExtractorsManager: extractorManager
+    });
     connectionManager.registerAdapter(editor.context.path, adapter);
   });
 }

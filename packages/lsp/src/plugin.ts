@@ -7,9 +7,9 @@
  */
 
 /**
- * When multiple servers match specific document/language, the server with the highest priority will be used
+ * When multiple servers match specific document/language, the server with the highest rank will be used
  */
-export type PriorityOfTheServer = number;
+export type RankOfTheServer = number;
 /**
  * Whether to ask server to send logs with execution trace (for debugging). To see these messages, set loggingLevel to debug or log. Accepted values are: "off", "messages", "verbose". Servers are allowed to ignore this request.
  */
@@ -38,7 +38,7 @@ export interface LanguageServer {
  */
 export interface LanguageServer1 {
   configuration?: LanguageServerConfigurations;
-  priority?: PriorityOfTheServer;
+  rank?: RankOfTheServer;
   [k: string]: any;
 }
 /**
