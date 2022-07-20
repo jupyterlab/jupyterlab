@@ -52,6 +52,10 @@ Documentation <https://jupyter.readthedocs.io/en/latest/contributing/content-con
 and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
+We maintain the **two most recently released major versions of JupyterLab**, 
+JupyterLab v2 and JupyterLab v3. When JupyterLab v4 is released, v2 will leave support.
+All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+
 All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
