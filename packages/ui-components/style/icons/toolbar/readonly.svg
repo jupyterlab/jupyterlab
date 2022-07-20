@@ -1,0 +1,23 @@
+<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+  <mask id="donutHole">
+    <rect width="24" height="24" fill="white"/>
+    <circle cx="12" cy="12" r="10" fill="black"/>
+  </mask>
+
+  <g class="jp-icon3" fill="#616161">
+    <rect height="2" width="4" x="10" y="17" transform="rotate(225,12,12)"/>
+    <rect height="3" width="4" x="10" y="13" transform="rotate(225,12,12)"/>
+    <rect height="3" width="4" x="10" y="7" transform="rotate(225,12,12)"/>
+    <polygon points="10,4 6,4 8,7.46" transform="translate(5.6, 8.2) rotate(45), scale(.9)"/>
+  </g>
+
+  <g class="jp-icon3" fill="#616161" stroke="#616161" stroke-linejoin="round">
+    <rect height="1" width="3" x="10.5" y="18" transform="rotate(225,12,12)"/>
+    <polygon points="10,4 6,4 8,7.46" transform="translate(6.2, 8.75) rotate(45) scale(.80)"/>
+  </g>
+
+  <g class="jp-icon3" fill="#616161">
+    <rect height="24" width="2" x="11" y="0" transform="rotate(315,12,12)"/>
+    <circle cx="12" cy="12" r="12" mask="url(#donutHole)"/>
+  </g>
+</svg>
