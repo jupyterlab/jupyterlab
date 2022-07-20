@@ -81,6 +81,7 @@
   --jp-icon-python: url('icons/filetype/python.svg');
   --jp-icon-r-kernel: url('icons/filetype/r-kernel.svg');
   --jp-icon-react: url('icons/filetype/react.svg');
+  --jp-icon-readonly: url('icons/toolbar/readonly.svg');
   --jp-icon-redo: url('icons/toolbar/redo.svg');
   --jp-icon-refresh: url('icons/toolbar/refresh.svg');
   --jp-icon-regex: url('icons/search/regex.svg');
@@ -382,6 +383,10 @@
 
 .jp-ReactIcon {
   background-image: var(--jp-icon-react);
+}
+
+.jp-ReadonlyIcon {
+  background-image: var(--jp-icon-readonly);
 }
 
 .jp-RedoIcon {
