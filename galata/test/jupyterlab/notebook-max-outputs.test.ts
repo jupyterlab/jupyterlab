@@ -48,6 +48,7 @@ input('Your age:')
 `);
 
   await page.menu.clickMenuItem('Run>Run All Cells');
+  await page.waitForSelector('.jp-Stdin >> text=Your age:');
   expect(await page.locator('.jp-RenderedMarkdown').count()).toBeGreaterThan(
     MAX_OUTPUTS
   );
