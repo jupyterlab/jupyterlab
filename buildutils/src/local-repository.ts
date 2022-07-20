@@ -33,10 +33,10 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   } catch (e) {
     // Do nothing
   }
-  if (!prev_npm || prev_npm.indexOf('localhost') !== -1) {
+  if (!prev_npm || prev_npm.indexOf('0.0.0.0') !== -1) {
     prev_npm = 'https://registry.npmjs.org/';
   }
-  if (prev_yarn.indexOf('localhost') !== -1) {
+  if (prev_yarn.indexOf('0.0.0.0') !== -1) {
     prev_yarn = '';
   }
 
@@ -50,6 +50,7 @@ auth:
 uplinks:
     npmjs:
         url: ${prev_npm}
+        timeout: 10m
 packages:
   '@*/*':
     access: $all
@@ -66,7 +67,7 @@ packages:
   const log_file = path.join(out_dir, 'verdaccio.log');
 
   // Start local registry
-  const args = `-c verdaccio.yml -l localhost:${port}`;
+  const args = `-c verdaccio.yml -l 0.0.0.0:${port}`;
   console.log(`Starting verdaccio on port ${port} in ${out_dir}`);
 
   // Ensure a clean log file
@@ -119,8 +120,13 @@ packages:
   utils.writeJSONFile(info_file, data);
 
   // Set registry to local registry
-  const local_registry = `http://localhost:${port}`;
-  child_process.execSync(`npm config set registry "${local_registry}"`);
+  const local_registry = `http://0.0.0.0:${port}`;
+  child_process.execFileSync('npm', [
+    'config',
+    'set',
+    'registry',
+    local_registry
+  ]);
   try {
     child_process.execSync(`yarn config set registry "${local_registry}"`);
   } catch (e) {
@@ -141,25 +147,26 @@ packages:
     loginPs.stdout.on('data', (chunk: string) => {
       const data = Buffer.from(chunk, 'utf-8').toString().trim();
       console.log('stdout:', data);
-      switch (data) {
-        case 'Username:':
-          console.log('Passing username...');
-          loginPs.stdin.write(user + '\n');
-          break;
-        case 'Password:':
-          console.log('Passing password...');
-          loginPs.stdin.write(pass + '\n');
-          break;
-        case 'Email: (this IS public)':
-          console.log('Passing email...');
-          loginPs.stdin.write(email + '\n');
-          break;
-        default:
-          reject(`Unexpected prompt: "${data}"`);
-      }
       if (data.indexOf('Logged in as') !== -1) {
         loginPs.stdin.end();
         // do not accept here yet, the token may not have been written
+      } else {
+        switch (data) {
+          case 'Username:':
+            console.log('Passing username...');
+            loginPs.stdin.write(user + '\n');
+            break;
+          case 'Password:':
+            console.log('Passing password...');
+            loginPs.stdin.write(pass + '\n');
+            break;
+          case 'Email: (this IS public)':
+            console.log('Passing email...');
+            loginPs.stdin.write(email + '\n');
+            break;
+          default:
+            reject(`Unexpected prompt: "${data}"`);
+        }
       }
       loginPs.stderr.on('data', (chunk: string) => {
         const data = Buffer.from(chunk, 'utf-8').toString().trim();
@@ -235,7 +242,7 @@ function fixLinks(package_dir: string) {
   let hash = shasum.update(content);
   console.log('Prior hash', hash.digest('hex'));
 
-  const regex = /http\:\/\/localhost\:\d+/g;
+  const regex = /http\:\/\/0\.0\.0\.0\:\d+/g;
   const new_content = content.replace(regex, yarn_reg);
 
   shasum = crypto.createHash('sha256');
