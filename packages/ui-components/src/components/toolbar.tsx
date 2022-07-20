@@ -52,15 +52,15 @@ class ToolbarLayout extends PanelLayout {
    */
   protected onFitRequest(msg: Message): void {
     super.onFitRequest(msg);
-    if (this.parent!.isAttached) {
+    if (this.parent && this.parent.isAttached) {
       // If there are any widgets not explicitly hidden, expand the toolbar to
       // accommodate them.
       if (some(this.widgets, w => !w.isHidden)) {
-        this.parent!.node.style.minHeight = 'var(--jp-private-toolbar-height)';
-        this.parent!.removeClass('jp-Toolbar-micro');
+        this.parent.node.style.minHeight = 'var(--jp-private-toolbar-height)';
+        this.parent.removeClass('jp-Toolbar-micro');
       } else {
-        this.parent!.node.style.minHeight = '';
-        this.parent!.addClass('jp-Toolbar-micro');
+        this.parent.node.style.minHeight = '';
+        this.parent.addClass('jp-Toolbar-micro');
       }
     }
 

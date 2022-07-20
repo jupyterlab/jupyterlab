@@ -3,6 +3,7 @@
   "description": "Notebook Panel settings.",
   "jupyter.lab.toolbars": {
     "Notebook": [
+      { "name": "readonlyLabel", "rank": 9 },
       { "name": "save", "rank": 10 },
       {
         "name": "insert",

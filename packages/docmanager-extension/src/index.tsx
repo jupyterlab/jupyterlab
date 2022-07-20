@@ -13,8 +13,6 @@ import {
   JupyterLab
 } from '@jupyterlab/application';
 import {
-  addCommandToolbarButtonClass,
-  CommandToolbarButtonComponent,
   Dialog,
   ICommandPalette,
   InputDialog,
@@ -43,8 +41,13 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
+import {
+  addCommandToolbarButtonClass,
+  CommandToolbarButtonComponent,
+  readonlyIcon,
+  saveIcon
+} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -564,8 +567,38 @@ export default plugins;
  */
 export namespace ToolbarItems {
   /**
+   * create readonly label toolbar item
+   */
+  export function createReadonlyLabel(
+    panel: DocumentWidget,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
+    return addCommandToolbarButtonClass(
+      ReactWidget.create(
+        <UseSignal signal={panel.context.fileChanged}>
+          {() =>
+            !panel.context.contentsModel?.writable ? (
+              <readonlyIcon.react
+                className="jp-ToolbarLabelComponent-icon"
+                label="readonly document"
+                stylesheet="toolbarButton"
+                tag="span"
+                title={trans.__(
+                  `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+                )}
+              />
+            ) : (
+              <></>
+            )
+          }
+        </UseSignal>
+      )
+    );
+  }
+
+  /**
    * Create save button toolbar item.
-   *
    */
   export function createSaveButton(
     commands: CommandRegistry,
