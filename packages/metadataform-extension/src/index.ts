@@ -9,11 +9,8 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  INotebookTools,
-  INotebookTracker,
-  NotebookTools
-} from '@jupyterlab/notebook';
+import * as nbformat from '@jupyterlab/nbformat';
+import { INotebookTools, NotebookTools } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
@@ -53,20 +50,17 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     metadataKeys: MetadataForm.IMetadataKeys,
     uiSchema: MetadataForm.IUiSchema,
     defaultValues?: any,
+    cellTypes?: Private.ICellTypes,
     pluginId?: string,
     translator?: ITranslator
   ) {
     super();
-    this._props = {
-      properties: builtProperties,
-      metadataKeys: metadataKeys,
-      uiSchema: uiSchema,
-      defaultValues: defaultValues,
-      translator: translator || null,
-      formData: null,
-      parent: this
-    };
 
+    this._properties = builtProperties;
+    this._metadataKeys = metadataKeys;
+    this._uiSchema = uiSchema;
+    this._defaultValues = defaultValues;
+    this._cellTypes = cellTypes;
     this._pluginId = pluginId;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
@@ -81,6 +75,17 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     this._placeholder = new Widget({ node });
     this._placeholder.addClass('jp-MetadataForm-placeholder');
     layout.widget = this._placeholder;
+
+    // Build the form
+    this.buildWidget({
+      properties: builtProperties,
+      metadataKeys: metadataKeys,
+      uiSchema: this._uiSchema,
+      defaultValues: this._defaultValues,
+      translator: this.translator || null,
+      formData: null,
+      parent: this
+    });
   }
 
   /**
@@ -102,8 +107,8 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   /**
    * Build widget
    */
-  buildWidget(): void {
-    const formWidget = new FormWidget(this._props, this._pluginId);
+  buildWidget(props: MetadataForm.IProps): void {
+    const formWidget = new FormWidget(props, this._pluginId);
     formWidget.addClass('jp-MetadataForm');
     this.setContent(formWidget);
   }
@@ -123,16 +128,31 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   }
 
   /**
-   * Update the form with current cell metadata.
+   * Update the form with current cell metadata, and remove inconsistent fields.
    */
   private _update(): void {
-    const formData = {} as PartialJSONObject;
-
     const cell = this.notebookTools.activeCell;
 
     if (cell == undefined) return;
 
-    for (let [key, nestedKeys] of Object.entries(this._props.metadataKeys)) {
+    const metadataKeys: MetadataForm.IMetadataKeys = {};
+    const builtProperties: MetadataForm.IProperties = {
+      type: 'object',
+      properties: {}
+    };
+    const formData = {} as PartialJSONObject;
+
+    for (let [key, nestedKeys] of Object.entries(this._metadataKeys)) {
+      if (
+        this._cellTypes &&
+        this._cellTypes[key] &&
+        !this._cellTypes[key].includes(cell.model.type)
+      ) {
+        continue;
+      }
+
+      metadataKeys[key] = nestedKeys;
+      builtProperties.properties[key] = this._properties.properties[key];
       let workingObject: PartialJSONObject = cell.model.metadata.toJSON();
       let hasValue = true;
       // Navigate to the value
@@ -150,8 +170,15 @@ export class MetadataFormWidget extends NotebookTools.Tool {
         formData[key] = workingObject[nestedKeys[nestedKeys.length - 1]];
     }
 
-    this._props.formData = formData;
-    this.buildWidget();
+    this.buildWidget({
+      properties: builtProperties,
+      metadataKeys: metadataKeys,
+      uiSchema: this._uiSchema,
+      defaultValues: this._defaultValues,
+      translator: this.translator || null,
+      formData: formData,
+      parent: this
+    });
   }
 
   /**
@@ -255,19 +282,21 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     this._updatingMetadata = false;
   }
 
-  public tracker: INotebookTracker;
   protected translator: ITranslator;
+  private _properties: MetadataForm.IProperties;
+  private _metadataKeys: MetadataForm.IMetadataKeys;
+  private _uiSchema: MetadataForm.IUiSchema;
+  private _defaultValues: MetadataForm.IDefaultValues;
   private _trans: TranslationBundle;
   private _placeholder: Widget;
   private _updatingMetadata: boolean;
   private _pluginId: string | undefined;
-  private _props: MetadataForm.IProps;
+  private _cellTypes: Private.ICellTypes | undefined;
 }
 
 namespace Private {
-  export interface IProperties {
-    metadataKeys: { [metadataKey: string]: Array<string> };
-    properties: { [metadataKey: string]: PartialJSONObject };
+  export interface ICellTypes {
+    [metadataKey: string]: nbformat.CellType[];
   }
 
   export async function loadSettingsMetadataForm(
@@ -359,12 +388,13 @@ namespace Private {
       let metadataKeys: MetadataForm.IMetadataKeys = {};
       let uiSchema: MetadataForm.IUiSchema = {};
       let defaultValues: MetadataForm.IDefaultValues = {};
+      let cellTypes: ICellTypes = {};
 
       for (let metadataSchema of schema.metadataKeys) {
         // Name of the key in RJSF schema.
         const joinedMetadataKey = metadataSchema.metadataKey.join('.');
 
-        // Links the key to the metadata path of the data.
+        // Links the key to the path of the data in metadata.
         metadataKeys[joinedMetadataKey] = metadataSchema.metadataKey;
 
         // Links the key to its singular property.
@@ -393,17 +423,12 @@ namespace Private {
           if (renderer !== undefined)
             uiSchema[joinedMetadataKey]['ui:widget'] = renderer;
         }
-      }
 
-      // Creates the tool.
-      const tool = new MetadataFormWidget(
-        builtProperties,
-        metadataKeys,
-        uiSchema,
-        defaultValues,
-        schema._origin,
-        translator
-      );
+        // Optionally links key to cell type
+        if (metadataSchema['cellType']) {
+          cellTypes[joinedMetadataKey] = metadataSchema['cellType'];
+        }
+      }
 
       // Adds a section to notebookTools.
       notebookTools.addSection({
@@ -412,8 +437,16 @@ namespace Private {
         label: schema.label ?? schema.mainKey
       });
 
-      // Builds the form.
-      tool.buildWidget();
+      // Creates the tool.
+      const tool = new MetadataFormWidget(
+        builtProperties,
+        metadataKeys,
+        uiSchema,
+        defaultValues,
+        cellTypes,
+        schema._origin,
+        translator
+      );
 
       // Adds the form to the section.
       notebookTools.addItem({ section: schema.label, tool: tool });
