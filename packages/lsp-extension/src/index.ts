@@ -33,7 +33,6 @@ import {
   pythonIcon
 } from '@jupyterlab/ui-components';
 import { PartialJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 import { renderServerSetting } from './renderer';
@@ -111,53 +110,52 @@ function activate(
       options.setTrace
     );
   };
-  let transformDisposable: IDisposable | undefined;
-  languageServerManager.sessionsChanged.connect(() => {
-    if (transformDisposable) {
-      transformDisposable.dispose();
-    }
-    transformDisposable = settingRegistry.transform(plugin.id, {
-      fetch: plugin => {
-        const schema = plugin.schema.properties!;
-        const defaultValue: { [key: string]: any } = {};
-        languageServerManager.sessions.forEach((_, key) => {
-          defaultValue[key] = { rank: 50, configuration: {} };
-        });
 
-        schema[LANGUAGE_SERVERS]['default'] = defaultValue;
-        return plugin;
-      },
-      compose: plugin => {
-        const properties = plugin.schema.properties!;
-        const user = plugin.data.user;
+  settingRegistry.transform(plugin.id, {
+    fetch: plugin => {
+      const schema = plugin.schema.properties!;
+      const defaultValue: { [key: string]: any } = {};
+      languageServerManager.sessions.forEach((_, key) => {
+        defaultValue[key] = { rank: 50, configuration: {} };
+      });
 
-        const serverDefaultSettings = properties[LANGUAGE_SERVERS][
-          'default'
-        ] as PartialJSONObject;
-        const serverUserSettings = user[LANGUAGE_SERVERS] as
-          | PartialJSONObject
-          | undefined;
-        let serverComposite = { ...serverDefaultSettings };
-        if (serverUserSettings) {
-          serverComposite = { ...serverComposite, ...serverUserSettings };
-        }
-        const composite: { [key: string]: any } = {
-          [LANGUAGE_SERVERS]: serverComposite
-        };
-        Object.entries(properties).forEach(([key, value]) => {
-          if (key !== LANGUAGE_SERVERS) {
-            if (key in user) {
-              composite[key] = user[key];
-            } else {
-              composite[key] = value.default;
-            }
-          }
-        });
-        plugin.data.composite = composite;
-        return plugin;
+      schema[LANGUAGE_SERVERS]['default'] = defaultValue;
+      return plugin;
+    },
+    compose: plugin => {
+      const properties = plugin.schema.properties!;
+      const user = plugin.data.user;
+
+      const serverDefaultSettings = properties[LANGUAGE_SERVERS][
+        'default'
+      ] as PartialJSONObject;
+      const serverUserSettings = user[LANGUAGE_SERVERS] as
+        | PartialJSONObject
+        | undefined;
+      let serverComposite = { ...serverDefaultSettings };
+      if (serverUserSettings) {
+        serverComposite = { ...serverComposite, ...serverUserSettings };
       }
-    });
+      const composite: { [key: string]: any } = {
+        [LANGUAGE_SERVERS]: serverComposite
+      };
+      Object.entries(properties).forEach(([key, value]) => {
+        if (key !== LANGUAGE_SERVERS) {
+          if (key in user) {
+            composite[key] = user[key];
+          } else {
+            composite[key] = value.default;
+          }
+        }
+      });
+      plugin.data.composite = composite;
+      return plugin;
+    }
   });
+  languageServerManager.sessionsChanged.connect(async () => {
+    await settingRegistry.reload(plugin.id);
+  });
+
   settingRegistry
     .load(plugin.id)
     .then(settings => {

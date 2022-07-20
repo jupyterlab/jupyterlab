@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon": "lsp:codeCheck",
+  "jupyter.lab.setting-icon": "ui-components:code-check",
   "jupyter.lab.setting-icon-label": "Language integration",
   "jupyter.lab.transform": true,
   "title": "Language Servers",

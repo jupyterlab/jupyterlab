@@ -28,6 +28,7 @@ import circleSvgstr from '../../style/icons/toolbar/circle.svg';
 import clearSvgstr from '../../style/icons/toolbar/clear.svg';
 import closeSvgstr from '../../style/icons/toolbar/close.svg';
 import codeSvgstr from '../../style/icons/toolbar/code.svg';
+import codeCheckSvgstr from '../../style/icons/lsp/code-check.svg';
 import collapseAllSvgstr from '../../style/icons/toolbar/collapse-all.svg';
 import consoleSvgstr from '../../style/icons/filetype/console.svg';
 import copySvgstr from '../../style/icons/toolbar/copy.svg';
@@ -122,6 +123,7 @@ export const circleIcon = new LabIcon({ name: 'ui-components:circle', svgstr: ci
 export const clearIcon = new LabIcon({ name: 'ui-components:clear', svgstr: clearSvgstr });
 export const closeIcon = new LabIcon({ name: 'ui-components:close', svgstr: closeSvgstr });
 export const codeIcon = new LabIcon({ name: 'ui-components:code', svgstr: codeSvgstr });
+export const codeCheckIcon = new LabIcon({ name: 'ui-components:code-check', svgstr: codeCheckSvgstr });
 export const collapseAllIcon = new LabIcon({ name: 'ui-components:collapse-all', svgstr: collapseAllSvgstr });
 export const consoleIcon = new LabIcon({ name: 'ui-components:console', svgstr: consoleSvgstr });
 export const copyIcon = new LabIcon({ name: 'ui-components:copy', svgstr: copySvgstr });
