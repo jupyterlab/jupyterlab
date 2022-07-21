@@ -244,6 +244,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: localhost:8888
+          artifacts_name: benchmark-assets
 
       - name: Save report to file
         if: always()
