@@ -169,6 +169,10 @@ jobs:
         shell: bash
         working-directory: galata
         run: |
+          set -ex
+          # Update test screenshots - in case they have not yet been corrected on the challenger branch
+          BENCHMARK_NUMBER_SAMPLES=1 PW_VIDEO=1 jlpm run test:benchmark -u
+
           jlpm run test:benchmark
 
       - name: Stop JupyterLab
