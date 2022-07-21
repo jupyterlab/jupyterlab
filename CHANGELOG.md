@@ -41,8 +41,8 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.4.x/CHANGELOG.md'
 
 ### Maintenance and upkeep improvements
 
-- Backport #12799 on branch 3.4.x (Update verdaccio, start registry on … [#12825](https://github.com/jupyterlab/jupyterlab/pull/12825) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #12785: Use Vega SVG renderer to drop canvas dependency [#12811](https://github.com/jupyterlab/jupyterlab/pull/12811) ([@fcollonval](https://github.com/fcollonval))
+- Update verdaccio, start registry on 0.0.0.0 [#12825](https://github.com/jupyterlab/jupyterlab/pull/12825) ([@fcollonval](https://github.com/fcollonval))
+- Use Vega SVG renderer to drop canvas dependency [#12811](https://github.com/jupyterlab/jupyterlab/pull/12811) ([@fcollonval](https://github.com/fcollonval))
 - Bump moment from 2.29.2 to 2.29.4 [#12781](https://github.com/jupyterlab/jupyterlab/pull/12781) ([@dependabot[bot]](https://github.com/apps/dependabot))
 - [memory-leaks] Fixes following cell addition analysis [#12774](https://github.com/jupyterlab/jupyterlab/pull/12774) ([@fcollonval](https://github.com/fcollonval))
 - Bump @lumino/widgets to 1.33.0 [#12777](https://github.com/jupyterlab/jupyterlab/pull/12777) ([@fcollonval](https://github.com/fcollonval))
@@ -53,7 +53,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.4.x/CHANGELOG.md'
 ### Documentation improvements
 
 - Adds version maintenance policy [#12829](https://github.com/jupyterlab/jupyterlab/pull/12829) ([@jweill-aws](https://github.com/jweill-aws))
-- Backport PR #12707: Explicitly set language to `en` in `conf.py` [#12712](https://github.com/jupyterlab/jupyterlab/pull/12712) ([@jtpio](https://github.com/jtpio))
+- Explicitly set language to `en` in `conf.py` [#12712](https://github.com/jupyterlab/jupyterlab/pull/12712) ([@jtpio](https://github.com/jtpio))
 
 ### Contributors to this release
 
