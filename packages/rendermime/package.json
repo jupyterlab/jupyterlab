@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "JupyterLab - RenderMime",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,14 +41,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.4.3",
-    "@jupyterlab/codemirror": "^3.4.3",
-    "@jupyterlab/coreutils": "^5.4.3",
-    "@jupyterlab/nbformat": "^3.4.3",
-    "@jupyterlab/observables": "^4.4.3",
-    "@jupyterlab/rendermime-interfaces": "^3.4.3",
-    "@jupyterlab/services": "^6.4.3",
-    "@jupyterlab/translation": "^3.4.3",
+    "@jupyterlab/apputils": "^3.4.4",
+    "@jupyterlab/codemirror": "^3.4.4",
+    "@jupyterlab/coreutils": "^5.4.4",
+    "@jupyterlab/nbformat": "^3.4.4",
+    "@jupyterlab/observables": "^4.4.4",
+    "@jupyterlab/rendermime-interfaces": "^3.4.4",
+    "@jupyterlab/services": "^6.4.4",
+    "@jupyterlab/translation": "^3.4.4",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/messaging": "^1.10.0",
@@ -58,8 +58,8 @@
     "marked": "^4.0.17"
   },
   "devDependencies": {
-    "@jupyterlab/mathjax2": "^3.4.3",
-    "@jupyterlab/testutils": "^3.4.3",
+    "@jupyterlab/mathjax2": "^3.4.4",
+    "@jupyterlab/testutils": "^3.4.4",
     "@types/jest": "^26.0.10",
     "@types/lodash.escape": "^4.0.6",
     "@types/marked": "^4.0.3",

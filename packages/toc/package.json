@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc",
-  "version": "5.4.3",
+  "version": "5.4.4",
   "description": "JupyterLab - Table of Contents widget",
   "keywords": [
     "jupyterlab"
@@ -40,18 +40,18 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.4.3",
-    "@jupyterlab/cells": "^3.4.3",
-    "@jupyterlab/coreutils": "^5.4.3",
-    "@jupyterlab/docmanager": "^3.4.3",
-    "@jupyterlab/docregistry": "^3.4.3",
-    "@jupyterlab/fileeditor": "^3.4.3",
-    "@jupyterlab/markdownviewer": "^3.4.3",
-    "@jupyterlab/notebook": "^3.4.3",
-    "@jupyterlab/rendermime": "^3.4.3",
-    "@jupyterlab/settingregistry": "^3.4.3",
-    "@jupyterlab/translation": "^3.4.3",
-    "@jupyterlab/ui-components": "^3.4.3",
+    "@jupyterlab/apputils": "^3.4.4",
+    "@jupyterlab/cells": "^3.4.4",
+    "@jupyterlab/coreutils": "^5.4.4",
+    "@jupyterlab/docmanager": "^3.4.4",
+    "@jupyterlab/docregistry": "^3.4.4",
+    "@jupyterlab/fileeditor": "^3.4.4",
+    "@jupyterlab/markdownviewer": "^3.4.4",
+    "@jupyterlab/notebook": "^3.4.4",
+    "@jupyterlab/rendermime": "^3.4.4",
+    "@jupyterlab/settingregistry": "^3.4.4",
+    "@jupyterlab/translation": "^3.4.4",
+    "@jupyterlab/ui-components": "^3.4.4",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/domutils": "^1.8.0",
     "@lumino/messaging": "^1.10.0",
@@ -63,7 +63,7 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^3.4.3",
+    "@jupyterlab/testutils": "^3.4.4",
     "@types/jest": "^26.0.10",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",

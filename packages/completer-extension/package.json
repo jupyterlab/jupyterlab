@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer-extension",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "JupyterLab - Completer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,12 +37,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.4.3",
-    "@jupyterlab/completer": "^3.4.3",
-    "@jupyterlab/console": "^3.4.3",
-    "@jupyterlab/fileeditor": "^3.4.3",
-    "@jupyterlab/notebook": "^3.4.3",
-    "@jupyterlab/services": "^6.4.3",
+    "@jupyterlab/application": "^3.4.4",
+    "@jupyterlab/completer": "^3.4.4",
+    "@jupyterlab/console": "^3.4.4",
+    "@jupyterlab/fileeditor": "^3.4.4",
+    "@jupyterlab/notebook": "^3.4.4",
+    "@jupyterlab/services": "^6.4.4",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/widgets": "^1.33.0"
   },
