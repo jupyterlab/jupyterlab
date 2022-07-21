@@ -149,6 +149,12 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   display: none;
 }
 
+/* Hide empty lines in the output area, for instance due to cleared widgets */
+jp-OutputArea-prompt:empty {
+  padding: 0;
+  border: 0;
+}
+
 /*-----------------------------------------------------------------------------
 | executeResult is added to any Output-result for the display of the object
 | returned by a cell
