@@ -8,7 +8,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as utils from './utils';
 
-utils.exitOnUuncaughtException();
+utils.exitOnUncaughtException();
 
 utils.run('npm run build:packages');
 

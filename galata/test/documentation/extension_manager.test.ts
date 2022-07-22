@@ -1,9 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
-import { generateCaptureArea, setLeftSidebarWidth } from './utils';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
+import { setSidebarWidth, stubExtensionsSearch } from './utils';
+import { default as extensionsList } from './data/extensions.json';
 
 test.use({
   autoGoto: false,
@@ -12,21 +17,29 @@ test.use({
 });
 
 test.describe('Extension Manager', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock get extensions list
+    await page.route(galata.Routes.extensions, async (route, request) => {
+      switch (request.method()) {
+        case 'GET':
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(extensionsList)
+          });
+        default:
+          return route.continue();
+      }
+    });
+  });
+
   test('Sidebar', async ({ page }) => {
     await page.goto();
 
     await openExtensionSidebar(page);
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 600 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_default.png');
   });
 
@@ -34,17 +47,8 @@ test.describe('Extension Manager', () => {
     await page.goto();
 
     await page.click('[title="Extension Manager"]');
-
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('extensions_disabled.png');
   });
 
@@ -53,20 +57,14 @@ test.describe('Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 400 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('extensions_enabled.png');
   });
 
   test('Search', async ({ page }) => {
+    await stubExtensionsSearch(page);
+
     await page.goto();
 
     await openExtensionSidebar(page);
@@ -81,16 +79,8 @@ test.describe('Extension Manager', () => {
     // We can not wait for extension kept by the keyword as they are already in the DOM
     await page.waitForSelector('text=No entries');
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 600 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_search.png');
   });
 
@@ -117,16 +107,8 @@ test.describe('Extension Manager', () => {
 
     await page.click('[title="Extension Manager"]');
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 31, left: 0, width: 283, height: 160 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 160 } })
     ).toMatchSnapshot('extensions_simultaneous_block_allow.png');
   });
 
@@ -153,16 +135,10 @@ test.describe('Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({
+        clip: { y: 110, x: 33, width: 250, height: 280 }
+      })
     ).toMatchSnapshot('extensions_blocked_list.png');
   });
 
@@ -189,16 +165,10 @@ test.describe('Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 110, left: 33, width: 250, height: 280 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({
+        clip: { y: 110, x: 33, width: 250, height: 280 }
+      })
     ).toMatchSnapshot('extensions_allowed_list.png');
   });
 });
@@ -212,5 +182,5 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     '.jp-extensionmanager-view >> .jp-stack-panel-header >> button'
   );
 
-  await setLeftSidebarWidth(page);
+  await setSidebarWidth(page);
 }

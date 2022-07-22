@@ -358,6 +358,17 @@ export class ListModel extends VDomModel {
   }
 
   /**
+   * Dispose the extensions list model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._debouncedUpdate.dispose();
+    super.dispose();
+  }
+
+  /**
    * Initialize the model.
    */
   initialize(): Promise<void> {

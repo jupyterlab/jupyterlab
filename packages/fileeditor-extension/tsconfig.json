@@ -31,6 +31,9 @@
       "path": "../docregistry"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
       "path": "../filebrowser"
     },
     {
@@ -53,6 +56,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

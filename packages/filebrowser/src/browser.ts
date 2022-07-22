@@ -7,6 +7,7 @@ import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
+  IScore,
   ReactWidget,
   SidePanel
 } from '@jupyterlab/ui-components';
@@ -97,7 +98,10 @@ export class FileBrowser extends SidePanel {
     this.listing.addClass(LISTING_CLASS);
 
     this._filenameSearcher = FilenameSearcher({
-      updateFilter: (filterFn: (item: string) => boolean) => {
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
         this.listing.model.setFilter(value => {
           return filterFn(value.name.toLowerCase());
         });
@@ -161,7 +165,10 @@ export class FileBrowser extends SidePanel {
     this._filenameSearcher.dispose();
 
     this._filenameSearcher = FilenameSearcher({
-      updateFilter: (filterFn: (item: string) => boolean) => {
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
         this.listing.model.setFilter(value => {
           return filterFn(value.name.toLowerCase());
         });
@@ -185,6 +192,22 @@ export class FileBrowser extends SidePanel {
   set showHiddenFiles(value: boolean) {
     this.model.showHiddenFiles(value);
     this._showHiddenFiles = value;
+  }
+
+  /**
+   * Whether to show checkboxes next to files and folders
+   */
+  get showFileCheckboxes(): boolean {
+    return this._showFileCheckboxes;
+  }
+
+  set showFileCheckboxes(value: boolean) {
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('is_selected', value);
+      this._showFileCheckboxes = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
   }
 
   /**
@@ -404,6 +427,7 @@ export class FileBrowser extends SidePanel {
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
   private _showHiddenFiles: boolean = false;
+  private _showFileCheckboxes: boolean = false;
 }
 
 /**

@@ -519,12 +519,12 @@
     {
       "command": "notebook:move-cursor-heading-above-or-collapse",
       "keys": ["ArrowLeft"],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "selector": ".jp-Notebook:focus.jp-mod-commandMode"
     },
     {
       "command": "notebook:move-cursor-heading-below-or-expand",
       "keys": ["ArrowRight"],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "selector": ".jp-Notebook:focus.jp-mod-commandMode"
     },
     {
       "command": "notebook:insert-heading-above",
@@ -624,18 +624,8 @@
       "selector": ".jp-Notebook:focus"
     },
     {
-      "command": "notebook:toggle-cell-line-numbers",
-      "keys": ["L"],
-      "selector": ".jp-Notebook:focus"
-    },
-    {
       "command": "notebook:undo-cell-action",
       "keys": ["Z"],
-      "selector": ".jp-Notebook:focus"
-    },
-    {
-      "command": "notebook:toggle-render-side-by-side",
-      "keys": ["Ctrl Shift R"],
       "selector": ".jp-Notebook:focus"
     },
     {
@@ -856,7 +846,13 @@
       "title": "Number of cells to render directly",
       "description": "Define the number of cells to render directly when virtual notebook intersection observer is available",
       "type": "number",
-      "default": 20
+      "default": 99999
+    },
+    "remainingTimeBeforeRescheduling": {
+      "title": "Remaining time in milliseconds before virtual notebook rendering is rescheduled",
+      "description": "Define the remaining time in milliseconds before virtual notebook rendering is rescheduled. Set 0 if you want to disable any rescheduling",
+      "type": "number",
+      "default": 50
     },
     "renderCellOnIdle": {
       "title": "Render cell on browser idle time",
@@ -926,6 +922,13 @@
       "description": "Side-by-side right margin override.",
       "type": "string",
       "default": "10px"
+    },
+    "sideBySideOutputRatio": {
+      "title": "Side-by-side output ratio",
+      "description": "For the side-by-side rendering, the side-by-side output ratio defines the width of the output vs the input. Set 1 for same size, > 1 for larger output, < 1 for smaller output.",
+      "type": "number",
+      "default": 1,
+      "minimum": 0
     }
   },
   "additionalProperties": false,

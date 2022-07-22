@@ -9,9 +9,8 @@ import { CommandToolbarButton, Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { BoxLayout, Widget } from '@lumino/widgets';
+import { BoxLayout, SplitPanel, Widget } from '@lumino/widgets';
 import { createInspector } from './inspector';
-import { SplitPanel } from './splitpanel';
 
 /**
  * A class name added to all raw editors.
@@ -222,20 +221,6 @@ export class RawEditor extends SplitPanel {
   protected onAfterAttach(msg: Message): void {
     Private.populateToolbar(this._commands, this._toolbar);
     this.update();
-  }
-
-  /**
-   * Handle `'update-request'` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    const settings = this._settings;
-    const defaults = this._defaults;
-    const user = this._user;
-
-    if (settings) {
-      defaults.editor.refresh();
-      user.editor.refresh();
-    }
   }
 
   /**

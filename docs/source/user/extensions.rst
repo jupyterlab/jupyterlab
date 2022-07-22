@@ -365,7 +365,7 @@ For example, to set blocked extensions, launch the server with
 ``http://example.com/blocklist.json`` is a JSON file as described below.
 
 The details for the listings_request_options are listed
-on `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__
+on `this page <https://requests.readthedocs.io/en/stable/api/#requests.request>`__
 (for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
 
 The listings are json files hosted on the URIs you have given.

@@ -87,7 +87,7 @@ release = version_ns["__version__"]
 # for a list of supported languages.
 #
 # This is also used if you do content translation via gettext catalogs.
-# language = None # Must be set from the command line to generate various languages
+language = "en"  # Must be set from the command line to generate various languages
 
 locale_dirs = ["locale/"]
 gettext_compact = False
@@ -183,6 +183,36 @@ def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
         copied_files.append(target)
 
     return copied_files
+
+
+COMMANDS_LIST_PATH = "commands.test.ts-snapshots/commandsList-documentation-linux.json"
+COMMANDS_LIST_DOC = "user/commands_list.md"
+
+
+def document_commands_list(temp_folder: Path) -> None:
+    """Generate the command list documentation page for application extraction."""
+    list_path = HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / COMMANDS_LIST_PATH
+
+    commands_list = json.loads(list_path.read_text())
+
+    template = """| Command id | Label | Shortcuts |
+| ---------- | ----- | --------- |
+"""
+
+    for command in sorted(commands_list, key=lambda c: c["id"]):
+        for key in ("id", "label", "caption"):
+            if key not in command:
+                command[key] = ""
+            else:
+                command[key] = command[key].replace("\n", " ")
+        shortcuts = command.get("shortcuts", [])
+        command["shortcuts"] = (
+            "<kbd>" + "</kbd>, <kbd>".join(shortcuts) + "</kbd>" if len(shortcuts) else ""
+        )
+
+        template += "| `{id}` | {label} | {shortcuts} |\n".format(**command)
+
+    (temp_folder / COMMANDS_LIST_DOC).write_text(template)
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -358,5 +388,7 @@ def setup(app):
 
         for f in tmp_files:
             f.unlink()
+
+    document_commands_list(Path(app.srcdir))
 
     app.connect("build-finished", partial(clean_code_files, tmp_files))

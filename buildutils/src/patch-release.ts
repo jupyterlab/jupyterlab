@@ -13,7 +13,7 @@ commander
   .option('--all', 'Patch all JS packages instead of the changed ones')
   .option('--skip-commit', 'Whether to skip commit changes')
   .action((options: any) => {
-    utils.exitOnUuncaughtException();
+    utils.exitOnUncaughtException();
 
     // Make sure we can patch release.
     const pyVersion = utils.getPythonVersion();

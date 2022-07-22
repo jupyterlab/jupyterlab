@@ -1,6 +1,6 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { FieldProps } from '@rjsf/core';
+import type { FieldProps } from '@rjsf/core';
 import React, { useState } from 'react';
 
 const AVAILABLE_PROVIDERS = 'availableProviders';
@@ -40,7 +40,7 @@ export function renderAvailableProviders(props: FieldProps): JSX.Element {
       [key]: parseInt(e.target.value)
     };
 
-    settings.set(AVAILABLE_PROVIDERS, newValue);
+    settings.set(AVAILABLE_PROVIDERS, newValue).catch(console.error);
 
     setValue(newValue);
   };

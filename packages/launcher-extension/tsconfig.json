@@ -13,6 +13,9 @@
       "path": "../apputils"
     },
     {
+      "path": "../filebrowser"
+    },
+    {
       "path": "../launcher"
     },
     {

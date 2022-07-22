@@ -164,6 +164,11 @@ export class CodeConsole extends Widget {
   readonly sessionContext: ISessionContext;
 
   /**
+   * The configuration options for the text editor widget.
+   */
+  editorConfig?: Partial<CodeEditor.IConfig>;
+
+  /**
    * The list of content cells in the console.
    *
    * #### Notes
@@ -423,10 +428,8 @@ export class CodeConsole extends Widget {
 
     const cell = this._cells.get(cellIndex);
 
-    const targetArea: CellDragUtils.ICellTargetArea = CellDragUtils.detectTargetArea(
-      cell,
-      event.target as HTMLElement
-    );
+    const targetArea: CellDragUtils.ICellTargetArea =
+      CellDragUtils.detectTargetArea(cell, event.target as HTMLElement);
 
     if (targetArea === 'prompt') {
       this._dragData = {
@@ -719,7 +722,14 @@ export class CodeConsole extends Widget {
     const modelFactory = this.modelFactory;
     const model = modelFactory.createCodeCell({});
     const rendermime = this.rendermime;
-    return { model, rendermime, contentFactory, placeholder: false };
+    const editorConfig = this.editorConfig;
+    return {
+      model,
+      rendermime,
+      contentFactory,
+      editorConfig,
+      placeholder: false
+    };
   }
 
   /**
@@ -882,7 +892,8 @@ export namespace CodeConsole {
    */
   export class ContentFactory
     extends Cell.ContentFactory
-    implements IContentFactory {
+    implements IContentFactory
+  {
     /**
      * Create a new code cell widget.
      *

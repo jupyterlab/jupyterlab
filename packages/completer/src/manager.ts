@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { ConnectorProxy } from './connectorproxy';
 import { CONTEXT_PROVIDER_ID } from './default/contextprovider';
@@ -24,6 +25,16 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   constructor() {
     this._providers = new Map();
     this._panelHandlers = new Map();
+    this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
+      this
+    );
+  }
+
+  /**
+   * Signal emitted when active providers list is changed.
+   */
+  get activeProvidersChanged(): ISignal<ICompletionProviderManager, void> {
+    return this._activeProvidersChanged;
   }
 
   /**
@@ -94,6 +105,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       this._activeProviders.add(KERNEL_PROVIDER_ID);
       this._activeProviders.add(CONTEXT_PROVIDER_ID);
     }
+    this._activeProvidersChanged.emit();
   }
 
   /**
@@ -192,13 +204,22 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     completerContext: ICompletionContext
   ): Promise<CompletionHandler> {
     const firstProvider = [...this._activeProviders][0];
-    let renderer = this._providers.get(firstProvider)?.renderer;
+    const provider = this._providers.get(firstProvider);
+
+    let renderer = provider?.renderer;
     if (!renderer) {
       renderer = Completer.defaultRenderer;
     }
+    const modelFactory = provider?.modelFactory;
+    let model: Completer.IModel;
+    if (modelFactory) {
+      model = await modelFactory(completerContext);
+    } else {
+      model = new CompleterModel();
+    }
 
-    const model = new CompleterModel();
     const completer = new Completer({ model, renderer });
+    completer.showDocsPanel = this._showDoc;
     completer.hide();
     Widget.attach(completer, document.body);
     const connectorProxy = await this.generateConnectorProxy(completerContext);
@@ -241,4 +262,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    * Flag to enable/disable continuous hinting.
    */
   private _autoCompletion: boolean;
+
+  private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
 }

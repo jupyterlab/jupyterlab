@@ -15,34 +15,42 @@ import {
   ICommandPalette,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
+  MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
   CodeEditor,
+  CodeViewerWidget,
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
   FileEditorFactory,
+  FileEditorSearchProvider,
   IEditorTracker,
+  LaTeXTableOfContentsFactory,
+  MarkdownTableOfContentsFactory,
+  PythonTableOfContentsFactory,
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
+import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
-import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
-import { Commands, FACTORY, IFileTypeData } from './commands';
-import { Session } from '@jupyterlab/services';
+import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
 
@@ -65,6 +73,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IMainMenu,
     ILayoutRestorer,
     ISessionContextDialogs,
+    ITableOfContentsRegistry,
     IToolbarWidgetRegistry
   ],
   provides: IEditorTracker,
@@ -175,13 +184,26 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to search file editors
+ */
+const searchProvider: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:search',
+  requires: [ISearchProviderRegistry],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
+    registry.add('jp-fileeditorSearchProvider', FileEditorSearchProvider);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   plugin,
   lineColStatus,
-  tabSpaceStatus,
-  completerPlugin
+  completerPlugin,
+  searchProvider,
+  tabSpaceStatus
 ];
 export default plugins;
 
@@ -200,6 +222,7 @@ function activate(
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
   sessionDialogs: ISessionContextDialogs | null,
+  tocRegistry: ITableOfContentsRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
@@ -347,6 +370,33 @@ function activate(
     sessionDialogs
   );
 
+  const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(
+    {
+      namespace: 'codeviewer'
+    }
+  );
+
+  // Handle state restoration for code viewers
+  if (restorer) {
+    void restorer.restore(codeViewerTracker, {
+      command: CommandIDs.openCodeViewer,
+      args: widget => ({
+        content: widget.content.content,
+        label: widget.content.title.label,
+        mimeType: widget.content.mimeType,
+        widgetId: widget.content.id
+      }),
+      name: widget => widget.content.id
+    });
+  }
+
+  Commands.addOpenCodeViewerCommand(
+    app,
+    editorServices,
+    codeViewerTracker,
+    trans
+  );
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
     Commands.addLauncherItems(launcher, trans);
@@ -386,6 +436,12 @@ function activate(
       console.error(reason.message);
     });
 
+  if (tocRegistry) {
+    tocRegistry.add(new LaTeXTableOfContentsFactory(tracker));
+    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker));
+    tocRegistry.add(new PythonTableOfContentsFactory(tracker));
+  }
+
   return tracker;
 }
 
@@ -395,23 +451,33 @@ function activate(
 function activateFileEditorCompleterService(
   app: JupyterFrontEnd,
   editorTracker: IEditorTracker,
-  manager?: ICompletionProviderManager
+  manager: ICompletionProviderManager | null,
+  translator: ITranslator | null
 ): void {
   if (!manager) {
     return;
   }
 
-  Commands.addCompleterCommands(app.commands, editorTracker, manager);
+  Commands.addCompleterCommands(
+    app.commands,
+    editorTracker,
+    manager,
+    translator
+  );
+  const sessionManager = app.serviceManager.sessions;
 
   const _activeSessions = new Map<string, Session.ISessionConnection>();
-  editorTracker.widgetAdded.connect(async (_, widget) => {
+  const updateCompleter = async (
+    _: IEditorTracker,
+    widget: IDocumentWidget<FileEditor>
+  ) => {
     const completerContext = {
       editor: widget.content.editor,
       widget
     };
-    const sessionManager = app.serviceManager.sessions;
+
     await manager.updateCompleter(completerContext);
-    const onRunningChanged = async (
+    const onRunningChanged = (
       _: Session.IManager,
       models: Session.IModel[]
     ) => {
@@ -436,7 +502,7 @@ function activateFileEditorCompleterService(
           widget,
           session
         };
-        manager.updateCompleter(newCompleterContext);
+        manager.updateCompleter(newCompleterContext).catch(console.error);
         _activeSessions.set(widget.id, session);
       } else {
         // If we didn't find a match, make sure
@@ -449,7 +515,7 @@ function activateFileEditorCompleterService(
       }
     };
 
-    await onRunningChanged(sessionManager, toArray(sessionManager.running()));
+    onRunningChanged(sessionManager, toArray(sessionManager.running()));
     sessionManager.runningChanged.connect(onRunningChanged);
 
     widget.disposed.connect(() => {
@@ -459,6 +525,12 @@ function activateFileEditorCompleterService(
         _activeSessions.delete(widget.id);
         session.dispose();
       }
+    });
+  };
+  editorTracker.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    editorTracker.forEach(editorWidget => {
+      updateCompleter(editorTracker, editorWidget).catch(console.error);
     });
   });
 }

@@ -18,6 +18,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
       "path": "../filebrowser"
     },
     {
@@ -37,6 +40,9 @@
     },
     {
       "path": "../shared-models"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

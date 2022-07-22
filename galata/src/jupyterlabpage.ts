@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ElementHandle, Page, Response } from '@playwright/test';
 import * as path from 'path';
 import { ContentsHelper } from './contents';
@@ -17,6 +18,7 @@ import {
   StatusBarHelper,
   ThemeHelper
 } from './helpers';
+import { IPluginNameToInterfaceMap, PLUGIN_ID_SETTINGS } from './inpage/tokens';
 import * as Utils from './utils';
 
 /**
@@ -515,8 +517,17 @@ export class JupyterLabPage implements IJupyterLabPage {
     await this.kernel.shutdownAll();
     // show status bar
     await this.statusbar.show();
-    // make sure all sidebar tabs are on left
-    await this.sidebar.moveAllTabsToLeft();
+    // Reset the layout
+    await this.page.evaluate(
+      async ({ pluginId }) => {
+        const settingRegistry = (await window.galataip.getPlugin(
+          pluginId
+        )) as ISettingRegistry;
+        const SHELL_ID = '@jupyterlab/application-extension:shell';
+        await settingRegistry.remove(SHELL_ID, 'layout');
+      },
+      { pluginId: PLUGIN_ID_SETTINGS as keyof IPluginNameToInterfaceMap }
+    );
     // show Files tab on sidebar
     await this.sidebar.openTab('filebrowser');
     // go to home folder

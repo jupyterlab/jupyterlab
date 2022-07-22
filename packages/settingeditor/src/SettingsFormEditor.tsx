@@ -5,7 +5,7 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
-import { Settings } from '@jupyterlab/settingregistry';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
 import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
@@ -77,19 +77,50 @@ export namespace SettingsFormEditor {
      * Sends whether this editor has unsaved changes to the parent class.
      */
     updateDirtyState: (dirty: boolean) => void;
+
+    /**
+     * List of strings that match search value.
+     */
+    filteredValues: string[] | null;
   }
 
   export interface IState {
-    /**
-     * The current form values being displayed in the editor.
-     */
-    formData: any;
-
     /**
      * Indicates whether the settings have been modified. Used for hiding
      * the "Restore to Default" button when there are no changes.
      */
     isModified: boolean;
+
+    // The following are state derived from props for memoization to avoid
+    // `Form` update that results in focus lost
+    // A better fix (that will break the API) would be to move this as props
+    // of the component
+    /**
+     * Form UI schema
+     */
+    uiSchema: UiSchema;
+    /**
+     * Filtered schema
+     */
+    filteredSchema?: ISettingRegistry.ISchema;
+    /**
+     * Field template
+     */
+    fieldTemplate?: React.StatelessComponent<FieldTemplateProps<any>>;
+    /**
+     * Array Field template
+     */
+    arrayFieldTemplate?: React.StatelessComponent<ArrayFieldTemplateProps<any>>;
+    /**
+     * Object Field template
+     */
+    objectFieldTemplate?: React.StatelessComponent<
+      ObjectFieldTemplateProps<any>
+    >;
+    /**
+     * Form context
+     */
+    formContext?: any;
   }
 }
 
@@ -155,7 +186,7 @@ const CustomArrayTemplateFactory = (
       </div>
     );
   };
-  factory.displayName = 'CustomArrayTemplate';
+  factory.displayName = 'JupyterLabArrayTemplate';
   return factory;
 };
 
@@ -197,126 +228,141 @@ const CustomObjectTemplateFactory = (
       </fieldset>
     );
   };
-  factory.displayName = 'CustomObjectTemplate';
+  factory.displayName = 'JupyterLabObjectTemplate';
   return factory;
 };
 
 /**
  * Renders the modified indicator and errors
  */
-const CustomTemplate = (props: FieldTemplateProps) => {
-  const {
-    formData,
-    schema,
-    label,
-    displayLabel,
-    id,
-    formContext,
-    errors,
-    rawErrors,
-    children,
-    onKeyChange,
-    onDropPropertyClick
-  } = props;
-  /**
-   * Determine if the field has been modified
-   * Schema Id is formatted as 'root_<field name>.<nexted field name>'
-   * This logic parses out the field name to find the default value
-   * before determining if the field has been modified.
-   */
-  const schemaIds = id.split('_');
-  schemaIds.shift();
-  const schemaId = schemaIds.join('.');
-  let defaultValue;
-  if (schemaIds.length === 1) {
-    defaultValue = formContext.settings.default(schemaId);
-  } else if (schemaIds.length > 1) {
-    const allDefaultsForObject: any = {};
-    allDefaultsForObject[schemaIds[0]] = formContext.settings.default(
-      schemaIds[0]
-    );
-    defaultValue = reduce(
-      schemaIds,
-      (acc, val, i) => {
-        return acc?.[val];
-      },
-      allDefaultsForObject
-    );
-  }
-  const isModified =
-    schemaId !== '' &&
-    formData !== undefined &&
-    defaultValue !== undefined &&
-    !schema.properties &&
-    schema.type !== 'array' &&
-    !JSONExt.deepEqual(formData, defaultValue);
-  const isRoot = schemaId === '';
+const CustomTemplateFactory = (
+  translator: ITranslator
+): React.FC<FieldTemplateProps> => {
+  const trans = translator.load('jupyterlab');
 
-  const needsDescription =
-    !isRoot &&
-    schema.type != 'object' &&
-    id !=
-      'jp-SettingsEditor-@jupyterlab/shortcuts-extension:shortcuts_shortcuts';
+  const factory = (props: FieldTemplateProps) => {
+    const {
+      formData,
+      schema,
+      label,
+      displayLabel,
+      id,
+      formContext,
+      errors,
+      rawErrors,
+      children,
+      onKeyChange,
+      onDropPropertyClick
+    } = props;
+    /**
+     * Determine if the field has been modified
+     * Schema Id is formatted as 'root_<field name>.<nexted field name>'
+     * This logic parses out the field name to find the default value
+     * before determining if the field has been modified.
+     */
+    const schemaIds = id.split('_');
+    schemaIds.shift();
+    const schemaId = schemaIds.join('.');
+    let defaultValue;
+    if (schemaIds.length === 1) {
+      defaultValue = formContext.settings.default(schemaId);
+    } else if (schemaIds.length > 1) {
+      const allDefaultsForObject: any = {};
+      allDefaultsForObject[schemaIds[0]] = formContext.settings.default(
+        schemaIds[0]
+      );
+      defaultValue = reduce(
+        schemaIds,
+        (acc, val, i) => {
+          return acc?.[val];
+        },
+        allDefaultsForObject
+      );
+    }
+    const isModified =
+      schemaId !== '' &&
+      formData !== undefined &&
+      defaultValue !== undefined &&
+      !schema.properties &&
+      schema.type !== 'array' &&
+      !JSONExt.deepEqual(formData, defaultValue);
+    const isRoot = schemaId === '';
 
-  // While we can implement "remove" button for array items in array template,
-  // object templates do not provide a way to do this; instead we need to add
-  // buttons here (and first check if the field can be removed = is additional).
-  const isAdditional = schema.hasOwnProperty(utils.ADDITIONAL_PROPERTY_FLAG);
+    const needsDescription =
+      !isRoot &&
+      schema.type != 'object' &&
+      id !=
+        'jp-SettingsEditor-@jupyterlab/shortcuts-extension:shortcuts_shortcuts';
 
-  return (
-    <div
-      className={`form-group ${
-        displayLabel || schema.type === 'boolean' ? 'small-field' : ''
-      }`}
-    >
-      {
-        // Only show the modified indicator if there are no errors
-        isModified && !rawErrors && <div className="jp-modifiedIndicator" />
-      }
-      {
-        // Shows a red indicator for fields that have validation errors
-        rawErrors && <div className="jp-modifiedIndicator jp-errorIndicator" />
-      }
-      <div className="jp-FormGroup-content">
-        {displayLabel && !isRoot && label && !isAdditional && (
-          <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
-            {label}
-          </h3>
-        )}
-        {isAdditional && (
-          <input
-            className="jp-FormGroup-contentItem jp-mod-styled"
-            type="text"
-            onBlur={event => onKeyChange(event.target.value)}
-            defaultValue={label}
-          />
-        )}
-        <div
-          className={`${
-            isRoot
-              ? 'jp-root'
-              : schema.type === 'object'
-              ? 'jp-objectFieldWrapper'
-              : 'jp-inputFieldWrapper jp-FormGroup-contentItem'
-          }`}
-        >
-          {children}
-        </div>
-        {isAdditional && (
-          <button
-            className="jp-FormGroup-contentItem jp-mod-styled jp-mod-warn jp-FormGroup-removeButton"
-            onClick={onDropPropertyClick(label)}
+    // While we can implement "remove" button for array items in array template,
+    // object templates do not provide a way to do this; instead we need to add
+    // buttons here (and first check if the field can be removed = is additional).
+    const isAdditional = schema.hasOwnProperty(utils.ADDITIONAL_PROPERTY_FLAG);
+
+    return (
+      <div
+        className={`form-group ${
+          displayLabel || schema.type === 'boolean' ? 'small-field' : ''
+        }`}
+      >
+        {
+          // Only show the modified indicator if there are no errors
+          isModified && !rawErrors && <div className="jp-modifiedIndicator" />
+        }
+        {
+          // Shows a red indicator for fields that have validation errors
+          rawErrors && (
+            <div className="jp-modifiedIndicator jp-errorIndicator" />
+          )
+        }
+        <div className="jp-FormGroup-content">
+          {displayLabel && !isRoot && label && !isAdditional && (
+            <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
+              {label}
+            </h3>
+          )}
+          {isAdditional && (
+            <input
+              className="jp-FormGroup-contentItem jp-mod-styled"
+              type="text"
+              onBlur={event => onKeyChange(event.target.value)}
+              defaultValue={label}
+            />
+          )}
+          <div
+            className={`${
+              isRoot
+                ? 'jp-root'
+                : schema.type === 'object'
+                ? 'jp-objectFieldWrapper'
+                : 'jp-inputFieldWrapper jp-FormGroup-contentItem'
+            }`}
           >
-            {'Remove'}
-          </button>
-        )}
-        {schema.description && needsDescription && (
-          <div className="jp-FormGroup-description">{schema.description}</div>
-        )}
-        <div className="validationErrors">{errors}</div>
+            {children}
+          </div>
+          {isAdditional && (
+            <button
+              className="jp-FormGroup-contentItem jp-mod-styled jp-mod-warn jp-FormGroup-removeButton"
+              onClick={onDropPropertyClick(label)}
+            >
+              {trans.__('Remove')}
+            </button>
+          )}
+          {schema.description && needsDescription && (
+            <div className="jp-FormGroup-description">{schema.description}</div>
+          )}
+          {isModified && schema.default !== undefined && (
+            <div className="jp-FormGroup-default">
+              {trans.__('Default: %1', schema.default?.toLocaleString())}
+            </div>
+          )}
+          <div className="validationErrors">{errors}</div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+  factory.displayName = 'JupyterLabFieldTemplate';
+  return factory;
 };
 
 /**
@@ -330,12 +376,44 @@ export class SettingsFormEditor extends React.Component<
   constructor(props: SettingsFormEditor.IProps) {
     super(props);
     const { settings } = props;
+    this._formData = settings.composite;
     this.state = {
-      formData: settings.composite,
-      isModified: settings.isModified
+      isModified: settings.isModified,
+      uiSchema: {},
+      filteredSchema: this.props.settings.schema,
+      fieldTemplate: CustomTemplateFactory(this.props.translator),
+      arrayFieldTemplate: CustomArrayTemplateFactory(this.props.translator),
+      objectFieldTemplate: CustomObjectTemplateFactory(this.props.translator),
+      formContext: { settings: this.props.settings }
     };
     this.handleChange = this.handleChange.bind(this);
     this._debouncer = new Debouncer(this.handleChange);
+  }
+
+  componentDidMount(): void {
+    this._setUiSchema();
+    this._setFilteredSchema();
+  }
+
+  componentDidUpdate(prevProps: SettingsFormEditor.IProps): void {
+    this._setUiSchema(prevProps.renderers);
+    this._setFilteredSchema(prevProps.filteredValues);
+
+    if (prevProps.translator !== this.props.translator) {
+      this.setState({
+        fieldTemplate: CustomTemplateFactory(this.props.translator),
+        arrayFieldTemplate: CustomArrayTemplateFactory(this.props.translator),
+        objectFieldTemplate: CustomObjectTemplateFactory(this.props.translator)
+      });
+    }
+
+    if (prevProps.settings !== this.props.settings) {
+      this.setState({ formContext: { settings: this.props.settings } });
+    }
+  }
+
+  componentWillUnmount(): void {
+    this._debouncer.dispose();
   }
 
   /**
@@ -346,13 +424,13 @@ export class SettingsFormEditor extends React.Component<
     // Prevent unnecessary save when opening settings that haven't been modified.
     if (
       !this.props.settings.isModified &&
-      this.props.settings.isDefault(this.state.formData)
+      this.props.settings.isDefault(this._formData)
     ) {
       this.props.updateDirtyState(false);
       return;
     }
     this.props.settings
-      .save(JSON.stringify(this.state.formData, undefined, JSON_INDENTATION))
+      .save(JSON.stringify(this._formData, undefined, JSON_INDENTATION))
       .then(() => {
         this.props.updateDirtyState(false);
         this.setState({ isModified: this.props.settings.isModified });
@@ -369,32 +447,17 @@ export class SettingsFormEditor extends React.Component<
    * modified settings then calls `setFormData` to restore the
    * values.
    */
-  reset = async (): Promise<void> => {
+  reset = async (event: React.MouseEvent): Promise<void> => {
+    event.stopPropagation();
     for (const field in this.props.settings.user) {
       await this.props.settings.remove(field);
     }
-    this.setState({
-      formData: this.props.settings.composite,
-      isModified: false
-    });
+    this._formData = this.props.settings.composite;
+    this.setState({ isModified: false });
   };
 
   render(): JSX.Element {
     const trans = this.props.translator.load('jupyterlab');
-
-    /**
-     * Construct uiSchema to pass any custom renderers to the form editor.
-     */
-    const uiSchema: UiSchema = {};
-    for (const id in this.props.renderers) {
-      if (
-        Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
-      ) {
-        uiSchema[id] = {
-          'ui:field': id
-        };
-      }
-    }
     const icon = this.props.isCollapsed ? caretRightIcon : caretDownIcon;
 
     return (
@@ -425,40 +488,94 @@ export class SettingsFormEditor extends React.Component<
         </div>
         {!this.props.isCollapsed && (
           <Form
-            schema={this.props.settings.schema as JSONSchema7}
-            formData={this.state.formData}
-            FieldTemplate={CustomTemplate}
-            ArrayFieldTemplate={CustomArrayTemplateFactory(
-              this.props.translator
-            )}
-            ObjectFieldTemplate={CustomObjectTemplateFactory(
-              this.props.translator
-            )}
-            uiSchema={uiSchema}
+            schema={this.state.filteredSchema as JSONSchema7}
+            formData={this._formData}
+            FieldTemplate={this.state.fieldTemplate}
+            ArrayFieldTemplate={this.state.arrayFieldTemplate}
+            ObjectFieldTemplate={this.state.objectFieldTemplate}
+            uiSchema={this.state.uiSchema}
             fields={this.props.renderers}
-            formContext={{ settings: this.props.settings }}
+            formContext={this.state.formContext}
             liveValidate
             idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
-            onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-              this.props.hasError(e.errors.length !== 0);
-              this.setState({ formData: e.formData });
-              if (e.errors.length === 0) {
-                this.props.updateDirtyState(true);
-                void this._debouncer.invoke();
-              }
-              this.props.onSelect(this.props.settings.id);
-            }}
+            onChange={this._onChange}
           />
         )}
       </div>
     );
   }
 
+  /**
+   * Callback on plugin selection
+   * @param list Plugin list
+   * @param id Plugin id
+   */
   protected onSelect = (list: PluginList, id: string): void => {
     if (id === this.props.settings.id) {
       this.props.onCollapseChange(false);
     }
   };
 
+  private _onChange = (e: IChangeEvent<ReadonlyPartialJSONObject>): void => {
+    this.props.hasError(e.errors.length !== 0);
+    this._formData = e.formData;
+    if (e.errors.length === 0) {
+      this.props.updateDirtyState(true);
+      void this._debouncer.invoke();
+    }
+    this.props.onSelect(this.props.settings.id);
+  };
+
+  private _setUiSchema(prevRenderers?: { [id: string]: Field }) {
+    if (
+      !prevRenderers ||
+      !JSONExt.deepEqual(
+        Object.keys(prevRenderers).sort(),
+        Object.keys(this.props.renderers).sort()
+      )
+    ) {
+      /**
+       * Construct uiSchema to pass any custom renderers to the form editor.
+       */
+      const uiSchema: UiSchema = {};
+      for (const id in this.props.renderers) {
+        if (
+          Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
+        ) {
+          uiSchema[id] = {
+            'ui:field': id
+          };
+        }
+      }
+      this.setState({ uiSchema });
+    }
+  }
+
+  private _setFilteredSchema(prevFilteredValues?: string[] | null) {
+    if (
+      prevFilteredValues === undefined ||
+      !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues)
+    ) {
+      /**
+       * Only show fields that match search value.
+       */
+      const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
+      if (this.props.filteredValues?.length ?? 0 > 0) {
+        for (const field in filteredSchema.properties) {
+          if (
+            !this.props.filteredValues?.includes(
+              filteredSchema.properties[field].title ?? field
+            )
+          ) {
+            delete filteredSchema.properties[field];
+          }
+        }
+      }
+
+      this.setState({ filteredSchema });
+    }
+  }
+
   private _debouncer: Debouncer<void, any>;
+  private _formData: any;
 }

@@ -76,10 +76,10 @@ function activateHTMLViewer(
   const trans = translator.load('jupyterlab');
 
   if (toolbarRegistry) {
-    toolbarRegistry.registerFactory<HTMLViewer>(FACTORY, 'refresh', widget =>
+    toolbarRegistry.addFactory<HTMLViewer>(FACTORY, 'refresh', widget =>
       ToolbarItems.createRefreshButton(widget, translator)
     );
-    toolbarRegistry.registerFactory<HTMLViewer>(FACTORY, 'trust', widget =>
+    toolbarRegistry.addFactory<HTMLViewer>(FACTORY, 'trust', widget =>
       ToolbarItems.createTrustButton(widget, translator)
     );
 

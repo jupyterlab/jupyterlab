@@ -4,7 +4,12 @@
   "jupyter.lab.toolbars": {
     "Notebook": [
       { "name": "save", "rank": 10 },
-      { "name": "insert", "command": "notebook:insert-cell-below", "rank": 20 },
+      {
+        "name": "insert",
+        "command": "notebook:insert-cell-below",
+        "icon": "ui-components:add",
+        "rank": 20
+      },
       { "name": "cut", "command": "notebook:cut-cell", "rank": 21 },
       { "name": "copy", "command": "notebook:copy-cell", "rank": 22 },
       { "name": "paste", "command": "notebook:paste-cell-below", "rank": 23 },

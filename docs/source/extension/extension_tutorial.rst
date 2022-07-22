@@ -81,7 +81,7 @@ Create a repository
 -------------------
 
 Create a new repository for your extension (see, for example, the
-`GitHub instructions <https://help.github.com/articles/create-a-repo/>`__. This is an
+`GitHub instructions <https://docs.github.com/en/get-started/quickstart/create-a-repo>`__. This is an
 optional step, but highly recommended if you want to share your
 extension.
 

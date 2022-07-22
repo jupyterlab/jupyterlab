@@ -13,11 +13,10 @@ import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import { SplitPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
-import { SplitPanel } from './splitpanel';
 
 /**
  * The ratio panes in the setting editor.
@@ -335,9 +334,8 @@ export class JsonSettingEditor extends SplitPanel {
   private _instructions: Widget;
   private _list: PluginList;
   private _saving = false;
-  private _state: JsonSettingEditor.ILayoutState = JSONExt.deepCopy(
-    DEFAULT_LAYOUT
-  );
+  private _state: JsonSettingEditor.ILayoutState =
+    JSONExt.deepCopy(DEFAULT_LAYOUT);
   private _when: Promise<any>;
 }
 

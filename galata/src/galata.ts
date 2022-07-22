@@ -257,6 +257,11 @@ export namespace galata {
     export const contents = /.*\/api\/contents(?<path>\/.+)?\?/;
 
     /**
+     * Extensions API
+     */
+    export const extensions = /.*\/lab\/api\/extensions/;
+
+    /**
      * Sessions API
      *
      * The session id can be found in the named group `id`.

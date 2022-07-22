@@ -1,0 +1,2143 @@
+[
+  {
+    "id": "application:activate-next-tab",
+    "label": "Activate Next Tab",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift ]"
+    ]
+  },
+  {
+    "id": "application:activate-next-tab-bar",
+    "label": "Activate Next Tab Bar",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift ."
+    ]
+  },
+  {
+    "id": "application:activate-previous-tab",
+    "label": "Activate Previous Tab",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift ["
+    ]
+  },
+  {
+    "id": "application:activate-previous-tab-bar",
+    "label": "Activate Previous Tab Bar",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift ,"
+    ]
+  },
+  {
+    "id": "application:close",
+    "label": "Close Tab",
+    "caption": "",
+    "shortcuts": [
+      "Alt W"
+    ]
+  },
+  {
+    "id": "application:close-all",
+    "label": "Close All Tabs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "application:close-other-tabs",
+    "label": "Close All Other Tabs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "application:close-right-tabs",
+    "label": "Close Tabs to Right",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "application:reset-layout",
+    "label": "Reset Default Layout",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "application:set-mode",
+    "label": "Set the layout `mode`.",
+    "caption": "The layout `mode` can be \"single-document\" or \"multiple-document\".",
+    "shortcuts": []
+  },
+  {
+    "id": "application:toggle-header",
+    "label": "Show Header",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "application:toggle-left-area",
+    "label": "Show Left Sidebar",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl B"
+    ]
+  },
+  {
+    "id": "application:toggle-mode",
+    "label": "Simple Interface",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift D"
+    ]
+  },
+  {
+    "id": "application:toggle-presentation-mode",
+    "label": "Presentation Mode",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "application:toggle-right-area",
+    "label": "Show Right Sidebar",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "application:toggle-side-tabbar",
+    "label": "Show Left Activity Bar",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:activate-command-palette",
+    "label": "Activate Command Palette",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift C"
+    ]
+  },
+  {
+    "id": "apputils:change-font",
+    "label": "waiting for fonts",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-theme",
+    "label": "Switch to the provided `theme`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:decr-font-size",
+    "label": "Decrease Font Size",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:incr-font-size",
+    "label": "Increase Font Size",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:load-statedb",
+    "label": "Load state for the current workspace.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:print",
+    "label": "Print…",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl P"
+    ]
+  },
+  {
+    "id": "apputils:reset",
+    "label": "Reset Application State",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:reset-on-load",
+    "label": "Reset state when loading for the workspace.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:run-all-enabled",
+    "label": "Run All Enabled Commands Passed as Args",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:run-first-enabled",
+    "label": "Run First Enabled Command",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:theme-scrollbars",
+    "label": "Theme Scrollbars",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:toggle-header",
+    "label": "Show Header Above Content",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "code-viewer:open",
+    "label": "Open Code Viewer",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:change-keymap",
+    "label": "default",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:change-mode",
+    "label": "Change editor mode to the provided `name`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:change-theme",
+    "label": "jupyter",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:find",
+    "label": "Find…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:go-to-line",
+    "label": "Go to Line…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "completer:invoke-console",
+    "label": "Display the completion helper.",
+    "caption": "",
+    "shortcuts": [
+      "Tab"
+    ]
+  },
+  {
+    "id": "completer:invoke-file",
+    "label": "Display the completion helper.",
+    "caption": "",
+    "shortcuts": [
+      "Tab"
+    ]
+  },
+  {
+    "id": "completer:invoke-notebook",
+    "label": "Display the completion helper.",
+    "caption": "",
+    "shortcuts": [
+      "Tab"
+    ]
+  },
+  {
+    "id": "completer:select-console",
+    "label": "Select the completion suggestion.",
+    "caption": "",
+    "shortcuts": [
+      "Enter"
+    ]
+  },
+  {
+    "id": "completer:select-file",
+    "label": "Select the completion suggestion.",
+    "caption": "",
+    "shortcuts": [
+      "Enter"
+    ]
+  },
+  {
+    "id": "completer:select-notebook",
+    "label": "Select the completion suggestion.",
+    "caption": "",
+    "shortcuts": [
+      "Enter"
+    ]
+  },
+  {
+    "id": "console:change-kernel",
+    "label": "Change Kernel…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:clear",
+    "label": "Clear Console Cells",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:close-and-shutdown",
+    "label": "Close and Shut Down…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:create",
+    "label": "Console",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:get-kernel",
+    "label": "Get Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:inject",
+    "label": "Inject some code in a console.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:interaction-mode",
+    "label": "Set the console interaction mode.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:interrupt-kernel",
+    "label": "Interrupt Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:linebreak",
+    "label": "Insert Line Break",
+    "caption": "",
+    "shortcuts": [
+      "Enter"
+    ]
+  },
+  {
+    "id": "console:open",
+    "label": "Open a console for the provided `path`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:replace-selection",
+    "label": "Replace Selection in Console",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:restart-kernel",
+    "label": "Restart Kernel…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:run-forced",
+    "label": "Run Cell (forced)",
+    "caption": "",
+    "shortcuts": [
+      "Shift Enter"
+    ]
+  },
+  {
+    "id": "console:run-unforced",
+    "label": "Run Cell (unforced)",
+    "caption": "",
+    "shortcuts": [
+      "Enter"
+    ]
+  },
+  {
+    "id": "console:shutdown",
+    "label": "Shut Down",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:toggle-autoclosing-brackets",
+    "label": "Auto Close Brackets for Code Console Prompt",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:toggle-show-all-kernel-activity",
+    "label": "Show All Kernel Activity",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "csv:go-to-line",
+    "label": "Go to Line",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "debugger:continue",
+    "label": "Continue",
+    "caption": "Continue",
+    "shortcuts": [
+      "F9"
+    ]
+  },
+  {
+    "id": "debugger:evaluate",
+    "label": "Evaluate Code",
+    "caption": "Evaluate Code",
+    "shortcuts": []
+  },
+  {
+    "id": "debugger:inspect-variable",
+    "label": "Inspect Variable",
+    "caption": "Inspect Variable",
+    "shortcuts": []
+  },
+  {
+    "id": "debugger:next",
+    "label": "Next",
+    "caption": "Next",
+    "shortcuts": [
+      "F10"
+    ]
+  },
+  {
+    "id": "debugger:pause",
+    "label": "Enable / Disable pausing on exceptions",
+    "caption": "Enable / Disable pausing on exceptions",
+    "shortcuts": []
+  },
+  {
+    "id": "debugger:render-mime-variable",
+    "label": "Render Variable",
+    "caption": "Render variable according to its mime type",
+    "shortcuts": []
+  },
+  {
+    "id": "debugger:restart-debug",
+    "label": "Restart Kernel and Debug…",
+    "caption": "Restart Kernel and Debug…",
+    "shortcuts": []
+  },
+  {
+    "id": "debugger:show-panel",
+    "label": "Debugger Panel",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift E"
+    ]
+  },
+  {
+    "id": "debugger:stepIn",
+    "label": "Step In",
+    "caption": "Step In",
+    "shortcuts": [
+      "F11"
+    ]
+  },
+  {
+    "id": "debugger:stepOut",
+    "label": "Step Out",
+    "caption": "Step Out",
+    "shortcuts": [
+      "Shift F11"
+    ]
+  },
+  {
+    "id": "debugger:terminate",
+    "label": "Terminate",
+    "caption": "Terminate",
+    "shortcuts": [
+      "Shift F9"
+    ]
+  },
+  {
+    "id": "docmanager:clone",
+    "label": "New View for ",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:delete",
+    "label": "Delete ",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:delete-file",
+    "label": "Delete ",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:download",
+    "label": "Download",
+    "caption": "Download the file to your computer",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:new-untitled",
+    "label": "New undefined",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:open",
+    "label": "Open the provided `path`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:open-browser-tab",
+    "label": "Open in New Browser Tab",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:reload",
+    "label": "Reload  from Disk",
+    "caption": "Reload contents from disk",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:rename",
+    "label": "Rename…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:restore-checkpoint",
+    "label": "Revert  to Checkpoint…",
+    "caption": "Revert contents to previous checkpoint",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:save",
+    "label": "Save ",
+    "caption": "Save and create checkpoint",
+    "shortcuts": [
+      "Ctrl S"
+    ]
+  },
+  {
+    "id": "docmanager:save-all",
+    "label": "Save All",
+    "caption": "Save all open documents",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:save-as",
+    "label": "Save  As…",
+    "caption": "Save with new path",
+    "shortcuts": [
+      "Ctrl Shift S"
+    ]
+  },
+  {
+    "id": "docmanager:show-in-file-browser",
+    "label": "Show in File Browser",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:toggle-autosave",
+    "label": "Autosave Documents",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "documentsearch:highlightNext",
+    "label": "Find Next",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl G"
+    ]
+  },
+  {
+    "id": "documentsearch:highlightPrevious",
+    "label": "Find Previous",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift G"
+    ]
+  },
+  {
+    "id": "documentsearch:start",
+    "label": "Find…",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl F"
+    ]
+  },
+  {
+    "id": "documentsearch:startWithReplace",
+    "label": "Find and Replace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "editmenu:clear-all",
+    "label": "Clear All",
+    "caption": "Clear All",
+    "shortcuts": []
+  },
+  {
+    "id": "editmenu:clear-current",
+    "label": "Clear",
+    "caption": "Clear",
+    "shortcuts": []
+  },
+  {
+    "id": "editmenu:go-to-line",
+    "label": "Go to Line…",
+    "caption": "Go to Line…",
+    "shortcuts": []
+  },
+  {
+    "id": "editmenu:open",
+    "label": "Open Edit Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "editmenu:redo",
+    "label": "Redo",
+    "caption": "Redo",
+    "shortcuts": [
+      "Ctrl Shift Z"
+    ]
+  },
+  {
+    "id": "editmenu:undo",
+    "label": "Undo",
+    "caption": "Undo",
+    "shortcuts": [
+      "Ctrl Z"
+    ]
+  },
+  {
+    "id": "extensionmanager:show-panel",
+    "label": "Extension Manager",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift X"
+    ]
+  },
+  {
+    "id": "extensionmanager:toggle",
+    "label": "Enable Extension Manager",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:activate",
+    "label": "Open the file browser for the provided `path`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:copy",
+    "label": "Copy",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl C"
+    ]
+  },
+  {
+    "id": "filebrowser:copy-download-link",
+    "label": "Copy Download Link",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:copy-path",
+    "label": "Copy Path",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:create-new-directory",
+    "label": "New Folder",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:create-new-file",
+    "label": "New File",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:create-new-markdown-file",
+    "label": "New Markdown File",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:cut",
+    "label": "Cut",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl X"
+    ]
+  },
+  {
+    "id": "filebrowser:delete",
+    "label": "Delete",
+    "caption": "",
+    "shortcuts": [
+      "Delete"
+    ]
+  },
+  {
+    "id": "filebrowser:download",
+    "label": "Download",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:duplicate",
+    "label": "Duplicate",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl D"
+    ]
+  },
+  {
+    "id": "filebrowser:go-to-path",
+    "label": "Update the file browser to display the provided `path`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:go-up",
+    "label": "go up",
+    "caption": "",
+    "shortcuts": [
+      "Backspace"
+    ]
+  },
+  {
+    "id": "filebrowser:hide-main",
+    "label": "Hide the file browser.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:open",
+    "label": "Open",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:open-browser-tab",
+    "label": "Open in New Browser Tab",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:open-path",
+    "label": "Open from Path…",
+    "caption": "Open from path",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:open-url",
+    "label": "Open from URL…",
+    "caption": "Open from URL",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:paste",
+    "label": "Paste",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl V"
+    ]
+  },
+  {
+    "id": "filebrowser:refresh",
+    "label": "Refresh File List",
+    "caption": "Refresh the file browser.",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:rename",
+    "label": "Rename",
+    "caption": "",
+    "shortcuts": [
+      "F2"
+    ]
+  },
+  {
+    "id": "filebrowser:search",
+    "label": "Search on File Names",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:share-main",
+    "label": "Copy Shareable Link",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:shutdown",
+    "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-file-checkboxes",
+    "label": "Show File Checkboxes",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-hidden-files",
+    "label": "Show Hidden Files",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-last-modified",
+    "label": "Show Last Modified Column",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-main",
+    "label": "File Browser",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift F"
+    ]
+  },
+  {
+    "id": "filebrowser:toggle-navigate-to-current-directory",
+    "label": "Show Active File in File Browser",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:change-font-size",
+    "label": "Decrease Font Size",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:change-tabs",
+    "label": "Indent with Tab",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:copy",
+    "label": "Copy",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:create-console",
+    "label": "Create Console for Editor",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:create-new",
+    "label": "Text File",
+    "caption": "Create a new text file",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:create-new-markdown-file",
+    "label": "Markdown File",
+    "caption": "Create a new markdown file",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:cut",
+    "label": "Cut",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:markdown-preview",
+    "label": "Show Markdown Preview",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:paste",
+    "label": "Paste",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:redo",
+    "label": "Redo",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:replace-selection",
+    "label": "Replace Selection in Editor",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:restart-console",
+    "label": "Restart Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:run-all",
+    "label": "Run All Code",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:run-code",
+    "label": "Run Selected Code",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:select-all",
+    "label": "Select All",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:toggle-autoclosing-brackets",
+    "label": "Auto Close Brackets for Text Editor",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:toggle-autoclosing-brackets-universal",
+    "label": "Auto Close Brackets",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:toggle-current-line-numbers",
+    "label": "Show Line Numbers",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:toggle-current-line-wrap",
+    "label": "Wrap Words",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:toggle-current-match-brackets",
+    "label": "Match Brackets",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:toggle-line-numbers",
+    "label": "Line Numbers",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:toggle-line-wrap",
+    "label": "Word Wrap",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:toggle-match-brackets",
+    "label": "Match Brackets",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:undo",
+    "label": "Undo",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filemenu:close-and-cleanup",
+    "label": "Close and Shut Down",
+    "caption": "Close and Shut Down",
+    "shortcuts": [
+      "Ctrl Shift Q"
+    ]
+  },
+  {
+    "id": "filemenu:create-console",
+    "label": "New Console for Activity",
+    "caption": "New Console for Activity",
+    "shortcuts": []
+  },
+  {
+    "id": "filemenu:logout",
+    "label": "Log Out",
+    "caption": "Log out of JupyterLab",
+    "shortcuts": []
+  },
+  {
+    "id": "filemenu:open",
+    "label": "Open File Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filemenu:shutdown",
+    "label": "Shut Down",
+    "caption": "Shut down JupyterLab",
+    "shortcuts": []
+  },
+  {
+    "id": "help:about",
+    "label": "About JupyterLab",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "help:jupyter-forum",
+    "label": "Jupyter Forum",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "help:license-report",
+    "label": "Download All Licenses as Markdown",
+    "caption": "Download All Licenses as Markdown",
+    "shortcuts": []
+  },
+  {
+    "id": "help:licenses",
+    "label": "Licenses",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "help:licenses-refresh",
+    "label": "Refresh Licenses",
+    "caption": "Refresh Licenses",
+    "shortcuts": []
+  },
+  {
+    "id": "help:open",
+    "label": "Open the provided `url` in a tab.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "helpmenu:get-kernel",
+    "label": "Get Kernel",
+    "caption": "Get Kernel",
+    "shortcuts": []
+  },
+  {
+    "id": "helpmenu:open",
+    "label": "Open Help Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "htmlviewer:trust-html",
+    "label": "Trust HTML File",
+    "caption": "Whether the HTML file is trusted.\n    Trusting the file allows scripts to run in it,\n    which may result in security risks.\n    Only enable for files you trust.",
+    "shortcuts": []
+  },
+  {
+    "id": "imageviewer:flip-horizontal",
+    "label": "Flip image horizontally",
+    "caption": "",
+    "shortcuts": [
+      "H"
+    ]
+  },
+  {
+    "id": "imageviewer:flip-vertical",
+    "label": "Flip image vertically",
+    "caption": "",
+    "shortcuts": [
+      "V"
+    ]
+  },
+  {
+    "id": "imageviewer:invert-colors",
+    "label": "Invert Colors",
+    "caption": "",
+    "shortcuts": [
+      "I"
+    ]
+  },
+  {
+    "id": "imageviewer:reset-image",
+    "label": "Reset Image",
+    "caption": "",
+    "shortcuts": [
+      "0"
+    ]
+  },
+  {
+    "id": "imageviewer:rotate-clockwise",
+    "label": "Rotate Clockwise",
+    "caption": "",
+    "shortcuts": [
+      "]"
+    ]
+  },
+  {
+    "id": "imageviewer:rotate-counterclockwise",
+    "label": "Rotate Counterclockwise",
+    "caption": "",
+    "shortcuts": [
+      "["
+    ]
+  },
+  {
+    "id": "imageviewer:zoom-in",
+    "label": "Zoom In",
+    "caption": "",
+    "shortcuts": [
+      "="
+    ]
+  },
+  {
+    "id": "imageviewer:zoom-out",
+    "label": "Zoom Out",
+    "caption": "",
+    "shortcuts": [
+      "-"
+    ]
+  },
+  {
+    "id": "inspector:close",
+    "label": "Hide Contextual Help",
+    "caption": "Live updating code documentation from the active kernel",
+    "shortcuts": [
+      "Ctrl I"
+    ]
+  },
+  {
+    "id": "inspector:open",
+    "label": "Show Contextual Help",
+    "caption": "Live updating code documentation from the active kernel",
+    "shortcuts": [
+      "Ctrl I"
+    ]
+  },
+  {
+    "id": "inspector:toggle",
+    "label": "Show Contextual Help",
+    "caption": "Live updating code documentation from the active kernel",
+    "shortcuts": []
+  },
+  {
+    "id": "jupyterlab-translation:en",
+    "label": "English",
+    "caption": "English",
+    "shortcuts": []
+  },
+  {
+    "id": "jupyterlab-translation:zh_CN",
+    "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "caption": "Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "shortcuts": []
+  },
+  {
+    "id": "kernelmenu:change",
+    "label": "Change Kernel…",
+    "caption": "Change Kernel…",
+    "shortcuts": []
+  },
+  {
+    "id": "kernelmenu:interrupt",
+    "label": "Interrupt Kernel",
+    "caption": "Interrupt Kernel",
+    "shortcuts": [
+      "I",
+      "I"
+    ]
+  },
+  {
+    "id": "kernelmenu:open",
+    "label": "Open Kernel Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "kernelmenu:reconnect-to-kernel",
+    "label": "Reconnect to Kernel",
+    "caption": "Reconnect to Kernel",
+    "shortcuts": []
+  },
+  {
+    "id": "kernelmenu:restart",
+    "label": "Restart Kernel…",
+    "caption": "Restart Kernel…",
+    "shortcuts": [
+      "0",
+      "0"
+    ]
+  },
+  {
+    "id": "kernelmenu:restart-and-clear",
+    "label": "Restart Kernel and Clear…",
+    "caption": "Restart Kernel and Clear…",
+    "shortcuts": []
+  },
+  {
+    "id": "kernelmenu:shutdown",
+    "label": "Shut Down Kernel",
+    "caption": "Shut Down Kernel",
+    "shortcuts": []
+  },
+  {
+    "id": "kernelmenu:shutdownAll",
+    "label": "Shut Down All Kernels…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "launcher:create",
+    "label": "New Launcher",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift L"
+    ]
+  },
+  {
+    "id": "logconsole:add-checkpoint",
+    "label": "Add Checkpoint",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "logconsole:clear",
+    "label": "Clear Log",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "logconsole:open",
+    "label": "Show Log Console",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "logconsole:set-level",
+    "label": "Set log level to `level`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "mainmenu:open-first",
+    "label": "Open First Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "markdownviewer:edit",
+    "label": "Show Markdown Editor",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "markdownviewer:open",
+    "label": "Markdown Preview",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:change-cell-to-code",
+    "label": "Change to Code Cell Type",
+    "caption": "",
+    "shortcuts": [
+      "Y"
+    ]
+  },
+  {
+    "id": "notebook:change-cell-to-heading-1",
+    "label": "Change to Heading 1",
+    "caption": "",
+    "shortcuts": [
+      "1"
+    ]
+  },
+  {
+    "id": "notebook:change-cell-to-heading-2",
+    "label": "Change to Heading 2",
+    "caption": "",
+    "shortcuts": [
+      "2"
+    ]
+  },
+  {
+    "id": "notebook:change-cell-to-heading-3",
+    "label": "Change to Heading 3",
+    "caption": "",
+    "shortcuts": [
+      "3"
+    ]
+  },
+  {
+    "id": "notebook:change-cell-to-heading-4",
+    "label": "Change to Heading 4",
+    "caption": "",
+    "shortcuts": [
+      "4"
+    ]
+  },
+  {
+    "id": "notebook:change-cell-to-heading-5",
+    "label": "Change to Heading 5",
+    "caption": "",
+    "shortcuts": [
+      "5"
+    ]
+  },
+  {
+    "id": "notebook:change-cell-to-heading-6",
+    "label": "Change to Heading 6",
+    "caption": "",
+    "shortcuts": [
+      "6"
+    ]
+  },
+  {
+    "id": "notebook:change-cell-to-markdown",
+    "label": "Change to Markdown Cell Type",
+    "caption": "",
+    "shortcuts": [
+      "M"
+    ]
+  },
+  {
+    "id": "notebook:change-cell-to-raw",
+    "label": "Change to Raw Cell Type",
+    "caption": "",
+    "shortcuts": [
+      "R"
+    ]
+  },
+  {
+    "id": "notebook:change-kernel",
+    "label": "Change Kernel…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:clear-all-cell-outputs",
+    "label": "Clear Outputs of All Cells",
+    "caption": "Clear all outputs of all cells",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:clear-cell-output",
+    "label": "Clear Cell Output",
+    "caption": "Clear outputs for the selected cells",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:close-and-shutdown",
+    "label": "Close and Shut Down Notebook",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:collapse-all-headings",
+    "label": "Collapse All Headings",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift ArrowLeft"
+    ]
+  },
+  {
+    "id": "notebook:copy-cell",
+    "label": "Copy Cells",
+    "caption": "Copy the selected cells",
+    "shortcuts": [
+      "C"
+    ]
+  },
+  {
+    "id": "notebook:copy-to-clipboard",
+    "label": "Copy Output to Clipboard",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:create-console",
+    "label": "New Console for Notebook",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:create-new",
+    "label": "Notebook",
+    "caption": "Create a new notebook",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:create-output-view",
+    "label": "Create New View for Cell Output",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:cut-cell",
+    "label": "Cut Cells",
+    "caption": "Cut the selected cells",
+    "shortcuts": [
+      "X"
+    ]
+  },
+  {
+    "id": "notebook:delete-cell",
+    "label": "Delete Cells",
+    "caption": "",
+    "shortcuts": [
+      "D",
+      "D"
+    ]
+  },
+  {
+    "id": "notebook:deselect-all",
+    "label": "Deselect All Cells",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:disable-output-scrolling",
+    "label": "Disable Scrolling for Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:duplicate-below",
+    "label": "Duplicate Cells Below",
+    "caption": "Copy the selected cells and paste them below the selection",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:enable-output-scrolling",
+    "label": "Enable Scrolling for Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:enter-command-mode",
+    "label": "Enter Command Mode",
+    "caption": "",
+    "shortcuts": [
+      "Escape"
+    ]
+  },
+  {
+    "id": "notebook:enter-edit-mode",
+    "label": "Enter Edit Mode",
+    "caption": "",
+    "shortcuts": [
+      "Enter"
+    ]
+  },
+  {
+    "id": "notebook:expand-all-headings",
+    "label": "Expand All Headings",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift ArrowRight"
+    ]
+  },
+  {
+    "id": "notebook:export-to-format",
+    "label": "Save and Export Notebook to the given `format`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:extend-marked-cells-above",
+    "label": "Extend Selection Above",
+    "caption": "",
+    "shortcuts": [
+      "Shift ArrowUp"
+    ]
+  },
+  {
+    "id": "notebook:extend-marked-cells-below",
+    "label": "Extend Selection Below",
+    "caption": "",
+    "shortcuts": [
+      "Shift ArrowDown"
+    ]
+  },
+  {
+    "id": "notebook:extend-marked-cells-bottom",
+    "label": "Extend Selection to Bottom",
+    "caption": "",
+    "shortcuts": [
+      "Shift End"
+    ]
+  },
+  {
+    "id": "notebook:extend-marked-cells-top",
+    "label": "Extend Selection to Top",
+    "caption": "",
+    "shortcuts": [
+      "Shift Home"
+    ]
+  },
+  {
+    "id": "notebook:get-kernel",
+    "label": "Get Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:hide-all-cell-code",
+    "label": "Collapse All Code",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:hide-all-cell-outputs",
+    "label": "Collapse All Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:hide-cell-code",
+    "label": "Collapse Selected Code",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:hide-cell-outputs",
+    "label": "Collapse Selected Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:insert-cell-above",
+    "label": "Insert Cell Above",
+    "caption": "",
+    "shortcuts": [
+      "A"
+    ]
+  },
+  {
+    "id": "notebook:insert-cell-below",
+    "label": "Insert Cell Below",
+    "caption": "Insert a cell below",
+    "shortcuts": [
+      "B"
+    ]
+  },
+  {
+    "id": "notebook:insert-heading-above",
+    "label": "Insert Heading Above Current Heading",
+    "caption": "",
+    "shortcuts": [
+      "Shift A"
+    ]
+  },
+  {
+    "id": "notebook:insert-heading-below",
+    "label": "Insert Heading Below Current Heading",
+    "caption": "",
+    "shortcuts": [
+      "Shift B"
+    ]
+  },
+  {
+    "id": "notebook:interrupt-kernel",
+    "label": "Interrupt Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:merge-cell-above",
+    "label": "Merge Cell Above",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Backspace"
+    ]
+  },
+  {
+    "id": "notebook:merge-cell-below",
+    "label": "Merge Cell Below",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift M"
+    ]
+  },
+  {
+    "id": "notebook:merge-cells",
+    "label": "Merge Selected Cells",
+    "caption": "",
+    "shortcuts": [
+      "Shift M"
+    ]
+  },
+  {
+    "id": "notebook:move-cell-down",
+    "label": "Move Cells Down",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:move-cell-up",
+    "label": "Move Cells Up",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:move-cursor-down",
+    "label": "Select Cell Below",
+    "caption": "",
+    "shortcuts": [
+      "ArrowDown"
+    ]
+  },
+  {
+    "id": "notebook:move-cursor-heading-above-or-collapse",
+    "label": "Select Heading Above or Collapse Heading",
+    "caption": "",
+    "shortcuts": [
+      "ArrowLeft"
+    ]
+  },
+  {
+    "id": "notebook:move-cursor-heading-below-or-expand",
+    "label": "Select Heading Below or Expand Heading",
+    "caption": "",
+    "shortcuts": [
+      "ArrowRight"
+    ]
+  },
+  {
+    "id": "notebook:move-cursor-up",
+    "label": "Select Cell Above",
+    "caption": "",
+    "shortcuts": [
+      "ArrowUp"
+    ]
+  },
+  {
+    "id": "notebook:paste-and-replace-cell",
+    "label": "Paste Cells and Replace",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:paste-cell-above",
+    "label": "Paste Cells Above",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:paste-cell-below",
+    "label": "Paste Cells Below",
+    "caption": "Paste cells from the clipboard",
+    "shortcuts": [
+      "V"
+    ]
+  },
+  {
+    "id": "notebook:reconnect-to-kernel",
+    "label": "Reconnect to Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:redo",
+    "label": "Redo",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:redo-cell-action",
+    "label": "Redo Cell Operation",
+    "caption": "",
+    "shortcuts": [
+      "Shift Z"
+    ]
+  },
+  {
+    "id": "notebook:render-all-markdown",
+    "label": "Render All Markdown Cells",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:replace-selection",
+    "label": "Replace Selection in Notebook Cell",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:restart-and-run-to-selected",
+    "label": "Restart Kernel and Run up to Selected Cell…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:restart-clear-output",
+    "label": "Restart Kernel and Clear Outputs of All Cells…",
+    "caption": "Restart the kernel and clear all outputs of all cells",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:restart-kernel",
+    "label": "Restart Kernel…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:restart-run-all",
+    "label": "Restart Kernel and Run All Cells…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:run-all-above",
+    "label": "Run All Above Selected Cell",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:run-all-below",
+    "label": "Run Selected Cell and All Below",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:run-all-cells",
+    "label": "Run All Cells",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:run-cell",
+    "label": "Run Selected Cells and Don't Advance",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Enter"
+    ]
+  },
+  {
+    "id": "notebook:run-cell-and-insert-below",
+    "label": "Run Selected Cells and Insert Below",
+    "caption": "",
+    "shortcuts": [
+      "Alt Enter"
+    ]
+  },
+  {
+    "id": "notebook:run-cell-and-select-next",
+    "label": "Run Selected Cells",
+    "caption": "",
+    "shortcuts": [
+      "Shift Enter"
+    ]
+  },
+  {
+    "id": "notebook:run-in-console",
+    "label": "Run Selected Text or Current Line in Console",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:select-all",
+    "label": "Select All Cells",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl A"
+    ]
+  },
+  {
+    "id": "notebook:select-last-run-cell",
+    "label": "Select current running or last run cell",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:set-side-by-side-ratio",
+    "label": "Set side-by-side ratio",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:show-all-cell-code",
+    "label": "Expand All Code",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:show-all-cell-outputs",
+    "label": "Expand All Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:show-cell-code",
+    "label": "Expand Selected Code",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:show-cell-outputs",
+    "label": "Expand Selected Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:shutdown-kernel",
+    "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:split-cell-at-cursor",
+    "label": "Split Cell",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift -"
+    ]
+  },
+  {
+    "id": "notebook:toggle-all-cell-line-numbers",
+    "label": "Show Line Numbers",
+    "caption": "",
+    "shortcuts": [
+      "Shift L"
+    ]
+  },
+  {
+    "id": "notebook:toggle-autoclosing-brackets",
+    "label": "Auto Close Brackets for All Notebook Cell Types",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:toggle-heading-collapse",
+    "label": "Toggle Collapse Notebook Heading",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:toggle-render-side-by-side-current",
+    "label": "Render Side-by-Side",
+    "caption": "",
+    "shortcuts": [
+      "Shift R"
+    ]
+  },
+  {
+    "id": "notebook:trust",
+    "label": "Trust Notebook",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:undo",
+    "label": "Undo",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:undo-cell-action",
+    "label": "Undo Cell Operation",
+    "caption": "",
+    "shortcuts": [
+      "Z"
+    ]
+  },
+  {
+    "id": "property-inspector:show-panel",
+    "label": "Property Inspector",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift U"
+    ]
+  },
+  {
+    "id": "rendermime:handle-local-link",
+    "label": "Handle Local Link",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "runmenu:open",
+    "label": "Open Run Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "runmenu:restart-and-run-all",
+    "label": "Restart Kernel and Run All",
+    "caption": "Restart Kernel and Run All",
+    "shortcuts": []
+  },
+  {
+    "id": "runmenu:run",
+    "label": "Run Selected",
+    "caption": "Run Selected",
+    "shortcuts": [
+      "Shift Enter"
+    ]
+  },
+  {
+    "id": "runmenu:run-all",
+    "label": "Run All",
+    "caption": "Run All",
+    "shortcuts": []
+  },
+  {
+    "id": "running:show-panel",
+    "label": "Sessions and Tabs",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift B"
+    ]
+  },
+  {
+    "id": "settingeditor:open",
+    "label": "Settings Editor",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl ,"
+    ]
+  },
+  {
+    "id": "settingeditor:open-json",
+    "label": "Advanced Settings Editor",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "settingeditor:revert",
+    "label": "Revert User Settings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "settingeditor:save",
+    "label": "Save User Settings",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl S"
+    ]
+  },
+  {
+    "id": "settingsmenu:open",
+    "label": "Open Settings Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "sidebar:switch",
+    "label": "Switch Sidebar Side",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "statusbar:toggle",
+    "label": "Show Status Bar",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "tabsmenu:activate-by-id",
+    "label": "Activate a widget by its `id`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "tabsmenu:activate-previously-used-tab",
+    "label": "Activate Previously Used Tab",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift '"
+    ]
+  },
+  {
+    "id": "tabsmenu:open",
+    "label": "Open Tabs Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:create-new",
+    "label": "Terminal",
+    "caption": "Start a new terminal session",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:decrease-font",
+    "label": "Decrease Terminal Font Size",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:increase-font",
+    "label": "Increase Terminal Font Size",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:open",
+    "label": "Open a terminal by its `name`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:refresh",
+    "label": "Refresh Terminal",
+    "caption": "Refresh the current terminal session",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:set-theme",
+    "label": "Set terminal theme to the provided `theme`.",
+    "caption": "Set the terminal theme",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:shut-down",
+    "label": "Shutdown Terminal",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "toc:display-h1-numbering",
+    "label": "Show first-level heading number",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "toc:display-numbering",
+    "label": "Show heading number in the document",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "toc:display-outputs-numbering",
+    "label": "Show output headings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "toc:run-cells",
+    "label": "Select and Run Cell(s) for this Heading",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "toc:show-panel",
+    "label": "Table of Contents",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift K"
+    ]
+  },
+  {
+    "id": "toc:toggle-collapse",
+    "label": "Collapse All Headings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "tooltip:dismiss",
+    "label": "Dismiss the tooltip",
+    "caption": "",
+    "shortcuts": [
+      "Escape"
+    ]
+  },
+  {
+    "id": "tooltip:launch-console",
+    "label": "Open the tooltip",
+    "caption": "",
+    "shortcuts": [
+      "Shift Tab"
+    ]
+  },
+  {
+    "id": "tooltip:launch-file",
+    "label": "Open the tooltip",
+    "caption": "",
+    "shortcuts": [
+      "Shift Tab"
+    ]
+  },
+  {
+    "id": "tooltip:launch-notebook",
+    "label": "Open the tooltip",
+    "caption": "",
+    "shortcuts": [
+      "Shift Tab"
+    ]
+  },
+  {
+    "id": "tsv:go-to-line",
+    "label": "Go to Line",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "viewmenu:line-numbering",
+    "label": "Show Line Numbers",
+    "caption": "Show Line Numbers",
+    "shortcuts": []
+  },
+  {
+    "id": "viewmenu:match-brackets",
+    "label": "Match Brackets",
+    "caption": "Match Brackets",
+    "shortcuts": []
+  },
+  {
+    "id": "viewmenu:open",
+    "label": "Open View Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "viewmenu:word-wrap",
+    "label": "Wrap Words",
+    "caption": "Wrap Words",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:save",
+    "label": "Save Current Workspace",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:save-as",
+    "label": "Save Current Workspace As…",
+    "caption": "",
+    "shortcuts": []
+  }
+]

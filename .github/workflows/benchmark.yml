@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
           fetch-depth: 100
@@ -30,7 +30,7 @@ jobs:
 
       - name: Get hashes for PR review event
         if: ${{ github.event_name == 'pull_request_review' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const child_process = require("child_process");
@@ -54,19 +54,19 @@ jobs:
             });
 
       - name: Install node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '14.x'
 
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
       - uses: iterative/setup-cml@v1
 
       - name: Cache pip on Linux
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-3.8-${{ hashFiles('**/requirements.txt', 'setup.cfg') }}
@@ -77,7 +77,7 @@ jobs:
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - name: Cache yarn
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -169,6 +169,10 @@ jobs:
         shell: bash
         working-directory: galata
         run: |
+          set -ex
+          # Update test screenshots - in case they have not yet been corrected on the challenger branch
+          BENCHMARK_NUMBER_SAMPLES=1 PW_VIDEO=1 jlpm run test:benchmark -u
+
           jlpm run test:benchmark
 
       - name: Stop JupyterLab
@@ -185,7 +189,7 @@ jobs:
         run: |
           # Publish image to cml.dev
           echo "" >> ${REPORT}
-          cml-publish ./benchmark-results/lab-benchmark.png --md >> ${REPORT}
+          cml-publish ./benchmark-results/lab-benchmark.svg --md >> ${REPORT}
           echo "" >> ${REPORT}
 
           # Test if metadata have changed
@@ -209,7 +213,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: benchmark-assets
           path: |

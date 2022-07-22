@@ -629,9 +629,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.ICompleteReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.ICompleteReplyMsg>;
   }
 
   /**
@@ -653,9 +654,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content: content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.IInspectReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.IInspectReplyMsg>;
   }
 
   /**
@@ -677,9 +679,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.IHistoryReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.IHistoryReplyMsg>;
   }
 
   /**
@@ -783,9 +786,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.IIsCompleteReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.IIsCompleteReplyMsg>;
   }
 
   /**
@@ -805,9 +809,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
-    return Private.handleShellMessage(this, msg) as Promise<
-      KernelMessage.ICommInfoReplyMsg
-    >;
+    return Private.handleShellMessage(
+      this,
+      msg
+    ) as Promise<KernelMessage.ICommInfoReplyMsg>;
   }
 
   /**
@@ -816,7 +821,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void {
     const msg = KernelMessage.createMessage({
       msgType: 'input_reply',
       channel: 'stdin',
@@ -824,6 +832,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content
     });
+    msg.parent_header = parent_header;
 
     this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });
@@ -991,12 +1000,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
       // We've seen it before, update existing outputs with same display_id
       // by handling display_data as update_display_data.
       const updateMsg: KernelMessage.IMessage = {
-        header: (JSONExt.deepCopy(
-          (msg.header as unknown) as JSONObject
-        ) as unknown) as KernelMessage.IHeader,
-        parent_header: (JSONExt.deepCopy(
-          (msg.parent_header as unknown) as JSONObject
-        ) as unknown) as KernelMessage.IHeader,
+        header: JSONExt.deepCopy(
+          msg.header as unknown as JSONObject
+        ) as unknown as KernelMessage.IHeader,
+        parent_header: JSONExt.deepCopy(
+          msg.parent_header as unknown as JSONObject
+        ) as unknown as KernelMessage.IHeader,
         metadata: JSONExt.deepCopy(msg.metadata),
         content: JSONExt.deepCopy(msg.content as JSONObject),
         channel: msg.channel,

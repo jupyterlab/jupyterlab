@@ -109,11 +109,41 @@ namespace Private {
     let offsets: number[] = [];
     offsets.push(8 * (1 + offsetNumber));
     offsets.push(msg.channel.length + offsets[offsets.length - 1]);
+    const encoder = new TextEncoder();
+    const channelEncoded = encoder.encode(msg.channel);
+    const headerEncoded = encoder.encode(header);
+    const parentHeaderEncoded = encoder.encode(parentHeader);
+    const metadataEncoded = encoder.encode(metadata);
+    const contentEncoded = encoder.encode(content);
+    const binMsgNoBuff = new Uint8Array(
+      channelEncoded.length +
+        headerEncoded.length +
+        parentHeaderEncoded.length +
+        metadataEncoded.length +
+        contentEncoded.length
+    );
+    binMsgNoBuff.set(channelEncoded);
+    binMsgNoBuff.set(headerEncoded, channelEncoded.length);
+    binMsgNoBuff.set(
+      parentHeaderEncoded,
+      channelEncoded.length + headerEncoded.length
+    );
+    binMsgNoBuff.set(
+      metadataEncoded,
+      channelEncoded.length + headerEncoded.length + parentHeaderEncoded.length
+    );
+    binMsgNoBuff.set(
+      contentEncoded,
+      channelEncoded.length +
+        headerEncoded.length +
+        parentHeaderEncoded.length +
+        metadataEncoded.length
+    );
     for (let length of [
-      header.length,
-      parentHeader.length,
-      metadata.length,
-      content.length
+      headerEncoded.length,
+      parentHeaderEncoded.length,
+      metadataEncoded.length,
+      contentEncoded.length
     ]) {
       offsets.push(length + offsets[offsets.length - 1]);
     }
@@ -123,10 +153,6 @@ namespace Private {
       offsets.push(length + offsets[offsets.length - 1]);
       buffersByteLength += length;
     }
-    const encoder = new TextEncoder();
-    const binMsgNoBuff = encoder.encode(
-      msg.channel + header + parentHeader + metadata + content
-    );
     const binMsg = new Uint8Array(
       8 * (1 + offsetNumber) + binMsgNoBuff.byteLength + buffersByteLength
     );

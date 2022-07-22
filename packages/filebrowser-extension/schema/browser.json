@@ -7,10 +7,6 @@
         "id": "jp-mainmenu-file",
         "items": [
           {
-            "command": "filebrowser:create-main-launcher",
-            "rank": 1
-          },
-          {
             "type": "separator",
             "rank": 1
           },
@@ -127,9 +123,14 @@
         "rank": 14
       },
       {
+        "command": "filebrowser:toggle-file-checkboxes",
+        "selector": ".jp-DirListing-header",
+        "rank": 15
+      },
+      {
         "command": "filebrowser:share-main",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 15
+        "rank": 16
       },
       {
         "type": "separator",
@@ -151,11 +152,6 @@
   "title": "File Browser",
   "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [
-    {
-      "command": "filebrowser:create-main-launcher",
-      "keys": ["Accel Shift L"],
-      "selector": "body"
-    },
     {
       "command": "filebrowser:toggle-main",
       "keys": ["Accel Shift F"],
@@ -210,6 +206,12 @@
       "description": "Whether to apply fuzzy algorithm while filtering on file names",
       "default": true
     },
+    "filterDirectories": {
+      "type": "boolean",
+      "title": "Filter directories",
+      "description": "Whether to apply the search on directories",
+      "default": true
+    },
     "showLastModifiedColumn": {
       "type": "boolean",
       "title": "Show last modified column",
@@ -220,6 +222,12 @@
       "type": "boolean",
       "title": "Show hidden files",
       "description": "Whether to show hidden files. The server parameter `ContentsManager.allow_hidden` must be set to `True` to display hidden files.",
+      "default": false
+    },
+    "showFileCheckboxes": {
+      "type": "boolean",
+      "title": "Use checkboxes to select items",
+      "description": "Whether to show checkboxes next to files and folders",
       "default": false
     }
   },

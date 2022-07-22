@@ -613,3 +613,15 @@ h6:hover .jp-InternalAnchorLink {
 .jp-RenderedHTMLCommon > *:last-child {
   margin-bottom: 0.5em;
 }
+
+.jp-mimeType-highlight {
+  background-color: var(
+    --jp-search-unselected-match-background-color
+  ) !important;
+  color: var(--jp-search-unselected-match-color) !important;
+}
+
+.jp-mod-selected.jp-mimeType-highlight {
+  background-color: var(--jp-search-selected-match-background-color) !important;
+  color: var(--jp-search-selected-match-color) !important;
+}

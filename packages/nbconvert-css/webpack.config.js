@@ -21,7 +21,7 @@ module.exports = {
       },
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader'
+        type: 'asset/inline'
       },
       /* Use null-loader to drop resources that are not used in the CSS */
       {

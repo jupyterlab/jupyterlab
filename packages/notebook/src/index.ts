@@ -12,6 +12,8 @@ export * from './modelfactory';
 export * from './modestatus';
 export * from './notebooktools';
 export * from './panel';
+export * from './searchprovider';
+export * from './toc';
 export * from './tokens';
 export * from './tracker';
 export * from './truststatus';

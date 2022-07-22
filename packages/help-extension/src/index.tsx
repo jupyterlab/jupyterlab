@@ -135,7 +135,7 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© 2015-2021 Project Jupyter Contributors')}
+            {trans.__('© 2015-2022 Project Jupyter Contributors')}
           </span>
         );
         const body = (
@@ -223,8 +223,7 @@ const resources: JupyterFrontEndPlugin<void> = {
       },
       {
         text: trans.__('JupyterLab FAQ'),
-        url:
-          'https://jupyterlab.readthedocs.io/en/latest/getting_started/faq.html'
+        url: 'https://jupyterlab.readthedocs.io/en/latest/getting_started/faq.html'
       },
       {
         text: trans.__('Jupyter Reference'),
@@ -262,7 +261,9 @@ const resources: JupyterFrontEndPlugin<void> = {
     }
 
     commands.addCommand(CommandIDs.open, {
-      label: args => args['text'] as string,
+      label: args =>
+        (args['text'] as string) ??
+        trans.__('Open the provided `url` in a tab.'),
       execute: args => {
         const url = args['url'] as string;
         const text = args['text'] as string;
@@ -355,9 +356,8 @@ const resources: JupyterFrontEndPlugin<void> = {
           // has registered itself with the help menu.
           let usesKernel = false;
           const onCurrentChanged = async () => {
-            const kernel: Kernel.IKernelConnection | null = await commands.execute(
-              'helpmenu:get-kernel'
-            );
+            const kernel: Kernel.IKernelConnection | null =
+              await commands.execute('helpmenu:get-kernel');
             usesKernel = kernel?.name === name;
           };
           // Set the status for the current widget
@@ -548,7 +548,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
       label: licensesText,
       execute: (args: any) => {
         const licenseMain = createLicenseWidget(args as Licenses.ICreateArgs);
-        shell.add(licenseMain, 'main');
+        shell.add(licenseMain, 'main', { type: 'Licenses' });
 
         // add to tracker so it can be restored, and update when choices change
         void licensesTracker.add(licenseMain);
@@ -607,11 +607,8 @@ const licenses: JupyterFrontEndPlugin<void> = {
         command: CommandIDs.licenses,
         name: widget => 'licenses',
         args: widget => {
-          const {
-            currentBundleName,
-            currentPackageIndex,
-            packageFilter
-          } = widget.content.model;
+          const { currentBundleName, currentPackageIndex, packageFilter } =
+            widget.content.model;
 
           const args: Licenses.ICreateArgs = {
             currentBundleName,

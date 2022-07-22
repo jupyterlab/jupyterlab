@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, test } from '@jupyterlab/galata';
-import { expect, Page } from '@playwright/test';
+import { expect, galata, test } from '@jupyterlab/galata';
+import { Page } from '@playwright/test';
 import * as path from 'path';
 
 const nbFile = 'simple_notebook.ipynb';

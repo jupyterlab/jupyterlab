@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor-extension",
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.11",
   "description": "JupyterLab - Editor Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,33 +37,36 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.7",
-    "@jupyterlab/apputils": "^4.0.0-alpha.7",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.7",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.7",
-    "@jupyterlab/completer": "^4.0.0-alpha.7",
-    "@jupyterlab/console": "^4.0.0-alpha.7",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.7",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.7",
-    "@jupyterlab/filebrowser": "^4.0.0-alpha.7",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.7",
-    "@jupyterlab/launcher": "^4.0.0-alpha.7",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.7",
-    "@jupyterlab/observables": "^5.0.0-alpha.7",
-    "@jupyterlab/services": "^7.0.0-alpha.7",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.7",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.7",
-    "@jupyterlab/translation": "^4.0.0-alpha.7",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.22",
+    "@codemirror/commands": "^6.0.0",
+    "@jupyterlab/application": "^4.0.0-alpha.11",
+    "@jupyterlab/apputils": "^4.0.0-alpha.11",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.11",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.11",
+    "@jupyterlab/completer": "^4.0.0-alpha.11",
+    "@jupyterlab/console": "^4.0.0-alpha.11",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.11",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.11",
+    "@jupyterlab/documentsearch": "^4.0.0-alpha.11",
+    "@jupyterlab/filebrowser": "^4.0.0-alpha.11",
+    "@jupyterlab/fileeditor": "^4.0.0-alpha.11",
+    "@jupyterlab/launcher": "^4.0.0-alpha.11",
+    "@jupyterlab/mainmenu": "^4.0.0-alpha.11",
+    "@jupyterlab/observables": "^5.0.0-alpha.11",
+    "@jupyterlab/services": "^7.0.0-alpha.11",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.11",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.11",
+    "@jupyterlab/toc": "^6.0.0-alpha.11",
+    "@jupyterlab/translation": "^4.0.0-alpha.11",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",
     "@lumino/coreutils": "^1.12.0",
-    "@lumino/widgets": "^1.31.1"
+    "@lumino/widgets": "^1.33.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.5.2"
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

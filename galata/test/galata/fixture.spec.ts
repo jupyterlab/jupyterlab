@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect } from '@playwright/test';
-import { JupyterLabPage, test } from '@jupyterlab/galata';
+import { expect, JupyterLabPage, test } from '@jupyterlab/galata';
 
 test.describe('page', () => {
   test('should return a JupyterLabPage', ({ page }) => {
@@ -17,7 +16,7 @@ test.describe('page', () => {
 
   test('should have playwright Page interface', async ({ page }) => {
     expect(page.waitForSelector).toBe(
-      ((page as any) as JupyterLabPage).page.waitForSelector
+      (page as any as JupyterLabPage).page.waitForSelector
     );
   });
 });

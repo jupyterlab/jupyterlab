@@ -550,7 +550,8 @@ export async function ensurePackage(
   const buildScript = data.scripts?.build || '';
   if (
     buildScript &&
-    (pkgPath.indexOf('packages') == -1 || buildScript.indexOf('tsc') == -1) &&
+    ((pkgPath.indexOf('packages') == -1 && pkgPath.indexOf('template') == -1) ||
+      buildScript.indexOf('tsc') == -1) &&
     !isPrivate
   ) {
     data.scripts['build:all'] = 'npm run build';

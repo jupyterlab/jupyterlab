@@ -103,6 +103,13 @@ export class InputArea extends Widget {
   }
 
   /**
+   * Get the rendered input area widget, if any.
+   */
+  get renderedInput(): Widget {
+    return this._rendered;
+  }
+
+  /**
    * Render an input instead of the text editor.
    */
   renderInput(widget: Widget): void {
@@ -262,7 +269,8 @@ export namespace InputArea {
   /**
    * The default editor factory singleton based on CodeMirror.
    */
-  export const defaultEditorFactory: CodeEditor.Factory = _createDefaultEditorFactory();
+  export const defaultEditorFactory: CodeEditor.Factory =
+    _createDefaultEditorFactory();
 
   /**
    * The default `ContentFactory` instance.

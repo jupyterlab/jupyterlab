@@ -342,7 +342,7 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
     }`;
   } else {
     // File name from current path
-    let currentFile: string = PathExt.basename(current.split(':')[1]);
+    let currentFile: string = PathExt.basename(window.location.href);
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
@@ -410,6 +410,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     db.changed.connect(() => updateTabTitle(workspace, db, name));
 
     commands.addCommand(CommandIDs.loadState, {
+      label: trans.__('Load state for the current workspace.'),
       execute: async (args: IRouter.ILocation) => {
         // Since the command can be executed an arbitrary number of times, make
         // sure it is safe to call multiple times.
@@ -485,6 +486,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     });
 
     commands.addCommand(CommandIDs.resetOnLoad, {
+      label: trans.__('Reset state when loading for the workspace.'),
       execute: (args: IRouter.ILocation) => {
         const { hash, path, search } = args;
         const query = URLExt.queryStringToObject(search || '');

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor",
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.11",
   "description": "The JupyterLab default setting editor interface",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,15 +36,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.7",
-    "@jupyterlab/apputils": "^4.0.0-alpha.7",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.7",
-    "@jupyterlab/inspector": "^4.0.0-alpha.7",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.7",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.7",
-    "@jupyterlab/statedb": "^4.0.0-alpha.7",
-    "@jupyterlab/translation": "^4.0.0-alpha.7",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.22",
+    "@jupyterlab/application": "^4.0.0-alpha.11",
+    "@jupyterlab/apputils": "^4.0.0-alpha.11",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.11",
+    "@jupyterlab/inspector": "^4.0.0-alpha.11",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.11",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.11",
+    "@jupyterlab/statedb": "^4.0.0-alpha.11",
+    "@jupyterlab/translation": "^4.0.0-alpha.11",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",
     "@lumino/coreutils": "^1.12.0",
@@ -52,7 +52,7 @@
     "@lumino/messaging": "^1.10.1",
     "@lumino/polling": "^1.10.0",
     "@lumino/signaling": "^1.10.1",
-    "@lumino/widgets": "^1.31.1",
+    "@lumino/widgets": "^1.33.0",
     "@rjsf/core": "^3.1.0",
     "json-schema": "^0.4.0",
     "react": "^17.0.1"
@@ -61,7 +61,7 @@
     "@types/react": "^17.0.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.5.2"
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

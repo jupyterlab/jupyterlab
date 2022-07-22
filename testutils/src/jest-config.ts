@@ -1,6 +1,12 @@
 import path from 'path';
 
-const esModules = ['lib0', 'y\\-protocols', 'y\\-websocket', 'yjs'].join('|');
+const esModules = [
+  '@codemirror',
+  'lib0',
+  'y\\-protocols',
+  'y\\-websocket',
+  'yjs'
+].join('|');
 
 module.exports = function (baseDir: string) {
   return {
@@ -10,8 +16,7 @@ module.exports = function (baseDir: string) {
       '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
     },
     transform: {
-      '\\.svg$': 'jest-raw-loader',
-      '^.+\\.md?$': 'markdown-loader-jest'
+      '\\.svg$': 'jest-raw-loader'
     },
     testTimeout: 10000,
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],

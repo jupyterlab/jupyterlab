@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { galata, test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
-import { generateCaptureArea, setLeftSidebarWidth } from './utils';
+import { expect, galata, test } from '@jupyterlab/galata';
+import { setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -15,51 +14,35 @@ test.describe('Internationalization', () => {
   test('Menu', async ({ page }) => {
     await page.goto();
 
-    await setLeftSidebarWidth(page);
+    await setSidebarWidth(page);
 
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 5, left: 250, width: 800, height: 600 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({ clip: { y: 5, x: 250, width: 800, height: 600 } })
     ).toMatchSnapshot('language_settings.png');
   });
 
   test('Confirm language', async ({ page }) => {
     await page.goto();
 
-    await setLeftSidebarWidth(page);
+    await setSidebarWidth(page);
 
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
     await page.click('#jp-mainmenu-settings-language >> text=Chinese');
 
-    // Inject capture zone
-    await page.evaluate(
-      ([zone]) => {
-        document.body.insertAdjacentHTML('beforeend', zone);
-      },
-      [generateCaptureArea({ top: 200, left: 350, width: 600, height: 300 })]
-    );
-
     expect(
-      await (await page.$('#capture-screenshot')).screenshot()
+      await page.screenshot({
+        clip: { y: 200, x: 350, width: 600, height: 300 }
+      })
     ).toMatchSnapshot('language_change.png');
   });
 
   test('UI in Chinese', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
-
-    await setLeftSidebarWidth(page);
 
     await page.click('text=Settings');
     await page.click('ul[role="menu"] >> text=Language');
@@ -83,6 +66,8 @@ test.describe('Internationalization', () => {
 
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
+
+    await setSidebarWidth(page);
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });

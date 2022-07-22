@@ -315,9 +315,8 @@ export class DocumentRegistry implements IDisposable {
           }
         });
       if (!this._defaultWidgetFactories[fileTypeName]) {
-        this._defaultWidgetFactories[
-          fileTypeName
-        ] = this._widgetFactoriesForFileType[fileTypeName][0];
+        this._defaultWidgetFactories[fileTypeName] =
+          this._widgetFactoriesForFileType[fileTypeName][0];
       }
     }
 
@@ -739,9 +738,8 @@ export class DocumentRegistry implements IDisposable {
   private _defaultWidgetFactoryOverrides: {
     [key: string]: string;
   } = Object.create(null);
-  private _defaultWidgetFactories: { [key: string]: string } = Object.create(
-    null
-  );
+  private _defaultWidgetFactories: { [key: string]: string } =
+    Object.create(null);
   private _defaultRenderedWidgetFactories: {
     [key: string]: string;
   } = Object.create(null);
@@ -1052,44 +1050,15 @@ export namespace DocumentRegistry {
   /**
    * The options used to initialize a widget factory.
    */
-  export interface IWidgetFactoryOptions<T extends Widget = Widget> {
-    /**
-     * A unique name identifying of the widget.
-     */
-    readonly name: string;
-
-    /**
-     * The label of the widget to display in dialogs.
-     * If not given, name is used instead.
-     */
-    readonly label?: string;
-
-    /**
-     * The file types the widget can view.
-     */
-    readonly fileTypes: ReadonlyArray<string>;
-
-    /**
-     * The file types for which the factory should be the default.
-     */
-    readonly defaultFor?: ReadonlyArray<string>;
-
-    /**
-     * The file types for which the factory should be the default for rendering,
-     * if that is different than the default factory (which may be for editing).
-     * If undefined, then it will fall back on the default file type.
-     */
-    readonly defaultRendered?: ReadonlyArray<string>;
-
+  export interface IWidgetFactoryOptions<T extends Widget = Widget>
+    extends Omit<
+      IRenderMime.IDocumentWidgetFactoryOptions,
+      'primaryFileType' | 'toolbarFactory'
+    > {
     /**
      * Whether the widget factory is read only.
      */
     readonly readOnly?: boolean;
-
-    /**
-     * The registered name of the model type used to create the widgets.
-     */
-    readonly modelName?: string;
 
     /**
      * Whether the widgets prefer having a kernel started.
@@ -1105,11 +1074,6 @@ export namespace DocumentRegistry {
      * Whether the kernel should be shutdown when the widget is closed.
      */
     readonly shutdownOnClose?: boolean;
-
-    /**
-     * The application language translator.
-     */
-    readonly translator?: ITranslator;
 
     /**
      * A function producing toolbar widgets, overriding the default toolbar widgets.
@@ -1152,6 +1116,15 @@ export namespace DocumentRegistry {
      * This field may be used or ignored depending on shell implementation.
      */
     rank?: number;
+
+    /**
+     * Type of widget to open
+     *
+     * #### Notes
+     * This is the key used to load user customization.
+     * Its typical value is: a factory name or the widget id (if singleton)
+     */
+    type?: string;
   }
 
   /**
@@ -1249,47 +1222,11 @@ export namespace DocumentRegistry {
   /**
    * An interface for a file type.
    */
-  export interface IFileType {
-    /**
-     * The name of the file type.
-     */
-    readonly name: string;
-
-    /**
-     * The mime types associated the file type.
-     */
-    readonly mimeTypes: ReadonlyArray<string>;
-
-    /**
-     * The extensions of the file type (e.g. `".txt"`).  Can be a compound
-     * extension (e.g. `".table.json`).
-     */
-    readonly extensions: ReadonlyArray<string>;
-
-    /**
-     * An optional display name for the file type.
-     */
-    readonly displayName?: string;
-
-    /**
-     * An optional pattern for a file name (e.g. `^Dockerfile$`).
-     */
-    readonly pattern?: string;
-
+  export interface IFileType extends IRenderMime.IFileType {
     /**
      * The icon for the file type.
      */
     readonly icon?: LabIcon;
-
-    /**
-     * The icon class name for the file type.
-     */
-    readonly iconClass?: string;
-
-    /**
-     * The icon label for the file type.
-     */
-    readonly iconLabel?: string;
 
     /**
      * The content type of the new file.

@@ -1,4 +1,7 @@
 import { Page } from '@playwright/test';
+import { default as extensionsSearchStub } from './data/extensions-search.json';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Generate a SVG arrow to inject in a HTML document.
@@ -24,29 +27,6 @@ export function generateArrow(
 }
 
 /**
- * Generate a capture area
- *
- * @param position Absolute position of the area
- * @param id HTML element id (default: "capture-screenshot")
- * @returns The div element to inject in the page
- */
-export function generateCaptureArea(
-  position: {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  },
-  id = 'capture-screenshot'
-): string {
-  const { top, left, width, height } = position;
-  return `<div
-    id="${id}"
-    style="position: absolute; top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px; pointer-events: none;">
-  </div>`;
-}
-
-/**
  * Generate a SVG mouse pointer to inject in a HTML document.
  *
  * @param position Absolute position
@@ -59,11 +39,25 @@ export function positionMouse(position: { x: number; y: number }): string {
 </svg>`;
 }
 
-export async function setLeftSidebarWidth(
+/**
+ * Set the sidebar width
+ *
+ * @param page Page object
+ * @param width Sidebar width in pixels
+ * @param side Which sidebar to set: 'left' or 'right'
+ */
+export async function setSidebarWidth(
   page: Page,
-  width = 251
+  width = 251,
+  side: 'left' | 'right' = 'left'
 ): Promise<void> {
-  const splitHandle = await page.$('.lm-SplitPanel-handle');
+  const handles = page.locator(
+    '#jp-main-split-panel > .lm-SplitPanel-handle:not(.lm-mod-hidden)'
+  );
+  const splitHandle =
+    side === 'left'
+      ? await handles.first().elementHandle()
+      : await handles.last().elementHandle();
   const handleBBox = await splitHandle.boundingBox();
 
   await page.mouse.move(
@@ -71,6 +65,38 @@ export async function setLeftSidebarWidth(
     handleBBox.y + 0.5 * handleBBox.height
   );
   await page.mouse.down();
-  await page.mouse.move(33 + width, handleBBox.y + 0.5 * handleBBox.height);
+  await page.mouse.move(
+    side === 'left' ? 33 + width : page.viewportSize().width - 33 - width,
+    handleBBox.y + 0.5 * handleBBox.height
+  );
   await page.mouse.up();
+}
+
+export async function stubExtensionsSearch(page: Page): Promise<void> {
+  await page.route(
+    'https://registry.npmjs.org/-/v1/search*',
+    async (route, request) => {
+      switch (request.method()) {
+        case 'GET':
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(extensionsSearchStub)
+          });
+        default:
+          return route.continue();
+      }
+    }
+  );
+
+  // stub out github user icons
+  // only first and last icon for now
+  // logic in @jupyterlab/extensionmanager/src/models::ListEntry#translateSearchResult
+  await page.route('https://github.com/*.png*', async (route, request) => {
+    return route.fulfill({
+      status: 200,
+      contentType: 'image/png',
+      body: fs.readFileSync(path.resolve(__dirname, './data/jupyter.png'))
+    });
+  });
 }

@@ -7,9 +7,8 @@
  * @module rendermime-interfaces
  */
 
-import { ITranslator } from '@jupyterlab/translation';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * A namespace for rendermime associated interfaces.
@@ -73,7 +72,7 @@ export namespace IRenderMime {
    */
   export interface IToolbarItem {
     /**
-     * Item name
+     * Unique item name
      */
     name: string;
     /**
@@ -93,6 +92,12 @@ export namespace IRenderMime {
      * The name of the widget to display in dialogs.
      */
     readonly name: string;
+
+    /**
+     * The label of the widget to display in dialogs.
+     * If not given, name is used instead.
+     */
+    readonly label?: string;
 
     /**
      * The name of the document model type.
@@ -122,9 +127,14 @@ export namespace IRenderMime {
     readonly defaultRendered?: ReadonlyArray<string>;
 
     /**
+     * The application language translator.
+     */
+    readonly translator?: ITranslator;
+
+    /**
      * A function returning a list of toolbar items to add to the toolbar.
      */
-    readonly toolbarFactory?: (widget?: IRenderer) => IToolbarItem[];
+    readonly toolbarFactory?: (widget?: Widget) => IToolbarItem[];
   }
 
   export namespace LabIcon {
@@ -151,8 +161,7 @@ export namespace IRenderMime {
      */
     export interface IRenderer {
       readonly render: (container: HTMLElement, options?: any) => void;
-      // TODO: make unrenderer optional once @lumino/virtualdom > 1.4.1 is used
-      readonly unrender: (container: HTMLElement) => void;
+      readonly unrender?: (container: HTMLElement, options?: any) => void;
     }
 
     /**
@@ -211,7 +220,7 @@ export namespace IRenderMime {
     /**
      * The file format for the file type ('text', 'base64', or 'json').
      */
-    readonly fileFormat?: string;
+    readonly fileFormat?: string | null;
   }
 
   /**
@@ -277,11 +286,6 @@ export namespace IRenderMime {
    * A widget which displays the contents of a mime model.
    */
   export interface IRenderer extends Widget {
-    /**
-     * The application language translator.
-     */
-    translator?: ITranslator;
-
     /**
      * Render a mime model.
      *
@@ -449,5 +453,158 @@ export namespace IRenderMime {
      * @returns - A promise of the string.
      */
     render(source: string): Promise<string>;
+  }
+
+  // ********************** //
+  // Translation interfaces //
+  // ********************** //
+
+  /**
+   * Bundle of gettext-based translation functions for a specific domain.
+   */
+  export type TranslationBundle = {
+    /**
+     * Alias for `gettext` (translate strings without number inflection)
+     * @param msgid message (text to translate)
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    __(msgid: string, ...args: any[]): string;
+    /**
+     * Alias for `ngettext` (translate accounting for plural forms)
+     * @param msgid message for singular
+     * @param msgid_plural message for plural
+     * @param n determines which plural form to use
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    _n(msgid: string, msgid_plural: string, n: number, ...args: any[]): string;
+    /**
+     * Alias for `pgettext` (translate in given context)
+     * @param msgctxt context
+     * @param msgid message (text to translate)
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    _p(msgctxt: string, msgid: string, ...args: any[]): string;
+    /**
+     * Alias for `npgettext` (translate accounting for plural forms in given context)
+     * @param msgctxt context
+     * @param msgid message for singular
+     * @param msgid_plural message for plural
+     * @param n number used to determine which plural form to use
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    _np(
+      msgctxt: string,
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: any[]
+    ): string;
+    /**
+     * Look up the message id in the catalog and return the corresponding message string.
+     * Otherwise, the message id is returned.
+     *
+     * @param msgid message (text to translate)
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    gettext(msgid: string, ...args: any[]): string;
+    /**
+     * Do a plural-forms lookup of a message id. msgid is used as the message id for
+     * purposes of lookup in the catalog, while n is used to determine which plural form
+     * to use. Otherwise, when n is 1 msgid is returned, and msgid_plural is returned in
+     * all other cases.
+     *
+     * @param msgid message for singular
+     * @param msgid_plural message for plural
+     * @param n determines which plural form to use
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    ngettext(
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: any[]
+    ): string;
+    /**
+     * Look up the context and message id in the catalog and return the corresponding
+     * message string. Otherwise, the message id is returned.
+     *
+     * @param msgctxt context
+     * @param msgid message (text to translate)
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    pgettext(msgctxt: string, msgid: string, ...args: any[]): string;
+    /**
+     * Do a plural-forms lookup of a message id. msgid is used as the message id for
+     * purposes of lookup in the catalog, while n is used to determine which plural
+     * form to use. Otherwise, when n is 1 msgid is returned, and msgid_plural is
+     * returned in all other cases.
+     *
+     * @param msgctxt context
+     * @param msgid message for singular
+     * @param msgid_plural message for plural
+     * @param n number used to determine which plural form to use
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    npgettext(
+      msgctxt: string,
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: any[]
+    ): string;
+
+    /**
+     * Do a plural-forms lookup of a message id. msgid is used as the message id for
+     * purposes of lookup in the catalog, while n is used to determine which plural
+     * form to use. Otherwise, when n is 1 msgid is returned, and msgid_plural is
+     * returned in all other cases.
+     *
+     * @param domain - The translations domain.
+     * @param msgctxt - The message context.
+     * @param msgid - The singular string to translate.
+     * @param msgid_plural - The plural string to translate.
+     * @param n - The number for pluralization.
+     * @param args - Any additional values to use with interpolation
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    dcnpgettext(
+      domain: string,
+      msgctxt: string,
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: any[]
+    ): string;
+  };
+
+  /**
+   * Translation provider interface
+   */
+  export interface ITranslator {
+    /**
+     * Load translation bundles for a given domain.
+     *
+     * @param domain The translation domain to use for translations.
+     *
+     * @returns The translation bundle if found, or the English bundle.
+     */
+    load(domain: string): TranslationBundle;
   }
 }

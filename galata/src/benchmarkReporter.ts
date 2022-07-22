@@ -9,7 +9,6 @@ import {
   TestResult
 } from '@playwright/test/reporter';
 import { dists, meanpw, variancepn } from '@stdlib/stats/base';
-import * as canvas from 'canvas';
 import fs from 'fs';
 import path from 'path';
 import si from 'systeminformation';
@@ -382,9 +381,9 @@ class BenchmarkReporter implements Reporter {
         ...result.attachments
           .filter(a => a.name === benchmark.DEFAULT_NAME_ATTACHMENT)
           .map(raw => {
-            const json = (JSON.parse(
+            const json = JSON.parse(
               raw.body?.toString() ?? '{}'
-            ) as any) as benchmark.IRecord;
+            ) as any as benchmark.IRecord;
             return { ...json, reference: this._reference };
           })
       );
@@ -451,10 +450,8 @@ class BenchmarkReporter implements Reporter {
       }
 
       // - Create report
-      const [
-        reportContentString,
-        reportExtension
-      ] = await this._buildTextReport(allData);
+      const [reportContentString, reportExtension] =
+        await this._buildTextReport(allData);
       const reportFile = path.resolve(
         outputDir,
         `${baseName}.${reportExtension}`
@@ -468,25 +465,11 @@ class BenchmarkReporter implements Reporter {
       const vegaSpec = vl.compile(config as any).spec;
 
       const view = new vega.View(vega.parse(vegaSpec), {
-        renderer: 'canvas'
+        renderer: 'svg'
       }).initialize();
-      const canvas = ((await view.toCanvas()) as any) as canvas.Canvas;
-      const graphFile = path.resolve(outputDir, `${baseName}.png`);
-      const fileStream = fs.createWriteStream(graphFile);
-
-      // Wait for pipe operation to finish
-      let resolver: (v: unknown) => void;
-      const waitForPipe = new Promise(resolve => {
-        resolver = resolve;
-      });
-      fileStream.once('finish', () => {
-        resolver(void 0);
-      });
-
-      const stream = canvas.createPNGStream();
-      stream.pipe(fileStream, {});
-
-      await waitForPipe;
+      const svgFigure = await view.toSVG();
+      const graphFile = path.resolve(outputDir, `${baseName}.svg`);
+      fs.writeFileSync(graphFile, svgFigure);
     } else {
       console.log(reportString);
     }
@@ -554,10 +537,12 @@ class BenchmarkReporter implements Reporter {
     }
 
     const compare =
-      (groups.values().next().value?.values().next().value as Map<
-        string,
-        Map<string, number[]>
-      >).size === 2;
+      (
+        groups.values().next().value?.values().next().value as Map<
+          string,
+          Map<string, number[]>
+        >
+      ).size === 2;
 
     // - Create report
     const reportContent = new Array<string>(
@@ -578,10 +563,13 @@ class BenchmarkReporter implements Reporter {
 
     let header = '| Test file |';
     let nFiles = 0;
-    for (const [
-      file
-    ] of groups.values().next().value.values().next().value.values().next()
-      .value) {
+    for (const [file] of groups
+      .values()
+      .next()
+      .value.values()
+      .next()
+      .value.values()
+      .next().value) {
       header += ` ${file} |`;
       nFiles++;
     }

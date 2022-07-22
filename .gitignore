@@ -11,6 +11,7 @@ dev_mode/workspaces
 dev_mode/stats.json
 
 docs/_build
+docs/source/user/commands_list.md
 docs/api
 **/docs/source/_build
 
@@ -121,6 +122,7 @@ junit.xml
 # ms IDE stuff
 *.code-workspace
 .history
-.vscode/settings.json
+.vscode/*
+!.vscode/extension.json
 
 .jupyter_releaser_checkout

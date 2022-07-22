@@ -30,7 +30,8 @@ export const MIME_TYPE = 'application/json';
  */
 export class RenderedJSON
   extends Widget
-  implements IRenderMime.IRenderer, Printing.IPrintable {
+  implements IRenderMime.IRenderer, Printing.IPrintable
+{
   /**
    * Create a new widget for rendering JSON.
    */

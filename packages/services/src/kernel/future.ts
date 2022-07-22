@@ -21,7 +21,8 @@ export abstract class KernelFutureHandler<
     REPLY extends KernelMessage.IShellControlMessage
   >
   extends DisposableDelegate
-  implements Kernel.IFuture<REQUEST, REPLY> {
+  implements Kernel.IFuture<REQUEST, REPLY>
+{
   /**
    * Construct a new KernelFutureHandler.
    */
@@ -153,8 +154,11 @@ export abstract class KernelFutureHandler<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
-    this._kernel.sendInputReply(content);
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void {
+    this._kernel.sendInputReply(content, parent_header);
   }
 
   /**
@@ -206,9 +210,9 @@ export abstract class KernelFutureHandler<
       case 'shell':
         if (
           msg.channel === this.msg.channel &&
-          (msg.parent_header as KernelMessage.IHeader<
-            KernelMessage.MessageType
-          >).msg_id === this.msg.header.msg_id
+          (
+            msg.parent_header as KernelMessage.IHeader<KernelMessage.MessageType>
+          ).msg_id === this.msg.header.msg_id
         ) {
           await this._handleReply(msg as REPLY);
         }
@@ -460,10 +464,8 @@ namespace Private {
       this._hooks.length -= numNulls;
     }
 
-    private _hooks: (
-      | ((msg: T) => boolean | PromiseLike<boolean>)
-      | null
-    )[] = [];
+    private _hooks: (((msg: T) => boolean | PromiseLike<boolean>) | null)[] =
+      [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }

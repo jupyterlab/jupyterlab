@@ -12,6 +12,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
       "path": "../nbformat"
     },
     {

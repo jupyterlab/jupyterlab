@@ -76,23 +76,6 @@
   width: 40px;
 }
 
-.jp-FileBrowser-toolbar
-  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher'] {
-  width: 72px;
-  background: var(--jp-brand-color1);
-}
-
-.jp-FileBrowser-toolbar
-  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']:focus-visible {
-  background-color: var(--jp-accept-color-active, var(--jp-brand-color0));
-}
-
-.jp-FileBrowser-toolbar
-  .jp-ToolbarButtonComponent[data-command='filebrowser:create-main-launcher']
-  .jp-icon3 {
-  fill: var(--jp-layout-color1);
-}
-
 /*-----------------------------------------------------------------------------
 | Other styles
 |----------------------------------------------------------------------------*/
@@ -138,6 +121,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
+  align-items: center;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -216,11 +200,46 @@
 .jp-DirListing-item {
   display: flex;
   flex-direction: row;
+  align-items: center;
   padding: 4px 12px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.jp-DirListing-checkboxWrapper {
+  /* Increases hit area of checkbox. */
+  padding: 4px;
+}
+
+.jp-DirListing-header
+  .jp-DirListing-checkboxWrapper
+  + .jp-DirListing-headerItem {
+  padding-left: 4px;
+}
+
+.jp-DirListing-content .jp-DirListing-checkboxWrapper {
+  position: relative;
+  left: -4px;
+  margin: -4px 0 -4px -8px;
+}
+
+.jp-DirListing-checkboxWrapper.jp-mod-visible {
+  visibility: visible;
+}
+
+/* For devices that support hovering, hide checkboxes until hovered, selected...
+*/
+@media (hover: hover) {
+  .jp-DirListing-checkboxWrapper {
+    visibility: hidden;
+  }
+
+  .jp-DirListing-item:hover .jp-DirListing-checkboxWrapper,
+  .jp-DirListing-item.jp-mod-selected .jp-DirListing-checkboxWrapper {
+    visibility: visible;
+  }
 }
 
 .jp-DirListing-item[data-is-dot] {
