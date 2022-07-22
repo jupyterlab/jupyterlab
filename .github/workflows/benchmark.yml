@@ -246,24 +246,6 @@ jobs:
           server_url: localhost:8888
           artifacts_name: benchmark-assets
 
-      - name: Save report to file
-        if: always()
-        shell: bash
-        env:
-          REPORT: lab-memory-leak-report.md
-        run: |
-          echo "# Memory leaks report" > ${REPORT}
-          echo "" >> ${REPORT}
-          echo ${{ steps.memory_leaks.outputs.report }} >> ${REPORT}
-
-      - name: Upload Memory Leak Tests report
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: benchmark-assets
-          path: |
-            lab-memory-leak-report.md
-
       - name: Kill the server
         if: always()
         shell: bash
