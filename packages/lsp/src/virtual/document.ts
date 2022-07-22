@@ -169,7 +169,6 @@ export class VirtualDocumentInfo implements IDocumentInfo {
    * Get the uri of the virtual document, if the document is not available,
    * it returns an empty string, users need to check for the length of returned
    * value before using it.
-   *
    */
   get uri(): string {
     const uris = DocumentConnectionManager.solveUris(
@@ -347,7 +346,6 @@ export class VirtualDocument implements IDisposable {
    * and defines whether following chunks of code in the same
    * language should be appended to this document (false, not standalone)
    * or should be considered separate documents (true, standalone)
-   *
    */
   readonly standalone: boolean;
 
@@ -730,7 +728,6 @@ export class VirtualDocument implements IDisposable {
    * a map of foreign document if any.
    * @param  block - block to be appended
    * @param  editorShift - position shift in source document
-   *
    */
   prepareCodeBlock(
     block: ICodeBlockOptions,
@@ -752,7 +749,6 @@ export class VirtualDocument implements IDisposable {
    * extractors.
    * @param  block - block to be appended
    * @param  editorShift - position shift in source document
-   *
    */
   extractForeignCode(
     block: ICodeBlockOptions,
@@ -895,7 +891,6 @@ export class VirtualDocument implements IDisposable {
    * Can be null because some lines are added as padding/anchors
    * to the virtual document and those do not exist in the source document
    * and thus they are absent in the editor.
-   *
    */
   transformVirtualToEditor(
     virtualPosition: IVirtualPosition
@@ -911,7 +906,6 @@ export class VirtualDocument implements IDisposable {
    * Transform the position in the virtual document to the source.
    * Can be null because some lines are added as padding/anchors
    * to the virtual document and those do not exist in the source document.
-   *
    */
   transformVirtualToSource(position: IVirtualPosition): ISourcePosition | null {
     const line = this.virtualLines.get(position.line)!.sourceLine;
@@ -926,7 +920,6 @@ export class VirtualDocument implements IDisposable {
 
   /**
    * Get the corresponding editor of the virtual line.
-   *
    */
   getEditorAtVirtualLine(pos: IVirtualPosition): CodeEditor.IEditor {
     let line = pos.line;
@@ -1002,7 +995,6 @@ export class VirtualDocument implements IDisposable {
 
   /**
    * Get the foreign document that can be opened with the input extractor.
-   *
    */
   private chooseForeignDocument(
     extractor: IForeignCodeExtractor

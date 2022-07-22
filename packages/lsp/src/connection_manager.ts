@@ -46,7 +46,6 @@ export class DocumentConnectionManager
 
   /**
    * Map between the path of the document and its adapter
-   *
    */
   readonly adapters: Map<string, WidgetLSPAdapter<IDocumentWidget>>;
 
@@ -342,7 +341,6 @@ export class DocumentConnectionManager
   /**
    * Disconnect the connection to the language server of the requested
    * language.
-   *
    */
   disconnect(languageId: TLanguageServerId): void {
     Private.disconnect(languageId);
@@ -399,7 +397,6 @@ export class DocumentConnectionManager
 
   /**
    * Disconnect the signals of requested virtual document.
-   *
    */
   unregisterDocument(
     virtualDocument: VirtualDocument,
@@ -420,7 +417,6 @@ export class DocumentConnectionManager
 
   /**
    * Enable or disable the logging feature of the language servers
-   *
    */
   updateLogging(
     logAllCommunication: boolean,
@@ -480,7 +476,6 @@ export class DocumentConnectionManager
 
   /**
    * Helper to apply callback on all documents of a connection.
-   *
    */
   private _forEachDocumentOfConnection(
     connection: ILSPConnection,

@@ -93,7 +93,6 @@ export class LanguageServerManager implements ILanguageServerManager {
 
   /**
    * Get matching language server for input language option.
-   *
    */
   getMatchingServers(
     options: ILanguageServerManager.IGetServerIdOptions
@@ -118,7 +117,6 @@ export class LanguageServerManager implements ILanguageServerManager {
 
   /**
    * Get matching language server spec for input language option.
-   *
    */
   getMatchingSpecs(
     options: ILanguageServerManager.IGetServerIdOptions

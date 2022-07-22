@@ -503,7 +503,6 @@ class SettingRenderer extends React.Component<IProps, IState> {
 
   /**
    * Add setting item to the setting component.
-   *
    */
   addServerSetting = (): void => {
     let index = 0;

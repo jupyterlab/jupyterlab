@@ -25,7 +25,6 @@ export class FeatureManager implements ILSPFeatureManager {
 
   /**
    * Register a new feature, skip if it is already registered.
-   *
    */
   register(feature: IFeature): void {
     if (this.features.some(ft => ft.id === feature.id)) {
@@ -40,7 +39,6 @@ export class FeatureManager implements ILSPFeatureManager {
 
   /**
    * Get the capabilities of all clients.
-   *
    */
   clientCapabilities(): ClientCapabilities {
     let capabilities: ClientCapabilities = {};

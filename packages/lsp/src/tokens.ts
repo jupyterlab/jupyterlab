@@ -48,7 +48,6 @@ export type TLanguageId = string;
 export interface ILanguageServerManager extends IDisposable {
   /**
    * Signal emitted when the language server sessions are changed.
-   *
    */
   sessionsChanged: ISignal<ILanguageServerManager, void>;
 
@@ -89,13 +88,11 @@ export interface ILanguageServerManager extends IDisposable {
 
   /**
    * Set the configuration for language servers
-   *
    */
   setConfiguration(configuration: TLanguageServerConfigurations): void;
 
   /**
    * Send a request to language server handler to get the session information.
-   *
    */
   fetchSessions(): Promise<void>;
 }
@@ -235,7 +232,6 @@ export interface ILSPDocumentConnectionManager {
   /**
    * Retry to connect to the server each `reconnectDelay` seconds
    * and for `retrialsLeft` times.
-   *
    */
   retryToConnect(
     options: ISocketConnectionOptions,
@@ -256,13 +252,11 @@ export interface ILSPDocumentConnectionManager {
   /**
    * Disconnect the connection to the language server of the requested
    * language.
-   *
    */
   disconnect(languageId: TLanguageServerId): void;
 
   /**
    * Disconnect the signals of requested virtual document.
-   *
    */
   unregisterDocument(virtualDocument: VirtualDocument): void;
 
@@ -561,7 +555,6 @@ export interface ILSPConnection extends ILspConnection {
   /**
    * Get send request to the server to get completion results
    * from a completion item
-   *
    */
   getCompletion(
     location: IPosition,
