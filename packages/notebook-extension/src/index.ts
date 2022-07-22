@@ -1782,7 +1782,6 @@ function activateNotebookLanguageServer(
 ): void {
   notebooks.widgetAdded.connect(async (_, notebook) => {
     const adapter = new NotebookAdapter(notebook, {
-      app,
       connectionManager,
       featureManager,
       foreignCodeExtractorsManager: codeExtractorManager

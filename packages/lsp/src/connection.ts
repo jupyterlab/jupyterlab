@@ -156,7 +156,7 @@ type AnyMethod =
   | Method.ServerRequest;
 
 /**
- * Create a ma[ between the request method and its handler
+ * Create a map between the request method and its handler
  */
 function createMethodMap<T, H, U extends keyof T = keyof T>(
   methods: AnyMethodType,
@@ -284,7 +284,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * Close the connection to the server.
-   *
    */
   close(): void {
     try {
@@ -297,7 +296,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * initialize a connection over a web socket that speaks the LSP
-   *
    */
   connect(socket: WebSocket): this {
     super.connect(socket);
@@ -319,7 +317,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   /**
    * Get send request to the server to get completion results
    * from a completion item
-   *
    */
   async getCompletionResolve(
     completionItem: lsp.CompletionItem
@@ -341,7 +338,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * Generate the notification handlers
-   *
    */
   protected constructNotificationHandlers<
     T extends ServerNotifications | ClientNotifications
@@ -356,7 +352,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * Generate the client request handler
-   *
    */
   protected constructClientRequestHandler<
     T extends ClientRequests,
@@ -371,7 +366,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * Generate the server response handler
-   *
    */
   protected constructServerRequestHandler<
     T extends ServerRequests,
@@ -391,10 +385,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   protected initializeParams(): lsp.InitializeParams {
     return {
       ...super.initializeParams(),
-      // TODO: remove as `lsp.ClientCapabilities` after upgrading to 3.17
-      // which should finally include a fix for moniker issue:
-      // https://github.com/microsoft/vscode-languageserver-node/pull/720
-      capabilities: this._options.capabilities as lsp.ClientCapabilities,
+      capabilities: this._options.capabilities,
       initializationOptions: null,
       processId: null,
       workspaceFolders: null
@@ -403,7 +394,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * Callback called when the server is initialized.
-   *
    */
   protected onServerInitialized(params: lsp.InitializeResult): void {
     this.afterInitialized();
@@ -416,7 +406,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   /**
    * Once the server is initialized, this method generates the
    * client and server handlers
-   *
    */
   protected afterInitialized(): void {
     for (const method of Object.values(
@@ -510,7 +499,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * Send the document changed data to the server.
-   *
    */
   private _sendChange(
     changeEvents: lsp.TextDocumentContentChangeEvent[],

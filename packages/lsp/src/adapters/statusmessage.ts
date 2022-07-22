@@ -3,7 +3,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 export class StatusMessage implements IDisposable {
   constructor() {
-    this.message = '';
+    this._message = '';
     this._timer = null;
   }
 
@@ -22,11 +22,6 @@ export class StatusMessage implements IDisposable {
   }
 
   /**
-   * The text message to be shown on the statusbar
-   */
-  message: string;
-
-  /**
    * Dispose the object.
    */
   dispose(): void {
@@ -41,6 +36,13 @@ export class StatusMessage implements IDisposable {
   }
 
   /**
+   * The text message to be shown on the statusbar.
+   */
+  get message(): string {
+    return this._message;
+  }
+
+  /**
    * Set the text message and (optionally) the timeout to remove it.
    * @param message
    * @param timeout - number of ms to until the message is cleaned;
@@ -49,7 +51,7 @@ export class StatusMessage implements IDisposable {
    */
   set(message: string, timeout: number = 1000 * 3): void {
     this._expireTimer();
-    this.message = message;
+    this._message = message;
     this._changed.emit();
     if (timeout !== -1) {
       this._timer = window.setTimeout(this.clear.bind(this), timeout);
@@ -60,7 +62,7 @@ export class StatusMessage implements IDisposable {
    * Clear the status message.
    */
   clear(): void {
-    this.message = '';
+    this._message = '';
     this._changed.emit();
   }
   /**
@@ -77,6 +79,12 @@ export class StatusMessage implements IDisposable {
       this._timer = null;
     }
   }
+
+  /**
+   * The text message to be shown on the statusbar
+   */
+  private _message: string;
+
   private _changed = new Signal<StatusMessage, void>(this);
 
   private _isDisposed = false;

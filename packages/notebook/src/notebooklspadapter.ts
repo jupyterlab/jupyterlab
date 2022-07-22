@@ -41,7 +41,6 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
 
   /**
    * The wrapped `Notebook` widget.
-   *
    */
   readonly editor: Notebook;
 
@@ -128,8 +127,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Get the index of input editor
    *
-   * @param {CodeEditor.IEditor} ceEditor - instance of the code editor
-   *
+   * @param ceEditor - instance of the code editor
    */
   getEditorIndex(ceEditor: CodeEditor.IEditor): number {
     let cell = this._ceEditorToCell.get(ceEditor)!;
@@ -142,7 +140,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Get the wrapper of input editor.
    *
-   * @param {CodeEditor.IEditor} ceEditor
+   * @param ceEditor - instance of the code editor
    */
   getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement {
     let cell = this._ceEditorToCell.get(ceEditor)!;
@@ -153,8 +151,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * Callback on kernel changed event, it will disconnect the
    * document with the language server and then reconnect.
    *
-   * @param {SessionContext} _session
-   * @param {Session.ISessionConnection.IKernelChangedArgs} change
+   * @param _session - Session context of changed kernel
+   * @param change - Changed data
    */
   async onKernelChanged(
     _session: SessionContext,
@@ -197,7 +195,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     if (this.isDisposed) {
       return;
     }
-    this.isDisposed = true;
+    this._isDisposed = true;
     this.widget.context.sessionContext.kernelChanged.disconnect(
       this.onKernelChanged,
       this
@@ -230,8 +228,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Update the virtual document on cell changing event.
    *
-   * @param {IObservableUndoableList<ICellModel>} cells
-   * @param {IObservableList.IChangedArgs<ICellModel>} change
+   * @param cells - Observable list of changed cells
+   * @param change - Changed data
    */
   async handleCellChange(
     cells: IObservableUndoableList<ICellModel>,
@@ -352,7 +350,6 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * Initialization function called once the editor and the LSP connection
    * manager is ready. This function will create the virtual document and
    * connect various signals.
-   *
    */
   protected async initOnceReady(): Promise<void> {
     await this.widget.context.sessionContext.ready;
@@ -390,7 +387,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Connect the cell changed event to its handler
    *
-   * @param {(NotebookPanel | Notebook)} notebook
+   * @param  notebook - The notebook that emitted event.
    */
   private _connectModelSignals(notebook: NotebookPanel | Notebook) {
     if (notebook.model === null) {
@@ -420,8 +417,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
 
   /**
    * Handle the cell changed event
-   * @param {Notebook} notebook
-   * @param {Cell} cell
+   * @param  notebook - The notebook that emitted event
+   * @param cell - Changed cell.
    */
   private _activeCellChanged(notebook: Notebook, cell: Cell) {
     if (cell.model.type !== this._type) {
@@ -440,7 +437,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
 
   /**
    * Get the cell at the cursor position of the virtual document.
-   * @param {IVirtualPosition} pos
+   * @param  pos - Position in the virtual document.
    */
   private _getCellAt(pos: IVirtualPosition): Cell {
     let ceEditor = this.virtualDocument.getEditorAtVirtualLine(pos);
@@ -449,7 +446,6 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
 
   /**
    * A map between the CM editor and the containing cell
-   *
    */
   private _ceEditorToCell: Map<IEditor, Cell>;
 

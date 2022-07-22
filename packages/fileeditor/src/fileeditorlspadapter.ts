@@ -1,3 +1,4 @@
+import { DocumentRegistry } from './../../docregistry/src/registry';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
@@ -9,15 +10,24 @@ import {
 } from '@jupyterlab/lsp';
 import { FileEditor } from './widget';
 
+export interface IFileEditorAdapterOptions extends IAdapterOptions {
+  /**
+   * The document registry instance.
+   */
+  docRegistry: DocumentRegistry;
+}
+
 export class FileEditorAdapter extends WidgetLSPAdapter<
   IDocumentWidget<FileEditor>
 > {
   constructor(
     editorWidget: IDocumentWidget<FileEditor>,
-    options: IAdapterOptions
+    options: IFileEditorAdapterOptions
   ) {
-    super(editorWidget, options);
+    const { docRegistry, ...others } = options;
+    super(editorWidget, others);
     this.editor = editorWidget.content;
+    this._docRegistry = docRegistry;
     this.initialized = new Promise<void>((resolve, reject) => {
       this.initOnceReady().then(resolve).catch(reject);
     });
@@ -28,7 +38,6 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
 
   /**
    * The wrapped `FileEditor` widget.
-   *
    */
   readonly editor: FileEditor;
 
@@ -56,8 +65,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
       // registry (and this is arguably easier to extend), so let's check it
       // just in case; this is also how the "Klingon" language for testing
       // gets registered, so we need it for tests too.
-      let fileType =
-        this.options.app.docRegistry.getFileTypeForModel(contentsModel);
+      let fileType = this._docRegistry.getFileTypeForModel(contentsModel);
       return fileType.mimeTypes[0];
     } else {
       // "text/plain" this is
@@ -131,7 +139,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * 0
    *
    * @param position - the position of cursor in the virtual document.
-   * @return {*}  {number} - index of the virtual editor
+   * @return  {number} - index of the virtual editor
    */
   getEditorIndexAt(position: IVirtualPosition): number {
     return 0;
@@ -140,8 +148,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   /**
    * Get the index of input editor
    *
-   * @param {CodeEditor.IEditor} ceEditor - instance of the code editor
-   *
+   * @param ceEditor - instance of the code editor
    */
   getEditorIndex(ceEditor: CodeEditor.IEditor): number {
     return 0;
@@ -150,8 +157,8 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   /**
    * Get the wrapper of input editor.
    *
-   * @param {CodeEditor.IEditor} ceEditor
-   * @return {*}  {HTMLElement}
+   * @param ceEditor
+   * @return  {HTMLElement}
    */
   getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement {
     return this.wrapperElement;
@@ -161,7 +168,6 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * Initialization function called once the editor and the LSP connection
    * manager is ready. This function will create the virtual document and
    * connect various signals.
-   *
    */
   protected async initOnceReady(): Promise<void> {
     if (!this.editor.context.isReady) {
@@ -176,4 +182,9 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
 
     this.editor.model.mimeTypeChanged.connect(this.reloadConnection, this);
   }
+
+  /**
+   * The document registry instance.
+   */
+  private readonly _docRegistry: DocumentRegistry;
 }

@@ -1,4 +1,4 @@
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IDisposable } from '@lumino/disposable';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
@@ -44,11 +44,6 @@ export interface IEditorChangedData {
 
 export interface IAdapterOptions {
   /**
-   * The application object
-   */
-  app: JupyterFrontEnd;
-
-  /**
    * The LSP document and connection manager instance.
    */
   connectionManager: ILSPDocumentConnectionManager;
@@ -75,21 +70,28 @@ export interface IAdapterOptions {
  * as this would make the logic of inspections caching impossible to maintain, thus the WidgetAdapter
  * has to handle that, keeping multiple connections and multiple virtual documents.
  */
-export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
+export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
+  implements IDisposable
+{
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
   constructor(public widget: T, protected options: IAdapterOptions) {
-    this.app = options.app;
     this.connectionManager = options.connectionManager;
     this.isConnected = false;
-    this.trans = (options.translator || nullTranslator).load('jupyterlab-lsp');
+    this.trans = (options.translator || nullTranslator).load('jupyterlab');
     // set up signal connections
     this.widget.context.saveState.connect(this.onSaveState, this);
     this.connectionManager.closed.connect(this.onConnectionClosed, this);
     this.widget.disposed.connect(this.dispose, this);
   }
 
+  /**
+   * Check if the adapter is disposed
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
   /**
    * Check if the document contains multiple editors
    */
@@ -141,6 +143,13 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
    */
   get activeEditorChanged(): ISignal<WidgetLSPAdapter<T>, IEditorChangedData> {
     return this._activeEditorChanged;
+  }
+
+  /**
+   * Signal emitted when the adapter is disposed.
+   */
+  get disposed(): ISignal<WidgetLSPAdapter<T>, void> {
+    return this._disposed;
   }
 
   /**
@@ -237,19 +246,20 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
    * Dispose the adapter.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       return;
     }
-    this.isDisposed = true;
+    this._isDisposed = true;
 
     this.widget.context.saveState.disconnect(this.onSaveState, this);
     this.connectionManager.closed.disconnect(this.onConnectionClosed, this);
     this.widget.disposed.disconnect(this.dispose, this);
 
     this.disconnect();
+    this._disposed.emit();
     Signal.clearData(this);
+
     // just to be sure
-    this.app = null as any;
     this.widget = null as any;
     this.connectionManager = null as any;
     this.widget = null as any;
@@ -280,7 +290,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
    * Update the virtual document.
    */
   updateDocuments(): Promise<void> {
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       console.warn('Cannot update documents: adapter disposed');
       return Promise.reject('Cannot update documents: adapter disposed');
     }
@@ -297,14 +307,13 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
 
   /**
    * Callback called on the document changed event.
-   *
    */
   documentChanged(
     virtualDocument: VirtualDocument,
     document: VirtualDocument,
     isInit = false
   ): void {
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       console.warn('Cannot swap document: adapter disposed');
       return;
     }
@@ -323,17 +332,6 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
       virtualDocument.value,
       virtualDocument.documentInfo
     );
-    // the first change (initial) is not propagated to features,
-    // as it has no associated CodeMirrorChange object
-    if (!isInit) {
-      // TODO??
-      // guarantee that the virtual editor won't perform an update of the virtual documents while
-      // the changes are recorded...
-      // TODO this is not ideal - why it solves the problem of some errors,
-      //  it introduces an unnecessary delay. A better way could be to invalidate some of the updates when a new one comes in.
-      //  but maybe not every one (then the outdated state could be kept for too long fo a user who writes very quickly)
-      //  also we would not want to invalidate the updates for the purpose of autocompletion (the trigger characters)
-    }
   }
 
   /**
@@ -347,22 +345,21 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
    * 0
    *
    * @param position - the position of cursor in the virtual document.
-   * @return {*}  {number} - index of the virtual editor
+   * @return - index of the virtual editor
    */
   abstract getEditorIndexAt(position: IVirtualPosition): number;
 
   /**
    * Get the index of input editor
    *
-   * @param {CodeEditor.IEditor} ceEditor - instance of the code editor
-   *
+   * @param ceEditor - instance of the code editor
    */
   abstract getEditorIndex(ceEditor: CodeEditor.IEditor): number;
 
   /**
    * Get the wrapper of input editor.
    *
-   * @param {CodeEditor.IEditor} ceEditor
+   * @param ceEditor
    */
   abstract getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement;
 
@@ -389,7 +386,6 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
 
   /**
    * Callback on document saved event.
-   *
    */
   protected onSaveState(
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>,
@@ -422,11 +418,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
     }
   }
 
-  protected isDisposed = false;
-  /**
-   * The application object.
-   */
-  protected app: JupyterFrontEnd;
+  protected _isDisposed = false;
 
   /**
    * Connect the virtual document with the language server.
@@ -539,7 +531,6 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
 
   /**
    * Create the virtual document using current path and language.
-   *
    */
   protected initVirtual(): void {
     let virtualDocument = this.createVirtualDocument();
@@ -593,22 +584,26 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget> {
   > = new Signal(this);
 
   /**
-   * Signal emitted when the an editor is changed.
+   * Signal emitted when an editor is changed.
    */
   protected _editorAdded: Signal<WidgetLSPAdapter<T>, IEditorChangedData> =
     new Signal(this);
 
   /**
-   * Signal emitted when the an editor is removed.
+   * Signal emitted when an editor is removed.
    */
   protected _editorRemoved: Signal<WidgetLSPAdapter<T>, IEditorChangedData> =
     new Signal(this);
 
   /**
+   * Signal emitted when the adapter is disposed.
+   */
+  protected _disposed: Signal<WidgetLSPAdapter<T>, void> = new Signal(this);
+
+  /**
    * Callback called when a foreign document is closed,
    * the associated signals with this virtual document
    * are disconnected.
-   *
    */
   private _onForeignDocumentClosed(
     _: VirtualDocument,

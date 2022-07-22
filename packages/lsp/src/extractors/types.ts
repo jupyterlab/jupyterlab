@@ -45,12 +45,12 @@ export interface IForeignCodeExtractor {
   /**
    * The foreign language.
    */
-  language: LanguageIdentifier;
+  readonly language: LanguageIdentifier;
 
   /**
    * The supported cell types.
    */
-  cellType: string[];
+  readonly cellType: string[];
 
   /**
    * Split the code into the host and foreign code (if any foreign code was detected)
@@ -61,7 +61,7 @@ export interface IForeignCodeExtractor {
    * Does the extractor produce code which should be appended to the previously established virtual document (False)
    * of the same language, or does it produce standalone snippets which require separate connections (True)?
    */
-  standalone: boolean;
+  readonly standalone: boolean;
 
   /**
    * Test if there is any foreign code in provided code snippet.
@@ -71,5 +71,5 @@ export interface IForeignCodeExtractor {
   /**
    * Extension of the virtual document (some servers check extensions of files), e.g. 'py' or 'R'.
    */
-  fileExtension: string;
+  readonly fileExtension: string;
 }

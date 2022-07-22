@@ -16,23 +16,23 @@ export class TextForeignCodeExtractor implements IForeignCodeExtractor {
   /**
    * The foreign language.
    */
-  language: LanguageIdentifier;
+  readonly language: LanguageIdentifier;
 
   /**
    * Should the foreign code be appended (False) to the previously established virtual document of the same language,
    * or is it standalone snippet which requires separate connection?
    */
-  standalone: boolean;
+  readonly standalone: boolean;
 
   /**
    * Extension of the virtual document (some servers check extensions of files), e.g. 'py' or 'R'.
    */
-  fileExtension: string;
+  readonly fileExtension: string;
 
   /**
    * The supported cell types.
    */
-  cellType: string[];
+  readonly cellType: string[];
 
   /**
    * Test if there is any foreign code in provided code snippet.

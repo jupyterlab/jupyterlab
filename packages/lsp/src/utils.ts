@@ -39,7 +39,6 @@ export function untilReady(
 
 /**
  * Convert dotted path into dictionary.
- *
  */
 export function expandDottedPaths(obj: ReadonlyJSONObject): ReadonlyJSONObject {
   const settings: any = [];

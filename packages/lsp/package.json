@@ -40,6 +40,9 @@
     "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
+  "resolutions": {
+    "vscode-languageserver-protocol": "^3.17.0"
+  },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.11",
     "@jupyterlab/apputils": "^4.0.0-alpha.11",
@@ -50,12 +53,13 @@
     "@jupyterlab/translation": "^4.0.0-alpha.11",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
+    "@lumino/polling": "^1.11.0",
     "@lumino/signaling": "^1.10.1",
     "codemirror": "~5.61.0",
     "lodash.mergewith": "^4.6.1",
     "lsp-ws-connection": "~0.7.0",
     "vscode-jsonrpc": "^6.0.0",
-    "vscode-languageserver-protocol": "^3.16.0",
+    "vscode-languageserver-protocol": "^3.17.0",
     "vscode-ws-jsonrpc": "0.2.0"
   },
   "devDependencies": {

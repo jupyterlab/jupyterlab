@@ -1,10 +1,11 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { FieldProps } from '@rjsf/core';
-import React, { useState } from 'react';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { UUID } from '@lumino/coreutils';
 import { closeIcon } from '@jupyterlab/ui-components';
+import { UUID } from '@lumino/coreutils';
+import { Debouncer } from '@lumino/polling';
+import React, { useState } from 'react';
 
+import type { FieldProps } from '@rjsf/core';
 type TDict = { [key: string]: any };
 
 interface ISettingPropertyMap {
@@ -27,22 +28,6 @@ interface ISettingProperty {
 const SETTING_NAME = 'languageServers';
 const SERVER_SETTINGS = 'configuration';
 
-/**
- * Debouncer with support for function with arguments.
- */
-function debounce<Params extends any[]>(
-  func: (...args: Params) => any,
-  timeout: number = 500
-): (...args: Params) => void {
-  let timer: NodeJS.Timeout;
-  return (...args: Params) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      func(...args);
-    }, timeout);
-  };
-}
-
 interface ISettingFormProps {
   /**
    * The translation bundle.
@@ -57,7 +42,7 @@ interface ISettingFormProps {
   /**
    * Callback to update the setting item.
    */
-  updateSetting: (hash: string, newSetting: TDict) => void;
+  updateSetting: Debouncer<void, any, [hash: string, newSetting: TDict]>;
 
   /**
    * Hash to differentiate the setting fields.
@@ -94,7 +79,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
    * Callback on server name field change event
    */
   const onServerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    props.updateSetting(props.serverHash, { serverName: e.target.value });
+    props.updateSetting.invoke(props.serverHash, {
+      serverName: e.target.value
+    });
     setCurrentServerName(e.target.value);
   };
 
@@ -141,7 +128,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
       ...otherSettingsComposite,
       [property]: settingValue
     };
-    props.updateSetting(props.serverHash, newProps);
+    props.updateSetting.invoke(props.serverHash, newProps);
     setOtherSettingsComposite(newProps);
   };
 
@@ -158,7 +145,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     Object.values(newMap).forEach(value => {
       payload[value.property] = value.value;
     });
-    props.updateSetting(props.serverHash, { [SERVER_SETTINGS]: payload });
+    props.updateSetting.invoke(props.serverHash, {
+      [SERVER_SETTINGS]: payload
+    });
     setPropertyMap(newMap);
   };
 
@@ -175,7 +164,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
       Object.values(newMap).forEach(value => {
         payload[value.property] = value.value;
       });
-      props.updateSetting(props.serverHash, { [SERVER_SETTINGS]: payload });
+      props.updateSetting.invoke(props.serverHash, {
+        [SERVER_SETTINGS]: payload
+      });
       setPropertyMap(newMap);
     });
   };
@@ -191,10 +182,16 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
         payload[value.property] = value.value;
       });
       setPropertyMap(newMap);
-      props.updateSetting(props.serverHash, { [SERVER_SETTINGS]: payload });
+      props.updateSetting.invoke(props.serverHash, {
+        [SERVER_SETTINGS]: payload
+      });
     }
   };
-
+  const debouncedSetProperty = new Debouncer<
+    void,
+    any,
+    [hash: string, property: ISettingProperty]
+  >(setProperty);
   return (
     <div className="array-item">
       <div className="form-group ">
@@ -273,7 +270,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                       hash={hash}
                       property={property}
                       removeProperty={removeProperty}
-                      setProperty={debounce(setProperty)}
+                      setProperty={debouncedSetProperty}
                     />
                   );
                 })}
@@ -302,7 +299,7 @@ function PropertyFrom(props: {
   hash: string;
   property: ISettingProperty;
   removeProperty: (hash: string) => void;
-  setProperty: (hash: string, property: ISettingProperty) => void;
+  setProperty: Debouncer<void, any, [hash: string, property: ISettingProperty]>;
 }): JSX.Element {
   const [state, setState] = useState<{
     property: string;
@@ -317,7 +314,7 @@ function PropertyFrom(props: {
 
   const changeName = (newName: string) => {
     const newState = { ...state, property: newName };
-    props.setProperty(props.hash, newState);
+    props.setProperty.invoke(props.hash, newState);
     setState(newState);
   };
 
@@ -330,7 +327,7 @@ function PropertyFrom(props: {
       value = parseFloat(newValue);
     }
     const newState = { ...state, value };
-    props.setProperty(props.hash, newState);
+    props.setProperty.invoke(props.hash, newState);
     setState(newState);
   };
 
@@ -345,7 +342,7 @@ function PropertyFrom(props: {
     }
     const newState = { ...state, type: newType, value };
     setState(newState);
-    props.setProperty(props.hash, newState);
+    props.setProperty.invoke(props.hash, newState);
   };
 
   return (
@@ -442,6 +439,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
       });
     }
     this.state = { title, desc, items };
+    this._debouncedUpdateSetting = new Debouncer(this.updateSetting.bind(this));
   }
 
   /**
@@ -548,7 +546,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
                   key={`${idx}-${hash}`}
                   trans={this._trans}
                   removeSetting={this.removeSetting}
-                  updateSetting={debounce(this.updateSetting)}
+                  updateSetting={this._debouncedUpdateSetting}
                   serverHash={hash}
                   settings={value}
                   schema={this._schema}
@@ -589,6 +587,12 @@ class SettingRenderer extends React.Component<IProps, IState> {
    * The setting schema.
    */
   private _schema: TDict;
+
+  private _debouncedUpdateSetting: Debouncer<
+    void,
+    any,
+    [hash: string, newSetting: TDict]
+  >;
 }
 
 /**

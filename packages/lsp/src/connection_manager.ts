@@ -206,7 +206,7 @@ export class DocumentConnectionManager
     adapter: WidgetLSPAdapter<IDocumentWidget>
   ): void {
     this.adapters.set(path, adapter);
-    adapter.widget.disposed.connect(() => {
+    adapter.disposed.connect(() => {
       this.adapters.delete(path);
     });
   }
@@ -437,7 +437,7 @@ export class DocumentConnectionManager
   /**
    * Create the LSP connection for requested virtual document.
    *
-   * @return {*}  Return the promise of the LSP connection.
+   * @return  Return the promise of the LSP connection.
    */
 
   private async _connectSocket(

@@ -146,7 +146,7 @@ export function isWithinRange(
 export class VirtualDocumentInfo implements IDocumentInfo {
   /**
    * Creates an instance of VirtualDocumentInfo.
-   * @param {VirtualDocument} document - the virtual document need to
+   * @param document - the virtual document need to
    * be wrapped.
    */
   constructor(document: VirtualDocument) {
@@ -534,7 +534,7 @@ export class VirtualDocument implements IDisposable {
   /**
    * Get the virtual document from the cursor position of the source
    * document
-   * @param {ISourcePosition} position - position in source document
+   * @param position - position in source document
    */
   documentAtSourcePosition(position: ISourcePosition): VirtualDocument {
     let sourceLine = this.sourceLines.get(position.line);
@@ -571,7 +571,7 @@ export class VirtualDocument implements IDisposable {
    * Detect if the input source position is belong to the current
    * virtual document.
    *
-   * @param {ISourcePosition} sourcePosition - position in the source document
+   * @param sourcePosition - position in the source document
    */
   isWithinForeign(sourcePosition: ISourcePosition): boolean {
     let sourceLine = this.sourceLines.get(sourcePosition.line)!;
@@ -592,8 +592,8 @@ export class VirtualDocument implements IDisposable {
    * Compute the position in root document from the position of
    * a child editor.
    *
-   * @param {CodeEditor.IEditor} editor - the active editor.
-   * @param {IEditorPosition} position - position in the active editor.
+   * @param editor - the active editor.
+   * @param position - position in the active editor.
    */
   transformFromEditorToRoot(
     editor: CodeEditor.IEditor,
@@ -614,7 +614,7 @@ export class VirtualDocument implements IDisposable {
    * Compute the position in the virtual document from the position
    * if the source document.
    *
-   * @param {ISourcePosition} sourcePosition - position in source document
+   * @param sourcePosition - position in source document
    */
   virtualPositionAtDocument(sourcePosition: ISourcePosition): IVirtualPosition {
     let sourceLine = this.sourceLines.get(sourcePosition.line);
@@ -1104,7 +1104,7 @@ export namespace VirtualDocument {
 /**
  * Create foreign documents if available from input virtual documents.
  * @param virtualDocument - the virtual document to be collected
- * @return {*}  - Set of generated foreign documents
+ * @return - Set of generated foreign documents
  */
 export function collectDocuments(
   virtualDocument: VirtualDocument

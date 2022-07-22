@@ -565,10 +565,10 @@ function activateFileEditorLanguageServer(
 ): void {
   editors.widgetAdded.connect(async (_, editor) => {
     const adapter = new FileEditorAdapter(editor, {
-      app,
       connectionManager,
       featureManager,
-      foreignCodeExtractorsManager: extractorManager
+      foreignCodeExtractorsManager: extractorManager,
+      docRegistry: app.docRegistry
     });
     connectionManager.registerAdapter(editor.context.path, adapter);
   });
