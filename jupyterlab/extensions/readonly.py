@@ -62,7 +62,7 @@ class ReadOnlyExtensionsManager(ExtensionsManager):
             The action result
         """
         trans = translator.load("jupyterlab")
-        raise ActionResult(
+        return ActionResult(
             status="error", message=trans.gettext("Extension installation not supported.")
         )
 
@@ -80,6 +80,6 @@ class ReadOnlyExtensionsManager(ExtensionsManager):
             The action result
         """
         trans = translator.load("jupyterlab")
-        raise ActionResult(
-            status="error", message=trans.gettext("Extension uninstallation not supported.")
+        return ActionResult(
+            status="error", message=trans.gettext("Extension removal not supported.")
         )

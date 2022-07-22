@@ -4,6 +4,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 import abc
+import dataclasses
 import json
 import re
 from dataclasses import dataclass, field
@@ -49,7 +50,7 @@ def _build_check_info(app_options):
     return status
 
 
-@dataclass
+@dataclass(frozen=True)
 class ExtensionPackage:
     """Extension package entry.
 
@@ -59,7 +60,7 @@ class ExtensionPackage:
         url: Package home page
         pkg_type: Type of package - ["prebuilt", "source"]
         enabled: [optional] Whether the package is enabled or not -  default False
-        core: [optiona] Whether the package is a core package or not - default False
+        core: [optional] Whether the package is a core package or not - default False
         latest_version: [optional] Latest available version - default ""
         installed_version: [optional] Installed version - default ""
         status: [optional] Package status - ["ok", "warning", "error"]; default "ok"
@@ -84,7 +85,7 @@ class ExtensionPackage:
     status: str = "ok"
 
 
-@dataclass
+@dataclass(frozen=True)
 class ActionResult:
     """Action result
 
@@ -166,8 +167,8 @@ class ExtensionsManager(abc.ABC):
         self._extensions_cache: Dict[Optional[str], ExtensionsCache] = {}
         self._listings_cache: Optional[dict] = None
         self._listings_block_mode = True
-
         self._listing_fetch: Optional[ioloop.PeriodicCallback] = None
+
         if len(self.options.allowed_extensions_uris) or len(self.options.blocked_extensions_uris):
             self._listings_block_mode = len(self.options.allowed_extensions_uris) == 0
 
@@ -294,12 +295,12 @@ class ExtensionsManager(abc.ABC):
         return extension.name
 
     async def list_extensions(
-        self, query: str = "", page: int = 1, per_page: int = 30
+        self, query: Optional[str] = None, page: int = 1, per_page: int = 30
     ) -> Tuple[Set[ExtensionPackage], Optional[int]]:
         """List extensions for a given ``query`` search term.
 
-        This will return the extensions installed or available if
-        allowed by the listing settings.
+        This will return the extensions installed (if ``query`` is None) or
+        available if allowed by the listing settings.
 
         Args:
             query: [optional] Query search term.
@@ -317,27 +318,23 @@ class ExtensionsManager(abc.ABC):
 
         cache = self._extensions_cache[query].cache[page]
         extensions = set(cache.values())
-        if self._listings_cache is not None:
+        if query is not None and self._listings_cache is not None:
             listing = list(self._listings_cache)
             extensions = set()
             if self._listings_block_mode:
                 for name, ext in cache.items():
                     if name not in listing:
-                        ext.is_allowed = True
-                        extensions.add(ext)
+                        extensions.add(dataclasses.replace(ext, is_allowed=True))
                     elif ext.installed_version:
                         self.log.warning(f"Blocked extension '{name}' is installed.")
-                        ext.is_allowed = False
-                        extensions.add(ext)
+                        extensions.add(dataclasses.replace(ext, is_allowed=False))
             else:
                 for name, ext in cache.items():
                     if name in listing:
-                        ext.is_allowed = True
-                        extensions.add(ext)
+                        extensions.add(dataclasses.replace(ext, is_allowed=True))
                     elif ext.installed_version:
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
-                        ext.is_allowed = False
-                        extensions.add(ext)
+                        extensions.add(dataclasses.replace(ext, is_allowed=False))
 
         return extensions
 
@@ -359,7 +356,7 @@ class ExtensionsManager(abc.ABC):
                     r = requests.request(
                         "GET",
                         blocked_extensions_uri,
-                        **self.options.listings_request_opts,
+                        **self.options.listings_request_options,
                     )
                     j = json.loads(r.text)
                     rules.extend(j.get("blocked_extensions", []))
@@ -369,7 +366,9 @@ class ExtensionsManager(abc.ABC):
             )
             for allowed_extensions_uri in self.options.allowed_extensions_uris:
                 r = requests.request(
-                    "GET", allowed_extensions_uri, **self.options.listings_request_opts
+                    "GET",
+                    allowed_extensions_uri,
+                    **self.options.listings_request_options,
                 )
                 j = json.loads(r.text)
                 rules.extend(j.get("allowed_extensions", []))
@@ -413,8 +412,10 @@ class ExtensionsManager(abc.ABC):
                 pkg_type="prebuilt",
                 companion=self._get_companion(data),
             )
+
             if get_latest_version:
-                pkg["latest_version"] = await self.get_latest_version(pkg)
+                pkg = dataclasses.replace(pkg, latest_version=await self.get_latest_version(pkg))
+
             extensions[normalized_name] = pkg
 
         for name, data in info["extensions"].items():

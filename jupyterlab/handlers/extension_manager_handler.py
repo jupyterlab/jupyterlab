@@ -28,7 +28,7 @@ class ExtensionHandler(APIHandler):
             page: [optional] Result page - default 1 (min. 1)
             per_page: [optional] Number of results per page - default 30 (max. 100)
         """
-        query = self.get_argument("query", "") or None
+        query = self.get_argument("query", None)
         page = max(1, int(self.get_argument("page", "1")))
         per_page = min(100, int(self.get_argument("per_page", "30")))
         extensions, last_page = await self.manager.list_extensions(query, page, per_page)

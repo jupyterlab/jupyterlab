@@ -3,9 +3,9 @@
 import sys
 from typing import Optional
 
-from .default import ReadOnlyExtensionsManager
 from .manager import ActionResult, ExtensionPackage, ExtensionsManager  # noqa: F401
 from .pypi import PyPiExtensionsManager
+from .readonly import ReadOnlyExtensionsManager
 
 # See compatibility note on `group` keyword in https://docs.python.org/3/library/importlib.metadata.html#entry-points
 if sys.version_info < (3, 10):
