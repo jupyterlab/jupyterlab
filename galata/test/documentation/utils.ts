@@ -1,5 +1,5 @@
 import { Page } from '@playwright/test';
-import { default as extensionsSearchStub } from './data/extensions-search.json';
+import { default as extensionsSearchStub } from './data/extensions-search-drawio.json';
 import fs from 'fs';
 import path from 'path';
 
@@ -72,9 +72,9 @@ export async function setSidebarWidth(
   await page.mouse.up();
 }
 
-export async function stubExtensionsSearch(page: Page): Promise<void> {
+export async function stubDrawioExtensionsSearch(page: Page): Promise<void> {
   await page.route(
-    'https://registry.npmjs.org/-/v1/search*',
+    'https://registry.npmjs.org/-/v1/search*text=drawio*',
     async (route, request) => {
       switch (request.method()) {
         case 'GET':

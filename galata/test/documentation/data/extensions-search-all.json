@@ -1,0 +1,202 @@
+{
+  "objects": [
+    {
+      "package": {
+        "name": "@jupyterlab/apputils",
+        "scope": "jupyterlab",
+        "version": "3.4.4",
+        "description": "JupyterLab - Application Utilities",
+        "keywords": ["jupyter", "jupyterlab", "jupyterlab-extension"],
+        "date": "2022-07-21T14:47:49.450Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40jupyterlab%2Fapputils",
+          "homepage": "https://github.com/jupyterlab/jupyterlab",
+          "repository": "https://github.com/jupyterlab/jupyterlab",
+          "bugs": "https://github.com/jupyterlab/jupyterlab/issues"
+        },
+        "author": { "name": "Project Jupyter" },
+        "publisher": {
+          "username": "fcollonval",
+          "email": "fcollonval@gmail.com"
+        },
+        "maintainers": [
+          { "username": "3coins", "email": "pyjain@gmail.com" },
+          { "username": "jweill-aws", "email": "jweill@amazon.com" },
+          { "username": "krassowski", "email": "krassowski.michal@gmail.com" },
+          { "username": "darian", "email": "npm@darian.email" },
+          { "username": "declanvk", "email": "dkelly.home@gmail.com" },
+          { "username": "markellekelly", "email": "markellekelly@gmail.com" },
+          { "username": "zuoyuanh", "email": "david.hzy97@gmail.com" },
+          { "username": "ellisonbg", "email": "ellisonbg@gmail.com" },
+          { "username": "blink1073", "email": "steven.silvester@ieee.org" },
+          { "username": "jasongrout", "email": "jason@jasongrout.org" },
+          { "username": "sylvaincorlay", "email": "sylvain.corlay@gmail.com" },
+          { "username": "ian-r-rose", "email": "ian.r.rose@gmail.com" },
+          { "username": "gnestor", "email": "grantnestor@gmail.com" },
+          { "username": "parente", "email": "parente@gmail.com" },
+          { "username": "mpacer", "email": "mpacer@berkeley.edu" },
+          { "username": "jaipreets", "email": "jaipreet@amazon.com" },
+          { "username": "minrk", "email": "benjaminrk@gmail.com" },
+          { "username": "saulshanabrook", "email": "s.shanabrook@gmail.com" },
+          { "username": "hoo761", "email": "jacobrhoussian@gmail.com" },
+          { "username": "zsailer", "email": "zachsailer@gmail.com" },
+          { "username": "telamonian", "email": "telamonian@hotmail.com" },
+          { "username": "fcollonval", "email": "fcollonval@gmail.com" },
+          { "username": "lresende", "email": "lresende@us.ibm.com" },
+          { "username": "consideratio", "email": "erik.i.sundell@gmail.com" },
+          { "username": "ajbozarth", "email": "ajbozart@us.ibm.com" },
+          { "username": "marthacryan", "email": "martha.cryan326@gmail.com" },
+          { "username": "jtpio", "email": "jeremy@jtp.io" },
+          { "username": "echarles", "email": "eric@datalayer.io" },
+          { "username": "goanpeca", "email": "goanpeca@gmail.com" },
+          { "username": "mbektas", "email": "mbektas@outlook.com" },
+          { "username": "loichuder", "email": "loic.huder@esrf.fr" }
+        ]
+      },
+      "score": {
+        "final": 0.3189719547427941,
+        "detail": {
+          "quality": 0.4344936230693638,
+          "popularity": 0.20559200330090951,
+          "maintenance": 0.3333333333333333
+        }
+      },
+      "searchScore": 9.516456e-8
+    },
+    {
+      "package": {
+        "name": "@jupyterlab/translation",
+        "scope": "jupyterlab",
+        "version": "3.4.4",
+        "description": "JupyterLab - Translation services",
+        "keywords": ["jupyter", "jupyterlab", "jupyterlab-extension"],
+        "date": "2022-07-21T14:51:44.592Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40jupyterlab%2Ftranslation",
+          "homepage": "https://github.com/jupyterlab/jupyterlab",
+          "repository": "https://github.com/jupyterlab/jupyterlab",
+          "bugs": "https://github.com/jupyterlab/jupyterlab/issues"
+        },
+        "author": { "name": "Project Jupyter" },
+        "publisher": {
+          "username": "fcollonval",
+          "email": "fcollonval@gmail.com"
+        },
+        "maintainers": [
+          { "username": "3coins", "email": "pyjain@gmail.com" },
+          { "username": "jweill-aws", "email": "jweill@amazon.com" },
+          { "username": "krassowski", "email": "krassowski.michal@gmail.com" },
+          { "username": "darian", "email": "npm@darian.email" },
+          { "username": "declanvk", "email": "dkelly.home@gmail.com" },
+          { "username": "markellekelly", "email": "markellekelly@gmail.com" },
+          { "username": "zuoyuanh", "email": "david.hzy97@gmail.com" },
+          { "username": "ellisonbg", "email": "ellisonbg@gmail.com" },
+          { "username": "blink1073", "email": "steven.silvester@ieee.org" },
+          { "username": "jasongrout", "email": "jason@jasongrout.org" },
+          { "username": "sylvaincorlay", "email": "sylvain.corlay@gmail.com" },
+          { "username": "ian-r-rose", "email": "ian.r.rose@gmail.com" },
+          { "username": "gnestor", "email": "grantnestor@gmail.com" },
+          { "username": "parente", "email": "parente@gmail.com" },
+          { "username": "mpacer", "email": "mpacer@berkeley.edu" },
+          { "username": "jaipreets", "email": "jaipreet@amazon.com" },
+          { "username": "minrk", "email": "benjaminrk@gmail.com" },
+          { "username": "saulshanabrook", "email": "s.shanabrook@gmail.com" },
+          { "username": "hoo761", "email": "jacobrhoussian@gmail.com" },
+          { "username": "zsailer", "email": "zachsailer@gmail.com" },
+          { "username": "telamonian", "email": "telamonian@hotmail.com" },
+          { "username": "fcollonval", "email": "fcollonval@gmail.com" },
+          { "username": "lresende", "email": "lresende@us.ibm.com" },
+          { "username": "consideratio", "email": "erik.i.sundell@gmail.com" },
+          { "username": "ajbozarth", "email": "ajbozart@us.ibm.com" },
+          { "username": "marthacryan", "email": "martha.cryan326@gmail.com" },
+          { "username": "jtpio", "email": "jeremy@jtp.io" },
+          { "username": "echarles", "email": "eric@datalayer.io" },
+          { "username": "goanpeca", "email": "goanpeca@gmail.com" },
+          { "username": "mbektas", "email": "mbektas@outlook.com" },
+          { "username": "loichuder", "email": "loic.huder@esrf.fr" }
+        ]
+      },
+      "score": {
+        "final": 0.3043979310975364,
+        "detail": {
+          "quality": 0.4477368226117161,
+          "popularity": 0.1526006218495854,
+          "maintenance": 0.3333333333333333
+        }
+      },
+      "searchScore": 3.6817326e-8
+    },
+    {
+      "package": {
+        "name": "@jupyterlab/git",
+        "scope": "jupyterlab",
+        "version": "0.37.1",
+        "description": "A JupyterLab extension for version control using git",
+        "keywords": [
+          "Jupyter",
+          "JupyterLab",
+          "JupyterLab3",
+          "jupyterlab-extension",
+          "Git"
+        ],
+        "date": "2022-04-26T06:32:46.362Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40jupyterlab%2Fgit",
+          "homepage": "https://github.com/jupyterlab/jupyterlab-git",
+          "repository": "https://github.com/jupyterlab/jupyterlab-git",
+          "bugs": "https://github.com/jupyterlab/jupyterlab-git/issues"
+        },
+        "author": { "name": "Jupyter Development Team" },
+        "publisher": {
+          "username": "fcollonval",
+          "email": "fcollonval@gmail.com"
+        },
+        "maintainers": [
+          { "username": "3coins", "email": "pyjain@gmail.com" },
+          { "username": "jweill-aws", "email": "jweill@amazon.com" },
+          { "username": "krassowski", "email": "krassowski.michal@gmail.com" },
+          { "username": "darian", "email": "npm@darian.email" },
+          { "username": "declanvk", "email": "dkelly.home@gmail.com" },
+          { "username": "markellekelly", "email": "markellekelly@gmail.com" },
+          { "username": "zuoyuanh", "email": "david.hzy97@gmail.com" },
+          { "username": "ellisonbg", "email": "ellisonbg@gmail.com" },
+          { "username": "blink1073", "email": "steven.silvester@ieee.org" },
+          { "username": "jasongrout", "email": "jason@jasongrout.org" },
+          { "username": "sylvaincorlay", "email": "sylvain.corlay@gmail.com" },
+          { "username": "ian-r-rose", "email": "ian.r.rose@gmail.com" },
+          { "username": "gnestor", "email": "grantnestor@gmail.com" },
+          { "username": "parente", "email": "parente@gmail.com" },
+          { "username": "mpacer", "email": "mpacer@berkeley.edu" },
+          { "username": "jaipreets", "email": "jaipreet@amazon.com" },
+          { "username": "minrk", "email": "benjaminrk@gmail.com" },
+          { "username": "saulshanabrook", "email": "s.shanabrook@gmail.com" },
+          { "username": "hoo761", "email": "jacobrhoussian@gmail.com" },
+          { "username": "zsailer", "email": "zachsailer@gmail.com" },
+          { "username": "telamonian", "email": "telamonian@hotmail.com" },
+          { "username": "fcollonval", "email": "fcollonval@gmail.com" },
+          { "username": "lresende", "email": "lresende@us.ibm.com" },
+          { "username": "consideratio", "email": "erik.i.sundell@gmail.com" },
+          { "username": "ajbozarth", "email": "ajbozart@us.ibm.com" },
+          { "username": "marthacryan", "email": "martha.cryan326@gmail.com" },
+          { "username": "jtpio", "email": "jeremy@jtp.io" },
+          { "username": "echarles", "email": "eric@datalayer.io" },
+          { "username": "goanpeca", "email": "goanpeca@gmail.com" },
+          { "username": "mbektas", "email": "mbektas@outlook.com" },
+          { "username": "loichuder", "email": "loic.huder@esrf.fr" }
+        ]
+      },
+      "flags": { "unstable": true },
+      "score": {
+        "final": 0.29652759181361366,
+        "detail": {
+          "quality": 0.5405756504548741,
+          "popularity": 0.05053780002995652,
+          "maintenance": 0.3333333333333333
+        }
+      },
+      "searchScore": 1.2284681e-8
+    }
+  ],
+  "total": 1043,
+  "time": "Fri Jul 22 2022 12:23:25 GMT+0000 (Coordinated Universal Time)"
+}
