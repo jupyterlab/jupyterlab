@@ -79,9 +79,11 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
    * Callback on server name field change event
    */
   const onServerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    props.updateSetting.invoke(props.serverHash, {
-      serverName: e.target.value
-    });
+    props.updateSetting
+      .invoke(props.serverHash, {
+        serverName: e.target.value
+      })
+      .catch(console.error);
     setCurrentServerName(e.target.value);
   };
 
@@ -128,7 +130,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
       ...otherSettingsComposite,
       [property]: settingValue
     };
-    props.updateSetting.invoke(props.serverHash, newProps);
+    props.updateSetting.invoke(props.serverHash, newProps).catch(console.error);
     setOtherSettingsComposite(newProps);
   };
 
@@ -145,9 +147,11 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     Object.values(newMap).forEach(value => {
       payload[value.property] = value.value;
     });
-    props.updateSetting.invoke(props.serverHash, {
-      [SERVER_SETTINGS]: payload
-    });
+    props.updateSetting
+      .invoke(props.serverHash, {
+        [SERVER_SETTINGS]: payload
+      })
+      .catch(console.error);
     setPropertyMap(newMap);
   };
 
@@ -164,9 +168,11 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
       Object.values(newMap).forEach(value => {
         payload[value.property] = value.value;
       });
-      props.updateSetting.invoke(props.serverHash, {
-        [SERVER_SETTINGS]: payload
-      });
+      props.updateSetting
+        .invoke(props.serverHash, {
+          [SERVER_SETTINGS]: payload
+        })
+        .catch(console.error);
       setPropertyMap(newMap);
     });
   };
@@ -182,9 +188,11 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
         payload[value.property] = value.value;
       });
       setPropertyMap(newMap);
-      props.updateSetting.invoke(props.serverHash, {
-        [SERVER_SETTINGS]: payload
-      });
+      props.updateSetting
+        .invoke(props.serverHash, {
+          [SERVER_SETTINGS]: payload
+        })
+        .catch(console.error);
     }
   };
   const debouncedSetProperty = new Debouncer<
@@ -314,7 +322,7 @@ function PropertyFrom(props: {
 
   const changeName = (newName: string) => {
     const newState = { ...state, property: newName };
-    props.setProperty.invoke(props.hash, newState);
+    props.setProperty.invoke(props.hash, newState).catch(console.error);
     setState(newState);
   };
 
@@ -327,7 +335,7 @@ function PropertyFrom(props: {
       value = parseFloat(newValue);
     }
     const newState = { ...state, value };
-    props.setProperty.invoke(props.hash, newState);
+    props.setProperty.invoke(props.hash, newState).catch(console.error);
     setState(newState);
   };
 
@@ -342,7 +350,7 @@ function PropertyFrom(props: {
     }
     const newState = { ...state, type: newType, value };
     setState(newState);
-    props.setProperty.invoke(props.hash, newState);
+    props.setProperty.invoke(props.hash, newState).catch(console.error);
   };
 
   return (

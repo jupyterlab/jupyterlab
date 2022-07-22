@@ -2281,7 +2281,7 @@
     "@lumino/algorithm" "^1.9.1"
     "@lumino/collections" "^1.9.1"
 
-"@lumino/polling@^1.10.0", "@lumino/polling@^1.11.0":
+"@lumino/polling@^1.10.0":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@lumino/polling/-/polling-1.11.0.tgz#b1b98f7f9998cd766795640ff0be2d6233aaedaf"
   integrity sha512-wXV9OXOLjsragDeeVg1fUIq48chLgKk7/VoxlydIWqs0T7sZS59u7InMUi0od0L+7URtDUHAQ9XfWYEFVs6mvQ==
