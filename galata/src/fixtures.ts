@@ -12,6 +12,7 @@ import {
   PlaywrightWorkerOptions,
   TestType
 } from '@playwright/test';
+import * as path from 'path';
 import { ContentsHelper } from './contents';
 import { galata } from './galata';
 import { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
@@ -243,9 +244,10 @@ export const test: TestType<
    * folder and cleaning it.
    */
   tmpPath: async ({ baseURL, serverFiles }, use, testInfo) => {
-    const parts = testInfo.outputDir.split('/');
     // Remove appended retry part for reproducibility
-    const testFolder = parts[parts.length - 1].replace(/-retry\d+$/i, '');
+    const testFolder = path
+      .basename(testInfo.outputDir)
+      .replace(/-retry\d+$/i, '');
 
     const contents = new ContentsHelper(baseURL!);
 
