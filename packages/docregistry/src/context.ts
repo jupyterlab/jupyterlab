@@ -557,10 +557,14 @@ export class Context<
    * @param newName - the new name for the document.
    */
   private async _rename(newName: string): Promise<void> {
-    const splitPath = this.path.split('/');
+    const splitPath = this.localPath.split('/');
     splitPath[splitPath.length - 1] = newName;
-    const newPath = splitPath.join('/');
-
+    let newPath = PathExt.join(...splitPath);
+    const drivName = this._manager.contents.driveName(this.path);
+    if (drivName) {
+      newPath = `${drivName}:${newPath}`;
+    }
+    
     await this._manager.contents.rename(this.path, newPath);
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newName);
