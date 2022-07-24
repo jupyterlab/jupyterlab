@@ -537,7 +537,8 @@ export class DocumentWidget<
     const validNameExp = /[\/\\:]/;
     const name = this.title.label;
     // Use localPath to avoid the drive name
-    const filename = this.context.localPath.split('/').pop() || this.context.localPath;
+    const filename =
+      this.context.localPath.split('/').pop() || this.context.localPath;
 
     if (name === filename) {
       return;
