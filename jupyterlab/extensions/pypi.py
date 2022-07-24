@@ -3,6 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import asyncio
 import sys
 import xmlrpc.client
 from functools import partial
@@ -22,11 +23,14 @@ from jupyterlab.extensions.manager import (
 class PyPiExtensionsManager(ExtensionsManager):
     """Extensions manager using pip as package manager and PyPi.org as packages source."""
 
+    # PyPi.org XML-RPC API throttling time between request in seconds.
+    PYPI_REQUEST_THROTTLING: float = 1.01
+
     def __init__(
         self, app_options: Optional[dict] = None, ext_options: Optional[dict] = None
     ) -> None:
         super().__init__(app_options, ext_options)
-        self.rpcClient = xmlrpc.client.ServerProxy("https://pypi.org/pypi")
+        self._rpcClient = xmlrpc.client.ServerProxy("https://pypi.org/pypi")
 
     @property
     def can_install(self) -> bool:
@@ -47,7 +51,7 @@ class PyPiExtensionsManager(ExtensionsManager):
         """
         current_loop = tornado.ioloop.IOLoop.current()
         latest_version = await current_loop.run_in_executor(
-            None, self.rpcClient.package_releases, pkg
+            None, self._rpcClient.package_releases, pkg
         )
         if len(latest_version) > 0:
             return latest_version[0]
@@ -97,17 +101,18 @@ class PyPiExtensionsManager(ExtensionsManager):
         current_loop = tornado.ioloop.IOLoop.current()
         matches = await current_loop.run_in_executor(
             None,
-            self.rpcClient.browse(["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"]),
+            self._rpcClient.browse,
+            ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
         )
 
         extensions = {}
 
-        for name, group in groupby(matches, lambda e: e[0]):
-            if query not in name:
-                continue
+        for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
             _, latest_version = list(group)[-1]
+            # Throttle XML-RPC API requests
+            await asyncio.sleep(PyPiExtensionsManager.PYPI_REQUEST_THROTTLING)
             data = await current_loop.run_in_executor(
-                None, self.rpcClient.release_data, name, latest_version
+                None, self._rpcClient.release_data, name, latest_version
             )
             normalized_name = self._normalize_name(name)
             extensions[normalized_name] = ExtensionPackage(
