@@ -564,7 +564,7 @@ export class Context<
     if (drivName) {
       newPath = `${drivName}:${newPath}`;
     }
-    
+
     await this._manager.contents.rename(this.path, newPath);
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newName);
