@@ -47,32 +47,43 @@ export type TLanguageId = string;
 
 export interface ILanguageServerManager extends IDisposable {
   /**
+   * @alpha
+   *
    * Signal emitted when the language server sessions are changed.
    */
   sessionsChanged: ISignal<ILanguageServerManager, void>;
 
   /**
+   * @alpha
+   *
    * The current session information of running language servers.
    */
   readonly sessions: TSessionMap;
 
   /**
+   * @alpha
+   *
    * A promise that is fulfilled when the connection manager is ready.
    */
   readonly ready: Promise<void>;
 
   /**
+   * @alpha
+   *
    * Current endpoint to get the status of running language servers
    */
   readonly statusUrl: string;
 
   /**
+   * @alpha
    *
    * Status code of the `fetchSession` request.
    */
   readonly statusCode: number;
 
   /**
+   * @alpha
+   *
    * An ordered list of matching >running< sessions, with servers of higher rank higher in the list
    */
   getMatchingServers(
@@ -80,6 +91,8 @@ export interface ILanguageServerManager extends IDisposable {
   ): TLanguageServerId[];
 
   /**
+   * @alpha
+   *
    * A list of all known matching specs (whether detected or not).
    */
   getMatchingSpecs(
@@ -87,11 +100,15 @@ export interface ILanguageServerManager extends IDisposable {
   ): TSpecsMap;
 
   /**
+   * @alpha
+   *
    * Set the configuration for language servers
    */
   setConfiguration(configuration: TLanguageServerConfigurations): void;
 
   /**
+   * @alpha
+   *
    * Send a request to language server handler to get the session information.
    */
   fetchSessions(): Promise<void>;
@@ -322,15 +339,38 @@ export interface ILSPCodeExtractorsManager {
   ): void;
 }
 
+/**
+ * @alpha
+ *
+ * The virtual documents and language server connections manager
+ * Require this token in your extension to access the associated virtual
+ * document and LS connection of opened documents.
+ *
+ */
 export const ILSPDocumentConnectionManager =
   new Token<ILSPDocumentConnectionManager>(
     '@jupyterlab/lsp:ILSPDocumentConnectionManager'
   );
 
+/**
+ * @alpha
+ *
+ * The language server feature manager. Require this token in your extension
+ * to register the client capabilities implemented by your extension.
+ *
+ */
 export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
   '@jupyterlab/lsp:ILSPFeatureManager'
 );
 
+/**
+ * @alpha
+ *
+ * The code extractor manager. Require this token in your extension to
+ * register new code extractors. Code extractor allows creating multiple
+ * virtual documents from an opened document.
+ *
+ */
 export const ILSPCodeExtractorsManager = new Token<ILSPCodeExtractorsManager>(
   '@jupyterlab/lsp:ILSPCodeExtractorsManager'
 );
@@ -497,62 +537,86 @@ export type ServerRequests<
 
 export interface ILSPConnection extends ILspConnection {
   /**
+   * @alpha
+   *
    * Identifier of the language server
    */
   serverIdentifier?: string;
 
   /**
+   * @alpha
+   *
    * Language of the language server
    */
   serverLanguage?: string;
 
   /**
+   * @alpha
+   *
    * Should log all communication?
    */
   logAllCommunication: boolean;
 
   /**
+   * @alpha
+   *
    * Is the language server is ready?
    */
   isReady: boolean;
 
   /**
+   * @alpha
+   *
    * Notifications comes from the client.
    */
   clientNotifications: ClientNotifications;
 
   /**
+   * @alpha
+   *
    * Notifications comes from the server.
    */
   serverNotifications: ServerNotifications;
 
   /**
+   * @alpha
+   *
    * Requests comes from the client.
    */
   clientRequests: ClientRequests;
 
   /**
+   * @alpha
+   *
    * Responses comes from the server.
    */
   serverRequests: ServerRequests;
 
   /**
+   * @alpha
+   *
    * Send save notification to the server.
    */
   sendSaved(documentInfo: IDocumentInfo): void;
 
   /**
+   * @alpha
+   *
    * Send the open request to the backend when the server is
    * ready.
    */
   sendOpenWhenReady(documentInfo: IDocumentInfo): void;
 
   /**
+   * @alpha
+   *
    * Send all changes to the server.
    */
   sendFullTextChange(text: string, documentInfo: IDocumentInfo): void;
 
   /**
+   * @alpha
+   *
    * Get send request to the server to get completion results
    * from a completion item
    */

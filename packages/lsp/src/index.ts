@@ -7,16 +7,13 @@
  * @module lsp
  */
 
-export * from './connection_manager';
-export * from './manager';
-export * from './tokens';
 export * from './adapters/adapter';
-export * from './positioning';
-export * from './virtual/document';
-export * from './utils';
-export * from './connection';
+export * from './connection_manager';
+export * from './extractors';
 export * from './feature';
-export * from './extractors/manager';
-export * from './extractors/text_extractor';
-export * from './extractors/types';
+export * from './manager';
 export * from './plugin';
+export * from './positioning';
+export * from './tokens';
+export * from './utils';
+export * from './virtual/document';

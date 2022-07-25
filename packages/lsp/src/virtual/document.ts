@@ -241,6 +241,7 @@ export namespace VirtualDocument {
 }
 
 /**
+ *
  * A notebook can hold one or more virtual documents; there is always one,
  * "root" document, corresponding to the language of the kernel. All other
  * virtual documents are extracted out of the notebook, based on magics,
