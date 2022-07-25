@@ -33,7 +33,7 @@
     "build": "jlpm run build:dev",
     "build:all": "lerna run build:all",
     "build:builder": "cd builder && jlpm run build",
-    "build:core": "cd jupyterlab/staging && jlpm && (jlpm yarn-deduplicate || jlpm) && jlpm run build",
+    "build:core": "cd jupyterlab/staging && jlpm && (jlpm yarn-deduplicate -s fewer --fail || jlpm) && jlpm run build",
     "build:dev": "jlpm run integrity && jlpm run build:all && cd dev_mode && jlpm run build",
     "build:dev:prod": "jlpm run integrity && jlpm run build:all && cd dev_mode && jlpm run build:prod",
     "build:dev:prod:release": "jlpm run integrity && jlpm run build:all && cd dev_mode && jlpm run build:prod:release",
