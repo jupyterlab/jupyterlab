@@ -1531,6 +1531,14 @@ export namespace DocumentRegistry {
         extensions: ['.bmp'],
         icon: imageIcon,
         fileFormat: 'base64'
+      },
+      {
+        name: 'webp',
+        displayName: trans.__('Image'),
+        mimeTypes: ['image/webp'],
+        extensions: ['.webp'],
+        icon: imageIcon,
+        fileFormat: 'base64'
       }
     ];
   }
