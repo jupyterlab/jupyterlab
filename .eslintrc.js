@@ -128,6 +128,7 @@ module.exports = {
           'output_type',
           'outputs_hidden',
           'parent_header',
+          'per_page',
           'pf_re',
           'pkg_type',
           'protocol_version',

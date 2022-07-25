@@ -13,6 +13,10 @@ import { classes } from '../utils';
 export interface IInputGroupProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   /**
+   * Pass a ref to the input element
+   */
+  inputRef?: React.RefObject<HTMLInputElement>;
+  /**
    * Right icon adornment
    */
   rightIcon?: string | LabIcon;
@@ -25,10 +29,10 @@ export interface IInputGroupProps
  * @returns Component
  */
 export function InputGroup(props: IInputGroupProps): JSX.Element {
-  const { className, rightIcon, ...others } = props;
+  const { className, inputRef, rightIcon, ...others } = props;
   return (
     <div className={classes('jp-InputGroup', className)}>
-      <input {...others}></input>
+      <input ref={inputRef} {...others}></input>
       {rightIcon && (
         <span className="jp-InputGroupAction">
           {typeof rightIcon === 'string' ? (

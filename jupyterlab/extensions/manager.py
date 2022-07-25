@@ -9,9 +9,9 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
-import requests
+import tornado
 from tornado import ioloop
 
 from ..commands import (
@@ -106,13 +106,13 @@ class ExtensionsOption:
         allowed_extensions_uris: A list of comma-separated URIs to get the allowed extensions list
         blocked_extensions_uris: A list of comma-separated URIs to get the blocked extensions list
         listings_refresh_seconds: The interval delay in seconds to refresh the lists
-        listings_request_options: The optional kwargs to use for the listings HTTP requests as described on https://2.python-requests.org/en/v2.7.0/api/#requests.request
+        listings_tornado_options: The optional kwargs to use for the listings HTTP requests as described on https://www.tornadoweb.org/en/stable/httpclient.html#tornado.httpclient.HTTPRequest
     """
 
     allowed_extensions_uris: Set[str] = field(default_factory=set)
     blocked_extensions_uris: Set[str] = field(default_factory=set)
     listings_refresh_seconds: int = 60 * 60
-    listings_request_options: dict = field(default_factory=dict)
+    listings_tornado_options: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -296,7 +296,7 @@ class ExtensionsManager(abc.ABC):
 
     async def list_extensions(
         self, query: Optional[str] = None, page: int = 1, per_page: int = 30
-    ) -> Tuple[Set[ExtensionPackage], Optional[int]]:
+    ) -> Tuple[List[ExtensionPackage], Optional[int]]:
         """List extensions for a given ``query`` search term.
 
         This will return the extensions installed (if ``query`` is None) or
@@ -309,7 +309,8 @@ class ExtensionsManager(abc.ABC):
             The extensions
             Last page of results
         """
-        if query not in self._extensions_cache or page not in self._extensions_cache[query]:
+        self.log.info(self._extensions_cache)
+        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
             await self.refresh(query, page, per_page)
 
         # filter using listings settings
@@ -317,26 +318,27 @@ class ExtensionsManager(abc.ABC):
             self._listing_fetch.callback()
 
         cache = self._extensions_cache[query].cache[page]
-        extensions = set(cache.values())
+        self.log.info(cache.values())
+        extensions = list(cache.values())
         if query is not None and self._listings_cache is not None:
             listing = list(self._listings_cache)
-            extensions = set()
+            extensions = []
             if self._listings_block_mode:
                 for name, ext in cache.items():
                     if name not in listing:
-                        extensions.add(dataclasses.replace(ext, is_allowed=True))
+                        extensions.append(dataclasses.replace(ext, is_allowed=True))
                     elif ext.installed_version:
                         self.log.warning(f"Blocked extension '{name}' is installed.")
-                        extensions.add(dataclasses.replace(ext, is_allowed=False))
+                        extensions.append(dataclasses.replace(ext, is_allowed=False))
             else:
                 for name, ext in cache.items():
                     if name in listing:
-                        extensions.add(dataclasses.replace(ext, is_allowed=True))
+                        extensions.append(dataclasses.replace(ext, is_allowed=True))
                     elif ext.installed_version:
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
-                        extensions.add(dataclasses.replace(ext, is_allowed=False))
+                        extensions.append(dataclasses.replace(ext, is_allowed=False))
 
-        return extensions
+        return extensions, self._extensions_cache[query].last_page
 
     async def refresh(self, query: Optional[str], page: int, per_page: int) -> None:
         """Refresh the list of extensions."""
@@ -344,31 +346,30 @@ class ExtensionsManager(abc.ABC):
             self._extensions_cache[query].cache[page] = None
         await self._update_extensions_list(query, page, per_page)
 
-    def _fetch_listings(self) -> None:
+    async def _fetch_listings(self) -> None:
         """Fetch the listings for the extension manager."""
         rules = []
+        client = tornado.httpclient.AsyncHTTPClient()
         if self._listings_block_mode:
             if len(self.options.blocked_extensions_uris):
                 self.log.info(
                     f"Fetching blocked extensions from {self.options.blocked_extensions_uris}"
                 )
                 for blocked_extensions_uri in self.options.blocked_extensions_uris:
-                    r = requests.request(
-                        "GET",
+                    r = await client.fetch(
                         blocked_extensions_uri,
-                        **self.options.listings_request_options,
+                        **self.options.listings_tornado_options,
                     )
-                    j = json.loads(r.text)
+                    j = json.loads(r.body)
                     rules.extend(j.get("blocked_extensions", []))
         elif len(self.options.allowed_extensions_uris):
             self.log.info(
                 f"Fetching allowed extensions from { self.options.allowed_extensions_uris}"
             )
             for allowed_extensions_uri in self.options.allowed_extensions_uris:
-                r = requests.request(
-                    "GET",
+                r = await client.fetch(
                     allowed_extensions_uri,
-                    **self.options.listings_request_options,
+                    **self.options.listings_tornado_options,
                 )
                 j = json.loads(r.text)
                 rules.extend(j.get("allowed_extensions", []))
@@ -406,6 +407,7 @@ class ExtensionsManager(abc.ABC):
                 enabled=(name not in info["disabled"]),
                 core=False,
                 latest_version=data["version"],
+                installed=True,
                 installed_version=data["version"],
                 status=status,
                 install=data.get("install", {}),
@@ -414,7 +416,9 @@ class ExtensionsManager(abc.ABC):
             )
 
             if get_latest_version:
-                pkg = dataclasses.replace(pkg, latest_version=await self.get_latest_version(pkg))
+                pkg = dataclasses.replace(
+                    pkg, latest_version=await self.get_latest_version(pkg.name)
+                )
 
             extensions[normalized_name] = pkg
 
@@ -438,13 +442,16 @@ class ExtensionsManager(abc.ABC):
                 enabled=(name not in info["disabled"]),
                 core=False,
                 latest_version=data["version"],
+                installed=True,
                 installed_version=data["version"],
                 status=status,
                 pkg_type="source",
                 companion=self._get_companion(data),
             )
             if get_latest_version:
-                pkg["latest_version"] = await self.get_latest_version(pkg)
+                pkg = dataclasses.replace(
+                    pkg, latest_version=await self.get_latest_version(pkg.name)
+                )
             extensions[normalized_name] = pkg
 
         for name in build_check_info["uninstall"]:

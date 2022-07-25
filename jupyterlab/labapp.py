@@ -76,7 +76,10 @@ build_aliases["debug-log-path"] = "DebugLogFileMixin.debug_log_path"
 
 build_flags = dict(base_flags)
 
-build_flags["dev-build"] = ({"LabBuildApp": {"dev_build": True}}, "Build in development mode.")
+build_flags["dev-build"] = (
+    {"LabBuildApp": {"dev_build": True}},
+    "Build in development mode.",
+)
 build_flags["no-minimize"] = (
     {"LabBuildApp": {"minimize": False}},
     "Do not minimize a production build.",
@@ -159,7 +162,9 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
     )
 
     minimize = Bool(
-        True, config=True, help="Whether to minimize a production build (defaults to True)."
+        True,
+        config=True,
+        help="Whether to minimize a production build (defaults to True).",
     )
 
     pre_clean = Bool(
@@ -206,8 +211,14 @@ clean_flags["extensions"] = (
     {"LabCleanApp": {"extensions": True}},
     "Also delete <app-dir>/extensions.\n%s" % ext_warn_msg,
 )
-clean_flags["settings"] = ({"LabCleanApp": {"settings": True}}, "Also delete <app-dir>/settings")
-clean_flags["static"] = ({"LabCleanApp": {"static": True}}, "Also delete <app-dir>/static")
+clean_flags["settings"] = (
+    {"LabCleanApp": {"settings": True}},
+    "Also delete <app-dir>/settings",
+)
+clean_flags["static"] = (
+    {"LabCleanApp": {"static": True}},
+    "Also delete <app-dir>/static",
+)
 clean_flags["all"] = (
     {"LabCleanApp": {"all": True}},
     "Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
@@ -443,7 +454,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     aliases["app-dir"] = "LabApp.app_dir"
 
     flags = flags
-    flags["core-mode"] = ({"LabApp": {"core_mode": True}}, "Start the app in core mode.")
+    flags["core-mode"] = (
+        {"LabApp": {"core_mode": True}},
+        "Start the app in core mode.",
+    )
     flags["dev-mode"] = (
         {"LabApp": {"dev_mode": True}},
         "Start the app in dev mode for running from source.",
@@ -484,7 +498,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
 
     override_theme_url = Unicode(
-        config=True, help=("The override url for static lab theme assets, typically a CDN.")
+        config=True,
+        help=("The override url for static lab theme assets, typically a CDN."),
     )
 
     app_dir = Unicode(None, config=True, help="The app directory to launch JupyterLab from.")
@@ -743,10 +758,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 sys.exit(-1)
 
             listings_config = {
-                "blocked_extensions_uris": set(blocked_extensions_uris.split(",")),
-                "allowed_extensions_uris": set(allowed_extensions_uris.split(",")),
+                "blocked_extensions_uris": set(
+                    filter(lambda uri: len(uri) > 0, blocked_extensions_uris.split(","))
+                ),
+                "allowed_extensions_uris": set(
+                    filter(lambda uri: len(uri) > 0, allowed_extensions_uris.split(","))
+                ),
                 "listings_refresh_seconds": config.get("listings_refresh_seconds", 60 * 60),
-                "listings_request_options": config.get("listings_request_options", {}),
+                "listings_tornado_options": config.get("listings_tornado_options", {}),
             }
             if len(listings_config["blocked_extensions_uris"]) or len(
                 listings_config["allowed_extensions_uris"]
@@ -755,7 +774,11 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
             ext_manager = manager_factory(build_handler_options, listings_config)
             page_config["extensions_manager_can_install"] = ext_manager.can_install
-            ext_handler = (extensions_handler_path, ExtensionHandler, {"manager": ext_manager})
+            ext_handler = (
+                extensions_handler_path,
+                ExtensionHandler,
+                {"manager": ext_manager},
+            )
             handlers.append(ext_handler)
 
         # If running under JupyterHub, add more metadata.

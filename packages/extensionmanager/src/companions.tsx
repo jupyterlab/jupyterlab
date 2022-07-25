@@ -120,10 +120,8 @@ function getInstallCommands(info: IInstallInfo) {
 
 /**
  * Prompt the user what do about companion packages, if present.
- *
- * @param builder the build manager
  */
-export function presentCompanions(
+export async function presentCompanions(
   kernelCompanions: KernelCompanion[],
   serverCompanion: IInstallInfo | undefined,
   translator?: ITranslator
@@ -209,7 +207,7 @@ installation?`)}
   } else {
     title = trans.__('Server Companion');
   }
-  return showDialog({
+  const install = await showDialog({
     title,
     body,
     buttons: [
@@ -219,7 +217,6 @@ installation?`)}
         caption: trans.__('Install the JupyterLab extension.')
       })
     ]
-  }).then(result => {
-    return result.button.accept;
   });
+  return install.button.accept;
 }

@@ -4,14 +4,17 @@
 # Distributed under the terms of the Modified BSD License.
 
 import asyncio
+import json
+import re
 import sys
 import xmlrpc.client
 from functools import partial
 from itertools import groupby
 from subprocess import run
-from typing import Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 import tornado
+from async_lru import alru_cache
 
 from jupyterlab.extensions.manager import (
     ActionResult,
@@ -20,17 +23,34 @@ from jupyterlab.extensions.manager import (
 )
 
 
+@alru_cache(maxsize=500)
+async def _fetch_package_metadata(name: str, latest_version: str) -> dict:
+    http_client = tornado.httpclient.AsyncHTTPClient()
+    response = await http_client.fetch(
+        PyPiExtensionsManager.BASE_URL + f"/{name}/{latest_version}/json",
+        headers={"Content-Type": "application/json"},
+    )
+    data = json.loads(response.body).get("info")
+
+    # Keep minimal information to limit cache size
+    return {k: data.get(k) for k in ["summary", "home_page"]}
+
+
 class PyPiExtensionsManager(ExtensionsManager):
     """Extensions manager using pip as package manager and PyPi.org as packages source."""
 
+    # Base PyPI server URL
+    BASE_URL = "https://pypi.org/pypi"
     # PyPi.org XML-RPC API throttling time between request in seconds.
-    PYPI_REQUEST_THROTTLING: float = 1.01
+    PYPI_REQUEST_THROTTLING: float = 1.0
 
     def __init__(
         self, app_options: Optional[dict] = None, ext_options: Optional[dict] = None
     ) -> None:
         super().__init__(app_options, ext_options)
-        self._rpcClient = xmlrpc.client.ServerProxy("https://pypi.org/pypi")
+        # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
+        self._http_client = tornado.httpclient.AsyncHTTPClient()
+        self._rpc_client = xmlrpc.client.ServerProxy(PyPiExtensionsManager.BASE_URL)
 
     @property
     def can_install(self) -> bool:
@@ -49,14 +69,17 @@ class PyPiExtensionsManager(ExtensionsManager):
         Returns:
             The latest available version
         """
-        current_loop = tornado.ioloop.IOLoop.current()
-        latest_version = await current_loop.run_in_executor(
-            None, self._rpcClient.package_releases, pkg
-        )
-        if len(latest_version) > 0:
-            return latest_version[0]
-        else:
+        try:
+            http_client = tornado.httpclient.AsyncHTTPClient()
+            response = await http_client.fetch(
+                PyPiExtensionsManager.BASE_URL + f"/{pkg}/json",
+                headers={"Content-Type": "application/json"},
+            )
+            data = json.loads(response.body).get("info")
+        except Exception:
             return None
+        else:
+            return data.get("version")
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
         """Normalize extension name.
@@ -76,6 +99,38 @@ class PyPiExtensionsManager(ExtensionsManager):
             if install_metadata["packageManager"] == "python":
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
+
+    async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:
+        """Throttle XMLRPC API request
+
+        Args:
+            recursive: Whether to call the throttling recursively once or not.
+            fn: API method to call
+            *args: API method arguments
+        Returns:
+            Result of the method
+        Raises:
+            xmlrpc.client.Fault
+        """
+        current_loop = tornado.ioloop.IOLoop.current()
+        try:
+            data = await current_loop.run_in_executor(None, fn, *args)
+        except xmlrpc.client.Fault as err:
+            if err.faultCode == -32500 and err.faultString.startswith("HTTPTooManyRequests:"):
+                delay = 1.01
+                match = re.search(r"Limit may reset in (\d+) seconds.", err.faultString)
+                if match is not None:
+                    delay = int(match.group(1) or "1")
+                self.log.info(
+                    f"HTTPTooManyRequests - Perform next call to PyPI XMLRPC API in {delay}s."
+                )
+                await asyncio.sleep(delay * PyPiExtensionsManager.PYPI_REQUEST_THROTTLING + 0.01)
+                if recursive:
+                    data = await self.__throttleRequest(False, fn, *args)
+                else:
+                    data = await current_loop.run_in_executor(None, fn, *args)
+
+        return data
 
     async def list_packages(
         self, query: str, page: int, per_page: int
@@ -98,10 +153,9 @@ class PyPiExtensionsManager(ExtensionsManager):
             The available extensions in a mapping {name: metadata}
             The results last page; None if the manager does not support pagination
         """
-        current_loop = tornado.ioloop.IOLoop.current()
-        matches = await current_loop.run_in_executor(
-            None,
-            self._rpcClient.browse,
+        matches = await self.__throttleRequest(
+            True,
+            self._rpc_client.browse,
             ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
         )
 
@@ -109,11 +163,8 @@ class PyPiExtensionsManager(ExtensionsManager):
 
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
             _, latest_version = list(group)[-1]
-            # Throttle XML-RPC API requests
-            await asyncio.sleep(PyPiExtensionsManager.PYPI_REQUEST_THROTTLING)
-            data = await current_loop.run_in_executor(
-                None, self._rpcClient.release_data, name, latest_version
-            )
+            data = await _fetch_package_metadata(name, latest_version)
+
             normalized_name = self._normalize_name(name)
             extensions[normalized_name] = ExtensionPackage(
                 name=normalized_name,

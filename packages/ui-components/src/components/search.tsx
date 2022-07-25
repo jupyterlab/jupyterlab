@@ -11,6 +11,36 @@ import React, { useEffect, useState } from 'react';
  */
 export interface IFilterBoxProps {
   /**
+   * Whether to use case-sensitive search
+   */
+  caseSensitive?: boolean;
+
+  /**
+   * Whether the search box is disabled or not.
+   */
+  disabled?: boolean;
+
+  /**
+   * Whether to force a refresh.
+   */
+  forceRefresh?: boolean;
+
+  /**
+   * An optional initial search value.
+   */
+  initialQuery?: string;
+
+  /**
+   * Pass a ref to the input element
+   */
+  inputRef?: React.RefObject<HTMLInputElement>;
+
+  /**
+   * Optional placeholder for the search box.
+   */
+  placeholder?: string;
+
+  /**
    * A function to callback when filter is updated.
    */
   updateFilter: (
@@ -22,26 +52,6 @@ export interface IFilterBoxProps {
    * Whether to use the fuzzy filter.
    */
   useFuzzyFilter: boolean;
-
-  /**
-   * Optional placeholder for the search box.
-   */
-  placeholder?: string;
-
-  /**
-   * Whether to force a refresh.
-   */
-  forceRefresh?: boolean;
-
-  /**
-   * Whether to use case-sensitive search
-   */
-  caseSensitive?: boolean;
-
-  /**
-   * An optional initial search value.
-   */
-  initialQuery?: string;
 }
 
 /**
@@ -135,7 +145,7 @@ export const updateFilterFunction = (
   };
 };
 
-export const FilterBox = (props: IFilterBoxProps) => {
+export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
   const [filter, setFilter] = useState(props.initialQuery ?? '');
 
   if (props.forceRefresh) {
@@ -178,11 +188,13 @@ export const FilterBox = (props: IFilterBoxProps) => {
 
   return (
     <InputGroup
+      className="jp-FilterBox"
+      inputRef={props.inputRef}
       type="text"
+      disabled={props.disabled}
       rightIcon="ui-components:search"
       placeholder={props.placeholder}
       onChange={handleChange}
-      className="jp-FilterBox"
       value={filter}
     />
   );

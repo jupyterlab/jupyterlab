@@ -1,24 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
+/* global RequestInit */
+
+import { URLExt } from '@jupyterlab/coreutils';
 import {
   KernelSpec,
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
 import {
-  IKernelInstallInfo,
-  KernelCompanion,
-  presentCompanions
+  IKernelInstallInfo
+  // KernelCompanion,
+  // presentCompanions
 } from './companions';
 import { reportInstallError } from './dialog';
-import { isJupyterOrg } from './npm';
 
 /**
  * Information about an extension.
@@ -131,24 +131,15 @@ export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
  */
 export class ListModel extends VDomModel {
   constructor(
-    app: JupyterFrontEnd,
     serviceManager: ServiceManager.IManager,
-    settings: ISettingRegistry.ISettings,
     translator?: ITranslator
   ) {
     super();
     this.translator = translator || nullTranslator;
-    this._app = app;
     this._installed = [];
     this._searchResult = [];
     this.serviceManager = serviceManager;
-    this.serverConnectionSettings = ServerConnection.makeSettings();
     this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
-    _isDisclaimed = settings.composite['disclaimed'] === true;
-    settings.changed.connect(() => {
-      _isDisclaimed = settings.composite['disclaimed'] === true;
-      void this.update();
-    });
   }
 
   /**
@@ -156,6 +147,20 @@ export class ListModel extends VDomModel {
    */
   get installed(): ReadonlyArray<IEntry> {
     return this._installed;
+  }
+
+  /**
+   * Whether the warning is disclaimed or not.
+   */
+  get isDisclaimed(): boolean {
+    return this._isDisclaimed;
+  }
+  set isDisclaimed(v: boolean) {
+    if (v !== this._isDisclaimed) {
+      this._isDisclaimed = v;
+      this.stateChanged.emit();
+      void this._debouncedUpdate.invoke();
+    }
   }
 
   /**
@@ -174,8 +179,9 @@ export class ListModel extends VDomModel {
     return this._query;
   }
   set query(value: string | null) {
-    this._query = value;
-    void this._debouncedUpdate.invoke();
+    if (this._query !== value) {
+      this._query = value;
+    }
   }
 
   /**
@@ -187,8 +193,10 @@ export class ListModel extends VDomModel {
     return this._page;
   }
   set page(value: number) {
-    this._page = value;
-    void this.update();
+    if (this._page !== value) {
+      this._page = value;
+      void this._debouncedUpdate.invoke();
+    }
   }
 
   /**
@@ -200,8 +208,10 @@ export class ListModel extends VDomModel {
     return this._pagination;
   }
   set pagination(value: number) {
-    this._pagination = value;
-    void this.update();
+    if (this._pagination !== value) {
+      this._pagination = value;
+      void this._debouncedUpdate.invoke();
+    }
   }
 
   /**
@@ -209,27 +219,6 @@ export class ListModel extends VDomModel {
    */
   get totalEntries(): number {
     return this._totalEntries;
-  }
-
-  /**
-   * The list mode.
-   */
-  get listMode(): 'block' | 'allow' | 'default' | 'invalid' {
-    return this._listMode;
-  }
-
-  /**
-   * The total number of blockedExtensions results in the current search.
-   */
-  get totalblockedExtensionsFound(): number {
-    return this._totalblockedExtensionsFound;
-  }
-
-  /**
-   * The total number of allowedExtensions results in the current search.
-   */
-  get totalallowedExtensionsFound(): number {
-    return this._totalallowedExtensionsFound;
   }
 
   /**
@@ -241,21 +230,6 @@ export class ListModel extends VDomModel {
     }
     this._debouncedUpdate.dispose();
     super.dispose();
-  }
-
-  /**
-   * Initialize the model.
-   */
-  initialize(): Promise<void> {
-    return this.update()
-      .then(() => {
-        this.initialized = true;
-        this.stateChanged.emit(undefined);
-      })
-      .catch(() => {
-        this.initialized = true;
-        this.stateChanged.emit(undefined);
-      });
   }
 
   /**
@@ -337,33 +311,35 @@ export class ListModel extends VDomModel {
    * @param entry An entry indicating which extension to check.
    */
   checkCompanionPackages(entry: IEntry): Promise<boolean> {
-    return this.searcher
-      .fetchPackageData(entry.name, entry.latest_version)
-      .then(data => {
-        if (!data || !data.jupyterlab || !data.jupyterlab.discovery) {
-          return true;
-        }
-        const discovery = data.jupyterlab.discovery;
-        const kernelCompanions: KernelCompanion[] = [];
-        if (discovery.kernel) {
-          // match specs
-          for (const kernelInfo of discovery.kernel) {
-            const matches = Private.matchSpecs(
-              kernelInfo,
-              this.serviceManager.kernelspecs.specs
-            );
-            kernelCompanions.push({ kernelInfo, kernels: matches });
-          }
-        }
-        if (kernelCompanions.length < 1 && !discovery.server) {
-          return true;
-        }
-        return presentCompanions(
-          kernelCompanions,
-          discovery.server,
-          this.translator
-        );
-      });
+    // TODO
+    return Promise.resolve(false);
+    // return this.searcher
+    //   .fetchPackageData(entry.name, entry.latest_version)
+    //   .then(data => {
+    //     if (!data || !data.jupyterlab || !data.jupyterlab.discovery) {
+    //       return true;
+    //     }
+    //     const discovery = data.jupyterlab.discovery;
+    //     const kernelCompanions: KernelCompanion[] = [];
+    //     if (discovery.kernel) {
+    //       // match specs
+    //       for (const kernelInfo of discovery.kernel) {
+    //         const matches = Private.matchSpecs(
+    //           kernelInfo,
+    //           this.serviceManager.kernelspecs.specs
+    //         );
+    //         kernelCompanions.push({ kernelInfo, kernels: matches });
+    //       }
+    //     }
+    //     if (kernelCompanions.length < 1 && !discovery.server) {
+    //       return true;
+    //     }
+    //     return presentCompanions(
+    //       kernelCompanions,
+    //       discovery.server,
+    //       this.translator
+    //     );
+    //   });
   }
 
   /**
@@ -375,36 +351,6 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Make a request to the server for info about its installed extensions.
-   */
-  protected fetchInstalled(refreshInstalled = false): Promise<IEntry[]> {
-    const url = new URL(
-      EXTENSION_API_PATH,
-      this.serverConnectionSettings.baseUrl
-    );
-    if (refreshInstalled) {
-      url.searchParams.append('refresh', '1');
-    }
-    const request = ServerConnection.makeRequest(
-      url.toString(),
-      {},
-      this.serverConnectionSettings
-    ).then(response => {
-      Private.handleError(response);
-      return response.json() as Promise<IEntry[]>;
-    });
-    request.then(
-      () => {
-        this.serverConnectionError = null;
-      },
-      reason => {
-        this.serverConnectionError = reason.toString();
-      }
-    );
-    return request;
-  }
-
-  /**
    * Search with current query.
    *
    * Sets searchError and totalEntries as appropriate.
@@ -412,24 +358,20 @@ export class ListModel extends VDomModel {
    * @returns {Promise<{ [key: string]: IEntry; }>} The search result as a map of entries.
    */
   protected async performSearch(): Promise<{ [key: string]: IEntry }> {
-    if (this.query === null) {
-      this.query = '';
-    }
-
-    // Start the search without waiting for it:
-    const search = this.searcher.searchExtensions(
-      this.query,
-      this.page,
-      this.pagination
-    );
-    const searchMapPromise = this.translateSearchResult(search);
-
-    let searchMap: { [key: string]: IEntry };
+    let searchMap: { [key: string]: IEntry } = {};
+    this.searchError = null;
     try {
-      searchMap = await searchMapPromise;
-      this.searchError = null;
+      const extensions = await Private.requestAPI<IEntry[]>({
+        query: this.query ?? '',
+        page: this.page,
+        per_page: this.pagination
+      });
+      searchMap = extensions.reduce<{ [k: string]: IEntry }>((agg, ext) => {
+        agg[ext.name] = ext;
+        return agg;
+      }, {});
+      this._totalEntries = extensions.length;
     } catch (reason) {
-      searchMap = {};
       this.searchError = reason.toString();
     }
 
@@ -446,14 +388,20 @@ export class ListModel extends VDomModel {
   protected async queryInstalled(
     refreshInstalled: boolean
   ): Promise<{ [key: string]: IEntry }> {
-    let installedMap;
+    let installedMap = {};
+    this.installedError = null;
     try {
-      installedMap = await this.translateInstalled(
-        this.fetchInstalled(refreshInstalled)
+      const extensions = await Private.requestAPI<IEntry[]>({
+        refresh: refreshInstalled ? 1 : 0
+      });
+      installedMap = extensions.reduce<{ [key: string]: IEntry }>(
+        (agg, ext) => {
+          agg[ext.name] = ext;
+          return agg;
+        },
+        {}
       );
-      this.installedError = null;
     } catch (reason) {
-      installedMap = {};
       this.installedError = reason.toString();
     }
     return installedMap;
@@ -467,9 +415,10 @@ export class ListModel extends VDomModel {
    * Emits the `stateChanged` signal on successful completion.
    */
   protected async update(refreshInstalled = false): Promise<void> {
-    if (ListModel.isDisclaimed()) {
+    if (this.isDisclaimed) {
       const [searchMap, installedMap] = await Promise.all([
         this.performSearch(),
+        // Promise.resolve<{ [k: string]: IEntry }>({}),
         this.queryInstalled(refreshInstalled)
       ]);
 
@@ -493,7 +442,7 @@ export class ListModel extends VDomModel {
     }
 
     // Signal updated state
-    this.stateChanged.emit(undefined);
+    this.stateChanged.emit();
   }
 
   /**
@@ -506,27 +455,15 @@ export class ListModel extends VDomModel {
     action: string,
     entry: IEntry
   ): Promise<IActionReply> {
-    const url = new URL(
-      EXTENSION_API_PATH,
-      this.serverConnectionSettings.baseUrl
-    );
-    const request: RequestInit = {
+    const actionRequest = Private.requestAPI<IActionReply>(undefined, {
       method: 'POST',
       body: JSON.stringify({
         cmd: action,
         extension_name: entry.name
       })
-    };
-    const completed = ServerConnection.makeRequest(
-      url.toString(),
-      request,
-      this.serverConnectionSettings
-    ).then(response => {
-      Private.handleError(response);
-      this.triggerBuildCheck();
-      return response.json() as Promise<IActionReply>;
     });
-    completed.then(
+
+    actionRequest.then(
       () => {
         this.serverConnectionError = null;
       },
@@ -534,8 +471,8 @@ export class ListModel extends VDomModel {
         this.serverConnectionError = reason.toString();
       }
     );
-    this._addPendingAction(completed);
-    return completed;
+    this._addPendingAction(actionRequest);
+    return actionRequest;
   }
 
   /**
@@ -570,11 +507,6 @@ export class ListModel extends VDomModel {
   searchError: string | null = null;
 
   /**
-   * Contains an error message if an error occurred when searching for lists.
-   */
-  blockedExtensionsError: string | null = null;
-
-  /**
    * Contains an error message if an error occurred when querying the server extension.
    */
   serverConnectionError: string | null = null;
@@ -585,19 +517,11 @@ export class ListModel extends VDomModel {
   serverRequirementsError: string | null = null;
 
   /**
-   * Whether the model has finished async initialization.
+   * Whether a reload should be considered due to actions taken.
    */
-  initialized: boolean = false;
+  promptReload: boolean = false;
 
-  /**
-   * Whether a fresh build should be considered due to actions taken.
-   */
-  promptBuild: boolean = false;
-
-  /**
-   * Settings for connecting to the notebook server.
-   */
-  protected serverConnectionSettings: ServerConnection.ISettings;
+  isUpdating = false;
 
   /**
    * The service manager to use for building.
@@ -605,7 +529,8 @@ export class ListModel extends VDomModel {
   protected serviceManager: ServiceManager.IManager;
 
   protected translator: ITranslator;
-  private _app: JupyterFrontEnd;
+
+  private _isDisclaimed = false;
   private _query: string | null = ''; // TODO: we may not need the null case?
   private _page: number = 0;
   private _pagination: number = 250;
@@ -615,13 +540,7 @@ export class ListModel extends VDomModel {
   private _searchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
   private _debouncedUpdate: Debouncer<void, void>;
-
-  private _listMode: 'block' | 'allow' | 'default' | 'invalid';
-  private _totalblockedExtensionsFound: number = 0;
-  private _totalallowedExtensionsFound: number = 0;
 }
-
-let _isDisclaimed = false;
 
 /**
  * ListModel statics.
@@ -638,14 +557,6 @@ export namespace ListModel {
     }
     return semver.lt(entry.installed_version, entry.latest_version);
   }
-
-  export function isDisclaimed(): boolean {
-    return _isDisclaimed;
-  }
-
-  export function toogleDisclaimed(): void {
-    _isDisclaimed = !_isDisclaimed;
-  }
 }
 
 /**
@@ -658,18 +569,8 @@ namespace Private {
   export function comparator(a: IEntry, b: IEntry): number {
     if (a.name === b.name) {
       return 0;
-    }
-
-    const testA = isJupyterOrg(a.name);
-    const testB = isJupyterOrg(b.name);
-
-    if (testA === testB) {
-      // Retain sort-order from API
-      return 0;
-    } else if (testA && !testB) {
-      return -1;
     } else {
-      return 1;
+      return a.name > b.name ? 1 : -1;
     }
   }
 
@@ -713,14 +614,48 @@ namespace Private {
   }
 
   /**
-   * Convert a response to an exception on error.
+   * Call the API extension
    *
-   * @param response The response to inspect.
+   * @param endPoint API REST end point for the extension
+   * @param init Initial values for the request
+   * @returns The response body interpreted as JSON
    */
-  export function handleError(response: Response): Response {
-    if (!response.ok) {
-      throw new Error(`${response.status} (${response.statusText})`);
+  export async function requestAPI<T>(
+    queryArgs: { [k: string]: any } = {},
+    init: RequestInit = {}
+  ): Promise<T> {
+    // Make request to Jupyter API
+    const settings = ServerConnection.makeSettings();
+    const requestUrl = URLExt.join(
+      settings.baseUrl,
+      EXTENSION_API_PATH // API Namespace
+    );
+
+    let response: Response;
+    try {
+      response = await ServerConnection.makeRequest(
+        requestUrl + URLExt.objectToQueryString(queryArgs),
+        init,
+        settings
+      );
+    } catch (error) {
+      throw new ServerConnection.NetworkError(error);
     }
-    return response;
+
+    let data: any = await response.text();
+
+    if (data.length > 0) {
+      try {
+        data = JSON.parse(data);
+      } catch (error) {
+        console.log('Not a JSON response body.', response);
+      }
+    }
+
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message || data);
+    }
+
+    return data;
   }
 }

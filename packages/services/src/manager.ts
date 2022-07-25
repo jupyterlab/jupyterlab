@@ -221,6 +221,8 @@ export namespace ServiceManager {
   interface IManagers {
     /**
      * The builder for the manager.
+     *
+     * @deprecated will be removed in v5
      */
     readonly builder: Builder.IManager;
 
