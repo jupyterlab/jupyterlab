@@ -7,8 +7,9 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { setSidebarWidth, stubExtensionsSearch } from './utils';
+import { setSidebarWidth, stubDrawioExtensionsSearch } from './utils';
 import { default as extensionsList } from './data/extensions.json';
+import { default as allExtensionsList } from './data/extensions-search-all.json';
 
 test.use({
   autoGoto: false,
@@ -31,11 +32,28 @@ test.describe('Extension Manager', () => {
           return route.continue();
       }
     });
+
+    await page.route(
+      'https://registry.npmjs.org/-/v1/search*text=+keywords%3A%22jupyterlab-extension%22*',
+      async (route, request) => {
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(allExtensionsList)
+            });
+          default:
+            return route.continue();
+        }
+      }
+    );
   });
 
   test('Sidebar', async ({ page }) => {
     await page.goto();
 
+    await page.pause();
     await openExtensionSidebar(page);
 
     expect(
@@ -63,7 +81,7 @@ test.describe('Extension Manager', () => {
   });
 
   test('Search', async ({ page }) => {
-    await stubExtensionsSearch(page);
+    await stubDrawioExtensionsSearch(page);
 
     await page.goto();
 
