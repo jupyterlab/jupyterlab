@@ -28,7 +28,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
     super(editorWidget, others);
     this.editor = editorWidget.content;
     this._docRegistry = docRegistry;
-    this.initialized = new Promise<void>((resolve, reject) => {
+    this.ready = new Promise<void>((resolve, reject) => {
       this.initOnceReady().then(resolve).catch(reject);
     });
 

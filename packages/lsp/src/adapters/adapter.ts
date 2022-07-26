@@ -223,7 +223,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   /**
    * Promise that resolves once the adapter is initialized
    */
-  initialized: Promise<void>;
+  ready: Promise<void>;
 
   /**
    * Internal virtual document of the adapter.
