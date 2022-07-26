@@ -1,36 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   Button,
-  caretDownIcon,
-  caretRightIcon,
-  Collapse,
   FilterBox,
   listingsInfoIcon,
+  PanelWithToolbar,
+  ReactWidget,
   refreshIcon,
-  ToolbarButtonComponent,
-  VDomRenderer
+  SidePanel,
+  ToolbarButton,
+  ToolbarButtonComponent
 } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
+import { AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 import { Action, IEntry, ListModel } from './model';
 
 // TODO: Replace pagination with lazy loading of lower search results
-
-/**
- * Icons with custom styling bound.
- */
-const caretDownIconStyled = caretDownIcon.bindprops({
-  height: 'auto',
-  width: '20px'
-});
-const caretRightIconStyled = caretRightIcon.bindprops({
-  height: 'auto',
-  width: '20px'
-});
 
 const badgeSize = 32;
 const badgeQuerySize = Math.floor(devicePixelRatio * badgeSize);
@@ -165,7 +154,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
 /**
  * The namespace for extension entry statics.
  */
-export namespace ListEntry {
+namespace ListEntry {
   export interface IProperties {
     /**
      * The entry to visualize.
@@ -192,7 +181,7 @@ export namespace ListEntry {
 /**
  * List view widget for extensions
  */
-export function ListView(props: ListView.IProperties): React.ReactElement<any> {
+function ListView(props: ListView.IProperties): React.ReactElement<any> {
   const { trans } = props;
 
   return (
@@ -239,7 +228,7 @@ export function ListView(props: ListView.IProperties): React.ReactElement<any> {
 /**
  * The namespace for list view widget statics.
  */
-export namespace ListView {
+namespace ListView {
   export interface IProperties {
     /**
      * The extension entries to display.
@@ -283,351 +272,123 @@ namespace ErrorMessage {
   }
 }
 
-/**
- *
- */
-export class CollapsibleSection extends React.Component<
-  CollapsibleSection.IProperties,
-  CollapsibleSection.IState
-> {
-  constructor(props: CollapsibleSection.IProperties) {
-    super(props);
-    this.state = {
-      isOpen: props.isOpen ? true : false
-    };
+class Header extends ReactWidget {
+  constructor(
+    protected model: ListModel,
+    protected trans: TranslationBundle,
+    protected searchInputRef: React.RefObject<HTMLInputElement>
+  ) {
+    super();
+    model.stateChanged.connect(this.update, this);
   }
 
-  /**
-   * Render the collapsible section using the virtual DOM.
-   */
-  render(): React.ReactNode {
-    let isOpen = this.state.isOpen;
-    let className = 'jp-extensionmanager-headerText';
-    if (this.props.disabled) {
-      isOpen = false;
-      className = 'jp-extensionmanager-headerTextDisabled';
-    }
-    let icon = isOpen ? caretDownIconStyled : caretRightIconStyled;
-
-    return (
-      <>
-        <div className="jp-stack-panel-header">
-          <ToolbarButtonComponent
-            icon={icon}
-            onClick={() => {
-              this.handleCollapse();
-            }}
-          />
-          <span className={className}>{this.props.header}</span>
-          {!this.props.disabled && this.props.headerElements}
-        </div>
-        <Collapse isOpen={isOpen}>{this.props.children}</Collapse>
-      </>
-    );
-  }
-
-  /**
-   * Handler for search input changes.
-   */
-  handleCollapse(): void {
-    this.setState(
-      {
-        isOpen: !this.state.isOpen
-      },
-      () => {
-        if (this.props.onCollapse) {
-          this.props.onCollapse(this.state.isOpen);
-        }
-      }
-    );
-  }
-
-  UNSAFE_componentWillReceiveProps(
-    nextProps: CollapsibleSection.IProperties
-  ): void {
-    if (nextProps.forceOpen) {
-      this.setState({
-        isOpen: true
-      });
-    }
-  }
-}
-
-/**
- * The namespace for collapsible section statics.
- */
-export namespace CollapsibleSection {
-  /**
-   * React properties for collapsible section component.
-   */
-  export interface IProperties {
-    /**
-     * The header string for section list.
-     */
-    header: string;
-
-    /**
-     * Whether the view will be expanded or collapsed initially, defaults to open.
-     */
-    isOpen?: boolean;
-
-    /**
-     * Handle collapse event.
-     */
-    onCollapse?: (isOpen: boolean) => void;
-
-    /**
-     * Any additional elements to add to the header.
-     */
-    headerElements?: React.ReactNode;
-
-    /**
-     * If given, this will be displayed instead of the children.
-     */
-    errorMessage?: string | null;
-
-    /**
-     * If true, the section will be collapsed and will not respond
-     * to open nor close actions.
-     */
-    disabled?: boolean;
-
-    /**
-     * If true, the section will be opened if not disabled.
-     */
-    forceOpen?: boolean;
-  }
-
-  /**
-   * React state for collapsible section component.
-   */
-  export interface IState {
-    /**
-     * Whether the section is expanded or collapsed.
-     */
-    isOpen: boolean;
-  }
-}
-
-/**
- * The main view for the discovery extension.
- */
-export class ExtensionView extends VDomRenderer<ListModel> {
-  constructor(model: ListModel, trans: TranslationBundle) {
-    super(model);
-    this.trans = trans;
-    this._forceOpen = false;
-    this._searchInputRef = React.createRef<HTMLInputElement>();
-    this.addClass('jp-extensionmanager-view');
-  }
-
-  /**
-   * Render the extension view using the virtual DOM.
-   */
-  protected render(): JSX.Element | JSX.Element[] | null {
-    const model = this.model;
-
-    const pages = Math.ceil(model.totalEntries / model.pagination);
-
-    const content = [];
-    content.push(
-      <CollapsibleSection
-        key="warning-section"
-        isOpen={!this.model.isDisclaimed}
-        disabled={false}
-        header={this.trans.__('Warning')}
-      >
-        <div className="jp-extensionmanager-disclaimer">
-          <div>
-            {this.trans
-              .__(`The JupyterLab development team is excited to have a robust
-third-party extension community. However, we do not review
-third-party extensions, and some extensions may introduce security
-risks or contain malicious code that runs on your machine.`)}
-          </div>
-          <div style={{ paddingTop: 8 }}>
-            {model.isDisclaimed ? (
-              <Button
-                className="jp-extensionmanager-disclaimer-disable"
-                onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
-                  this.model.isDisclaimed = false;
-                }}
-              >
-                {this.trans.__('Disable')}
-              </Button>
-            ) : (
-              <Button
-                className="jp-extensionmanager-disclaimer-enable"
-                onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
-                  this._forceOpen = true;
-                  this.model.isDisclaimed = true;
-                }}
-              >
-                {this.trans.__('Enable')}
-              </Button>
-            )}
-          </div>
-        </div>
-      </CollapsibleSection>
-    );
-    if (model.isUpdating) {
-      content.push(
-        <div key="loading-placeholder" className="jp-extensionmanager-loader">
-          {this.trans.__('Updating extensions list…')}
-        </div>
-      );
-    } else if (model.serverConnectionError !== null) {
-      content.push(
-        <ErrorMessage key="error-msg">
-          <p>
-            {this.trans
-              .__(`Error communicating with server extension. Consult the documentation
-            for how to ensure that it is enabled.`)}
-          </p>
-
-          <p>{this.trans.__('Reason given:')}</p>
-          <pre>{model.serverConnectionError}</pre>
-        </ErrorMessage>
-      );
-    } else if (model.serverRequirementsError !== null) {
-      content.push(
-        <ErrorMessage key="server-requirements-error">
-          <p>
-            {this.trans.__(
-              'The server has some missing requirements for installing extensions.'
-            )}
-          </p>
-
-          <p>{this.trans.__('Details:')}</p>
-          <pre>{model.serverRequirementsError}</pre>
-        </ErrorMessage>
-      );
-    } else {
-      // List installed and discovery sections
-      const query = new RegExp(model.query?.toLowerCase() ?? '');
-      content.push(
-        <CollapsibleSection
-          key="installed-section"
-          isOpen={model.isDisclaimed}
-          forceOpen={this._forceOpen}
-          disabled={!model.isDisclaimed}
-          header={this.trans.__('Installed')}
-          headerElements={
-            <ToolbarButtonComponent
-              key="refresh-button"
-              icon={refreshIcon}
-              onClick={() => {
-                model.refreshInstalled();
-              }}
-              tooltip={this.trans.__('Refresh extension list')}
-            />
-          }
-        >
-          {model.installedError !== null ? (
-            <ErrorMessage>
-              {`Error querying installed extensions${
-                model.installedError ? `: ${model.installedError}` : '.'
-              }`}
-            </ErrorMessage>
-          ) : (
-            <ListView
-              entries={model.installed.filter(
-                pkg => !model.query || query.test(pkg.name)
-              )}
-              numPages={1}
-              trans={this.trans}
-              onPage={value => {
-                /* no-op */
-              }}
-              performAction={this.onAction.bind(this)}
-              supportInstallation={model.isDisclaimed}
-            />
-          )}
-        </CollapsibleSection>
-      );
-
-      content.push(
-        <CollapsibleSection
-          key="search-section"
-          isOpen={model.isDisclaimed}
-          forceOpen={this._forceOpen}
-          disabled={!model.isDisclaimed}
-          header={
-            model.query
-              ? this.trans.__('Search Results')
-              : this.trans.__('Discover')
-          }
-          onCollapse={(isOpen: boolean) => {
-            if (isOpen && model.query === null) {
-              model.query = '';
-            }
-          }}
-        >
-          {model.searchError !== null ? (
-            <ErrorMessage>
-              {`Error searching for extensions${
-                model.searchError ? `: ${model.searchError}` : '.'
-              }`}
-            </ErrorMessage>
-          ) : (
-            <ListView
-              // Filter out installed extensions:
-              entries={model.searchResult.filter(
-                entry => model.installed.indexOf(entry) === -1
-              )}
-              numPages={pages}
-              onPage={value => {
-                this.onPage(value);
-              }}
-              performAction={this.onAction.bind(this)}
-              supportInstallation={model.isDisclaimed}
-              trans={this.trans}
-            />
-          )}
-        </CollapsibleSection>
-      );
-    }
-
-    // Reset the force open for future usage.
-    this._forceOpen = false;
-
+  render(): JSX.Element {
     return (
       <>
         <FilterBox
           placeholder={this.trans.__('Search')}
           disabled={!this.model.isDisclaimed}
-          updateFilter={(fn, query) => void 0}
+          updateFilter={(fn, query) => {
+            console.log(`Query: ${query}`);
+            this.model.query = query ?? '';
+          }}
           useFuzzyFilter={false}
-          inputRef={this._searchInputRef}
+          inputRef={this.searchInputRef}
         />
 
         <div
           className={`jp-extensionmanager-pending ${
-            model.hasPendingActions() ? 'jp-mod-hasPending' : ''
+            this.model.hasPendingActions() ? 'jp-mod-hasPending' : ''
           }`}
         />
-
-        <div className="jp-extensionmanager-content">{content}</div>
+        {this.model.actionError && (
+          <ErrorMessage>
+            <p>{this.trans.__('Error when performing an action.')}</p>
+            <p>{this.trans.__('Reason given:')}</p>
+            <pre>{this.model.actionError}</pre>
+          </ErrorMessage>
+        )}
       </>
     );
   }
+}
 
-  /**
-   * Callback handler for the user specifies a new search query.
-   *
-   * @param value The new query.
-   */
-  onSearch(value: string): void {
-    this.model!.query = value;
+class Warning extends ReactWidget {
+  constructor(protected model: ListModel, protected trans: TranslationBundle) {
+    super();
+    this.addClass('jp-extensionmanager-disclaimer');
+    model.stateChanged.connect(this.update, this);
   }
 
-  /**
-   * Callback handler for the user changes the page of the search result pagination.
-   *
-   * @param value The pagination page number.
-   */
-  onPage(value: number): void {
-    this.model!.page = value;
+  render(): JSX.Element {
+    return (
+      <>
+        <p>
+          {this.trans
+            .__(`The JupyterLab development team is excited to have a robust
+third-party extension community. However, we do not review
+third-party extensions, and some extensions may introduce security
+risks or contain malicious code that runs on your machine.`)}
+        </p>
+        {this.model.isDisclaimed ? (
+          <Button
+            className="jp-extensionmanager-disclaimer-disable"
+            onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+              this.model.isDisclaimed = false;
+            }}
+          >
+            {this.trans.__('Disable')}
+          </Button>
+        ) : (
+          <Button
+            className="jp-extensionmanager-disclaimer-enable"
+            onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+              this.model.isDisclaimed = true;
+            }}
+          >
+            {this.trans.__('Enable')}
+          </Button>
+        )}
+      </>
+    );
+  }
+}
+
+class InstalledList extends ReactWidget {
+  constructor(protected model: ListModel, protected trans: TranslationBundle) {
+    super();
+    model.stateChanged.connect(this.update, this);
+  }
+
+  render(): JSX.Element {
+    return (
+      <>
+        {this.model.installedError !== null ? (
+          <ErrorMessage>
+            {`Error querying installed extensions${
+              this.model.installedError ? `: ${this.model.installedError}` : '.'
+            }`}
+          </ErrorMessage>
+        ) : this.model.isLoadingInstalledExtensions ? (
+          <div className="jp-extensionmanager-loader">
+            {this.trans.__('Updating extensions list…')}
+          </div>
+        ) : (
+          <ListView
+            entries={this.model.installed.filter(pkg =>
+              new RegExp(this.model.query.toLowerCase()).test(pkg.name)
+            )}
+            numPages={1}
+            trans={this.trans}
+            onPage={value => {
+              /* no-op */
+            }}
+            performAction={this.onAction.bind(this)}
+            supportInstallation={this.model.isDisclaimed}
+          />
+        )}
+      </>
+    );
   }
 
   /**
@@ -639,15 +400,145 @@ risks or contain malicious code that runs on your machine.`)}
   onAction(action: Action, entry: IEntry): Promise<void> {
     switch (action) {
       case 'install':
-        return this.model!.install(entry);
+        return this.model.install(entry);
       case 'uninstall':
-        return this.model!.uninstall(entry);
+        return this.model.uninstall(entry);
       case 'enable':
-        return this.model!.enable(entry);
+        return this.model.enable(entry);
       case 'disable':
-        return this.model!.disable(entry);
+        return this.model.disable(entry);
       default:
         throw new Error(`Invalid action: ${action}`);
+    }
+  }
+}
+
+class SearchResult extends ReactWidget {
+  constructor(protected model: ListModel, protected trans: TranslationBundle) {
+    super();
+    model.stateChanged.connect(this.update, this);
+  }
+
+  /**
+   * Callback handler for the user changes the page of the search result pagination.
+   *
+   * @param value The pagination page number.
+   */
+  onPage(value: number): void {
+    this.model.page = value;
+  }
+
+  /**
+   * Callback handler for when the user wants to perform an action on an extension.
+   *
+   * @param action The action to perform.
+   * @param entry The entry to perform the action on.
+   */
+  onAction(action: Action, entry: IEntry): Promise<void> {
+    switch (action) {
+      case 'install':
+        return this.model.install(entry);
+      case 'uninstall':
+        return this.model.uninstall(entry);
+      case 'enable':
+        return this.model.enable(entry);
+      case 'disable':
+        return this.model.disable(entry);
+      default:
+        throw new Error(`Invalid action: ${action}`);
+    }
+  }
+
+  render(): JSX.Element {
+    return (
+      <>
+        {this.model.searchError !== null ? (
+          <ErrorMessage>
+            {`Error searching for extensions${
+              this.model.searchError ? `: ${this.model.searchError}` : '.'
+            }`}
+          </ErrorMessage>
+        ) : this.model.isSearching ? (
+          <div className="jp-extensionmanager-loader">
+            {this.trans.__('Updating extensions list…')}
+          </div>
+        ) : (
+          <ListView
+            // Filter out installed extensions:
+            entries={this.model.searchResult.filter(
+              entry => this.model.installed.indexOf(entry) === -1
+            )}
+            numPages={Math.ceil(
+              this.model.totalEntries / this.model.pagination
+            )}
+            onPage={value => {
+              this.onPage(value);
+            }}
+            performAction={this.onAction.bind(this)}
+            supportInstallation={this.model.isDisclaimed}
+            trans={this.trans}
+          />
+        )}
+      </>
+    );
+  }
+
+  update(): void {
+    this.title.label = this.model.query
+      ? this.trans.__('Search Results')
+      : this.trans.__('Discover');
+    super.update();
+  }
+}
+
+export namespace ExtensionsPanel {
+  export interface IOptions {
+    model: ListModel;
+    translator: ITranslator;
+  }
+}
+
+export class ExtensionsPanel extends SidePanel {
+  constructor(options: ExtensionsPanel.IOptions) {
+    const { model, translator } = options;
+    super({ translator });
+    this.model = model;
+    this._searchInputRef = React.createRef<HTMLInputElement>();
+    this.addClass('jp-extensionmanager-view');
+
+    this.trans = translator.load('jupyterlab');
+
+    this.header.addWidget(new Header(model, this.trans, this._searchInputRef));
+
+    const warning = new Warning(model, this.trans);
+    warning.title.label = this.trans.__('Warning');
+
+    this.addWidget(warning);
+
+    const installed = new PanelWithToolbar();
+    installed.title.label = this.trans.__('Installed');
+
+    installed.toolbar.addItem(
+      'refresh',
+      new ToolbarButton({
+        icon: refreshIcon,
+        onClick: () => {
+          model.refreshInstalled();
+        },
+        tooltip: this.trans.__('Refresh extension list')
+      })
+    );
+
+    installed.addWidget(new InstalledList(model, this.trans));
+
+    this.addWidget(installed);
+
+    this.addWidget(new SearchResult(model, this.trans));
+
+    if (this.model.isDisclaimed) {
+      (this.content as AccordionPanel).collapse(0);
+    } else {
+      (this.content as AccordionPanel).expand(0);
     }
   }
 
@@ -670,6 +561,12 @@ risks or contain malicious code that runs on your machine.`)}
       default:
         break;
     }
+  }
+
+  update(): void {
+    this.header.update();
+    this.widgets.forEach(w => w.update());
+    super.update();
   }
 
   /**
@@ -709,7 +606,7 @@ risks or contain malicious code that runs on your machine.`)}
     this.toggleClass('lm-mod-focused', focused);
   }
 
+  protected model: ListModel;
   protected trans: TranslationBundle;
-  private _forceOpen: boolean;
   private _searchInputRef: React.RefObject<HTMLInputElement>;
 }

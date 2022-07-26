@@ -11,7 +11,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
-import { ExtensionView, ListModel } from '@jupyterlab/extensionmanager';
+import { ExtensionsPanel, ListModel } from '@jupyterlab/extensionmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
@@ -52,10 +52,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const model = new ListModel(serviceManager, translator);
 
-    let view: ExtensionView | null = null;
+    let view: ExtensionsPanel | null = null;
 
     const createView = () => {
-      const v = new ExtensionView(model, trans);
+      const v = new ExtensionsPanel({ model, translator: translator! });
       v.id = 'extensionmanager.main-view';
       v.title.icon = extensionIcon;
       v.title.caption = trans.__('Extension Manager');

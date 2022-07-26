@@ -163,6 +163,14 @@ export class ListModel extends VDomModel {
     }
   }
 
+  get isLoadingInstalledExtensions(): boolean {
+    return this._isLoadingInstalledExtensions;
+  }
+
+  get isSearching(): boolean {
+    return this._isSearching;
+  }
+
   /**
    * A readonly array containing the latest search result
    */
@@ -171,14 +179,14 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * The current NPM repository search query.
+   * The search query.
    *
    * Setting its value triggers a new search.
    */
-  get query(): string | null {
+  get query(): string {
     return this._query;
   }
-  set query(value: string | null) {
+  set query(value: string) {
     if (this._query !== value) {
       this._query = value;
     }
@@ -465,10 +473,10 @@ export class ListModel extends VDomModel {
 
     actionRequest.then(
       () => {
-        this.serverConnectionError = null;
+        this.actionError = null;
       },
       reason => {
-        this.serverConnectionError = reason.toString();
+        this.actionError = reason.toString();
       }
     );
     this._addPendingAction(actionRequest);
@@ -496,6 +504,8 @@ export class ListModel extends VDomModel {
     this.stateChanged.emit(undefined);
   }
 
+  actionError: string | null = null;
+
   /**
    * Contains an error message if an error occurred when querying installed extensions.
    */
@@ -507,21 +517,9 @@ export class ListModel extends VDomModel {
   searchError: string | null = null;
 
   /**
-   * Contains an error message if an error occurred when querying the server extension.
-   */
-  serverConnectionError: string | null = null;
-
-  /**
-   * Contains an error message if the server has unfulfilled requirements.
-   */
-  serverRequirementsError: string | null = null;
-
-  /**
    * Whether a reload should be considered due to actions taken.
    */
-  promptReload: boolean = false;
-
-  isUpdating = false;
+  promptReload = false;
 
   /**
    * The service manager to use for building.
@@ -531,7 +529,10 @@ export class ListModel extends VDomModel {
   protected translator: ITranslator;
 
   private _isDisclaimed = false;
-  private _query: string | null = ''; // TODO: we may not need the null case?
+  private _isLoadingInstalledExtensions = false;
+  private _isSearching = false;
+
+  private _query: string = '';
   private _page: number = 0;
   private _pagination: number = 250;
   private _totalEntries: number = 0;
