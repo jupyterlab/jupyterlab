@@ -280,6 +280,7 @@ class Header extends ReactWidget {
   ) {
     super();
     model.stateChanged.connect(this.update, this);
+    this.addClass('jp-extensionmanager-header');
   }
 
   render(): JSX.Element {
@@ -523,7 +524,7 @@ export class ExtensionsPanel extends SidePanel {
       new ToolbarButton({
         icon: refreshIcon,
         onClick: () => {
-          model.refreshInstalled();
+          model.refreshInstalled(true);
         },
         tooltip: this.trans.__('Refresh extension list')
       })
@@ -563,24 +564,27 @@ export class ExtensionsPanel extends SidePanel {
     }
   }
 
-  update(): void {
-    this.header.update();
-    this.widgets.forEach(w => w.update());
-    super.update();
-  }
-
   /**
    * A message handler invoked on a `'before-attach'` message.
    */
   protected onBeforeAttach(msg: Message): void {
     this.node.addEventListener('focus', this, true);
     this.node.addEventListener('blur', this, true);
+
+    if (!this._wasInitialized) {
+      this._wasInitialized = true;
+      this.model.refreshInstalled().catch(reason => {
+        console.log(`Failed to refresh installed extension list:\n${reason}`);
+      });
+    }
+    super.onBeforeAttach(msg);
   }
 
   /**
    * A message handler invoked on an `'after-detach'` message.
    */
   protected onAfterDetach(msg: Message): void {
+    super.onAfterDetach(msg);
     this.node.removeEventListener('focus', this, true);
     this.node.removeEventListener('blur', this, true);
   }
@@ -596,6 +600,7 @@ export class ExtensionsPanel extends SidePanel {
         input.select();
       }
     }
+    super.onActivateRequest(msg);
   }
 
   /**
@@ -609,4 +614,5 @@ export class ExtensionsPanel extends SidePanel {
   protected model: ListModel;
   protected trans: TranslationBundle;
   private _searchInputRef: React.RefObject<HTMLInputElement>;
+  private _wasInitialized = false;
 }

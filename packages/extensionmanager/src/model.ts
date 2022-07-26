@@ -13,11 +13,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
-import {
-  IKernelInstallInfo
-  // KernelCompanion,
-  // presentCompanions
-} from './companions';
+import { IKernelInstallInfo } from './companions';
 import { reportInstallError } from './dialog';
 
 /**
@@ -137,9 +133,9 @@ export class ListModel extends VDomModel {
     super();
     this.translator = translator || nullTranslator;
     this._installed = [];
-    this._searchResult = [];
+    this._lastSearchResult = [];
     this.serviceManager = serviceManager;
-    this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
+    this._debouncedSearch = new Debouncer(this.search.bind(this), 1000);
   }
 
   /**
@@ -159,7 +155,7 @@ export class ListModel extends VDomModel {
     if (v !== this._isDisclaimed) {
       this._isDisclaimed = v;
       this.stateChanged.emit();
-      void this._debouncedUpdate.invoke();
+      void this._debouncedSearch.invoke();
     }
   }
 
@@ -175,7 +171,7 @@ export class ListModel extends VDomModel {
    * A readonly array containing the latest search result
    */
   get searchResult(): ReadonlyArray<IEntry> {
-    return this._searchResult;
+    return this._lastSearchResult;
   }
 
   /**
@@ -189,6 +185,7 @@ export class ListModel extends VDomModel {
   set query(value: string) {
     if (this._query !== value) {
       this._query = value;
+      this._debouncedSearch.invoke();
     }
   }
 
@@ -203,7 +200,7 @@ export class ListModel extends VDomModel {
   set page(value: number) {
     if (this._page !== value) {
       this._page = value;
-      void this._debouncedUpdate.invoke();
+      void this._debouncedSearch.invoke();
     }
   }
 
@@ -218,7 +215,7 @@ export class ListModel extends VDomModel {
   set pagination(value: number) {
     if (this._pagination !== value) {
       this._pagination = value;
-      void this._debouncedUpdate.invoke();
+      void this._debouncedSearch.invoke();
     }
   }
 
@@ -236,7 +233,7 @@ export class ListModel extends VDomModel {
     if (this.isDisposed) {
       return;
     }
-    this._debouncedUpdate.dispose();
+    this._debouncedSearch.dispose();
     super.dispose();
   }
 
@@ -253,24 +250,11 @@ export class ListModel extends VDomModel {
    * @param entry An entry indicating which extension to install.
    */
   async install(entry: IEntry): Promise<void> {
-    if (entry.installed) {
-      // Updating
-      await this._performAction('install', entry).then(data => {
-        if (data.status !== 'ok') {
-          reportInstallError(entry.name, data.message, this.translator);
-        }
-        return this.update();
-      });
-    }
-    await this.checkCompanionPackages(entry).then(shouldInstall => {
-      if (shouldInstall) {
-        return this._performAction('install', entry).then(data => {
-          if (data.status !== 'ok') {
-            reportInstallError(entry.name, data.message, this.translator);
-          }
-          return this.update();
-        });
+    await this.performAction('install', entry).then(data => {
+      if (data.status !== 'ok') {
+        reportInstallError(entry.name, data.message, this.translator);
       }
+      return this.update();
     });
   }
 
@@ -283,7 +267,7 @@ export class ListModel extends VDomModel {
     if (!entry.installed) {
       throw new Error(`Not installed, cannot uninstall: ${entry.name}`);
     }
-    await this._performAction('uninstall', entry);
+    await this.performAction('uninstall', entry);
     return this.update();
   }
 
@@ -296,8 +280,8 @@ export class ListModel extends VDomModel {
     if (entry.enabled) {
       throw new Error(`Already enabled: ${entry.name}`);
     }
-    await this._performAction('enable', entry);
-    await this.update();
+    await this.performAction('enable', entry);
+    await this.refreshInstalled(true);
   }
 
   /**
@@ -309,53 +293,34 @@ export class ListModel extends VDomModel {
     if (!entry.enabled) {
       throw new Error(`Already disabled: ${entry.name}`);
     }
-    await this._performAction('disable', entry);
-    await this.update();
-  }
-
-  /**
-   * Check for companion packages in kernels or server.
-   *
-   * @param entry An entry indicating which extension to check.
-   */
-  checkCompanionPackages(entry: IEntry): Promise<boolean> {
-    // TODO
-    return Promise.resolve(false);
-    // return this.searcher
-    //   .fetchPackageData(entry.name, entry.latest_version)
-    //   .then(data => {
-    //     if (!data || !data.jupyterlab || !data.jupyterlab.discovery) {
-    //       return true;
-    //     }
-    //     const discovery = data.jupyterlab.discovery;
-    //     const kernelCompanions: KernelCompanion[] = [];
-    //     if (discovery.kernel) {
-    //       // match specs
-    //       for (const kernelInfo of discovery.kernel) {
-    //         const matches = Private.matchSpecs(
-    //           kernelInfo,
-    //           this.serviceManager.kernelspecs.specs
-    //         );
-    //         kernelCompanions.push({ kernelInfo, kernels: matches });
-    //       }
-    //     }
-    //     if (kernelCompanions.length < 1 && !discovery.server) {
-    //       return true;
-    //     }
-    //     return presentCompanions(
-    //       kernelCompanions,
-    //       discovery.server,
-    //       this.translator
-    //     );
-    //   });
+    await this.performAction('disable', entry);
+    await this.refreshInstalled(true);
   }
 
   /**
    * Refresh installed packages
+   *
+   * @param force Force refreshing the list of installed packages
    */
-  refreshInstalled(): void {
-    const refresh = this.update(true);
-    this._addPendingAction(refresh);
+  async refreshInstalled(force = false): Promise<void> {
+    if (!this.isDisclaimed) {
+      return Promise.reject('Installation warning is not disclaimed.');
+    }
+
+    this.installedError = null;
+    this._isLoadingInstalledExtensions = true;
+    this.stateChanged.emit();
+    try {
+      const extensions = await Private.requestAPI<IEntry[]>({
+        refresh: force ? 1 : 0
+      });
+      this._installed = extensions.sort(Private.comparator);
+    } catch (reason) {
+      this.installedError = reason.toString();
+    } finally {
+      this._isLoadingInstalledExtensions = false;
+      this.stateChanged.emit();
+    }
   }
 
   /**
@@ -363,94 +328,51 @@ export class ListModel extends VDomModel {
    *
    * Sets searchError and totalEntries as appropriate.
    *
-   * @returns {Promise<{ [key: string]: IEntry; }>} The search result as a map of entries.
+   * @returns The extensions matching the current query.
    */
-  protected async performSearch(): Promise<{ [key: string]: IEntry }> {
-    let searchMap: { [key: string]: IEntry } = {};
+  protected async search(): Promise<void> {
+    if (!this.isDisclaimed) {
+      return Promise.reject('Installation warning is not disclaimed.');
+    }
+
     this.searchError = null;
+    this._isSearching = true;
+    this.stateChanged.emit();
     try {
       const extensions = await Private.requestAPI<IEntry[]>({
         query: this.query ?? '',
         page: this.page,
         per_page: this.pagination
       });
-      searchMap = extensions.reduce<{ [k: string]: IEntry }>((agg, ext) => {
-        agg[ext.name] = ext;
-        return agg;
-      }, {});
+
       this._totalEntries = extensions.length;
+
+      const installedNames = this._installed.map(pkg => pkg.name);
+      this._lastSearchResult = extensions
+        .filter(pkg => !installedNames.includes(pkg.name))
+        .sort(Private.comparator);
     } catch (reason) {
       this.searchError = reason.toString();
+    } finally {
+      this._isSearching = false;
+      this.stateChanged.emit();
     }
-
-    return searchMap;
-  }
-
-  /**
-   * Query the installed extensions.
-   *
-   * Sets installedError as appropriate.
-   *
-   * @returns {Promise<{ [key: string]: IEntry; }>} A map of installed extensions.
-   */
-  protected async queryInstalled(
-    refreshInstalled: boolean
-  ): Promise<{ [key: string]: IEntry }> {
-    let installedMap = {};
-    this.installedError = null;
-    try {
-      const extensions = await Private.requestAPI<IEntry[]>({
-        refresh: refreshInstalled ? 1 : 0
-      });
-      installedMap = extensions.reduce<{ [key: string]: IEntry }>(
-        (agg, ext) => {
-          agg[ext.name] = ext;
-          return agg;
-        },
-        {}
-      );
-    } catch (reason) {
-      this.installedError = reason.toString();
-    }
-    return installedMap;
   }
 
   /**
    * Update the current model.
    *
-   * This will query the NPM repository, and the notebook server.
+   * This will query the packages repository, and the notebook server.
    *
    * Emits the `stateChanged` signal on successful completion.
    */
   protected async update(refreshInstalled = false): Promise<void> {
     if (this.isDisclaimed) {
-      const [searchMap, installedMap] = await Promise.all([
-        this.performSearch(),
-        // Promise.resolve<{ [k: string]: IEntry }>({}),
-        this.queryInstalled(refreshInstalled)
+      await Promise.all([
+        this.search(),
+        this.refreshInstalled(refreshInstalled)
       ]);
-
-      // Map results to attributes:
-      const installed: IEntry[] = [];
-      for (const key of Object.keys(installedMap)) {
-        installed.push(installedMap[key]);
-      }
-      this._installed = installed.sort(Private.comparator);
-
-      const searchResult: IEntry[] = [];
-      for (const key of Object.keys(searchMap)) {
-        // Filter out installed entries from search results:
-        if (installedMap[key] === undefined) {
-          searchResult.push(searchMap[key]);
-        } else {
-          searchResult.push(installedMap[key]);
-        }
-      }
-      this._searchResult = searchResult.sort(Private.comparator);
     }
-
-    // Signal updated state
-    this.stateChanged.emit();
   }
 
   /**
@@ -459,17 +381,20 @@ export class ListModel extends VDomModel {
    * @param action A valid action to perform.
    * @param entry The extension to perform the action on.
    */
-  protected _performAction(
+  protected performAction(
     action: string,
     entry: IEntry
   ): Promise<IActionReply> {
-    const actionRequest = Private.requestAPI<IActionReply>(undefined, {
-      method: 'POST',
-      body: JSON.stringify({
-        cmd: action,
-        extension_name: entry.name
-      })
-    });
+    const actionRequest = Private.requestAPI<IActionReply>(
+      {},
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          cmd: action,
+          extension_name: entry.name
+        })
+      }
+    );
 
     actionRequest.then(
       () => {
@@ -479,7 +404,7 @@ export class ListModel extends VDomModel {
         this.actionError = reason.toString();
       }
     );
-    this._addPendingAction(actionRequest);
+    this.addPendingAction(actionRequest);
     return actionRequest;
   }
 
@@ -488,7 +413,7 @@ export class ListModel extends VDomModel {
    *
    * @param pending A promise that resolves when the action is completed.
    */
-  protected _addPendingAction(pending: Promise<any>): void {
+  protected addPendingAction(pending: Promise<any>): void {
     // Add to pending actions collection
     this._pendingActions.push(pending);
 
@@ -538,9 +463,9 @@ export class ListModel extends VDomModel {
   private _totalEntries: number = 0;
 
   private _installed: IEntry[];
-  private _searchResult: IEntry[];
+  private _lastSearchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
-  private _debouncedUpdate: Debouncer<void, void>;
+  private _debouncedSearch: Debouncer<void, void>;
 }
 
 /**
