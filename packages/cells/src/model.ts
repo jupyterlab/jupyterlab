@@ -734,10 +734,16 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     return this._needTrustButton;
   }
 
+  /**
+   * Set the flag that indicates the cell output widget need to have a trust button.
+   */
   set needTrustButton(value: boolean) {
     this._needTrustButton = value;
   }
 
+  /**
+   * A signal emitted when a `display_data` message is processed.
+   */
   get displayModelRequested(): ISignal<ICodeCellModel, void> {
     return this._displayModelRequested;
   }
@@ -1012,6 +1018,11 @@ export namespace CodeCellModel {
 
 namespace Private {
   /**
+   * The list of mime type that can be displayed immediately in RTC mode.
+   */
+  const MIME_WHITE_LIST = ['text/plain'];
+
+  /**
    * Check the output message for its type and data content. If the message type
    * is one of `execute_result`, `display_data`, or `update_display_data` and its
    * data contains  at least one `application/*` key, returns `true`.
@@ -1028,7 +1039,7 @@ namespace Private {
       out.data
     ) {
       for (const key in out.data as nbformat.IMimeBundle) {
-        if (key.startsWith('application/')) {
+        if (!MIME_WHITE_LIST.includes(key)) {
           return true;
         }
       }
