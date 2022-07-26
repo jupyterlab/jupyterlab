@@ -1,13 +1,17 @@
-/*
- * Copyright (c) Jupyter Development Team.
- * Distributed under the terms of the Modified BSD License.
- */
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { closeBrackets } from '@codemirror/autocomplete';
 import { defaultKeymap } from '@codemirror/commands';
-import { indentUnit, LanguageSupport } from '@codemirror/language';
+import {
+  bracketMatching,
+  foldGutter,
+  indentOnInput,
+  indentUnit,
+  LanguageSupport
+} from '@codemirror/language';
 
 import {
   Compartment,
@@ -29,7 +33,7 @@ import { StyleSpec } from 'style-mod';
 
 import { Mode } from './mode';
 
-import { jupyterTheme } from './editortheme';
+import { Theme } from './editortheme';
 
 export namespace Configuration {
   /**
@@ -301,37 +305,19 @@ export namespace Configuration {
   class ThemeBuilder implements IConfigurableBuilder {
     constructor() {
       this._compartment = new Compartment();
-      this._themeMap = new Map<string, Extension>([['jupyter', jupyterTheme]]);
     }
 
     of<T>(value: T): Extension {
       const v = value as unknown as string;
-      return this._compartment.of(this._getTheme(v));
+      return this._compartment.of(Theme.getTheme(v));
     }
 
     reconfigure<T>(value: T): StateEffect<unknown> {
       const v = value as unknown as string;
-      return this._compartment.reconfigure(this._getTheme(v));
-    }
-
-    defaultTheme(): Extension {
-      return this._themeMap.get('jupyter')!;
-    }
-
-    registerTheme(name: string, theme: Extension) {
-      this._themeMap.set(name, theme);
-    }
-
-    private _getTheme(value: string): Extension {
-      let ext = this._themeMap.get(value);
-      if (!ext) {
-        ext = this.defaultTheme();
-      }
-      return ext!;
+      return this._compartment.reconfigure(Theme.getTheme(v));
     }
 
     private _compartment: Compartment;
-    private _themeMap: Map<string, Extension>;
   }
 
   /**
@@ -393,7 +379,10 @@ export namespace Configuration {
         ['readOnly', createConfigurableBuilder(EditorState.readOnly)],
         ['keymap', createConfigurableBuilder(keymap)],
         ['indentUnit', createConfigurableBuilder(indentUnit)],
+        ['smartIndent', createConditionalBuilder(indentOnInput())],
         ['autoClosingBrackets', createConditionalBuilder(closeBrackets())],
+        ['matchBrackets', createConditionalBuilder(bracketMatching())],
+        ['foldGutter', createConditionalBuilder(foldGutter())],
         ['styleActiveLine', createConditionalBuilder(highlightActiveLine())],
         ['lineNumbers', createConditionalBuilder(lineNumbers())],
         [
@@ -478,8 +467,7 @@ export namespace Configuration {
       }
 
       if (!config.theme) {
-        const themeBuilder = this.get('theme') as ThemeBuilder;
-        extensions.push(themeBuilder.defaultTheme());
+        extensions.push(Theme.defaultTheme());
       }
 
       const builder = this.get('keymap');
@@ -512,11 +500,6 @@ export namespace Configuration {
         });
 
       return extensions;
-    }
-
-    registerTheme(name: string, theme: Extension) {
-      const builder = this.get('theme') as ThemeBuilder;
-      builder.registerTheme(name, theme);
     }
 
     private updateThemeOverload(

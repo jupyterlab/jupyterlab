@@ -1,7 +1,5 @@
-/*
- * Copyright (c) Jupyter Development Team.
- * Distributed under the terms of the Modified BSD License.
- */
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { Extension } from '@codemirror/state';
@@ -81,3 +79,23 @@ export const jupyterTheme: Extension = [
   jupyterEditorTheme,
   syntaxHighlighting(jupyterHighlightStyle)
 ];
+
+export namespace Theme {
+  const themeMap: Map<string, Extension> = new Map([['jupyter', jupyterTheme]]);
+
+  export function defaultTheme(): Extension {
+    return themeMap.get('jupyter')!;
+  }
+
+  export function registerTheme(name: string, theme: Extension) {
+    themeMap.set(name, theme);
+  }
+
+  export function getTheme(value: string): Extension {
+    let ext = themeMap.get(value);
+    if (!ext) {
+      ext = this.defaultTheme();
+    }
+    return ext!;
+  }
+}

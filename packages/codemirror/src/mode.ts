@@ -50,7 +50,7 @@ export namespace Mode {
     return res;
   }
 
-  export const modeList: ISpec[] = [
+  const modeList: ISpec[] = [
     makeSpec({
       name: 'C',
       mime: 'text/x-csrc',
