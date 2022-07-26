@@ -44,6 +44,10 @@
           {
             "command": "docmanager:rename",
             "rank": 5
+          },
+          {
+            "command": "docmanager:duplicate",
+            "rank": 5
           }
         ]
       },
@@ -85,6 +89,11 @@
         "command": "docmanager:show-in-file-browser",
         "selector": "[data-type=\"document-title\"]",
         "rank": 23
+      },
+      {
+        "command": "docmanager:duplicate",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 24
       }
     ]
   },
