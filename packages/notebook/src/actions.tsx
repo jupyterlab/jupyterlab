@@ -2198,51 +2198,67 @@ namespace Private {
             });
             return Promise.resolve(false);
           }
+          let promise = Promise.resolve();
           if (sessionContext.hasNoKernel) {
-            void sessionContextDialogs.selectKernel(sessionContext);
-            return Promise.resolve(false);
+            promise = sessionContext.startKernel().then(shouldSelect => {
+              if (shouldSelect) {
+                return sessionContextDialogs.selectKernel(sessionContext);
+              }
+            });
           }
-          const deletedCells = notebook.model?.deletedCells ?? [];
-          executionScheduled.emit({ notebook, cell });
-          return CodeCell.execute(cell as CodeCell, sessionContext, {
-            deletedCells,
-            recordTiming: notebook.notebookConfig.recordTiming
-          })
-            .then(reply => {
-              deletedCells.splice(0, deletedCells.length);
-              if (cell.isDisposed) {
-                return false;
-              }
+          return promise.then(() => {
+            if (sessionContext.hasNoKernel) {
+              // Session has still no kernel, so we can't execute the cell.
+              return false;
+            }
 
-              if (!reply) {
-                return true;
-              }
-              if (reply.content.status === 'ok') {
-                const content = reply.content;
-
-                if (content.payload && content.payload.length) {
-                  handlePayload(content, notebook, cell);
+            let deletedCells = notebook.model?.deletedCells ?? [];
+            executionScheduled.emit({ notebook, cell });
+            return CodeCell.execute(cell as CodeCell, sessionContext, {
+              deletedCells,
+              recordTiming: notebook.notebookConfig.recordTiming
+            })
+              .then(reply => {
+                deletedCells.splice(0, deletedCells.length);
+                if (cell.isDisposed) {
+                  return false;
                 }
 
-                return true;
-              } else {
-                throw new KernelError(reply.content);
-              }
-            })
-            .catch(reason => {
-              if (cell.isDisposed || reason.message.startsWith('Canceled')) {
-                return false;
-              }
-              executed.emit({ notebook, cell, success: false, error: reason });
-              throw reason;
-            })
-            .then(ran => {
-              if (ran) {
-                executed.emit({ notebook, cell, success: true });
-              }
+                if (!reply) {
+                  return true;
+                }
+                if (reply.content.status === 'ok') {
+                  const content = reply.content;
 
-              return ran;
-            });
+                  if (content.payload && content.payload.length) {
+                    handlePayload(content, notebook, cell);
+                  }
+
+                  return true;
+                } else {
+                  throw new KernelError(reply.content);
+                }
+              })
+              .catch(reason => {
+                if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+                  return false;
+                }
+                executed.emit({
+                  notebook,
+                  cell,
+                  success: false,
+                  error: reason
+                });
+                throw reason;
+              })
+              .then(ran => {
+                if (ran) {
+                  executed.emit({ notebook, cell, success: true });
+                }
+
+                return ran;
+              });
+          });
         }
         cell.model.sharedModel.transact(() => {
           (cell.model as ICodeCellModel).clearExecution();

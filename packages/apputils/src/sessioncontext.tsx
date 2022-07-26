@@ -199,6 +199,13 @@ export interface ISessionContext extends IObservableDisposable {
   readonly specsManager: KernelSpec.IManager;
 
   /**
+   * Starts new Kernel.
+   *
+   * @returns Whether to ask the user to pick a kernel.
+   */
+  startKernel(): Promise<boolean>;
+
+  /**
    * Restart the current Kernel.
    *
    * @returns A promise that resolves when the kernel is restarted.
@@ -645,6 +652,35 @@ export class SessionContext implements ISessionContext {
     Signal.clearData(this);
   }
 
+  async startKernel(): Promise<boolean> {
+    const preference = this.kernelPreference;
+    let options: Partial<Kernel.IModel> | undefined;
+    if (preference.id) {
+      options = { id: preference.id };
+    } else {
+      const name = SessionContext.getDefaultKernel({
+        specs: this.specsManager.specs,
+        sessions: this.sessionManager.running(),
+        preference
+      });
+      if (name) {
+        options = { name };
+      }
+    }
+
+    if (options) {
+      try {
+        await this._changeKernel(options);
+        return false;
+      } catch (err) {
+        /* no-op */
+      }
+    }
+
+    // Always fall back to selecting a kernel
+    return true;
+  }
+
   /**
    * Restart the current Kernel.
    *
@@ -817,31 +853,7 @@ export class SessionContext implements ISessionContext {
       return false;
     }
 
-    let options: Partial<Kernel.IModel> | undefined;
-    if (preference.id) {
-      options = { id: preference.id };
-    } else {
-      const name = SessionContext.getDefaultKernel({
-        specs: this.specsManager.specs,
-        sessions: this.sessionManager.running(),
-        preference
-      });
-      if (name) {
-        options = { name };
-      }
-    }
-
-    if (options) {
-      try {
-        await this._changeKernel(options);
-        return false;
-      } catch (err) {
-        /* no-op */
-      }
-    }
-
-    // Always fall back to selecting a kernel
-    return true;
+    return this.startKernel();
   }
 
   /**
@@ -1431,10 +1443,9 @@ namespace Private {
     options: SessionContext.IKernelSearch
   ): string | null {
     const { specs, preference } = options;
-    const { name, language, shouldStart, canStart, autoStartDefault } =
-      preference;
+    const { name, language, canStart, autoStartDefault } = preference;
 
-    if (!specs || shouldStart === false || canStart === false) {
+    if (!specs || canStart === false) {
       return null;
     }
 
