@@ -31,9 +31,10 @@ class ExtensionHandler(APIHandler):
         query = self.get_argument("query", None)
         page = max(1, int(self.get_argument("page", "1")))
         per_page = min(100, int(self.get_argument("per_page", "30")))
-        extensions, last_page = await self.manager.list_extensions(query, page, per_page)
         if self.get_argument("refresh", "0") == "1":
             await self.manager.refresh(query, page, per_page)
+
+        extensions, last_page = await self.manager.list_extensions(query, page, per_page)
 
         self.set_status(200)
         if last_page is not None:

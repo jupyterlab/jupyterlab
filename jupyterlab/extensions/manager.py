@@ -22,6 +22,8 @@ from ..commands import (
     get_app_info,
 )
 
+PYTHON_TO_SEMVER = {"a": "-alpha.", "b": "-beta.", "rc": "-rc."}
+
 
 def _ensure_compat_errors(info, app_options):
     """Ensure that the app info has compat_errors field"""
@@ -68,6 +70,8 @@ class ExtensionPackage:
         install: [optional] Extension package installation instructions - default None
         installed: [optional] Whether the extension is currently installed - default None
         is_allowed: [optional] Whether this extension is allowed or not - default True
+        author: [optional] Package author - default None
+        license: [optional] Package license - default None
     """
 
     name: str
@@ -83,6 +87,8 @@ class ExtensionPackage:
     is_allowed: bool = True
     latest_version: str = ""
     status: str = "ok"
+    author: Optional[str] = None
+    license: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -92,10 +98,12 @@ class ActionResult:
     Attributes:
         status: Action status - ["ok", "warning", "error"]
         message: Action status explanation
+        needs_restart: Required action follow-up - Valid follow-up are "frontend", "kernel" and "server"
     """
 
     status: str  # FIXME
     message: Optional[str] = None
+    needs_restart: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -124,9 +132,7 @@ class ExtensionsCache:
         last_page: Last available page result
     """
 
-    cache: Dict[int, Optional[Dict[str, ExtensionPackage]]] = field(
-        default_factory=dict
-    )
+    cache: Dict[int, Optional[Dict[str, ExtensionPackage]]] = field(default_factory=dict)
     last_page: int = 1
 
 
@@ -171,9 +177,7 @@ class ExtensionsManager(abc.ABC):
         self._listings_block_mode = True
         self._listing_fetch: Optional[ioloop.PeriodicCallback] = None
 
-        if len(self.options.allowed_extensions_uris) or len(
-            self.options.blocked_extensions_uris
-        ):
+        if len(self.options.allowed_extensions_uris) or len(self.options.blocked_extensions_uris):
             self._listings_block_mode = len(self.options.allowed_extensions_uris) == 0
 
             self._listing_fetch = ioloop.PeriodicCallback(
@@ -225,9 +229,7 @@ class ExtensionsManager(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    async def install(
-        self, extension: str, version: Optional[str] = None
-    ) -> ActionResult:
+    async def install(self, extension: str, version: Optional[str] = None) -> ActionResult:
         """Install the required extension.
 
         Note:
@@ -269,9 +271,7 @@ class ExtensionsManager(abc.ABC):
         """
         try:
             disable_extension(extension, app_options=self.app_options)
-            return ActionResult(
-                status="ok",
-            )
+            return ActionResult(status="ok", needs_restart=["frontend"])
         except Exception as err:
             return ActionResult(status="error", message=repr(err))
 
@@ -285,11 +285,29 @@ class ExtensionsManager(abc.ABC):
         """
         try:
             enable_extension(extension, app_options=self.app_options)
-            return ActionResult(
-                status="ok",
-            )
+            return ActionResult(status="ok", needs_restart=["frontend"])
         except Exception as err:
             return ActionResult(status="error", message=repr(err))
+
+    @staticmethod
+    def get_semver_version(version: str) -> str:
+        """Convert a Python version to Semver version.
+
+        It:
+
+        - drops ``.devN`` and ``.postN``
+        - converts ``aN``, ``bN`` and ``rcN`` to ``-alpha.N``, ``-beta.N``, ``-rc.N`` respectively
+
+        Args:
+            version: Version to convert
+        Returns
+            Semver compatible version
+        """
+        return re.sub(
+            r"(a|b|rc)(\d+)$",
+            lambda m: f"{PYTHON_TO_SEMVER[m.group(1)]}{m.group(2)}",
+            re.subn(r"\.(dev|post)\d+", "", version)[0],
+        )
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
         """Normalize extension name.
@@ -321,11 +339,7 @@ class ExtensionsManager(abc.ABC):
             The extensions
             Last page of results
         """
-        self.log.info(self._extensions_cache)
-        if (
-            query not in self._extensions_cache
-            or page not in self._extensions_cache[query].cache
-        ):
+        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
             await self.refresh(query, page, per_page)
 
         # filter using listings settings
@@ -333,7 +347,6 @@ class ExtensionsManager(abc.ABC):
             self._listing_fetch.callback()
 
         cache = self._extensions_cache[query].cache[page]
-        self.log.info(cache.values())
         extensions = list(cache.values())
         if query is not None and self._listings_cache is not None:
             listing = list(self._listings_cache)
@@ -350,9 +363,7 @@ class ExtensionsManager(abc.ABC):
                     if name in listing:
                         extensions.append(dataclasses.replace(ext, is_allowed=True))
                     elif ext.installed_version:
-                        self.log.warning(
-                            f"Not allowed extension '{name}' is installed."
-                        )
+                        self.log.warning(f"Not allowed extension '{name}' is installed.")
                         extensions.append(dataclasses.replace(ext, is_allowed=False))
 
         return extensions, self._extensions_cache[query].last_page
@@ -423,9 +434,9 @@ class ExtensionsManager(abc.ABC):
                 url=data.get("url", ""),
                 enabled=(name not in info["disabled"]),
                 core=False,
-                latest_version=data["version"],
+                latest_version=ExtensionsManager.get_semver_version(data["version"]),
                 installed=True,
-                installed_version=data["version"],
+                installed_version=ExtensionsManager.get_semver_version(data["version"]),
                 status=status,
                 install=data.get("install", {}),
                 pkg_type="prebuilt",
@@ -458,9 +469,9 @@ class ExtensionsManager(abc.ABC):
                 url=data["url"],
                 enabled=(name not in info["disabled"]),
                 core=False,
-                latest_version=data["version"],
+                latest_version=ExtensionsManager.get_semver_version(data["version"]),
                 installed=True,
-                installed_version=data["version"],
+                installed_version=ExtensionsManager.get_semver_version(data["version"]),
                 status=status,
                 pkg_type="source",
                 companion=self._get_companion(data),
@@ -482,8 +493,8 @@ class ExtensionsManager(abc.ABC):
                     installed=False,
                     enabled=False,
                     core=False,
-                    latest_version=data["version"],
-                    installed_version=data["version"],
+                    latest_version=ExtensionsManager.get_semver_version(data["version"]),
+                    installed_version=ExtensionsManager.get_semver_version(data["version"]),
                     status="warning",
                     pkg_type="prebuilt",
                 )
@@ -525,6 +536,4 @@ class ExtensionsManager(abc.ABC):
             self._extensions_cache[query].cache[page] = extensions
             self._extensions_cache[query].last_page = last_page or 1
         else:
-            self._extensions_cache[query] = ExtensionsCache(
-                {page: extensions}, last_page or 1
-            )
+            self._extensions_cache[query] = ExtensionsCache({page: extensions}, last_page or 1)

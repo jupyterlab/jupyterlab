@@ -2,8 +2,28 @@ import json
 from typing import NamedTuple
 from unittest.mock import Mock, patch
 
+import pytest
+
 from jupyterlab.extensions import PyPiExtensionsManager, ReadOnlyExtensionsManager
-from jupyterlab.extensions.manager import ExtensionPackage
+from jupyterlab.extensions.manager import ExtensionPackage, ExtensionsManager
+
+
+@pytest.mark.parametrize(
+    "version, expected",
+    (
+        ("1", "1"),
+        ("1.0", "1.0"),
+        ("1.0.0", "1.0.0"),
+        ("1.0.0a52", "1.0.0-alpha.52"),
+        ("1.0.0b3", "1.0.0-beta.3"),
+        ("1.0.0rc22", "1.0.0-rc.22"),
+        ("1.0.0rc23.post2", "1.0.0-rc.23"),
+        ("1.0.0rc24.dev2", "1.0.0-rc.24"),
+        ("1.0.0rc25.post4.dev2", "1.0.0-rc.25"),
+    ),
+)
+def test_ExtensionsManager_get_semver_version(version, expected):
+    assert ExtensionsManager.get_semver_version(version) == expected
 
 
 async def test_ExtensionsManager_list_extensions_installed(monkeypatch):

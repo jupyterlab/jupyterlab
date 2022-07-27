@@ -110,6 +110,11 @@ export interface IActionReply {
    * An optional message when the status is not 'ok'.
    */
   message?: string;
+
+  /**
+   * Follow-up restart needed by the action
+   */
+  needs_restart: ('frontend' | 'kernel' | 'server')[];
 }
 
 /**
@@ -263,7 +268,7 @@ export class ListModel extends VDomModel {
       if (data.status !== 'ok') {
         reportInstallError(entry.name, data.message, this.translator);
       }
-      return this.update();
+      return this.update(true);
     });
   }
 
@@ -277,7 +282,7 @@ export class ListModel extends VDomModel {
       throw new Error(`Not installed, cannot uninstall: ${entry.name}`);
     }
     await this.performAction('uninstall', entry);
-    return this.update();
+    return this.update(true);
   }
 
   /**
@@ -339,7 +344,7 @@ export class ListModel extends VDomModel {
    *
    * @returns The extensions matching the current query.
    */
-  protected async search(): Promise<void> {
+  protected async search(force = false): Promise<void> {
     if (!this.isDisclaimed) {
       return Promise.reject('Installation warning is not disclaimed.');
     }
@@ -351,7 +356,8 @@ export class ListModel extends VDomModel {
       const extensions = await Private.requestAPI<IEntry[]>({
         query: this.query ?? '',
         page: this.page,
-        per_page: this.pagination
+        per_page: this.pagination,
+        refresh: force ? 1 : 0
       });
 
       this._totalEntries = extensions.length;
@@ -375,12 +381,11 @@ export class ListModel extends VDomModel {
    *
    * Emits the `stateChanged` signal on successful completion.
    */
-  protected async update(refreshInstalled = false): Promise<void> {
+  protected async update(force = false): Promise<void> {
     if (this.isDisclaimed) {
-      await Promise.all([
-        this.search(),
-        this.refreshInstalled(refreshInstalled)
-      ]);
+      // First refresh the installed list - so the search results are correctly filtered
+      await this.refreshInstalled(force);
+      await this.search();
     }
   }
 

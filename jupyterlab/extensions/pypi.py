@@ -4,14 +4,18 @@
 # Distributed under the terms of the Modified BSD License.
 
 import asyncio
+import io
 import json
 import re
 import sys
 import xmlrpc.client
 from functools import partial
 from itertools import groupby
-from subprocess import run
+from pathlib import Path
+from subprocess import CalledProcessError, run
+from tarfile import TarFile
 from typing import Any, Callable, Dict, Optional, Tuple
+from zipfile import ZipFile
 
 import tornado
 from async_lru import alru_cache
@@ -33,7 +37,7 @@ async def _fetch_package_metadata(name: str, latest_version: str) -> dict:
     data = json.loads(response.body).get("info")
 
     # Keep minimal information to limit cache size
-    return {k: data.get(k) for k in ["summary", "home_page"]}
+    return {k: data.get(k) for k in ["summary", "home_page", "package_url", "author", "license"]}
 
 
 class PyPiExtensionsManager(ExtensionsManager):
@@ -79,7 +83,7 @@ class PyPiExtensionsManager(ExtensionsManager):
         except Exception:
             return None
         else:
-            return data.get("version")
+            return ExtensionsManager.get_semver_version(data.get("version"))
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
         """Normalize extension name.
@@ -169,8 +173,10 @@ class PyPiExtensionsManager(ExtensionsManager):
             extensions[normalized_name] = ExtensionPackage(
                 name=normalized_name,
                 description=data.get("summary"),
-                url=data.get("home_page"),
-                latest_version=latest_version,
+                url=data.get("home_page", data.get("package_url")),
+                author=data.get("author"),
+                license=data.get("license"),
+                latest_version=ExtensionsManager.get_semver_version(latest_version),
                 pkg_type="prebuilt",
             )
 
@@ -191,12 +197,14 @@ class PyPiExtensionsManager(ExtensionsManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
+
         cmdline = [
             sys.executable,
             "-m",
             "pip",
             "install",
             "--no-input",
+            "--quiet",
             "--progress-bar",
             "off",
         ]
@@ -204,6 +212,31 @@ class PyPiExtensionsManager(ExtensionsManager):
             cmdline.append(f"{name}=={version}")
         else:
             cmdline.append(name)
+
+        pkg_action = {}
+        try:
+            tmp_cmd = cmdline.copy()
+            tmp_cmd.insert(-1, "--dry-run")
+            tmp_cmd.insert(-1, "--report")
+            tmp_cmd.insert(-1, "-")
+            result = await current_loop.run_in_executor(
+                None, partial(run, tmp_cmd, capture_output=True, check=True)
+            )
+
+            action_info = json.loads(result.stdout.decode("utf-8"))
+            pkg_action = list(
+                filter(
+                    lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
+                    action_info.get("install", []),
+                )
+            )[0]
+        except CalledProcessError as e:
+            self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
+        except Exception as err:
+            self.log.debug("Fail to get installation report.", exc_info=err)
+        else:
+            self.log.debug(f"Actions to be executed by pip {json.dumps(action_info)}.")
+
         self.log.debug(f"Executing '{' '.join(cmdline)}'")
 
         result = await current_loop.run_in_executor(
@@ -215,7 +248,46 @@ class PyPiExtensionsManager(ExtensionsManager):
         error = result.stderr.decode("utf-8")
         if result.returncode == 0:
             self.log.debug(f"stderr: {error}")
-            return ActionResult(status="ok")
+            # Figure out if the package has server or kernel parts
+            jlab_metadata = None
+            try:
+                download_url: str = pkg_action.get("download_info", {}).get("url")
+                if download_url is not None:
+                    response = await self._http_client.fetch(download_url)
+                    if download_url.endswith(".whl"):
+                        with ZipFile(io.BytesIO(response.body)) as wheel:
+                            for name in filter(
+                                lambda f: Path(f).name == "package.json",
+                                wheel.namelist(),
+                            ):
+                                data = json.loads(wheel.read(name))
+                                jlab_metadata = data.get("jupyterlab")
+                                if jlab_metadata is not None:
+                                    break
+                    elif download_url.endswith("tar.gz"):
+                        with TarFile(io.BytesIO(response.body)) as sdist:
+                            for name in filter(
+                                lambda f: Path(f).name == "package.json",
+                                sdist.getnames(),
+                            ):
+                                data = json.load(sdist.extractfile(sdist.getmember(name)))
+                                jlab_metadata = data.get("jupyterlab")
+                                if jlab_metadata is not None:
+                                    break
+            except Exception as e:
+                self.log.debug("Fail to get package.json.", exc_info=e)
+
+            follow_ups = [
+                "frontend",
+            ]
+            if jlab_metadata is not None:
+                discovery = jlab_metadata.get("discovery", {})
+                if "kernel" in discovery:
+                    follow_ups.append("kernel")
+                if "server" in discovery:
+                    follow_ups.append("server")
+
+            return ActionResult(status="ok", needs_restart=follow_ups)
         else:
             self.log.error(f"Failed to installed {name}: code {result.returncode}\n{error}")
             return ActionResult(status="error", message=error)
@@ -243,6 +315,30 @@ class PyPiExtensionsManager(ExtensionsManager):
             "--no-input",
             extension,
         ]
+
+        # Figure out if the package has server or kernel parts
+        jlab_metadata = None
+        try:
+            tmp_cmd = cmdline.copy()
+            tmp_cmd.remove("--yes")
+            result = await current_loop.run_in_executor(
+                None, partial(run, tmp_cmd, capture_output=True)
+            )
+            lines = filter(
+                lambda l: l.endswith("package.json"),
+                map(lambda l: l.strip(), result.stdout.decode("utf-8").splitlines()),
+            )
+            for filepath in filter(
+                lambda f: f.name == "package.json",
+                map(lambda l: Path(l), lines),
+            ):
+                data = json.loads(filepath.read_bytes())
+                jlab_metadata = data.get("jupyterlab")
+                if jlab_metadata is not None:
+                    break
+        except Exception as e:
+            self.log.debug("Fail to list files to be uninstalled.", exc_info=e)
+
         self.log.debug(f"Executing '{' '.join(cmdline)}'")
 
         result = await current_loop.run_in_executor(
@@ -254,7 +350,17 @@ class PyPiExtensionsManager(ExtensionsManager):
         error = result.stderr.decode("utf-8")
         if result.returncode == 0:
             self.log.debug(f"stderr: {error}")
-            return ActionResult(status="ok")
+            follow_ups = [
+                "frontend",
+            ]
+            if jlab_metadata is not None:
+                discovery = jlab_metadata.get("discovery", {})
+                if "kernel" in discovery:
+                    follow_ups.append("kernel")
+                if "server" in discovery:
+                    follow_ups.append("server")
+
+            return ActionResult(status="ok", needs_restart=follow_ups)
         else:
             self.log.error(f"Failed to installed {extension}: code {result.returncode}\n{error}")
             return ActionResult(status="error", message=error)
