@@ -27,13 +27,23 @@ export class LspWsConnection implements ILspConnection {
     this._rootUri = options.rootUri;
   }
 
+  /**
+   * Is the language server is connected?
+   */
   get isConnected(): boolean {
     return this._isConnected;
   }
 
+  /**
+   * Is the language server is initialized?
+   */
   get isInitialized(): boolean {
     return this._isInitialized;
   }
+
+  /**
+   * Is the language server is connected and initialized?
+   */
   get isReady() {
     return this._isConnected && this._isInitialized;
   }
@@ -93,6 +103,9 @@ export class LspWsConnection implements ILspConnection {
     });
   }
 
+  /**
+   * Close the connection
+   */
   close() {
     if (this.connection) {
       this.connection.dispose();
@@ -101,6 +114,9 @@ export class LspWsConnection implements ILspConnection {
     this.socket.close();
   }
 
+  /**
+   * The initialize request telling the server which options the client supports
+   */
   sendInitialize() {
     if (!this._isConnected) {
       return;
@@ -122,6 +138,9 @@ export class LspWsConnection implements ILspConnection {
       );
   }
 
+  /**
+   * Inform the server that the document was opened
+   */
   sendOpen(documentInfo: IDocumentInfo) {
     const textDocumentMessage: protocol.DidOpenTextDocumentParams = {
       textDocument: {
@@ -139,6 +158,9 @@ export class LspWsConnection implements ILspConnection {
     this.sendChange(documentInfo);
   }
 
+  /**
+   * Sends the full text of the document to the server
+   */
   sendChange(documentInfo: IDocumentInfo) {
     if (!this.isReady) {
       return;
@@ -161,6 +183,9 @@ export class LspWsConnection implements ILspConnection {
     documentInfo.version++;
   }
 
+  /**
+   * Send save notification to the server.
+   */
   sendSaved(documentInfo: IDocumentInfo) {
     if (!this.isReady) {
       return;
@@ -179,6 +204,9 @@ export class LspWsConnection implements ILspConnection {
     );
   }
 
+  /**
+   * Send configuration change to the server.
+   */
   sendConfigurationChange(settings: protocol.DidChangeConfigurationParams) {
     if (!this.isReady) {
       return;
@@ -190,13 +218,32 @@ export class LspWsConnection implements ILspConnection {
     );
   }
 
+  /**
+   * The internal websocket connection to the LSP handler
+   */
   protected socket: WebSocket;
+
+  /**
+   * The json-rpc wrapper over the internal websocket connection.
+   */
   protected connection: MessageConnection;
+
+  /**
+   * Map to track opened virtual documents..
+   */
   protected openedUris = new Map<string, boolean>();
+
+  /**
+   * Server capabilities provider.
+   */
   protected serverCapabilities: protocol.ServerCapabilities;
+
   protected _isConnected = false;
   protected _isInitialized = false;
 
+  /**
+   * Callback called when the server is initialized.
+   */
   protected onServerInitialized(params: protocol.InitializeResult): void {
     this._isInitialized = true;
     this.serverCapabilities = params.capabilities;

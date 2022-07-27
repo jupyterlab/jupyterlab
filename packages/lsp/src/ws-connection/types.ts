@@ -7,9 +7,24 @@
 import type * as lsp from 'vscode-languageserver-protocol';
 
 export interface IDocumentInfo {
+  /**
+   * URI of the virtual document.
+   */
   uri: string;
+
+  /**
+   * Version virtual document.
+   */
   version: number;
+
+  /**
+   * Text content of the document.
+   */
   text: string;
+  
+  /**
+   * Language id of the document.
+   */
   languageId: string;
 }
 
@@ -74,7 +89,18 @@ export interface ILspConnection {
 }
 
 export interface ILspOptions {
+  /**
+   * LSP handler endpoint.
+   */
   serverUri: string;
+
+  /**
+   * Language Id.
+   */
   languageId: string;
+
+  /**
+   * The root URI set by server.
+   */
   rootUri: string;
 }
