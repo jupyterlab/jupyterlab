@@ -3,6 +3,7 @@
 
 /* global RequestInit */
 
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import {
   KernelSpec,
@@ -411,7 +412,35 @@ export class ListModel extends VDomModel {
     );
 
     actionRequest.then(
-      () => {
+      reply => {
+        const trans = this.translator.load('jupyterlab');
+        if (reply.needs_restart.includes('server')) {
+          showDialog({
+            title: trans.__('Information'),
+            body: trans.__(
+              'You will need to restart JupyterLab to apply the changes.'
+            ),
+            buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+          });
+        } else {
+          const followUps: string[] = [];
+          if (reply.needs_restart.includes('frontend')) {
+            followUps.push(trans.__('refresh the web page'));
+          }
+          if (reply.needs_restart.includes('kernel')) {
+            followUps.push(
+              trans.__('install the extension in all kernels and restart them')
+            );
+          }
+          showDialog({
+            title: trans.__('Information'),
+            body: trans.__(
+              'You will need to %1 to apply the changes.',
+              followUps.join(trans.__(' and '))
+            ),
+            buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+          });
+        }
         this.actionError = null;
       },
       reason => {
