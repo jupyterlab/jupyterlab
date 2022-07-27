@@ -1,7 +1,6 @@
-// Disclaimer/acknowledgement: Fragments are based on LspWsConnection, which is copyright of wylieconlon and contributors and ISC licenced.
-// ISC licence is, quote, "functionally equivalent to the simplified BSD and MIT licenses,
-// but without language deemed unnecessary following the Berne Convention." (Wikipedia).
-// Introduced modifications are BSD licenced, copyright JupyterLab development team.
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Signal } from '@lumino/signaling';
 import { IDocumentInfo, LspWsConnection } from 'lsp-ws-connection';
 import {

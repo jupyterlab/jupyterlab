@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 /* eslint-disable */
 
 /**
@@ -11,9 +14,13 @@
  */
 export type RankOfTheServer = number;
 /**
- * Whether to ask server to send logs with execution trace (for debugging). To see these messages, set loggingLevel to debug or log. Accepted values are: "off", "messages", "verbose". Servers are allowed to ignore this request.
+ * Whether to ask server to send logs with execution trace (for debugging). Accepted values are: "off", "messages", "verbose". Servers are allowed to ignore this request.
  */
 export type AskServersToSendTraceNotifications = 'off' | 'messages' | 'verbose';
+/**
+ * Enable or disable the logging feature of the language servers.
+ */
+export type LogCommunication = boolean;
 
 /**
  * Language Server Protocol settings.
@@ -21,6 +28,7 @@ export type AskServersToSendTraceNotifications = 'off' | 'messages' | 'verbose';
 export interface LanguageServers {
   languageServers?: LanguageServer;
   setTrace?: AskServersToSendTraceNotifications;
+  logAllCommunication?: LogCommunication;
   [k: string]: any;
 }
 /**

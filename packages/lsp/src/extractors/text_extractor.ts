@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { LanguageIdentifier } from '../lsp';
 import { positionAtOffset } from '../positioning';
 

@@ -1,13 +1,13 @@
-import { DocumentRegistry } from './../../docregistry/src/registry';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
-  IAdapterOptions,
-  IVirtualPosition,
-  VirtualDocument,
-  WidgetLSPAdapter
+    IAdapterOptions, IVirtualPosition, VirtualDocument, WidgetLSPAdapter
 } from '@jupyterlab/lsp';
+
 import { FileEditor } from './widget';
 
 export interface IFileEditorAdapterOptions extends IAdapterOptions {
@@ -62,9 +62,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
     } else if (contentsModel) {
       // a script that does not have a MIME type known by the editor
       // (no syntax highlight mode), can still be known by the document
-      // registry (and this is arguably easier to extend), so let's check it
-      // just in case; this is also how the "Klingon" language for testing
-      // gets registered, so we need it for tests too.
+      // registry (and this is arguably easier to extend).
       let fileType = this._docRegistry.getFileTypeForModel(contentsModel);
       return fileType.mimeTypes[0];
     } else {

@@ -51,7 +51,13 @@
       "title": "Ask servers to send trace notifications",
       "enum": ["off", "messages", "verbose"],
       "default": "off",
-      "description": "Whether to ask server to send logs with execution trace (for debugging). To see these messages, set loggingLevel to debug or log. Accepted values are: \"off\", \"messages\", \"verbose\". Servers are allowed to ignore this request."
+      "description": "Whether to ask server to send logs with execution trace (for debugging). Accepted values are: \"off\", \"messages\", \"verbose\". Servers are allowed to ignore this request."
+    },
+    "logAllCommunication": {
+      "title": "Log communication",
+      "type": "boolean",
+      "default": false,
+      "description": "Enable or disable the logging feature of the language servers."
     }
   }
 }
