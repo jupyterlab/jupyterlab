@@ -55,10 +55,9 @@
     "@lumino/signaling": "^1.10.1",
     "codemirror": "~5.61.0",
     "lodash.mergewith": "^4.6.1",
-    "lsp-ws-connection": "~0.7.0",
     "vscode-jsonrpc": "^6.0.0",
     "vscode-languageserver-protocol": "^3.17.0",
-    "vscode-ws-jsonrpc": "0.2.0"
+    "vscode-ws-jsonrpc": "~1.0.2"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.11",

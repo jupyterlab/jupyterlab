@@ -1,5 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/**
+ * @packageDocumentation
+ * @module lsp
+ */
 
 export * from './adapters/adapter';
 export * from './connection_manager';

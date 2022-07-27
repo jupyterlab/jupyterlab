@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Signal } from '@lumino/signaling';
-import { IDocumentInfo, LspWsConnection } from 'lsp-ws-connection';
-import {
-  registerServerCapability,
-  unregisterServerCapability
-} from 'lsp-ws-connection/lib/server-capability-registration';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   ClientNotifications,
@@ -14,6 +9,7 @@ import {
   IClientRequestHandler,
   IClientRequestParams,
   IClientResult,
+  IDocumentInfo,
   ILSPConnection,
   ILSPOptions,
   IServerRequestHandler,
@@ -24,6 +20,11 @@ import {
   ServerRequests
 } from './tokens';
 import { untilReady } from './utils';
+import {
+  registerServerCapability,
+  unregisterServerCapability
+} from './ws-connection/server-capability-registration';
+import { LspWsConnection } from './ws-connection/ws-connection';
 
 import type * as lsp from 'vscode-languageserver-protocol';
 
@@ -236,6 +237,50 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   logAllCommunication: boolean;
 
   /**
+   * Check if the connection is disposed
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Signal emitted when the connection is closed.
+   */
+  get closeSignal(): ISignal<ILSPConnection, boolean> {
+    return this._closeSignal;
+  }
+
+  /**
+   * Signal emitted when the connection receives an error
+   * message..
+   */
+  get errorSignal(): ISignal<ILSPConnection, any> {
+    return this._errorSignal;
+  }
+
+  /**
+   * Signal emitted when the connection is initialized.
+   */
+  get serverInitialized(): ISignal<
+    ILSPConnection,
+    lsp.ServerCapabilities<any>
+  > {
+    return this._serverInitialized;
+  }
+
+  /**
+   * Dispose the connection.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this.close();
+    Signal.clearData(this);
+  }
+
+  /**
    * Helper to print the logs to logger, for now we are using
    * directly the browser's console.
    */
@@ -296,21 +341,20 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   /**
    * initialize a connection over a web socket that speaks the LSP
    */
-  connect(socket: WebSocket): this {
+  connect(socket: WebSocket): void {
     super.connect(socket);
     untilReady(() => {
       return this.isConnected;
     }, -1)
       .then(() => {
         this.connection.onClose(() => {
-          this.isConnected = false;
-          this.emit('close', this._closingManually);
+          this._isConnected = false;
+          this._closeSignal.emit(this._closingManually);
         });
       })
       .catch(() => {
         console.error('Could not connect onClose signal');
       });
-    return this;
   }
 
   /**
@@ -400,6 +444,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     while (this.documentsToOpen.length) {
       this.sendOpen(this.documentsToOpen.pop()!);
     }
+    this._serverInitialized.emit(this.serverCapabilities);
   }
 
   /**
@@ -407,6 +452,8 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    * client and server handlers
    */
   protected afterInitialized(): void {
+    this.connection.onError(e => this._errorSignal.emit(e));
+
     for (const method of Object.values(
       Method.ServerNotification
     ) as (keyof ServerNotifications)[]) {
@@ -496,6 +543,14 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   private _options: ILSPOptions;
 
+  private _closeSignal: Signal<ILSPConnection, boolean> = new Signal(this);
+  private _errorSignal: Signal<ILSPConnection, any> = new Signal(this);
+  private _serverInitialized: Signal<
+    ILSPConnection,
+    lsp.ServerCapabilities<any>
+  > = new Signal(this);
+
+  private _isDisposed = false;
   /**
    * Send the document changed data to the server.
    */

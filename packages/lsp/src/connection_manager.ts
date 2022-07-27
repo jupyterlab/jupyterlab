@@ -259,7 +259,7 @@ export class DocumentConnectionManager
    * singletons).
    */
   onNewConnection = (connection: LSPConnection): void => {
-    connection.on('error', e => {
+    connection.errorSignal.connect((_, e) => {
       console.error(e);
       // TODO invalid now
       let error: Error = e.length && e.length >= 1 ? e[0] : new Error();
@@ -281,7 +281,7 @@ export class DocumentConnectionManager
       }
     });
 
-    connection.on('serverInitialized', capabilities => {
+    connection.serverInitialized.connect(() => {
       // Initialize using settings stored in the SettingRegistry
       this._forEachDocumentOfConnection(connection, virtualDocument => {
         // TODO: is this still necessary, e.g. for status bar to update responsively?
@@ -289,8 +289,7 @@ export class DocumentConnectionManager
       });
       this.updateServerConfigurations(this.initialConfigurations);
     });
-
-    connection.on('close', closedManually => {
+    connection.closeSignal.connect((_, closedManually) => {
       if (!closedManually) {
         console.error('Connection unexpectedly disconnected');
       } else {
@@ -411,6 +410,7 @@ export class DocumentConnectionManager
       const allConnection = new Set(this.connections.values());
       if (!allConnection.has(connection)) {
         this.disconnect(connection.serverIdentifier as TLanguageServerId);
+        connection.dispose();
       }
       if (emit) {
         this._documentsChanged.emit(this.documents);
@@ -658,8 +658,7 @@ namespace Private {
         serverIdentifier: languageServerId,
         capabilities: capabilities
       });
-      // TODO: remove remaining unbounded users of connection.on
-      connection.setMaxListeners(999);
+
       _connections.set(languageServerId, connection);
       connection.connect(socket);
       onCreate(connection);

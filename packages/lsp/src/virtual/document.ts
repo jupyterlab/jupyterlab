@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IDisposable } from '@lumino/disposable';
-import { IDocumentInfo } from 'lsp-ws-connection';
+import { IDocumentInfo } from '../ws-connection/types';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ISignal, Signal } from '@lumino/signaling';

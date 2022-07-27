@@ -4,16 +4,8 @@
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import {
-  AnyCompletion,
-  AnyLocation,
-  IDocumentInfo,
-  ILspConnection,
-  ILspOptions,
-  IPosition,
-  ITokenInfo
-} from 'lsp-ws-connection';
 
 import { WidgetLSPAdapter } from './adapters/adapter';
 import { IForeignCodeExtractor } from './extractors/types';
@@ -21,11 +13,17 @@ import { ClientCapabilities, LanguageIdentifier } from './lsp';
 import { LanguageServer1 as LSPLanguageServerSettings } from './plugin';
 import * as SCHEMA from './schema';
 import { VirtualDocument } from './virtual/document';
+import {
+  AnyCompletion,
+  AnyLocation,
+  IDocumentInfo,
+  ILspConnection,
+  ILspOptions
+} from './ws-connection/types';
 
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
-import { IDisposable } from '@lumino/disposable';
-
+export { IDocumentInfo };
 export type TLanguageServerId =
   | 'pylsp'
   | 'bash-language-server'
@@ -538,7 +536,7 @@ export type ServerRequests<
   [key in T]: IServerRequestHandler<key>;
 };
 
-export interface ILSPConnection extends ILspConnection {
+export interface ILSPConnection extends ILspConnection, IDisposable {
   /**
    * @alpha
    *
@@ -559,13 +557,6 @@ export interface ILSPConnection extends ILspConnection {
    * Should log all communication?
    */
   logAllCommunication: boolean;
-
-  /**
-   * @alpha
-   *
-   * Is the language server is ready?
-   */
-  isReady: boolean;
 
   /**
    * @alpha
@@ -598,9 +589,24 @@ export interface ILSPConnection extends ILspConnection {
   /**
    * @alpha
    *
-   * Send save notification to the server.
+   * Signal emitted when the connection is closed.
    */
-  sendSaved(documentInfo: IDocumentInfo): void;
+  closeSignal: ISignal<ILSPConnection, boolean>;
+
+  /**
+   * @alpha
+   *
+   * Signal emitted when the connection receives an error
+   * message..
+   */
+  errorSignal: ISignal<ILSPConnection, any>;
+
+  /**
+   * @alpha
+   *
+   * Signal emitted when the connection is initialized.
+   */
+  serverInitialized: ISignal<ILSPConnection, lsp.ServerCapabilities<any>>;
 
   /**
    * @alpha
@@ -616,19 +622,4 @@ export interface ILSPConnection extends ILspConnection {
    * Send all changes to the server.
    */
   sendFullTextChange(text: string, documentInfo: IDocumentInfo): void;
-
-  /**
-   * @alpha
-   *
-   * Get send request to the server to get completion results
-   * from a completion item
-   */
-  getCompletion(
-    location: IPosition,
-    token: ITokenInfo,
-    documentInfo: IDocumentInfo,
-    emit?: boolean,
-    triggerCharacter?: string,
-    triggerKind?: lsp.CompletionTriggerKind
-  ): Promise<lsp.CompletionItem[] | undefined>;
 }

@@ -5,7 +5,10 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
-    IAdapterOptions, IVirtualPosition, VirtualDocument, WidgetLSPAdapter
+  IAdapterOptions,
+  IVirtualPosition,
+  VirtualDocument,
+  WidgetLSPAdapter
 } from '@jupyterlab/lsp';
 
 import { FileEditor } from './widget';

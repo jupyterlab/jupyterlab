@@ -5,8 +5,7 @@ const esModules = [
   'lib0',
   'y\\-protocols',
   'y\\-websocket',
-  'yjs',
-  'lsp-ws-connection'
+  'yjs'
 ].join('|');
 
 module.exports = function (baseDir: string) {
