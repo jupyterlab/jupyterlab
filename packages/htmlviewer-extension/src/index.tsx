@@ -30,6 +30,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { html5Icon } from '@jupyterlab/ui-components';
 
+const HTML_VIEWER_PLUGIN_ID = '@jupyterlab/htmlviewer-extension:plugin';
+
 /**
  * Factory name
  */
@@ -47,7 +49,7 @@ namespace CommandIDs {
  */
 const htmlPlugin: JupyterFrontEndPlugin<IHTMLViewerTracker> = {
   activate: activateHTMLViewer,
-  id: '@jupyterlab/htmlviewer-extension:plugin',
+  id: HTML_VIEWER_PLUGIN_ID,
   provides: IHTMLViewerTracker,
   requires: [ITranslator],
   optional: [
@@ -131,23 +133,34 @@ function activateHTMLViewer(
     });
   }
 
-  app.docRegistry.addWidgetFactory(factory);
-  factory.widgetCreated.connect((sender, widget) => {
-    // Track the widget.
-    void tracker.add(widget);
-    // Notify the widget tracker if restore data needs to update.
-    widget.context.pathChanged.connect(() => {
-      void tracker.save(widget);
-    });
-    // Notify the application when the trust state changes so it
-    // can update any renderings of the trust command.
-    widget.trustedChanged.connect(() => {
-      app.commands.notifyCommandChanged(CommandIDs.trustHTML);
-    });
+  // Fetch settings if possible.
+  const fetchSettings = settingRegistry
+    ? settingRegistry.load(HTML_VIEWER_PLUGIN_ID)
+    : Promise.reject(
+        new Error(`No setting registry for ${HTML_VIEWER_PLUGIN_ID}`)
+      );
 
-    widget.title.icon = ft.icon!;
-    widget.title.iconClass = ft.iconClass ?? '';
-    widget.title.iconLabel = ft.iconLabel ?? '';
+  fetchSettings.then(settings => {
+    app.docRegistry.addWidgetFactory(factory);
+    factory.widgetCreated.connect((sender, widget) => {
+      // Track the widget.
+      void tracker.add(widget);
+      // Notify the widget tracker if restore data needs to update.
+      widget.context.pathChanged.connect(() => {
+        void tracker.save(widget);
+      });
+      // Notify the application when the trust state changes so it
+      // can update any renderings of the trust command.
+      widget.trustedChanged.connect(() => {
+        app.commands.notifyCommandChanged(CommandIDs.trustHTML);
+      });
+
+      widget.trusted = settings.get('trustbydefault').composite as boolean;
+
+      widget.title.icon = ft.icon!;
+      widget.title.iconClass = ft.iconClass ?? '';
+      widget.title.iconLabel = ft.iconLabel ?? '';
+    });
   });
 
   // Add a command to trust the active HTML document,
