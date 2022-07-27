@@ -361,15 +361,15 @@ You or your administrator can use the following traits to define the listings lo
 - ``blocked_extensions_uris``: A list of comma-separated URIs to fetch a blocklist file from
 - ``allowed_extensions_uris``: A list of comma-separated URIs to fetch an allowlist file from
 - ``listings_refresh_seconds``: The interval delay in seconds to refresh the lists
-- ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
+- ``listings_tornado_options``: The optional kwargs to use for the listings HTTP requests
 
 For example, to set blocked extensions, launch the server with
 ``--LabServerApp.blocked_extensions_uris=http://example.com/blocklist.json`` where
 ``http://example.com/blocklist.json`` is a JSON file as described below.
 
-The details for the listings_request_options are listed
-on `this page <https://requests.readthedocs.io/en/stable/api/#requests.request>`__
-(for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
+The details for the ``listings_tornado_options`` are listed
+on `this page <https://www.tornadoweb.org/en/stable/httpclient.html#tornado.httpclient.HTTPRequest>`__
+(for example, you could pass ``{'request_timeout': 10}`` to change the HTTP request timeout value).
 
 The listings are json files hosted on the URIs you have given.
 
