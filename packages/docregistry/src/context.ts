@@ -560,9 +560,9 @@ export class Context<
     const splitPath = this.localPath.split('/');
     splitPath[splitPath.length - 1] = newName;
     let newPath = PathExt.join(...splitPath);
-    const drivName = this._manager.contents.driveName(this.path);
-    if (drivName) {
-      newPath = `${drivName}:${newPath}`;
+    const driveName = this._manager.contents.driveName(this.path);
+    if (driveName) {
+      newPath = `${driveName}:${newPath}`;
     }
 
     await this._manager.contents.rename(this.path, newPath);
