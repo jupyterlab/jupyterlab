@@ -5,16 +5,11 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import {
-  KernelSpec,
-  ServerConnection,
-  ServiceManager
-} from '@jupyterlab/services';
+import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
-import { IKernelInstallInfo } from './companions';
 import { reportInstallError } from './dialog';
 
 /**
@@ -544,48 +539,9 @@ namespace Private {
   }
 
   /**
-   * Match kernel specs against kernel spec regexps
-   *
-   * @param kernelInfo The info containing the regexp patterns
-   * @param specs The available kernel specs.
-   */
-  export function matchSpecs(
-    kernelInfo: IKernelInstallInfo,
-    specs: KernelSpec.ISpecModels | null
-  ): KernelSpec.ISpecModel[] {
-    if (!specs) {
-      return [];
-    }
-    const matches: KernelSpec.ISpecModel[] = [];
-    let reLang: RegExp | null = null;
-    let reName: RegExp | null = null;
-    if (kernelInfo.kernel_spec.language) {
-      reLang = new RegExp(kernelInfo.kernel_spec.language);
-    }
-    if (kernelInfo.kernel_spec.display_name) {
-      reName = new RegExp(kernelInfo.kernel_spec.display_name);
-    }
-    for (const key of Object.keys(specs.kernelspecs)) {
-      const spec = specs.kernelspecs[key]!;
-      let match = false;
-      if (reLang) {
-        match = reLang.test(spec.language);
-      }
-      if (!match && reName) {
-        match = reName.test(spec.display_name);
-      }
-      if (match) {
-        matches.push(spec);
-        continue;
-      }
-    }
-    return matches;
-  }
-
-  /**
    * Call the API extension
    *
-   * @param endPoint API REST end point for the extension
+   * @param queryArgs Query arguments
    * @param init Initial values for the request
    * @returns The response body interpreted as JSON
    */
