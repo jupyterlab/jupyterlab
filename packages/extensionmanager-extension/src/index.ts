@@ -98,14 +98,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
           app.commands.notifyCommandChanged(CommandIDs.toggle);
 
           if (enabled) {
-            const accepted = await Private.showWarning(trans);
-            if (!accepted) {
-              void settings.set('enabled', false);
-              if (view) {
-                view.dispose();
-                view = null;
+            if (view === null || !view.isAttached) {
+              const accepted = await Private.showWarning(trans);
+              if (!accepted) {
+                void settings.set('enabled', false);
+                return;
               }
-              return;
             }
             view = view ?? createView();
           } else {
