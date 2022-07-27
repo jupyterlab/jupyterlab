@@ -59,7 +59,7 @@ class ExtensionPackage:
         description: Package description
         url: Package home page
         pkg_type: Type of package - ["prebuilt", "source"]
-        enabled: [optional] Whether the package is enabled or not -  default False
+        enabled: [optional] Whether the package is enabled or not - default False
         core: [optional] Whether the package is a core package or not - default False
         latest_version: [optional] Latest available version - default ""
         installed_version: [optional] Installed version - default ""
@@ -124,7 +124,9 @@ class ExtensionsCache:
         last_page: Last available page result
     """
 
-    cache: Dict[int, Optional[Dict[str, ExtensionPackage]]] = field(default_factory=dict)
+    cache: Dict[int, Optional[Dict[str, ExtensionPackage]]] = field(
+        default_factory=dict
+    )
     last_page: int = 1
 
 
@@ -169,7 +171,9 @@ class ExtensionsManager(abc.ABC):
         self._listings_block_mode = True
         self._listing_fetch: Optional[ioloop.PeriodicCallback] = None
 
-        if len(self.options.allowed_extensions_uris) or len(self.options.blocked_extensions_uris):
+        if len(self.options.allowed_extensions_uris) or len(
+            self.options.blocked_extensions_uris
+        ):
             self._listings_block_mode = len(self.options.allowed_extensions_uris) == 0
 
             self._listing_fetch = ioloop.PeriodicCallback(
@@ -221,7 +225,9 @@ class ExtensionsManager(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    async def install(self, extension: str, version: Optional[str] = None) -> ActionResult:
+    async def install(
+        self, extension: str, version: Optional[str] = None
+    ) -> ActionResult:
         """Install the required extension.
 
         Note:
@@ -261,10 +267,13 @@ class ExtensionsManager(abc.ABC):
         Returns:
             The action result
         """
-        disable_extension(extension, app_options=self.app_options)
-        raise ActionResult(
-            status="ok",
-        )
+        try:
+            disable_extension(extension, app_options=self.app_options)
+            return ActionResult(
+                status="ok",
+            )
+        except Exception as err:
+            return ActionResult(status="error", message=repr(err))
 
     async def enable(self, extension: str) -> ActionResult:
         """Enable an extension.
@@ -274,10 +283,13 @@ class ExtensionsManager(abc.ABC):
         Returns:
             The action result
         """
-        enable_extension(extension, app_options=self.app_options)
-        return ActionResult(
-            status="ok",
-        )
+        try:
+            enable_extension(extension, app_options=self.app_options)
+            return ActionResult(
+                status="ok",
+            )
+        except Exception as err:
+            return ActionResult(status="error", message=repr(err))
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
         """Normalize extension name.
@@ -310,7 +322,10 @@ class ExtensionsManager(abc.ABC):
             Last page of results
         """
         self.log.info(self._extensions_cache)
-        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
+        if (
+            query not in self._extensions_cache
+            or page not in self._extensions_cache[query].cache
+        ):
             await self.refresh(query, page, per_page)
 
         # filter using listings settings
@@ -335,7 +350,9 @@ class ExtensionsManager(abc.ABC):
                     if name in listing:
                         extensions.append(dataclasses.replace(ext, is_allowed=True))
                     elif ext.installed_version:
-                        self.log.warning(f"Not allowed extension '{name}' is installed.")
+                        self.log.warning(
+                            f"Not allowed extension '{name}' is installed."
+                        )
                         extensions.append(dataclasses.replace(ext, is_allowed=False))
 
         return extensions, self._extensions_cache[query].last_page
@@ -508,4 +525,6 @@ class ExtensionsManager(abc.ABC):
             self._extensions_cache[query].cache[page] = extensions
             self._extensions_cache[query].last_page = last_page or 1
         else:
-            self._extensions_cache[query] = ExtensionsCache({page: extensions}, last_page or 1)
+            self._extensions_cache[query] = ExtensionsCache(
+                {page: extensions}, last_page or 1
+            )

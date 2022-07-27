@@ -3,7 +3,7 @@
 
 /* global RequestInit */
 
-import { URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import {
   KernelSpec,
   ServerConnection,
@@ -131,12 +131,21 @@ export class ListModel extends VDomModel {
     translator?: ITranslator
   ) {
     super();
+
+    this.canInstall =
+      PageConfig.getOption('extensions_manager_can_install').toLowerCase() ===
+      'true';
     this.translator = translator || nullTranslator;
     this._installed = [];
     this._lastSearchResult = [];
     this.serviceManager = serviceManager;
     this._debouncedSearch = new Debouncer(this.search.bind(this), 1000);
   }
+
+  /**
+   * Whether the extensions manager support installation methods or not.
+   */
+  readonly canInstall: boolean;
 
   /**
    * A readonly array of the installed extensions.

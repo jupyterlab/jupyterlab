@@ -21,13 +21,6 @@
 }
 
 /*
-  TODO Approved extension
-*/
-
-/* .jp-extensionmanager-approved {
-} */
-
-/*
   List view layout and styling
 */
 
@@ -53,6 +46,8 @@
 
 .jp-extensionmanager-view .jp-SidePanel-header .jp-extensionmanager-error {
   text-transform: none;
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 400;
 }
 
 /*

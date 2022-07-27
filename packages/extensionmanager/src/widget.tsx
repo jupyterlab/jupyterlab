@@ -40,12 +40,13 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
-  let title = entry.name;
+  const title = entry.name;
   const githubUser = getExtensionGitHubUser(entry);
 
   if (!entry.is_allowed) {
     flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
   }
+
   return (
     <li
       className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}
@@ -385,7 +386,9 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={this.onAction.bind(this)}
-            supportInstallation={this.model.isDisclaimed}
+            supportInstallation={
+              this.model.canInstall && this.model.isDisclaimed
+            }
           />
         )}
       </>
@@ -476,7 +479,9 @@ class SearchResult extends ReactWidget {
               this.onPage(value);
             }}
             performAction={this.onAction.bind(this)}
-            supportInstallation={this.model.isDisclaimed}
+            supportInstallation={
+              this.model.canInstall && this.model.isDisclaimed
+            }
             trans={this.trans}
           />
         )}
