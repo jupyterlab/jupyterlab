@@ -9,12 +9,13 @@ import json
 import re
 import sys
 import xmlrpc.client
+from datetime import datetime, timedelta
 from functools import partial
 from itertools import groupby
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from zipfile import ZipFile
 
 import tornado
@@ -48,6 +49,9 @@ class PyPiExtensionsManager(ExtensionsManager):
     # PyPi.org XML-RPC API throttling time between request in seconds.
     PYPI_REQUEST_THROTTLING: float = 1.0
 
+    # Don't request all extensions candidates more than once every 5 minutes
+    LIST_ALL_PACKAGES_TIMEOUT: float = 5 * 60.0
+
     def __init__(
         self, app_options: Optional[dict] = None, ext_options: Optional[dict] = None
     ) -> None:
@@ -55,6 +59,10 @@ class PyPiExtensionsManager(ExtensionsManager):
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._http_client = tornado.httpclient.AsyncHTTPClient()
         self._rpc_client = xmlrpc.client.ServerProxy(PyPiExtensionsManager.BASE_URL)
+        self.__last_all_packages_request_time = datetime.now() - timedelta(
+            seconds=PyPiExtensionsManager.LIST_ALL_PACKAGES_TIMEOUT * 1.01
+        )
+        self.__all_packages_cache = None
 
     @property
     def can_install(self) -> bool:
@@ -157,11 +165,7 @@ class PyPiExtensionsManager(ExtensionsManager):
             The available extensions in a mapping {name: metadata}
             The results last page; None if the manager does not support pagination
         """
-        matches = await self.__throttleRequest(
-            True,
-            self._rpc_client.browse,
-            ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
-        )
+        matches = await self.__get_all_extensions()
 
         extensions = {}
 
@@ -181,6 +185,23 @@ class PyPiExtensionsManager(ExtensionsManager):
             )
 
         return extensions, None
+
+    async def __get_all_extensions(self) -> List[Tuple[str, str]]:
+        if (
+            self.__all_packages_cache is None
+            or datetime.now()
+            > self.__last_all_packages_request_time
+            + timedelta(seconds=PyPiExtensionsManager.LIST_ALL_PACKAGES_TIMEOUT)
+        ):
+            self.log.debug("Requesting PyPI.org RPC API for prebuilt JupyterLab extensions.")
+            self.__all_packages_cache = await self.__throttleRequest(
+                True,
+                self._rpc_client.browse,
+                ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
+            )
+            self.__last_all_packages_request_time = datetime.now()
+
+        return self.__all_packages_cache
 
     async def install(self, name: str, version: Optional[str] = None) -> ActionResult:
         """Install the required extension.
