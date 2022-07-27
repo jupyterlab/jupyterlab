@@ -150,10 +150,9 @@ export class LspWsConnection implements ILspConnection {
         version: documentInfo.version
       } as protocol.TextDocumentItem
     };
-    this.connection.sendNotification(
-      'textDocument/didOpen',
-      textDocumentMessage
-    );
+    this.connection
+      .sendNotification('textDocument/didOpen', textDocumentMessage)
+      .catch(console.error);
     this.openedUris.set(documentInfo.uri, true);
     this.sendChange(documentInfo);
   }
@@ -176,10 +175,9 @@ export class LspWsConnection implements ILspConnection {
       } as protocol.VersionedTextDocumentIdentifier,
       contentChanges: [{ text: documentInfo.text }]
     };
-    this.connection.sendNotification(
-      'textDocument/didChange',
-      textDocumentChange
-    );
+    this.connection
+      .sendNotification('textDocument/didChange', textDocumentChange)
+      .catch(console.error);
     documentInfo.version++;
   }
 
@@ -198,10 +196,9 @@ export class LspWsConnection implements ILspConnection {
       } as protocol.VersionedTextDocumentIdentifier,
       text: documentInfo.text
     };
-    this.connection.sendNotification(
-      'textDocument/didSave',
-      textDocumentChange
-    );
+    this.connection
+      .sendNotification('textDocument/didSave', textDocumentChange)
+      .catch(console.error);
   }
 
   /**
@@ -212,10 +209,9 @@ export class LspWsConnection implements ILspConnection {
       return;
     }
 
-    this.connection.sendNotification(
-      'workspace/didChangeConfiguration',
-      settings
-    );
+    this.connection
+      .sendNotification('workspace/didChangeConfiguration', settings)
+      .catch(console.error);
   }
 
   /**
@@ -247,10 +243,12 @@ export class LspWsConnection implements ILspConnection {
   protected onServerInitialized(params: protocol.InitializeResult): void {
     this._isInitialized = true;
     this.serverCapabilities = params.capabilities;
-    this.connection.sendNotification('initialized', {});
-    this.connection.sendNotification('workspace/didChangeConfiguration', {
-      settings: {}
-    });
+    this.connection.sendNotification('initialized', {}).catch(console.error);
+    this.connection
+      .sendNotification('workspace/didChangeConfiguration', {
+        settings: {}
+      })
+      .catch(console.error);
   }
 
   /**

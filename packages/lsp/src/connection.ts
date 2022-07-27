@@ -476,7 +476,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
           method,
           message: params
         });
-        this.connection.sendNotification(method, params);
+        this.connection.sendNotification(method, params).catch(console.error);
       });
     }
 
@@ -574,10 +574,9 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
       } as lsp.VersionedTextDocumentIdentifier,
       contentChanges: changeEvents
     };
-    this.connection.sendNotification(
-      'textDocument/didChange',
-      textDocumentChange
-    );
+    this.connection
+      .sendNotification('textDocument/didChange', textDocumentChange)
+      .catch(console.error);
     documentInfo.version++;
   }
 }
