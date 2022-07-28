@@ -21,7 +21,7 @@ export interface IDocumentInfo {
    * Text content of the document.
    */
   text: string;
-  
+
   /**
    * Language id of the document.
    */
