@@ -31,8 +31,6 @@ jobs:
       - name: Apply Changes
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: github-actions[bot]
-          author_email: github-actions[bot]@users.noreply.github.com
           message: 'Automatic application of license header'
           push: false
 
