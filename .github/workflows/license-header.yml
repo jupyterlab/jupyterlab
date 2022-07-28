@@ -38,6 +38,7 @@ jobs:
         shell: bash -l {0}
         run: |
           git config push.default upstream
+          git log -n1
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
