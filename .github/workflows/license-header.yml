@@ -1,0 +1,28 @@
+name: Fix License Headers
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  header-license-fix:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Fix License Header
+        uses: apache/skywalking-eyes/header@v0.4.0
+        with:
+          mode: fix
+      - name: Apply Changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: github-actions[bot]
+          author_email: github-actions[bot]@users.noreply.github.com
+          message: 'Automatic application of license header'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,25 @@
+header:
+  license:
+    spdx-id: BSD-3-Clause
+    copyright-owner: Jupyter Development Team
+
+  paths-ignore:
+    - '**/*.json'
+    - '**/*.md'
+    - '**/*.yml'
+    - '**/*.yaml'
+    - '**/build'
+    - '**/lib'
+    - '**/node_modules'
+    - '**/static'
+    - '**/typings'
+    - '**/schemas'
+    - '**/themes'
+    - 'coverage'
+    - '*.map.js'
+    - '*.bundle.js'
+    - '.*'
+    - 'LICENSE'
+    - 'yarn.lock'
+
+  comment: on-failure
