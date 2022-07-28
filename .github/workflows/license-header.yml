@@ -29,16 +29,18 @@ jobs:
         with:
           mode: fix
       - name: Apply Changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: 'Automatic application of license header'
-          push: false
-
+        shell: bash -l {0}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add *
+          git commit -m "Automatic application of license header"
+        env:
+          GITHUB_TOKEN: ${{ inputs.github_token }}
       - name: Push fixes
         shell: bash -l {0}
         run: |
           git config push.default upstream
-          git log -n1
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
