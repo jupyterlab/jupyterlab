@@ -351,7 +351,7 @@ class PyPiExtensionsManager(ExtensionsManager):
             )
             for filepath in filter(
                 lambda f: f.name == "package.json",
-                map(lambda l: Path(l), lines),
+                map(Path, lines),
             ):
                 data = json.loads(filepath.read_bytes())
                 jlab_metadata = data.get("jupyterlab")

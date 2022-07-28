@@ -88,7 +88,7 @@ class ExtensionHandler(APIHandler):
                 "Link",
                 f'<{first}>; rel="first", <{prev}>; rel="prev", <{next}>; rel="next", <{last}>; rel="last",',
             )
-        self.finish(json.dumps(list(map(lambda e: dataclasses.asdict(e), extensions))))
+        self.finish(json.dumps(list(map(dataclasses.asdict, extensions))))
 
     @web.authenticated
     async def post(self):
