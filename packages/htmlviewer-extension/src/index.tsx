@@ -133,34 +133,45 @@ function activateHTMLViewer(
     });
   }
 
-  // Fetch settings if possible.
-  const fetchSettings = settingRegistry
-    ? settingRegistry.load(HTML_VIEWER_PLUGIN_ID)
-    : Promise.reject(
-        new Error(`No setting registry for ${HTML_VIEWER_PLUGIN_ID}`)
-      );
+  let trustedAtOpen = false;
 
-  fetchSettings.then(settings => {
-    app.docRegistry.addWidgetFactory(factory);
-    factory.widgetCreated.connect((sender, widget) => {
-      // Track the widget.
-      void tracker.add(widget);
-      // Notify the widget tracker if restore data needs to update.
-      widget.context.pathChanged.connect(() => {
-        void tracker.save(widget);
+  if (settingRegistry) {
+    const loadSettings = settingRegistry.load(HTML_VIEWER_PLUGIN_ID);
+    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+      trustedAtOpen = settings.get('trustbydefault').composite as boolean;
+    };
+
+    Promise.all([loadSettings, app.restored])
+      .then(([settings]) => {
+        updateSettings(settings);
+        settings.changed.connect(settings => {
+          updateSettings(settings);
+        });
+      })
+      .catch((reason: Error) => {
+        console.error(reason.message);
       });
-      // Notify the application when the trust state changes so it
-      // can update any renderings of the trust command.
-      widget.trustedChanged.connect(() => {
-        app.commands.notifyCommandChanged(CommandIDs.trustHTML);
-      });
+  }
 
-      widget.trusted = settings.get('trustbydefault').composite as boolean;
-
-      widget.title.icon = ft.icon!;
-      widget.title.iconClass = ft.iconClass ?? '';
-      widget.title.iconLabel = ft.iconLabel ?? '';
+  app.docRegistry.addWidgetFactory(factory);
+  factory.widgetCreated.connect((sender, widget) => {
+    // Track the widget.
+    void tracker.add(widget);
+    // Notify the widget tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => {
+      void tracker.save(widget);
     });
+    // Notify the application when the trust state changes so it
+    // can update any renderings of the trust command.
+    widget.trustedChanged.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.trustHTML);
+    });
+
+    widget.trusted = trustedAtOpen;
+
+    widget.title.icon = ft.icon!;
+    widget.title.iconClass = ft.iconClass ?? '';
+    widget.title.iconLabel = ft.iconLabel ?? '';
   });
 
   // Add a command to trust the active HTML document,
