@@ -28,16 +28,22 @@ jobs:
         uses: apache/skywalking-eyes/header@v0.4.0
         with:
           mode: fix
+
+      - name: Get modified files in the staging directory
+        id: changed-files
+        uses: tj-actions/changed-files@v24
+
       - name: Apply Changes
+        if: steps.changed-files.outputs.any_changed == 'true'
         shell: bash -l {0}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add *
           git commit -m "Automatic application of license header"
-        env:
-          GITHUB_TOKEN: ${{ inputs.github_token }}
+
       - name: Push fixes
+        if: steps.changed-files.outputs.any_changed == 'true'
         shell: bash -l {0}
         run: |
           git config push.default upstream
