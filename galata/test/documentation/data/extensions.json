@@ -7,8 +7,10 @@
     "core": false,
     "latest_version": "3.2.0",
     "installed_version": "3.2.0",
-    "status": "error",
+    "status": "ok",
     "pkg_type": "prebuilt",
+    "is_allowed": true,
+    "installed": true,
     "install": {
       "packageManager": "python",
       "packageName": "jupyterlab-geojson",
@@ -23,8 +25,10 @@
     "core": false,
     "latest_version": "3.1.0",
     "installed_version": "3.1.0",
-    "status": "error",
+    "status": "ok",
     "pkg_type": "prebuilt",
+    "is_allowed": true,
+    "installed": true,
     "install": {
       "packageManager": "python",
       "packageName": "jupyterlab_widgets",

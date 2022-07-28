@@ -4,15 +4,13 @@
 # Distributed under the terms of the Modified BSD License.
 
 import abc
-import dataclasses
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 import tornado
-from tornado import ioloop
 
 from ..commands import (
     _AppHandler,
@@ -175,13 +173,17 @@ class ExtensionsManager(abc.ABC):
         self._extensions_cache: Dict[Optional[str], ExtensionsCache] = {}
         self._listings_cache: Optional[dict] = None
         self._listings_block_mode = True
-        self._listing_fetch: Optional[ioloop.PeriodicCallback] = None
+        self._listing_fetch: Optional[tornado.ioloop.PeriodicCallback] = None
 
         if len(self.options.allowed_extensions_uris) or len(self.options.blocked_extensions_uris):
             self._listings_block_mode = len(self.options.allowed_extensions_uris) == 0
+            if not self._listings_block_mode and len(self.options.blocked_extensions_uris) > 0:
+                self.log.warning(
+                    "You have define simultaneously blocked and allowed extensions listings. The allowed listing will take precedence."
+                )
 
-            self._listing_fetch = ioloop.PeriodicCallback(
-                lambda: self._fetch_listings(),
+            self._listing_fetch = tornado.ioloop.PeriodicCallback(
+                self._fetch_listings,
                 callback_time=self.options.listings_refresh_seconds * 1000,
                 jitter=0.1,
             )
@@ -354,17 +356,17 @@ class ExtensionsManager(abc.ABC):
             if self._listings_block_mode:
                 for name, ext in cache.items():
                     if name not in listing:
-                        extensions.append(dataclasses.replace(ext, is_allowed=True))
+                        extensions.append(replace(ext, is_allowed=True))
                     elif ext.installed_version:
                         self.log.warning(f"Blocked extension '{name}' is installed.")
-                        extensions.append(dataclasses.replace(ext, is_allowed=False))
+                        extensions.append(replace(ext, is_allowed=False))
             else:
                 for name, ext in cache.items():
                     if name in listing:
-                        extensions.append(dataclasses.replace(ext, is_allowed=True))
+                        extensions.append(replace(ext, is_allowed=True))
                     elif ext.installed_version:
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
-                        extensions.append(dataclasses.replace(ext, is_allowed=False))
+                        extensions.append(replace(ext, is_allowed=False))
 
         return extensions, self._extensions_cache[query].last_page
 
@@ -444,9 +446,7 @@ class ExtensionsManager(abc.ABC):
             )
 
             if get_latest_version:
-                pkg = dataclasses.replace(
-                    pkg, latest_version=await self.get_latest_version(pkg.name)
-                )
+                pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
 
             extensions[normalized_name] = pkg
 
@@ -477,9 +477,7 @@ class ExtensionsManager(abc.ABC):
                 companion=self._get_companion(data),
             )
             if get_latest_version:
-                pkg = dataclasses.replace(
-                    pkg, latest_version=await self.get_latest_version(pkg.name)
-                )
+                pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
             extensions[normalized_name] = pkg
 
         for name in build_check_info["uninstall"]:

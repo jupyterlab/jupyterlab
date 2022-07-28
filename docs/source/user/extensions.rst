@@ -277,14 +277,7 @@ mode. JupyterLab will check the extensions against the defined listings.
 .. warning::
 
     Only one mode at a time is allowed. If you or your server administrator configures
-    both block and allow listings, the JupyterLab server will not start.
-
-
-.. figure:: ../images/extensions-simultaneous-block-allow.png
-   :align: center
-   :class: jp-screenshot
-
-   **Figure:** Simultaneous block and allow listings
+    both block and allow listings, the allow listing takes precedence.
 
 
 The following details the behavior for the :ref:`blocklist_mode` and the :ref:`allowlist_mode`.

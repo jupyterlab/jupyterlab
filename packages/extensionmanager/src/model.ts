@@ -313,10 +313,6 @@ export class ListModel extends VDomModel {
    * @param force Force refreshing the list of installed packages
    */
   async refreshInstalled(force = false): Promise<void> {
-    if (!this.isDisclaimed) {
-      return Promise.reject('Installation warning is not disclaimed.');
-    }
-
     this.installedError = null;
     this._isLoadingInstalledExtensions = true;
     this.stateChanged.emit();

@@ -93,59 +93,61 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           <div className="jp-extensionmanager-entry-description">
             {entry.description}
           </div>
-          <div className="jp-extensionmanager-entry-buttons">
-            {entry.installed ? (
-              <>
-                {supportInstallation && (
-                  <>
-                    {ListModel.entryHasUpdate(entry) && (
+          {props.performAction && (
+            <div className="jp-extensionmanager-entry-buttons">
+              {entry.installed ? (
+                <>
+                  {supportInstallation && (
+                    <>
+                      {ListModel.entryHasUpdate(entry) && (
+                        <Button
+                          onClick={() => props.performAction!('install', entry)}
+                          minimal
+                          small
+                        >
+                          {trans.__('Update')}
+                        </Button>
+                      )}
                       <Button
-                        onClick={() => props.performAction('install', entry)}
+                        onClick={() => props.performAction!('uninstall', entry)}
                         minimal
                         small
                       >
-                        {trans.__('Update')}
+                        {trans.__('Uninstall')}
                       </Button>
-                    )}
+                    </>
+                  )}
+                  {entry.enabled ? (
                     <Button
-                      onClick={() => props.performAction('uninstall', entry)}
+                      onClick={() => props.performAction!('disable', entry)}
                       minimal
                       small
                     >
-                      {trans.__('Uninstall')}
+                      {trans.__('Disable')}
                     </Button>
-                  </>
-                )}
-                {entry.enabled ? (
+                  ) : (
+                    <Button
+                      onClick={() => props.performAction!('enable', entry)}
+                      minimal
+                      small
+                    >
+                      {trans.__('Enable')}
+                    </Button>
+                  )}
+                </>
+              ) : (
+                supportInstallation && (
                   <Button
-                    onClick={() => props.performAction('disable', entry)}
+                    onClick={() => props.performAction!('install', entry)}
                     minimal
                     small
                   >
-                    {trans.__('Disable')}
+                    {trans.__('Install')}
                   </Button>
-                ) : (
-                  <Button
-                    onClick={() => props.performAction('enable', entry)}
-                    minimal
-                    small
-                  >
-                    {trans.__('Enable')}
-                  </Button>
-                )}
-              </>
-            ) : (
-              supportInstallation && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Install')}
-                </Button>
-              )
-            )}
-          </div>
+                )
+              )}
+            </div>
+          )}
         </div>
       </div>
     </li>
@@ -169,8 +171,10 @@ namespace ListEntry {
 
     /**
      * Callback to use for performing an action on the entry.
+     *
+     * Not provided if actions are not allowed.
      */
-    performAction: (action: Action, entry: IEntry) => void;
+    performAction?: (action: Action, entry: IEntry) => void;
 
     /**
      * The language translator.
@@ -258,8 +262,10 @@ namespace ListView {
 
     /**
      * Callback to use for performing an action on an entry.
+     *
+     * Not provided if actions are not allowed.
      */
-    performAction: (action: Action, entry: IEntry) => void;
+    performAction?: (action: Action, entry: IEntry) => void;
   }
 }
 
@@ -385,7 +391,9 @@ class InstalledList extends ReactWidget {
             onPage={value => {
               /* no-op */
             }}
-            performAction={this.onAction.bind(this)}
+            performAction={
+              this.model.isDisclaimed ? this.onAction.bind(this) : null
+            }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
             }
@@ -468,17 +476,16 @@ class SearchResult extends ReactWidget {
           </div>
         ) : (
           <ListView
-            // Filter out installed extensions:
-            entries={this.model.searchResult.filter(
-              entry => this.model.installed.indexOf(entry) === -1
-            )}
+            entries={this.model.searchResult}
             numPages={Math.ceil(
               this.model.totalEntries / this.model.pagination
             )}
             onPage={value => {
               this.onPage(value);
             }}
-            performAction={this.onAction.bind(this)}
+            performAction={
+              this.model.isDisclaimed ? this.onAction.bind(this) : null
+            }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
             }
@@ -531,7 +538,7 @@ export class ExtensionsPanel extends SidePanel {
         onClick: () => {
           model.refreshInstalled(true);
         },
-        tooltip: this.trans.__('Refresh extension list')
+        tooltip: this.trans.__('Refresh extensions list')
       })
     );
 
@@ -541,11 +548,28 @@ export class ExtensionsPanel extends SidePanel {
 
     this.addWidget(new SearchResult(model, this.trans));
 
+    this._wasDisclaimed = this.model.isDisclaimed;
     if (this.model.isDisclaimed) {
       (this.content as AccordionPanel).collapse(0);
     } else {
+      // If warning is not disclaimed expand only the warning panel
       (this.content as AccordionPanel).expand(0);
+      (this.content as AccordionPanel).collapse(1);
+      (this.content as AccordionPanel).collapse(2);
     }
+
+    this.model.stateChanged.connect(this._onDisclaimedChanged, this);
+  }
+
+  /**
+   * Dispose of the widget and its descendant widgets.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model.stateChanged.disconnect(this._onDisclaimedChanged, this);
+    super.dispose();
   }
 
   /**
@@ -575,14 +599,16 @@ export class ExtensionsPanel extends SidePanel {
   protected onBeforeAttach(msg: Message): void {
     this.node.addEventListener('focus', this, true);
     this.node.addEventListener('blur', this, true);
+    super.onBeforeAttach(msg);
+  }
 
+  protected onBeforeShow(msg: Message): void {
     if (!this._wasInitialized) {
       this._wasInitialized = true;
       this.model.refreshInstalled().catch(reason => {
         console.log(`Failed to refresh installed extension list:\n${reason}`);
       });
     }
-    super.onBeforeAttach(msg);
   }
 
   /**
@@ -608,6 +634,13 @@ export class ExtensionsPanel extends SidePanel {
     super.onActivateRequest(msg);
   }
 
+  private _onDisclaimedChanged(): void {
+    if (!this._wasDisclaimed && this.model.isDisclaimed) {
+      (this.content as AccordionPanel).expand(1);
+      (this.content as AccordionPanel).expand(2);
+    }
+  }
+
   /**
    * Toggle the focused modifier based on the input node focus state.
    */
@@ -620,4 +653,5 @@ export class ExtensionsPanel extends SidePanel {
   protected trans: TranslationBundle;
   private _searchInputRef: React.RefObject<HTMLInputElement>;
   private _wasInitialized = false;
+  private _wasDisclaimed = true;
 }
