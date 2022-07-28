@@ -8,6 +8,7 @@ header:
       Distributed under the terms of the Modified BSD License.
 
   paths-ignore:
+    - '**/*.ipynb'
     - '**/*.json'
     - '**/*.md'
     - '**/*.yml'
@@ -15,14 +16,20 @@ header:
     - '**/build'
     - '**/lib'
     - '**/node_modules'
+    - '**/MANIFEST.in'
     - '**/static'
     - '**/typings'
     - '**/schemas'
     - '**/themes'
-    - 'coverage'
     - '*.map.js'
     - '*.bundle.js'
-    - '.*'
+    - '**/.*'
+    - 'binder/postBuild'
+    - 'binder/start'
+    - 'coverage'
+    - 'examples/federated/example.cert'
+    - 'packages/extensionmanager-extension/examples/listings/settings/@jupyterlab/extensionmanager-extension/plugin.jupyterlab-settings'
+    - 'typedoc-theme'
     - 'LICENSE'
     - 'yarn.lock'
 
