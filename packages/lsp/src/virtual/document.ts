@@ -3,7 +3,7 @@
 
 import { IDisposable } from '@lumino/disposable';
 import { IDocumentInfo } from '../ws-connection/types';
-
+import { IPosition } from '../positioning';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -19,7 +19,6 @@ import {
 } from '../positioning';
 import { DefaultMap, untilReady } from '../utils';
 
-import type * as CodeMirror from 'codemirror';
 type IRange = CodeEditor.IRange;
 
 type language = string;
@@ -310,7 +309,7 @@ export class VirtualDocument implements IDisposable {
   /**
    * Convert from code editor position into code mirror position.
    */
-  static ceToCm(position: CodeEditor.IPosition): CodeMirror.Position {
+  static ceToCm(position: CodeEditor.IPosition): IPosition {
     return { line: position.line, ch: position.column };
   }
 
@@ -607,7 +606,7 @@ export class VirtualDocument implements IDisposable {
     }
     let shift = this._editorToSourceLine.get(editor)!;
     return {
-      ...(position as CodeMirror.Position),
+      ...(position as IPosition),
       line: position.line + shift
     } as IRootPosition;
   }

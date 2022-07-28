@@ -2,14 +2,29 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import type * as CodeMirror from 'codemirror';
 import type * as lsp from 'vscode-languageserver-protocol';
+
+/**
+ * CM5 position interface.
+ *
+ * TODO: Migrate to offset-only mode once `CodeEditor.IPosition`
+ * is migrated.
+ */
+export interface IPosition {
+  /**
+   * Line number
+   */
+  line: number;
+
+  /**
+   * Position of character in line
+   */
+  ch: number;
+}
 
 /**
  * is_* attributes are there only to enforce strict interface type checking
  */
-export interface IPosition extends CodeMirror.Position {}
-
 export interface ISourcePosition extends IPosition {
   isSource: true;
 }
