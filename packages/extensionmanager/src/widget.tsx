@@ -536,7 +536,11 @@ export class ExtensionsPanel extends SidePanel {
       new ToolbarButton({
         icon: refreshIcon,
         onClick: () => {
-          model.refreshInstalled(true);
+          model.refreshInstalled(true).catch(reason => {
+            console.error(
+              `Failed to refresh the installed extensions list:\n${reason}`
+            );
+          });
         },
         tooltip: this.trans.__('Refresh extensions list')
       })

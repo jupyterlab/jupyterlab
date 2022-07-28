@@ -195,7 +195,7 @@ export class ListModel extends VDomModel {
   set query(value: string) {
     if (this._query !== value) {
       this._query = value;
-      this._debouncedSearch.invoke();
+      void this._debouncedSearch.invoke();
     }
   }
 
