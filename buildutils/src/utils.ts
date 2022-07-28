@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 /* global NodeRequire */
 import path from 'path';
 import glob from 'glob';

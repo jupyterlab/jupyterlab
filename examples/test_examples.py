@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 """
 This file is meant to be used to test all of the example here and and
 in ../packages/services/examples.  We import each of the applications

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 import { Token } from '@lumino/coreutils';
 

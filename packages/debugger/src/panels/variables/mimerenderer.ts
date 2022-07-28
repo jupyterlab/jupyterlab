@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry, MimeModel } from '@jupyterlab/rendermime';
 import {

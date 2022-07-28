@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { Page } from '@playwright/test';
 import { default as extensionsSearchStub } from './data/extensions-search-drawio.json';
 import fs from 'fs';

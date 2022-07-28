@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 // Type definitions for duplicate-package-checker-webpack-plugin 2.1
 // Project: https://github.com/darrenscerri/duplicate-package-checker-webpack-plugin#readme
 // Definitions by: Matt Traynham <https://github.com/mtraynham>

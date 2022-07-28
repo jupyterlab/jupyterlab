@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 # This file comes from https://github.com/podhmo/python-semver/blob/b42e9896e391e086b773fc621b23fa299d16b874/semver/__init__.py
 #
 # It is licensed under the following license:
