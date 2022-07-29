@@ -3,6 +3,7 @@
 
 import { ISessionContext } from '@jupyterlab/apputils';
 import {
+  AttachmentsCellModel,
   Cell,
   CellDragUtils,
   CodeCell,
@@ -971,7 +972,9 @@ export namespace CodeConsole {
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createRawCell(options: RawCellModel.IOptions): IRawCellModel;
+    createRawCell(
+      options: AttachmentsCellModel.IOptions<ISharedRawCell>
+    ): IRawCellModel;
   }
 
   /**
@@ -1016,7 +1019,9 @@ export namespace CodeConsole {
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createRawCell(options: RawCellModel.IOptions): IRawCellModel {
+    createRawCell(
+      options: AttachmentsCellModel.IOptions<ISharedRawCell>
+    ): IRawCellModel {
       return new RawCellModel(options);
     }
   }

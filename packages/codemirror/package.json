@@ -80,7 +80,7 @@
     "@lumino/widgets": "^2.0.0-alpha.6",
     "react": "^17.0.1",
     "style-mod": "^4.0.0",
-    "y-codemirror.next": "~0.3.2",
+    "y-codemirror.next": "^0.3.2",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.40"
   },

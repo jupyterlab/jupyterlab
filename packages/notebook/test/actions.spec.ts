@@ -231,7 +231,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should preserve the widget mode', () => {
@@ -271,7 +271,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should select the next cell if there is only one cell selected', () => {
@@ -399,7 +399,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.deleteCells(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should switch to command mode', () => {
@@ -469,7 +469,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.insertAbove(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should widget mode should be preserved', () => {
@@ -518,7 +518,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.insertBelow(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should widget mode should be preserved', () => {
@@ -568,7 +568,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.changeCellType(widget, 'code');
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should preserve the widget mode', () => {
@@ -696,7 +696,7 @@ describe('@jupyterlab/notebook', () => {
         const result = await NotebookActions.run(widget, undefined);
         expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;
-        expect(cell.model.executionCount).toBe(0);
+        expect(cell.model.executionCount).toBe(null);
         expect(emitted).toBe(1);
       });
 

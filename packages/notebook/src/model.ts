@@ -50,6 +50,9 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * The array of deleted cells since the notebook was last run.
    */
   readonly deletedCells: string[];
+  /**
+   * Shared model
+   */
   readonly sharedModel: sharedModels.ISharedNotebook;
 }
 
@@ -61,10 +64,10 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    this.sharedModel = sharedModels.YNotebook.create(
-      options.disableDocumentWideUndoRedo || false,
-      options.defaultCell
-    ) as sharedModels.ISharedNotebook;
+    this.sharedModel = sharedModels.YNotebook.create({
+      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false,
+      initialCellType: options.defaultCell
+    }) as sharedModels.ISharedNotebook;
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._cells.changed.connect(this._onCellsChanged, this);
@@ -464,6 +467,9 @@ export namespace NotebookModel {
      */
     languagePreference?: string;
 
+    /**
+     * Default cell type.
+     */
     defaultCell?: 'code' | 'markdown' | 'raw';
 
     /**

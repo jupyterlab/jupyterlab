@@ -7,7 +7,11 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
@@ -20,7 +24,6 @@ import {
 } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
 import {
-  ChangeSet,
   EditorSelection,
   EditorState,
   Extension,
@@ -41,16 +44,14 @@ import {
   ViewUpdate,
   WidgetType
 } from '@codemirror/view';
-
-import * as Y from 'yjs';
+import { SyntaxNodeRef } from '@lezer/common';
 import { yCollab } from 'y-codemirror.next';
 import { Awareness } from 'y-protocols/awareness';
-import { Mode } from './mode';
-import { Configuration } from './editorconfiguration';
+import * as Y from 'yjs';
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
-import { SyntaxNodeRef } from '@lezer/common';
-import { Poll } from '@lumino/polling';
+import { Configuration } from './editorconfiguration';
+import { Mode } from './mode';
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -104,6 +105,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._editorConfig = new Configuration.EditorConfiguration();
     const host = (this.host = options.host);
     this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
 
     host.classList.add(EDITOR_CLASS);
     host.classList.add('jp-Editor');
@@ -250,16 +252,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
 
     this._onMimeTypeChanged();
     this._onCursorActivity();
-    this._poll = new Poll({
-      factory: async () => {
-        // nop
-      },
-      frequency: { interval: 3000, backoff: false },
-      standby: () => {
-        // If changed, only stand by when hidden, otherwise always stand by.
-        return this._lastChange ? 'when-hidden' : true;
-      }
-    });
 
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
@@ -370,7 +362,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
     this._keydownHandlers.length = 0;
-    this._poll.dispose();
     Signal.clearData(this);
     this.editor.destroy();
   }
@@ -837,9 +828,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // If we can id the selection to a specific collaborator,
     // use that information.
     let collaborator: ICollaborator | undefined;
-    if (this._model.modelDB.collaborators) {
-      collaborator = this._model.modelDB.collaborators.get(uuid);
-    }
 
     // Style each selection for the uuid.
     selections.forEach(selection => {
@@ -975,10 +963,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (update.transactions.length && update.transactions[0].selection) {
       this._onCursorActivity();
     }
-
-    if (update.docChanged) {
-      this._lastChange = update.changes;
-    }
   }
 
   /**
@@ -1048,6 +1032,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
   private _editor: EditorView;
   private _selectionMarkers: {
@@ -1061,8 +1046,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
   private _isDisposed = false;
-  private _lastChange: ChangeSet | null = null;
-  private _poll: Poll;
   private _yeditorBinding: IYCodeMirrorBinding | null;
   private _editorConfig: Configuration.EditorConfiguration;
   private _addMark: StateEffectType<Private.ICollabSelectionText>;

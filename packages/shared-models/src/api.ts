@@ -225,8 +225,11 @@ export namespace ISharedNotebook {
      * Wether the the undo/redo logic should be
      * considered on the full document across all cells.
      */
-    disableDocumentWideUndoRedo: boolean;
-    defaultCell?: 'code' | 'markdown' | 'raw';
+    disableDocumentWideUndoRedo?: boolean;
+    /**
+     * Initial cell type.
+     */
+    initialCellType?: 'code' | 'markdown' | 'raw';
   }
 }
 
@@ -255,12 +258,31 @@ export interface ISharedLanguageInfoMetadata
   pygments_lexer?: string;
 }
 
-// Cell Types.
+/** Cell Types. */
 export type ISharedCell =
   | ISharedCodeCell
   | ISharedRawCell
   | ISharedMarkdownCell
   | ISharedUnrecognizedCell;
+
+/**
+ * Shared cell namespace
+ */
+export namespace ISharedCell {
+  /**
+   * Shared cell constructor options.
+   */
+  export interface IOptions {
+    /**
+     * Cell id
+     */
+    id?: string;
+    /**
+     * Whether the cell is standalone or not.
+     */
+    isStandalone?: boolean;
+  }
+}
 
 /**
  * Cell-level metadata.

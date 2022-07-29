@@ -437,7 +437,7 @@ export namespace NotebookActions {
       if (notebook.isSelectedOrActive(widgets[i])) {
         if (!notebook.isSelectedOrActive(widgets[i + 1])) {
           const activeCellIndex = notebook.activeCellIndex;
-          notebook.model?.sharedModel.moveCell(i, i + 1);
+          notebook.moveCell(i, i + 1);
           if (activeCellIndex === i) {
             notebook.activeCellIndex = activeCellIndex + 1;
           }
@@ -452,7 +452,7 @@ export namespace NotebookActions {
   /**
    * Move the selected cell(s) up.
    *
-   * @param widget - The target notebook widget.
+   * @param notebook - The target notebook widget.
    */
   export function moveUp(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -462,11 +462,10 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const cells = notebook.model.cells;
     const widgets = notebook.widgets;
-    const sharedModel = notebook.model.sharedModel;
     for (let i = 1; i < cells.length; i++) {
       if (notebook.isSelectedOrActive(widgets[i])) {
         if (!notebook.isSelectedOrActive(widgets[i - 1])) {
-          sharedModel.moveCell(i, i - 1);
+          notebook.moveCell(i, i - 1);
           if (notebook.activeCellIndex === i) {
             notebook.activeCellIndex--;
           }

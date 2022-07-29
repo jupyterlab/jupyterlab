@@ -193,11 +193,6 @@ export namespace CodeEditor {
     readonly selections: IObservableMap<ITextSelection[]>;
 
     /**
-     * The underlying `IModelDB` instance in which the selection and mime-type is stored.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
      * The shared model for the cell editor.
      */
     readonly sharedModel: models.ISharedText;
@@ -210,7 +205,7 @@ export namespace CodeEditor {
     /**
      * Construct a new Model.
      */
-    constructor(options: Model.IOptions) {
+    constructor(options: Model.IOptions = {}) {
       this.modelDB = new ModelDB();
       this.sharedModel =
         options?.sharedModel ||
@@ -238,7 +233,7 @@ export namespace CodeEditor {
      * The underlying `IModelDB` instance in which state is
      * stored in an observable manner.
      */
-    readonly modelDB: IModelDB;
+    protected readonly modelDB: IModelDB;
 
     /**
      * A signal emitted when a mimetype changes.
@@ -740,7 +735,10 @@ export namespace CodeEditor {
        */
       mimeType?: string;
 
-      sharedModel: ISharedText;
+      /**
+       * Shared editor text.
+       */
+      sharedModel?: ISharedText;
     }
   }
 }

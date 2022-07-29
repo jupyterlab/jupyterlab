@@ -505,7 +505,7 @@ describe('cells/model', () => {
             called++;
           }
         });
-        expect(model.executionCount).toBe(0);
+        expect(model.executionCount).toBe(null);
         expect(model.isDirty).toBe(false);
         expect(called).toBe(0);
 

@@ -13,14 +13,12 @@ import {
   WidgetLSPAdapter
 } from '@jupyterlab/lsp';
 import * as nbformat from '@jupyterlab/nbformat';
-import {
-  IObservableList,
-  IObservableUndoableList
-} from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { Session } from '@jupyterlab/services';
 
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
+import { CellList } from './celllist';
 
 type ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 
@@ -234,7 +232,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * @param change - Changed data
    */
   async handleCellChange(
-    cells: IObservableUndoableList<ICellModel>,
+    cells: CellList,
     change: IObservableList.IChangedArgs<ICellModel>
   ): Promise<void> {
     let cellsAdded: ICellModel[] = [];

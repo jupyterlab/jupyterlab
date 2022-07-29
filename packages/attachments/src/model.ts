@@ -101,6 +101,9 @@ export namespace IAttachmentsModel {
      */
     contentFactory?: IContentFactory;
 
+    /**
+     * The shared cell model.
+     */
     sharedModel: ISharedMarkdownCell | ISharedRawCell;
   }
 

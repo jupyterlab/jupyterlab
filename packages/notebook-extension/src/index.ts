@@ -1773,7 +1773,7 @@ function activateNotebookCompleterService(
     await manager.updateCompleter(completerContext);
     notebook.content.activeCellChanged.connect((_, cell) => {
       // Ensure the editor will exist on the cell before adding the completer
-      cell.ready
+      cell?.ready
         .then(() => {
           const newCompleterContext = {
             editor: cell.editor,

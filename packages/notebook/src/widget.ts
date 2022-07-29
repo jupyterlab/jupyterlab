@@ -365,6 +365,39 @@ export class StaticNotebook extends WindowedList {
   }
 
   /**
+   * Move a cell preserving widget view state.
+   *
+   * #### Notes
+   * This is required because at the model level a move is a deletion
+   * followed by an insertion. Hence the view state is not preserved.
+   *
+   * @param from The index of the cell to move
+   * @param to The new index of the cell
+   */
+  moveCell(from: number, to: number): void {
+    if (!this.model) {
+      return;
+    }
+
+    const oldCell = this.widgets[from];
+    const viewModel: { [k: string]: any } = {};
+    if (oldCell.model.type === 'markdown') {
+      for (const k of ['rendered', 'headingCollapsed']) {
+        // @ts-expect-error Cell has no index signature
+        viewModel[k] = oldCell[k];
+      }
+    }
+
+    this.model.sharedModel.moveCell(from, to);
+
+    const newCell = this.widgets[to];
+    for (const state in viewModel) {
+      // @ts-expect-error Cell has no index signature
+      newCell[state] = viewModel[state];
+    }
+  }
+
+  /**
    * Force rendering the cell outputs of a given cell if it is still a placeholder.
    *
    * #### Notes
@@ -608,6 +641,19 @@ export class StaticNotebook extends WindowedList {
     ArrayExt.insert(this.cellsArray, index, widget);
     this.onCellInserted(index, widget);
 
+  private _renderPlaceholderCells(deadline: any) {
+    if (this.notebookConfig.remainingTimeBeforeRescheduling > 0) {
+      const timeRemaining = deadline.timeRemaining();
+      // In case this got triggered because of timeout or when there are screen updates (https://w3c.github.io/requestidlecallback/#idle-periods),
+      // avoiding the render and rescheduling the place holder cell rendering.
+      if (
+        deadline.didTimeout ||
+        timeRemaining < this.notebookConfig.remainingTimeBeforeRescheduling
+      ) {
+        if (this._idleCallBack) {
+          window.cancelIdleCallback(this._idleCallBack);
+          this._idleCallBack = null;
+        }
     this._scheduleCellRenderOnIdle();
   }
 
@@ -1209,7 +1255,7 @@ export class Notebook extends StaticNotebook {
    * This can be due to the active index changing or the
    * cell at the active index changing.
    */
-  get activeCellChanged(): ISignal<this, Cell> {
+  get activeCellChanged(): ISignal<this, Cell | null> {
     return this._activeCellChanged;
   }
 
@@ -1287,7 +1333,7 @@ export class Notebook extends StaticNotebook {
     }
 
     this._activeCellIndex = newValue;
-    const cell = this.widgets[newValue];
+    const cell = this.widgets[newValue] ?? null;
     if (cell !== this._activeCell) {
       // Post an update request.
       this.update();
@@ -2551,7 +2597,7 @@ export class Notebook extends StaticNotebook {
     index: number;
   } | null = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
-  private _activeCellChanged = new Signal<this, Cell>(this);
+  private _activeCellChanged = new Signal<this, Cell | null>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
 
