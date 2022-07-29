@@ -18,10 +18,10 @@
       "type": "array",
       "default": []
     },
-    "trustbydefault": {
+    "trustByDefault": {
       "type": "boolean",
       "title": "Trust HTML by default",
-      "description": "Whether to trust html upon opening file",
+      "description": "Whether to trust HTML files upon opening",
       "default": false
     }
   },

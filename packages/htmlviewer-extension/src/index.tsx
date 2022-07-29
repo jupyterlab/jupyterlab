@@ -133,12 +133,12 @@ function activateHTMLViewer(
     });
   }
 
-  let trustedAtOpen = false;
+  let trustByDefault = false;
 
   if (settingRegistry) {
     const loadSettings = settingRegistry.load(HTML_VIEWER_PLUGIN_ID);
     const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-      trustedAtOpen = settings.get('trustbydefault').composite as boolean;
+      trustByDefault = settings.get('trustByDefault').composite as boolean;
     };
 
     Promise.all([loadSettings, app.restored])
@@ -167,7 +167,7 @@ function activateHTMLViewer(
       app.commands.notifyCommandChanged(CommandIDs.trustHTML);
     });
 
-    widget.trusted = trustedAtOpen;
+    widget.trusted = trustByDefault;
 
     widget.title.icon = ft.icon!;
     widget.title.iconClass = ft.iconClass ?? '';
