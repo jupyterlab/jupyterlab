@@ -102,7 +102,7 @@ There is one optional setting:
 - The new version in form *X.Y.postZ* - if not provided, the post number will be bumped.
 
 .. image:: prep_language_packs.png
-  :alt: A screenshot showcasing the "Prepare language packs for release" workflow on github actions.
+  :alt: The "Prepare language packs for release" workflow on GitHub Actions.
 
 The workflow is:
 

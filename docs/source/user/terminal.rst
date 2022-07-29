@@ -14,7 +14,7 @@ there.
 .. image:: ../images/terminal-layout.png
    :align: center
    :class: jp-screenshot
-   :alt:
+   :alt: JupyterLab with an open terminal in the main document area.
 
 .. _open-terminal:
 

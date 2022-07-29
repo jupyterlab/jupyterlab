@@ -488,7 +488,7 @@ Now run Lighthouse against this local server and show the results:
    jlpm run lighthouse --view
 
 .. image:: ../images/lighthouse.png
-   :alt: Screenshot of Lighthouse tool used for benchmarking performance.
+   :alt: The Lighthouse tool used for benchmarking performance.
 
 Using throttling
 ^^^^^^^^^^^^^^^^
@@ -769,7 +769,7 @@ Inspecting the debug messages in VS Code can be useful to understand when debug 
 The first step is to create a test file and a debug configuration (``launch.json``):
 
 .. image:: ./debugger_launch_configuration.png
-   :alt: Small screenshot of the GUI showing the menu for creating a debug configuration.
+   :alt: An editor showing the menu for creating a debug configuration.
 
 .. code:: json
 
@@ -790,7 +790,7 @@ The first step is to create a test file and a debug configuration (``launch.json
 Then start the debugger:
 
 .. image:: ./debugger_vscode_start.png
-   :alt:
+   :alt: A started debugging session in the editor. There are additional buttons in the upper right for navigating the session.
 
 The content of the log file looks like this:
 

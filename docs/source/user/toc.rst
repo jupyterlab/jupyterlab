@@ -14,7 +14,7 @@ In the sidebar panel, you can number headings, collapse sections, and navigate i
 Here is an animation showing the table of content use with a notebook:
 
 .. image:: ./images/toc/toc.gif
-    :alt: A .gif file displaying how to use the table of contents feature within a notebook.
+    :alt: A GIF displaying how to use the table of contents feature within a notebook. It toggles which cells types are lsited as well as expanding and collapsing headings.
 
 The table of contents will be automatically generated for your notebook by taking all the
 headings from your markdown cells. Each listed section will be linked to the actual section
@@ -37,7 +37,7 @@ option via the *More actions* button in the table of contents toolbar. Here is a
 showing its use:
 
 .. image:: ./images/toc/numberingH1.gif
-    :alt:A .gif file showing how to toggle the "Automatic section numbering" feature for the first-level headings (h1) within a notebook.
+    :alt:A GIF showing how to toggle Automatic section numbering for headings within a notebook. Clicking the button instantly applies multilevel numbering to each heading.
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -46,7 +46,6 @@ containing runnable code cells, and clicking the *Select and Run Cell(s) for thi
 option will make the cells run in notebook. Here is an animation showing its use:
 
 .. image:: ./images/toc/runcell.gif
-    :alt:
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +55,6 @@ option will make the cells run in notebook. Here is an animation showing its use
  Editor and then go to Table of Contents section and in User Preferences check the ``syncCollapseState`` box. Here is an animation showing its use:
 
 .. image:: ./images/toc/syncCollapseState.gif
-    :alt:
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -65,7 +63,6 @@ This can be tuned by changing the settings ``includeOutput`` to ``false``. To pe
 Editor and then go to Table of Contents section and in User Preferences add unchecked ``includeOutput`` box. Here is an animation showing its use
 
 .. image:: ./images/toc/includeOutput.gif
-    :alt:
 
 
 .. _Settings:

@@ -4,10 +4,10 @@ This extension creates a generic statusbar to showcase the various states of Jup
 extensions to add custom elements into the statusbar.
 
 Changing Contexts
-![Context Changes ](http://g.recordit.co/OndGalRjws.gif)
+![Context Changes](http://g.recordit.co/OndGalRjws.gif)
 
 Component Interactions
-![Component Previews ](http://g.recordit.co/jT0NA6D9c9.gif)
+![Component Previews](http://g.recordit.co/jT0NA6D9c9.gif)
 
 ## Dependencies
 

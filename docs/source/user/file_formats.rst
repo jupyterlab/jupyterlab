@@ -19,7 +19,6 @@ by right-clicking on the filename in the file browser and using the
 .. image:: ../images/file-formats-open-with.png
    :align: center
    :class: jp-screenshot
-   :alt:
 
 To use these different data formats as output in a notebook or code
 console, you can use the relevant display API for the kernel you are
@@ -37,7 +36,6 @@ code console cell:
 .. image:: ../images/file-formats-html-display.png
    :align: center
    :class: jp-screenshot
-   :alt:
 
 The IPython display function can also construct a raw rich output
 message from a dictionary of keys (MIME types) and values (MIME data):
@@ -284,7 +282,6 @@ vegalite R package, or Vegas (Scala/Spark).
 .. image:: ../images/file-formats-altair.png
    :align: center
    :class: jp-screenshot
-   :alt:
 
 A JupyterLab extension that supports Vega 3.x and Vega-Lite 2.x can be
 found `here <https://github.com/jupyterlab/jupyter-renderers>`__.
@@ -321,4 +318,3 @@ JupyterLab:
 .. image:: ../images/file-formats-nteract-vdom.png
    :align: center
    :class: jp-screenshot
-   :alt:

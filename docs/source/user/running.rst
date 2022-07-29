@@ -12,6 +12,8 @@ directories:
    :class: jp-screenshot
    :alt:
 
+<!---Alt text is intentionally left blank because the image content is described directly prior.--->
+
 .. _reopen-document:
 
 As with the classic Jupyter Notebook, when you close a notebook

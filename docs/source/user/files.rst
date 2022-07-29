@@ -22,7 +22,7 @@ Many actions on files can also be carried out in the File menu:
 .. image:: ../images/files-menu-top.png
    :align: center
    :class: jp-screenshot
-   :alt: A screenshot showing the File menu open including options like "New", "Save All." 
+   :alt: The File menu open including options like "New", "Save All." 
 
 .. _open-file:
 
@@ -89,7 +89,7 @@ directory open.
 .. image:: ../images/files-shareable-link.png
    :align: center
    :class: jp-screenshot
-   :alt: A screenshot showing the Copy Shareable Link option in the context menu opened over a file, which is the last entry on the list. 
+   :alt: The Copy Shareable Link option in the context menu of a file. Copy Shareable Link is the last entry on the list. 
 
 .. _file-copy-path:
 
@@ -119,7 +119,7 @@ You can also create new documents or activities using the File menu:
 .. image:: ../images/files-create-text-file.png
    :align: center
    :class: jp-screenshot
-   :alt: A screenshot showing the context menu entry for creating a new file. 
+   :alt: The context menu entry for creating a new file. 
 
 .. _current-directory:
 

@@ -133,17 +133,14 @@ It contains a sequence of cells widgets.
  - Code cells have the following DOM structure:
 
    .. image:: images/code-cell-dom.svg
-    :alt:
 
  - Rendered markdown cells have the following DOM structure:
 
    .. image:: images/rendered-markdown-cell-dom.svg
-    :alt:
 
  - Active markdown cells have the following DOM structure:
 
    .. image:: images/active-markdown-cell-dom.svg
-    :alt:
 
 .. note::
    The default nbconvert template for the HTML exporter produces the same DOM
