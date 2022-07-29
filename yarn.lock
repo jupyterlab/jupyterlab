@@ -13482,10 +13482,10 @@ xterm@~4.18.0:
   resolved "https://registry.yarnpkg.com/xterm/-/xterm-4.18.0.tgz#a1f6ab2c330c3918fb094ae5f4c2562987398ea1"
   integrity sha512-JQoc1S0dti6SQfI0bK1AZvGnAxH4MVw45ZPFSO6FHTInAiau3Ix77fSxNx3mX4eh9OL4AYa8+4C8f5UvnSfppQ==
 
-y-codemirror.next@~0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/y-codemirror.next/-/y-codemirror.next-0.3.0.tgz#79ac9c198c095619f77be467367eef5aaee4ca94"
-  integrity sha512-UqM2w32+62GF4j0jZ49OhWeXdzp25rw4y92vK9nttux0audUGTlsya0LfBqtKfQ/8GBeedpAu9kjZbEHj1yvfA==
+y-codemirror.next@~0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/y-codemirror.next/-/y-codemirror.next-0.3.2.tgz#15f7afec14a56fba4f25811d5f90b986e1cc644c"
+  integrity sha512-3ksMXoietzNkrgluG9ut+5q4PNHCS6sQ+mHd44hNX1s7TBe4iDgOOIswfY3oLsdamZLAUPr+TnRdYgYuNDs7Qg==
   dependencies:
     lib0 "^0.2.42"
 
