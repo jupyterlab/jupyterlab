@@ -58,7 +58,7 @@
     "@lumino/dragdrop": "^1.14.0",
     "@lumino/messaging": "^1.10.1",
     "@lumino/signaling": "^1.10.1",
-    "@lumino/widgets": "^1.32.0"
+    "@lumino/widgets": "^1.33.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.11",

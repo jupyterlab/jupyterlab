@@ -503,6 +503,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._resizeDebouncer.dispose();
     this._input = null!;
     this._model = null!;
     this._inputWrapper = null!;
@@ -522,14 +523,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this.editor.focus();
-  }
-
-  /**
-   * Handle `fit-request` messages.
-   */
-  protected onFitRequest(msg: Message): void {
-    // need this for for when a theme changes font size
-    this.editor.refresh();
   }
 
   /**
@@ -1615,12 +1608,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
     this._rendered = value;
     this._handleRendered();
-    // Refreshing an editor can be really expensive, so we don't call it from
-    // _handleRendered, since _handledRendered is also called on every update
-    // request.
-    if (!this._rendered) {
-      this.editor.refresh();
-    }
 
     // If the rendered state changed, raise an event.
     this._displayChanged.emit();
@@ -1652,6 +1639,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   get renderer(): IRenderMime.IRenderer {
     return this._renderer;
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._monitor.dispose();
+    super.dispose();
   }
 
   protected maybeCreateCollapseButton(): void {

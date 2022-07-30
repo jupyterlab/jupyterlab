@@ -539,8 +539,8 @@ describe('docregistry/default', () => {
     describe('#preferredLanguage()', () => {
       it('should get the preferred kernel language given an extension', () => {
         const factory = new TextModelFactory();
-        expect(factory.preferredLanguage('.py')).toBe('python');
-        expect(factory.preferredLanguage('.jl')).toBe('julia');
+        expect(factory.preferredLanguage('.py')).toBe('Python');
+        expect(factory.preferredLanguage('.jl')).toBe('Julia');
       });
     });
   });

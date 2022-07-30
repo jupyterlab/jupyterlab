@@ -66,7 +66,7 @@
     "@lumino/polling": "^1.10.0",
     "@lumino/signaling": "^1.10.1",
     "@lumino/virtualdom": "^1.14.1",
-    "@lumino/widgets": "^1.32.0",
+    "@lumino/widgets": "^1.33.0",
     "react": "^17.0.1"
   },
   "devDependencies": {

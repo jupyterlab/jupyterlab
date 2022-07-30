@@ -19,7 +19,7 @@ test('Search with a text', async ({ page }) => {
 
   await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
 
-  await page.fill('[role="main"] >> textarea', TEST_FILE_CONTENT);
+  await page.type('.cm-content', TEST_FILE_CONTENT);
 
   await page.evaluate(async searchText => {
     await window.jupyterapp.commands.execute('documentsearch:start', {
@@ -39,7 +39,7 @@ test('Search with a text and replacement', async ({ page }) => {
 
   await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
 
-  await page.fill('[role="main"] >> textarea', TEST_FILE_CONTENT);
+  await page.type('.cm-content', TEST_FILE_CONTENT);
 
   await page.evaluate(
     async ([searchText, replaceText]) => {

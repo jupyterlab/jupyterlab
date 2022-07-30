@@ -252,7 +252,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    */
   preferredLanguage(path: string): string {
     const mode = Mode.findByFileName(path);
-    return mode && mode.mode;
+    return mode?.name ?? '';
   }
 
   private _isDisposed = false;

@@ -48,7 +48,7 @@
     "@jupyterlab/translation": "^4.0.0-alpha.11",
     "@jupyterlab/ui-components": "^4.0.0-alpha.26",
     "@lumino/algorithm": "^1.9.1",
-    "@lumino/widgets": "^1.32.0"
+    "@lumino/widgets": "^1.33.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.14.1",

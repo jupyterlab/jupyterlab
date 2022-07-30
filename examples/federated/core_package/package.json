@@ -91,9 +91,10 @@
     "@lumino/properties": "^1.8.1",
     "@lumino/signaling": "^1.10.1",
     "@lumino/virtualdom": "^1.14.1",
-    "@lumino/widgets": "^1.32.0",
+    "@lumino/widgets": "^1.33.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "yjs": "^13.5.34"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.11",
@@ -207,7 +208,8 @@
       "@lumino/virtualdom",
       "@lumino/widgets",
       "react",
-      "react-dom"
+      "react-dom",
+      "yjs"
     ],
     "extensions": [
       "@jupyterlab/application-extension",

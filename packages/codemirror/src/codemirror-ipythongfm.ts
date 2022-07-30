@@ -1,11 +1,32 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import CodeMirror from 'codemirror';
+import { Mode } from './mode';
+
+Mode.registerModeInfo({
+  name: 'ipythongfm',
+  mime: 'text/x-ipythongfm',
+  load: () => {
+    return import('@codemirror/lang-markdown').then(m =>
+      m.markdown({ codeLanguages: Mode.modeList as any })
+    );
+  }
+});
+
+// TODO: add support for LaTeX
+// This should be coded as an extension for https://github.com/lezer-parser/markdown
+// see https://github.com/lezer-parser/markdown/blob/main/src/extension.ts for examples
+// Then this extension can be passed to the markdown function above:
+//
+// load: () => {
+//   return import('@codemirror/lang-markdown').then(m => m.markdown({extensions: latex}));
+// }
+
+/*import CodeMirror from 'codemirror';
 import 'codemirror/addon/mode/multiplex';
 import 'codemirror/mode/gfm/gfm';
 import 'codemirror/mode/stex/stex';
-
+*/
 /**
  * Define an IPython GFM (GitHub Flavored Markdown) mode.
  *
@@ -15,7 +36,7 @@ import 'codemirror/mode/stex/stex';
  *  But was later removed in
  *   https://github.com/codemirror/CodeMirror/commit/d9c9f1b1ffe984aee41307f3e927f80d1f23590c
  */
-CodeMirror.defineMode(
+/*CodeMirror.defineMode(
   'ipythongfm',
   (config: CodeMirror.EditorConfiguration, modeOptions?: any) => {
     const gfmMode = CodeMirror.getMode(config, {
@@ -97,4 +118,4 @@ CodeMirror.modeInfo.push({
   mime: 'text/x-ipythongfm',
   mode: 'ipythongfm',
   name: 'ipythongfm'
-});
+});*/

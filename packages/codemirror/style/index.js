@@ -10,8 +10,5 @@ import '@jupyterlab/statusbar/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/codeeditor/style/index.js';
 import '@jupyterlab/documentsearch/style/index.js';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/dialog/dialog.css';
-import 'codemirror/addon/fold/foldgutter.css';
 
 import './base.css';

@@ -532,15 +532,16 @@ export namespace ExecutionIndicator {
       context: panel.sessionContext
     });
 
-    panel.disposed.connect(() => {
-      toolbarItem.dispose();
-    });
     if (loadSettings) {
       loadSettings
         .then(settings => {
-          toolbarItem.model.updateRenderOption(getSettingValue(settings));
-          settings.changed.connect(newSettings => {
+          const updateSettings = (newSettings: ISettingRegistry.ISettings) => {
             toolbarItem.model.updateRenderOption(getSettingValue(newSettings));
+          };
+          settings.changed.connect(updateSettings);
+          updateSettings(settings);
+          toolbarItem.disposed.connect(() => {
+            settings.changed.disconnect(updateSettings);
           });
         })
         .catch((reason: Error) => {
