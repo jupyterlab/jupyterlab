@@ -213,7 +213,16 @@ If you use ``conda``, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge 'nodejs'
+   conda install -c conda-forge nodejs
+
+The canvas node package is not properly packaged for Mac OS X with ARM architectures (M1 and M2).
+To build JupyterLab on such platforms, you need a few additional packages, and to specify the pkg-config
+path:
+
+.. code:: bash
+
+   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib
+   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
 
 If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
 
