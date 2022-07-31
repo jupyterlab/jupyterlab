@@ -233,14 +233,6 @@ To check which version of Node.js is installed:
 Installing JupyterLab
 ---------------------
 
-If you use ``conda``, you may also want to install ``nb_conda_kernels`` to have a kernel
-option for different `conda
-environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`__
-
-.. code:: bash
-
-   conda install -c conda-forge nb_conda_kernels
-
 Fork the JupyterLab
 `repository <https://github.com/jupyterlab/jupyterlab>`__.
 
