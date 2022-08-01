@@ -15,8 +15,10 @@ test('should load the example', async ({ page }) => {
 
   const handleMessage = async (msg: ConsoleMessage) => {
     const text = msg.text();
+    const url = msg.location().url;
     console.log(msg.type(), '>>', text);
-    if (msg.type() === 'error') {
+    // Skip the missing lsp handler error
+    if (msg.type() === 'error' && !url.includes('lsp/status')) {
       errorLogs += 1;
     }
 
@@ -39,5 +41,5 @@ test('should load the example', async ({ page }) => {
 
   await waitForTestEnd;
 
-  expect(errorLogs).toEqual(0);
+  expect(errorLogs).toEqual(0); // Missing lsp handlers
 });

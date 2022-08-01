@@ -48,6 +48,7 @@ const packages = [
   'launcher',
   'logconsole-extension',
   'logconsole',
+  'lsp-extension',
   'mainmenu-extension',
   'mainmenu',
   'markdownviewer-extension',

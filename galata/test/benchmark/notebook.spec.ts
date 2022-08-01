@@ -137,7 +137,7 @@ test.describe('Benchmark', () => {
       // Shutdown the kernel to be sure it does not get in our way (especially for the close action)
       await page.click('li[role="menuitem"]:has-text("Kernel")');
       await page.click('ul[role="menu"] >> text=Shut Down All Kernels…');
-      await page.click(':nth-match(button:has-text("Shut Down All"), 3)');
+      await page.click('button:has-text("Shut Down All") >> nth=-1'); // Click on the last matched button.
 
       // Open text file
       const fromTime = await perf.measure(async () => {
