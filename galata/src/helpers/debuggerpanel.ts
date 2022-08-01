@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { ElementHandle, Page } from '@playwright/test';
 import { SidebarHelper } from './sidebar';
 import { NotebookHelper } from './notebook';
