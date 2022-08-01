@@ -13,7 +13,7 @@ export interface IDocumentInfo {
   uri: string;
 
   /**
-   * Version virtual document.
+   * Version of the virtual document.
    */
   version: number;
 
@@ -27,15 +27,6 @@ export interface IDocumentInfo {
    */
   languageId: string;
 }
-
-export type AnyLocation =
-  | lsp.Location
-  | lsp.Location[]
-  | lsp.LocationLink[]
-  | undefined
-  | null;
-
-export type AnyCompletion = lsp.CompletionList | lsp.CompletionItem[];
 
 export interface ILspConnection {
   /**

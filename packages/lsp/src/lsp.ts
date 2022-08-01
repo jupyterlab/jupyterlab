@@ -142,3 +142,19 @@ export type RecommendedLanguageIdentifier = keyof typeof Languages;
  * the identifiers as recommended by the LSP documentation.
  */
 export type LanguageIdentifier = RecommendedLanguageIdentifier | string;
+
+/**
+ * Type represents a location inside a resource, such as a line
+ * inside a text file.
+ */
+export type AnyLocation =
+  | lsp.Location
+  | lsp.Location[]
+  | lsp.LocationLink[]
+  | undefined
+  | null;
+
+/**
+ * Type represents the completion result.
+ */
+export type AnyCompletion = lsp.CompletionList | lsp.CompletionItem[];

@@ -9,13 +9,16 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { WidgetLSPAdapter } from './adapters/adapter';
 import { IForeignCodeExtractor } from './extractors/types';
-import { ClientCapabilities, LanguageIdentifier } from './lsp';
+import {
+  AnyCompletion,
+  AnyLocation,
+  ClientCapabilities,
+  LanguageIdentifier
+} from './lsp';
 import { LanguageServer1 as LSPLanguageServerSettings } from './plugin';
 import * as SCHEMA from './schema';
 import { VirtualDocument } from './virtual/document';
 import {
-  AnyCompletion,
-  AnyLocation,
   IDocumentInfo,
   ILspConnection,
   ILspOptions
@@ -24,6 +27,12 @@ import {
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
 export { IDocumentInfo };
+
+/**
+ * Example server keys==ids that are expected. The list is not exhaustive.
+ * Custom server keys are allowed. Constraining the values helps avoid errors,
+ * but at runtime any value is allowed.
+ */
 export type TLanguageServerId =
   | 'pylsp'
   | 'bash-language-server'
@@ -36,14 +45,34 @@ export type TLanguageServerId =
   | 'yaml-language-server'
   | 'r-languageserver';
 
+/**
+ * Type alias for the server ids.
+ */
 export type TServerKeys = TLanguageServerId;
+
+/**
+ * Type of language server configuration, it is a map between server
+ * id and its setting.
+ */
 export type TLanguageServerConfigurations = Partial<
   Record<TServerKeys, LSPLanguageServerSettings>
 >;
 
+/**
+ * Type of language server session, it is a map between server
+ * id and the associated session.
+ */
 export type TSessionMap = Map<TServerKeys, SCHEMA.LanguageServerSession>;
+
+/**
+ * Type of language server specs, it is a map between server
+ * id and the associated specs.
+ */
 export type TSpecsMap = Map<TServerKeys, SCHEMA.LanguageServerSpec>;
 
+/**
+ * Type alias for language server id, it helps to clarify other types.
+ */
 export type TLanguageId = string;
 
 export interface ILanguageServerManager extends IDisposable {
@@ -116,30 +145,62 @@ export interface ILanguageServerManager extends IDisposable {
 }
 
 export namespace ILanguageServerManager {
+  /**
+   * LSP endpoint prefix.
+   */
   export const URL_NS = 'lsp';
+
   export interface IOptions {
+    /**
+     * The Jupyter server settings objec
+     */
     settings?: ServerConnection.ISettings;
+
+    /**
+     * Base URL of current JupyterLab server.
+     */
     baseUrl?: string;
+
     /**
      * Number of connection retries to fetch the sessions.
      * Default 2.
      */
     retries?: number;
+
     /**
      * The interval for retries, default 10 seconds.
      */
     retriesInterval?: number;
   }
+  /**
+   * The argument for getting server session or specs.
+   */
   export interface IGetServerIdOptions {
+    /**
+     * Language server id
+     */
     language?: TLanguageId;
+
+    /**
+     * Server specs mime type.
+     */
     mimeType?: string;
   }
 }
 
+/**
+ * Option to create the websocket connection to the LSP proxy server
+ * on the backend.
+ */
 export interface ISocketConnectionOptions {
+  /**
+   * The virtual document trying to connect to the LSP server.
+   */
   virtualDocument: VirtualDocument;
+
   /**
-   * The language identifier, corresponding to the API endpoint on the LSP proxy server.
+   * The language identifier, corresponding to the API endpoint on the
+   * LSP proxy server.
    */
   language: string;
 
@@ -148,30 +209,33 @@ export interface ISocketConnectionOptions {
    */
   capabilities: ClientCapabilities;
 
-  hasLspSupportedFile: boolean;
-}
-export interface IDocumentRegistationOptions {
   /**
-   * The language identifier, corresponding to the API endpoint on the LSP proxy server.
+   * Is the file format is supported by LSP?
    */
-  language: string;
-  /**
-   * Path to the document in the JupyterLab space
-   */
-  document: string;
-  /**
-   * LSP capabilities describing currently supported features
-   */
-  capabilities: ClientCapabilities;
-
   hasLspSupportedFile: boolean;
 }
 
+/**
+ * @alpha
+ *
+ * Interface describing the LSP connection state
+ */
 export interface IDocumentConnectionData {
+  /**
+   * The virtual document connected to the language server
+   */
   virtualDocument: VirtualDocument;
+  /**
+   * The connection between the virtual document and the language server.
+   */
   connection: ILSPConnection;
 }
 
+/**
+ * @alpha
+ *
+ * The LSP connection state manager
+ */
 export interface ILSPDocumentConnectionManager {
   /**
    * The mapping of document uri to the  connection to language server.
@@ -290,6 +354,11 @@ export interface ILSPDocumentConnectionManager {
   ): void;
 }
 
+/**
+ * @alpha
+ *
+ * Interface describing the client feature
+ */
 export interface IFeature {
   /**
    * The feature identifier. It must be the same as the feature plugin id.
@@ -302,6 +371,11 @@ export interface IFeature {
   capabilities?: ClientCapabilities;
 }
 
+/**
+ * @alpha
+ *
+ * The LSP feature manager
+ */
 export interface ILSPFeatureManager {
   /**
    * A read-only registry of all registered features.
@@ -314,12 +388,20 @@ export interface ILSPFeatureManager {
    */
   register(feature: IFeature): void;
 
+  /**
+   * Signal emitted when a feature is registered
+   */
   featuresRegistered: ISignal<ILSPFeatureManager, IFeature>;
 
+  /**
+   * Get capabilities of all registered features
+   */
   clientCapabilities(): ClientCapabilities;
 }
 
 /**
+ * @alpha
+ *
  * Manages code transclusion plugins.
  */
 export interface ILSPCodeExtractorsManager {
@@ -376,8 +458,18 @@ export const ILSPCodeExtractorsManager = new Token<ILSPCodeExtractorsManager>(
   '@jupyterlab/lsp:ILSPCodeExtractorsManager'
 );
 
+/**
+ * Argument for creating a connection to the LSP proxy server.
+ */
 export interface ILSPOptions extends ILspOptions {
+  /**
+   * Client capabilities implemented by the client.
+   */
   capabilities: ClientCapabilities;
+
+  /**
+   * Language server id.
+   */
   serverIdentifier?: string;
 }
 
@@ -429,6 +521,9 @@ export namespace Method {
   }
 }
 
+/**
+ * Interface describing the notifications that come from the server.
+ */
 export interface IServerNotifyParams {
   [Method.ServerNotification.LOG_MESSAGE]: lsp.LogMessageParams;
   [Method.ServerNotification.LOG_TRACE]: rpc.LogTraceParams;
@@ -436,6 +531,9 @@ export interface IServerNotifyParams {
   [Method.ServerNotification.SHOW_MESSAGE]: lsp.ShowMessageParams;
 }
 
+/**
+ * Interface describing the notifications that come from the client.
+ */
 export interface IClientNotifyParams {
   [Method.ClientNotification
     .DID_CHANGE_CONFIGURATION]: lsp.DidChangeConfigurationParams;
@@ -446,6 +544,9 @@ export interface IClientNotifyParams {
   [Method.ClientNotification.SET_TRACE]: rpc.SetTraceParams;
 }
 
+/**
+ * Interface describing the requests sent to the server.
+ */
 export interface IServerRequestParams {
   [Method.ServerRequest.REGISTER_CAPABILITY]: lsp.RegistrationParams;
   [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.ShowMessageRequestParams;
@@ -453,6 +554,9 @@ export interface IServerRequestParams {
   [Method.ServerRequest.WORKSPACE_CONFIGURATION]: lsp.ConfigurationParams;
 }
 
+/**
+ * Interface describing the responses received from the server.
+ */
 export interface IServerResult {
   [Method.ServerRequest.REGISTER_CAPABILITY]: void;
   [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.MessageActionItem | null;
@@ -460,6 +564,9 @@ export interface IServerResult {
   [Method.ServerRequest.WORKSPACE_CONFIGURATION]: any[];
 }
 
+/**
+ * Interface describing the request sent to the client.
+ */
 export interface IClientRequestParams {
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: lsp.CompletionParams;
@@ -475,6 +582,9 @@ export interface IClientRequestParams {
   [Method.ClientRequest.TYPE_DEFINITION]: lsp.TextDocumentPositionParams;
 }
 
+/**
+ * Interface describing the responses received from the client.
+ */
 export interface IClientResult {
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: AnyCompletion;
@@ -490,6 +600,10 @@ export interface IClientResult {
   [Method.ClientRequest.TYPE_DEFINITION]: AnyLocation;
 }
 
+/**
+ * Type of server notification handlers, it is a map between the server
+ * notification name and the associated `ISignal`.
+ */
 export type ServerNotifications<
   T extends keyof IServerNotifyParams = keyof IServerNotifyParams
 > = {
@@ -497,6 +611,10 @@ export type ServerNotifications<
   [key in T]: ISignal<ILSPConnection, IServerNotifyParams[key]>;
 };
 
+/**
+ * Type of client notification handlers, it is a map between the client
+ * notification name and the associated signal.
+ */
 export type ClientNotifications<
   T extends keyof IClientNotifyParams = keyof IClientNotifyParams
 > = {
@@ -504,12 +622,18 @@ export type ClientNotifications<
   [key in T]: Signal<ILSPConnection, IClientNotifyParams[key]>;
 };
 
+/**
+ * Interface describing the client request handler.
+ */
 export interface IClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > {
   request(params: IClientRequestParams[T]): Promise<IClientResult[T]>;
 }
 
+/**
+ * Interface describing the server request handler.
+ */
 export interface IServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > {
@@ -522,6 +646,10 @@ export interface IServerRequestHandler<
   clearHandler(): void;
 }
 
+/**
+ * Type of client request handlers, it is a map between the client
+ * request name and the associated handler.
+ */
 export type ClientRequests<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > = {
@@ -529,6 +657,10 @@ export type ClientRequests<
   [key in T]: IClientRequestHandler<key>;
 };
 
+/**
+ * Type of server request handlers, it is a map between the server
+ * request name and the associated handler.
+ */
 export type ServerRequests<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > = {
@@ -536,6 +668,11 @@ export type ServerRequests<
   [key in T]: IServerRequestHandler<key>;
 };
 
+/**
+ * @alpha
+ *
+ * Interface describing he connection to the language server.
+ */
 export interface ILSPConnection extends ILspConnection, IDisposable {
   /**
    * @alpha
@@ -561,28 +698,28 @@ export interface ILSPConnection extends ILspConnection, IDisposable {
   /**
    * @alpha
    *
-   * Notifications comes from the client.
+   * Notifications that come from the client.
    */
   clientNotifications: ClientNotifications;
 
   /**
    * @alpha
    *
-   * Notifications comes from the server.
+   * Notifications that come from the server.
    */
   serverNotifications: ServerNotifications;
 
   /**
    * @alpha
    *
-   * Requests comes from the client.
+   * Requests that come from the client.
    */
   clientRequests: ClientRequests;
 
   /**
    * @alpha
    *
-   * Responses comes from the server.
+   * Responses that come from the server.
    */
   serverRequests: ServerRequests;
 
