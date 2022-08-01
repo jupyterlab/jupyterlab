@@ -3,24 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ISignal, Signal } from '@lumino/signaling';
-import { SplitPanel as SPanel } from '@lumino/widgets';
+import { SplitPanel } from '@lumino/widgets';
 
 /**
- * A deprecated split panel that will be removed when the phosphor split panel
- * supports a handle moved signal. See https://github.com/phosphorjs/phosphor/issues/297.
+ * @deprecated alias for `SplitPanel` from `@lumino/widgets`, will be removed in JupyterLab 4.0.
+ * Please use `import { SplitPanel } from '@lumino/widgets';` instead.
  */
-export class SplitPanel extends SPanel {
-  /**
-   * Emits when the split handle has moved.
-   */
-  readonly handleMoved: ISignal<any, void> = new Signal<any, void>(this);
-
-  handleEvent(event: Event): void {
-    super.handleEvent(event);
-
-    if (event.type === 'mouseup') {
-      (this.handleMoved as Signal<any, void>).emit(undefined);
-    }
-  }
-}
+export { SplitPanel };
