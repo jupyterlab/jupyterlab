@@ -29,6 +29,7 @@ header:
     - 'binder/start'
     - 'coverage'
     - 'examples/federated/example.cert'
+    - 'galata/test/jupyterlab/notebooks/'
     - 'jupyterlab/staging'
     - 'packages/extensionmanager-extension/examples/listings/settings/@jupyterlab/extensionmanager-extension/plugin.jupyterlab-settings'
     - 'typedoc-theme'
