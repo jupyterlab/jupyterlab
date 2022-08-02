@@ -321,7 +321,7 @@ Additionally, you might want to execute the following optional commands:
    jlpm run build:core
 
    # Build the app dir assets (optional)
-   jupyter lab build  
+   jupyter lab build
 
 Notes:
 
