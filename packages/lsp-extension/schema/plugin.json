@@ -2,7 +2,7 @@
   "jupyter.lab.setting-icon": "ui-components:code-check",
   "jupyter.lab.setting-icon-label": "Language integration",
   "jupyter.lab.transform": true,
-  "title": "Language Servers",
+  "title": "Language Servers (Experimental)",
   "description": "Language Server Protocol settings.",
   "type": "object",
   "definitions": {
@@ -36,6 +36,12 @@
     }
   },
   "properties": {
+    "activate": {
+      "title": "Activate",
+      "description": "Enable or disable the language server services.",
+      "enum": ["off", "on"],
+      "default": "off"
+    },
     "languageServers": {
       "title": "Language Server",
       "description": "Language-server specific configuration, keyed by implementation",

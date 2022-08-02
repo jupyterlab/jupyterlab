@@ -115,6 +115,27 @@ export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
    *
+   * Check if the manager is enabled or disabled
+   */
+  readonly isEnabled: boolean;
+
+  /**
+   * @alpha
+   *
+   * Enable the language server services
+   */
+  enable(): void;
+
+  /**
+   * @alpha
+   *
+   * Disable the language server services
+   */
+  disable(): void;
+
+  /**
+   * @alpha
+   *
    * An ordered list of matching >running< sessions, with servers of higher rank higher in the list
    */
   getMatchingServers(

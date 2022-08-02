@@ -18,7 +18,7 @@ import {
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
   LanguageServerManager,
-  LanguageServers,
+  LanguageServersExperimental,
   TextForeignCodeExtractor,
   TLanguageServerConfigurations,
   TLanguageServerId
@@ -96,10 +96,15 @@ function activate(
   });
 
   const updateOptions = (settings: ISettingRegistry.ISettings) => {
-    const options = settings.composite as Required<LanguageServers>;
+    const options = settings.composite as Required<LanguageServersExperimental>;
     const languageServerSettings = (options.languageServers ||
       {}) as TLanguageServerConfigurations;
-
+    if (options.activate === 'on' && !languageServerManager.isEnabled) {
+      languageServerManager.enable();
+    } else if (options.activate === 'off' && languageServerManager.isEnabled) {
+      languageServerManager.disable();
+      return;
+    }
     connectionManager.initialConfigurations = languageServerSettings;
     // TODO: if priorities changed reset connections
     connectionManager.updateConfiguration(languageServerSettings);
@@ -162,10 +167,12 @@ function activate(
       settings.changed.connect(() => {
         updateOptions(settings);
       });
+      languageServerManager.disable();
     })
     .catch((reason: Error) => {
       console.error(reason.message);
     });
+
   // Add a sessions manager if the running extension is available
   if (runningSessionManagers) {
     addRunningSessionManager(

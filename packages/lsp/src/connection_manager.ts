@@ -409,6 +409,7 @@ export class DocumentConnectionManager
     if (connection) {
       this.connections.delete(virtualDocument.uri);
       const allConnection = new Set(this.connections.values());
+
       if (!allConnection.has(connection)) {
         this.disconnect(connection.serverIdentifier as TLanguageServerId);
         connection.dispose();
