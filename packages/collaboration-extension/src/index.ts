@@ -22,7 +22,6 @@ import {
   ICurrentUser,
   IGlobalAwareness,
   IUserMenu,
-  IUserPanel,
   RendererUserMenu,
   User,
   UserInfoPanel,
@@ -155,7 +154,6 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/collaboration-extension:rtcPanel',
   autoStart: true,
   requires: [ICurrentUser, IGlobalAwareness],
-  provides: IUserPanel,
   activate: (
     app: JupyterFrontEnd,
     currentUser: User,
