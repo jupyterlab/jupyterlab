@@ -4,9 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": [
-    "src/*"
-  ],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../application"
@@ -27,10 +25,10 @@
       "path": "../statedb"
     },
     {
-      "path": "../ui-components"
+      "path": "../translation"
     },
     {
-      "path": "../translation"
+      "path": "../ui-components"
     }
   ]
 }
