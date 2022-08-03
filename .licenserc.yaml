@@ -28,6 +28,7 @@ header:
     - 'binder/postBuild'
     - 'binder/start'
     - 'coverage'
+    - 'dev_mode/style.js'
     - 'examples/federated/example.cert'
     - 'galata/test/jupyterlab/notebooks/'
     - 'jupyterlab/staging'
