@@ -15,8 +15,6 @@ export class UserInfoPanel extends Panel {
 
   constructor(user: ICurrentUser) {
     super({});
-    this.title.label = 'User info';
-    this.title.caption = 'User information';
     this.addClass('jp-UserInfoPanel');
 
     this._profile = user;

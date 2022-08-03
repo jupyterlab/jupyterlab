@@ -32,6 +32,7 @@ import { Menu, MenuBar } from '@lumino/widgets';
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * Jupyter plugin providing the ICurrentUser.
@@ -153,15 +154,18 @@ const rtcGlobalAwarenessPlugin: JupyterFrontEndPlugin<IAwareness> = {
 const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/collaboration-extension:rtcPanel',
   autoStart: true,
-  requires: [ICurrentUser, IGlobalAwareness],
+  requires: [ICurrentUser, IGlobalAwareness, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     currentUser: User,
-    awareness: Awareness
+    awareness: Awareness,
+    translator: ITranslator
   ): void => {
     if (PageConfig.getOption('collaborative') !== 'true') {
       return;
     }
+
+    const trans = translator.load('jupyterlab');
 
     const userPanel = new SidePanel();
     userPanel.id = DOMUtils.createDomID();
@@ -170,6 +174,8 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
     app.shell.add(userPanel, 'left', { rank: 300 });
 
     const currentUserPanel = new UserInfoPanel(currentUser);
+    currentUserPanel.title.label = trans.__('User info');
+    currentUserPanel.title.caption = trans.__('User information');
     userPanel.addWidget(currentUserPanel);
 
     const fileopener = (path: string) => {
@@ -181,6 +187,7 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
       awareness,
       fileopener
     );
+    collaboratorsPanel.title.label = trans.__('Online Collaborators');
     userPanel.addWidget(collaboratorsPanel);
   }
 };
