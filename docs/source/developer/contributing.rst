@@ -254,8 +254,16 @@ Then use the following steps:
    pip install -e .
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
-   jlpm run build:core  # Build the core mode assets (optional)
-   jupyter lab build  # Build the app dir assets (optional)
+
+Additionally, you might want to execute the following optional commands:
+
+.. code:: bash
+
+   # Build the core mode assets (optional)
+   jlpm run build:core
+
+   # Build the app dir assets (optional)
+   jupyter lab build
 
 Notes:
 
