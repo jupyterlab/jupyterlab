@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
+import {
+  defaultHighlightStyle,
+  HighlightStyle,
+  syntaxHighlighting
+} from '@codemirror/language';
 import { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
@@ -75,27 +79,65 @@ export const jupyterHighlightStyle = HighlightStyle.define([
   { tag: [t.separator, t.derefOperator, t.paren], color: '' }
 ]);
 
+/**
+ * JupyterLab CodeMirror 6 theme
+ */
 export const jupyterTheme: Extension = [
   jupyterEditorTheme,
   syntaxHighlighting(jupyterHighlightStyle)
 ];
 
+/**
+ * A namespace to handle CodeMirror 6 theme
+ *
+ * @alpha
+ */
 export namespace Theme {
-  const themeMap: Map<string, Extension> = new Map([['jupyter', jupyterTheme]]);
+  /**
+   * CodeMirror 6 themes
+   */
+  const themeMap: Map<string, Extension> = new Map([
+    [
+      'codemirror',
+      [EditorView.baseTheme({}), syntaxHighlighting(defaultHighlightStyle)]
+    ],
+    ['jupyter', jupyterTheme]
+  ]);
 
+  /**
+   * Get the default CodeMirror 6 theme for JupyterLab
+   *
+   * @alpha
+   * @returns Default theme
+   */
   export function defaultTheme(): Extension {
     return themeMap.get('jupyter')!;
   }
 
+  /**
+   * Register a new theme.
+   *
+   * @alpha
+   * @param name Theme name
+   * @param theme Codemirror 6 theme extension
+   */
   export function registerTheme(name: string, theme: Extension) {
     themeMap.set(name, theme);
   }
 
-  export function getTheme(value: string): Extension {
-    let ext = themeMap.get(value);
-    if (!ext) {
-      ext = this.defaultTheme();
-    }
-    return ext!;
+  /**
+   * Get a theme.
+   *
+   * #### Notes
+   * It falls back to the default theme
+   *
+   * @alpha
+   * @param name Theme name
+   * @returns Theme extension
+   */
+  export function getTheme(name: string): Extension {
+    let ext = themeMap.get(name);
+
+    return ext ?? this.defaultTheme();
   }
 }

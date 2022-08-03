@@ -318,10 +318,7 @@ function activateEditorCommands(
    * Create a menu for the editor.
    */
   commands.addCommand(CommandIDs.changeTheme, {
-    label: args =>
-      args.theme === 'default'
-        ? trans.__('codemirror')
-        : trans.__((args.theme as string) ?? theme),
+    label: args => (args.theme as string) ?? theme,
     execute: args => {
       const key = 'theme';
       const value = (theme = (args['theme'] as string) ?? theme);
