@@ -60,6 +60,12 @@ jupyter-labhub = "jupyterlab.labhubapp:main"
 
 [project.urls]
 Homepage = "https://jupyter.org"
+Changelog = "https://jupyterlab.readthedocs.io/en/stable/getting_started/changelog.html"
+Documentation = "https://jupyterlab.readthedocs.io"
+Source = "https://github.com/jupyterlab/jupyterlab"
+Issues = "https://github.com/jupyterlab/jupyterlab/issues/new/choose"
+Gitter = "https://gitter.im/jupyterlab/jupyterlab"
+Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
 docs = [
