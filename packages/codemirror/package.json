@@ -29,10 +29,9 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:test": "tsc --build tsconfig.test.json",
+    "build:test": "lezer-generator test/foo.grammar -o test/foo.js && tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "pretest": "cd test && lezer-generator foo.grammar -o foo.js",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
