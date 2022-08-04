@@ -10,7 +10,8 @@ import fs from 'fs-extra';
 import childProcess from 'child_process';
 import { DepGraph } from 'dependency-graph';
 import sortPackageJson from 'sort-package-json';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
+
+const assert = require('assert');
 
 type Dict<T> = { [key: string]: T };
 
@@ -76,7 +77,7 @@ export function getCorePaths(): string[] {
  */
 export function writePackageData(
   pkgJsonPath: string,
-  data: JSONObject
+  data: Record<any, any>
 ): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
@@ -101,7 +102,10 @@ export function readJSONFile(filePath: string): any {
 /**
  * Write a json file.
  */
-export function writeJSONFile(filePath: string, data: JSONObject): boolean {
+export function writeJSONFile(
+  filePath: string,
+  data: Record<any, any>
+): boolean {
   function sortObjByKey(value: any): any {
     // https://stackoverflow.com/a/35810961
     return typeof value === 'object'
@@ -123,11 +127,15 @@ export function writeJSONFile(filePath: string, data: JSONObject): boolean {
   } catch (e) {
     // no-op
   }
-  if (!JSONExt.deepEqual(data, orig)) {
+
+  // If values do not match, overwrite file.
+  try {
+    assert.deepStrictEqual(data, orig);
+    return false;
+  } catch (error) {
     fs.writeFileSync(filePath, text, 'utf8');
     return true;
   }
-  return false;
 }
 
 /**
