@@ -1115,8 +1115,6 @@ export namespace CodeMirrorEditor {
     styleActiveLine: false,
     styleSelectedText: true,
     selectionPointer: false,
-    rulers: [],
-    foldGutter: false,
     handlePaste: true
   };
 
@@ -1166,8 +1164,8 @@ namespace Private {
     const doc = ybinding?.text.toString();
     const view = new EditorView({
       state: EditorState.create({
-        doc: doc,
-        extensions: extensions
+        doc,
+        extensions
       }),
       parent: host
     });

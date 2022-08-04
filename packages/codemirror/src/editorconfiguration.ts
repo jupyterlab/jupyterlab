@@ -102,11 +102,6 @@ export namespace Configuration {
     fixedGutter?: boolean;
 
     /**
-     * Whether the folding gutter should be drawn
-     */
-    foldGutter?: boolean;
-
-    /**
      * Whether the cursor should be drawn when a selection is active.
      */
     showCursorWhenSelecting?: boolean;
@@ -374,6 +369,7 @@ export namespace Configuration {
    */
   export class EditorConfiguration {
     constructor() {
+      // Order does not matter
       this._configurableBuilderMap = new Map<string, IConfigurableBuilder>([
         ['tabSize', createConfigurableBuilder(EditorState.tabSize)],
         ['readOnly', createConfigurableBuilder(EditorState.readOnly)],
@@ -382,7 +378,7 @@ export namespace Configuration {
         ['smartIndent', createConditionalBuilder(indentOnInput())],
         ['autoClosingBrackets', createConditionalBuilder(closeBrackets())],
         ['matchBrackets', createConditionalBuilder(bracketMatching())],
-        ['foldGutter', createConditionalBuilder(foldGutter())],
+        ['codeFolding', createConditionalBuilder(foldGutter())],
         ['styleActiveLine', createConditionalBuilder(highlightActiveLine())],
         ['lineNumbers', createConditionalBuilder(lineNumbers())],
         [
