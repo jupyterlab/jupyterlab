@@ -32,6 +32,7 @@ header:
     - 'examples/federated/example.cert'
     - 'galata/test/jupyterlab/notebooks/'
     - 'jupyterlab/staging'
+    - 'packages/codemirror/test/foo.grammar'
     - 'packages/extensionmanager-extension/examples/listings/settings/@jupyterlab/extensionmanager-extension/plugin.jupyterlab-settings'
     - 'typedoc-theme'
     - 'LICENSE'
