@@ -26,13 +26,41 @@ export const jupyterEditorTheme = EditorView.theme({
     background: 'transparent'
   },
 
-  'cm-cursor': {
+  '.cm-content': {
+    caretColor: 'var(--jp-editor-cursor-color)'
+  },
+
+  '.cm-cursor, .cm-dropCursor': {
     borderLeft:
       'var(--jp-code-cursor-width0) solid var(--jp-editor-cursor-color)'
   },
 
-  'cm-gutter, cm-activeLine': {
+  '.cm-selectionBackground, .cm-content ::selection': {
+    backgroundColor: 'var(--jp-editor-selected-background)'
+  },
+
+  '&.cm-focused .cm-selectionBackground': {
+    backgroundColor: 'var(--jp-editor-selected-focused-background)'
+  },
+
+  '.cm-gutters': {
+    borderRight: '1px solid var(--jp-border-color2)',
     backgroundColor: 'var(--jp-layout-color2)'
+  },
+
+  '.cm-gutter, .cm-activeLine': {
+    backgroundColor: 'var(--jp-layout-color2)'
+  },
+
+  '.cm-searchMatch, .cm-searching, .cm-searching span': {
+    backgroundColor: 'var(--jp-search-unselected-match-background-color)',
+    color: 'var(--jp-search-unselected-match-color)'
+  },
+
+  '.cm-searching span::selection, .cm-searchMatch.cm-searchMatch-selected': {
+    backgroundColor:
+      'var(--jp-search-selected-match-background-color) !important',
+    color: 'var(--jp-search-selected-match-color) !important'
   }
 });
 
@@ -76,7 +104,10 @@ export const jupyterHighlightStyle = HighlightStyle.define([
   { tag: t.heading, color: 'var(--jp-mirror-editor-header-color)' },
   { tag: t.quote, color: 'var(--jp-mirror-editor-quote-color)' },
   { tag: t.link, color: 'var(--jp-mirror-editor-link-color)' },
-  { tag: [t.separator, t.derefOperator, t.paren], color: '' }
+  { tag: [t.separator, t.derefOperator, t.paren], color: '' },
+  { tag: t.strong, fontWeight: 'bold' },
+  { tag: t.emphasis, fontStyle: 'italic' },
+  { tag: t.strikethrough, textDecoration: 'line-through' }
 ]);
 
 /**

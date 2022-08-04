@@ -23,23 +23,8 @@
   color: var(--jp-content-font-color1);
 }
 
-/* This causes https://github.com/jupyter/jupyterlab/issues/522 */
-
-/* May not cause it not because we changed it! */
-.cm-line {
-  padding: var(--jp-code-padding) 0;
-}
-
-.cm-lineNumbers {
-  padding: 0 5px 0 0;
-}
-
 .jp-CodeMirrorEditor {
   cursor: text;
-}
-
-.jp-CodeMirrorEditor[data-type='inline'] .cm-cursor {
-  border-left: var(--jp-code-cursor-width0) solid var(--jp-editor-cursor-color);
 }
 
 /* When zoomed out 67% and 33% on a screen of 1440 width x 900 height */
@@ -72,34 +57,10 @@
   margin-right: -5px;
 }
 
-.cm-gutters {
-  border-right: 1px solid var(--jp-border-color2);
-  background-color: var(--jp-layout-color2) !important;
-}
-
-.cm-searching,
-.cm-searching span {
-  background-color: var(--jp-search-unselected-match-background-color);
-  color: var(--jp-search-unselected-match-color);
-}
-
-.cm-searching span::selection {
-  background-color: var(--jp-search-selected-match-background-color) !important;
-  color: var(--jp-search-selected-match-color) !important;
-}
-
 .cm-trailingspace {
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAsElEQVQIHQGlAFr/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA7+r3zKmT0/+pk9P/7+r3zAAAAAAAAAAABAAAAAAAAAAA6OPzM+/q9wAAAAAA6OPzMwAAAAAAAAAAAgAAAAAAAAAAGR8NiRQaCgAZIA0AGR8NiQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQyoYJ/SY80UAAAAASUVORK5CYII=);
   background-position: center left;
   background-repeat: repeat-x;
-}
-
-.cm-focused .cm-selected {
-  background-color: var(--jp-editor-selected-focused-background);
-}
-
-.cm-selected {
-  background-color: var(--jp-editor-selected-background);
 }
 
 .jp-CollaboratorCursor-hover {
