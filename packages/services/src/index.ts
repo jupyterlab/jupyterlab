@@ -14,6 +14,7 @@ export * from './serverconnection';
 export * from './session';
 export * from './setting';
 export * from './terminal';
+export * from './user';
 export * from './workspace';
 export * from './nbconvert';
 

@@ -25,6 +25,8 @@ import { Setting, SettingManager } from './setting';
 
 import { Terminal, TerminalManager } from './terminal';
 
+import { User, UserManager } from './user';
+
 import { Workspace, WorkspaceManager } from './workspace';
 
 /**
@@ -56,6 +58,7 @@ export class ServiceManager implements ServiceManager.IManager {
     this.workspaces = options.workspaces || new WorkspaceManager(normalized);
     this.nbconvert = options.nbconvert || new NbConvertManager(normalized);
     this.kernelspecs = options.kernelspecs || new KernelSpecManager(normalized);
+    this.user = options.user || new UserManager(normalized);
 
     // Relay connection failures from the service managers that poll
     // the server for current information.
@@ -136,6 +139,11 @@ export class ServiceManager implements ServiceManager.IManager {
    * Get the terminal manager instance.
    */
   readonly terminals: Terminal.IManager;
+
+  /**
+   * Get the user manager instance.
+   */
+  readonly user: User.IManager;
 
   /**
    * Get the workspace manager instance.
@@ -260,6 +268,11 @@ export namespace ServiceManager {
      * The terminals manager for the manager.
      */
     readonly terminals: Terminal.IManager;
+
+    /**
+     * The user manager for the manager.
+     */
+    readonly user: User.IManager;
 
     /**
      * The workspace manager for the manager.
