@@ -8,7 +8,7 @@ Mode.registerModeInfo({
   mime: 'text/x-ipythongfm',
   load: () => {
     return import('@codemirror/lang-markdown').then(m =>
-      m.markdown({ codeLanguages: Mode.modeList as any })
+      m.markdown({ codeLanguages: Mode.getModeInfo() as any })
     );
   }
 });
