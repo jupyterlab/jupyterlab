@@ -354,6 +354,14 @@ class AppOptions(HasTraits):
 
     splice_source = Bool(False, help="Splice source packages into app directory.")
 
+    skip_full_build_check = Bool(
+        False,
+        help=(
+            "If true, perform only a quick check that the lab build is up to date."
+            " If false, perform a thorough check, which verifies extension contents."
+        ),
+    )
+
     @default("logger")
     def _default_logger(self):
         return logging.getLogger("jupyterlab")
@@ -611,6 +619,7 @@ class _AppHandler(object):
         self.labextensions_path = options.labextensions_path
         self.kill_event = options.kill_event
         self.registry = options.registry
+        self.skip_full_build_check = options.skip_full_build_check
 
         # Do this last since it relies on other attributes
         self.info = self._get_app_info()
@@ -803,11 +812,13 @@ class _AppHandler(object):
             logger.info("\nBuild recommended, please run `jupyter lab build`:")
             [logger.info("    %s" % item) for item in messages]
 
-    def build_check(self, fast=False):
+    def build_check(self, fast=None):
         """Determine whether JupyterLab should be built.
 
         Returns a list of messages.
         """
+        if fast is None:
+            fast = self.skip_full_build_check
         app_dir = self.app_dir
         local = self.info["local_extensions"]
         linked = self.info["linked_packages"]
