@@ -50,10 +50,10 @@ describe('Mode', () => {
         container
       );
       expect(container.innerHTML).toEqual(
-        `<span class="ͼ18">(</span><span class="ͼt">defun</span> <span class="ͼt">check-login</span> <span class="ͼ18">(</span><span class="ͼt">name</span> <span class="ͼt">password</span><span class="ͼ18">)</span> <span class="ͼy">; absolutely secure</span>
-      <span class="ͼ18">(</span><span class="ͼt">if</span> <span class="ͼ18">(</span><span class="ͼt">equal</span> <span class="ͼt">name</span> <span class="ͼz">"admin"</span><span class="ͼ18">)</span>
-        <span class="ͼ18">(</span><span class="ͼt">equal</span> <span class="ͼt">password</span> <span class="ͼz">"12345"</span><span class="ͼ18">)</span>
-        #t<span class="ͼ18">)</span><span class="ͼ18">)</span>`
+        `<span class="ͼ19">(</span><span class="ͼw">defun</span> <span class="ͼw">check-login</span> <span class="ͼ19">(</span><span class="ͼw">name</span> <span class="ͼw">password</span><span class="ͼ19">)</span> <span class="ͼ11">; absolutely secure</span>
+      <span class="ͼ19">(</span><span class="ͼw">if</span> <span class="ͼ19">(</span><span class="ͼw">equal</span> <span class="ͼw">name</span> <span class="ͼ12">"admin"</span><span class="ͼ19">)</span>
+        <span class="ͼ19">(</span><span class="ͼw">equal</span> <span class="ͼw">password</span> <span class="ͼ12">"12345"</span><span class="ͼ19">)</span>
+        #t<span class="ͼ19">)</span><span class="ͼ19">)</span>`
       );
     });
   });
