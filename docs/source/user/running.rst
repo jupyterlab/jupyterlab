@@ -12,7 +12,8 @@ directories:
    :class: jp-screenshot
    :alt:
 
-<!---Alt text is intentionally left blank because the image content is described directly prior.--->
+.. only:: comment
+   Alt text is intentionally left blank because the image content is described directly prior.
 
 .. _reopen-document:
 
