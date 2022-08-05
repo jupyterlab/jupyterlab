@@ -67,6 +67,14 @@ export const jupyterEditorTheme = EditorView.theme({
 // The list of available tags for syntax highlighting is available at
 // https://lezer.codemirror.net/docs/ref/#highlight.tags
 export const jupyterHighlightStyle = HighlightStyle.define([
+  // Order matters - a rule will override the previous ones; important for example for in headings styles.
+  { tag: t.meta, color: 'var(--jp-mirror-editor-meta-color)' },
+  { tag: t.heading, color: 'var(--jp-mirror-editor-header-color)' },
+  {
+    tag: [t.heading1, t.heading2, t.heading3, t.heading4],
+    color: 'var(--jp-mirror-editor-header-color)',
+    fontWeight: 'bold'
+  },
   {
     tag: t.keyword,
     color: 'var(--jp-mirror-editor-keyword-color)',
@@ -96,14 +104,19 @@ export const jupyterHighlightStyle = HighlightStyle.define([
     fontStyle: 'italic'
   },
   { tag: t.string, color: 'var(--jp-mirror-editor-string-color)' },
-  { tag: t.special(t.string), color: 'var(--jp-mirror-editor-string-2-color)' },
-  { tag: t.meta, color: 'var(--jp-mirror-editor-meta-color)' },
+  {
+    tag: [t.labelName, t.monospace, t.special(t.string)],
+    color: 'var(--jp-mirror-editor-string-2-color)'
+  },
   { tag: t.bracket, color: 'var(--jp-mirror-editor-bracket-color)' },
   { tag: t.tagName, color: 'var(--jp-mirror-editor-tag-color)' },
   { tag: t.attributeName, color: 'var(--jp-mirror-editor-attribute-color)' },
-  { tag: t.heading, color: 'var(--jp-mirror-editor-header-color)' },
   { tag: t.quote, color: 'var(--jp-mirror-editor-quote-color)' },
-  { tag: t.link, color: 'var(--jp-mirror-editor-link-color)' },
+  {
+    tag: t.link,
+    color: 'var(--jp-mirror-editor-link-color)',
+    textDecoration: 'underline'
+  },
   { tag: [t.separator, t.derefOperator, t.paren], color: '' },
   { tag: t.strong, fontWeight: 'bold' },
   { tag: t.emphasis, fontStyle: 'italic' },

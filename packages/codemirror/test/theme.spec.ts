@@ -1,5 +1,5 @@
 import { Theme } from '@jupyterlab/codemirror';
-import { nord } from './nordtheme';
+import { oneDark } from './onedarktheme';
 
 describe('Theme', () => {
   describe('#defaultTheme', () => {
@@ -10,17 +10,17 @@ describe('Theme', () => {
 
   describe('#registerTheme', () => {
     it('should add a new theme', () => {
-      Theme.registerTheme('nord', nord);
+      Theme.registerTheme('one dark', oneDark);
 
-      expect(Theme.getTheme('nord')).toBe(nord);
+      expect(Theme.getTheme('one dark')).toBe(oneDark);
     });
   });
 
   describe('#getTheme', () => {
     it('should return the given theme', () => {
-      Theme.registerTheme('nord', nord);
+      Theme.registerTheme('one dark', oneDark);
 
-      expect(Theme.getTheme('nord')).toBe(nord);
+      expect(Theme.getTheme('one dark')).toBe(oneDark);
     });
 
     it('should return the default theme if the name does not exist', () => {
