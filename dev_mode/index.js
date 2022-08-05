@@ -48,11 +48,6 @@ export async function main() {
        el.textContent = JSON.stringify(errors)
      };
      console.error = function(message) {
-       // Skip lsp status failure
-       if (message.location && message.location().url.includes('lsp/status')) {
-         console.log(message);
-         return;
-       }
        errors.push(String(message));
        el.textContent = JSON.stringify(errors)
      };
