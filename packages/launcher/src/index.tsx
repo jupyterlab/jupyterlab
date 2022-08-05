@@ -364,7 +364,9 @@ export namespace ILauncher {
  *
  * @param launcher - the Launcher instance to which this is added.
  *
- * @param launcherCallback - a callback to call after an item has been launched.
+ * @param commands - the command registry holding the command of item.
+ *
+ * @param trans - the translation bundle.
  *
  * @returns a vdom `VirtualElement` for the launcher card.
  */
@@ -404,6 +406,7 @@ function Card(
         }
       })
       .catch(err => {
+        console.error(err);
         launcher.pending = false;
         void showErrorMessage(trans._p('Error', 'Launcher Error'), err);
       });
