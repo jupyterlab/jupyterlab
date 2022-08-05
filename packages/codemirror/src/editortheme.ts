@@ -52,12 +52,12 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-layout-color2)'
   },
 
-  '.cm-searchMatch, .cm-searching, .cm-searching span': {
+  '.cm-searchMatch': {
     backgroundColor: 'var(--jp-search-unselected-match-background-color)',
     color: 'var(--jp-search-unselected-match-color)'
   },
 
-  '.cm-searching span::selection, .cm-searchMatch.cm-searchMatch-selected': {
+  '.cm-searchMatch.cm-searchMatch-selected': {
     backgroundColor:
       'var(--jp-search-selected-match-background-color) !important',
     color: 'var(--jp-search-selected-match-color) !important'
