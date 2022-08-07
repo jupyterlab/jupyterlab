@@ -21,7 +21,7 @@ cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 .. image:: ../images/interface-jupyterlab.png
    :align: center
    :class: jp-screenshot
-   :alt: A screenshot of the JupyterLab interface. The main work area is in the middle section of the interface. There is also a left sidebar and a top menu bar.
+   :alt: A screenshot of the default JupyterLab interface. The main work area is in the middle. There is also a left sidebar and a top menu bar.
 
 JupyterLab sessions always reside in a :ref:`workspace <url-workspaces-ui>`.
 Workspaces contain the state of JupyterLab: the files that are currently open,
@@ -72,7 +72,7 @@ The left sidebar contains a number of commonly-used tabs including:
 .. image:: ../images/interface-left.png
    :align: center
    :class: jp-screenshot
-   :alt: A screenshot of the primary JupyterLab sidebar showing a variety of files in the file browser.
+   :alt: The left JupyterLab sidebar showing a variety of files in the file browser.
 
 .. _right-sidebar:
 
@@ -84,7 +84,7 @@ The right sidebar contains:
 .. image:: ../images/interface-right.png
    :align: center
    :class: jp-screenshot
-   :alt: A screenshot of the secondary JupyterLab sidebar showing the property inspector.
+   :alt: The right JupyterLab sidebar showing the property inspector.
 
 The column that allows to switch between tabs is called Activity Bar in JupyterLab.
 
@@ -136,14 +136,14 @@ activities in the main work area:
 .. image:: ../images/interface-tabs.png
    :align: center
    :class: jp-screenshot
-   :alt: A screenshot of the tabs panel in JupyterLab that lists some sample documents.
+   :alt: The tabs panel in JupyterLab with a list of sample documents.
 
 The same information is also available in the Tabs menu:
 
 .. image:: ../images/interface-tabs-menu.png
    :align: center
    :class: jp-screenshot
-   :alt: A screenshot of the tabs menu in JupyterLab with a list of sample documents.
+   :alt: The tabs menu in JupyterLab with a list of sample documents.
 
 .. _tabs-singledocument:
 

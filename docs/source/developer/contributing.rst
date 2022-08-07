@@ -595,6 +595,7 @@ The Debugger Adapter Protocol
 The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
 
 .. image:: ./debugger_protocol_diagram.png
+   :alt: UML sequence diagram illustrating the interaction between a user, JupyterLab, and the kernel. From top to bottom, the timeline starts with opening the notebook and includes annotations where the debugger is started and stopped. Specific interactions and message types are discussed in the subsequent text.
 
 Inspecting Debug Messages in VS Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -604,6 +605,7 @@ Inspecting the debug messages in VS Code can be useful to understand when debug 
 The first step is to create a test file and a debug configuration (``launch.json``):
 
 .. image:: ./debugger_launch_configuration.png
+   :alt: An editor showing the menu for creating a debug configuration.
 
 .. code:: json
 
@@ -624,6 +626,7 @@ The first step is to create a test file and a debug configuration (``launch.json
 Then start the debugger:
 
 .. image:: ./debugger_vscode_start.png
+   :alt: A started debugging session in the editor. There are additional buttons in the upper right for navigating the session.
 
 The content of the log file looks like this:
 

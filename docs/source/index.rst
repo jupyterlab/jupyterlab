@@ -15,7 +15,11 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
 .. image:: ./images/jupyterlab.png
    :align: center
    :class: jp-screenshot shadow
+   :alt:
 
+.. only:: comment
+
+   Alt text is intentionally left blank because the image content is decorative.
 
 See the sections below (and the top-level links above) for more information about using, extending, and contributing to JupyterLab.
 
