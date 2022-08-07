@@ -23,6 +23,7 @@ Here is an animation showing the table of content use, with a notebook from the 
 
 
 .. image:: ./images/toc/toc.gif
+    :alt: A GIF displaying how to use the table of contents feature within a notebook. It toggles which cells types are listed and toggles expanding and collapsing headings.
 
 
 
@@ -46,6 +47,7 @@ and in User Preferences add ``numberingH1:false`` and save the settings. Here is
 
 
 .. image:: ./images/toc/numberingH1.gif
+    :alt: A GIF showing how to toggle Automatic section numbering for headings within a notebook. Clicking the button instantly applies multilevel numbering to each heading.
 
 
 

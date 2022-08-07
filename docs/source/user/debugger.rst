@@ -39,6 +39,7 @@ For Python, both ``ipykernel`` (6.0+) and ``xeus-python`` support debugging.
 Enable the debugger, set breakpoints and step into the code:
 
 .. image:: ./images/debugger/step.gif
+   :alt: A GIF showing how to enable the debugger within the kernel.
 
 Tutorial Notebook
 -----------------

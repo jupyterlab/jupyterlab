@@ -8,6 +8,7 @@ JupyterLab is a next-generation web-based user interface for Project Jupyter.
 .. image:: ../user/images/interface_jupyterlab.png
    :align: center
    :class: jp-screenshot
+   :alt: JupyterLab showing the file browser, notebook, and several other open files.
 
 JupyterLab enables you to work with documents and activities such as
 :ref:`Jupyter notebooks <notebook>`, text editors, terminals, and custom
