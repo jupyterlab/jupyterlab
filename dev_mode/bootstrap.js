@@ -1,7 +1,7 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 // We copy some of the pageconfig parsing logic in @jupyterlab/coreutils
 // below, since this must run before any other files are loaded (including

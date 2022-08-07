@@ -787,8 +787,8 @@ export namespace CodeEditor {
    * The default configuration options for an editor.
    */
   export const defaultConfig: IConfig = {
+    // Order matters as gutters will be sorted by the configuration order
     autoClosingBrackets: false,
-    codeFolding: false,
     cursorBlinkRate: 530,
     fontFamily: null,
     fontSize: null,
@@ -802,7 +802,8 @@ export namespace CodeEditor {
     tabSize: 4,
     rulers: [],
     showTrailingSpace: false,
-    wordWrapColumn: 80
+    wordWrapColumn: 80,
+    codeFolding: false
   };
 
   /**

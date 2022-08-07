@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 const fs = require('fs');
 
 const packages = [
@@ -48,6 +53,7 @@ const packages = [
   'launcher',
   'logconsole-extension',
   'logconsole',
+  'lsp-extension',
   'mainmenu-extension',
   'mainmenu',
   'markdownviewer-extension',

@@ -50,7 +50,7 @@ export namespace Mode {
     return res;
   }
 
-  export const modeList: ISpec[] = [
+  const modeList: ISpec[] = [
     makeSpec({
       name: 'C',
       mime: 'text/x-csrc',
@@ -1338,6 +1338,9 @@ export namespace Mode {
 
   /**
    * Get the raw list of available modes specs.
+   *
+   * @alpha
+   * @returns The available modes
    */
   export function getModeInfo(): ISpec[] {
     return modeList as ISpec[];
@@ -1345,6 +1348,10 @@ export namespace Mode {
 
   /**
    * Find a codemirror mode by MIME.
+   *
+   * @alpha
+   * @param mime Mime type to look for
+   * @returns The mode or null
    */
   export function findByMIME(mime: string | readonly string[]): ISpec | null {
     if (Array.isArray(mime)) {
@@ -1374,6 +1381,10 @@ export namespace Mode {
 
   /**
    * Find a codemirror mode by name.
+   *
+   * @alpha
+   * @param name The mode name
+   * @returns The mode or null
    */
   export function findByName(name: string): ISpec | null {
     name = name.toLowerCase();
@@ -1393,6 +1404,10 @@ export namespace Mode {
 
   /**
    * Find a codemirror mode by extension.
+   *
+   * @alpha
+   * @param ext The extension name
+   * @returns The mode or null
    */
   export function findByExtension(
     ext: string | readonly string[]
@@ -1418,6 +1433,9 @@ export namespace Mode {
 
   /**
    * Find a codemirror mode by filename.
+   *
+   * @param name File name
+   * @returns The mode or null
    */
   export function findByFileName(name: string): ISpec | null {
     const basename = PathExt.basename(name);
@@ -1437,18 +1455,25 @@ export namespace Mode {
 
   /**
    * Find a codemirror mode by name or CodeMirror spec.
+   *
+   * @alpha
+   * @param mode The CodeMirror mode
+   * @param fallback Whether to fallback to default mimetype spec or not
+   * @returns The mode or null
    */
-  export function findBest(mode: string | ISpec): ISpec | null {
+  export function findBest(
+    mode: string | ISpec,
+    fallback = true
+  ): ISpec | null {
     const modename = typeof mode === 'string' ? mode : mode.name;
     const mimetype = typeof mode !== 'string' ? mode.mime : modename;
     const ext = typeof mode !== 'string' ? mode.extensions ?? [] : [];
 
     return (
-      findByName(modename || '') ||
-      findByMIME(mimetype || '') ||
-      findByExtension(ext) ||
-      findByMIME(IEditorMimeTypeService.defaultMimeType) ||
-      findByMIME('text/plain')
+      (modename ? findByName(modename) : null) ??
+      (mimetype ? findByMIME(mimetype) : null) ??
+      findByExtension(ext) ??
+      (fallback ? findByMIME(IEditorMimeTypeService.defaultMimeType) : null)
     );
   }
 
@@ -1470,16 +1495,27 @@ export namespace Mode {
   }
 
   /**
+   * Register a new mode for CodeMirror
    *
+   * @alpha
+   * @param mode Mode to register
    */
   export function registerModeInfo(mode: ISpec): void {
-    const info = findBest(mode);
+    const info = findBest(mode, false);
     if (info) {
-      throw new Error(`$"mode.mime" already registered`);
+      throw new Error(`${mode.mime} already registered`);
     }
     modeList.push(makeSpec(mode));
   }
 
+  /**
+   * Parse and style a string.
+   *
+   * @alpha
+   * @param code Code to highlight
+   * @param mode Code mode
+   * @param el HTML element into which the highlighted code will be inserted
+   */
   export function run(code: string, mode: ISpec, el: HTMLElement): void {
     const language = mode.support?.language;
     if (!language) return;

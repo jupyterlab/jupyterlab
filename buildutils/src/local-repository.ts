@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 /* eslint-disable camelcase */
 import * as fs from 'fs-extra';
 import * as child_process from 'child_process';

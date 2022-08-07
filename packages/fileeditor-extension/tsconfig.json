@@ -43,6 +43,9 @@
       "path": "../launcher"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../mainmenu"
     },
     {
