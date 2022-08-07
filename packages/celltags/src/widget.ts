@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { checkIcon } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import { TagTool } from './tool';

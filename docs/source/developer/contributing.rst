@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 Contribute
 ==========
 
@@ -268,7 +271,16 @@ If you use ``conda``, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge 'nodejs'
+   conda install -c conda-forge nodejs
+
+The canvas node package is not properly packaged for Mac OS X with ARM architectures (M1 and M2).
+To build JupyterLab on such platforms, you need a few additional packages, and to specify the pkg-config
+path:
+
+.. code:: bash
+
+   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib
+   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
 
 If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
 
@@ -288,14 +300,6 @@ To check which version of Node.js is installed:
 Installing JupyterLab
 ---------------------
 
-If you use ``conda``, you may also want to install ``nb_conda_kernels`` to have a kernel
-option for different `conda
-environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`__
-
-.. code:: bash
-
-   conda install -c conda-forge nb_conda_kernels
-
 Fork the JupyterLab
 `repository <https://github.com/jupyterlab/jupyterlab>`__.
 
@@ -308,8 +312,16 @@ Then use the following steps:
    pip install -e ".[test]"
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
-   jlpm run build:core  # Build the core mode assets (optional)
-   jupyter lab build  # Build the app dir assets (optional)
+
+Additionally, you might want to execute the following optional commands:
+
+.. code:: bash
+
+   # Build the core mode assets (optional)
+   jlpm run build:core
+
+   # Build the app dir assets (optional)
+   jupyter lab build
 
 Notes:
 

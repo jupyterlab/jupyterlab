@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 """
 This file is mean to be called with a path to an example directory as
 its argument.  We import the application entry point for the example

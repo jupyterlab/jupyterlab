@@ -25,6 +25,7 @@ import '@jupyterlab/javascript-extension/style/index.js';
 import '@jupyterlab/json-extension/style/index.js';
 import '@jupyterlab/launcher-extension/style/index.js';
 import '@jupyterlab/logconsole-extension/style/index.js';
+import '@jupyterlab/lsp-extension/style/index.js';
 import '@jupyterlab/mainmenu-extension/style/index.js';
 import '@jupyterlab/markdownviewer-extension/style/index.js';
 import '@jupyterlab/markedparser-extension/style/index.js';

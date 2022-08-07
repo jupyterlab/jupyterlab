@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 """
 This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.

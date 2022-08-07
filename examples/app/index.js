@@ -31,6 +31,7 @@ const extensions = [
   import('@jupyterlab/imageviewer-extension'),
   import('@jupyterlab/inspector-extension'),
   import('@jupyterlab/launcher-extension'),
+  import('@jupyterlab/lsp-extension'),
   import('@jupyterlab/mainmenu-extension'),
   import('@jupyterlab/markdownviewer-extension'),
   import('@jupyterlab/mathjax2-extension'),

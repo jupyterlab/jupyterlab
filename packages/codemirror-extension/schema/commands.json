@@ -70,6 +70,12 @@
                 {
                   "command": "codemirror:change-theme",
                   "args": {
+                    "theme": "codemirror"
+                  }
+                },
+                {
+                  "command": "codemirror:change-theme",
+                  "args": {
                     "theme": "jupyter"
                   }
                 }

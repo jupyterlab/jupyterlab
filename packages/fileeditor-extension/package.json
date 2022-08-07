@@ -50,6 +50,7 @@
     "@jupyterlab/filebrowser": "^4.0.0-alpha.11",
     "@jupyterlab/fileeditor": "^4.0.0-alpha.11",
     "@jupyterlab/launcher": "^4.0.0-alpha.11",
+    "@jupyterlab/lsp": "^4.0.0-alpha.11",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.11",
     "@jupyterlab/observables": "^5.0.0-alpha.11",
     "@jupyterlab/services": "^7.0.0-alpha.11",

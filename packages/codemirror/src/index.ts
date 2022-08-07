@@ -15,6 +15,7 @@ export * from './searchprovider';
 export * from './mimetype';
 export * from './mode';
 export * from './syntaxstatus';
+export * from './editortheme';
 
 /**
  * The default editor services.
