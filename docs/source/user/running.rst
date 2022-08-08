@@ -10,6 +10,11 @@ directories:
 .. image:: images/running_layout.png
    :align: center
    :class: jp-screenshot
+   :alt:
+
+.. only:: comment
+
+   Alt text is intentionally left blank because the image content is described directly prior.
 
 .. _reopen-document:
 
