@@ -67,6 +67,9 @@ export class User implements ICurrentUser {
   get color(): string {
     return this._color;
   }
+  set color(value: string) {
+    this._color = value;
+  }
 
   /**
    * Whether the user is anonymous or not.

@@ -7,10 +7,25 @@
   "include": ["src/*"],
   "references": [
     {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../collaboration"
+    },
+    {
       "path": "../coreutils"
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

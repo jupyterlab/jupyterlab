@@ -100,6 +100,7 @@
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
   --jp-icon-user: url('icons/sidebar/user.svg');
+  --jp-icon-users: url('icons/sidebar/users.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
 }

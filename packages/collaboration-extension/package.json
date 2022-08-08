@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/user-extension",
+  "name": "@jupyterlab/collaboration-extension",
   "version": "^3.5.0-beta.0",
-  "description": "JupyterLab - User Extension",
+  "description": "JupyterLab - Collaboration Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -42,9 +42,17 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.5.0-beta.0",
+    "@jupyterlab/apputils": "^3.5.0-beta.0",
+    "@jupyterlab/collaboration": "^3.5.0-beta.0",
     "@jupyterlab/coreutils": "^5.5.0-beta.0",
-    "@jupyterlab/user": "^3.5.0-beta.0",
-    "@lumino/widgets": "^1.30.0"
+    "@jupyterlab/services": "^6.5.0-beta.0",
+    "@jupyterlab/statedb": "^3.5.0-beta.0",
+    "@jupyterlab/translation": "^3.5.0-beta.0",
+    "@jupyterlab/ui-components": "^3.5.0-beta.0",
+    "@lumino/widgets": "^1.33.0",
+    "y-protocols": "^1.0.5",
+    "y-websocket": "^1.3.15",
+    "yjs": "^13.5.34"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -55,7 +63,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "./schema"
   },
   "styleModule": "style/index.js"
 }

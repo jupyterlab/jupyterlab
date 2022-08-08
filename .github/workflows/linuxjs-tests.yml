@@ -20,6 +20,7 @@ jobs:
             js-cell-toolbar,
             js-codeeditor,
             js-codemirror,
+            js-collaboration,
             js-completer,
             js-console,
             js-coreutils,
@@ -46,7 +47,6 @@ jobs:
             js-toc,
             js-translation,
             js-ui-components,
-            js-user,
             js-testutils,
           ]
       fail-fast: false

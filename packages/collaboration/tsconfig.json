@@ -13,7 +13,10 @@
       "path": "../coreutils"
     },
     {
-      "path": "../user"
+      "path": "../services"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }
