@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/user",
+  "name": "@jupyterlab/collaboration",
   "version": "4.0.0-alpha.11",
-  "description": "JupyterLab - User Widget",
+  "description": "JupyterLab - Real Time Collaboration Widgets",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -41,13 +41,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyterlab/apputils": "^4.0.0-alpha.11",
     "@jupyterlab/coreutils": "^6.0.0-alpha.11",
     "@jupyterlab/services": "^7.0.0-alpha.11",
     "@jupyterlab/ui-components": "^4.0.0-alpha.26",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/signaling": "^1.10.1",
     "@lumino/virtualdom": "^1.14.1",
-    "@lumino/widgets": "^1.33.0"
+    "@lumino/widgets": "^1.33.0",
+    "react": "^17.0.1",
+    "y-protocols": "^1.0.5",
+    "yjs": "^13.5.34"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.11",

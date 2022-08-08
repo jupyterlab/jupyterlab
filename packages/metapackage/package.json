@@ -44,6 +44,8 @@
     "@jupyterlab/codeeditor": "^4.0.0-alpha.11",
     "@jupyterlab/codemirror": "^4.0.0-alpha.11",
     "@jupyterlab/codemirror-extension": "^4.0.0-alpha.11",
+    "@jupyterlab/collaboration": "^4.0.0-alpha.11",
+    "@jupyterlab/collaboration-extension": "^4.0.0-alpha.11",
     "@jupyterlab/completer": "^4.0.0-alpha.11",
     "@jupyterlab/completer-extension": "^4.0.0-alpha.11",
     "@jupyterlab/console": "^4.0.0-alpha.11",
@@ -123,8 +125,6 @@
     "@jupyterlab/translation-extension": "^4.0.0-alpha.11",
     "@jupyterlab/ui-components": "^4.0.0-alpha.26",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.11",
-    "@jupyterlab/user": "^4.0.0-alpha.11",
-    "@jupyterlab/user-extension": "^4.0.0-alpha.11",
     "@jupyterlab/vdom": "^4.0.0-alpha.11",
     "@jupyterlab/vdom-extension": "^4.0.0-alpha.11",
     "@jupyterlab/vega5-extension": "^4.0.0-alpha.11"

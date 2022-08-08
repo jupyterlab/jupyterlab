@@ -10,6 +10,9 @@
       "path": "../application"
     },
     {
+      "path": "../collaboration"
+    },
+    {
       "path": "../coreutils"
     },
     {
@@ -17,9 +20,6 @@
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../user"
     }
   ]
 }

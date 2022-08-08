@@ -3,6 +3,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
+import { IUser } from './tokens';
 
 /**
  * Call the API extension
@@ -131,3 +132,18 @@ export const moonsOfJupyter = [
  */
 export const getAnonymousUserName = (): string =>
   moonsOfJupyter[Math.floor(Math.random() * moonsOfJupyter.length)];
+
+/**
+ * Global awareness for JupyterLab scopped shared data.
+ */
+export interface ICollaboratorAwareness {
+  /**
+   * The User owning theses data.
+   */
+  user: IUser.User;
+
+  /**
+   * The current file/context the user is working on.
+   */
+  current?: string;
+}

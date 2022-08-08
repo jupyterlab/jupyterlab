@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.11",
+    "@jupyterlab/collaboration": "^4.0.0-alpha.11",
     "@jupyterlab/coreutils": "^6.0.0-alpha.11",
     "@jupyterlab/docprovider": "^4.0.0-alpha.11",
-    "@jupyterlab/services": "^7.0.0-alpha.11",
-    "@jupyterlab/user": "^4.0.0-alpha.11"
+    "@jupyterlab/services": "^7.0.0-alpha.11"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
