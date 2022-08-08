@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docprovider",
-  "version": "4.0.0-alpha.11",
+  "version": "4.0.0-alpha.12",
   "description": "JupyterLab - Document Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -39,14 +39,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/collaboration": "^4.0.0-alpha.11",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.11",
+    "@jupyterlab/collaboration": "^4.0.0-alpha.12",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.12",
     "@lumino/coreutils": "^1.12.0",
     "lib0": "^0.2.42",
     "y-websocket": "^1.3.15"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.11",
+    "@jupyterlab/testutils": "^4.0.0-alpha.12",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

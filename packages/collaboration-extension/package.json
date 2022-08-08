@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/collaboration-extension",
-  "version": "4.0.0-alpha.11",
+  "version": "4.0.0-alpha.12",
   "description": "JupyterLab - Collaboration Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,14 +37,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.11",
-    "@jupyterlab/apputils": "^4.0.0-alpha.11",
-    "@jupyterlab/collaboration": "^4.0.0-alpha.11",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.11",
-    "@jupyterlab/services": "^7.0.0-alpha.11",
-    "@jupyterlab/statedb": "^4.0.0-alpha.11",
-    "@jupyterlab/translation": "^4.0.0-alpha.11",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
+    "@jupyterlab/application": "^4.0.0-alpha.12",
+    "@jupyterlab/apputils": "^4.0.0-alpha.12",
+    "@jupyterlab/collaboration": "^4.0.0-alpha.12",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
+    "@jupyterlab/services": "^7.0.0-alpha.12",
+    "@jupyterlab/statedb": "^4.0.0-alpha.12",
+    "@jupyterlab/translation": "^4.0.0-alpha.12",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.27",
     "@lumino/widgets": "^1.33.0",
     "y-protocols": "^1.0.5",
     "y-websocket": "^1.3.15",
