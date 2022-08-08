@@ -179,7 +179,7 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
     userPanel.addWidget(currentUserPanel);
 
     const fileopener = (path: string) => {
-      app.commands.execute('docmanager:open', { path });
+      void app.commands.execute('docmanager:open', { path });
     };
 
     const collaboratorsPanel = new CollaboratorsPanel(
