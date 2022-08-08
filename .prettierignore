@@ -1,6 +1,7 @@
 **/build
 **/node_modules
 **/lib
+**/dist
 **/package.json
 **/static
 **/.ipynb_checkpoints
@@ -28,7 +29,6 @@ jupyterlab/staging/yarn.js
 jupyterlab/staging/index.js
 jupyterlab/staging/webpack.config.js
 packages/ui-components/src/icon/iconimports.ts
-packages/extensionmanager/examples/listings
 tsconfigdoc.json
 typedoc-theme
 

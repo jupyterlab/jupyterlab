@@ -79,7 +79,7 @@ export class KernelSourcesBody extends ReactWidget {
                         this._model.open(source);
                       })
                       .catch(reason => {
-                        showErrorMessage(
+                        void showErrorMessage(
                           this._trans.__('Fail to get source'),
                           this._trans.__(
                             "Fail to get '%1' source:\n%2",

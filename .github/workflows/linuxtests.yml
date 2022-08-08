@@ -132,7 +132,7 @@ jobs:
           mkdir test
           tar --strip-components=1 -zxvf *.tar.gz -C ./test
           cd test
-          pip install -e .[test]
+          pip install -e .[dev,test]
           pip install pytest-github-actions-annotate-failures
       - name: Run Test
         run: |
@@ -141,7 +141,7 @@ jobs:
 
   pre-commit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
       - name: Base Setup

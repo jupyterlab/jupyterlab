@@ -20,10 +20,9 @@ test('should load the example', async ({ page }) => {
 
   const handleMessage = async (msg: ConsoleMessage) => {
     const text = msg.text();
-    const url = msg.location().url;
     console.log(msg.type(), '>>', text);
-    // Skip the missing lsp handler error
-    if (msg.type() === 'error' && !url.includes('lsp/status')) {
+
+    if (msg.type() === 'error') {
       errorLogs += 1;
     }
 

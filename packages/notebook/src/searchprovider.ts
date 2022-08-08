@@ -386,13 +386,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
 
-    cellSearchProvider
+    void cellSearchProvider
       .setIsActive(
         !(this._filters?.selectedCells ?? false) ||
           this.widget.content.isSelectedOrActive(cell)
       )
       .then(() => {
-        cellSearchProvider.startQuery(this._query, this._filters);
+        void cellSearchProvider.startQuery(this._query, this._filters);
       });
   }
 

@@ -29,8 +29,7 @@
     "style/index.js"
   ],
   "scripts": {
-    "build": "jlpm build:schema && tsc -b",
-    "build:all": "npm run build",
+    "build": "tsc -b",
     "build:schema": "node ./schema.js",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",

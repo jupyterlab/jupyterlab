@@ -235,7 +235,7 @@ export class GalataInpage implements IGalataInpage {
     const nbPanel = this._app.shell.currentWidget as NotebookPanel;
     const nb = nbPanel.content;
 
-    this._app.commands.execute('notebook:delete-cell');
+    void this._app.commands.execute('notebook:delete-cell');
 
     nb.update();
   }
@@ -251,7 +251,7 @@ export class GalataInpage implements IGalataInpage {
     const nb = nbPanel.content;
 
     if (nb !== null) {
-      this._app.commands.execute('notebook:insert-cell-below');
+      void this._app.commands.execute('notebook:insert-cell-below');
 
       const numCells = nb.widgets.length;
 
@@ -536,7 +536,7 @@ export class GalataInpage implements IGalataInpage {
       return;
     }
 
-    this._app.commands.execute('notebook:deselect-all');
+    void this._app.commands.execute('notebook:deselect-all');
 
     for (let i = 0; i < numCells; ++i) {
       const cell = notebook.widgets[i];

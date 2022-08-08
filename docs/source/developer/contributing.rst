@@ -75,7 +75,7 @@ speeding up the review process.
 As long as your code is valid,
 the pre-commit hook should take care of how it should look.
 `pre-commit` and its associated hooks will automatically be installed when
-you run ``pip install -e ".[test]"``
+you run ``pip install -e ".[dev,test]"``
 
 To install ``pre-commit`` manually, run the following::
 
@@ -309,7 +309,7 @@ Then use the following steps:
 
    git clone https://github.com/<your-github-username>/jupyterlab.git
    cd jupyterlab
-   pip install -e ".[test]"
+   pip install -e ".[dev,test]"
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
 

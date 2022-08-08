@@ -512,7 +512,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 
     function updateTreePath(treePath: string) {
       // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-      treeResolver.paths.then(() => {
+      void treeResolver.paths.then(() => {
         _defaultBrowserTreePath = treePath;
         if (!_docTreePath) {
           const url = PageConfig.getUrl({ treePath });
@@ -559,7 +559,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     });
 
     // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-    treeResolver.paths.then(() => {
+    void treeResolver.paths.then(() => {
       // Watch the path of the current widget in the main area and update the page
       // URL to reflect the change.
       app.shell.currentPathChanged.connect((_, args) => {
@@ -987,7 +987,7 @@ const shell: JupyterFrontEndPlugin<ILabShell> = {
       throw new Error(`${shell.id} did not find a LabShell instance.`);
     }
     if (settingRegistry) {
-      settingRegistry.load(shell.id).then(settings => {
+      void settingRegistry.load(shell.id).then(settings => {
         (app.shell as LabShell).updateConfig(settings.composite);
         settings.changed.connect(() => {
           (app.shell as LabShell).updateConfig(settings.composite);

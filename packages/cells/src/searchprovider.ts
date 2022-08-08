@@ -542,7 +542,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
     if (this.isActive && this.query && this.filters?.output !== false) {
       await Promise.all([
         this.outputsProvider.map(provider => {
-          provider.startQuery(this.query);
+          void provider.startQuery(this.query);
         })
       ]);
     }
@@ -684,11 +684,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     this._unrenderedByHighligh = false;
     if (this.isActive) {
       if (rendered) {
-        this.renderedProvider.startQuery(this.query);
+        void this.renderedProvider.startQuery(this.query);
       } else {
         // Force cursor position to ensure reverse search is working as expected
         cell.editor.setCursorPosition({ column: 0, line: 0 });
-        this.renderedProvider.endQuery();
+        void this.renderedProvider.endQuery();
       }
     }
   }

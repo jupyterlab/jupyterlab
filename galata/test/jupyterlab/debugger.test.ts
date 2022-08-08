@@ -47,7 +47,7 @@ test.describe('Debugger Tests', () => {
     expect(await callStackPanel.innerText()).toBe('');
 
     // don't add await, run will be blocked by the breakpoint
-    page.notebook.run().then();
+    void page.notebook.run().then();
 
     await page.debugger.waitForCallStack();
     expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
