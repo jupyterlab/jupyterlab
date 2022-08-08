@@ -38,7 +38,7 @@ export function generateArrow(
  * @returns The svg to inject in the page
  */
 export function positionMouse(position: { x: number; y: number }): string {
-  return `<svg style="position: absolute;top: ${position.y}px;left: ${position.x}px;z-index: 100000" width="64" height="64" version="1.1" viewBox="0 0 16.933 16.933" xmlns="http://www.w3.org/2000/svg">
+  return `<svg style="pointer-events: none; position: absolute;top: ${position.y}px;left: ${position.x}px;z-index: 100000" width="64" height="64" version="1.1" viewBox="0 0 16.933 16.933" xmlns="http://www.w3.org/2000/svg">
   <path d="m3.6043 1.0103 0.28628 12.757 2.7215-3.3091 2.5607 5.7514 2.0005-0.89067-2.5607-5.7514 4.2802 0.19174z"
       stroke="#ffffff" stroke-width=".54745" style="paint-order:markers fill stroke" />
 </svg>`;

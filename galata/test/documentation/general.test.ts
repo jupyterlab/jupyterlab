@@ -209,12 +209,15 @@ test.describe('General', () => {
     await page.click('text=Lorenz.ipynb', { button: 'right' });
     await page.hover('text=Copy Shareable Link');
 
+    const itemHandle = await page.$('text=Copy Shareable Link');
+    const itemBBox = await itemHandle.boundingBox();
+
     // Inject mouse
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 260, y: 350 })]
+      [positionMouse({ x: 260, y: itemBBox.y + itemBBox.height * 0.5 })]
     );
 
     expect(
