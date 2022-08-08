@@ -27,7 +27,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 - Moved theme Map and added API to use it from other dependencies [#12861](https://github.com/jupyterlab/jupyterlab/pull/12861) ([@JohanMabille](https://github.com/JohanMabille))
 - Removes info about meeting notes on Binder [#12847](https://github.com/jupyterlab/jupyterlab/pull/12847) ([@jweill-aws](https://github.com/jweill-aws))
 - Add an option to enable "fast checks" of the jupyter lab build. [#12844](https://github.com/jupyterlab/jupyterlab/pull/12844) ([@thetorpedodog](https://github.com/thetorpedodog))
-- feat: Add .webp filetype in docRegistry. [#12839](https://github.com/jupyterlab/jupyterlab/pull/12839) ([@yangql176](https://github.com/yangql176))
+- Add .webp filetype in docRegistry. [#12839](https://github.com/jupyterlab/jupyterlab/pull/12839) ([@yangql176](https://github.com/yangql176))
 - Adds version maintenance policy [#12829](https://github.com/jupyterlab/jupyterlab/pull/12829) ([@jweill-aws](https://github.com/jweill-aws))
 - Debugger: Make kernel source list react based [#12751](https://github.com/jupyterlab/jupyterlab/pull/12751) ([@vidartf](https://github.com/vidartf))
 - Optimize debugger editor `eachLine` loops [#12746](https://github.com/jupyterlab/jupyterlab/pull/12746) ([@vidartf](https://github.com/vidartf))
@@ -129,6 +129,8 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 ### API and Breaking Changes
 
 - Fixes renaming files from title while using a custom drive [#12849](https://github.com/jupyterlab/jupyterlab/pull/12849) ([@hbcarlos](https://github.com/hbcarlos))
+- RTC left panel [#12095](https://github.com/jupyterlab/jupyterlab/pull/12095) ([@martinRenou](https://github.com/martinRenou))
+- Migrate to Codemirror 6 [#11638](https://github.com/jupyterlab/jupyterlab/pull/11638) ([@JohanMabille](https://github.com/JohanMabille))
 
 ### Contributors to this release
 
