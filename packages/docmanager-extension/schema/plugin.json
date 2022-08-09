@@ -76,22 +76,22 @@
         "rank": 20
       },
       {
-        "command": "docmanager:delete",
+        "command": "docmanager:duplicate",
         "selector": "[data-type=\"document-title\"]",
         "rank": 21
       },
       {
-        "command": "docmanager:clone",
+        "command": "docmanager:delete",
         "selector": "[data-type=\"document-title\"]",
         "rank": 22
       },
       {
-        "command": "docmanager:show-in-file-browser",
+        "command": "docmanager:clone",
         "selector": "[data-type=\"document-title\"]",
         "rank": 23
       },
       {
-        "command": "docmanager:duplicate",
+        "command": "docmanager:show-in-file-browser",
         "selector": "[data-type=\"document-title\"]",
         "rank": 24
       }
