@@ -35,7 +35,6 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.15",
-    "@jupyterlab/collaboration": "^4.0.0-alpha.15",
     "@jupyterlab/coreutils": "^6.0.0-alpha.15",
     "@jupyterlab/docprovider": "^4.0.0-alpha.15",
     "@jupyterlab/services": "^7.0.0-alpha.15",

@@ -25,7 +25,7 @@ import { Setting, SettingManager } from './setting';
 
 import { Terminal, TerminalManager } from './terminal';
 
-import { User, UserManager } from './user';
+import { UserManager } from './user';
 
 import { Workspace, WorkspaceManager } from './workspace';
 
@@ -143,7 +143,7 @@ export class ServiceManager implements ServiceManager.IManager {
   /**
    * Get the user manager instance.
    */
-  readonly user: User.IManager;
+  readonly user: UserManager.IManager;
 
   /**
    * Get the workspace manager instance.
@@ -272,7 +272,7 @@ export namespace ServiceManager {
     /**
      * The user manager for the manager.
      */
-    readonly user: User.IManager;
+    readonly user: UserManager.IManager;
 
     /**
      * The workspace manager for the manager.

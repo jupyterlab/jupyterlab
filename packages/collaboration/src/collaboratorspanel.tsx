@@ -9,9 +9,11 @@ import { Panel } from '@lumino/widgets';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { ICurrentUser } from './tokens';
-import { ICollaboratorAwareness } from './utils';
+import { UserManager } from '@jupyterlab/services';
+
 import { PathExt } from '@jupyterlab/coreutils';
+
+import { ICollaboratorAwareness } from './utils';
 
 /**
  * The CSS class added to collaborators list container.
@@ -34,12 +36,12 @@ const CLICKABLE_COLLABORATOR_CLASS = 'jp-ClickableCollaborator';
 const COLLABORATOR_ICON_CLASS = 'jp-CollaboratorIcon';
 
 export class CollaboratorsPanel extends Panel {
-  private _currentUser: ICurrentUser;
+  private _currentUser: UserManager.IManager;
   private _awareness: Awareness;
   private _body: CollaboratorsBody;
 
   constructor(
-    currentUser: ICurrentUser,
+    currentUser: UserManager.IManager,
     awareness: Awareness,
     fileopener: (path: string) => void
   ) {
@@ -64,7 +66,10 @@ export class CollaboratorsPanel extends Panel {
     const collaborators: ICollaboratorAwareness[] = [];
 
     state.forEach((value: ICollaboratorAwareness, key: any) => {
-      if (value.user.name !== this._currentUser.name) {
+      if (
+        this._currentUser.isReady &&
+        value.user.name !== this._currentUser.identity!.name
+      ) {
         collaborators.push(value);
       }
     });
@@ -118,9 +123,7 @@ export class CollaboratorsBody extends ReactWidget {
         }
       };
 
-      const displayName = `${
-        value.user.displayName != '' ? value.user.displayName : value.user.name
-      } ${separator} ${current}`;
+      const displayName = `${value.user.display_name} ${separator} ${current}`;
 
       return (
         <div
