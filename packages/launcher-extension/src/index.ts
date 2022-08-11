@@ -123,7 +123,7 @@ function activate(
       function maybeCreate() {
         // Create a launcher if there are no open items.
         if (labShell!.isEmpty('main')) {
-          commands.execute(CommandIDs.create);
+          void commands.execute(CommandIDs.create);
         }
       }
       maybeCreate();

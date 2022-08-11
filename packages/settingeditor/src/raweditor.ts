@@ -224,20 +224,6 @@ export class RawEditor extends SplitPanel {
   }
 
   /**
-   * Handle `'update-request'` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    const settings = this._settings;
-    const defaults = this._defaults;
-    const user = this._user;
-
-    if (settings) {
-      defaults.editor.refresh();
-      user.editor.refresh();
-    }
-  }
-
-  /**
    * Handle text changes in the underlying editor.
    */
   private _onTextChanged(): void {

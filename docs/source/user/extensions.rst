@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _user_extensions:
 
 Extensions
@@ -220,7 +223,7 @@ a small Jupyter icon next to their name.
 .. figure:: ../images/extensions-default.png
    :align: center
    :class: jp-screenshot
-   :alt: Screenshot showing the discovery extension listing.
+   :alt: The discovery extension listing.
 
 
 Alternatively, you can limit your discovery by using the search bar. This
@@ -229,7 +232,7 @@ performs a free-text search of JupyterLab extensions on the NPM registry.
 .. image:: ../images/extensions-search.png
    :align: center
    :class: jp-screenshot
-   :alt: Screenshot showing an example search result
+   :alt: An example search result in the discovery extension listing.
 
 
 Installing an Extension

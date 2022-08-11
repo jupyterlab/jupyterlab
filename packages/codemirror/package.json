@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror",
-  "version": "4.0.0-alpha.11",
+  "version": "4.0.0-alpha.12",
   "description": "JupyterLab - CodeMirror Editor Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:test": "tsc --build tsconfig.test.json",
+    "build:test": "lezer-generator test/foo.grammar -o test/foo.js && tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "test": "jest",
@@ -39,16 +39,38 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.11",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.11",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.11",
-    "@jupyterlab/documentsearch": "^4.0.0-alpha.11",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.11",
-    "@jupyterlab/observables": "^5.0.0-alpha.11",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.11",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.11",
-    "@jupyterlab/translation": "^4.0.0-alpha.11",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
+    "@codemirror/autocomplete": "^6.0.0",
+    "@codemirror/commands": "^6.0.0",
+    "@codemirror/lang-cpp": "^6.0.0",
+    "@codemirror/lang-css": "^6.0.0",
+    "@codemirror/lang-html": "^6.0.0",
+    "@codemirror/lang-java": "^6.0.0",
+    "@codemirror/lang-javascript": "^6.0.0",
+    "@codemirror/lang-json": "^6.0.0",
+    "@codemirror/lang-markdown": "^6.0.0",
+    "@codemirror/lang-php": "^6.0.0",
+    "@codemirror/lang-python": "^6.0.0",
+    "@codemirror/lang-rust": "^6.0.0",
+    "@codemirror/lang-sql": "^6.0.0",
+    "@codemirror/lang-wast": "^6.0.0",
+    "@codemirror/lang-xml": "^6.0.0",
+    "@codemirror/language": "^6.0.0",
+    "@codemirror/legacy-modes": "^6.0.0",
+    "@codemirror/search": "^6.0.0",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0",
+    "@jupyterlab/apputils": "^4.0.0-alpha.12",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.12",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
+    "@jupyterlab/documentsearch": "^4.0.0-alpha.12",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.12",
+    "@jupyterlab/observables": "^5.0.0-alpha.12",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.12",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.12",
+    "@jupyterlab/translation": "^4.0.0-alpha.12",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.27",
+    "@lezer/common": "^1.0.0",
+    "@lezer/highlight": "^1.0.0",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",
     "@lumino/coreutils": "^1.12.0",
@@ -56,13 +78,16 @@
     "@lumino/polling": "^1.10.0",
     "@lumino/signaling": "^1.10.1",
     "@lumino/widgets": "^1.33.0",
-    "codemirror": "~5.61.0",
     "react": "^17.0.1",
-    "y-codemirror": "^3.0.1"
+    "style-mod": "^4.0.0",
+    "y-codemirror.next": "~0.3.2",
+    "y-protocols": "^1.0.5",
+    "yjs": "^13.5.34"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.11",
-    "@types/codemirror": "^0.0.109",
+    "@jupyterlab/testutils": "^4.0.0-alpha.12",
+    "@lezer/generator": "^1.0.0",
+    "@lezer/lr": "^1.0.0",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
@@ -72,15 +97,6 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "jupyterlab": {
-    "extraStyles": {
-      "codemirror": [
-        "lib/codemirror.css",
-        "addon/dialog/dialog.css",
-        "addon/fold/foldgutter.css"
-      ]
-    }
   },
   "styleModule": "style/index.js"
 }

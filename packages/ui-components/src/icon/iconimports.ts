@@ -27,6 +27,7 @@ import circleEmptySvgstr from '../../style/icons/toolbar/circle-empty.svg';
 import circleSvgstr from '../../style/icons/toolbar/circle.svg';
 import clearSvgstr from '../../style/icons/toolbar/clear.svg';
 import closeSvgstr from '../../style/icons/toolbar/close.svg';
+import codeCheckSvgstr from '../../style/icons/lsp/code-check.svg';
 import codeSvgstr from '../../style/icons/toolbar/code.svg';
 import collapseAllSvgstr from '../../style/icons/toolbar/collapse-all.svg';
 import consoleSvgstr from '../../style/icons/filetype/console.svg';
@@ -98,6 +99,7 @@ import treeViewSvgstr from '../../style/icons/toolbar/tree-view.svg';
 import trustedSvgstr from '../../style/icons/statusbar/trusted.svg';
 import undoSvgstr from '../../style/icons/toolbar/undo.svg';
 import userSvgstr from '../../style/icons/sidebar/user.svg';
+import usersSvgstr from '../../style/icons/sidebar/users.svg';
 import vegaSvgstr from '../../style/icons/filetype/vega.svg';
 import yamlSvgstr from '../../style/icons/filetype/yaml.svg';
 
@@ -121,6 +123,7 @@ export const circleEmptyIcon = new LabIcon({ name: 'ui-components:circle-empty',
 export const circleIcon = new LabIcon({ name: 'ui-components:circle', svgstr: circleSvgstr });
 export const clearIcon = new LabIcon({ name: 'ui-components:clear', svgstr: clearSvgstr });
 export const closeIcon = new LabIcon({ name: 'ui-components:close', svgstr: closeSvgstr });
+export const codeCheckIcon = new LabIcon({ name: 'ui-components:code-check', svgstr: codeCheckSvgstr });
 export const codeIcon = new LabIcon({ name: 'ui-components:code', svgstr: codeSvgstr });
 export const collapseAllIcon = new LabIcon({ name: 'ui-components:collapse-all', svgstr: collapseAllSvgstr });
 export const consoleIcon = new LabIcon({ name: 'ui-components:console', svgstr: consoleSvgstr });
@@ -192,5 +195,6 @@ export const treeViewIcon = new LabIcon({ name: 'ui-components:tree-view', svgst
 export const trustedIcon = new LabIcon({ name: 'ui-components:trusted', svgstr: trustedSvgstr });
 export const undoIcon = new LabIcon({ name: 'ui-components:undo', svgstr: undoSvgstr });
 export const userIcon = new LabIcon({ name: 'ui-components:user', svgstr: userSvgstr });
+export const usersIcon = new LabIcon({ name: 'ui-components:users', svgstr: usersSvgstr });
 export const vegaIcon = new LabIcon({ name: 'ui-components:vega', svgstr: vegaSvgstr });
 export const yamlIcon = new LabIcon({ name: 'ui-components:yaml', svgstr: yamlSvgstr });

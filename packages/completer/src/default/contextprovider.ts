@@ -53,8 +53,7 @@ namespace Private {
     editor: CodeEditor.IEditor
   ): CompletionHandler.ICompletionItemsReply {
     // Find the token at the cursor
-    const cursor = editor.getCursorPosition();
-    const token = editor.getTokenForPosition(cursor);
+    const token = editor.getTokenAtCursor();
 
     // Get the list of matching tokens.
     const tokenList = getCompletionTokens(token, editor);

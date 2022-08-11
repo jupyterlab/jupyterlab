@@ -11,6 +11,7 @@ repos:
     hooks:
       - id: forbid-new-submodules
       - id: end-of-file-fixer
+        exclude: galata/.*-snapshots
       - id: check-case-conflict
       - id: check-executables-have-shebangs
       - id: requirements-txt-fixer
@@ -37,18 +38,17 @@ repos:
         args: [--profile=black]
 
   - repo: https://github.com/pycqa/flake8
-    rev: 4.0.1
+    rev: 5.0.4
     hooks:
       - id: flake8
         additional_dependencies:
           [
-            'flake8-bugbear==20.1.4',
-            'flake8-logging-format==0.6.0',
+            'flake8-bugbear==22.6.22',
             'flake8-implicit-str-concat==0.2.0'
           ]
 
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.16.2
+    rev: 0.17.1
     hooks:
       - id: check-jsonschema
         name: 'Check GitHub Workflows'

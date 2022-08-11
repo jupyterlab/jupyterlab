@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _extension_migration:
 
 Extension Migration Guide
@@ -43,6 +46,8 @@ bumped their major version (following semver convention). We want to point out p
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
    in particular those with the strict null checks enabled.
+- ``@jupyterlab/docmanager`` from 3.x to 4.x
+   The ``renameDialog`` now receives the ``DocumentRegistry.Context`` instead of a path.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
    ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.

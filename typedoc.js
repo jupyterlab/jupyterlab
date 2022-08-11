@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 const fs = require('fs');
 
 const packages = [
@@ -12,6 +17,8 @@ const packages = [
   'codeeditor',
   'codemirror-extension',
   'codemirror',
+  'collaboration',
+  'collaboration-extension',
   'completer-extension',
   'completer',
   'console-extension',
@@ -48,6 +55,7 @@ const packages = [
   'launcher',
   'logconsole-extension',
   'logconsole',
+  'lsp-extension',
   'mainmenu-extension',
   'mainmenu',
   'markdownviewer-extension',
@@ -89,8 +97,6 @@ const packages = [
   'translation',
   'ui-components-extension',
   'ui-components',
-  'user',
-  'user-extension',
   'vdom-extension',
   'vdom',
   'vega5-extension'

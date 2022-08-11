@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 Contribute
 ==========
 
@@ -52,6 +55,11 @@ Documentation <https://jupyter.readthedocs.io/en/latest/contributing/content-con
 and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
+We maintain the **two most recently released major versions of JupyterLab**,
+JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no
+longer maintain v2.
+All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+
 All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
@@ -67,7 +75,7 @@ speeding up the review process.
 As long as your code is valid,
 the pre-commit hook should take care of how it should look.
 `pre-commit` and its associated hooks will automatically be installed when
-you run ``pip install -e ".[test]"``
+you run ``pip install -e ".[dev,test]"``
 
 To install ``pre-commit`` manually, run the following::
 
@@ -263,7 +271,16 @@ If you use ``conda``, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge 'nodejs'
+   conda install -c conda-forge nodejs
+
+The canvas node package is not properly packaged for Mac OS X with ARM architectures (M1 and M2).
+To build JupyterLab on such platforms, you need a few additional packages, and to specify the pkg-config
+path:
+
+.. code:: bash
+
+   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib
+   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
 
 If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
 
@@ -283,14 +300,6 @@ To check which version of Node.js is installed:
 Installing JupyterLab
 ---------------------
 
-If you use ``conda``, you may also want to install ``nb_conda_kernels`` to have a kernel
-option for different `conda
-environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`__
-
-.. code:: bash
-
-   conda install -c conda-forge nb_conda_kernels
-
 Fork the JupyterLab
 `repository <https://github.com/jupyterlab/jupyterlab>`__.
 
@@ -300,11 +309,19 @@ Then use the following steps:
 
    git clone https://github.com/<your-github-username>/jupyterlab.git
    cd jupyterlab
-   pip install -e ".[test]"
+   pip install -e ".[dev,test]"
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
-   jlpm run build:core  # Build the core mode assets (optional)
-   jupyter lab build  # Build the app dir assets (optional)
+
+Additionally, you might want to execute the following optional commands:
+
+.. code:: bash
+
+   # Build the core mode assets (optional)
+   jlpm run build:core
+
+   # Build the app dir assets (optional)
+   jupyter lab build
 
 Notes:
 
@@ -578,6 +595,7 @@ The Debugger Adapter Protocol
 The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
 
 .. image:: ./debugger_protocol_diagram.png
+   :alt: UML sequence diagram illustrating the interaction between a user, JupyterLab, and the kernel. From top to bottom, the timeline starts with opening the notebook and includes annotations where the debugger is started and stopped. Specific interactions and message types are discussed in the subsequent text.
 
 Inspecting Debug Messages in VS Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -587,6 +605,7 @@ Inspecting the debug messages in VS Code can be useful to understand when debug 
 The first step is to create a test file and a debug configuration (``launch.json``):
 
 .. image:: ./debugger_launch_configuration.png
+   :alt: An editor showing the menu for creating a debug configuration.
 
 .. code:: json
 
@@ -607,6 +626,7 @@ The first step is to create a test file and a debug configuration (``launch.json
 Then start the debugger:
 
 .. image:: ./debugger_vscode_start.png
+   :alt: A started debugging session in the editor. There are additional buttons in the upper right for navigating the session.
 
 The content of the log file looks like this:
 

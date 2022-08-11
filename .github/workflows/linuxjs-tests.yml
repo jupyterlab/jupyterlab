@@ -21,6 +21,7 @@ jobs:
             js-cells,
             js-codeeditor,
             js-codemirror,
+            js-collaboration,
             js-completer,
             js-console,
             js-coreutils,
@@ -34,6 +35,7 @@ jobs:
             js-imageviewer,
             js-inspector,
             js-logconsole,
+            js-lsp,
             js-mainmenu,
             js-nbformat,
             js-notebook,
@@ -48,7 +50,6 @@ jobs:
             js-toc,
             js-translation,
             js-ui-components,
-            js-user,
             js-testutils,
           ]
       fail-fast: false

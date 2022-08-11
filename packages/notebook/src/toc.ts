@@ -698,7 +698,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
-    widget.context.ready.then(() => {
+    void widget.context.ready.then(() => {
       onHeadingsChanged(model);
 
       model.activeHeadingChanged.connect(onActiveHeadingChanged);

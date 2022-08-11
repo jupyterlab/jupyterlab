@@ -41,6 +41,11 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
+import {
+  ILSPCodeExtractorsManager,
+  ILSPDocumentConnectionManager,
+  ILSPFeatureManager
+} from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
@@ -51,6 +56,7 @@ import {
   INotebookWidgetFactory,
   Notebook,
   NotebookActions,
+  NotebookAdapter,
   NotebookModelFactory,
   NotebookPanel,
   NotebookSearchProvider,
@@ -808,6 +814,18 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const languageServerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:language-server',
+  requires: [
+    INotebookTracker,
+    ILSPDocumentConnectionManager,
+    ILSPFeatureManager,
+    ILSPCodeExtractorsManager
+  ],
+  activate: activateNotebookLanguageServer,
+  autoStart: true
+};
+
 /**
  * Export the plugins as default.
  */
@@ -828,7 +846,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   lineColStatus,
   completerPlugin,
   searchProvider,
-  tocPlugin
+  tocPlugin,
+  languageServerPlugin
 ];
 export default plugins;
 
@@ -1438,7 +1457,7 @@ function activateNotebookHandler(
             .then(result => {
               setSideBySideOutputRatio(result.value!);
               if (result.value) {
-                settings.set('sideBySideOutputRatio', result.value);
+                void settings.set('sideBySideOutputRatio', result.value);
               }
             })
             .catch(console.error);
@@ -1748,6 +1767,26 @@ function activateNotebookCompleterService(
     notebooks.forEach(panel => {
       updateCompleter(undefined, panel).catch(e => console.error(e));
     });
+  });
+}
+
+/**
+ * Activate the language server for notebook.
+ */
+function activateNotebookLanguageServer(
+  app: JupyterFrontEnd,
+  notebooks: INotebookTracker,
+  connectionManager: ILSPDocumentConnectionManager,
+  featureManager: ILSPFeatureManager,
+  codeExtractorManager: ILSPCodeExtractorsManager
+): void {
+  notebooks.widgetAdded.connect(async (_, notebook) => {
+    const adapter = new NotebookAdapter(notebook, {
+      connectionManager,
+      featureManager,
+      foreignCodeExtractorsManager: codeExtractorManager
+    });
+    connectionManager.registerAdapter(notebook.context.path, adapter);
   });
 }
 
@@ -2841,7 +2880,7 @@ function addCommands(
       }
 
       current.content.extendContiguousSelectionTo(lastIndex);
-      NotebookActions.run(current.content, current.sessionContext);
+      void NotebookActions.run(current.content, current.sessionContext);
     }
   });
 }

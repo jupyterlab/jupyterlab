@@ -66,6 +66,12 @@ pkg:codeeditor:
   - packages/codeeditor/**/*
   - packages/codeeditor/*
 
+pkg:collaboration:
+  - packages/collaboration/**/*
+  - packages/collaboration/*
+  - packages/collaboration-extension/**/*
+  - packages/collaboration-extension/*
+
 pkg:codemirror:
   - packages/codemirror/**/*
   - packages/codemirror/*
@@ -185,6 +191,12 @@ pkg:logconsole:
   - packages/logconsole/*
   - packages/logconsole-extension/**/*
   - packages/logconsole-extension/*
+
+pkg:lsp:
+  - packages/lsp/**/*
+  - packages/lsp/*
+  - packages/lsp-extension/**/*
+  - packages/lsp-extension/*
 
 pkg:mainmenu:
   - packages/mainmenu/**/*
@@ -307,12 +319,6 @@ pkg:ui-components:
   - packages/ui-components/*
   - packages/ui-components-extension/**/*
   - packages/ui-components-extension/*
-
-pkg:user:
-  - packages/user/**/*
-  - packages/user/*
-  - packages/user-extension/**/*
-  - packages/user-extension/*
 
 pkg:vdom:
   - packages/vdom/**/*

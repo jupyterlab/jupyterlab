@@ -3,10 +3,10 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
-      "path": "../shared-models"
+      "path": "../collaboration"
     },
     {
-      "path": "../user"
+      "path": "../shared-models"
     },
     {
       "path": "."

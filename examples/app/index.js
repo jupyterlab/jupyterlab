@@ -26,7 +26,9 @@ const extensions = [
   import('@jupyterlab/docmanager-extension'),
   import('@jupyterlab/documentsearch-extension'),
   import('@jupyterlab/filebrowser-extension'),
-  import('@jupyterlab/fileeditor-extension'),
+  import('@jupyterlab/fileeditor-extension').then(plugins =>
+    plugins.default.filter(({ id }) => !id.includes(':language-server'))
+  ),
   import('@jupyterlab/help-extension'),
   import('@jupyterlab/imageviewer-extension'),
   import('@jupyterlab/inspector-extension'),
@@ -34,7 +36,9 @@ const extensions = [
   import('@jupyterlab/mainmenu-extension'),
   import('@jupyterlab/markdownviewer-extension'),
   import('@jupyterlab/mathjax2-extension'),
-  import('@jupyterlab/notebook-extension'),
+  import('@jupyterlab/notebook-extension').then(plugins =>
+    plugins.default.filter(({ id }) => !id.includes(':language-server'))
+  ),
   import('@jupyterlab/rendermime-extension'),
   import('@jupyterlab/running-extension'),
   import('@jupyterlab/settingeditor-extension'),

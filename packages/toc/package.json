@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc",
-  "version": "6.0.0-alpha.11",
+  "version": "6.0.0-alpha.12",
   "description": "JupyterLab - Table of Contents widget",
   "keywords": [
     "jupyterlab"
@@ -40,13 +40,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.11",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.11",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.11",
-    "@jupyterlab/observables": "^5.0.0-alpha.11",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.11",
-    "@jupyterlab/translation": "^4.0.0-alpha.11",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
+    "@jupyterlab/apputils": "^4.0.0-alpha.12",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.12",
+    "@jupyterlab/observables": "^5.0.0-alpha.12",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.12",
+    "@jupyterlab/translation": "^4.0.0-alpha.12",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.27",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/disposable": "^1.10.1",
     "@lumino/messaging": "^1.10.1",
@@ -57,7 +57,7 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^4.0.0-alpha.11",
+    "@jupyterlab/testutils": "^4.0.0-alpha.12",
     "@types/jest": "^26.0.10",
     "@types/react": "^17.0.0",
     "jest": "^26.4.2",

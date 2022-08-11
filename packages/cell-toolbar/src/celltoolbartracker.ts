@@ -50,7 +50,7 @@ export class CellToolbarTracker implements IDisposable {
     this._toolbar.changed.connect(this._onToolbarChanged, this);
 
     // Only add the toolbar to the notebook's active cell (if any) once it has fully rendered and been revealed.
-    panel.revealed.then(() => this._onActiveCellChanged(panel.content));
+    void panel.revealed.then(() => this._onActiveCellChanged(panel.content));
 
     // Check whether the toolbar should be rendered upon a layout change
     panel.content.renderingLayoutChanged.connect(

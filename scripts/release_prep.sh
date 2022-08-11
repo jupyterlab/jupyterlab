@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 
 # Prep a fresh conda environment in a temporary folder for a release
 if [[ $# -ne 1 ]]; then

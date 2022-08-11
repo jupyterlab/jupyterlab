@@ -104,7 +104,7 @@
       },
       {
         "command": "filebrowser:shutdown",
-        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"].jp-mod-running",
         "rank": 11
       },
       {
