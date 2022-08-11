@@ -58,8 +58,8 @@ test.describe('Text Editor Tests', () => {
 
     await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
 
-    await page.fill(
-      '[role="main"] >> textarea',
+    await page.type(
+      '.cm-content',
       `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam urna
 libero, dictum a egestas non, placerat vel neque. In imperdiet iaculis fermentum.
 Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia

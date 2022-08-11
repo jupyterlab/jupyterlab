@@ -1,9 +1,8 @@
 // This file is auto-generated from the corresponding file in /dev_mode
-// This file is auto-generated from the corresponding file in /dev_mode
-/* -----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 const path = require('path');
 const fs = require('fs-extra');
@@ -11,8 +10,8 @@ const Handlebars = require('handlebars');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const merge = require('webpack-merge').default;
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
-  .BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
 

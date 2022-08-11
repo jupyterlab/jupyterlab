@@ -3,12 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ICurrentUser } from '@jupyterlab/user';
+import { ICurrentUser } from '@jupyterlab/collaboration';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
-import * as Y from 'yjs';
 import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 
 /**
@@ -23,7 +22,8 @@ import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
  */
 export class WebSocketProvider
   extends YWebsocketProvider
-  implements IDocumentProvider {
+  implements IDocumentProvider
+{
   /**
    * Construct a new WebSocketProvider
    *
@@ -32,7 +32,7 @@ export class WebSocketProvider
   constructor(options: WebSocketProvider.IOptions) {
     super(
       options.url,
-      options.contentType + ':' + options.path,
+      options.format + ':' + options.contentType + ':' + options.path,
       options.ymodel.ydoc,
       {
         awareness: options.ymodel.awareness
@@ -40,30 +40,11 @@ export class WebSocketProvider
     );
     this._path = options.path;
     this._contentType = options.contentType;
+    this._format = options.format;
     this._serverUrl = options.url;
 
-    // Message handler that receives the initial content
-    this.messageHandlers[127] = (
-      encoder,
-      decoder,
-      provider,
-      emitSynced,
-      messageType
-    ) => {
-      // received initial content
-      const initialContent = decoding.readTailAsUint8Array(decoder);
-      // Apply data from server
-      if (initialContent.byteLength > 0) {
-        Y.applyUpdate(this.doc, initialContent);
-      }
-      const initialContentRequest = this._initialContentRequest;
-      this._initialContentRequest = null;
-      if (initialContentRequest) {
-        initialContentRequest.resolve(initialContent.byteLength > 0);
-      }
-    };
     // Message handler that receives the rename acknowledge
-    this.messageHandlers[125] = (
+    this.messageHandlers[127] = (
       encoder,
       decoder,
       provider,
@@ -74,9 +55,6 @@ export class WebSocketProvider
         decoding.readTailAsUint8Array(decoder)[0] ? true : false
       );
     };
-    this._isInitialized = false;
-    this._onConnectionStatus = this._onConnectionStatus.bind(this);
-    this.on('status', this._onConnectionStatus);
 
     const awareness = options.ymodel.awareness;
     const user = options.user;
@@ -100,10 +78,12 @@ export class WebSocketProvider
       this._path = newPath;
       const encoder = encoding.createEncoder();
       this._renameAck = new PromiseDelegate<boolean>();
-      encoding.write(encoder, 125);
+      encoding.write(encoder, 127);
       // writing a utf8 string to the encoder
       const escapedPath = unescape(
-        encodeURIComponent(this._contentType + ':' + newPath)
+        encodeURIComponent(
+          this._format + ':' + this._contentType + ':' + newPath
+        )
       );
       for (let i = 0; i < escapedPath.length; i++) {
         encoding.write(
@@ -116,40 +96,16 @@ export class WebSocketProvider
       this.disconnectBc();
       // The next time the provider connects, we should connect through a different server url
       this.bcChannel =
-        this._serverUrl + '/' + this._contentType + ':' + this._path;
+        this._serverUrl +
+        '/' +
+        this._format +
+        ':' +
+        this._contentType +
+        ':' +
+        this._path;
       this.url = this.bcChannel;
       this.connectBc();
     }
-  }
-
-  /**
-   * Resolves to true if the initial content has been initialized on the server. false otherwise.
-   */
-  requestInitialContent(): Promise<boolean> {
-    if (this._initialContentRequest) {
-      return this._initialContentRequest.promise;
-    }
-
-    this._initialContentRequest = new PromiseDelegate<boolean>();
-    this._sendMessage(new Uint8Array([127]));
-
-    // Resolve with true if the server doesn't respond for some reason.
-    // In case of a connection problem, we don't want the user to re-initialize the window.
-    // Instead wait for y-websocket to connect to the server.
-    // @todo maybe we should reload instead..
-    setTimeout(() => this._initialContentRequest?.resolve(false), 1000);
-    return this._initialContentRequest.promise;
-  }
-
-  /**
-   * Put the initialized state.
-   */
-  putInitializedState(): void {
-    const encoder = encoding.createEncoder();
-    encoding.writeVarUint(encoder, 126);
-    encoding.writeUint8Array(encoder, Y.encodeStateAsUpdate(this.doc));
-    this._sendMessage(encoding.toUint8Array(encoder));
-    this._isInitialized = true;
   }
 
   /**
@@ -171,27 +127,10 @@ export class WebSocketProvider
     send();
   }
 
-  /**
-   * Handle a change to the connection status.
-   *
-   * @param status The connection status.
-   */
-  private async _onConnectionStatus(status: {
-    status: 'connected' | 'disconnected';
-  }): Promise<void> {
-    if (this._isInitialized && status.status === 'connected') {
-      const contentIsInitialized = await this.requestInitialContent();
-      if (!contentIsInitialized) {
-        this.putInitializedState();
-      }
-    }
-  }
-
   private _path: string;
   private _contentType: string;
+  private _format: string;
   private _serverUrl: string;
-  private _isInitialized: boolean;
-  private _initialContentRequest: PromiseDelegate<boolean> | null = null;
   private _renameAck: PromiseDelegate<boolean>;
 }
 

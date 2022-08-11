@@ -187,9 +187,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       void this.update(widget, connection);
     };
 
-    const contextKernelChangedHandlers = this._contextKernelChangedHandlers[
-      widget.id
-    ];
+    const contextKernelChangedHandlers =
+      this._contextKernelChangedHandlers[widget.id];
 
     if (contextKernelChangedHandlers) {
       sessionContext.kernelChanged.disconnect(contextKernelChangedHandlers);
@@ -341,6 +340,17 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
 
     addToolbarButton(false);
+
+    // listen to the disposed signals
+    widget.disposed.connect(async () => {
+      if (isDebuggerOn()) {
+        await stopDebugger();
+      }
+      removeHandlers();
+      delete this._iconButtons[widget.id];
+      delete this._contextKernelChangedHandlers[widget.id];
+    });
+
     const debuggingEnabled = await this._service.isAvailable(connection);
     if (!debuggingEnabled) {
       removeHandlers();
@@ -382,9 +392,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     // if the debugger is started but there is no handler, create a new one
     createHandler();
     this._previousConnection = connection;
-
-    // listen to the disposed signals
-    widget.disposed.connect(removeHandlers);
   }
 
   private _type: DebuggerHandler.SessionType;

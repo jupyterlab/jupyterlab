@@ -4,7 +4,6 @@
 import { JSONEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { framePromise } from '@jupyterlab/testutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -303,18 +302,6 @@ describe('codeeditor', () => {
         simulate(editor.revertButtonNode, 'click');
         simulate(editor.commitButtonNode, 'click');
         expect(editor.events).toEqual(['blur', 'click', 'click']);
-      });
-    });
-
-    describe('#onAfterShow()', () => {
-      it('should update the editor', async () => {
-        editor.hide();
-        Widget.attach(editor, document.body);
-        editor.show();
-        await framePromise();
-        expect(editor.methods).toEqual(
-          expect.arrayContaining(['onUpdateRequest'])
-        );
       });
     });
 

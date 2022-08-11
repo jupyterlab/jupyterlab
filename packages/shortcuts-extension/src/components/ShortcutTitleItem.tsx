@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import * as React from 'react';
 
 import { classes } from 'typestyle';
@@ -14,9 +19,7 @@ export interface IShortcutTitleItemProps {
   active: string;
 }
 
-export class ShortcutTitleItem extends React.Component<
-  IShortcutTitleItemProps
-> {
+export class ShortcutTitleItem extends React.Component<IShortcutTitleItemProps> {
   render(): JSX.Element {
     return (
       <div

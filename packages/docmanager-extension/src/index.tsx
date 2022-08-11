@@ -24,7 +24,7 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   IDocumentManager,
@@ -616,7 +616,7 @@ function addCommands(
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
       const factory = (args['factory'] as string) || void 0;
-      const kernel = (args?.kernel as unknown) as Kernel.IModel | undefined;
+      const kernel = args?.kernel as unknown as Kernel.IModel | undefined;
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       return docManager.services.contents
@@ -738,9 +738,19 @@ function addCommands(
     }
   });
 
+  const caption = () => {
+    if (PageConfig.getOption('collaborative') == 'true') {
+      return trans.__(
+        'In collaborative mode, the document is saved automatically after every change'
+      );
+    } else {
+      return trans.__('Save and create checkpoint');
+    }
+  };
+
   commands.addCommand(CommandIDs.save, {
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
-    caption: trans.__('Save and create checkpoint'),
+    caption,
     icon: args => (args.toolbar ? saveIcon : ''),
     isEnabled: isWritable,
     execute: () => {
@@ -772,8 +782,7 @@ function addCommands(
             })
             .catch(err => {
               // If the save was canceled by user-action, do nothing.
-              // FIXME-TRANS: Is this using the text on the button or?
-              if (err.message === 'Cancel') {
+              if (err.name === 'ModalCancelError') {
                 return;
               }
               throw err;
@@ -919,7 +928,7 @@ function addLabCommands(
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
-        return renameDialog(docManager, context!.path);
+        return renameDialog(docManager, context!);
       }
     }
   });

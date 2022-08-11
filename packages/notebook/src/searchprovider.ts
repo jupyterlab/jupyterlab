@@ -196,9 +196,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    */
   getInitialQuery(): string {
     const activeCell = this.widget.content.activeCell;
-    const selection = (activeCell?.editor as
-      | CodeMirrorEditor
-      | undefined)?.doc.getSelection();
+    const editor = activeCell?.editor as CodeMirrorEditor | undefined;
+    const selection = editor?.state.sliceDoc(
+      editor?.state.selection.main.from,
+      editor?.state.selection.main.to
+    );
     // if there are newlines, just return empty string
     return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
@@ -384,13 +386,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
 
-    cellSearchProvider
+    void cellSearchProvider
       .setIsActive(
         !(this._filters?.selectedCells ?? false) ||
           this.widget.content.isSelectedOrActive(cell)
       )
       .then(() => {
-        cellSearchProvider.startQuery(this._query, this._filters);
+        void cellSearchProvider.startQuery(this._query, this._filters);
       });
   }
 

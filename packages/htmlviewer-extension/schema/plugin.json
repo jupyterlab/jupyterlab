@@ -17,6 +17,12 @@
       },
       "type": "array",
       "default": []
+    },
+    "trustByDefault": {
+      "type": "boolean",
+      "title": "Trust HTML by default",
+      "description": "Whether to trust HTML files upon opening",
+      "default": false
     }
   },
   "additionalProperties": false,

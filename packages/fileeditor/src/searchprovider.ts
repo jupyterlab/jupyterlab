@@ -21,14 +21,14 @@ export type FileEditorPanel = MainAreaWidget<FileEditor>;
  */
 export class FileEditorSearchProvider
   extends CodeMirrorSearchProvider
-  implements ISearchProvider {
+  implements ISearchProvider
+{
   /**
    * Constructor
    * @param widget File editor panel
    */
   constructor(widget: FileEditorPanel) {
-    super();
-    this.editor = widget.content.editor as CodeMirrorEditor;
+    super(widget.content.editor as CodeMirrorEditor);
   }
 
   /**
@@ -69,7 +69,10 @@ export class FileEditorSearchProvider
    */
   getInitialQuery(): string {
     const cm = this.editor as CodeMirrorEditor;
-    const selection = cm.doc.getSelection();
+    const selection = cm.state.sliceDoc(
+      cm.state.selection.main.from,
+      cm.state.selection.main.to
+    );
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
   }

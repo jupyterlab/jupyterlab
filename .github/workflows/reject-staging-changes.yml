@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get modified files in the staging directory
         id: modified-files-in-staging
-        uses: tj-actions/changed-files@v18.6
+        uses: tj-actions/changed-files@v24
         with:
           # only checks for modified files in this directory
           files: jupyterlab/staging

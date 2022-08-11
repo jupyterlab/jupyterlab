@@ -209,12 +209,15 @@ test.describe('General', () => {
     await page.click('text=Lorenz.ipynb', { button: 'right' });
     await page.hover('text=Copy Shareable Link');
 
+    const itemHandle = await page.$('text=Copy Shareable Link');
+    const itemBBox = await itemHandle.boundingBox();
+
     // Inject mouse
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 260, y: 350 })]
+      [positionMouse({ x: 260, y: itemBBox.y + itemBBox.height * 0.5 })]
     );
 
     expect(
@@ -447,7 +450,7 @@ test.describe('General', () => {
     await page.click('text=File');
     await page.click('ul[role="menu"] >> text=New Console for Notebook');
 
-    await page.click('.jp-CodeConsole-input >> pre[role="presentation"]');
+    await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
       "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
     );

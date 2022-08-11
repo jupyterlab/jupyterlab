@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ArrayExt, StringExt } from '@lumino/algorithm';
@@ -151,7 +156,7 @@ function matchItems(items: any, query: string): any {
   query = normalizeQuery(query);
 
   // Create the array to hold the scores.
-  let scores: Object[] = [];
+  let scores: any[] = [];
   // Iterate over the items and match against the query.
   let itemList = Object.keys(items);
   for (let i = 0, n = itemList.length; i < n; ++i) {
@@ -257,7 +262,7 @@ export class ShortcutUI extends React.Component<
   IShortcutUIProps,
   IShortcutUIState
 > {
-  constructor(props: any) {
+  constructor(props: IShortcutUIProps) {
     super(props);
     this.state = {
       shortcutList: {},
@@ -277,7 +282,8 @@ export class ShortcutUI extends React.Component<
   }
   /** Fetch shortcut list from SettingRegistry  */
   private async _refreshShortcutList(): Promise<void> {
-    const shortcuts: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
+    const shortcuts: ISettingRegistry.ISettings =
+      await this.props.external.getAllShortCutSettings();
     const shortcutObjects = getShortcutObjects(this.props.external, shortcuts);
     this.setState(
       {
@@ -314,7 +320,7 @@ export class ShortcutUI extends React.Component<
   };
 
   /** Filter shortcut list using current search query */
-  private searchFilterShortcuts(shortcutObjects: Object): ShortcutObject[] {
+  private searchFilterShortcuts(shortcutObjects: any): ShortcutObject[] {
     const filteredShortcuts = matchItems(
       shortcutObjects,
       this.state.searchQuery
@@ -325,7 +331,7 @@ export class ShortcutUI extends React.Component<
   }
 
   /** Reset all shortcuts to their defaults */
-  resetShortcuts = async () => {
+  resetShortcuts = async (): Promise<void> => {
     const settings = await this.props.external.getAllShortCutSettings();
     for (const key of Object.keys(settings.user)) {
       await this.props.external.removeShortCut(key);
@@ -334,8 +340,12 @@ export class ShortcutUI extends React.Component<
   };
 
   /** Set new shortcut for command, refresh state */
-  handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
-    const settings: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
+  handleUpdate = async (
+    shortcutObject: ShortcutObject,
+    keys: string[]
+  ): Promise<void> => {
+    const settings: ISettingRegistry.ISettings =
+      await this.props.external.getAllShortCutSettings();
     const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
     let found = false;
@@ -369,14 +379,15 @@ export class ShortcutUI extends React.Component<
   deleteShortcut = async (
     shortcutObject: ShortcutObject,
     shortcutId: string
-  ) => {
+  ): Promise<void> => {
     await this.handleUpdate(shortcutObject, ['']);
     await this._refreshShortcutList();
   };
 
   /** Reset a specific shortcut to its default settings */
-  resetShortcut = async (shortcutObject: ShortcutObject) => {
-    const settings: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
+  resetShortcut = async (shortcutObject: ShortcutObject): Promise<void> => {
+    const settings: ISettingRegistry.ISettings =
+      await this.props.external.getAllShortCutSettings();
     const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
     for (let shortcut of userShortcuts as any) {
@@ -461,7 +472,7 @@ export class ShortcutUI extends React.Component<
     this.setState({ filteredShortcutList: shortcutList });
   };
 
-  contextMenu = (event: any, commandIDs: string[]) => {
+  contextMenu = (event: React.MouseEvent, commandIDs: string[]): void => {
     event.persist();
     this.setState(
       {
@@ -477,7 +488,7 @@ export class ShortcutUI extends React.Component<
     );
   };
 
-  render() {
+  render(): JSX.Element | null {
     if (!this.state.shortcutsFetched) {
       return null;
     }

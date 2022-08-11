@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/ui-components",
-  "version": "4.0.0-alpha.24",
+  "version": "4.0.0-alpha.27",
   "description": "JupyterLab - UI components written in React",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,8 +40,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
-    "@jupyterlab/translation": "^4.0.0-alpha.9",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.12",
+    "@jupyterlab/translation": "^4.0.0-alpha.12",
     "@lumino/algorithm": "^1.9.1",
     "@lumino/commands": "^1.20.0",
     "@lumino/coreutils": "^1.12.0",
@@ -51,7 +52,7 @@
     "@lumino/properties": "^1.8.1",
     "@lumino/signaling": "^1.10.1",
     "@lumino/virtualdom": "^1.14.1",
-    "@lumino/widgets": "^1.31.1",
+    "@lumino/widgets": "^1.33.0",
     "@rjsf/core": "^3.1.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -60,7 +61,7 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^4.0.0-alpha.9",
+    "@jupyterlab/testutils": "^4.0.0-alpha.12",
     "@types/jest": "^26.0.10",
     "@types/react": "^17.0.0",
     "babel-loader": "^8.0.6",
@@ -69,7 +70,7 @@
     "svgo": "^2.8.0",
     "ts-jest": "^26.3.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.6.3"
+    "typescript": "~4.7.3"
   },
   "peerDependencies": {
     "react": "^17.0.1"

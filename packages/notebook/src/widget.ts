@@ -213,7 +213,6 @@ export class StaticNotebook extends Widget {
     // Section for the virtual-notebook behavior.
     this._idleCallBack = null;
     this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
-    this._cellsArray = new Array<Cell>();
     if ('IntersectionObserver' in window) {
       this._observer = new IntersectionObserver(
         (entries, observer) => {
@@ -235,6 +234,10 @@ export class StaticNotebook extends Widget {
         }
       );
     }
+  }
+
+  get cellCollapsed(): ISignal<this, Cell> {
+    return this._cellCollapsed;
   }
 
   /**
@@ -266,6 +269,13 @@ export class StaticNotebook extends Widget {
    */
   get modelContentChanged(): ISignal<this, void> {
     return this._modelContentChanged;
+  }
+
+  /**
+   * A signal emitted when the rendering layout of the notebook changes.
+   */
+  get renderingLayoutChanged(): ISignal<this, RenderingLayout> {
+    return this._renderingLayoutChanged;
   }
 
   /**
@@ -366,6 +376,7 @@ export class StaticNotebook extends Widget {
     } else {
       this.node.classList.remove(SIDE_BY_SIDE_CLASS);
     }
+    this._renderingLayoutChanged.emit(this._renderingLayout ?? 'default');
   }
 
   /**
@@ -574,7 +585,6 @@ export class StaticNotebook extends Widget {
     widget.addClass(NB_CELL_CLASS);
 
     const layout = this.layout as PanelLayout;
-    this._cellsArray.push(widget);
     if (
       this._observer &&
       insertType === 'push' &&
@@ -642,7 +652,7 @@ export class StaticNotebook extends Widget {
     }
 
     if (
-      this._renderedCellsCount < this._cellsArray.length &&
+      this._renderedCellsCount < (this.model?.cells.length ?? 0) &&
       this._renderedCellsCount >=
         this.notebookConfig.numberCellsToRenderDirectly
     ) {
@@ -704,16 +714,17 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false,
       placeholder: false,
-      showEditorForReadOnlyMarkdown: this._notebookConfig
-        .showEditorForReadOnlyMarkdown
+      showEditorForReadOnlyMarkdown:
+        this._notebookConfig.showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
     cell.syncEditable = true;
     // Connect collapsed signal for each markdown cell widget
-    cell.toggleCollapsedSignal.connect(
+    cell.headingCollapsedChanged.connect(
       (newCell: MarkdownCell, collapsed: boolean) => {
         NotebookActions.setHeadingCollapse(newCell, collapsed, this);
+        this._cellCollapsed.emit(newCell);
       }
     );
     return cell;
@@ -836,7 +847,6 @@ export class StaticNotebook extends Widget {
           break;
       }
       cell.editor.setOptions({ ...config });
-      cell.editor.refresh();
     }
   }
 
@@ -855,14 +865,13 @@ export class StaticNotebook extends Widget {
       this._notebookConfig.showHiddenCellsButton
     );
     // Control editor visibility for read-only Markdown cells
-    const showEditorForReadOnlyMarkdown = this._notebookConfig
-      .showEditorForReadOnlyMarkdown;
-    // 'this._cellsArray' check is here as '_updateNotebookConfig()'
-    // can be called before 'this._cellsArray' is defined
-    if (showEditorForReadOnlyMarkdown !== undefined && this._cellsArray) {
-      for (const cell of this._cellsArray) {
+    const showEditorForReadOnlyMarkdown =
+      this._notebookConfig.showEditorForReadOnlyMarkdown;
+    if (showEditorForReadOnlyMarkdown !== undefined) {
+      for (const cell of this.widgets) {
         if (cell.model.type === 'markdown') {
-          (cell as MarkdownCell).showEditorForReadOnly = showEditorForReadOnlyMarkdown;
+          (cell as MarkdownCell).showEditorForReadOnly =
+            showEditorForReadOnlyMarkdown;
         }
       }
     }
@@ -879,6 +888,7 @@ export class StaticNotebook extends Widget {
     return this._toRenderMap.size;
   }
 
+  private _cellCollapsed = new Signal<this, Cell>(this);
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
@@ -892,8 +902,8 @@ export class StaticNotebook extends Widget {
   private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
   private _idleCallBack: any;
-  private _cellsArray: Array<Cell>;
   private _renderingLayout: RenderingLayout | undefined;
+  private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
 }
 
 /**
@@ -1098,6 +1108,11 @@ export namespace StaticNotebook {
      * Override the side-by-side right margin.
      */
     sideBySideRightMarginOverride: string;
+
+    /**
+     * Side-by-side output ratio.
+     */
+    sideBySideOutputRatio: number;
   }
 
   /**
@@ -1118,7 +1133,8 @@ export namespace StaticNotebook {
     disableDocumentWideUndoRedo: false,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
-    sideBySideRightMarginOverride: '10px'
+    sideBySideRightMarginOverride: '10px',
+    sideBySideOutputRatio: 1
   };
 
   /**
@@ -1126,7 +1142,8 @@ export namespace StaticNotebook {
    */
   export class ContentFactory
     extends Cell.ContentFactory
-    implements IContentFactory {
+    implements IContentFactory
+  {
     /**
      * Create a new code cell widget.
      *
@@ -2137,6 +2154,10 @@ export class Notebook extends StaticNotebook {
 
       this.deselectAll();
       this.activeCellIndex = index;
+      // Focus notebook if active cell changes but does not have focus.
+      if (!this.activeCell!.node.contains(document.activeElement)) {
+        this.node.focus();
+      }
     }
 
     this._mouseMode = null;

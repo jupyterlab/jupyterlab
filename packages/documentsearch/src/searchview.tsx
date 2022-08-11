@@ -682,10 +682,10 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
           this.model.filters = { ...this.model.filters, ...filters };
         }}
         onHighlightNext={() => {
-          this.model.highlightNext();
+          void this.model.highlightNext();
         }}
         onHighlightPrevious={() => {
-          this.model.highlightPrevious();
+          void this.model.highlightPrevious();
         }}
         onSearchChanged={(q: string) => {
           this.model.searchExpression = q;
@@ -702,10 +702,10 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
           this.model.replaceText = q;
         }}
         onReplaceCurrent={() => {
-          this.model.replaceCurrentMatch();
+          void this.model.replaceCurrentMatch();
         }}
         onReplaceAll={() => {
-          this.model.replaceAllMatches();
+          void this.model.replaceAllMatches();
         }}
       ></SearchOverlay>
     );

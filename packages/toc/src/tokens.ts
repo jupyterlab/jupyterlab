@@ -1,39 +1,41 @@
-import { IWidgetTracker } from '@jupyterlab/apputils';
-import type { Cell } from '@jupyterlab/cells';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { VDomRenderer } from '@jupyterlab/ui-components';
+import type { JSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * Interface describing the table of contents registry.
  */
 export interface ITableOfContentsRegistry {
   /**
-   * Finds a table of contents generator for a widget.
+   * Finds a table of contents model for a widget.
    *
    * ## Notes
    *
-   * -   If unable to find a table of contents generator, the method return `undefined`.
+   * -   If unable to find a table of contents model, the method return `undefined`.
    *
    * @param widget - widget
-   * @returns table of contents generator
+   * @param configuration - Table of contents configuration
+   * @returns Table of contents model or undefined if not found
    */
-  find(widget: Widget): ITableOfContentsRegistry.IGenerator | undefined;
+  getModel(
+    widget: Widget,
+    configuration?: TableOfContents.IConfig
+  ): TableOfContents.Model | undefined;
 
   /**
-   * Adds a table of contents generator to the registry.
+   * Adds a table of contents factory to the registry.
    *
-   * @param generator - table of contents generator
+   * @param factory - table of contents factory
    */
-  add(generator: ITableOfContentsRegistry.IGenerator): void;
-
-  /**
-   * Signal emitted when a table of content section collapse state changes.
-   */
-  readonly collapseChanged: ISignal<
-    this,
-    ITableOfContentsRegistry.ICollapseChangedArgs
-  >;
+  add(factory: TableOfContents.IFactory): IDisposable;
 }
 
 /**
@@ -44,206 +46,237 @@ export const ITableOfContentsRegistry = new Token<ITableOfContentsRegistry>(
 );
 
 /**
- * Interface describing a heading.
+ * Interface for the table of contents tracker
  */
-export interface IHeading {
+export interface ITableOfContentsTracker {
   /**
-   * Heading text.
-   */
-  text: string;
-
-  /**
-   * HTML heading level.
-   */
-  level: number;
-
-  /**
-   * Callback invoked upon clicking a ToC item.
+   * Get the model associated with a given widget.
    *
-   * ## Notes
-   *
-   * -   This will typically be used to scroll the parent widget to this item.
+   * @param widget Widget
    */
-  onClick: () => void;
-
-  /**
-   * Special HTML markup.
-   *
-   * ## Notes
-   *
-   * -   The HTML string **should** be properly **sanitized**!
-   * -   The HTML string can be used to render Markdown headings which have already been rendered as HTML.
-   */
-  html?: string;
+  get(widget: Widget): TableOfContents.IModel<TableOfContents.IHeading> | null;
 }
 
 /**
- * Interface describing a numbered heading.
+ * Table of contents tracker token.
  */
-export interface INumberedHeading extends IHeading {
-  /**
-   * Heading numbering.
-   */
-  numbering?: string | null;
-}
-
-/**
- * Cell running status
- */
-export enum RunningStatus {
-  /**
-   * Cell is idle
-   */
-  Idle = -1,
-  /**
-   * Cell execution is scheduled
-   */
-  Scheduled = 0,
-  /**
-   * Cell is running
-   */
-  Running = 1
-}
-
-/**
- * Interface describing a notebook cell heading.
- */
-export interface INotebookHeading extends INumberedHeading {
-  /**
-   * Heading type.
-   */
-  type: 'header' | 'markdown' | 'code';
-
-  /**
-   * Reference to a notebook cell.
-   */
-  cellRef: Cell;
-
-  /**
-   * Heading prompt.
-   */
-  prompt?: string;
-
-  /**
-   * Boolean indicating whether a heading has a child node.
-   */
-  hasChild?: boolean;
-
-  /**
-   * index of reference cell in the notebook
-   */
-  index: number;
-
-  /**
-   * Running status of the cells in the heading
-   */
-  isRunning: RunningStatus;
-}
+export const ITableOfContentsTracker = new Token<ITableOfContentsTracker>(
+  '@jupyterlab/toc:ITableOfContentsTracker'
+);
 
 /**
  * Namespace for table of contents interface
  */
-export namespace ITableOfContentsRegistry {
+export namespace TableOfContents {
   /**
-   * Interface for managing options affecting how a table of contents is generated for a particular widget type.
+   * Table of content model factory interface
    */
-  export interface IOptionsManager {}
-
-  /**
-   * Interface for the arguments needed in the collapse signal of a generator
-   */
-  export interface ICollapseChangedArgs {
+  export interface IFactory<W extends Widget = Widget> {
     /**
-     * Boolean indicating whether the given heading is collapsed in ToC
+     * Whether the factory can handle the widget or not.
+     *
+     * @param widget - widget
+     * @returns boolean indicating a ToC can be generated
      */
-    collapsedState: boolean;
+    isApplicable: (widget: W) => boolean;
 
     /**
-     * Heading that was involved in the collapse event
+     * Create a new table of contents model for the widget
+     *
+     * @param widget - widget
+     * @param configuration - Table of contents configuration
+     * @returns The table of contents model
      */
-    heading: IHeading;
-
-    /**
-     * Type of file that the given heading was produced from
-     */
-    tocType: string;
+    createNew: (
+      widget: W,
+      configuration?: TableOfContents.IConfig
+    ) => IModel<IHeading>;
   }
 
   /**
-   * Interface describing a widget table of contents generator.
+   * Table of Contents configuration
+   *
+   * #### Notes
+   * A document model may ignore some of those options.
    */
-  export interface IGenerator<W extends Widget = Widget> {
+  export interface IConfig extends JSONObject {
     /**
-     * Widget instance tracker.
+     * Base level for the highest headings
      */
-    tracker: IWidgetTracker<W>;
+    baseNumbering: number;
+    /**
+     * Maximal depth of headings to display
+     */
+    maximalDepth: number;
+    /**
+     * Whether to number first-level headings or not.
+     */
+    numberingH1: boolean;
+    /**
+     * Whether to number headings in document or not.
+     */
+    numberHeaders: boolean;
+    /**
+     * Whether to include cell outputs in headings or not.
+     */
+    includeOutput: boolean;
+    /**
+     * Whether to synchronize heading collapse state between the ToC and the document or not.
+     */
+    syncCollapseState: boolean;
+  }
+
+  /**
+   * Default table of content configuration
+   */
+  export const defaultConfig: IConfig = {
+    baseNumbering: 1,
+    maximalDepth: 4,
+    numberingH1: true,
+    numberHeaders: false,
+    includeOutput: true,
+    syncCollapseState: false
+  };
+
+  /**
+   * Interface describing a heading.
+   */
+  export interface IHeading {
+    /**
+     * Heading text.
+     */
+    text: string;
 
     /**
-     * Returns a boolean indicating whether we can generate a ToC for a widget.
-     *
-     * ## Notes
-     *
-     * -   By default, we assume ToC generation is enabled if the widget is hosted in `tracker`.
-     * -   However, a user may want to add additional checks (e.g., only generate a ToC for text files only if they have a given MIME type).
-     *
-     * @param widget - widget
-     * @returns boolean indicating whether we can generate a ToC for a widget
+     * HTML heading level.
      */
-    isEnabled?: (widget: W) => boolean;
+    level: number;
 
     /**
-     * Boolean indicating whether a document uses LaTeX typesetting.
-     *
-     * @default false
+     * Heading prefix.
      */
-    usesLatex?: boolean;
+    prefix?: string | null;
 
     /**
-     * Options manager.
-     *
-     * @default undefined
+     * Dataset to add to the item node
      */
-    options?: IOptionsManager;
+    dataset?: Record<string, string>;
 
     /**
-     * Signal to indicate that a collapse event happened to this heading
-     * within the ToC.
+     * Whether the heading is collapsed or not
      */
-    collapseChanged?: ISignal<IOptionsManager, ICollapseChangedArgs>;
+    collapsed?: boolean;
+  }
+
+  /**
+   * Interface describing a widget table of contents model.
+   */
+  export interface IModel<H extends IHeading> extends VDomRenderer.IModel {
+    /**
+     * Active heading
+     */
+    readonly activeHeading: H | null;
 
     /**
-     * Returns a JSX element for each heading.
-     *
-     * ## Notes
-     *
-     * -   If not present, a default renderer will be used.
-     *
-     * @param item - heading
-     * @param toc - list of headings
-     * @returns JSX element
+     * Signal emitted when the active heading changes.
      */
-    itemRenderer?: (
-      item: IHeading,
-      toc: INotebookHeading[]
-    ) => JSX.Element | null;
+    readonly activeHeadingChanged: ISignal<IModel<H>, H | null>;
 
     /**
-     * Returns a toolbar component.
+     * Signal emitted when a table of content section collapse state changes.
      *
-     * ## Notes
-     *
-     * -   If not present, no toolbar is generated.
-     *
-     * @returns toolbar component
+     * If all headings state are set at the same time, the argument is null.
      */
-    toolbarGenerator?: () => any;
+    readonly collapseChanged: ISignal<IModel<H>, H | null>;
 
     /**
-     * Returns a list of headings.
+     * Model configuration
+     */
+    readonly configuration: IConfig;
+
+    /**
+     * Type of document supported by the model.
      *
-     * @param widget - widget
+     * #### Notes
+     * A `data-document-type` attribute with this value will be set
+     * on the tree view `.jp-TableOfContents-content[data-document-type="..."]`
+     */
+    readonly documentType: string;
+
+    /**
+     * Returns the list of headings.
+     *
      * @returns list of headings
      */
-    generate(widget: W, options?: IOptionsManager): IHeading[];
+    readonly headings: H[];
+
+    /**
+     * Signal emitted when the headings changes.
+     */
+    readonly headingsChanged: ISignal<IModel<H>, void>;
+
+    /**
+     * Whether the model needs to be kept up to date or not.
+     *
+     * ### Notes
+     * This is set to `true` if the ToC panel is visible and
+     * to `false` if it is hidden. But some models may require
+     * to be always active; e.g. to add numbering in the document.
+     */
+    isActive: boolean;
+
+    /**
+     * Set a new active heading.
+     *
+     * @param heading The new active heading
+     * @param emitSignal Whether to emit the activeHeadingChanged signal or not.
+     */
+    setActiveHeading(heading: H | null, emitSignal?: boolean): void;
+
+    /**
+     * Model configuration setter.
+     *
+     * @param c New configuration
+     */
+    setConfiguration(c: Partial<IConfig>): void;
+
+    /**
+     * List of configuration options supported by the model.
+     */
+    readonly supportedOptions: (keyof IConfig)[];
+
+    /**
+     * Document title
+     */
+    title?: string;
+
+    /**
+     * Callback on heading collapse.
+     *
+     * @param options.heading The heading to change state (all headings if not provided)
+     * @param options.collapsed The new collapsed status (toggle existing status if not provided)
+     */
+    toggleCollapse: (options: { heading?: H; collapsed?: boolean }) => void;
   }
+
+  /**
+   * Generic table of contents type
+   */
+  export type Model = IModel<IHeading>;
+
+  /**
+   * Interface describing table of contents widget options.
+   */
+  export interface IOptions {
+    /**
+     * Table of contents model.
+     */
+    model?: IModel<IHeading>;
+  }
+
+  /**
+   * Interface describing a toolbar item list
+   */
+  export interface IToolbarItems
+    extends IObservableList<ToolbarRegistry.IToolbarItem> {}
 }

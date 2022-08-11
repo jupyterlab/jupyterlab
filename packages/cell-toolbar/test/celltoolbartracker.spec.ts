@@ -6,52 +6,20 @@ import {
   createToolbarFactory,
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
-import { CellBarExtension } from '@jupyterlab/cell-toolbar';
+import { CellBarExtension, CellToolbarTracker } from '@jupyterlab/cell-toolbar';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { ITranslator } from '@jupyterlab/translation';
-
 import { CommandRegistry } from '@lumino/commands';
-import { Signal } from '@lumino/signaling';
-
-import { CellToolbarTracker } from '../src/celltoolbartracker';
-
-class TestSettings implements ISettingRegistry.ISettings {
-  changed = new Signal<this, void>(this);
-  composite = {};
-  id = 'test-settings';
-  isDisposed = false;
-  plugin = {
-    id: 'test-plugin',
-    data: {
-      composite: {},
-      user: {}
-    }, // ISettingBundle
-    raw: '',
-    schema: { type: 'object' } as ISettingRegistry.ISchema,
-    version: '0.0.1'
-  };
-  raw = '';
-  schema = { type: 'object' } as ISettingRegistry.ISchema;
-  user = {};
-  version = '0.0.2';
-  annotatedDefaults = jest.fn();
-  default = jest.fn();
-  get = jest.fn();
-  remove = jest.fn();
-  save = jest.fn();
-  set = jest.fn();
-  validate = jest.fn();
-  dispose = jest.fn();
-}
+import { Widget } from '@lumino/widgets';
 
 function testToolbarFactory() {
   const pluginId = '@jupyterlab/cell-toolbar';
 
   const toolbarRegistry = new ToolbarWidgetRegistry({
-    defaultFactory: jest.fn()
+    defaultFactory: jest.fn().mockImplementation(() => new Widget())
   });
 
   const bar: ISettingRegistry.IPlugin = {
@@ -159,7 +127,6 @@ describe('@jupyterlab/cell-toolbar', () => {
 
   describe('CellToolbarTracker', () => {
     let commands: CommandRegistry;
-    let settings: ISettingRegistry.ISettings;
     let panel: NotebookPanel;
     let extension: CellBarExtension;
 
@@ -171,8 +138,6 @@ describe('@jupyterlab/cell-toolbar', () => {
       commands.addCommand('notebook:move-cell-down', {
         execute: args => null
       });
-
-      settings = new TestSettings();
 
       extension = new CellBarExtension(commands, testToolbarFactory());
     });

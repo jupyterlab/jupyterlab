@@ -46,6 +46,12 @@ pkg:attachments:
   - packages/attachments/**/*
   - packages/attachments/*
 
+pkg:cell-toolbar:
+  - packages/cell-toolbar/**/*
+  - packages/cell-toolbar/*
+  - packages/cell-toolbar-extension/**/*
+  - packages/cell-toolbar-extension/*
+
 pkg:cells:
   - packages/cells/**/*
   - packages/cells/*
@@ -59,6 +65,12 @@ pkg:celltags:
 pkg:codeeditor:
   - packages/codeeditor/**/*
   - packages/codeeditor/*
+
+pkg:collaboration:
+  - packages/collaboration/**/*
+  - packages/collaboration/*
+  - packages/collaboration-extension/**/*
+  - packages/collaboration-extension/*
 
 pkg:codemirror:
   - packages/codemirror/**/*
@@ -179,6 +191,12 @@ pkg:logconsole:
   - packages/logconsole/*
   - packages/logconsole-extension/**/*
   - packages/logconsole-extension/*
+
+pkg:lsp:
+  - packages/lsp/**/*
+  - packages/lsp/*
+  - packages/lsp-extension/**/*
+  - packages/lsp-extension/*
 
 pkg:mainmenu:
   - packages/mainmenu/**/*

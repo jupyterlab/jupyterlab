@@ -268,6 +268,7 @@ export namespace CodeEditor {
         this.value.text = sharedModel.getSource();
       }
       this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
+      this.sharedModel.dispose();
       // clone model retrieve a shared (not standalone) model
       this.sharedModel = sharedModel;
       this.sharedModel.changed.connect(this._onSharedModelChanged, this);
@@ -402,6 +403,7 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this.modelDB.dispose();
       Signal.clearData(this);
     }
 
@@ -613,14 +615,6 @@ export namespace CodeEditor {
     blur(): void;
 
     /**
-     * Repaint the editor.
-     *
-     * #### Notes
-     * A repainted editor should fit to its host node.
-     */
-    refresh(): void;
-
-    /**
      * Resize the editor to fit its host node.
      */
     resizeToFit(): void;
@@ -633,16 +627,6 @@ export namespace CodeEditor {
      * @returns A disposable that can be used to remove the handler.
      */
     addKeydownHandler(handler: KeydownHandler): IDisposable;
-
-    /**
-     * Set the size of the editor.
-     *
-     * @param size - The desired size.
-     *
-     * #### Notes
-     * Use `null` if the size is unknown.
-     */
-    setSize(size: IDimension | null): void;
 
     /**
      * Reveals the given position in the editor.
@@ -678,19 +662,24 @@ export namespace CodeEditor {
     getPositionForCoordinate(coordinate: ICoordinate): IPosition | null;
 
     /**
+     * Get a list of tokens for the current editor text content.
+     */
+    getTokens(): CodeEditor.IToken[];
+
+    /**
+     * Get the token at a given editor position.
+     */
+    getTokenAt(offset: number): CodeEditor.IToken;
+
+    /**
+     * Get the token a the cursor position.
+     */
+    getTokenAtCursor(): CodeEditor.IToken;
+
+    /**
      * Inserts a new line at the cursor position and indents it.
      */
     newIndentedLine(): void;
-
-    /**
-     * Gets the token at a given position.
-     */
-    getTokenForPosition(position: IPosition): IToken;
-
-    /**
-     * Gets the list of tokens for the editor model.
-     */
-    getTokens(): IToken[];
 
     /**
      * Replaces selection with the given text.
@@ -798,8 +787,8 @@ export namespace CodeEditor {
    * The default configuration options for an editor.
    */
   export const defaultConfig: IConfig = {
+    // Order matters as gutters will be sorted by the configuration order
     autoClosingBrackets: false,
-    codeFolding: false,
     cursorBlinkRate: 530,
     fontFamily: null,
     fontSize: null,
@@ -813,7 +802,8 @@ export namespace CodeEditor {
     tabSize: 4,
     rulers: [],
     showTrailingSpace: false,
-    wordWrapColumn: 80
+    wordWrapColumn: 80,
+    codeFolding: false
   };
 
   /**

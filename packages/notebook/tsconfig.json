@@ -28,6 +28,9 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../nbformat"
     },
     {
@@ -47,6 +50,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

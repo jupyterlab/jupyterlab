@@ -88,14 +88,15 @@ export class OutputArea extends Widget {
    */
   constructor(options: OutputArea.IOptions) {
     super();
-    const model = (this.model = options.model);
     this.addClass(OUTPUT_AREA_CLASS);
-    this.rendermime = options.rendermime;
+
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
+    this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
 
+    const model = (this.model = options.model);
     for (
       let i = 0;
       i < Math.min(model.length, this._maxNumberOutputs + 1);
@@ -109,14 +110,19 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * The model used by the widget.
-   */
-  readonly model: IOutputAreaModel;
-
-  /**
    * The content factory used by the widget.
    */
   readonly contentFactory: OutputArea.IContentFactory;
+
+  /**
+   * Narrow the type of OutputArea's layout prop
+   */
+  readonly layout: PanelLayout;
+
+  /**
+   * The model used by the widget.
+   */
+  readonly model: IOutputAreaModel;
 
   /**
    * The rendermime instance used by the widget.
@@ -127,7 +133,7 @@ export class OutputArea extends Widget {
    * A read-only sequence of the children widgets in the output area.
    */
   get widgets(): ReadonlyArray<Widget> {
-    return (this.layout as PanelLayout).widgets;
+    return this.layout.widgets;
   }
 
   /**
@@ -394,14 +400,21 @@ export class OutputArea extends Widget {
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
 
-    const layout = this.layout as PanelLayout;
-    layout.addWidget(panel);
+    // Increase number of outputs to display the result up to the input request.
+    if (this.model.length >= this.maxNumberOutputs) {
+      this.maxNumberOutputs = this.model.length;
+    }
+    this.layout.addWidget(panel);
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
      * and remove the stdin widget.
      */
     void input.value.then(value => {
+      // Increase number of outputs to display the result of stdin if needed.
+      if (this.model.length >= this.maxNumberOutputs) {
+        this.maxNumberOutputs = this.model.length + 1;
+      }
       // Use stdin as the stream so it does not get combined with stdout.
       this.model.add({
         output_type: 'stream',
@@ -419,12 +432,10 @@ export class OutputArea extends Widget {
     if (index >= this._maxNumberOutputs) {
       return;
     }
-
-    const layout = this.layout as PanelLayout;
-    const panel = layout.widgets[index] as Panel;
-    const renderer = (panel.widgets
-      ? panel.widgets[1]
-      : panel) as IRenderMime.IRenderer;
+    const panel = this.layout.widgets[index] as Panel;
+    const renderer = (
+      panel.widgets ? panel.widgets[1] : panel
+    ) as IRenderMime.IRenderer;
     // Check whether it is safe to reuse renderer:
     // - Preferred mime type has not changed
     // - Isolation has not changed
@@ -439,7 +450,7 @@ export class OutputArea extends Widget {
     ) {
       void renderer.renderModel(model);
     } else {
-      layout.widgets[index].dispose();
+      this.layout.widgets[index].dispose();
       this._insertOutput(index, model);
     }
   }
@@ -901,14 +912,15 @@ export class Stdin extends Widget implements IStdin {
       node: Private.createInputWidgetNode(options.prompt, options.password)
     });
     this.addClass(STDIN_CLASS);
-    this._history_ix = 0;
+    this._historyIndex = 0;
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
     // make users aware of the line history feature
     this._input.placeholder = '↑↓ for history';
     this._future = options.future;
-    this._parent_header = options.parent_header;
+    this._parentHeader = options.parent_header;
     this._value = options.prompt + ' ';
+    this._password = options.password;
   }
 
   /**
@@ -932,25 +944,25 @@ export class Stdin extends Widget implements IStdin {
     const input = this._input;
     if (event.type === 'keydown') {
       if (event.key === 'ArrowUp') {
-        const historyLine = Stdin._historyAt(this._history_ix - 1);
+        const historyLine = Stdin._historyAt(this._historyIndex - 1);
         if (historyLine) {
-          if (this._history_ix === 0) {
-            this._value_cache = input.value;
+          if (this._historyIndex === 0) {
+            this._valueCache = input.value;
           }
           input.value = historyLine;
-          --this._history_ix;
+          --this._historyIndex;
         }
       } else if (event.key === 'ArrowDown') {
-        if (this._history_ix === 0) {
+        if (this._historyIndex === 0) {
           // do nothing
-        } else if (this._history_ix === -1) {
-          input.value = this._value_cache;
-          ++this._history_ix;
+        } else if (this._historyIndex === -1) {
+          input.value = this._valueCache;
+          ++this._historyIndex;
         } else {
-          const historyLine = Stdin._historyAt(this._history_ix + 1);
+          const historyLine = Stdin._historyAt(this._historyIndex + 1);
           if (historyLine) {
             input.value = historyLine;
-            ++this._history_ix;
+            ++this._historyIndex;
           }
         }
       } else if (event.key === 'Enter') {
@@ -959,10 +971,10 @@ export class Stdin extends Widget implements IStdin {
             status: 'ok',
             value: input.value
           },
-          this._parent_header
+          this._parentHeader
         );
-        if (input.type === 'password') {
-          this._value += Array(input.value.length + 1).join('·');
+        if (this._password) {
+          this._value += '········';
         } else {
           this._value += input.value;
           Stdin._historyPush(input.value);
@@ -994,13 +1006,14 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _history_ix: number;
-  private _parent_header: KernelMessage.IInputReplyMsg['parent_header'];
+  private _historyIndex: number;
+  private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
   private _future: Kernel.IShellFuture;
   private _input: HTMLInputElement;
   private _value: string;
-  private _value_cache: string;
+  private _valueCache: string;
   private _promise = new PromiseDelegate<void>();
+  private _password: boolean;
 }
 
 export namespace Stdin {
@@ -1064,7 +1077,8 @@ namespace Private {
    */
   export class IsolatedRenderer
     extends Widget
-    implements IRenderMime.IRenderer {
+    implements IRenderMime.IRenderer
+  {
     /**
      * Create an isolated renderer.
      */
@@ -1185,13 +1199,13 @@ namespace Private {
       onClick: (event: MouseEvent) => void
     ) {
       const node = document.createElement('div');
+      const title = `The first ${maxNumberOutputs} are displayed`;
+      const msg = 'Show more outputs';
       node.insertAdjacentHTML(
         'afterbegin',
-        `<a>
-        <pre>Output of this cell has been trimmed on the initial display.</pre>
-        <pre>Displaying the first ${maxNumberOutputs} top outputs.</pre>
-        <pre>Click on this message to get the complete output.</pre>
-      </a>`
+        `<a title=${title}>
+          <pre>${msg}</pre>
+        </a>`
       );
       super({
         node

@@ -11,7 +11,8 @@ import { INotebookModel, NotebookModel } from './model';
  * A model factory for notebooks.
  */
 export class NotebookModelFactory
-  implements DocumentRegistry.IModelFactory<INotebookModel> {
+  implements DocumentRegistry.IModelFactory<INotebookModel>
+{
   /**
    * Construct a new notebook model factory.
    */

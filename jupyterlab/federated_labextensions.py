@@ -27,6 +27,7 @@ from jupyter_core.paths import ENV_JUPYTER_PATH, SYSTEM_JUPYTER_PATH, jupyter_da
 from jupyter_core.utils import ensure_dir_exists
 from jupyter_server.extension.serverextension import ArgumentConflict
 from jupyterlab_server.config import get_federated_extensions
+from tomli import load
 
 from .commands import _test_overlap
 
@@ -275,12 +276,6 @@ def _ensure_builder(ext_path, core_path):
     if "/" in depVersion2:
         with open(osp.join(ext_path, depVersion2, "package.json")) as fid:
             depVersion2 = json.load(fid).get("version")
-    overlap = _test_overlap(depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True)
-    if not overlap:
-        raise ValueError(
-            "Extensions require a devDependency on @jupyterlab/builder@%s, you have a dependency on %s"
-            % (depVersion1, depVersion2)
-        )
     if not osp.exists(osp.join(ext_path, "node_modules")):
         subprocess.check_call(["jlpm"], cwd=ext_path)
 
@@ -291,6 +286,22 @@ def _ensure_builder(ext_path, core_path):
         if osp.dirname(target) == target:
             raise ValueError("Could not find @jupyterlab/builder")
         target = osp.dirname(target)
+
+    overlap = _test_overlap(depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True)
+    if not overlap:
+        with open(
+            osp.join(target, "node_modules", "@jupyterlab", "builder", "package.json")
+        ) as fid:
+            depVersion2 = json.load(fid).get("version")
+        overlap = _test_overlap(
+            depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True
+        )
+
+    if not overlap:
+        raise ValueError(
+            "Extensions require a devDependency on @jupyterlab/builder@%s, you have a dependency on %s"
+            % (depVersion1, depVersion2)
+        )
 
     return osp.join(
         target, "node_modules", "@jupyterlab", "builder", "lib", "build-labextension.js"
@@ -414,18 +425,28 @@ def _get_labextension_metadata(module):
     except Exception as exc:
         errors.append(exc)
 
+    # Try to get the package name
+    package = None
+
+    # Try getting the package name from pyproject.toml
+    if os.path.exists(os.path.join(mod_path, "pyproject.toml")):
+        with open(os.path.join(mod_path, "pyproject.toml"), "rb") as fid:
+            data = load(fid)
+        package = data.get("project", {}).get("name")
+
     # Try getting the package name from setup.py
-    try:
-        package = (
-            subprocess.check_output([sys.executable, "setup.py", "--name"], cwd=mod_path)
-            .decode("utf8")
-            .strip()
-        )
-    except subprocess.CalledProcessError:
-        raise FileNotFoundError(
-            "The Python package `{}` is not a valid package, "
-            "it is missing the `setup.py` file.".format(module)
-        )
+    if not package:
+        try:
+            package = (
+                subprocess.check_output([sys.executable, "setup.py", "--name"], cwd=mod_path)
+                .decode("utf8")
+                .strip()
+            )
+        except subprocess.CalledProcessError:
+            raise FileNotFoundError(
+                "The Python package `{}` is not a valid package, "
+                "it is missing the `setup.py` file.".format(module)
+            )
 
     # Make sure the package is installed
     try:

@@ -68,7 +68,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         'aria-label',
         trans.__('Extension Manager section')
       );
-      labShell.add(view, 'left', { rank: 1000 });
+      labShell.add(view, 'left', { rank: 1000, type: 'Extension Manager' });
     }
 
     // If the extension is enabled or disabled,
@@ -90,7 +90,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
               trans.__('Extension Manager section')
             );
             if (labShell) {
-              labShell.add(view, 'left', { rank: 1000 });
+              labShell.add(view, 'left', {
+                rank: 1000,
+                type: 'Extension Manager'
+              });
             }
           } else if (!enabled && view?.isAttached) {
             app.commands.notifyCommandChanged(CommandIDs.toggle);

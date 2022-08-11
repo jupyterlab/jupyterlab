@@ -11,6 +11,7 @@ from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_fla
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
+from jupyter_server_ydoc.ydoc import JupyterSQLiteYStore
 from jupyterlab_server import (
     LabServerApp,
     LicensesApp,
@@ -19,8 +20,8 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from notebook_shim.shim import NotebookConfigShimMixin
-from tornado import web
-from traitlets import Bool, Instance, Unicode, default
+from traitlets import Bool, Instance, Int, Type, Unicode, default
+from ypy_websocket.ystore import BaseYStore
 
 from ._version import __version__
 from .commands import (
@@ -49,7 +50,6 @@ from .handlers.extension_manager_handler import (
     ExtensionManager,
     extensions_handler_path,
 )
-from .handlers.yjs_echo_ws import ROOMS, YjsEchoWebSocket
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -538,6 +538,32 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
+    collaborative_file_poll_interval = Int(
+        1,
+        config=True,
+        help="""The period in seconds to check for file changes in the back-end (relevant only
+        in collaborative mode). Defaults to 1s, if 0 then file changes will only be checked when
+        saving changes from the front-end.""",
+    )
+
+    collaborative_document_cleanup_delay = Int(
+        60,
+        allow_none=True,
+        config=True,
+        help="""The delay in seconds to keep a document in memory in the back-end after all clients
+        disconnect (relevant only in collaborative mode). Defaults to 60s, if None then the
+        document will be kept in memory forever.""",
+    )
+
+    collaborative_ystore_class = Type(
+        default_value=JupyterSQLiteYStore,
+        klass=BaseYStore,
+        config=True,
+        help="""The YStore class to use for storing Y updates (relevant only in collaborative mode).
+        Defaults to JupyterSQLiteYStore, which stores Y updates in a '.jupyter_ystore.db' SQLite
+        database in the current directory.""",
+    )
+
     @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -627,33 +653,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
-    def initialize_settings(self):
-        def hook(model, path, **kwargs):
-            if "type" in model and model["type"] == "directory":
-                pass
-            elif "content" in model and model["content"] is not None:
-                # content sent through HTTP, it must not be an RTC session
-                if path in ROOMS:
-                    raise web.HTTPError(
-                        409,
-                        "Document content cannot be present both in RTC session and HTTP request",
-                    )
-                # keep the content sent through HTTP
-            else:
-                # no content sent through HTTP, it must be an RTC session
-                if path in ROOMS:
-                    # we found the RTC session as expected
-                    # set the document content from y-py
-                    model["content"] = ROOMS[path].get_source()
-                else:
-                    # RTC session not available, shouldn't happen
-                    raise web.HTTPError(
-                        410, "Could not find an RTC session corresponding to this document"
-                    )
-
-        self.serverapp.contents_manager.register_pre_save_hook(hook)
-        super().initialize_settings()
-
     def initialize_handlers(self):
 
         handlers = []
@@ -684,10 +683,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         builder = Builder(self.core_mode, app_options=build_handler_options)
         build_handler = (build_path, BuildHandler, {"builder": builder})
         handlers.append(build_handler)
-
-        # Yjs Echo WebSocket handler
-        yjs_echo_handler = (r"/api/yjs/(.*)", YjsEchoWebSocket)
-        handlers.append(yjs_echo_handler)
 
         errored = False
 
@@ -737,7 +732,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             page_config["token"] = api_token
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
-        self.serverapp.web_app.settings["page_config_data"] = page_config
+        self.serverapp.web_app.settings.update(
+            {
+                "page_config_data": page_config,
+                "collaborative_file_poll_interval": self.collaborative_file_poll_interval,
+                "collaborative_document_cleanup_delay": self.collaborative_document_cleanup_delay,
+                "collaborative_ystore_class": self.collaborative_ystore_class,
+            }
+        )
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)

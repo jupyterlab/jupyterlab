@@ -220,7 +220,10 @@ export class CellSearchProvider implements IBaseSearchProvider {
       this.currentIndex < this.cmHandler.matches.length
     ) {
       const editor = this.cell.editor as CodeMirrorEditor;
-      const selection = editor.doc.getSelection();
+      const selection = editor.state.sliceDoc(
+        editor.state.selection.main.from,
+        editor.state.selection.main.to
+      );
       const match = this.getCurrentMatch();
       // If cursor is not on a selection, highlight the next match
       if (selection !== match?.text) {
@@ -539,7 +542,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
     if (this.isActive && this.query && this.filters?.output !== false) {
       await Promise.all([
         this.outputsProvider.map(provider => {
-          provider.startQuery(this.query);
+          void provider.startQuery(this.query);
         })
       ]);
     }
@@ -681,11 +684,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     this._unrenderedByHighligh = false;
     if (this.isActive) {
       if (rendered) {
-        this.renderedProvider.startQuery(this.query);
+        void this.renderedProvider.startQuery(this.query);
       } else {
         // Force cursor position to ensure reverse search is working as expected
         cell.editor.setCursorPosition({ column: 0, line: 0 });
-        this.renderedProvider.endQuery();
+        void this.renderedProvider.endQuery();
       }
     }
   }

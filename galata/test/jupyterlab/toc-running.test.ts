@@ -6,17 +6,19 @@ import { expect, test } from '@jupyterlab/galata';
 test.describe('ToC Running indicator', () => {
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew();
-    await page.notebook.addCell('markdown', '# Title 1');
+    await page.notebook.setCell(0, 'markdown', '# Title 1');
     await page.notebook.addCell('code', 'from time import sleep');
     await page.notebook.addCell('code', 'sleep(2)');
     await page.notebook.addCell('markdown', '## Title 1.1');
+    await page.notebook.addCell('markdown', 'No heading');
     await page.notebook.addCell('code', 'sleep(2)');
     await page.notebook.addCell('markdown', '## Title 1.2');
     await page.notebook.addCell('code', 'sleep(1)');
 
-    await page.notebook.run();
-
     await page.sidebar.openTab('table-of-contents');
+    await page.waitForSelector(
+      '.jp-TableOfContents-content[data-document-type="notebook"]'
+    );
   });
 
   test('should display running indicators', async ({ page }) => {
@@ -39,9 +41,11 @@ test.describe('ToC Running indicator', () => {
     const tocPanel = await page.sidebar.getContentPanel(
       await page.sidebar.getTabPosition('table-of-contents')
     );
+    await page.notebook.run();
+
     // Collapse ToC
     await page.click(
-      '[aria-label="Table of Contents section"] li >> :nth-match(div, 3)'
+      '[aria-label="Table of Contents section"] >> button:left-of(:text("Title 1"))'
     );
 
     const executed = page.notebook.runCell(5);
@@ -50,24 +54,6 @@ test.describe('ToC Running indicator', () => {
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-top-level.png'
     );
-
-    await executed;
-  });
-
-  test('should display running indicator in prompt', async ({ page }) => {
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
-    );
-    const toolbarButtons = await tocPanel.$$('.toc-toolbar .toc-toolbar-icon');
-    await toolbarButtons[0].click();
-
-    const tocEntry = page
-      .locator('.jp-TableOfContents-content .jp-tocItem')
-      .nth(2)
-      .locator('.toc-code-cell-prompt');
-    const executed = page.notebook.runCell(3);
-
-    await expect(tocEntry).toHaveText('[*]: ');
 
     await executed;
   });

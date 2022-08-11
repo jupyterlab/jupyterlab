@@ -164,15 +164,8 @@ export function renderImage(
   options: renderImage.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const {
-    host,
-    mimeType,
-    source,
-    width,
-    height,
-    needsBackground,
-    unconfined
-  } = options;
+  const { host, mimeType, source, width, height, needsBackground, unconfined } =
+    options;
 
   // Clear the content in the host.
   host.textContent = '';
@@ -410,6 +403,16 @@ export namespace renderMarkdown {
      * The application language translator.
      */
     translator?: ITranslator;
+  }
+
+  /**
+   * Create a normalized id for a header element.
+   *
+   * @param header Header element
+   * @returns Normalized id
+   */
+  export function createHeaderId(header: Element): string {
+    return (header.textContent ?? '').replace(/ /g, '-');
   }
 }
 
@@ -832,7 +835,7 @@ namespace Private {
       const headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
-        header.id = (header.textContent ?? '').replace(/ /g, '-');
+        header.id = renderMarkdown.createHeaderId(header);
         const anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';

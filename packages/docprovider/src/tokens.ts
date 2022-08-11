@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 import { Token } from '@lumino/coreutils';
 
@@ -12,16 +17,6 @@ export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
  * An interface for a document provider.
  */
 export interface IDocumentProvider {
-  /**
-   * Resolves to true if the initial content has been initialized on the server. false otherwise.
-   */
-  requestInitialContent(): Promise<boolean>;
-
-  /**
-   * Put the initialized state.
-   */
-  putInitializedState(): void;
-
   /**
    * Returns a Promise that resolves when renaming is ackownledged.
    */
@@ -58,6 +53,7 @@ export namespace IDocumentProviderFactory {
      */
     path: string;
     contentType: string;
+    format: string;
 
     /**
      * The YNotebook.

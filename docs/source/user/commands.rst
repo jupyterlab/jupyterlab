@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _commands:
 
 Commands
@@ -29,6 +32,8 @@ The command palette can be accessed from the View menu or using the keyboard sho
 ``Command/Ctrl Shift C``.
 
 The command palette can be displayed in the sidebar by adding ``'modal': false`` to the Settings.
+
+.. _commands-list:
 
 Commands List
 ^^^^^^^^^^^^^

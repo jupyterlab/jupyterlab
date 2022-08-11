@@ -18,7 +18,13 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

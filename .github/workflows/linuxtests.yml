@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
@@ -82,7 +82,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
@@ -100,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Install dependencies
@@ -110,7 +110,7 @@ jobs:
         run: |
           pip install build
           python -m build --sdist
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: "sdist"
           path: dist/*.tar.gz
@@ -124,7 +124,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Download sdist
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
       - name: Install From SDist
         run: |
           set -ex
@@ -132,7 +132,7 @@ jobs:
           mkdir test
           tar --strip-components=1 -zxvf *.tar.gz -C ./test
           cd test
-          pip install -e .[test]
+          pip install -e .[dev,test]
           pip install pytest-github-actions-annotate-failures
       - name: Run Test
         run: |
@@ -141,11 +141,11 @@ jobs:
 
   pre-commit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Install Jupyterlab
         run: pip install -e .
-      - uses: pre-commit/action@v2.0.0
+      - uses: pre-commit/action@v3.0.0

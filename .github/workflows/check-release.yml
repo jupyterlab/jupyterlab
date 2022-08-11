@@ -18,7 +18,7 @@ jobs:
         group: [check_release, link_check]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -36,7 +36,7 @@ jobs:
 
       - name: Upload Assets
         if: ${{ matrix.group == 'check_release' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-releaser-dist-${{ github.run_number }}
           path: |

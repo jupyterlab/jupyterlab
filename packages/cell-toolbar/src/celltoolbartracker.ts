@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
-import { Cell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
+import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
@@ -13,6 +13,15 @@ import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
+
+/*
+ * Text mime types
+ */
+const TEXT_MIME_TYPES = [
+  'text/plain',
+  'application/vnd.jupyter.stdout',
+  'application/vnd.jupyter.stderr'
+];
 
 /**
  * Widget cell toolbar classes
@@ -41,7 +50,13 @@ export class CellToolbarTracker implements IDisposable {
     this._toolbar.changed.connect(this._onToolbarChanged, this);
 
     // Only add the toolbar to the notebook's active cell (if any) once it has fully rendered and been revealed.
-    panel.revealed.then(() => this._onActiveCellChanged(panel.content));
+    void panel.revealed.then(() => this._onActiveCellChanged(panel.content));
+
+    // Check whether the toolbar should be rendered upon a layout change
+    panel.content.renderingLayoutChanged.connect(
+      this._onActiveCellChanged,
+      this
+    );
 
     // Handle subsequent changes of active cell.
     panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
@@ -124,8 +139,8 @@ export class CellToolbarTracker implements IDisposable {
       this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
       // Attempt to remove the resize and changed event handlers.
       cell.displayChanged.disconnect(this._resizeEventCallback, this);
-      cell.model.contentChanged.disconnect(this._changedEventCallback, this);
     }
+    model.contentChanged.disconnect(this._changedEventCallback, this);
   }
 
   /**
@@ -133,8 +148,8 @@ export class CellToolbarTracker implements IDisposable {
    */
   private _onToolbarChanged(): void {
     // Reset toolbar when settings changes
-    const activeCell: Cell<ICellModel> | null | undefined = this._panel?.content
-      .activeCell;
+    const activeCell: Cell<ICellModel> | null | undefined =
+      this._panel?.content.activeCell;
     if (activeCell) {
       this._removeToolbar(activeCell.model);
       this._addToolbar(activeCell.model);
@@ -194,7 +209,11 @@ export class CellToolbarTracker implements IDisposable {
     }
 
     // Check for overlap in code content
-    return this._codeOverlapsToolbar(activeCell);
+    if (this._panel?.content.renderingLayout === 'default') {
+      return this._codeOverlapsToolbar(activeCell);
+    } else {
+      return this._outputOverlapsToolbar(activeCell);
+    }
   }
 
   /**
@@ -210,7 +229,8 @@ export class CellToolbarTracker implements IDisposable {
     const markdownOutputWidget = markdownOutput.renderedInput;
     const markdownOutputElement = markdownOutputWidget.node;
 
-    const firstOutputElementChild = markdownOutputElement.firstElementChild as HTMLElement;
+    const firstOutputElementChild =
+      markdownOutputElement.firstElementChild as HTMLElement;
     if (firstOutputElementChild === null) {
       return false;
     }
@@ -229,6 +249,41 @@ export class CellToolbarTracker implements IDisposable {
     return toolbarLeft === null ? false : lineRight > toolbarLeft;
   }
 
+  private _outputOverlapsToolbar(activeCell: Cell<ICellModel>): boolean {
+    const outputArea = (activeCell as CodeCell).outputArea.node;
+    if (outputArea) {
+      const outputs = outputArea.querySelectorAll('[data-mime-type]');
+      const toolbarRect = this._cellToolbarRect(activeCell);
+      if (toolbarRect) {
+        const { left: toolbarLeft, bottom: toolbarBottom } = toolbarRect;
+        return Array.from(outputs).some(output => {
+          const node = output.firstElementChild;
+          if (node) {
+            const range = new Range();
+            if (
+              TEXT_MIME_TYPES.includes(
+                output.getAttribute('data-mime-type') || ''
+              )
+            ) {
+              // If the node is plain text, it's in a <pre>. To get the true bounding box of the
+              // text, the node contents need to be selected.
+              range.selectNodeContents(node);
+            } else {
+              range.selectNode(node);
+            }
+            const { right: nodeRight, top: nodeTop } =
+              range.getBoundingClientRect();
+
+            // Note: y-coordinate increases toward the bottom of page
+            return nodeRight > toolbarLeft && nodeTop < toolbarBottom;
+          }
+          return false;
+        });
+      }
+    }
+    return false;
+  }
+
   private _codeOverlapsToolbar(activeCell: Cell<ICellModel>): boolean {
     const editorWidget = activeCell.editorWidget;
     const editor = activeCell.editor;
@@ -236,9 +291,8 @@ export class CellToolbarTracker implements IDisposable {
       return false; // Nothing in the editor
     }
 
-    const codeMirrorLines = editorWidget.node.getElementsByClassName(
-      'CodeMirror-line'
-    );
+    const codeMirrorLines =
+      editorWidget.node.getElementsByClassName('CodeMirror-line');
     if (codeMirrorLines.length < 1) {
       return false; // No lines present
     }
@@ -258,14 +312,18 @@ export class CellToolbarTracker implements IDisposable {
     return activeCell.editorWidget.node.getBoundingClientRect().right;
   }
 
-  private _cellToolbarLeft(activeCell: Cell<ICellModel>): number | null {
+  private _cellToolbarRect(activeCell: Cell<ICellModel>): DOMRect | null {
     const toolbarWidgets = this._findToolbarWidgets(activeCell);
     if (toolbarWidgets.length < 1) {
       return null;
     }
     const activeCellToolbar = toolbarWidgets[0].node;
 
-    return activeCellToolbar.getBoundingClientRect().left;
+    return activeCellToolbar.getBoundingClientRect();
+  }
+
+  private _cellToolbarLeft(activeCell: Cell<ICellModel>): number | null {
+    return this._cellToolbarRect(activeCell)?.left || null;
   }
 
   private _isDisposed = false;

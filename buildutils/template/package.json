@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template",
-  "version": "4.0.0-alpha.9",
+  "version": "4.0.0-alpha.12",
   "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -27,7 +27,6 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:all": "npm run build",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "test": "jest",
@@ -37,12 +36,12 @@
     "watch": "tsc -b --watch"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.9",
+    "@jupyterlab/testutils": "^4.0.0-alpha.12",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
-    "typescript": "~4.6.3"
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

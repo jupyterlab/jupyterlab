@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _user_extensions:
 
 Extensions
@@ -220,7 +223,7 @@ a small Jupyter icon next to their name.
 .. figure:: ../images/extensions-default.png
    :align: center
    :class: jp-screenshot
-   :alt: Screenshot showing the discovery extension listing.
+   :alt: The discovery extension listing.
 
 
 Alternatively, you can limit your discovery by using the search bar. This
@@ -229,7 +232,7 @@ performs a free-text search of JupyterLab extensions on the NPM registry.
 .. image:: ../images/extensions-search.png
    :align: center
    :class: jp-screenshot
-   :alt: Screenshot showing an example search result
+   :alt: An example search result in the discovery extension listing.
 
 
 Installing an Extension
@@ -365,7 +368,7 @@ For example, to set blocked extensions, launch the server with
 ``http://example.com/blocklist.json`` is a JSON file as described below.
 
 The details for the listings_request_options are listed
-on `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__
+on `this page <https://requests.readthedocs.io/en/stable/api/#requests.request>`__
 (for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
 
 The listings are json files hosted on the URIs you have given.

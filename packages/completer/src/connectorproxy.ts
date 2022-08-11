@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { IObservableString } from '@jupyterlab/observables';
 import { CompletionHandler } from './handler';
 import {
@@ -36,7 +41,8 @@ export class ConnectorProxy implements IConnectorProxy {
     request: CompletionHandler.IRequest
   ): Promise<Array<CompletionHandler.ICompletionItemsReply | null>> {
     const current = ++this._fetching;
-    let promises: Promise<CompletionHandler.ICompletionItemsReply | null>[] = [];
+    let promises: Promise<CompletionHandler.ICompletionItemsReply | null>[] =
+      [];
     for (const provider of this._providers) {
       let promise: Promise<CompletionHandler.ICompletionItemsReply | null>;
       promise = provider.fetch(request, this._context).then(reply => {
@@ -50,11 +56,10 @@ export class ConnectorProxy implements IConnectorProxy {
         return { ...reply, items };
       });
 
-      const timeoutPromise = new Promise<CompletionHandler.ICompletionItemsReply | null>(
-        resolve => {
+      const timeoutPromise =
+        new Promise<CompletionHandler.ICompletionItemsReply | null>(resolve => {
           return setTimeout(() => resolve(null), this._timeout);
-        }
-      );
+        });
       promise = Promise.race([promise, timeoutPromise]);
       promises.push(promise);
     }

@@ -17,7 +17,8 @@ import * as renderers from './renderers';
  */
 export abstract class RenderedCommon
   extends Widget
-  implements IRenderMime.IRenderer {
+  implements IRenderMime.IRenderer
+{
   /**
    * Construct a new rendered common widget.
    *

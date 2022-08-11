@@ -43,6 +43,9 @@
       "path": "../launcher"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../mainmenu"
     },
     {
@@ -56,6 +59,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

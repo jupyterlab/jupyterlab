@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../apputils"
@@ -22,7 +22,13 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

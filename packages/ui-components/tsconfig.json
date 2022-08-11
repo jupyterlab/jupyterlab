@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
+    "lib": ["DOM", "ES2021.WeakRef"],
     "outDir": "lib",
     "rootDir": "src",
     "types": ["node"]
@@ -9,6 +10,9 @@
   "references": [
     {
       "path": "../coreutils"
+    },
+    {
+      "path": "../rendermime-interfaces"
     },
     {
       "path": "../translation"

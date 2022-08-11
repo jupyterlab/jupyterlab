@@ -17,6 +17,7 @@ import {
   ICommandPalette,
   IKernelStatusModel,
   InputDialog,
+  ISanitizer,
   ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
@@ -40,6 +41,11 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
+import {
+  ILSPCodeExtractorsManager,
+  ILSPDocumentConnectionManager,
+  ILSPFeatureManager
+} from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
@@ -50,9 +56,11 @@ import {
   INotebookWidgetFactory,
   Notebook,
   NotebookActions,
+  NotebookAdapter,
   NotebookModelFactory,
   NotebookPanel,
   NotebookSearchProvider,
+  NotebookToCFactory,
   NotebookTools,
   NotebookTracker,
   NotebookTrustStatus,
@@ -65,10 +73,11 @@ import {
   IObservableUndoableList
 } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addAboveIcon,
@@ -282,6 +291,8 @@ namespace CommandIDs {
   export const invokeCompleter = 'completer:invoke-notebook';
 
   export const selectCompleter = 'completer:select-notebook';
+
+  export const tocRunCells = 'toc:run-cells';
 }
 
 /**
@@ -654,21 +665,22 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
 /**
  * The notebook widget factory provider.
  */
-const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> = {
-  id: '@jupyterlab/notebook-extension:widget-factory',
-  provides: INotebookWidgetFactory,
-  requires: [
-    NotebookPanel.IContentFactory,
-    IEditorServices,
-    IRenderMimeRegistry,
-    ISessionContextDialogs,
-    IToolbarWidgetRegistry,
-    ITranslator
-  ],
-  optional: [ISettingRegistry],
-  activate: activateWidgetFactory,
-  autoStart: true
-};
+const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> =
+  {
+    id: '@jupyterlab/notebook-extension:widget-factory',
+    provides: INotebookWidgetFactory,
+    requires: [
+      NotebookPanel.IContentFactory,
+      IEditorServices,
+      IRenderMimeRegistry,
+      ISessionContextDialogs,
+      IToolbarWidgetRegistry,
+      ITranslator
+    ],
+    optional: [ISettingRegistry],
+    activate: activateWidgetFactory,
+    autoStart: true
+  };
 
 /**
  * The cloned output provider.
@@ -786,6 +798,34 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const tocPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:toc',
+  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
+  optional: [IMarkdownParser],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    tocRegistry: ITableOfContentsRegistry,
+    sanitizer: ISanitizer,
+    mdParser: IMarkdownParser | null
+  ): void => {
+    tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
+  }
+};
+
+const languageServerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:language-server',
+  requires: [
+    INotebookTracker,
+    ILSPDocumentConnectionManager,
+    ILSPFeatureManager,
+    ILSPCodeExtractorsManager
+  ],
+  activate: activateNotebookLanguageServer,
+  autoStart: true
+};
+
 /**
  * Export the plugins as default.
  */
@@ -805,7 +845,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelStatus,
   lineColStatus,
   completerPlugin,
-  searchProvider
+  searchProvider,
+  tocPlugin,
+  languageServerPlugin
 ];
 export default plugins;
 
@@ -826,6 +868,7 @@ function activateNotebookTools(
   const activeCellTool = new NotebookTools.ActiveCellTool();
   const editable = NotebookTools.createEditableToggle(translator);
   const slideShow = NotebookTools.createSlideShowSelector(translator);
+  const tocBaseNumbering = NotebookTools.createToCBaseNumbering(translator);
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
     editorFactory,
@@ -902,6 +945,7 @@ function activateNotebookTools(
   notebookTools.addItem({ tool: activeCellTool, section: 'common', rank: 1 });
   notebookTools.addItem({ tool: editable, section: 'common', rank: 2 });
   notebookTools.addItem({ tool: slideShow, section: 'common', rank: 3 });
+  notebookTools.addItem({ tool: tocBaseNumbering, section: 'common', rank: 4 });
 
   notebookTools.addItem({
     tool: cellMetadataEditor,
@@ -955,13 +999,13 @@ function activateWidgetFactory(
     | undefined;
 
   // Register notebook toolbar widgets
-  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'save', panel =>
+  toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'save', panel =>
     DocToolbarItems.createSaveButton(commands, panel.context.fileChanged)
   );
-  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
+  toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
     ToolbarItems.createCellTypeItem(panel, translator)
   );
-  toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'kernelName', panel =>
+  toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'kernelName', panel =>
     Toolbar.createKernelNameItem(
       panel.sessionContext,
       sessionContextDialogs,
@@ -969,7 +1013,7 @@ function activateWidgetFactory(
     )
   );
 
-  toolbarRegistry.registerFactory<NotebookPanel>(
+  toolbarRegistry.addFactory<NotebookPanel>(
     FACTORY,
     'executionProgress',
     panel => {
@@ -1082,7 +1126,8 @@ function activateClonedOutputs(
       const widget = new MainAreaWidget({ content });
       current.context.addSibling(widget, {
         ref: current.id,
-        mode: 'split-bottom'
+        mode: 'split-bottom',
+        type: 'Cloned Output'
       });
 
       const updateCloned = () => {
@@ -1187,12 +1232,13 @@ function activateCodeConsole(
         // eslint-disable-next-line
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          const reply = await current.context.sessionContext.session?.kernel?.requestIsComplete(
-            {
-              // ipython needs an empty line at the end to correctly identify completeness of indented code
-              code: code + '\n\n'
-            }
-          );
+          const reply =
+            await current.context.sessionContext.session?.kernel?.requestIsComplete(
+              {
+                // ipython needs an empty line at the end to correctly identify completeness of indented code
+                code: code + '\n\n'
+              }
+            );
           if (reply?.content.status === 'complete') {
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
@@ -1354,6 +1400,12 @@ function activateNotebookHandler(
     return Private.isEnabled(shell, tracker);
   };
 
+  const setSideBySideOutputRatio = (sideBySideOutputRatio: number) =>
+    document.documentElement.style.setProperty(
+      '--jp-side-by-side-output-size',
+      `${sideBySideOutputRatio}fr`
+    );
+
   // Fetch settings if possible.
   const fetchSettings = settingRegistry
     ? settingRegistry.load(trackerPlugin.id)
@@ -1394,6 +1446,22 @@ function activateNotebookHandler(
           ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
             x => (settings.get(x).composite as JSONObject).autoClosingBrackets
           )
+      });
+      commands.addCommand(CommandIDs.setSideBySideRatio, {
+        label: trans.__('Set side-by-side ratio'),
+        execute: args => {
+          InputDialog.getNumber({
+            title: trans.__('Width of the output in side-by-side mode'),
+            value: settings.get('sideBySideOutputRatio').composite as number
+          })
+            .then(result => {
+              setSideBySideOutputRatio(result.value!);
+              if (result.value) {
+                void settings.set('sideBySideOutputRatio', result.value);
+              }
+            })
+            .catch(console.error);
+        }
       });
     })
     .catch((reason: Error) => {
@@ -1507,8 +1575,11 @@ function activateNotebookHandler(
         .composite as string,
       sideBySideRightMarginOverride: settings.get(
         'sideBySideRightMarginOverride'
-      ).composite as string
+      ).composite as string,
+      sideBySideOutputRatio: settings.get('sideBySideOutputRatio')
+        .composite as number
     };
+    setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
       margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
@@ -1696,6 +1767,26 @@ function activateNotebookCompleterService(
     notebooks.forEach(panel => {
       updateCompleter(undefined, panel).catch(e => console.error(e));
     });
+  });
+}
+
+/**
+ * Activate the language server for notebook.
+ */
+function activateNotebookLanguageServer(
+  app: JupyterFrontEnd,
+  notebooks: INotebookTracker,
+  connectionManager: ILSPDocumentConnectionManager,
+  featureManager: ILSPFeatureManager,
+  codeExtractorManager: ILSPCodeExtractorsManager
+): void {
+  notebooks.widgetAdded.connect(async (_, notebook) => {
+    const adapter = new NotebookAdapter(notebook, {
+      connectionManager,
+      featureManager,
+      foreignCodeExtractorsManager: codeExtractorManager
+    });
+    connectionManager.registerAdapter(notebook.context.path, adapter);
   });
 }
 
@@ -2671,24 +2762,6 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.setSideBySideRatio, {
-    label: trans.__('Set side-by-side ratio'),
-    execute: args => {
-      InputDialog.getNumber({
-        title: trans.__('Width of the output in side-by-side mode'),
-        value: 1
-      })
-        .then(result => {
-          if (result.value) {
-            document.documentElement.style.setProperty(
-              '--jp-side-by-side-output-size',
-              `${result.value}fr`
-            );
-          }
-        })
-        .catch(console.error);
-    }
-  });
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: trans.__('Expand All Outputs'),
     execute: args => {
@@ -2744,8 +2817,9 @@ function addCommands(
     },
     isEnabled
   });
+
   commands.addCommand(CommandIDs.toggleCollapseCmd, {
-    label: 'Toggle Collapse Notebook Heading',
+    label: trans.__('Toggle Collapse Notebook Heading'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -2755,7 +2829,7 @@ function addCommands(
     isEnabled: isEnabledAndHeadingSelected
   });
   commands.addCommand(CommandIDs.collapseAllCmd, {
-    label: 'Collapse All Headings',
+    label: trans.__('Collapse All Headings'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -2764,12 +2838,49 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.expandAllCmd, {
-    label: 'Expand All Headings',
+    label: trans.__('Expand All Headings'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
         return NotebookActions.expandAllHeadings(current.content);
       }
+    }
+  });
+
+  commands.addCommand(CommandIDs.tocRunCells, {
+    label: trans.__('Select and Run Cell(s) for this Heading'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, { activate: false, ...args });
+      if (current === null) {
+        return;
+      }
+
+      const activeCell = current.content.activeCell;
+      let lastIndex = current.content.activeCellIndex;
+
+      if (activeCell instanceof MarkdownCell) {
+        const cells = current.content.widgets;
+        const level = activeCell.headingInfo.level;
+        for (
+          let i = current.content.activeCellIndex + 1;
+          i < cells.length;
+          i++
+        ) {
+          const cell = cells[i];
+          if (
+            cell instanceof MarkdownCell &&
+            // cell.headingInfo.level === -1 if no heading
+            cell.headingInfo.level >= 0 &&
+            cell.headingInfo.level <= level
+          ) {
+            break;
+          }
+          lastIndex = i;
+        }
+      }
+
+      current.content.extendContiguousSelectionTo(lastIndex);
+      void NotebookActions.run(current.content, current.sessionContext);
     }
   });
 }
@@ -2991,7 +3102,8 @@ namespace Private {
       preferredLanguage: widget.context.model.defaultKernelLanguage,
       activate: activate,
       ref: widget.id,
-      insertMode: 'split-bottom'
+      insertMode: 'split-bottom',
+      type: 'Linked Console'
     };
 
     return commands.execute('console:create', options);
@@ -3060,9 +3172,9 @@ namespace Private {
   /**
    * The default Export To ... formats and their human readable labels.
    */
-  export function getFormatLabels(
-    translator: ITranslator
-  ): { [k: string]: string } {
+  export function getFormatLabels(translator: ITranslator): {
+    [k: string]: string;
+  } {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     return {

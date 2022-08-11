@@ -31,7 +31,9 @@
   --jp-icon-circle: url('icons/toolbar/circle.svg');
   --jp-icon-clear: url('icons/toolbar/clear.svg');
   --jp-icon-close: url('icons/toolbar/close.svg');
+  --jp-icon-code-check: url('icons/lsp/code-check.svg');
   --jp-icon-code: url('icons/toolbar/code.svg');
+  --jp-icon-collapse-all: url('icons/toolbar/collapse-all.svg');
   --jp-icon-console: url('icons/filetype/console.svg');
   --jp-icon-copy: url('icons/toolbar/copy.svg');
   --jp-icon-copyright: url('icons/licenses/copyright.svg');
@@ -41,6 +43,7 @@
   --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
+  --jp-icon-expand-all: url('icons/toolbar/expand-all.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
   --jp-icon-fast-forward: url('icons/toolbar/fast-forward.svg');
   --jp-icon-file-upload: url('icons/toolbar/file-upload.svg');
@@ -100,6 +103,7 @@
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
   --jp-icon-user: url('icons/sidebar/user.svg');
+  --jp-icon-users: url('icons/sidebar/users.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
 }
@@ -182,8 +186,16 @@
   background-image: var(--jp-icon-close);
 }
 
+.jp-CodeCheckIcon {
+  background-image: var(--jp-icon-code-check);
+}
+
 .jp-CodeIcon {
   background-image: var(--jp-icon-code);
+}
+
+.jp-CollapseAllIcon {
+  background-image: var(--jp-icon-collapse-all);
 }
 
 .jp-ConsoleIcon {
@@ -220,6 +232,10 @@
 
 .jp-EllipsesIcon {
   background-image: var(--jp-icon-ellipses);
+}
+
+.jp-ExpandAllIcon {
+  background-image: var(--jp-icon-expand-all);
 }
 
 .jp-ExtensionIcon {
@@ -456,6 +472,10 @@
 
 .jp-UserIcon {
   background-image: var(--jp-icon-user);
+}
+
+.jp-UsersIcon {
+  background-image: var(--jp-icon-users);
 }
 
 .jp-VegaIcon {

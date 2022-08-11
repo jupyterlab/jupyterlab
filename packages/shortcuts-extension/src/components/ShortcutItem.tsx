@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { TranslationBundle } from '@jupyterlab/translation';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
@@ -59,9 +64,9 @@ enum ShortCutLocation {
 }
 
 /** Describe commands that are used by shortcuts */
-function getCommands(
-  trans: TranslationBundle
-): { [key: string]: { commandId: string; label: string; caption: string } } {
+function getCommands(trans: TranslationBundle): {
+  [key: string]: { commandId: string; label: string; caption: string };
+} {
   return {
     shortcutEditLeft: {
       commandId: 'shortcutui:EditLeft',

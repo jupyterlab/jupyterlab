@@ -75,7 +75,7 @@ function activate(
   addKernelRunningSessionManager(runningSessionManagers, translator, app);
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
-  app.shell.add(running, 'left', { rank: 200 });
+  app.shell.add(running, 'left', { rank: 200, type: 'Sessions and Tabs' });
 
   app.commands.addCommand(CommandIDs.showPanel, {
     label: trans.__('Sessions and Tabs'),

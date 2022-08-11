@@ -106,7 +106,7 @@ function activate(
   const openUi = async (args: { query: string }) => {
     if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
       if (!tracker.currentWidget.isAttached) {
-        shell.add(tracker.currentWidget);
+        shell.add(tracker.currentWidget, 'main', { type: 'Settings' });
       }
       shell.activateById(tracker.currentWidget.id);
       return;
@@ -152,7 +152,7 @@ function activate(
     editor.title.closable = true;
 
     void tracker.add(editor);
-    shell.add(editor);
+    shell.add(editor, 'main', { type: 'Settings' });
   };
 
   commands.addCommand(CommandIDs.open, {
@@ -160,12 +160,12 @@ function activate(
       query?: string;
       settingEditorType?: SettingEditorType;
     }) => {
-      registry.load(plugin.id).then(settings => {
+      void registry.load(plugin.id).then(settings => {
         args.settingEditorType ??
         (settings.get('settingEditorType').composite as SettingEditorType) ===
           'json'
-          ? commands.execute(CommandIDs.openJSON)
-          : openUi({ query: args.query ?? '' });
+          ? void commands.execute(CommandIDs.openJSON)
+          : void openUi({ query: args.query ?? '' });
       });
     },
     label: args => {
@@ -242,7 +242,9 @@ function activateJSON(
     execute: async () => {
       if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
         if (!tracker.currentWidget.isAttached) {
-          shell.add(tracker.currentWidget);
+          shell.add(tracker.currentWidget, 'main', {
+            type: 'Advanced Settings'
+          });
         }
         shell.activateById(tracker.currentWidget.id);
         return;
@@ -301,7 +303,7 @@ function activateJSON(
       container.title.closable = true;
 
       void tracker.add(container);
-      shell.add(container);
+      shell.add(container, 'main', { type: 'Advanced Settings' });
     },
     label: trans.__('Advanced Settings Editor')
   });

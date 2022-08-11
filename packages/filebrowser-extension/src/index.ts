@@ -20,7 +20,6 @@ import {
   ICommandPalette,
   InputDialog,
   IToolbarWidgetRegistry,
-  MainAreaWidget,
   setToolbar,
   showErrorMessage,
   WidgetTracker
@@ -36,7 +35,6 @@ import {
   IFileBrowserFactory,
   Uploader
 } from '@jupyterlab/filebrowser';
-import { Launcher } from '@jupyterlab/launcher';
 import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -51,10 +49,12 @@ import {
   editIcon,
   fileIcon,
   folderIcon,
+  IDisposableMenuItem,
   linkIcon,
   markdownIcon,
   newFolderIcon,
   pasteIcon,
+  RankedMenu,
   refreshIcon,
   stopIcon,
   textEditorIcon
@@ -62,7 +62,6 @@ import {
 import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
-import { JSONObject } from '@lumino/coreutils';
 
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
@@ -74,9 +73,6 @@ namespace CommandIDs {
   export const copy = 'filebrowser:copy';
 
   export const copyDownloadLink = 'filebrowser:copy-download-link';
-
-  // For main browser only.
-  export const createLauncher = 'filebrowser:create-main-launcher';
 
   export const cut = 'filebrowser:cut';
 
@@ -402,7 +398,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     browser.title.icon = folderIcon;
 
     // Toolbar
-    toolbarRegistry.registerFactory(
+    toolbarRegistry.addFactory(
       FILE_BROWSER_FACTORY,
       'uploader',
       (browser: FileBrowser) =>
@@ -420,7 +416,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
       )
     );
 
-    labShell.add(browser, 'left', { rank: 100 });
+    labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
     commands.addCommand(CommandIDs.showBrowser, {
       label: trans.__('Open the file browser for the provided `path`.'),
@@ -472,21 +468,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     });
 
     void Promise.all([app.restored, browser.model.restored]).then(() => {
-      function maybeCreate() {
-        // Create a launcher if there are no open items.
-        if (
-          labShell.isEmpty('main') &&
-          commands.hasCommand('launcher:create')
-        ) {
-          void Private.createLauncher(commands, browser);
-        }
-      }
-
-      // When layout is modified, create a launcher if there are no open items.
-      labShell.layoutModified.connect(() => {
-        maybeCreate();
-      });
-
       // Whether to automatically navigate to a document's current directory
       labShell.currentChanged.connect(async (_, change) => {
         if (browser.navigateToCurrentDirectory && change.newValue) {
@@ -505,8 +486,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
           }
         }
       });
-
-      maybeCreate();
     });
   }
 };
@@ -574,19 +553,24 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
     const { docRegistry } = app;
     const { tracker } = factory;
 
+    let items: IDisposableMenuItem[] = [];
+
     function updateOpenWithMenu(contextMenu: ContextMenu) {
       const openWith =
-        contextMenu.menu.items.find(
+        (contextMenu.menu.items.find(
           item =>
             item.type === 'submenu' &&
             item.submenu?.id === 'jp-contextmenu-open-with'
-        )?.submenu ?? null;
+        )?.submenu as RankedMenu) ?? null;
 
       if (!openWith) {
         return; // Bail early if the open with menu is not displayed
       }
 
       // clear the current menu items
+      items.forEach(item => item.dispose());
+      items.length = 0;
+      // Ensure that the menu is empty
       openWith.clearItems();
 
       // get the widget factories that could be used to open all of the items
@@ -600,12 +584,12 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
         : new Set<DocumentRegistry.WidgetFactory>();
 
       // make new menu items from the widget factories
-      factories.forEach(factory => {
+      items = [...factories].map(factory =>
         openWith.addItem({
           args: { factory: factory.name, label: factory.label || factory.name },
           command: CommandIDs.open
-        });
-      });
+        })
+      );
     }
 
     app.contextMenu.opened.connect(updateOpenWithMenu);
@@ -635,25 +619,44 @@ const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
     const { tracker } = factory;
 
     commands.addCommand(CommandIDs.openBrowserTab, {
-      execute: () => {
+      execute: args => {
         const widget = tracker.currentWidget;
 
         if (!widget) {
           return;
         }
 
+        const mode = args['mode'] as string | undefined;
+
         return Promise.all(
           toArray(
             map(widget.selectedItems(), item => {
-              return commands.execute('docmanager:open-browser-tab', {
-                path: item.path
-              });
+              if (mode === 'single-document') {
+                const url = PageConfig.getUrl({
+                  mode: 'single-document',
+                  treePath: item.path
+                });
+                const opened = window.open();
+                if (opened) {
+                  opened.opener = null;
+                  opened.location.href = url;
+                } else {
+                  throw new Error('Failed to open new browser tab.');
+                }
+              } else {
+                return commands.execute('docmanager:open-browser-tab', {
+                  path: item.path
+                });
+              }
             })
           )
         );
       },
       icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Open in New Browser Tab'),
+      label: args =>
+        args['mode'] === 'single-document'
+          ? trans.__('Open in Simple Mode')
+          : trans.__('Open in New Browser Tab'),
       mnemonic: 0
     });
   }
@@ -1117,16 +1120,6 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.createLauncher, {
-    label: trans.__('New Launcher'),
-    icon: args => (args.toolbar ? addIcon : undefined),
-    execute: (args: JSONObject) => {
-      if (commands.hasCommand('launcher:create')) {
-        return Private.createLauncher(commands, browser, args);
-      }
-    }
-  });
-
   if (settingRegistry) {
     commands.addCommand(CommandIDs.toggleNavigateToCurrentDirectory, {
       label: trans.__('Show Active File in File Browser'),
@@ -1206,31 +1199,25 @@ function addCommands(
 }
 
 /**
+ * Export the plugins as default.
+ */
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  factory,
+  browser,
+  shareFile,
+  fileUploadStatus,
+  downloadPlugin,
+  browserWidget,
+  openWithPlugin,
+  openBrowserTabPlugin,
+  openUrlPlugin
+];
+export default plugins;
+
+/**
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   * Create a launcher for a given filebrowser widget.
-   */
-  export function createLauncher(
-    commands: CommandRegistry,
-    browser: FileBrowser,
-    args?: JSONObject
-  ): Promise<MainAreaWidget<Launcher>> {
-    const { model } = browser;
-
-    return commands
-      .execute('launcher:create', { cwd: model.path, ...args })
-      .then((launcher: MainAreaWidget<Launcher>) => {
-        model.pathChanged.connect(() => {
-          if (launcher.content) {
-            launcher.content.cwd = model.path;
-          }
-        }, launcher);
-        return launcher;
-      });
-  }
-
   /**
    * Get browser object given file path.
    */
@@ -1336,25 +1323,7 @@ namespace Private {
     };
     router.routed.connect(listener);
   }
-}
 
-/**
- * Export the plugins as default.
- */
-const plugins: JupyterFrontEndPlugin<any>[] = [
-  factory,
-  browser,
-  shareFile,
-  fileUploadStatus,
-  downloadPlugin,
-  browserWidget,
-  openWithPlugin,
-  openBrowserTabPlugin,
-  openUrlPlugin
-];
-export default plugins;
-
-namespace Private {
   export namespace OpenWith {
     /**
      * Get the factories for the selected item

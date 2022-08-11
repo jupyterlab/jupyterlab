@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import * as React from 'react';
 
 import { classes } from 'typestyle';
@@ -305,9 +310,10 @@ export class ShortcutInput extends React.Component<
           binding !== ''
         ) {
           isAvailable = false;
-          takenByObject = this.props.keyBindingsUsed[
-            binding + '_' + this.props.shortcut.selector
-          ];
+          takenByObject =
+            this.props.keyBindingsUsed[
+              binding + '_' + this.props.shortcut.selector
+            ];
           break;
         }
       }
@@ -321,16 +327,18 @@ export class ShortcutInput extends React.Component<
         currentChain !== ''
       ) {
         isAvailable = false;
-        takenByObject = this.props.keyBindingsUsed[
-          currentChain + '_' + this.props.shortcut.selector
-        ];
+        takenByObject =
+          this.props.keyBindingsUsed[
+            currentChain + '_' + this.props.shortcut.selector
+          ];
       }
 
       /** If unavailable set takenByObject */
     } else {
-      takenByObject = this.props.keyBindingsUsed[
-        keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
-      ];
+      takenByObject =
+        this.props.keyBindingsUsed[
+          keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
+        ];
     }
 
     /** allow to set shortcut to what it initially was if replacing */

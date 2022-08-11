@@ -73,6 +73,11 @@
   overflow-y: auto;
   max-height: 24em;
   margin-left: var(--jp-private-cell-scrolling-output-offset);
+  resize: vertical;
+}
+
+.jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea[style*='height'] {
+  max-height: unset;
 }
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea::after {
@@ -123,6 +128,7 @@
 .jp-collapseHeadingButton {
   display: flex;
   min-height: var(--jp-cell-collapser-min-height);
+  font-size: var(--jp-code-font-size);
   position: absolute;
   background-color: transparent;
   background-size: 25px;
@@ -151,32 +157,32 @@
   Align collapseHeadingButton with cell top header
   The font sizes are identical to the ones in packages/rendermime/style/base.css
 */
-.jp-collapseHeadingButton[data-heading-level='1'] {
+.jp-mod-rendered .jp-collapseHeadingButton[data-heading-level='1'] {
   font-size: var(--jp-content-font-size5);
   background-position-y: calc(0.3 * var(--jp-content-font-size5));
 }
 
-.jp-collapseHeadingButton[data-heading-level='2'] {
+.jp-mod-rendered .jp-collapseHeadingButton[data-heading-level='2'] {
   font-size: var(--jp-content-font-size4);
   background-position-y: calc(0.3 * var(--jp-content-font-size4));
 }
 
-.jp-collapseHeadingButton[data-heading-level='3'] {
+.jp-mod-rendered .jp-collapseHeadingButton[data-heading-level='3'] {
   font-size: var(--jp-content-font-size3);
   background-position-y: calc(0.3 * var(--jp-content-font-size3));
 }
 
-.jp-collapseHeadingButton[data-heading-level='4'] {
+.jp-mod-rendered .jp-collapseHeadingButton[data-heading-level='4'] {
   font-size: var(--jp-content-font-size2);
   background-position-y: calc(0.3 * var(--jp-content-font-size2));
 }
 
-.jp-collapseHeadingButton[data-heading-level='5'] {
+.jp-mod-rendered .jp-collapseHeadingButton[data-heading-level='5'] {
   font-size: var(--jp-content-font-size1);
   background-position-y: top;
 }
 
-.jp-collapseHeadingButton[data-heading-level='6'] {
+.jp-mod-rendered .jp-collapseHeadingButton[data-heading-level='6'] {
   font-size: var(--jp-content-font-size0);
   background-position-y: top;
 }

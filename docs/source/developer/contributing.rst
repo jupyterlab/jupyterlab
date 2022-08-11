@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 Contribute
 ==========
 
@@ -52,6 +55,11 @@ Documentation <https://jupyter.readthedocs.io/en/latest/contributing/content-con
 and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
+We maintain the **two most recently released major versions of JupyterLab**,
+JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no
+longer maintain v2.
+All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+
 All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
@@ -67,7 +75,7 @@ speeding up the review process.
 As long as your code is valid,
 the pre-commit hook should take care of how it should look.
 `pre-commit` and its associated hooks will automatically be installed when
-you run ``pip install -e ".[test]"``
+you run ``pip install -e ".[dev,test]"``
 
 To install ``pre-commit`` manually, run the following::
 
@@ -263,7 +271,16 @@ If you use ``conda``, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge 'nodejs'
+   conda install -c conda-forge nodejs
+
+The canvas node package is not properly packaged for Mac OS X with ARM architectures (M1 and M2).
+To build JupyterLab on such platforms, you need a few additional packages, and to specify the pkg-config
+path:
+
+.. code:: bash
+
+   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib
+   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
 
 If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
 
@@ -283,14 +300,6 @@ To check which version of Node.js is installed:
 Installing JupyterLab
 ---------------------
 
-If you use ``conda``, you may also want to install ``nb_conda_kernels`` to have a kernel
-option for different `conda
-environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`__
-
-.. code:: bash
-
-   conda install -c conda-forge nb_conda_kernels
-
 Fork the JupyterLab
 `repository <https://github.com/jupyterlab/jupyterlab>`__.
 
@@ -300,11 +309,19 @@ Then use the following steps:
 
    git clone https://github.com/<your-github-username>/jupyterlab.git
    cd jupyterlab
-   pip install -e ".[test]"
+   pip install -e ".[dev,test]"
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
-   jlpm run build:core  # Build the core mode assets (optional)
-   jupyter lab build  # Build the app dir assets (optional)
+
+Additionally, you might want to execute the following optional commands:
+
+.. code:: bash
+
+   # Build the core mode assets (optional)
+   jlpm run build:core
+
+   # Build the app dir assets (optional)
+   jupyter lab build
 
 Notes:
 
@@ -463,231 +480,51 @@ must be delayed on minor or major versions.
 Performance Testing
 -------------------
 
-If you are making a change that might affect how long it takes to load
-JupyterLab in the browser, we recommend doing some performance testing
-using `Lighthouse <https://github.com/GoogleChrome/lighthouse>`__. It
-let's you easily compute a number of metrics, like page load time, for
-the site.
+Benchmark of JupyterLab is done using Playwright. The actions measured are:
 
-To use it, first build JupyterLab in dev mode:
+- Opening a file
+- Switching from the file to a simple text file
+- Switching back to the file
+- Closing the file
 
-.. code:: bash
+Two files are tested: a notebook with many code cells and another with many markdown cells.
 
-   jlpm run build:dev
+The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
+the same CI job to ensure using the same hardware.
+The benchmark job is triggered on:
 
-Then, start JupyterLab using the dev build:
+- Approved PR review
+- PR review that contains the sentence ``please run benchmark``
 
-.. code:: bash
-
-   jupyter lab --dev-mode --ServerApp.token=''  --no-browser
-
-Now run Lighthouse against this local server and show the results:
-
-.. code:: bash
-
-   jlpm run lighthouse --view
-
-.. image:: ../images/lighthouse.png
-
-Using throttling
-^^^^^^^^^^^^^^^^
-
-Lighthouse recommends using the system level
-`comcast <https://github.com/tylertreat/comcast>`__ tool to throttle
-your network connection and emulate different scenarios. To use it,
-first install that tool using ``go``:
+The tests are located in the subfolder ``galata/test/benchmark``. And they can be
+executed with the following command:
 
 .. code:: bash
 
-   go get github.com/tylertreat/comcast
+   jlpm run test:benchmark
 
-Then, before you run Lighthouse, enable the throttling (this requires
-sudo):
 
-.. code:: bash
+A special report will be generated in the folder ``benchmark-results`` that will contain 4 files:
 
-   run lighthouse:throttling:start
+- ``lab-benchmark.json``: The execution time of the tests and some metadata.
+- ``lab-benchmark.md``: A report in Markdown
+- ``lab-benchmark.png``: A comparison of execution time distribution
+- ``lab-benchmark.vl.json``: The `Vega-Lite <https://vega.github.io/vega-lite>`__ description used to produce the PNG file.
 
-This enables the "WIFI (good)" preset of comcast, which should emulate
-loading JupyterLab over a local network.
+The reference, tagged *expected*, is stored in ``lab-benchmark-expected.json``. It can be
+created using the ``-u`` option of Playwright; i.e. ``jlpm run test:benchmark -u``.
 
-Then run the lighthouse tests:
+Benchmark parameters
+^^^^^^^^^^^^^^^^^^^^
 
-.. code:: bash
+The benchmark can be customized using the following environment variables:
 
-   jlpm run lighthouse [...]
+- ``BENCHMARK_NUMBER_SAMPLES``: Number of samples to compute the execution time distribution; default 20.
+- ``BENCHMARK_OUTPUTFILE``: Benchmark result output file; default ``benchmark.json``. It is overridden in the ``playwright-benchmark.config.js``.
+- ``BENCHMARK_REFERENCE``: Reference name of the data; default is ``actual`` for current data and ``expected`` for the reference.
 
-Then disable the throttling after you are done:
-
-.. code:: bash
-
-   jlpm run lighthouse:throttling:stop
-
-Comparing results
-^^^^^^^^^^^^^^^^^
-
-Performance results are usually only useful in comparison to other
-results. For that reason, we have included a comparison script that can
-take two lighthouse results and show the changes between them.
-
-Let's say we want to compare the results of the production build of
-JupyterLab with the normal build. The production build minifies all the
-JavaScript, so should load a bit faster.
-
-First, we build JupyterLab normally, start it up, profile it and save
-the results:
-
-.. code:: bash
-
-   jlpm build:dev
-   jupyter lab --dev --ServerApp.token='' --no-browser
-
-   # in new window
-   jlpm run lighthouse --output json --output-path normal.json
-
-Then rebuild with the production build and retest:
-
-.. code:: bash
-
-   jlpm run build:dev:prod
-   jupyter lab --dev --ServerApp.token='' --no-browser
-
-   # in new window
-   jlpm run lighthouse --output json --output-path prod.json
-
-Now we can use compare the two outputs:
-
-.. code:: bash
-
-   jlpm run lighthouse:compare normal.json prod.json
-
-This gives us a report of the relative differences between the audits in
-the two reports:
-
-.. admonition:: Resulting Output
-
-   ``normal.json`` -> ``prod.json``
-
-   | **First Contentful Paint**
-   | - -62% Δ
-   | - 1.9 s -> 0.7 s
-   | - First Contentful Paint marks the time at which the first text or
-     image is painted. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/first-contentful-paint>`__.
-
-   | **First Meaningful Paint**
-   | - -50% Δ
-   | - 2.5 s -> 1.3 s
-   | - First Meaningful Paint measures when the primary content of a
-     page is visible. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/first-meaningful-paint>`__.
-
-   | **Speed Index**
-   | - -48% Δ
-   | - 2.6 s -> 1.3 s
-   | - Speed Index shows how quickly the contents of a page are visibly
-     populated. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/speed-index>`__.
-
-   | **Estimated Input Latency**
-   | - 0% Δ
-   | - 20 ms -> 20 ms
-   | - Estimated Input Latency is an estimate of how long your app takes
-     to respond to user input, in milliseconds, during the busiest 5s
-     window of page load. If your latency is higher than 50 ms, users
-     may perceive your app as laggy. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/estimated-input-latency>`__.
-
-   | **Max Potential First Input Delay**
-   | - 9% Δ
-   | - 200 ms -> 210 ms
-   | - The maximum potential First Input Delay that your users could
-     experience is the duration, in milliseconds, of the longest task.
-     `Learn
-     more <https://developers.google.com/web/updates/2018/05/first-input-delay>`__.
-
-   | **First CPU Idle**
-   | - -50% Δ
-   | - 2.5 s -> 1.3 s
-   | - First CPU Idle marks the first time at which the page's main
-     thread is quiet enough to handle input. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/first-interactive>`__.
-
-   | **Time to Interactive**
-   | - -52% Δ
-   | - 2.5 s -> 1.2 s
-   | - Time to interactive is the amount of time it takes for the page
-     to become fully interactive. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/consistently-interactive>`__.
-
-   | **Avoid multiple page redirects**
-   | - -2% Δ
-   | - Potential savings of 10 ms -> Potential savings of 10 ms
-   | - Redirects introduce additional delays before the page can be
-     loaded. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/redirects>`__.
-
-   | **Minimize main-thread work**
-   | - -54% Δ
-   | - 2.1 s -> 1.0 s
-   | - Consider reducing the time spent parsing, compiling and executing
-     JS. You may find delivering smaller JS payloads helps with this.
-
-   | **JavaScript execution time**
-   | - -49% Δ
-   | - 1.1 s -> 0.6 s
-   | - Consider reducing the time spent parsing, compiling, and
-     executing JS. You may find delivering smaller JS payloads helps
-     with this. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/bootup>`__.
-
-   | **Preload key requests**
-   | - -100% Δ
-   | - Potential savings of 240 ms ->
-   | - Consider using <link rel=preload> to prioritize fetching
-     resources that are currently requested later in page load. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/preload>`__.
-
-   | **Uses efficient cache policy on static assets**
-   | - 0% Δ
-   | - 1 resource found -> 1 resource found
-   | - A long cache lifetime can speed up repeat visits to your page.
-     `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/cache-policy>`__.
-
-   | **Avoid enormous network payloads**
-   | - -86% Δ
-   | - Total size was 30,131 KB -> Total size was 4,294 KB
-   | - Large network payloads cost users real money and are highly
-     correlated with long load times. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/network-payloads>`__.
-
-   | **Minify JavaScript**
-   | - -100% Δ
-   | - Potential savings of 23,041 KB ->
-   | - Minifying JavaScript files can reduce payload sizes and script
-     parse time. `Learn
-     more <https://developers.google.com/speed/docs/insights/MinifyResources>`__.
-
-   | **Enable text compression**
-   | - -86% Δ
-   | - Potential savings of 23,088 KB -> Potential savings of 3,112 KB
-   | - Text-based resources should be served with compression (gzip,
-     deflate or brotli) to minimize total network bytes. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/text-compression>`__.
-
-   | **Avoid an excessive DOM size**
-   | - 0% Δ
-   | - 1,268 elements -> 1,268 elements
-   | - Browser engineers recommend pages contain fewer than ~1,500 DOM
-     elements. The sweet spot is a tree depth < 32 elements and fewer
-     than 60 children/parent element. A large DOM can increase memory
-     usage, cause longer `style
-     calculations <https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations>`__,
-     and produce costly `layout
-     reflows <https://developers.google.com/speed/articles/reflow>`__.
-     `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`__.
+More tests can be carried out manually on JupyterLab branches and run weekly on the default branch in
+`jupyterlab/benchmarks <https://github.com/jupyterlab/benchmarks/#readme>`__ repository.
 
 Visual Regression and UI Tests
 ------------------------------
@@ -758,6 +595,7 @@ The Debugger Adapter Protocol
 The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
 
 .. image:: ./debugger_protocol_diagram.png
+   :alt: UML sequence diagram illustrating the interaction between a user, JupyterLab, and the kernel. From top to bottom, the timeline starts with opening the notebook and includes annotations where the debugger is started and stopped. Specific interactions and message types are discussed in the subsequent text.
 
 Inspecting Debug Messages in VS Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -767,6 +605,7 @@ Inspecting the debug messages in VS Code can be useful to understand when debug 
 The first step is to create a test file and a debug configuration (``launch.json``):
 
 .. image:: ./debugger_launch_configuration.png
+   :alt: An editor showing the menu for creating a debug configuration.
 
 .. code:: json
 
@@ -787,6 +626,7 @@ The first step is to create a test file and a debug configuration (``launch.json
 Then start the debugger:
 
 .. image:: ./debugger_vscode_start.png
+   :alt: A started debugging session in the editor. There are additional buttons in the upper right for navigating the session.
 
 The content of the log file looks like this:
 

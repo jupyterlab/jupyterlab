@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/imageviewer",
-  "version": "4.0.0-alpha.9",
+  "version": "4.0.0-alpha.12",
   "description": "JupyterLab - Image Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,21 +41,21 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.9",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.9",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.9",
+    "@jupyterlab/apputils": "^4.0.0-alpha.12",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.12",
     "@lumino/coreutils": "^1.12.0",
     "@lumino/messaging": "^1.10.1",
-    "@lumino/widgets": "^1.31.1"
+    "@lumino/widgets": "^1.33.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.9",
+    "@jupyterlab/testutils": "^4.0.0-alpha.12",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.6.3"
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

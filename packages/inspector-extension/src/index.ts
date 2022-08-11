@@ -85,7 +85,11 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.content.source?.onEditorChange(args);
       }
       if (!inspector.isAttached) {
-        shell.add(inspector, 'main', { activate: false, mode: 'split-right' });
+        shell.add(inspector, 'main', {
+          activate: false,
+          mode: 'split-right',
+          type: 'Inspector'
+        });
       }
       shell.activateById(inspector.id);
       document.body.dataset[datasetKey] = 'open';

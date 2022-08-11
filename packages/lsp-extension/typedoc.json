@@ -1,0 +1,4 @@
+{
+  "out": "../../docs/api/lsp-extension",
+  "theme": "../../typedoc-theme"
+}

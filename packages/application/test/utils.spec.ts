@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import {
   createSemanticCommand,
   JupyterLab,
@@ -21,12 +26,12 @@ describe('@jupyterlab/application', () => {
       currentWidget = new Widget();
       translator = nullTranslator;
       semanticCmd = new SemanticCommand();
-      app = ({
+      app = {
         commands,
         shell: {
           currentWidget
         } as LabShell
-      } as any) as JupyterLab;
+      } as any as JupyterLab;
     });
 
     it.each([

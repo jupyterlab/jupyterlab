@@ -5,7 +5,9 @@
  * @module fileeditor
  */
 
+export * from './fileeditorlspadapter';
 export * from './searchprovider';
 export * from './tabspacestatus';
+export * from './toc';
 export * from './tokens';
 export * from './widget';
