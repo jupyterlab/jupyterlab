@@ -508,6 +508,26 @@ namespace Private {
     }
 
     /**
+     * Handle the mouse down event for the data grid.
+     *
+     * @param grid - The data grid of interest.
+     *
+     * @param event - The mouse down event of interest.
+     */
+    onMouseDown(grid: DataGrid, event: MouseEvent): void {
+      // Unpack the event.
+      let { clientX, clientY } = event;
+
+      // Hit test the grid.
+      let hit = grid.hitTest(clientX, clientY);
+
+      this._selected.emit(hit);
+
+      // Propagate event to Lumino DataGrid BasicMouseHandler.
+      super.onMouseDown(grid, event);
+    }
+
+    /**
      * Handle the context menu event for the data grid.
      *
      * @param grid - The data grid of interest.
