@@ -24,7 +24,7 @@ import { HTMLHandler } from 'mathjax-full/js/handlers/html/HTMLHandler';
 
 import { browserAdaptor } from 'mathjax-full/js/adaptors/browserAdaptor';
 
-import 'mathjax-full/js/input/tex/require/RequireConfiguration'
+import 'mathjax-full/js/input/tex/require/RequireConfiguration';
 
 mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
 
