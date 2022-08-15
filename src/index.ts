@@ -24,6 +24,8 @@ import { HTMLHandler } from 'mathjax-full/js/handlers/html/HTMLHandler';
 
 import { browserAdaptor } from 'mathjax-full/js/adaptors/browserAdaptor';
 
+import 'mathjax-full/js/input/tex/require/RequireConfiguration'
+
 mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
 
 // Override dynamically generated fonts in favor
@@ -40,7 +42,7 @@ export class MathJax3Typesetter implements ILatexTypesetter {
       font: new emptyFont(),
     });
     const tex = new TeX({
-      packages: AllPackages,
+      packages: AllPackages.concat('require'),
       inlineMath: [
         ['$', '$'],
         ['\\(', '\\)'],

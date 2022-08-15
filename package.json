@@ -55,7 +55,7 @@
   "dependencies": {
     "@jupyterlab/application": "^3.2.8",
     "@jupyterlab/rendermime": "^3.2.8",
-    "mathjax-full": "^3.1.2"
+    "mathjax-full": "^3.2.2"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.2.8",
