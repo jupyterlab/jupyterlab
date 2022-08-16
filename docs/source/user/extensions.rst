@@ -152,13 +152,22 @@ Managing Extensions Using the Extension Manager
 
 .. _extension_manager:
 
-You can use the Extension Manager in JupyterLab to manage extensions.
+You can use the Extension Manager in JupyterLab to manage extensions. That feature
+may have been disabled by your system administrator for security reasons.
+
+.. note::
+
+   Since JupyterLab v4, the default manager use PyPI.org as source for the available
+   extensions and ``pip`` to install them.
+
+   An extension will be listed if the Python package has the classifier:
+   `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt>`__
+   Moreover it is advised for extension author to provide the ``install.json`` file
+   to specified the exact Python package name.
 
 .. warning::
-
-   Since JupyterLab v4, the core manager does not handle searching, installing or
-   uninstalling extensions. This is due to the multiple managers available to
-   distribute extensions.
+   There are no verification that the extension is compatible with the current JupyterLab
+   version.
 
 The Extension Manager is in the :ref:`left sidebar <left-sidebar>`.
 
@@ -212,12 +221,8 @@ Finding Extensions
 
 You can use the extension manager to find extensions for JupyterLab. To discovery
 freely among the currently available extensions, expand the "Discovery" section.
-This triggers a search for all JupyterLab extensions on the NPM registry, and
-the results are listed according to the `registry's sort order
-<https://docs.npmjs.com/searching-for-and-choosing-packages-to-download#package-search-rank-criteria>`__.
-An exception to this sort order is that extensions released by the Jupyter
-organization are always placed first. These extensions are distinguished by
-a small Jupyter icon next to their name.
+This triggers a search for all JupyterLab extensions on the PyPI.org registry, and
+the results are listed alphabetically.
 
 
 .. figure:: ../images/extensions-default.png
@@ -227,7 +232,7 @@ a small Jupyter icon next to their name.
 
 
 Alternatively, you can limit your discovery by using the search bar. This
-performs a free-text search of JupyterLab extensions on the NPM registry.
+performs a free-text search of JupyterLab extensions on the PyPI.org registry.
 
 .. image:: ../images/extensions-search.png
    :align: center
@@ -249,10 +254,7 @@ it by clicking the "Install" button of the extension list entry.
     avoid installing extensions you do not trust, and watch out for
     any extensions trying to masquerade as a trusted extension.
 
-
-A short while after starting the install of an extension, a drop-down should
-appear under the search bar indicating that the extension has been
-downloaded. The newly installed extension may require to restart JupyterLab.
+The newly installed extension may require to restart JupyterLab.
 
 
 Managing Installed Extensions
