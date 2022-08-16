@@ -406,7 +406,7 @@ export class ListModel extends VDomModel {
       reply => {
         const trans = this.translator.load('jupyterlab');
         if (reply.needs_restart.includes('server')) {
-          showDialog({
+          void showDialog({
             title: trans.__('Information'),
             body: trans.__(
               'You will need to restart JupyterLab to apply the changes.'
@@ -423,7 +423,7 @@ export class ListModel extends VDomModel {
               trans.__('install the extension in all kernels and restart them')
             );
           }
-          showDialog({
+          void showDialog({
             title: trans.__('Information'),
             body: trans.__(
               'You will need to %1 to apply the changes.',

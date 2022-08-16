@@ -193,6 +193,8 @@ async def test_PyPiExtensionsManager_list_extensions_query(mocked_rpcclient):
         url="https://github.com/jupyterlab/jupyterlab-git",
         pkg_type="prebuilt",
         latest_version="0.37.1",
+        author="Jupyter Development Team",
+        license="BSD-3-Clause",
     )
     extension2 = ExtensionPackage(
         name="jupyterlab-github",
@@ -200,6 +202,8 @@ async def test_PyPiExtensionsManager_list_extensions_query(mocked_rpcclient):
         url="https://github.com/jupyterlab/jupyterlab-github",
         pkg_type="prebuilt",
         latest_version="3.0.1",
+        author="Ian Rose",
+        license="BSD-3-Clause",
     )
 
     proxy = Mock(
