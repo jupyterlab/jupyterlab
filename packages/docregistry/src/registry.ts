@@ -1508,14 +1508,23 @@ export interface IDocumentWidget<
   readonly content: T;
 
   /**
-   * A promise resolving after the content widget is revealed.
-   */
-  readonly revealed: Promise<void>;
-
-  /**
    * The context associated with the document.
    */
   readonly context: DocumentRegistry.IContext<U>;
+
+  /**
+   * Whether the content is untitled or not.
+   *
+   * #### Notes
+   * A document is untitled if its name is untitled and up
+   * to the instant the user saves it manually for the first time.
+   */
+  isUntitled?: boolean;
+
+  /**
+   * A promise resolving after the content widget is revealed.
+   */
+  readonly revealed: Promise<void>;
 
   /**
    * The toolbar for the widget.

@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   Button,
   closeIcon,
@@ -452,6 +453,8 @@ export class Dialog<T> extends Widget {
  * The namespace for Dialog class statics.
  */
 export namespace Dialog {
+  export let trans = nullTranslator.load('jupyterlab');
+
   /**
    * The body input types.
    */
@@ -605,7 +608,7 @@ export namespace Dialog {
     /**
      * Create the body of the dialog.
      *
-     * @param value - The input value for the body.
+     * @param body - The input value for the body.
      *
      * @returns A widget for the body.
      */

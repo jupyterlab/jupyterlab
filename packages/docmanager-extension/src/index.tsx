@@ -24,7 +24,7 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, PageConfig, Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   IDocumentManager,
@@ -33,7 +33,7 @@ import {
   SavingStatus
 } from '@jupyterlab/docmanager';
 import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -748,12 +748,14 @@ function addCommands(
     }
   };
 
+  const saveInProgress = new WeakSet<DocumentRegistry.Context>();
+
   commands.addCommand(CommandIDs.save, {
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
     caption,
     icon: args => (args.toolbar ? saveIcon : ''),
     isEnabled: isWritable,
-    execute: () => {
+    execute: async () => {
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
         const widget = shell.currentWidget;
@@ -765,6 +767,10 @@ function addCommands(
             buttons: [Dialog.okButton({ label: trans.__('Ok') })]
           });
         } else {
+          if (saveInProgress.has(context)) {
+            return;
+          }
+
           if (context.model.readOnly) {
             return showDialog({
               title: trans.__('Cannot Save'),
@@ -773,20 +779,43 @@ function addCommands(
             });
           }
 
-          return context
-            .save()
-            .then(() => {
-              if (!widget?.isDisposed) {
-                return context!.createCheckpoint();
-              }
-            })
-            .catch(err => {
-              // If the save was canceled by user-action, do nothing.
-              if (err.name === 'ModalCancelError') {
-                return;
-              }
-              throw err;
+          saveInProgress.add(context);
+
+          let newName = '';
+          const oldName = PathExt.basename(context.contentsModel?.path ?? '');
+
+          if ((widget as IDocumentWidget).isUntitled === true) {
+            const result = await InputDialog.getText({
+              title: trans.__('Rename file'),
+              okLabel: trans.__('Rename'),
+              placeholder: trans.__('File name'),
+              text: PathExt.basename(context.contentsModel?.path ?? '')
             });
+
+            if (result.button.accept) {
+              newName = result.value ?? oldName;
+              (widget as IDocumentWidget).isUntitled = false;
+            }
+          }
+
+          try {
+            await context.save();
+
+            if (!widget?.isDisposed) {
+              return context!.createCheckpoint();
+            }
+          } catch (err) {
+            // If the save was canceled by user-action, do nothing.
+            if (err.name === 'ModalCancelError') {
+              return;
+            }
+            throw err;
+          } finally {
+            saveInProgress.delete(context);
+            if (newName !== oldName) {
+              await context.rename(newName);
+            }
+          }
         }
       }
     }
