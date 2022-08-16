@@ -152,6 +152,7 @@ class ExtensionsManager(LoggingConfigurable):
     Args:
         app_options: Application options
         ext_options: Extensions manager options
+        parent: Configurable parent
 
     Attributes:
         log: Logger
@@ -516,6 +517,16 @@ class ExtensionsManager(LoggingConfigurable):
                 return json.load(fid)
         else:
             return None
+
+    def _normalize_name(self, name: str) -> str:
+        """Normalize extension name; by default does nothing.
+
+        Args:
+            name: Extension name
+        Returns:
+            Normalized name
+        """
+        return name
 
     async def _update_extensions_list(
         self, query: Optional[str] = None, page: int = 1, per_page: int = 30

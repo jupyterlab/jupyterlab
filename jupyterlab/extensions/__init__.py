@@ -3,6 +3,8 @@
 import sys
 from typing import Optional
 
+from traitlets.config import Configurable
+
 from .manager import ActionResult, ExtensionPackage, ExtensionsManager  # noqa: F401
 from .pypi import PyPiExtensionsManager
 from .readonly import ReadOnlyExtensionsManager
@@ -24,14 +26,18 @@ for entry in entry_points(group="jupyterlab.extension_manager_v1"):
 
 
 def get_readonly_manager(
-    app_options: Optional[dict] = None, ext_options: Optional[dict] = None
+    app_options: Optional[dict] = None,
+    ext_options: Optional[dict] = None,
+    parent: Optional[Configurable] = None,
 ) -> ExtensionsManager:
     """Read-Only Extensions Manager factory"""
-    return ReadOnlyExtensionsManager(app_options, ext_options)
+    return ReadOnlyExtensionsManager(app_options, ext_options, parent)
 
 
 def get_pypi_manager(
-    app_options: Optional[dict] = None, ext_options: Optional[dict] = None
+    app_options: Optional[dict] = None,
+    ext_options: Optional[dict] = None,
+    parent: Optional[Configurable] = None,
 ) -> ExtensionsManager:
     """PyPi Extensions Manager factory"""
-    return PyPiExtensionsManager(app_options, ext_options)
+    return PyPiExtensionsManager(app_options, ext_options, parent)

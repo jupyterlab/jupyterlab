@@ -44,6 +44,7 @@ from .commands import (
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
 from .extensions import MANAGERS as EXT_MANAGERS
+from .extensions.readonly import ReadOnlyExtensionsManager
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import (
@@ -772,7 +773,17 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             ):
                 self.log.debug(f"Extensions manager will be constrained by {listings_config}")
 
-            ext_manager = manager_factory(build_handler_options, listings_config, self)
+            try:
+                ext_manager = manager_factory(build_handler_options, listings_config, self)
+            except Exception as err:
+                self.log.warning(
+                    f"Failed to instantiate the extensions manager {provider}. Falling back to read-only manager.",
+                    exc_info=err,
+                )
+                ext_manager = ReadOnlyExtensionsManager(
+                    build_handler_options, listings_config, self
+                )
+
             page_config["extensions_manager_can_install"] = ext_manager.can_install
             ext_handler = (
                 extensions_handler_path,
