@@ -1,11 +1,33 @@
 import json
 from typing import NamedTuple
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
+
+try:
+    from unittest.mock import AsyncMock
+except ImportError:
+    AsyncMock = None
 
 import pytest
+import tornado
+from jupyter_server.utils import ensure_async
+from traitlets.config import Config, Configurable
 
 from jupyterlab.extensions import PyPiExtensionsManager, ReadOnlyExtensionsManager
 from jupyterlab.extensions.manager import ExtensionPackage, ExtensionsManager
+
+
+class Response(NamedTuple):
+    """Fake tornado response."""
+
+    body: bytes
+
+
+def to_async_mock(args):
+    """Convert arguments to awaitable arguments or asynchronous mock."""
+    if AsyncMock is None:
+        return ensure_async(args)
+    else:
+        return AsyncMock(return_value=args)
 
 
 @pytest.mark.parametrize(
@@ -38,7 +60,7 @@ async def test_ExtensionsManager_list_extensions_installed(monkeypatch):
 
     extensions = await manager.list_extensions()
 
-    assert extensions == {extension1}
+    assert extensions == ([extension1], 1)
 
 
 async def test_ExtensionsManager_list_extensions_query(monkeypatch):
@@ -54,19 +76,19 @@ async def test_ExtensionsManager_list_extensions_query(monkeypatch):
 
     extensions = await manager.list_extensions("ext")
 
-    assert extensions == {extension1, extension2}
+    assert extensions == ([extension1, extension2], 1)
 
 
-@patch("jupyterlab.extensions.manager.requests")
-async def test_ExtensionsManager_list_extensions_query_allow(mock_requests, monkeypatch):
+@patch("tornado.httpclient.AsyncHTTPClient")
+async def test_ExtensionsManager_list_extensions_query_allow(mock_client, monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
     extension2 = ExtensionPackage("extension2", "Extension 2 description", "", "prebuilt")
 
-    class Request(NamedTuple):
-        text: str
-
-    mock_requests.request.return_value = Request(
-        json.dumps({"allowed_extensions": [{"name": "extension1"}]})
+    mock_client.return_value = MagicMock(
+        spec=tornado.httpclient.AsyncHTTPClient,
+        fetch=to_async_mock(
+            Response(json.dumps({"allowed_extensions": [{"name": "extension1"}]}).encode())
+        ),
     )
 
     async def mock_list(*args, **kwargs):
@@ -75,24 +97,24 @@ async def test_ExtensionsManager_list_extensions_query_allow(mock_requests, monk
     monkeypatch.setattr(ReadOnlyExtensionsManager, "list_packages", mock_list)
 
     manager = ReadOnlyExtensionsManager(
-        ext_options=dict(allowed_extensions_uris={"http://dummy-allowed-extension"})
+        ext_options=dict(allowed_extensions_uris={"http://dummy-allowed-extension"}),
     )
 
     extensions = await manager.list_extensions("ext")
 
-    assert extensions == {extension1}
+    assert extensions == ([extension1], 1)
 
 
-@patch("jupyterlab.extensions.manager.requests")
-async def test_ExtensionsManager_list_extensions_query_block(mock_requests, monkeypatch):
+@patch("tornado.httpclient.AsyncHTTPClient")
+async def test_ExtensionsManager_list_extensions_query_block(mock_client, monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
     extension2 = ExtensionPackage("extension2", "Extension 2 description", "", "prebuilt")
 
-    class Request(NamedTuple):
-        text: str
-
-    mock_requests.request.return_value = Request(
-        json.dumps({"blocked_extensions": [{"name": "extension1"}]})
+    mock_client.return_value = MagicMock(
+        spec=tornado.httpclient.AsyncHTTPClient,
+        fetch=to_async_mock(
+            Response(json.dumps({"blocked_extensions": [{"name": "extension1"}]}).encode())
+        ),
     )
 
     async def mock_list(*args, **kwargs):
@@ -106,24 +128,26 @@ async def test_ExtensionsManager_list_extensions_query_block(mock_requests, monk
 
     extensions = await manager.list_extensions("ext")
 
-    assert extensions == {extension2}
+    assert extensions == ([extension2], 1)
 
 
-@patch("jupyterlab.extensions.manager.requests")
-async def test_ExtensionsManager_list_extensions_query_allow_block(mock_requests, monkeypatch):
+@patch("tornado.httpclient.AsyncHTTPClient")
+async def test_ExtensionsManager_list_extensions_query_allow_block(mock_client, monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
     extension2 = ExtensionPackage("extension2", "Extension 2 description", "", "prebuilt")
 
-    class Request(NamedTuple):
-        text: str
-
-    mock_requests.request.return_value = Request(
-        json.dumps(
-            {
-                "allowed_extensions": [{"name": "extension1"}],
-                "blocked_extensions": [{"name": "extension1"}],
-            }
-        )
+    mock_client.return_value = MagicMock(
+        spec=tornado.httpclient.AsyncHTTPClient,
+        fetch=to_async_mock(
+            Response(
+                json.dumps(
+                    {
+                        "allowed_extensions": [{"name": "extension1"}],
+                        "blocked_extensions": [{"name": "extension1"}],
+                    }
+                ).encode()
+            )
+        ),
     )
 
     async def mock_list(*args, **kwargs):
@@ -140,7 +164,7 @@ async def test_ExtensionsManager_list_extensions_query_allow_block(mock_requests
 
     extensions = await manager.list_extensions("ext")
 
-    assert extensions == {extension1}
+    assert extensions == ([extension1], 1)
 
 
 async def test_ExtensionsManager_install():
@@ -324,4 +348,14 @@ async def test_PyPiExtensionsManager_list_extensions_query(mocked_rpcclient):
 
     extensions = await manager.list_extensions("git")
 
-    assert extensions == {extension1, extension2}
+    assert extensions == ([extension1, extension2], 1)
+
+
+async def test_PyPiExtensionsManager_custom_server_url():
+    BASE_URL = "https://mylocal.pypi.server/pypi"
+
+    parent = Configurable(config=Config({"PyPiExtensionsManager": {"base_url": BASE_URL}}))
+
+    manager = PyPiExtensionsManager(parent=parent)
+
+    assert manager.base_url == BASE_URL

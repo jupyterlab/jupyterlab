@@ -3,7 +3,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-import abc
 import json
 import re
 from dataclasses import dataclass, field, replace
@@ -11,6 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 import tornado
+from traitlets.config import Configurable, LoggingConfigurable
 
 from ..commands import (
     _AppHandler,
@@ -134,7 +134,7 @@ class ExtensionsCache:
     last_page: int = 1
 
 
-class ExtensionsManager(abc.ABC):
+class ExtensionsManager(LoggingConfigurable):
     """Base abstract extensions manager.
 
     Note:
@@ -162,8 +162,12 @@ class ExtensionsManager(abc.ABC):
     """
 
     def __init__(
-        self, app_options: Optional[dict] = None, ext_options: Optional[dict] = None
+        self,
+        app_options: Optional[dict] = None,
+        ext_options: Optional[dict] = None,
+        parent: Optional[Configurable] = None,
     ) -> None:
+        super(ExtensionsManager, self).__init__(parent=parent)
         app_options = _ensure_options(app_options)
         self.log = app_options.logger
         self.app_dir = Path(app_options.app_dir)
@@ -194,7 +198,6 @@ class ExtensionsManager(abc.ABC):
             self._listing_fetch.stop()
 
     @property
-    @abc.abstractmethod
     def can_install(self) -> bool:
         """Whether the manager can un-/install extensions or not.
 
@@ -203,7 +206,6 @@ class ExtensionsManager(abc.ABC):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
     async def get_latest_version(self, extension: str) -> Optional[str]:
         """Return the latest available version for a given extension.
 
@@ -214,7 +216,6 @@ class ExtensionsManager(abc.ABC):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
     async def list_packages(
         self, query: str, page: int, per_page: int
     ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
@@ -230,7 +231,6 @@ class ExtensionsManager(abc.ABC):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
     async def install(self, extension: str, version: Optional[str] = None) -> ActionResult:
         """Install the required extension.
 
@@ -247,7 +247,6 @@ class ExtensionsManager(abc.ABC):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
     async def uninstall(self, extension: str) -> ActionResult:
         """Uninstall the required extension.
 
@@ -346,7 +345,7 @@ class ExtensionsManager(abc.ABC):
 
         # filter using listings settings
         if self._listings_cache is None and self._listing_fetch is not None:
-            self._listing_fetch.callback()
+            await self._listing_fetch.callback()
 
         cache = self._extensions_cache[query].cache[page]
         extensions = list(cache.values())
@@ -401,7 +400,7 @@ class ExtensionsManager(abc.ABC):
                     allowed_extensions_uri,
                     **self.options.listings_tornado_options,
                 )
-                j = json.loads(r.text)
+                j = json.loads(r.body)
                 rules.extend(j.get("allowed_extensions", []))
 
         self._listings_cache = dict([(r["name"], r) for r in rules])

@@ -772,7 +772,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             ):
                 self.log.debug(f"Extensions manager will be constrained by {listings_config}")
 
-            ext_manager = manager_factory(build_handler_options, listings_config)
+            ext_manager = manager_factory(build_handler_options, listings_config, self)
             page_config["extensions_manager_can_install"] = ext_manager.can_install
             ext_handler = (
                 extensions_handler_path,
