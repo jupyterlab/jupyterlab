@@ -297,6 +297,18 @@ To check which version of Node.js is installed:
 
    node -v
 
+Using automation to set up a local development environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+While there is a lot to learn by following the steps above, they can be automated to save time. This section shows how
+to do that using Vagrant as an example.
+
+The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
+re-build the environment, better standardisation ("baseline", reproducible environments).
+
+A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
+includes a ``Vagrantfile``, the bootstrap files and additional documentation.
+
 Installing JupyterLab
 ---------------------
 
