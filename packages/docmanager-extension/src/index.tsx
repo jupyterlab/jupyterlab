@@ -71,6 +71,8 @@ namespace CommandIDs {
 
   export const del = 'docmanager:delete';
 
+  export const duplicate = 'docmanager:duplicate';
+
   export const restoreCheckpoint = 'docmanager:restore-checkpoint';
 
   export const save = 'docmanager:save';
@@ -858,7 +860,8 @@ function addCommands(
       CommandIDs.restoreCheckpoint,
       CommandIDs.save,
       CommandIDs.saveAs,
-      CommandIDs.toggleAutosave
+      CommandIDs.toggleAutosave,
+      CommandIDs.duplicate
     ].forEach(command => {
       palette.addItem({ command, category });
     });
@@ -929,6 +932,21 @@ function addLabCommands(
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
         return renameDialog(docManager, context!);
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.duplicate, {
+    label: () =>
+      trans.__('Duplicate %1', fileType(contextMenuWidget(), docManager)),
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        const context = docManager.contextForWidget(contextMenuWidget()!);
+        if (!context) {
+          return;
+        }
+        return docManager.duplicate(context.path);
       }
     }
   });

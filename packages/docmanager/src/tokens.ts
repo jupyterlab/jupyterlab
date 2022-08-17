@@ -134,6 +134,16 @@ export interface IDocumentManager extends IDisposable {
   deleteFile(path: string): Promise<void>;
 
   /**
+   * Duplicate a file.
+   *
+   * @param path - The full path to the file to be duplicated.
+   *
+   * @returns A promise which resolves when the file is duplicated.
+   *
+   */
+  duplicate(path: string): Promise<Contents.IModel>;
+
+  /**
    * See if a widget already exists for the given path and widget name.
    *
    * @param path - The file path to use.

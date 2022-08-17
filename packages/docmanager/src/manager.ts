@@ -276,6 +276,18 @@ export class DocumentManager implements IDocumentManager {
   }
 
   /**
+   * Duplicate a file.
+   *
+   * @param path - The full path to the file to be duplicated.
+   *
+   * @returns A promise which resolves when the file is duplicated.
+   */
+  duplicate(path: string): Promise<Contents.IModel> {
+    const basePath = PathExt.dirname(path);
+    return this.services.contents.copy(path, basePath);
+  }
+
+  /**
    * See if a widget already exists for the given path and widget name.
    *
    * @param path - The file path to use.
