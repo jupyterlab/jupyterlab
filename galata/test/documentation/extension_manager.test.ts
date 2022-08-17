@@ -126,7 +126,7 @@ test.describe('Filtered Extensions Manager', () => {
     await page.pause();
     expect(
       await page.screenshot({
-        clip: { y: 110, x: 33, width: 250, height: 280 }
+        clip: { x: 33, y: 100, width: 250, height: 280 }
       })
     ).toMatchSnapshot('extensions_blocked_list.png');
   });
@@ -153,7 +153,7 @@ test.describe('Filtered Extensions Manager', () => {
 
     expect(
       await page.screenshot({
-        clip: { y: 110, x: 33, width: 250, height: 280 }
+        clip: { x: 33, y: 100, width: 250, height: 280 }
       })
     ).toMatchSnapshot('extensions_allowed_list.png');
   });
