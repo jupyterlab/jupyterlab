@@ -213,6 +213,10 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
         .composite as number | null;
       docManager.lastModifiedCheckMargin = lastModifiedCheckMargin || 500;
 
+      const renameUntitledFile = settings.get('renameUntitledFileOnSave')
+        .composite as boolean;
+      docManager.renameUntitledFileOnSave = renameUntitledFile ?? true;
+
       // Handle default widget factory overrides.
       const defaultViewers = settings.get('defaultViewers').composite as {
         [ft: string]: string;
@@ -781,15 +785,24 @@ function addCommands(
 
           saveInProgress.add(context);
 
-          let newName = '';
           const oldName = PathExt.basename(context.contentsModel?.path ?? '');
+          let newName = oldName;
 
-          if ((widget as IDocumentWidget).isUntitled === true) {
+          if (
+            docManager.renameUntitledFileOnSave &&
+            (widget as IDocumentWidget).isUntitled === true
+          ) {
             const result = await InputDialog.getText({
               title: trans.__('Rename file'),
               okLabel: trans.__('Rename'),
               placeholder: trans.__('File name'),
-              text: PathExt.basename(context.contentsModel?.path ?? '')
+              text: PathExt.basename(context.contentsModel?.path ?? ''),
+              checkbox: {
+                label: trans.__("Don't ask me again."),
+                caption: trans.__(
+                  'If checked, you will no be asked to rename future untitled files when saving them.'
+                )
+              }
             });
 
             if (result.button.accept) {
