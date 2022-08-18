@@ -157,16 +157,16 @@ may have been disabled by your system administrator for security reasons.
 
 .. note::
 
-   Since JupyterLab v4, the default manager use PyPI.org as source for the available
+   Since JupyterLab v4, the default manager uses PyPI.org as source for the available
    extensions and ``pip`` to install them.
 
    An extension will be listed if the Python package has the classifier:
    `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt>`__
    Moreover it is advised for extension author to provide the ``install.json`` file
-   to specified the exact Python package name.
+   to specify the exact Python package name.
 
 .. warning::
-   There are no verification that the extension is compatible with the current JupyterLab
+   There is no check to ensure the extension is compatible with the current JupyterLab
    version.
 
 The Extension Manager is in the :ref:`left sidebar <left-sidebar>`.
