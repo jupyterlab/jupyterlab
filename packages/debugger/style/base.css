@@ -24,3 +24,7 @@
 .jp-DebuggerBugButton[aria-pressed='true'] path {
   fill: var(--jp-warn-color0);
 }
+
+.jp-MimeRenderer {
+  overflow: auto;
+}

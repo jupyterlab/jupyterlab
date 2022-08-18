@@ -15,6 +15,8 @@ import { Panel } from '@lumino/widgets';
 import { murmur2 } from '../../hash';
 import { IDebugger } from '../../tokens';
 
+const MIME_RENDERER_CLASS = 'jp-MimeRenderer';
+
 /**
  * Debugger variable mime type renderer
  */
@@ -30,6 +32,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
       content,
       reveal: Promise.all([dataLoader, loaded.promise])
     });
+    this.addClass(MIME_RENDERER_CLASS);
     this.trans = (translator ?? nullTranslator).load('jupyterlab');
     this.dataLoader = dataLoader;
     this.renderMime = rendermime;
