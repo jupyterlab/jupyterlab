@@ -61,8 +61,8 @@ bumped their major version (following semver convention). We want to point out p
    you will need to register a ``ISearchProviderFactory`` to the ``ISearchProviderRegistry``. The
    factory will build a ``ISearchProvider`` for the document widget.
 - ``@jupyterlab/extensionmanager`` from 3.x to 4.x
-   The frontend API has been drastically reduced to fetch all information from the backend. And it is now advised
-   to provide a custom ``ExtensionManager`` class for your need rather than overriding the frontend plugins.
+   The frontend API has been drastically reduced to fetch all information from the backend. It is now advised
+   that you implement a custom ``ExtensionManager`` class for your needs rather than overriding the frontend plugins.
    See ``jupyterlab/extensions/pypi.py`` for an example using PyPI.org and pip. You can then register your manager
    by defining an entry point in the Python package; see ``pyproject.toml::project.entry-points."jupyterlab.extension_manager_v1"``.
 - ``@jupyterlab/fileeditor`` from 3.x to 4.x

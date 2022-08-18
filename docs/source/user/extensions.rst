@@ -254,7 +254,7 @@ it by clicking the "Install" button of the extension list entry.
     avoid installing extensions you do not trust, and watch out for
     any extensions trying to masquerade as a trusted extension.
 
-The newly installed extension may require to restart JupyterLab.
+The newly installed extension may require JupyterLab to be restarted.
 
 
 Managing Installed Extensions
