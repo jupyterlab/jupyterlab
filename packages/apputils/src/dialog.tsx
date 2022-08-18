@@ -917,14 +917,16 @@ export namespace Dialog {
      */
     createCheckboxNode(checkbox: ICheckbox): HTMLElement {
       const e = document.createElement('label');
-      e.className = `jp-Dialog-checkbox ${checkbox.className}`.trim();
+      e.className = 'jp-Dialog-checkbox';
+      if (checkbox.className) {
+        e.classList.add(checkbox.className);
+      }
       e.title = checkbox.caption;
-      e.insertAdjacentHTML(
-        'afterbegin',
-        `<input type="checkbox" ${checkbox.checked ? 'checked' : ''}>${
-          checkbox.label
-        }`
-      );
+      e.textContent = checkbox.label;
+      const input = document.createElement('input') as HTMLInputElement;
+      input.type = 'checkbox';
+      input.checked = !!checkbox.checked;
+      e.insertAdjacentElement('afterbegin', input);
       return e;
     }
 
