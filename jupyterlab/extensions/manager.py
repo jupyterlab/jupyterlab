@@ -134,8 +134,8 @@ class ExtensionsCache:
     last_page: int = 1
 
 
-class ExtensionsManager(LoggingConfigurable):
-    """Base abstract extensions manager.
+class ExtensionManager(LoggingConfigurable):
+    """Base abstract extension manager.
 
     Note:
         Any concrete implementation will need to implement the five
@@ -151,7 +151,7 @@ class ExtensionsManager(LoggingConfigurable):
 
     Args:
         app_options: Application options
-        ext_options: Extensions manager options
+        ext_options: Extension manager options
         parent: Configurable parent
 
     Attributes:
@@ -159,7 +159,7 @@ class ExtensionsManager(LoggingConfigurable):
         app_dir: Application directory
         core_config: Core configuration
         app_options: Application options
-        options: Extensions manager options
+        options: Extension manager options
     """
 
     def __init__(
@@ -168,7 +168,7 @@ class ExtensionsManager(LoggingConfigurable):
         ext_options: Optional[dict] = None,
         parent: Optional[Configurable] = None,
     ) -> None:
-        super(ExtensionsManager, self).__init__(parent=parent)
+        super(ExtensionManager, self).__init__(parent=parent)
         app_options = _ensure_options(app_options)
         self.log = app_options.logger
         self.app_dir = Path(app_options.app_dir)
@@ -436,9 +436,9 @@ class ExtensionsManager(LoggingConfigurable):
                 url=data.get("url", ""),
                 enabled=(name not in info["disabled"]),
                 core=False,
-                latest_version=ExtensionsManager.get_semver_version(data["version"]),
+                latest_version=ExtensionManager.get_semver_version(data["version"]),
                 installed=True,
-                installed_version=ExtensionsManager.get_semver_version(data["version"]),
+                installed_version=ExtensionManager.get_semver_version(data["version"]),
                 status=status,
                 install=data.get("install", {}),
                 pkg_type="prebuilt",
@@ -469,9 +469,9 @@ class ExtensionsManager(LoggingConfigurable):
                 url=data["url"],
                 enabled=(name not in info["disabled"]),
                 core=False,
-                latest_version=ExtensionsManager.get_semver_version(data["version"]),
+                latest_version=ExtensionManager.get_semver_version(data["version"]),
                 installed=True,
-                installed_version=ExtensionsManager.get_semver_version(data["version"]),
+                installed_version=ExtensionManager.get_semver_version(data["version"]),
                 status=status,
                 pkg_type="source",
                 companion=self._get_companion(data),
@@ -491,8 +491,8 @@ class ExtensionsManager(LoggingConfigurable):
                     installed=False,
                     enabled=False,
                     core=False,
-                    latest_version=ExtensionsManager.get_semver_version(data["version"]),
-                    installed_version=ExtensionsManager.get_semver_version(data["version"]),
+                    latest_version=ExtensionManager.get_semver_version(data["version"]),
+                    installed_version=ExtensionManager.get_semver_version(data["version"]),
                     status="warning",
                     pkg_type="prebuilt",
                 )

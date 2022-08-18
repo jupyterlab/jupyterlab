@@ -144,7 +144,7 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Whether the extensions manager support installation methods or not.
+   * Whether the extension manager support installation methods or not.
    */
   readonly canInstall: boolean;
 

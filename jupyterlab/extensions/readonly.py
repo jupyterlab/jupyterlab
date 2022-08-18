@@ -1,4 +1,4 @@
-"""Extensions manager without installation capabilities."""
+"""Extension manager without installation capabilities."""
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
@@ -7,11 +7,11 @@ from typing import Dict, Optional, Tuple
 
 from jupyterlab_server.translation_utils import translator
 
-from .manager import ActionResult, ExtensionPackage, ExtensionsManager
+from .manager import ActionResult, ExtensionManager, ExtensionPackage
 
 
-class ReadOnlyExtensionsManager(ExtensionsManager):
-    """Extensions manager without installation capabilities."""
+class ReadOnlyExtensionManager(ExtensionManager):
+    """Extension manager without installation capabilities."""
 
     @property
     def can_install(self) -> bool:

@@ -12,8 +12,8 @@ import tornado
 from jupyter_server.utils import ensure_async
 from traitlets.config import Config, Configurable
 
-from jupyterlab.extensions import PyPiExtensionsManager, ReadOnlyExtensionsManager
-from jupyterlab.extensions.manager import ExtensionPackage, ExtensionsManager
+from jupyterlab.extensions import PyPiExtensionManager, ReadOnlyExtensionManager
+from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage
 
 
 class Response(NamedTuple):
@@ -44,35 +44,35 @@ def to_async_mock(args):
         ("1.0.0rc25.post4.dev2", "1.0.0-rc.25"),
     ),
 )
-def test_ExtensionsManager_get_semver_version(version, expected):
-    assert ExtensionsManager.get_semver_version(version) == expected
+def test_ExtensionManager_get_semver_version(version, expected):
+    assert ExtensionManager.get_semver_version(version) == expected
 
 
-async def test_ExtensionsManager_list_extensions_installed(monkeypatch):
+async def test_ExtensionManager_list_extensions_installed(monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
 
     async def mock_installed(*args, **kwargs):
         return {"extension1": extension1}
 
-    monkeypatch.setattr(ReadOnlyExtensionsManager, "_get_installed_extensions", mock_installed)
+    monkeypatch.setattr(ReadOnlyExtensionManager, "_get_installed_extensions", mock_installed)
 
-    manager = ReadOnlyExtensionsManager()
+    manager = ReadOnlyExtensionManager()
 
     extensions = await manager.list_extensions()
 
     assert extensions == ([extension1], 1)
 
 
-async def test_ExtensionsManager_list_extensions_query(monkeypatch):
+async def test_ExtensionManager_list_extensions_query(monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
     extension2 = ExtensionPackage("extension2", "Extension 2 description", "", "prebuilt")
 
     async def mock_list(*args, **kwargs):
         return {"extension1": extension1, "extension2": extension2}, None
 
-    monkeypatch.setattr(ReadOnlyExtensionsManager, "list_packages", mock_list)
+    monkeypatch.setattr(ReadOnlyExtensionManager, "list_packages", mock_list)
 
-    manager = ReadOnlyExtensionsManager()
+    manager = ReadOnlyExtensionManager()
 
     extensions = await manager.list_extensions("ext")
 
@@ -80,7 +80,7 @@ async def test_ExtensionsManager_list_extensions_query(monkeypatch):
 
 
 @patch("tornado.httpclient.AsyncHTTPClient")
-async def test_ExtensionsManager_list_extensions_query_allow(mock_client, monkeypatch):
+async def test_ExtensionManager_list_extensions_query_allow(mock_client, monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
     extension2 = ExtensionPackage("extension2", "Extension 2 description", "", "prebuilt")
 
@@ -94,9 +94,9 @@ async def test_ExtensionsManager_list_extensions_query_allow(mock_client, monkey
     async def mock_list(*args, **kwargs):
         return {"extension1": extension1, "extension2": extension2}, None
 
-    monkeypatch.setattr(ReadOnlyExtensionsManager, "list_packages", mock_list)
+    monkeypatch.setattr(ReadOnlyExtensionManager, "list_packages", mock_list)
 
-    manager = ReadOnlyExtensionsManager(
+    manager = ReadOnlyExtensionManager(
         ext_options=dict(allowed_extensions_uris={"http://dummy-allowed-extension"}),
     )
 
@@ -106,7 +106,7 @@ async def test_ExtensionsManager_list_extensions_query_allow(mock_client, monkey
 
 
 @patch("tornado.httpclient.AsyncHTTPClient")
-async def test_ExtensionsManager_list_extensions_query_block(mock_client, monkeypatch):
+async def test_ExtensionManager_list_extensions_query_block(mock_client, monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
     extension2 = ExtensionPackage("extension2", "Extension 2 description", "", "prebuilt")
 
@@ -120,9 +120,9 @@ async def test_ExtensionsManager_list_extensions_query_block(mock_client, monkey
     async def mock_list(*args, **kwargs):
         return {"extension1": extension1, "extension2": extension2}, None
 
-    monkeypatch.setattr(ReadOnlyExtensionsManager, "list_packages", mock_list)
+    monkeypatch.setattr(ReadOnlyExtensionManager, "list_packages", mock_list)
 
-    manager = ReadOnlyExtensionsManager(
+    manager = ReadOnlyExtensionManager(
         ext_options=dict(blocked_extensions_uris={"http://dummy-blocked-extension"})
     )
 
@@ -132,7 +132,7 @@ async def test_ExtensionsManager_list_extensions_query_block(mock_client, monkey
 
 
 @patch("tornado.httpclient.AsyncHTTPClient")
-async def test_ExtensionsManager_list_extensions_query_allow_block(mock_client, monkeypatch):
+async def test_ExtensionManager_list_extensions_query_allow_block(mock_client, monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
     extension2 = ExtensionPackage("extension2", "Extension 2 description", "", "prebuilt")
 
@@ -153,9 +153,9 @@ async def test_ExtensionsManager_list_extensions_query_allow_block(mock_client, 
     async def mock_list(*args, **kwargs):
         return {"extension1": extension1, "extension2": extension2}, None
 
-    monkeypatch.setattr(ReadOnlyExtensionsManager, "list_packages", mock_list)
+    monkeypatch.setattr(ReadOnlyExtensionManager, "list_packages", mock_list)
 
-    manager = ReadOnlyExtensionsManager(
+    manager = ReadOnlyExtensionManager(
         ext_options=dict(
             allowed_extensions_uris={"http://dummy-allowed-extension"},
             blocked_extensions_uris={"http://dummy-blocked-extension"},
@@ -167,8 +167,8 @@ async def test_ExtensionsManager_list_extensions_query_allow_block(mock_client, 
     assert extensions == ([extension1], 1)
 
 
-async def test_ExtensionsManager_install():
-    manager = ReadOnlyExtensionsManager()
+async def test_ExtensionManager_install():
+    manager = ReadOnlyExtensionManager()
 
     result = await manager.install("extension1")
 
@@ -176,8 +176,8 @@ async def test_ExtensionsManager_install():
     assert result.message == "Extension installation not supported."
 
 
-async def test_ExtensionsManager_uninstall():
-    manager = ReadOnlyExtensionsManager()
+async def test_ExtensionManager_uninstall():
+    manager = ReadOnlyExtensionManager()
 
     result = await manager.uninstall("extension1")
 
@@ -186,7 +186,7 @@ async def test_ExtensionsManager_uninstall():
 
 
 @patch("jupyterlab.extensions.pypi.xmlrpc.client")
-async def test_PyPiExtensionsManager_list_extensions_query(mocked_rpcclient):
+async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
     extension1 = ExtensionPackage(
         name="jupyterlab-git",
         description="A JupyterLab extension for version control using git",
@@ -348,18 +348,18 @@ async def test_PyPiExtensionsManager_list_extensions_query(mocked_rpcclient):
     )
     mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
 
-    manager = PyPiExtensionsManager()
+    manager = PyPiExtensionManager()
 
     extensions = await manager.list_extensions("git")
 
     assert extensions == ([extension1, extension2], 1)
 
 
-async def test_PyPiExtensionsManager_custom_server_url():
+async def test_PyPiExtensionManager_custom_server_url():
     BASE_URL = "https://mylocal.pypi.server/pypi"
 
-    parent = Configurable(config=Config({"PyPiExtensionsManager": {"base_url": BASE_URL}}))
+    parent = Configurable(config=Config({"PyPiExtensionManager": {"base_url": BASE_URL}}))
 
-    manager = PyPiExtensionsManager(parent=parent)
+    manager = PyPiExtensionManager(parent=parent)
 
     assert manager.base_url == BASE_URL

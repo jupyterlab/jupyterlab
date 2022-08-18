@@ -19,7 +19,7 @@ test.use({
   viewport: { height: 720, width: 1280 }
 });
 
-test.describe('Extensions Manager', () => {
+test.describe('Extension Manager', () => {
   test.beforeEach(async ({ page }) => {
     // Mock get extensions list
     await page.route(galata.Routes.extensions, async (route, request) => {
@@ -102,7 +102,7 @@ test.describe('Extensions Manager', () => {
   });
 });
 
-test.describe('Filtered Extensions Manager', () => {
+test.describe('Filtered Extension Manager', () => {
   test('Blocked installed extension', async ({ page }) => {
     // Mock get extensions list
     const extensions = JSONExt.deepCopy(extensionsList);

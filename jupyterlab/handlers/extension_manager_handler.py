@@ -10,11 +10,11 @@ from urllib.parse import urlencode, urlunparse
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from ..extensions.manager import ExtensionsManager
+from ..extensions.manager import ExtensionManager
 
 
 class ExtensionHandler(APIHandler):
-    def initialize(self, manager: ExtensionsManager):
+    def initialize(self, manager: ExtensionManager):
         super().initialize()
         self.manager = manager
 

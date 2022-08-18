@@ -44,7 +44,7 @@ from .commands import (
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
 from .extensions import MANAGERS as EXT_MANAGERS
-from .extensions.readonly import ReadOnlyExtensionsManager
+from .extensions.readonly import ReadOnlyExtensionManager
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import (
@@ -545,7 +545,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     extensions_manager = Unicode(
         "pypi",
         config=True,
-        help="""The extensions manager factory to use. The default options are:
+        help="""The extension manager factory to use. The default options are:
         "readonly" for a manager without installation capability or "pypi" for
         a manager using PyPi.org and pip to install extensions.""",
     )
@@ -740,10 +740,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             provider = self.extensions_manager
             entry_point = EXT_MANAGERS.get(provider)
             if entry_point is None:
-                self.log.error(f"Extensions Manager: No manager defined for provider '{provider}'.")
+                self.log.error(f"Extension Manager: No manager defined for provider '{provider}'.")
                 raise NotImplementedError()
             else:
-                self.log.info(f"Extensions Manager is '{provider}'.")
+                self.log.info(f"Extension Manager is '{provider}'.")
             manager_factory = entry_point.load()
             config = self.settings.get("config", {}).get("LabServerApp", {})
 
@@ -771,18 +771,16 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             if len(listings_config["blocked_extensions_uris"]) or len(
                 listings_config["allowed_extensions_uris"]
             ):
-                self.log.debug(f"Extensions manager will be constrained by {listings_config}")
+                self.log.debug(f"Extension manager will be constrained by {listings_config}")
 
             try:
                 ext_manager = manager_factory(build_handler_options, listings_config, self)
             except Exception as err:
                 self.log.warning(
-                    f"Failed to instantiate the extensions manager {provider}. Falling back to read-only manager.",
+                    f"Failed to instantiate the extension manager {provider}. Falling back to read-only manager.",
                     exc_info=err,
                 )
-                ext_manager = ReadOnlyExtensionsManager(
-                    build_handler_options, listings_config, self
-                )
+                ext_manager = ReadOnlyExtensionManager(build_handler_options, listings_config, self)
 
             page_config["extensions_manager_can_install"] = ext_manager.can_install
             ext_handler = (

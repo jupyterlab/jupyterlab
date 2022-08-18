@@ -1,4 +1,4 @@
-"""Extensions manager using pip as package manager and PyPi.org as packages source."""
+"""Extension manager using pip as package manager and PyPi.org as packages source."""
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
@@ -24,8 +24,8 @@ from traitlets import CFloat, Unicode, config
 
 from jupyterlab.extensions.manager import (
     ActionResult,
+    ExtensionManager,
     ExtensionPackage,
-    ExtensionsManager,
 )
 
 
@@ -42,8 +42,8 @@ async def _fetch_package_metadata(name: str, latest_version: str, base_url: str)
     return {k: data.get(k) for k in ["summary", "home_page", "package_url", "author", "license"]}
 
 
-class PyPiExtensionsManager(ExtensionsManager):
-    """Extensions manager using pip as package manager and PyPi.org as packages source."""
+class PyPiExtensionManager(ExtensionManager):
+    """Extension manager using pip as package manager and PyPi.org as packages source."""
 
     # Base PyPI server URL
     base_url = Unicode("https://pypi.org/pypi", config=True, help="The base URL of PyPI index.")
@@ -63,7 +63,7 @@ class PyPiExtensionsManager(ExtensionsManager):
         ext_options: Optional[dict] = None,
         parent: Optional[config.Configurable] = None,
     ) -> None:
-        super(PyPiExtensionsManager, self).__init__(app_options, ext_options, parent)
+        super(PyPiExtensionManager, self).__init__(app_options, ext_options, parent)
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._http_client = tornado.httpclient.AsyncHTTPClient()
         self._rpc_client = xmlrpc.client.ServerProxy(self.base_url)
@@ -101,7 +101,7 @@ class PyPiExtensionsManager(ExtensionsManager):
         except Exception:
             return None
         else:
-            return ExtensionsManager.get_semver_version(data.get("version"))
+            return ExtensionManager.get_semver_version(data.get("version"))
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
         """Normalize extension name.
@@ -190,7 +190,7 @@ class PyPiExtensionsManager(ExtensionsManager):
                 url=data.get("home_page", data.get("package_url")),
                 author=data.get("author"),
                 license=data.get("license"),
-                latest_version=ExtensionsManager.get_semver_version(latest_version),
+                latest_version=ExtensionManager.get_semver_version(latest_version),
                 pkg_type="prebuilt",
             )
 
