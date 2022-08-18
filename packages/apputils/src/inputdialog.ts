@@ -18,7 +18,7 @@ export namespace InputDialog {
    */
   export interface IOptions {
     /**
-     * The top level text for the dialog.  Defaults to an empty string.
+     * The top level text for the dialog. Defaults to an empty string.
      */
     title: Dialog.Header;
 
@@ -33,7 +33,7 @@ export namespace InputDialog {
     label?: string;
 
     /**
-     * An optional renderer for dialog items.  Defaults to a shared
+     * An optional renderer for dialog items. Defaults to a shared
      * default renderer.
      */
     renderer?: Dialog.IRenderer;
@@ -47,6 +47,11 @@ export namespace InputDialog {
      * Label for cancel button.
      */
     cancelLabel?: string;
+
+    /**
+     * The checkbox to display in the footer. Defaults no checkbox.
+     */
+    checkbox?: Partial<Dialog.ICheckbox> | null;
   }
 
   /**
