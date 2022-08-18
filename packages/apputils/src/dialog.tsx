@@ -921,9 +921,9 @@ export namespace Dialog {
       e.title = checkbox.caption;
       e.insertAdjacentHTML(
         'afterbegin',
-        `${checkbox.label}<input type="checkbox" ${
-          checkbox.checked ? 'checked' : ''
-        }>`
+        `<input type="checkbox" ${checkbox.checked ? 'checked' : ''}>${
+          checkbox.label
+        }`
       );
       return e;
     }

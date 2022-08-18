@@ -796,7 +796,8 @@ function addCommands(
               title: trans.__('Rename file'),
               okLabel: trans.__('Rename'),
               placeholder: trans.__('File name'),
-              text: PathExt.basename(context.contentsModel?.path ?? ''),
+              text: oldName,
+              selectionRange: oldName.length - PathExt.extname(oldName).length,
               checkbox: {
                 label: trans.__("Don't ask me again."),
                 caption: trans.__(
@@ -808,6 +809,27 @@ function addCommands(
             if (result.button.accept) {
               newName = result.value ?? oldName;
               (widget as IDocumentWidget).isUntitled = false;
+              if (typeof result.isChecked === 'boolean') {
+                const currentSetting = (
+                  await settingRegistry.get(
+                    docManagerPluginId,
+                    'renameUntitledFileOnSave'
+                  )
+                ).composite as boolean;
+                if (result.isChecked === currentSetting) {
+                  settingRegistry
+                    .set(
+                      docManagerPluginId,
+                      'renameUntitledFileOnSave',
+                      !result.isChecked
+                    )
+                    .catch(reason => {
+                      console.error(
+                        `Fail to set 'renameUntitledFileOnSave:\n${reason}`
+                      );
+                    });
+                }
+              }
             }
           }
 
