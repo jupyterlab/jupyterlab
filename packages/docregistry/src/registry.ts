@@ -1513,13 +1513,13 @@ export interface IDocumentWidget<
   readonly context: DocumentRegistry.IContext<U>;
 
   /**
-   * Whether the content is untitled or not.
+   * Whether the document has an auto-generated name or not.
    *
    * #### Notes
-   * A document is untitled if its name is untitled and up
+   * A document has auto-generated name if its name is untitled and up
    * to the instant the user saves it manually for the first time.
    */
-  isUntitled?: boolean;
+  hasAutoName?: boolean;
 
   /**
    * A promise resolving after the content widget is revealed.

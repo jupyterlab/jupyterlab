@@ -1623,7 +1623,7 @@ function activateNotebookHandler(
         factory: FACTORY,
         kernel: { name: kernelName }
       })) as unknown as IDocumentWidget;
-      widget.isUntitled = true;
+      widget.hasAutoName = true;
       return widget;
     }
   };
