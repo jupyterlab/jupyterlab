@@ -48,6 +48,8 @@ bumped their major version (following semver convention). We want to point out p
    in particular those with the strict null checks enabled.
 - ``@jupyterlab/docmanager`` from 3.x to 4.x
    The ``renameDialog`` now receives the ``DocumentRegistry.Context`` instead of a path.
+   The interface ``DocumentManager.IWidgetOpener`` is now ``IWidgetOpener`` and is provided
+   by a new plugin ``@jupyterlab/docmanager-extension:widget-opener``.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
    ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.

@@ -23,7 +23,7 @@ describe('@jupyterlab/filebrowser', () => {
   let registry: DocumentRegistry;
 
   beforeAll(async () => {
-    const opener: DocumentManager.IWidgetOpener = {
+    const opener: IWidgetOpener = {
       open: widget => {
         /* no op */
       }

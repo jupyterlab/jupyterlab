@@ -632,7 +632,7 @@ export class DocumentManager implements IDocumentManager {
   protected translator: ITranslator;
   private _activateRequested = new Signal<this, string>(this);
   private _contexts: Private.IContext[] = [];
-  private _opener: DocumentManager.IWidgetOpener;
+  private _opener: IWidgetOpener;
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
@@ -705,19 +705,6 @@ export namespace DocumentManager {
      * By default, it always returns `true`.
      */
     isConnectedCallback?: () => boolean;
-  }
-
-  /**
-   * An interface for a widget opener.
-   */
-  export interface IWidgetOpener {
-    /**
-     * Open the given widget.
-     */
-    open(
-      widget: IDocumentWidget,
-      options?: DocumentRegistry.IOpenOptions
-    ): void;
   }
 }
 

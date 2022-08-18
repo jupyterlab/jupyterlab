@@ -28,6 +28,7 @@ import { IChangedArgs, PageConfig, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   IDocumentManager,
+  IWidgetOpener,
   PathStatus,
   renameDialog,
   SavingStatus
@@ -96,29 +97,19 @@ const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 /**
  * A plugin providing the default document manager.
  */
-const manager: JupyterFrontEndPlugin<IDocumentManager> = {
-  id: '@jupyterlab/docmanager-extension:manager',
-  provides: IDocumentManager,
+const manager: JupyterFrontEndPlugin<IWidgetOpener> = {
+  id: '@jupyterlab/docmanager-extension:widget-opener',
+  provides: IWidgetOpener,
   optional: [
-    ITranslator,
     ILabStatus,
-    ISessionContextDialogs,
-    IDocumentProviderFactory,
-    JupyterLab.IInfo
   ],
   activate: (
     app: JupyterFrontEnd,
-    translator: ITranslator | null,
     status: ILabStatus | null,
-    sessionDialogs: ISessionContextDialogs | null,
-    docProviderFactory: IDocumentProviderFactory | null,
-    info: JupyterLab.IInfo | null
   ) => {
-    const { serviceManager: manager, docRegistry: registry } = app;
     const contexts = new WeakSet<DocumentRegistry.Context>();
-    const when = app.restored.then(() => void 0);
 
-    const opener: DocumentManager.IWidgetOpener = {
+    const opener: IWidgetOpener = {
       open: (widget, options) => {
         if (!widget.id) {
           widget.id = `document-manager-${++Private.id}`;
@@ -142,6 +133,36 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
         }
       }
     };
+
+    return opener;
+  }
+};
+
+/**
+ * A plugin providing the default document manager.
+ */
+const manager: JupyterFrontEndPlugin<IDocumentManager> = {
+  id: '@jupyterlab/docmanager-extension:manager',
+  provides: IDocumentManager,
+  requires: [IWidgetOpener],
+  optional: [
+    ITranslator,
+    ILabStatus,
+    ISessionContextDialogs,
+    IDocumentProviderFactory,
+    JupyterLab.IInfo
+  ],
+  activate: (
+    app: JupyterFrontEnd,
+    opener: IWidgetOpener,
+    translator: ITranslator | null,
+    status: ILabStatus | null,
+    sessionDialogs: ISessionContextDialogs | null,
+    docProviderFactory: IDocumentProviderFactory | null,
+    info: JupyterLab.IInfo | null
+  ) => {
+    const { serviceManager: manager, docRegistry: registry } = app;
+    const when = app.restored.then(() => void 0);
 
     const docManager = new DocumentManager({
       registry,
@@ -171,10 +192,11 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
 const docManagerPlugin: JupyterFrontEndPlugin<void> = {
   id: docManagerPluginId,
   autoStart: true,
-  requires: [IDocumentManager, ISettingRegistry],
+  requires: [IWidgetOpener, IDocumentManager, ISettingRegistry],
   optional: [ITranslator, ICommandPalette, ILabShell],
   activate: (
     app: JupyterFrontEnd,
+    opener: IWidgetOpener,
     docManager: IDocumentManager,
     settingRegistry: ISettingRegistry,
     translator: ITranslator | null,
@@ -545,7 +567,7 @@ function fileType(widget: Widget | null, docManager: IDocumentManager): string {
 function addCommands(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
-  opener: DocumentManager.IWidgetOpener,
+  opener: IWidgetOpener,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
@@ -872,7 +894,7 @@ function addLabCommands(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
   labShell: ILabShell,
-  opener: DocumentManager.IWidgetOpener,
+  opener: IWidgetOpener,
   translator: ITranslator
 ): void {
   const trans = translator.load('jupyterlab');

@@ -53,7 +53,7 @@ describe('filebrowser/model', () => {
   let path: string;
 
   beforeAll(async () => {
-    const opener: DocumentManager.IWidgetOpener = {
+    const opener: IWidgetOpener = {
       open: widget => {
         /* no op */
       }

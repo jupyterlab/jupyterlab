@@ -16,6 +16,13 @@ export const IDocumentManager = new Token<IDocumentManager>(
 );
 
 /**
+ * The document widget opener token.
+ */
+export const IWidgetOpener = new Token<IWidgetOpener>(
+  '@jupyterlab/docmanager:IWidgetOpener'
+);
+
+/**
  * The interface for a document manager.
  */
 export interface IDocumentManager extends IDisposable {
@@ -236,4 +243,14 @@ export interface IDocumentManager extends IDisposable {
    * a file.
    */
   rename(oldPath: string, newPath: string): Promise<Contents.IModel>;
+}
+
+/**
+ * An interface for a widget opener.
+ */
+export interface IWidgetOpener {
+  /**
+   * Open the given widget.
+   */
+  open(widget: IDocumentWidget, options?: DocumentRegistry.IOpenOptions): void;
 }

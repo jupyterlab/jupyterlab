@@ -50,7 +50,7 @@ describe('filebrowser/model', () => {
   let subDir: string;
   let subSubDir: string;
   let state: StateDB;
-  const opener: DocumentManager.IWidgetOpener = {
+  const opener: IWidgetOpener = {
     open: widget => {
       /* no op */
     }
