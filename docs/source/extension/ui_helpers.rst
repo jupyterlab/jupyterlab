@@ -10,6 +10,44 @@ Those speed up development and ensure a common look and feel.
 Dialogs
 -------
 
+Generic Dialog
+^^^^^^^^^^^^^^
+
+The generic way to display a dialog is through ``showDialog`` function from ``@jupyterlab/apputils``.
+
+The options available are:
+
+.. code:: typescript
+
+   showDialog({
+     title: 'Dialog title', // Can be a text or a react element
+     body: 'Dialog body', // Can be a text, a widget or a react element
+     host: document.body, // Host element
+     buttons: [ // List of buttons
+      {
+        label: 'my button', // Button label
+        caption: 'my button title', // Button title
+        className: 'my-button', // Additional button CSS class
+        accept: true, // Whether this is the discarding or accepting the dialog
+        displayType: 'default' // 'default' or 'warn' to tune style
+      }
+     ],
+     checkbox: { // Optional checkbox in dialog footer
+       label: 'check me', // Checkbox label
+       caption: 'check me I\'magic', // Checkbox title
+       className: 'my-checkbox', // Additional checkbox CSS class
+       checked: true, // Default checkbox state
+     },
+     defaultButton: 0, // Index of the default button
+     focusNodeSelector: '.my-input', // Selector to use for focusing an element on display
+     hasClose: false, // Whether to display a close button or not
+     renderer: undefined // To define to customize dialog structure.
+   })
+
+.. note::
+
+   If you do not specify any options, the dialog will only contain two buttons *OK* and *Cancel*.
+
 Message Dialogs
 ^^^^^^^^^^^^^^^
 

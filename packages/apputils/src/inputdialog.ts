@@ -332,7 +332,7 @@ class InputTextDialog extends InputDialogBase<string> {
     }
     this._initialSelectionRange = Math.min(
       this._input.value.length,
-      Math.max(0, options.selectionRange ?? 0)
+      Math.max(0, options.selectionRange ?? this._input.value.length)
     );
   }
 
