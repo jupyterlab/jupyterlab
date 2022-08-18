@@ -32,7 +32,6 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
       content,
       reveal: Promise.all([dataLoader, loaded.promise])
     });
-    this.addClass(MIME_RENDERER_CLASS);
     this.trans = (translator ?? nullTranslator).load('jupyterlab');
     this.dataLoader = dataLoader;
     this.renderMime = rendermime;
@@ -77,6 +76,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
 
         if (mimeType) {
           const widget = this.renderMime.createRenderer(mimeType);
+          widget.addClass(MIME_RENDERER_CLASS);
           const model = new MimeModel({ ...data, trusted: true });
           this._dataHash = hash;
           await widget.renderModel(model);
