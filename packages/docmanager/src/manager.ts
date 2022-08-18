@@ -18,7 +18,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { SaveHandler } from './savehandler';
-import { IDocumentManager } from './tokens';
+import { IDocumentManager, IWidgetOpener } from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
 
 /**
