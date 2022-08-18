@@ -86,6 +86,7 @@ docs-screenshots = [
     "jupyterlab-geojson==3.2.0",
     "jupyterlab-language-pack-zh-CN==3.2.post7",
     "matplotlib==3.5.1",
+    "matplotlib-inline==0.1.3",
     "pandas==1.3.5",
     "scipy==1.7.3",
     "vdom==0.6",
