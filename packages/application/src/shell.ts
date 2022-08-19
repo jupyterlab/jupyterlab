@@ -666,7 +666,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._translator = value;
 
       // Set translator for tab bars
-      // @ts-expect-error TS is confused by the namespace and the class
       TabBarSvg.translator = value;
 
       const trans = value.load('jupyterlab');
