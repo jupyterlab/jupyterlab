@@ -120,7 +120,7 @@
 
 .jp-VariableRendererPanel-renderer {
   overflow: auto;
-  height: 100%
+  height: 100%;
 }
 
 .jp-VariableRenderer-TrustButton[aria-pressed='true'] {
