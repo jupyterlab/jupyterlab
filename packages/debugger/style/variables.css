@@ -114,8 +114,13 @@
   color: var(--jp-content-font-color0);
 }
 
-.jp-VariableRenderer {
+.jp-VariableRendererPanel {
   overflow: auto;
+}
+
+.jp-VariableRendererPanel-renderer {
+  overflow: auto;
+  height: 100%
 }
 
 .jp-VariableRenderer-TrustButton[aria-pressed='true'] {
