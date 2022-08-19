@@ -32,6 +32,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
       content,
       reveal: Promise.all([dataLoader, loaded.promise])
     });
+    this.content.addClass(MIME_RENDERER_CLASS);
     this.trans = (translator ?? nullTranslator).load('jupyterlab');
     this.dataLoader = dataLoader;
     this.renderMime = rendermime;
