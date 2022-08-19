@@ -97,7 +97,7 @@ const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 /**
  * A plugin providing the default document manager.
  */
-const manager: JupyterFrontEndPlugin<IWidgetOpener> = {
+const widgetOpener: JupyterFrontEndPlugin<IWidgetOpener> = {
   id: '@jupyterlab/docmanager-extension:widget-opener',
   provides: IWidgetOpener,
   optional: [
@@ -494,6 +494,7 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  widgetOpener,
   manager,
   docManagerPlugin,
   pathStatusPlugin,
