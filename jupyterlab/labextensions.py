@@ -164,7 +164,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
 
 class InstallLabExtensionApp(BaseExtensionApp):
-    description = """Install one or several JupyterLab extensions
+    description = """Install labextension(s)
 
      Usage
 
