@@ -15,7 +15,7 @@ import { Panel } from '@lumino/widgets';
 import { murmur2 } from '../../hash';
 import { IDebugger } from '../../tokens';
 
-const MIME_RENDERER_CLASS = 'jp-MimeRenderer';
+const MIME_RENDERER_CLASS = 'jp-VariableRenderer';
 
 /**
  * Debugger variable mime type renderer
