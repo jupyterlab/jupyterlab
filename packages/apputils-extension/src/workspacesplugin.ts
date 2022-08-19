@@ -272,7 +272,7 @@ namespace Private {
     const result = await showDialog({
       title: trans.__('Save Current Workspace As…'),
       body: new SaveWidget(defaultPath),
-      buttons: [Dialog.cancelButton({ label: trans.__('Cancel') }), saveBtn]
+      buttons: [Dialog.cancelButton(), saveBtn]
     });
     if (result.button.label === trans.__('Save')) {
       return result.value;

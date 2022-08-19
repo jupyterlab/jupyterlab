@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   Button,
   closeIcon,
@@ -40,10 +41,10 @@ export function showDialog<T>(
 export function showErrorMessage(
   title: string,
   error: string | Dialog.IError,
-  buttons: ReadonlyArray<Dialog.IButton> = [
-    Dialog.okButton({ label: 'Dismiss' })
-  ]
+  buttons?: ReadonlyArray<Dialog.IButton>
 ): Promise<void> {
+  const trans = Dialog.translator.load('jupyterlab');
+  buttons = buttons ?? [Dialog.okButton({ label: trans.__('Dismiss') })];
   console.warn('Showing error:', error);
 
   // Cache promises to prevent multiple copies of identical dialogs showing
@@ -453,6 +454,11 @@ export class Dialog<T> extends Widget {
  */
 export namespace Dialog {
   /**
+   * Translator object.
+   */
+  export let translator: ITranslator = nullTranslator;
+
+  /**
    * The body input types.
    */
   export type Body<T> = IBodyWidget<T> | React.ReactElement<any> | string;
@@ -650,7 +656,8 @@ export namespace Dialog {
    */
   export function createButton(value: Partial<IButton>): Readonly<IButton> {
     value.accept = value.accept !== false;
-    const defaultLabel = value.accept ? 'OK' : 'Cancel';
+    const trans = translator.load('jupyterlab');
+    const defaultLabel = value.accept ? trans.__('Ok') : trans.__('Cancel');
     return {
       label: value.label || defaultLabel,
       iconClass: value.iconClass || '',
@@ -740,6 +747,7 @@ export namespace Dialog {
       };
 
       if (typeof title === 'string') {
+        const trans = translator.load('jupyterlab');
         header = ReactWidget.create(
           <>
             {title}
@@ -748,7 +756,7 @@ export namespace Dialog {
                 className="jp-Dialog-close-button"
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
-                title="Cancel"
+                title={trans.__('Cancel')}
                 minimal
               >
                 <LabIcon.resolveReact

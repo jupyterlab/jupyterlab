@@ -213,7 +213,7 @@ installation?`)}
     title,
     body,
     buttons: [
-      Dialog.cancelButton({ label: trans.__('Cancel') }),
+      Dialog.cancelButton(),
       Dialog.okButton({
         label: trans.__('OK'),
         caption: trans.__('Install the JupyterLab extension.')

@@ -68,7 +68,7 @@ export namespace ToolbarItems {
         return showDialog({
           title: trans.__('Cannot Save'),
           body: trans.__('Document is read-only'),
-          buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+          buttons: [Dialog.okButton()]
         });
       }
       void panel.context.save().then(() => {

@@ -36,6 +36,6 @@ export function reportInstallError(
   void showDialog({
     title: trans.__('Extension Installation Error'),
     body,
-    buttons: [Dialog.warnButton({ label: trans.__('OK') })]
+    buttons: [Dialog.warnButton({ label: trans.__('Ok') })]
   });
 }

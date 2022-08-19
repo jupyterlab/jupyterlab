@@ -374,7 +374,7 @@ export class DocumentWidgetManager implements IDisposable {
       title: trans.__('Save your work'),
       body: trans.__('Save changes in "%1" before closing?', fileName),
       buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.cancelButton(),
         Dialog.warnButton({ label: trans.__('Discard') }),
         Dialog.okButton({ label: saveLabel })
       ]
