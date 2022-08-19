@@ -850,9 +850,13 @@ Do you want to overwrite the file on disk with the version open here,
 or load the version on disk (revert)?`,
       this.path
     );
-    const revertBtn = Dialog.okButton({ label: this._trans.__('Revert') });
+    const revertBtn = Dialog.okButton({
+      label: this._trans.__('Revert'),
+      actions: ['revert']
+    });
     const overwriteBtn = Dialog.warnButton({
-      label: this._trans.__('Overwrite')
+      label: this._trans.__('Overwrite'),
+      actions: ['overwrite']
     });
     this._timeConflictModalIsOpen = true;
     return showDialog({
@@ -864,11 +868,10 @@ or load the version on disk (revert)?`,
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
-      if (result.button.label === this._trans.__('Overwrite')) {
+      if (result.button.actions.includes('overwrite')) {
         return this._manager.contents.save(this._path, options);
       }
-      // FIXME-TRANS: Why compare to label?
-      if (result.button.label === this._trans.__('Revert')) {
+      if (result.button.actions.includes('revert')) {
         return this.revert().then(() => {
           return model;
         });
@@ -888,7 +891,8 @@ or load the version on disk (revert)?`,
       path
     );
     const overwriteBtn = Dialog.warnButton({
-      label: this._trans.__('Overwrite')
+      label: this._trans.__('Overwrite'),
+      accept: true
     });
     return showDialog({
       title: this._trans.__('File Overwrite?'),
@@ -898,8 +902,8 @@ or load the version on disk (revert)?`,
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
-      // FIXME-TRANS: Why compare to label?
-      if (result.button.label === this._trans.__('Overwrite')) {
+
+      if (result.button.accept) {
         return this._manager.contents.delete(path).then(() => {
           return this._finishSaveAs(path);
         });
@@ -1035,14 +1039,13 @@ namespace Private {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
-    const saveBtn = Dialog.okButton({ label: trans.__('Save') });
+    const saveBtn = Dialog.okButton({ label: trans.__('Save'), accept: true });
     return showDialog({
       title: trans.__('Save File As..'),
       body: new SaveWidget(path),
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
-      // FIXME-TRANS: Why use the label?
-      if (result.button.label === trans.__('Save')) {
+      if (result.button.accept) {
         return result.value ?? undefined;
       }
       return;

@@ -996,7 +996,6 @@ function addCommands(
         return folderIcon.bindprops({ stylesheet: 'menuItem' });
       }
     },
-    // FIXME-TRANS: Is this localizable?
     label: args =>
       (args['label'] || args['factory'] || trans.__('Open')) as string,
     mnemonic: 0

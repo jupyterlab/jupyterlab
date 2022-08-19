@@ -593,7 +593,6 @@ function addCommands(
 
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
-      // FIXME-TRANS: Localizing args['error']?
       const errorTitle = (args['error'] as string) || trans.__('Error');
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
