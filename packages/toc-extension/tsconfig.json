@@ -10,19 +10,7 @@
       "path": "../application"
     },
     {
-      "path": "../docmanager"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../markdownviewer"
-    },
-    {
-      "path": "../notebook"
-    },
-    {
-      "path": "../rendermime"
+      "path": "../settingregistry"
     },
     {
       "path": "../toc"

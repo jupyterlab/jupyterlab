@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 /*-----------------------------------------------------------------------------
 | Variables
 |----------------------------------------------------------------------------*/
@@ -20,6 +25,7 @@
   min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
+
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
@@ -56,7 +62,7 @@
   letter-spacing: 1px;
   font-size: var(--jp-ui-font-size0);
   padding: 8px 8px 8px 12px;
-  margin: 0px;
+  margin: 0;
 }
 
 .jp-RunningSessions-sectionHeader .jp-ToolbarButtonComponent {
@@ -82,7 +88,7 @@
   color: var(--jp-ui-font-color1);
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
-  padding: 0 8px 0 8px;
+  padding: 0 8px;
 }
 
 .jp-RunningSessions-item:hover {
@@ -92,7 +98,7 @@
 .jp-RunningSessions-itemLabel {
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 55%;
-  padding: 0 4px 0 4px;
+  padding: 0 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -105,18 +111,19 @@
 .jp-RunningSessions-itemDetail {
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 45%;
-  padding: 0 4px 0 4px;
+  padding: 0 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
 
 .jp-RunningSessions-item .jp-RunningSessions-itemShutdown {
-  border-radius: 0px;
+  border-radius: 0;
 }
 
 .jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {
   visibility: hidden;
+
   /* display: none; */
 }
 
@@ -127,7 +134,7 @@
 }
 
 .jp-RunningSessions-shutdownAll.jp-mod-styled {
-  margin: 0px 8px;
+  margin: 0 8px;
   color: var(--jp-warn-color1);
   background-color: transparent;
   height: var(--jp-private-running-shutdown-button-height);

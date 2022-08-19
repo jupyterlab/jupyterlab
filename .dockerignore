@@ -1,0 +1,44 @@
+.git
+.dockerignore
+Dockerfile
+
+# project files
+coverage/
+
+dev_mode/listings
+dev_mode/schemas
+dev_mode/static
+dev_mode/themes
+dev_mode/workspaces
+dev_mode/stats.json
+
+# Skip docs
+docs/
+**/docs/source/_build
+
+# Skip examples
+examples/
+
+junit.xml
+
+galata
+jupyterlab/geckodriver
+jupyterlab/static
+jupyterlab/schemas
+jupyterlab/themes
+jupyterlab/style.js
+jupyterlab/tests/**/static
+jupyterlab/tests/**/labextension
+
+# Remove after next release
+jupyterlab/imports.css
+
+packages/nbconvert-css/style/
+packages/services/examples/node/config.json
+packages/services/examples/browser/tmp
+packages/theme-*/static
+
+tests/**/coverage
+tests/**/.cache-loader
+
+**/node_modules

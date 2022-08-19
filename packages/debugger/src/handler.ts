@@ -2,38 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
-import {
-  ISessionContext,
-  SessionContext,
-  ToolbarButton
-} from '@jupyterlab/apputils';
-
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { ConsolePanel } from '@jupyterlab/console';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import { DocumentWidget } from '@jupyterlab/docregistry';
-
 import { FileEditor } from '@jupyterlab/fileeditor';
-
 import { NotebookPanel } from '@jupyterlab/notebook';
-
-import { Kernel, Session, KernelMessage } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
-import { bugIcon, Switch } from '@jupyterlab/ui-components';
-
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { bugDotIcon, bugIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { Debugger } from './debugger';
-
+import { ConsoleHandler } from './handlers/console';
+import { FileHandler } from './handlers/file';
+import { NotebookHandler } from './handlers/notebook';
 import { IDebugger } from './tokens';
 
-import { ConsoleHandler } from './handlers/console';
-
-import { FileHandler } from './handlers/file';
-
-import { NotebookHandler } from './handlers/notebook';
+const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 
 /**
  * Add a bug icon to the widget toolbar to enable and disable debugging.
@@ -44,59 +28,59 @@ import { NotebookHandler } from './handlers/notebook';
 function updateIconButton(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
   onClick: () => void,
-  translator?: ITranslator
+  enabled?: boolean,
+  pressed?: boolean,
+  translator: ITranslator = nullTranslator
 ): ToolbarButton {
-  translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
   const icon = new ToolbarButton({
     className: 'jp-DebuggerBugButton',
     icon: bugIcon,
-    tooltip: trans.__('Enable / Disable Debugger'),
+    tooltip: trans.__('Enable Debugger'),
+    pressedIcon: bugDotIcon,
+    pressedTooltip: trans.__('Disable Debugger'),
+    disabledTooltip: trans.__(
+      'Select a kernel that supports debugging to enable debugger'
+    ),
+    enabled,
+    pressed,
     onClick
   });
-  widget.toolbar.addItem('debugger-icon', icon);
+  if (!widget.toolbar.insertBefore('kernelName', TOOLBAR_DEBUGGER_ITEM, icon)) {
+    widget.toolbar.addItem(TOOLBAR_DEBUGGER_ITEM, icon);
+  }
 
   return icon;
 }
 
 /**
- * Add a toggle button to the widget toolbar to enable and disable debugging.
+ * Updates button state to on/off,
+ * adds/removes css class to update styling
  *
- * @param widget The widget to add the debug toolbar button to.
- * @param onClick The callback when the toolbar button is clicked.
+ * @param widget the debug button widget
+ * @param pressed true if pressed, false otherwise
+ * @param enabled true if widget enabled, false otherwise
+ * @param onClick click handler
  */
-function updateToggleButton(
-  widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
-  sessionStarted: boolean,
-  onClick: () => void,
-  translator?: ITranslator
-): Switch {
-  translator = translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
-
-  const button = new Switch();
-  button.id = 'jp-debugger';
-  button.value = sessionStarted;
-  button.caption = trans.__('Enable / Disable Debugger');
-  button.handleEvent = (event: Event) => {
-    event.preventDefault();
-    switch (event.type) {
-      case 'click':
-        onClick();
-        break;
-      default:
-        break;
+function updateIconButtonState(
+  widget: ToolbarButton,
+  pressed: boolean,
+  enabled: boolean = true,
+  onClick?: () => void
+) {
+  if (widget) {
+    widget.enabled = enabled;
+    widget.pressed = pressed;
+    if (onClick) {
+      widget.onClick = onClick;
     }
-  };
-
-  widget.toolbar.addItem('debugger-button', button);
-  return button;
+  }
 }
 
 /**
  * A handler for debugging a widget.
  */
-export class DebuggerHandler {
+export class DebuggerHandler implements DebuggerHandler.IHandler {
   /**
    * Instantiate a new DebuggerHandler.
    *
@@ -106,6 +90,15 @@ export class DebuggerHandler {
     this._type = options.type;
     this._shell = options.shell;
     this._service = options.service;
+  }
+
+  /**
+   * Get the active widget.
+   */
+  get activeWidget():
+    | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+    | null {
+    return this._activeWidget;
   }
 
   /**
@@ -123,11 +116,11 @@ export class DebuggerHandler {
       delete this._kernelChangedHandlers[widget.id];
       delete this._statusChangedHandlers[widget.id];
       delete this._iopubMessageHandlers[widget.id];
-      return this._update(widget, connection);
+      return this.updateWidget(widget, connection);
     }
 
     const kernelChanged = (): void => {
-      void this._update(widget, connection);
+      void this.updateWidget(widget, connection);
     };
     const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
 
@@ -143,7 +136,7 @@ export class DebuggerHandler {
     ): void => {
       // FIXME-TRANS: Localizable?
       if (status.endsWith('restarting')) {
-        void this._update(widget, connection);
+        void this.updateWidget(widget, connection);
       }
     };
     const statusChangedHandler = this._statusChangedHandlers[widget.id];
@@ -173,8 +166,9 @@ export class DebuggerHandler {
     }
     connection.iopubMessage.connect(iopubMessage);
     this._iopubMessageHandlers[widget.id] = iopubMessage;
+    this._activeWidget = widget;
 
-    return this._update(widget, connection);
+    return this.updateWidget(widget, connection);
   }
 
   /**
@@ -193,9 +187,8 @@ export class DebuggerHandler {
       void this.update(widget, connection);
     };
 
-    const contextKernelChangedHandlers = this._contextKernelChangedHandlers[
-      widget.id
-    ];
+    const contextKernelChangedHandlers =
+      this._contextKernelChangedHandlers[widget.id];
 
     if (contextKernelChangedHandlers) {
       sessionContext.kernelChanged.disconnect(contextKernelChangedHandlers);
@@ -212,7 +205,7 @@ export class DebuggerHandler {
    * @param widget The widget to update.
    * @param connection The session connection.
    */
-  private async _update(
+  async updateWidget(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     connection: Session.ISessionConnection | null
   ): Promise<void> {
@@ -288,36 +281,44 @@ export class DebuggerHandler {
       updateAttribute();
     };
 
-    const addToolbarButton = (): void => {
-      if (!this._iconButtons[widget.id]) {
+    const addToolbarButton = (enabled: boolean = true): void => {
+      const debugButton = this._iconButtons[widget.id];
+      if (!debugButton) {
         this._iconButtons[widget.id] = updateIconButton(
           widget,
-          toggleDebugging
-        );
-      }
-      if (!this._toggleButtons[widget.id]) {
-        this._toggleButtons[widget.id] = updateToggleButton(
-          widget,
+          toggleDebugging,
           this._service.isStarted,
+          enabled
+        );
+      } else {
+        updateIconButtonState(
+          debugButton,
+          this._service.isStarted,
+          enabled,
           toggleDebugging
         );
       }
-      this._toggleButtons[widget.id]!.value = this._service.isStarted;
     };
 
-    const removeToolbarButton = (): void => {
-      if (!this._iconButtons[widget.id]) {
-        return;
-      } else {
-        this._iconButtons[widget.id]!.dispose();
-        delete this._iconButtons[widget.id];
-      }
+    const isDebuggerOn = (): boolean => {
+      return (
+        this._service.isStarted &&
+        this._previousConnection?.id === connection?.id
+      );
+    };
 
-      if (!this._toggleButtons[widget.id]) {
-        return;
-      } else {
-        this._toggleButtons[widget.id]!.dispose();
-        delete this._toggleButtons[widget.id];
+    const stopDebugger = async (): Promise<void> => {
+      this._service.session!.connection = connection;
+      await this._service.stop();
+    };
+
+    const startDebugger = async (): Promise<void> => {
+      this._service.session!.connection = connection;
+      this._previousConnection = connection;
+      await this._service.restoreState(true);
+      await this._service.displayDefinedVariables();
+      if (this._service.session?.capabilities?.supportsModulesRequest) {
+        await this._service.displayModules();
       }
     };
 
@@ -326,33 +327,34 @@ export class DebuggerHandler {
       if (!hasFocus()) {
         return;
       }
-
-      if (
-        this._service.isStarted &&
-        this._previousConnection?.id === connection?.id
-      ) {
-        if (this._toggleButtons[widget.id]) {
-          this._toggleButtons[widget.id]!.value = false;
-        }
-        this._service.session!.connection = connection;
-        await this._service.stop();
+      const debugButton = this._iconButtons[widget.id]!;
+      if (isDebuggerOn()) {
+        await stopDebugger();
         removeHandlers();
+        updateIconButtonState(debugButton, false);
       } else {
-        if (this._toggleButtons[widget.id]) {
-          this._toggleButtons[widget.id]!.value = true;
-        }
-        this._service.session!.connection = connection;
-        this._previousConnection = connection;
-        await this._service.restoreState(true);
-        await this._service.displayDefinedVariables();
+        await startDebugger();
         createHandler();
+        updateIconButtonState(debugButton, true);
       }
     };
+
+    addToolbarButton(false);
+
+    // listen to the disposed signals
+    widget.disposed.connect(async () => {
+      if (isDebuggerOn()) {
+        await stopDebugger();
+      }
+      removeHandlers();
+      delete this._iconButtons[widget.id];
+      delete this._contextKernelChangedHandlers[widget.id];
+    });
 
     const debuggingEnabled = await this._service.isAvailable(connection);
     if (!debuggingEnabled) {
       removeHandlers();
-      removeToolbarButton();
+      updateIconButtonState(this._iconButtons[widget.id]!, false, false);
       return;
     }
 
@@ -368,8 +370,16 @@ export class DebuggerHandler {
     await this._service.restoreState(false);
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
       await this._service.displayDefinedVariables();
+      if (this._service.session?.capabilities?.supportsModulesRequest) {
+        await this._service.displayModules();
+      }
     }
-    addToolbarButton();
+
+    updateIconButtonState(
+      this._iconButtons[widget.id]!,
+      this._service.isStarted,
+      true
+    );
 
     // check the state of the debug session
     if (!this._service.isStarted) {
@@ -382,15 +392,15 @@ export class DebuggerHandler {
     // if the debugger is started but there is no handler, create a new one
     createHandler();
     this._previousConnection = connection;
-
-    // listen to the disposed signals
-    widget.disposed.connect(removeHandlers);
   }
 
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
   private _previousConnection: Session.ISessionConnection | null;
+  private _activeWidget:
+    | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+    | null;
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};
@@ -430,9 +440,6 @@ export class DebuggerHandler {
   private _iconButtons: {
     [id: string]: ToolbarButton | undefined;
   } = {};
-  private _toggleButtons: {
-    [id: string]: Switch | undefined;
-  } = {};
 }
 
 /**
@@ -457,6 +464,42 @@ export namespace DebuggerHandler {
      * The debugger service.
      */
     service: IDebugger;
+  }
+
+  /**
+   * An interface for debugger handler.
+   */
+  export interface IHandler {
+    /**
+     * Get the active widget.
+     */
+    activeWidget:
+      | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+      | null;
+
+    /**
+     * Update a debug handler for the given widget, and
+     * handle kernel changed events.
+     *
+     * @param widget The widget to update.
+     * @param connection The session connection.
+     */
+    update(
+      widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
+      connection: Session.ISessionConnection | null
+    ): Promise<void>;
+
+    /**
+     * Update a debug handler for the given widget, and
+     * handle connection kernel changed events.
+     *
+     * @param widget The widget to update.
+     * @param sessionContext The session context.
+     */
+    updateContext(
+      widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
+      sessionContext: ISessionContext
+    ): Promise<void>;
   }
 
   /**

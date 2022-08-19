@@ -2,18 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JSONObject } from '@lumino/coreutils';
-
 import {
   validateSpecModel,
   validateSpecModels
 } from '../../src/kernelspec/validate';
-
 import { PYTHON_SPEC } from '../utils';
 
 describe('kernelspec/validate', () => {
   describe('#validateSpecModel', () => {
     it('should pass with valid data', () => {
-      validateSpecModel(PYTHON_SPEC);
+      expect(() => {
+        validateSpecModel(PYTHON_SPEC);
+      }).not.toThrow();
     });
 
     it('should fail on missing data', () => {
@@ -37,7 +37,9 @@ describe('kernelspec/validate', () => {
           python: PYTHON_SPEC
         }
       };
-      validateSpecModels(model);
+      expect(() => {
+        validateSpecModels(model);
+      }).not.toThrow();
     });
 
     it('should fail on missing data', () => {

@@ -1,16 +1,14 @@
+/* eslint-disable camelcase */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// sanitize-html uses the url package, so we depend on a standalone version of
-// it which acts as a polyfill for browsers.
 import sanitize from 'sanitize-html';
-
 import { ISanitizer } from './tokens';
 
 /**
  * Helper class that contains regular expressions for inline CSS style validation.
  *
- * Which properties (and values) to allow is largly based on the Google Caja project:
+ * Which properties (and values) to allow is largely based on the Google Caja project:
  *   https://github.com/google/caja
  *
  * The regular expressions are largly based on the syntax definition found at
@@ -31,7 +29,7 @@ class CssProp {
     number: `[+-]?([0-9]*[.])?[0-9]+(e-?[0-9]*)?`,
     number_pos: `[+]?([0-9]*[.])?[0-9]+(e-?[0-9]*)?`,
     number_zero_hundred: `[+]?(([0-9]|[1-9][0-9])([.][0-9]+)?|100)`,
-    number_zero_one: `[+]?(1([.][0]+)?|0([.][0-9]+)?)`
+    number_zero_one: `[+]?(1([.][0]+)?|0?([.][0-9]+)?)`
   };
 
   /*
@@ -54,7 +52,7 @@ class CssProp {
   };
 
   /*
-   * Atomic (i.e. not dependant on other regular expresions) sub RegEx segments
+   * Atomic (i.e. not dependant on other regular expressions) sub RegEx segments
    */
   private static readonly A = {
     absolute_size: `xx-small|x-small|small|medium|large|x-large|xx-large`,
@@ -86,7 +84,7 @@ class CssProp {
   };
 
   /*
-   * Compound (i.e. dependant on other (sub) regular expresions) sub RegEx segments
+   * Compound (i.e. dependant on other (sub) regular expressions) sub RegEx segments
    */
   private static readonly _C = {
     alpha: `${CssProp.N.integer_zero_ff}|${CssProp.N.number_zero_one}|${CssProp.B.percentage_zero_hundred}`,
@@ -96,6 +94,8 @@ class CssProp {
     border_width: `thin|medium|thick|${CssProp.B.length}`,
     bottom: `${CssProp.B.length}|auto`,
     color: `${CssProp._COLOR.hex}|${CssProp._COLOR.rgb}|${CssProp._COLOR.rgba}|${CssProp._COLOR.name}`,
+    color_stop_length: `(${CssProp.B.len_or_perc}\\s*){1,2}`,
+    linear_color_hint: `${CssProp.B.len_or_perc}`,
     family_name: `${CssProp.B.string}|(${CssProp.B.ident}\\s*)+`,
     image_decl: CssProp.B.url,
     left: `${CssProp.B.length}|auto`,
@@ -112,16 +112,32 @@ class CssProp {
 
   private static readonly _C1 = {
     image_list: `image\\(\\s*(${CssProp.B.url})*\\s*(${CssProp.B.url}|${CssProp._C.color})\\s*\\)`,
+    linear_color_stop: `(${CssProp._C.color})(\\s*${CssProp._C.color_stop_length})?`,
     shadow: `((${CssProp._C.color})\\s+((${CssProp.B.length})\\s*){2,4}(\s+inset)?)|((inset\\s+)?((${CssProp.B.length})\\s*){2,4}\\s*(${CssProp._C.color})?)`
   };
 
   private static readonly _C2 = {
-    bg_image: `(${CssProp.B.url}|${CssProp._C1.image_list})|none`,
-    image: `${CssProp.B.url}|${CssProp._C1.image_list}`,
+    color_stop_list: `((${CssProp._C1.linear_color_stop})(\\s*(${CssProp._C.linear_color_hint}))?\\s*,\\s*)+(${CssProp._C1.linear_color_stop})`,
     shape: `rect\\(\\s*(${CssProp._C.top})\\s*,\\s*(${CssProp._C.right})\\s*,\\s*(${CssProp._C.bottom})\\s*,\\s*(${CssProp._C.left})\\s*\\)`
   };
 
-  private static readonly C = { ...CssProp._C, ...CssProp._C1, ...CssProp._C2 };
+  private static readonly _C3 = {
+    linear_gradient: `linear-gradient\\((((${CssProp.B.angle})|to\\s+(${CssProp.A.side_or_corner}))\\s*,\\s*)?\\s*(${CssProp._C2.color_stop_list})\\s*\\)`,
+    radial_gradient: `radial-gradient\\(((((${CssProp.A.ending_shape})|(${CssProp._C.size}))\\s*)*\\s*(at\\s+${CssProp._C.position})?\\s*,\\s*)?\\s*(${CssProp._C2.color_stop_list})\\s*\\)`
+  };
+
+  private static readonly _C4 = {
+    image: `${CssProp.B.url}|${CssProp._C3.linear_gradient}|${CssProp._C3.radial_gradient}|${CssProp._C1.image_list}`,
+    bg_image: `(${CssProp.B.url}|${CssProp._C3.linear_gradient}|${CssProp._C3.radial_gradient}|${CssProp._C1.image_list})|none`
+  };
+
+  private static readonly C = {
+    ...CssProp._C,
+    ...CssProp._C1,
+    ...CssProp._C2,
+    ...CssProp._C3,
+    ...CssProp._C4
+  };
 
   /*
    * Property value regular expressions not dependant on other sub expressions
@@ -625,7 +641,6 @@ export class Sanitizer implements ISanitizer {
       font: ['color', 'face', 'size'],
       form: [
         'accept',
-        'action',
         'autocomplete',
         'enctype',
         'method',

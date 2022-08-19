@@ -2,32 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
-
-import { IMimeBundle, CellType } from '@jupyterlab/nbformat';
-
+import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import {
   acceptDialog,
   createSessionContext,
   dismissDialog,
   sleep
 } from '@jupyterlab/testutils';
-
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-
 import { each } from '@lumino/algorithm';
-
-import { JSONObject, JSONArray, UUID } from '@lumino/coreutils';
-
-import { NotebookModel } from '../src';
-
-import { NotebookActions } from '../src';
-
-import { Notebook } from '../src';
-
+import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
+import { KernelError, Notebook, NotebookActions, NotebookModel } from '..';
 import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';
@@ -75,7 +62,9 @@ describe('@jupyterlab/notebook', () => {
         contentFactory: utils.createNotebookFactory(),
         mimeTypeService: utils.mimeTypeService
       });
-      const model = new NotebookModel();
+      const model = new NotebookModel({
+        disableDocumentWideUndoRedo: true
+      });
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
       model.sharedModel.clearUndoHistory();
@@ -100,16 +89,68 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         const next = widget.widgets[1] as MarkdownCell;
         let emitted = 0;
-
+        let failed = 0;
         widget.select(next);
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.executed.connect(() => {
+        NotebookActions.executed.connect((_, args) => {
+          const { success } = args;
           emitted += 1;
+          if (!success) {
+            failed += 1;
+          }
         });
 
         await NotebookActions.run(widget, sessionContext);
         expect(emitted).toBe(2);
+        expect(failed).toBe(0);
+        expect(next.rendered).toBe(true);
+      });
+
+      it('should emit an error for a cell execution failure.', async () => {
+        let emitted = 0;
+        let failed = 0;
+        let cellError: KernelError | null | undefined = null;
+        NotebookActions.executed.connect((_, args) => {
+          const { success, error } = args;
+          emitted += 1;
+          if (!success) {
+            failed += 1;
+            cellError = error;
+          }
+        });
+
+        const cell = widget.model!.contentFactory.createCodeCell({});
+        cell.value.text = ERROR_INPUT;
+        widget.model!.cells.push(cell);
+        widget.select(widget.widgets[widget.widgets.length - 1]);
+        const result = await NotebookActions.run(widget, ipySessionContext);
+        expect(result).toBe(false);
+        expect(emitted).toBe(2);
+        expect(failed).toBe(1);
+        expect(cellError).toBeInstanceOf(KernelError);
+        expect(cellError!.errorName).toBe('NameError');
+        expect(cellError!.errorValue).toBe("name 'foo' is not defined");
+        expect(cellError!.traceback).not.toBeNull();
+        await ipySessionContext.session!.kernel!.restart();
+      });
+    });
+
+    describe('#executionScheduled', () => {
+      it('should emit only when code cell execution is scheduled', async () => {
+        const cell = widget.activeCell as CodeCell;
+        const next = widget.widgets[1] as MarkdownCell;
+        let emitted = 0;
+        widget.activeCell!.model.value.text = "print('hello')";
+        widget.select(next);
+        cell.model.outputs.clear();
+        next.rendered = false;
+        NotebookActions.executionScheduled.connect(() => {
+          emitted += 1;
+        });
+
+        await NotebookActions.run(widget, sessionContext);
+        expect(emitted).toBe(1);
         expect(next.rendered).toBe(true);
       });
     });
@@ -553,6 +594,10 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#run()', () => {
       it('should run the selected cells', async () => {
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         const next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         const cell = widget.activeCell as CodeCell;
@@ -562,55 +607,90 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(true);
         expect(cell.model.outputs.length).toBeGreaterThan(0);
         expect(next.rendered).toBe(true);
+        expect(emitted).toBe(1);
       });
 
       it('should delete deletedCells metadata when cell run', () => {
         const cell = widget.activeCell as CodeCell;
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         cell.model.outputs.clear();
         return NotebookActions.run(widget, sessionContext).then(result => {
           expect(result).toBe(true);
           expect(widget.model!.deletedCells.length).toBe(0);
+          expect(emitted).toBe(1);
         });
       });
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(false);
+        expect(emitted).toBe(0);
       });
 
       it('should activate the last selected cell', async () => {
         const other = widget.widgets[2];
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         widget.select(other);
         other.model.value.text = 'a = 1';
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(true);
         expect(widget.activeCell).toBe(other);
+        expect(emitted).toBe(1);
       });
 
       it('should clear the selection', async () => {
         const next = widget.widgets[1];
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         widget.select(next);
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(true);
         expect(widget.isSelected(widget.widgets[0])).toBe(false);
+        expect(emitted).toBe(1);
       });
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(true);
         expect(widget.mode).toBe('command');
+        expect(emitted).toBe(1);
       });
 
       it('should handle no session', async () => {
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         const result = await NotebookActions.run(widget, undefined);
         expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;
         expect(cell.model.executionCount).toBeNull();
+        expect(emitted).toBe(1);
       });
 
       it('should stop executing code cells on an error', async () => {
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         let cell = widget.model!.contentFactory.createCodeCell({});
         cell.value.text = ERROR_INPUT;
         widget.model!.cells.insert(2, cell);
@@ -622,9 +702,14 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(false);
         expect(cell.executionCount).toBeNull();
         await ipySessionContext.session!.kernel!.restart();
+        expect(emitted).toBe(1);
       });
 
       it('should render all markdown cells on an error', async () => {
+        let emitted = 0;
+        NotebookActions.selectionExecuted.connect(() => {
+          emitted += 1;
+        });
         const cell = widget.model!.contentFactory.createMarkdownCell({});
         widget.model!.cells.push(cell);
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
@@ -639,6 +724,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(false);
         expect(child.rendered).toBe(true);
         await ipySessionContext.session!.kernel!.restart();
+        expect(emitted).toBe(1);
       });
     });
 
@@ -864,7 +950,7 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].model.value.text = 'a = 1';
       });
 
-      it('should run all of the cells in the notebok', async () => {
+      it('should run all of the cells in the notebook', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
@@ -963,24 +1049,6 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(0);
       });
-
-      it('should not change if in edit mode and no non-collapsed cells above', () => {
-        widget.activeCellIndex = 1;
-        widget.mode = 'edit';
-        widget.widgets[0].inputHidden = true;
-        NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).toBe(1);
-      });
-
-      it('should not skip collapsed cells and in command mode', () => {
-        widget.activeCellIndex = 3;
-        widget.mode = 'command';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).toBe(2);
-      });
     });
 
     describe('#selectBelow()', () => {
@@ -1010,32 +1078,12 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('edit');
       });
 
-      it('should skip collapsed cells in edit mode', () => {
-        widget.activeCellIndex = 0;
-        widget.mode = 'edit';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).toBe(3);
-      });
-
       it('should not change if in edit mode and no non-collapsed cells below', () => {
         widget.activeCellIndex = widget.widgets.length - 2;
         widget.mode = 'edit';
         widget.widgets[widget.widgets.length - 1].inputHidden = true;
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
-      });
-
-      it('should not skip collapsed cells and in command mode', () => {
-        widget.activeCellIndex = 0;
-        widget.mode = 'command';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).toBe(1);
       });
     });
 
@@ -1106,7 +1154,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.isSelected(widget.widgets[1])).toBe(true);
       });
 
-      it('should extend the selection the bottomost cell', () => {
+      it('should extend the selection the bottom-most cell', () => {
         NotebookActions.extendSelectionBelow(widget, true);
         for (let i = widget.activeCellIndex; i < widget.widgets.length; i++) {
           expect(widget.isSelected(widget.widgets[i])).toBe(true);
@@ -1488,6 +1536,7 @@ describe('@jupyterlab/notebook', () => {
         for (let i = 0; i < widget.widgets.length; i++) {
           const cell = widget.widgets[i];
           if (cell instanceof CodeCell) {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(cell.model.outputs.length).toBe(0);
           }
         }
@@ -1578,7 +1627,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be a no-op if the model is `null`', async () => {
         widget.model = null;
-        await NotebookActions.trust(widget);
+        await expect(NotebookActions.trust(widget)).resolves.not.toThrow();
       });
 
       it('should show a dialog if all cells are trusted', async () => {
@@ -1591,7 +1640,7 @@ describe('@jupyterlab/notebook', () => {
         }
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await promise;
+        await expect(promise).resolves.not.toThrow();
       });
     });
   });

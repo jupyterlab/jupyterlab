@@ -1,41 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, chain } from '@lumino/algorithm';
-
-import {
-  ReadonlyPartialJSONValue,
-  ReadonlyPartialJSONObject
-} from '@lumino/coreutils';
-
-import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
-
-import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
-
-import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { Collapse, Styling } from '@jupyterlab/apputils';
-
 import { Cell, ICellModel } from '@jupyterlab/cells';
-
 import {
   CodeEditor,
   CodeEditorWrapper,
   JSONEditor
 } from '@jupyterlab/codeeditor';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { NotebookPanel } from './panel';
+import { Collapser, Styling } from '@jupyterlab/ui-components';
+import { ArrayExt, chain, each } from '@lumino/algorithm';
+import {
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
+import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
+import { NotebookPanel } from './panel';
 import { INotebookTools, INotebookTracker } from './tokens';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
@@ -90,7 +79,7 @@ export class NotebookTools extends Widget implements INotebookTools {
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(this._commonTools);
-    layout.addWidget(new Collapse({ widget: this._advancedTools }));
+    layout.addWidget(new Collapser({ widget: this._advancedTools }));
 
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
@@ -298,7 +287,7 @@ export namespace NotebookTools {
     /**
      * The tool to add to the notebook tools area.
      */
-    tool: Tool;
+    tool: INotebookTools.ITool;
 
     /**
      * The section to which the tool should be added.
@@ -337,7 +326,7 @@ export namespace NotebookTools {
      */
     notebookTools: INotebookTools;
 
-    dispose() {
+    dispose(): void {
       super.dispose();
       if (this.notebookTools) {
         this.notebookTools = null!;
@@ -446,7 +435,7 @@ export namespace NotebookTools {
     /**
      * Dispose of the resources used by the tool.
      */
-    dispose() {
+    dispose(): void {
       if (this._model === null) {
         return;
       }
@@ -475,7 +464,6 @@ export namespace NotebookTools {
       if (!activeCell) {
         const cell = new Widget();
         cell.addClass('jp-InputArea-editor');
-        cell.addClass('jp-InputArea-editor');
         layout.addWidget(cell);
         this._cellModel = null;
         return;
@@ -494,7 +482,6 @@ export namespace NotebookTools {
 
       const model = this._model;
       const editorWidget = new CodeEditorWrapper({ model, factory });
-      editorWidget.addClass('jp-InputArea-editor');
       editorWidget.addClass('jp-InputArea-editor');
       editorWidget.editor.setOption('readOnly', true);
       layout.addWidget(prompt);
@@ -737,7 +724,9 @@ export namespace NotebookTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onActiveCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
+    protected onActiveCellMetadataChanged(
+      msg: ObservableJSON.ChangeMessage
+    ): void {
       if (this._changeGuard) {
         return;
       }
@@ -799,6 +788,132 @@ export namespace NotebookTools {
       value: ReadonlyPartialJSONValue | undefined
     ) => void;
     private _default: ReadonlyPartialJSONValue | undefined;
+  }
+
+  /**
+   * A notebook metadata number editor
+   */
+  export class NotebookMetadataNumberTool extends Tool {
+    constructor(options: { key: string; label: string }) {
+      super({
+        node: Private.createInputNode({
+          label: options.label,
+          value: '1'
+        })
+      });
+      this.addClass('jp-NumberSetter');
+      this._key = options.key;
+    }
+
+    /**
+     * The select node for the widget.
+     */
+    get inputNode(): HTMLInputElement {
+      return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+    }
+
+    /**
+     * Handle the DOM events for the widget.
+     *
+     * @param event - The DOM event sent to the widget.
+     *
+     * #### Notes
+     * This method implements the DOM `EventListener` interface and is
+     * called in response to events on the notebook panel's node. It should
+     * not be called directly by user code.
+     */
+    handleEvent(event: Event): void {
+      switch (event.type) {
+        case 'change':
+        case 'input':
+          this.onValueChanged();
+          break;
+        default:
+          break;
+      }
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      const node = this.inputNode;
+      node.addEventListener('change', this);
+      node.addEventListener('input', this);
+    }
+
+    /**
+     * Handle `before-detach` messages for the widget.
+     */
+    protected onBeforeDetach(msg: Message): void {
+      const node = this.inputNode;
+      node.removeEventListener('change', this);
+      node.removeEventListener('input', this);
+    }
+
+    /**
+     * Handle a change to the notebook.
+     */
+    protected onActiveNotebookPanelChanged(msg: Message): void {
+      this._update();
+    }
+
+    /**
+     * Handle a change to the notebook metadata.
+     */
+    protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
+      this._update();
+    }
+
+    /**
+     * Handle a change to the value.
+     */
+    protected onValueChanged(): void {
+      const nb =
+        this.notebookTools.activeNotebookPanel &&
+        this.notebookTools.activeNotebookPanel.content;
+      const metadata = nb?.model?.metadata ?? null;
+      if (metadata) {
+        const keyPath = this._key.split('/');
+        const value = { ...((metadata.get(keyPath[0]) ?? {}) as any) };
+        let lastObj = value;
+        for (let p = 1; p < keyPath.length - 1; p++) {
+          if (lastObj[keyPath[p]] === undefined) {
+            lastObj[keyPath[p]] = {};
+          }
+          lastObj = lastObj[keyPath[p]];
+        }
+        lastObj[keyPath[keyPath.length - 1]] =
+          this.inputNode.valueAsNumber ?? 1;
+
+        metadata.set(keyPath[0], value);
+      }
+    }
+
+    private _update() {
+      const nb =
+        this.notebookTools.activeNotebookPanel &&
+        this.notebookTools.activeNotebookPanel.content;
+      const metadata = nb?.model?.metadata ?? null;
+      if (metadata) {
+        const keyPath = this._key.split('/');
+        let value = metadata.get(keyPath[0]) as any;
+        for (let p = 1; p < keyPath.length; p++) {
+          value = (value ?? {})[keyPath[p]];
+        }
+
+        if (value !== undefined) {
+          this.inputNode.valueAsNumber = value;
+        } else {
+          this.inputNode.valueAsNumber = 1;
+        }
+      }
+    }
+
+    /**
+     * Metadata key to set
+     */
+    private _key: string;
   }
 
   /**
@@ -931,6 +1046,35 @@ export namespace NotebookTools {
       validCellTypes: ['raw']
     });
   }
+
+  /**
+   * Create read-only toggle.
+   */
+  export function createEditableToggle(translator?: ITranslator): KeySelector {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return new KeySelector({
+      key: 'editable',
+      title: trans.__('Editable'),
+      optionValueArray: [
+        [trans.__('Editable'), true],
+        [trans.__('Read-Only'), false]
+      ],
+      default: true
+    });
+  }
+
+  /**
+   * Create base table of content numbering
+   */
+  export function createToCBaseNumbering(translator?: ITranslator): Tool {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return new NotebookMetadataNumberTool({
+      key: 'toc/base_numbering',
+      label: trans.__('Table of content - Base number')
+    });
+  }
 }
 
 /**
@@ -973,10 +1117,32 @@ namespace Private {
     each(options.optionValueArray, item => {
       option = item[0];
       value = JSON.stringify(item[1]);
-      optionNodes.push(h.option({ value }, option));
+      const attrs =
+        options.default == item[1]
+          ? { value, selected: 'selected' }
+          : { value };
+      optionNodes.push(h.option(attrs, option));
     });
     const node = VirtualDOM.realize(
       h.div({}, h.label(title, h.select({}, optionNodes)))
+    );
+    Styling.styleNode(node);
+    return node;
+  }
+
+  /**
+   * Create the node for a number input.
+   */
+  export function createInputNode(options: {
+    label: string;
+    value: string;
+  }): HTMLElement {
+    const title = options.label;
+    const node = VirtualDOM.realize(
+      h.div(
+        {},
+        h.label(title, h.input({ value: options.value, type: 'number' }))
+      )
     );
     Styling.styleNode(node);
     return node;

@@ -55,12 +55,9 @@ async function getSpecifier(
         `Current version range is not recognized: ${currentSpecifier}`
       );
     }
-    const [, currentSigil] = match;
-    if (currentSigil) {
-      suggestedSigil = currentSigil;
-    }
+    suggestedSigil = match[1];
   }
-  return `${suggestedSigil}${suggestedTag}`;
+  return `${suggestedSigil ?? ''}${suggestedTag}`;
 }
 
 async function getVersion(pkg: string, specifier: string) {
@@ -77,7 +74,12 @@ async function getVersion(pkg: string, specifier: string) {
 
     // Look up the actual version corresponding to the tag
     const { version } = await packageJson(pkg, { version: match[2] });
-    specifier = match[1] + version;
+    specifier = `${match[1] ?? ''}${version}`;
+    if (semver.validRange(specifier) === null) {
+      throw Error(
+        `Could not find valid version range for ${pkg}: ${specifier}`
+      );
+    }
   }
   versionCache.set(key, specifier);
   return specifier;

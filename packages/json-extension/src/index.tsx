@@ -5,22 +5,15 @@
  * @module json-extension
  */
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import { Printing } from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import * as ReactDOM from 'react-dom';
-
 import { Component } from './component';
-import { JSONValue, JSONObject } from '@lumino/coreutils';
 
 /**
  * The CSS class to add to the JSON Widget.
@@ -37,7 +30,8 @@ export const MIME_TYPE = 'application/json';
  */
 export class RenderedJSON
   extends Widget
-  implements IRenderMime.IRenderer, Printing.IPrintable {
+  implements IRenderMime.IRenderer, Printing.IPrintable
+{
   /**
    * Create a new widget for rendering JSON.
    */
@@ -51,7 +45,7 @@ export class RenderedJSON
   }
 
   [Printing.symbol]() {
-    return () => Printing.printWidget(this);
+    return (): Promise<void> => Printing.printWidget(this);
   }
 
   /**
@@ -104,6 +98,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'JSON',
+      // TODO: how to translate label of the factory?
       primaryFileType: 'json',
       fileTypes: ['json', 'notebook', 'geojson'],
       defaultFor: ['json']

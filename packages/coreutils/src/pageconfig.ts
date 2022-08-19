@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JSONExt } from '@lumino/coreutils';
-
 import minimist from 'minimist';
-
 import { URLExt } from './url';
 
 /**
@@ -54,7 +52,7 @@ export namespace PageConfig {
       }
     }
     // Otherwise use CLI if given.
-    if (!found && typeof process !== 'undefined') {
+    if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
         const path: any = require('path');
@@ -142,16 +140,16 @@ export namespace PageConfig {
    * @param options - IGetUrlOptions for the new path.
    */
   export function getUrl(options: IGetUrlOptions): string {
-    let path = getOption('baseUrl') || '/';
+    let path = options.toShare ? getShareUrl() : getBaseUrl();
     const mode = options.mode ?? getOption('mode');
     const workspace = options.workspace ?? getOption('workspace');
-    const labOrDoc = mode === 'multiple-document' ? 'lab' : 'doc';
+    const labOrDoc = mode === 'single-document' ? 'doc' : 'lab';
     path = URLExt.join(path, labOrDoc);
     if (workspace !== defaultWorkspace) {
       path = URLExt.join(
         path,
         'workspaces',
-        encodeURIComponent(getOption('workspace'))
+        encodeURIComponent(getOption('workspace') ?? defaultWorkspace)
       );
     }
     const treePath = options.treePath ?? getOption('treePath');
@@ -180,6 +178,11 @@ export namespace PageConfig {
      * URL segment will be included) pass the string PageConfig.defaultWorkspace.
      */
     workspace?: string;
+
+    /**
+     * Whether the url is meant to be shared or not; default false.
+     */
+    toShare?: boolean;
 
     /**
      * The optional tree path as as string. If treePath is not provided it will be

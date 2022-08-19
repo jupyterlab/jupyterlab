@@ -1,28 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
-import { UUID } from '@lumino/coreutils';
-
-import { Widget } from '@lumino/widgets';
-
 import {
   ABCWidgetFactory,
   Base64ModelFactory,
+  Context,
   DocumentModel,
   DocumentRegistry,
   DocumentWidget,
   IDocumentWidget,
-  TextModelFactory,
-  Context
+  TextModelFactory
 } from '@jupyterlab/docregistry';
-
 import { ServiceManager } from '@jupyterlab/services';
-
 import { sleep } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { toArray } from '@lumino/algorithm';
+import { UUID } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(
@@ -195,10 +189,18 @@ describe('docregistry/default', () => {
         const context = await Mock.createFileContext();
         const widget = factory.createNew(context);
         const widget2 = factory.createNew(context);
-        expect(toArray(widget.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(widget2.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(widget.toolbar.children()).length).toBe(2);
-        expect(toArray(widget2.toolbar.children()).length).toBe(2);
+        expect(toArray(widget.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(widget2.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(toArray(widget.toolbar.children()).length).toBe(3);
+        expect(toArray(widget2.toolbar.children()).length).toBe(3);
       });
     });
 
@@ -537,8 +539,8 @@ describe('docregistry/default', () => {
     describe('#preferredLanguage()', () => {
       it('should get the preferred kernel language given an extension', () => {
         const factory = new TextModelFactory();
-        expect(factory.preferredLanguage('.py')).toBe('python');
-        expect(factory.preferredLanguage('.jl')).toBe('julia');
+        expect(factory.preferredLanguage('.py')).toBe('Python');
+        expect(factory.preferredLanguage('.jl')).toBe('Julia');
       });
     });
   });
@@ -577,6 +579,14 @@ describe('docregistry/default', () => {
       it('should add the dirty class when the model is dirty', async () => {
         context.model.fromString('bar');
         expect(widget.title.className).toContain('jp-mod-dirty');
+      });
+
+      it('should remove the dirty class', () => {
+        context.model.dirty = true;
+        context.model.dirty = true;
+        expect(widget.title.className).toContain('jp-mod-dirty');
+        context.model.dirty = false;
+        expect(widget.title.className).not.toContain('jp-mod-dirty');
       });
 
       it('should store the context', () => {

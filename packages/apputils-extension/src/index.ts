@@ -13,43 +13,32 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
+  defaultSanitizer,
   Dialog,
   ICommandPalette,
+  ISanitizer,
   ISessionContextDialogs,
   ISplashScreen,
   IWindowResolver,
-  WindowResolver,
+  MainAreaWidget,
   Printing,
   sessionContextDialogs,
-  ISanitizer,
-  defaultSanitizer,
-  MainAreaWidget
+  WindowResolver
 } from '@jupyterlab/apputils';
-
-import { URLExt, PageConfig } from '@jupyterlab/coreutils';
-
-import { IStateDB, StateDB } from '@jupyterlab/statedb';
-
-import { ITranslator } from '@jupyterlab/translation';
-
-import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
-
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import { DisposableDelegate } from '@lumino/disposable';
-
-import { Debouncer, Throttler } from '@lumino/polling';
-
-import { Palette } from './palette';
-
-import { settingsPlugin } from './settingsplugin';
-
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
-
+import { IStateDB, StateDB } from '@jupyterlab/statedb';
+import { ITranslator } from '@jupyterlab/translation';
+import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
+import { PromiseDelegate } from '@lumino/coreutils';
+import { DisposableDelegate } from '@lumino/disposable';
+import { Debouncer, Throttler } from '@lumino/polling';
+import { Palette } from './palette';
+import { settingsPlugin } from './settingsplugin';
+import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
+import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
+import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 
 /**
@@ -70,6 +59,8 @@ namespace CommandIDs {
   export const resetOnLoad = 'apputils:reset-on-load';
 
   export const runFirstEnabled = 'apputils:run-first-enabled';
+
+  export const runAllEnabled = 'apputils:run-all-enabled';
 
   export const toggleHeader = 'apputils:toggle-header';
 }
@@ -215,7 +206,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
         }
 
         dialog = new Dialog({
-          title: trans.__('Loading...'),
+          title: trans.__('Loading…'),
           body: trans.__(`The loading screen is taking a long time.
 Would you like to clear the workspace or keep waiting?`),
           buttons: [
@@ -346,23 +337,30 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   if (current === undefined) {
-    document.title = `JupyterLab${
+    document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
       workspace.startsWith('auto-') ? ` (${workspace})` : ``
     }`;
   } else {
-    // First 15 characters of current document name
-    current = current.split(':')[1].slice(0, 15);
+    // File name from current path
+    let currentFile: string = PathExt.basename(window.location.href);
+    // Truncate to first 12 characters of current document name + ... if length > 15
+    currentFile =
+      currentFile.length > 15
+        ? currentFile.slice(0, 12).concat(`…`)
+        : currentFile;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
 
     if (workspace.startsWith('auto-')) {
-      document.title = `${current} (${workspace}${
+      document.title = `${currentFile} (${workspace}${
         count > 1 ? ` : ${count}` : ``
       }) - ${name}`;
     } else {
-      document.title = `${current}${count > 1 ? ` (${count})` : ``} - ${name}`;
+      document.title = `${currentFile}${
+        count > 1 ? ` (${count})` : ``
+      } - ${name}`;
     }
   }
 }
@@ -412,6 +410,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     db.changed.connect(() => updateTabTitle(workspace, db, name));
 
     commands.addCommand(CommandIDs.loadState, {
+      label: trans.__('Load state for the current workspace.'),
       execute: async (args: IRouter.ILocation) => {
         // Since the command can be executed an arbitrary number of times, make
         // sure it is safe to call multiple times.
@@ -487,6 +486,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     });
 
     commands.addCommand(CommandIDs.resetOnLoad, {
+      label: trans.__('Reset state when loading for the workspace.'),
       execute: (args: IRouter.ILocation) => {
         const { hash, path, search } = args;
         const query = URLExt.queryStringToObject(search || '');
@@ -581,6 +581,29 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    // Add a command for taking lists of commands and command arguments
+    // and running all the enabled commands.
+    commands.addCommand(CommandIDs.runAllEnabled, {
+      label: trans.__('Run All Enabled Commands Passed as Args'),
+      execute: async args => {
+        const commands: string[] = args.commands as string[];
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
+        const errorIfNotEnabled: boolean = args.errorIfNotEnabled as boolean;
+        for (let i = 0; i < commands.length; i++) {
+          const cmd = commands[i];
+          const arg = argList ? commandArgs[i] : commandArgs;
+          if (app.commands.isEnabled(cmd, arg)) {
+            await app.commands.execute(cmd, arg);
+          } else {
+            if (errorIfNotEnabled) {
+              console.error(`${cmd} is not enabled.`);
+            }
+          }
+        }
+      }
+    });
   }
 };
 
@@ -600,10 +623,12 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  kernelStatus,
   palette,
   paletteRestorer,
   print,
   resolver,
+  runningSessionsStatus,
   sanitizer,
   settingsPlugin,
   state,
@@ -612,6 +637,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   themesPlugin,
   themesPaletteMenuPlugin,
   toggleHeader,
+  toolbarRegistry,
   utilityCommands,
   workspacesPlugin
 ];

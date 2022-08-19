@@ -1,17 +1,17 @@
-import * as React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
-import { Text } from '@jupyterlab/coreutils';
-
-import { Notebook, NotebookMode } from '.';
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 import { TextItem } from '@jupyterlab/statusbar';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
+import * as React from 'react';
+import { Notebook, NotebookMode } from '.';
 
 /**
  * A pure function for rendering a Command/Edit mode component.
@@ -26,7 +26,7 @@ function CommandEditComponent(
   const trans = (props.translator || nullTranslator).load('jupyterlab');
   return (
     <TextItem
-      source={trans.__('Mode: %1', Text.titleCase(props.notebookMode))}
+      source={trans.__('Mode: %1', props.modeNames[props.notebookMode])}
     />
   );
 }
@@ -48,6 +48,11 @@ namespace CommandEditComponent {
      * Language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Mapping translating the names of modes.
+     */
+    modeNames: Record<NotebookMode, string>;
   }
 }
 
@@ -62,29 +67,35 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
     super(new CommandEditStatus.Model());
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
+    this._modeNames = {
+      command: this._trans.__('Command'),
+      edit: this._trans.__('Edit')
+    };
   }
 
   /**
    * Render the CommandEdit status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (!this.model) {
       return null;
     }
     this.node.title = this._trans.__(
       'Notebook is in %1 mode',
-      this.model.notebookMode
+      this._modeNames[this.model.notebookMode]
     );
     return (
       <CommandEditComponent
         notebookMode={this.model.notebookMode}
         translator={this.translator}
+        modeNames={this._modeNames}
       />
     );
   }
 
   protected translator: ITranslator;
   private _trans: TranslationBundle;
+  private readonly _modeNames: Record<NotebookMode, string>;
 }
 
 /**
@@ -92,13 +103,13 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
  */
 export namespace CommandEditStatus {
   /**
-   * A VDomModle for the CommandEdit renderer.
+   * A VDomModel for the CommandEdit renderer.
    */
   export class Model extends VDomModel {
     /**
      * The current mode of the current notebook.
      */
-    get notebookMode() {
+    get notebookMode(): NotebookMode {
       return this._notebookMode;
     }
 

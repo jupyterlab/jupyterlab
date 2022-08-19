@@ -3,28 +3,18 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import marked from 'marked';
-
 import { ISanitizer } from '@jupyterlab/apputils';
-
-import { Mode, CodeMirrorEditor } from '@jupyterlab/codemirror';
-
 import { URLExt } from '@jupyterlab/coreutils';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { toArray } from '@lumino/algorithm';
-
 import escape from 'lodash.escape';
-
 import { removeMath, replaceMath } from './latex';
 
 /**
  * Render HTML into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -166,7 +156,7 @@ export namespace renderHTML {
 /**
  * Render an image into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -174,15 +164,8 @@ export function renderImage(
   options: renderImage.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const {
-    host,
-    mimeType,
-    source,
-    width,
-    height,
-    needsBackground,
-    unconfined
-  } = options;
+  const { host, mimeType, source, width, height, needsBackground, unconfined } =
+    options;
 
   // Clear the content in the host.
   host.textContent = '';
@@ -266,7 +249,7 @@ export namespace renderImage {
 /**
  * Render LaTeX into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -321,7 +304,7 @@ export namespace renderLatex {
 /**
  * Render Markdown into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -329,7 +312,7 @@ export async function renderMarkdown(
   options: renderMarkdown.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, source, ...others } = options;
+  const { host, source, markdownParser, ...others } = options;
 
   // Clear the content if there is no source.
   if (!source) {
@@ -337,14 +320,20 @@ export async function renderMarkdown(
     return;
   }
 
-  // Separate math from normal markdown text.
-  const parts = removeMath(source);
+  let html = '';
+  if (markdownParser) {
+    // Separate math from normal markdown text.
+    const parts = removeMath(source);
 
-  // Convert the markdown to HTML.
-  let html = await Private.renderMarked(parts['text']);
+    // Convert the markdown to HTML.
+    html = await markdownParser.render(parts['text']);
 
-  // Replace math.
-  html = replaceMath(html, parts['math']);
+    // Replace math.
+    html = replaceMath(html, parts['math']);
+  } else {
+    // Fallback if the application does not have any markdown parser.
+    html = `<pre>${source}</pre>`;
+  }
 
   // Render HTML.
   await renderHTML({
@@ -406,16 +395,31 @@ export namespace renderMarkdown {
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
 
     /**
-     * The application languate translator.
+     * The Markdown parser.
+     */
+    markdownParser: IRenderMime.IMarkdownParser | null;
+
+    /**
+     * The application language translator.
      */
     translator?: ITranslator;
+  }
+
+  /**
+   * Create a normalized id for a header element.
+   *
+   * @param header Header element
+   * @returns Normalized id
+   */
+  export function createHeaderId(header: Element): string {
+    return (header.textContent ?? '').replace(/ /g, '-');
   }
 }
 
 /**
  * Render SVG into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -491,11 +495,11 @@ export namespace renderSVG {
 /**
  * Replace URLs with links.
  *
- * @param content - The plain text content.
+ * @param content - The text content of a node.
  *
- * @returns The content where all URLs have been replaced with corresponding links.
+ * @returns A list of text nodes and anchor elements.
  */
-function autolink(content: string): string {
+function autolink(content: string): Array<HTMLAnchorElement | Text> {
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/9f709d170b06e991502153f281ec3c012add2e42/src/vs/workbench/contrib/debug/browser/linkDetector.ts#L17-L18
   const controlCodes = '\\u0000-\\u0020\\u007f-\\u009f';
@@ -507,23 +511,63 @@ function autolink(content: string): string {
       '"\'(){}\\[\\],:;.!?]',
     'ug'
   );
-  return content.replace(webLinkRegex, url => {
+
+  const nodes = [];
+  let lastIndex = 0;
+
+  let match: RegExpExecArray | null;
+  while (null != (match = webLinkRegex.exec(content))) {
+    if (match.index !== lastIndex) {
+      nodes.push(
+        document.createTextNode(content.slice(lastIndex, match.index))
+      );
+    }
+    let url = match[0];
     // Special case when the URL ends with ">" or "<"
-    const lastChars = url.slice(-3);
-    const endsWithGtLt = ['&gt', '&lt'].indexOf(lastChars) !== -1;
-    const toAppend = endsWithGtLt ? lastChars : '';
-    const len = endsWithGtLt ? url.length - 3 : url.length;
-    return (
-      `<a href="${url.slice(0, len)}" rel="noopener" target="_blank">` +
-      `${url.slice(0, len)}</a>${toAppend}`
+    const lastChars = url.slice(-1);
+    const endsWithGtLt = ['>', '<'].indexOf(lastChars) !== -1;
+    const len = endsWithGtLt ? url.length - 1 : url.length;
+    const anchor = document.createElement('a');
+    url = url.slice(0, len);
+    anchor.href = url.startsWith('www.') ? 'https://' + url : url;
+    anchor.rel = 'noopener';
+    anchor.target = '_blank';
+    anchor.appendChild(document.createTextNode(url.slice(0, len)));
+    nodes.push(anchor);
+    lastIndex = match.index + len;
+  }
+  if (lastIndex !== content.length) {
+    nodes.push(
+      document.createTextNode(content.slice(lastIndex, content.length))
     );
-  });
+  }
+  return nodes;
+}
+
+/**
+ * Split a shallow node (node without nested nodes inside) at a given text content position.
+ *
+ * @param node the shallow node to be split
+ * @param at the position in textContent at which the split should occur
+ */
+function splitShallowNode<T extends Node>(
+  node: T,
+  at: number
+): { pre: T; post: T } {
+  const pre = node.cloneNode() as T;
+  pre.textContent = node.textContent?.substr(0, at) as string;
+  const post = node.cloneNode() as T;
+  post.textContent = node.textContent?.substr(at) as string;
+  return {
+    pre: pre,
+    post: post
+  };
 }
 
 /**
  * Render text into a host node.
  *
- * @params options - The options for rendering.
+ * @param options - The options for rendering.
  *
  * @returns A promise which resolves when rendering is complete.
  */
@@ -538,7 +582,92 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
 
   // Set the sanitized content for the host node.
   const pre = document.createElement('pre');
-  pre.innerHTML = autolink(content);
+  pre.innerHTML = content;
+
+  const preTextContent = pre.textContent;
+
+  if (preTextContent) {
+    // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
+    const linkedNodes = autolink(preTextContent);
+    let inAnchorElement = false;
+
+    const combinedNodes: (HTMLAnchorElement | Text | HTMLSpanElement)[] = [];
+    const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
+
+    while (preNodes.length && linkedNodes.length) {
+      // Use non-null assertions to workaround TypeScript context awareness limitation
+      // (if any of the arrays were empty, we would not enter the body of the loop).
+      let preNode = preNodes.shift()!;
+      let linkNode = linkedNodes.shift()!;
+
+      // This should never happen because we modify the arrays in flight so they should end simultaneously,
+      // but this makes the coding assistance happy and might make it easier to conceptualize.
+      if (typeof preNode === 'undefined') {
+        combinedNodes.push(linkNode);
+        break;
+      }
+      if (typeof linkNode === 'undefined') {
+        combinedNodes.push(preNode);
+        break;
+      }
+
+      let preLen = preNode.textContent?.length;
+      let linkLen = linkNode.textContent?.length;
+      if (preLen && linkLen) {
+        if (preLen > linkLen) {
+          // Split pre node and only keep the shorter part
+          let { pre: keep, post: postpone } = splitShallowNode(
+            preNode,
+            linkLen
+          );
+          preNodes.unshift(postpone);
+          preNode = keep;
+        } else if (linkLen > preLen) {
+          let { pre: keep, post: postpone } = splitShallowNode(
+            linkNode,
+            preLen
+          );
+          linkedNodes.unshift(postpone);
+          linkNode = keep;
+        }
+      }
+
+      const lastCombined = combinedNodes[combinedNodes.length - 1];
+
+      // If we are already in an anchor element and the anchor element did not change,
+      // we should insert the node from <pre> which is either Text node or coloured span Element
+      // into the anchor content as a child
+      if (
+        inAnchorElement &&
+        (linkNode as HTMLAnchorElement).href ===
+          (lastCombined as HTMLAnchorElement).href
+      ) {
+        lastCombined.appendChild(preNode);
+      } else {
+        // the `linkNode` is either Text or AnchorElement;
+        const isAnchor = linkNode.nodeType !== Node.TEXT_NODE;
+        // if we are NOT about to start an anchor element, just add the pre Node
+        if (!isAnchor) {
+          combinedNodes.push(preNode);
+          inAnchorElement = false;
+        } else {
+          // otherwise start a new anchor; the contents of the `linkNode` and `preNode` should be the same,
+          // so we just put the neatly formatted `preNode` inside the anchor node (`linkNode`)
+          // and append that to combined nodes.
+          linkNode.textContent = '';
+          linkNode.appendChild(preNode);
+          combinedNodes.push(linkNode);
+          inAnchorElement = true;
+        }
+      }
+    }
+    // TODO: replace with `.replaceChildren()` once the target ES version allows it
+    pre.innerHTML = '';
+    for (const child of combinedNodes) {
+      pre.appendChild(child);
+    }
+  }
+
   host.appendChild(pre);
 
   // Return the rendered promise.
@@ -614,26 +743,6 @@ namespace Private {
       // Replace the old script in the parent.
       script.parentNode.replaceChild(clone, script);
     }
-  }
-
-  /**
-   * Render markdown for the specified content.
-   *
-   * @param content - The string of markdown to render.
-   *
-   * @return A promise which resolves with the rendered content.
-   */
-  export function renderMarked(content: string): Promise<string> {
-    initializeMarked();
-    return new Promise<string>((resolve, reject) => {
-      marked(content, (err: any, content: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(content);
-        }
-      });
-    });
   }
 
   /**
@@ -726,7 +835,7 @@ namespace Private {
       const headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
-        header.id = (header.textContent ?? '').replace(/ /g, '-');
+        header.id = renderMarkdown.createHeaderId(header);
         const anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
@@ -820,57 +929,6 @@ namespace Private {
         // just make it an empty link.
         anchor.href = '';
       });
-  }
-
-  let markedInitialized = false;
-
-  /**
-   * Support GitHub flavored Markdown, leave sanitizing to external library.
-   */
-  function initializeMarked(): void {
-    if (markedInitialized) {
-      return;
-    }
-    markedInitialized = true;
-    marked.setOptions({
-      gfm: true,
-      sanitize: false,
-      // breaks: true; We can't use GFM breaks as it causes problems with tables
-      langPrefix: `cm-s-${CodeMirrorEditor.defaultConfig.theme} language-`,
-      highlight: (code, lang, callback) => {
-        const cb = (err: Error | null, code: string) => {
-          if (callback) {
-            callback(err, code);
-          }
-          return code;
-        };
-        if (!lang) {
-          // no language, no highlight
-          return cb(null, code);
-        }
-        Mode.ensure(lang)
-          .then(spec => {
-            const el = document.createElement('div');
-            if (!spec) {
-              console.error(`No CodeMirror mode: ${lang}`);
-              return cb(null, code);
-            }
-            try {
-              Mode.run(code, spec.mime, el);
-              return cb(null, el.innerHTML);
-            } catch (err) {
-              console.error(`Failed to highlight ${lang} code`, err);
-              return cb(err, code);
-            }
-          })
-          .catch(err => {
-            console.error(`No CodeMirror mode: ${lang}`);
-            console.error(`Require CodeMirror mode error: ${err}`);
-            return cb(null, code);
-          });
-        return code;
-      }
-    });
   }
 
   const ANSI_COLORS = [

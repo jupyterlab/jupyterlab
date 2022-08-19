@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
-
 import { Token } from '@lumino/coreutils';
-
 import { MarkdownDocument } from './widget';
 
 /**

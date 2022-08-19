@@ -16,7 +16,7 @@ import * as KernelMessage from './messages';
 import { KernelSpec } from '../kernelspec';
 import { IManager as IBaseManager } from '../basemanager';
 
-import { IModel, IKernelOptions } from './restapi';
+import { IKernelOptions, IModel } from './restapi';
 
 export { Status } from './messages';
 export { IModel, IKernelOptions };
@@ -109,6 +109,15 @@ export interface IKernelConnection extends IObservableDisposable {
    * See https://github.com/jupyter/jupyter_client/issues/263
    */
   handleComms: boolean;
+
+  /**
+   * Whether the kernel connection has pending input.
+   *
+   * #### Notes
+   * This is a guard to avoid deadlock is the user asks input
+   * as second time before submitting his first input
+   */
+  hasPendingInput: boolean;
 
   /**
    * Send a shell message to the kernel.
@@ -358,7 +367,10 @@ export interface IKernelConnection extends IObservableDisposable {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void;
 
   /**
    * Create a new comm.
@@ -457,6 +469,11 @@ export interface IKernelConnection extends IObservableDisposable {
   ): void;
 
   /**
+   * Remove the input guard, if any.
+   */
+  removeInputGuard(): void;
+
+  /**
    * A signal emitted when the kernel status changes.
    */
   statusChanged: ISignal<this, KernelMessage.Status>;
@@ -485,6 +502,11 @@ export interface IKernelConnection extends IObservableDisposable {
    * message should be treated as read-only.
    */
   anyMessage: ISignal<this, IAnyMessageArgs>;
+
+  /**
+   * A signal emitted when a kernel has pending inputs from the user.
+   */
+  pendingInput: ISignal<this, boolean>;
 
   /**
    * The server settings for the kernel.
@@ -756,7 +778,10 @@ export interface IFuture<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void;
 }
 
 export interface IShellFuture<
@@ -808,7 +833,7 @@ export interface IComm extends IDisposable {
    *
    * @param data - The data to send to the server on opening.
    *
-   * @param metadata - Additional metatada for the message.
+   * @param metadata - Additional metadata for the message.
    *
    * @returns A future for the generated message.
    *
@@ -826,7 +851,7 @@ export interface IComm extends IDisposable {
    *
    * @param data - The data to send to the server on opening.
    *
-   * @param metadata - Additional metatada for the message.
+   * @param metadata - Additional metadata for the message.
    *
    * @param buffers - Optional buffer data.
    *
@@ -849,7 +874,7 @@ export interface IComm extends IDisposable {
    *
    * @param data - The data to send to the server on opening.
    *
-   * @param metadata - Additional metatada for the message.
+   * @param metadata - Additional metadata for the message.
    *
    * @returns A future for the generated message.
    *

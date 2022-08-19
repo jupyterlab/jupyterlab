@@ -4,7 +4,18 @@
 |----------------------------------------------------------------------------*/
 
 .jp-DebuggerEditor-highlight {
-  background-color: var(--jp-warn-color0);
+  text-shadow: 0 0 1px var(--jp-layout-color0);
+  outline: 1px solid;
+}
+
+body[data-jp-theme-light='false'] .jp-DebuggerEditor-highlight {
+  background-color: var(--md-brown-800);
+  outline-color: var(--md-brown-600);
+}
+
+body[data-jp-theme-light='true'] .jp-DebuggerEditor-highlight {
+  background-color: var(--md-brown-100);
+  outline-color: var(--md-brown-300);
 }
 
 .jp-DebuggerEditor-marker {

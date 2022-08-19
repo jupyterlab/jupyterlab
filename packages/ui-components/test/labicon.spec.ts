@@ -1,10 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { LabIcon } from '@jupyterlab/ui-components';
 import * as fs from 'fs';
 import * as path from 'path';
-
-import { LabIcon } from '@jupyterlab/ui-components';
 
 const fooSvgstr = fs.readFileSync(path.join(__dirname, 'foo.svg'), {
   encoding: 'utf8'

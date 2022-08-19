@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { UUID, JSONObject } from '@lumino/coreutils';
+import { JSONObject, UUID } from '@lumino/coreutils';
 
 export interface IOptions<T extends Message> {
   session: string;
@@ -202,6 +202,7 @@ export type IOPubMessageType =
   | 'error'
   | 'execute_input'
   | 'execute_result'
+  | 'shutdown_reply'
   | 'status'
   | 'stream'
   | 'update_display_data'
@@ -299,7 +300,7 @@ export interface IMessage<MSGTYPE extends MessageType = MessageType> {
   /**
    * The parent message
    */
-  parent_header: IHeader | {};
+  parent_header: IHeader | Record<string, never>;
 }
 
 /**
@@ -686,7 +687,7 @@ export function isCommMsgMsg(msg: IMessage): msg is ICommMsgMsg {
 // ///////////////////////////////////////////////
 
 /**
- * Reply content indicating a sucessful request.
+ * Reply content indicating a successful request.
  */
 export interface IReplyOkContent {
   status: 'ok';
@@ -740,7 +741,7 @@ type ReplyContent<T> = T | IReplyErrorContent | IReplyAbortContent;
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-info).
  */
 export interface IInfoRequestMsg extends IShellMessage<'kernel_info_request'> {
-  content: {};
+  content: Record<string, never>;
 }
 
 /**
@@ -1131,7 +1132,7 @@ export interface ICommInfoReplyMsg extends IShellMessage<'comm_info_reply'> {
 // ///////////////////////////////////////////////
 
 /**
- * An experimental `'debug_request'` messsage on the `'control'` channel.
+ * An experimental `'debug_request'` message on the `'control'` channel.
  *
  * @hidden
  *
@@ -1164,7 +1165,7 @@ export function isDebugRequestMsg(msg: IMessage): msg is IDebugRequestMsg {
 }
 
 /**
- * An experimental `'debug_reply'` messsage on the `'control'` channel.
+ * An experimental `'debug_reply'` message on the `'control'` channel.
  *
  * @hidden
  *
@@ -1254,4 +1255,15 @@ export interface IInputReplyMsg extends IStdinMessage<'input_reply'> {
  */
 export function isInputReplyMsg(msg: IMessage): msg is IInputReplyMsg {
   return msg.header.msg_type === 'input_reply';
+}
+
+// ///////////////////////////////////////////////
+// Message (de)serialization
+// ///////////////////////////////////////////////
+
+/**
+ * The list of supported kernel wire protocols over websocket.
+ */
+export enum supportedKernelWebSocketProtocols {
+  v1KernelWebsocketJupyterOrg = 'v1.kernel.websocket.jupyter.org'
 }

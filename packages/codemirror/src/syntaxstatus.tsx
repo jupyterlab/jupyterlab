@@ -1,27 +1,23 @@
-import React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import {
   interactiveItem,
   Popup,
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
-import { Mode } from '.';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-
 import { JSONObject } from '@lumino/coreutils';
-
 import { Menu } from '@lumino/widgets';
+import React from 'react';
+import { Mode } from '.';
 
 /**
  * A namespace for `EditorSyntaxComponentStatics`.
@@ -78,7 +74,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
   /**
    * Render the status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (!this.model) {
       return null;
     }
@@ -106,7 +102,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
         return aName.localeCompare(bName);
       })
       .forEach(spec => {
-        if (spec.mode.indexOf('brainf') === 0) {
+        if (spec.name.toLowerCase().indexOf('brainf') === 0) {
           return;
         }
 
@@ -165,7 +161,7 @@ export namespace EditorSyntaxStatus {
         this._mode = '';
       } else {
         const spec = Mode.findByMIME(this._editor.model.mimeType);
-        this._mode = spec.name || spec.mode;
+        this._mode = spec?.name ?? 'text/plain';
 
         this._editor.model.mimeTypeChanged.connect(this._onMIMETypeChange);
       }
@@ -182,7 +178,7 @@ export namespace EditorSyntaxStatus {
     ) => {
       const oldMode = this._mode;
       const spec = Mode.findByMIME(change.newValue);
-      this._mode = spec.name || spec.mode;
+      this._mode = spec?.name ?? 'text/plain';
 
       this._triggerChange(oldMode, this._mode);
     };

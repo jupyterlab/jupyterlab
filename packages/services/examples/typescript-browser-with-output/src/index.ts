@@ -21,8 +21,8 @@ import '../style/index.css';
 import { OutputArea, OutputAreaModel } from '@jupyterlab/outputarea';
 
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import { KernelManager } from '@jupyterlab/services';

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { URLExt, PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '../serverconnection';
 
 /**
@@ -30,16 +30,25 @@ export interface IModel {
 /**
  * Start a new terminal session.
  *
- * @param options - The session options to use.
+ * @param settings - The server settings to use.
  *
- * @returns A promise that resolves with the session instance.
+ * @param name - The name of the target terminal.
+ *
+ * @param cwd - The path in which the terminal will start.
+ *
+ * @returns A promise that resolves with the session model.
  */
 export async function startNew(
-  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
+  name?: string,
+  cwd?: string
 ): Promise<IModel> {
   Private.errorIfNotAvailable();
   const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
-  const init = { method: 'POST' };
+  const init = {
+    method: 'POST',
+    body: JSON.stringify({ name, cwd })
+  };
 
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
@@ -111,7 +120,7 @@ namespace Private {
   /**
    * Throw an error if terminals are not available.
    */
-  export function errorIfNotAvailable() {
+  export function errorIfNotAvailable(): void {
     if (!isAvailable()) {
       throw new Error('Terminals Unavailable');
     }

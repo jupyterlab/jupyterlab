@@ -9,9 +9,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { IThemeManager } from '@jupyterlab/apputils';
-
 import { ITranslator } from '@jupyterlab/translation';
 
 /**

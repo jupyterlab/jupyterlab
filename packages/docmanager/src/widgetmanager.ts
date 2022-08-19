@@ -1,27 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, map, find, filter, toArray } from '@lumino/algorithm';
-
-import { DisposableSet, IDisposable } from '@lumino/disposable';
-
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
-
-import { AttachedProperty } from '@lumino/properties';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { Time } from '@jupyterlab/coreutils';
-
-import { showDialog, Dialog } from '@jupyterlab/apputils';
-
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { Contents } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ArrayExt, each, filter, find, map, toArray } from '@lumino/algorithm';
+import { DisposableSet, IDisposable } from '@lumino/disposable';
+import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import { AttachedProperty } from '@lumino/properties';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The class name added to document widgets.

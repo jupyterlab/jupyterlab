@@ -2,14 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
-
 import { ISignal } from '@lumino/signaling';
 
 /**

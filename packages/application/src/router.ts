@@ -4,15 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { PromiseDelegate, Token } from '@lumino/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { IRouter } from './tokens';
 
 /**

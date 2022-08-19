@@ -50,9 +50,9 @@ Users should be able to:
   - Select multiple cells at once (mouse, shortcut)
   - Move cell(s) up and down (mouse)
 - Use notebook operations
-  - Clear All Outputs (command palette)
+  - Clear Outputs of All Cells (command palette)
   - Interrupt Kernel (command palette, shortcut, toolbar)
-  - Restart Kernel & Clear Outputs (command palette)
+  - Restart Kernel & Clear Outputs of All Cells (command palette)
   - Restart Kernel & Run All (command palette)
   - Run All Cells (command palette)
   - Switch Kernel (command palette, toolbar)

@@ -1,5 +1,8 @@
-Contributing to JupyterLab
-==========================
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
+Contribute
+==========
 
 If you're reading this section, you're probably interested in
 contributing to JupyterLab. Welcome and thanks for your interest in
@@ -17,19 +20,34 @@ or `help
 wanted <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22>`__
 that we believe are good examples of small, self-contained changes. We
 encourage those that are new to the code base to implement and/or ask
-questions about these issues.
+questions about these issues. You are not required to ask for a permission
+to work on such issue, but if you do and do not get a reply within 48 hours
+please assume that no one else is working on it (even if someone previously
+volunteered) and open a pull request with proposed implementation.
+If you are not certain about the implementation, using draft pull requests is encouraged.
+
 
 If you believe you’ve found a security vulnerability in JupyterLab or
 any Jupyter project, please report it to security@ipython.org. If you
 prefer to encrypt your security reports, you can use `this PGP public
 key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc>`__.
 
+.. toctree::
+   :hidden:
+
+   repo
+   components
+   patterns
+   internationalization
+   css
+   api
+
 .. contents:: Table of contents
     :local:
     :depth: 1
 
 General Guidelines for Contributing
-------------------------------------
+-----------------------------------
 
 For general documentation about contributing to Jupyter projects, see
 the `Project Jupyter Contributor
@@ -37,18 +55,46 @@ Documentation <https://jupyter.readthedocs.io/en/latest/contributing/content-con
 and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
+We maintain the **two most recently released major versions of JupyterLab**,
+JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no
+longer maintain v2.
+All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+
 All source code is written in
-`TypeScript <http://www.typescriptlang.org/Handbook>`__. See the `Style
+`TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
-All source code is formatted using `prettier <https://prettier.io>`__.
+All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `black <https://github.com/psf/black>`__.
 When code is modified and committed, all staged files will be
-automatically formatted using pre-commit git hooks (with help from the
-`lint-staged <https://github.com/okonet/lint-staged>`__ and
-`husky <https://github.com/typicode/husky>`__ libraries). The benefit of
-using a code formatter like prettier is that it removes the topic of
+automatically formatted using pre-commit git hooks (with help from
+`pre-commit <https://github.com/pre-commit/pre-commit>`__). The benefit of
+using a code formatters like ``prettier`` and ``black`` is that it removes the topic of
 code style from the conversation when reviewing pull requests, thereby
 speeding up the review process.
+
+As long as your code is valid,
+the pre-commit hook should take care of how it should look.
+`pre-commit` and its associated hooks will automatically be installed when
+you run ``pip install -e ".[dev,test]"``
+
+To install ``pre-commit`` manually, run the following::
+
+    pip install pre-commit
+    pre-commit install
+
+You can invoke the pre-commit hook by hand at any time with::
+
+    pre-commit run
+
+which should run any autoformatting on your code
+and tell you about any errors it couldn't fix automatically.
+You may also install `black integration <https://github.com/psf/black#editor-integration>`__
+into your text editor to format code automatically.
+
+If you have already committed files before setting up the pre-commit
+hook with ``pre-commit install``, you can fix everything up using
+``pre-commit run --all-files``. You need to make the fixing commit
+yourself after that.
 
 You may also use the prettier npm script (e.g. ``npm run prettier`` or
 ``yarn prettier`` or ``jlpm prettier``) to format the entire code base.
@@ -60,24 +106,121 @@ Submitting a Pull Request Contribution
 --------------------------------------
 
 Generally, an issue should be opened describing a piece of proposed work
-and the issues it solves before a pull request is opened.
+and the issues it solves before a pull request is opened. A triager will
+ensure that your issue meets our definition of ready before we can merge
+any pull requests that relate to it.
+
+Pull requests must target the development branch (= ``master``) even if
+it aims at addressing an issue seen in a stable release. Once the pull
+request is merged on the development branch, it will be backported to
+the stable branch using a bot action (or manually if the bot action
+failed).
+
+.. note::
+
+   Don't hesitate to mention the targeted version in a PR description.
+   A maintainer will set the milestone accordingly.
 
 Issue Management
 ^^^^^^^^^^^^^^^^
 
 Opening an issue lets community members participate in the design
 discussion, makes others aware of work being done, and sets the stage
-for a fruitful community interaction. A pull request should reference
+for a fruitful community interaction. When you open a new bug or
+enhancement request, please provide all the requested information
+in the issue template
+so that a responder will be able to triage your bug without delay.
+
+A pull request should reference
 the issue it is addressing. Once the pull request is merged, the issue
 related to it will also be closed. If there is additional discussion
-around implemementation the issue may be re-opened. Once 30 days have
+around implementation the issue may be re-opened. Once 30 days have
 passed with no additional discussion, the `lock
 bot <https://github.com/apps/lock>`__ will lock the issue. If additional
 discussion is desired, or if the pull request doesn't fully address the
 locked issue, please open a new issue referencing the locked issue.
 
-Tag Issues with Labels
-^^^^^^^^^^^^^^^^^^^^^^
+New issues are subject to triage. A developer with triage permissions
+(a *triager*) will do the following:
+
+1. Read the issue
+2. Search the existing issues and mark it as a duplicate if necessary
+3. If additional information is required, add a comment requesting it
+4. If the issue is ready to be worked on, assign it to a milestone
+5. Apply appropriate labels to the issue (see examples below)
+
+A developer may start to work on an issue as soon as it is filed. Please
+work with a triager if they have any questions about your issue so that
+your changes can be merged in without delay.
+
+Definition of Ready
+^^^^^^^^^^^^^^^^^^^
+
+One of the main goals of triage is to get issues into a state where they
+are **ready** for someone to work on. Once a triager is satisfied that an
+issue meets the definition below, they will remove the ``status:Needs Triage``
+label from it. We will not merge a pull request for an issue that still
+needs triage.
+
+Triagers should also ensure that the issue has appropriate labels that
+describe it, such as labels with the ``pkg:`` prefix for issues that
+affect one or more packages.
+
+**All requested information, where applicable, is provided.** From the
+templates in JupyterLab’s issues:
+
+For a **bug**:
+
+* Description, preferably including screen shots
+* Steps to reproduce
+* Expected behavior
+* Context, such as OS, browser, JupyterLab version, and output or log excerpts
+
+For a **feature request**:
+
+* Description of the problem
+* Description of the proposed solution
+* Additional context
+
+**The issue should represent real, relevant, feasible work**. In short, if a
+knowledgeable person were to be assigned this issue, they would be able to
+complete it with a reasonable amount of effort and assistance, and it
+furthers the goals of the Jupyter project.
+
+* Issues should be unique; triage is the best time to identify duplicates.
+* Bugs represent valid expectations for use of Jupyter products and services.
+* Expectations for security, performance, accessibility, and localization match
+  generally-accepted norms in the community that uses Jupyter products.
+* The issue represents work that one developer can commit to owning, even if
+  they collaborate with other developers for feedback. Excessively large issues
+  should be split into multiple issues, each triaged individually, or into
+  `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
+  more substantive changes.
+
+Labels Used by Triagers
+^^^^^^^^^^^^^^^^^^^^^^^
+
+All new bugs and enhancement requests have the ``status:Needs Triage`` label.
+
+On a regular basis, Jupyter contributors (triage reviewers or triagers)
+review JupyterLab issues tagged
+with ``status:Needs Triage``, starting with the oldest, and determine
+whether they meet the definition of ready.
+
+Once triaged, if the issue is ready, the reviewer removes the
+``status:Needs Triage`` label; no additional label is required. If there
+is not enough information in the issue as filed, the triage reviewer applies
+the ``status:Needs Info`` label and leaves ``status:Needs Triage`` in place.
+If an issue has remained in ``status:Needs Info`` for more than 14 days
+without any follow-up communication, the reviewer should apply
+``status:Blocked``. A blocked issue should be closed after another 14 days
+pass without a reply that unblocks it.
+
+Our expectation is that every new issue should be examined within a week of
+its creation.
+
+Tagging Issues with Labels
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Users without the commit rights to the JupyterLab repository can tag
 issues with labels using the ``@meeseeksdev`` bot. For example: To apply
@@ -86,9 +229,20 @@ the label ``foo`` and ``bar baz`` to an issue, comment
 
 Contributing from within the browser
 ------------------------------------
-Using the https://github.com web interface - documented
-`here <https://docs.github.com/en/free-pro-team@latest/github>`__ - you
-can create and propose a change purely within your browser.
+
+Contributing to JupyterLab codebase is also possible without setting up
+a local environment, directly from the Web browser:
+
+-  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
+   however it is not actively maintained,
+-  GitHub's
+   `built-in editor <https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files>`__
+   is suitable for contributing very small fixes,
+-  more advanced `github.dev <https://docs.github.com/en/codespaces/the-githubdev-web-based-editor>`__
+   editor can be accessed by pressing the dot (``.``) key while in the JupyterLab GitHub repository,
+-  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
+   allows to prototype JupyterLab extensions from within JupyterLab and
+   can be run without installation in the browser using Binder.
 
 Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
 changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
@@ -117,9 +271,18 @@ If you use ``conda``, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge 'nodejs'
+   conda install -c conda-forge nodejs
 
-If you use `Homebrew <http://brew.sh>`__ on Mac OS X:
+The canvas node package is not properly packaged for Mac OS X with ARM architectures (M1 and M2).
+To build JupyterLab on such platforms, you need a few additional packages, and to specify the pkg-config
+path:
+
+.. code:: bash
+
+   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib
+   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
+
+If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
 
 .. code:: bash
 
@@ -134,16 +297,20 @@ To check which version of Node.js is installed:
 
    node -v
 
+Using automation to set up a local development environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+While there is a lot to learn by following the steps above, they can be automated to save time. This section shows how
+to do that using Vagrant as an example.
+
+The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
+re-build the environment, better standardisation ("baseline", reproducible environments).
+
+A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
+includes a ``Vagrantfile``, the bootstrap files and additional documentation.
+
 Installing JupyterLab
 ---------------------
-
-If you use ``conda``, you may also want to install ``nb_conda_kernels`` to have a kernel
-option for different `conda
-environments <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`__
-
-.. code:: bash
-
-   conda install -c conda-forge nb_conda_kernels
 
 Fork the JupyterLab
 `repository <https://github.com/jupyterlab/jupyterlab>`__.
@@ -154,11 +321,19 @@ Then use the following steps:
 
    git clone https://github.com/<your-github-username>/jupyterlab.git
    cd jupyterlab
-   pip install -e .
+   pip install -e ".[dev,test]"
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
-   jlpm run build:core  # Build the core mode assets (optional)
-   jupyter lab build  # Build the app dir assets (optional)
+
+Additionally, you might want to execute the following optional commands:
+
+.. code:: bash
+
+   # Build the core mode assets (optional)
+   jlpm run build:core
+
+   # Build the app dir assets (optional)
+   jupyter lab build
 
 Notes:
 
@@ -171,8 +346,16 @@ Notes:
    installation, make sure Python 3.0+ is installed. Also, try using the
    Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
    install JupyterLab from the forked repository.
+-  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
+   returned exit status 127 while in binding.gyp`` while running the
+   ``pip install`` command above, you may be missing packages required
+   by ``canvas``. On macOS with Homebrew, you can add these packages by
+   running
+   ``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
+   If you are using mamba or conda, you can install the necessary packages
+   with `conda install -c conda-forge pkg-config glib pango pixman`.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
-   `yarn <https://yarnpkg.com/en>`__ package manager. If you have
+   `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when
    developing, and it will use the local version of ``yarn`` in
    ``jupyterlab/yarn.js`` when run in the repository or a built
@@ -224,7 +407,8 @@ Start JupyterLab in development mode:
 
 Development mode ensures that you are running the JavaScript assets that
 are built in the dev-installed Python package. Note that when running in
-dev mode, extensions will not be activated by default.
+dev mode, extensions will not be activated by default - refer
+:ref:`documentation on extension development <prebuilt_dev_workflow>` to know more.
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
@@ -257,7 +441,7 @@ We use ``jest`` for all tests, so standard ``jest`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an
 ``it.only`` to a specific test when debugging. All of the ``test*``
 scripts in each package accept ``jest`` `cli
-options <https://jestjs.io/docs/en/cli.html>`__.
+options <https://jestjs.io/docs/cli>`__.
 
 VSCode Debugging
 """"""""""""""""
@@ -286,7 +470,7 @@ tests.
 For tests that rely on ``@jupyterlab/services`` (starting kernels,
 interacting with files, etc.), there are two options. If a simple
 interaction is needed, the ``Mock`` namespace exposed by ``testutils``
-has a number of mock implmentations (see ``testutils/src/mock.ts``). If
+has a number of mock implementations (see ``testutils/src/mock.ts``). If
 a full server interaction is required, use the ``JupyterServer`` class.
 
 We have a helper function called ``testEmission`` to help with writing
@@ -296,234 +480,117 @@ sometimes have to set a sentinel value inside a ``Promise`` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
 
+Internationalization
+--------------------
+
+Translatable strings update
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The translatable strings update cannot occur on patch release. They
+must be delayed on minor or major versions.
+
 Performance Testing
 -------------------
 
-If you are making a change that might affect how long it takes to load
-JupyterLab in the browser, we recommend doing some performance testing
-using `Lighthouse <https://github.com/GoogleChrome/lighthouse>`__. It
-let's you easily compute a number of metrics, like page load time, for
-the site.
+Benchmark of JupyterLab is done using Playwright. The actions measured are:
 
-To use it, first build JupyterLab in dev mode:
+- Opening a file
+- Switching from the file to a simple text file
+- Switching back to the file
+- Closing the file
 
-.. code:: bash
+Two files are tested: a notebook with many code cells and another with many markdown cells.
 
-   jlpm run build:dev
+The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
+the same CI job to ensure using the same hardware.
+The benchmark job is triggered on:
 
-Then, start JupyterLab using the dev build:
+- Approved PR review
+- PR review that contains the sentence ``please run benchmark``
 
-.. code:: bash
-
-   jupyter lab --dev --NotebookApp.token=''  --no-browser
-
-Now run Lighthouse against this local server and show the results:
-
-.. code:: bash
-
-   jlpm run lighthouse --view
-
-.. image:: /images/lighthouse.png
-
-Using throttling
-^^^^^^^^^^^^^^^^
-
-Lighthouse recommends using the system level
-`comcast <https://github.com/tylertreat/comcast>`__ tool to throttle
-your network connection and emulate different scenarios. To use it,
-first install that tool using ``go``:
+The tests are located in the subfolder ``galata/test/benchmark``. And they can be
+executed with the following command:
 
 .. code:: bash
 
-   go get github.com/tylertreat/comcast
+   jlpm run test:benchmark
 
-Then, before you run Lighthouse, enable the throttling (this requires
-sudo):
 
-.. code:: bash
+A special report will be generated in the folder ``benchmark-results`` that will contain 4 files:
 
-   run lighthouse:throttling:start
+- ``lab-benchmark.json``: The execution time of the tests and some metadata.
+- ``lab-benchmark.md``: A report in Markdown
+- ``lab-benchmark.png``: A comparison of execution time distribution
+- ``lab-benchmark.vl.json``: The `Vega-Lite <https://vega.github.io/vega-lite>`__ description used to produce the PNG file.
 
-This enables the "WIFI (good)" preset of comcast, which should emulate
-loading JupyterLab over a local network.
+The reference, tagged *expected*, is stored in ``lab-benchmark-expected.json``. It can be
+created using the ``-u`` option of Playwright; i.e. ``jlpm run test:benchmark -u``.
 
-Then run the lighthouse tests:
+Benchmark parameters
+^^^^^^^^^^^^^^^^^^^^
 
-.. code:: bash
+The benchmark can be customized using the following environment variables:
 
-   jlpm run lighthouse [...]
+- ``BENCHMARK_NUMBER_SAMPLES``: Number of samples to compute the execution time distribution; default 20.
+- ``BENCHMARK_OUTPUTFILE``: Benchmark result output file; default ``benchmark.json``. It is overridden in the ``playwright-benchmark.config.js``.
+- ``BENCHMARK_REFERENCE``: Reference name of the data; default is ``actual`` for current data and ``expected`` for the reference.
 
-Then disable the throttling after you are done:
+More tests can be carried out manually on JupyterLab branches and run weekly on the default branch in
+`jupyterlab/benchmarks <https://github.com/jupyterlab/benchmarks/#readme>`__ repository.
 
-.. code:: bash
+Visual Regression and UI Tests
+------------------------------
 
-   jlpm run lighthouse:throttling:stop
+As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
+`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI
+testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and
+inspect JupyterLab UI programmatically.
 
-Comparing results
-^^^^^^^^^^^^^^^^^
+UI tests are run for each commit into JupyterLab project in PRs or direct commits. Code
+changes can sometimes cause UI tests to fail for various reasons. After each test run,
+Galata generates a user friendly test result report which can be used to inspect failing
+UI tests. Result report shows the failure reason, call-stack up to the failure and
+detailed information on visual regression issues. For visual regression errors, reference
+image and test capture image, along with diff image generated during comparison are
+provided in the report. You can use these information to debug failing tests. Galata test
+report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
+named ``galata-report`` and once you extract it, you can access the report by launching
+a server to serve the files ``python -m http.server -d <path-to-extracted-report>``.
+Then open *http://localhost:8000* with your web browser.
 
-Performance results are usually only useful in comparison to other
-results. For that reason, we have included a comparison script that can
-take two lighthouse results and show the changes between them.
+Main reasons for UI test failures are:
 
-Let's say we want to compare the results of the production build of
-JupyterLab with the normal build. The production build minifies all the
-JavaScript, so should load a bit faster.
+1. **A visual regression caused by code changes**:
 
-First, we build JupyterLab normally, start it up, profile it and save
-the results:
+   Sometimes unintentional UI changes are introduced by modifications to project source
+   code. Goal of visual regression testing is to detect this kind of UI changes. If your
+   PR / commit is causing visual regression, then debug and fix the regression caused.
+   You can locally run and debug the UI tests to fix the visual regression. To debug your
+   test, you may run ``PWDEBUG=1 jlpm playwright test <path-to-test-file>``. Once you
+   have a fix, you can push the change to your GitHub branch and test with GitHub actions.
 
-.. code:: bash
+2. **An intended update to user interface**:
 
-   jlpm build:dev
-   jupyter lab --dev --NotebookApp.token='' --no-browser
+   If your code change is introducing an update to UI which causes existing UI Tests to
+   fail, then you will need to update reference image(s) for the failing tests. In order
+   to do that, you can post a comment on your PR with the following content:
 
-   # in new window
-   jlpm run lighthouse --output json --output-path normal.json
+   - ``please update galata snapshots``: A bot will push a new commit to your PR updating galata
+     test snaphsots.
+   - ``please update documentation snapshots``: A bot will push a new commit to your PR updating
+     documentation test snapshots.
+   - ``please update snapshots``: Combine the two previous comments effects.
 
-Then rebuild with the production build and retest:
+For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/master/galata/README.md>`__
+and `Playwright documentation <https://playwright.dev/docs/intro>`__.
 
-.. code:: bash
+Good Practices for Integration tests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   jlpm run build:dev:prod
-   jupyter lab --dev --NotebookApp.token='' --no-browser
+Here are some good practices to follow when writing integration tests:
 
-   # in new window
-   jlpm run lighthouse --output json --output-path prod.json
-
-Now we can use compare the two outputs:
-
-.. code:: bash
-
-   jlpm run lighthouse:compare normal.json prod.json
-
-This gives us a report of the relative differences between the audits in
-the two reports:
-
-.. admonition:: Resulting Output
-
-   ``normal.json`` -> ``prod.json``
-
-   | **First Contentful Paint**
-   | - -62% Δ
-   | - 1.9 s -> 0.7 s
-   | - First Contentful Paint marks the time at which the first text or
-     image is painted. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/first-contentful-paint>`__.
-
-   | **First Meaningful Paint**
-   | - -50% Δ
-   | - 2.5 s -> 1.3 s
-   | - First Meaningful Paint measures when the primary content of a
-     page is visible. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/first-meaningful-paint>`__.
-
-   | **Speed Index**
-   | - -48% Δ
-   | - 2.6 s -> 1.3 s
-   | - Speed Index shows how quickly the contents of a page are visibly
-     populated. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/speed-index>`__.
-
-   | **Estimated Input Latency**
-   | - 0% Δ
-   | - 20 ms -> 20 ms
-   | - Estimated Input Latency is an estimate of how long your app takes
-     to respond to user input, in milliseconds, during the busiest 5s
-     window of page load. If your latency is higher than 50 ms, users
-     may perceive your app as laggy. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/estimated-input-latency>`__.
-
-   | **Max Potential First Input Delay**
-   | - 9% Δ
-   | - 200 ms -> 210 ms
-   | - The maximum potential First Input Delay that your users could
-     experience is the duration, in milliseconds, of the longest task.
-     `Learn
-     more <https://developers.google.com/web/updates/2018/05/first-input-delay>`__.
-
-   | **First CPU Idle**
-   | - -50% Δ
-   | - 2.5 s -> 1.3 s
-   | - First CPU Idle marks the first time at which the page's main
-     thread is quiet enough to handle input. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/first-interactive>`__.
-
-   | **Time to Interactive**
-   | - -52% Δ
-   | - 2.5 s -> 1.2 s
-   | - Time to interactive is the amount of time it takes for the page
-     to become fully interactive. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/consistently-interactive>`__.
-
-   | **Avoid multiple page redirects**
-   | - -2% Δ
-   | - Potential savings of 10 ms -> Potential savings of 10 ms
-   | - Redirects introduce additional delays before the page can be
-     loaded. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/redirects>`__.
-
-   | **Minimize main-thread work**
-   | - -54% Δ
-   | - 2.1 s -> 1.0 s
-   | - Consider reducing the time spent parsing, compiling and executing
-     JS. You may find delivering smaller JS payloads helps with this.
-
-   | **JavaScript execution time**
-   | - -49% Δ
-   | - 1.1 s -> 0.6 s
-   | - Consider reducing the time spent parsing, compiling, and
-     executing JS. You may find delivering smaller JS payloads helps
-     with this. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/bootup>`__.
-
-   | **Preload key requests**
-   | - -100% Δ
-   | - Potential savings of 240 ms ->
-   | - Consider using <link rel=preload> to prioritize fetching
-     resources that are currently requested later in page load. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/preload>`__.
-
-   | **Uses efficient cache policy on static assets**
-   | - 0% Δ
-   | - 1 resource found -> 1 resource found
-   | - A long cache lifetime can speed up repeat visits to your page.
-     `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/cache-policy>`__.
-
-   | **Avoid enormous network payloads**
-   | - -86% Δ
-   | - Total size was 30,131 KB -> Total size was 4,294 KB
-   | - Large network payloads cost users real money and are highly
-     correlated with long load times. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/network-payloads>`__.
-
-   | **Minify JavaScript**
-   | - -100% Δ
-   | - Potential savings of 23,041 KB ->
-   | - Minifying JavaScript files can reduce payload sizes and script
-     parse time. `Learn
-     more <https://developers.google.com/speed/docs/insights/MinifyResources>`__.
-
-   | **Enable text compression**
-   | - -86% Δ
-   | - Potential savings of 23,088 KB -> Potential savings of 3,112 KB
-   | - Text-based resources should be served with compression (gzip,
-     deflate or brotli) to minimize total network bytes. `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/text-compression>`__.
-
-   | **Avoid an excessive DOM size**
-   | - 0% Δ
-   | - 1,268 elements -> 1,268 elements
-   | - Browser engineers recommend pages contain fewer than ~1,500 DOM
-     elements. The sweet spot is a tree depth < 32 elements and fewer
-     than 60 children/parent element. A large DOM can increase memory
-     usage, cause longer `style
-     calculations <https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations>`__,
-     and produce costly `layout
-     reflows <https://developers.google.com/speed/articles/reflow>`__.
-     `Learn
-     more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`__.
+- Don't compare multiple screenshots in the same test; if the first comparison breaks,
+  it will require running multiple times the CI workflow to fix all tests.
 
 Contributing to the debugger front-end
 --------------------------------------
@@ -540,6 +607,7 @@ The Debugger Adapter Protocol
 The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
 
 .. image:: ./debugger_protocol_diagram.png
+   :alt: UML sequence diagram illustrating the interaction between a user, JupyterLab, and the kernel. From top to bottom, the timeline starts with opening the notebook and includes annotations where the debugger is started and stopped. Specific interactions and message types are discussed in the subsequent text.
 
 Inspecting Debug Messages in VS Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -549,6 +617,7 @@ Inspecting the debug messages in VS Code can be useful to understand when debug 
 The first step is to create a test file and a debug configuration (``launch.json``):
 
 .. image:: ./debugger_launch_configuration.png
+   :alt: An editor showing the menu for creating a debug configuration.
 
 .. code:: json
 
@@ -569,6 +638,7 @@ The first step is to create a test file and a debug configuration (``launch.json
 Then start the debugger:
 
 .. image:: ./debugger_vscode_start.png
+   :alt: A started debugging session in the editor. There are additional buttons in the upper right for navigating the session.
 
 The content of the log file looks like this:
 
@@ -696,14 +766,14 @@ need to install the documentation dependencies with ``pip``:
 
 .. code:: bash
 
-   pip install -r docs/requirements.txt
+   pip install -e .[docs]
 
 
 To test the docs run:
 
 .. code:: bash
 
-   py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+   python -m pytest --check-links -k .md . || python -m pytest --check-links -k .md --lf .
 
 The Read the Docs pages can be built using ``make``:
 
@@ -721,17 +791,17 @@ Or with ``jlpm``:
 Writing Style
 ^^^^^^^^^^^^^
 
--  The documentation should be written in the second person, referring
-   to the reader as "you" and not using the first person plural "we."
+-  Write documentation in the second person, referring
+   to the reader as "you". Do not use the first person plural "we."
    The author of the documentation is not sitting next to the user, so
    using "we" can lead to frustration when things don't work as
    expected.
 -  Avoid words that trivialize using JupyterLab such as "simply" or
    "just." Tasks that developers find simple or easy may not be for
    users.
--  Write in the active tense, so "drag the notebook cells..." rather
-   than "notebook cells can be dragged..."
--  The beginning of each section should begin with a short (1-2
+-  Write in the active tense. For example, "drag the notebook cells…" rather
+   than "notebook cells can be dragged…".
+-  The beginning of each section should begin with a short (1–2
    sentence) high-level description of the topic, feature or component.
 -  Use "enable" rather than "allow" to indicate what JupyterLab makes
    possible for users. Using "allow" connotes that we are giving them
@@ -743,36 +813,56 @@ User Interface Naming Conventions
 Documents, Files, and Activities
 """"""""""""""""""""""""""""""""
 
-Files are referrred to as either files or documents, depending on the
-context.
+Refer to files as either files or documents, depending on the context.
 
-Documents are more human centered. If human viewing, interpretation,
-interaction is an important part of the experience, it is a document in
-that context. For example, notebooks and markdown files will often be
-referring to as documents unless referring to the file-ness aspect of it
+*Documents* are more human centered. If human viewing, interpretation,
+or interaction is an important part of the experience, use the term
+"document". For example, notebooks and Markdown files will often be
+referred to as documents except in the context of a file system
 (e.g., the notebook filename).
 
-Files are used in a less human-focused context. For example, we refer to
-files in relation to a file system or file name.
+Use the term *files* in a less human-focused context. For example,
+refer to files in relation to a file system or file name.
 
-Activities can be either a document or another UI panel that is not file
-backed, such as terminals, consoles or the inspector. An open document
-or file is an activity in that it is represented by a panel that you can
-interact with.
+*Activities* are either an opened document or another UI panel that is
+not related to a file, such as terminals, consoles or the inspector.
+
+Notebook Cells
+""""""""""""""
+
+A notebook contains *cells*, each of which have *input* and one or more
+*outputs*. When the user runs a cell, the kernel reads and executes the
+input and generates outputs. The notebook then displays the cell's output.
+The term *output* describes one of possibly multiple results of running a
+cell. *Cell output* describes the collective output of one cell. Use
+*outputs of all cells* to describe all outputs from all cells.
+
+Command Names
+"""""""""""""
+
+Command names appear in menus, in the Command Palette, and in toolbar buttons
+(where the name typically appears on hover).
+
+-  Keep command names short, concise, and unambiguous.
+-  Add an ellipsis (…) after any command name that requires more options. This
+   tells the user that they should expect a pop-up window to appear before they
+   execute the command.
+-  Commands should use verbs in the imperative case. Do not use articles with nouns.
+   For example, write "Clear Cell", not "Clear the Cell" or "Clearing Cell".
 
 Element Names
 """""""""""""
 
--  The generic content area of a tabbed UI is a panel, but prefer to
-   refer to the more specific name, such as “File browser.” Tab bars
-   have tabs which toggle panels.
--  The menu bar contains menu items, which have their own submenus.
--  The main work area can be referred to as the work area when the name
+-  The generic content area of a tabbed UI is a *panel*. Refer to a panel
+   by its most specific name, such as “File browser.” *Tab bars*
+   have *tabs* that let a user view different panels.
+-  The *menu bar* contains *menu items* that have their own *submenus*.
+-  Refer to the *main work area* as the work area when the name
    is unambiguous.
--  When describing elements in the UI, colloquial names are preferred
-   (e.g., “File browser” instead of “Files panel”).
+-  When describing elements in the UI, prefer colloquial names over
+   technical names. For example, use “File browser” instead of “Files panel”.
 
-The majority of names are written in lower case. These names include:
+Write most element names in lowercase. These names include:
 
 -  tab
 -  panel
@@ -788,18 +878,15 @@ The majority of names are written in lower case. These names include:
 -  cell inspector
 -  code console
 
-The following sections of the user interface should be in title case,
-directly quoting a word in the UI:
+Write the following sections of the user interface with one or more
+initial capitals, mirroring their use in the UI:
 
+-  Activity Bar
 -  File menu
 -  Files tab
 -  Running panel
 -  Tabs panel
 -  Simple Interface mode
-
-The capitalized words match the label of the UI element the user is
-clicking on because there does not exist a good colloquial name for the
-tool, such as “file browser” or “command palette”.
 
 See :ref:`interface` for descriptions of elements in the UI.
 
@@ -867,7 +954,7 @@ Linking/Unlinking Packages to JupyterLab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you want to make changes to one of JupyterLab's external packages
-(for example, `Lumino <https://github.com/jupyterlab/lumino>`__ and test
+(for example, `Lumino <https://github.com/jupyterlab/lumino>`__) and test
 them out against your copy of JupyterLab, you can easily do so using the
 ``link`` command:
 
@@ -936,6 +1023,9 @@ preparing them:
 -  Make sure the screenshot does not contain copyrighted material
    (preferable), or the license is allowed in our documentation and
    clearly stated.
+-  For screenshots, you should prefer creating visual tests. This allows
+   to update them dynamically. Those tests are defined in ``galata/test/documentation``
+   folder.
 -  If taking a png screenshot, use the Firefox or Chrome developer tools
    to do the following:
 

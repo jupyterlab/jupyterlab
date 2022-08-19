@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _file-editor:
 
 Text Editor
@@ -6,7 +9,7 @@ Text Editor
 The text editor in JupyterLab enables you to edit text files in
 JupyterLab:
 
-.. image:: images/file_editor_overview.png
+.. image:: ../images/file-editor-overview.png
    :align: center
    :class: jp-screenshot
 
@@ -14,7 +17,7 @@ The text editor includes syntax highlighting, configurable indentation
 (tabs or spaces), :ref:`key maps <editor-keymaps>` and
 basic theming. These settings can be found in the Settings menu:
 
-.. image:: images/file_editor_settings.png
+.. image:: ../images/file-editor-settings.png
    :align: center
    :class: jp-screenshot
 

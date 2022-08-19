@@ -1,21 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message, MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { CodeConsole, ConsolePanel } from '../src';
-
 import { dismissDialog } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { CodeConsole, ConsolePanel } from '../src';
 import {
   createConsolePanelFactory,
-  rendermime,
+  editorFactory,
   mimeTypeService,
-  editorFactory
+  rendermime
 } from './utils';
 
 class TestPanel extends ConsolePanel {
@@ -91,7 +86,9 @@ describe('console/panel', () => {
       it('should start the session', async () => {
         Widget.attach(panel, document.body);
         await panel.sessionContext.ready;
-        await panel.sessionContext.session!.kernel!.info;
+        await expect(
+          panel.sessionContext.session!.kernel!.info
+        ).resolves.not.toThrow();
       });
     });
 

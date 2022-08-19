@@ -1,8 +1,8 @@
 // This file is auto-generated from the corresponding file in /dev_mode
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 // We copy some of the pageconfig parsing logic in @jupyterlab/coreutils
 // below, since this must run before any other files are loaded (including
@@ -40,26 +40,6 @@ function getOption(name) {
 
 // eslint-disable-next-line no-undef
 __webpack_public_path__ = getOption('fullStaticUrl') + '/';
-
-// Promise.allSettled polyfill, until our supported browsers implement it
-// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
-if (Promise.allSettled === undefined) {
-  Promise.allSettled = promises =>
-    Promise.all(
-      promises.map(promise =>
-        promise.then(
-          value => ({
-            status: 'fulfilled',
-            value
-          }),
-          reason => ({
-            status: 'rejected',
-            reason
-          })
-        )
-      )
-    );
-}
 
 function loadScript(url) {
   return new Promise((resolve, reject) => {

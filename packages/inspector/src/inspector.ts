@@ -2,15 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Printing } from '@jupyterlab/apputils';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-
 import { IInspector } from './tokens';
 
 /**
@@ -33,7 +30,8 @@ const DEFAULT_CONTENT_CLASS = 'jp-Inspector-default-content';
  */
 export class InspectorPanel
   extends Panel
-  implements IInspector, Printing.IPrintable {
+  implements IInspector, Printing.IPrintable
+{
   /**
    * Construct an inspector.
    */
@@ -64,7 +62,7 @@ export class InspectorPanel
    * Print in iframe
    */
   [Printing.symbol]() {
-    return () => Printing.printWidget(this);
+    return (): Promise<void> => Printing.printWidget(this);
   }
 
   /**
@@ -162,7 +160,7 @@ export namespace InspectorPanel {
     initialContent?: Widget | string | undefined;
 
     /**
-     * The aplication language translator.
+     * The application language translator.
      */
     translator?: ITranslator;
   }

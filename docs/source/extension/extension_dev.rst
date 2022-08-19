@@ -1,11 +1,29 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _developer_extensions:
 
-Extension Developer Guide
-=========================
+Develop Extensions
+==================
 
 The JupyterLab application is comprised of a core application object and a set of extensions. JupyterLab extensions provide nearly every function in JupyterLab, including notebooks, document editors and viewers, code consoles, terminals, themes, the file browser, contextual help system, debugger, and settings editor. Extensions even provide more fundamental parts of the application, such as the menu system, status bar, and the underlying communication mechanism with the server.
 
 A JupyterLab extension is a package that contains a number of JupyterLab plugins. We will discuss how to write a plugin, then how to package together a set of plugins into a JupyterLab extension.
+
+See the sections below for more detailed information, or browse the rest of this page for an overview.
+
+.. toctree::
+   :maxdepth: 1
+
+   extension_points
+   ui_components
+   documents
+   notebook
+   virtualdom
+   ui_helpers
+   internationalization
+   extension_tutorial
+   extension_migration
 
 Other resources
 ---------------
@@ -30,7 +48,6 @@ We provide several cookiecutters to create JupyterLab extensions:
 - `extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`_: Create a JupyterLab extension in TypeScript
 - `extension-cookiecutter-js <https://github.com/jupyterlab/extension-cookiecutter-js>`_: Create a JupyterLab extension in JavaScript
 - `mimerender-cookiecutter-ts <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`_: Create a MIME Renderer JupyterLab extension in TypeScript
-- `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a theme extension for JupyterLab
 
 API Reference Documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -51,7 +68,7 @@ A JupyterLab plugin is the basic unit of extensibility in JupyterLab. An extensi
 
 An extension can be published both as a source extension on NPM and as a prebuilt extension (e.g., published as a Python package). In some cases, system administrators may even choose to install a prebuilt extension by directly copying the prebuilt bundle to an appropriate directory, circumventing the need to create a Python package. If a source extension and a prebuilt extension with the same name are installed in JupyterLab, the prebuilt extension takes precedence.
 
-Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multiuser systems where JuptyerLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the per-user level, the per-environment level, or the system level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JupyterLab.
+Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multiuser systems where JupyterLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the per-user level, the per-environment level, or the system level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JupyterLab.
 
 .. tip::
    We recommend publishing prebuilt extensions in Python packages for user convenience.
@@ -172,7 +189,7 @@ document can then be saved by the user in the usual manner.
 Theme plugins
 ^^^^^^^^^^^^^
 
-A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated.
+A theme is a special application plugin that registers a theme with the ``ThemeManager`` service. Theme CSS assets are specially bundled in an extension (see :ref:`themePath`) so they can be unloaded or loaded as the theme is activated. Since CSS files referenced by the ``style`` or ``styleModule`` keys are automatically bundled and loaded on the page, the theme files should not be referenced by these keys.
 
 The extension package containing the theme plugin must include all static assets that are referenced by ``@import`` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or ``url('../foo/bar.css')`` can be used to refer local files in the theme. Absolute URLs (starting with a ``/``) or external URLs (e.g. ``https:``) can be used to refer to external assets.
 
@@ -234,10 +251,10 @@ Theme plugin assets (e.g., CSS files) need to bundled separately from a typical 
 
         "jupyterlab": {
           "extension": true,
-          "themePath": "style/index.css"
+          "themePath": "style/theme.css"
         }
 
-An extension cannot bundle multiple theme plugins, and any other CSS in the package is ignored (so any other application or mimeRenderer plugins in the package cannot have associated CSS).
+An extension cannot bundle multiple theme plugins.
 
 Ensure that the theme path files are included in the ``files`` metadata in ``package.json``.  If you want to use SCSS, SASS, or LESS files, you must compile them to CSS and point ``jupyterlab.themePath`` to the CSS files.
 
@@ -448,9 +465,9 @@ Currently supported package managers are ``pip`` and ``conda``.
 Extension CSS
 ^^^^^^^^^^^^^
 
-If your extension has a top-level ``style`` key in ``package.json``, and is not a theme extension (i.e., has no ``jupyterlab.themePath`` key), the CSS file it points to will be included on the page automatically.
+If your extension has a top-level ``style`` key in ``package.json``, the CSS file it points to will be included on the page automatically.
 
-A convention in JupyterLab for deduplicating CSS on the page is that if your extension has a top-level ``styleModule`` key in ``package.json`` giving a JavaScript module that can be imported, it will be preferred over the ``style`` key CSS file.
+A convention in JupyterLab for deduplicating CSS on the page is that if your extension has a top-level ``styleModule`` key in ``package.json`` giving a JavaScript module that can be imported, it will be imported (as a JavaScript module) instead of importing the ``style`` key CSS file as a CSS file.
 
 
 Prebuilt Extensions
@@ -570,7 +587,56 @@ This ``install.json`` file is used by JupyterLab to help a user know how to mana
 * ``packageName``: This is the package name of the prebuilt extension in the package manager above, which may be different than the package name in ``package.json``.
 * ``uninstallInstructions``: This is a short block of text giving the user instructions for uninstalling the prebuilt extension. For example, it might instruct them to use a system package manager or talk to a system administrator.
 
+.. _dev_trove_classifiers:
 
+PyPI Trove Classifiers
+""""""""""""""""""""""
+
+Extensions distributed as Python packages may declare additional metadata in the form of
+`trove classifiers <https://pypi.org/classifiers>`__. These improve the browsing
+experience for users on `PyPI <https://pypi.org/search>`__. While including the license,
+development status, Python versions supported, and other topic classifiers are useful
+for many audiences, the following classifiers are specific to Jupyter and JupyterLab.
+
+.. code-block::
+
+    Framework :: Jupyter
+    Framework :: Jupyter :: JupyterLab
+    Framework :: Jupyter :: JupyterLab :: 1
+    Framework :: Jupyter :: JupyterLab :: 2
+    Framework :: Jupyter :: JupyterLab :: 3
+    Framework :: Jupyter :: JupyterLab :: 4
+    Framework :: Jupyter :: JupyterLab :: Extensions
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
+    Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
+
+Include each relevant classifier (and its parents) to help describe what your package
+provides to prospective users in your ``setup.py``, ``setup.cfg``, or ``pyproject.toml``.
+
+.. hint::
+
+    For example, a theme, only compatible with JupyterLab 3, and distributed as
+    a ready-to-run, prebuilt extension might look like:
+
+    .. code-block:: python
+
+        # setup.py
+        setup(
+            # the rest of the package's metadata
+            # ...
+            classifiers=[
+                "Framework :: Jupyter",
+                "Framework :: Jupyter :: JupyterLab",
+                "Framework :: Jupyter :: JupyterLab :: 3",
+                "Framework :: Jupyter :: JupyterLab :: Extensions",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+                "Framework :: Jupyter :: JupyterLab :: Extensions :: Themes",
+            ]
+        )
+
+    This would be discoverable from, for example, a
+    `PyPI search for theme extensions <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Themes>`__.
 
 .. _source_dev_workflow:
 
@@ -626,7 +692,7 @@ If you want to test a source extension against the unreleased versions of Jupyte
     jupyter lab --watch --splice-source
 
 This command will splice the local ``packages`` directory into the application directory, allowing you to build source extension(s)
-against the current development sources.  To statically build spliced sources, use ``jupyter lab build --splice-source``.  Once a spliced build is created, any subsquent calls to `jupyter labextension build` will be in splice mode by default.  A spliced build can be forced by calling ``jupyter labextension build --splice-source``. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier than source package building.
+against the current development sources.  To statically build spliced sources, use ``jupyter lab build --splice-source``.  Once a spliced build is created, any subsequent calls to `jupyter labextension build` will be in splice mode by default.  A spliced build can be forced by calling ``jupyter labextension build --splice-source``. Note that :ref:`developing a prebuilt extension <prebuilt_dev_workflow>` against a development version of JupyterLab is generally much easier than source package building.
 
 The package should export EMCAScript 6 compatible JavaScript. It can
 import CSS using the syntax ``require('foo.css')``. The CSS files can
@@ -651,24 +717,6 @@ not enabled in our build configuration. To build a compatible package set
 ``output.libraryTarget`` to ``"commonjs2"`` in your Webpack configuration.
 (see `this <https://github.com/saulshanabrook/jupyterlab-webpack>`__ example repo).
 
-Another option to try out your extension with a local version of JupyterLab is to add it to the
-list of locally installed packages and to have JupyterLab register your extension when it starts up.
-
-You can do this by adding your extension to the ``jupyterlab.externalExtensions`` key
-in the ``dev_mode/package.json`` file. It should be a mapping
-of extension name to version, just like in ``dependencies``. Then run ``jlpm run integrity``
-and these extensions should be added automatically to the ``dependencies`` and pulled in.
-
-When you then run ``jlpm run build && jupyter lab --dev`` or ``jupyter lab --dev --watch`` this extension
-will be loaded by default. For example, this is how you can add the Jupyter Widgets
-extensions:
-
-::
-
-    "externalExtensions": {
-      "@jupyter-widgets/jupyterlab-manager": "2.0.0"
-    },
-
 If you publish your extension on ``npm.org``, users will be able to install
 it as simply ``jupyter labextension install <foo>``, where ``<foo>`` is
 the name of the published ``npm`` package. You can alternatively provide a
@@ -681,16 +729,15 @@ path on the user's machine or a provided tarball. Any valid
 We encourage extension authors to add the `jupyterlab-extension GitHub topic
 <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__ to any GitHub extension repository.
 
+.. _testing_with_jest:
+
 Testing your extension
 ^^^^^^^^^^^^^^^^^^^^^^
 
 There are a number of helper functions in ``testutils`` in this repo (which
 is a public ``npm`` package called ``@jupyterlab/testutils``) that can be used when
 writing tests for an extension.  See ``tests/test-application`` for an example
-of the infrastructure needed to run tests.  There is a ``karma`` config file
-that points to the parent directory's ``karma`` config, and a test runner,
-``run-test.py`` that starts a Jupyter server.
-
+of the infrastructure needed to run tests.
 
 If you are using `jest <https://jestjs.io/>`__ to test your extension, you will
 need to transpile the jupyterlab packages to ``commonjs`` as they are using ES6 modules
@@ -703,14 +750,22 @@ To transpile jupyterlab packages, you need to install the following package:
    jlpm add --dev jest @types/jest ts-jest @babel/core@^7 @babel/preset-env@^7
 
 Then in `jest.config.js`, you will specify to use babel for js files and ignore
-all node modules except the jupyterlab ones:
+all node modules except the ES6 modules:
 
 ::
+
+   const esModules = [
+     '@jupyterlab/',
+     'lib0',
+     'y\\-protocols',
+     'y\\-websocket',
+     'yjs'
+   ].join('|');
 
    module.exports = {
      preset: 'ts-jest/presets/js-with-babel',
      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-     transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
+     transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
      globals: {
        'ts-jest': {
          tsConfig: 'tsconfig.json'

@@ -2,34 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  IRouter
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { showDialog, Dialog, IWindowResolver } from '@jupyterlab/apputils';
-
+import { Dialog, IWindowResolver, showDialog } from '@jupyterlab/apputils';
+import { URLExt } from '@jupyterlab/coreutils';
 import {
-  DocumentRegistry,
   ABCWidgetFactory,
-  IDocumentWidget,
-  DocumentWidget
+  DocumentRegistry,
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
-
 import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
-import {
-  ContentsManager,
-  Workspace,
-  WorkspaceManager
-} from '@jupyterlab/services';
-
+import { Contents, Workspace, WorkspaceManager } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
 namespace CommandIDs {
@@ -50,24 +38,33 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
   autoStart: true,
   requires: [
-    IMainMenu,
     IFileBrowserFactory,
     IWindowResolver,
     IStateDB,
-    ITranslator
+    ITranslator,
+    JupyterFrontEnd.IPaths
   ],
   optional: [IRouter],
   activate: (
     app: JupyterFrontEnd,
-    menu: IMainMenu,
     fbf: IFileBrowserFactory,
     resolver: IWindowResolver,
     state: IStateDB,
     translator: ITranslator,
+    paths: JupyterFrontEnd.IPaths,
     router: IRouter | null
   ): void => {
+    // The workspace factory creates dummy widgets to load a new workspace.
+    const factory = new Private.WorkspaceFactory({
+      workspaces: app.serviceManager.workspaces,
+      router,
+      state,
+      translator,
+      paths
+    });
     const trans = translator.load('jupyterlab');
-    const ft: DocumentRegistry.IFileType = {
+
+    app.docRegistry.addFileType({
       name: WORKSPACE_NAME,
       contentType: 'file',
       fileFormat: 'text',
@@ -75,18 +72,8 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
       extensions: [WORKSPACE_EXT],
       mimeTypes: ['text/json'],
       iconClass: ICON_NAME
-    };
-    app.docRegistry.addFileType(ft);
-
-    // The workspace factory creates dummy widgets to load a new workspace.
-    const factory = new Private.WorkspaceFactory(
-      app.serviceManager.workspaces,
-      router,
-      state,
-      translator
-    );
+    });
     app.docRegistry.addWidgetFactory(factory);
-
     app.commands.addCommand(CommandIDs.saveWorkspaceAs, {
       label: trans.__('Save Current Workspace As…'),
       execute: async () => {
@@ -120,14 +107,6 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-
-    menu.fileMenu.addGroup(
-      [
-        { command: CommandIDs.saveWorkspaceAs },
-        { command: CommandIDs.saveWorkspace }
-      ],
-      40
-    );
   }
 };
 
@@ -137,7 +116,7 @@ namespace Private {
    */
   export async function save(
     userPath: string,
-    contents: ContentsManager,
+    contents: Contents.IManager,
     data: Promise<Workspace.IWorkspace>,
     state: IStateDB
   ): Promise<void> {
@@ -154,7 +133,7 @@ namespace Private {
     await state.save(LAST_SAVE_ID, userPath);
 
     const resolvedData = await data;
-    resolvedData.metadata.id = `/lab/workspaces/${name}`;
+    resolvedData.metadata.id = `${name}`;
     await contents.save(userPath, {
       type: 'file',
       format: 'text',
@@ -168,7 +147,7 @@ namespace Private {
    */
   export async function saveAs(
     browser: FileBrowser,
-    contents: ContentsManager,
+    contents: Contents.IManager,
     data: Promise<Workspace.IWorkspace>,
     state: IStateDB,
     translator?: ITranslator
@@ -196,44 +175,24 @@ namespace Private {
    */
   export class WorkspaceFactory extends ABCWidgetFactory<IDocumentWidget> {
     /**
-     * Construct a widget factory that will upload workspace into lab and jump to it
-     * @param workspaces - Used to upload the opened workspace into lab
-     * @param router - Used to navigate into the opened workspace
-     * @param state - Used to save the current workspace file name
+     * Construct a widget factory that uploads a workspace and navigates to it.
+     *
+     * @param options - The instantiation options for a `WorkspaceFactory`.
      */
-    constructor(
-      workspaces: WorkspaceManager,
-      router: IRouter | null,
-      state: IStateDB,
-      translator?: ITranslator
-    ) {
-      translator = translator || nullTranslator;
-      const trans = translator.load('jupyterlab');
+    constructor(options: WorkspaceFactory.IOptions) {
+      const trans = (options.translator || nullTranslator).load('jupyterlab');
       super({
-        name: trans.__('Workspace loader'),
+        name: 'Workspace loader',
+        label: trans.__('Workspace loader'),
         fileTypes: [WORKSPACE_NAME],
         defaultFor: [WORKSPACE_NAME],
         readOnly: true
       });
-      this.workspaces = workspaces;
-      this.router = router;
-      this.state = state;
+      this._application = options.paths.urls.app;
+      this._router = options.router;
+      this._state = options.state;
+      this._workspaces = options.workspaces;
     }
-
-    /**
-     * The workspaces API service manager.
-     */
-    readonly workspaces: WorkspaceManager;
-
-    /**
-     * An optional application URL router.
-     */
-    readonly router: IRouter | null;
-
-    /**
-     * The application state database.
-     */
-    readonly state: IStateDB;
 
     /**
      * Loads the workspace into load, and jump to it
@@ -242,23 +201,49 @@ namespace Private {
     protected createNewWidget(
       context: DocumentRegistry.Context
     ): IDocumentWidget {
-      // Save workspace description into jupyterlab, and navigate to it when done
+      // Save a file's contents as a workspace and navigate to that workspace.
       void context.ready.then(async () => {
-        const workspaceDesc = (context.model.toJSON() as unknown) as Workspace.IWorkspace;
+        const file = context.model;
+        const workspace = file.toJSON() as unknown as Workspace.IWorkspace;
         const path = context.path;
+        const id = workspace.metadata.id;
 
-        const workspaceId = workspaceDesc.metadata.id;
-        // Upload workspace content to jupyterlab
-        await this.workspaces.save(workspaceId, workspaceDesc);
-        // Save last save location, for save button to work
-        await this.state.save(LAST_SAVE_ID, path);
-        if (this.router) {
-          this.router.navigate(workspaceId, { hard: true });
+        // Save the file contents as a workspace.
+        await this._workspaces.save(id, workspace);
+
+        // Save last save location for the save command.
+        await this._state.save(LAST_SAVE_ID, path);
+
+        // Navigate to new workspace.
+        const url = URLExt.join(this._application, 'workspaces', id);
+        if (this._router) {
+          this._router.navigate(url, { hard: true });
         } else {
-          document.location.href = workspaceId;
+          document.location.href = url;
         }
       });
       return dummyWidget(context);
+    }
+
+    private _application: string;
+    private _router: IRouter | null;
+    private _state: IStateDB;
+    private _workspaces: WorkspaceManager;
+  }
+
+  /**
+   * A namespace for `WorkspaceFactory`
+   */
+  export namespace WorkspaceFactory {
+    /**
+     * Instantiation options for a `WorkspaceFactory`
+     */
+    export interface IOptions {
+      paths: JupyterFrontEnd.IPaths;
+      router: IRouter | null;
+      state: IStateDB;
+      translator: ITranslator;
+      workspaces: WorkspaceManager;
     }
   }
 
@@ -285,7 +270,7 @@ namespace Private {
     const trans = translator.load('jupyterlab');
     const saveBtn = Dialog.okButton({ label: trans.__('Save') });
     const result = await showDialog({
-      title: trans.__('Save Current Workspace As...'),
+      title: trans.__('Save Current Workspace As…'),
       body: new SaveWidget(defaultPath),
       buttons: [Dialog.cancelButton({ label: trans.__('Cancel') }), saveBtn]
     });

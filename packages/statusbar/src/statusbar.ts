@@ -2,25 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ArrayExt } from '@lumino/algorithm';
-
 import {
   DisposableDelegate,
   DisposableSet,
   IDisposable
 } from '@lumino/disposable';
-
 import { Message } from '@lumino/messaging';
-
-import { Widget, Panel, PanelLayout } from '@lumino/widgets';
-
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import {
   statusBar as barStyle,
-  side as sideStyle,
   item as itemStyle,
   leftSide as leftSideStyle,
-  rightSide as rightSideStyle
+  rightSide as rightSideStyle,
+  side as sideStyle
 } from './style/statusbar';
-
 import { IStatusBar } from './tokens';
 
 /**
@@ -121,7 +116,7 @@ export class StatusBar extends Widget implements IStatusBar {
   /**
    * Dispose of the status bar.
    */
-  dispose() {
+  dispose(): void {
     this._leftRankItems.length = 0;
     this._rightRankItems.length = 0;
     this._disposables.dispose();
@@ -131,7 +126,7 @@ export class StatusBar extends Widget implements IStatusBar {
   /**
    * Handle an 'update-request' message to the status bar.
    */
-  protected onUpdateRequest(msg: Message) {
+  protected onUpdateRequest(msg: Message): void {
     this._refreshAll();
     super.onUpdateRequest(msg);
   }

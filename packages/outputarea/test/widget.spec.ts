@@ -2,26 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { SessionContext } from '@jupyterlab/apputils';
-
-import { KernelManager } from '@jupyterlab/services';
-
-import { Message } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
 import {
   IOutputAreaModel,
-  OutputAreaModel,
-  OutputArea
+  OutputArea,
+  OutputAreaModel
 } from '@jupyterlab/outputarea';
-
+import { KernelManager } from '@jupyterlab/services';
 import {
   createSessionContext,
   defaultRenderMime,
-  NBTestUtils,
+  flakyIt as it,
   JupyterServer,
-  flakyIt as it
+  NBTestUtils
 } from '@jupyterlab/testutils';
+import { Message } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 
 /**
  * The default rendermime instance to use for testing.
@@ -107,6 +103,83 @@ describe('outputarea/widget', () => {
       });
     });
 
+    describe('#maxNumberOutputs', () => {
+      test.each([20, 6, 5, 2])(
+        'should control the list of visible outputs',
+        maxNumberOutputs => {
+          const widget = new OutputArea({
+            rendermime,
+            model,
+            maxNumberOutputs
+          });
+
+          expect(widget.widgets.length).toBeLessThanOrEqual(
+            maxNumberOutputs + 1
+          );
+
+          if (widget.widgets.length > maxNumberOutputs) {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(
+              widget.widgets[widget.widgets.length - 1].node.textContent
+            ).toContain('Show more outputs');
+          } else {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(
+              widget.widgets[widget.widgets.length - 1].node.textContent
+            ).not.toContain('Show more outputs');
+          }
+        }
+      );
+
+      test('should display all widgets when clicked', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+
+        expect(widget.widgets.length).toBeLessThan(model.length);
+        Widget.attach(widget, document.body);
+        simulate(
+          widget.widgets[widget.widgets.length - 1].node.querySelector('a')!,
+          'click'
+        );
+        Widget.detach(widget);
+
+        expect(widget.widgets.length).toEqual(model.length);
+      });
+
+      test('should display new widgets if increased', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+        expect(widget.widgets.length).toBeLessThan(model.length);
+
+        widget.maxNumberOutputs += 1;
+
+        expect(widget.widgets.length).toEqual(widget.maxNumberOutputs + 1);
+        expect(widget.widgets.length).toBeLessThan(model.length);
+      });
+
+      test('should not change displayed widgets if reduced', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+        expect(widget.widgets.length).toBeLessThan(model.length);
+
+        widget.maxNumberOutputs -= 1;
+
+        expect(widget.widgets.length).toBeGreaterThan(
+          widget.maxNumberOutputs + 1
+        );
+        expect(widget.widgets.length).toBeLessThan(model.length);
+      });
+    });
+
     describe('#widgets', () => {
       it('should get the child widget at the specified index', () => {
         expect(widget.widgets[0]).toBeInstanceOf(Widget);
@@ -136,9 +209,9 @@ describe('outputarea/widget', () => {
       });
 
       it('should execute code on a kernel and send outputs to the model', async () => {
-        const future = sessionContext.session?.kernel?.requestExecute({
+        const future = sessionContext.session!.kernel!.requestExecute({
           code: CODE
-        })!;
+        });
         widget.future = future;
         const reply = await future.done;
         expect(reply!.content.execution_count).toBeTruthy();
@@ -148,9 +221,9 @@ describe('outputarea/widget', () => {
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
-        const future = sessionContext.session?.kernel?.requestExecute({
+        const future = sessionContext.session!.kernel!.requestExecute({
           code: CODE
-        })!;
+        });
         widget.future = future;
         const reply = await future.done;
         expect(reply!.content.execution_count).toBeTruthy();
@@ -381,6 +454,14 @@ describe('outputarea/widget', () => {
           const factory = new OutputArea.ContentFactory();
           const future = kernel.requestExecute({ code: CODE });
           const options = {
+            parent_header: {
+              date: '',
+              msg_id: '',
+              msg_type: 'input_request' as const,
+              session: '',
+              username: '',
+              version: ''
+            },
             prompt: 'hello',
             password: false,
             future

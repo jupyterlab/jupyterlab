@@ -5,13 +5,9 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
 import { ILoggerRegistry, LogLevel } from '@jupyterlab/logconsole';
-
+import * as nbformat from '@jupyterlab/nbformat';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
 import { KernelMessage } from '@jupyterlab/services';
 
 /**
@@ -29,7 +25,7 @@ function activateNBOutput(
   app: JupyterFrontEnd,
   nbtracker: INotebookTracker,
   loggerRegistry: ILoggerRegistry | null
-) {
+): void {
   if (!loggerRegistry) {
     // Automatically disable if logconsole is missing
     return;

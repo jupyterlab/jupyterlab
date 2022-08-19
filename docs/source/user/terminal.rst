@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _terminal:
 
 Terminals
@@ -11,9 +14,10 @@ running, with the privileges of your user. Thus, if JupyterLab is
 installed on your local machine, the JupyterLab terminals will run
 there.
 
-.. image:: images/terminal_layout.png
+.. image:: ../images/terminal-layout.png
    :align: center
    :class: jp-screenshot
+   :alt: JupyterLab with an open terminal in the main document area.
 
 .. _open-terminal:
 
@@ -60,5 +64,5 @@ for something else such as the vi editor.
 
 For anyone using a \*nix shell, the default ``Ctrl+Shift+C`` conflicts with the default
 shortcut for toggling the command palette (``apputils:activate-command-palette``).
-If desired, that shortcut can be changed by editing the keyboard shortcuts in setttings.
+If desired, that shortcut can be changed by editing the keyboard shortcuts in settings.
 Using ``Ctrl+Shift+V`` for paste works as usual.

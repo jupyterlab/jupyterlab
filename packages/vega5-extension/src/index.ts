@@ -7,11 +7,10 @@
  * @module vega5-extension
  */
 
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import * as VegaModuleType from 'vega-embed';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * The CSS class to add to the Vega and Vega-Lite widget.
@@ -86,6 +85,13 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
       | undefined;
     const embedOptions =
       metadata && metadata.embed_options ? metadata.embed_options : {};
+
+    // If the JupyterLab theme is dark, render this using a dark Vega theme.
+    let bodyThemeDark = document.body.dataset.jpThemeLight === 'false';
+    if (bodyThemeDark) {
+      embedOptions.theme = 'dark';
+    }
+
     const mode: VegaModuleType.Mode =
       this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
 

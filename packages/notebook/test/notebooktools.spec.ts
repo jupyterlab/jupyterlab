@@ -1,28 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message } from '@lumino/messaging';
-
-import { TabPanel, Widget } from '@lumino/widgets';
-
-import { simulate } from 'simulate-event';
-
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
-
 import { Context } from '@jupyterlab/docregistry';
-
 import { ObservableJSON } from '@jupyterlab/observables';
-
+import { initNotebookContext, sleep } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import { Message } from '@lumino/messaging';
+import { TabPanel, Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 import {
   INotebookModel,
   NotebookActions,
   NotebookPanel,
   NotebookTools,
   NotebookTracker
-} from '../src';
-
-import { initNotebookContext, sleep } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+} from '..';
 import * as utils from './utils';
 
 class LogTool extends NotebookTools.Tool {
@@ -190,13 +183,17 @@ describe('@jupyterlab/notebook', () => {
       describe('#addItem()', () => {
         it('should add a cell tool item', () => {
           const tool = new NotebookTools.Tool();
-          notebookTools.addItem({ tool });
+          expect(() => {
+            notebookTools.addItem({ tool });
+          }).not.toThrow();
           tool.dispose();
         });
 
         it('should accept a rank', () => {
           const tool = new NotebookTools.Tool();
-          notebookTools.addItem({ tool, rank: 100 });
+          expect(() => {
+            notebookTools.addItem({ tool, rank: 100 });
+          }).not.toThrow();
           tool.dispose();
         });
       });

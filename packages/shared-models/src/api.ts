@@ -14,13 +14,10 @@
  * It also defines the shared changes to be used in the events.
  */
 
-import { PartialJSONObject } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal } from '@lumino/signaling';
-
 import * as nbformat from '@jupyterlab/nbformat';
+import { PartialJSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal } from '@lumino/signaling';
 
 /**
  * ISharedBase defines common operations that can be performed on any shared object.
@@ -209,6 +206,30 @@ export interface ISharedNotebook extends ISharedDocument {
 }
 
 /**
+ * Definition of the map changes for yjs.
+ */
+export type MapChange = Map<
+  string,
+  { action: 'add' | 'update' | 'delete'; oldValue: any; newValue: any }
+>;
+
+/**
+ * The namespace for `ISharedNotebook` class statics.
+ */
+export namespace ISharedNotebook {
+  /**
+   * The options used to initialize a a ISharedNotebook
+   */
+  export interface IOptions {
+    /**
+     * Wether the the undo/redo logic should be
+     * considered on the full document across all cells.
+     */
+    disableDocumentWideUndoRedo: boolean;
+  }
+}
+
+/**
  * The Shared kernelspec metadata.
  */
 export interface ISharedKernelspecMetadata
@@ -371,9 +392,9 @@ export interface ISharedMarkdownCell
   /**
    * Sets the cell attachments
    *
-   * @param attchments: The cell attachments.
+   * @param attachments: The cell attachments.
    */
-  setAttachments(attchments: nbformat.IAttachments | undefined): void;
+  setAttachments(attachments: nbformat.IAttachments | undefined): void;
 
   /**
    * Serialize the model to JSON.
@@ -402,9 +423,9 @@ export interface ISharedRawCell
   /**
    * Sets the cell attachments
    *
-   * @param attchments: The cell attachments.
+   * @param attachments: The cell attachments.
    */
-  setAttachments(attchments: nbformat.IAttachments | undefined): void;
+  setAttachments(attachments: nbformat.IAttachments | undefined): void;
 
   /**
    * Serialize the model to JSON.
@@ -451,12 +472,27 @@ export type NotebookChange = {
     oldValue: nbformat.INotebookMetadata;
     newValue: nbformat.INotebookMetadata | undefined;
   };
+  nbformatChanged?: {
+    key: string;
+    oldValue: number | undefined;
+    newValue: number | undefined;
+  };
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 export type FileChange = {
   sourceChange?: Delta<string>;
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
 
 /**
@@ -477,12 +513,9 @@ export type CellChange<MetadataType> = {
 
 export type DocumentChange = {
   contextChange?: MapChange;
+  stateChange?: Array<{
+    name: string;
+    oldValue: any;
+    newValue: any;
+  }>;
 };
-
-/**
- * Definition of the map changes for yjs.
- */
-export type MapChange = Map<
-  string,
-  { action: 'add' | 'update' | 'delete'; oldValue: any; newValue: any }
->;

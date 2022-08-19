@@ -7,57 +7,43 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-
 import { PathExt, Time } from '@jupyterlab/coreutils';
-
 import {
   IDocumentManager,
   isValidFileName,
   renameFile
 } from '@jupyterlab/docmanager';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import { Contents } from '@jupyterlab/services';
-
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import {
   caretDownIcon,
   caretUpIcon,
   classes,
   LabIcon
 } from '@jupyterlab/ui-components';
-
 import {
   ArrayExt,
   ArrayIterator,
-  StringExt,
   each,
   filter,
   find,
   IIterator,
+  StringExt,
   toArray
 } from '@lumino/algorithm';
-
 import { MimeData, PromiseDelegate } from '@lumino/coreutils';
-
 import { ElementExt } from '@lumino/domutils';
-
 import { Drag, IDragEvent } from '@lumino/dragdrop';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
+import { h, VirtualDOM } from '@lumino/virtualdom';
 import { Widget } from '@lumino/widgets';
-
-import { VirtualDOM, h } from '@lumino/virtualdom';
-
 import { FilterFileBrowserModel } from './model';
-import {
-  nullTranslator,
-  TranslationBundle,
-  ITranslator
-} from '@jupyterlab/translation';
 
 /**
  * The class name added to DirListing widget.
@@ -108,6 +94,12 @@ const ITEM_ICON_CLASS = 'jp-DirListing-itemIcon';
  * The class name added to the listing item modified cell.
  */
 const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
+
+/**
+ * The class name added to the label element that wraps each item's checkbox and
+ * the header's check-all checkbox.
+ */
+const CHECKBOX_WRAPPER_CLASS = 'jp-DirListing-checkboxWrapper';
 
 /**
  * The class name added to the dir listing editor node.
@@ -180,7 +172,7 @@ const MULTI_SELECTED_CLASS = 'jp-mod-multiSelected';
 const RUNNING_CLASS = 'jp-mod-running';
 
 /**
- * The class name added for a decending sort.
+ * The class name added for a descending sort.
  */
 const DESCENDING_CLASS = 'jp-mod-descending';
 
@@ -369,7 +361,8 @@ export class DirListing extends Widget {
 
     each(this._clipboard, path => {
       if (this._isCut) {
-        const parts = path.split('/');
+        const localPath = this._manager.services.contents.localPath(path);
+        const parts = localPath.split('/');
         const name = parts[parts.length - 1];
         const newPath = PathExt.join(basePath, name);
         promises.push(this._model.manager.rename(path, newPath));
@@ -427,7 +420,10 @@ export class DirListing extends Widget {
       buttons: [
         Dialog.cancelButton({ label: this._trans.__('Cancel') }),
         Dialog.warnButton({ label: this._trans.__('Delete') })
-      ]
+      ],
+      // By default focus on "Cancel" to protect from accidental deletion
+      // ("delete" and "Enter" are next to each other on many keyboards).
+      defaultButton: 0
     });
 
     if (!this.isDisposed && result.button.accept) {
@@ -616,7 +612,7 @@ export class DirListing extends Widget {
   /**
    * Clear the selected items.
    */
-  clearSelectedItems() {
+  clearSelectedItems(): void {
     this.selection = Object.create(null);
   }
 
@@ -624,10 +620,11 @@ export class DirListing extends Widget {
    * Select an item by name.
    *
    * @param name - The name of the item to select.
+   * @param focus - Whether to move focus the selected item.
    *
    * @returns A promise that resolves when the name is selected.
    */
-  async selectItemByName(name: string): Promise<void> {
+  async selectItemByName(name: string, focus: boolean = false): Promise<void> {
     // Make sure the file is available.
     await this.model.refresh();
 
@@ -639,7 +636,7 @@ export class DirListing extends Widget {
     if (index === -1) {
       throw new Error('Item does not exist.');
     }
-    this._selectItem(index, false);
+    this._selectItem(index, false, focus);
     MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
     ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
   }
@@ -666,13 +663,13 @@ export class DirListing extends Widget {
         this._evtMousemove(event as MouseEvent);
         break;
       case 'keydown':
-        this._evtKeydown(event as KeyboardEvent);
+        this.evtKeydown(event as KeyboardEvent);
         break;
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
       case 'dblclick':
-        this._evtDblClick(event as MouseEvent);
+        this.evtDblClick(event as MouseEvent);
         break;
       case 'dragenter':
       case 'dragover':
@@ -685,22 +682,22 @@ export class DirListing extends Widget {
         break;
       case 'drop':
         this.removeClass('jp-mod-native-drop');
-        this._evtNativeDrop(event as DragEvent);
+        this.evtNativeDrop(event as DragEvent);
         break;
       case 'scroll':
         this._evtScroll(event as MouseEvent);
         break;
       case 'lm-dragenter':
-        this._evtDragEnter(event as IDragEvent);
+        this.evtDragEnter(event as IDragEvent);
         break;
       case 'lm-dragleave':
-        this._evtDragLeave(event as IDragEvent);
+        this.evtDragLeave(event as IDragEvent);
         break;
       case 'lm-dragover':
-        this._evtDragOver(event as IDragEvent);
+        this.evtDragOver(event as IDragEvent);
         break;
       case 'lm-drop':
-        this._evtDrop(event as IDragEvent);
+        this.evtDrop(event as IDragEvent);
         break;
       default:
         break;
@@ -795,11 +792,32 @@ export class DirListing extends Widget {
     }
 
     // Remove extra classes from the nodes.
-    nodes.forEach(item => {
-      item.classList.remove(SELECTED_CLASS);
-      item.classList.remove(RUNNING_CLASS);
-      item.classList.remove(CUT_CLASS);
+    nodes.forEach(node => {
+      node.classList.remove(SELECTED_CLASS);
+      node.classList.remove(RUNNING_CLASS);
+      node.classList.remove(CUT_CLASS);
+      const checkbox = renderer.getCheckboxNode(node);
+      if (checkbox) {
+        // Uncheck each file checkbox
+        checkbox.checked = false;
+      }
     });
+
+    // Put the check-all checkbox in the header into the correct state
+    const checkAllCheckbox = renderer.getCheckboxNode(this.headerNode);
+    if (checkAllCheckbox) {
+      const totalSelected = Object.keys(this.selection).length;
+      const allSelected = items.length > 0 && totalSelected === items.length;
+      const someSelected = !allSelected && totalSelected > 0;
+      checkAllCheckbox.checked = allSelected;
+      checkAllCheckbox.indeterminate = someSelected;
+      // Stash the state in data attributes so we can access them in the click
+      // handler (because in the click handler, checkbox.checked and
+      // checkbox.indeterminate do not hold the previous value; they hold the
+      // next value).
+      checkAllCheckbox.dataset.checked = String(allSelected);
+      checkAllCheckbox.dataset.indeterminate = String(someSelected);
+    }
 
     // Add extra classes to item nodes based on widget state.
     items.forEach((item, i) => {
@@ -814,8 +832,14 @@ export class DirListing extends Widget {
       );
       if (this.selection[item.path]) {
         node.classList.add(SELECTED_CLASS);
+
         if (this._isCut && this._model.path === this._prevPath) {
           node.classList.add(CUT_CLASS);
+        }
+
+        const checkbox = renderer.getCheckboxNode(node);
+        if (checkbox) {
+          checkbox.checked = true;
         }
       }
 
@@ -857,13 +881,16 @@ export class DirListing extends Widget {
     this._prevPath = this._model.path;
   }
 
-  onResize(msg: Widget.ResizeMessage) {
+  onResize(msg: Widget.ResizeMessage): void {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
   }
 
-  setColumnVisibility(name: DirListing.ToggleableColumn, visible: boolean) {
+  setColumnVisibility(
+    name: DirListing.ToggleableColumn,
+    visible: boolean
+  ): void {
     if (visible) {
       this._hiddenColumns.delete(name);
     } else {
@@ -879,16 +906,52 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Would this click (or other event type) hit the checkbox by default?
+   */
+  protected isWithinCheckboxHitArea(event: Event): boolean {
+    let element: HTMLElement | null = event.target as HTMLElement;
+    while (element) {
+      if (element.classList.contains(CHECKBOX_WRAPPER_CLASS)) {
+        return true;
+      }
+      element = element.parentElement;
+    }
+    return false;
+  }
+
+  /**
    * Handle the `'click'` event for the widget.
    */
   private _evtClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
 
     const header = this.headerNode;
+    const renderer = this._renderer;
     if (header.contains(target)) {
-      const state = this.renderer.handleHeaderClick(header, event);
-      if (state) {
-        this.sort(state);
+      const checkbox = renderer.getCheckboxNode(header);
+      if (checkbox && this.isWithinCheckboxHitArea(event)) {
+        const previouslyUnchecked =
+          checkbox.dataset.indeterminate === 'false' &&
+          checkbox.dataset.checked === 'false';
+        // The only time a click on the check-all checkbox should check all is
+        // when it was previously unchecked; otherwise, if the checkbox was
+        // either checked (all selected) or indeterminate (some selected), the
+        // click should clear all.
+        if (previouslyUnchecked) {
+          // Select all items
+          this._sortedItems.forEach(
+            (item: Contents.IModel) => (this.selection[item.path] = true)
+          );
+        } else {
+          // Unselect all items
+          this.clearSelectedItems();
+        }
+        this.update();
+      } else {
+        const state = this.renderer.handleHeaderClick(header, event);
+        if (state) {
+          this.sort(state);
+        }
       }
       return;
     }
@@ -966,6 +1029,13 @@ export class DirListing extends Widget {
       }
       this._softSelection = '';
     }
+    // Re-focus the selected file. This is needed because nodes corresponding
+    // to files selected in mousedown handler will not retain the focus
+    // as mousedown event is always followed by a blur/focus event.
+    if (event.button === 0) {
+      this._focusSelectedFile();
+    }
+
     // Remove the drag listeners if necessary.
     if (event.button !== 0 || !this._drag) {
       document.removeEventListener('mousemove', this, true);
@@ -1023,7 +1093,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'keydown'` event for the widget.
    */
-  private _evtKeydown(event: KeyboardEvent): void {
+  protected evtKeydown(event: KeyboardEvent): void {
     switch (event.keyCode) {
       case 13: {
         // Enter
@@ -1035,9 +1105,9 @@ export class DirListing extends Widget {
         event.stopPropagation();
 
         const selected = Object.keys(this.selection);
-        const name = selected[0];
+        const path = selected[0];
         const items = this._sortedItems;
-        const i = ArrayExt.findFirstIndex(items, value => value.name === name);
+        const i = ArrayExt.findFirstIndex(items, value => value.path === path);
         if (i === -1) {
           return;
         }
@@ -1064,6 +1134,9 @@ export class DirListing extends Widget {
     // Not all browsers support .key, but it discharges us from reconstructing
     // characters from key codes.
     if (!this._inRename && event.key !== undefined && event.key.length === 1) {
+      if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+        return;
+      }
       this._searchPrefix += event.key;
 
       clearTimeout(this._searchPrefixTimer);
@@ -1080,7 +1153,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'dblclick'` event for the widget.
    */
-  private _evtDblClick(event: MouseEvent): void {
+  protected evtDblClick(event: MouseEvent): void {
     // Do nothing if it's not a left mouse press.
     if (event.button !== 0) {
       return;
@@ -1088,6 +1161,13 @@ export class DirListing extends Widget {
 
     // Do nothing if any modifier keys are pressed.
     if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+      return;
+    }
+
+    // Do nothing if the double click is on a checkbox. (Otherwise a rapid
+    // check-uncheck on the checkbox will cause the adjacent file/folder to
+    // open, which is probably not what the user intended.)
+    if (this.isWithinCheckboxHitArea(event)) {
       return;
     }
 
@@ -1114,7 +1194,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `drop` event for the widget.
    */
-  private _evtNativeDrop(event: DragEvent): void {
+  protected evtNativeDrop(event: DragEvent): void {
     const files = event.dataTransfer?.files;
     if (!files || files.length === 0) {
       return;
@@ -1125,7 +1205,7 @@ export class DirListing extends Widget {
     }
     for (let i = 0; i < length; i++) {
       let entry = event.dataTransfer?.items[i].webkitGetAsEntry();
-      if (entry.isDirectory) {
+      if (entry?.isDirectory) {
         console.log('currently not supporting drag + drop for folders');
         void showDialog({
           title: this._trans.__('Error Uploading Folder'),
@@ -1145,7 +1225,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  private _evtDragEnter(event: IDragEvent): void {
+  protected evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
       const index = Private.hitTestNodes(this._items, event);
       if (index === -1) {
@@ -1165,7 +1245,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  private _evtDragLeave(event: IDragEvent): void {
+  protected evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     const dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
@@ -1177,7 +1257,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  private _evtDragOver(event: IDragEvent): void {
+  protected evtDragOver(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
@@ -1192,7 +1272,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  private _evtDrop(event: IDragEvent): void {
+  protected evtDrop(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     clearTimeout(this._selectTimer);
@@ -1377,8 +1457,18 @@ export class DirListing extends Widget {
     const path = items[index].path;
     const selected = Object.keys(this.selection);
 
+    const isLeftClickOnCheckbox =
+      event.button === 0 &&
+      // On Mac, a left-click with the ctrlKey is treated as a right-click.
+      !(IS_MAC && event.ctrlKey) &&
+      this.isWithinCheckboxHitArea(event);
+
     // Handle toggling.
-    if ((IS_MAC && event.metaKey) || (!IS_MAC && event.ctrlKey)) {
+    if (
+      (IS_MAC && event.metaKey) ||
+      (!IS_MAC && event.ctrlKey) ||
+      isLeftClickOnCheckbox
+    ) {
       if (this.selection[path]) {
         delete this.selection[path];
       } else {
@@ -1396,10 +1486,38 @@ export class DirListing extends Widget {
       // Default to selecting the only the item.
     } else {
       // Select only the given item.
-      this.clearSelectedItems();
-      this.selection[path] = true;
+      return this._selectItem(index, false);
     }
     this.update();
+  }
+
+  /**
+   * (Re-)focus on the selected file.
+   *
+   * If index is not given, it will be inferred from the current selection;
+   * providing index saves on the iteration time.
+   */
+  private _focusSelectedFile(index?: number): void {
+    if (typeof index === 'undefined') {
+      const selected = Object.keys(this.selection);
+      if (selected.length > 1) {
+        // Multiselect - do not focus on any single file
+        return;
+      }
+      index = ArrayExt.findFirstIndex(
+        this._sortedItems,
+        value => value.path === selected[0]
+      );
+    }
+    if (index === -1) {
+      return;
+    }
+    // Focus on text to make shortcuts works
+    const node = this._items[index];
+    const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+    if (text) {
+      text.focus();
+    }
   }
 
   /**
@@ -1473,8 +1591,8 @@ export class DirListing extends Widget {
   private _doRename(): Promise<string> {
     this._inRename = true;
     const items = this._sortedItems;
-    const name = Object.keys(this.selection)[0];
-    const index = ArrayExt.findFirstIndex(items, value => value.name === name);
+    const path = Object.keys(this.selection)[0];
+    const index = ArrayExt.findFirstIndex(items, value => value.path === path);
     const row = this._items[index];
     const item = items[index];
     const nameNode = this.renderer.getNameNode(row);
@@ -1491,7 +1609,7 @@ export class DirListing extends Widget {
         }
         if (!isValidFileName(newName)) {
           void showErrorMessage(
-            this._trans.__('showErrorMessage', 'Rename Error'),
+            this._trans.__('Rename Error'),
             Error(
               this._trans._p(
                 'showErrorMessage',
@@ -1543,14 +1661,22 @@ export class DirListing extends Widget {
   /**
    * Select a given item.
    */
-  private _selectItem(index: number, keepExisting: boolean) {
+  private _selectItem(
+    index: number,
+    keepExisting: boolean,
+    focus: boolean = true
+  ) {
     // Selected the given row(s)
     const items = this._sortedItems;
     if (!keepExisting) {
       this.clearSelectedItems();
     }
-    const name = items[index].name;
-    this.selection[name] = true;
+    const path = items[index].path;
+    this.selection[path] = true;
+
+    if (!keepExisting && focus) {
+      this._focusSelectedFile(index);
+    }
     this.update();
   }
 
@@ -1562,9 +1688,9 @@ export class DirListing extends Widget {
     const existing = Object.keys(this.selection);
     this.clearSelectedItems();
     each(this._model.items(), item => {
-      const name = item.name;
-      if (existing.indexOf(name) !== -1) {
-        this.selection[name] = true;
+      const path = item.path;
+      if (existing.indexOf(path) !== -1) {
+        this.selection[path] = true;
       }
     });
     if (this.isVisible) {
@@ -1697,7 +1823,7 @@ export namespace DirListing {
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified';
+  export type ToggleableColumn = 'last_modified' | 'is_selected';
 
   /**
    * A file contents model thunk.
@@ -1785,6 +1911,20 @@ export namespace DirListing {
     getNameNode(node: HTMLElement): HTMLElement;
 
     /**
+     * Get the checkbox input element node.
+     *
+     * Downstream interface implementations,such as jupyterlab-unfold, that
+     * don't support checkboxes should simply always return null for this
+     * function.
+     *
+     * @param node A node created by [[createItemNode]] or
+     * [[createHeaderItemNode]]
+     *
+     * @returns The checkbox node.
+     */
+    getCheckboxNode: (node: HTMLElement) => HTMLInputElement | null;
+
+    /**
      * Create an appropriate drag image for an item.
      *
      * @param node - A node created by [[createItemNode]].
@@ -1818,7 +1958,7 @@ export namespace DirListing {
       header.className = HEADER_CLASS;
       node.appendChild(header);
       node.appendChild(content);
-      node.tabIndex = 1;
+      node.tabIndex = 0;
       return node;
     }
 
@@ -1842,6 +1982,12 @@ export namespace DirListing {
       modified.classList.add(MODIFIED_ID_CLASS);
       narrow.classList.add(NARROW_ID_CLASS);
       narrow.textContent = '...';
+      if (!hiddenColumns?.has?.('is_selected')) {
+        const checkboxWrapper = this.createCheckboxWrapperNode({
+          alwaysVisible: true
+        });
+        node.appendChild(checkboxWrapper);
+      }
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
@@ -1945,9 +2091,19 @@ export namespace DirListing {
       icon.className = ITEM_ICON_CLASS;
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
+      if (!hiddenColumns?.has?.('is_selected')) {
+        const checkboxWrapper = this.createCheckboxWrapperNode();
+        node.appendChild(checkboxWrapper);
+      }
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+
+      // Make the text note focusable so that it receives keyboard events;
+      // text node was specifically chosen to receive shortcuts because
+      // text element gets substituted with input area during file name edits
+      // which conveniently deactivate irrelevant shortcuts.
+      text.tabIndex = 0;
 
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
@@ -1955,6 +2111,43 @@ export namespace DirListing {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
       return node;
+    }
+
+    /**
+     * Creates a node containing a checkbox.
+     *
+     * We wrap the checkbox in a label element in order to increase its hit
+     * area. This is because the padding of the checkbox itself cannot be
+     * increased via CSS, as the CSS/form compatibility table at the following
+     * url from MDN shows:
+     * https://developer.mozilla.org/en-US/docs/Learn/Forms/Property_compatibility_table_for_form_controls#check_boxes_and_radio_buttons
+     *
+     * @param [options]
+     * @params options.alwaysVisible Should the checkbox be visible even when
+     * not hovered?
+     * @returns A new DOM node that contains a checkbox.
+     */
+    createCheckboxWrapperNode(options?: {
+      alwaysVisible: boolean;
+    }): HTMLElement {
+      // Wrap the checkbox in a label element in order to increase its hit area.
+      const labelWrapper = document.createElement('label');
+      labelWrapper.classList.add(CHECKBOX_WRAPPER_CLASS);
+      // The individual file checkboxes are visible on hover, but the header
+      // check-all checkbox is always visible.
+      if (options?.alwaysVisible) {
+        labelWrapper.classList.add('jp-mod-visible');
+      }
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      // Prevent the user from clicking (via mouse, keyboard, or touch) the
+      // checkbox since other code handles the mouse and keyboard events and
+      // controls the checked state of the checkbox.
+      checkbox.addEventListener('click', event => {
+        event.preventDefault();
+      });
+      labelWrapper.appendChild(checkbox);
+      return labelWrapper;
     }
 
     /**
@@ -1985,6 +2178,18 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const checkboxWrapper = DOMUtils.findElement(
+        node,
+        CHECKBOX_WRAPPER_CLASS
+      );
+
+      const showFileCheckboxes = !hiddenColumns?.has?.('is_selected');
+      if (checkboxWrapper && !showFileCheckboxes) {
+        node.removeChild(checkboxWrapper);
+      } else if (showFileCheckboxes && !checkboxWrapper) {
+        const checkboxWrapper = this.createCheckboxWrapperNode();
+        node.insertBefore(checkboxWrapper, iconContainer);
+      }
 
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
@@ -2066,6 +2271,20 @@ export namespace DirListing {
      */
     getNameNode(node: HTMLElement): HTMLElement {
       return DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+    }
+
+    /**
+     * Get the checkbox input element node.
+     *
+     * @param node A node created by [[createItemNode]] or
+     * [[createHeaderItemNode]]
+     *
+     * @returns The checkbox node.
+     */
+    getCheckboxNode(node: HTMLElement): HTMLInputElement | null {
+      return node.querySelector(
+        `.${CHECKBOX_WRAPPER_CLASS} input[type=checkbox]`
+      );
     }
 
     /**

@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
-
 import { MessageLoop } from '@lumino/messaging';
-
 import { BoxPanel, Widget } from '@lumino/widgets';
 
 describe('@jupyterlab/apputils', () => {
@@ -15,7 +13,6 @@ describe('@jupyterlab/apputils', () => {
         const widget = new MainAreaWidget({ content });
         expect(widget).toBeInstanceOf(MainAreaWidget);
         expect(widget.hasClass('jp-MainAreaWidget')).toBe(true);
-        expect(widget.content.node.tabIndex).toBe(-1);
         expect(widget.title.closable).toBe(true);
       });
 

@@ -9,7 +9,7 @@
 // https://nbformat.readthedocs.io/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
-import { PartialJSONObject, JSONExt } from '@lumino/coreutils';
+import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
 
 /**
  * The earliest major version of the notebook format we support.
@@ -30,7 +30,7 @@ export interface IKernelspecMetadata extends PartialJSONObject {
 }
 
 /**
- * The language info metatda
+ * The language info metadata
  */
 export interface ILanguageInfoMetadata extends PartialJSONObject {
   name: string;
@@ -46,7 +46,7 @@ export interface ILanguageInfoMetadata extends PartialJSONObject {
 export interface INotebookMetadata extends PartialJSONObject {
   kernelspec?: IKernelspecMetadata;
   language_info?: ILanguageInfoMetadata;
-  orig_nbformat: number;
+  orig_nbformat?: number;
 }
 
 /**
@@ -102,7 +102,7 @@ export function validateMimeValue(
   value: MultilineString | PartialJSONObject
 ): boolean {
   // Check if "application/json" or "application/foo+json"
-  const jsonTest = /^application\/(.*?)+\+json$/;
+  const jsonTest = /^application\/.+\+json$/;
   const isJSONType = type === 'application/json' || jsonTest.test(type);
 
   const isString = (x: any) => {

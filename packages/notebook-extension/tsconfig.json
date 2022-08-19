@@ -19,10 +19,22 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../completer"
+    },
+    {
       "path": "../coreutils"
     },
     {
       "path": "../docmanager"
+    },
+    {
+      "path": "../docmanager-extension"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../documentsearch"
     },
     {
       "path": "../filebrowser"
@@ -34,6 +46,9 @@
       "path": "../logconsole"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../mainmenu"
     },
     {
@@ -41,6 +56,9 @@
     },
     {
       "path": "../notebook"
+    },
+    {
+      "path": "../observables"
     },
     {
       "path": "../property-inspector"
@@ -59,6 +77,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

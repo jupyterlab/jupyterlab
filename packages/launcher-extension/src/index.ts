@@ -11,13 +11,13 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
-import { ILauncher, LauncherModel, Launcher } from '@jupyterlab/launcher';
+import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
 import { ITranslator } from '@jupyterlab/translation';
-import { launcherIcon } from '@jupyterlab/ui-components';
-
-import { toArray } from '@lumino/algorithm';
+import { addIcon, launcherIcon } from '@jupyterlab/ui-components';
+import { find, toArray } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the launcher plugin.
@@ -33,7 +33,7 @@ const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
   requires: [ITranslator],
-  optional: [ILabShell, ICommandPalette],
+  optional: [ILabShell, ICommandPalette, IFileBrowserFactory],
   provides: ILauncher,
   autoStart: true
 };
@@ -50,7 +50,8 @@ function activate(
   app: JupyterFrontEnd,
   translator: ITranslator,
   labShell: ILabShell | null,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  factory: IFileBrowserFactory | null
 ): ILauncher {
   const { commands, shell } = app;
   const trans = translator.load('jupyterlab');
@@ -58,11 +59,17 @@ function activate(
 
   commands.addCommand(CommandIDs.create, {
     label: trans.__('New Launcher'),
+    icon: args => (args.toolbar ? addIcon : undefined),
     execute: (args: JSONObject) => {
-      const cwd = args['cwd'] ? String(args['cwd']) : '';
+      const cwd =
+        (args['cwd'] as string) ?? factory?.defaultBrowser.model.path ?? '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
-        shell.add(item, 'main', { ref: id });
+        // If widget is attached to the main area replace the launcher
+        if (find(shell.widgets('main'), w => w === item)) {
+          shell.add(item, 'main', { ref: id });
+          launcher.dispose();
+        }
       };
       const launcher = new Launcher({
         model,
@@ -82,7 +89,10 @@ function activate(
       main.title.closable = !!toArray(shell.widgets('main')).length;
       main.id = id;
 
-      shell.add(main, 'main', { activate: args['activate'] as boolean });
+      shell.add(main, 'main', {
+        activate: args['activate'] as boolean,
+        ref: args['ref'] as string
+      });
 
       if (labShell) {
         labShell.layoutModified.connect(() => {
@@ -91,14 +101,55 @@ function activate(
         }, main);
       }
 
+      if (factory) {
+        const onPathChanged = (model: FileBrowserModel) => {
+          launcher.cwd = model.path;
+        };
+        factory.defaultBrowser.model.pathChanged.connect(onPathChanged);
+        launcher.disposed.connect(() => {
+          factory.defaultBrowser.model.pathChanged.disconnect(onPathChanged);
+        });
+      }
+
       return main;
     }
   });
+
+  if (labShell) {
+    void Promise.all([
+      app.restored,
+      factory?.defaultBrowser.model.restored
+    ]).then(() => {
+      function maybeCreate() {
+        // Create a launcher if there are no open items.
+        if (labShell!.isEmpty('main')) {
+          void commands.execute(CommandIDs.create);
+        }
+      }
+      maybeCreate();
+      // When layout is modified, create a launcher if there are no open items.
+      labShell.layoutModified.connect(() => {
+        maybeCreate();
+      });
+    });
+  }
 
   if (palette) {
     palette.addItem({
       command: CommandIDs.create,
       category: trans.__('Launcher')
+    });
+  }
+
+  if (labShell) {
+    labShell.addButtonEnabled = true;
+    labShell.addRequested.connect((sender: DockPanel, arg: TabBar<Widget>) => {
+      // Get the ref for the current tab of the tabbar which the add button was clicked
+      const ref =
+        arg.currentTitle?.owner.id ||
+        arg.titles[arg.titles.length - 1].owner.id;
+
+      return commands.execute(CommandIDs.create, { ref });
     });
   }
 

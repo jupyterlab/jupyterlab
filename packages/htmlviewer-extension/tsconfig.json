@@ -19,6 +19,12 @@
       "path": "../htmlviewer"
     },
     {
+      "path": "../observables"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../translation"
     },
     {

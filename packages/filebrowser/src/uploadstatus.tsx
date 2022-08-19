@@ -2,22 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 //
 
-import { VDomRenderer, VDomModel, WidgetTracker } from '@jupyterlab/apputils';
-
+import { WidgetTracker } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import { GroupItem, ProgressBar, TextItem } from '@jupyterlab/statusbar';
-
-import { ArrayExt } from '@lumino/algorithm';
-
-import { IUploadModel, FileBrowserModel, FileBrowser } from '.';
-
-import React from 'react';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
+import { ArrayExt } from '@lumino/algorithm';
+import React from 'react';
+import { FileBrowser, FileBrowserModel, IUploadModel } from '.';
 
 /**
  * Half-spacing between items in the overall status item.
@@ -91,7 +87,7 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
   /**
    * Render the FileUpload status.
    */
-  render() {
+  render(): JSX.Element {
     const uploadPaths = this.model!.items;
     if (uploadPaths.length > 0) {
       const item = this.model!.items[0];
@@ -111,7 +107,7 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
     }
   }
 
-  dispose() {
+  dispose(): void {
     super.dispose();
     this._tracker.currentChanged.disconnect(this._onBrowserChange);
   }
@@ -151,7 +147,7 @@ export namespace FileUploadStatus {
     /**
      * The currently uploading items.
      */
-    get items() {
+    get items(): IFileUploadItem[] {
       return this._items;
     }
 
@@ -199,15 +195,15 @@ export namespace FileUploadStatus {
           this._items[idx].progress = uploads.newValue.progress * 100;
         }
       } else if (uploads.name === 'finish') {
-        const idx = ArrayExt.findFirstIndex(
+        const finishedItem = ArrayExt.findFirstValue(
           this._items,
           val => val.path === uploads.oldValue.path
         );
 
-        if (idx !== -1) {
-          this._items[idx].complete = true;
+        if (finishedItem) {
+          finishedItem.complete = true;
           setTimeout(() => {
-            ArrayExt.removeAt(this._items, idx);
+            ArrayExt.removeFirstOf(this._items, finishedItem);
             this.stateChanged.emit(void 0);
           }, UPLOAD_COMPLETE_MESSAGE_MILLIS);
         }

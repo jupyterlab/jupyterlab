@@ -12,7 +12,7 @@ import '@jupyterlab/codemirror/style/index.css';
 import '@jupyterlab/completer/style/index.css';
 import '@jupyterlab/documentsearch/style/index.css';
 import '@jupyterlab/notebook/style/index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { CommandRegistry } from '@lumino/commands';
@@ -23,16 +23,17 @@ import { ServiceManager } from '@jupyterlab/services';
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 
 import {
+  NotebookModelFactory,
   NotebookPanel,
-  NotebookWidgetFactory,
-  NotebookModelFactory
+  NotebookWidgetFactory
 } from '@jupyterlab/notebook';
 
 import {
-  CompleterModel,
   Completer,
+  CompleterModel,
   CompletionHandler,
-  KernelConnector
+  ConnectorProxy,
+  KernelCompleterProvider
 } from '@jupyterlab/completer';
 
 import { editorServices } from '@jupyterlab/codemirror';
@@ -42,9 +43,10 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
 import { SetupCommands } from './commands';
 
 function main(): void {
@@ -116,15 +118,24 @@ function createApp(manager: ServiceManager.IManager): void {
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
   const sessionContext = nbWidget.context.sessionContext;
-  const connector = new KernelConnector({
-    session: sessionContext.session
-  });
+  const timeout = 1000;
+  const provider = new KernelCompleterProvider();
+  const connector = new ConnectorProxy(
+    { widget: nbWidget, editor, session: sessionContext.session },
+    [provider],
+    timeout
+  );
   const handler = new CompletionHandler({ completer, connector });
 
   void sessionContext.ready.then(() => {
-    handler.connector = new KernelConnector({
-      session: sessionContext.session
-    });
+    const provider = new KernelCompleterProvider();
+    const connector = new ConnectorProxy(
+      { widget: nbWidget, editor, session: sessionContext.session },
+      [provider],
+      timeout
+    );
+
+    handler.connector = connector;
   });
 
   // Set the handler's editor.

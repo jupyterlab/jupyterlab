@@ -338,7 +338,7 @@ export namespace LabIconStyle {
 
     settingsEditor: {
       container: {
-        display: 'inline-block',
+        display: 'flex',
         flex: '0 0 20px',
         margin: '0 3px 0 0',
         position: 'relative',
@@ -425,7 +425,6 @@ export namespace LabIconStyle {
     toolbarButton: {
       container: {
         display: 'inline-block',
-        margin: 'auto',
         verticalAlign: 'middle'
       },
       element: {
@@ -538,7 +537,7 @@ export namespace LabIconStyle {
   }
 
   /**
-   * Resolve a pure icon styleheet into a typestyle class
+   * Resolve a pure icon stylesheet into a typestyle class
    */
   function resolveStyleClass(stylesheet: ISheetPure): string {
     return typestyleClass({

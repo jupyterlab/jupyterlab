@@ -2,24 +2,17 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { Contents, Session } from '@jupyterlab/services';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
-
 import {
-  ISessionContext,
+  defaultSanitizer,
   ISanitizer,
-  defaultSanitizer
+  ISessionContext
 } from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { Contents, Session } from '@jupyterlab/services';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
 import { MimeModel } from './mimemodel';
-
 import { IRenderMimeRegistry } from './tokens';
 
 /**
@@ -40,11 +33,12 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    */
   constructor(options: RenderMimeRegistry.IOptions = {}) {
     // Parse the options.
-    this.translator = options.translator || nullTranslator;
-    this.resolver = options.resolver || null;
-    this.linkHandler = options.linkHandler || null;
-    this.latexTypesetter = options.latexTypesetter || null;
-    this.sanitizer = options.sanitizer || defaultSanitizer;
+    this.translator = options.translator ?? nullTranslator;
+    this.resolver = options.resolver ?? null;
+    this.linkHandler = options.linkHandler ?? null;
+    this.latexTypesetter = options.latexTypesetter ?? null;
+    this.markdownParser = options.markdownParser ?? null;
+    this.sanitizer = options.sanitizer ?? defaultSanitizer;
 
     // Add the initial factories.
     if (options.initialFactories) {
@@ -73,6 +67,11 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    * The LaTeX typesetter for the rendermime.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+  /**
+   * The Markdown parser for the rendermime.
+   */
+  readonly markdownParser: IRenderMime.IMarkdownParser | null;
 
   /**
    * The application language translator.
@@ -147,6 +146,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
       latexTypesetter: this.latexTypesetter,
+      markdownParser: this.markdownParser,
       translator: this.translator
     });
   }
@@ -172,11 +172,13 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   clone(options: IRenderMimeRegistry.ICloneOptions = {}): RenderMimeRegistry {
     // Create the clone.
     const clone = new RenderMimeRegistry({
-      resolver: options.resolver || this.resolver || undefined,
-      sanitizer: options.sanitizer || this.sanitizer || undefined,
-      linkHandler: options.linkHandler || this.linkHandler || undefined,
+      resolver: options.resolver ?? this.resolver ?? undefined,
+      sanitizer: options.sanitizer ?? this.sanitizer ?? undefined,
+      linkHandler: options.linkHandler ?? this.linkHandler ?? undefined,
       latexTypesetter:
-        options.latexTypesetter || this.latexTypesetter || undefined,
+        options.latexTypesetter ?? this.latexTypesetter ?? undefined,
+      markdownParser:
+        options.markdownParser ?? this.markdownParser ?? undefined,
       translator: this.translator
     });
 
@@ -314,6 +316,11 @@ export namespace RenderMimeRegistry {
     latexTypesetter?: IRenderMime.ILatexTypesetter;
 
     /**
+     * An optional Markdown parser.
+     */
+    markdownParser?: IRenderMime.IMarkdownParser;
+
+    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -385,8 +392,25 @@ export namespace RenderMimeRegistry {
      * manager.
      */
     isLocal(url: string): boolean {
-      const path = decodeURI(url);
-      return URLExt.isLocal(url) || !!this._contents.driveName(path);
+      if (this.isMalformed(url)) {
+        return false;
+      }
+      return URLExt.isLocal(url) || !!this._contents.driveName(decodeURI(url));
+    }
+
+    /**
+     * Whether the URL can be decoded using `decodeURI`.
+     */
+    isMalformed(url: string): boolean {
+      try {
+        decodeURI(url);
+        return false;
+      } catch (error: unknown) {
+        if (error instanceof URIError) {
+          return true;
+        }
+        throw error;
+      }
     }
 
     private _path: string;

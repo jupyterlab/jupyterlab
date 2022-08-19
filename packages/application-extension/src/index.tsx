@@ -6,54 +6,65 @@
  */
 
 import {
+  ConnectionLost,
   IConnectionLost,
   ILabShell,
   ILabStatus,
   ILayoutRestorer,
   IRouter,
   ITreePathUpdater,
-  ConnectionLost,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
   JupyterFrontEndContextMenu,
+  JupyterFrontEndPlugin,
   JupyterLab,
   LabShell,
   LayoutRestorer,
   Router
 } from '@jupyterlab/application';
-
 import {
   Dialog,
   ICommandPalette,
   IWindowResolver,
+  MenuFactory,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-
-import { URLExt, PageConfig } from '@jupyterlab/coreutils';
-
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
 } from '@jupyterlab/property-inspector';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
+import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
-
-import { ITranslator } from '@jupyterlab/translation';
-
-import { buildIcon, jupyterIcon } from '@jupyterlab/ui-components';
-
-import { each, iter, toArray } from '@lumino/algorithm';
-
-import { PromiseDelegate } from '@lumino/coreutils';
-
+import { IStatusBar } from '@jupyterlab/statusbar';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
+  buildIcon,
+  ContextMenuSvg,
+  jupyterIcon,
+  RankedMenu,
+  Switch
+} from '@jupyterlab/ui-components';
+import { find, iter, toArray } from '@lumino/algorithm';
+import {
+  JSONExt,
+  PromiseDelegate,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-
-import { Widget, DockLayout, DockPanel } from '@lumino/widgets';
-
+import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { topbar } from './topbar';
+
+/**
+ * Default context menu item rank
+ */
+export const DEFAULT_CONTEXT_ITEM_RANK = 100;
 
 /**
  * The command IDs used by the application plugin.
@@ -79,11 +90,19 @@ namespace CommandIDs {
 
   export const setMode: string = 'application:set-mode';
 
+  export const showPropertyPanel: string = 'property-inspector:show-panel';
+
+  export const resetLayout: string = 'application:reset-layout';
+
+  export const toggleHeader: string = 'application:toggle-header';
+
   export const toggleMode: string = 'application:toggle-mode';
 
   export const toggleLeftArea: string = 'application:toggle-left-area';
 
   export const toggleRightArea: string = 'application:toggle-right-area';
+
+  export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
@@ -107,7 +126,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell | null,
     palette: ICommandPalette | null
   ) => {
-    const { commands, contextMenu, shell } = app;
+    const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
     const category = trans.__('Main Area');
 
@@ -116,12 +135,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       label: trans.__('Shift+Right Click for Browser Menu'),
       isEnabled: () => false,
       execute: () => void 0
-    });
-
-    contextMenu.addItem({
-      command: JupyterFrontEndContextMenu.contextMenu,
-      selector: 'body',
-      rank: Infinity // At the bottom always
     });
 
     // Returns the widget associated with the most recent contextmenu event.
@@ -203,12 +216,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       return widgets.slice(index + 1);
     };
 
-    // A CSS selector targeting tabs in the main area. This is a very
-    // specific selector since we really only want tabs that are
-    // in the main area, as opposed to those in sidebars, ipywidgets, etc.
-    const tabSelector =
-      '#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab';
-
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
       isEnabled: () => {
@@ -221,11 +228,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           widget.close();
         }
       }
-    });
-    contextMenu.addItem({
-      command: CommandIDs.close,
-      selector: tabSelector,
-      rank: 4
     });
 
     commands.addCommand(CommandIDs.closeOtherTabs, {
@@ -247,11 +249,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         closeWidgets(otherWidgets);
       }
     });
-    contextMenu.addItem({
-      command: CommandIDs.closeOtherTabs,
-      selector: tabSelector,
-      rank: 4
-    });
 
     commands.addCommand(CommandIDs.closeRightTabs, {
       label: () => trans.__('Close Tabs to Right'),
@@ -265,11 +262,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         }
         closeWidgets(widgetsRightOf(widget));
       }
-    });
-    contextMenu.addItem({
-      command: CommandIDs.closeRightTabs,
-      selector: tabSelector,
-      rank: 5
     });
 
     if (labShell) {
@@ -308,8 +300,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         }
       });
 
+      commands.addCommand(CommandIDs.toggleHeader, {
+        label: trans.__('Show Header'),
+        execute: () => {
+          if (labShell.mode === 'single-document') {
+            labShell.toggleTopInSimpleModeVisibility();
+          }
+        },
+        isToggled: () => labShell.isTopInSimpleModeVisible(),
+        isVisible: () => labShell.mode === 'single-document'
+      });
+
       commands.addCommand(CommandIDs.toggleLeftArea, {
-        label: () => trans.__('Show Left Sidebar'),
+        label: trans.__('Show Left Sidebar'),
         execute: () => {
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
@@ -321,11 +324,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           }
         },
         isToggled: () => !labShell.leftCollapsed,
-        isVisible: () => !labShell.isEmpty('left')
+        isEnabled: () => !labShell.isEmpty('left')
       });
 
       commands.addCommand(CommandIDs.toggleRightArea, {
-        label: () => trans.__('Show Right Sidebar'),
+        label: trans.__('Show Right Sidebar'),
         execute: () => {
           if (labShell.rightCollapsed) {
             labShell.expandRight();
@@ -337,7 +340,29 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           }
         },
         isToggled: () => !labShell.rightCollapsed,
-        isVisible: () => !labShell.isEmpty('right')
+        isEnabled: () => !labShell.isEmpty('right')
+      });
+
+      commands.addCommand(CommandIDs.toggleSideTabBar, {
+        label: args =>
+          args.side === 'right'
+            ? trans.__('Show Right Activity Bar')
+            : trans.__('Show Left Activity Bar'),
+        execute: args => {
+          if (args.side === 'right') {
+            labShell.toggleSideTabBarVisibility('right');
+          } else {
+            labShell.toggleSideTabBarVisibility('left');
+          }
+        },
+        isToggled: args =>
+          args.side === 'right'
+            ? labShell.isSideTabBarVisible('right')
+            : labShell.isSideTabBarVisible('left'),
+        isEnabled: args =>
+          args.side === 'right'
+            ? !labShell.isEmpty('right')
+            : !labShell.isEmpty('left')
       });
 
       commands.addCommand(CommandIDs.togglePresentationMode, {
@@ -350,6 +375,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.setMode, {
+        label: args =>
+          args['mode']
+            ? trans.__('Set %1 mode.', args['mode'])
+            : trans.__('Set the layout `mode`.'),
+        caption: trans.__(
+          'The layout `mode` can be "single-document" or "multiple-document".'
+        ),
         isVisible: args => {
           const mode = args['mode'] as string;
           return mode === 'single-document' || mode === 'multiple-document';
@@ -375,6 +407,45 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return commands.execute(CommandIDs.setMode, args);
         }
       });
+
+      commands.addCommand(CommandIDs.resetLayout, {
+        label: trans.__('Reset Default Layout'),
+        execute: () => {
+          // Turn off presentation mode
+          if (labShell.presentationMode) {
+            commands
+              .execute(CommandIDs.togglePresentationMode)
+              .catch(reason => {
+                console.error('Failed to undo presentation mode.', reason);
+              });
+          }
+          // Display top header
+          if (
+            labShell.mode === 'single-document' &&
+            !labShell.isTopInSimpleModeVisible()
+          ) {
+            commands.execute(CommandIDs.toggleHeader).catch(reason => {
+              console.error('Failed to display title header.', reason);
+            });
+          }
+          // Display side tabbar
+          (['left', 'right'] as ('left' | 'right')[]).forEach(side => {
+            if (
+              !labShell.isSideTabBarVisible(side) &&
+              !labShell.isEmpty(side)
+            ) {
+              commands
+                .execute(CommandIDs.toggleSideTabBar, { side })
+                .catch(reason => {
+                  console.error(`Failed to show ${side} activity bar.`, reason);
+                });
+            }
+          });
+
+          // Some actions are also trigger indirectly
+          // - by listening to this command execution.
+        }
+      });
     }
 
     if (palette) {
@@ -387,11 +458,21 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.closeAll,
         CommandIDs.closeOtherTabs,
         CommandIDs.closeRightTabs,
+        CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
-        CommandIDs.toggleMode
+        CommandIDs.toggleMode,
+        CommandIDs.resetLayout
       ].forEach(command => palette.addItem({ command, category }));
+
+      ['right', 'left'].forEach(side => {
+        palette.addItem({
+          command: CommandIDs.toggleSideTabBar,
+          category,
+          args: { side }
+        });
+      });
     }
   }
 };
@@ -401,7 +482,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [IRouter, IWindowResolver, ITranslator],
+  requires: [
+    IRouter,
+    IWindowResolver,
+    ITranslator,
+    JupyterFrontEnd.ITreeResolver
+  ],
   optional: [IConnectionLost],
   provides: ITreePathUpdater,
   activate: (
@@ -409,6 +495,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     router: IRouter,
     resolver: IWindowResolver,
     translator: ITranslator,
+    treeResolver: JupyterFrontEnd.ITreeResolver,
     connectionLost: IConnectionLost | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -424,13 +511,17 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     let _defaultBrowserTreePath = '';
 
     function updateTreePath(treePath: string) {
-      _defaultBrowserTreePath = treePath;
-      if (!_docTreePath) {
-        const path = PageConfig.getUrl({ treePath });
-        router.navigate(path, { skipRouting: true });
-        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-        PageConfig.setOption('treePath', treePath);
-      }
+      // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
+      void treeResolver.paths.then(() => {
+        _defaultBrowserTreePath = treePath;
+        if (!_docTreePath) {
+          const url = PageConfig.getUrl({ treePath });
+          const path = URLExt.parse(url).pathname;
+          router.navigate(path, { skipRouting: true });
+          // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+          PageConfig.setOption('treePath', treePath);
+        }
+      });
     }
 
     // Requiring the window resolver guarantees that the application extension
@@ -460,22 +551,27 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
     app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
-      const path = PageConfig.getUrl({ mode: args as string });
+      const url = PageConfig.getUrl({ mode: args as string });
+      const path = URLExt.parse(url).pathname;
       router.navigate(path, { skipRouting: true });
       // Persist this mode change to PageConfig as it is used elsewhere at runtime.
       PageConfig.setOption('mode', args as string);
     });
 
-    // Watch the path of the current widget in the main area and update the page
-    // URL to reflect the change.
-    app.shell.currentPathChanged.connect((_, args) => {
-      const maybeTreePath = args.newValue as string;
-      const treePath = maybeTreePath || _defaultBrowserTreePath;
-      const path = PageConfig.getUrl({ treePath: treePath });
-      router.navigate(path, { skipRouting: true });
-      // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-      PageConfig.setOption('treePath', treePath);
-      _docTreePath = maybeTreePath;
+    // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
+    void treeResolver.paths.then(() => {
+      // Watch the path of the current widget in the main area and update the page
+      // URL to reflect the change.
+      app.shell.currentPathChanged.connect((_, args) => {
+        const maybeTreePath = args.newValue as string;
+        const treePath = maybeTreePath || _defaultBrowserTreePath;
+        const url = PageConfig.getUrl({ treePath: treePath });
+        const path = URLExt.parse(url).pathname;
+        router.navigate(path, { skipRouting: true });
+        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+        PageConfig.setOption('treePath', treePath);
+        _docTreePath = maybeTreePath;
+      });
     });
 
     // If the connection to the server is lost, handle it with the
@@ -560,7 +656,64 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         }).then(result => (result.button.accept ? build() : undefined));
       });
     }
+    return updateTreePath;
+  },
+  autoStart: true
+};
 
+/**
+ * Plugin to build the context menu from the settings.
+ */
+const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:context-menu',
+  autoStart: true,
+  requires: [ISettingRegistry, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
+  ): void => {
+    const trans = translator.load('jupyterlab');
+
+    function createMenu(options: ISettingRegistry.IMenu): RankedMenu {
+      const menu = new RankedMenu({ ...options, commands: app.commands });
+      if (options.label) {
+        menu.title.label = trans.__(options.label);
+      }
+      return menu;
+    }
+
+    // Load the context menu lately so plugins are loaded.
+    app.started
+      .then(() => {
+        return Private.loadSettingsContextMenu(
+          app.contextMenu,
+          settingRegistry,
+          createMenu,
+          translator
+        );
+      })
+      .catch(reason => {
+        console.error(
+          'Failed to load context menu items from settings registry.',
+          reason
+        );
+      });
+  }
+};
+
+/**
+ * Check if the application is dirty before closing the browser tab.
+ */
+const dirty: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:dirty',
+  autoStart: true,
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator): void => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${dirty.id} must be activated in JupyterLab.`);
+    }
+    const trans = translator.load('jupyterlab');
     const message = trans.__(
       'Are you sure you want to exit JupyterLab?\n\nAny unsaved changes will be lost.'
     );
@@ -575,9 +728,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         return ((event as any).returnValue = message);
       }
     });
-    return updateTreePath;
-  },
-  autoStart: true
+  }
 };
 
 /**
@@ -585,28 +736,79 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
  */
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IStateDB, ILabShell],
+  requires: [IStateDB, ILabShell, ISettingRegistry],
+  optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
     labShell: ILabShell,
-    info: JupyterLab.IInfo
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator | null
   ) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const first = app.started;
     const registry = app.commands;
+
     const restorer = new LayoutRestorer({ connector: state, first, registry });
 
-    void restorer.fetch().then(saved => {
-      labShell.restoreLayout(
-        PageConfig.getOption('mode') as DockPanel.Mode,
-        saved
-      );
-      labShell.layoutModified.connect(() => {
-        void restorer.save(labShell.saveLayout());
+    settingRegistry
+      .load(shell.id)
+      .then(settings => {
+        // Add a layer of customization to support app shell mode
+        const customizedLayout = settings.composite['layout'] as any;
+
+        void restorer.fetch().then(saved => {
+          labShell.restoreLayout(
+            PageConfig.getOption('mode') as DockPanel.Mode,
+            saved,
+            {
+              'multiple-document': customizedLayout.multiple ?? {},
+              'single-document': customizedLayout.single ?? {}
+            }
+          );
+          labShell.layoutModified.connect(() => {
+            void restorer.save(labShell.saveLayout());
+          });
+
+          settings.changed.connect(onSettingsChanged);
+          Private.activateSidebarSwitcher(app, labShell, settings, trans);
+        });
+      })
+      .catch(reason => {
+        console.error('Fail to load settings for the layout restorer.');
+        console.error(reason);
       });
-    });
 
     return restorer;
+
+    async function onSettingsChanged(
+      settings: ISettingRegistry.ISettings
+    ): Promise<void> {
+      if (
+        !JSONExt.deepEqual(
+          settings.composite['layout'] as ReadonlyPartialJSONValue,
+          {
+            single: labShell.userLayout['single-document'],
+            multiple: labShell.userLayout['multiple-document']
+          } as any
+        )
+      ) {
+        const result = await showDialog({
+          title: trans.__('Information'),
+          body: trans.__(
+            'User layout customization has changed. You may need to reload JupyterLab to see the changes.'
+          ),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.okButton({ label: trans.__('Reload') })
+          ]
+        });
+
+        if (result.button.accept) {
+          location.reload();
+        }
+      }
+    }
   },
   autoStart: true,
   provides: ILayoutRestorer
@@ -771,99 +973,26 @@ const busy: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
-const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
-
-/**
- * Keep user settings for where to show the side panels.
- */
-const sidebar: JupyterFrontEndPlugin<void> = {
-  id: SIDEBAR_ID,
-  autoStart: true,
-  requires: [ISettingRegistry, ILabShell, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry,
-    labShell: ILabShell,
-    translator: ITranslator,
-    info: JupyterLab.IInfo
-  ) => {
-    const trans = translator.load('jupyterlab');
-    type overrideMap = { [id: string]: 'left' | 'right' };
-    let overrides: overrideMap = {};
-    // const trans = translator.load("jupyterlab");
-    const handleLayoutOverrides = () => {
-      each(labShell.widgets('left'), widget => {
-        if (overrides[widget.id] && overrides[widget.id] === 'right') {
-          labShell.add(widget, 'right');
-        }
-      });
-      each(labShell.widgets('right'), widget => {
-        if (overrides[widget.id] && overrides[widget.id] === 'left') {
-          labShell.add(widget, 'left');
-        }
-      });
-    };
-    labShell.layoutModified.connect(handleLayoutOverrides);
-    // Fetch overrides from the settings system.
-    void Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
-      ([settings]) => {
-        overrides = (settings.get('overrides').composite as overrideMap) || {};
-        settings.changed.connect(settings => {
-          overrides =
-            (settings.get('overrides').composite as overrideMap) || {};
-          handleLayoutOverrides();
-        });
-      }
-    );
-
-    // Add a command to switch a side panels's side
-    app.commands.addCommand(CommandIDs.switchSidebar, {
-      label: trans.__('Switch Sidebar Side'),
-      execute: () => {
-        // First, try to find the correct panel based on the
-        // application context menu click.
-        const contextNode: HTMLElement | undefined = app.contextMenuHitTest(
-          node => !!node.dataset.id
-        );
-        let id: string;
-        let side: 'left' | 'right';
-        if (contextNode) {
-          id = contextNode.dataset['id']!;
-          const leftPanel = document.getElementById('jp-left-stack');
-          const node = document.getElementById(id);
-          if (leftPanel && node && leftPanel.contains(node)) {
-            side = 'right';
-          } else {
-            side = 'left';
-          }
-        } else {
-          // Bail if we don't find a sidebar for the widget.
-          return;
-        }
-        // Move the panel to the other side.
-        const newOverrides = { ...overrides };
-        newOverrides[id] = side;
-        return settingRegistry.set(SIDEBAR_ID, 'overrides', newOverrides);
-      }
-    });
-
-    // Add a context menu item to sidebar tabs.
-    app.contextMenu.addItem({
-      command: CommandIDs.switchSidebar,
-      selector: '.jp-SideBar .lm-TabBar-tab',
-      rank: 500
-    });
-  }
-};
-
 /**
  * The default JupyterLab application shell.
  */
 const shell: JupyterFrontEndPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
-  activate: (app: JupyterFrontEnd) => {
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry | null
+  ) => {
     if (!(app.shell instanceof LabShell)) {
       throw new Error(`${shell.id} did not find a LabShell instance.`);
+    }
+    if (settingRegistry) {
+      void settingRegistry.load(shell.id).then(settings => {
+        (app.shell as LabShell).updateConfig(settings.composite);
+        settings.changed.connect(() => {
+          (app.shell as LabShell).updateConfig(settings.composite);
+        });
+      });
     }
     return app.shell;
   },
@@ -945,7 +1074,15 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
     widget.title.icon = buildIcon;
     widget.title.caption = trans.__('Property Inspector');
     widget.id = 'jp-property-inspector';
-    labshell.add(widget, 'right', { rank: 100 });
+    labshell.add(widget, 'right', { rank: 100, type: 'Property Inspector' });
+
+    app.commands.addCommand(CommandIDs.showPropertyPanel, {
+      label: trans.__('Property Inspector'),
+      execute: () => {
+        labshell.activateById(widget.id);
+      }
+    });
+
     if (restorer) {
       restorer.add(widget, 'jp-property-inspector');
     }
@@ -972,9 +1109,89 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The simple interface mode switch in the status bar.
+ */
+const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:mode-switch',
+  requires: [ILabShell, ITranslator],
+  optional: [IStatusBar, ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    translator: ITranslator,
+    statusBar: IStatusBar | null,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    if (statusBar === null) {
+      // Bail early
+      return;
+    }
+    const trans = translator.load('jupyterlab');
+    const modeSwitch = new Switch();
+    modeSwitch.id = 'jp-single-document-mode';
+
+    modeSwitch.valueChanged.connect((_, args) => {
+      labShell.mode = args.newValue ? 'single-document' : 'multiple-document';
+    });
+    labShell.modeChanged.connect((_, mode) => {
+      modeSwitch.value = mode === 'single-document';
+    });
+
+    if (settingRegistry) {
+      const loadSettings = settingRegistry.load(shell.id);
+      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        const startMode = settings.get('startMode').composite as string;
+        if (startMode) {
+          labShell.mode =
+            startMode === 'single' ? 'single-document' : 'multiple-document';
+        }
+      };
+
+      Promise.all([loadSettings, app.restored])
+        .then(([settings]) => {
+          updateSettings(settings);
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
+
+    modeSwitch.value = labShell.mode === 'single-document';
+
+    // Show the current file browser shortcut in its title.
+    const updateModeSwitchTitle = () => {
+      const binding = app.commands.keyBindings.find(
+        b => b.command === 'application:toggle-mode'
+      );
+      if (binding) {
+        const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+        modeSwitch.caption = trans.__('Simple Interface (%1)', ks);
+      } else {
+        modeSwitch.caption = trans.__('Simple Interface');
+      }
+    };
+    updateModeSwitchTitle();
+    app.commands.keyBindingChanged.connect(() => {
+      updateModeSwitchTitle();
+    });
+
+    modeSwitch.label = trans.__('Simple');
+
+    statusBar.registerStatusItem(modeSwitchPlugin.id, {
+      item: modeSwitch,
+      align: 'left',
+      rank: -1
+    });
+  },
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  contextMenuPlugin,
+  dirty,
   main,
   mainCommands,
   layout,
@@ -982,13 +1199,259 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tree,
   notfound,
   busy,
-  sidebar,
   shell,
   status,
   info,
+  modeSwitchPlugin,
   paths,
   propertyInspector,
-  JupyterLogo
+  JupyterLogo,
+  topbar
 ];
 
 export default plugins;
+
+namespace Private {
+  async function displayInformation(trans: TranslationBundle): Promise<void> {
+    const result = await showDialog({
+      title: trans.__('Information'),
+      body: trans.__(
+        'Context menu customization has changed. You will need to reload JupyterLab to see the changes.'
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.okButton({ label: trans.__('Reload') })
+      ]
+    });
+
+    if (result.button.accept) {
+      location.reload();
+    }
+  }
+
+  export async function loadSettingsContextMenu(
+    contextMenu: ContextMenuSvg,
+    registry: ISettingRegistry,
+    menuFactory: (options: ISettingRegistry.IMenu) => RankedMenu,
+    translator: ITranslator
+  ): Promise<void> {
+    const trans = translator.load('jupyterlab');
+    const pluginId = contextMenuPlugin.id;
+    let canonical: ISettingRegistry.ISchema | null = null;
+    let loaded: { [name: string]: ISettingRegistry.IContextMenuItem[] } = {};
+
+    /**
+     * Populate the plugin's schema defaults.
+     *
+     * We keep track of disabled entries in case the plugin is loaded
+     * after the menu initialization.
+     */
+    function populate(schema: ISettingRegistry.ISchema) {
+      loaded = {};
+      const pluginDefaults = Object.keys(registry.plugins)
+        .map(plugin => {
+          const items =
+            registry.plugins[plugin]!.schema['jupyter.lab.menus']?.context ??
+            [];
+          loaded[plugin] = items;
+          return items;
+        })
+        .concat([schema['jupyter.lab.menus']?.context ?? []])
+        .reduceRight(
+          (
+            acc: ISettingRegistry.IContextMenuItem[],
+            val: ISettingRegistry.IContextMenuItem[]
+          ) => SettingRegistry.reconcileItems(acc, val, true),
+          []
+        )!;
+
+      // Apply default value as last step to take into account overrides.json
+      // The standard default being [] as the plugin must use `jupyter.lab.menus.context`
+      // to define their default value.
+      schema.properties!.contextMenu.default = SettingRegistry.reconcileItems(
+        pluginDefaults,
+        schema.properties!.contextMenu.default as any[],
+        true
+      )!
+        // flatten one level
+        .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
+    }
+
+    // Transform the plugin object to return different schema than the default.
+    registry.transform(pluginId, {
+      compose: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        const defaults = canonical.properties?.contextMenu?.default ?? [];
+        const user = {
+          ...plugin.data.user,
+          contextMenu: plugin.data.user.contextMenu ?? []
+        };
+        const composite = {
+          ...plugin.data.composite,
+          contextMenu: SettingRegistry.reconcileItems(
+            defaults as ISettingRegistry.IContextMenuItem[],
+            user.contextMenu as ISettingRegistry.IContextMenuItem[],
+            false
+          )
+        };
+
+        plugin.data = { composite, user };
+
+        return plugin;
+      },
+      fetch: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        return {
+          data: plugin.data,
+          id: plugin.id,
+          raw: plugin.raw,
+          schema: canonical,
+          version: plugin.version
+        };
+      }
+    });
+
+    // Repopulate the canonical variable after the setting registry has
+    // preloaded all initial plugins.
+    const settings = await registry.load(pluginId);
+
+    const contextItems: ISettingRegistry.IContextMenuItem[] =
+      (settings.composite.contextMenu as any) ?? [];
+
+    // Create menu item for non-disabled element
+    SettingRegistry.filterDisabledItems(contextItems).forEach(item => {
+      MenuFactory.addContextItem(
+        {
+          // We have to set the default rank because Lumino is sorting the visible items
+          rank: DEFAULT_CONTEXT_ITEM_RANK,
+          ...item
+        },
+        contextMenu,
+        menuFactory
+      );
+    });
+
+    settings.changed.connect(() => {
+      // As extension may change the context menu through API,
+      // prompt the user to reload if the menu has been updated.
+      const newItems = (settings.composite.contextMenu as any) ?? [];
+      if (!JSONExt.deepEqual(contextItems, newItems)) {
+        void displayInformation(trans);
+      }
+    });
+
+    registry.pluginChanged.connect(async (sender, plugin) => {
+      if (plugin !== pluginId) {
+        // If the plugin changed its menu.
+        const oldItems = loaded[plugin] ?? [];
+        const newItems =
+          registry.plugins[plugin]!.schema['jupyter.lab.menus']?.context ?? [];
+        if (!JSONExt.deepEqual(oldItems, newItems)) {
+          if (loaded[plugin]) {
+            // The plugin has changed, request the user to reload the UI
+            await displayInformation(trans);
+          } else {
+            // The plugin was not yet loaded when the menu was built => update the menu
+            loaded[plugin] = JSONExt.deepCopy(newItems);
+            // Merge potential disabled state
+            const toAdd =
+              SettingRegistry.reconcileItems(
+                newItems,
+                contextItems,
+                false,
+                false
+              ) ?? [];
+            SettingRegistry.filterDisabledItems(toAdd).forEach(item => {
+              MenuFactory.addContextItem(
+                {
+                  // We have to set the default rank because Lumino is sorting the visible items
+                  rank: DEFAULT_CONTEXT_ITEM_RANK,
+                  ...item
+                },
+                contextMenu,
+                menuFactory
+              );
+            });
+          }
+        }
+      }
+    });
+  }
+
+  export function activateSidebarSwitcher(
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    settings: ISettingRegistry.ISettings,
+    trans: TranslationBundle
+  ): void {
+    // Add a command to switch a side panels's side
+    app.commands.addCommand(CommandIDs.switchSidebar, {
+      label: trans.__('Switch Sidebar Side'),
+      execute: () => {
+        // First, try to find the correct panel based on the application
+        // context menu click. Bail if we don't find a sidebar for the widget.
+        const contextNode: HTMLElement | undefined = app.contextMenuHitTest(
+          node => !!node.dataset.id
+        );
+        if (!contextNode) {
+          return;
+        }
+
+        const id = contextNode.dataset['id']!;
+        const leftPanel = document.getElementById('jp-left-stack');
+        const node = document.getElementById(id);
+
+        let newLayout: {
+          'single-document': ILabShell.IUserLayout;
+          'multiple-document': ILabShell.IUserLayout;
+        } | null = null;
+        // Move the panel to the other side.
+        if (leftPanel && node && leftPanel.contains(node)) {
+          const widget = find(labShell.widgets('left'), w => w.id === id);
+          if (widget) {
+            newLayout = labShell.move(widget, 'right');
+            labShell.activateById(widget.id);
+          }
+        } else {
+          const widget = find(labShell.widgets('right'), w => w.id === id);
+          if (widget) {
+            newLayout = labShell.move(widget, 'left');
+            labShell.activateById(widget.id);
+          }
+        }
+
+        if (newLayout) {
+          settings
+            .set('layout', {
+              single: newLayout['single-document'],
+              multiple: newLayout['multiple-document']
+            } as any)
+            .catch(reason => {
+              console.error(
+                'Failed to save user layout customization.',
+                reason
+              );
+            });
+        }
+      }
+    });
+
+    app.commands.commandExecuted.connect((registry, executed) => {
+      if (executed.id === CommandIDs.resetLayout) {
+        settings.remove('layout').catch(reason => {
+          console.error('Failed to remove user layout customization.', reason);
+        });
+      }
+    });
+  }
+}

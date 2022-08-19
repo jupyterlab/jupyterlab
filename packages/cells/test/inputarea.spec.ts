@@ -5,7 +5,7 @@ import { Widget } from '@lumino/widgets';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { InputArea, InputPrompt, CodeCellModel } from '@jupyterlab/cells';
+import { CodeCellModel, InputArea, InputPrompt } from '@jupyterlab/cells';
 
 const PROMPT_CLASS = 'jp-InputArea-prompt';
 

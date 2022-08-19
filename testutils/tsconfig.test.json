@@ -34,36 +34,6 @@
     },
     {
       "path": "."
-    },
-    {
-      "path": "../packages/apputils"
-    },
-    {
-      "path": "../packages/cells"
-    },
-    {
-      "path": "../packages/codeeditor"
-    },
-    {
-      "path": "../packages/codemirror"
-    },
-    {
-      "path": "../packages/coreutils"
-    },
-    {
-      "path": "../packages/docregistry"
-    },
-    {
-      "path": "../packages/nbformat"
-    },
-    {
-      "path": "../packages/notebook"
-    },
-    {
-      "path": "../packages/rendermime"
-    },
-    {
-      "path": "../packages/services"
     }
   ]
 }

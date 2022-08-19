@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterServer } from '@jupyterlab/testutils';
 import {
   ContentsManager,
   ServiceManager,
@@ -9,7 +10,6 @@ import {
   TerminalManager,
   WorkspaceManager
 } from '../src';
-import { JupyterServer } from '@jupyterlab/testutils';
 
 const server = new JupyterServer();
 

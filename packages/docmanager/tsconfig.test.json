@@ -9,6 +9,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docprovider"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -19,30 +22,15 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     },
     {
       "path": "."
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statusbar"
-    },
-    {
-      "path": "../translation"
     }
   ]
 }

@@ -61,8 +61,8 @@
   margin: 2px;
 }
 
-.jp-DocumentSearch-focused-input {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+.jp-DocumentSearch-input-wrapper:focus-within {
+  border-color: var(--jp-cell-editor-active-border-color);
 }
 
 .jp-DocumentSearch-input-wrapper * {
@@ -106,7 +106,7 @@
   width: 5px;
 }
 
-.jp-DocumentSearch-input-button:before {
+.jp-DocumentSearch-input-button::before {
   display: block;
   padding-top: 100%;
 }
@@ -187,6 +187,7 @@
   width: 200px;
   display: grid;
 }
+
 .jp-DocumentSearch-search-options-disabled {
   color: var(--jp-ui-font-color2);
 }
@@ -247,4 +248,14 @@
 
 .jp-DocumentSearch-replace-toggle:hover {
   background-color: var(--jp-layout-color2);
+}
+
+.jp-DocumentSearch-document-loaded .jp-DocumentSearch-document-loading {
+  display: block !important;
+}
+
+.jp-DocumentSearch-document-loading {
+  display: none;
+  margin: 5px;
+  color: var(--jp-ui-font-color2);
 }

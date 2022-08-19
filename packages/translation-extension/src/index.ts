@@ -11,28 +11,14 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import {
   ITranslator,
-  TranslationManager,
-  requestTranslationsAPI
+  requestTranslationsAPI,
+  TranslationManager
 } from '@jupyterlab/translation';
-
-import { Menu } from '@lumino/widgets';
-
-/**
- * A namespace for command IDs.
- */
-export namespace CommandIDs {
-  export const installAdditionalLanguages =
-    'jupyterlab-translation:install-additional-languages';
-}
 
 /**
  * Translation plugins
@@ -56,9 +42,11 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     const displayStringsPrefix: boolean = setting.get('displayStringsPrefix')
       .composite as boolean;
     stringsPrefix = displayStringsPrefix ? stringsPrefix : '';
+    const serverSettings = app.serviceManager.serverSettings;
     const translationManager = new TranslationManager(
       paths.urls.translations,
-      stringsPrefix
+      stringsPrefix,
+      serverSettings
     );
     await translationManager.fetch(currentLocale);
     return translationManager;
@@ -102,22 +90,17 @@ const langMenu: JupyterFrontEndPlugin<void> = {
         setting.changed.connect(loadSetting);
 
         // Create a languages menu
-        const languagesMenu: Menu = new Menu({ commands });
-        languagesMenu.title.label = trans.__('Language');
-        mainMenu.settingsMenu.addGroup(
-          [
-            {
-              type: 'submenu' as Menu.ItemType,
-              submenu: languagesMenu
-            }
-          ],
-          1
-        );
+        const languagesMenu = mainMenu.settingsMenu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-settings-language'
+        )?.submenu;
 
         let command: string;
 
+        const serverSettings = app.serviceManager.serverSettings;
         // Get list of available locales
-        requestTranslationsAPI<any>('')
+        requestTranslationsAPI<any>('', '', {}, serverSettings)
           .then(data => {
             for (const locale in data['data']) {
               const value = data['data'][locale];
@@ -126,7 +109,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               const toggled = displayName === nativeName;
               const label = toggled
                 ? `${displayName}`
-                : `${displayName} (${nativeName})`;
+                : `${displayName} - ${nativeName}`;
 
               // Add a command per language
               command = `jupyterlab-translation:${locale}`;
@@ -139,10 +122,13 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                 execute: () => {
                   return showDialog({
                     title: trans.__('Change interface language?'),
-                    body: trans.__('Are you sure you want to refresh?'),
+                    body: trans.__(
+                      'After changing the interface language to %1, you will need to reload JupyterLab to see the changes.',
+                      label
+                    ),
                     buttons: [
                       Dialog.cancelButton({ label: trans.__('Cancel') }),
-                      Dialog.okButton({ label: trans.__('Ok') })
+                      Dialog.okButton({ label: trans.__('Change and reload') })
                     ]
                   }).then(result => {
                     if (result.button.accept) {
@@ -160,10 +146,12 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               });
 
               // Add the language command to the menu
-              languagesMenu.addItem({
-                command,
-                args: {}
-              });
+              if (languagesMenu) {
+                languagesMenu.addItem({
+                  command,
+                  args: {}
+                });
+              }
             }
           })
           .catch(reason => {

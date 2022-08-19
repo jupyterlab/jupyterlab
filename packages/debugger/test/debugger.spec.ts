@@ -18,8 +18,8 @@ import { KernelSpecManager, Session } from '@jupyterlab/services';
 
 import {
   createSession,
-  signalToPromise,
-  JupyterServer
+  JupyterServer,
+  signalToPromise
 } from '@jupyterlab/testutils';
 
 import { toArray } from '@lumino/algorithm';
@@ -40,14 +40,7 @@ import { DebuggerModel } from '../src/model';
 
 import { SourcesBody } from '../src/panels/sources/body';
 
-import { SourcesHeader } from '../src/panels/sources/header';
-
 import { IDebugger } from '../src/tokens';
-
-/**
- * A test sidebar.
- */
-class TestSidebar extends Debugger.Sidebar {}
 
 const server = new JupyterServer();
 
@@ -81,7 +74,7 @@ describe('Debugger', () => {
   let session: Debugger.Session;
   let path: string;
   let connection: Session.ISessionConnection;
-  let sidebar: TestSidebar;
+  let sidebar: Debugger.Sidebar;
 
   beforeAll(async () => {
     connection = await createSession({
@@ -94,7 +87,7 @@ describe('Debugger', () => {
     session = new Debugger.Session({ connection });
     service.session = session;
 
-    sidebar = new TestSidebar({
+    sidebar = new Debugger.Sidebar({
       service,
       callstackCommands: {
         registry,
@@ -104,6 +97,10 @@ describe('Debugger', () => {
         stepIn: '',
         stepOut: '',
         evaluate: ''
+      },
+      breakpointsCommands: {
+        registry,
+        pause: ''
       },
       editorServices: {
         factoryService,
@@ -155,25 +152,124 @@ describe('Debugger', () => {
     });
   });
 
+  describe('Panel', () => {
+    let toolbarList: any;
+    beforeEach(() => {
+      toolbarList = sidebar.content.node.querySelectorAll(
+        '.jp-AccordionPanel-title'
+      );
+    });
+    it('should have 5 child widgets', () => {
+      expect(sidebar.widgets.length).toBe(5);
+    });
+
+    it('should have 5 toolbars', () => {
+      expect(toolbarList.length).toBe(5);
+    });
+    describe('Variable toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(0);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Variables');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(2);
+        expect(buttons[0].title).toBe('Tree View');
+        expect(buttons[1].title).toBe('Table View');
+      });
+    });
+    describe('Callstack toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(1);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Callstack');
+      });
+      it('should have six buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(6);
+      });
+    });
+    describe('Breakpoints toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(2);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Breakpoints');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(2);
+      });
+    });
+    describe('Source toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(3);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Source');
+      });
+
+      it('should have one button', () => {
+        const buttons = toolbar.querySelectorAll('button');
+        expect(buttons.length).toBe(1);
+      });
+    });
+  });
+
   describe('#callstack', () => {
-    it('should have a header and a body', () => {
-      expect(sidebar.callstack.widgets.length).toEqual(2);
+    it('should have a body', () => {
+      expect(sidebar.callstack.widgets.length).toEqual(1);
     });
 
     it('should have the jp-DebuggerCallstack class', () => {
       expect(sidebar.callstack.hasClass('jp-DebuggerCallstack')).toBe(true);
-    });
-
-    it('should have the debug buttons', () => {
-      const node = sidebar.callstack.node;
-      const items = node.querySelectorAll('button');
-
-      expect(items.length).toEqual(6);
-      items.forEach(item => {
-        expect(Array.from(items[0].classList)).toEqual(
-          expect.arrayContaining(['jp-ToolbarButtonComponent'])
-        );
-      });
     });
 
     it('should display the stack frames', () => {
@@ -256,19 +352,18 @@ describe('Debugger', () => {
   });
 
   describe('#sources', () => {
-    it('should have a header and a body', () => {
-      expect(sidebar.sources.widgets.length).toEqual(2);
+    it('should have a body', () => {
+      expect(sidebar.sources.widgets.length).toEqual(1);
     });
 
     it('should display the source path in the header', () => {
-      const body = sidebar.sources.widgets[0] as SourcesHeader;
-      const children = toArray(body.children());
-      const sourcePath = children[2].node.querySelector('span');
-      expect(sourcePath!.innerHTML).toEqual(path);
+      const header = sidebar.sources.toolbar;
+      const pathWidget = header.node.innerHTML;
+      expect(pathWidget).toContain(path);
     });
 
     it('should display the source code in the body', () => {
-      const body = sidebar.sources.widgets[1] as SourcesBody;
+      const body = sidebar.sources.widgets[0] as SourcesBody;
       const children = toArray(body.children());
       const editor = children[0] as CodeEditorWrapper;
       expect(editor.model.value.text).toEqual(code);

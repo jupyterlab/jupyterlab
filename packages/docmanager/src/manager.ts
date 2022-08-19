@@ -2,35 +2,23 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
-
 import { PathExt } from '@jupyterlab/coreutils';
-
-import { UUID } from '@lumino/coreutils';
-
+import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 import {
-  DocumentRegistry,
   Context,
+  DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
-
+import { UUID } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import { SaveHandler } from './savehandler';
-
 import { IDocumentManager } from './tokens';
-
 import { DocumentWidgetManager } from './widgetmanager';
 
 /**
@@ -53,6 +41,8 @@ export class DocumentManager implements IDocumentManager {
     this.services = options.manager;
     this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
+    this._docProviderFactory = options.docProviderFactory;
+    this._isConnectedCallback = options.isConnectedCallback || (() => true);
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -124,6 +114,22 @@ export class DocumentManager implements IDocumentManager {
         return;
       }
       handler.saveInterval = value || 120;
+    });
+  }
+
+  /**
+   * Defines max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+   */
+  get lastModifiedCheckMargin(): number {
+    return this._lastModifiedCheckMargin;
+  }
+
+  set lastModifiedCheckMargin(value: number) {
+    this._lastModifiedCheckMargin = value;
+
+    // For each existing context, update the margin value.
+    this._contexts.forEach(context => {
+      context.lastModifiedCheckMargin = value;
     });
   }
 
@@ -270,6 +276,18 @@ export class DocumentManager implements IDocumentManager {
   }
 
   /**
+   * Duplicate a file.
+   *
+   * @param path - The full path to the file to be duplicated.
+   *
+   * @returns A promise which resolves when the file is duplicated.
+   */
+  duplicate(path: string): Promise<Contents.IModel> {
+    const basePath = PathExt.dirname(path);
+    return this.services.contents.copy(path, basePath);
+  }
+
+  /**
    * See if a widget already exists for the given path and widget name.
    *
    * @param path - The file path to use.
@@ -379,10 +397,13 @@ export class DocumentManager implements IDocumentManager {
   ): IDocumentWidget | undefined {
     const widget = this.findWidget(path, widgetName);
     if (widget) {
-      this._opener.open(widget, options || {});
+      this._opener.open(widget, {
+        type: widgetName,
+        ...options
+      });
       return widget;
     }
-    return this.open(path, widgetName, kernel, options || {});
+    return this.open(path, widgetName, kernel, options ?? {});
   }
 
   /**
@@ -470,6 +491,7 @@ export class DocumentManager implements IDocumentManager {
       options?: DocumentRegistry.IOpenOptions
     ) => {
       this._widgetManager.adoptWidget(context, widget);
+      // TODO should we pass the type for layout customization
       this._opener.open(widget, options);
     };
     const modelDBFactory =
@@ -483,10 +505,14 @@ export class DocumentManager implements IDocumentManager {
       modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      collaborative: this._collaborative
+      collaborative: this._collaborative,
+      docProviderFactory: this._docProviderFactory,
+      lastModifiedCheckMargin: this._lastModifiedCheckMargin,
+      translator: this.translator
     });
     const handler = new SaveHandler({
       context,
+      isConnectedCallback: this._isConnectedCallback,
       saveInterval: this.autosaveInterval
     });
     Private.saveHandlerProperty.set(context, handler);
@@ -550,7 +576,7 @@ export class DocumentManager implements IDocumentManager {
       return undefined;
     }
 
-    // Handle the kernel pereference.
+    // Handle the kernel preference.
     const preference = this.registry.getKernelPreference(
       path,
       widgetFactory.name,
@@ -579,10 +605,14 @@ export class DocumentManager implements IDocumentManager {
     }
 
     const widget = this._widgetManager.createWidget(widgetFactory, context);
-    this._opener.open(widget, options || {});
+    this._opener.open(widget, { type: widgetFactory.name, ...options });
 
     // If the initial opening of the context fails, dispose of the widget.
     ready.catch(err => {
+      console.error(
+        `Failed to initialize the context with '${factory.name}' for ${path}`,
+        err
+      );
       widget.close();
     });
 
@@ -607,10 +637,13 @@ export class DocumentManager implements IDocumentManager {
   private _isDisposed = false;
   private _autosave = true;
   private _autosaveInterval = 120;
+  private _lastModifiedCheckMargin = 500;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
+  private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _collaborative: boolean;
+  private _isConnectedCallback: () => boolean;
 }
 
 /**
@@ -652,14 +685,26 @@ export namespace DocumentManager {
     sessionDialogs?: ISessionContext.IDialogs;
 
     /**
-     * The applicaton language translator.
+     * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * A factory method for the document provider.
+     */
+    docProviderFactory?: IDocumentProviderFactory;
+
     /**
      * Whether the context should be collaborative.
      * If true, the context will connect through yjs_ws_server to share information if possible.
      */
     collaborative?: boolean;
+
+    /**
+     * Autosaving should be paused while this callback function returns `false`.
+     * By default, it always returns `true`.
+     */
+    isConnectedCallback?: () => boolean;
   }
 
   /**

@@ -10,25 +10,13 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
-    },
-    {
       "path": "../coreutils"
-    },
-    {
-      "path": "../docmanager"
     },
     {
       "path": "../docregistry"
     },
     {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../markdownviewer"
-    },
-    {
-      "path": "../notebook"
+      "path": "../observables"
     },
     {
       "path": "../rendermime"

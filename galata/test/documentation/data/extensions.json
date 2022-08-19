@@ -1,0 +1,34 @@
+[
+  {
+    "name": "@jupyterlab/geojson-extension",
+    "description": "GeoJSON renderer for JupyterLab",
+    "url": "https://github.com/jupyterlab/jupyter-renderers",
+    "enabled": true,
+    "core": false,
+    "latest_version": "3.2.0",
+    "installed_version": "3.2.0",
+    "status": "error",
+    "pkg_type": "prebuilt",
+    "install": {
+      "packageManager": "python",
+      "packageName": "jupyterlab-geojson",
+      "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package jupyterlab-geojson"
+    }
+  },
+  {
+    "name": "@jupyter-widgets/jupyterlab-manager",
+    "description": "The JupyterLab extension providing Jupyter widgets.",
+    "url": "https://github.com/jupyter-widgets/ipywidgets",
+    "enabled": true,
+    "core": false,
+    "latest_version": "3.1.0",
+    "installed_version": "3.1.0",
+    "status": "error",
+    "pkg_type": "prebuilt",
+    "install": {
+      "packageManager": "python",
+      "packageName": "jupyterlab_widgets",
+      "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package jupyterlab_widgets"
+    }
+  }
+]

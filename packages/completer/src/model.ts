@@ -3,18 +3,14 @@
 
 import {
   IIterator,
-  IterableOrArrayLike,
   iter,
+  IterableOrArrayLike,
   map,
+  StringExt,
   toArray
 } from '@lumino/algorithm';
-
 import { JSONExt, ReadonlyPartialJSONArray } from '@lumino/coreutils';
-
-import { StringExt } from '@lumino/algorithm';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 
@@ -187,8 +183,8 @@ export class CompleterModel implements Completer.IModel {
   setCompletionItems?(newValue: CompletionHandler.ICompletionItems): void {
     if (
       JSONExt.deepEqual(
-        (newValue as unknown) as ReadonlyPartialJSONArray,
-        (this._completionItems as unknown) as ReadonlyPartialJSONArray
+        newValue as unknown as ReadonlyPartialJSONArray,
+        this._completionItems as unknown as ReadonlyPartialJSONArray
       )
     ) {
       return;
@@ -202,6 +198,7 @@ export class CompleterModel implements Completer.IModel {
 
   /**
    * The list of visible items in the completer menu.
+   * @deprecated use `completionItems` instead
    *
    * #### Notes
    * This is a read-only property.
@@ -240,7 +237,7 @@ export class CompleterModel implements Completer.IModel {
    * ```
    * ['function', 'instance', 'class', 'module', 'keyword']
    * ```
-   * and then has any remaining types listed alphebetically. This will give
+   * and then has any remaining types listed alphabetically. This will give
    * reliable visual encoding for these known types, but allow kernels to
    * provide new types.
    */
@@ -254,7 +251,7 @@ export class CompleterModel implements Completer.IModel {
   setOptions(
     newValue: IterableOrArrayLike<string>,
     typeMap?: Completer.TypeMap
-  ) {
+  ): void {
     const values = toArray(newValue || []);
     const types = typeMap || {};
 
@@ -330,7 +327,6 @@ export class CompleterModel implements Completer.IModel {
    */
   handleTextChange(change: Completer.ITextState): void {
     const original = this._original;
-
     // If there is no active completion, return.
     if (!original) {
       return;
@@ -361,7 +357,6 @@ export class CompleterModel implements Completer.IModel {
     const original = this._original;
     const cursor = this._cursor;
     const current = this._current;
-
     if (!original || !cursor || !current) {
       return undefined;
     }
@@ -379,7 +374,7 @@ export class CompleterModel implements Completer.IModel {
    *
    * @param hard - Reset even if a subset match is in progress.
    */
-  reset(hard = false) {
+  reset(hard = false): void {
     // When the completer detects a common subset prefix for all options,
     // it updates the model and sets the model source to that value, triggering
     // a reset. Unless explicitly a hard reset, this should be ignored.
@@ -464,6 +459,60 @@ export class CompleterModel implements Completer.IModel {
   }
 
   /**
+   * Lazy load missing data of item at `activeIndex`.
+   * @param {number} activeIndex - index of item
+   * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
+   * Return a promise of `null` if another `resolveItem` is called. Otherwise return the
+   * promise of resolved completion item.
+   */
+  resolveItem(
+    activeIndex: number
+  ): Promise<CompletionHandler.ICompletionItem | null> | undefined {
+    const current = ++this._resolvingItem;
+    let resolvedItem: Promise<CompletionHandler.ICompletionItem>;
+    if (!this.completionItems) {
+      return undefined;
+    }
+
+    let completionItems = this.completionItems();
+    if (!completionItems || !completionItems[activeIndex]) {
+      return undefined;
+    }
+    let completionItem = completionItems[activeIndex];
+    if (completionItem.resolve) {
+      let patch: Completer.IPatch | undefined;
+      if (completionItem.insertText) {
+        patch = this.createPatch(completionItem.insertText);
+      }
+      resolvedItem = completionItem.resolve(patch);
+    } else {
+      resolvedItem = Promise.resolve(completionItem);
+    }
+    return resolvedItem
+      .then(activeItem => {
+        (
+          Object.keys(activeItem) as Array<
+            keyof CompletionHandler.ICompletionItem
+          >
+        ).forEach(
+          <Key extends keyof CompletionHandler.ICompletionItem>(key: Key) => {
+            completionItem[key] = activeItem[key];
+          }
+        );
+        completionItem.resolve = undefined;
+        if (current !== this._resolvingItem) {
+          return Promise.resolve(null);
+        }
+        return activeItem;
+      })
+      .catch(e => {
+        console.error(e);
+        // Failed to resolve missing data, return the original item.
+        return Promise.resolve(completionItem);
+      });
+  }
+
+  /**
    * Reset the state of the model.
    */
   private _reset(): void {
@@ -489,6 +538,11 @@ export class CompleterModel implements Completer.IModel {
   private _typeMap: Completer.TypeMap = {};
   private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
+
+  /**
+   * A counter to cancel ongoing `resolveItem` call.
+   */
+  private _resolvingItem = 0;
 }
 
 /**

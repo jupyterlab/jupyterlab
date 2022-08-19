@@ -1,28 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as models from '@jupyterlab/shared-models';
-
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { JSONObject } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
+import * as nbformat from '@jupyterlab/nbformat';
 import {
   IModelDB,
-  ModelDB,
-  IObservableValue,
-  ObservableValue,
   IObservableMap,
-  IObservableString
+  IObservableString,
+  IObservableValue,
+  ModelDB,
+  ObservableValue
 } from '@jupyterlab/observables';
-
+import * as models from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
+import { JSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+
+const globalModelDBMutex = models.createMutex();
 
 /**
  * A namespace for code editors.
@@ -66,7 +61,7 @@ export namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export interface ICoordinate extends JSONObject, ClientRect {}
+  export interface ICoordinate extends DOMRectReadOnly {}
 
   /**
    * A range.
@@ -234,7 +229,6 @@ export namespace CodeEditor {
      */
     constructor(options?: Model.IOptions) {
       options = options || {};
-
       if (options.modelDB) {
         this.modelDB = options.modelDB;
       } else {
@@ -274,6 +268,7 @@ export namespace CodeEditor {
         this.value.text = sharedModel.getSource();
       }
       this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
+      this.sharedModel.dispose();
       // clone model retrieve a shared (not standalone) model
       this.sharedModel = sharedModel;
       this.sharedModel.changed.connect(this._onSharedModelChanged, this);
@@ -283,14 +278,14 @@ export namespace CodeEditor {
     /**
      * We update the modeldb store when the shared model changes.
      * To ensure that we don't run into infinite loops, we wrap this call in a "mutex".
-     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged hander
+     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged handler
      * or the modelDB change handler.
      */
     protected _onSharedModelChanged(
       sender: models.ISharedBaseCell<any>,
       change: models.CellChange<nbformat.IBaseCellMetadata>
     ): void {
-      this._mutex(() => {
+      globalModelDBMutex(() => {
         if (change.sourceChange) {
           const value = this.modelDB.get('value') as IObservableString;
           let currpos = 0;
@@ -315,7 +310,7 @@ export namespace CodeEditor {
       value: IObservableString,
       event: IObservableString.IChangedArgs
     ): void {
-      this._mutex(() => {
+      globalModelDBMutex(() => {
         this.sharedModel.transact(() => {
           switch (event.type) {
             case 'insert':
@@ -344,11 +339,6 @@ export namespace CodeEditor {
      * The shared model for the cell editor.
      */
     sharedModel: models.ISharedText;
-
-    /**
-     * A mutex to update the shared model.
-     */
-    protected readonly _mutex = models.createMutex();
 
     /**
      * The underlying `IModelDB` instance in which model
@@ -413,6 +403,7 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this.modelDB.dispose();
       Signal.clearData(this);
     }
 
@@ -541,7 +532,7 @@ export namespace CodeEditor {
     readonly charWidth: number;
 
     /**
-     * Get the number of lines in the eidtor.
+     * Get the number of lines in the editor.
      */
     readonly lineCount: number;
 
@@ -558,7 +549,7 @@ export namespace CodeEditor {
     /**
      * Set config options for the editor.
      */
-    setOptions<K extends keyof IConfig>(options: IConfigOptions<K>[]): void;
+    setOptions(options: Partial<IConfig>): void;
 
     /**
      * Returns the content for the given line number.
@@ -624,14 +615,6 @@ export namespace CodeEditor {
     blur(): void;
 
     /**
-     * Repaint the editor.
-     *
-     * #### Notes
-     * A repainted editor should fit to its host node.
-     */
-    refresh(): void;
-
-    /**
      * Resize the editor to fit its host node.
      */
     resizeToFit(): void;
@@ -644,16 +627,6 @@ export namespace CodeEditor {
      * @returns A disposable that can be used to remove the handler.
      */
     addKeydownHandler(handler: KeydownHandler): IDisposable;
-
-    /**
-     * Set the size of the editor.
-     *
-     * @param size - The desired size.
-     *
-     * #### Notes
-     * Use `null` if the size is unknown.
-     */
-    setSize(size: IDimension | null): void;
 
     /**
      * Reveals the given position in the editor.
@@ -689,19 +662,24 @@ export namespace CodeEditor {
     getPositionForCoordinate(coordinate: ICoordinate): IPosition | null;
 
     /**
+     * Get a list of tokens for the current editor text content.
+     */
+    getTokens(): CodeEditor.IToken[];
+
+    /**
+     * Get the token at a given editor position.
+     */
+    getTokenAt(offset: number): CodeEditor.IToken;
+
+    /**
+     * Get the token a the cursor position.
+     */
+    getTokenAtCursor(): CodeEditor.IToken;
+
+    /**
      * Inserts a new line at the cursor position and indents it.
      */
     newIndentedLine(): void;
-
-    /**
-     * Gets the token at a given position.
-     */
-    getTokenForPosition(position: IPosition): IToken;
-
-    /**
-     * Gets the list of tokens for the editor model.
-     */
-    getTokens(): IToken[];
 
     /**
      * Replaces selection with the given text.
@@ -718,6 +696,13 @@ export namespace CodeEditor {
    * The configuration options for an editor.
    */
   export interface IConfig {
+    /**
+     * Half-period in milliseconds used for cursor blinking.
+     * By setting this to zero, blinking can be disabled.
+     * A negative value hides the cursor entirely.
+     */
+    cursorBlinkRate: number;
+
     /**
      * User preferred font family for text editors.
      */
@@ -788,37 +773,38 @@ export namespace CodeEditor {
     rulers: Array<number>;
 
     /**
-     * Wheter to allow code folding
+     * Whether to allow code folding
      */
     codeFolding: boolean;
+
+    /**
+     * Whether to highlight trailing whitespace
+     */
+    showTrailingSpace: boolean;
   }
 
   /**
    * The default configuration options for an editor.
    */
   export const defaultConfig: IConfig = {
+    // Order matters as gutters will be sorted by the configuration order
+    autoClosingBrackets: false,
+    cursorBlinkRate: 530,
     fontFamily: null,
     fontSize: null,
+    handlePaste: true,
+    insertSpaces: true,
     lineHeight: null,
     lineNumbers: false,
     lineWrap: 'on',
-    wordWrapColumn: 80,
+    matchBrackets: true,
     readOnly: false,
     tabSize: 4,
-    insertSpaces: true,
-    matchBrackets: true,
-    autoClosingBrackets: true,
-    handlePaste: true,
     rulers: [],
+    showTrailingSpace: false,
+    wordWrapColumn: 80,
     codeFolding: false
   };
-
-  /**
-   * The options used to set several options at once with setOptions.
-   */
-  export interface IConfigOptions<K extends keyof IConfig> {
-    K: IConfig[K];
-  }
 
   /**
    * The options used to initialize an editor.
@@ -857,7 +843,11 @@ export namespace CodeEditor {
 
   export namespace Model {
     export interface IOptions {
+      /**
+       * A unique identifier for the model.
+       */
       id?: string;
+
       /**
        * The initial value of the model.
        */

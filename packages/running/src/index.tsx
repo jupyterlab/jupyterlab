@@ -5,24 +5,19 @@
  * @module running
  */
 
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  Dialog,
+  closeIcon,
+  LabIcon,
   ReactWidget,
-  showDialog,
+  refreshIcon,
   ToolbarButtonComponent,
   UseSignal
-} from '@jupyterlab/apputils';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
-import { closeIcon, LabIcon, refreshIcon } from '@jupyterlab/ui-components';
-
+} from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { ISignal } from '@lumino/signaling';
-
 import * as React from 'react';
 
 /**
@@ -80,14 +75,12 @@ const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
  */
 const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
 
-/* tslint:disable */
 /**
  * The running sessions token.
  */
 export const IRunningSessionManagers = new Token<IRunningSessionManagers>(
   '@jupyterlab/running:IRunningSessionManagers'
 );
-/* tslint:enable */
 
 /**
  * The running interface.
@@ -325,7 +318,7 @@ export class RunningSessions extends ReactWidget {
     this.addClass(RUNNING_CLASS);
   }
 
-  protected render() {
+  protected render(): JSX.Element {
     return (
       <RunningSessionsComponent
         managers={this.managers}

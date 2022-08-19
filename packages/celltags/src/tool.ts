@@ -1,15 +1,22 @@
-import { reduce } from '@lumino/algorithm';
-import { PanelLayout } from '@lumino/widgets';
-import { NotebookTools, INotebookTracker } from '@jupyterlab/notebook';
-import { Cell } from '@jupyterlab/cells';
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { Cell } from '@jupyterlab/cells';
+import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { TagWidget } from './widget';
+import { reduce } from '@lumino/algorithm';
+import { Message } from '@lumino/messaging';
+import { Signal } from '@lumino/signaling';
+import { PanelLayout } from '@lumino/widgets';
 import { AddWidget } from './addwidget';
+import { TagWidget } from './widget';
 
 /**
  * A Tool for tag operations.
@@ -38,7 +45,7 @@ export class TagTool extends NotebookTools.Tool {
   /**
    * Add an AddWidget input box to the layout.
    */
-  createTagInput() {
+  createTagInput(): void {
     const layout = this.layout as PanelLayout;
     const input = new AddWidget(this.translator);
     input.id = 'add-tag';
@@ -68,7 +75,7 @@ export class TagTool extends NotebookTools.Tool {
    *
    * @param name - The name of the tag.
    */
-  addTag(name: string) {
+  addTag(name: string): void {
     const cell = this.tracker?.activeCell;
     if (cell) {
       const oldTags = [
@@ -87,7 +94,7 @@ export class TagTool extends NotebookTools.Tool {
    *
    * @param name - The name of the tag.
    */
-  removeTag(name: string) {
+  removeTag(name: string): void {
     const cell = this.tracker?.activeCell;
     if (cell) {
       const oldTags = [
@@ -107,7 +114,7 @@ export class TagTool extends NotebookTools.Tool {
    * Update each tag widget to represent whether it is applied to the current
    * active cell.
    */
-  loadActiveTags() {
+  loadActiveTags(): void {
     const layout = this.layout as PanelLayout;
     for (const widget of layout.widgets) {
       widget.update();
@@ -118,7 +125,7 @@ export class TagTool extends NotebookTools.Tool {
    * Pull from cell metadata all the tags used in the notebook and update the
    * stored tag list.
    */
-  pullTags() {
+  pullTags(): void {
     const notebook = this.tracker?.currentWidget;
     const cells = notebook?.model?.cells ?? [];
     const allTags = reduce(
@@ -136,7 +143,7 @@ export class TagTool extends NotebookTools.Tool {
    * Pull the most recent list of tags and update the tag widgets - dispose if
    * the tag no longer exists, and create new widgets for new tags.
    */
-  refreshTags() {
+  refreshTags(): void {
     this.pullTags();
     const layout = this.layout as PanelLayout;
     const tagWidgets = layout.widgets.filter(w => w.id !== 'add-tag');
@@ -158,7 +165,7 @@ export class TagTool extends NotebookTools.Tool {
    * Validate the 'tags' of cell metadata, ensuring it is a list of strings and
    * that each string doesn't include spaces.
    */
-  validateTags(cell: Cell, tags: string[]) {
+  validateTags(cell: Cell, tags: string[]): void {
     tags = tags.filter(tag => typeof tag === 'string');
     tags = reduce(
       tags,
@@ -183,7 +190,7 @@ export class TagTool extends NotebookTools.Tool {
   /**
    * Get all tags once available.
    */
-  protected onAfterShow() {
+  protected onAfterShow(): void {
     this.refreshTags();
     this.loadActiveTags();
   }
@@ -192,7 +199,7 @@ export class TagTool extends NotebookTools.Tool {
    * Upon attach, add label if it doesn't already exist and listen for changes
    * from the notebook tracker.
    */
-  protected onAfterAttach() {
+  protected onAfterAttach(msg: Message): void {
     if (!this.label) {
       const label = document.createElement('label');
       label.textContent = this._trans.__('Cell Tags');
@@ -200,20 +207,16 @@ export class TagTool extends NotebookTools.Tool {
       this.parent!.node.insertBefore(label, this.node);
       this.label = true;
     }
-    if (this.tracker.currentWidget) {
-      void this.tracker.currentWidget.context.ready.then(() => {
-        this.refreshTags();
-        this.loadActiveTags();
-      });
-      this.tracker.currentWidget.model!.cells.changed.connect(() => {
-        this.refreshTags();
-        this.loadActiveTags();
-      });
-    }
-    this.tracker.currentChanged.connect(() => {
-      this.refreshTags();
-      this.loadActiveTags();
-    });
+    this.onCurrentChanged();
+    super.onAfterAttach(msg);
+  }
+
+  /**
+   * Clear signal connections before detaching
+   */
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    Signal.disconnectReceiver(this);
   }
 
   /**
@@ -232,6 +235,36 @@ export class TagTool extends NotebookTools.Tool {
       }
     }
     this.validateTags(this.tracker.activeCell!, taglist);
+  }
+
+  /**
+   * Callback on current widget changes
+   */
+  protected onCurrentChanged(): void {
+    Signal.disconnectReceiver(this);
+    this.tracker.currentChanged.connect(this.onCurrentChanged, this);
+    if (this.tracker.currentWidget) {
+      void this.tracker.currentWidget.context.ready.then(() => {
+        this.refresh();
+      });
+      this.tracker.currentWidget.model!.cells.changed.connect(
+        this.refresh,
+        this
+      );
+      this.tracker.currentWidget.content.activeCellChanged.connect(
+        this.refresh,
+        this
+      );
+    }
+    this.refresh();
+  }
+
+  /**
+   * Refresh tags and active status
+   */
+  protected refresh(): void {
+    this.refreshTags();
+    this.loadActiveTags();
   }
 
   public tracker: INotebookTracker;

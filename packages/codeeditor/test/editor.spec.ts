@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IObservableString } from '@jupyterlab/observables';
 
 describe('CodeEditor.Model', () => {

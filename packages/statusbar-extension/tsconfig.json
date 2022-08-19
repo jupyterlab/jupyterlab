@@ -13,24 +13,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
-    },
-    {
-      "path": "../console"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../mainmenu"
-    },
-    {
-      "path": "../notebook"
-    },
-    {
       "path": "../settingregistry"
     },
     {
@@ -38,9 +20,6 @@
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }

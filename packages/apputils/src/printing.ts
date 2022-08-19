@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@lumino/widgets';
-
 import { ServerConnection } from '@jupyterlab/services';
+import { Widget } from '@lumino/widgets';
 
 /**
  * Any object is "printable" if it implements the `IPrintable` interface.
@@ -67,13 +66,13 @@ export namespace Printing {
     return printContent(widget.node);
   }
 
-  const settings = ServerConnection.makeSettings();
   /**
    * Prints a URL by loading it into an iframe.
    *
    * @param url URL to load into an iframe.
    */
   export async function printURL(url: string): Promise<void> {
+    const settings = ServerConnection.makeSettings();
     const text = await (
       await ServerConnection.makeRequest(url, {}, settings)
     ).text();

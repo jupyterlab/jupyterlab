@@ -56,6 +56,12 @@ export interface ISessionConnection extends IObservableDisposable {
   connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
 
   /**
+   * The kernel pendingInput signal, proxied from the current
+   * kernel.
+   */
+  pendingInput: ISignal<this, boolean>;
+
+  /**
    * The kernel iopubMessage signal, proxied from the current kernel.
    */
   iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;

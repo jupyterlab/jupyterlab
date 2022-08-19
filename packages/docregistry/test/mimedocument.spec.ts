@@ -1,23 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message } from '@lumino/messaging';
-
-import { BoxLayout } from '@lumino/widgets';
-
 import {
-  DocumentRegistry,
   Context,
+  DocumentRegistry,
   MimeContent,
   MimeDocument,
   MimeDocumentFactory
 } from '@jupyterlab/docregistry';
-
-import { RenderedText, IRenderMime } from '@jupyterlab/rendermime';
-
+import { IRenderMime, RenderedText } from '@jupyterlab/rendermime';
 import { defaultRenderMime, testEmission } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { Message } from '@lumino/messaging';
+import { BoxLayout } from '@lumino/widgets';
 
 const RENDERMIME = defaultRenderMime();
 

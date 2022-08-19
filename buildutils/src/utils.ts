@@ -1,14 +1,31 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/* global NodeRequire */
 import path from 'path';
 import glob from 'glob';
 import fs from 'fs-extra';
 import childProcess from 'child_process';
 import { DepGraph } from 'dependency-graph';
 import sortPackageJson from 'sort-package-json';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
+
+const assert = require('assert');
 
 type Dict<T> = { [key: string]: T };
 
 const backSlash = /\\/g;
+
+/**
+ *  Exit with an error code on uncaught error.
+ */
+export function exitOnUncaughtException(): void {
+  process.on('uncaughtException', function (err) {
+    console.error('Uncaught exception', err);
+    process.exit(1);
+  });
+}
 
 /**
  * Get all of the lerna package paths.
@@ -60,7 +77,7 @@ export function getCorePaths(): string[] {
  */
 export function writePackageData(
   pkgJsonPath: string,
-  data: JSONObject
+  data: Record<any, any>
 ): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
@@ -85,7 +102,10 @@ export function readJSONFile(filePath: string): any {
 /**
  * Write a json file.
  */
-export function writeJSONFile(filePath: string, data: JSONObject): boolean {
+export function writeJSONFile(
+  filePath: string,
+  data: Record<any, any>
+): boolean {
   function sortObjByKey(value: any): any {
     // https://stackoverflow.com/a/35810961
     return typeof value === 'object'
@@ -107,11 +127,15 @@ export function writeJSONFile(filePath: string, data: JSONObject): boolean {
   } catch (e) {
     // no-op
   }
-  if (!JSONExt.deepEqual(data, orig)) {
+
+  // If values do not match, overwrite file.
+  try {
+    assert.deepStrictEqual(data, orig);
+    return false;
+  } catch (error) {
     fs.writeFileSync(filePath, text, 'utf8');
     return true;
   }
-  return false;
 }
 
 /**
@@ -175,8 +199,9 @@ export function checkStatus(cmd: string): number | null {
  * Get the current version of JupyterLab
  */
 export function getPythonVersion(): string {
-  const cmd = 'python setup.py --version';
-  return run(cmd, { stdio: 'pipe' }, true);
+  const cmd = 'hatchling version';
+  const lines = run(cmd, { stdio: 'pipe' }, true).split('\n');
+  return lines[lines.length - 1];
 }
 
 /**
@@ -215,18 +240,13 @@ ${status}`
 /**
  * Post-bump.
  */
-export function postbump(): void {
-  // Get the current version.
-  const curr = getPythonVersion();
-
-  // Update the dev mode version.
-  const filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
-  const data = readJSONFile(filePath);
-  data.jupyterlab.version = curr;
-  writeJSONFile(filePath, data);
+export function postbump(commit = true): void {
+  run('jlpm run integrity');
 
   // Commit changes.
-  run('git commit -am "bump version"');
+  if (commit) {
+    run('git commit -am "[ci skip] bump version"');
+  }
 }
 
 /**
@@ -307,6 +327,25 @@ export function getPackageGraph(): DepGraph<Dict<unknown>> {
   return graph;
 }
 
+function isModuleDir(current: string, moduleDirs: string[]): boolean {
+  return moduleDirs.some(dir => current.endsWith(dir));
+}
+
+function findPackageJson(base: string, moduleDirs: string[]): NodeRequire {
+  const { root } = path.parse(base);
+  let current = base;
+
+  while (current !== root && !isModuleDir(current, moduleDirs)) {
+    const pkgJsonPath = path.join(current, 'package.json');
+    if (fs.existsSync(pkgJsonPath)) {
+      return require(pkgJsonPath);
+    }
+    current = path.resolve(current, '..');
+  }
+  throw new Error(
+    `Unable to find package.json for '${base}', moduleDirs = '${moduleDirs[0]}'`
+  );
+}
 /**
  * Resolve a `package.json` in the `module` starting at resolution from the `parentModule`.
  *
@@ -320,12 +359,30 @@ function requirePackage(parentModule: string, module: string): NodeRequire {
   try {
     parentModulePath = require.resolve(parentModule);
   } catch {
-    return require(packagePath);
+    try {
+      return require(packagePath);
+    } catch {
+      return findPackageJson(module, [path.resolve(packagePath, '..')]);
+    }
   }
-  const requirePath = require.resolve(packagePath, {
-    paths: [parentModulePath]
-  });
-  return require(requirePath);
+
+  try {
+    // This may fail for package not exporting `package.json` in their exports map
+    // https://github.com/nodejs/node/issues/33460
+    const requirePath = require.resolve(packagePath, {
+      paths: [parentModulePath]
+    });
+    return require(requirePath);
+  } catch {
+    // If it fails, try to find the package.json by going parent to parent
+    // Inspired by https://github.com/rollup/plugins/blob/540767b947cfad0dd06a278b977b8ce05da9593c/packages/node-resolve/src/package/utils.js#L11
+    const base = require.resolve(module, {
+      paths: [parentModulePath]
+    });
+    return findPackageJson(base, [parentModulePath]);
+  }
+
+  throw new Error(`Unable to find package.json for '${module}'.`);
 }
 
 /**

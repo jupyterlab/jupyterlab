@@ -3,11 +3,13 @@
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
+
+import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { IDebugger } from './tokens';
 
@@ -30,6 +32,13 @@ export class DebuggerSession implements IDebugger.ISession {
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * Returns the initialize response .
+   */
+  get capabilities(): DebugProtocol.Capabilities | undefined {
+    return this._capabilities;
   }
 
   /**
@@ -80,10 +89,37 @@ export class DebuggerSession implements IDebugger.ISession {
   }
 
   /**
-   * Whether the debug session is started
+   * Whether the debug session is started.
    */
   get isStarted(): boolean {
     return this._isStarted;
+  }
+
+  /**
+   * Whether to pause on exceptions
+   */
+  get pausingOnExceptions(): string[] {
+    return this._pausingOnExceptions;
+  }
+
+  set pausingOnExceptions(updatedPausingOnExceptions: string[]) {
+    this._pausingOnExceptions = updatedPausingOnExceptions;
+  }
+
+  /**
+   * Exception paths defined by the debugger
+   */
+  get exceptionPaths(): string[] {
+    return this._exceptionPaths;
+  }
+
+  /**
+   * Exception breakpoint filters defined by the debugger
+   */
+  get exceptionBreakpointFilters():
+    | DebugProtocol.ExceptionBreakpointsFilter[]
+    | undefined {
+    return this._exceptionBreakpointFilters;
   }
 
   /**
@@ -109,7 +145,7 @@ export class DebuggerSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    const reply = await this.sendRequest('initialize', {
+    const initializeResponse = await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
       adapterID: this.connection?.kernel?.name ?? '',
@@ -122,12 +158,15 @@ export class DebuggerSession implements IDebugger.ISession {
       locale: document.documentElement.lang
     });
 
-    if (!reply.success) {
-      throw new Error(`Could not start the debugger: ${reply.message}`);
+    if (!initializeResponse.success) {
+      throw new Error(
+        `Could not start the debugger: ${initializeResponse.message}`
+      );
     }
-
+    this._capabilities = initializeResponse.body;
     this._isStarted = true;
-
+    this._exceptionBreakpointFilters =
+      initializeResponse.body?.exceptionBreakpointFilters;
     await this.sendRequest('attach', {});
   }
 
@@ -148,6 +187,7 @@ export class DebuggerSession implements IDebugger.ISession {
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
     const message = await this.sendRequest('debugInfo', {});
     this._isStarted = message.body.isStarted;
+    this._exceptionPaths = message.body?.exceptionPaths;
     return message;
   }
 
@@ -216,8 +256,14 @@ export class DebuggerSession implements IDebugger.ISession {
   private _seq = 0;
   private _ready = new PromiseDelegate<void>();
   private _connection: Session.ISessionConnection | null;
+  private _capabilities: DebugProtocol.Capabilities | undefined;
   private _isDisposed = false;
   private _isStarted = false;
+  private _pausingOnExceptions: string[] = [];
+  private _exceptionPaths: string[] = [];
+  private _exceptionBreakpointFilters:
+    | DebugProtocol.ExceptionBreakpointsFilter[]
+    | undefined = [];
   private _disposed = new Signal<this, void>(this);
   private _eventMessage = new Signal<
     IDebugger.ISession,

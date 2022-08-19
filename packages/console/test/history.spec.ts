@@ -2,18 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext } from '@jupyterlab/apputils';
-
-import { KernelMessage } from '@jupyterlab/services';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
+import { KernelMessage } from '@jupyterlab/services';
 import { createSessionContext, signalToPromise } from '@jupyterlab/testutils';
-
 import { ConsoleHistory } from '../src';
 
-const mockHistory = ({
+const mockHistory = {
   header: null,
   parent_header: {
     date: '',
@@ -35,7 +30,7 @@ const mockHistory = ({
       [0, 0, 'qux']
     ]
   }
-} as unknown) as KernelMessage.IHistoryReplyMsg;
+} as unknown as KernelMessage.IHistoryReplyMsg;
 
 class TestHistory extends ConsoleHistory {
   methods: string[] = [];

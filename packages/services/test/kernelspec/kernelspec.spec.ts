@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterServer } from '@jupyterlab/testutils';
 import { KernelSpecAPI } from '../../src';
-
-import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
-
-import { makeSettings, PYTHON_SPEC, getRequestHandler } from '../utils';
+import { getRequestHandler, makeSettings, PYTHON_SPEC } from '../utils';
 
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
@@ -47,7 +45,7 @@ describe('kernel', () => {
         default: PYTHON_SPEC.name
       });
       const promise = KernelSpecAPI.getSpecs(serverSettings);
-      await expectFailure(promise, 'No kernelspecs found');
+      await expect(promise).rejects.toThrow(/No kernelspecs found/);
     });
 
     it('should omit an invalid kernelspec', async () => {
@@ -73,7 +71,7 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = KernelSpecAPI.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
+      await expect(promise).rejects.toThrow(/No valid kernelspecs found/);
     });
 
     it('should handle an improper language', async () => {
@@ -84,7 +82,7 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = KernelSpecAPI.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
+      await expect(promise).rejects.toThrow(/No valid kernelspecs found/);
     });
 
     it('should handle an improper argv', async () => {
@@ -95,7 +93,7 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = KernelSpecAPI.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
+      await expect(promise).rejects.toThrow(/No valid kernelspecs found/);
     });
 
     it('should handle an improper display_name', async () => {
@@ -106,7 +104,7 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = KernelSpecAPI.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
+      await expect(promise).rejects.toThrow(/No valid kernelspecs found/);
     });
 
     it('should handle missing resources', async () => {
@@ -117,17 +115,18 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = KernelSpecAPI.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
+      await expect(promise).rejects.toThrow(/No valid kernelspecs found/);
     });
 
     it('should throw an error for an invalid response', async () => {
       const serverSettings = getRequestHandler(201, {});
       const promise = KernelSpecAPI.getSpecs(serverSettings);
-      await expectFailure(promise, 'Invalid response: 201 Created');
+      await expect(promise).rejects.toThrow(/Invalid response: 201 Created/);
     });
 
     it('should handle metadata', async () => {
       const PYTHON_SPEC_W_MD = JSON.parse(JSON.stringify(PYTHON_SPEC));
+      // eslint-disable-next-line camelcase
       PYTHON_SPEC_W_MD.spec.metadata = { some_application: { key: 'value' } };
       const serverSettings = getRequestHandler(200, {
         default: 'python',

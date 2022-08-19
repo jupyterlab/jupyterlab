@@ -1,22 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { KernelMessage } from '@jupyterlab/services';
-
-import { Signal } from '@lumino/signaling';
-
-import { Panel } from '@lumino/widgets';
-
-import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
-
-import { defaultRenderMime, NBTestUtils } from '@jupyterlab/testutils';
-
-import * as Mock from '@jupyterlab/testutils/lib/mock';
-
 import { ISessionContext } from '@jupyterlab/apputils';
-
+import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import { KernelMessage } from '@jupyterlab/services';
+import { defaultRenderMime, NBTestUtils } from '@jupyterlab/testutils';
+import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { UUID } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
+import { Panel } from '@lumino/widgets';
 import { ForeignHandler } from '../src';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {

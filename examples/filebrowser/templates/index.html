@@ -1,3 +1,8 @@
+<!--
+  ~ Copyright (c) Jupyter Development Team.
+  ~ Distributed under the terms of the Modified BSD License.
+-->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,10 +12,10 @@
 
   {# Copy so we do not modify the page_config with updates. #}
   {% set page_config_full = page_config.copy() %}
-    
+
   {# Set a dummy variable - we just want the side effect of the update. #}
   {% set _ = page_config_full.update(baseUrl=base_url, wsUrl=ws_url) %}
-    
+
   <script id="jupyter-config-data" type="application/json">
     {{ page_config_full | tojson }}
   </script>

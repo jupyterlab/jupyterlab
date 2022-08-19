@@ -8,8 +8,8 @@ import { Printing } from '@jupyterlab/apputils';
 import {
   ABCWidgetFactory,
   DocumentRegistry,
-  IDocumentWidget,
-  DocumentWidget
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -33,7 +33,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   constructor(context: DocumentRegistry.Context) {
     super();
     this.context = context;
-    this.node.tabIndex = -1;
+    this.node.tabIndex = 0;
     this.addClass(IMAGE_CLASS);
 
     this._img = document.createElement('img');
@@ -59,7 +59,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
    * Print in iframe.
    */
   [Printing.symbol]() {
-    return () => Printing.printWidget(this);
+    return (): Promise<void> => Printing.printWidget(this);
   }
 
   /**

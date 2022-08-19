@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IIterator, iter, every } from '@lumino/algorithm';
+import { every, IIterator, iter } from '@lumino/algorithm';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -10,7 +10,7 @@ import { ServerConnection } from '../serverconnection';
 import * as Session from './session';
 import { BaseManager } from '../basemanager';
 import { SessionConnection } from './default';
-import { startSession, shutdownSession, listRunning } from './restapi';
+import { listRunning, shutdownSession, startSession } from './restapi';
 import { Kernel } from '../kernel';
 
 /**
@@ -44,7 +44,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
     this._ready = (async () => {
       await this._pollModels.start();
       await this._pollModels.tick;
-      await this._kernelManager.ready;
+      if (this._kernelManager.isActive) {
+        await this._kernelManager.ready;
+      }
       this._isReady = true;
     })();
   }
@@ -249,11 +251,13 @@ export class SessionManager extends BaseManager implements Session.IManager {
     try {
       models = await listRunning(this.serverSettings);
     } catch (err) {
-      // Check for a network error, or a 503 error, which is returned
-      // by a JupyterHub when a server is shut down.
+      // Handle network errors, as well as cases where we are on a
+      // JupyterHub and the server is not running. JupyterHub returns a
+      // 503 (<2.0) or 424 (>2.0) in that case.
       if (
         err instanceof ServerConnection.NetworkError ||
-        err.response?.status === 503
+        err.response?.status === 503 ||
+        err.response?.status === 424
       ) {
         this._connectionFailure.emit(err);
       }
@@ -355,11 +359,84 @@ export namespace SessionManager {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
-    standby?: Poll.Standby;
+    standby?: Poll.Standby | (() => boolean | Poll.Standby);
 
     /**
      * Kernel Manager
      */
     kernelManager: Kernel.IManager;
+  }
+
+  /**
+   * A no-op session manager to be used when starting sessions is not supported.
+   */
+  export class NoopManager extends SessionManager {
+    /**
+     * Whether the manager is active.
+     */
+    get isActive(): boolean {
+      return false;
+    }
+
+    /**
+     * Used for testing.
+     */
+    get parentReady(): Promise<void> {
+      return super.ready;
+    }
+
+    /**
+     * Start a new session - throw an error since it is not supported.
+     */
+    async startNew(
+      createOptions: Session.ISessionOptions,
+      connectOptions: Omit<
+        Session.ISessionConnection.IOptions,
+        'model' | 'connectToKernel' | 'serverSettings'
+      > = {}
+    ): Promise<Session.ISessionConnection> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Session Manager')
+      );
+    }
+
+    /*
+     * Connect to a running session - throw an error since it is not supported.
+     */
+    connectTo(
+      options: Omit<
+        Session.ISessionConnection.IOptions,
+        'connectToKernel' | 'serverSettings'
+      >
+    ): Session.ISessionConnection {
+      throw Error('Not implemented in no-op Session Manager');
+    }
+
+    /**
+     * A promise that fulfills when the manager is ready (never).
+     */
+    get ready(): Promise<void> {
+      return this.parentReady.then(() => this._readyPromise);
+    }
+
+    /**
+     * Shut down a session by id - throw an error since it is not supported.
+     */
+    async shutdown(id: string): Promise<void> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Session Manager')
+      );
+    }
+
+    /**
+     * Execute a request to the server to poll running sessions and update state.
+     */
+    protected async requestRunning(): Promise<void> {
+      return Promise.resolve();
+    }
+
+    private _readyPromise = new Promise<void>(() => {
+      /* no-op */
+    });
   }
 }

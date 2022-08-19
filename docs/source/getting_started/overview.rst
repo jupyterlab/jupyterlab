@@ -1,13 +1,17 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _overview:
 
-Overview
-========
+Get Started
+===========
 
 JupyterLab is a next-generation web-based user interface for Project Jupyter.
 
-.. image:: ../user/images/interface_jupyterlab.png
+.. image:: ../images/interface-jupyterlab.png
    :align: center
    :class: jp-screenshot
+   :alt: JupyterLab showing the file browser, notebook, and several other open files.
 
 JupyterLab enables you to work with documents and activities such as
 :ref:`Jupyter notebooks <notebook>`, text editors, terminals, and custom
@@ -54,6 +58,15 @@ JupyterLab is served from the same `server
 <https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses the same
 `notebook document format <https://nbformat.readthedocs.io/en/latest/>`__ as the
 classic Jupyter Notebook.
+
+.. toctree::
+   :maxdepth: 2
+
+   installation
+   starting
+   issue
+   faq
+   changelog
 
 .. _releases:
 

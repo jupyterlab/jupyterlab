@@ -2,17 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { PathExt } from '@jupyterlab/coreutils';
-
 import { Contents } from '@jupyterlab/services';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
-
 import { IDocumentManager } from './';
 
 /**
@@ -23,7 +18,7 @@ const FILE_DIALOG_CLASS = 'jp-FileDialog';
 /**
  * The class name added for the new name label in the rename dialog
  */
-const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
+const RENAME_NEW_NAME_TITLE_CLASS = 'jp-new-name-title';
 
 /**
  * A stripped-down interface for a file container.
@@ -44,15 +39,18 @@ export interface IFileContainer extends JSONObject {
  */
 export function renameDialog(
   manager: IDocumentManager,
-  oldPath: string,
+  context: DocumentRegistry.Context,
   translator?: ITranslator
-): Promise<Contents.IModel | null> {
+): Promise<void | null> {
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
 
+  const localPath = context.localPath.split('/');
+  const fileName = localPath.pop() || context.localPath;
+
   return showDialog({
     title: trans.__('Rename File'),
-    body: new RenameHandler(oldPath),
+    body: new RenameHandler(fileName),
     focusNodeSelector: 'input',
     buttons: [
       Dialog.cancelButton({ label: trans.__('Cancel') }),
@@ -74,9 +72,7 @@ export function renameDialog(
       );
       return null;
     }
-    const basePath = PathExt.dirname(oldPath);
-    const newPath = PathExt.join(basePath, result.value);
-    return renameFile(manager, oldPath, newPath);
+    return context.rename(result.value);
   });
 }
 
@@ -89,10 +85,13 @@ export function renameFile(
   newPath: string
 ): Promise<Contents.IModel | null> {
   return manager.rename(oldPath, newPath).catch(error => {
-    if (error.message.indexOf('409') === -1) {
+    if (error.response.status !== 409) {
+      // if it's not caused by an already existing file, rethrow
       throw error;
     }
-    return shouldOverwrite(newPath).then(value => {
+
+    // otherwise, ask for confirmation
+    return shouldOverwrite(newPath).then((value: boolean) => {
       if (value) {
         return manager.overwrite(oldPath, newPath);
       }
@@ -186,7 +185,7 @@ namespace Private {
 
     const nameTitle = document.createElement('label');
     nameTitle.textContent = trans.__('New Name');
-    nameTitle.className = RENAME_NEWNAME_TITLE_CLASS;
+    nameTitle.className = RENAME_NEW_NAME_TITLE_CLASS;
     const name = document.createElement('input');
 
     body.appendChild(existingLabel);

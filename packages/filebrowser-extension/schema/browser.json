@@ -1,18 +1,196 @@
 {
   "jupyter.lab.setting-icon": "ui-components:folder",
   "jupyter.lab.setting-icon-label": "File Browser",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-file",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 1
+          },
+          {
+            "command": "filebrowser:open-path",
+            "rank": 1
+          },
+          {
+            "command": "filebrowser:open-url",
+            "rank": 1
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "command": "filebrowser:toggle-main",
+            "rank": 1
+          },
+          {
+            "command": "filebrowser:toggle-hidden-files",
+            "rank": 9.95
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 5
+          },
+          {
+            "command": "filebrowser:toggle-navigate-to-current-directory",
+            "rank": 5
+          },
+          {
+            "type": "separator",
+            "rank": 5
+          }
+        ]
+      }
+    ],
+    "context": [
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-content",
+        "rank": 0
+      },
+      {
+        "command": "filebrowser:open",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 1
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 4
+      },
+      {
+        "command": "filebrowser:rename",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 5
+      },
+      {
+        "command": "filebrowser:delete",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 6
+      },
+      {
+        "command": "filebrowser:cut",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 7
+      },
+      {
+        "command": "filebrowser:copy",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "rank": 8
+      },
+      {
+        "command": "filebrowser:paste",
+        "selector": ".jp-DirListing-content",
+        "rank": 8.5
+      },
+      {
+        "command": "filebrowser:duplicate",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "rank": 9
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 10
+      },
+      {
+        "command": "filebrowser:shutdown",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"].jp-mod-running",
+        "rank": 11
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 12
+      },
+      {
+        "command": "filebrowser:copy-path",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 14
+      },
+      {
+        "command": "filebrowser:toggle-last-modified",
+        "selector": ".jp-DirListing-header",
+        "rank": 14
+      },
+      {
+        "command": "filebrowser:toggle-file-checkboxes",
+        "selector": ".jp-DirListing-header",
+        "rank": 15
+      },
+      {
+        "command": "filebrowser:share-main",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 16
+      },
+      {
+        "type": "separator",
+        "selector": ".jp-DirListing-item[data-isdir]",
+        "rank": 50
+      },
+      {
+        "command": "filebrowser:create-new-file",
+        "selector": ".jp-DirListing-content",
+        "rank": 51
+      },
+      {
+        "command": "filebrowser:create-new-directory",
+        "selector": ".jp-DirListing-content",
+        "rank": 55
+      }
+    ]
+  },
   "title": "File Browser",
   "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [
     {
-      "command": "filebrowser:create-main-launcher",
-      "keys": ["Accel Shift L"],
-      "selector": "body"
-    },
-    {
       "command": "filebrowser:toggle-main",
       "keys": ["Accel Shift F"],
       "selector": "body"
+    },
+    {
+      "command": "filebrowser:go-up",
+      "keys": ["Backspace"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:delete",
+      "keys": ["Delete"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:cut",
+      "keys": ["Accel X"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:copy",
+      "keys": ["Accel C"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:paste",
+      "keys": ["Accel V"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:rename",
+      "keys": ["F2"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:duplicate",
+      "keys": ["Accel D"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }
   ],
   "properties": {
@@ -28,11 +206,29 @@
       "description": "Whether to apply fuzzy algorithm while filtering on file names",
       "default": true
     },
+    "filterDirectories": {
+      "type": "boolean",
+      "title": "Filter directories",
+      "description": "Whether to apply the search on directories",
+      "default": true
+    },
     "showLastModifiedColumn": {
       "type": "boolean",
       "title": "Show last modified column",
       "description": "Whether to show the last modified column",
       "default": true
+    },
+    "showHiddenFiles": {
+      "type": "boolean",
+      "title": "Show hidden files",
+      "description": "Whether to show hidden files. The server parameter `ContentsManager.allow_hidden` must be set to `True` to display hidden files.",
+      "default": false
+    },
+    "showFileCheckboxes": {
+      "type": "boolean",
+      "title": "Use checkboxes to select items",
+      "description": "Whether to show checkboxes next to files and folders",
+      "default": false
     }
   },
   "additionalProperties": false,

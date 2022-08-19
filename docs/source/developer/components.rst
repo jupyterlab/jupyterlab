@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 Using JupyterLab components
 ===========================
 
@@ -39,7 +42,7 @@ Dissecting the 'filebrowser' example
 ------------------------------------
 
 The filebrowser example provides a stand-alone implementation of a
-filebrowser. Here's what the filebrowser's user interface looks like:
+filebrowser. Here's what the filebrowser’s user interface looks like:
 
 |filebrowser user interface|
 

@@ -1,22 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {
+  Button,
+  closeIcon,
+  LabIcon,
+  ReactWidget,
+  Styling
+} from '@jupyterlab/ui-components';
 import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
-
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
-import { PanelLayout, Panel, Widget } from '@lumino/widgets';
-
-import { closeIcon, Button, LabIcon } from '@jupyterlab/ui-components';
-
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-
-import { Styling } from './styling';
-
-import { ReactWidget } from './vdom';
-
 import { WidgetTracker } from './widgettracker';
 
 /**
@@ -43,7 +39,7 @@ export function showDialog<T>(
  */
 export function showErrorMessage(
   title: string,
-  error: any,
+  error: string | Dialog.IError,
   buttons: ReadonlyArray<Dialog.IButton> = [
     Dialog.okButton({ label: 'Dismiss' })
   ]
@@ -101,10 +97,14 @@ export class Dialog<T> extends Widget {
         return renderer.createButtonNode(button);
       })
     );
+    this._lastMouseDownInDialog = false;
 
     const layout = (this.layout = new PanelLayout());
     const content = new Panel();
     content.addClass('jp-Dialog-content');
+    if (typeof options.body === 'string') {
+      content.addClass('jp-Dialog-content-small');
+    }
     layout.addWidget(content);
 
     this._body = normalized.body;
@@ -211,6 +211,9 @@ export class Dialog<T> extends Widget {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
+      case 'mousedown':
+        this._evtMouseDown(event as MouseEvent);
+        break;
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
@@ -234,6 +237,7 @@ export class Dialog<T> extends Widget {
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
     node.addEventListener('click', this, true);
+    document.addEventListener('mousedown', this, true);
     document.addEventListener('focus', this, true);
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
@@ -245,7 +249,7 @@ export class Dialog<T> extends Widget {
         this._primary = el as HTMLElement;
       }
     }
-    this._primary.focus();
+    this._primary?.focus();
   }
 
   /**
@@ -257,6 +261,7 @@ export class Dialog<T> extends Widget {
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
     document.removeEventListener('focus', this, true);
+    document.removeEventListener('mousedown', this, true);
     this._original.focus();
   }
 
@@ -282,7 +287,7 @@ export class Dialog<T> extends Widget {
     if (!content.contains(event.target as HTMLElement)) {
       event.stopPropagation();
       event.preventDefault();
-      if (this._hasClose) {
+      if (this._hasClose && !this._lastMouseDownInDialog) {
         this.reject();
       }
       return;
@@ -310,9 +315,46 @@ export class Dialog<T> extends Widget {
           this.reject();
         }
         break;
+      case 37: {
+        // Left arrow
+        const activeEl = document.activeElement;
+
+        if (activeEl instanceof HTMLButtonElement) {
+          let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) - 1;
+
+          // Handle a left arrows on the first button
+          if (idx < 0) {
+            idx = this._buttonNodes.length - 1;
+          }
+
+          const node = this._buttonNodes[idx];
+          event.stopPropagation();
+          event.preventDefault();
+          node.focus();
+        }
+        break;
+      }
+      case 39: {
+        // Right arrow
+        const activeEl = document.activeElement;
+
+        if (activeEl instanceof HTMLButtonElement) {
+          let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) + 1;
+
+          // Handle a right arrows on the last button
+          if (idx == this._buttons.length) {
+            idx = 0;
+          }
+
+          const node = this._buttonNodes[idx];
+          event.stopPropagation();
+          event.preventDefault();
+          node.focus();
+        }
+        break;
+      }
       case 9: {
         // Tab.
-
         // Handle a tab on the last button.
         const node = this._buttonNodes[this._buttons.length - 1];
         if (document.activeElement === node && !event.shiftKey) {
@@ -322,11 +364,20 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 13: // Enter.
+      case 13: {
+        // Enter.
         event.stopPropagation();
         event.preventDefault();
-        this.resolve();
+
+        const activeEl = document.activeElement;
+        let index: number | undefined;
+
+        if (activeEl instanceof HTMLButtonElement) {
+          index = this._buttonNodes.indexOf(activeEl as HTMLElement);
+        }
+        this.resolve(index);
         break;
+      }
       default:
         break;
     }
@@ -341,8 +392,21 @@ export class Dialog<T> extends Widget {
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
       event.stopPropagation();
-      this._buttonNodes[this._defaultButton].focus();
+      this._buttonNodes[this._defaultButton]?.focus();
     }
+  }
+
+  /**
+   * Handle the `'mousedown'` event for the widget.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtMouseDown(event: MouseEvent): void {
+    const content = this.node.getElementsByClassName(
+      'jp-Dialog-content'
+    )[0] as HTMLElement;
+    const target = event.target as HTMLElement;
+    this._lastMouseDownInDialog = content.contains(target as HTMLElement);
   }
 
   /**
@@ -380,6 +444,7 @@ export class Dialog<T> extends Widget {
   private _host: HTMLElement;
   private _hasClose: boolean;
   private _body: Dialog.Body<T>;
+  private _lastMouseDownInDialog: boolean;
   private _focusNodeSelector: string | undefined = '';
 }
 
@@ -450,6 +515,16 @@ export namespace Dialog {
      * The button display type.
      */
     displayType: 'default' | 'warn';
+  }
+
+  /**
+   * Error object interface
+   */
+  export interface IError {
+    /**
+     * Error message
+     */
+    message: string | React.ReactElement<any>;
   }
 
   /**
@@ -859,23 +934,19 @@ namespace Private {
   export function handleOptions<T>(
     options: Partial<Dialog.IOptions<T>> = {}
   ): Dialog.IOptions<T> {
-    const buttons = options.buttons || [
+    const buttons = options.buttons ?? [
       Dialog.cancelButton(),
       Dialog.okButton()
     ];
-    let defaultButton = buttons.length - 1;
-    if (options.defaultButton !== undefined) {
-      defaultButton = options.defaultButton;
-    }
     return {
-      title: options.title || '',
-      body: options.body || '',
-      host: options.host || document.body,
+      title: options.title ?? '',
+      body: options.body ?? '',
+      host: options.host ?? document.body,
       buttons,
-      defaultButton,
-      renderer: options.renderer || Dialog.defaultRenderer,
-      focusNodeSelector: options.focusNodeSelector || '',
-      hasClose: options.hasClose || true
+      defaultButton: options.defaultButton ?? buttons.length - 1,
+      renderer: options.renderer ?? Dialog.defaultRenderer,
+      focusNodeSelector: options.focusNodeSelector ?? '',
+      hasClose: options.hasClose ?? true
     };
   }
 

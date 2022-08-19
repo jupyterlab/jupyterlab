@@ -1,8 +1,7 @@
-// This file is auto-generated from the corresponding file in /dev_mode
-/* -----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 const path = require('path');
 const fs = require('fs-extra');
@@ -10,8 +9,8 @@ const Handlebars = require('handlebars');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const merge = require('webpack-merge').default;
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
-  .BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
 
@@ -21,21 +20,7 @@ const packageData = require('./package.json');
 
 // Handle the extensions.
 const jlab = packageData.jupyterlab;
-const { extensions, mimeExtensions, externalExtensions } = jlab;
-
-// Add external extensions to the extensions/mimeExtensions data as
-// appropriate
-for (const pkg in externalExtensions) {
-  const {
-    jupyterlab: { extension, mimeExtension }
-  } = require(`${pkg}/package.json`);
-  if (extension !== undefined) {
-    extensions[pkg] = extension === true ? '' : extension;
-  }
-  if (mimeExtension !== undefined) {
-    mimeExtensions[pkg] = mimeExtension === true ? '' : mimeExtension;
-  }
-}
+const { extensions, mimeExtensions } = jlab;
 
 // Deduplicated list of extension package names.
 const extensionPackages = [

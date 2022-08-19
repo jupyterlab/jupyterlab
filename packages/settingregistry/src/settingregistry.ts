@@ -1,32 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import Ajv from 'ajv';
-
-import * as json5 from 'json5';
-
+import { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
-
 import {
   JSONExt,
   JSONObject,
   JSONValue,
-  ReadonlyJSONObject,
+  PartialJSONArray,
+  PartialJSONObject,
   PartialJSONValue,
+  ReadonlyJSONObject,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue,
-  PartialJSONObject
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { IDataConnector } from '@jupyterlab/statedb';
-
-import { ISettingRegistry } from './tokens';
-
+import Ajv from 'ajv';
+import * as json5 from 'json5';
 import SCHEMA from './plugin-schema.json';
+import { ISettingRegistry } from './tokens';
 
 /**
  * An alias for the JSON deep copy function.
@@ -58,7 +51,7 @@ export interface ISchemaValidator {
    * @param populate - Whether plugin data should be populated, defaults to
    * `true`.
    *
-   * @return A list of errors if either the schema or data fail to validate or
+   * @returns A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
   validateData(
@@ -123,7 +116,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    * @param populate - Whether plugin data should be populated, defaults to
    * `true`.
    *
-   * @return A list of errors if either the schema or data fail to validate or
+   * @returns A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
   validateData(
@@ -203,7 +196,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    *
    * @param schema - The schema being added.
    *
-   * @return A list of errors if the schema fails to validate or `null` if there
+   * @returns A list of errors if the schema fails to validate or `null` if there
    * are no errors.
    *
    * #### Notes
@@ -468,7 +461,9 @@ export class SettingRegistry implements ISettingRegistry {
     const transformers = this._transformers;
 
     if (plugin in transformers) {
-      throw new Error(`${plugin} already has a transformer.`);
+      const error = new Error(`${plugin} already has a transformer.`);
+      error.name = 'TransformError';
+      throw error;
     }
 
     transformers[plugin] = {
@@ -727,6 +722,32 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * Checks if any fields are different from the default value.
+   */
+  isDefault(user: ReadonlyPartialJSONObject): boolean {
+    for (const key in this.schema.properties) {
+      const value = user[key];
+      const defaultValue = this.default(key);
+      if (
+        value === undefined ||
+        defaultValue === undefined ||
+        JSONExt.deepEqual(value, JSONExt.emptyObject) ||
+        JSONExt.deepEqual(value, JSONExt.emptyArray)
+      ) {
+        continue;
+      }
+      if (!JSONExt.deepEqual(value, defaultValue)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  get isModified(): boolean {
+    return !this.isDefault(this.user);
+  }
+
+  /**
    * The user settings.
    */
   get user(): ReadonlyPartialJSONObject {
@@ -754,7 +775,7 @@ export class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A calculated default JSON value for a specific setting.
    */
-  default(key: string): PartialJSONValue | undefined {
+  default(key?: string): PartialJSONValue | undefined {
     return Private.reifyDefault(this.schema, key);
   }
 
@@ -781,9 +802,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(
-    key: string
-  ): {
+  get(key: string): {
     composite: ReadonlyPartialJSONValue | undefined;
     user: ReadonlyPartialJSONValue | undefined;
   } {
@@ -897,6 +916,164 @@ export namespace SettingRegistry {
   }
 
   /**
+   * Reconcile the menus.
+   *
+   * @param reference The reference list of menus.
+   * @param addition The list of menus to add.
+   * @param warn Warn if the command items are duplicated within the same menu.
+   * @returns The reconciled list of menus.
+   */
+  export function reconcileMenus(
+    reference: ISettingRegistry.IMenu[] | null,
+    addition: ISettingRegistry.IMenu[] | null,
+    warn: boolean = false,
+    addNewItems: boolean = true
+  ): ISettingRegistry.IMenu[] {
+    if (!reference) {
+      return addition && addNewItems ? JSONExt.deepCopy(addition) : [];
+    }
+    if (!addition) {
+      return JSONExt.deepCopy(reference);
+    }
+
+    const merged = JSONExt.deepCopy(reference);
+
+    addition.forEach(menu => {
+      const refIndex = merged.findIndex(ref => ref.id === menu.id);
+      if (refIndex >= 0) {
+        merged[refIndex] = {
+          ...merged[refIndex],
+          ...menu,
+          items: reconcileItems(
+            merged[refIndex].items,
+            menu.items,
+            warn,
+            addNewItems
+          )
+        };
+      } else {
+        if (addNewItems) {
+          merged.push(menu);
+        }
+      }
+    });
+
+    return merged;
+  }
+
+  /**
+   * Merge two set of menu items.
+   *
+   * @param reference Reference set of menu items
+   * @param addition New items to add
+   * @param warn Whether to warn if item is duplicated; default to false
+   * @returns The merged set of items
+   */
+  export function reconcileItems<T extends ISettingRegistry.IMenuItem>(
+    reference?: T[],
+    addition?: T[],
+    warn: boolean = false,
+    addNewItems: boolean = true
+  ): T[] | undefined {
+    if (!reference) {
+      return addition ? JSONExt.deepCopy(addition) : undefined;
+    }
+    if (!addition) {
+      return JSONExt.deepCopy(reference);
+    }
+
+    const items = JSONExt.deepCopy(reference);
+
+    // Merge array element depending on the type
+    addition.forEach(item => {
+      switch (item.type ?? 'command') {
+        case 'separator':
+          if (addNewItems) {
+            items.push({ ...item });
+          }
+          break;
+        case 'submenu':
+          if (item.submenu) {
+            const refIndex = items.findIndex(
+              ref =>
+                ref.type === 'submenu' && ref.submenu?.id === item.submenu?.id
+            );
+            if (refIndex < 0) {
+              if (addNewItems) {
+                items.push(JSONExt.deepCopy(item));
+              }
+            } else {
+              items[refIndex] = {
+                ...items[refIndex],
+                ...item,
+                submenu: reconcileMenus(
+                  items[refIndex].submenu
+                    ? [items[refIndex].submenu as any]
+                    : null,
+                  [item.submenu],
+                  warn,
+                  addNewItems
+                )[0]
+              };
+            }
+          }
+          break;
+        case 'command':
+          if (item.command) {
+            const refIndex = items.findIndex(
+              ref =>
+                ref.command === item.command &&
+                ref.selector === item.selector &&
+                JSONExt.deepEqual(ref.args ?? {}, item.args ?? {})
+            );
+            if (refIndex < 0) {
+              if (addNewItems) {
+                items.push({ ...item });
+              }
+            } else {
+              if (warn) {
+                console.warn(
+                  `Menu entry for command '${item.command}' is duplicated.`
+                );
+              }
+              items[refIndex] = { ...items[refIndex], ...item };
+            }
+          }
+      }
+    });
+
+    return items;
+  }
+
+  /**
+   * Remove disabled entries from menu items
+   *
+   * @param items Menu items
+   * @returns Filtered menu items
+   */
+  export function filterDisabledItems<T extends ISettingRegistry.IMenuItem>(
+    items: T[]
+  ): T[] {
+    return items.reduce<T[]>((final, value) => {
+      const copy = { ...value };
+      if (!copy.disabled) {
+        if (copy.type === 'submenu') {
+          const { submenu } = copy;
+          if (submenu && !submenu.disabled) {
+            copy.submenu = {
+              ...submenu,
+              items: filterDisabledItems(submenu.items ?? [])
+            };
+          }
+        }
+        final.push(copy);
+      }
+
+      return final;
+    }, []);
+  }
+
+  /**
    * Reconcile default and user shortcuts and return the composite list.
    *
    * @param defaults - The list of default shortcuts.
@@ -917,9 +1094,8 @@ export namespace SettingRegistry {
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
-      const keys = CommandRegistry.normalizeKeys(shortcut).join(
-        RECORD_SEPARATOR
-      );
+      const keys =
+        CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
       if (!keys) {
         console.warn(
           'Skipping this shortcut because there are no actionable keys on this platform',
@@ -953,9 +1129,8 @@ export namespace SettingRegistry {
       ...defaults.filter(s => !!s.disabled),
       ...defaults.filter(s => !s.disabled)
     ].filter(shortcut => {
-      const keys = CommandRegistry.normalizeKeys(shortcut).join(
-        RECORD_SEPARATOR
-      );
+      const keys =
+        CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
 
       if (!keys) {
         return false;
@@ -983,7 +1158,57 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return user.concat(defaults).filter(shortcut => !shortcut.disabled);
+    return (
+      user
+        .concat(defaults)
+        .filter(shortcut => !shortcut.disabled)
+        // Fix shortcuts comparison in rjsf Form to avoid polluting the user settings
+        .map(shortcut => {
+          return { args: {}, ...shortcut };
+        })
+    );
+  }
+
+  /**
+   * Merge two set of toolbar items.
+   *
+   * @param reference Reference set of toolbar items
+   * @param addition New items to add
+   * @param warn Whether to warn if item is duplicated; default to false
+   * @returns The merged set of items
+   */
+  export function reconcileToolbarItems(
+    reference?: ISettingRegistry.IToolbarItem[],
+    addition?: ISettingRegistry.IToolbarItem[],
+    warn: boolean = false
+  ): ISettingRegistry.IToolbarItem[] | undefined {
+    if (!reference) {
+      return addition ? JSONExt.deepCopy(addition) : undefined;
+    }
+    if (!addition) {
+      return JSONExt.deepCopy(reference);
+    }
+
+    const items = JSONExt.deepCopy(reference);
+
+    // Merge array element depending on the type
+    addition.forEach(item => {
+      // Name must be unique so it's sufficient to only compare it
+      const refIndex = items.findIndex(ref => ref.name === item.name);
+      if (refIndex < 0) {
+        items.push({ ...item });
+      } else {
+        if (
+          warn &&
+          JSONExt.deepEqual(Object.keys(item), Object.keys(items[refIndex]))
+        ) {
+          console.warn(`Toolbar item '${item.name}' is duplicated.`);
+        }
+        items[refIndex] = { ...items[refIndex], ...item };
+      }
+    });
+
+    return items;
   }
 }
 
@@ -1151,23 +1376,50 @@ namespace Private {
     schema: ISettingRegistry.IProperty,
     root?: string
   ): PartialJSONValue | undefined {
+    const definitions = schema.definitions as PartialJSONObject;
     // If the property is at the root level, traverse its schema.
     schema = (root ? schema.properties?.[root] : schema) || {};
 
-    // If the property has no default or is a primitive, return.
-    if (!('default' in schema) || schema.type !== 'object') {
+    if (schema.type === 'object') {
+      // Make a copy of the default value to populate.
+      const result = JSONExt.deepCopy(schema.default as PartialJSONObject);
+
+      // Iterate through and populate each child property.
+      const props = schema.properties || {};
+      for (const property in props) {
+        result[property] = reifyDefault(props[property]);
+      }
+
+      return result;
+    } else if (schema.type === 'array') {
+      // Make a copy of the default value to populate.
+      const result = JSONExt.deepCopy(schema.default as PartialJSONArray);
+
+      // Items defines the properties of each item in the array
+      let props = (schema.items as PartialJSONObject) || {};
+      // Use referenced definition if one exists
+      if (props['$ref'] && definitions) {
+        const ref: string = (props['$ref'] as string).replace(
+          '#/definitions/',
+          ''
+        );
+        props = (definitions[ref] as PartialJSONObject) ?? {};
+      }
+      // Iterate through the items in the array and fill in defaults
+      for (const item in result) {
+        // Use the values that are hard-coded in the default array over the defaults for each field.
+        const reified = (reifyDefault(props) as PartialJSONObject) || {};
+        for (const prop in reified) {
+          if ((result[item] as PartialJSONObject)?.[prop]) {
+            reified[prop] = (result[item] as PartialJSONObject)[prop];
+          }
+        }
+        result[item] = reified;
+      }
+
+      return result;
+    } else {
       return schema.default;
     }
-
-    // Make a copy of the default value to populate.
-    const result = JSONExt.deepCopy(schema.default as PartialJSONObject);
-
-    // Iterate through and populate each child property.
-    const props = schema.properties || {};
-    for (const property in props) {
-      result[property] = reifyDefault(props[property]);
-    }
-
-    return result;
   }
 }

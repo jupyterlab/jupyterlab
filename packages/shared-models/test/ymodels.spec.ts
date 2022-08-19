@@ -1,19 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { YNotebook, YCodeCell } from '../src';
+import { YCodeCell, YNotebook } from '../src';
 
 describe('@jupyterlab/shared-models', () => {
   describe('ynotebook', () => {
     it('should create a notebook', () => {
-      const notebook = YNotebook.create();
+      const notebook = YNotebook.create(false);
       expect(notebook.cells.length).toBe(0);
     });
   });
 
   describe('ynotebook metadata', () => {
     it('should update metadata', () => {
-      const notebook = YNotebook.create();
+      const notebook = YNotebook.create(false);
       const metadata = notebook.getMetadata();
       expect(metadata).toBeTruthy();
       metadata.orig_nbformat = 1;
@@ -40,20 +40,20 @@ describe('@jupyterlab/shared-models', () => {
 
   describe('ycell shared', () => {
     it('should insert a cell', () => {
-      const notebook = YNotebook.create();
+      const notebook = YNotebook.create(false);
       const codeCell = YCodeCell.create();
       notebook.insertCell(0, codeCell);
       expect(notebook.cells.length).toBe(1);
     });
     it('should set cell source', () => {
-      const notebook = YNotebook.create();
+      const notebook = YNotebook.create(false);
       const codeCell = YCodeCell.create();
       notebook.insertCell(0, codeCell);
       codeCell.setSource('test');
       expect(notebook.cells[0].getSource()).toBe('test');
     });
     it('should update source', () => {
-      const notebook = YNotebook.create();
+      const notebook = YNotebook.create(false);
       const codeCell = YCodeCell.create();
       notebook.insertCell(0, codeCell);
       codeCell.setSource('test');
@@ -64,7 +64,7 @@ describe('@jupyterlab/shared-models', () => {
 
   describe('ycell standalone', () => {
     it('should not insert a standalone cell', () => {
-      const notebook = YNotebook.create();
+      const notebook = YNotebook.create(false);
       const codeCell = YCodeCell.createStandalone();
       let failed = false;
       try {

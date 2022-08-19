@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONValue } from '@lumino/coreutils';
-
 import { each } from '@lumino/algorithm';
-
+import { JSONValue } from '@lumino/coreutils';
 import { IObservableList, ObservableList } from './observablelist';
 
 /**
@@ -71,7 +69,8 @@ export interface IObservableUndoableList<T> extends IObservableList<T> {
  */
 export class ObservableUndoableList<T>
   extends ObservableList<T>
-  implements IObservableUndoableList<T> {
+  implements IObservableUndoableList<T>
+{
   /**
    * Construct a new undoable observable list.
    */
@@ -291,7 +290,8 @@ export namespace ObservableUndoableList {
    * A default, identity serializer.
    */
   export class IdentitySerializer<T extends JSONValue>
-    implements ISerializer<T> {
+    implements ISerializer<T>
+  {
     /**
      * Identity serialize.
      */

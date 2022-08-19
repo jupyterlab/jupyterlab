@@ -1,3 +1,8 @@
+<!--
+  ~ Copyright (c) Jupyter Development Team.
+  ~ Distributed under the terms of the Modified BSD License.
+-->
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -10,7 +15,7 @@
     <script id="jupyter-config-data" type="application/json">
       {{ page_config_full | tojson }}
     </script>
-  
+
     <script src="{{page_config['fullStaticUrl'] | e}}/bundle.js" main="index"></script>
     <pre id='output'></pre>
   </body>

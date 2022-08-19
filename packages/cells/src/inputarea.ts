@@ -66,7 +66,9 @@ export class InputArea extends Widget {
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(prompt);
-    layout.addWidget(editor);
+    if (!options.placeholder) {
+      layout.addWidget(editor);
+    }
   }
 
   /**
@@ -98,6 +100,13 @@ export class InputArea extends Widget {
    */
   get promptNode(): HTMLElement {
     return this._prompt.node;
+  }
+
+  /**
+   * Get the rendered input area widget, if any.
+   */
+  get renderedInput(): Widget {
+    return this._rendered;
   }
 
   /**
@@ -133,7 +142,7 @@ export class InputArea extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
@@ -173,6 +182,11 @@ export namespace InputArea {
      * Whether to send an update request to the editor when it is shown.
      */
     updateOnShow?: boolean;
+
+    /**
+     * Whether this input area is a placeholder for future rendering.
+     */
+    placeholder?: boolean;
   }
 
   /**
@@ -183,7 +197,7 @@ export namespace InputArea {
    */
   export interface IContentFactory {
     /**
-     * The editor factory we need to include in `CodeEditorWratter.IOptions`.
+     * The editor factory we need to include in `CodeEditorWrapper.IOptions`.
      *
      * This is a separate readonly attribute rather than a factory method as we need
      * to pass it around.
@@ -255,7 +269,8 @@ export namespace InputArea {
   /**
    * The default editor factory singleton based on CodeMirror.
    */
-  export const defaultEditorFactory: CodeEditor.Factory = _createDefaultEditorFactory();
+  export const defaultEditorFactory: CodeEditor.Factory =
+    _createDefaultEditorFactory();
 
   /**
    * The default `ContentFactory` instance.

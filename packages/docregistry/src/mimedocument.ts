@@ -1,30 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showErrorMessage, Printing } from '@jupyterlab/apputils';
-
+import { Printing, showErrorMessage } from '@jupyterlab/apputils';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
 import {
   IRenderMime,
   IRenderMimeRegistry,
   MimeModel
 } from '@jupyterlab/rendermime';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { PromiseDelegate, JSONExt, PartialJSONObject } from '@lumino/coreutils';
-
+import { JSONExt, PartialJSONObject, PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { StackedLayout, Widget } from '@lumino/widgets';
-
 import { ABCWidgetFactory, DocumentWidget } from './default';
-
 import { DocumentRegistry } from './registry';
 
 /**
@@ -87,9 +79,9 @@ export class MimeContent extends Widget {
   readonly mimeType: string;
 
   /**
-   * Print method. Defered to the renderer.
+   * Print method. Deferred to the renderer.
    */
-  [Printing.symbol]() {
+  [Printing.symbol](): Printing.OptionalAsyncThunk {
     return Printing.getPrintFunction(this.renderer);
   }
 
@@ -103,7 +95,7 @@ export class MimeContent extends Widget {
   /**
    * Set URI fragment identifier.
    */
-  setFragment(fragment: string) {
+  setFragment(fragment: string): void {
     this._fragment = fragment;
     this.update();
   }
@@ -304,7 +296,8 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
         resolver: rendermime.resolver,
         sanitizer: rendermime.sanitizer,
         linkHandler: rendermime.linkHandler,
-        latexTypesetter: rendermime.latexTypesetter
+        latexTypesetter: rendermime.latexTypesetter,
+        markdownParser: rendermime.markdownParser
       });
     } else {
       renderer = rendermime.createRenderer(mimeType);
@@ -318,7 +311,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
       dataType: this._dataType
     });
 
-    content.title.icon = ft?.icon!;
+    content.title.icon = ft?.icon;
     content.title.iconClass = ft?.iconClass ?? '';
     content.title.iconLabel = ft?.iconLabel ?? '';
 

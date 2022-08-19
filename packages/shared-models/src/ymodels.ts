@@ -3,18 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ISignal, Signal } from '@lumino/signaling';
-import { UUID } from '@lumino/coreutils';
-
-import * as Y from 'yjs';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import * as models from './api';
-
-import { Delta } from './api';
-
+import { UUID } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
+import * as Y from 'yjs';
+import * as models from './api';
+import { Delta, ISharedNotebook } from './api';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
@@ -91,6 +86,7 @@ export class YDocument<T> implements models.ISharedDocument {
   public isDisposed = false;
   public ydoc = new Y.Doc();
   public source = this.ydoc.getText('source');
+  public ystate: Y.Map<any> = this.ydoc.getMap('state');
   public undoManager = new Y.UndoManager([this.source], {
     trackedOrigins: new Set([this])
   });
@@ -100,10 +96,20 @@ export class YDocument<T> implements models.ISharedDocument {
 
 export class YFile
   extends YDocument<models.FileChange>
-  implements models.ISharedFile, models.ISharedText, IYText {
+  implements models.ISharedFile, models.ISharedText, IYText
+{
   constructor() {
     super();
     this.ysource.observe(this._modelObserver);
+    this.ystate.observe(this._onStateChanged);
+  }
+
+  /**
+   * Dispose of the resources.
+   */
+  dispose(): void {
+    this.ysource.unobserve(this._modelObserver);
+    this.ystate.unobserve(this._onStateChanged);
   }
 
   /**
@@ -115,8 +121,29 @@ export class YFile
     this._changed.emit(changes);
   };
 
+  /**
+   * Handle a change to the ystate.
+   */
+  private _onStateChanged = (event: Y.YMapEvent<any>) => {
+    const stateChange: any = [];
+
+    event.keysChanged.forEach(key => {
+      const change = event.changes.keys.get(key);
+      if (change) {
+        stateChange.push({
+          name: key,
+          oldValue: change.oldValue,
+          newValue: this.ystate.get(key)
+        });
+      }
+    });
+
+    this._changed.emit({ stateChange });
+  };
+
   public static create(): YFile {
-    return new YFile();
+    const model = new YFile();
+    return model;
   }
 
   /**
@@ -175,16 +202,50 @@ export class YFile
  */
 export class YNotebook
   extends YDocument<models.NotebookChange>
-  implements models.ISharedNotebook {
-  constructor() {
+  implements models.ISharedNotebook
+{
+  constructor(options: ISharedNotebook.IOptions) {
     super();
+    this._disableDocumentWideUndoRedo = options.disableDocumentWideUndoRedo;
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
       if (!this._ycellMapping.has(ycell)) {
-        this._ycellMapping.set(ycell, createCellFromType(ycell));
+        this._ycellMapping.set(ycell, createCellModelFromSharedType(ycell));
       }
       return this._ycellMapping.get(ycell) as YCellType;
     });
+
+    this.ymeta.observe(this._onMetaChanged);
+    this.ystate.observe(this._onStateChanged);
+  }
+
+  get nbformat(): number {
+    return this.ymeta.get('nbformat');
+  }
+
+  set nbformat(value: number) {
+    this.transact(() => {
+      this.ymeta.set('nbformat', value);
+    }, false);
+  }
+
+  get nbformat_minor(): number {
+    return this.ymeta.get('nbformat_minor');
+  }
+
+  set nbformat_minor(value: number) {
+    this.transact(() => {
+      this.ymeta.set('nbformat_minor', value);
+    }, false);
+  }
+
+  /**
+   * Dispose of the resources.
+   */
+  dispose(): void {
+    this.ycells.unobserve(this._onYCellsChanged);
+    this.ymeta.unobserve(this._onMetaChanged);
+    this.ystate.unobserve(this._onStateChanged);
   }
 
   /**
@@ -219,8 +280,9 @@ export class YNotebook
   insertCells(index: number, cells: YCellType[]): void {
     cells.forEach(cell => {
       this._ycellMapping.set(cell.ymodel, cell);
-      // cell.yawareness = this.yawareness;
-      // cell.yUndoManager = this.yUndoManager;
+      if (!this.disableDocumentWideUndoRedo) {
+        cell.undoManager = this.undoManager;
+      }
     });
     this.transact(() => {
       this.ycells.insert(
@@ -274,7 +336,7 @@ export class YNotebook
    */
   getMetadata(): nbformat.INotebookMetadata {
     const meta = this.ymeta.get('metadata');
-    return meta ? deepCopy(meta) : { orig_nbformat: 1 };
+    return meta ? deepCopy(meta) : {};
   }
 
   /**
@@ -292,36 +354,47 @@ export class YNotebook
    * @param value: Metadata's attribute to update.
    */
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
+    // TODO: Maybe modify only attributes instead of replacing the whole metadata?
     this.ymeta.set('metadata', Object.assign({}, this.getMetadata(), value));
   }
 
   /**
    * Create a new YNotebook.
    */
-  public static create(): models.ISharedNotebook {
-    return new YNotebook();
+  public static create(
+    disableDocumentWideUndoRedo: boolean
+  ): models.ISharedNotebook {
+    const model = new YNotebook({ disableDocumentWideUndoRedo });
+    return model;
   }
 
   /**
-   * Dispose of the resources.
+   * Wether the the undo/redo logic should be
+   * considered on the full document across all cells.
+   *
+   * @returns The disableDocumentWideUndoRedo setting.
    */
-  dispose(): void {
-    this.ycells.unobserve(this._onYCellsChanged);
+  get disableDocumentWideUndoRedo(): boolean {
+    return this._disableDocumentWideUndoRedo;
   }
 
   /**
    * Handle a change to the list of cells.
    */
   private _onYCellsChanged = (event: Y.YArrayEvent<Y.Map<any>>) => {
-    // update the type⇔cell mapping by iterating through the addded/removed types
+    // update the type⇔cell mapping by iterating through the added/removed types
     event.changes.added.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
       if (!this._ycellMapping.has(type)) {
-        this._ycellMapping.set(type, createCellFromType(type));
+        this._ycellMapping.set(type, createCellModelFromSharedType(type));
       }
       const cell = this._ycellMapping.get(type) as any;
       cell._notebook = this;
-      cell._undoManager = this.undoManager;
+      if (!this.disableDocumentWideUndoRedo) {
+        cell._undoManager = this.undoManager;
+      } else {
+        cell._undoManager = new Y.UndoManager([cell.ymodel], {});
+      }
     });
     event.changes.deleted.forEach(item => {
       const type = (item.content as Y.ContentType).type as Y.Map<any>;
@@ -356,22 +429,74 @@ export class YNotebook
     });
   };
 
+  /**
+   * Handle a change to the ystate.
+   */
+  private _onMetaChanged = (event: Y.YMapEvent<any>) => {
+    if (event.keysChanged.has('metadata')) {
+      const change = event.changes.keys.get('metadata');
+      const metadataChange = {
+        oldValue: change?.oldValue ? change!.oldValue : undefined,
+        newValue: this.getMetadata()
+      };
+      this._changed.emit({ metadataChange });
+    }
+
+    if (event.keysChanged.has('nbformat')) {
+      const change = event.changes.keys.get('nbformat');
+      const nbformatChanged = {
+        key: 'nbformat',
+        oldValue: change?.oldValue ? change!.oldValue : undefined,
+        newValue: this.nbformat
+      };
+      this._changed.emit({ nbformatChanged });
+    }
+
+    if (event.keysChanged.has('nbformat_minor')) {
+      const change = event.changes.keys.get('nbformat_minor');
+      const nbformatChanged = {
+        key: 'nbformat_minor',
+        oldValue: change?.oldValue ? change!.oldValue : undefined,
+        newValue: this.nbformat_minor
+      };
+      this._changed.emit({ nbformatChanged });
+    }
+  };
+
+  /**
+   * Handle a change to the ystate.
+   */
+  private _onStateChanged = (event: Y.YMapEvent<any>) => {
+    const stateChange: any = [];
+    event.keysChanged.forEach(key => {
+      const change = event.changes.keys.get(key);
+      if (change) {
+        stateChange.push({
+          name: key,
+          oldValue: change.oldValue,
+          newValue: this.ystate.get(key)
+        });
+      }
+    });
+
+    this._changed.emit({ stateChange });
+  };
+
   public ycells: Y.Array<Y.Map<any>> = this.ydoc.getArray('cells');
   public ymeta: Y.Map<any> = this.ydoc.getMap('meta');
   public ymodel: Y.Map<any> = this.ydoc.getMap('model');
   public undoManager = new Y.UndoManager([this.ycells], {
     trackedOrigins: new Set([this])
   });
+  private _disableDocumentWideUndoRedo: boolean;
   private _ycellMapping: Map<Y.Map<any>, YCellType> = new Map();
-  public nbformat_minor: number = nbformat.MINOR_VERSION;
-  public nbformat: number = nbformat.MAJOR_VERSION;
   public cells: YCellType[];
 }
 
 /**
- * Create a new shared cell given the type.
+ * Create a new shared cell model given the YJS shared type.
  */
-export const createCellFromType = (type: Y.Map<any>): YCellType => {
+export const createCellModelFromSharedType = (type: Y.Map<any>): YCellType => {
   switch (type.get('cell_type')) {
     case 'code':
       return new YCodeCell(type);
@@ -403,12 +528,14 @@ export const createStandaloneCell = (
 };
 
 export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
-  implements models.ISharedBaseCell<Metadata>, IYText {
+  implements models.ISharedBaseCell<Metadata>, IYText
+{
   constructor(ymodel: Y.Map<any>) {
     this.ymodel = ymodel;
     const ysource = ymodel.get('source');
     this._prevSourceLength = ysource ? ysource.length : 0;
     this.ymodel.observeDeep(this._modelObserver);
+    this._awareness = null;
   }
 
   get ysource(): Y.Text {
@@ -416,7 +543,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   }
 
   get awareness(): Awareness | null {
-    return this.notebook?.awareness || null;
+    return this._awareness ?? this.notebook?.awareness ?? null;
   }
 
   /**
@@ -433,7 +560,19 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    * The notebook that this cell belongs to.
    */
   get undoManager(): Y.UndoManager | null {
-    return this.notebook ? this.notebook.undoManager : this._undoManager;
+    if (!this.notebook) {
+      return this._undoManager;
+    }
+    return this.notebook?.disableDocumentWideUndoRedo
+      ? this._undoManager
+      : this.notebook.undoManager;
+  }
+
+  /**
+   * Set the undoManager when adding new cells.
+   */
+  set undoManager(undoManager: Y.UndoManager | null) {
+    this._undoManager = undoManager;
   }
 
   /**
@@ -513,7 +652,9 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   public static createStandalone(id?: string): YBaseCell<any> {
     const cell = this.create(id);
     cell.isStandalone = true;
-    new Y.Doc().getArray().insert(0, [cell.ymodel]);
+    const doc = new Y.Doc();
+    doc.getArray().insert(0, [cell.ymodel]);
+    cell._awareness = new Awareness(doc);
     cell._undoManager = new Y.UndoManager([cell.ymodel], {
       trackedOrigins: new Set([cell])
     });
@@ -533,13 +674,17 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
     ymodel.set('cell_type', this.cell_type);
     ymodel.set('id', this.getId());
     const Self: any = this.constructor;
-    return new Self(ymodel);
+    const clone = new Self(ymodel);
+    // TODO The assignment of the undoManager does not work for a clone.
+    // See https://github.com/jupyterlab/jupyterlab/issues/11035
+    clone._undoManager = this.undoManager;
+    return clone;
   }
 
   /**
    * Handle a change to the ymodel.
    */
-  private _modelObserver = (events: Y.YEvent[]) => {
+  private _modelObserver = (events: Y.YEvent<any>[]) => {
     const changes: models.CellChange<Metadata> = {};
     const sourceEvent = events.find(
       event => event.target === this.ymodel.get('source')
@@ -599,6 +744,12 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
    */
   dispose(): void {
     this.ymodel.unobserveDeep(this._modelObserver);
+    if (this._awareness) {
+      this._awareness.destroy();
+    }
+    if (!this.notebook && this._undoManager) {
+      this._undoManager.destroy();
+    }
   }
 
   /**
@@ -613,14 +764,14 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   /**
    * Sets the cell attachments
    *
-   * @param attchments: The cell attachments.
+   * @param attachments: The cell attachments.
    */
-  public setAttachments(value: nbformat.IAttachments | undefined): void {
+  public setAttachments(attachments: nbformat.IAttachments | undefined): void {
     this.transact(() => {
-      if (value == null) {
-        this.ymodel.set('attachments', value);
-      } else {
+      if (attachments == null) {
         this.ymodel.delete('attachments');
+      } else {
+        this.ymodel.set('attachments', attachments);
       }
     });
   }
@@ -721,11 +872,13 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   private _undoManager: Y.UndoManager | null = null;
   private _changed = new Signal<this, models.CellChange<Metadata>>(this);
   private _prevSourceLength: number;
+  private _awareness: Awareness | null;
 }
 
 export class YCodeCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedCodeCell {
+  implements models.ISharedCodeCell
+{
   /**
    * The type of the cell.
    */
@@ -764,7 +917,7 @@ export class YCodeCell
     this.transact(() => {
       youtputs.delete(0, youtputs.length);
       youtputs.insert(0, outputs);
-    });
+    }, false);
   }
 
   /**
@@ -786,7 +939,7 @@ export class YCodeCell
     this.transact(() => {
       youtputs.delete(start, fin);
       youtputs.insert(start, outputs);
-    });
+    }, false);
   }
 
   /**
@@ -842,7 +995,8 @@ export class YCodeCell
 
 export class YRawCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedRawCell {
+  implements models.ISharedRawCell
+{
   /**
    * Create a new YRawCell that can be inserted into a YNotebook
    */
@@ -882,7 +1036,8 @@ export class YRawCell
 
 export class YMarkdownCell
   extends YBaseCell<models.ISharedBaseCellMetadata>
-  implements models.ISharedMarkdownCell {
+  implements models.ISharedMarkdownCell
+{
   /**
    * Create a new YMarkdownCell that can be inserted into a YNotebook
    */

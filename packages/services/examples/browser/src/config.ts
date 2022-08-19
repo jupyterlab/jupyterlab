@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ConfigWithDefaults, ConfigSection } from '@jupyterlab/services';
+import { ConfigSection, ConfigWithDefaults } from '@jupyterlab/services';
 
 import { log } from './log';
 
-export async function main() {
+export async function main(): Promise<void> {
   log('Config');
   // The base url of the Jupyter server.
 

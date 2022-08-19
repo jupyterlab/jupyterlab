@@ -1,15 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONExt } from '@lumino/coreutils';
-
 import {
   ModelDB,
+  ObservableJSON,
   ObservableString,
-  ObservableValue,
   ObservableUndoableList,
-  ObservableJSON
+  ObservableValue
 } from '@jupyterlab/observables';
+import { JSONExt } from '@lumino/coreutils';
 
 describe('@jupyterlab/observables', () => {
   describe('ObservableValue', () => {
@@ -144,9 +143,9 @@ describe('@jupyterlab/observables', () => {
     });
 
     describe('#connected', () => {
-      it('should resolve immediately for an in-memory database', () => {
+      it('should resolve immediately for an in-memory database', async () => {
         const db = new ModelDB();
-        return db.connected;
+        await expect(db.connected).resolves.not.toThrow();
       });
     });
 

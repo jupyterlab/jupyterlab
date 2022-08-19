@@ -1,10 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel, KernelMessage, KernelAPI, KernelManager } from '../../src';
-
+import { flakyIt as it, JupyterServer } from '@jupyterlab/testutils';
+import { Kernel, KernelAPI, KernelManager, KernelMessage } from '../../src';
 import { KernelTester } from '../utils';
-import { JupyterServer, flakyIt as it } from '@jupyterlab/testutils';
 
 const server = new JupyterServer();
 
@@ -106,8 +105,10 @@ describe('Kernel.IShellFuture', () => {
           calls.push('first');
           // Check to make sure we actually got the messages we expected.
           if (msg.header.msg_type === 'stream') {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect((msg as KernelMessage.IStreamMsg).content.text).toBe('foo');
           } else {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(
               (msg as KernelMessage.IStatusMsg).content.execution_state
             ).toBe('idle');

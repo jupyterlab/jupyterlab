@@ -6,29 +6,20 @@
  */
 
 export { ConnectionLost } from './connectionlost';
-
 export {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  JupyterFrontEndContextMenu
+  JupyterFrontEndContextMenu,
+  JupyterFrontEndPlugin
 } from './frontend';
-
 export { JupyterLab } from './lab';
-
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
-
 export {
-  IMimeDocumentTracker,
   createRendermimePlugin,
-  createRendermimePlugins
+  createRendermimePlugins,
+  IMimeDocumentTracker
 } from './mimerenderers';
-
 export { Router } from './router';
-
 export { ILabShell, LabShell } from './shell';
-
-export { ILabStatus } from './status';
-
-export { ITreePathUpdater } from './treepathupdater';
-
 export * from './tokens';
+export { ITreePathUpdater } from './treepathupdater';
+export * from './utils';

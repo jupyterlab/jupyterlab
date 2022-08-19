@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import * as Y from 'yjs';
-
 import * as models from './api';
 
 export function convertYMapEventToMapChange(

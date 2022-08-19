@@ -3,18 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
-
 import * as renderers from './renderers';
 
 /**
@@ -22,7 +17,8 @@ import * as renderers from './renderers';
  */
 export abstract class RenderedCommon
   extends Widget
-  implements IRenderMime.IRenderer {
+  implements IRenderMime.IRenderer
+{
   /**
    * Construct a new rendered common widget.
    *
@@ -34,8 +30,9 @@ export abstract class RenderedCommon
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
-    this.translator = options.translator || nullTranslator;
+    this.translator = options.translator ?? nullTranslator;
     this.latexTypesetter = options.latexTypesetter;
+    this.markdownParser = options.markdownParser ?? null;
     this.node.dataset['mimeType'] = this.mimeType;
   }
 
@@ -63,6 +60,11 @@ export abstract class RenderedCommon
    * The latexTypesetter.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+  /**
+   * The markdownParser.
+   */
+  readonly markdownParser: IRenderMime.IMarkdownParser | null;
 
   /**
    * The translator.
@@ -117,7 +119,7 @@ export abstract class RenderedCommon
    *
    * @param fragment - The URI fragment identifier.
    */
-  protected setFragment(fragment: string) {
+  protected setFragment(fragment: string): void {
     /* no-op */
   }
 }
@@ -136,10 +138,14 @@ export abstract class RenderedHTMLCommon extends RenderedCommon {
     this.addClass('jp-RenderedHTMLCommon');
   }
 
-  setFragment(fragment: string) {
+  setFragment(fragment: string): void {
     let el;
     try {
-      el = this.node.querySelector(fragment);
+      el = this.node.querySelector(
+        fragment.startsWith('#')
+          ? `#${CSS.escape(fragment.slice(1))}`
+          : fragment
+      );
     } catch (error) {
       console.warn('Unable to set URI fragment identifier.', error);
     }
@@ -302,6 +308,7 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
       linkHandler: this.linkHandler,
       shouldTypeset: this.isAttached,
       latexTypesetter: this.latexTypesetter,
+      markdownParser: this.markdownParser,
       translator: this.translator
     });
   }

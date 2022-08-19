@@ -1,10 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ServerConnection, SettingManager } from '../../src';
-
-import { init } from '../utils';
 import { JupyterServer } from '@jupyterlab/testutils';
+import { ServerConnection, SettingManager } from '../../src';
+import { init } from '../utils';
 
 // Initialize the fetch overrides.
 init();

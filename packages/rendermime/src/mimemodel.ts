@@ -2,9 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 /**
  * The default mime model implementation.
@@ -94,7 +93,7 @@ namespace Private {
   /**
    * A no-op callback function.
    */
-  export function noOp() {
+  export function noOp(): void {
     /* no-op */
   }
 }

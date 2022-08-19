@@ -18,29 +18,28 @@ from traitlets.config import Configurable
 
 
 class DebugLogFileMixin(Configurable):
-    debug_log_path = Unicode('', config=True, help='Path to use for the debug log file')
+    debug_log_path = Unicode("", config=True, help="Path to use for the debug log file")
 
     @contextlib.contextmanager
     def debug_logging(self):
         log_path = self.debug_log_path
         if os.path.isdir(log_path):
-            log_path = os.path.join(log_path, 'jupyterlab-debug.log')
+            log_path = os.path.join(log_path, "jupyterlab-debug.log")
         if not log_path:
-            handle, log_path = tempfile.mkstemp(prefix='jupyterlab-debug-', suffix='.log')
+            handle, log_path = tempfile.mkstemp(prefix="jupyterlab-debug-", suffix=".log")
             os.close(handle)
         log = self.log
 
         # Transfer current log level to the handlers:
         for h in log.handlers:
             h.setLevel(self.log_level)
-        log.setLevel('DEBUG')
+        log.setLevel("DEBUG")
 
         # Create our debug-level file handler:
-        _debug_handler = logging.FileHandler(
-            log_path, 'w', 'utf8', delay=True)
+        _debug_handler = logging.FileHandler(log_path, "w", "utf8", delay=True)
         _log_formatter = self._log_formatter_cls(fmt=self.log_format, datefmt=self.log_datefmt)
         _debug_handler.setFormatter(_log_formatter)
-        _debug_handler.setLevel('DEBUG')
+        _debug_handler.setLevel("DEBUG")
 
         log.addHandler(_debug_handler)
 
@@ -52,11 +51,11 @@ class DebugLogFileMixin(Configurable):
             for line in msg:
                 self.log.debug(line)
             if isinstance(ex, SystemExit):
-                print('An error occured. See the log file for details: ', log_path)
+                print("An error occurred. See the log file for details: ", log_path)
                 raise
-            print('An error occured.')
+            print("An error occurred.")
             print(msg[-1].strip())
-            print('See the log file for details: ', log_path)
+            print("See the log file for details: ", log_path)
             self.exit(1)
         else:
             log.removeHandler(_debug_handler)
@@ -67,4 +66,3 @@ class DebugLogFileMixin(Configurable):
             except FileNotFoundError:
                 pass
         log.removeHandler(_debug_handler)
-

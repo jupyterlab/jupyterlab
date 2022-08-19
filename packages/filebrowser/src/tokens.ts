@@ -2,21 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { WidgetTracker } from '@jupyterlab/apputils';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { Token } from '@lumino/coreutils';
-
 import { FileBrowser } from './browser';
 
-/* tslint:disable */
 /**
  * The path tracker token.
  */
 export const IFileBrowserFactory = new Token<IFileBrowserFactory>(
   '@jupyterlab/filebrowser:IFileBrowserFactory'
 );
-/* tslint:enable */
 
 /**
  * The file browser factory interface.
@@ -111,3 +106,10 @@ export namespace IFileBrowserFactory {
     state?: IStateDB | null;
   }
 }
+
+/**
+ * The token that indicates the default file browser commands are loaded.
+ */
+export const IFileBrowserCommands = new Token<void>(
+  '@jupyterlab/filebrowser:IFileBrowserCommands'
+);

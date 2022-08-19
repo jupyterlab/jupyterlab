@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import * as widgets from './widgets';
 
 /**
@@ -83,12 +82,13 @@ export const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
 /**
  * The standard factories provided by the rendermime package.
  */
-export const standardRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
-  htmlRendererFactory,
-  markdownRendererFactory,
-  latexRendererFactory,
-  svgRendererFactory,
-  imageRendererFactory,
-  javaScriptRendererFactory,
-  textRendererFactory
-];
+export const standardRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> =
+  [
+    htmlRendererFactory,
+    markdownRendererFactory,
+    latexRendererFactory,
+    svgRendererFactory,
+    imageRendererFactory,
+    javaScriptRendererFactory,
+    textRendererFactory
+  ];

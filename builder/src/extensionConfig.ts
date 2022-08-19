@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
 import { Build } from './build';
-import { LicenseWebpackPlugin } from 'license-webpack-plugin';
+import { WPPlugin } from './webpack-plugins';
 import { merge } from 'webpack-merge';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
@@ -237,9 +237,7 @@ function generateConfig({
 
   if (mode === 'production') {
     plugins.push(
-      new LicenseWebpackPlugin({
-        perChunkOutput: false,
-        outputFilename: 'third-party-licenses.txt',
+      new WPPlugin.JSONLicenseWebpackPlugin({
         excludedPackageTest: packageName => packageName === data.name
       })
     );
@@ -265,7 +263,7 @@ function generateConfig({
           publicPath: staticUrl || 'auto'
         },
         module: {
-          rules: [{ test: /\.html$/, use: 'file-loader' }]
+          rules: [{ test: /\.html$/, type: 'asset/resource' }]
         },
         plugins
       },
@@ -275,7 +273,14 @@ function generateConfig({
 
   if (mode === 'development') {
     const logPath = path.join(outputPath, 'build_log.json');
-    fs.writeFileSync(logPath, JSON.stringify(config, null, '  '));
+    function regExpReplacer(key: any, value: any) {
+      if (value instanceof RegExp) {
+        return value.toString();
+      } else {
+        return value;
+      }
+    }
+    fs.writeFileSync(logPath, JSON.stringify(config, regExpReplacer, '  '));
   }
   return config;
 }

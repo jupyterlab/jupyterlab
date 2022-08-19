@@ -1,42 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  showErrorMessage,
-  Toolbar,
-  ToolbarButton,
-  ReactWidget
-} from '@jupyterlab/apputils';
-
+import { showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
 import { Contents, ServerConnection } from '@jupyterlab/services';
-
-import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
-
-import { IIterator } from '@lumino/algorithm';
-
-import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { BreadCrumbs } from './crumbs';
-
-import { DirListing } from './listing';
-
-import { FilterFileBrowserModel } from './model';
-
-import { Uploader } from './upload';
-
-import { FilenameSearcher } from './search';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  nullTranslator,
-  TranslationBundle,
-  ITranslator
-} from '@jupyterlab/translation';
+  FilenameSearcher,
+  IScore,
+  ReactWidget,
+  SidePanel
+} from '@jupyterlab/ui-components';
+import { IIterator } from '@lumino/algorithm';
+import { Panel } from '@lumino/widgets';
+import { BreadCrumbs } from './crumbs';
+import { DirListing } from './listing';
+import { FilterFileBrowserModel } from './model';
 
 /**
  * The class name added to file browsers.
  */
 const FILE_BROWSER_CLASS = 'jp-FileBrowser';
+
+/**
+ * The class name added to file browser panel (gather filter, breadcrumbs and listing).
+ */
+const FILE_BROWSER_PANEL_CLASS = 'jp-FileBrowser-Panel';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -65,81 +54,68 @@ const LISTING_CLASS = 'jp-FileBrowser-listing';
  * and presents itself as a flat list of files and directories with
  * breadcrumbs.
  */
-export class FileBrowser extends Widget {
+export class FileBrowser extends SidePanel {
   /**
    * Construct a new file browser.
    *
-   * @param model - The file browser view model.
+   * @param options - The file browser options.
    */
   constructor(options: FileBrowser.IOptions) {
-    super();
+    super({ content: new Panel(), translator: options.translator });
     this.addClass(FILE_BROWSER_CLASS);
+    this.toolbar.addClass(TOOLBAR_CLASS);
     this.id = options.id;
+    const translator = (this.translator = options.translator ?? nullTranslator);
 
     const model = (this.model = options.model);
     const renderer = options.renderer;
-    const translator = this.translator;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
-    this.translator = options.translator || nullTranslator;
     this._manager = model.manager;
-    this._trans = this.translator.load('jupyterlab');
-    this.crumbs = new BreadCrumbs({ model, translator });
-    this.toolbar = new Toolbar<Widget>();
+
     // a11y
     this.toolbar.node.setAttribute('role', 'navigation');
     this.toolbar.node.setAttribute(
       'aria-label',
       this._trans.__('file browser')
     );
+
     this._directoryPending = false;
 
-    const newFolder = new ToolbarButton({
-      icon: newFolderIcon,
-      onClick: () => {
-        this.createNewDirectory();
-      },
-      tooltip: this._trans.__('New Folder')
-    });
-    const uploader = new Uploader({ model, translator: this.translator });
+    // File browser widgets container
+    this.mainPanel = new Panel();
+    this.mainPanel.addClass(FILE_BROWSER_PANEL_CLASS);
+    this.mainPanel.title.label = this._trans.__('File Browser');
 
-    const refresher = new ToolbarButton({
-      icon: refreshIcon,
-      onClick: () => {
-        void model.refresh();
-      },
-      tooltip: this._trans.__('Refresh File List')
-    });
-
-    this.toolbar.addItem('newFolder', newFolder);
-    this.toolbar.addItem('upload', uploader);
-    this.toolbar.addItem('refresher', refresher);
+    this.crumbs = new BreadCrumbs({ model, translator });
+    this.crumbs.addClass(CRUMBS_CLASS);
 
     this.listing = this.createDirListing({
       model,
       renderer,
-      translator: this.translator
+      translator
     });
+    this.listing.addClass(LISTING_CLASS);
 
     this._filenameSearcher = FilenameSearcher({
-      listing: this.listing,
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
+        this.listing.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
       useFuzzyFilter: this._useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name')
     });
-
-    this.crumbs.addClass(CRUMBS_CLASS);
-    this.toolbar.addClass(TOOLBAR_CLASS);
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    this.listing.addClass(LISTING_CLASS);
 
-    this.layout = new PanelLayout();
-    this.layout.addWidget(this.toolbar);
-    this.layout.addWidget(this._filenameSearcher);
-    this.layout.addWidget(this.crumbs);
-    this.layout.addWidget(this.listing);
+    this.mainPanel.addWidget(this._filenameSearcher);
+    this.mainPanel.addWidget(this.crumbs);
+    this.mainPanel.addWidget(this.listing);
 
-    // We need to make the FileBrowser focusable so that it receives keyboard events
-    this.node.tabIndex = 0;
+    this.addWidget(this.mainPanel);
 
     if (options.restore !== false) {
       void model.restore(this.id);
@@ -150,16 +126,6 @@ export class FileBrowser extends Widget {
    * The model used by the file browser.
    */
   readonly model: FilterFileBrowserModel;
-
-  /**
-   * The toolbar used by the file browser.
-   */
-  readonly toolbar: Toolbar<Widget>;
-
-  /**
-   * Override Widget.layout with a more specific PanelLayout type.
-   */
-  layout: PanelLayout;
 
   /**
    * Whether to show active file in file browser
@@ -194,22 +160,54 @@ export class FileBrowser extends Widget {
   set useFuzzyFilter(value: boolean) {
     this._useFuzzyFilter = value;
 
+    // Detach and dispose the current widget
+    this._filenameSearcher.parent = null;
+    this._filenameSearcher.dispose();
+
     this._filenameSearcher = FilenameSearcher({
-      listing: this.listing,
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
+        this.listing.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
       useFuzzyFilter: this._useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name'),
       forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
-    this._filenameSearcher.id = 'filename-searcher';
 
-    this.layout.removeWidget(this._filenameSearcher);
-    this.layout.removeWidget(this.crumbs);
-    this.layout.removeWidget(this.listing);
+    this.mainPanel.insertWidget(0, this._filenameSearcher);
+  }
 
-    this.layout.addWidget(this._filenameSearcher);
-    this.layout.addWidget(this.crumbs);
-    this.layout.addWidget(this.listing);
+  /**
+   * Whether to show hidden files
+   */
+  get showHiddenFiles(): boolean {
+    return this._showHiddenFiles;
+  }
+
+  set showHiddenFiles(value: boolean) {
+    this.model.showHiddenFiles(value);
+    this._showHiddenFiles = value;
+  }
+
+  /**
+   * Whether to show checkboxes next to files and folders
+   */
+  get showFileCheckboxes(): boolean {
+    return this._showFileCheckboxes;
+  }
+
+  set showFileCheckboxes(value: boolean) {
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('is_selected', value);
+      this._showFileCheckboxes = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
   }
 
   /**
@@ -290,6 +288,7 @@ export class FileBrowser extends Widget {
         this._directoryPending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._directoryPending = false;
       });
   }
@@ -319,6 +318,7 @@ export class FileBrowser extends Widget {
         this._filePending = false;
       })
       .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
         this._filePending = false;
       });
   }
@@ -417,7 +417,8 @@ export class FileBrowser extends Widget {
 
   protected listing: DirListing;
   protected crumbs: BreadCrumbs;
-  private _trans: TranslationBundle;
+  protected mainPanel: Panel;
+
   private _filenameSearcher: ReactWidget;
   private _manager: IDocumentManager;
   private _directoryPending: boolean;
@@ -425,6 +426,8 @@ export class FileBrowser extends Widget {
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
+  private _showHiddenFiles: boolean = false;
+  private _showFileCheckboxes: boolean = false;
 }
 
 /**

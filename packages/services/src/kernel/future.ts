@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { DisposableDelegate } from '@lumino/disposable';
-
 import * as Kernel from './kernel';
-
 import * as KernelMessage from './messages';
 
 declare let setImmediate: any;
@@ -24,7 +21,8 @@ export abstract class KernelFutureHandler<
     REPLY extends KernelMessage.IShellControlMessage
   >
   extends DisposableDelegate
-  implements Kernel.IFuture<REQUEST, REPLY> {
+  implements Kernel.IFuture<REQUEST, REPLY>
+{
   /**
    * Construct a new KernelFutureHandler.
    */
@@ -156,8 +154,11 @@ export abstract class KernelFutureHandler<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
-    this._kernel.sendInputReply(content);
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void {
+    this._kernel.sendInputReply(content, parent_header);
   }
 
   /**
@@ -209,9 +210,9 @@ export abstract class KernelFutureHandler<
       case 'shell':
         if (
           msg.channel === this.msg.channel &&
-          (msg.parent_header as KernelMessage.IHeader<
-            KernelMessage.MessageType
-          >).msg_id === this.msg.header.msg_id
+          (
+            msg.parent_header as KernelMessage.IHeader<KernelMessage.MessageType>
+          ).msg_id === this.msg.header.msg_id
         ) {
           await this._handleReply(msg as REPLY);
         }
@@ -241,6 +242,7 @@ export abstract class KernelFutureHandler<
   }
 
   private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
+    this._kernel.hasPendingInput = true;
     const stdin = this._stdin;
     if (stdin) {
       // tslint:disable-next-line:await-promise
@@ -327,7 +329,7 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export const noOp = () => {
+  export const noOp = (): void => {
     /* no-op */
   };
 
@@ -462,10 +464,8 @@ namespace Private {
       this._hooks.length -= numNulls;
     }
 
-    private _hooks: (
-      | ((msg: T) => boolean | PromiseLike<boolean>)
-      | null
-    )[] = [];
+    private _hooks: (((msg: T) => boolean | PromiseLike<boolean>) | null)[] =
+      [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }

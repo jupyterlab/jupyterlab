@@ -1,32 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect from 'expect';
-
 import { PageConfig } from '@jupyterlab/coreutils';
-
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
-
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-
 import { Contents, ServiceManager } from '@jupyterlab/services';
-
 import { StateDB } from '@jupyterlab/statedb';
-
 import {
   acceptDialog,
   dismissDialog,
   signalToPromises,
   sleep
 } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-
 import { toArray } from '@lumino/algorithm';
-
 import { UUID } from '@lumino/coreutils';
-
-import { FileBrowserModel, CHUNK_SIZE, LARGE_FILE_SIZE } from '../src';
+import expect from 'expect';
+import { CHUNK_SIZE, FileBrowserModel, LARGE_FILE_SIZE } from '../src';
 
 /**
  * A contents manager that delays requests by less each time it is called
@@ -195,6 +185,14 @@ describe('filebrowser/model', () => {
       });
     });
 
+    describe('#rootPath', () => {
+      it('should be and remain the root path of the model', async () => {
+        expect(model.rootPath).toBe('');
+        await model.cd('src/');
+        expect(model.rootPath).toBe('');
+      });
+    });
+
     describe('#items()', () => {
       it('should get an iterator of items in the current path', () => {
         const items = model.items();
@@ -238,8 +236,8 @@ describe('filebrowser/model', () => {
     });
 
     describe('#refresh()', () => {
-      it('should refresh the contents', () => {
-        return model.refresh();
+      it('should refresh the contents', async () => {
+        await expect(model.refresh()).resolves.not.toThrow();
       });
     });
 
@@ -323,7 +321,7 @@ describe('filebrowser/model', () => {
     });
 
     describe('#download()', () => {
-      it('should download the file without error', () => {
+      it.skip('should download the file without error', () => {
         // TODO: how to test this?
       });
     });

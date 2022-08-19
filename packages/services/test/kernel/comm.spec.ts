@@ -1,16 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate } from '@lumino/coreutils';
-
-import { KernelMessage, Kernel, KernelManager } from '../../src';
-
 import {
   isFulfilled,
-  JupyterServer,
-  flakyIt as it
+  flakyIt as it,
+  JupyterServer
 } from '@jupyterlab/testutils';
-
+import { PromiseDelegate } from '@lumino/coreutils';
+import { Kernel, KernelManager, KernelMessage } from '../../src';
 import { init } from '../utils';
 
 // Initialize fetch override.
@@ -281,7 +278,7 @@ describe('jupyter.services - Comm', () => {
           comm.send('quit');
         });
         await kernel.requestExecute({ code: SEND }, true).done;
-        await promise.promise;
+        await expect(promise.promise).resolves.not.toThrow();
       });
     });
 
@@ -329,7 +326,7 @@ describe('jupyter.services - Comm', () => {
           data,
           data.buffer
         ]);
-        await future2.done;
+        await expect(future2.done).resolves.not.toThrow();
       });
     });
 
@@ -337,13 +334,13 @@ describe('jupyter.services - Comm', () => {
       it('should send a message to the server', async () => {
         await comm.open().done;
         const future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
-        await future.done;
+        await expect(future.done).resolves.not.toThrow();
       });
 
       it('should pass through a buffers field', async () => {
         await comm.open().done;
         const future = comm.send({ buffers: 'bar' });
-        await future.done;
+        await expect(future.done).resolves.not.toThrow();
       });
     });
 
@@ -353,7 +350,7 @@ describe('jupyter.services - Comm', () => {
         const encoder = new TextEncoder();
         const data = encoder.encode('hello');
         const future = comm.close({ foo: 'bar' }, {}, [data, data.buffer]);
-        await future.done;
+        await expect(future.done).resolves.not.toThrow();
       });
 
       it('should trigger an onClose', async () => {

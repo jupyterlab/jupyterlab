@@ -17,19 +17,24 @@ dev_mode/workspaces
 docs/_build
 docs/api
 docs/build
-examples/chrome-example-test.js
+examples/example.spec.ts
 examples/federated/core_package/index.template.js
-jupyterlab/chrome-test.js
-jupyterlab/geckodriver
-packages/extensionmanager-extension/examples/listings
-packages/nbconvert-css/raw.js
-packages/ui-components/src/icon/iconimports.ts
-packages/ui-components/storybook-static
-jupyterlab/staging/yarn.js
-jupyterlab/staging/index.js
-tsconfigdoc.json
 examples/federated/core_package/index.js
 examples/federated/labextensions
+galata/playwright-report
+jupyterlab/chrome-test.js
+jupyterlab/geckodriver
+jupyterlab/staging/yarn.js
+jupyterlab/staging/index.js
+jupyterlab/staging/webpack.config.js
+packages/extensionmanager-extension/examples/listings
+packages/nbconvert-css/raw.js
+packages/services/dist
+packages/ui-components/src/icon/iconimports.ts
+tsconfigdoc.json
+
+#TypeDoc
+typedoc-theme/
 
 # jetbrains IDE stuff
 .idea/
@@ -37,3 +42,7 @@ examples/federated/labextensions
 # ms IDE stuff
 .history/
 .vscode/
+
+# generated LSP interfaces
+packages/lsp/src/_*
+packages/lsp/schema.js

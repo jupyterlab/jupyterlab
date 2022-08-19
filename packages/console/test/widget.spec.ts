@@ -1,28 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message, MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
 import { SessionContext } from '@jupyterlab/apputils';
-
-import { CodeConsole } from '../src';
-
 import {
   CodeCell,
   CodeCellModel,
-  RawCellModel,
-  RawCell
+  RawCell,
+  RawCellModel
 } from '@jupyterlab/cells';
-
 import { createSessionContext, NBTestUtils } from '@jupyterlab/testutils';
-
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { CodeConsole } from '../src';
 import {
   createConsoleFactory,
-  rendermime,
+  editorFactory,
   mimeTypeService,
-  editorFactory
+  rendermime
 } from './utils';
 
 class TestConsole extends CodeConsole {

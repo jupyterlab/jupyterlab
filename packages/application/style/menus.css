@@ -31,7 +31,7 @@
 }
 
 .lm-MenuBar-item {
-  padding: 0px 8px;
+  padding: 0 8px;
   border-left: var(--jp-border-width) solid transparent;
   border-right: var(--jp-border-width) solid transparent;
   border-top: var(--jp-border-width) solid transparent;
@@ -77,7 +77,7 @@
 
 .lm-Menu {
   z-index: 10000;
-  padding: 4px 0px;
+  padding: 4px 0;
   background: var(--jp-layout-color0);
   color: var(--jp-ui-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
@@ -88,7 +88,7 @@
 .lm-Menu-item {
   min-height: var(--jp-private-menu-item-height);
   max-height: var(--jp-private-menu-item-height);
-  padding: 0px;
+  padding: 0;
   line-height: var(--jp-private-menu-item-height);
 }
 
@@ -102,12 +102,12 @@
 
 .lm-Menu-itemIcon {
   width: 21px;
-  padding: 0px 2px 0px 4px;
+  padding: 0 2px 0 4px;
   margin-top: -2px;
 }
 
 .lm-Menu-itemLabel {
-  padding: 0px 32px 0px 2px;
+  padding: 0 32px 0 2px;
 }
 
 .lm-Menu-itemMnemonic {
@@ -115,12 +115,12 @@
 }
 
 .lm-Menu-itemShortcut {
-  padding: 0px;
+  padding: 0;
 }
 
 .lm-Menu-itemSubmenuIcon {
   width: 18px;
-  padding: 0px 4px 0px 0px;
+  padding: 0 4px 0 0;
 }
 
 .lm-Menu-item[data-type='separator'] > div {

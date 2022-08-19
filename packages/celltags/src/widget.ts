@@ -1,7 +1,10 @@
-import { Widget } from '@lumino/widgets';
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 import { checkIcon } from '@jupyterlab/ui-components';
-
+import { Widget } from '@lumino/widgets';
 import { TagTool } from './tool';
 
 /**
@@ -22,7 +25,7 @@ export class TagWidget extends Widget {
   /**
    * Create tag div with icon and attach to this.node.
    */
-  buildTag() {
+  buildTag(): void {
     const text = document.createElement('span');
     text.textContent = this.name;
     text.style.textOverflow = 'ellipsis';
@@ -50,7 +53,7 @@ export class TagWidget extends Widget {
   /**
    * Handle `after-attach` messages for the widget.
    */
-  onAfterAttach() {
+  onAfterAttach(): void {
     this.node.addEventListener('mousedown', this);
     this.node.addEventListener('mouseover', this);
     this.node.addEventListener('mouseout', this);
@@ -59,7 +62,7 @@ export class TagWidget extends Widget {
   /**
    * Handle `before-detach` messages for the widget.
    */
-  onBeforeDetach() {
+  onBeforeDetach(): void {
     this.node.removeEventListener('mousedown', this);
     this.node.removeEventListener('mouseover', this);
     this.node.removeEventListener('mouseout', this);
@@ -94,7 +97,7 @@ export class TagWidget extends Widget {
   /**
    * Handle `update-request` messages. Check if applied to current active cell.
    */
-  onUpdateRequest() {
+  onUpdateRequest(): void {
     const applied = this.parent?.checkApplied(this.name);
     if (applied !== this.applied) {
       this.toggleApplied();
@@ -104,7 +107,7 @@ export class TagWidget extends Widget {
   /**
    * Update styling to reflect whether tag is applied to current active cell.
    */
-  toggleApplied() {
+  toggleApplied(): void {
     if (this.applied) {
       this.removeClass('applied-tag');
       (this.node.firstChild?.lastChild as HTMLSpanElement).style.display =

@@ -3,6 +3,7 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import url('./linecol.css');
 
 .jp-JSONEditor {
   display: flex;
@@ -13,7 +14,7 @@
 .jp-JSONEditor-host {
   flex: 1 1 auto;
   border: var(--jp-border-width) solid var(--jp-input-border-color);
-  border-radius: 0px;
+  border-radius: 0;
   background: var(--jp-layout-color0);
   min-height: 50px;
   padding: 1px;

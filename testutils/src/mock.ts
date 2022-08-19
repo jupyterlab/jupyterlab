@@ -11,14 +11,14 @@ import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 
 import {
+  Contents,
+  ContentsManager,
   Kernel,
   KernelMessage,
   KernelSpec,
-  Session,
-  ServiceManager,
-  Contents,
   ServerConnection,
-  ContentsManager
+  ServiceManager,
+  Session
 } from '@jupyterlab/services';
 
 import { ArrayIterator } from '@lumino/algorithm';
@@ -58,7 +58,7 @@ export const KERNELSPECS: { [key: string]: KernelSpec.ISpecModel } = {
       '{connection_file}'
     ],
     display_name: 'R',
-    language: 'python',
+    language: 'r',
     metadata: {},
     name: 'irkernel',
     resources: {}
@@ -96,7 +96,7 @@ export const NOTEBOOK_PATHS: { [kernelName: string]: string[] } = {
 export function updateKernelStatus(
   sessionContext: ISessionContext,
   newStatus: KernelMessage.Status
-) {
+): void {
   const kernel = sessionContext.session!.kernel!;
   (kernel as any).status = newStatus;
   (sessionContext.statusChanged as any).emit(newStatus);
@@ -170,6 +170,10 @@ export const KernelMock = jest.fn<
     ...jest.requireActual('@jupyterlab/services'),
     ...options,
     ...model,
+    model,
+    serverSettings: ServerConnection.makeSettings(
+      options.serverSettings as Partial<ServerConnection.ISettings>
+    ),
     status: 'idle',
     spec: Promise.resolve(spec),
     dispose: jest.fn(),
@@ -235,7 +239,7 @@ export const KernelMock = jest.fn<
         KernelMessage.IExecuteReplyMsg
       >;
     })
-  } as any; // FIXME: fix the typing error this any cast is ignoring
+  };
   // Add signals.
   const iopubMessageSignal = new Signal<
     Kernel.IKernelConnection,
@@ -245,8 +249,13 @@ export const KernelMock = jest.fn<
     Kernel.IKernelConnection,
     Kernel.Status
   >(thisObject);
+  const pendingInputSignal = new Signal<Kernel.IKernelConnection, boolean>(
+    thisObject
+  );
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
+  (thisObject as any).pendingInput = pendingInputSignal;
+  (thisObject as any).hasPendingInput = false;
   return thisObject;
 });
 
@@ -266,6 +275,7 @@ export const SessionConnectionMock = jest.fn<
   const name = kernel?.name || options.model?.kernel?.name || DEFAULT_NAME;
   kernel = kernel || new KernelMock({ model: { name } });
   const model = {
+    id: UUID.uuid4(),
     path: 'foo',
     type: 'notebook',
     name: 'foo',
@@ -274,11 +284,13 @@ export const SessionConnectionMock = jest.fn<
   };
   const thisObject: Session.ISessionConnection = {
     ...jest.requireActual('@jupyterlab/services'),
-    id: UUID.uuid4(),
     ...options,
     model,
     ...model,
     kernel,
+    serverSettings: ServerConnection.makeSettings(
+      options.serverSettings as Partial<ServerConnection.ISettings>
+    ),
     dispose: jest.fn(),
     changeKernel: jest.fn(partialModel => {
       return Private.changeKernel(kernel!, partialModel!);
@@ -299,7 +311,7 @@ export const SessionConnectionMock = jest.fn<
       propertyChangedSignal.emit('type');
       return Promise.resolve();
     })
-  } as any; // FIXME: fix the typing error this any cast is ignoring
+  };
   const disposedSignal = new Signal<Session.ISessionConnection, undefined>(
     thisObject
   );
@@ -329,12 +341,20 @@ export const SessionConnectionMock = jest.fn<
     KernelMessage.IMessage
   >(thisObject);
 
+  const pendingInputSignal = new Signal<Session.ISessionConnection, boolean>(
+    thisObject
+  );
+
   kernel!.iopubMessage.connect((_, args) => {
     iopubMessageSignal.emit(args);
   }, thisObject);
 
   kernel!.statusChanged.connect((_, args) => {
     statusChangedSignal.emit(args);
+  }, thisObject);
+
+  kernel!.pendingInput.connect((_, args) => {
+    pendingInputSignal.emit(args);
   }, thisObject);
 
   (thisObject as any).disposed = disposedSignal;
@@ -344,6 +364,7 @@ export const SessionConnectionMock = jest.fn<
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).unhandledMessage = unhandledMessageSignal;
+  (thisObject as any).pendingInput = pendingInputSignal;
   return thisObject;
 });
 
@@ -374,10 +395,9 @@ export const SessionContextMock = jest.fn<
     path: session.path,
     type: session.type,
     name: session.name,
-    kernel: session.kernel,
     session,
     dispose: jest.fn(),
-    initialize: jest.fn(() => Promise.resolve()),
+    initialize: jest.fn(() => Promise.resolve(false)),
     ready: Promise.resolve(),
     changeKernel: jest.fn(partialModel => {
       return Private.changeKernel(
@@ -386,7 +406,7 @@ export const SessionContextMock = jest.fn<
       );
     }),
     shutdown: jest.fn(() => Promise.resolve())
-  } as any; // FIXME: fix the typing error this any cast is ignoring
+  };
 
   const disposedSignal = new Signal<ISessionContext, undefined>(thisObject);
 
@@ -420,12 +440,17 @@ export const SessionContextMock = jest.fn<
     kernelChangedSignal.emit(args);
   });
 
+  session!.pendingInput.connect((_, args) => {
+    (thisObject as any).pendingInput = args;
+  });
+
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).propertyChanged = propertyChangedSignal;
   (thisObject as any).disposed = disposedSignal;
   (thisObject as any).session = session;
+  (thisObject as any).pendingInput = false;
 
   return thisObject;
 });
@@ -504,7 +529,12 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
         if (options?.content !== false) {
           const content: Contents.IModel[] = [];
           files.forEach(fileModel => {
-            if (PathExt.dirname(fileModel.path) == model.path) {
+            if (
+              // If file path is under this directory, add it to contents array.
+              PathExt.dirname(fileModel.path) == model.path &&
+              // But the directory should exclude itself from the contents array.
+              fileModel !== model
+            ) {
               content.push(fileModel);
             }
           });
@@ -784,7 +814,7 @@ namespace Private {
   }
 
   // Get the kernel spec for kernel name
-  export function kernelSpecForKernelName(name: string) {
+  export function kernelSpecForKernelName(name: string): KernelSpec.ISpecModel {
     return KERNELSPECS[name];
   }
 
@@ -807,7 +837,7 @@ namespace Private {
   export function changeKernel(
     kernel: Kernel.IKernelConnection,
     partialModel: Partial<Kernel.IModel>
-  ): Promise<Kernel.IModel> {
+  ): Promise<Kernel.IKernelConnection> {
     if (partialModel.id) {
       const kernelIdx = KERNEL_MODELS.findIndex(model => {
         return model.id === partialModel.id;

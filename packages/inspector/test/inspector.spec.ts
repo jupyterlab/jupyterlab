@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
 import { IInspector, InspectorPanel } from '@jupyterlab/inspector';
+import { Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 class TestInspectorPanel extends InspectorPanel {
   methods: string[] = [];
@@ -29,6 +27,10 @@ class TestInspectable implements IInspector.IInspectable {
   isDisposed = false;
 
   standby = false;
+
+  onEditorChange(customText?: string): void {
+    /* empty */
+  }
 }
 
 describe('inspector/index', () => {

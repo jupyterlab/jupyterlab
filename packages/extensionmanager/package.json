@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager",
-  "version": "3.1.0-alpha.8",
+  "version": "4.0.0-alpha.12",
   "description": "JupyterLab - Extension Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,30 +33,30 @@
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-alpha.8",
-    "@jupyterlab/apputils": "^3.1.0-alpha.8",
-    "@jupyterlab/coreutils": "^5.1.0-alpha.8",
-    "@jupyterlab/services": "^6.1.0-alpha.8",
-    "@jupyterlab/settingregistry": "^3.1.0-alpha.8",
-    "@jupyterlab/translation": "^3.1.0-alpha.8",
-    "@jupyterlab/ui-components": "^3.1.0-alpha.8",
-    "@lumino/messaging": "^1.4.3",
-    "@lumino/polling": "^1.3.3",
-    "@lumino/signaling": "^1.4.3",
+    "@jupyterlab/application": "^4.0.0-alpha.12",
+    "@jupyterlab/apputils": "^4.0.0-alpha.12",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
+    "@jupyterlab/services": "^7.0.0-alpha.12",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.12",
+    "@jupyterlab/translation": "^4.0.0-alpha.12",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.27",
+    "@lumino/messaging": "^1.10.1",
+    "@lumino/polling": "^1.10.0",
+    "@lumino/signaling": "^1.10.1",
     "react": "^17.0.1",
     "react-paginate": "^6.3.2",
     "semver": "^7.3.2"
   },
   "devDependencies": {
+    "@types/react": "^17.0.0",
     "@types/react-paginate": "^6.2.1",
     "@types/semver": "^7.3.3",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.20.0-beta.27",
-    "typescript": "~4.1.3"
+    "typedoc": "~0.22.10",
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

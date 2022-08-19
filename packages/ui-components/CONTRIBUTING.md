@@ -21,7 +21,7 @@ Design goals for JLIcon (already implemented):
 - reusable
   - every defined icon can be used any number of times in any set of contexts
   - where an icon is defined should not matter; all icons defined in core and extensions are reusable in any other extension
-- replacable
+- replaceable
   - all icons can be customized by replacing their svg dynamically during runtime
   - replaceability does not depend on dynamic lookup (you can assign to the `.svgstr` property of any `LabIcon` instance to trigger replacement)
   - whenever its svg is replaced, all visible copies of an icon should immediately rerender

@@ -8,26 +8,12 @@
   width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
 }
 
-.jp-skiplink {
-  position: absolute;
-  top: -100em;
-}
+#jp-top-bar {
+  --jp-private-toolbar-height: var(--jp-private-menu-panel-height);
 
-.jp-skiplink:focus-within {
-  position: absolute;
-  z-index: 10000;
-  top: 0;
-  left: 46%;
-  margin: 0 auto;
-  padding: 1em;
-  width: 15%;
-  box-shadow: var(--jp-elevation-z4);
-  border-radius: 4px;
-  background: var(--jp-layout-color0);
-  text-align: center;
-}
-
-.jp-skiplink:focus-within a {
-  text-decoration: underline;
-  color: var(--jp-content-link-color);
+  flex: 1 1 auto;
+  padding: 0 2px;
+  box-shadow: none;
+  border: none;
+  align-items: center;
 }

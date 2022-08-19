@@ -2,15 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ILabShell, LayoutRestorer } from '@jupyterlab/application';
-
 import { WidgetTracker } from '@jupyterlab/apputils';
-
 import { StateDB } from '@jupyterlab/statedb';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
 
 describe('apputils', () => {
@@ -45,12 +40,12 @@ describe('apputils', () => {
         });
         const promise = restorer.restored;
         ready.resolve(void 0);
-        await promise;
+        await expect(promise).resolves.not.toThrow();
       });
     });
 
     describe('#add()', () => {
-      it('should add a widget to be tracked by the restorer', async () => {
+      it('should add a widget in the main area to be tracked by the restorer', async () => {
         const ready = new PromiseDelegate<void>();
         const restorer = new LayoutRestorer({
           connector: new StateDB(),
@@ -60,9 +55,21 @@ describe('apputils', () => {
         const currentWidget = new Widget();
         const dehydrated: ILabShell.ILayout = {
           mainArea: { currentWidget, dock: null },
-          leftArea: { collapsed: true, currentWidget: null, widgets: null },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null },
-          relativeSizes: null
+          downArea: { currentWidget: null, widgets: null, size: null },
+          leftArea: {
+            collapsed: true,
+            currentWidget: null,
+            widgets: null,
+            visible: false
+          },
+          rightArea: {
+            collapsed: true,
+            currentWidget: null,
+            widgets: null,
+            visible: false
+          },
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
@@ -70,6 +77,40 @@ describe('apputils', () => {
         await restorer.save(dehydrated);
         const layout = await restorer.fetch();
         expect(layout.mainArea?.currentWidget).toBe(currentWidget);
+      });
+
+      it('should add a widget in the down area to be tracked by the restorer', async () => {
+        const ready = new PromiseDelegate<void>();
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: ready.promise,
+          registry: new CommandRegistry()
+        });
+        const currentWidget = new Widget();
+        const dehydrated: ILabShell.ILayout = {
+          mainArea: { currentWidget: null, dock: null },
+          downArea: { currentWidget, widgets: null, size: null },
+          leftArea: {
+            collapsed: true,
+            currentWidget: null,
+            widgets: null,
+            visible: false
+          },
+          rightArea: {
+            collapsed: true,
+            currentWidget: null,
+            widgets: null,
+            visible: false
+          },
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
+        };
+        restorer.add(currentWidget, 'test-one');
+        ready.resolve(void 0);
+        await restorer.restored;
+        await restorer.save(dehydrated);
+        const layout = await restorer.fetch();
+        expect(layout.downArea?.currentWidget).toBe(currentWidget);
       });
     });
 
@@ -96,13 +137,21 @@ describe('apputils', () => {
         const dehydrated: ILabShell.ILayout = {
           fresh: false,
           mainArea: { currentWidget: null, dock: null },
+          downArea: { currentWidget: null, widgets: null, size: 0 },
           leftArea: {
             currentWidget,
             collapsed: true,
-            widgets: [currentWidget]
+            widgets: [currentWidget],
+            visible: true
           },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null },
-          relativeSizes: null
+          rightArea: {
+            collapsed: true,
+            currentWidget: null,
+            widgets: null,
+            visible: false
+          },
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
@@ -154,9 +203,21 @@ describe('apputils', () => {
         });
         const dehydrated: ILabShell.ILayout = {
           mainArea: { currentWidget: null, dock: null },
-          leftArea: { currentWidget: null, collapsed: true, widgets: null },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null },
-          relativeSizes: null
+          downArea: { currentWidget: null, widgets: null, size: null },
+          leftArea: {
+            currentWidget: null,
+            collapsed: true,
+            widgets: null,
+            visible: false
+          },
+          rightArea: {
+            collapsed: true,
+            currentWidget: null,
+            widgets: null,
+            visible: false
+          },
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
 
         await expect(restorer.save(dehydrated)).rejects.toBe(
@@ -176,13 +237,21 @@ describe('apputils', () => {
         const dehydrated: ILabShell.ILayout = {
           fresh: false,
           mainArea: { currentWidget: null, dock: null },
+          downArea: { currentWidget: null, widgets: null, size: 0 },
           leftArea: {
             currentWidget,
             collapsed: true,
-            widgets: [currentWidget]
+            widgets: [currentWidget],
+            visible: true
           },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null },
-          relativeSizes: null
+          rightArea: {
+            collapsed: true,
+            currentWidget: null,
+            widgets: null,
+            visible: false
+          },
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);

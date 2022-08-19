@@ -22,7 +22,13 @@
       "path": "../services"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

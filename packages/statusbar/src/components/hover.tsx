@@ -1,19 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { HoverBox } from '@jupyterlab/apputils';
-
+import { HoverBox } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
-
-import { Widget, PanelLayout } from '@lumino/widgets';
-
-import { style } from 'typestyle/lib';
-
-import { clickedItem, interactiveItem } from '../style/statusbar';
-
-const hoverItem = style({
-  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
-});
+import { PanelLayout, Widget } from '@lumino/widgets';
+import { clickedItem, hoverItem, interactiveItem } from '../style/statusbar';
 
 /**
  * Create and show a popup component.
@@ -51,7 +42,7 @@ export class Popup extends Widget {
   /**
    * Attach the popup widget to the page.
    */
-  launch() {
+  launch(): void {
     this._setGeometry();
     Widget.attach(this, document.body);
     this.update();
@@ -95,7 +86,7 @@ export class Popup extends Widget {
   /**
    * Dispose of the widget.
    */
-  dispose() {
+  dispose(): void {
     super.dispose();
     this._anchor.removeClass(clickedItem);
     this._anchor.addClass(interactiveItem);

@@ -12,7 +12,10 @@
 /* Icons urls */
 
 :root {
+  --jp-icon-add-above: url('icons/toolbar/add-above.svg');
+  --jp-icon-add-below: url('icons/toolbar/add-below.svg');
   --jp-icon-add: url('icons/toolbar/add.svg');
+  --jp-icon-bug-dot: url('icons/toolbar/bug-dot.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
   --jp-icon-caret-down-empty-thin: url('icons/arrow/caret-down-empty-thin.svg');
@@ -28,34 +31,46 @@
   --jp-icon-circle: url('icons/toolbar/circle.svg');
   --jp-icon-clear: url('icons/toolbar/clear.svg');
   --jp-icon-close: url('icons/toolbar/close.svg');
+  --jp-icon-code-check: url('icons/lsp/code-check.svg');
   --jp-icon-code: url('icons/toolbar/code.svg');
+  --jp-icon-collapse-all: url('icons/toolbar/collapse-all.svg');
   --jp-icon-console: url('icons/filetype/console.svg');
   --jp-icon-copy: url('icons/toolbar/copy.svg');
+  --jp-icon-copyright: url('icons/licenses/copyright.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
+  --jp-icon-delete: url('icons/toolbar/delete.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
+  --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
+  --jp-icon-expand-all: url('icons/toolbar/expand-all.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
   --jp-icon-fast-forward: url('icons/toolbar/fast-forward.svg');
   --jp-icon-file-upload: url('icons/toolbar/file-upload.svg');
   --jp-icon-file: url('icons/filetype/file.svg');
   --jp-icon-filter-list: url('icons/toolbar/filter-list.svg');
+  --jp-icon-folder-favorite: url('icons/filetype/folder-favorite.svg');
   --jp-icon-folder: url('icons/filetype/folder.svg');
+  --jp-icon-home: url('icons/filetype/home.svg');
   --jp-icon-html5: url('icons/filetype/html5.svg');
   --jp-icon-image: url('icons/filetype/image.svg');
   --jp-icon-inspector: url('icons/filetype/inspector.svg');
   --jp-icon-json: url('icons/filetype/json.svg');
+  --jp-icon-julia: url('icons/filetype/julia.svg');
   --jp-icon-jupyter-favicon: url('icons/jupyter/jupyter-favicon.svg');
   --jp-icon-jupyter: url('icons/jupyter/jupyter.svg');
   --jp-icon-jupyterlab-wordmark: url('icons/jupyter/jupyterlab-wordmark.svg');
   --jp-icon-kernel: url('icons/statusbar/kernel.svg');
   --jp-icon-keyboard: url('icons/filetype/keyboard.svg');
+  --jp-icon-launch: url('icons/toolbar/launch.svg');
   --jp-icon-launcher: url('icons/filetype/launcher.svg');
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
   --jp-icon-link: url('icons/toolbar/link.svg');
   --jp-icon-list: url('icons/statusbar/list.svg');
   --jp-icon-listings-info: url('icons/listings/listings-info.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
+  --jp-icon-move-down: url('icons/toolbar/move-down.svg');
+  --jp-icon-move-up: url('icons/toolbar/move-up.svg');
   --jp-icon-new-folder: url('icons/toolbar/new-folder.svg');
   --jp-icon-not-trusted: url('icons/statusbar/not-trusted.svg');
   --jp-icon-notebook: url('icons/filetype/notebook.svg');
@@ -75,6 +90,7 @@
   --jp-icon-save: url('icons/toolbar/save.svg');
   --jp-icon-search: url('icons/toolbar/search.svg');
   --jp-icon-settings: url('icons/filetype/settings.svg');
+  --jp-icon-share: url('icons/sidebar/share.svg');
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
   --jp-icon-stop: url('icons/toolbar/stop.svg');
   --jp-icon-tab: url('icons/sidebar/tab.svg');
@@ -86,237 +102,386 @@
   --jp-icon-tree-view: url('icons/toolbar/tree-view.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
+  --jp-icon-user: url('icons/sidebar/user.svg');
+  --jp-icon-users: url('icons/sidebar/users.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
 }
 
 /* Icon CSS class declarations */
 
+.jp-AddAboveIcon {
+  background-image: var(--jp-icon-add-above);
+}
+
+.jp-AddBelowIcon {
+  background-image: var(--jp-icon-add-below);
+}
+
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
 }
+
+.jp-BugDotIcon {
+  background-image: var(--jp-icon-bug-dot);
+}
+
 .jp-BugIcon {
   background-image: var(--jp-icon-bug);
 }
+
 .jp-BuildIcon {
   background-image: var(--jp-icon-build);
 }
+
 .jp-CaretDownEmptyIcon {
   background-image: var(--jp-icon-caret-down-empty);
 }
+
 .jp-CaretDownEmptyThinIcon {
   background-image: var(--jp-icon-caret-down-empty-thin);
 }
+
 .jp-CaretDownIcon {
   background-image: var(--jp-icon-caret-down);
 }
+
 .jp-CaretLeftIcon {
   background-image: var(--jp-icon-caret-left);
 }
+
 .jp-CaretRightIcon {
   background-image: var(--jp-icon-caret-right);
 }
+
 .jp-CaretUpEmptyThinIcon {
   background-image: var(--jp-icon-caret-up-empty-thin);
 }
+
 .jp-CaretUpIcon {
   background-image: var(--jp-icon-caret-up);
 }
+
 .jp-CaseSensitiveIcon {
   background-image: var(--jp-icon-case-sensitive);
 }
+
 .jp-CheckIcon {
   background-image: var(--jp-icon-check);
 }
+
 .jp-CircleEmptyIcon {
   background-image: var(--jp-icon-circle-empty);
 }
+
 .jp-CircleIcon {
   background-image: var(--jp-icon-circle);
 }
+
 .jp-ClearIcon {
   background-image: var(--jp-icon-clear);
 }
+
 .jp-CloseIcon {
   background-image: var(--jp-icon-close);
 }
+
+.jp-CodeCheckIcon {
+  background-image: var(--jp-icon-code-check);
+}
+
 .jp-CodeIcon {
   background-image: var(--jp-icon-code);
 }
+
+.jp-CollapseAllIcon {
+  background-image: var(--jp-icon-collapse-all);
+}
+
 .jp-ConsoleIcon {
   background-image: var(--jp-icon-console);
 }
+
 .jp-CopyIcon {
   background-image: var(--jp-icon-copy);
 }
+
+.jp-CopyrightIcon {
+  background-image: var(--jp-icon-copyright);
+}
+
 .jp-CutIcon {
   background-image: var(--jp-icon-cut);
 }
+
+.jp-DeleteIcon {
+  background-image: var(--jp-icon-delete);
+}
+
 .jp-DownloadIcon {
   background-image: var(--jp-icon-download);
 }
+
+.jp-DuplicateIcon {
+  background-image: var(--jp-icon-duplicate);
+}
+
 .jp-EditIcon {
   background-image: var(--jp-icon-edit);
 }
+
 .jp-EllipsesIcon {
   background-image: var(--jp-icon-ellipses);
 }
+
+.jp-ExpandAllIcon {
+  background-image: var(--jp-icon-expand-all);
+}
+
 .jp-ExtensionIcon {
   background-image: var(--jp-icon-extension);
 }
+
 .jp-FastForwardIcon {
   background-image: var(--jp-icon-fast-forward);
 }
+
 .jp-FileIcon {
   background-image: var(--jp-icon-file);
 }
+
 .jp-FileUploadIcon {
   background-image: var(--jp-icon-file-upload);
 }
+
 .jp-FilterListIcon {
   background-image: var(--jp-icon-filter-list);
 }
+
+.jp-FolderFavoriteIcon {
+  background-image: var(--jp-icon-folder-favorite);
+}
+
 .jp-FolderIcon {
   background-image: var(--jp-icon-folder);
 }
+
+.jp-HomeIcon {
+  background-image: var(--jp-icon-home);
+}
+
 .jp-Html5Icon {
   background-image: var(--jp-icon-html5);
 }
+
 .jp-ImageIcon {
   background-image: var(--jp-icon-image);
 }
+
 .jp-InspectorIcon {
   background-image: var(--jp-icon-inspector);
 }
+
 .jp-JsonIcon {
   background-image: var(--jp-icon-json);
 }
+
+.jp-JuliaIcon {
+  background-image: var(--jp-icon-julia);
+}
+
 .jp-JupyterFaviconIcon {
   background-image: var(--jp-icon-jupyter-favicon);
 }
+
 .jp-JupyterIcon {
   background-image: var(--jp-icon-jupyter);
 }
+
 .jp-JupyterlabWordmarkIcon {
   background-image: var(--jp-icon-jupyterlab-wordmark);
 }
+
 .jp-KernelIcon {
   background-image: var(--jp-icon-kernel);
 }
+
 .jp-KeyboardIcon {
   background-image: var(--jp-icon-keyboard);
 }
+
+.jp-LaunchIcon {
+  background-image: var(--jp-icon-launch);
+}
+
 .jp-LauncherIcon {
   background-image: var(--jp-icon-launcher);
 }
+
 .jp-LineFormIcon {
   background-image: var(--jp-icon-line-form);
 }
+
 .jp-LinkIcon {
   background-image: var(--jp-icon-link);
 }
+
 .jp-ListIcon {
   background-image: var(--jp-icon-list);
 }
+
 .jp-ListingsInfoIcon {
   background-image: var(--jp-icon-listings-info);
 }
+
 .jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown);
 }
+
+.jp-MoveDownIcon {
+  background-image: var(--jp-icon-move-down);
+}
+
+.jp-MoveUpIcon {
+  background-image: var(--jp-icon-move-up);
+}
+
 .jp-NewFolderIcon {
   background-image: var(--jp-icon-new-folder);
 }
+
 .jp-NotTrustedIcon {
   background-image: var(--jp-icon-not-trusted);
 }
+
 .jp-NotebookIcon {
   background-image: var(--jp-icon-notebook);
 }
+
 .jp-NumberingIcon {
   background-image: var(--jp-icon-numbering);
 }
+
 .jp-OfflineBoltIcon {
   background-image: var(--jp-icon-offline-bolt);
 }
+
 .jp-PaletteIcon {
   background-image: var(--jp-icon-palette);
 }
+
 .jp-PasteIcon {
   background-image: var(--jp-icon-paste);
 }
+
 .jp-PdfIcon {
   background-image: var(--jp-icon-pdf);
 }
+
 .jp-PythonIcon {
   background-image: var(--jp-icon-python);
 }
+
 .jp-RKernelIcon {
   background-image: var(--jp-icon-r-kernel);
 }
+
 .jp-ReactIcon {
   background-image: var(--jp-icon-react);
 }
+
 .jp-RedoIcon {
   background-image: var(--jp-icon-redo);
 }
+
 .jp-RefreshIcon {
   background-image: var(--jp-icon-refresh);
 }
+
 .jp-RegexIcon {
   background-image: var(--jp-icon-regex);
 }
+
 .jp-RunIcon {
   background-image: var(--jp-icon-run);
 }
+
 .jp-RunningIcon {
   background-image: var(--jp-icon-running);
 }
+
 .jp-SaveIcon {
   background-image: var(--jp-icon-save);
 }
+
 .jp-SearchIcon {
   background-image: var(--jp-icon-search);
 }
+
 .jp-SettingsIcon {
   background-image: var(--jp-icon-settings);
 }
+
+.jp-ShareIcon {
+  background-image: var(--jp-icon-share);
+}
+
 .jp-SpreadsheetIcon {
   background-image: var(--jp-icon-spreadsheet);
 }
+
 .jp-StopIcon {
   background-image: var(--jp-icon-stop);
 }
+
 .jp-TabIcon {
   background-image: var(--jp-icon-tab);
 }
+
 .jp-TableRowsIcon {
   background-image: var(--jp-icon-table-rows);
 }
+
 .jp-TagIcon {
   background-image: var(--jp-icon-tag);
 }
+
 .jp-TerminalIcon {
   background-image: var(--jp-icon-terminal);
 }
+
 .jp-TextEditorIcon {
   background-image: var(--jp-icon-text-editor);
 }
+
 .jp-TocIcon {
   background-image: var(--jp-icon-toc);
 }
+
 .jp-TreeViewIcon {
   background-image: var(--jp-icon-tree-view);
 }
+
 .jp-TrustedIcon {
   background-image: var(--jp-icon-trusted);
 }
+
 .jp-UndoIcon {
   background-image: var(--jp-icon-undo);
 }
+
+.jp-UserIcon {
+  background-image: var(--jp-icon-user);
+}
+
+.jp-UsersIcon {
+  background-image: var(--jp-icon-users);
+}
+
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
 }
+
 .jp-YamlIcon {
   background-image: var(--jp-icon-yaml);
 }

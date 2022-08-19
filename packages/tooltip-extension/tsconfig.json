@@ -32,6 +32,9 @@
     },
     {
       "path": "../tooltip"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

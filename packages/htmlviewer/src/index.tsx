@@ -7,32 +7,26 @@
  * @module htmlviewer
  */
 
-import {
-  IFrame,
-  IWidgetTracker,
-  ReactWidget,
-  ToolbarButton,
-  ToolbarButtonComponent,
-  UseSignal
-} from '@jupyterlab/apputils';
-
+import { IWidgetTracker } from '@jupyterlab/apputils';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
 import {
   ABCWidgetFactory,
   DocumentRegistry,
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
-import { refreshIcon } from '@jupyterlab/ui-components';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  IFrame,
+  ReactWidget,
+  refreshIcon,
+  ToolbarButton,
+  ToolbarButtonComponent,
+  UseSignal
+} from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
@@ -64,14 +58,15 @@ const CSS_CLASS = 'jp-HTMLViewer';
  * since it can execute Javascript, and make same-origin requests
  * to the server, thereby executing arbitrary Javascript.
  *
- * Here, we sandbox the iframe so that it can't execute Javsacript
+ * Here, we sandbox the iframe so that it can't execute Javascript
  * or launch any popups. We allow one exception: 'allow-same-origin'
  * requests, so that local HTML documents can access CSS, images,
  * etc from the files system.
  */
 export class HTMLViewer
   extends DocumentWidget<IFrame>
-  implements IDocumentWidget<IFrame> {
+  implements IDocumentWidget<IFrame>
+{
   /**
    * Create a new widget for rendering HTML.
    */
@@ -81,7 +76,6 @@ export class HTMLViewer
       content: new IFrame({ sandbox: ['allow-same-origin'] })
     });
     this.translator = options.translator || nullTranslator;
-    const trans = this.translator.load('jupyterlab');
     this.content.addClass(CSS_CLASS);
 
     void this.context.ready.then(() => {
@@ -93,31 +87,6 @@ export class HTMLViewer
       });
       this._monitor.activityStopped.connect(this.update, this);
     });
-
-    // Make a refresh button for the toolbar.
-    this.toolbar.addItem(
-      'refresh',
-      new ToolbarButton({
-        icon: refreshIcon,
-        onClick: async () => {
-          if (!this.context.model.dirty) {
-            await this.context.revert();
-            this.update();
-          }
-        },
-        tooltip: trans.__('Rerender HTML Document')
-      })
-    );
-    // Make a trust button for the toolbar.
-    this.toolbar.addItem(
-      'trust',
-      ReactWidget.create(
-        <Private.TrustButtonComponent
-          htmlDocument={this}
-          translator={this.translator}
-        />
-      )
-    );
   }
 
   /**
@@ -223,10 +192,8 @@ export class HTMLViewer
   protected translator: ITranslator;
   private _renderPending = false;
   private _parser = new DOMParser();
-  private _monitor: ActivityMonitor<
-    DocumentRegistry.IModel,
-    void
-  > | null = null;
+  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
+    null;
   private _objectUrl: string = '';
   private _trustedChanged = new Signal<this, boolean>(this);
 }
@@ -240,6 +207,73 @@ export class HTMLViewerFactory extends ABCWidgetFactory<HTMLViewer> {
    */
   protected createNewWidget(context: DocumentRegistry.Context): HTMLViewer {
     return new HTMLViewer({ context });
+  }
+
+  /**
+   * Default factory for toolbar items to be added after the widget is created.
+   */
+  protected defaultToolbarFactory(
+    widget: HTMLViewer
+  ): DocumentRegistry.IToolbarItem[] {
+    return [
+      // Make a refresh button for the toolbar.
+      {
+        name: 'refresh',
+        widget: ToolbarItems.createRefreshButton(widget, this.translator)
+      },
+      // Make a trust button for the toolbar.
+      {
+        name: 'trust',
+        widget: ToolbarItems.createTrustButton(widget, this.translator)
+      }
+    ];
+  }
+}
+
+/**
+ * A namespace for toolbar items generator
+ */
+export namespace ToolbarItems {
+  /**
+   * Create the refresh button
+   *
+   * @param widget HTML viewer widget
+   * @param translator Application translator object
+   * @returns Toolbar item button
+   */
+  export function createRefreshButton(
+    widget: HTMLViewer,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    return new ToolbarButton({
+      icon: refreshIcon,
+      onClick: async () => {
+        if (!widget.context.model.dirty) {
+          await widget.context.revert();
+          widget.update();
+        }
+      },
+      tooltip: trans.__('Rerender HTML Document')
+    });
+  }
+  /**
+   * Create the trust button
+   *
+   * @param document HTML viewer widget
+   * @param translator Application translator object
+   * @returns Toolbar item button
+   */
+  export function createTrustButton(
+    document: HTMLViewer,
+    translator: ITranslator
+  ): Widget {
+    return ReactWidget.create(
+      <Private.TrustButtonComponent
+        htmlDocument={document}
+        translator={translator}
+      />
+    );
   }
 }
 
@@ -277,9 +311,11 @@ namespace Private {
   /**
    * React component for a trusted button.
    *
-   * This wraps the ToolbarButtonComponent and watches for trust chagnes.
+   * This wraps the ToolbarButtonComponent and watches for trust changes.
    */
-  export function TrustButtonComponent(props: TrustButtonComponent.IProps) {
+  export function TrustButtonComponent(
+    props: TrustButtonComponent.IProps
+  ): JSX.Element {
     const translator = props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     return (
@@ -287,7 +323,7 @@ namespace Private {
         signal={props.htmlDocument.trustedChanged}
         initialSender={props.htmlDocument}
       >
-        {session => (
+        {() => (
           <ToolbarButtonComponent
             className=""
             onClick={() =>

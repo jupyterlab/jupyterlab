@@ -7,23 +7,16 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   ISplashScreen,
   IThemeManager,
   ThemeManager
 } from '@jupyterlab/apputils';
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
-
-import { Menu } from '@lumino/widgets';
 
 namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';
@@ -90,6 +83,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => {
+        if (args.theme === undefined) {
+          return trans.__('Switch to the provided `theme`.');
+        }
         const theme = args['theme'] as string;
         const displayName = manager.getDisplayName(theme);
         return args['isPalette']
@@ -122,12 +118,34 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     });
 
     commands.addCommand(CommandIDs.incrFontSize, {
-      label: args => `${args['label']}`, // args['label'] is localized
+      label: args => {
+        switch (args.key) {
+          case 'code-font-size':
+            return trans.__('Increase Code Font Size');
+          case 'content-font-size1':
+            return trans.__('Increase Content Font Size');
+          case 'ui-font-size1':
+            return trans.__('Increase UI Font Size');
+          default:
+            return trans.__('Increase Font Size');
+        }
+      },
       execute: args => manager.incrFontSize(args['key'] as string)
     });
 
     commands.addCommand(CommandIDs.decrFontSize, {
-      label: args => `${args['label']}`, // args['label'] is localized
+      label: args => {
+        switch (args.key) {
+          case 'code-font-size':
+            return trans.__('Decrease Code Font Size');
+          case 'content-font-size1':
+            return trans.__('Decrease Content Font Size');
+          case 'ui-font-size1':
+            return trans.__('Decrease UI Font Size');
+          default:
+            return trans.__('Decrease Font Size');
+        }
+      },
       execute: args => manager.decrFontSize(args['key'] as string)
     });
 
@@ -157,87 +175,28 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
     mainMenu: IMainMenu | null
   ): void => {
     const trans = translator.load('jupyterlab');
-    const commands = app.commands;
 
     // If we have a main menu, add the theme manager to the settings menu.
     if (mainMenu) {
-      const themeMenu = new Menu({ commands });
-      themeMenu.title.label = trans.__('JupyterLab Theme');
       void app.restored.then(() => {
         const isPalette = false;
 
+        const themeMenu = mainMenu.settingsMenu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-settings-apputilstheme'
+        )?.submenu;
+
         // choose a theme
-        manager.themes.forEach(theme => {
-          themeMenu.addItem({
-            command: CommandIDs.changeTheme,
-            args: { isPalette, theme }
+        if (themeMenu) {
+          manager.themes.forEach((theme, index) => {
+            themeMenu.insertItem(index, {
+              command: CommandIDs.changeTheme,
+              args: { isPalette, theme }
+            });
           });
-        });
-        themeMenu.addItem({ type: 'separator' });
-
-        // toggle scrollbar theming
-        themeMenu.addItem({ command: CommandIDs.themeScrollbars });
-        themeMenu.addItem({ type: 'separator' });
-
-        // increase/decrease code font size
-        themeMenu.addItem({
-          command: CommandIDs.incrFontSize,
-          args: {
-            label: trans.__('Increase Code Font Size'),
-            key: 'code-font-size'
-          }
-        });
-        themeMenu.addItem({
-          command: CommandIDs.decrFontSize,
-          args: {
-            label: trans.__('Decrease Code Font Size'),
-            key: 'code-font-size'
-          }
-        });
-        themeMenu.addItem({ type: 'separator' });
-
-        // increase/decrease content font size
-        themeMenu.addItem({
-          command: CommandIDs.incrFontSize,
-          args: {
-            label: trans.__('Increase Content Font Size'),
-            key: 'content-font-size1'
-          }
-        });
-        themeMenu.addItem({
-          command: CommandIDs.decrFontSize,
-          args: {
-            label: trans.__('Decrease Content Font Size'),
-            key: 'content-font-size1'
-          }
-        });
-        themeMenu.addItem({ type: 'separator' });
-
-        // increase/decrease ui font size
-        themeMenu.addItem({
-          command: CommandIDs.incrFontSize,
-          args: {
-            label: trans.__('Increase UI Font Size'),
-            key: 'ui-font-size1'
-          }
-        });
-        themeMenu.addItem({
-          command: CommandIDs.decrFontSize,
-          args: {
-            label: trans.__('Decrease UI Font Size'),
-            key: 'ui-font-size1'
-          }
-        });
+        }
       });
-      mainMenu.settingsMenu.addGroup(
-        [
-          {
-            type: 'submenu' as Menu.ItemType,
-            submenu: themeMenu
-          }
-        ],
-        0
-      );
     }
 
     // If we have a command palette, add theme switching options to it.
@@ -259,7 +218,6 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         palette.addItem({
           command: CommandIDs.incrFontSize,
           args: {
-            label: trans.__('Increase Code Font Size'),
             key: 'code-font-size'
           },
           category
@@ -267,7 +225,6 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         palette.addItem({
           command: CommandIDs.decrFontSize,
           args: {
-            label: trans.__('Decrease Code Font Size'),
             key: 'code-font-size'
           },
           category
@@ -276,7 +233,6 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         palette.addItem({
           command: CommandIDs.incrFontSize,
           args: {
-            label: trans.__('Increase Content Font Size'),
             key: 'content-font-size1'
           },
           category
@@ -284,7 +240,6 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         palette.addItem({
           command: CommandIDs.decrFontSize,
           args: {
-            label: trans.__('Decrease Content Font Size'),
             key: 'content-font-size1'
           },
           category
@@ -293,7 +248,6 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         palette.addItem({
           command: CommandIDs.incrFontSize,
           args: {
-            label: trans.__('Increase UI Font Size'),
             key: 'ui-font-size1'
           },
           category
@@ -301,7 +255,6 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         palette.addItem({
           command: CommandIDs.decrFontSize,
           args: {
-            label: trans.__('Decrease UI Font Size'),
             key: 'ui-font-size1'
           },
           category

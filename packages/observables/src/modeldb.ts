@@ -1,29 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable, DisposableSet } from '@lumino/disposable';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
 import {
   JSONExt,
+  JSONObject,
   JSONValue,
-  PartialJSONValue,
-  JSONObject
+  PartialJSONValue
 } from '@lumino/coreutils';
-
-import { ObservableMap } from './observablemap';
-
+import { DisposableSet, IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
 import { IObservableJSON, ObservableJSON } from './observablejson';
-
+import { IObservableMap, ObservableMap } from './observablemap';
 import { IObservableString, ObservableString } from './observablestring';
-
 import {
   IObservableUndoableList,
   ObservableUndoableList
 } from './undoablelist';
-
-import { IObservableMap } from './observablemap';
 
 /**
  * String type annotations for Observable objects that can be

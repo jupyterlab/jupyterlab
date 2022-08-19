@@ -1,9 +1,11 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { PageConfig } from '@jupyterlab/coreutils';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
-
 import { Throttler } from '@lumino/polling';
 
 /**

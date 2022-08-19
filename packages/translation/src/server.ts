@@ -6,6 +6,11 @@ import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 
 /**
+ * The url for the translations service.
+ */
+const TRANSLATIONS_SETTINGS_URL = 'api/translations';
+
+/**
  * Call the API extension
  *
  * @param locale API REST end point for the extension
@@ -15,11 +20,13 @@ import { ServerConnection } from '@jupyterlab/services';
 export async function requestTranslationsAPI<T>(
   translationsUrl: string = '',
   locale = '',
-  init: RequestInit = {}
+  init: RequestInit = {},
+  serverSettings: ServerConnection.ISettings | undefined = undefined
 ): Promise<T> {
   // Make request to Jupyter API
-  const settings = ServerConnection.makeSettings();
-  translationsUrl = translationsUrl || `${settings.appUrl}/api/translations/`;
+  const settings = serverSettings ?? ServerConnection.makeSettings();
+  translationsUrl =
+    translationsUrl || `${settings.appUrl}/${TRANSLATIONS_SETTINGS_URL}`;
   const requestUrl = URLExt.join(settings.baseUrl, translationsUrl, locale);
   let response: Response;
   try {

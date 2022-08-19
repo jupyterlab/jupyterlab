@@ -10,7 +10,11 @@ import * as utils from './utils';
 commander
   .description('Create a patch release')
   .option('--force', 'Force the upgrade')
+  .option('--all', 'Patch all JS packages instead of the changed ones')
+  .option('--skip-commit', 'Whether to skip commit changes')
   .action((options: any) => {
+    utils.exitOnUncaughtException();
+
     // Make sure we can patch release.
     const pyVersion = utils.getPythonVersion();
     if (
@@ -25,7 +29,10 @@ commander
     utils.prebump();
 
     // Version the changed
-    let cmd = `lerna version patch -m \"New version\" --no-push`;
+    let cmd = `lerna version patch -m \"[ci skip] New version\" --no-push`;
+    if (options.all) {
+      cmd += ' --force-publish=*';
+    }
     if (options.force) {
       cmd += ' --yes';
     }
@@ -59,7 +66,8 @@ commander
     utils.run('bumpversion release --allow-dirty'); // switches to final.
 
     // Run post-bump actions.
-    utils.postbump();
+    const commit = options.skipCommit !== true;
+    utils.postbump(commit);
   });
 
 commander.parse(process.argv);

@@ -1,15 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { JSONObject } from '@lumino/coreutils';
-
-import { ConfigSection, ConfigWithDefaults } from '../../src';
-
 import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
-
-import { handleRequest, makeSettings, getRequestHandler } from '../utils';
+import { JSONObject, UUID } from '@lumino/coreutils';
+import { ConfigSection, ConfigWithDefaults } from '../../src';
+import { getRequestHandler, handleRequest, makeSettings } from '../utils';
 
 /**
  * Generate a random config section name.
@@ -55,7 +50,9 @@ describe('config', () => {
         name: randomName(),
         serverSettings
       });
-      await expectFailure(configPromise, 'Invalid response: 201 Created');
+      await expect(configPromise).rejects.toThrow(
+        /Invalid response: 201 Created/
+      );
     });
   });
 
@@ -86,7 +83,7 @@ describe('config', () => {
       const config = await ConfigSection.create({ name: randomName() });
       handleRequest(config, 201, {});
       const update = config.update({ foo: 'baz' });
-      await expectFailure(update, 'Invalid response: 201 Created');
+      await expect(update).rejects.toThrow(/Invalid response: 201 Created/);
     });
   });
 });

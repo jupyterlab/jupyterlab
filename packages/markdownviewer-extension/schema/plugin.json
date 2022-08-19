@@ -3,6 +3,14 @@
   "jupyter.lab.setting-icon-label": "Markdown Viewer",
   "title": "Markdown Viewer",
   "description": "Markdown viewer settings.",
+  "jupyter.lab.menus": {
+    "context": [
+      {
+        "command": "markdownviewer:edit",
+        "selector": ".jp-RenderedMarkdown"
+      }
+    ]
+  },
   "definitions": {
     "fontFamily": {
       "type": ["string", "null"]

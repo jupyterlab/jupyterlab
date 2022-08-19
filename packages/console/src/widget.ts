@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext } from '@jupyterlab/apputils';
-
 import {
   Cell,
   CellDragUtils,
@@ -10,34 +9,22 @@ import {
   CodeCell,
   CodeCellModel,
   ICodeCellModel,
-  isCodeCellModel,
   IRawCellModel,
+  isCodeCellModel,
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-
-import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
-
+import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { KernelMessage } from '@jupyterlab/services';
-
 import { each } from '@lumino/algorithm';
-
-import { MimeData, JSONObject } from '@lumino/coreutils';
-
+import { JSONObject, MimeData } from '@lumino/coreutils';
 import { Drag } from '@lumino/dragdrop';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-
 import { ConsoleHistory, IConsoleHistory } from './history';
 
 /**
@@ -177,6 +164,11 @@ export class CodeConsole extends Widget {
   readonly sessionContext: ISessionContext;
 
   /**
+   * The configuration options for the text editor widget.
+   */
+  editorConfig?: Partial<CodeEditor.IConfig>;
+
+  /**
    * The list of content cells in the console.
    *
    * #### Notes
@@ -208,7 +200,7 @@ export class CodeConsole extends Widget {
    * rendered code cell widgets and does not execute them (though it can store
    * the execution message id).
    */
-  addCell(cell: CodeCell, msgId?: string) {
+  addCell(cell: CodeCell, msgId?: string): void {
     cell.addClass(CONSOLE_CELL_CLASS);
     this._content.addWidget(cell);
     this._cells.push(cell);
@@ -223,7 +215,7 @@ export class CodeConsole extends Widget {
   /**
    * Add a banner cell.
    */
-  addBanner() {
+  addBanner(): void {
     if (this._banner) {
       // An old banner just becomes a normal cell now.
       const cell = this._banner;
@@ -235,7 +227,8 @@ export class CodeConsole extends Widget {
     model.value.text = '...';
     const banner = (this._banner = new RawCell({
       model,
-      contentFactory: this.contentFactory
+      contentFactory: this.contentFactory,
+      placeholder: false
     })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
@@ -268,7 +261,7 @@ export class CodeConsole extends Widget {
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
@@ -435,10 +428,8 @@ export class CodeConsole extends Widget {
 
     const cell = this._cells.get(cellIndex);
 
-    const targetArea: CellDragUtils.ICellTargetArea = CellDragUtils.detectTargetArea(
-      cell,
-      event.target as HTMLElement
-    );
+    const targetArea: CellDragUtils.ICellTargetArea =
+      CellDragUtils.detectTargetArea(cell, event.target as HTMLElement);
 
     if (targetArea === 'prompt') {
       this._dragData = {
@@ -731,7 +722,14 @@ export class CodeConsole extends Widget {
     const modelFactory = this.modelFactory;
     const model = modelFactory.createCodeCell({});
     const rendermime = this.rendermime;
-    return { model, rendermime, contentFactory };
+    const editorConfig = this.editorConfig;
+    return {
+      model,
+      rendermime,
+      contentFactory,
+      editorConfig,
+      placeholder: false
+    };
   }
 
   /**
@@ -894,7 +892,8 @@ export namespace CodeConsole {
    */
   export class ContentFactory
     extends Cell.ContentFactory
-    implements IContentFactory {
+    implements IContentFactory
+  {
     /**
      * Create a new code cell widget.
      *

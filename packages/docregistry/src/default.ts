@@ -1,36 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Mode } from '@jupyterlab/codemirror';
-
-import { Contents } from '@jupyterlab/services';
-
-import { PartialJSONValue } from '@lumino/coreutils';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget } from '@lumino/widgets';
-
-import { MainAreaWidget } from '@jupyterlab/apputils';
-
+import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
+import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-
-import { IModelDB } from '@jupyterlab/observables';
-
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
-
-import { DocumentRegistry, IDocumentWidget } from './index';
-
+import { IModelDB, IObservableList } from '@jupyterlab/observables';
+import { Contents } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { PartialJSONValue } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Title, Widget } from '@lumino/widgets';
+import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
  * The default implementation of a document model.
  */
 export class DocumentModel
   extends CodeEditor.Model
-  implements DocumentRegistry.ICodeModel {
+  implements DocumentRegistry.ICodeModel
+{
   /**
    * Construct a new document model.
    */
@@ -40,6 +30,8 @@ export class DocumentModel
     const filemodel = new models.YFile() as models.ISharedFile;
     this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
+
+    this.sharedModel.changed.connect(this._onStateChanged, this);
   }
 
   /**
@@ -63,12 +55,16 @@ export class DocumentModel
     return this._dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
+    const oldValue = this._dirty;
+    if (newValue === oldValue) {
       return;
     }
-    const oldValue = this._dirty;
     this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
+    this.triggerStateChange({
+      name: 'dirty',
+      oldValue,
+      newValue
+    });
   }
 
   /**
@@ -162,6 +158,20 @@ export class DocumentModel
     this.dirty = true;
   }
 
+  private _onStateChanged(
+    sender: models.ISharedFile,
+    changes: models.NotebookChange
+  ): void {
+    if (changes.stateChange) {
+      changes.stateChange.forEach(value => {
+        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
+          this._dirty = value.newValue;
+          this.triggerStateChange(value);
+        }
+      });
+    }
+  }
+
   /**
    * The shared notebook model.
    */
@@ -242,7 +252,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    */
   preferredLanguage(path: string): string {
     const mode = Mode.findByFileName(path);
-    return mode && mode.mode;
+    return mode?.name ?? '';
   }
 
   private _isDisposed = false;
@@ -288,13 +298,15 @@ export class Base64ModelFactory extends TextModelFactory {
 export abstract class ABCWidgetFactory<
   T extends IDocumentWidget,
   U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IWidgetFactory<T, U> {
+> implements DocumentRegistry.IWidgetFactory<T, U>
+{
   /**
    * Construct a new `ABCWidgetFactory`.
    */
   constructor(options: DocumentRegistry.IWidgetFactoryOptions<T>) {
     this._translator = options.translator || nullTranslator;
     this._name = options.name;
+    this._label = options.label || options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
     this._defaultRendered = (options.defaultRendered || []).slice();
@@ -340,10 +352,18 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The name of the widget to display in dialogs.
+   * A unique name identifying of the widget.
    */
   get name(): string {
     return this._name;
+  }
+
+  /**
+   * The label of the widget to display in dialogs.
+   * If not given, name is used instead.
+   */
+  get label(): string {
+    return this._label;
   }
 
   /**
@@ -390,7 +410,7 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The aplication language translator.
+   * The application language translator.
    */
   get translator(): ITranslator {
     return this._translator;
@@ -416,16 +436,11 @@ export abstract class ABCWidgetFactory<
     // Create the new widget
     const widget = this.createNewWidget(context, source);
 
-    // Add toolbar items
-    let items: DocumentRegistry.IToolbarItem[];
-    if (this._toolbarFactory) {
-      items = this._toolbarFactory(widget);
-    } else {
-      items = this.defaultToolbarFactory(widget);
-    }
-    items.forEach(({ name, widget: item }) => {
-      widget.toolbar.addItem(name, item);
-    });
+    // Add toolbar
+    setToolbar(
+      widget,
+      this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)
+    );
 
     // Emit widget created signal
     this._widgetCreated.emit(widget);
@@ -449,11 +464,16 @@ export abstract class ABCWidgetFactory<
   }
 
   private _toolbarFactory:
-    | ((widget: T) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: T
+      ) =>
+        | DocumentRegistry.IToolbarItem[]
+        | IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
   private _isDisposed = false;
   private _translator: ITranslator;
   private _name: string;
+  private _label: string;
   private _readOnly: boolean;
   private _canStartKernel: boolean;
   private _shutdownOnClose: boolean;
@@ -480,7 +500,8 @@ export class DocumentWidget<
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   >
   extends MainAreaWidget<T>
-  implements IDocumentWidget<T, U> {
+  implements IDocumentWidget<T, U>
+{
   constructor(options: DocumentWidget.IOptions<T, U>) {
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);
@@ -497,6 +518,9 @@ export class DocumentWidget<
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
+
+    // listen for changes to the title object
+    this.title.changed.connect(this._onTitleChanged, this);
   }
 
   /**
@@ -504,6 +528,31 @@ export class DocumentWidget<
    */
   setFragment(fragment: string): void {
     /* no-op */
+  }
+
+  /**
+   * Handle a title change.
+   */
+  private async _onTitleChanged(_sender: Title<this>) {
+    const validNameExp = /[\/\\:]/;
+    const name = this.title.label;
+    // Use localPath to avoid the drive name
+    const filename =
+      this.context.localPath.split('/').pop() || this.context.localPath;
+
+    if (name === filename) {
+      return;
+    }
+    if (name.length > 0 && !validNameExp.test(name)) {
+      const oldPath = this.context.path;
+      await this.context.rename(name);
+      if (this.context.path !== oldPath) {
+        // Rename succeeded
+        return;
+      }
+    }
+    // Reset title if name is invalid or rename fails
+    this.title.label = filename;
   }
 
   /**
@@ -532,7 +581,10 @@ export class DocumentWidget<
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this.context.model.dirty) {
+    if (
+      this.context.model.dirty &&
+      !this.title.className.includes(DIRTY_CLASS)
+    ) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
@@ -555,6 +607,10 @@ export namespace DocumentWidget {
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   > extends MainAreaWidget.IOptionsOptionalContent<T> {
     context: DocumentRegistry.IContext<U>;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }

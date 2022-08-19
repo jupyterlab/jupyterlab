@@ -1,25 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect from 'expect';
-
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
-
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-
-import { BreadCrumbs, FileBrowserModel } from '../src';
-
 import { ServiceManager } from '@jupyterlab/services';
-
 import { framePromise, signalToPromise } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
-
+import expect from 'expect';
 import { simulate } from 'simulate-event';
+import { BreadCrumbs, FileBrowserModel } from '../src';
 
 const HOME_ITEM_CLASS = 'jp-BreadCrumbs-home';
 const ITEM_CLASS = 'jp-BreadCrumbs-item';

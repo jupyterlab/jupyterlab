@@ -11,6 +11,8 @@
  * Ensure a consistent version of all packages.
  * Manage the metapackage meta package.
  */
+import { execSync } from 'child_process';
+import * as glob from 'glob';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
@@ -22,18 +24,35 @@ import {
 
 type Dict<T> = { [key: string]: T };
 
+type CoreData = Map<string, any>;
+
+// URL config for this branch
+// Source and target branches
+// Target RTD version name
+// For master these will be the same, for other branches the source
+// branch is whichever branch it was created from
+// The current release branch should target RTD stable
+// Master should target latest
+// All other release branches should target a specific named version
+const URL_CONFIG = {
+  source: 'master',
+  target: 'master',
+  rtdVersion: 'latest'
+};
+
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
   '@jupyterlab/builder': ['path'],
+  '@jupyterlab/galata': ['fs', 'path'],
   '@jupyterlab/testutils': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
 const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
-  '@jupyterlab/apputils': ['@types/react', 'url'],
+  '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/builder': [
@@ -55,32 +74,45 @@ const UNUSED: Dict<string[]> = {
     '@babel/preset-env',
     'babel-loader',
     'css-loader',
-    'file-loader',
     'path-browserify',
     'process',
-    'raw-loader',
     'style-loader',
-    'svg-url-loader',
     'terser-webpack-plugin',
     'to-string-loader',
-    'url-loader',
     'webpack-cli',
     'worker-loader'
   ],
+  '@jupyterlab/buildutils': ['verdaccio'],
+  '@jupyterlab/codemirror': [
+    '@codemirror/lang-cpp',
+    '@codemirror/lang-css',
+    '@codemirror/lang-html',
+    '@codemirror/lang-java',
+    '@codemirror/lang-javascript',
+    '@codemirror/lang-json',
+    '@codemirror/lang-markdown',
+    '@codemirror/lang-php',
+    '@codemirror/lang-python',
+    '@codemirror/lang-rust',
+    '@codemirror/lang-sql',
+    '@codemirror/lang-wast',
+    '@codemirror/lang-xml'
+  ],
   '@jupyterlab/coreutils': ['path-browserify'],
+  '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/galata': ['node-fetch', 'http-server'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
+    'fs-extra',
     'node-fetch',
     'identity-obj-proxy',
     'jest-raw-loader',
-    'markdown-loader-jest',
     'jest-junit',
     'jest-summary-reporter'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
-  '@jupyterlab/ui-components': ['@blueprintjs/icons']
+  '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
 };
 
 // Packages that are allowed to have differing versions
@@ -103,9 +135,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@lumino/virtualdom',
     '@lumino/widgets'
   ],
-  '@jupyterlab/codemirror-extension': ['codemirror'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
-  '@jupyterlab/debugger': ['codemirror'],
   '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
     '@jupyterlab/codeeditor', // Only used for model
@@ -117,12 +147,12 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/codeeditor',
     '@jupyterlab/codemirror',
     '@jupyterlab/fileeditor',
-    '@jupyterlab/notebook',
-    'codemirror'
+    '@jupyterlab/notebook'
   ],
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
+  '@jupyterlab/lsp': ['codemirror'],
   '@jupyterlab/metapackage': [
     '@jupyterlab/ui-components',
     '@jupyterlab/apputils',
@@ -143,6 +173,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/outputarea',
     '@jupyterlab/cells',
     '@jupyterlab/notebook',
+    '@jupyterlab/cell-toolbar',
+    '@jupyterlab/cell-toolbar-extension',
     '@jupyterlab/celltags',
     '@jupyterlab/celltags-extension',
     '@jupyterlab/fileeditor',
@@ -154,10 +186,12 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/console-extension',
     '@jupyterlab/csvviewer',
     '@jupyterlab/documentsearch',
+    '@jupyterlab/docprovider',
     '@jupyterlab/csvviewer-extension',
     '@jupyterlab/debugger',
     '@jupyterlab/debugger-extension',
     '@jupyterlab/docmanager-extension',
+    '@jupyterlab/docprovider-extension',
     '@jupyterlab/documentsearch-extension',
     '@jupyterlab/extensionmanager',
     '@jupyterlab/extensionmanager-extension',
@@ -176,9 +210,12 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/launcher-extension',
     '@jupyterlab/logconsole',
     '@jupyterlab/logconsole-extension',
+    '@jupyterlab/lsp',
+    '@jupyterlab/lsp-extension',
     '@jupyterlab/mainmenu-extension',
     '@jupyterlab/markdownviewer',
     '@jupyterlab/markdownviewer-extension',
+    '@jupyterlab/markedparser-extension',
     '@jupyterlab/mathjax2',
     '@jupyterlab/mathjax2-extension',
     '@jupyterlab/nbconvert-css',
@@ -189,6 +226,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/running-extension',
     '@jupyterlab/settingeditor',
     '@jupyterlab/settingeditor-extension',
+    '@jupyterlab/shortcuts-extension',
     '@jupyterlab/statusbar-extension',
     '@jupyterlab/terminal',
     '@jupyterlab/terminal-extension',
@@ -200,6 +238,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/tooltip-extension',
     '@jupyterlab/translation-extension',
     '@jupyterlab/ui-components-extension',
+    '@jupyterlab/collaboration',
+    '@jupyterlab/collaboration-extension',
     '@jupyterlab/vdom',
     '@jupyterlab/vdom-extension',
     '@jupyterlab/vega5-extension'
@@ -215,7 +255,14 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/cells',
     '@jupyterlab/notebook'
   ],
-  '@jupyterlab/ui-extension': ['@blueprintjs/icons']
+  '@jupyterlab/theme-light-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils'
+  ],
+  '@jupyterlab/theme-dark-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils'
+  ]
 };
 
 const pkgData: Dict<any> = {};
@@ -223,6 +270,97 @@ const pkgPaths: Dict<string> = {};
 const pkgNames: Dict<string> = {};
 const depCache: Dict<string> = {};
 const locals: Dict<string> = {};
+
+/**
+ * Ensure branch integrity - GitHub and RTD urls, and workflow target branches
+ *
+ * @returns An array of messages for changes.
+ */
+function ensureBranch(): string[] {
+  const messages: string[] = [];
+
+  const { source, target, rtdVersion } = URL_CONFIG;
+
+  // Handle the github_version in conf.py
+  const confPath = 'docs/source/conf.py';
+  const oldConfData = fs.readFileSync(confPath, 'utf-8');
+  const confTest = new RegExp('"github_version": "(.*)"');
+  const newConfData = oldConfData.replace(
+    confTest,
+    `"github_version": "${target}"`
+  );
+  if (newConfData !== oldConfData) {
+    messages.push(`Overwriting ${confPath}`);
+    fs.writeFileSync(confPath, newConfData, 'utf-8');
+  }
+
+  // Handle urls in files
+  // Get all files matching the desired file types
+  const fileTypes = ['.json', '.md', '.rst', '.yml', '.ts', '.tsx', '.py'];
+  let files = execSync('git ls-tree -r HEAD --name-only')
+    .toString()
+    .trim()
+    .split(/\r?\n/);
+  files = files.filter(filePath => {
+    return fileTypes.indexOf(path.extname(filePath)) !== -1;
+  });
+
+  // Set up string replacements
+  const base = '/jupyterlab/jupyterlab';
+  const rtdString = `jupyterlab.readthedocs.io/en/${rtdVersion}/`;
+  const urlMap = [
+    [`\/jupyterlab\/jupyterlab\/${source}\/`, `${base}/${target}/`],
+    [`\/jupyterlab\/jupyterlab\/blob\/${source}\/`, `${base}/blob/${target}/`],
+    [`\/jupyterlab\/jupyterlab\/tree\/${source}\/`, `${base}/tree/${target}/`],
+    [`jupyterlab.readthedocs.io\/en\/.*?\/`, rtdString]
+  ];
+
+  // Make the string replacements
+  files.forEach(filePath => {
+    if (path.basename(filePath) === 'ensure-repo.ts') {
+      return;
+    }
+    const oldData = fs.readFileSync(filePath, 'utf-8');
+    let newData = oldData;
+    urlMap.forEach(section => {
+      const test = new RegExp(section[0], 'g');
+      const replacer = section[1];
+      if (newData.match(test)) {
+        newData = newData.replace(test, replacer);
+      }
+    });
+
+    // Make sure the root RTD links point to stable
+    const badgeLink = '(http://jupyterlab.readthedocs.io/en/stable/)';
+    const toReplace = badgeLink.replace('stable', rtdVersion);
+    if (badgeLink !== toReplace) {
+      while (newData.indexOf(toReplace) !== -1) {
+        newData = newData.replace(toReplace, badgeLink);
+      }
+    }
+
+    if (newData !== oldData) {
+      messages.push(`Overwriting ${filePath}`);
+      fs.writeFileSync(filePath, newData, 'utf-8');
+    }
+  });
+
+  // Handle workflow file target branches
+  const workflows = glob.sync(path.join('.github', 'workflows', '*.yml'));
+  workflows.forEach(filePath => {
+    let workflowData = fs.readFileSync(filePath, 'utf-8');
+    const test = new RegExp(`\\[${source}\\]`, 'g');
+    if (workflowData.match(test)) {
+      if (workflowData.match(test)![1] !== `[${target}]`) {
+        messages.push(`Overwriting ${filePath}`);
+        workflowData = workflowData.replace(test, `[${target}]`);
+        fs.writeFileSync(filePath, workflowData, 'utf-8');
+      }
+    }
+  });
+
+  return messages;
+}
 
 /**
  * Ensure the metapackage package.
@@ -268,6 +406,9 @@ function ensureMetaPackage(): string[] {
     }
   });
 
+  // Add to build:all target
+  mpData.scripts['build:all'] = 'npm run build';
+
   // Write the files.
   if (messages.length > 0) {
     utils.writePackageData(mpJson, mpData);
@@ -280,27 +421,12 @@ function ensureMetaPackage(): string[] {
 }
 
 /**
- * Ensure the jupyterlab application package.
+ * Get the core data for the given core paths.
  */
-function ensureJupyterlab(): string[] {
-  const basePath = path.resolve('.');
-  const corePath = path.join(basePath, 'dev_mode', 'package.json');
-  const corePackage = utils.readJSONFile(corePath);
-
-  corePackage.jupyterlab.extensions = {};
-  corePackage.jupyterlab.mimeExtensions = {};
-  corePackage.jupyterlab.linkedPackages = {};
-  // start with known external dependencies
-  corePackage.dependencies = Object.assign(
-    {},
-    corePackage.jupyterlab.externalExtensions
-  );
-  corePackage.resolutions = {};
-
-  const singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
+function getCoreData(corePaths: string[]): CoreData {
   const coreData = new Map<string, any>();
 
-  utils.getCorePaths().forEach(pkgPath => {
+  corePaths.forEach(pkgPath => {
     const dataPath = path.join(pkgPath, 'package.json');
     let data: any;
     try {
@@ -310,6 +436,29 @@ function ensureJupyterlab(): string[] {
     }
 
     coreData.set(data.name, data);
+  });
+
+  return coreData;
+}
+
+/**
+ * Ensure a core package.
+ */
+function ensureCorePackage(corePackage: any, corePaths: string[]) {
+  corePackage.jupyterlab.extensions = {};
+  corePackage.dependencies = {};
+
+  const singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
+  const coreData = getCoreData(corePaths);
+
+  corePaths.forEach(pkgPath => {
+    const dataPath = path.join(pkgPath, 'package.json');
+    let data: any;
+    try {
+      data = utils.readJSONFile(dataPath);
+    } catch (e) {
+      return;
+    }
 
     // If the package has a tokens.ts file, make sure it is noted as a singleton
     if (
@@ -356,7 +505,66 @@ function ensureJupyterlab(): string[] {
       )}`
     );
   }
+}
 
+/**
+ * Ensure the federated example core package.
+ */
+function ensureFederatedExample(): string[] {
+  const basePath = path.resolve('.');
+  const corePath = path.join(
+    basePath,
+    'examples',
+    'federated',
+    'core_package',
+    'package.json'
+  );
+  const corePackage = utils.readJSONFile(corePath);
+  // the list of dependencies might differ from the main JupyterLab application
+  const dependencies = new Set(Object.keys(corePackage.dependencies));
+
+  const corePaths = utils.getCorePaths().filter(p => {
+    return dependencies.has(`@jupyterlab/${path.basename(p)}`);
+  });
+
+  ensureCorePackage(corePackage, corePaths);
+
+  const coreData = getCoreData(corePaths);
+  corePackage.jupyterlab.extensions = [];
+  coreData.forEach((data, name) => {
+    // Make sure it is included as a dependency.
+    corePackage.dependencies[data.name] = `^${data.version}`;
+
+    const meta = data.jupyterlab;
+    const keep = meta?.extension || meta?.mimeExtension;
+    if (!keep) {
+      return;
+    }
+    corePackage.jupyterlab.extensions.push(name);
+  });
+
+  corePackage.jupyterlab.extensions.sort();
+
+  // Write the package.json back to disk.
+  if (utils.writePackageData(corePath, corePackage)) {
+    return ['Updated federated example'];
+  }
+  return [];
+}
+
+/**
+ * Ensure the jupyterlab application package.
+ */
+function ensureJupyterlab(): string[] {
+  const basePath = path.resolve('.');
+  const corePath = path.join(basePath, 'dev_mode', 'package.json');
+  const corePackage = utils.readJSONFile(corePath);
+  const corePaths = utils.getCorePaths();
+
+  ensureCorePackage(corePackage, corePaths);
+  corePackage.jupyterlab.mimeExtensions = {};
+
+  const coreData = getCoreData(corePaths);
   coreData.forEach((data, name) => {
     // Determine if the package wishes to be included in the top-level
     // dependencies.
@@ -374,7 +582,7 @@ function ensureJupyterlab(): string[] {
 
     // Handle extensions.
     ['extension', 'mimeExtension'].forEach(item => {
-      let ext = meta[item];
+      let ext = data.jupyterlab[item];
       if (ext === true) {
         ext = '';
       }
@@ -385,6 +593,7 @@ function ensureJupyterlab(): string[] {
     });
   });
 
+  corePackage.jupyterlab.linkedPackages = {};
   utils.getLernaPaths().forEach(pkgPath => {
     const dataPath = path.join(pkgPath, 'package.json');
     let data: any;
@@ -404,6 +613,10 @@ function ensureJupyterlab(): string[] {
     );
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
+
+  // Update the dev mode version.
+  const curr = utils.getPythonVersion();
+  corePackage.jupyterlab.version = curr;
 
   // Write the package.json back to disk.
   if (utils.writePackageData(corePath, corePackage)) {
@@ -436,10 +649,52 @@ function ensureBuildUtils() {
 }
 
 /**
+ * Ensure lockfile structure
+ */
+function ensureLockfile(): string[] {
+  const staging = './jupyterlab/staging';
+  const lockFile = path.join(staging, 'yarn.lock');
+  const content = fs.readFileSync(lockFile, { encoding: 'utf-8' });
+  let newContent = content;
+  const messages = [];
+
+  // Verify that all packages have resolved to the correct (default) registry
+  const resolvedPattern =
+    /^\s*resolved "((?!https:\/\/registry\.yarnpkg\.com\/).*)"\s*$/gm;
+  let badRegistry;
+  while ((badRegistry = resolvedPattern.exec(content)) !== null) {
+    messages.push(`Fixing bad npm/yarn registry: ${badRegistry[1]}`);
+    const parsed = new URL(badRegistry[1]);
+    const newUrl = badRegistry[1].replace(
+      parsed.origin,
+      'https://registry.yarnpkg.com'
+    );
+    newContent = newContent.replace(badRegistry[1], newUrl);
+  }
+
+  if (content !== newContent) {
+    // Write the updated lockfile data back
+    fs.writeFileSync(lockFile, newContent, 'utf-8');
+  }
+  return messages;
+}
+
+/**
  * Ensure the repo integrity.
  */
 export async function ensureIntegrity(): Promise<boolean> {
   const messages: Dict<string[]> = {};
+
+  if (process.env.SKIP_INTEGRITY_CHECK === 'true') {
+    console.log('Skipping integrity check');
+    return true;
+  }
+
+  // Handle branch integrity
+  const branchMessages = ensureBranch();
+  if (branchMessages.length > 0) {
+    messages['branch'] = branchMessages;
+  }
 
   // Pick up all the package versions.
   const paths = utils.getLernaPaths();
@@ -483,25 +738,23 @@ export async function ensureIntegrity(): Promise<boolean> {
       ...(data.jupyterlab && data.jupyterlab.extraStyles)
     };
 
-    // Add automatic dependency css if package is not a theme package
-    if (!(data.jupyterlab && data.jupyterlab.themePath)) {
-      Object.keys(deps).forEach(depName => {
-        // Bail for skipped imports and known extra styles.
-        if (skip.includes(depName) || depName in cssData) {
-          return;
-        }
+    // Add automatic dependency css
+    Object.keys(deps).forEach(depName => {
+      // Bail for skipped imports and known extra styles.
+      if (skip.includes(depName) || depName in cssData) {
+        return;
+      }
 
-        const depData = graph.getNodeData(depName) as any;
-        if (typeof depData.style === 'string') {
-          cssData[depName] = [depData.style];
-        }
-        if (typeof depData.styleModule === 'string') {
-          cssModuleData[depName] = [depData.styleModule];
-        } else if (typeof depData.style === 'string') {
-          cssModuleData[depName] = [depData.style];
-        }
-      });
-    }
+      const depData = graph.getNodeData(depName) as any;
+      if (typeof depData.style === 'string') {
+        cssData[depName] = [depData.style];
+      }
+      if (typeof depData.styleModule === 'string') {
+        cssModuleData[depName] = [depData.styleModule];
+      } else if (typeof depData.style === 'string') {
+        cssModuleData[depName] = [depData.style];
+      }
+    });
 
     // Get our CSS imports in dependency order.
     cssImports[name] = [];
@@ -575,6 +828,12 @@ export async function ensureIntegrity(): Promise<boolean> {
     messages[pkgName] = messages[pkgName].concat(pkgMessages);
   }
 
+  // Ensure the staging area lockfile
+  const lockFileMessages = ensureLockfile();
+  if (lockFileMessages.length > 0) {
+    messages['lockfile'] = lockFileMessages;
+  }
+
   // Handle the top level package.
   const corePath = path.resolve('.', 'package.json');
   const coreData: any = utils.readJSONFile(corePath);
@@ -594,12 +853,39 @@ export async function ensureIntegrity(): Promise<boolean> {
     .getCorePaths()
     .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
     .map(pth => {
-      return { path: './' + path.relative('.', pth) };
+      return { path: './' + path.relative('.', pth).replace(/\\/g, '/') };
     });
   utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
   // Handle buildutils
   ensureBuildUtils();
+
+  // Handle the pyproject.toml file
+  const pyprojectPath = path.resolve('.', 'pyproject.toml');
+  const curr = utils.getPythonVersion();
+  let tag = 'latest';
+  if (!/\d+\.\d+\.\d+$/.test(curr)) {
+    tag = 'next';
+  }
+  const publishCommand = `npm publish --tag ${tag}`;
+  let pyprojectText = fs.readFileSync(pyprojectPath, { encoding: 'utf8' });
+  if (pyprojectText.indexOf(publishCommand) === -1) {
+    pyprojectText = pyprojectText.replace(
+      /npm publish --tag [a-z]+/,
+      publishCommand
+    );
+    fs.writeFileSync(pyprojectPath, pyprojectText, { encoding: 'utf8' });
+    if (!messages['top']) {
+      messages['top'] = [];
+    }
+    messages['top'].push('Update npm publish command in pyproject.toml');
+  }
+
+  // Handle the federated example application
+  pkgMessages = ensureFederatedExample();
+  if (pkgMessages.length > 0) {
+    messages['@jupyterlab/example-federated-core'] = pkgMessages;
+  }
 
   // Handle the JupyterLab application top package.
   pkgMessages = ensureJupyterlab();
@@ -628,5 +914,8 @@ export async function ensureIntegrity(): Promise<boolean> {
 }
 
 if (require.main === module) {
-  void ensureIntegrity();
+  void ensureIntegrity().catch(e => {
+    process.exitCode = 1;
+    console.error(e);
+  });
 }

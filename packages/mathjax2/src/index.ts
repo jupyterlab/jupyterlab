@@ -8,7 +8,6 @@
  */
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import { PromiseDelegate } from '@lumino/coreutils';
 
 // Stub for window MathJax.

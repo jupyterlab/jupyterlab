@@ -1,47 +1,32 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each } from '@lumino/algorithm';
-
-import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
-
-import { Message } from '@lumino/messaging';
-
-import { MimeData } from '@lumino/coreutils';
-
-import { AttachedProperty } from '@lumino/properties';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
-import { Drag, IDragEvent } from '@lumino/dragdrop';
-
-import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { h, VirtualDOM } from '@lumino/virtualdom';
-
-import { ElementExt } from '@lumino/domutils';
-
 import {
-  ICellModel,
   Cell,
-  IMarkdownCellModel,
   CodeCell,
-  MarkdownCell,
+  ICellModel,
   ICodeCellModel,
-  RawCell,
-  IRawCellModel
+  IMarkdownCellModel,
+  IRawCellModel,
+  MarkdownCell,
+  RawCell
 } from '@jupyterlab/cells';
-
-import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
-
+import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { IObservableMap, IObservableList } from '@jupyterlab/observables';
-
+import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ArrayExt, each, findIndex } from '@lumino/algorithm';
+import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { ElementExt } from '@lumino/domutils';
+import { Drag, IDragEvent } from '@lumino/dragdrop';
+import { Message } from '@lumino/messaging';
+import { AttachedProperty } from '@lumino/properties';
+import { ISignal, Signal } from '@lumino/signaling';
+import { h, VirtualDOM } from '@lumino/virtualdom';
+import { PanelLayout, Widget } from '@lumino/widgets';
+import { NotebookActions } from './actions';
 import { INotebookModel } from './model';
 
 /**
@@ -144,10 +129,54 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
  */
 const DRAG_THRESHOLD = 5;
 
+/*
+ * The type of cell insert provided via signal.
+ */
+type InsertType = 'push' | 'insert' | 'set';
+
+/*
+ * The rendering mode for the notebook.
+ */
+type RenderingLayout = 'default' | 'side-by-side';
+
+/**
+ * The class attached to the heading collapser button
+ */
+const HEADING_COLLAPSER_CLASS = 'jp-collapseHeadingButton';
+
+/**
+ * The class that controls the visibility of "heading collapser" and "show hidden cells" buttons.
+ */
+const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS =
+  'jp-mod-showHiddenCellsButton';
+
+const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
+
 /**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
+
+if ((window as any).requestIdleCallback === undefined) {
+  // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
+  // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  (window as any).requestIdleCallback = function (handler: Function) {
+    let startTime = Date.now();
+    return setTimeout(function () {
+      handler({
+        didTimeout: false,
+        timeRemaining: function () {
+          return Math.max(0, 50.0 - (Date.now() - startTime));
+        }
+      });
+    }, 1);
+  };
+
+  (window as any).cancelIdleCallback = function (id: number) {
+    clearTimeout(id);
+  };
+}
 
 /**
  * A widget which renders static non-interactive notebooks.
@@ -167,7 +196,9 @@ export class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
+    this.node.dataset[CODE_RUNNER] = 'true';
     this.rendermime = options.rendermime;
+    this.translator = options.translator || nullTranslator;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory =
       options.contentFactory || StaticNotebook.defaultContentFactory;
@@ -175,7 +206,52 @@ export class StaticNotebook extends Widget {
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
+    this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
+    this.renderingLayout = options.notebookConfig?.renderingLayout;
+
+    // Section for the virtual-notebook behavior.
+    this._idleCallBack = null;
+    this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
+    if ('IntersectionObserver' in window) {
+      this._observer = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach(o => {
+            if (o.isIntersecting) {
+              observer.unobserve(o.target);
+              const ci = this._toRenderMap.get(o.target.id);
+              if (ci) {
+                const { cell, index } = ci;
+                this._renderPlaceholderCell(cell, index);
+              }
+            }
+          });
+        },
+        {
+          root: this.node,
+          threshold: 1,
+          rootMargin: `${this.notebookConfig.observedTopMargin} 0px ${this.notebookConfig.observedBottomMargin} 0px`
+        }
+      );
+    }
+  }
+
+  get cellCollapsed(): ISignal<this, Cell> {
+    return this._cellCollapsed;
+  }
+
+  /**
+   * A signal emitted when the notebook is fully rendered.
+   */
+  get fullyRendered(): ISignal<this, boolean> {
+    return this._fullyRendered;
+  }
+
+  /**
+   * A signal emitted when the a placeholder cell is rendered.
+   */
+  get placeholderCellRendered(): ISignal<this, Cell> {
+    return this._placeholderCellRendered;
   }
 
   /**
@@ -196,6 +272,13 @@ export class StaticNotebook extends Widget {
   }
 
   /**
+   * A signal emitted when the rendering layout of the notebook changes.
+   */
+  get renderingLayoutChanged(): ISignal<this, RenderingLayout> {
+    return this._renderingLayoutChanged;
+  }
+
+  /**
    * The cell factory used by the widget.
    */
   readonly contentFactory: StaticNotebook.IContentFactory;
@@ -204,6 +287,11 @@ export class StaticNotebook extends Widget {
    * The Rendermime instance used by the widget.
    */
   readonly rendermime: IRenderMimeRegistry;
+
+  /**
+   * Translator to be used by cell renderers
+   */
+  readonly translator: ITranslator;
 
   /**
    * The model for the widget.
@@ -278,10 +366,23 @@ export class StaticNotebook extends Widget {
     this._updateNotebookConfig();
   }
 
+  get renderingLayout(): RenderingLayout | undefined {
+    return this._renderingLayout;
+  }
+  set renderingLayout(value: RenderingLayout | undefined) {
+    this._renderingLayout = value;
+    if (this._renderingLayout === 'side-by-side') {
+      this.node.classList.add(SIDE_BY_SIDE_CLASS);
+    } else {
+      this.node.classList.remove(SIDE_BY_SIDE_CLASS);
+    }
+    this._renderingLayoutChanged.emit(this._renderingLayout ?? 'default');
+  }
+
   /**
    * Dispose of the resources held by the widget.
    */
-  dispose() {
+  dispose(): void {
     // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
@@ -393,7 +494,7 @@ export class StaticNotebook extends Widget {
     }
 
     each(cells, (cell: ICellModel, i: number) => {
-      this._insertCell(i, cell);
+      this._insertCell(i, cell, 'set');
     });
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -411,8 +512,10 @@ export class StaticNotebook extends Widget {
     switch (args.type) {
       case 'add':
         index = args.newIndex;
+        // eslint-disable-next-line no-case-declarations
+        const insertType: InsertType = args.oldIndex == -1 ? 'push' : 'insert';
         each(args.newValues, value => {
-          this._insertCell(index++, value);
+          this._insertCell(index++, value, insertType);
         });
         break;
       case 'move':
@@ -446,7 +549,7 @@ export class StaticNotebook extends Widget {
           // Note: this ordering (insert then remove)
           // is important for getting the active cell
           // index for the editable notebook correct.
-          this._insertCell(index, value);
+          this._insertCell(index, value, 'set');
           this._removeCell(index + 1);
           index++;
         });
@@ -459,7 +562,11 @@ export class StaticNotebook extends Widget {
   /**
    * Create a cell widget and insert into the notebook.
    */
-  private _insertCell(index: number, cell: ICellModel): void {
+  private _insertCell(
+    index: number,
+    cell: ICellModel,
+    insertType: InsertType
+  ): void {
     let widget: Cell;
     switch (cell.type) {
       case 'code':
@@ -476,9 +583,97 @@ export class StaticNotebook extends Widget {
         widget = this._createRawCell(cell as IRawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
+
     const layout = this.layout as PanelLayout;
-    layout.insertWidget(index, widget);
-    this.onCellInserted(index, widget);
+    if (
+      this._observer &&
+      insertType === 'push' &&
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly &&
+      cell.type !== 'markdown'
+    ) {
+      // We have an observer and we are have been asked to push (not to insert).
+      // and we are above the number of cells to render directly, then
+      // we will add a placeholder and let the intersection observer or the
+      // idle browser render those placeholder cells.
+      this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
+      const placeholder = this._createPlaceholderCell(
+        cell as IRawCellModel,
+        index
+      );
+      placeholder.node.id = widget.model.id;
+      layout.insertWidget(index, placeholder);
+      this.onCellInserted(index, placeholder);
+      this._fullyRendered.emit(false);
+      this._observer.observe(placeholder.node);
+    } else {
+      // We have no intersection observer, or we insert, or we are below
+      // the number of cells to render directly, so we render directly.
+      layout.insertWidget(index, widget);
+      this.onCellInserted(index, widget);
+      this._incrementRenderedCount();
+    }
+    this._scheduleCellRenderOnIdle();
+  }
+
+  private _scheduleCellRenderOnIdle() {
+    if (
+      this._observer &&
+      this.notebookConfig.renderCellOnIdle &&
+      !this.isDisposed
+    ) {
+      if (!this._idleCallBack) {
+        const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
+        this._idleCallBack = (window as any).requestIdleCallback(
+          renderPlaceholderCells,
+          {
+            timeout: 3000
+          }
+        );
+      }
+    }
+  }
+
+  private _renderPlaceholderCells(deadline: any) {
+    if (this.notebookConfig.remainingTimeBeforeRescheduling > 0) {
+      const timeRemaining = deadline.timeRemaining();
+      // In case this got triggered because of timeout or when there are screen updates (https://w3c.github.io/requestidlecallback/#idle-periods),
+      // avoiding the render and rescheduling the place holder cell rendering.
+      if (
+        deadline.didTimeout ||
+        timeRemaining < this.notebookConfig.remainingTimeBeforeRescheduling
+      ) {
+        if (this._idleCallBack) {
+          window.cancelIdleCallback(this._idleCallBack);
+          this._idleCallBack = null;
+        }
+        this._scheduleCellRenderOnIdle();
+      }
+    }
+
+    if (
+      this._renderedCellsCount < (this.model?.cells.length ?? 0) &&
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly
+    ) {
+      const ci = this._toRenderMap.entries().next();
+      this._renderPlaceholderCell(ci.value[1].cell, ci.value[1].index);
+    }
+  }
+
+  private _renderPlaceholderCell(cell: Cell, index: number) {
+    // We don't have cancel mechanism for scheduled requestIdleCallback(renderPlaceholderCells),
+    // adding defensive check for layout in case tab is closed.
+    if (!this.layout) {
+      return;
+    }
+    const pl = this.layout as PanelLayout;
+    pl.removeWidgetAt(index);
+    pl.insertWidget(index, cell);
+    this._toRenderMap.delete(cell.model.id);
+    this._incrementRenderedCount();
+    this.onCellInserted(index, cell);
+    this._placeholderCellRendered.emit(cell);
   }
 
   /**
@@ -495,6 +690,7 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false,
       placeholder: false,
+      translator: this.translator,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs
     };
     const cell = this.contentFactory.createCodeCell(options, this);
@@ -516,9 +712,44 @@ export class StaticNotebook extends Widget {
       model,
       rendermime,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false,
+      showEditorForReadOnlyMarkdown:
+        this._notebookConfig.showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    // Connect collapsed signal for each markdown cell widget
+    cell.headingCollapsedChanged.connect(
+      (newCell: MarkdownCell, collapsed: boolean) => {
+        NotebookActions.setHeadingCollapse(newCell, collapsed, this);
+        this._cellCollapsed.emit(newCell);
+      }
+    );
+    return cell;
+  }
+
+  /**
+   * Create a placeholder cell widget from a raw cell model.
+   */
+  private _createPlaceholderCell(model: IRawCellModel, index: number): RawCell {
+    const contentFactory = this.contentFactory;
+    const editorConfig = this.editorConfig.raw;
+    const options = {
+      editorConfig,
+      model,
+      contentFactory,
+      updateEditorOnShow: false,
+      placeholder: true
+    };
+    const cell = this.contentFactory.createRawCell(options, this);
+    cell.node.innerHTML = `
+      <div class="jp-Cell-Placeholder">
+        <div class="jp-Cell-Placeholder-wrapper">
+        </div>
+      </div>`;
+    cell.inputHidden = true;
     cell.syncCollapse = true;
     cell.syncEditable = true;
     return cell;
@@ -534,7 +765,8 @@ export class StaticNotebook extends Widget {
       editorConfig,
       model,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false
     };
     const cell = this.contentFactory.createRawCell(options, this);
     cell.syncCollapse = true;
@@ -602,7 +834,7 @@ export class StaticNotebook extends Widget {
   private _updateEditorConfig() {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
-      let config: Partial<CodeEditor.IConfig>;
+      let config: Partial<CodeEditor.IConfig> = {};
       switch (cell.model.type) {
         case 'code':
           config = this._editorConfig.code;
@@ -614,12 +846,7 @@ export class StaticNotebook extends Widget {
           config = this._editorConfig.raw;
           break;
       }
-      let editorOptions: any = {};
-      Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-        editorOptions[key] = config[key] ?? null;
-      });
-      cell.editor.setOptions(editorOptions);
-      cell.editor.refresh();
+      cell.editor.setOptions({ ...config });
     }
   }
 
@@ -632,8 +859,36 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
+    // Control visibility of heading collapser UI
+    this.toggleClass(
+      HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS,
+      this._notebookConfig.showHiddenCellsButton
+    );
+    // Control editor visibility for read-only Markdown cells
+    const showEditorForReadOnlyMarkdown =
+      this._notebookConfig.showEditorForReadOnlyMarkdown;
+    if (showEditorForReadOnlyMarkdown !== undefined) {
+      for (const cell of this.widgets) {
+        if (cell.model.type === 'markdown') {
+          (cell as MarkdownCell).showEditorForReadOnly =
+            showEditorForReadOnlyMarkdown;
+        }
+      }
+    }
   }
 
+  private _incrementRenderedCount() {
+    if (this._toRenderMap.size === 0) {
+      this._fullyRendered.emit(true);
+    }
+    this._renderedCellsCount++;
+  }
+
+  public get remainingCellToRenderCount(): number {
+    return this._toRenderMap.size;
+  }
+
+  private _cellCollapsed = new Signal<this, Cell>(this);
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
@@ -641,6 +896,14 @@ export class StaticNotebook extends Widget {
   private _mimetypeService: IEditorMimeTypeService;
   private _modelChanged = new Signal<this, void>(this);
   private _modelContentChanged = new Signal<this, void>(this);
+  private _fullyRendered = new Signal<this, boolean>(this);
+  private _placeholderCellRendered = new Signal<this, Cell>(this);
+  private _observer: IntersectionObserver;
+  private _renderedCellsCount = 0;
+  private _toRenderMap: Map<string, { index: number; cell: Cell }>;
+  private _idleCallBack: any;
+  private _renderingLayout: RenderingLayout | undefined;
+  private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
 }
 
 /**
@@ -680,6 +943,11 @@ export namespace StaticNotebook {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**
@@ -739,7 +1007,7 @@ export namespace StaticNotebook {
       ...CodeEditor.defaultConfig,
       lineWrap: 'off',
       matchBrackets: true,
-      autoClosingBrackets: true
+      autoClosingBrackets: false
     },
     markdown: {
       ...CodeEditor.defaultConfig,
@@ -760,6 +1028,11 @@ export namespace StaticNotebook {
    */
   export interface INotebookConfig {
     /**
+     * Show hidden cells button if collapsed
+     */
+    showHiddenCellsButton: boolean;
+
+    /**
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
@@ -774,19 +1047,94 @@ export namespace StaticNotebook {
      */
     recordTiming: boolean;
 
+    /*
+     * Remaining time in milliseconds before
+     * virtual notebook rendering is rescheduled.
+     */
+    numberCellsToRenderDirectly: number;
+
+    /*
+     * Number of cells to render directly when virtual
+     * notebook intersection observer is available.
+     */
+    remainingTimeBeforeRescheduling: number;
+
+    /**
+     * Defines if the placeholder cells should be rendered
+     * when the browser is idle.
+     */
+    renderCellOnIdle: boolean;
+
+    /**
+     * Defines the observed top margin for the
+     * virtual notebook, set a positive number of pixels
+     * to render cells below the visible view.
+     */
+    observedTopMargin: string;
+
+    /**
+     * Defines the observed bottom margin for the
+     * virtual notebook, set a positive number of pixels
+     * to render cells below the visible view.
+     */
+    observedBottomMargin: string;
+
     /**
      * Defines the maximum number of outputs per cell.
      */
     maxNumberOutputs: number;
+
+    /**
+     * Should an editor be shown for read-only markdown
+     */
+    showEditorForReadOnlyMarkdown?: boolean;
+
+    /**
+     * Defines if the document can be undo/redo.
+     */
+    disableDocumentWideUndoRedo: boolean;
+
+    /**
+     * Defines the rendering layout to use.
+     */
+    renderingLayout: RenderingLayout;
+
+    /**
+     * Override the side-by-side left margin.
+     */
+    sideBySideLeftMarginOverride: string;
+
+    /**
+     * Override the side-by-side right margin.
+     */
+    sideBySideRightMarginOverride: string;
+
+    /**
+     * Side-by-side output ratio.
+     */
+    sideBySideOutputRatio: number;
   }
+
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
+    showHiddenCellsButton: true,
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
-    maxNumberOutputs: 50
+    numberCellsToRenderDirectly: 99999,
+    remainingTimeBeforeRescheduling: 50,
+    renderCellOnIdle: true,
+    observedTopMargin: '1000px',
+    observedBottomMargin: '1000px',
+    maxNumberOutputs: 50,
+    showEditorForReadOnlyMarkdown: true,
+    disableDocumentWideUndoRedo: false,
+    renderingLayout: 'default',
+    sideBySideLeftMarginOverride: '10px',
+    sideBySideRightMarginOverride: '10px',
+    sideBySideOutputRatio: 1
   };
 
   /**
@@ -794,7 +1142,8 @@ export namespace StaticNotebook {
    */
   export class ContentFactory
     extends Cell.ContentFactory
-    implements IContentFactory {
+    implements IContentFactory
+  {
     /**
      * Create a new code cell widget.
      *
@@ -845,7 +1194,7 @@ export namespace StaticNotebook {
   }
 
   /**
-   * A namespace for the staic notebook content factory.
+   * A namespace for the static notebook content factory.
    */
   export namespace ContentFactory {
     /**
@@ -869,7 +1218,7 @@ export class Notebook extends StaticNotebook {
    */
   constructor(options: Notebook.IOptions) {
     super(Private.processNotebookOptions(options));
-    this.node.tabIndex = -1; // Allow the widget to take focus.
+    this.node.tabIndex = 0; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
   }
@@ -985,6 +1334,13 @@ export class Notebook extends StaticNotebook {
    */
   get activeCell(): Cell | null {
     return this._activeCell;
+  }
+
+  get lastClipboardInteraction(): 'copy' | 'cut' | 'paste' | null {
+    return this._lastClipboardInteraction;
+  }
+  set lastClipboardInteraction(newValue: 'copy' | 'cut' | 'paste' | null) {
+    this._lastClipboardInteraction = newValue;
   }
 
   /**
@@ -1457,7 +1813,11 @@ export class Notebook extends StaticNotebook {
     if (this._fragment) {
       let el;
       try {
-        el = this.node.querySelector(this._fragment);
+        el = this.node.querySelector(
+          this._fragment.startsWith('#')
+            ? `#${CSS.escape(this._fragment.slice(1))}`
+            : this._fragment
+        );
       } catch (error) {
         console.warn('Unable to set URI fragment identifier', error);
       }
@@ -1794,6 +2154,10 @@ export class Notebook extends StaticNotebook {
 
       this.deselectAll();
       this.activeCellIndex = index;
+      // Focus notebook if active cell changes but does not have focus.
+      if (!this.activeCell!.node.contains(document.activeElement)) {
+        this.node.focus();
+      }
     }
 
     this._mouseMode = null;
@@ -1921,6 +2285,19 @@ export class Notebook extends StaticNotebook {
       // the same notebook.
       event.dropAction = 'move';
       const toMove: Cell[] = event.mimeData.getData('internal:cells');
+
+      // For collapsed markdown headings with hidden "child" cells, move all
+      // child cells as well as the markdown heading.
+      const cell = toMove[toMove.length - 1];
+      if (cell instanceof MarkdownCell && cell.headingCollapsed) {
+        const nextParent = NotebookActions.findNextParentHeading(cell, source);
+        if (nextParent > 0) {
+          const index = findIndex(source.widgets, (possibleCell: Cell) => {
+            return cell.model.id === possibleCell.model.id;
+          });
+          toMove.push(...source.widgets.slice(index + 1, nextParent));
+        }
+      }
 
       // Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
@@ -2077,14 +2454,10 @@ export class Notebook extends StaticNotebook {
       if (node.contains(target)) {
         this.mode = 'edit';
       }
+      this.activeCellIndex = index;
     } else {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
-    }
-    if (this.mode === 'command' && target !== this.node) {
-      delete this.node.dataset[CODE_RUNNER];
-    } else {
-      this.node.dataset[CODE_RUNNER] = 'true';
     }
   }
 
@@ -2134,6 +2507,11 @@ export class Notebook extends StaticNotebook {
 
     const [target, index] = this._findEventTargetAndCell(event);
 
+    if (
+      (event.target as HTMLElement).classList.contains(HEADING_COLLAPSER_CLASS)
+    ) {
+      return;
+    }
     if (index === -1) {
       return;
     }
@@ -2177,6 +2555,8 @@ export class Notebook extends StaticNotebook {
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
   private _checkCacheOnNextResize = false;
+
+  private _lastClipboardInteraction: 'copy' | 'cut' | 'paste' | null = null;
 }
 
 /**
@@ -2312,7 +2692,9 @@ namespace Private {
    * #### Notes
    * This defaults the content factory to that in the `Notebook` namespace.
    */
-  export function processNotebookOptions(options: Notebook.IOptions) {
+  export function processNotebookOptions(
+    options: Notebook.IOptions
+  ): Notebook.IOptions {
     if (options.contentFactory) {
       return options;
     } else {

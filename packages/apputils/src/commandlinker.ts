@@ -3,12 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
 import { CommandRegistry } from '@lumino/commands';
-
+import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { ElementDataset } from '@lumino/virtualdom';
 
 /**

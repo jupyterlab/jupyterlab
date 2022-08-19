@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/ui-components-extension",
-  "version": "3.1.0-alpha.8",
+  "version": "4.0.0-alpha.12",
   "description": "JupyterLab - UI component plugins",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,17 +29,16 @@
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-alpha.8",
-    "@jupyterlab/ui-components": "^3.1.0-alpha.8"
+    "@jupyterlab/application": "^4.0.0-alpha.12",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.27"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "~0.20.0-beta.27",
-    "typescript": "~4.1.3"
+    "typedoc": "~0.22.10",
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

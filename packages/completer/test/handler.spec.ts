@@ -1,19 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext, ISessionContext } from '@jupyterlab/apputils';
-
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
 import {
   Completer,
-  CompletionHandler,
   CompleterModel,
-  KernelConnector
+  CompletionHandler,
+  ConnectorProxy
 } from '@jupyterlab/completer';
-
+import { IObservableString } from '@jupyterlab/observables';
 import { createSessionContext } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
@@ -41,8 +38,11 @@ class TestCompleterModel extends CompleterModel {
 class TestCompletionHandler extends CompletionHandler {
   methods: string[] = [];
 
-  onTextChanged(): void {
-    super.onTextChanged();
+  onTextChanged(
+    str: IObservableString,
+    changed: IObservableString.IChangedArgs
+  ): void {
+    super.onTextChanged(str, changed);
     this.methods.push('onTextChanged');
   }
 
@@ -53,13 +53,13 @@ class TestCompletionHandler extends CompletionHandler {
 }
 
 describe('@jupyterlab/completer', () => {
-  let connector: KernelConnector;
+  let connector: ConnectorProxy;
   let sessionContext: ISessionContext;
 
   beforeAll(async () => {
     sessionContext = await createSessionContext();
     await (sessionContext as SessionContext).initialize();
-    connector = new KernelConnector({ session: sessionContext.session });
+    connector = new ConnectorProxy(null as any, null as any, 0);
   });
 
   afterAll(() => sessionContext.shutdown());
@@ -72,18 +72,6 @@ describe('@jupyterlab/completer', () => {
           completer: new Completer({ editor: null })
         });
         expect(handler).toBeInstanceOf(CompletionHandler);
-      });
-    });
-
-    describe('#connector', () => {
-      it('should be a data connector', () => {
-        const handler = new CompletionHandler({
-          connector,
-          completer: new Completer({ editor: null })
-        });
-        expect(handler.connector).toHaveProperty('fetch');
-        expect(handler.connector).toHaveProperty('remove');
-        expect(handler.connector).toHaveProperty('save');
       });
     });
 
@@ -250,7 +238,7 @@ describe('@jupyterlab/completer', () => {
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
         const line = 1;
-        const column = 5;
+        const column = 5; // this sets the cursor after the "#" sign - not in the mid of the replaced word
         const request: Completer.ITextState = {
           column,
           line,
@@ -305,7 +293,6 @@ describe('@jupyterlab/completer', () => {
           line,
           column: column + 6
         });
-        console.warn(editor.getCursorPosition());
         // Undo the completion, check its value and cursor position.
         editor.undo();
         expect(editor.model.value.text).toBe(text);
@@ -313,7 +300,6 @@ describe('@jupyterlab/completer', () => {
           line,
           column: column + 3
         });
-        console.warn(editor.getCursorPosition());
         // Redo the completion, check its value and cursor position.
         editor.redo();
         expect(editor.model.value.text).toBe(want);
@@ -321,7 +307,41 @@ describe('@jupyterlab/completer', () => {
           line,
           column: column + 6
         });
-        console.warn(editor.getCursorPosition());
+      });
+    });
+
+    it('should update cursor position after autocomplete on empty word', () => {
+      const model = new CompleterModel();
+      const patch = 'foobar';
+      const completer = new Completer({ editor: null, model });
+      const handler = new TestCompletionHandler({ completer, connector });
+      const editor = createEditorWidget().editor;
+      const text = 'eggs\n  # comment\nbaz';
+      const want = 'eggs\n foobar # comment\nbaz';
+      const line = 1;
+      const column = 1;
+      const request: Completer.ITextState = {
+        column: column,
+        line,
+        lineHeight: 0,
+        charWidth: 0,
+        coords: null,
+        text
+      };
+
+      handler.editor = editor;
+      handler.editor.model.value.text = text;
+      handler.editor.model.sharedModel.clearUndoHistory();
+      handler.editor.setCursorPosition({ line, column });
+      model.original = request;
+      const offset = handler.editor.getOffsetAt({ line, column });
+      model.cursor = { start: offset, end: offset };
+      // Make the completion, check its value and cursor position.
+      (completer.selected as any).emit(patch);
+      expect(editor.model.value.text).toBe(want);
+      expect(editor.getCursorPosition()).toEqual({
+        line,
+        column: column + 6
       });
     });
   });

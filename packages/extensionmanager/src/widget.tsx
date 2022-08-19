@@ -2,17 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  VDomRenderer,
-  ToolbarButtonComponent,
-  Dialog,
-  showDialog
-} from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
@@ -23,14 +18,14 @@ import {
   InputGroup,
   jupyterIcon,
   listingsInfoIcon,
-  refreshIcon
+  refreshIcon,
+  ToolbarButtonComponent,
+  VDomRenderer
 } from '@jupyterlab/ui-components';
-
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-
-import { ListModel, IEntry, Action } from './model';
+import { Action, IEntry, ListModel } from './model';
 import { isJupyterOrg } from './npm';
 
 // TODO: Replace pagination with lazy loading of lower search results
@@ -86,7 +81,7 @@ export class SearchBar extends React.Component<
   /**
    * Handler for search input changes.
    */
-  handleChange = (e: React.FormEvent<HTMLElement>) => {
+  handleChange = (e: React.FormEvent<HTMLElement>): void => {
     const target = e.target as HTMLInputElement;
     this.setState({
       value: target.value
@@ -252,7 +247,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               )}
               onClick={() =>
                 window.open(
-                  'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                  'https://jupyterlab.readthedocs.io/en/latest/user/extensions.html'
                 )
               }
             />
@@ -268,7 +263,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 )}
                 onClick={() =>
                   window.open(
-                    'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                    'https://jupyterlab.readthedocs.io/en/latest/user/extensions.html'
                   )
                 }
               />
@@ -287,42 +282,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             {entry.description}
           </div>
           <div className="jp-extensionmanager-entry-buttons">
-            {!entry.installed &&
-              entry.pkg_type == 'source' &&
-              !entry.blockedExtensionsEntry &&
-              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
-              ListModel.isDisclaimed() && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Install')}
-                </Button>
-              )}
-            {ListModel.entryHasUpdate(entry) &&
-              entry.pkg_type == 'source' &&
-              !entry.blockedExtensionsEntry &&
-              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
-              ListModel.isDisclaimed() && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
-                  {trans.__('Update')}
-                </Button>
-              )}
-            {entry.installed && entry.pkg_type == 'source' && (
-              <Button
-                onClick={() => props.performAction('uninstall', entry)}
-                minimal
-                small
-              >
-                {trans.__('Uninstall')}
-              </Button>
-            )}
-            {entry.enabled && entry.pkg_type == 'source' && (
+            {entry.enabled && (
               <Button
                 onClick={() => props.performAction('disable', entry)}
                 minimal
@@ -331,7 +291,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 {trans.__('Disable')}
               </Button>
             )}
-            {entry.installed && entry.pkg_type == 'source' && !entry.enabled && (
+            {entry.installed && !entry.enabled && (
               <Button
                 onClick={() => props.performAction('enable', entry)}
                 minimal
@@ -348,7 +308,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       title,
                       body: (
                         <div>
-                          {getprebuiltUninstallInstruction(entry, trans)}
+                          {getPrebuiltUninstallInstruction(entry, trans)}
                         </div>
                       ),
                       buttons: [
@@ -375,7 +335,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   );
 }
 
-function getprebuiltUninstallInstruction(
+function getPrebuiltUninstallInstruction(
   entry: IEntry,
   trans: TranslationBundle
 ): JSX.Element {
@@ -398,11 +358,11 @@ function getprebuiltUninstallInstruction(
       </p>
       <p>
         <a
-          href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+          href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html"
           target="_blank"
           rel="noopener noreferrer"
         >
-          https://jupyterlab.readthedocs.io/en/stable/user/extensions.html
+          https://jupyterlab.readthedocs.io/en/latest/user/extensions.html
         </a>
       </p>
     </div>
@@ -600,7 +560,7 @@ export class CollapsibleSection extends React.Component<
   /**
    * Handler for search input changes.
    */
-  handleCollapse() {
+  handleCollapse(): void {
     this.setState(
       {
         isOpen: !this.state.isOpen
@@ -613,7 +573,9 @@ export class CollapsibleSection extends React.Component<
     );
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
+  UNSAFE_componentWillReceiveProps(
+    nextProps: CollapsibleSection.IProperties
+  ): void {
     if (nextProps.forceOpen) {
       this.setState({
         isOpen: true
@@ -651,7 +613,7 @@ export namespace CollapsibleSection {
     headerElements?: React.ReactNode;
 
     /**
-     * If given, this will be diplayed instead of the children.
+     * If given, this will be displayed instead of the children.
      */
     errorMessage?: string | null;
 
@@ -688,7 +650,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   private _forceOpen: boolean;
   constructor(
     app: JupyterFrontEnd,
-    serviceManager: ServiceManager,
+    serviceManager: ServiceManager.IManager,
     settings: ISettingRegistry.ISettings,
     translator?: ITranslator
   ) {
@@ -727,7 +689,7 @@ administrator to verify the listings configuration.`)}
           </div>
           <div>
             <a
-              href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+              href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -864,12 +826,15 @@ risks or contain malicious code that runs on your machine.`)}
           </ErrorMessage>
         );
       } else {
+        const query = new RegExp(model.query?.toLowerCase() ?? '');
         installedContent.push(
           <ListView
             key="installed-items"
             listMode={model.listMode}
             viewType={'installed'}
-            entries={model.installed}
+            entries={model.installed.filter(
+              pkg => !model.query || query.test(pkg.name)
+            )}
             numPages={1}
             translator={this.translator}
             onPage={value => {
@@ -970,7 +935,7 @@ risks or contain malicious code that runs on your machine.`)}
    *
    * @param value The new query.
    */
-  onSearch(value: string) {
+  onSearch(value: string): void {
     this.model!.query = value;
   }
 
@@ -979,7 +944,7 @@ risks or contain malicious code that runs on your machine.`)}
    *
    * @param value The pagination page number.
    */
-  onPage(value: number) {
+  onPage(value: number): void {
     this.model!.page = value;
   }
 
@@ -989,7 +954,7 @@ risks or contain malicious code that runs on your machine.`)}
    * @param action The action to perform.
    * @param entry The entry to perform the action on.
    */
-  onAction(action: Action, entry: IEntry) {
+  onAction(action: Action, entry: IEntry): Promise<void> {
     switch (action) {
       case 'install':
         return this.model!.install(entry);
@@ -1005,13 +970,13 @@ risks or contain malicious code that runs on your machine.`)}
   }
 
   /**
-   * Handle the DOM events for the command palette.
+   * Handle the DOM events for the extension manager search bar.
    *
-   * @param event - The DOM event sent to the command palette.
+   * @param event - The DOM event sent to the extension manager search bar.
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the command palette's DOM node.
+   * called in response to events on the search bar's DOM node.
    * It should not be called directly by user code.
    */
   handleEvent(event: Event): void {

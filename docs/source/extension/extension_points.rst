@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _developer-extension-points:
 
 Common Extension Points
@@ -11,7 +14,7 @@ Following the list of core tokens is a guide for using some of JupyterLab's most
 However, it is not an exhaustive account of how to extend the application components,
 and more detailed descriptions of their public APIs may be found in the
 `JupyterLab <../api/index.html>`__ and
-`Lumino <http://jupyterlab.github.io/lumino/index.html>`__ API documentation.
+`Lumino <https://jupyterlab.github.io/lumino/index.html>`__ API documentation.
 
 .. contents:: Table of contents
     :local:
@@ -55,13 +58,15 @@ might want to use the services in your extensions.
 - ``@jupyterlab/apputils:ISplashScreen``: A service for the splash screen for the application.
   Use this if you want to show the splash screen for your own purposes.
 - ``@jupyterlab/apputils:IThemeManager``: A service for the theme manager for the application. This is used primarily in theme extensions to register new themes.
+- ``@jupyterlab/apputils:IToolbarWidgetRegistry``: A registry for toolbar widgets. Require this
+  if you want to build the toolbar dynamically from a data definition (stored in settings for example).
 - ``@jupyterlab/apputils:IWindowResolver``: A service for a window resolver for the
   application. JupyterLab workspaces are given a name, which are determined using
   the window resolver. Require this if you want to use the name of the current workspace.
 - ``@jupyterlab/codeeditor:IEditorServices``: A service for the text editor provider
   for the application. Use this to create new text editors and host them in your
   UI elements.
-- ``@jupyterlab/completer:ICompletionManager``: A service for the completion manager
+- ``@jupyterlab/completer:ICompletionProviderManager``: A service for the completion manager
   for the application. Use this to allow your extension to invoke a completer.
 - ``@jupyterlab/console:IConsoleTracker``: A widget tracker for code consoles.
   Use this if you want to be able to iterate over and interact with code consoles
@@ -71,6 +76,8 @@ might want to use the services in your extensions.
 - ``@jupyterlab/docmanager:IDocumentManager``: A service for the manager for all
   documents used by the application. Use this if you want to open and close documents,
   create and delete files, and otherwise interact with the file system.
+- ``@jupyterlab/docprovider:IDocumentProviderFactory``: A factory object that creates new providers for
+  shared documents. Use this if you want to create a provider for a new shared document.
 - ``@jupyterlab/documentsearch:ISearchProviderRegistry``: A service for a registry of search
   providers for the application. Plugins can register their UI elements with this registry
   to provide find/replace support.
@@ -105,6 +112,7 @@ might want to use the services in your extensions.
   for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a `mime renderer extension <#mime-renderer-extensions>`__ rather than using this service directly.
 - ``@jupyterlab/rendermime:ILatexTypesetter``: A service for the LaTeX typesetter for the
   application. Use this if you want to typeset math in your extension.
+- ``@jupyterlab/rendermime:IMarkdownParser``: A service for rendering markdown syntax as HTML content.
 - ``@jupyterlab/settingeditor:ISettingEditorTracker``: A widget tracker for setting editors.
   Use this if you want to be able to iterate over and interact with setting editors
   created by the application.
@@ -121,6 +129,11 @@ might want to use the services in your extensions.
   created by the application.
 - ``@jupyterlab/tooltip:ITooltipManager``: A service for the tooltip manager for the application.
   Use this to allow your extension to invoke a tooltip.
+- ``@jupyterlab/collaboration:IGlobalAwareness``: A service for the global awareness, providing information about other collaborators.
+- ``@jupyterlab/collaboration:ICurrentUser``: A service for the current user information.
+  Use this if you want to access to the identity of the current connected user.
+- ``@jupyterlab/collaboration:IUserMenu``: A service for the user menu on the application.
+  Use this if you want to add new items to the user menu.
 - ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
   Use this to iterate over and interact with VDOM document instances created by the application.
 
@@ -146,12 +159,12 @@ Here is a sample block of code that adds a command to the application (given by 
 .. code:: typescript
 
     const commandID = 'my-command';
-    const toggled = false;
+    let toggled = false;
 
     app.commands.addCommand(commandID, {
       label: 'My Cool Command',
-      isEnabled: true,
-      isVisible: true,
+      isEnabled: () => true,
+      isVisible: () => true,
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
       execute: () => {
@@ -174,7 +187,7 @@ a string value or a function that returns a string value.
 
 There are several more options which can be passed into the command registry when
 adding new commands. These are documented
-`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
+`here <https://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
 
 After a command has been added to the application command registry
 you can add them to various places in the application user interface,
@@ -209,6 +222,7 @@ Your command ``label`` function can then check the ``args`` it is provided for `
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+.. _context_menu:
 
 Context Menu
 ------------
@@ -222,8 +236,46 @@ The context menu system determines which items to show based on
 It propagates up the DOM tree and tests whether a given HTML element
 matches the CSS selector provided by a given command.
 
+Items can be added in the context menu in two ways:
+
+1. Using the settings - this is the preferred way as they are configurable by the user.
+2. Using the API - this is for advanced cases like dynamic menu or semantic items.
+
 Here is an example showing how to add a command to the application context
-menu.  See the Lumino `docs
+menu using the settings.
+
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "context": [
+        {
+          "command": "my-command",
+          "selector": ".jp-Notebook",
+          "rank": 500
+        }
+      ]
+    }
+
+In this example, the command with id ``my-command`` is shown whenever the user
+right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a notebook).
+The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
+A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
+
+Item must follow this definition:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/jupyter.lab.menus.json
+   :language: json
+   :lines: 14-34
+
+where ``menuItem`` definition is:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/menuItem.json
+   :language: json
+
+
+The same example using the API is shown below. See the Lumino `docs
 <https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
 for the item creation options.
 
@@ -233,11 +285,6 @@ for the item creation options.
       command: commandID,
       selector: '.jp-Notebook'
     })
-
-In this example, the command indicated by ``commandID`` is shown whenever the user
-right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a notebook).
-The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
-A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
 
 If you don't want JupyterLab's custom context menu to appear for your element, because you have
 your own right click behavior that you want to trigger, you can add the `data-jp-suppress-context-menu` data attribute
@@ -362,7 +409,7 @@ the shortcut handler propagates up the DOM tree from the focused element
 and tests each element against the registered selectors. If a match is found,
 then that command is executed with the provided ``args``.
 Full documentation for the options for ``addKeyBinding`` can be found
-`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
+`here <https://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
 
 JupyterLab also provides integration with its settings system for keyboard shortcuts.
 Your extension can provide a settings schema with a ``jupyter.lab.shortcuts`` key,
@@ -382,6 +429,31 @@ declaring default keyboard shortcuts for a command:
 
 Shortcuts added to the settings system will be editable by users.
 
+From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut.
+This requires you to define a keyboard shortcut for ``apputils:run-all-enabled`` command:
+
+.. code:: json
+
+    {
+      "command": "apputils:run-all-enabled",
+      "keys": ["Accel T"],
+      "args": {
+          "commands": [
+              "my-command-1",
+              "my-command-2"
+          ],
+          "args": [
+              {},
+              {}
+            ]
+        },
+      "selector": "body"
+    }
+
+In this example ``my-command-1`` and ``my-command-2`` are passed in ``args``
+of ``apputils:run-all-enabled`` command as ``commands`` list.
+You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args``
+of ``apputils:run-all-enabled`` command as ``args`` list.
 
 Launcher
 --------
@@ -416,9 +488,26 @@ In JupyterLab, the application shell consists of:
 -  A ``menu`` area for top-level menus, which is collapsed into the ``top`` area in multiple-document mode and put below it in single-document mode.
 -  ``left`` and ``right`` sidebar areas for collapsible content.
 -  A ``main`` work area for user activity.
+-  A ``down`` area for information content; like log console, contextual help.
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 
+Top Area
+^^^^^^^^
+
+The top area is intended to host most persistent user interface elements that span the whole session of a user.
+A toolbar named **TopBar** is available on the right of the main menu bar. For example, JupyterLab adds a user
+dropdown to that toolbar when started in ``collaborative`` mode.
+
+See :ref:`generic toolbars <generic-toolbar>` to see how to add a toolbar or a custom widget to a toolbar.
+
+You can use a numeric rank to control the ordering of top bar items in the settings; see :ref:`Toolbar definitions <toolbar-settings-definition>`.
+
+JupyterLab adds a spacer widget to the top bar at rank ``50`` by default.
+You can then use the following guidelines to place your items:
+
+* ``rank <= 50`` to place items to the left side in the top bar
+* ``rank > 50`` to place items to the right side in the top bar
 
 Left/Right Areas
 ^^^^^^^^^^^^^^^^
@@ -457,16 +546,113 @@ The recommended ranges for this rank are:
 Main Menu
 ---------
 
-There are three main ways to extend JupyterLab's main menu.
+There are two ways to extend JupyterLab's main menu.
+
+1. Using the settings - this is the preferred way as they are configurable by the user.
+2. Using the API - this is for advanced cases like dynamic menu or semantic items.
+
+Settings-defined menu
+^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab provides integration with its settings system for menu definitions.
+Your extension can provide a settings schema with a ``jupyter.lab.menus`` key,
+declaring default menus. You don't need to set anything in the TypeScript code
+(except the command definitions).
+
+To add a new menu with your extension command:
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "main": [
+        {
+          "id": "jp-mainmenu-myextension",
+          "label": "My Menu",
+          "items": [
+            {
+              "command": "my-command",
+              "rank": 500
+            }
+          ],
+          "rank": 100
+        }
+      ]
+    }
+
+The menu item label will be set with the command label. For menus (and
+submenus), the label needs to be set explicitly with the ``label``
+property.
+
+Menu and item have a ``rank`` that will determine the elements order.
+
+
+To add a new entry in an existing menu:
+
+.. code:: json
+
+    {
+      "jupyter.lab.menus": {
+      "main": [
+        {
+          "id": "jp-mainmenu-file",
+          "items": [
+            {
+              "command": "my-command",
+              "rank": 500
+            }
+          ]
+        }
+      ]
+    }
+
+Here is the list of default menu ids:
+
+- File menu: ``jp-mainmenu-file``
+
+  * New file submenu: ``jp-mainmenu-file-new``
+
+- Edit menu: ``jp-mainmenu-edit``
+- View menu: ``jp-mainmenu-view``
+
+  * Appearance submenu: ``jp-mainmenu-view-appearance``
+
+- Run menu: ``jp-mainmenu-run``
+- Kernel menu: ``jp-mainmenu-kernel``
+- Tabs menu: ``jp-mainmenu-tabs``
+- Settings menu: ``jp-mainmenu-settings``
+- Help menu: ``jp-mainmenu-help``
+
+The default main menu is defined in the ``mainmenu-extension`` package settings.
+
+A menu must respect the following schema:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/jupyter.lab.menus.json
+   :language: json
+   :lines: 5-13
+
+And an item must follow:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/menu.json
+   :language: json
+
+Menus added to the settings system will be editable by users using the ``mainmenu-extension``
+settings. In particular, they can be disabled at the item or the menu level by setting the
+property ``disabled`` to ``true``.
+
+API-defined menu
+^^^^^^^^^^^^^^^^
+
+To use the API, you should request the ``IMainMenu`` token for your extension.
+
+There are three main ways to extend:
 
 1. You can add your own menu to the menu bar.
 2. You can add new commands to the existing menus.
 3. You can register your extension with one of the existing semantic menu items.
 
-In all three cases, you should request the ``IMainMenu`` token for your extension.
-
 Adding a New Menu
-^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~
 
 To add a new menu to the menu bar, you need to create a new
 `Lumino menu <https://jupyterlab.github.io/lumino/widgets/classes/menu.html>`__.
@@ -489,7 +675,7 @@ rendering and execution behavior of the command in the menu context.
 
 
 Adding a New Command to an Existing Menu
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In many cases you will want to add your commands to the existing JupyterLab menus
 rather than creating a separate menu for your extension.
@@ -514,7 +700,7 @@ to the File menu, you would do the following:
 
 
 Registering a Semantic Menu Item
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are some commands in the JupyterLab menu system that are considered
 common and important enough that they are treated differently.
@@ -588,6 +774,204 @@ When the ``labStatus`` busy state changes, we update the text content of the
       align: 'middle',
       item: statusWidget
     });
+
+.. _toolbar-registry:
+
+
+Toolbar Registry
+----------------
+
+JupyterLab provides an infrastructure to define and customize toolbar widgets
+from the settings, which is similar to that defining the context menu and the main menu
+bar.
+
+Document Widgets
+^^^^^^^^^^^^^^^^
+
+A typical example is the notebook toolbar as in the snippet below:
+
+.. code:: typescript
+
+   function activatePlugin(
+     app: JupyterFrontEnd,
+     // ...
+     toolbarRegistry: IToolbarWidgetRegistry | null,
+     settingRegistry: ISettingRegistry | null
+   ): NotebookWidgetFactory.IFactory {
+     const { commands } = app;
+     let toolbarFactory:
+       | ((widget: NotebookPanel) => DocumentRegistry.IToolbarItem[])
+       | undefined;
+
+     // Register notebook toolbar specific widgets
+     if (toolbarRegistry) {
+       toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
+         ToolbarItems.createCellTypeItem(panel, translator)
+       );
+
+       toolbarRegistry.registerFactory<NotebookPanel>(
+         FACTORY,
+         'kernelStatus',
+         panel => Toolbar.createKernelStatusItem(panel.sessionContext, translator)
+       );
+       // etc...
+
+       if (settingRegistry) {
+         // Create the factory
+         toolbarFactory = createToolbarFactory(
+           toolbarRegistry,
+           settingRegistry,
+           // Factory name
+           FACTORY,
+           // Setting id in which the toolbar items are defined
+           '@jupyterlab/notebook-extension:panel',
+           translator
+         );
+       }
+     }
+
+     const factory = new NotebookWidgetFactory({
+       name: FACTORY,
+       fileTypes: ['notebook'],
+       modelName: 'notebook',
+       defaultFor: ['notebook'],
+       // ...
+       toolbarFactory,
+       translator: translator
+     });
+     app.docRegistry.addWidgetFactory(factory);
+
+The registry ``registerFactory`` method allows an extension to provide special widget for a unique pair
+(factory name, toolbar item name). Then the helper ``createToolbarFactory`` can be used to extract the
+toolbar definition from the settings and build the factory to pass to the widget factory.
+
+The default toolbar items can be defined across multiple extensions by providing an entry in the ``"jupyter.lab.toolbars"``
+mapping. For example for the notebook panel:
+
+.. _toolbar-settings-definition:
+
+.. code:: js
+
+   "jupyter.lab.toolbars": {
+     "Notebook": [ // Factory name
+       // Item with non-default widget - it must be registered within an extension
+       {
+         "name": "save", // Unique toolbar item name
+         "rank": 10 // Item rank
+       },
+       // Item with default button widget triggering a command
+       { "name": "insert", "command": "notebook:insert-cell-below", "rank": 20 },
+       { "name": "cut", "command": "notebook:cut-cell", "rank": 21 },
+       { "name": "copy", "command": "notebook:copy-cell", "rank": 22 },
+       { "name": "paste", "command": "notebook:paste-cell-below", "rank": 23 },
+       { "name": "run", "command": "runmenu:run", "rank": 30 },
+       { "name": "interrupt", "command": "kernelmenu:interrupt", "rank": 31 },
+       { "name": "restart", "command": "kernelmenu:restart", "rank": 32 },
+       {
+         "name": "restart-and-run",
+         "command": "runmenu:restart-and-run-all",
+         "rank": 33 // The default rank is 50
+       },
+       { "name": "cellType", "rank": 40 },
+       // Horizontal spacer widget
+       { "name": "spacer", "type": "spacer", "rank": 100 },
+       { "name": "kernelName", "rank": 1000 },
+       { "name": "kernelStatus", "rank": 1001 }
+     ]
+   },
+   "jupyter.lab.transform": true,
+   "properties": {
+     "toolbar": {
+       "title": "Notebook panel toolbar items",
+       "items": {
+         "$ref": "#/definitions/toolbarItem"
+       },
+       "type": "array",
+       "default": []
+     }
+   }
+
+
+The settings registry will merge those definitions from settings schema with any
+user-provided overrides (customizations) transparently and save them under the
+``toolbar`` property in the final settings object. The ``toolbar`` list will be used to
+create the toolbar. Both the source settings schema and the final settings object
+are identified by the plugin ID passed to ``createToolbarFactory``. The user can
+customize the toolbar by adding new items or overriding existing ones (like
+providing a different rank or adding ``"disabled": true`` to remove the item).
+
+.. note::
+
+   You need to set ``jupyter.lab.transform`` to ``true`` in the plugin id that will gather all items.
+
+
+The current widget factories supporting the toolbar customization are:
+
+- ``Notebook``: Notebook panel toolbar
+- ``Cell``: Cell toolbar
+- ``Editor``: Text editor toolbar
+- ``HTML Viewer``: HTML Viewer toolbar
+- ``CSVTable``: CSV (Comma Separated Value) Viewer toolbar
+- ``TSVTable``: TSV (Tabulation Separated Value) Viewer toolbar
+
+.. _toolbar-item:
+
+And the toolbar item must follow this definition:
+
+.. literalinclude:: ../snippets/packages/settingregistry/src/toolbarItem.json
+   :language: json
+
+.. _generic-toolbar:
+
+Generic Widget with Toolbar
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The logic detailed in the previous section can be used to customize any widgets with a toolbar.
+
+The additional keys used in ``jupyter.lab.toolbars`` settings attributes are:
+
+- ``Cell``: Cell toolbar
+- ``FileBrowser``: Default file browser panel toolbar items
+- ``TopBar``: Top area toolbar (right of the main menu bar)
+
+Here is an example for enabling a toolbar on a widget:
+
+.. code:: typescript
+
+   function activatePlugin(
+     app: JupyterFrontEnd,
+     // ...
+     toolbarRegistry: IToolbarWidgetRegistry,
+     settingRegistry: ISettingRegistry
+   ): void {
+
+     const browser = new FileBrowser();
+
+     // Toolbar
+     // - Define a custom toolbar item
+     toolbarRegistry.registerFactory(
+       'FileBrowser', // Factory name
+       'uploader',
+       (browser: FileBrowser) =>
+         new Uploader({ model: browser.model, translator })
+     );
+
+     // - Link the widget toolbar and its definition from the settings
+     setToolbar(
+       browser, // This widget is the one passed to the toolbar item factory
+       createToolbarFactory(
+         toolbarRegistry,
+         settings,
+         'FileBrowser', // Factory name
+         plugin.id,
+         translator
+       ),
+       // You can explicitly pass the toolbar widget if it is not accessible as `toolbar` attribute
+       // toolbar,
+     );
+
+See :ref:`Toolbar definitions <toolbar-settings-definition>` example on how to define the toolbar
+items in the settings.
 
 .. _widget-tracker:
 

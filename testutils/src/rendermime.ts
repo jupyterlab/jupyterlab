@@ -5,8 +5,8 @@ import json2html from 'json-to-html';
 
 import {
   IRenderMime,
-  RenderMimeRegistry,
   RenderedHTML,
+  RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
 

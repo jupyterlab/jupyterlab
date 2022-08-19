@@ -13,6 +13,8 @@
 | See: https://github.com/DefinitelyTyped/DefinitelyTyped
 |----------------------------------------------------------------------------*/
 
+import { normalizeDomain } from './utils';
+
 /**
  * A plural form function.
  */
@@ -30,6 +32,9 @@ interface IJsonDataHeader {
   /**
    * The domain of the translation, usually the normalized package name.
    * Example: "jupyterlab", "jupyterlab_git"
+   *
+   * #### Note
+   * Normalization replaces `-` by `_` in package name.
    */
   domain: string;
 
@@ -72,6 +77,9 @@ interface IOptions {
   /**
    * The domain of the translation, usually the normalized package name.
    * Example: "jupyterlab", "jupyterlab_git"
+   *
+   * #### Note
+   * Normalization replaces `-` by `_` in package name.
    */
   domain?: string;
 
@@ -130,7 +138,7 @@ class Gettext {
   constructor(options?: IOptions) {
     options = options || {};
 
-    // default values that could be overriden in Gettext() constructor
+    // default values that could be overridden in Gettext() constructor
     this._defaults = {
       domain: 'messages',
       locale: document.documentElement.getAttribute('lang') || 'en',
@@ -143,7 +151,7 @@ class Gettext {
 
     // Ensure the correct separator is used
     this._locale = (options.locale || this._defaults.locale).replace('_', '-');
-    this._domain = options.domain || this._defaults.domain;
+    this._domain = normalizeDomain(options.domain || this._defaults.domain);
     this._contextDelimiter =
       options.contextDelimiter || this._defaults.contextDelimiter;
     this._stringsPrefix = options.stringsPrefix || this._defaults.stringsPrefix;
@@ -173,7 +181,7 @@ class Gettext {
   /**
    * Get current context delimiter.
    *
-   * @return The current delimiter.
+   * @returns The current delimiter.
    */
   getContextDelimiter(): string {
     return this._contextDelimiter;
@@ -191,7 +199,7 @@ class Gettext {
   /**
    * Get current locale.
    *
-   * @return The current locale.
+   * @returns The current locale.
    */
   getLocale(): string {
     return this._locale;
@@ -203,13 +211,13 @@ class Gettext {
    * @param domain - The domain to set.
    */
   setDomain(domain: string): void {
-    this._domain = domain;
+    this._domain = normalizeDomain(domain);
   }
 
   /**
    * Get current domain.
    *
-   * @return The current domain string.
+   * @returns The current domain string.
    */
   getDomain(): string {
     return this._domain;
@@ -227,7 +235,7 @@ class Gettext {
   /**
    * Get current strings prefix.
    *
-   * @return The strings prefix.
+   * @returns The strings prefix.
    */
   getStringsPrefix(): string {
     return this._stringsPrefix;
@@ -275,6 +283,8 @@ class Gettext {
       );
     }
 
+    domain = normalizeDomain(domain);
+
     let headers = jsonData[''];
     let jsonDataCopy = JSON.parse(JSON.stringify(jsonData));
     delete jsonDataCopy[''];
@@ -293,7 +303,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -311,7 +321,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -328,7 +338,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -347,7 +357,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -369,7 +379,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    */
   gettext(msgid: string, ...args: any[]): string {
     return this.dcnpgettext('', '', msgid, '', 0, ...args);
@@ -381,7 +391,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    */
   ngettext(
     msgid: string,
@@ -399,7 +409,7 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param args - Any additional values to use with interpolation.
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    *
    * ### Notes
    * This is not a private method (starts with an underscore) it is just
@@ -418,7 +428,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    */
   npgettext(
     msgctxt: string,
@@ -440,7 +450,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation
    *
-   * @return A translated string if found, or the original string.
+   * @returns A translated string if found, or the original string.
    */
   dcnpgettext(
     domain: string,
@@ -450,7 +460,7 @@ class Gettext {
     n: number,
     ...args: any[]
   ): string {
-    domain = domain || this._domain;
+    domain = normalizeDomain(domain) || this._domain;
 
     let translation: Array<string>;
     let key: string = msgctxt
@@ -508,7 +518,7 @@ class Gettext {
    *
    * @param locale - The locale string.
    *
-   * @return An array of locales.
+   * @returns An array of locales.
    */
   private expandLocale(locale: string): Array<string> {
     let locales: Array<string> = [locale];
@@ -525,8 +535,9 @@ class Gettext {
    * Split a locale into parent locales. "es-CO" -> ["es-CO", "es"]
    *
    * @param pluralForm - Plural form string..
-   * @return An function to compute plural forms.
+   * @returns An function to compute plural forms.
    */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private getPluralFunc(pluralForm: string): Function {
     // Plural form string regexp
     // taken from https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js
@@ -556,7 +567,7 @@ class Gettext {
    * Remove the context delimiter from string.
    *
    * @param str - Translation string.
-   * @return A translation string without context.
+   * @returns A translation string without context.
    */
   private removeContext(str: string): string {
     // if there is context, remove it
@@ -575,7 +586,7 @@ class Gettext {
    * @param options - Translation options.
    * @param args - Any variables to interpolate.
    *
-   * @return A translation string without context.
+   * @returns A translation string without context.
    *
    * ### Notes
    * Contains juicy parts of https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js
@@ -645,6 +656,8 @@ class Gettext {
     messages: IJsonDataMessages,
     pluralForms: string
   ): void {
+    domain = normalizeDomain(domain);
+
     if (pluralForms) this._pluralForms[locale] = pluralForms;
 
     if (!this._dictionary[domain]) this._dictionary[domain] = {};

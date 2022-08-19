@@ -11,64 +11,48 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   Dialog,
+  ICommandPalette,
+  IKernelStatusModel,
   ISessionContext,
   ISessionContextDialogs,
-  ICommandPalette,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
-import { IEditorServices } from '@jupyterlab/codeeditor';
-
-import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
-import { ILauncher } from '@jupyterlab/launcher';
-
 import {
-  IEditMenu,
-  IFileMenu,
-  IHelpMenu,
-  IKernelMenu,
-  IMainMenu,
-  IRunMenu
-} from '@jupyterlab/mainmenu';
-
+  CodeEditor,
+  IEditorServices,
+  IPositionModel
+} from '@jupyterlab/codeeditor';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
+import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { ILauncher } from '@jupyterlab/launcher';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { ITranslator } from '@jupyterlab/translation';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { consoleIcon } from '@jupyterlab/ui-components';
-
 import { find } from '@lumino/algorithm';
-
 import {
   JSONExt,
   JSONObject,
+  ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
-  UUID,
-  ReadonlyJSONValue
+  UUID
 } from '@lumino/coreutils';
-
 import { DisposableSet } from '@lumino/disposable';
-
-import { DockLayout, Menu } from '@lumino/widgets';
-
+import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 
 /**
  * The command IDs used by the console plugin.
  */
 namespace CommandIDs {
+  export const autoClosingBrackets = 'console:toggle-autoclosing-brackets';
+
   export const create = 'console:create';
 
   export const clear = 'console:clear';
@@ -91,6 +75,8 @@ namespace CommandIDs {
 
   export const changeKernel = 'console:change-kernel';
 
+  export const getKernel = 'console:get-kernel';
+
   export const enterToExecute = 'console:enter-to-execute';
 
   export const shiftEnterToExecute = 'console:shift-enter-to-execute';
@@ -98,6 +84,12 @@ namespace CommandIDs {
   export const interactionMode = 'console:interaction-mode';
 
   export const replaceSelection = 'console:replace-selection';
+
+  export const shutdown = 'console:shutdown';
+
+  export const invokeCompleter = 'completer:invoke-console';
+
+  export const selectCompleter = 'completer:select-console';
 }
 
 /**
@@ -141,9 +133,89 @@ const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
 };
 
 /**
+ * Kernel status indicator.
+ */
+const kernelStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extension:kernel-status',
+  autoStart: true,
+  requires: [IConsoleTracker, IKernelStatusModel],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IConsoleTracker,
+    kernelStatus: IKernelStatusModel
+  ) => {
+    const provider = (widget: Widget | null) => {
+      let session: ISessionContext | null = null;
+
+      if (widget && tracker.has(widget)) {
+        return (widget as ConsolePanel).sessionContext;
+      }
+
+      return session;
+    };
+
+    kernelStatus.addSessionProvider(provider);
+  }
+};
+
+/**
+ * Cursor position.
+ */
+const lineColStatus: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extension:cursor-position',
+  autoStart: true,
+  requires: [IConsoleTracker, IPositionModel],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IConsoleTracker,
+    positionModel: IPositionModel
+  ) => {
+    let previousWidget: ConsolePanel | null = null;
+
+    const provider = (widget: Widget | null) => {
+      let editor: CodeEditor.IEditor | null = null;
+      if (widget !== previousWidget) {
+        previousWidget?.console.promptCellCreated.disconnect(
+          positionModel.update
+        );
+
+        previousWidget = null;
+        if (widget && tracker.has(widget)) {
+          (widget as ConsolePanel).console.promptCellCreated.connect(
+            positionModel.update
+          );
+          editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
+          previousWidget = widget as ConsolePanel;
+        }
+      } else if (widget) {
+        editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
+      }
+      return editor;
+    };
+
+    positionModel.addEditorProvider(provider);
+  }
+};
+
+const completerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/console-extension:completer',
+  autoStart: true,
+  requires: [IConsoleTracker],
+  optional: [ICompletionProviderManager],
+  activate: activateConsoleCompleterService
+};
+
+/**
  * Export the plugins as the default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [factory, tracker, foreign];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  factory,
+  tracker,
+  foreign,
+  kernelStatus,
+  lineColStatus,
+  completerPlugin
+];
 export default plugins;
 
 /**
@@ -206,15 +278,10 @@ async function activateConsole(
           return;
         }
         disposables = new DisposableSet();
-        const baseUrl = PageConfig.getBaseUrl();
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
           let kernelIconUrl = spec.resources['logo-64x64'];
-          if (kernelIconUrl) {
-            const index = kernelIconUrl.indexOf('kernelspecs');
-            kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
-          }
           disposables.add(
             launcher.add({
               command: CommandIDs.create,
@@ -259,6 +326,15 @@ async function activateConsole(
      * to the main area relative to a reference widget.
      */
     insertMode?: DockLayout.InsertMode;
+
+    /**
+     * Type of widget to open
+     *
+     * #### Notes
+     * This is the key used to load user layout customization.
+     * Its typical value is: a factory name or the widget id (if singleton)
+     */
+    type?: string;
   }
 
   /**
@@ -295,26 +371,149 @@ async function activateConsole(
     shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
-      activate: options.activate !== false
+      activate: options.activate !== false,
+      type: options.type ?? 'Console'
     });
     return panel;
   }
 
+  type lineWrap_type = 'off' | 'on' | 'wordWrapColumn' | 'bounded';
+
+  const mapOption = (
+    editor: CodeEditor.IEditor,
+    config: JSONObject,
+    option: string
+  ) => {
+    if (config[option] === undefined) {
+      return;
+    }
+    switch (option) {
+      case 'autoClosingBrackets':
+        editor.setOption(
+          'autoClosingBrackets',
+          config['autoClosingBrackets'] as boolean
+        );
+        break;
+      case 'cursorBlinkRate':
+        editor.setOption(
+          'cursorBlinkRate',
+          config['cursorBlinkRate'] as number
+        );
+        break;
+      case 'fontFamily':
+        editor.setOption('fontFamily', config['fontFamily'] as string | null);
+        break;
+      case 'fontSize':
+        editor.setOption('fontSize', config['fontSize'] as number | null);
+        break;
+      case 'lineHeight':
+        editor.setOption('lineHeight', config['lineHeight'] as number | null);
+        break;
+      case 'lineNumbers':
+        editor.setOption('lineNumbers', config['lineNumbers'] as boolean);
+        break;
+      case 'lineWrap':
+        editor.setOption('lineWrap', config['lineWrap'] as lineWrap_type);
+        break;
+      case 'matchBrackets':
+        editor.setOption('matchBrackets', config['matchBrackets'] as boolean);
+        break;
+      case 'readOnly':
+        editor.setOption('readOnly', config['readOnly'] as boolean);
+        break;
+      case 'insertSpaces':
+        editor.setOption('insertSpaces', config['insertSpaces'] as boolean);
+        break;
+      case 'tabSize':
+        editor.setOption('tabSize', config['tabSize'] as number);
+        break;
+      case 'wordWrapColumn':
+        editor.setOption('wordWrapColumn', config['wordWrapColumn'] as number);
+        break;
+      case 'rulers':
+        editor.setOption('rulers', config['rulers'] as number[]);
+        break;
+      case 'codeFolding':
+        editor.setOption('codeFolding', config['codeFolding'] as boolean);
+        break;
+    }
+  };
+
+  const setOption = (
+    editor: CodeEditor.IEditor | undefined,
+    config: JSONObject
+  ) => {
+    if (editor === undefined) {
+      return;
+    }
+    mapOption(editor, config, 'autoClosingBrackets');
+    mapOption(editor, config, 'cursorBlinkRate');
+    mapOption(editor, config, 'fontFamily');
+    mapOption(editor, config, 'fontSize');
+    mapOption(editor, config, 'lineHeight');
+    mapOption(editor, config, 'lineNumbers');
+    mapOption(editor, config, 'lineWrap');
+    mapOption(editor, config, 'matchBrackets');
+    mapOption(editor, config, 'readOnly');
+    mapOption(editor, config, 'insertSpaces');
+    mapOption(editor, config, 'tabSize');
+    mapOption(editor, config, 'wordWrapColumn');
+    mapOption(editor, config, 'rulers');
+    mapOption(editor, config, 'codeFolding');
+  };
+
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
-  async function updateSettings() {
+  let promptCellConfig: JSONObject;
+
+  /**
+   * Update settings for one console or all consoles.
+   *
+   * @param panel Optional - single console to update.
+   */
+  async function updateSettings(panel?: ConsolePanel) {
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
-    tracker.forEach(widget => {
+    promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
+      .composite as JSONObject;
+
+    const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
-    });
+      // Update future promptCells
+      widget.console.editorConfig = promptCellConfig;
+      // Update promptCell already on screen
+      setOption(widget.console.promptCell?.editor, promptCellConfig);
+    };
+
+    if (panel) {
+      setWidgetOptions(panel);
+    } else {
+      tracker.forEach(setWidgetOptions);
+    }
   }
+
   settingRegistry.pluginChanged.connect((sender, plugin) => {
     if (plugin === pluginId) {
       void updateSettings();
     }
   });
   await updateSettings();
+
+  // Apply settings when a console is created.
+  tracker.widgetAdded.connect((sender, panel) => {
+    void updateSettings(panel);
+  });
+
+  commands.addCommand(CommandIDs.autoClosingBrackets, {
+    execute: async args => {
+      promptCellConfig.autoClosingBrackets = !!(
+        args['force'] ?? !promptCellConfig.autoClosingBrackets
+      );
+      await settingRegistry.set(pluginId, 'promptCellConfig', promptCellConfig);
+    },
+    label: trans.__('Auto Close Brackets for Code Console Prompt'),
+    isToggled: () => promptCellConfig.autoClosingBrackets as boolean
+  });
 
   /**
    * Whether there is an active console.
@@ -338,6 +537,7 @@ async function activateConsole(
 
   let command = CommandIDs.open;
   commands.addCommand(command, {
+    label: trans.__('Open a console for the provided `path`.'),
     execute: (args: IOpenOptions) => {
       const path = args['path'];
       const widget = tracker.find(value => {
@@ -491,6 +691,18 @@ async function activateConsole(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.shutdown, {
+    label: trans.__('Shut Down'),
+    execute: args => {
+      const current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+
+      return current.console.sessionContext.shutdown();
+    }
+  });
+
   commands.addCommand(CommandIDs.closeAndShutdown, {
     label: trans.__('Close and Shut Down…'),
     execute: args => {
@@ -507,10 +719,12 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.console.sessionContext.shutdown().then(() => {
-            current.dispose();
-            return true;
-          });
+          return commands
+            .execute(CommandIDs.shutdown, { activate: false })
+            .then(() => {
+              current.dispose();
+              return true;
+            });
         } else {
           return false;
         }
@@ -520,6 +734,7 @@ async function activateConsole(
   });
 
   commands.addCommand(CommandIDs.inject, {
+    label: trans.__('Inject some code in a console.'),
     execute: args => {
       const path = args['path'];
       tracker.find(widget => {
@@ -554,6 +769,18 @@ async function activateConsole(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.getKernel, {
+    label: trans.__('Get Kernel'),
+    execute: args => {
+      const current = getCurrent({ activate: false, ...args });
+      if (!current) {
+        return;
+      }
+      return current.sessionContext.session?.kernel;
+    },
+    isEnabled
+  });
+
   if (palette) {
     // Add command palette items
     [
@@ -572,80 +799,51 @@ async function activateConsole(
   }
 
   if (mainMenu) {
-    // Add a console creator to the File menu
-    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
-
     // Add a close and shutdown command to the file menu.
     mainMenu.fileMenu.closeAndCleaners.add({
-      tracker,
-      closeAndCleanupLabel: (n: number) => trans.__('Shutdown Console'),
-      closeAndCleanup: (current: ConsolePanel) => {
-        return showDialog({
-          title: trans.__('Shut down the Console?'),
-          body: trans.__(
-            'Are you sure you want to close "%1"?',
-            current.title.label
-          ),
-          buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-        }).then(result => {
-          if (result.button.accept) {
-            return current.console.sessionContext.shutdown().then(() => {
-              current.dispose();
-            });
-          } else {
-            return void 0;
-          }
-        });
-      }
-    } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
+      id: CommandIDs.closeAndShutdown,
+      isEnabled
+    });
 
     // Add a kernel user to the Kernel menu
-    mainMenu.kernelMenu.kernelUsers.add({
-      tracker,
-      restartKernelAndClearLabel: n =>
-        trans.__('Restart Kernel and Clear Console'),
-      interruptKernel: current => {
-        const kernel = current.console.sessionContext.session?.kernel;
-        if (kernel) {
-          return kernel.interrupt();
-        }
-        return Promise.resolve(void 0);
-      },
-      restartKernel: current =>
-        sessionDialogs!.restart(current.console.sessionContext, translator),
-      restartKernelAndClear: current => {
-        return sessionDialogs!
-          .restart(current.console.sessionContext)
-          .then(restarted => {
-            if (restarted) {
-              current.console.clear();
-            }
-            return restarted;
-          });
-      },
-      changeKernel: current =>
-        sessionDialogs!.selectKernel(
-          current.console.sessionContext,
-          translator
-        ),
-      shutdownKernel: current => current.console.sessionContext.shutdown()
-    } as IKernelMenu.IKernelUser<ConsolePanel>);
+    mainMenu.kernelMenu.kernelUsers.changeKernel.add({
+      id: CommandIDs.changeKernel,
+      isEnabled
+    });
+    mainMenu.kernelMenu.kernelUsers.clearWidget.add({
+      id: CommandIDs.clear,
+      isEnabled
+    });
+    mainMenu.kernelMenu.kernelUsers.interruptKernel.add({
+      id: CommandIDs.interrupt,
+      isEnabled
+    });
+    mainMenu.kernelMenu.kernelUsers.restartKernel.add({
+      id: CommandIDs.restart,
+      isEnabled
+    });
+    mainMenu.kernelMenu.kernelUsers.shutdownKernel.add({
+      id: CommandIDs.shutdown,
+      isEnabled
+    });
 
     // Add a code runner to the Run menu.
-    mainMenu.runMenu.codeRunners.add({
-      tracker,
-      runLabel: (n: number) => trans.__('Run Cell'),
-      run: current => current.console.execute(true)
-    } as IRunMenu.ICodeRunner<ConsolePanel>);
+    mainMenu.runMenu.codeRunners.run.add({
+      id: CommandIDs.runForced,
+      isEnabled
+    });
 
     // Add a clearer to the edit menu
-    mainMenu.editMenu.clearers.add({
-      tracker,
-      clearCurrentLabel: (n: number) => trans.__('Clear Console Cell'),
-      clearCurrent: (current: ConsolePanel) => {
-        return current.console.clear();
-      }
-    } as IEditMenu.IClearer<ConsolePanel>);
+    mainMenu.editMenu.clearers.clearCurrent.add({
+      id: CommandIDs.clear,
+      isEnabled
+    });
+
+    // Add kernel information to the application help menu.
+    mainMenu.helpMenu.getKernel.add({
+      id: CommandIDs.getKernel,
+      isEnabled
+    });
   }
 
   // For backwards compatibility and clarity, we explicitly label the run
@@ -660,7 +858,9 @@ async function activateConsole(
 
   // Add the execute keystroke setting submenu.
   commands.addCommand(CommandIDs.interactionMode, {
-    label: args => runShortcutTitles[args['interactionMode'] as string] || '',
+    label: args =>
+      runShortcutTitles[args['interactionMode'] as string] ??
+      'Set the console interaction mode.',
     execute: async args => {
       const key = 'keyMap';
       try {
@@ -676,42 +876,79 @@ async function activateConsole(
     isToggled: args => args['interactionMode'] === interactionMode
   });
 
-  const executeMenu = new Menu({ commands });
-  executeMenu.title.label = trans.__('Console Run Keystroke');
+  return tracker;
+}
 
-  ['terminal', 'notebook'].forEach(name =>
-    executeMenu.addItem({
-      command: CommandIDs.interactionMode,
-      args: { interactionMode: name }
-    })
-  );
-
-  if (mainMenu) {
-    mainMenu.settingsMenu.addGroup(
-      [
-        {
-          type: 'submenu' as Menu.ItemType,
-          submenu: executeMenu
-        }
-      ],
-      10
-    );
-
-    // Add kernel information to the application help menu.
-    mainMenu.helpMenu.kernelUsers.add({
-      tracker,
-      getKernel: current => current.sessionContext.session?.kernel
-    } as IHelpMenu.IKernelUser<ConsolePanel>);
+/**
+ * Activate the completer service for console.
+ */
+function activateConsoleCompleterService(
+  app: JupyterFrontEnd,
+  consoles: IConsoleTracker,
+  manager: ICompletionProviderManager | null,
+  translator: ITranslator | null
+): void {
+  if (!manager) {
+    return;
   }
 
-  app.contextMenu.addItem({
-    command: CommandIDs.clear,
-    selector: '.jp-CodeConsole-content'
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.restart,
-    selector: '.jp-CodeConsole'
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+  app.commands.addCommand(CommandIDs.invokeCompleter, {
+    label: trans.__('Display the completion helper.'),
+    execute: () => {
+      const id = consoles.currentWidget && consoles.currentWidget.id;
+
+      if (id) {
+        return manager.invoke(id);
+      }
+    }
   });
 
-  return tracker;
+  app.commands.addCommand(CommandIDs.selectCompleter, {
+    label: trans.__('Select the completion suggestion.'),
+    execute: () => {
+      const id = consoles.currentWidget && consoles.currentWidget.id;
+
+      if (id) {
+        return manager.select(id);
+      }
+    }
+  });
+
+  app.commands.addKeyBinding({
+    command: CommandIDs.selectCompleter,
+    keys: ['Enter'],
+    selector: '.jp-ConsolePanel .jp-mod-completer-active'
+  });
+  const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
+    const completerContext = {
+      editor: consolePanel.console.promptCell?.editor ?? null,
+      session: consolePanel.console.sessionContext.session,
+      widget: consolePanel
+    };
+    await manager.updateCompleter(completerContext);
+    consolePanel.console.promptCellCreated.connect((codeConsole, cell) => {
+      const newContext = {
+        editor: cell.editor,
+        session: codeConsole.sessionContext.session,
+        widget: consolePanel
+      };
+      manager.updateCompleter(newContext).catch(console.error);
+    });
+    consolePanel.console.sessionContext.sessionChanged.connect(() => {
+      const newContext = {
+        editor: consolePanel.console.promptCell?.editor ?? null,
+        session: consolePanel.console.sessionContext.session,
+        widget: consolePanel
+      };
+      manager.updateCompleter(newContext).catch(console.error);
+    });
+  };
+  consoles.widgetAdded.connect(updateCompleter);
+  manager.activeProvidersChanged.connect(() => {
+    consoles.forEach(consoleWidget => {
+      updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
+    });
+  });
 }

@@ -10,17 +10,13 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
-
-import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
-
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
+  IImageTracker,
   ImageViewer,
-  ImageViewerFactory,
-  IImageTracker
+  ImageViewerFactory
 } from '@jupyterlab/imageviewer';
-
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -119,6 +115,7 @@ function activate(
 
   const factory = new ImageViewerFactory({
     name: FACTORY,
+    label: trans.__('Image'),
     modelName: 'base64',
     fileTypes: [...FILE_TYPES, ...TEXT_FILE_TYPES],
     defaultFor: FILE_TYPES,
@@ -127,6 +124,7 @@ function activate(
 
   const textFactory = new ImageViewerFactory({
     name: TEXT_FACTORY,
+    label: trans.__('Image (Text)'),
     modelName: 'text',
     fileTypes: TEXT_FILE_TYPES,
     defaultFor: TEXT_FILE_TYPES,
@@ -184,7 +182,7 @@ export function addCommands(
   app: JupyterFrontEnd,
   tracker: IImageTracker,
   translator: ITranslator
-) {
+): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
 

@@ -5,23 +5,23 @@ import { Message, MessageLoop } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 
-import { SessionContext, ISessionContext } from '@jupyterlab/apputils';
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
   Cell,
-  CellModel,
-  InputPrompt,
-  CodeCell,
-  CodeCellModel,
-  MarkdownCell,
-  RawCell,
-  RawCellModel,
-  MarkdownCellModel,
   CellFooter,
   CellHeader,
-  InputArea
+  CellModel,
+  CodeCell,
+  CodeCellModel,
+  InputArea,
+  InputPrompt,
+  MarkdownCell,
+  MarkdownCellModel,
+  RawCell,
+  RawCellModel
 } from '@jupyterlab/cells';
 
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
@@ -29,9 +29,10 @@ import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import {
   createSessionContext,
   framePromise,
-  NBTestUtils,
-  JupyterServer
+  JupyterServer,
+  NBTestUtils
 } from '@jupyterlab/testutils';
+import { IExecuteReplyMsg } from '../../services/lib/kernel/messages';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
 const rendermime = NBTestUtils.defaultRenderMime();
@@ -122,7 +123,7 @@ describe('cells/widget', () => {
         expect(widget).toBeInstanceOf(Cell);
       });
 
-      it('shoule accept a custom editorConfig', () => {
+      it('should accept a custom editorConfig', () => {
         const editorConfig: Partial<CodeEditor.IConfig> = {
           insertSpaces: false,
           matchBrackets: false
@@ -743,7 +744,9 @@ describe('cells/widget', () => {
       it('should fulfill a promise if there is no code to execute', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.initializeState();
-        await CodeCell.execute(widget, sessionContext);
+        await expect(
+          CodeCell.execute(widget, sessionContext)
+        ).resolves.not.toThrow();
       });
 
       it('should fulfill a promise if there is code to execute', async () => {
@@ -793,12 +796,9 @@ describe('cells/widget', () => {
         const msg = await future2;
         expect(msg).not.toBeUndefined();
 
-        // The `if` is a Typescript type guard so that msg.content works below.
-        if (msg) {
-          expect(widget.promptNode.textContent).toEqual(
-            `[${msg.content.execution_count}]:`
-          );
-        }
+        expect(widget.promptNode.textContent).toEqual(
+          `[${(msg as IExecuteReplyMsg).content.execution_count}]:`
+        );
       });
     });
   });

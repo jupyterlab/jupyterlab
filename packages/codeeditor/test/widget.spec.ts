@@ -1,17 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message, MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
-import { simulate } from 'simulate-event';
-
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-
-import { framePromise } from '@jupyterlab/testutils';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 
 class LogEditor extends CodeMirrorEditor {
   methods: string[] = [];
@@ -20,16 +14,6 @@ class LogEditor extends CodeMirrorEditor {
   handleEvent(event: Event): void {
     super.handleEvent(event);
     this.events.push(event.type);
-  }
-
-  refresh(): void {
-    super.refresh();
-    this.methods.push('refresh');
-  }
-
-  setSize(dims: CodeEditor.IDimension | null): void {
-    super.setSize(dims);
-    this.methods.push('setSize');
   }
 }
 
@@ -124,17 +108,8 @@ describe('CodeEditorWrapper', () => {
         Widget.attach(widget, document.body);
         const editor = widget.editor as LogEditor;
         editor.methods = [];
-        simulate(editor.editor.getInputField(), 'focus');
+        simulate(editor.editor.contentDOM, 'focus');
         expect(editor.methods).toEqual([]);
-      });
-
-      it('should refresh if editor was resized', () => {
-        Widget.attach(widget, document.body);
-        const editor = widget.editor as LogEditor;
-        MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-        editor.methods = [];
-        simulate(editor.editor.getInputField(), 'focus');
-        expect(editor.methods).toEqual(['refresh']);
       });
     });
   });
@@ -147,56 +122,6 @@ describe('CodeEditorWrapper', () => {
         expect.arrayContaining(['onActivateRequest'])
       );
       expect(widget.editor.hasFocus()).toBe(true);
-    });
-  });
-
-  describe('#onAfterAttach()', () => {
-    it('should refresh the editor', async () => {
-      Widget.attach(widget, document.body);
-      const editor = widget.editor as LogEditor;
-      await framePromise();
-      expect(editor.methods).toEqual(expect.arrayContaining(['refresh']));
-    });
-  });
-
-  describe('#onAfterShow()', () => {
-    it('should refresh the editor', async () => {
-      widget.hide();
-      Widget.attach(widget, document.body);
-      const editor = widget.editor as LogEditor;
-      expect(editor.methods).toEqual(expect.not.arrayContaining(['refresh']));
-      widget.show();
-      expect(widget.methods).toEqual(expect.arrayContaining(['onAfterShow']));
-      await framePromise();
-      expect(editor.methods).toEqual(expect.arrayContaining(['refresh']));
-    });
-  });
-
-  describe('#onResize()', () => {
-    it('should set the size of the editor', () => {
-      const msg = new Widget.ResizeMessage(10, 10);
-      const editor = widget.editor as LogEditor;
-      MessageLoop.sendMessage(widget, msg);
-      expect(editor.methods).toEqual(expect.arrayContaining(['setSize']));
-    });
-
-    it('should refresh the editor', () => {
-      const editor = widget.editor as LogEditor;
-      Widget.attach(widget, document.body);
-      editor.focus();
-      editor.methods = [];
-      MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-      expect(editor.methods).toEqual(expect.arrayContaining(['refresh']));
-    });
-
-    it('should defer the refresh until focused', () => {
-      const editor = widget.editor as LogEditor;
-      Widget.attach(widget, document.body);
-      editor.methods = [];
-      MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-      expect(editor.methods).toEqual([]);
-      simulate(editor.editor.getInputField(), 'focus');
-      expect(editor.methods).toEqual(['refresh']);
     });
   });
 });

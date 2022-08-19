@@ -1,25 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
+import { flakyIt as it, JupyterServer } from '@jupyterlab/testutils';
 import { toArray } from '@lumino/algorithm';
-
-import { SessionAPI } from '../../src';
-
-import { Session } from '../../src';
-
+import { UUID } from '@lumino/coreutils';
+import { Session, SessionAPI } from '../../src';
 import {
-  expectFailure,
-  JupyterServer,
-  flakyIt as it
-} from '@jupyterlab/testutils';
-
-import {
-  makeSettings,
   createSessionModel,
   getRequestHandler,
-  init
+  init,
+  makeSettings
 } from '../utils';
 
 init();
@@ -61,27 +51,23 @@ describe('session', () => {
     it('should throw an error for an invalid model', async () => {
       const data = { id: '1234', path: 'test' };
       const serverSettings = getRequestHandler(200, data);
-      const list = SessionAPI.listRunning(serverSettings);
-      await expectFailure(list);
+      await expect(SessionAPI.listRunning(serverSettings)).rejects.toThrow();
     });
 
     it('should throw an error for another invalid model', async () => {
       const data = [{ id: '1234', kernel: { id: '', name: '' }, path: '' }];
       const serverSettings = getRequestHandler(200, data);
-      const list = SessionAPI.listRunning(serverSettings);
-      await expectFailure(list);
+      await expect(SessionAPI.listRunning(serverSettings)).rejects.toThrow();
     });
 
     it('should fail for wrong response status', async () => {
       const serverSettings = getRequestHandler(201, [createSessionModel()]);
-      const list = SessionAPI.listRunning(serverSettings);
-      await expectFailure(list);
+      await expect(SessionAPI.listRunning(serverSettings)).rejects.toThrow();
     });
 
     it('should fail for error response status', async () => {
       const serverSettings = getRequestHandler(500, {});
-      const list = SessionAPI.listRunning(serverSettings);
-      await expectFailure(list, '');
+      await expect(SessionAPI.listRunning(serverSettings)).rejects.toThrow();
     });
   });
 
@@ -111,33 +97,26 @@ describe('session', () => {
     it('should fail for wrong response status', async () => {
       const sessionModel = createSessionModel();
       const serverSettings = getRequestHandler(200, sessionModel);
-      const sessionPromise = SessionAPI.startSession(
-        sessionModel as any,
-        serverSettings
-      );
-      await expectFailure(sessionPromise);
+      await expect(
+        SessionAPI.startSession(sessionModel as any, serverSettings)
+      ).rejects.toThrow();
     });
 
     it('should fail for error response status', async () => {
       const serverSettings = getRequestHandler(500, {});
       const sessionModel = createSessionModel();
-      const sessionPromise = SessionAPI.startSession(
-        sessionModel as any,
-        serverSettings
-      );
-      await expectFailure(sessionPromise, '');
+      await expect(
+        SessionAPI.startSession(sessionModel as any, serverSettings)
+      ).rejects.toThrow();
     });
 
     it('should fail for wrong response model', async () => {
       const sessionModel = createSessionModel();
       (sessionModel as any).path = 1;
       const serverSettings = getRequestHandler(201, sessionModel);
-      const sessionPromise = SessionAPI.startSession(
-        sessionModel as any,
-        serverSettings
-      );
-      const msg = `Property 'path' is not of type 'string'`;
-      await expectFailure(sessionPromise, msg);
+      await expect(
+        SessionAPI.startSession(sessionModel as any, serverSettings)
+      ).rejects.toThrow(/Property 'path' is not of type 'string'/);
     });
 
     it('should handle a deprecated response model', async () => {
@@ -164,11 +143,15 @@ describe('session', () => {
         name: UUID.uuid4(),
         type: 'test'
       });
-      await SessionAPI.shutdownSession(session.id);
+      await expect(
+        SessionAPI.shutdownSession(session.id)
+      ).resolves.not.toThrow();
     });
 
-    it('should handle a 404 status', () => {
-      return SessionAPI.shutdownSession(UUID.uuid4());
+    it('should handle a 404 status', async () => {
+      await expect(
+        SessionAPI.shutdownSession(UUID.uuid4())
+      ).resolves.not.toThrow();
     });
   });
 });

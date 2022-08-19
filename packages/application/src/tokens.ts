@@ -1,17 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
-
 import { ITranslator } from '@jupyterlab/translation';
-
-import { Token, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-
+import { CommandRegistry } from '@lumino/commands';
+import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-
 import { ISignal } from '@lumino/signaling';
+import { JupyterFrontEnd } from '.';
 
 /**
  * A token for which a plugin can provide to respond to connection failures
@@ -34,6 +30,52 @@ export type IConnectionLost = (
   err: ServerConnection.NetworkError,
   translator?: ITranslator
 ) => Promise<void>;
+
+/**
+ * The application status token.
+ */
+export const ILabStatus = new Token<ILabStatus>(
+  '@jupyterlab/application:ILabStatus'
+);
+
+/**
+ * An interface for JupyterLab-like application status functionality.
+ */
+export interface ILabStatus {
+  /**
+   * A signal for when application changes its busy status.
+   */
+  readonly busySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+
+  /**
+   * A signal for when application changes its dirty status.
+   */
+  readonly dirtySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+
+  /**
+   * Whether the application is busy.
+   */
+  readonly isBusy: boolean;
+
+  /**
+   * Whether the application is dirty.
+   */
+  readonly isDirty: boolean;
+
+  /**
+   * Set the application state to busy.
+   *
+   * @returns A disposable used to clear the busy state for the caller.
+   */
+  setBusy(): IDisposable;
+
+  /**
+   * Set the application state to dirty.
+   *
+   * @returns A disposable used to clear the dirty state for the caller.
+   */
+  setDirty(): IDisposable;
+}
 
 /**
  * The URL Router token.

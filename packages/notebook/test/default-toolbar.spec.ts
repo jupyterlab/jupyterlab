@@ -1,31 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { simulate } from 'simulate-event';
-
-import { Widget } from '@lumino/widgets';
-
-import { Context } from '@jupyterlab/docregistry';
-
 import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
-
+import { Context } from '@jupyterlab/docregistry';
+import { KernelMessage } from '@jupyterlab/services';
+import {
+  acceptDialog,
+  framePromise,
+  signalToPromise,
+  sleep
+} from '@jupyterlab/testutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 import {
   INotebookModel,
   NotebookActions,
   NotebookPanel,
   ToolbarItems
-} from '../src';
-
-import {
-  signalToPromise,
-  sleep,
-  framePromise,
-  acceptDialog
-} from '@jupyterlab/testutils';
-
+} from '..';
 import * as utils from './utils';
-import { PromiseDelegate } from '@lumino/coreutils';
-import { KernelMessage } from '@jupyterlab/services';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
@@ -53,7 +47,7 @@ describe('@jupyterlab/notebook', () => {
           const promise = signalToPromise(context.fileChanged);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          await promise;
+          await expect(promise).resolves.not.toThrow();
           button.dispose();
         });
 
@@ -220,8 +214,7 @@ describe('@jupyterlab/notebook', () => {
             'restart-and-run',
             'cellType',
             'spacer',
-            'kernelName',
-            'kernelStatus'
+            'kernelName'
           ]);
         });
       });
@@ -266,7 +259,7 @@ describe('@jupyterlab/notebook', () => {
             }
           });
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          await delegate.promise;
+          await expect(delegate.promise).resolves.not.toThrow();
           button.dispose();
         });
 
@@ -299,7 +292,7 @@ describe('@jupyterlab/notebook', () => {
           });
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
-          await delegate.promise;
+          await expect(delegate.promise).resolves.not.toThrow();
           button.dispose();
         });
 

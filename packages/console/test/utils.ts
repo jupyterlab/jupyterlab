@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { editorServices } from '@jupyterlab/codemirror';
-
 import { defaultRenderMime } from '@jupyterlab/testutils';
-
 import { CodeConsole, ConsolePanel } from '../src';
 
 export const editorFactory = editorServices.factoryService.newInlineEditor.bind(

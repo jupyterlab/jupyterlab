@@ -2,36 +2,26 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { OutputArea, IOutputPrompt } from '@jupyterlab/outputarea';
-
+import { IOutputPrompt, OutputArea } from '@jupyterlab/outputarea';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { Kernel, KernelMessage } from '@jupyterlab/services';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget, Panel, PanelLayout, StackedPanel } from '@lumino/widgets';
-
-import { LogOutputModel, LoggerOutputAreaModel } from './logger';
-
+import { Panel, PanelLayout, StackedPanel, Widget } from '@lumino/widgets';
+import { LoggerOutputAreaModel, LogOutputModel } from './logger';
 import {
-  ILogger,
   IContentChange,
+  ILogger,
   ILoggerRegistry,
   ILoggerRegistryChange,
-  LogLevel,
-  IStateChange
+  IStateChange,
+  LogLevel
 } from './tokens';
 
 function toTitleCase(value: string) {
@@ -169,7 +159,7 @@ export class ScrollingWidget<T extends Widget> extends Widget {
     return this._content;
   }
 
-  protected onAfterAttach(msg: Message) {
+  protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     // defer so content gets a chance to attach first
     requestAnimationFrame(() => {
@@ -189,13 +179,13 @@ export class ScrollingWidget<T extends Widget> extends Widget {
     }
   }
 
-  protected onBeforeDetach(msg: Message) {
+  protected onBeforeDetach(msg: Message): void {
     if (this._observer) {
       this._observer.disconnect();
     }
   }
 
-  protected onAfterShow(msg: Message) {
+  protected onAfterShow(msg: Message): void {
     if (this._tracking) {
       this._sentinel.scrollIntoView();
     }
@@ -331,7 +321,7 @@ export class LogConsolePanel extends StackedPanel {
     this._handlePlaceholder();
   }
 
-  protected onAfterShow(msg: Message) {
+  protected onAfterShow(msg: Message): void {
     super.onAfterShow(msg);
     if (this.source !== null) {
       this._sourceDisplayed.emit({

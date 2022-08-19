@@ -38,3 +38,7 @@ body {
 .jp-OutputArea {
   overflow: visible;
 }
+
+.jp-Completer-Cell {
+  position: fixed;
+}

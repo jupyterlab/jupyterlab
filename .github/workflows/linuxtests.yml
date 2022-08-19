@@ -1,89 +1,61 @@
 name: Linux Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
 
 jobs:
   linuxtests:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_check, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
-        python: [3.6, 3.8]
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
+        # This will be used by the base setup action
+        python-version: ["3.7", "3.10"]
         include:
-          - group: release_check
+          - group: release_test
             upload-output: true
         exclude:
           - group: integrity
-            python: 3.6
+            python-version: "3.7"
           - group: integrity2
-            python: 3.6
+            python-version: "3.7"
           - group: integrity3
-            python: 3.6
-          - group: release_check
-            python: 3.6
+            python-version: "3.7"
+          - group: release_test
+            python-version: "3.7"
           - group: docs
-            python: 3.6
+            python-version: "3.7"
           - group: usage
-            python: 3.6
+            python-version: "3.7"
           - group: usage2
-            python: 3.6
+            python-version: "3.7"
           - group: linkcheck
-            python: 3.6
+            python-version: "3.7"
           - group: nonode
-            python: 3.6
+            python-version: "3.7"
           - group: lint
-            python: 3.6
+            python-version: "3.7"
           - group: examples
-            python: 3.6
+            python-version: "3.7"
           - group: splice_source
-            python: 3.6
+            python-version: "3.7"
       fail-fast: false
-    timeout-minutes: 30
+    timeout-minutes: 45
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python }}
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Set up Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Setup firefox
         uses: browser-actions/setup-firefox@latest
-
-      - name: Cache pip on Linux
-        uses: actions/cache@v2
-        if: startsWith(runner.os, 'Linux')
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python }}-${{ hashFiles('**/requirements.txt', 'setup.py') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python }}
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Cache yarn
-        uses: actions/cache@v2
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Cache checked links build
-        uses: actions/cache@v2
-        if: ${{ matrix.group == 'linkcheck' }}
-        with:
-          path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-linkcheck-${{ hashFiles('**/*.rst') }}-changelog
-          restore-keys: |
-            ${{ runner.os }}-linkcheck-
 
       - name: Install dependencies
         env:
@@ -100,7 +72,80 @@ jobs:
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: ./build/${{ matrix.group }}_output
+
+  test_minimum_versions:
+    name: Test Minimum Versions
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_version: "3.7"
+      - name: Install miniumum versions
+        uses: jupyterlab/maintainer-tools/.github/actions/install-minimums@v1
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+      - name: Run the unit tests
+        run: pytest -vv || pytest -vv --lf
+
+  make_sdist:
+    name: Make SDist
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+      - name: Build SDist
+        run: |
+          pip install build
+          python -m build --sdist
+      - uses: actions/upload-artifact@v3
+        with:
+          name: "sdist"
+          path: dist/*.tar.gz
+
+  test_sdist:
+    runs-on: ubuntu-latest
+    needs: [make_sdist]
+    name: Install from SDist and Test
+    timeout-minutes: 20
+    steps:
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Download sdist
+        uses: actions/download-artifact@v3
+      - name: Install From SDist
+        run: |
+          set -ex
+          cd sdist
+          mkdir test
+          tar --strip-components=1 -zxvf *.tar.gz -C ./test
+          cd test
+          pip install -e .[dev,test]
+          pip install pytest-github-actions-annotate-failures
+      - name: Run Test
+        run: |
+          cd sdist/test
+          pytest -vv || pytest -vv --lf
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Install Jupyterlab
+        run: pip install -e .
+      - uses: pre-commit/action@v3.0.0

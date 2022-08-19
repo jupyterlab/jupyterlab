@@ -2,12 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Router } from '@jupyterlab/application';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { Token } from '@lumino/coreutils';
-
 import { signalToPromise } from '@jupyterlab/testutils';
+import { CommandRegistry } from '@lumino/commands';
+import { Token } from '@lumino/coreutils';
 
 const base = '/';
 
@@ -110,7 +107,7 @@ describe('apputils', () => {
     });
 
     describe('#navigate()', () => {
-      it('cannot be tested since changing location is a security risk', () => {
+      it.skip('cannot be tested since changing location is a security risk', () => {
         // Router#navigate() changes window.location.href but karma tests
         // disallow changing the window location.
       });

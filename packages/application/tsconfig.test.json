@@ -9,9 +9,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../docmanager"
-    },
-    {
       "path": "../docregistry"
     },
     {
@@ -37,36 +34,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docmanager"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../rendermime"
-    },
-    {
-      "path": "../rendermime-interfaces"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statedb"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }

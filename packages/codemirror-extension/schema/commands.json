@@ -1,6 +1,96 @@
 {
   "jupyter.lab.setting-icon": "ui-components:text-editor",
   "jupyter.lab.setting-icon-label": "CodeMirror",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 40
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-view-codemirror-theme",
+              "label": "Text Editor Syntax Highlighting"
+            },
+            "rank": 40
+          },
+          {
+            "type": "separator",
+            "rank": 40
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-view-codemirror-keymap",
+              "label": "Text Editor Key Map",
+              "items": [
+                {
+                  "command": "codemirror:change-keymap",
+                  "args": {
+                    "keyMap": "default"
+                  }
+                },
+                {
+                  "command": "codemirror:change-keymap",
+                  "args": {
+                    "keyMap": "sublime"
+                  }
+                },
+                {
+                  "command": "codemirror:change-keymap",
+                  "args": {
+                    "keyMap": "vim"
+                  }
+                },
+                {
+                  "command": "codemirror:change-keymap",
+                  "args": {
+                    "keyMap": "emacs"
+                  }
+                }
+              ]
+            },
+            "rank": 31
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-view-codemirror-theme",
+              "label": "Text Editor Theme",
+              "items": [
+                {
+                  "command": "codemirror:change-theme",
+                  "args": {
+                    "theme": "codemirror"
+                  }
+                },
+                {
+                  "command": "codemirror:change-theme",
+                  "args": {
+                    "theme": "jupyter"
+                  }
+                }
+              ]
+            },
+            "rank": 31
+          },
+          {
+            "type": "separator",
+            "rank": 39
+          }
+        ]
+      }
+    ]
+  },
   "title": "CodeMirror",
   "description": "Text editor settings for all CodeMirror editors.",
   "properties": {
@@ -13,7 +103,7 @@
     "theme": {
       "type": "string",
       "title": "Theme",
-      "description": "CSS file defining the corresponding\n.cm-s-[name] styles is loaded",
+      "description": "CodeMirror theme",
       "default": "jupyter"
     },
     "scrollPastEnd": {
@@ -23,26 +113,48 @@
       "default": true
     },
     "styleActiveLine": {
-      "type": ["boolean", "object"],
+      "oneOf": [
+        {
+          "type": "boolean",
+          "title": "Boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "nonEmpty": {
+              "type": "boolean"
+            }
+          },
+          "title": "Object"
+        }
+      ],
       "title": "Style Active Line",
-      "description": "Value is boolean, or { nonEmpty: boolean }",
+      "description": "Highlight active line. Value is boolean, or { nonEmpty: boolean }.",
       "default": false
     },
     "styleSelectedText": {
       "type": "boolean",
       "title": "Style Selected Text",
-      "description": "Value is boolean",
       "default": true
     },
     "selectionPointer": {
-      "type": ["boolean", "string"],
+      "oneOf": [
+        {
+          "type": "boolean",
+          "title": "Use default"
+        },
+        {
+          "type": "string",
+          "title": "Cursor pointer name"
+        }
+      ],
       "title": "Selection Pointer",
-      "description": "Value is boolean or string, e.g. 'pointer'",
+      "description": "Control the mouse cursor appearance when hovering over the selection. Value is boolean or string, e.g. 'pointer'.",
       "default": false
     },
     "lineWiseCopyCut": {
       "type": ["boolean"],
-      "title": "Ctrl-C",
+      "title": "Line-wise Ctrl-C",
       "description": "When enabled, which is the default, doing copy or cut when there is no selection will copy or cut the whole lines that have cursors on them.",
       "default": true
     }

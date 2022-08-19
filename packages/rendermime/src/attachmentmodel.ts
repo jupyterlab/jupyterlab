@@ -4,11 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 import * as nbformat from '@jupyterlab/nbformat';
-
 import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import {
   JSONExt,
   JSONObject,
@@ -16,9 +13,7 @@ import {
   PartialJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { MimeModel } from './mimemodel';
 
 /**
@@ -178,7 +173,7 @@ export namespace AttachmentModel {
   /**
    * Get the data for an attachment.
    *
-   * @params bundle - A kernel attachment MIME bundle.
+   * @param bundle - A kernel attachment MIME bundle.
    *
    * @returns - The data for the payload.
    */

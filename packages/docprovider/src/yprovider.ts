@@ -3,30 +3,47 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as sharedModels from '@jupyterlab/shared-models';
-
-import * as Y from 'yjs';
-
-import { WebsocketProvider } from 'y-websocket';
-
+import { ICurrentUser } from '@jupyterlab/collaboration';
+import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
-
 import * as encoding from 'lib0/encoding';
+import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
+import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 
 /**
- * A class to provide Yjs synchronization over Websocket.
+ * A class to provide Yjs synchronization over WebSocket.
+ *
+ * The user can specify their own user-name and user-color by adding url parameters:
+ *   ?username=Alice&usercolor=007007
+ * where usercolor must be a six-digit hexadecimal encoded RGB value without the hash token.
+ *
+ * We specify custom messages that the server can interpret. For reference please look in yjs_ws_server.
+ *
  */
-export class WebsocketProviderWithLocks extends WebsocketProvider {
+export class WebSocketProvider
+  extends YWebsocketProvider
+  implements IDocumentProvider
+{
   /**
-   * Construct a new WebsocketProviderWithLocks
+   * Construct a new WebSocketProvider
    *
-   * @param options The instantiation options for a WebsocketProviderWithLocks
+   * @param options The instantiation options for a WebSocketProvider
    */
-  constructor(options: WebsocketProviderWithLocks.IOptions) {
-    super(options.url, options.guid, options.ymodel.ydoc, {
-      awareness: options.ymodel.awareness
-    });
-    // Message handler that confirms when a lock has been acquired
+  constructor(options: WebSocketProvider.IOptions) {
+    super(
+      options.url,
+      options.format + ':' + options.contentType + ':' + options.path,
+      options.ymodel.ydoc,
+      {
+        awareness: options.ymodel.awareness
+      }
+    );
+    this._path = options.path;
+    this._contentType = options.contentType;
+    this._format = options.format;
+    this._serverUrl = options.url;
+
+    // Message handler that receives the rename acknowledge
     this.messageHandlers[127] = (
       encoder,
       decoder,
@@ -34,120 +51,68 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
       emitSynced,
       messageType
     ) => {
-      // acquired lock
-      const timestamp = decoding.readUint32(decoder);
-      const lockRequest = this._currentLockRequest;
-      this._currentLockRequest = null;
-      if (lockRequest) {
-        lockRequest.resolve(timestamp);
-      }
+      this._renameAck.resolve(
+        decoding.readTailAsUint8Array(decoder)[0] ? true : false
+      );
     };
-    // Message handler that receives the initial content
-    this.messageHandlers[125] = (
-      encoder,
-      decoder,
-      provider,
-      emitSynced,
-      messageType
-    ) => {
-      // received initial content
-      const initialContent = decoding.readTailAsUint8Array(decoder);
-      // Apply data from server
-      if (initialContent.byteLength > 0) {
-        setTimeout(() => {
-          Y.applyUpdate(this.doc, initialContent);
-        }, 0);
-      }
-      const initialContentRequest = this._initialContentRequest;
-      this._initialContentRequest = null;
-      if (initialContentRequest) {
-        initialContentRequest.resolve(initialContent.byteLength > 0);
-      }
+
+    const awareness = options.ymodel.awareness;
+    const user = options.user;
+    const userChanged = () => {
+      const name = user.displayName !== '' ? user.displayName : user.name;
+      awareness.setLocalStateField('user', { ...user.toJSON(), name });
     };
-    this.isInitialized = false;
-    this.onConnectionStatus = this.onConnectionStatus.bind(this);
-    this.on('status', this.onConnectionStatus);
+    if (user.isReady) {
+      userChanged();
+    }
+    user.ready.connect(userChanged);
+    user.changed.connect(userChanged);
+  }
+
+  get renameAck(): Promise<boolean> {
+    return this._renameAck.promise;
+  }
+
+  setPath(newPath: string): void {
+    if (newPath !== this._path) {
+      this._path = newPath;
+      const encoder = encoding.createEncoder();
+      this._renameAck = new PromiseDelegate<boolean>();
+      encoding.write(encoder, 127);
+      // writing a utf8 string to the encoder
+      const escapedPath = unescape(
+        encodeURIComponent(
+          this._format + ':' + this._contentType + ':' + newPath
+        )
+      );
+      for (let i = 0; i < escapedPath.length; i++) {
+        encoding.write(
+          encoder,
+          /** @type {number} */ escapedPath.codePointAt(i)!
+        );
+      }
+      this._sendMessage(encoding.toUint8Array(encoder));
+      // prevent publishing messages to the old channel id.
+      this.disconnectBc();
+      // The next time the provider connects, we should connect through a different server url
+      this.bcChannel =
+        this._serverUrl +
+        '/' +
+        this._format +
+        ':' +
+        this._contentType +
+        ':' +
+        this._path;
+      this.url = this.bcChannel;
+      this.connectBc();
+    }
   }
 
   /**
-   * Resolves to true if the initial content has been initialized on the server. false otherwise.
+   * Send a new message to WebSocket server.
+   *
+   * @param message The message to send
    */
-  requestInitialContent(): Promise<boolean> {
-    if (this._initialContentRequest) {
-      return this._initialContentRequest.promise;
-    }
-
-    let resolve: any, reject: any;
-    const promise: Promise<boolean> = new Promise((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-    this._initialContentRequest = { promise, resolve, reject };
-    this._sendMessage(new Uint8Array([125]));
-
-    // Resolve with true if the server doesn't respond for some reason.
-    // In case of a connection problem, we don't want the user to re-initialize the window.
-    // Instead wait for y-websocket to connect to the server.
-    // @todo maybe we should reload instead..
-    setTimeout(() => resolve(false), 1000);
-    return promise;
-  }
-
-  async onConnectionStatus(status: {
-    status: 'connected' | 'disconnected';
-  }): Promise<void> {
-    if (this.isInitialized && status.status === 'connected') {
-      const lock = await this.acquireLock();
-      const contentIsInitialized = await this.requestInitialContent();
-      if (!contentIsInitialized) {
-        this.putInitializedState();
-      }
-      this.releaseLock(lock);
-    }
-  }
-
-  putInitializedState(): void {
-    const encoder = encoding.createEncoder();
-    encoding.writeVarUint(encoder, 124);
-    encoding.writeUint8Array(encoder, Y.encodeStateAsUpdate(this.doc));
-    this._sendMessage(encoding.toUint8Array(encoder));
-    this.isInitialized = true;
-  }
-
-  acquireLock(): Promise<number> {
-    if (this._currentLockRequest) {
-      return this._currentLockRequest.promise;
-    }
-    this._sendMessage(new Uint8Array([127]));
-    // try to acquire lock in regular interval
-    const intervalID = setInterval(() => {
-      if (this.wsconnected) {
-        // try to acquire lock
-        this._sendMessage(new Uint8Array([127]));
-      }
-    }, 500);
-    let resolve: any, reject: any;
-    const promise: Promise<number> = new Promise((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-    this._currentLockRequest = { promise, resolve, reject };
-    const _finally = () => {
-      clearInterval(intervalID);
-    };
-    promise.then(_finally, _finally);
-    return promise;
-  }
-
-  releaseLock(lock: number): void {
-    const encoder = encoding.createEncoder();
-    // reply with release lock
-    encoding.writeVarUint(encoder, 126);
-    encoding.writeUint32(encoder, lock);
-    // releasing lock
-    this._sendMessage(encoding.toUint8Array(encoder));
-  }
-
   private _sendMessage(message: Uint8Array): void {
     // send once connected
     const send = () => {
@@ -162,40 +127,29 @@ export class WebsocketProviderWithLocks extends WebsocketProvider {
     send();
   }
 
-  isInitialized: boolean;
-  private _currentLockRequest: {
-    promise: Promise<number>;
-    resolve: (lock: number) => void;
-    reject: () => void;
-  } | null = null;
-  private _initialContentRequest: {
-    promise: Promise<boolean>;
-    resolve: (initialized: boolean) => void;
-    reject: () => void;
-  } | null = null;
+  private _path: string;
+  private _contentType: string;
+  private _format: string;
+  private _serverUrl: string;
+  private _renameAck: PromiseDelegate<boolean>;
 }
 
 /**
- * A namespace for WebsocketProviderWithLocks statics.
+ * A namespace for WebSocketProvider statics.
  */
-export namespace WebsocketProviderWithLocks {
+export namespace WebSocketProvider {
   /**
-   * The instantiation options for a WebsocketProviderWithLocks.
+   * The instantiation options for a WebSocketProvider.
    */
-  export interface IOptions {
+  export interface IOptions extends IDocumentProviderFactory.IOptions {
     /**
-     * The server URL.
+     * The server URL
      */
     url: string;
 
     /**
-     * The name of the room
+     * The user data
      */
-    guid: string;
-
-    /**
-     * The YNotebook.
-     */
-    ymodel: sharedModels.YDocument<sharedModels.DocumentChange>;
+    user: ICurrentUser;
   }
 }

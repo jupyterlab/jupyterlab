@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import miniSVGDataURI from 'mini-svg-data-uri';
 
 import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
@@ -143,16 +144,12 @@ export namespace Build {
 
       const { schemaDir, themePath } = extension;
 
-      // Handle styles.
-      // We explicitly ignore themes so they can be loaded dynamically.
-      if (!data.jupyterlab.themePath) {
-        // We prefer the styleModule key if it exists, falling back to
-        // the normal style key.
-        if (typeof data.styleModule === 'string') {
-          cssImports.push(`${name}/${data.styleModule}`);
-        } else if (typeof data.style === 'string') {
-          cssImports.push(`${name}/${data.style}`);
-        }
+      // We prefer the styleModule key if it exists, falling back to
+      // the normal style key.
+      if (typeof data.styleModule === 'string') {
+        cssImports.push(`${name}/${data.styleModule}`);
+      } else if (typeof data.style === 'string') {
+        cssImports.push(`${name}/${data.style}`);
       }
 
       // Handle schemas.
@@ -202,7 +199,8 @@ export namespace Build {
         output: {
           path: path.resolve(path.join(themeOutput, 'themes', name)),
           // we won't use these JS files, only the extracted CSS
-          filename: '[name].js'
+          filename: '[name].js',
+          hashFunction: 'sha256'
         },
         module: {
           rules: [
@@ -212,11 +210,14 @@ export namespace Build {
             },
             {
               test: /\.svg/,
-              use: [{ loader: 'svg-url-loader', options: { encoding: 'none' } }]
+              type: 'asset/inline',
+              generator: {
+                dataUrl: (content: any) => miniSVGDataURI(content.toString())
+              }
             },
             {
               test: /\.(cur|png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-              use: [{ loader: 'url-loader', options: { limit: 10000 } }]
+              type: 'asset'
             }
           ]
         },

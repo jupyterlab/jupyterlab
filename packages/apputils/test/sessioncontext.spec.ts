@@ -2,29 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  SessionManager,
-  KernelManager,
-  KernelSpecManager
-} from '@jupyterlab/services';
-
-import {
-  SessionContext,
   Dialog,
   ISessionContext,
+  SessionContext,
   sessionContextDialogs
 } from '@jupyterlab/apputils';
-
-import { UUID, PromiseDelegate } from '@lumino/coreutils';
-
+import {
+  KernelManager,
+  KernelSpecManager,
+  SessionAPI,
+  SessionManager
+} from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
-  testEmission,
+  flakyIt as it,
   JupyterServer,
-  flakyIt as it
+  testEmission
 } from '@jupyterlab/testutils';
-
-import { SessionAPI } from '@jupyterlab/services';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 const server = new JupyterServer();
 
@@ -374,10 +370,10 @@ describe('@jupyterlab/apputils', () => {
         expect(sessionContext.kernelDisplayStatus).toBe('initializing');
       });
 
-      it('should be "idle" if there is no current kernel', async () => {
+      it('should be "unknown" if there is no current kernel', async () => {
         await sessionContext.initialize();
         await sessionContext.shutdown();
-        expect(sessionContext.kernelDisplayStatus).toBe('idle');
+        expect(sessionContext.kernelDisplayStatus).toBe('unknown');
       });
     });
 
@@ -422,7 +418,7 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         sessionContext.dispose();
-        return delegate.promise;
+        await expect(delegate.promise).resolves.not.toThrow();
       });
     });
 
@@ -500,9 +496,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching name', () => {
-        const spec = specsManager.specs!.kernelspecs[
-          specsManager.specs!.default
-        ]!;
+        const spec =
+          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
 
         expect(
           SessionContext.getDefaultKernel({
@@ -522,9 +517,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching language', () => {
-        const spec = specsManager.specs!.kernelspecs[
-          specsManager.specs!.default
-        ]!;
+        const spec =
+          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
         const kernelspecs: any = {};
 
         kernelspecs[spec.name] = spec;
@@ -540,9 +534,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return null if a language matches twice', () => {
-        const spec = specsManager.specs!.kernelspecs[
-          specsManager.specs!.default
-        ]!;
+        const spec =
+          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
         const kernelspecs: any = {};
 
         kernelspecs['foo'] = spec;
@@ -564,7 +557,7 @@ describe('@jupyterlab/apputils', () => {
         it('should select a kernel for the session', async () => {
           await sessionContext.initialize();
 
-          const { id, name } = sessionContext?.session!.kernel!;
+          const { id, name } = sessionContext!.session!.kernel!;
           const accept = acceptDialog();
 
           await sessionContextDialogs.selectKernel(sessionContext);

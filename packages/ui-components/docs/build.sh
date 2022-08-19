@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 
 # get this script's parent dir
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -17,7 +20,7 @@ MONOREPO_DEVDOC=$(realpath $PKG_ROOT/../../docs/source/developer)
 # make the docs build dir
 mkdir -p $BUILD
 
-# paths in rst include directives are resovled relative to pwd
+# paths in rst include directives are resolved relative to pwd
 pushd $SOURCE > /dev/null
 
 # make a copy of labicon.rst with section levels shifted down

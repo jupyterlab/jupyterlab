@@ -11,28 +11,21 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IConsoleTracker } from '@jupyterlab/console';
-
 import {
   IInspector,
   InspectionHandler,
   InspectorPanel,
   KernelConnector
 } from '@jupyterlab/inspector';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { ITranslator } from '@jupyterlab/translation';
-
 import { inspectorIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -40,6 +33,8 @@ import { inspectorIcon } from '@jupyterlab/ui-components';
  */
 namespace CommandIDs {
   export const open = 'inspector:open';
+  export const close = 'inspector:close';
+  export const toggle = 'inspector:toggle';
 }
 
 /**
@@ -60,64 +55,118 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
   ): IInspector => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
-    const command = CommandIDs.open;
-    const label = trans.__('Show Contextual Help');
+    const caption = trans.__(
+      'Live updating code documentation from the active kernel'
+    );
+    const openedLabel = trans.__('Contextual Help');
     const namespace = 'inspector';
+    const datasetKey = 'jpInspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
       namespace
     });
 
+    function isInspectorOpen() {
+      return inspector && !inspector.isDisposed;
+    }
+
     let source: IInspector.IInspectable | null = null;
     let inspector: MainAreaWidget<InspectorPanel>;
-    function openInspector(): MainAreaWidget<InspectorPanel> {
-      if (!inspector || inspector.isDisposed) {
+    function openInspector(args: string): MainAreaWidget<InspectorPanel> {
+      if (!isInspectorOpen()) {
         inspector = new MainAreaWidget({
           content: new InspectorPanel({ translator })
         });
         inspector.id = 'jp-inspector';
-        inspector.title.label = label;
+        inspector.title.label = openedLabel;
         inspector.title.icon = inspectorIcon;
         void tracker.add(inspector);
         source = source && !source.isDisposed ? source : null;
         inspector.content.source = source;
+        inspector.content.source?.onEditorChange(args);
       }
       if (!inspector.isAttached) {
-        shell.add(inspector, 'main', { activate: false });
+        shell.add(inspector, 'main', {
+          activate: false,
+          mode: 'split-right',
+          type: 'Inspector'
+        });
       }
       shell.activateById(inspector.id);
+      document.body.dataset[datasetKey] = 'open';
       return inspector;
     }
+    function closeInspector(): void {
+      inspector.dispose();
+      delete document.body.dataset[datasetKey];
+    }
 
-    // Add command to registry.
-    commands.addCommand(command, {
-      caption: trans.__(
-        'Live updating code documentation from the active kernel'
-      ),
+    // Add inspector:open command to registry.
+    const showLabel = trans.__('Show Contextual Help');
+    commands.addCommand(CommandIDs.open, {
+      caption,
       isEnabled: () =>
         !inspector ||
         inspector.isDisposed ||
         !inspector.isAttached ||
         !inspector.isVisible,
-      label,
+      label: showLabel,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
-      execute: () => openInspector()
+      execute: args => {
+        const text = args && (args.text as string);
+        const refresh = args && (args.refresh as boolean);
+        // if inspector is open, see if we need a refresh
+        if (isInspectorOpen() && refresh)
+          inspector.content.source?.onEditorChange(text);
+        else openInspector(text);
+      }
     });
 
-    // Add command to UI where possible.
-    if (palette) {
-      palette.addItem({ command, category: label });
-    }
+    // Add inspector:close command to registry.
+    const closeLabel = trans.__('Hide Contextual Help');
+    commands.addCommand(CommandIDs.close, {
+      caption,
+      isEnabled: () => isInspectorOpen(),
+      label: closeLabel,
+      icon: args => (args.isLauncher ? inspectorIcon : undefined),
+      execute: () => closeInspector()
+    });
+
+    // Add inspector:toggle command to registry.
+    const toggleLabel = trans.__('Show Contextual Help');
+    commands.addCommand(CommandIDs.toggle, {
+      caption,
+      label: toggleLabel,
+      isToggled: () => isInspectorOpen(),
+      execute: args => {
+        if (isInspectorOpen()) {
+          closeInspector();
+        } else {
+          const text = args && (args.text as string);
+          openInspector(text);
+        }
+      }
+    });
+
+    // Add open command to launcher if possible.
     if (launcher) {
-      launcher.add({ command, args: { isLauncher: true } });
+      launcher.add({ command: CommandIDs.open, args: { isLauncher: true } });
+    }
+
+    // Add toggle command to command palette if possible.
+    if (palette) {
+      palette.addItem({ command: CommandIDs.toggle, category: toggleLabel });
     }
 
     // Handle state restoration.
     if (restorer) {
-      void restorer.restore(tracker, { command, name: () => 'inspector' });
+      void restorer.restore(tracker, {
+        command: CommandIDs.toggle,
+        name: () => 'inspector'
+      });
     }
 
     // Create a proxy to pass the `source` to the current inspector.
-    const proxy: IInspector = Object.defineProperty({}, 'source', {
+    const proxy = Object.defineProperty({} as IInspector, 'source', {
       get: (): IInspector.IInspectable | null =>
         !inspector || inspector.isDisposed ? null : inspector.content.source,
       set: (src: IInspector.IInspectable | null) => {
@@ -186,11 +235,6 @@ const consoles: JupyterFrontEndPlugin<void> = {
         manager.source = source;
       }
     });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.open,
-      selector: '.jp-CodeConsole-promptCell'
-    });
   }
 };
 
@@ -246,11 +290,6 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (source) {
         manager.source = source;
       }
-    });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.open,
-      selector: '.jp-Notebook'
     });
   }
 };

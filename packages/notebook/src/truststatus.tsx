@@ -1,15 +1,19 @@
-import React from 'react';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
-import { INotebookModel, Notebook } from '.';
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 import { Cell } from '@jupyterlab/cells';
-
-import { notTrustedIcon, trustedIcon } from '@jupyterlab/ui-components';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  notTrustedIcon,
+  trustedIcon,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/ui-components';
 import { toArray } from '@lumino/algorithm';
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import React from 'react';
+import { INotebookModel, Notebook } from '.';
 
 /**
  * Determine the notebook trust status message.
@@ -101,9 +105,7 @@ namespace NotebookTrustComponent {
 /**
  * The NotebookTrust status item.
  */
-export class NotebookTrustStatus extends VDomRenderer<
-  NotebookTrustStatus.Model
-> {
+export class NotebookTrustStatus extends VDomRenderer<NotebookTrustStatus.Model> {
   /**
    * Construct a new status item.
    */
@@ -115,7 +117,7 @@ export class NotebookTrustStatus extends VDomRenderer<
   /**
    * Render the NotebookTrust status item.
    */
-  render() {
+  render(): JSX.Element | null {
     if (!this.model) {
       return null;
     }
@@ -153,21 +155,21 @@ export namespace NotebookTrustStatus {
     /**
      * The total number of cells in the current notebook.
      */
-    get totalCells() {
+    get totalCells(): number {
       return this._totalCells;
     }
 
     /**
      * Whether the active cell is trusted.
      */
-    get activeCellTrusted() {
+    get activeCellTrusted(): boolean {
       return this._activeCellTrusted;
     }
 
     /**
      * The current notebook for the model.
      */
-    get notebook() {
+    get notebook(): Notebook | null {
       return this._notebook;
     }
     set notebook(model: Notebook | null) {
@@ -241,9 +243,10 @@ export namespace NotebookTrustStatus {
     /**
      * Given a notebook model, figure out how many of the cells are trusted.
      */
-    private _deriveCellTrustState(
-      model: INotebookModel | null
-    ): { total: number; trusted: number } {
+    private _deriveCellTrustState(model: INotebookModel | null): {
+      total: number;
+      trusted: number;
+    } {
       if (model === null) {
         return { total: 0, trusted: 0 };
       }

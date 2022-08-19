@@ -1,0 +1,190 @@
+{
+  "objects": [
+    {
+      "package": {
+        "name": "jupyterlab-drawio",
+        "scope": "unscoped",
+        "version": "0.9.0",
+        "description": "A JupyterLab extension for embedding drawio / mxgraph.",
+        "keywords": [
+          "extension",
+          "jupyter",
+          "jupyterlab",
+          "jupyterlab-extension"
+        ],
+        "date": "2021-04-29T10:22:28.814Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/jupyterlab-drawio",
+          "homepage": "https://github.com/QuantStack/jupyterlab-drawio",
+          "repository": "https://github.com/wolfv/jupyterlab-drawio",
+          "bugs": "https://github.com/QuantStack/jupyterlab-drawio/issues"
+        },
+        "author": {
+          "name": "Wolf Vollprecht"
+        },
+        "publisher": {
+          "username": "hbdoe",
+          "email": "placeholder@placeholder.com"
+        },
+        "maintainers": [
+          {
+            "username": "jtdoe",
+            "email": "placeholder@placeholder.com"
+          },
+          {
+            "username": "jadoe",
+            "email": "placeholder@placeholder.com"
+          },
+          {
+            "username": "sydoe",
+            "email": "placeholder@placeholder.com"
+          },
+          {
+            "username": "wodoe",
+            "email": "placeholder@placeholder.com"
+          },
+          {
+            "username": "hbdoe",
+            "email": "placeholder@placeholder.com"
+          }
+        ]
+      },
+      "flags": {
+        "unstable": true
+      },
+      "score": {
+        "final": 0.34052385756365255,
+        "detail": {
+          "quality": 0.7307105352777404,
+          "popularity": 0.01488181698227634,
+          "maintenance": 0.3317201743900962
+        }
+      },
+      "searchScore": 0.000034432942
+    },
+    {
+      "package": {
+        "name": "@deathbeds/ipydrawio",
+        "scope": "deathbeds",
+        "version": "1.2.0",
+        "description": "A JupyterLab extension for embedding interactive drawio / mxgraph diagrams.",
+        "keywords": ["jupyter", "jupyterlab", "jupyterlab-extension"],
+        "date": "2022-01-24T19:11:20.950Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40deathbeds%2Fipydrawio",
+          "homepage": "https://ipydrawio.rtfd.io",
+          "repository": "https://github.com/deathbeds/ipydrawio",
+          "bugs": "https://github.com/deathbeds/ipydrawio/issues"
+        },
+        "author": {
+          "name": "IPyDrawio Contributors"
+        },
+        "publisher": {
+          "username": "bodoe",
+          "email": "placeholder@placeholder.com"
+        },
+        "maintainers": [
+          {
+            "username": "bodoe",
+            "email": "placeholder@placeholder.com"
+          }
+        ]
+      },
+      "score": {
+        "final": 0.3128486745618167,
+        "detail": {
+          "quality": 0.619402165107716,
+          "popularity": 0.03013403799885858,
+          "maintenance": 0.332803176371147
+        }
+      },
+      "searchScore": 0.0000024371393
+    },
+    {
+      "package": {
+        "name": "@deathbeds/ipydrawio-jupyter-templates",
+        "scope": "deathbeds",
+        "version": "1.2.0",
+        "description": "Jupyter Templates for IPyDrawio",
+        "keywords": [
+          "jupyter",
+          "jupyterlab",
+          "jupyterlab-extension",
+          "ipydrawio"
+        ],
+        "date": "2022-01-24T19:11:05.334Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40deathbeds%2Fipydrawio-jupyter-templates",
+          "homepage": "https://ipydrawio.rtfd.io",
+          "repository": "https://github.com/deathbeds/ipydrawio",
+          "bugs": "https://github.com/deathbeds/ipydrawio/issues"
+        },
+        "author": {
+          "name": "IPyDrawio Contributors"
+        },
+        "publisher": {
+          "username": "bodoe",
+          "email": "placeholder@placeholder.com"
+        },
+        "maintainers": [
+          {
+            "username": "bodoe",
+            "email": "placeholder@placeholder.com"
+          }
+        ]
+      },
+      "score": {
+        "final": 0.2995447525446336,
+        "detail": {
+          "quality": 0.619402165107716,
+          "popularity": 0.004097416295027781,
+          "maintenance": 0.32082859231159744
+        }
+      },
+      "searchScore": 5.121934e-7
+    },
+    {
+      "package": {
+        "name": "@deathbeds/jupyterlab-drawio",
+        "scope": "deathbeds",
+        "version": "0.8.0-alpha1",
+        "description": "A JupyterLab extension for embedding drawio / mxgraph.",
+        "keywords": ["jupyter", "jupyterlab", "jupyterlab-extension"],
+        "date": "2020-08-16T20:49:05.709Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40deathbeds%2Fjupyterlab-drawio",
+          "homepage": "https://github.com/deathbeds/jupyterlab-drawio",
+          "repository": "https://github.com/deathbeds/jupyterlab-drawio",
+          "bugs": "https://github.com/deathbeds/jupyterlab-drawio/issues"
+        },
+        "author": {
+          "name": "Dead Pixels Collective"
+        },
+        "publisher": {
+          "username": "bodoe",
+          "email": "placeholder@placeholder.com"
+        },
+        "maintainers": [
+          {
+            "username": "bodoe",
+            "email": "placeholder@placeholder.com"
+          }
+        ]
+      },
+      "flags": {
+        "unstable": true
+      },
+      "score": {
+        "final": 0.1827061624993528,
+        "detail": {
+          "quality": 0.3406222556270111,
+          "popularity": 0.005075320545946132,
+          "maintenance": 0.22498035320048096
+        }
+      },
+      "searchScore": 6.2371446e-9
+    }
+  ],
+  "total": 4,
+  "time": "Fri Jun 17 2022 20:01:02 GMT+0000 (Coordinated Universal Time)"
+}

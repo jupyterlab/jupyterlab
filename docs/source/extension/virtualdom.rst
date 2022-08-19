@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _react:
 
 React
@@ -13,7 +16,7 @@ which have some additional features over native DOM elements, including:
 -  Both CSS-based and absolutely positioned layouts.
 
 We support wrapping React components to turn them into Lumino
-widgets using the ``ReactWidget`` class from ``@jupyterlab/apputils``:
+widgets using the ``ReactWidget`` class from ``@jupyterlab/ui-components``:
 
 .. literalinclude:: virtualdom.create.tsx
    :force:
@@ -24,7 +27,7 @@ into a Lumino widget. Whenever the widget is mounted, the React
 element will be rendered on the page.
 
 If you need to handle other life cycle events on the Lumino widget
-or add other methods to it, you can subbclass ``ReactWidget`` and
+or add other methods to it, you can subclass ``ReactWidget`` and
 override the ``render`` method to return a React element:
 
 
@@ -34,7 +37,7 @@ override the ``render`` method to return a React element:
 
 We use Lumino `Signals <https://jupyterlab.github.io/lumino/signaling/interfaces/isignal.html>`__ to represent
 data that changes over time in JupyterLab.
-To have your React element change in response to a signal event, use the ``UseSignal`` component from ``@jupyterlab/apputils``,
+To have your React element change in response to a signal event, use the ``UseSignal`` component from ``@jupyterlab/ui-components``,
 which implements the `"render props" <https://reactjs.org/docs/render-props.html>`__:
 
 

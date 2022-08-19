@@ -6,27 +6,23 @@ import { Cell } from '@jupyterlab/cells';
 import { Token } from '@lumino/coreutils';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { NotebookPanel } from './panel';
 import { NotebookTools } from './notebooktools';
+import { NotebookPanel } from './panel';
 import { NotebookWidgetFactory } from './widgetfactory';
 
-/* tslint:disable */
 /**
  * The notebook widget factory token.
  */
 export const INotebookWidgetFactory = new Token<NotebookWidgetFactory.IFactory>(
   '@jupyterlab/notebook:INotebookWidgetFactory'
 );
-/* tslint:enable */
 
-/* tslint:disable */
 /**
  * The notebook tools token.
  */
 export const INotebookTools = new Token<INotebookTools>(
   '@jupyterlab/notebook:INotebookTools'
 );
-/* tslint:enable */
 
 /**
  * The interface for notebook metadata tools.
@@ -70,14 +66,12 @@ export namespace INotebookTools {
   }
 }
 
-/* tslint:disable */
 /**
  * The notebook tracker token.
  */
 export const INotebookTracker = new Token<INotebookTracker>(
   '@jupyterlab/notebook:INotebookTracker'
 );
-/* tslint:enable */
 
 /**
  * An object that tracks notebook widgets.

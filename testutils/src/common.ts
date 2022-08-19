@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { simulate } from 'simulate-event';
 
 import { ServiceManager, Session } from '@jupyterlab/services';
@@ -8,9 +13,9 @@ import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 import {
-  TextModelFactory,
+  Context,
   DocumentRegistry,
-  Context
+  TextModelFactory
 } from '@jupyterlab/docregistry';
 
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
@@ -183,6 +188,7 @@ export function sleep(milliseconds?: number): Promise<void>;
 export function sleep<T>(milliseconds: number, value: T): Promise<T>;
 export function sleep<T>(
   milliseconds: number = 0,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   value?: any
 ): Promise<T> | Promise<void> {
   return new Promise<T>((resolve, reject) => {
@@ -241,7 +247,7 @@ export function createFileContext(
 export async function createFileContextWithKernel(
   path: string = UUID.uuid4() + '.txt',
   manager: ServiceManager.IManager = Private.getManager()
-) {
+): Promise<Context> {
   const factory = Private.textFactory;
   const specsManager = manager.kernelspecs;
   await specsManager.ready;
@@ -384,7 +390,9 @@ namespace Private {
 
   export const textFactory = new TextModelFactory();
 
-  export const notebookFactory = new NotebookModelFactory({});
+  export const notebookFactory = new NotebookModelFactory({
+    disableDocumentWideUndoRedo: false
+  });
 
   /**
    * Get or create the service manager singleton.

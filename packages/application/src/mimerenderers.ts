@@ -2,27 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IWidgetTracker, WidgetTracker } from '@jupyterlab/apputils';
-
 import {
-  MimeDocumentFactory,
   DocumentRegistry,
-  MimeDocument
+  MimeDocument,
+  MimeDocumentFactory
 } from '@jupyterlab/docregistry';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { LabIcon } from '@jupyterlab/ui-components';
-
-import { Token } from '@lumino/coreutils';
-
-import { AttachedProperty } from '@lumino/properties';
-
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
-
-import { ILayoutRestorer } from './layoutrestorer';
 import { ITranslator } from '@jupyterlab/translation';
+import { LabIcon } from '@jupyterlab/ui-components';
+import { Token } from '@lumino/coreutils';
+import { AttachedProperty } from '@lumino/properties';
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
+import { ILayoutRestorer } from './layoutrestorer';
 
 /**
  * A class that tracks mime documents.

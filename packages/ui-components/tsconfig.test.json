@@ -6,13 +6,16 @@
       "path": "../coreutils"
     },
     {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../translation"
+    },
+    {
       "path": "."
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../coreutils"
     }
   ]
 }

@@ -3,27 +3,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { find } from '@lumino/algorithm';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
-import { CommandPalette } from '@lumino/widgets';
-
 import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   IPaletteItem,
   ModalCommandPalette
 } from '@jupyterlab/apputils';
-
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
+import { find } from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { CommandPalette } from '@lumino/widgets';
 
 /**
  * The command IDs used by the apputils extension.
@@ -108,8 +100,7 @@ export namespace Palette {
       'aria-label',
       trans.__('Command Palette Section')
     );
-    shell.add(palette, 'left', { rank: 300 });
-
+    shell.add(palette, 'left', { rank: 300, type: 'Command Palette' });
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(PALETTE_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
@@ -117,7 +108,7 @@ export namespace Palette {
         if (modal && !newModal) {
           palette.parent = null;
           modalPalette.detach();
-          shell.add(palette, 'left', { rank: 300 });
+          shell.add(palette, 'left', { rank: 300, type: 'Command Palette' });
         } else if (!modal && newModal) {
           palette.parent = null;
           modalPalette.palette = palette;

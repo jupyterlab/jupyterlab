@@ -11,53 +11,38 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
-  CommandToolbarButton,
   ICommandPalette,
   MainAreaWidget,
-  WidgetTracker,
-  ReactWidget
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import {
   ILoggerRegistry,
   LogConsolePanel,
   LoggerRegistry,
   LogLevel
 } from '@jupyterlab/logconsole';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { IStatusBar } from '@jupyterlab/statusbar';
-
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
 import {
   addIcon,
   clearIcon,
+  CommandToolbarButton,
   HTMLSelect,
-  listIcon
+  listIcon,
+  ReactWidget
 } from '@jupyterlab/ui-components';
-
 import { UUID } from '@lumino/coreutils';
-
 import { DockLayout, Widget } from '@lumino/widgets';
-
 import * as React from 'react';
-
 import { LogConsoleStatus } from './status';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
@@ -80,13 +65,7 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   id: LOG_CONSOLE_PLUGIN_ID,
   provides: ILoggerRegistry,
   requires: [ILabShell, IRenderMimeRegistry, INotebookTracker, ITranslator],
-  optional: [
-    ICommandPalette,
-    ILayoutRestorer,
-    IMainMenu,
-    ISettingRegistry,
-    IStatusBar
-  ],
+  optional: [ICommandPalette, ILayoutRestorer, ISettingRegistry, IStatusBar],
   autoStart: true
 };
 
@@ -101,7 +80,6 @@ function activateLogConsole(
   translator: ITranslator,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null,
   settingRegistry: ISettingRegistry | null,
   statusBar: IStatusBar | null
 ): ILoggerRegistry {
@@ -198,11 +176,13 @@ function activateLogConsole(
       app.commands.notifyCommandChanged();
     });
 
-    app.shell.add(logConsoleWidget, 'main', {
+    app.shell.add(logConsoleWidget, 'down', {
       ref: options.ref,
-      mode: options.insertMode
+      mode: options.insertMode,
+      type: 'Log Console'
     });
     void tracker.add(logConsoleWidget);
+    app.shell.activateById(logConsoleWidget.id);
 
     logConsoleWidget.update();
     app.commands.notifyCommandChanged();
@@ -254,16 +234,11 @@ function activateLogConsole(
     },
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
     label: args =>
-      trans.__('Set Log Level to %1', toTitleCase(args.level as string))
+      args['level']
+        ? trans.__('Set Log Level to %1', toTitleCase(args.level as string))
+        : trans.__('Set log level to `level`.')
   });
 
-  app.contextMenu.addItem({
-    command: CommandIDs.open,
-    selector: '.jp-Notebook'
-  });
-  if (mainMenu) {
-    mainMenu.viewMenu.addGroup([{ command: CommandIDs.open }]);
-  }
   if (palette) {
     palette.addItem({
       command: CommandIDs.open,
@@ -274,7 +249,7 @@ function activateLogConsole(
     statusBar.registerStatusItem('@jupyterlab/logconsole-extension:status', {
       item: status,
       align: 'left',
-      isActive: () => true,
+      isActive: () => status.model?.version > 0,
       activeStateChanged: status.model!.stateChanged
     });
   }
@@ -379,7 +354,7 @@ export class LogLevelSwitcher extends ReactWidget {
     }
   };
 
-  render() {
+  render(): JSX.Element {
     const logger = this._logConsole.logger;
     return (
       <>

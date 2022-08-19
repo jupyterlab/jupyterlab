@@ -2,10 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-
-import { OutputModel } from '../src';
-
 import { NBTestUtils } from '@jupyterlab/testutils';
+import { OutputModel } from '../src';
 
 const DEFAULT_EXECUTE: nbformat.IOutput = {
   output_type: 'execute_result',
@@ -32,6 +30,20 @@ describe('rendermime/outputmodel', () => {
         expect(model).toBeInstanceOf(OutputModel);
         model = new OutputModel({ value, trusted: true });
         expect(model).toBeInstanceOf(OutputModel);
+      });
+    });
+
+    describe('#changed', () => {
+      it('should be emitted when the data changes', () => {
+        const value = DEFAULT_EXECUTE;
+        let model = new OutputModel({ value });
+        let called = false;
+        model.changed.connect((sender, args) => {
+          expect(sender).toBe(model);
+          called = true;
+        });
+        model.setData({ ...model.data });
+        expect(called).toBe(true);
       });
     });
 

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 const fs = require('fs');
 
 const packages = [
@@ -12,6 +17,8 @@ const packages = [
   'codeeditor',
   'codemirror-extension',
   'codemirror',
+  'collaboration',
+  'collaboration-extension',
   'completer-extension',
   'completer',
   'console-extension',
@@ -19,6 +26,10 @@ const packages = [
   'coreutils',
   'csvviewer-extension',
   'csvviewer',
+  'debugger-extension',
+  'debugger',
+  'docprovider-extension',
+  'docprovider',
   'docmanager-extension',
   'docmanager',
   'docregistry',
@@ -44,6 +55,7 @@ const packages = [
   'launcher',
   'logconsole-extension',
   'logconsole',
+  'lsp-extension',
   'mainmenu-extension',
   'mainmenu',
   'markdownviewer-extension',
@@ -53,8 +65,6 @@ const packages = [
   // 'metapackage',
   // 'nbconvert-css',
   'nbformat',
-  'shared-models',
-  'docprovider',
   'notebook-extension',
   'notebook',
   'observables',
@@ -70,6 +80,7 @@ const packages = [
   'settingeditor-extension',
   'settingeditor',
   'settingregistry',
+  'shared-models',
   'shortcuts-extension',
   'statedb',
   'statusbar-extension',
@@ -78,8 +89,12 @@ const packages = [
   'terminal',
   'theme-dark-extension',
   'theme-light-extension',
+  'toc',
+  'toc-extension',
   'tooltip-extension',
   'tooltip',
+  'translation-extension',
+  'translation',
   'ui-components-extension',
   'ui-components',
   'vdom-extension',
@@ -96,7 +111,8 @@ const entryPoints = packages
 const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +
   [
-    'packages/application-extension/src/index.tsx'
+    'packages/application-extension/src/index.tsx',
+    'examples/example.spec.ts'
     //'packages/*/test/*.spec.ts',
   ];
 
@@ -107,8 +123,9 @@ module.exports = {
   out: 'docs/api',
   // json: 'docs/api.json',
   readme: 'README.md',
-  theme: 'typedoc-theme',
+  theme: 'default',
   tsconfig: 'tsconfigdoc.json'
+  //plugin: "./typedoc-theme/lib/index.js"
 
   // theme: minimal,
   // excludePrivate: true,

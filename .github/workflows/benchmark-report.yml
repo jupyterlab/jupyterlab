@@ -1,0 +1,82 @@
+# Commenting on a PR requires write access
+# but PR opened from forks does not get write access
+# except when triggered with `pull_request_target`
+#
+# So the comments payload must be created from a `pull_request` event workflow.
+# Then that payload can be posted as PR comment in a `pull_request_target` event workflow.
+#
+# Documentation: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target
+# Blog post with example: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+
+name: Comment on the pull request
+
+on:
+  workflow_run:
+    workflows: ['Benchmark Tests']
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: 'Download artifact'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            var artifacts = await github.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{ github.event.workflow_run.id }},
+            });
+            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "benchmark-assets"
+            })[0];
+            var download = await github.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            var fs = require('fs');
+            fs.writeFileSync('${{ github.workspace }}/benchmark-assets.zip', Buffer.from(download.data));
+      - run: unzip benchmark-assets.zip
+
+      - name: 'Comment on PR'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            var fs = require('fs');
+            var issue_number = Number(fs.readFileSync('./benchmark-results/NR'));
+            var report = String(fs.readFileSync('./benchmark-results/lab-benchmark.md'));
+            var memory-report = String(fs.readFileSync('./memory-leak-report.md'));
+
+            // Get the existing comments.
+            const {data: comments} = await github.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+            })
+
+            // Find any comment already made by the bot.
+            const botComment = comments.find(comment => comment.user.id === 41898282)
+            if (botComment) {
+              await github.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: [report, memory-report].join('\n')
+              })
+            } else {
+              await github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                body: [report, memory-report].join('\n')
+              });
+            }

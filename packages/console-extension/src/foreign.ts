@@ -5,23 +5,17 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ICommandPalette } from '@jupyterlab/apputils';
-
 import {
   CodeConsole,
   ConsolePanel,
-  IConsoleTracker,
-  ForeignHandler
+  ForeignHandler,
+  IConsoleTracker
 } from '@jupyterlab/console';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ITranslator } from '@jupyterlab/translation';
-
-import { AttachedProperty } from '@lumino/properties';
-
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { AttachedProperty } from '@lumino/properties';
 
 /**
  * The console widget tracker provider.
@@ -42,7 +36,7 @@ function activateForeign(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   palette: ICommandPalette | null
-) {
+): void {
   const trans = translator.load('jupyterlab');
   const { shell } = app;
   tracker.widgetAdded.connect((sender, widget) => {
@@ -109,11 +103,6 @@ function activateForeign(
       args: { isPalette: true }
     });
   }
-
-  app.contextMenu.addItem({
-    command: toggleShowAllActivity,
-    selector: '.jp-CodeConsole'
-  });
 }
 
 /*

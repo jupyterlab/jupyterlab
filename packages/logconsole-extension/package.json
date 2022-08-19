@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole-extension",
-  "version": "3.1.0-alpha.8",
+  "version": "4.0.0-alpha.12",
   "description": "JupyterLab - Log Console Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,29 +30,27 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "prepublishOnly": "npm run build",
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-alpha.8",
-    "@jupyterlab/apputils": "^3.1.0-alpha.8",
-    "@jupyterlab/coreutils": "^5.1.0-alpha.8",
-    "@jupyterlab/logconsole": "^3.1.0-alpha.8",
-    "@jupyterlab/mainmenu": "^3.1.0-alpha.8",
-    "@jupyterlab/notebook": "^3.1.0-alpha.8",
-    "@jupyterlab/rendermime": "^3.1.0-alpha.8",
-    "@jupyterlab/settingregistry": "^3.1.0-alpha.8",
-    "@jupyterlab/statusbar": "^3.1.0-alpha.8",
-    "@jupyterlab/translation": "^3.1.0-alpha.8",
-    "@jupyterlab/ui-components": "^3.1.0-alpha.8",
-    "@lumino/coreutils": "^1.5.3",
-    "@lumino/signaling": "^1.4.3",
-    "@lumino/widgets": "^1.19.0",
+    "@jupyterlab/application": "^4.0.0-alpha.12",
+    "@jupyterlab/apputils": "^4.0.0-alpha.12",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
+    "@jupyterlab/logconsole": "^4.0.0-alpha.12",
+    "@jupyterlab/notebook": "^4.0.0-alpha.12",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.12",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.12",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.12",
+    "@jupyterlab/translation": "^4.0.0-alpha.12",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.27",
+    "@lumino/coreutils": "^1.12.0",
+    "@lumino/signaling": "^1.10.1",
+    "@lumino/widgets": "^1.33.0",
     "react": "^17.0.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~4.1.3"
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"

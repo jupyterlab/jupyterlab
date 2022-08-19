@@ -4,30 +4,18 @@
 import { JupyterLab } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
 
-// Promise.allSettled polyfill, until our supported browsers implement it
-// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
-if (Promise.allSettled === undefined) {
-  Promise.allSettled = promises =>
-    Promise.all(
-      promises.map(promise =>
-        promise
-          .then(value => ({
-            status: "fulfilled",
-            value,
-          }), reason => ({
-            status: "rejected",
-            reason,
-          }))
-      )
-    );
-}
-
 import('./style.js');
+
+const TO_DISABLE = [
+  '@jupyterlab/lsp-extension',
+  '@jupyterlab/fileeditor-extension:language-server',
+  '@jupyterlab/notebook-extension:language-server'
+];
 
 async function createModule(scope, module) {
   try {
     const factory = await window._JUPYTERLAB[scope].get(module);
-    return factory();  
+    return factory();
   } catch(e) {
     console.warn(`Failed to create module: package: ${scope}; module: ${module}`);
     throw e;
@@ -70,9 +58,14 @@ export async function main() {
     }
   });
 
+
+  function manuallyDisabled(id) {
+    return TO_DISABLE.includes(id) || TO_DISABLE.includes(id.split(":")[0])
+  }
+
   /**
    * Iterate over active plugins in an extension.
-   * 
+   *
    * #### Notes
    * This also populates the disabled, deferred, and ignored arrays.
    */
@@ -88,7 +81,10 @@ export async function main() {
 
     let plugins = Array.isArray(exports) ? exports : [exports];
     for (let plugin of plugins) {
-      if (PageConfig.Extension.isDisabled(plugin.id)) {
+      if (
+        PageConfig.Extension.isDisabled(plugin.id) ||
+        manuallyDisabled(plugin.id)
+      ) {
         disabled.push(plugin.id);
         continue;
       }

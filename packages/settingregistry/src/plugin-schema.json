@@ -6,7 +6,60 @@
   "type": "object",
   "additionalProperties": true,
   "properties": {
-    "jupyter.lab.setting-deprecated": { "type": "boolean", "default": false },
+    "jupyter.lab.internationalization": {
+      "type": "object",
+      "properties": {
+        "selectors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "jupyter.lab.menus": {
+      "type": "object",
+      "properties": {
+        "main": {
+          "title": "Main menu entries",
+          "description": "List of menu items to add to the main menubar.",
+          "items": {
+            "$ref": "#/definitions/menu"
+          },
+          "type": "array",
+          "default": []
+        },
+        "context": {
+          "title": "The application context menu.",
+          "description": "List of context menu items.",
+          "items": {
+            "allOf": [
+              { "$ref": "#/definitions/menuItem" },
+              {
+                "properties": {
+                  "selector": {
+                    "description": "The CSS selector for the context menu item.",
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          },
+          "type": "array",
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "jupyter.lab.setting-deprecated": {
+      "type": "boolean",
+      "default": false
+    },
     "jupyter.lab.setting-icon": {
       "type": "string",
       "default": ""
@@ -15,28 +68,232 @@
       "type": "string",
       "default": ""
     },
-    "jupyter.lab.setting-icon-label": { "type": "string", "default": "Plugin" },
+    "jupyter.lab.setting-icon-label": {
+      "type": "string",
+      "default": "Plugin"
+    },
     "jupyter.lab.shortcuts": {
-      "items": { "$ref": "#/definitions/shortcut" },
+      "items": {
+        "$ref": "#/definitions/shortcut"
+      },
       "type": "array",
       "default": []
     },
-    "jupyter.lab.transform": { "type": "boolean", "default": false }
+    "jupyter.lab.toolbars": {
+      "properties": {
+        "^\\w[\\w-\\.]*$": {
+          "items": {
+            "$ref": "#/definitions/toolbarItem"
+          },
+          "type": "array",
+          "default": []
+        }
+      },
+      "type": "object",
+      "default": {}
+    },
+    "jupyter.lab.transform": {
+      "type": "boolean",
+      "default": false
+    }
   },
   "definitions": {
+    "menu": {
+      "properties": {
+        "disabled": {
+          "description": "Whether the menu is disabled or not",
+          "type": "boolean",
+          "default": false
+        },
+        "icon": {
+          "description": "Menu icon id",
+          "type": "string"
+        },
+        "id": {
+          "description": "Menu unique id",
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "jp-menu-file",
+                "jp-menu-file-new",
+                "jp-menu-edit",
+                "jp-menu-help",
+                "jp-menu-kernel",
+                "jp-menu-run",
+                "jp-menu-settings",
+                "jp-menu-view",
+                "jp-menu-tabs"
+              ]
+            },
+            { "type": "string", "pattern": "[a-z][a-z0-9\\-_]+" }
+          ]
+        },
+        "items": {
+          "description": "Menu items",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/menuItem"
+          }
+        },
+        "label": {
+          "description": "Menu label",
+          "type": "string"
+        },
+        "mnemonic": {
+          "description": "Mnemonic index for the label",
+          "type": "number",
+          "minimum": -1,
+          "default": -1
+        },
+        "rank": {
+          "description": "Menu rank",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": ["id"],
+      "type": "object"
+    },
+    "menuItem": {
+      "properties": {
+        "args": {
+          "description": "Command arguments",
+          "type": "object"
+        },
+        "command": {
+          "description": "Command id",
+          "type": "string"
+        },
+        "disabled": {
+          "description": "Whether the item is disabled or not",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "description": "Item type",
+          "type": "string",
+          "enum": ["command", "submenu", "separator"],
+          "default": "command"
+        },
+        "rank": {
+          "description": "Item rank",
+          "type": "number",
+          "minimum": 0
+        },
+        "submenu": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/menu"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
     "shortcut": {
       "properties": {
-        "args": { "type": "object" },
-        "command": { "type": "string" },
-        "disabled": { "type": "boolean", "default": false },
+        "args": {
+          "title": "The arguments for the command",
+          "type": "object"
+        },
+        "command": {
+          "title": "The command id",
+          "description": "The command executed when the binding is matched.",
+          "type": "string"
+        },
+        "disabled": {
+          "description": "Whether this shortcut is disabled or not.",
+          "type": "boolean",
+          "default": false
+        },
         "keys": {
-          "items": { "type": "string" },
-          "minItems": 1,
+          "title": "The key sequence for the binding",
+          "description": "The key shortcut like `Accel A` or the sequence of shortcuts to press like [`Accel A`, `B`]",
+          "items": {
+            "type": "string"
+          },
           "type": "array"
         },
-        "selector": { "type": "string" }
+        "macKeys": {
+          "title": "The key sequence for the binding on macOS",
+          "description": "The key shortcut like `Cmd A` or the sequence of shortcuts to press like [`Cmd A`, `B`]",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "winKeys": {
+          "title": "The key sequence for the binding on Windows",
+          "description": "The key shortcut like `Ctrl A` or the sequence of shortcuts to press like [`Ctrl A`, `B`]",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "linuxKeys": {
+          "title": "The key sequence for the binding on Linux",
+          "description": "The key shortcut like `Ctrl A` or the sequence of shortcuts to press like [`Ctrl A`, `B`]",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "selector": {
+          "title": "CSS selector",
+          "type": "string"
+        }
       },
       "required": ["command", "keys", "selector"],
+      "type": "object"
+    },
+    "toolbarItem": {
+      "properties": {
+        "name": {
+          "title": "Unique name",
+          "type": "string"
+        },
+        "args": {
+          "title": "Command arguments",
+          "type": "object"
+        },
+        "command": {
+          "title": "Command id",
+          "type": "string",
+          "default": ""
+        },
+        "disabled": {
+          "title": "Whether the item is ignored or not",
+          "type": "boolean",
+          "default": false
+        },
+        "icon": {
+          "title": "Item icon id",
+          "description": "If defined, it will override the command icon",
+          "type": "string"
+        },
+        "label": {
+          "title": "Item label",
+          "description": "If defined, it will override the command label",
+          "type": "string"
+        },
+        "type": {
+          "title": "Item type",
+          "type": "string",
+          "enum": ["command", "spacer"]
+        },
+        "rank": {
+          "title": "Item rank",
+          "type": "number",
+          "minimum": 0,
+          "default": 50
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false,
       "type": "object"
     }
   }

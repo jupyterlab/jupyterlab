@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _notebook:
 
 Notebooks
@@ -7,9 +10,10 @@ Jupyter notebooks are documents that combine live runnable code with
 narrative text (Markdown), equations (LaTeX), images, interactive
 visualizations and other rich output:
 
-.. image:: images/notebook/notebook_ui.png
+.. image:: ../images/notebook-ui.png
    :align: center
    :class: jp-screenshot
+   :alt: JupyterLab with notebook titled Data.ipynb open. This notebook has text, code, an imported CSV, and an interactive map all in one.
 
 **Jupyter notebooks (.ipynb files) are fully supported in JupyterLab.** The
 `notebook document format <https://nbformat.readthedocs.io/en/latest/>`__ used in
@@ -120,7 +124,7 @@ information about the types of the matched items:
 
 Note: IPython 6.3.1 has temporarily disabled type annotations.
 To re-enable them, add ``c.Completer.use_jedi = True`` to an
-`ipython_config.py <https://ipython.readthedocs.io/en/stable/development/config.html>`__ file. 
+`ipython_config.py <https://ipython.readthedocs.io/en/stable/development/config.html>`__ file.
 
 .. _tooltip:
 
@@ -146,3 +150,11 @@ and select “New Console for Notebook”:
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/eq1l7DBngQQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _cell-toolbar:
+
+If there is enough room for it, each cell has a toolbar that provides quick access to
+commonly-used functions. If you would like to disable the cell toolbar, run
+``jupyter labextension disable @jupyterlab/cell-toolbar-extension`` on the command line.
+You can enable it again by running
+``jupyter labextension enable @jupyterlab/cell-toolbar-extension``.

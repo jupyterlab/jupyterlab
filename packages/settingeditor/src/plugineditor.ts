@@ -3,33 +3,22 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { CommandRegistry } from '@lumino/commands';
-
 import { JSONExt } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { Widget, StackedLayout } from '@lumino/widgets';
-
+import { StackedLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';
-
-import { SettingEditor } from './settingeditor';
+import { JsonSettingEditor } from './jsonsettingeditor';
 
 /**
  * The class name added to all plugin editors.
@@ -49,13 +38,8 @@ export class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    const {
-      commands,
-      editorFactory,
-      registry,
-      rendermime,
-      translator
-    } = options;
+    const { commands, editorFactory, registry, rendermime, translator } =
+      options;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
@@ -111,13 +95,13 @@ export class PluginEditor extends Widget {
   /**
    * The plugin editor layout state.
    */
-  get state(): SettingEditor.IPluginLayout {
+  get state(): JsonSettingEditor.IPluginLayout {
     const plugin = this._settings ? this._settings.id : '';
     const { sizes } = this._rawEditor;
 
     return { plugin, sizes };
   }
-  set state(state: SettingEditor.IPluginLayout) {
+  set state(state: JsonSettingEditor.IPluginLayout) {
     if (JSONExt.deepEqual(this.state, state)) {
       return;
     }
@@ -261,14 +245,13 @@ namespace Private {
   /**
    * Handle save errors.
    */
-  export function onSaveError(reason: any, translator?: ITranslator): void {
+  export function onSaveError(
+    reason: Dialog.IError,
+    translator?: ITranslator
+  ): void {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     console.error(`Saving setting editor value failed: ${reason.message}`);
-    void showDialog({
-      title: trans.__('Your changes were not saved.'),
-      body: reason.message,
-      buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-    });
+    void showErrorMessage(trans.__('Your changes were not saved.'), reason);
   }
 }

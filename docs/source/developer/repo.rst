@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _developer-guide:
 
 General Codebase Orientation
@@ -22,7 +25,7 @@ are described here.
 Python package: ``jupyterlab/``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This, along with the ``setup.py``, comprises the Python code for the project.
+This, along with the ``pyproject.toml``, comprises the Python code for the project.
 This includes the notebook server extension, JupyterLab's command line interface,
 entrypoints, and Python tests.
 
@@ -83,7 +86,7 @@ Documentation: ``docs/``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 This directory contains the Sphinx project for this documentation.
-You can create an environment to build the documentation using ``conda create -f environment.yml``,
+You can install the dependencies for building the documentation using ``pip install .[docs]``,
 and you can build the documentation by running ``make html``.
 The entry point to the built docs will then be in ``docs/build/index.html``.
 

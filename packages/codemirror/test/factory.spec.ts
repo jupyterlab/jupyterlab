@@ -2,11 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
-  CodeMirrorEditorFactory,
-  CodeMirrorEditor
+  CodeMirrorEditor,
+  CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
+
+import { indentSelection } from '@codemirror/commands';
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {
   public inlineCodeMirrorConfig: CodeMirrorEditor.IConfig;
@@ -20,9 +21,12 @@ describe('CodeMirrorEditorFactory', () => {
   const options: Partial<CodeMirrorEditor.IConfig> = {
     lineNumbers: false,
     lineWrap: 'on',
-    extraKeys: {
-      'Ctrl-Tab': 'indentAuto'
-    }
+    extraKeys: [
+      {
+        key: 'Ctrl-Tab',
+        run: indentSelection
+      }
+    ]
   };
 
   beforeEach(() => {

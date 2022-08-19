@@ -1,3 +1,6 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 export BLOCKED_EXTENSIONS_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/blockedExtensions_simple.json"
 # export BLOCKED_EXTENSIONS_URIS=""
 # export ALLOWED_EXTENSIONS_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/allowedExtensions_only_jlab.json"

@@ -1,0 +1,52 @@
+name: Fix License Headers
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  header-license-fix:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git to use https
+        run: git config --global hub.protocol https
+
+      - name: Checkout the branch from the PR that triggered the job
+        run: hub pr checkout ${{ github.event.pull_request.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fix License Header
+        uses: apache/skywalking-eyes/header@v0.4.0
+        with:
+          mode: fix
+
+      - name: Get modified files in the staging directory
+        id: changed-files
+        uses: tj-actions/changed-files@v24
+
+      - name: Apply Changes
+        if: steps.changed-files.outputs.any_changed == 'true'
+        shell: bash -l {0}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add *
+          git commit -m "Automatic application of license header"
+
+      - name: Push fixes
+        if: steps.changed-files.outputs.any_changed == 'true'
+        shell: bash -l {0}
+        run: |
+          git config push.default upstream
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

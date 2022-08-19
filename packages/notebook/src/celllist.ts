@@ -1,29 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ICellModel } from '@jupyterlab/cells';
+import {
+  IModelDB,
+  IObservableList,
+  IObservableMap,
+  IObservableUndoableList,
+  ObservableMap
+} from '@jupyterlab/observables';
+import * as models from '@jupyterlab/shared-models';
 import {
   ArrayExt,
+  ArrayIterator,
+  each,
   IIterator,
   IterableOrArrayLike,
-  each,
-  toArray,
-  ArrayIterator
+  toArray
 } from '@lumino/algorithm';
-
-import * as models from '@jupyterlab/shared-models';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { ICellModel } from '@jupyterlab/cells';
-
-import {
-  IObservableMap,
-  ObservableMap,
-  IObservableList,
-  IObservableUndoableList,
-  IModelDB
-} from '@jupyterlab/observables';
-
 import { NotebookModel } from './model';
 
 /**
@@ -156,7 +151,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   /**
    * Get the length of the cell list.
    *
-   * @return The number of cells in the cell list.
+   * @returns The number of cells in the cell list.
    *
    * #### Notes
    * This is a read-only property.

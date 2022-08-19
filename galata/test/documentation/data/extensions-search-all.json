@@ -1,0 +1,202 @@
+{
+  "objects": [
+    {
+      "package": {
+        "name": "@jupyterlab/apputils",
+        "scope": "jupyterlab",
+        "version": "3.4.4",
+        "description": "JupyterLab - Application Utilities",
+        "keywords": ["jupyter", "jupyterlab", "jupyterlab-extension"],
+        "date": "2022-07-21T14:47:49.450Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40jupyterlab%2Fapputils",
+          "homepage": "https://github.com/jupyterlab/jupyterlab",
+          "repository": "https://github.com/jupyterlab/jupyterlab",
+          "bugs": "https://github.com/jupyterlab/jupyterlab/issues"
+        },
+        "author": { "name": "Project Jupyter" },
+        "publisher": {
+          "username": "fcdoe",
+          "email": "placeholder@example.com"
+        },
+        "maintainers": [
+          { "username": "3cdoe", "email": "placeholder@example.com" },
+          { "username": "jwdoe", "email": "placeholder@example.com" },
+          { "username": "krdoe", "email": "placeholder@example.com" },
+          { "username": "dadoe", "email": "placeholder@example.com" },
+          { "username": "dedoe", "email": "placeholder@example.com" },
+          { "username": "madoe", "email": "placeholder@example.com" },
+          { "username": "zudoe", "email": "placeholder@example.com" },
+          { "username": "eldoe", "email": "placeholder@example.com" },
+          { "username": "bldoe", "email": "placeholder@example.com" },
+          { "username": "jadoe", "email": "placeholder@example.com" },
+          { "username": "sydoe", "email": "placeholder@example.com" },
+          { "username": "iadoe", "email": "placeholder@example.com" },
+          { "username": "gndoe", "email": "placeholder@example.com" },
+          { "username": "padoe", "email": "placeholder@example.com" },
+          { "username": "mpdoe", "email": "placeholder@example.com" },
+          { "username": "jadoe", "email": "placeholder@example.com" },
+          { "username": "midoe", "email": "placeholder@example.com" },
+          { "username": "sadoe", "email": "placeholder@example.com" },
+          { "username": "hodoe", "email": "placeholder@example.com" },
+          { "username": "zsdoe", "email": "placeholder@example.com" },
+          { "username": "tedoe", "email": "placeholder@example.com" },
+          { "username": "fcdoe", "email": "placeholder@example.com" },
+          { "username": "lrdoe", "email": "placeholder@example.com" },
+          { "username": "codoe", "email": "placeholder@example.com" },
+          { "username": "ajdoe", "email": "placeholder@example.com" },
+          { "username": "madoe", "email": "placeholder@example.com" },
+          { "username": "jtdoe", "email": "placeholder@example.com" },
+          { "username": "ecdoe", "email": "placeholder@example.com" },
+          { "username": "godoe", "email": "placeholder@example.com" },
+          { "username": "mbdoe", "email": "placeholder@example.com" },
+          { "username": "lodoe", "email": "placeholder@example.com" }
+        ]
+      },
+      "score": {
+        "final": 0.3189719547427941,
+        "detail": {
+          "quality": 0.4344936230693638,
+          "popularity": 0.20559200330090951,
+          "maintenance": 0.3333333333333333
+        }
+      },
+      "searchScore": 9.516456e-8
+    },
+    {
+      "package": {
+        "name": "@jupyterlab/translation",
+        "scope": "jupyterlab",
+        "version": "3.4.4",
+        "description": "JupyterLab - Translation services",
+        "keywords": ["jupyter", "jupyterlab", "jupyterlab-extension"],
+        "date": "2022-07-21T14:51:44.592Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40jupyterlab%2Ftranslation",
+          "homepage": "https://github.com/jupyterlab/jupyterlab",
+          "repository": "https://github.com/jupyterlab/jupyterlab",
+          "bugs": "https://github.com/jupyterlab/jupyterlab/issues"
+        },
+        "author": { "name": "Project Jupyter" },
+        "publisher": {
+          "username": "fcdoe",
+          "email": "placeholder@example.com"
+        },
+        "maintainers": [
+          { "username": "3cdoe", "email": "placeholder@example.com" },
+          { "username": "jwdoe", "email": "placeholder@example.com" },
+          { "username": "krdoe", "email": "placeholder@example.com" },
+          { "username": "dadoe", "email": "placeholder@example.com" },
+          { "username": "dedoe", "email": "placeholder@example.com" },
+          { "username": "madoe", "email": "placeholder@example.com" },
+          { "username": "zudoe", "email": "placeholder@example.com" },
+          { "username": "eldoe", "email": "placeholder@example.com" },
+          { "username": "bldoe", "email": "placeholder@example.com" },
+          { "username": "jadoe", "email": "placeholder@example.com" },
+          { "username": "sydoe", "email": "placeholder@example.com" },
+          { "username": "iadoe", "email": "placeholder@example.com" },
+          { "username": "gndoe", "email": "placeholder@example.com" },
+          { "username": "padoe", "email": "placeholder@example.com" },
+          { "username": "mpdoe", "email": "placeholder@example.com" },
+          { "username": "jadoe", "email": "placeholder@example.com" },
+          { "username": "midoe", "email": "placeholder@example.com" },
+          { "username": "sadoe", "email": "placeholder@example.com" },
+          { "username": "hodoe", "email": "placeholder@example.com" },
+          { "username": "zsdoe", "email": "placeholder@example.com" },
+          { "username": "tedoe", "email": "placeholder@example.com" },
+          { "username": "fcdoe", "email": "placeholder@example.com" },
+          { "username": "lrdoe", "email": "placeholder@example.com" },
+          { "username": "codoe", "email": "placeholder@example.com" },
+          { "username": "ajdoe", "email": "placeholder@example.com" },
+          { "username": "madoe", "email": "placeholder@example.com" },
+          { "username": "jtdoe", "email": "placeholder@example.com" },
+          { "username": "ecdoe", "email": "placeholder@example.com" },
+          { "username": "godoe", "email": "placeholder@example.com" },
+          { "username": "mbdoe", "email": "placeholder@example.com" },
+          { "username": "lodoe", "email": "placeholder@example.com" }
+        ]
+      },
+      "score": {
+        "final": 0.3043979310975364,
+        "detail": {
+          "quality": 0.4477368226117161,
+          "popularity": 0.1526006218495854,
+          "maintenance": 0.3333333333333333
+        }
+      },
+      "searchScore": 3.6817326e-8
+    },
+    {
+      "package": {
+        "name": "@jupyterlab/git",
+        "scope": "jupyterlab",
+        "version": "0.37.1",
+        "description": "A JupyterLab extension for version control using git",
+        "keywords": [
+          "Jupyter",
+          "JupyterLab",
+          "JupyterLab3",
+          "jupyterlab-extension",
+          "Git"
+        ],
+        "date": "2022-04-26T06:32:46.362Z",
+        "links": {
+          "npm": "https://www.npmjs.com/package/%40jupyterlab%2Fgit",
+          "homepage": "https://github.com/jupyterlab/jupyterlab-git",
+          "repository": "https://github.com/jupyterlab/jupyterlab-git",
+          "bugs": "https://github.com/jupyterlab/jupyterlab-git/issues"
+        },
+        "author": { "name": "Jupyter Development Team" },
+        "publisher": {
+          "username": "fcdoe",
+          "email": "placeholder@example.com"
+        },
+        "maintainers": [
+          { "username": "3cdoe", "email": "placeholder@example.com" },
+          { "username": "jwdoe", "email": "placeholder@example.com" },
+          { "username": "krdoe", "email": "placeholder@example.com" },
+          { "username": "dadoe", "email": "placeholder@example.com" },
+          { "username": "dedoe", "email": "placeholder@example.com" },
+          { "username": "madoe", "email": "placeholder@example.com" },
+          { "username": "zudoe", "email": "placeholder@example.com" },
+          { "username": "eldoe", "email": "placeholder@example.com" },
+          { "username": "bldoe", "email": "placeholder@example.com" },
+          { "username": "jadoe", "email": "placeholder@example.com" },
+          { "username": "sydoe", "email": "placeholder@example.com" },
+          { "username": "iadoe", "email": "placeholder@example.com" },
+          { "username": "gndoe", "email": "placeholder@example.com" },
+          { "username": "padoe", "email": "placeholder@example.com" },
+          { "username": "mpdoe", "email": "placeholder@example.com" },
+          { "username": "jadoe", "email": "placeholder@example.com" },
+          { "username": "midoe", "email": "placeholder@example.com" },
+          { "username": "sadoe", "email": "placeholder@example.com" },
+          { "username": "hodoe", "email": "placeholder@example.com" },
+          { "username": "zsdoe", "email": "placeholder@example.com" },
+          { "username": "tedoe", "email": "placeholder@example.com" },
+          { "username": "fcdoe", "email": "placeholder@example.com" },
+          { "username": "lrdoe", "email": "placeholder@example.com" },
+          { "username": "codoe", "email": "placeholder@example.com" },
+          { "username": "ajdoe", "email": "placeholder@example.com" },
+          { "username": "madoe", "email": "placeholder@example.com" },
+          { "username": "jtdoe", "email": "placeholder@example.com" },
+          { "username": "ecdoe", "email": "placeholder@example.com" },
+          { "username": "godoe", "email": "placeholder@example.com" },
+          { "username": "mbdoe", "email": "placeholder@example.com" },
+          { "username": "lodoe", "email": "placeholder@example.com" }
+        ]
+      },
+      "flags": { "unstable": true },
+      "score": {
+        "final": 0.29652759181361366,
+        "detail": {
+          "quality": 0.5405756504548741,
+          "popularity": 0.05053780002995652,
+          "maintenance": 0.3333333333333333
+        }
+      },
+      "searchScore": 1.2284681e-8
+    }
+  ],
+  "total": 1043,
+  "time": "Fri Jul 22 2022 12:23:25 GMT+0000 (Coordinated Universal Time)"
+}

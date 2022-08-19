@@ -7,4 +7,5 @@
 import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/rendermime/style/index.js';
 import '@jupyterlab/application/style/index.js';
+import '@jupyterlab/toc/style/index.js';
 import '@jupyterlab/markdownviewer/style/index.js';

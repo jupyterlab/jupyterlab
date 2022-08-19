@@ -2,35 +2,26 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-
 import {
   ABCWidgetFactory,
   DocumentRegistry,
-  IDocumentWidget,
-  DocumentWidget
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
-
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import {
   BasicKeyHandler,
   BasicMouseHandler,
   BasicSelectionModel,
+  CellRenderer,
   DataGrid,
-  TextRenderer,
-  CellRenderer
+  TextRenderer
 } from '@lumino/datagrid';
-
 import { Message } from '@lumino/messaging';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { PanelLayout, Widget } from '@lumino/widgets';
-
-import { CSVDelimiter } from './toolbar';
-
 import { DSVModel } from './model';
-import { ITranslator } from '@jupyterlab/translation';
+import { CSVDelimiter } from './toolbar';
 
 /**
  * The class name added to a CSV viewer.
@@ -114,7 +105,7 @@ export class GridSearchService {
   /**
    * Clear the search.
    */
-  clear() {
+  clear(): void {
     this._query = null;
     this._row = 0;
     this._column = -1;
@@ -294,7 +285,7 @@ export class CSVViewer extends Widget {
   /**
    * A promise that resolves when the csv viewer is ready to be revealed.
    */
-  get revealed() {
+  get revealed(): Promise<void> {
     return this._revealed.promise;
   }
 
@@ -350,7 +341,7 @@ export class CSVViewer extends Widget {
   /**
    * Go to line
    */
-  goToLine(lineNumber: number) {
+  goToLine(lineNumber: number): void {
     this._grid.scrollToRow(lineNumber);
   }
 
@@ -390,9 +381,8 @@ export class CSVViewer extends Widget {
     const renderer = new TextRenderer({
       textColor: rendererConfig.textColor,
       horizontalAlignment: rendererConfig.horizontalAlignment,
-      backgroundColor: this._searchService.cellBackgroundColorRendererFunc(
-        rendererConfig
-      )
+      backgroundColor:
+        this._searchService.cellBackgroundColorRendererFunc(rendererConfig)
     });
     this._grid.cellRenderers.update({
       body: renderer,
@@ -405,10 +395,8 @@ export class CSVViewer extends Widget {
   private _context: DocumentRegistry.Context;
   private _grid: DataGrid;
   private _searchService: GridSearchService;
-  private _monitor: ActivityMonitor<
-    DocumentRegistry.IModel,
-    void
-  > | null = null;
+  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
+    null;
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();
   private _baseRenderer: TextRenderConfig | null = null;
@@ -442,13 +430,6 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     if (delimiter) {
       content.delimiter = delimiter;
     }
-    const csvDelimiter = new CSVDelimiter({ selected: content.delimiter });
-    this.toolbar.addItem('delimiter', csvDelimiter);
-    csvDelimiter.delimiterChanged.connect(
-      (sender: CSVDelimiter, delimiter: string) => {
-        content!.delimiter = delimiter;
-      }
-    );
   }
 
   /**
@@ -484,19 +465,17 @@ export namespace CSVDocumentWidget {
 
   export interface IOptions
     extends DocumentWidget.IOptionsOptionalContent<CSVViewer> {
-    delimiter?: string;
-
     /**
-     * The application language translator.
+     * Data delimiter character
      */
-    translator?: ITranslator;
+    delimiter?: string;
   }
 }
 
 namespace Private {
   export function createContent(
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>
-  ) {
+  ): CSVViewer {
     return new CSVViewer({ context });
   }
 }
@@ -516,14 +495,29 @@ export class CSVViewerFactory extends ABCWidgetFactory<
     const translator = this.translator;
     return new CSVDocumentWidget({ context, translator });
   }
+
+  /**
+   * Default factory for toolbar items to be added after the widget is created.
+   */
+  protected defaultToolbarFactory(
+    widget: IDocumentWidget<CSVViewer>
+  ): DocumentRegistry.IToolbarItem[] {
+    return [
+      {
+        name: 'delimiter',
+        widget: new CSVDelimiter({
+          widget: widget.content,
+          translator: this.translator
+        })
+      }
+    ];
+  }
 }
 
 /**
  * A widget factory for TSV widgets.
  */
-export class TSVViewerFactory extends ABCWidgetFactory<
-  IDocumentWidget<CSVViewer>
-> {
+export class TSVViewerFactory extends CSVViewerFactory {
   /**
    * Create a new widget given a context.
    */

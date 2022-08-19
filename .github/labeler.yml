@@ -2,6 +2,12 @@ Design System CSS:
   - '**/*.css'
   - '*.css'
 
+documentation:
+  - docs/**/*
+  - docs/*
+  - '*.md'
+  - '**/*.md'
+
 tag:CSS:
   - '**/*.css'
   - '*.css'
@@ -10,10 +16,6 @@ tag:CSS:
   - design/**/*
   - design/*
 
-tag:Documentation:
-  - docs/**/*
-  - docs/*
-
 tag:Examples:
   - examples/**/*
   - examples/*
@@ -21,6 +23,8 @@ tag:Examples:
 tag:Testing:
   - tests/**/*
   - tests/*
+  - galata/**/*
+  - galata/*
 
 ######################
 #   Package Labels   #
@@ -42,6 +46,12 @@ pkg:attachments:
   - packages/attachments/**/*
   - packages/attachments/*
 
+pkg:cell-toolbar:
+  - packages/cell-toolbar/**/*
+  - packages/cell-toolbar/*
+  - packages/cell-toolbar-extension/**/*
+  - packages/cell-toolbar-extension/*
+
 pkg:cells:
   - packages/cells/**/*
   - packages/cells/*
@@ -55,6 +65,12 @@ pkg:celltags:
 pkg:codeeditor:
   - packages/codeeditor/**/*
   - packages/codeeditor/*
+
+pkg:collaboration:
+  - packages/collaboration/**/*
+  - packages/collaboration/*
+  - packages/collaboration-extension/**/*
+  - packages/collaboration-extension/*
 
 pkg:codemirror:
   - packages/codemirror/**/*
@@ -95,6 +111,12 @@ pkg:docmanager:
   - packages/docmanager/*
   - packages/docmanager-extension/**/*
   - packages/docmanager-extension/*
+
+pkg:docprovider:
+  - packages/docprovider/**/*
+  - packages/docprovider/*
+  - packages/docprovider-extension/**/*
+  - packages/docprovider-extension/*
 
 pkg:docregistry:
   - packages/docregistry/**/*
@@ -170,6 +192,12 @@ pkg:logconsole:
   - packages/logconsole-extension/**/*
   - packages/logconsole-extension/*
 
+pkg:lsp:
+  - packages/lsp/**/*
+  - packages/lsp/*
+  - packages/lsp-extension/**/*
+  - packages/lsp-extension/*
+
 pkg:mainmenu:
   - packages/mainmenu/**/*
   - packages/mainmenu/*
@@ -238,6 +266,10 @@ pkg:settingregistry:
   - packages/settingregistry/**/*
   - packages/settingregistry/*
 
+pkg:shared-models:
+  - packages/shared-models/**/*
+  - packages/shared-models/*
+
 pkg:shortcuts:
   - packages/shortcuts-extension/**/*
   - packages/shortcuts-extension/*
@@ -263,6 +295,12 @@ pkg:themes:
   - packages/theme-dark-extension/*
   - packages/theme-light-extension/**/*
   - packages/theme-light-extension/*
+
+pkg:toc:
+  - packages/toc/**/*
+  - packages/toc/*
+  - packages/toc-extension/**/*
+  - packages/toc-extension/*
 
 pkg:tooltip:
   - packages/tooltip/**/*

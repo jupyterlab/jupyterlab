@@ -4,13 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
-| Private CSS variables
-|----------------------------------------------------------------------------*/
-
-:root {
-}
-
-/*-----------------------------------------------------------------------------
 | Main OutputArea
 | OutputArea has a list of Outputs
 |----------------------------------------------------------------------------*/
@@ -20,12 +13,16 @@
 }
 
 .jp-OutputArea-child {
-  display: flex;
-  flex-direction: row;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
 }
 
 .jp-OutputPrompt {
-  flex: 0 0 var(--jp-cell-prompt-width);
+  display: table-cell;
+  vertical-align: top;
+  width: var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
@@ -34,11 +31,13 @@
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
   opacity: var(--jp-cell-prompt-opacity);
+
   /* Right align prompt text, don't wrap to handle large prompt numbers */
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
   /* Disable text selection */
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -47,17 +46,14 @@
 }
 
 .jp-OutputArea-output {
+  display: table-cell;
+  width: 100%;
   height: auto;
   overflow: auto;
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
   -ms-user-select: text;
-}
-
-.jp-OutputArea-child .jp-OutputArea-output {
-  flex-grow: 1;
-  flex-shrink: 1;
 }
 
 /**
@@ -78,7 +74,7 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated {
   position: relative;
 }
 
-body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
+body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   content: '';
   position: absolute;
   top: 0;
@@ -92,8 +88,8 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 
 .jp-OutputArea-output pre {
   border: none;
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   overflow-x: auto;
   overflow-y: auto;
   word-break: break-all;
@@ -138,6 +134,13 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   margin: 0;
 }
 
+.jp-TrimmedOutputs pre {
+  background: var(--jp-layout-color3);
+  font-size: calc(var(--jp-code-font-size) * 1.4);
+  text-align: center;
+  text-transform: uppercase;
+}
+
 /* Hide the gutter in case of
  *  - nested output areas (e.g. in the case of output widgets)
  *  - mirrored output areas
@@ -146,14 +149,20 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   display: none;
 }
 
+/* Hide empty lines in the output area, for instance due to cleared widgets */
+.jp-OutputArea-prompt:empty {
+  padding: 0;
+  border: 0;
+}
+
 /*-----------------------------------------------------------------------------
 | executeResult is added to any Output-result for the display of the object
 | returned by a cell
 |----------------------------------------------------------------------------*/
 
 .jp-OutputArea-output.jp-OutputArea-executeResult {
-  margin-left: 0px;
-  flex: 1 1 auto;
+  margin-left: 0;
+  width: 100%;
 }
 
 /* Text output with the Out[] prompt needs a top padding to match the
@@ -188,16 +197,26 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   background-color: inherit;
   width: 42%;
   min-width: 200px;
+
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
+
   /* padding + margin = 0.5em between prompt and cursor */
-  padding: 0em 0.25em;
-  margin: 0em 0.25em;
+  padding: 0 0.25em;
+  margin: 0 0.25em;
   flex: 0 0 70%;
+}
+
+.jp-Stdin-input::placeholder {
+  opacity: 0;
 }
 
 .jp-Stdin-input:focus {
   box-shadow: none;
+}
+
+.jp-Stdin-input:focus::placeholder {
+  opacity: 1;
 }
 
 /*-----------------------------------------------------------------------------
@@ -211,4 +230,40 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 
 .jp-LinkedOutputView .jp-OutputArea-output:only-child {
   height: 100%;
+}
+
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+
+@media print {
+  .jp-OutputArea-child {
+    break-inside: avoid-page;
+  }
+}
+
+/*-----------------------------------------------------------------------------
+| Mobile
+|----------------------------------------------------------------------------*/
+@media only screen and (max-width: 760px) {
+  .jp-OutputPrompt {
+    display: table-row;
+    text-align: left;
+  }
+
+  .jp-OutputArea-child .jp-OutputArea-output {
+    display: table-row;
+    margin-left: var(--jp-notebook-padding);
+  }
+}
+
+/* Trimmed outputs warning */
+.jp-TrimmedOutputs > a {
+  margin: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.jp-TrimmedOutputs > a:hover {
+  text-decoration: none;
 }

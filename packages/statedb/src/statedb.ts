@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { IDataConnector } from './interfaces';
-
 import { IStateDB } from './tokens';
 
 /**
@@ -14,7 +11,8 @@ import { IStateDB } from './tokens';
  */
 export class StateDB<
   T extends ReadonlyPartialJSONValue = ReadonlyPartialJSONValue
-> implements IStateDB<T> {
+> implements IStateDB<T>
+{
   /**
    * Create a new state database.
    *

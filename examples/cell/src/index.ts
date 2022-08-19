@@ -9,31 +9,34 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/cells/style/index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/theme-light-extension/style/theme.css';
+import '@jupyterlab/completer/style/index.css';
 import '../index.css';
 
-import { SessionContext, Toolbar } from '@jupyterlab/apputils';
+import { Toolbar as AppToolbar, SessionContext } from '@jupyterlab/apputils';
+import { Toolbar } from '@jupyterlab/ui-components';
 
-import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
 import { CodeMirrorMimeTypeService } from '@jupyterlab/codemirror';
 
 import {
-  CompleterModel,
   Completer,
+  CompleterModel,
   CompletionHandler,
-  KernelConnector
+  ConnectorProxy,
+  KernelCompleterProvider
 } from '@jupyterlab/completer';
 
 import {
-  RenderMimeRegistry,
-  standardRendererFactories as initialFactories
+  standardRendererFactories as initialFactories,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
-  SessionManager,
   KernelManager,
-  KernelSpecManager
+  KernelSpecManager,
+  SessionManager
 } from '@jupyterlab/services';
 
 import { CommandRegistry } from '@lumino/commands';
@@ -88,29 +91,48 @@ function main(): void {
   const editor = cellWidget.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
-  const connector = new KernelConnector({ session: sessionContext.session });
+  const timeout = 1000;
+  const provider = new KernelCompleterProvider();
+  const connector = new ConnectorProxy(
+    { widget: cellWidget, editor, session: sessionContext.session },
+    [provider],
+    timeout
+  );
   const handler = new CompletionHandler({ completer, connector });
+
+  //sessionContext.session?.kernel.
+  void sessionContext.ready.then(() => {
+    const provider = new KernelCompleterProvider();
+    handler.connector = new ConnectorProxy(
+      { widget: cellWidget, editor, session: sessionContext.session },
+      [provider],
+      timeout
+    );
+  });
 
   // Set the handler's editor.
   handler.editor = editor;
 
   // Hide the widget when it first loads.
   completer.hide();
+  completer.addClass('jp-Completer-Cell');
 
   // Create a toolbar for the cell.
   const toolbar = new Toolbar();
   toolbar.addItem('spacer', Toolbar.createSpacerItem());
-  toolbar.addItem('interrupt', Toolbar.createInterruptButton(sessionContext));
-  toolbar.addItem('restart', Toolbar.createRestartButton(sessionContext));
-  toolbar.addItem('name', Toolbar.createKernelNameItem(sessionContext));
-  toolbar.addItem('status', Toolbar.createKernelStatusItem(sessionContext));
+  toolbar.addItem(
+    'interrupt',
+    AppToolbar.createInterruptButton(sessionContext)
+  );
+  toolbar.addItem('restart', AppToolbar.createRestartButton(sessionContext));
+  toolbar.addItem('name', AppToolbar.createKernelNameItem(sessionContext));
+  toolbar.addItem('status', AppToolbar.createKernelStatusItem(sessionContext));
 
   // Lay out the widgets.
   const panel = new BoxPanel();
   panel.id = 'main';
   panel.direction = 'top-to-bottom';
   panel.spacing = 0;
-  panel.addWidget(completer);
   panel.addWidget(toolbar);
   panel.addWidget(cellWidget);
   BoxPanel.setStretch(toolbar, 0);
@@ -118,6 +140,7 @@ function main(): void {
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
+  Widget.attach(completer, document.body);
 
   // Handle widget state.
   window.addEventListener('resize', () => {

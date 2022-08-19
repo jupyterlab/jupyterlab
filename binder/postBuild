@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-pip install -e .
+pip install -e .[dev]
 
 jlpm
 

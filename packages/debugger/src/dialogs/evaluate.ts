@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { Dialog } from '@jupyterlab/apputils';
 
 import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
@@ -107,7 +112,7 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
       model
     }).initializeState();
 
-    // explicitely remove the prompt in front of the input area
+    // explicitly remove the prompt in front of the input area
     this._prompt.inputArea.promptNode.remove();
 
     this.node.appendChild(this._prompt.node);

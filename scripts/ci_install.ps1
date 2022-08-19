@@ -14,7 +14,7 @@ pip --version
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
 # Show a verbose install if the install fails, for debugging
-pip install -e ".[test]" || pip install -v -e ".[test]"
+pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
 jlpm versions
@@ -29,15 +29,5 @@ if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" 
 jupyter server extension enable jupyterlab
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 # TODO: batch script grepping
-
-# TODO: remove when we no longer support classic notebook
-jupyter serverextension enable jupyterlab
-if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
-# TODO: batch script grepping
-
-if ($Env:GROUP -eq "integrity") {
-    pip install notebook==4.3.1
-    if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
-}
 
 if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }

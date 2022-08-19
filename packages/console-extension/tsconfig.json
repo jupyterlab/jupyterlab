@@ -16,10 +16,10 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../console"
+      "path": "../completer"
     },
     {
-      "path": "../coreutils"
+      "path": "../console"
     },
     {
       "path": "../filebrowser"

@@ -1,11 +1,18 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/* eslint-disable camelcase */
 // Copyright (c) Jupyter Development Team.
 
-import { spawn, ChildProcess } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
+import merge from 'deepmerge';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 import { sleep } from './common';
 
 /**
@@ -39,15 +46,15 @@ export class JupyterServer {
    *
    * @throws Error if another server is still running.
    */
-  async start(): Promise<string> {
+  async start(options: Partial<JupyterServer.IOptions> = {}): Promise<string> {
     if (Private.child !== null) {
       throw Error('Previous server was not disposed');
     }
     const startDelegate = new PromiseDelegate<string>();
 
     const env = {
-      JUPYTER_CONFIG_DIR: Private.handleConfig(),
-      JUPYTER_DATA_DIR: Private.handleData(),
+      JUPYTER_CONFIG_DIR: Private.handleConfig(options),
+      JUPYTER_DATA_DIR: Private.handleData(options),
       JUPYTER_RUNTIME_DIR: Private.mktempDir('jupyter_runtime'),
       IPYTHONDIR: Private.mktempDir('ipython'),
       PATH: process.env.PATH
@@ -115,6 +122,29 @@ export class JupyterServer {
 }
 
 /**
+ * A namespace for JupyterServer static values.
+ */
+export namespace JupyterServer {
+  /**
+   * Options used to create a new JupyterServer instance.
+   */
+  export interface IOptions {
+    /**
+     * Additional Page Config values.
+     */
+    pageConfig: { [name: string]: string };
+    /**
+     * Additional traitlet config data.
+     */
+    configData: JSONObject;
+    /**
+     * Map of additional kernelspec names to kernel.json dictionaries
+     */
+    additionalKernelSpecs: JSONObject;
+  }
+}
+
+/**
  * A namespace for module private data.
  */
 namespace Private {
@@ -136,10 +166,12 @@ namespace Private {
   /**
    * Install a spec in the data directory.
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   export function installSpec(dataDir: string, name: string, spec: any): void {
     const specDir = path.join(dataDir, 'kernels', name);
     fs.mkdirSync(specDir, { recursive: true });
     fs.writeFileSync(path.join(specDir, 'kernel.json'), JSON.stringify(spec));
+    PageConfig.setOption(`__kernelSpec_${name}`, JSON.stringify(spec));
   }
 
   /**
@@ -200,11 +232,19 @@ namespace Private {
   /**
    * Handle configuration.
    */
-  export function handleConfig(): string {
+  export function handleConfig(
+    options: Partial<JupyterServer.IOptions>
+  ): string {
     // Set up configuration.
     const token = UUID.uuid4();
     PageConfig.setOption('token', token);
     PageConfig.setOption('terminalsAvailable', 'true');
+
+    if (options.pageConfig) {
+      Object.keys(options.pageConfig).forEach(key => {
+        PageConfig.setOption(key, options.pageConfig![key]);
+      });
+    }
 
     const configDir = mktempDir('config');
     const configPath = path.join(configDir, 'jupyter_server_config.json');
@@ -214,26 +254,30 @@ namespace Private {
     const user_settings_dir = mktempDir('settings');
     const workspaces_dir = mktempDir('workspaces');
 
-    const configData = {
-      LabApp: {
-        user_settings_dir,
-        workspaces_dir,
-        app_dir,
-        open_browser: false,
-        log_level: 'DEBUG'
+    const configData = merge(
+      {
+        LabApp: {
+          user_settings_dir,
+          workspaces_dir,
+          app_dir,
+          open_browser: false,
+          log_level: 'DEBUG'
+        },
+        ServerApp: {
+          token,
+          root_dir,
+          log_level: 'DEBUG'
+        },
+        MultiKernelManager: {
+          default_kernel_name: 'echo'
+        },
+        KernelManager: {
+          shutdown_wait_time: 1.0
+        }
       },
-      ServerApp: {
-        token,
-        root_dir,
-        log_level: 'DEBUG'
-      },
-      MultiKernelManager: {
-        default_kernel_name: 'echo'
-      },
-      KernelManager: {
-        shutdown_wait_time: 1.0
-      }
-    };
+      options.configData || {}
+    );
+    PageConfig.setOption('__configData', JSON.stringify(configData));
     fs.writeFileSync(configPath, JSON.stringify(configData));
     return configDir;
   }
@@ -241,7 +285,7 @@ namespace Private {
   /**
    * Handle data.
    */
-  export function handleData(): string {
+  export function handleData(options: Partial<JupyterServer.IOptions>): string {
     const dataDir = mktempDir('data');
 
     // Install custom specs.
@@ -262,6 +306,12 @@ namespace Private {
       display_name: 'Python 3',
       language: 'python'
     });
+
+    if (options.additionalKernelSpecs) {
+      Object.keys(options.additionalKernelSpecs).forEach(key => {
+        installSpec(dataDir, key, options.additionalKernelSpecs![key]);
+      });
+    }
     return dataDir;
   }
 

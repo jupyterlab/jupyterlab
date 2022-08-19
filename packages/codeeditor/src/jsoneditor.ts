@@ -3,12 +3,11 @@
 
 import { IObservableJSON } from '@jupyterlab/observables';
 import {
-  nullTranslator,
   ITranslator,
+  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
-
 import {
   JSONExt,
   JSONObject,
@@ -16,7 +15,6 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-
 import { CodeEditor } from './editor';
 
 /**
@@ -176,23 +174,6 @@ export class JSONEditor extends Widget {
     this.revertButtonNode.hidden = true;
     this.commitButtonNode.hidden = true;
     this.headerNode.addEventListener('click', this);
-    if (this.isVisible) {
-      this.update();
-    }
-  }
-
-  /**
-   * Handle `after-show` messages for the widget.
-   */
-  protected onAfterShow(msg: Message): void {
-    this.update();
-  }
-
-  /**
-   * Handle `update-request` messages for the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    this.editor.refresh();
   }
 
   /**
@@ -321,7 +302,6 @@ export class JSONEditor extends Widget {
         this.editor.setCursorPosition({ line: 0, column: 1 });
       }
     }
-    this.editor.refresh();
     this._changeGuard = false;
     this.commitButtonNode.hidden = true;
     this.revertButtonNode.hidden = true;

@@ -40,7 +40,7 @@
   height: 10px;
   width: 10px;
   margin: 3px;
-  left: 0px;
+  left: 0;
   background-color: var(--jp-ui-inverse-font-color1);
   -webkit-transition: 0.4s;
   transition: 0.4s;

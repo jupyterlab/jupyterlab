@@ -17,31 +17,34 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser {
+.jp-FileBrowser .jp-SidePanel-content {
   display: flex;
   flex-direction: column;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-  /* This is needed so that all font sizing of children done in ems is
-   * relative to this base size */
-  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
   border-bottom: none;
   height: auto;
-  margin: var(--jp-toolbar-header-margin);
+  margin: 8px 12px 0;
   box-shadow: none;
+  padding: 0;
+  justify-content: flex-start;
+}
+
+.jp-FileBrowser-Panel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .jp-BreadCrumbs {
   flex: 0 0 auto;
-  margin: 8px 12px 8px 12px;
+  margin: 8px 12px;
 }
 
 .jp-BreadCrumbs-item {
-  margin: 0px 2px;
-  padding: 0px 2px;
+  margin: 0 2px;
+  padding: 0 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
 }
@@ -51,7 +54,7 @@
 }
 
 .jp-BreadCrumbs-item:first-child {
-  margin-left: 0px;
+  margin-left: 0;
 }
 
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
@@ -63,43 +66,14 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar.jp-Toolbar {
-  padding: 0px;
-  margin: 8px 12px 0px 12px;
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar {
-  justify-content: flex-start;
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
-  padding-left: 0px;
+  padding-left: 0;
   padding-right: 2px;
 }
 
-.jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
   width: 40px;
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent {
-  width: 72px;
-  background: var(--jp-brand-color1);
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent:focus-visible {
-  background-color: var(--jp-brand-color0);
-}
-
-.jp-FileBrowser-toolbar.jp-Toolbar
-  .jp-Toolbar-item:first-child
-  .jp-ToolbarButtonComponent
-  .jp-icon3 {
-  fill: white;
 }
 
 /*-----------------------------------------------------------------------------
@@ -107,7 +81,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-FileDialog.jp-mod-conflict input {
-  color: red;
+  color: var(--jp-error-color1);
 }
 
 .jp-FileDialog .jp-new-name-title {
@@ -119,9 +93,13 @@
 }
 
 .jp-FileBrowser-filterBox {
-  padding: 0px;
+  padding: 0;
   flex: 0 0 auto;
-  margin: 8px 12px 0px 12px;
+  margin: 8px 12px 0;
+}
+
+.jp-FileBrowser .lm-AccordionPanel > h3:first-child {
+  display: none;
 }
 
 /*-----------------------------------------------------------------------------
@@ -143,6 +121,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
+  align-items: center;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -151,7 +130,7 @@
 }
 
 .jp-DirListing-headerItem {
-  padding: 4px 12px 2px 12px;
+  padding: 4px 12px 2px;
   font-weight: 500;
 }
 
@@ -172,7 +151,7 @@
 .jp-id-narrow {
   display: none;
   flex: 0 0 5px;
-  padding: 4px 4px;
+  padding: 4px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
   color: var(--jp-border-color2);
@@ -207,6 +186,10 @@
   font-weight: bold;
 }
 
+.jp-DirListing-content .jp-DirListing-item.jp-mod-selected mark {
+  color: var(--jp-ui-inverse-font-color0);
+}
+
 /* Style the directory listing content when a user drops a file to upload */
 .jp-DirListing.jp-mod-native-drop .jp-DirListing-content {
   outline: 5px dashed rgba(128, 128, 128, 0.5);
@@ -217,6 +200,7 @@
 .jp-DirListing-item {
   display: flex;
   flex-direction: row;
+  align-items: center;
   padding: 4px 12px;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -224,12 +208,46 @@
   user-select: none;
 }
 
+.jp-DirListing-checkboxWrapper {
+  /* Increases hit area of checkbox. */
+  padding: 4px;
+}
+
+.jp-DirListing-header
+  .jp-DirListing-checkboxWrapper
+  + .jp-DirListing-headerItem {
+  padding-left: 4px;
+}
+
+.jp-DirListing-content .jp-DirListing-checkboxWrapper {
+  position: relative;
+  left: -4px;
+  margin: -4px 0 -4px -8px;
+}
+
+.jp-DirListing-checkboxWrapper.jp-mod-visible {
+  visibility: visible;
+}
+
+/* For devices that support hovering, hide checkboxes until hovered, selected...
+*/
+@media (hover: hover) {
+  .jp-DirListing-checkboxWrapper {
+    visibility: hidden;
+  }
+
+  .jp-DirListing-item:hover .jp-DirListing-checkboxWrapper,
+  .jp-DirListing-item.jp-mod-selected .jp-DirListing-checkboxWrapper {
+    visibility: visible;
+  }
+}
+
 .jp-DirListing-item[data-is-dot] {
   opacity: 75%;
 }
 
 .jp-DirListing-item.jp-mod-selected {
-  color: white;
+  color: var(--jp-ui-inverse-font-color1);
   background: var(--jp-brand-color1);
 }
 
@@ -265,12 +283,17 @@
   border: none;
 }
 
-.jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon:before {
-  color: limegreen;
+.jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon::before {
+  color: var(--jp-success-color1);
   content: '\25CF';
   font-size: 8px;
   position: absolute;
   left: -8px;
+}
+
+.jp-DirListing-item.jp-mod-running.jp-mod-selected
+  .jp-DirListing-itemIcon::before {
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 .jp-DirListing-item.lm-mod-drag-image,
@@ -281,7 +304,7 @@
   width: 160px;
   background-color: var(--jp-ui-inverse-font-color2);
   box-shadow: var(--jp-elevation-z2);
-  border-radius: 0px;
+  border-radius: 0;
   color: var(--jp-ui-font-color1);
   transform: translateX(-40%) translateY(-58%);
 }

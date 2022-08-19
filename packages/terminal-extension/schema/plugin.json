@@ -1,6 +1,15 @@
 {
   "jupyter.lab.setting-icon": "ui-components:terminal",
   "jupyter.lab.setting-icon-label": "Terminal",
+  "jupyter.lab.menus": {
+    "context": [
+      {
+        "command": "terminal:refresh",
+        "selector": ".jp-Terminal",
+        "rank": 1
+      }
+    ]
+  },
   "title": "Terminal",
   "description": "Terminal settings.",
   "definitions": {
@@ -71,6 +80,12 @@
       "description": "Shut down the session when closing the terminal.",
       "type": "boolean",
       "default": false
+    },
+    "closeOnExit": {
+      "title": "Close on exit",
+      "description": "Close the widget when exiting the terminal.",
+      "type": "boolean",
+      "default": true
     },
     "pasteWithCtrlV": {
       "title": "Paste with Ctrl+V",

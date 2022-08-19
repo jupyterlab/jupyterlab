@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { Logger } from './logger';
-
 import { ILogger, ILoggerRegistry, ILoggerRegistryChange } from './tokens';
 
 /**
@@ -79,14 +76,14 @@ export class LoggerRegistry implements ILoggerRegistry {
   /**
    * Whether the register is disposed.
    */
-  get isDisposed() {
+  get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
    * Dispose the registry and all loggers.
    */
-  dispose() {
+  dispose(): void {
     if (this.isDisposed) {
       return;
     }

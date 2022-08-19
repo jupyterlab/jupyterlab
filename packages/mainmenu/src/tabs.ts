@@ -1,23 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Menu } from '@lumino/widgets';
-
-import { IJupyterLabMenu, JupyterLabMenu } from './labmenu';
+import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
 
 /**
  * An interface for a Tabs menu.
  */
-export interface ITabsMenu extends IJupyterLabMenu {}
+export interface ITabsMenu extends IRankedMenu {}
 
 /**
  * An extensible Tabs menu for the application.
  */
-export class TabsMenu extends JupyterLabMenu implements ITabsMenu {
+export class TabsMenu extends RankedMenu implements ITabsMenu {
   /**
    * Construct the tabs menu.
    */
-  constructor(options: Menu.IOptions) {
+  constructor(options: IRankedMenu.IOptions) {
     super(options);
   }
 }

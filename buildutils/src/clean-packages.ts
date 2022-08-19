@@ -6,12 +6,14 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as glob from 'glob';
-import { readJSONFile } from './utils';
+import { exitOnUncaughtException, readJSONFile } from './utils';
+
+exitOnUncaughtException();
 
 // Get all of the packages.
 const basePath = path.resolve('.');
 const baseConfig = readJSONFile(path.join(basePath, 'package.json'));
-const packageConfig = baseConfig.workspaces;
+const packageConfig = baseConfig.workspaces.packages;
 const skipSource = process.argv.indexOf('packages') === -1;
 const skipExamples = process.argv.indexOf('examples') === -1;
 
