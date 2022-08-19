@@ -207,7 +207,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       options.contentFactory || Cell.defaultContentFactory);
     this.layout = new PanelLayout();
     // Set up translator for aria labels
-    this.translator = options.translator || nullTranslator;
+    this.translator = options.translator ?? nullTranslator;
 
     // Header
     const header = contentFactory.createCellHeader();
@@ -773,7 +773,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
         model: model.outputs,
         rendermime,
         contentFactory: contentFactory,
-        maxNumberOutputs: options.maxNumberOutputs
+        maxNumberOutputs: options.maxNumberOutputs,
+        translator: this.translator
       }));
       output.addClass(CELL_OUTPUT_AREA_CLASS);
       // Set a CSS if there are no outputs, and connect a signal for future
