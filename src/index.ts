@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEndPlugin, JupyterFrontEnd } from '@jupyterlab/application';
+import {
+  JupyterFrontEndPlugin,
+  JupyterFrontEnd,
+} from '@jupyterlab/application';
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
@@ -59,14 +62,11 @@ export class MathJax3Typesetter implements ILatexTypesetter {
       OutputJax: chtml,
     });
 
-    const { commands } = app;
+    const mjclipboard = 'mathjax:clipboard';
+    const mjscale10 = 'mathjax:scale10';
+    const mjscale15 = 'mathjax:scale15';
 
-    const mjclipboard: string = 'mathjax:clipboard';
-    const mjscale10: string = 'mathjax:scale10';
-    const mjscale15: string = 'mathjax:scale15';
-
-    let that = this;
-
+    const that = this;
 
     app.commands.addCommand(mjclipboard, {
       execute: (args: any) => {
@@ -80,10 +80,10 @@ export class MathJax3Typesetter implements ILatexTypesetter {
     app.commands.addCommand(mjscale10, {
       execute: (args: any) => {
         const md = that._mathDocument;
-        md.outputJax.options.scale = 1.;
+        md.outputJax.options.scale = 1.0;
         md.rerender();
       },
-      label: 'MathJax Scale Reset'
+      label: 'MathJax Scale Reset',
     });
 
     app.commands.addCommand(mjscale15, {
@@ -92,39 +92,38 @@ export class MathJax3Typesetter implements ILatexTypesetter {
         md.outputJax.options.scale = 1.5;
         md.rerender();
       },
-      label: 'MathJax Scale x1.5'
+      label: 'MathJax Scale x1.5',
     });
 
     app.contextMenu.addItem({
       type: 'separator',
       selector: '.jp-Notebook .jp-Cell',
-      rank: 12
+      rank: 12,
     });
 
     app.contextMenu.addItem({
       command: mjclipboard,
       selector: '.MathJax',
-      rank: 13
+      rank: 13,
     });
 
     app.contextMenu.addItem({
       command: mjscale10,
       selector: '.MathJax',
-      rank: 13
+      rank: 13,
     });
 
     app.contextMenu.addItem({
       command: mjscale15,
       selector: '.MathJax',
-      rank: 13
+      rank: 13,
     });
 
     app.contextMenu.addItem({
       type: 'separator',
       selector: '.jp-Notebook .jp-Cell',
-      rank: 13
+      rank: 13,
     });
-
 
   }
 
