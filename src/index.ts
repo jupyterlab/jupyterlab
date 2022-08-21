@@ -62,8 +62,8 @@ export class MathJax3Typesetter implements ILatexTypesetter {
     const { commands } = app;
 
     const mjclipboard: string = 'mathjax:clipboard';
-    const mjzoom10: string = 'mathjax:zoom10';
-    const mjzoom15: string = 'mathjax:zoom15';
+    const mjscale10: string = 'mathjax:scale10';
+    const mjscale15: string = 'mathjax:scale15';
 
     let that = this;
 
@@ -77,22 +77,22 @@ export class MathJax3Typesetter implements ILatexTypesetter {
       label: 'MathJax Copy Latex'
     });
 
-    app.commands.addCommand(mjzoom10, {
+    app.commands.addCommand(mjscale10, {
       execute: (args: any) => {
         const md = that._mathDocument;
         md.outputJax.options.scale = 1.;
         md.rerender();
       },
-      label: 'MathJax Zoom Reset'
+      label: 'MathJax Scale Reset'
     });
 
-    app.commands.addCommand(mjzoom15, {
+    app.commands.addCommand(mjscale15, {
       execute: (args: any) => {
         const md = that._mathDocument;
         md.outputJax.options.scale = 1.5;
         md.rerender();
       },
-      label: 'MathJax Zoom 1.5'
+      label: 'MathJax Scale x1.5'
     });
 
     app.contextMenu.addItem({
@@ -108,13 +108,13 @@ export class MathJax3Typesetter implements ILatexTypesetter {
     });
 
     app.contextMenu.addItem({
-      command: mjzoom10,
+      command: mjscale10,
       selector: '.MathJax',
       rank: 13
     });
 
     app.contextMenu.addItem({
-      command: mjzoom15,
+      command: mjscale15,
       selector: '.MathJax',
       rank: 13
     });
