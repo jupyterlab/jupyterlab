@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { JupyterFrontEndPlugin, JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
@@ -37,7 +37,7 @@ class emptyFont extends TeXFont {}
  * The MathJax 3 Typesetter.
  */
 export class MathJax3Typesetter implements ILatexTypesetter {
-  constructor() {
+  constructor(app: JupyterFrontEnd) {
     const chtml = new CHTML({
       font: new emptyFont(),
     });
@@ -58,6 +58,74 @@ export class MathJax3Typesetter implements ILatexTypesetter {
       InputJax: tex,
       OutputJax: chtml,
     });
+
+    const { commands } = app;
+
+    const mjclipboard: string = 'mathjax:clipboard';
+    const mjzoom10: string = 'mathjax:zoom10';
+    const mjzoom15: string = 'mathjax:zoom15';
+
+    let that = this;
+
+
+    app.commands.addCommand(mjclipboard, {
+      execute: (args: any) => {
+        const md = that._mathDocument;
+        const oJax: any = md.outputJax;
+        navigator.clipboard.writeText(oJax.math.math);
+      },
+      label: 'MathJax Copy Latex'
+    });
+
+    app.commands.addCommand(mjzoom10, {
+      execute: (args: any) => {
+        const md = that._mathDocument;
+        md.outputJax.options.scale = 1.;
+        md.rerender();
+      },
+      label: 'MathJax Zoom Reset'
+    });
+
+    app.commands.addCommand(mjzoom15, {
+      execute: (args: any) => {
+        const md = that._mathDocument;
+        md.outputJax.options.scale = 1.5;
+        md.rerender();
+      },
+      label: 'MathJax Zoom 1.5'
+    });
+
+    app.contextMenu.addItem({
+      type: 'separator',
+      selector: '.jp-Notebook .jp-Cell',
+      rank: 12
+    });
+
+    app.contextMenu.addItem({
+      command: mjclipboard,
+      selector: '.MathJax',
+      rank: 13
+    });
+
+    app.contextMenu.addItem({
+      command: mjzoom10,
+      selector: '.MathJax',
+      rank: 13
+    });
+
+    app.contextMenu.addItem({
+      command: mjzoom15,
+      selector: '.MathJax',
+      rank: 13
+    });
+
+    app.contextMenu.addItem({
+      type: 'separator',
+      selector: '.jp-Notebook .jp-Cell',
+      rank: 13
+    });
+
+
   }
 
   /**
@@ -79,7 +147,7 @@ const mathJax3Plugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax3-extension:plugin',
   requires: [],
   provides: ILatexTypesetter,
-  activate: () => new MathJax3Typesetter(),
+  activate: (app: JupyterFrontEnd) => new MathJax3Typesetter(app),
   autoStart: true,
 };
 

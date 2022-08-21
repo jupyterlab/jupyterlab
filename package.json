@@ -53,8 +53,8 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.2.8",
-    "@jupyterlab/rendermime": "^3.2.8",
+    "@jupyterlab/application": "^3.4.5",
+    "@jupyterlab/rendermime": "^3.4.5",
     "mathjax-full": "^3.2.2"
   },
   "devDependencies": {
