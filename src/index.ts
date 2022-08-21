@@ -66,20 +66,18 @@ export class MathJax3Typesetter implements ILatexTypesetter {
     const mjscale10 = 'mathjax:scale10';
     const mjscale15 = 'mathjax:scale15';
 
-    const that = this;
-
     app.commands.addCommand(mjclipboard, {
       execute: (args: any) => {
-        const md = that._mathDocument;
+        const md = this._mathDocument;
         const oJax: any = md.outputJax;
         navigator.clipboard.writeText(oJax.math.math);
       },
-      label: 'MathJax Copy Latex'
+      label: 'MathJax Copy Latex',
     });
 
     app.commands.addCommand(mjscale10, {
       execute: (args: any) => {
-        const md = that._mathDocument;
+        const md = this._mathDocument;
         md.outputJax.options.scale = 1.0;
         md.rerender();
       },
@@ -88,7 +86,7 @@ export class MathJax3Typesetter implements ILatexTypesetter {
 
     app.commands.addCommand(mjscale15, {
       execute: (args: any) => {
-        const md = that._mathDocument;
+        const md = this._mathDocument;
         md.outputJax.options.scale = 1.5;
         md.rerender();
       },
@@ -124,7 +122,6 @@ export class MathJax3Typesetter implements ILatexTypesetter {
       selector: '.jp-Notebook .jp-Cell',
       rank: 13,
     });
-
   }
 
   /**
