@@ -45,6 +45,7 @@ import {
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
+import { bugIcon } from '@jupyterlab/ui-components';
 
 /**
  * A plugin that provides visual debugging support for consoles.
@@ -739,6 +740,9 @@ const main: JupyterFrontEndPlugin<void> = {
 
     sidebar.node.setAttribute('role', 'region');
     sidebar.node.setAttribute('aria-label', trans.__('Debugger section'));
+
+    sidebar.title.icon = bugIcon;
+    sidebar.title.caption = trans.__('Debugger');
 
     shell.add(sidebar, 'right', { type: 'Debugger' });
 
