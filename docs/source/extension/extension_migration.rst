@@ -102,8 +102,8 @@ bumped their major version (following semver convention). We want to point out p
    from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
    need to switch to the Blueprint components as the interfaces of those components in JupyterLab
    do not match those of Blueprint JS.
-- TypeScript 4.6 update
-   As a result of the update to TypeScript 4.5+, a couple of interfaces have had their definitions changed.
+- TypeScript 4.7 update
+   As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 
