@@ -115,9 +115,6 @@ jobs:
           jlpm run clean:slate
           jlpm run build
 
-          # Reset the reference after clean:slate as it removes non-versioned files
-          cp /tmp/lab-benchmark-expected.json galata/
-
       - name: Launch JupyterLab
         working-directory: galata
         run: |
@@ -145,6 +142,10 @@ jobs:
           set -ex
           # Update test screenshots - in case they have not yet been corrected on the challenger branch
           BENCHMARK_NUMBER_SAMPLES=1 PW_VIDEO=1 jlpm run test:benchmark -u
+
+          # Copy reference here otherwise it will use the value from the update screenshots
+          # command called just before
+          cp /tmp/lab-benchmark-expected.json galata/
 
           jlpm run test:benchmark
 
