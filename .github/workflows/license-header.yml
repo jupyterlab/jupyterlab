@@ -31,7 +31,7 @@ jobs:
 
       - name: Get modified files in the staging directory
         id: changed-files
-        uses: tj-actions/changed-files@v24
+        uses: tj-actions/changed-files@v28
 
       - name: Apply Changes
         if: steps.changed-files.outputs.any_changed == 'true'
