@@ -10,6 +10,9 @@ import { Panel } from '@lumino/widgets';
 import { murmur2 } from '../../hash';
 import { IDebugger } from '../../tokens';
 
+const RENDERER_PANEL_CLASS = 'jp-VariableRendererPanel';
+const RENDERER_PANEL_RENDERER_CLASS = 'jp-VariableRendererPanel-renderer';
+
 /**
  * Debugger variable mime type renderer
  */
@@ -25,6 +28,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
       content,
       reveal: Promise.all([dataLoader, loaded.promise])
     });
+    this.content.addClass(RENDERER_PANEL_CLASS);
     this.trans = (translator ?? nullTranslator).load('jupyterlab');
     this.dataLoader = dataLoader;
     this.renderMime = rendermime;
@@ -69,6 +73,7 @@ export class VariableMimeRenderer extends MainAreaWidget<Panel> {
 
         if (mimeType) {
           const widget = this.renderMime.createRenderer(mimeType);
+          widget.addClass(RENDERER_PANEL_RENDERER_CLASS);
           const model = new MimeModel({ ...data, trusted: true });
           this._dataHash = hash;
           await widget.renderModel(model);
