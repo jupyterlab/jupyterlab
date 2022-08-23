@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { every } from '@lumino/algorithm';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { ServerConnection } from '../serverconnection';
-
 import * as Session from './session';
 import { BaseManager } from '../basemanager';
 import { SessionConnection } from './default';
@@ -270,17 +267,17 @@ export class SessionManager extends BaseManager implements Session.IManager {
 
     if (
       this._models.size === models.length &&
-      every(models, x => {
-        const existing = this._models.get(x.id);
+      models.every(model => {
+        const existing = this._models.get(model.id);
         if (!existing) {
           return false;
         }
         return (
-          existing.kernel?.id === x.kernel?.id &&
-          existing.kernel?.name === x.kernel?.name &&
-          existing.name === x.name &&
-          existing.path === x.path &&
-          existing.type === x.type
+          existing.kernel?.id === model.kernel?.id &&
+          existing.kernel?.name === model.kernel?.name &&
+          existing.name === model.name &&
+          existing.path === model.path &&
+          existing.type === model.type
         );
       })
     ) {

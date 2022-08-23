@@ -51,7 +51,6 @@
     "@jupyterlab/observables": "^5.0.0-alpha.12",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.12",
     "@jupyterlab/statedb": "^4.0.0-alpha.12",
-    "@lumino/algorithm": "^2.0.0-alpha.1",
     "@lumino/coreutils": "^2.0.0-alpha.1",
     "@lumino/disposable": "^2.0.0-alpha.1",
     "@lumino/polling": "^2.0.0-alpha.1",

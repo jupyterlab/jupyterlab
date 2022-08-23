@@ -19,7 +19,6 @@
     "@jupyterlab/theme-light-extension": "^4.0.0-alpha.12",
     "@jupyterlab/translation": "^4.0.0-alpha.12",
     "@jupyterlab/ui-components": "^4.0.0-alpha.27",
-    "@lumino/algorithm": "^2.0.0-alpha.1",
     "@lumino/commands": "^2.0.0-alpha.1",
     "@lumino/widgets": "^2.0.0-alpha.1"
   },

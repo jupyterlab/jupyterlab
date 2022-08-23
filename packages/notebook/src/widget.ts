@@ -17,7 +17,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ArrayExt, each, findIndex } from '@lumino/algorithm';
+import { ArrayExt, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
@@ -2320,13 +2320,13 @@ export class Notebook extends StaticNotebook {
       // Move the cells one by one
       model.cells.beginCompoundOperation();
       if (fromIndex < toIndex) {
-        each(toMove, cellWidget => {
+        for (let length = toMove.length; length > 0; length--) {
           model.cells.move(fromIndex, toIndex);
-        });
+        }
       } else if (fromIndex > toIndex) {
-        each(toMove, cellWidget => {
+        for (let length = toMove.length; length > 0; length--) {
           model.cells.move(fromIndex++, toIndex++);
-        });
+        }
       }
       model.cells.endCompoundOperation();
     } else {
@@ -2344,7 +2344,7 @@ export class Notebook extends StaticNotebook {
 
       // Insert the copies of the original cells.
       model.cells.beginCompoundOperation();
-      each(values, (cell: nbformat.ICell) => {
+      for (const cell of values) {
         let value: ICellModel;
         switch (cell.cell_type) {
           case 'code':
@@ -2358,7 +2358,7 @@ export class Notebook extends StaticNotebook {
             break;
         }
         model.cells.insert(index++, value);
-      });
+      }
       model.cells.endCompoundOperation();
       // Select the inserted cells.
       this.deselectAll();
@@ -2374,15 +2374,15 @@ export class Notebook extends StaticNotebook {
     const cells = this.model!.cells;
     const selected: nbformat.ICell[] = [];
     const toMove: Cell[] = [];
-
-    each(this.widgets, (widget, i) => {
-      const cell = cells.get(i);
+    let i = -1;
+    for (const widget of this.widgets) {
+      const cell = cells.get(++i);
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
         toMove.push(widget);
       }
-    });
+    }
     const activeCell = this.activeCell;
     let dragImage: HTMLElement | null = null;
     let countString: string;
@@ -2431,9 +2431,9 @@ export class Notebook extends StaticNotebook {
         return;
       }
       this._drag = null;
-      each(toMove, widget => {
+      for (const widget of toMove) {
         widget.removeClass(DROP_SOURCE_CLASS);
-      });
+      }
     });
   }
 

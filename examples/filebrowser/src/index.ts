@@ -13,8 +13,6 @@ import '@jupyterlab/filebrowser/style/index.css';
 import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
-import { each } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
 
 import { DockPanel, Menu, SplitPanel, Widget } from '@lumino/widgets';
@@ -156,9 +154,9 @@ function createApp(
     iconClass: 'fa fa-folder-open-o',
     mnemonic: 0,
     execute: () => {
-      each(fbWidget.selectedItems(), item => {
+      for (const item of fbWidget.selectedItems()) {
         docManager.openOrReveal(item.path);
-      });
+      }
     }
   });
   commands.addCommand('file-rename', {
