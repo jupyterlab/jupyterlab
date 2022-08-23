@@ -194,7 +194,7 @@ describe('docregistry/registry', () => {
       it('should add a widget extension to the registry', () => {
         const extension = new WidgetExtension();
         registry.addWidgetExtension('foo', extension);
-        expect(registry.widgetExtensions('foo').next()).toBe(extension);
+        expect(registry.widgetExtensions('foo').next().value).toBe(extension);
       });
 
       it('should be a no-op if the extension is already registered for a given widget factory', () => {
@@ -202,7 +202,7 @@ describe('docregistry/registry', () => {
         registry.addWidgetExtension('foo', extension);
         const disposable = registry.addWidgetExtension('foo', extension);
         disposable.dispose();
-        expect(registry.widgetExtensions('foo').next()).toBe(extension);
+        expect(registry.widgetExtensions('foo').next().value).toBe(extension);
       });
 
       it('should be removed from the registry when disposed', () => {
@@ -677,7 +677,7 @@ describe('docregistry/registry', () => {
         const buzz = Array.from(registry.widgetExtensions('buzz'));
         expect(buzz[0]).toBe(foo);
         expect(Array.from(buzz).length).toBe(1);
-        expect(registry.widgetExtensions('baz').next()).toBeUndefined();
+        expect(registry.widgetExtensions('baz').next().done).toBe(true);
       });
     });
 
