@@ -181,11 +181,11 @@ describe('filebrowser/listing', () => {
         const checkbox = dirListing.renderer.getCheckboxNode!(
           itemNode
         ) as HTMLInputElement;
-        const item = dirListing.sortedItems().next()!;
-        await dirListing.selectItemByName(item.name);
+        const item = dirListing.sortedItems().next();
+        await dirListing.selectItemByName(item.value.name);
         await signalToPromise(dirListing.updated);
         expect(checkbox.checked).toBe(true);
-        expect(dirListing.isSelected(item.name)).toBe(true);
+        expect(dirListing.isSelected(item.value.name)).toBe(true);
         simulate(checkbox, 'mousedown', {
           clientX: 1,
           clientY: 1,
@@ -194,7 +194,7 @@ describe('filebrowser/listing', () => {
         await signalToPromise(dirListing.updated);
         // Item is still selected and checkbox is still checked after
         // right-click.
-        expect(dirListing.isSelected(item.name)).toBe(true);
+        expect(dirListing.isSelected(item.value.name)).toBe(true);
         expect(checkbox.checked).toBe(true);
       });
 

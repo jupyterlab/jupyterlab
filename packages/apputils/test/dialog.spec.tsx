@@ -8,7 +8,6 @@ import {
   dismissDialog,
   waitForDialog
 } from '@jupyterlab/testutils';
-import { each } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
@@ -415,8 +414,8 @@ describe('@jupyterlab/apputils', () => {
       describe('#createFooter()', () => {
         it('should create the footer of the dialog', () => {
           const buttons = [Dialog.okButton, { label: 'foo' }];
-          const nodes = buttons.map((button: Dialog.IButton) => {
-            return renderer.createButtonNode(button);
+          const nodes = buttons.map(button => {
+            return renderer.createButtonNode(button as Dialog.IButton);
           });
           const footer = renderer.createFooter(nodes, null);
           const buttonNodes = footer.node.querySelectorAll('button');
@@ -425,9 +424,9 @@ describe('@jupyterlab/apputils', () => {
           expect(footer.node.contains(nodes[0])).toBe(true);
           expect(footer.node.contains(nodes[1])).toBe(true);
           expect(buttonNodes.length).toBeGreaterThan(0);
-          each(buttonNodes, (node: Element) => {
+          for (const node of buttonNodes) {
             expect(node.className).toContain('jp-mod-styled');
-          });
+          }
         });
 
         it('should create the footer of the dialog with checkbox', () => {

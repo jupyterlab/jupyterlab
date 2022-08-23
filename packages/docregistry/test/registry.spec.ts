@@ -218,7 +218,7 @@ describe('docregistry/registry', () => {
         registry = new DocumentRegistry({ initialFileTypes: [] });
         const fileType = { name: 'notebook', extensions: ['.ipynb'] };
         registry.addFileType(fileType);
-        expect(registry.fileTypes().next()!.name).toBe(fileType.name);
+        expect(registry.fileTypes().next().value.name).toBe(fileType.name);
       });
 
       it('should be removed from the registry when disposed', () => {
@@ -235,7 +235,7 @@ describe('docregistry/registry', () => {
         registry.addFileType(fileType);
         const disposable = registry.addFileType(fileType);
         disposable.dispose();
-        expect(registry.fileTypes().next()!.name).toBe(fileType.name);
+        expect(registry.fileTypes().next().value.name).toBe(fileType.name);
       });
 
       it('should add a file type to some factories', () => {
@@ -592,9 +592,9 @@ describe('docregistry/registry', () => {
         registry.addFileType(fileTypes[1]);
         registry.addFileType(fileTypes[2]);
         const values = registry.fileTypes();
-        expect(values.next()!.name).toBe(fileTypes[0].name);
-        expect(values.next()!.name).toBe(fileTypes[1].name);
-        expect(values.next()!.name).toBe(fileTypes[2].name);
+        expect(values.next().value.name).toBe(fileTypes[0].name);
+        expect(values.next().value.name).toBe(fileTypes[1].name);
+        expect(values.next().value.name).toBe(fileTypes[2].name);
       });
     });
 
