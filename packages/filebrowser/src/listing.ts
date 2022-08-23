@@ -26,7 +26,7 @@ import {
   classes,
   LabIcon
 } from '@jupyterlab/ui-components';
-import { ArrayExt, each, filter, find, StringExt } from '@lumino/algorithm';
+import { ArrayExt, filter, StringExt } from '@lumino/algorithm';
 import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
@@ -350,7 +350,7 @@ export class DirListing extends Widget {
     const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
-    each(this._clipboard, path => {
+    for (const path of this._clipboard) {
       if (this._isCut) {
         const localPath = this._manager.services.contents.localPath(path);
         const parts = localPath.split('/');
@@ -360,12 +360,12 @@ export class DirListing extends Widget {
       } else {
         promises.push(this._model.manager.copy(path, basePath));
       }
-    });
+    }
 
     // Remove any cut modifiers.
-    each(this._items, item => {
+    for (const item of this._items) {
       item.classList.remove(CUT_CLASS);
-    });
+    }
 
     this._clipboard.length = 0;
     this._isCut = false;
@@ -431,11 +431,11 @@ export class DirListing extends Widget {
     const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
-    each(this.selectedItems(), item => {
+    for (const item of this.selectedItems()) {
       if (item.type !== 'directory') {
         promises.push(this._model.manager.copy(item.path, basePath));
       }
-    });
+    }
     return Promise.all(promises)
       .then(() => {
         return undefined;
@@ -852,7 +852,7 @@ export class DirListing extends Widget {
 
     // Handle file session statuses.
     const paths = items.map(item => item.path);
-    each(this._model.sessions(), session => {
+    for (const session of this._model.sessions()) {
       const index = ArrayExt.firstIndexOf(paths, session.path);
       const node = nodes[index];
       // Node may have been filtered out.
@@ -867,7 +867,7 @@ export class DirListing extends Widget {
         }
         node.title = this._trans.__('%1\nKernel: %2', node.title, name);
       }
-    });
+    }
 
     this._prevPath = this._model.path;
   }
@@ -1332,7 +1332,7 @@ export class DirListing extends Widget {
     let selectedPaths = Object.keys(this.selection);
     const source = this._items[index];
     const items = this._sortedItems;
-    let selectedItems: Contents.IModel[];
+    let selectedItems: Iterable<Contents.IModel>;
     let item: Contents.IModel | undefined;
 
     // If the source node is not selected, use just that node.
@@ -1342,8 +1342,8 @@ export class DirListing extends Widget {
       selectedItems = [item];
     } else {
       const path = selectedPaths[0];
-      item = find(items, value => value.path === path);
-      selectedItems = Array.from(this.selectedItems());
+      item = items.find(value => value.path === path);
+      selectedItems = this.selectedItems();
     }
 
     if (!item) {
@@ -1555,9 +1555,9 @@ export class DirListing extends Widget {
    */
   private _copy(): void {
     this._clipboard.length = 0;
-    each(this.selectedItems(), item => {
+    for (const item of this.selectedItems()) {
       this._clipboard.push(item.path);
-    });
+    }
   }
 
   /**
@@ -1678,12 +1678,12 @@ export class DirListing extends Widget {
     // Update the selection.
     const existing = Object.keys(this.selection);
     this.clearSelectedItems();
-    each(this._model.items(), item => {
+    for (const item of this._model.items()) {
       const path = item.path;
       if (existing.indexOf(path) !== -1) {
         this.selection[path] = true;
       }
-    });
+    }
     if (this.isVisible) {
       // Update the sorted items.
       this.sort(this.sortState);

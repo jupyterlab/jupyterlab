@@ -493,9 +493,10 @@ export class StaticNotebook extends Widget {
       );
     }
 
-    each(cells, (cell: ICellModel, i: number) => {
-      this._insertCell(i, cell, 'set');
-    });
+    let index = -1;
+    for (const cell of cells) {
+      this._insertCell(++index, cell, 'set');
+    }
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
     newValue.metadata.changed.connect(this.onMetadataChanged, this);
@@ -514,17 +515,17 @@ export class StaticNotebook extends Widget {
         index = args.newIndex;
         // eslint-disable-next-line no-case-declarations
         const insertType: InsertType = args.oldIndex == -1 ? 'push' : 'insert';
-        each(args.newValues, value => {
+        for (const value of args.newValues) {
           this._insertCell(index++, value, insertType);
-        });
+        }
         break;
       case 'move':
         this._moveCell(args.oldIndex, args.newIndex);
         break;
       case 'remove':
-        each(args.oldValues, value => {
-          this._removeCell(args.oldIndex);
-        });
+        for (let i = args.oldIndex, len = args.oldValues.length; len > 0; ) {
+          this._removeCell(i++);
+        }
         // Add default cell if there are no cells remaining.
         if (!sender.length) {
           const model = this.model;
@@ -545,14 +546,14 @@ export class StaticNotebook extends Widget {
       case 'set':
         // TODO: reuse existing widgets if possible.
         index = args.newIndex;
-        each(args.newValues, value => {
+        for (const value of args.newValues) {
           // Note: this ordering (insert then remove)
           // is important for getting the active cell
           // index for the editable notebook correct.
           this._insertCell(index, value, 'set');
           this._removeCell(index + 1);
           index++;
-        });
+        }
         break;
       default:
         return;
@@ -805,11 +806,11 @@ export class StaticNotebook extends Widget {
       return;
     }
     this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
-    each(this.widgets, widget => {
+    for (const widget of this.widgets) {
       if (widget.model.type === 'code') {
         widget.model.mimeType = this._mimetype;
       }
-    });
+    }
   }
 
   /**
@@ -1270,9 +1271,9 @@ export class Notebook extends StaticNotebook {
 
     if (newValue === 'edit') {
       // Edit mode deselects all cells.
-      each(this.widgets, widget => {
+      for (const widget of this.widgets) {
         this.deselect(widget);
-      });
+      }
       //  Edit mode unrenders an active markdown widget.
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
@@ -1408,12 +1409,12 @@ export class Notebook extends StaticNotebook {
    */
   deselectAll(): void {
     let changed = false;
-    each(this.widgets, widget => {
+    for (const widget of this.widgets) {
       if (Private.selectedProperty.get(widget)) {
         changed = true;
       }
       Private.selectedProperty.set(widget, false);
-    });
+    }
     if (changed) {
       this._selectionChanged.emit(void 0);
     }
@@ -1795,7 +1796,7 @@ export class Notebook extends StaticNotebook {
     }
 
     let count = 0;
-    each(this.widgets, widget => {
+    for (const widget of this.widgets) {
       if (widget !== activeCell) {
         widget.removeClass(ACTIVE_CLASS);
       }
@@ -1806,7 +1807,7 @@ export class Notebook extends StaticNotebook {
       } else {
         widget.removeClass(SELECTED_CLASS);
       }
-    });
+    }
     if (count > 1) {
       activeCell?.addClass(OTHER_SELECTED_CLASS);
     }

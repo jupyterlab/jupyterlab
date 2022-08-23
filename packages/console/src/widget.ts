@@ -19,7 +19,6 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { KernelMessage } from '@jupyterlab/services';
-import { each } from '@lumino/algorithm';
 import { JSONObject, MimeData } from '@lumino/coreutils';
 import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
@@ -377,12 +376,12 @@ export class CodeConsole extends Widget {
    */
   serialize(): nbformat.ICodeCell[] {
     const cells: nbformat.ICodeCell[] = [];
-    each(this._cells, cell => {
+    for (const cell of this._cells) {
       const model = cell.model;
       if (isCodeCellModel(model)) {
         cells.push(model.toJSON());
       }
-    });
+    }
 
     if (this.promptCell) {
       cells.push(this.promptCell.model.toJSON());
@@ -675,11 +674,11 @@ export class CodeConsole extends Widget {
           }
         }
       } else if (value && value.content.status === 'error') {
-        each(this._cells, (cell: CodeCell) => {
-          if (cell.model.executionCount === null) {
+        for (const cell of this._cells) {
+          if ((cell.model as ICodeCellModel).executionCount === null) {
             cell.setPrompt('');
           }
-        });
+        }
       }
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();

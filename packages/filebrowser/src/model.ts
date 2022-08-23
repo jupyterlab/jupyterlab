@@ -12,7 +12,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { IScore } from '@jupyterlab/ui-components';
-import { ArrayExt, filter, find } from '@lumino/algorithm';
+import { ArrayExt, filter } from '@lumino/algorithm';
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
@@ -428,7 +428,7 @@ export class FileBrowserModel implements IDisposable {
     await this.refresh();
     await this._uploadCheckDisposed();
     if (
-      find(this._items, i => i.name === file.name) &&
+      this._items.find(i => i.name === file.name) &&
       !(await shouldOverwrite(file.name))
     ) {
       throw err;

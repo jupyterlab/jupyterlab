@@ -16,7 +16,6 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { each } from '@lumino/algorithm';
 import { Token } from '@lumino/coreutils';
 import { INotebookModel } from './model';
 import { Notebook, StaticNotebook } from './widget';
@@ -96,8 +95,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   ): void {
     if (state === 'started' && this.model) {
       // Find markdown cells
-      const { cells } = this.model;
-      each(cells, cell => {
+      for (const cell of this.model.cells) {
         if (isMarkdownCellModel(cell)) {
           for (const key of cell.attachments.keys) {
             if (!cell.value.text.includes(key)) {
@@ -105,7 +103,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
             }
           }
         }
-      });
+      }
     }
   }
 

@@ -19,8 +19,6 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { textEditorIcon } from '@jupyterlab/ui-components';
 
-import { each } from '@lumino/algorithm';
-
 import { IDebugger } from './tokens';
 
 /**
@@ -152,20 +150,20 @@ export class DebuggerSources implements IDebugger.ISources {
       }
 
       const cells = consoleWidget.console.cells;
-      each(cells, cell => {
+      for (const cell of cells) {
         const code = cell.model.value.text;
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
-          return;
+          break;
         }
         if (source !== codeId) {
-          return;
+          break;
         }
         editors.push(cell.editor);
         if (focus) {
           this._shell.activateById(consoleWidget.id);
         }
-      });
+      }
     });
     return editors;
   }
