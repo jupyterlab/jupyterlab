@@ -468,7 +468,7 @@ describe('completer/widget', () => {
         widget.reset();
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.isHidden).toBe(true);
-        expect(model.options().next()).toBeUndefined();
+        expect(model.options().next().done).toBe(true);
         widget.dispose();
         anchor.dispose();
       });
@@ -538,7 +538,7 @@ describe('completer/widget', () => {
           simulate(document.body, 'keydown', { keyCode: 70 }); // F
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           expect(widget.isHidden).toBe(true);
-          expect(model.options().next()).toBeUndefined();
+          expect(model.options().next().done).toBe(true);
           widget.dispose();
           anchor.dispose();
         });

@@ -195,7 +195,7 @@ describe('filebrowser/model', () => {
     describe('#items()', () => {
       it('should get an iterator of items in the current path', () => {
         const items = model.items();
-        expect(items.next()).toBeTruthy();
+        expect(!items.next().done).toBe(true);
       });
     });
 
@@ -216,7 +216,7 @@ describe('filebrowser/model', () => {
           type: 'test'
         });
         await model.cd();
-        expect(model.sessions().next()).toBeTruthy();
+        expect(!model.sessions().next().done).toBe(true);
         await session.shutdown();
       });
     });

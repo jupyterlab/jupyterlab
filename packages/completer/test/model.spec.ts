@@ -304,7 +304,7 @@ describe('completer/model', () => {
     describe('#options()', () => {
       it('should default to an empty iterator', () => {
         const model = new CompleterModel();
-        expect(model.options().next()).toBeUndefined();
+        expect(model.options().next().done).toBe(true);
       });
 
       it('should return model options', () => {
@@ -390,7 +390,7 @@ describe('completer/model', () => {
         model.current = change;
         expect(model.current).toBeNull();
         expect(model.original).toBeNull();
-        expect(model.options().next()).toBeUndefined();
+        expect(model.options().next().done).toBe(true);
       });
     });
 
