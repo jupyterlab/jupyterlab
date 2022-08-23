@@ -41,7 +41,6 @@ import {
   textEditorIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONObject,
@@ -1246,9 +1245,11 @@ export namespace Commands {
       widget.title.caption = widget.title.label;
 
       // Get the fileType based on the mimetype to determine the icon
-      const fileType = toArray(app.docRegistry.fileTypes()).find(fileType => {
-        return mimetype ? fileType.mimeTypes.includes(mimetype) : undefined;
-      });
+      const fileType = Array.from(app.docRegistry.fileTypes()).find(
+        fileType => {
+          return mimetype ? fileType.mimeTypes.includes(mimetype) : undefined;
+        }
+      );
       widget.title.icon = fileType?.icon ?? textEditorIcon;
 
       if (args.widgetId) {

@@ -18,7 +18,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import { ITooltipManager, Tooltip } from '@jupyterlab/tooltip';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { find, toArray } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
@@ -193,7 +193,7 @@ const files: JupyterFrontEndPlugin<void> = {
     // matching path for the file editors.
     const onRunningChanged = (
       sender: Session.IManager,
-      models: Session.IModel[]
+      models: Iterable<Session.IModel>
     ) => {
       editorTracker.forEach(file => {
         const model = find(models, m => file.context.path === m.path);
@@ -221,7 +221,7 @@ const files: JupyterFrontEndPlugin<void> = {
         }
       });
     };
-    onRunningChanged(sessions, toArray(sessions.running()));
+    onRunningChanged(sessions, sessions.running());
     sessions.runningChanged.connect(onRunningChanged);
 
     // Clean up after a widget when it is disposed

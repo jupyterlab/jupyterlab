@@ -26,16 +26,7 @@ import {
   classes,
   LabIcon
 } from '@jupyterlab/ui-components';
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  filter,
-  find,
-  IIterator,
-  StringExt,
-  toArray
-} from '@lumino/algorithm';
+import { ArrayExt, each, filter, find, StringExt } from '@lumino/algorithm';
 import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag, IDragEvent } from '@lumino/dragdrop';
@@ -297,7 +288,7 @@ export class DirListing extends Widget {
    *
    * @returns A new iterator over the listing's selected items.
    */
-  selectedItems(): IIterator<Contents.IModel> {
+  selectedItems(): IterableIterator<Contents.IModel> {
     const items = this._sortedItems;
     return filter(items, item => this.selection[item.path]);
   }
@@ -307,8 +298,8 @@ export class DirListing extends Widget {
    *
    * @returns A new iterator over the listing's sorted items.
    */
-  sortedItems(): IIterator<Contents.IModel> {
-    return new ArrayIterator(this._sortedItems);
+  sortedItems(): IterableIterator<Contents.IModel> {
+    return this._sortedItems[Symbol.iterator]();
   }
 
   /**
@@ -462,7 +453,7 @@ export class DirListing extends Widget {
    */
   async download(): Promise<void> {
     await Promise.all(
-      toArray(this.selectedItems())
+      Array.from(this.selectedItems())
         .filter(item => item.type !== 'directory')
         .map(item => this._model.download(item.path))
     );
@@ -478,7 +469,7 @@ export class DirListing extends Widget {
     const items = this._sortedItems;
     const paths = items.map(item => item.path);
 
-    const promises = toArray(this._model.sessions())
+    const promises = Array.from(this._model.sessions())
       .filter(session => {
         const index = ArrayExt.firstIndexOf(paths, session.path);
         return this.selection[items[index].path];
@@ -587,7 +578,7 @@ export class DirListing extends Widget {
     const items = this._sortedItems;
 
     return (
-      toArray(
+      Array.from(
         filter(items, item => item.name === name && this.selection[item.path])
       ).length !== 0
     );
@@ -1352,7 +1343,7 @@ export class DirListing extends Widget {
     } else {
       const path = selectedPaths[0];
       item = find(items, value => value.path === path);
-      selectedItems = toArray(this.selectedItems());
+      selectedItems = Array.from(this.selectedItems());
     }
 
     if (!item) {
@@ -2415,10 +2406,10 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export function sort(
-    items: IIterator<Contents.IModel>,
+    items: Iterable<Contents.IModel>,
     state: DirListing.ISortState
   ): Contents.IModel[] {
-    const copy = toArray(items);
+    const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
 
     if (state.key === 'last_modified') {

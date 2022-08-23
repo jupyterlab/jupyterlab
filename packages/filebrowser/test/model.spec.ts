@@ -13,7 +13,6 @@ import {
   sleep
 } from '@jupyterlab/testutils';
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-import { toArray } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import expect from 'expect';
 import { CHUNK_SIZE, FileBrowserModel, LARGE_FILE_SIZE } from '../src';
@@ -452,7 +451,7 @@ describe('filebrowser/model', () => {
           );
 
           const uploaded = model.upload(file);
-          expect(toArray(model.uploads())).toEqual([]);
+          expect(Array.from(model.uploads())).toEqual([]);
           expect(await start).toEqual([
             model,
             {
@@ -461,7 +460,7 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 0 }
             }
           ]);
-          expect(toArray(model.uploads())).toEqual([
+          expect(Array.from(model.uploads())).toEqual([
             { path: fname, progress: 0 }
           ]);
           expect(await first).toEqual([
@@ -472,7 +471,7 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 0 }
             }
           ]);
-          expect(toArray(model.uploads())).toEqual([
+          expect(Array.from(model.uploads())).toEqual([
             { path: fname, progress: 0 }
           ]);
           expect(await second).toEqual([
@@ -483,7 +482,7 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 1 / 2 }
             }
           ]);
-          expect(toArray(model.uploads())).toEqual([
+          expect(Array.from(model.uploads())).toEqual([
             { path: fname, progress: 1 / 2 }
           ]);
           expect(await finished).toEqual([
@@ -494,7 +493,7 @@ describe('filebrowser/model', () => {
               newValue: null
             }
           ]);
-          expect(toArray(model.uploads())).toEqual([]);
+          expect(Array.from(model.uploads())).toEqual([]);
           await uploaded;
         });
 

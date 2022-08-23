@@ -43,7 +43,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
-import { each, map, some, toArray } from '@lumino/algorithm';
+import { map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -237,7 +237,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       });
       // Set the default factory overrides. If not provided, this has the
       // effect of unsetting any previous overrides.
-      each(registry.fileTypes(), ft => {
+      for (const ft of registry.fileTypes()) {
         try {
           registry.setDefaultWidgetFactory(ft.name, overrides[ft.name]);
         } catch {
@@ -247,7 +247,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
             }`
           );
         }
-      });
+      }
     };
 
     // Fetch the initial state of the settings.
@@ -267,11 +267,11 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
     settingRegistry.transform(docManagerPluginId, {
       fetch: plugin => {
         // Get the available file types.
-        const fileTypes = toArray(registry.fileTypes())
+        const fileTypes = Array.from(registry.fileTypes())
           .map(ft => ft.name)
           .join('    \n');
         // Get the available widget factories.
-        const factories = toArray(registry.widgetFactories())
+        const factories = Array.from(registry.widgetFactories())
           .map(f => f.name)
           .join('    \n');
         // Generate the help string.
@@ -466,7 +466,7 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
           }
         });
       },
-      icon: args => (args['icon'] as string) || '',
+      iconClass: args => (args['icon'] as string) || '',
       label: () => trans.__('Open in New Browser Tab')
     });
   }
@@ -628,7 +628,7 @@ function addCommands(
         .get(path, { content: false })
         .then(() => docManager.openOrReveal(path, factory, kernel, options));
     },
-    icon: args => (args['icon'] as string) || '',
+    iconClass: args => (args['icon'] as string) || '',
     label: args =>
       ((args['label'] || args['factory']) ??
         trans.__('Open the provided `path`.')) as string,
@@ -758,7 +758,7 @@ function addCommands(
   commands.addCommand(CommandIDs.save, {
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
     caption,
-    icon: args => (args.toolbar ? saveIcon : ''),
+    icon: args => (args.toolbar ? saveIcon : undefined),
     isEnabled: isWritable,
     execute: async () => {
       // Checks that shell.currentWidget is valid:
@@ -869,13 +869,13 @@ function addCommands(
     execute: () => {
       const promises: Promise<void>[] = [];
       const paths = new Set<string>(); // Cache so we don't double save files.
-      each(shell.widgets('main'), widget => {
+      for (const widget of shell.widgets('main')) {
         const context = docManager.contextForWidget(widget);
         if (context && !context.model.readOnly && !paths.has(context.path)) {
           paths.add(context.path);
           promises.push(context.save());
         }
-      });
+      }
       return Promise.all(promises);
     }
   });

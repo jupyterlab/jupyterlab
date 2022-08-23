@@ -37,7 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/coreutils": "^1.12.0"
+    "@lumino/coreutils": "^2.0.0-alpha.1"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.12",

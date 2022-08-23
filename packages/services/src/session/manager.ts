@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { every, IIterator, iter } from '@lumino/algorithm';
+import { every } from '@lumino/algorithm';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -128,8 +128,8 @@ export class SessionManager extends BaseManager implements Session.IManager {
    *
    * @returns A new iterator over the running sessions.
    */
-  running(): IIterator<Session.IModel> {
-    return iter([...this._models.values()]);
+  running(): IterableIterator<Session.IModel> {
+    return this._models.values();
   }
 
   /**

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { every, IIterator, iter } from '@lumino/algorithm';
+import { every } from '@lumino/algorithm';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -140,8 +140,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    *
    * @returns A new iterator over the running kernels.
    */
-  running(): IIterator<Kernel.IModel> {
-    return iter([...this._models.values()]);
+  running(): IterableIterator<Kernel.IModel> {
+    return this._models.values();
   }
 
   /**

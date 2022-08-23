@@ -26,7 +26,6 @@ import { ITerminal, ITerminalTracker } from '@jupyterlab/terminal';
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
 import { ITranslator } from '@jupyterlab/translation';
 import { terminalIcon } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 import { Menu, Widget } from '@lumino/widgets';
 
 /**
@@ -283,7 +282,7 @@ function addRunningSessionManager(
   managers.add({
     name: trans.__('Terminals'),
     running: () =>
-      toArray(manager.running()).map(model => new RunningTerminal(model)),
+      Array.from(manager.running()).map(model => new RunningTerminal(model)),
     shutdownAll: () => manager.shutdownAll(),
     refreshRunning: () => manager.refreshRunning(),
     runningChanged: manager.runningChanged,

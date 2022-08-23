@@ -15,7 +15,7 @@ import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
 import { ITranslator } from '@jupyterlab/translation';
 import { addIcon, launcherIcon } from '@jupyterlab/ui-components';
-import { find, toArray } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
@@ -86,7 +86,7 @@ function activate(
       const main = new MainAreaWidget({ content: launcher });
 
       // If there are any other widgets open, remove the launcher close icon.
-      main.title.closable = !!toArray(shell.widgets('main')).length;
+      main.title.closable = !!Array.from(shell.widgets('main')).length;
       main.id = id;
 
       shell.add(main, 'main', {
@@ -97,7 +97,7 @@ function activate(
       if (labShell) {
         labShell.layoutModified.connect(() => {
           // If there is only a launcher open, remove the close icon.
-          main.title.closable = toArray(labShell.widgets('main')).length > 1;
+          main.title.closable = Array.from(labShell.widgets('main')).length > 1;
         }, main);
       }
 

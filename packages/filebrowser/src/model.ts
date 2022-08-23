@@ -12,15 +12,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { IScore } from '@jupyterlab/ui-components';
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  filter,
-  find,
-  IIterator,
-  IterableOrArrayLike
-} from '@lumino/algorithm';
+import { ArrayExt, filter, find } from '@lumino/algorithm';
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
@@ -193,8 +185,8 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Create an iterator over the status of all in progress uploads.
    */
-  uploads(): IIterator<IUploadModel> {
-    return new ArrayIterator(this._uploads);
+  uploads(): IterableIterator<IUploadModel> {
+    return this._uploads[Symbol.iterator]();
   }
 
   /**
@@ -217,8 +209,8 @@ export class FileBrowserModel implements IDisposable {
    *
    * @returns A new iterator over the model's items.
    */
-  items(): IIterator<Contents.IModel> {
-    return new ArrayIterator(this._items);
+  items(): IterableIterator<Contents.IModel> {
+    return this._items[Symbol.iterator]();
   }
 
   /**
@@ -226,8 +218,8 @@ export class FileBrowserModel implements IDisposable {
    *
    * @returns A new iterator over the model's active sessions.
    */
-  sessions(): IIterator<Session.IModel> {
-    return new ArrayIterator(this._sessions);
+  sessions(): IterableIterator<Session.IModel> {
+    return this._sessions[Symbol.iterator]();
   }
 
   /**
@@ -604,7 +596,7 @@ export class FileBrowserModel implements IDisposable {
    */
   protected onRunningChanged(
     sender: Session.IManager,
-    models: IterableOrArrayLike<Session.IModel>
+    models: Iterable<Session.IModel>
   ): void {
     this._populateSessions(models);
     this._refreshed.emit(void 0);
@@ -639,13 +631,13 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Populate the model's sessions collection.
    */
-  private _populateSessions(models: IterableOrArrayLike<Session.IModel>): void {
+  private _populateSessions(models: Iterable<Session.IModel>): void {
     this._sessions.length = 0;
-    each(models, model => {
+    for (const model of models) {
       if (this._paths.has(model.path)) {
         this._sessions.push(model);
       }
-    });
+    }
   }
 
   protected translator: ITranslator;
@@ -736,7 +728,7 @@ export class TogglableHiddenFileBrowserModel extends FileBrowserModel {
    *
    * @returns A new iterator over the model's items.
    */
-  items(): IIterator<Contents.IModel> {
+  items(): IterableIterator<Contents.IModel> {
     return this._includeHiddenFiles
       ? super.items()
       : filter(super.items(), value => !value.name.startsWith('.'));
@@ -797,8 +789,8 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
    *
    * @returns A new iterator over the model's items.
    */
-  items(): IIterator<Contents.IModel> {
-    return filter(super.items(), (value, index) => {
+  items(): IterableIterator<Contents.IModel> {
+    return filter(super.items(), value => {
       if (!this._filterDirectories && value.type === 'directory') {
         return true;
       } else {

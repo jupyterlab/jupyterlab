@@ -21,7 +21,7 @@ import {
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ArrayExt, each, findIndex, toArray } from '@lumino/algorithm';
+import { every, findIndex } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -1371,15 +1371,15 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
-    each(notebook.model.cells, (cell: ICodeCellModel, index) => {
-      const child = notebook.widgets[index];
+    let index = -1;
+    for (const cell of notebook.model.cells) {
+      const child = notebook.widgets[++index];
 
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
-        cell.clearExecution();
+        (cell as ICodeCellModel).clearExecution();
         (child as CodeCell).outputHidden = false;
       }
-    });
+    }
     Private.handleState(notebook, state, true);
   }
 
@@ -1397,15 +1397,15 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
-    each(notebook.model.cells, (cell: ICodeCellModel, index) => {
-      const child = notebook.widgets[index];
+    let index = -1;
+    for (const cell of notebook.model.cells) {
+      const child = notebook.widgets[++index];
 
       if (cell.type === 'code') {
-        cell.clearExecution();
+        (cell as ICodeCellModel).clearExecution();
         (child as CodeCell).outputHidden = false;
       }
-    });
+    }
     Private.handleState(notebook, state, true);
   }
 
@@ -1979,8 +1979,7 @@ export namespace NotebookActions {
     }
     // Do nothing if already trusted.
 
-    const cells = toArray(notebook.model.cells);
-    const trusted = cells.every(cell => cell.trusted);
+    const trusted = every(notebook.model.cells, cell => cell.trusted);
     // FIXME
     const trustMessage = (
       <p>
@@ -2020,9 +2019,11 @@ export namespace NotebookActions {
       ] // FIXME?
     }).then(result => {
       if (result.button.accept) {
-        cells.forEach(cell => {
-          cell.trusted = true;
-        });
+        if (notebook.model) {
+          for (const cell of notebook.model.cells) {
+            cell.trusted = true;
+          }
+        }
       }
     });
   }
@@ -2360,7 +2361,7 @@ Please wait for the complete rendering before invoking that action.`,
     // Create a new code cell and add as the next cell.
     const newCell = notebook.model!.contentFactory.createCodeCell({});
     const cells = notebook.model!.cells;
-    const index = ArrayExt.firstIndexOf(toArray(cells), cell.model);
+    const index = findIndex(cells, model => model === cell.model);
 
     newCell.value.text = text;
     if (index === -1) {

@@ -6,7 +6,6 @@ import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import type { Cell, MarkdownCell } from '@jupyterlab/cells';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import { toArray } from '@lumino/algorithm';
 import {
   IGalataInpage,
   INotebookRunCallback,
@@ -593,7 +592,7 @@ export class GalataInpage implements IGalataInpage {
    */
   getNotebookToolbarItemIndex(itemName: string): number {
     const nbPanel = this._app.shell.currentWidget as NotebookPanel;
-    const names = toArray(nbPanel.toolbar.names());
+    const names = Array.from(nbPanel.toolbar.names());
 
     return names.indexOf(itemName);
   }

@@ -6,7 +6,6 @@ import {
   JupyterServer,
   testEmission
 } from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import { KernelAPI } from '../../src';
 import {
@@ -44,7 +43,9 @@ describe('kernel', () => {
   describe('Kernel.listRunning()', () => {
     it('should yield a list of valid kernel ids', async () => {
       const kernel = await KernelAPI.startNew();
-      expect(toArray(await KernelAPI.listRunning()).length).toBeGreaterThan(0);
+      expect(Array.from(await KernelAPI.listRunning()).length).toBeGreaterThan(
+        0
+      );
       await KernelAPI.shutdownKernel(kernel.id);
     });
 
@@ -52,7 +53,7 @@ describe('kernel', () => {
       const serverSettings = makeSettings();
       const k = await KernelAPI.startNew({}, serverSettings);
       const response = await KernelAPI.listRunning(serverSettings);
-      expect(toArray(response).length).toBeGreaterThan(0);
+      expect(Array.from(response).length).toBeGreaterThan(0);
       await KernelAPI.shutdownKernel(k.id);
     });
 

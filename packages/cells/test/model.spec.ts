@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@lumino/algorithm';
-
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
@@ -261,7 +259,7 @@ describe('cells/model', () => {
 
       it('should get a list of user metadata keys', () => {
         const model = new CellModel({});
-        expect(toArray(model.metadata.keys())).toHaveLength(0);
+        expect(Array.from(model.metadata.keys())).toHaveLength(0);
         model.metadata.set('foo', 1);
         expect(model.metadata.keys()).toEqual(['foo']);
       });

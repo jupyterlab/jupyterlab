@@ -3,7 +3,6 @@
 
 import { LabShell } from '@jupyterlab/application';
 import { framePromise } from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { DockPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -174,14 +173,14 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'top');
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(3);
+      expect(Array.from(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'top');
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(2);
+      expect(Array.from(shell.widgets('top')).length).toEqual(2);
     });
 
     it('should accept options', () => {
@@ -189,7 +188,7 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(3);
+      expect(Array.from(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should add widgets according to their ranks', () => {
@@ -200,7 +199,7 @@ describe('LabShell', () => {
       shell.add(foo, 'top', { rank: 10001 });
       shell.add(bar, 'top', { rank: 10000 });
       expect(
-        toArray(shell.widgets('top'))
+        Array.from(shell.widgets('top'))
           .slice(-2)
           .map(v => v.id)
       ).toEqual(['bar', 'foo']);
@@ -463,25 +462,33 @@ describe('LabShell', () => {
       widget.id = 'main';
       shell.add(widget, 'main');
 
-      expect(toArray(shell.widgets('header')).map(v => v.id)).toEqual([
+      expect(Array.from(shell.widgets('header')).map(v => v.id)).toEqual([
         'header'
       ]);
       expect(
-        toArray(shell.widgets('top'))
+        Array.from(shell.widgets('top'))
           .slice(-1)
           .map(v => v.id)
       ).toEqual(['top']);
-      expect(toArray(shell.widgets('menu')).map(v => v.id)).toEqual(['menu']);
-      expect(toArray(shell.widgets('left')).map(v => v.id)).toEqual(['left']);
-      expect(toArray(shell.widgets('right')).map(v => v.id)).toEqual(['right']);
-      expect(toArray(shell.widgets('main')).map(v => v.id)).toEqual(['main']);
+      expect(Array.from(shell.widgets('menu')).map(v => v.id)).toEqual([
+        'menu'
+      ]);
+      expect(Array.from(shell.widgets('left')).map(v => v.id)).toEqual([
+        'left'
+      ]);
+      expect(Array.from(shell.widgets('right')).map(v => v.id)).toEqual([
+        'right'
+      ]);
+      expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual([
+        'main'
+      ]);
     });
 
     it('should default to main area', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'main');
-      expect(toArray(shell.widgets()).map(v => v.id)).toEqual(['foo']);
+      expect(Array.from(shell.widgets()).map(v => v.id)).toEqual(['foo']);
     });
 
     it('should throw an error when an unrecognized area is given', () => {

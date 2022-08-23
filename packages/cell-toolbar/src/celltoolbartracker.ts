@@ -8,7 +8,6 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { Toolbar } from '@jupyterlab/ui-components';
-import { each, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
@@ -92,7 +91,9 @@ export class CellToolbarTracker implements IDisposable {
 
     const cells = this._panel?.context.model.cells;
     if (cells) {
-      each(cells.iter(), model => this._removeToolbar(model));
+      for (const model of cells) {
+        this._removeToolbar(model);
+      }
     }
 
     this._panel = null;
@@ -107,7 +108,7 @@ export class CellToolbarTracker implements IDisposable {
       const toolbarWidget = new Toolbar();
       toolbarWidget.addClass(CELL_MENU_CLASS);
 
-      toArray(this._toolbar).forEach(({ name, widget }) => {
+      Array.from(this._toolbar).forEach(({ name, widget }) => {
         toolbarWidget.addItem(name, widget);
       });
 

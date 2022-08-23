@@ -3,7 +3,6 @@
 
 import expect from 'expect';
 import { simulate } from 'simulate-event';
-import { toArray } from '@lumino/algorithm';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { DocumentManager } from '@jupyterlab/docmanager';
@@ -74,8 +73,8 @@ describe('filebrowser/listing', () => {
 
     describe('file/item checkbox', () => {
       it('check initial conditions', async () => {
-        expect(toArray(dirListing.selectedItems())).toHaveLength(0);
-        expect(toArray(dirListing.sortedItems())).toHaveLength(2);
+        expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
+        expect(Array.from(dirListing.sortedItems())).toHaveLength(2);
       });
 
       it('should be checked after item is selected', async () => {
@@ -125,7 +124,7 @@ describe('filebrowser/listing', () => {
         const checkboxes = itemNodes.map(node =>
           dirListing.renderer.getCheckboxNode!(node)
         ) as HTMLInputElement[];
-        const items = toArray(dirListing.sortedItems());
+        const items = Array.from(dirListing.sortedItems());
         expect(dirListing.isSelected(items[0].name)).toBe(false);
         expect(dirListing.isSelected(items[1].name)).toBe(false);
         simulate(checkboxes[0], 'mousedown', {
@@ -235,7 +234,7 @@ describe('filebrowser/listing', () => {
           ) as HTMLInputElement;
           expect(headerCheckbox.checked).toBe(false);
           expect(headerCheckbox!.indeterminate).toBe(false);
-          expect(toArray(dirListing.selectedItems())).toHaveLength(0);
+          expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
         });
         it('should check all', async () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
@@ -243,7 +242,7 @@ describe('filebrowser/listing', () => {
           ) as HTMLInputElement;
           simulate(headerCheckbox, 'click');
           await signalToPromise(dirListing.updated);
-          expect(toArray(dirListing.selectedItems())).toHaveLength(2);
+          expect(Array.from(dirListing.selectedItems())).toHaveLength(2);
         });
       });
 
@@ -257,7 +256,7 @@ describe('filebrowser/listing', () => {
             dirListing.headerNode
           ) as HTMLInputElement;
           expect(headerCheckbox.indeterminate).toBe(true);
-          expect(toArray(dirListing.selectedItems())).toHaveLength(1);
+          expect(Array.from(dirListing.selectedItems())).toHaveLength(1);
         });
         it('should uncheck all', async () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
@@ -265,7 +264,7 @@ describe('filebrowser/listing', () => {
           ) as HTMLInputElement;
           simulate(headerCheckbox, 'click');
           await signalToPromise(dirListing.updated);
-          expect(toArray(dirListing.selectedItems())).toHaveLength(0);
+          expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
         });
       });
 
@@ -281,7 +280,7 @@ describe('filebrowser/listing', () => {
           ) as HTMLInputElement;
           expect(headerCheckbox.checked).toBe(true);
           expect(headerCheckbox.indeterminate).toBe(false);
-          expect(toArray(dirListing.selectedItems())).toHaveLength(2);
+          expect(Array.from(dirListing.selectedItems())).toHaveLength(2);
         });
         it('should uncheck all', async () => {
           const headerCheckbox = dirListing.renderer.getCheckboxNode!(
@@ -289,7 +288,7 @@ describe('filebrowser/listing', () => {
           ) as HTMLInputElement;
           simulate(headerCheckbox, 'click');
           await signalToPromise(dirListing.updated);
-          expect(toArray(dirListing.selectedItems())).toHaveLength(0);
+          expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
         });
       });
     });

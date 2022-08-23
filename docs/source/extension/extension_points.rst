@@ -366,7 +366,7 @@ browser supports overriding the behavior of this item.
        },
        isVisible: () =>
          tracker.currentWidget &&
-         toArray(tracker.currentWidget.selectedItems()).length === 1,
+         Array.from(tracker.currentWidget.selectedItems()).length === 1,
        iconClass: 'jp-MaterialIcon jp-LinkIcon',
        label: 'Copy Shareable Link'
      });

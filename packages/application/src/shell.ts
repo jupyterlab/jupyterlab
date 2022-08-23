@@ -10,7 +10,7 @@ import {
   TabBarSvg,
   TabPanelSvg
 } from '@jupyterlab/ui-components';
-import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
+import { ArrayExt, find, map } from '@lumino/algorithm';
 import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
 import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
@@ -598,7 +598,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     } else {
       // Cache a reference to every widget currently in the dock panel before
       // changing its mode.
-      const widgets = toArray(dock.widgets());
+      const widgets = Array.from(dock.widgets());
       dock.mode = mode;
 
       // Restore the original layout.
@@ -974,10 +974,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Close all widgets in the main and down area.
    */
   closeAll(): void {
-    // Make a copy of all the widget in the dock panel (using `toArray()`)
+    // Make a copy of all the widget in the dock panel (using `Array.from()`)
     // before removing them because removing them while iterating through them
     // modifies the underlying data of the iterator.
-    toArray(this._dockPanel.widgets()).forEach(widget => widget.close());
+    Array.from(this._dockPanel.widgets()).forEach(widget => widget.close());
 
     this._downPanel.stackedPanel.widgets.forEach(widget => widget.close());
   }
@@ -1184,7 +1184,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       },
       downArea: {
         currentWidget: this._downPanel.currentWidget,
-        widgets: toArray(this._downPanel.stackedPanel.widgets),
+        widgets: Array.from(this._downPanel.stackedPanel.widgets),
         size: this._vsplitPanel.relativeSizes()[1]
       },
       leftArea: this._leftHandler.dehydrate(),
@@ -1254,14 +1254,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Returns the widgets for an application area.
    */
-  widgets(area?: ILabShell.Area): IIterator<Widget> {
+  widgets(area?: ILabShell.Area): IterableIterator<Widget> {
     switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();
       case 'left':
-        return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
+        return map(this._leftHandler.sideBar.titles, t => t.owner);
       case 'right':
-        return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
+        return map(this._rightHandler.sideBar.titles, t => t.owner);
       case 'header':
         return this._headerPanel.children();
       case 'top':
@@ -1546,7 +1546,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return null;
     }
 
-    const bars = toArray(this._dockPanel.tabBars());
+    const bars = Array.from(this._dockPanel.tabBars());
     const len = bars.length;
     const index = bars.indexOf(current);
 
@@ -1934,7 +1934,7 @@ namespace Private {
      */
     dehydrate(): ILabShell.ISideArea {
       const collapsed = this._sideBar.currentTitle === null;
-      const widgets = toArray(this._stackedPanel.widgets);
+      const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
       return {
         collapsed,

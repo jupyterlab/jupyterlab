@@ -49,7 +49,7 @@ import {
   RankedMenu,
   Switch
 } from '@jupyterlab/ui-components';
-import { find, iter, toArray } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import {
   JSONExt,
   PromiseDelegate,
@@ -147,15 +147,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return shell.currentWidget;
       }
 
-      const matches = toArray(shell.widgets('main')).filter(
-        widget => widget.id === node.dataset.id
-      );
-
-      if (matches.length < 1) {
-        return shell.currentWidget;
+      for (const widget of shell.widgets('main')) {
+        if (widget.id === node.dataset.id) {
+          return widget;
+        }
       }
 
-      return matches[0];
+      return shell.currentWidget;
     };
 
     // Closes an array of widgets.
@@ -170,15 +168,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     ): DockLayout.ITabAreaConfig | null => {
       switch (area.type) {
         case 'split-area': {
-          const iterator = iter(area.children);
+          const it = area.children[Symbol.iterator]();
           let tab: DockLayout.ITabAreaConfig | null = null;
-          let value: DockLayout.AreaConfig | undefined;
-          do {
-            value = iterator.next();
-            if (value) {
-              tab = findTab(value, widget);
-            }
-          } while (!tab && value);
+          let item = it.next();
+          while (!tab && !item.done) {
+            tab = findTab(item.value, widget);
+            item = it.next();
+          }
           return tab;
         }
         case 'tab-area': {
@@ -243,10 +239,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return;
         }
         const { id } = widget;
-        const otherWidgets = toArray(shell.widgets('main')).filter(
-          widget => widget.id !== id
-        );
-        closeWidgets(otherWidgets);
+        for (const widget of shell.widgets('main')) {
+          if (widget.id !== id) {
+            widget.close();
+          }
+        }
       }
     });
 

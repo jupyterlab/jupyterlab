@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { flakyIt as it, JupyterServer } from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import { Session, SessionAPI } from '../../src';
 import {
@@ -39,13 +38,13 @@ describe('session', () => {
 
   describe('Session.listRunning()', () => {
     it('should yield a list of valid session models', async () => {
-      expect(toArray(await SessionAPI.listRunning()).length).toBe(0);
+      expect(Array.from(await SessionAPI.listRunning()).length).toBe(0);
       const session = await SessionAPI.startSession({
         name: UUID.uuid4(),
         path: UUID.uuid4(),
         type: 'test'
       });
-      expect(toArray(await SessionAPI.listRunning())).toEqual([session]);
+      expect(Array.from(await SessionAPI.listRunning())).toEqual([session]);
     });
 
     it('should throw an error for an invalid model', async () => {

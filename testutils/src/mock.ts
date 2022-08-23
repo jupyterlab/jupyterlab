@@ -21,8 +21,6 @@ import {
   Session
 } from '@jupyterlab/services';
 
-import { ArrayIterator } from '@lumino/algorithm';
-
 import { AttachedProperty } from '@lumino/properties';
 
 import { UUID } from '@lumino/coreutils';
@@ -659,7 +657,7 @@ export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
       return Promise.resolve(void 0);
     }),
     refreshRunning: jest.fn(() => Promise.resolve(void 0)),
-    running: jest.fn(() => new ArrayIterator(sessions))
+    running: jest.fn(() => sessions[Symbol.iterator]())
   };
 
   const runningChangedSignal = new Signal<Session.IManager, Session.IModel[]>(
