@@ -523,7 +523,7 @@ export class StaticNotebook extends Widget {
         this._moveCell(args.oldIndex, args.newIndex);
         break;
       case 'remove':
-        for (let length = args.oldValues.length; length > 0; ) {
+        for (let length = args.oldValues.length; length > 0; length--) {
           this._removeCell(args.oldIndex);
         }
         // Add default cell if there are no cells remaining.
