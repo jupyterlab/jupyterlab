@@ -29,7 +29,7 @@ import {
 import { ArrayExt, each, filter, find, StringExt } from '@lumino/algorithm';
 import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
-import { Drag, IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
@@ -679,16 +679,16 @@ export class DirListing extends Widget {
         this._evtScroll(event as MouseEvent);
         break;
       case 'lm-dragenter':
-        this.evtDragEnter(event as IDragEvent);
+        this.evtDragEnter(event as Drag.Event);
         break;
       case 'lm-dragleave':
-        this.evtDragLeave(event as IDragEvent);
+        this.evtDragLeave(event as Drag.Event);
         break;
       case 'lm-dragover':
-        this.evtDragOver(event as IDragEvent);
+        this.evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this.evtDrop(event as IDragEvent);
+        this.evtDrop(event as Drag.Event);
         break;
       default:
         break;
@@ -1216,7 +1216,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  protected evtDragEnter(event: IDragEvent): void {
+  protected evtDragEnter(event: Drag.Event): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
       const index = Private.hitTestNodes(this._items, event);
       if (index === -1) {
@@ -1236,7 +1236,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  protected evtDragLeave(event: IDragEvent): void {
+  protected evtDragLeave(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     const dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
@@ -1248,7 +1248,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  protected evtDragOver(event: IDragEvent): void {
+  protected evtDragOver(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
@@ -1263,7 +1263,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  protected evtDrop(event: IDragEvent): void {
+  protected evtDrop(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     clearTimeout(this._selectTimer);

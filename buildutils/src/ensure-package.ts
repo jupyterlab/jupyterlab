@@ -146,17 +146,19 @@ export async function ensurePackage(
     });
   }
 
-  let names: string[] = Array.from(new Set(imports)).sort();
-  names = names.map(function (name) {
-    const parts = name.split('/');
-    if (name.indexOf('@') === 0) {
-      return parts[0] + '/' + parts[1];
-    }
-    if (parts[0].indexOf('!') !== -1) {
-      parts[0] = parts[0].slice(parts[0].lastIndexOf('!') + 1);
-    }
-    return parts[0];
-  });
+  const names = imports
+    .slice()
+    .sort()
+    .map(function (name) {
+      const parts = name.split('/');
+      if (name.indexOf('@') === 0) {
+        return parts[0] + '/' + parts[1];
+      }
+      if (parts[0].indexOf('!') !== -1) {
+        parts[0] = parts[0].slice(parts[0].lastIndexOf('!') + 1);
+      }
+      return parts[0];
+    });
 
   // Look for imports with no dependencies.
   promises = names.map(async name => {

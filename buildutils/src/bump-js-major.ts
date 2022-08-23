@@ -65,7 +65,7 @@ commander
     });
 
     // Look for dependencies of bumped packages
-    Array.from(toBump).forEach(val => {
+    toBump.forEach(val => {
       const deps = getDeps(val, lut);
       deps.forEach(dep => {
         maybeBump(dep);

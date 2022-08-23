@@ -8,6 +8,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { Toolbar } from '@jupyterlab/ui-components';
+import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
@@ -108,9 +109,9 @@ export class CellToolbarTracker implements IDisposable {
       const toolbarWidget = new Toolbar();
       toolbarWidget.addClass(CELL_MENU_CLASS);
 
-      Array.from(this._toolbar).forEach(({ name, widget }) => {
+      for (const { name, widget } of this._toolbar) {
         toolbarWidget.addItem(name, widget);
-      });
+      }
 
       toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
       (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
@@ -257,7 +258,7 @@ export class CellToolbarTracker implements IDisposable {
       const toolbarRect = this._cellToolbarRect(activeCell);
       if (toolbarRect) {
         const { left: toolbarLeft, bottom: toolbarBottom } = toolbarRect;
-        return Array.from(outputs).some(output => {
+        return some(outputs, output => {
           const node = output.firstElementChild;
           if (node) {
             const range = new Range();
