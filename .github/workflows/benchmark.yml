@@ -115,9 +115,6 @@ jobs:
           jlpm run clean:slate
           jlpm run build
 
-          # Reset the reference after clean:slate as it removes non-versioned files
-          cp /tmp/lab-benchmark-expected.json galata/
-
       - name: Launch JupyterLab
         working-directory: galata
         run: |
@@ -145,6 +142,10 @@ jobs:
           set -ex
           # Update test screenshots - in case they have not yet been corrected on the challenger branch
           BENCHMARK_NUMBER_SAMPLES=1 PW_VIDEO=1 jlpm run test:benchmark -u
+
+          # Copy reference here otherwise it will use the value from the update screenshots
+          # command called just before
+          cp /tmp/lab-benchmark-expected.json .
 
           jlpm run test:benchmark
 
@@ -240,9 +241,8 @@ jobs:
 
       - name: Execute memory leak tests
         id: memory_leaks
-        uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1.1
+        uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1.2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: localhost:8888
           artifacts_name: benchmark-assets
 
