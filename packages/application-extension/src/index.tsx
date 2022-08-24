@@ -147,13 +147,10 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return shell.currentWidget;
       }
 
-      for (const widget of shell.widgets('main')) {
-        if (widget.id === node.dataset.id) {
-          return widget;
-        }
-      }
-
-      return shell.currentWidget;
+      return (
+        find(shell.widgets('main'), widget => widget.id === node.dataset.id) ||
+        shell.currentWidget
+      );
     };
 
     // Closes an array of widgets.
