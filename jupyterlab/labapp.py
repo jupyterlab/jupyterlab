@@ -542,7 +542,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         against published packages may not work correctly.""",
     )
 
-    extensions_manager = Unicode(
+    extension_manager = Unicode(
         "pypi",
         config=True,
         help="""The extension manager factory to use. The default options are:
@@ -737,7 +737,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.cache_files = False
 
         if not self.core_mode and not errored:
-            provider = self.extensions_manager
+            provider = self.extension_manager
             entry_point = EXT_MANAGERS.get(provider)
             if entry_point is None:
                 self.log.error(f"Extension Manager: No manager defined for provider '{provider}'.")
