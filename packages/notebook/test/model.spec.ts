@@ -67,7 +67,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = model.contentFactory.createCodeCell({});
         model.cells.push(cell);
         model.fromJSON(utils.DEFAULT_CONTENT);
-        expect(ArrayExt.firstIndexOf(Array.from(model.cells), cell)).toBe(-1);
+        expect(findIndex(model.cells, c => c === cell)).toBe(-1);
         expect(model.cells.length).toBe(7);
       });
 
