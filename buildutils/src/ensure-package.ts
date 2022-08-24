@@ -146,8 +146,7 @@ export async function ensurePackage(
     });
   }
 
-  const names = imports
-    .slice()
+  const names = Array.from(new Set(imports))
     .sort()
     .map(function (name) {
       const parts = name.split('/');
