@@ -14,7 +14,7 @@ Following the list of core tokens is a guide for using some of JupyterLab's most
 However, it is not an exhaustive account of how to extend the application components,
 and more detailed descriptions of their public APIs may be found in the
 `JupyterLab <../api/index.html>`__ and
-`Lumino <https://lumino.readthedocs.io/en/1.x/api/>`__ API documentation.
+`Lumino <https://lumino.readthedocs.io/>`__ API documentation.
 
 .. contents:: Table of contents
     :local:
@@ -187,7 +187,7 @@ a string value or a function that returns a string value.
 
 There are several more options which can be passed into the command registry when
 adding new commands. These are documented
-`here <https://lumino.readthedocs.io/en/1.x/api/commands/interfaces/commandregistry.icommandoptions.html>`__.
+`here <https://lumino.readthedocs.io/en/latest/api/interfaces/commands.CommandRegistry.ICommandOptions.html>`__.
 
 After a command has been added to the application command registry
 you can add them to various places in the application user interface,
@@ -276,7 +276,7 @@ where ``menuItem`` definition is:
 
 
 The same example using the API is shown below. See the Lumino `docs
-<https://lumino.readthedocs.io/en/1.x/api/widgets/interfaces/contextmenu.iitemoptions.html>`__
+<https://lumino.readthedocs.io/en/latest/api/interfaces/widgets.ContextMenu.IItemOptions.html>`__
 for the item creation options.
 
 .. code:: typescript
@@ -308,7 +308,7 @@ Alternatively, you can use a 'contextmenu' event listener and
 call ``event.stopPropagation`` to prevent the application context menu
 handler from being called (it is listening in the bubble phase on the
 ``document``). At this point you could show your own Lumino
-`contextMenu <https://lumino.readthedocs.io/en/1.x/api/widgets/classes/contextmenu.html>`__,
+`contextMenu <https://lumino.readthedocs.io/en/latest/api/modules/widgets.ContextMenu.html>`__,
 or simply stop propagation and let the system context menu be shown.
 This would look something like the following in a ``Widget`` subclass:
 
@@ -409,7 +409,7 @@ the shortcut handler propagates up the DOM tree from the focused element
 and tests each element against the registered selectors. If a match is found,
 then that command is executed with the provided ``args``.
 Full documentation for the options for ``addKeyBinding`` can be found
-`here <https://lumino.readthedocs.io/en/1.x/api/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
+`here <https://lumino.readthedocs.io/en/latest/api/interfaces/commands.CommandRegistry.IKeyBindingOptions.html>`__.
 
 JupyterLab also provides integration with its settings system for keyboard shortcuts.
 Your extension can provide a settings schema with a ``jupyter.lab.shortcuts`` key,
@@ -655,7 +655,7 @@ Adding a New Menu
 ~~~~~~~~~~~~~~~~~
 
 To add a new menu to the menu bar, you need to create a new
-`Lumino menu <https://lumino.readthedocs.io/en/1.x/api/widgets/classes/menu.html>`__.
+`Lumino menu <https://lumino.readthedocs.io/en/latest/api/classes/widgets.Menu-1.html>`__.
 
 You can then add commands to the menu in a similar way to the command palette,
 and add that menu to the main menu bar:
