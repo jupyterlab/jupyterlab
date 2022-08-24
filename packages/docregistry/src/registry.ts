@@ -414,7 +414,7 @@ export class DocumentRegistry implements IDisposable {
     for (const name of factories) {
       const factory = this._widgetFactories[name];
       if (!factory) {
-        break;
+        continue;
       }
       const modelName = factory.modelName || 'text';
       if (modelName in this._modelFactories) {
