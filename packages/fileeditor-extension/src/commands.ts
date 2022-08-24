@@ -1245,7 +1245,7 @@ export namespace Commands {
       widget.title.caption = widget.title.label;
 
       // Get the fileType based on the mimetype to determine the icon
-      const fileType = Array.from(app.docRegistry.fileTypes()).find(
+      const fileType = find(app.docRegistry.fileTypes(),
         fileType => {
           return mimetype ? fileType.mimeTypes.includes(mimetype) : undefined;
         }
