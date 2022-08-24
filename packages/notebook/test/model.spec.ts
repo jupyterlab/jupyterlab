@@ -5,7 +5,7 @@ import { CodeCellModel } from '@jupyterlab/cells';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ModelDB } from '@jupyterlab/observables';
 import { acceptDialog } from '@jupyterlab/testutils';
-import { ArrayExt } from '@lumino/algorithm';
+import { findIndex } from '@lumino/algorithm';
 import { NotebookModel } from '..';
 import * as utils from './utils';
 
