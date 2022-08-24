@@ -92,21 +92,6 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
         shutil.move(osp.join(output_dir, "_temp", filename), osp.join(output_dir, filename))
     shutil.rmtree(osp.join(output_dir, "_temp"))
 
-    # Check whether there are any phosphor dependencies
-    has_phosphor = False
-    for name in ["devDependencies", "dependencies"]:
-        if name not in data:
-            continue
-
-        for (key, value) in list(data[name].items()):
-            if key.startswith("@phosphor/"):
-                has_phosphor = True
-                data[name][key.replace("@phosphor/", "@lumino/")] = value
-
-        for key in list(data[name]):
-            if key.startswith("@phosphor/"):
-                del data[name][key]
-
     # From the created package.json grab the devDependencies
     with open(osp.join(output_dir, "package.json")) as fid:
         temp_data = json.load(fid)
@@ -201,11 +186,6 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
         print("**", warning)
 
     print("** Remove _temp_extensions directory when finished")
-
-    if has_phosphor:
-        print(
-            "** Phosphor dependencies were upgraded to lumino dependencies, update imports as needed"
-        )
 
 
 if __name__ == "__main__":
