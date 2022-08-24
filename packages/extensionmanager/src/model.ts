@@ -134,7 +134,7 @@ export class ListModel extends VDomModel {
     super();
 
     this.canInstall =
-      PageConfig.getOption('extensions_manager_can_install').toLowerCase() ===
+      PageConfig.getOption('extensionsManagerCanInstall').toLowerCase() ===
       'true';
     this.translator = translator || nullTranslator;
     this._installed = [];

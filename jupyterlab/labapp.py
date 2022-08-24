@@ -782,7 +782,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 )
                 ext_manager = ReadOnlyExtensionManager(build_handler_options, listings_config, self)
 
-            page_config["extensions_manager_can_install"] = ext_manager.can_install
+            page_config["extensionsManagerCanInstall"] = ext_manager.can_install
             ext_handler = (
                 extensions_handler_path,
                 ExtensionHandler,

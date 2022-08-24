@@ -550,7 +550,9 @@ export class ExtensionsPanel extends SidePanel {
 
     this.addWidget(installed);
 
-    this.addWidget(new SearchResult(model, this.trans));
+    if (this.model.canInstall) {
+      this.addWidget(new SearchResult(model, this.trans));
+    }
 
     this._wasDisclaimed = this.model.isDisclaimed;
     if (this.model.isDisclaimed) {
