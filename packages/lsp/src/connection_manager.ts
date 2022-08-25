@@ -446,11 +446,9 @@ export class DocumentConnectionManager
     this.connectDocumentSignals(virtualDocument);
 
     const uris = DocumentConnectionManager.solveUris(virtualDocument, language);
-
     const matchingServers = this.languageServerManager.getMatchingServers({
       language
     });
-    console.debug('Matching servers: ', matchingServers);
 
     // for now use only the server with the highest rank.
     const languageServerId =
