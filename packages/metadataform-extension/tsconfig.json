@@ -26,6 +26,9 @@
     },
     {
       "path": "../ui-components"
+    },
+    {
+      "path": "../nbformat"
     }
   ]
 }

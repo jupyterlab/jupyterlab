@@ -35,6 +35,7 @@
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.11",
     "@jupyterlab/apputils": "^4.0.0-alpha.11",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.11",
     "@jupyterlab/notebook": "^4.0.0-alpha.11",
     "@jupyterlab/property-inspector": "^4.0.0-alpha.11",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.11",
@@ -44,7 +45,7 @@
     "@lumino/disposable": "^1.10.1",
     "@lumino/messaging": "^1.10.1",
     "@lumino/signaling": "^1.10.1",
-    "@lumino/widgets": "^1.32.0",
+    "@lumino/widgets": "^1.33.0",
     "@rjsf/core": "^3.1.0",
     "json-schema": "^0.4.0",
     "react": "^17.0.1",

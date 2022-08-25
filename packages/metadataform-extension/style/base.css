@@ -5,13 +5,9 @@
 |----------------------------------------------------------------------------*/
 
 .jp-MetadataForm {
-  display: flex;
+  width: 100%;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
-}
-
-.jp-MetadataForm-content {
-  flex-grow: 1;
 }
 
 .jp-MetadataForm-placeholder {
@@ -69,6 +65,50 @@
 .jp-MetadataForm fieldset {
   border: none;
   padding: 0;
+}
+
+.jp-MetadataForm-content .jp-FormGroup-content .form-group {
+  display: flex;
+  padding: 4px 8px 4px 0;
+}
+
+.jp-MetadataForm-content .jp-FormGroup-content {
+  width: 100%;
+}
+
+.jp-MetadataForm-content .jp-FormGroup-title {
+  padding-bottom: 7px;
+}
+
+.jp-MetadataForm-content .jp-FormGroup-fieldLabel {
+  font-size: var(--jp-ui-font-size2);
+  font-weight: normal;
+}
+
+.jp-MetadataForm-content .jp-FormGroup-title .jp-FormGroup-description {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color2);
+  padding-left: 3px;
+}
+
+.jp-MetadataForm-content .jp-inputFieldWrapper {
+  padding-left: 5px;
+}
+
+.jp-MetadataForm-content .jp-arrayFieldWrapper .array-item {
+  width: 100%;
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+  margin: 4px;
+}
+
+.jp-MetadataForm-content .jp-inputFieldWrapper .form-control {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.jp-MetadataForm-content .jp-arrayFieldWrapper button {
+  margin: 3px;
 }
 
 /* RJSF form validation error */
