@@ -5,7 +5,8 @@ import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   Button,
   FilterBox,
-  listingsInfoIcon,
+  infoIcon,
+  jupyterIcon,
   PanelWithToolbar,
   ReactWidget,
   refreshIcon,
@@ -43,7 +44,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   const title = entry.name;
   const githubUser = getExtensionGitHubUser(entry);
 
-  if (!entry.is_allowed) {
+  if (!entry.allowed) {
     flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
   }
 
@@ -74,9 +75,9 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               <div>{entry.name}</div>
             )}
           </div>
-          {entry.installed && !entry.is_allowed && (
+          {entry.installed && !entry.allowed && (
             <ToolbarButtonComponent
-              icon={listingsInfoIcon}
+              icon={infoIcon}
               iconLabel={trans.__(
                 '%1 extension is not allowed any more. Please uninstall immediately or contact your administrator.',
                 entry.name
@@ -86,6 +87,17 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   'https://jupyterlab.readthedocs.io/en/latest/user/extensions.html'
                 )
               }
+            />
+          )}
+          {entry.approved && (
+            <jupyterIcon.react
+              className="jp-extensionmanager-is-approved"
+              top="1px"
+              height="auto"
+              width="1em"
+              title={trans.__(
+                'This extension is approved by your security team.'
+              )}
             />
           )}
         </div>
@@ -293,6 +305,19 @@ class Header extends ReactWidget {
   render(): JSX.Element {
     return (
       <>
+        <div className="jp-extensionmanager-title">
+          <span>{this.trans.__('%1 Manager', this.model.name)}</span>
+          {this.model.installPath && (
+            <infoIcon.react
+              className="jp-extensionmanager-path"
+              tag="span"
+              title={this.trans.__(
+                'Extension installation path: %1',
+                this.model.installPath
+              )}
+            ></infoIcon.react>
+          )}
+        </div>
         <FilterBox
           placeholder={this.trans.__('Search')}
           disabled={!this.model.isDisclaimed}

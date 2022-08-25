@@ -4,6 +4,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import dataclasses
 import json
 import os
 
@@ -775,14 +776,16 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
             try:
                 ext_manager = manager_factory(build_handler_options, listings_config, self)
+                metadata = dataclasses.asdict(ext_manager.metadata)
             except Exception as err:
                 self.log.warning(
                     f"Failed to instantiate the extension manager {provider}. Falling back to read-only manager.",
                     exc_info=err,
                 )
                 ext_manager = ReadOnlyExtensionManager(build_handler_options, listings_config, self)
+                metadata = dataclasses.asdict(ext_manager.metadata)
 
-            page_config["extensionsManagerCanInstall"] = ext_manager.can_install
+            page_config["extensionManager"] = metadata
             ext_handler = (
                 extensions_handler_path,
                 ExtensionHandler,

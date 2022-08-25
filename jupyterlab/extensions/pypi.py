@@ -25,6 +25,7 @@ from traitlets import CFloat, Unicode, config
 from jupyterlab.extensions.manager import (
     ActionResult,
     ExtensionManager,
+    ExtensionManagerMetadata,
     ExtensionPackage,
 )
 
@@ -75,13 +76,9 @@ class PyPiExtensionManager(ExtensionManager):
         self.log.debug(f"Extensions list will be fetched from {self.base_url}.")
 
     @property
-    def can_install(self) -> bool:
-        """Whether the manager can un-/install extensions or not.
-
-        Returns:
-            The installation capability flag
-        """
-        return True
+    def metadata(self) -> ExtensionManagerMetadata:
+        """Extension manager metadata."""
+        return ExtensionManagerMetadata("PyPI", True, sys.prefix)
 
     async def get_latest_version(self, pkg: str) -> Optional[str]:
         """Return the latest available version for a given extension.

@@ -59,15 +59,16 @@ class ExtensionPackage:
         description: Package description
         url: Package home page
         pkg_type: Type of package - ["prebuilt", "source"]
-        enabled: [optional] Whether the package is enabled or not - default False
-        core: [optional] Whether the package is a core package or not - default False
-        latest_version: [optional] Latest available version - default ""
-        installed_version: [optional] Installed version - default ""
-        status: [optional] Package status - ["ok", "warning", "error"]; default "ok"
+        allowed: [optional] Whether this extension is allowed or not - default True
+        approved: [optional] Whether the package is approved by your administrators - default False
         companion: [optional] Type of companion for the frontend extension - [None, "kernel", "server"]; default None
+        core: [optional] Whether the package is a core package or not - default False
+        enabled: [optional] Whether the package is enabled or not - default False
         install: [optional] Extension package installation instructions - default None
         installed: [optional] Whether the extension is currently installed - default None
-        is_allowed: [optional] Whether this extension is allowed or not - default True
+        installed_version: [optional] Installed version - default ""
+        latest_version: [optional] Latest available version - default ""
+        status: [optional] Package status - ["ok", "warning", "error"]; default "ok"
         author: [optional] Package author - default None
         license: [optional] Package license - default None
     """
@@ -76,13 +77,14 @@ class ExtensionPackage:
     description: str
     url: str
     pkg_type: str
+    allowed: bool = True
+    approved: bool = False
     companion: Optional[str] = None
     core: bool = False
     enabled: bool = False
     install: Optional[dict] = None
     installed: Optional[bool] = None
     installed_version: str = ""
-    is_allowed: bool = True
     latest_version: str = ""
     status: str = "ok"
     author: Optional[str] = None
@@ -99,13 +101,15 @@ class ActionResult:
         needs_restart: Required action follow-up - Valid follow-up are "frontend", "kernel" and "server"
     """
 
-    status: str  # FIXME
+    # Note: no simple way to use Enum in dataclass - https://stackoverflow.com/questions/72859557/typing-dataclass-that-can-only-take-enum-values
+    #       keeping str for simplicity
+    status: str
     message: Optional[str] = None
     needs_restart: List[str] = field(default_factory=list)
 
 
 @dataclass
-class ExtensionsOption:
+class ExtensionManagerOptions:
     """Extension manager options.
 
     Attributes:
@@ -119,6 +123,21 @@ class ExtensionsOption:
     blocked_extensions_uris: Set[str] = field(default_factory=set)
     listings_refresh_seconds: int = 60 * 60
     listings_tornado_options: dict = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ExtensionManagerMetadata:
+    """Extension manager metadata.
+
+    Attributes:
+        name: Extension manager name to be displayed
+        can_install: Whether the extension manager can un-/install packages (default False)
+        install_path: Installation path for the extensions (default None); e.g. environment path
+    """
+
+    name: str
+    can_install: bool = False
+    install_path: Optional[str] = None
 
 
 @dataclass
@@ -140,7 +159,7 @@ class ExtensionManager(LoggingConfigurable):
     Note:
         Any concrete implementation will need to implement the five
         following abstract methods:
-        - :ref:`can_install`
+        - :ref:`metadata`
         - :ref:`get_latest_version`
         - :ref:`list_packages`
         - :ref:`install`
@@ -174,7 +193,7 @@ class ExtensionManager(LoggingConfigurable):
         self.app_dir = Path(app_options.app_dir)
         self.core_config = app_options.core_config
         self.app_options = app_options
-        self.options = ExtensionsOption(**(ext_options or {}))
+        self.options = ExtensionManagerOptions(**(ext_options or {}))
         self._extensions_cache: Dict[Optional[str], ExtensionsCache] = {}
         self._listings_cache: Optional[dict] = None
         self._listings_block_mode = True
@@ -199,12 +218,8 @@ class ExtensionManager(LoggingConfigurable):
             self._listing_fetch.stop()
 
     @property
-    def can_install(self) -> bool:
-        """Whether the manager can un-/install extensions or not.
-
-        Returns:
-            The installation capability flag
-        """
+    def metadata(self) -> ExtensionManagerMetadata:
+        """Extension manager metadata."""
         raise NotImplementedError()
 
     async def get_latest_version(self, extension: str) -> Optional[str]:
@@ -356,17 +371,17 @@ class ExtensionManager(LoggingConfigurable):
             if self._listings_block_mode:
                 for name, ext in cache.items():
                     if name not in listing:
-                        extensions.append(replace(ext, is_allowed=True))
+                        extensions.append(replace(ext, allowed=True))
                     elif ext.installed_version:
                         self.log.warning(f"Blocked extension '{name}' is installed.")
-                        extensions.append(replace(ext, is_allowed=False))
+                        extensions.append(replace(ext, allowed=False))
             else:
                 for name, ext in cache.items():
                     if name in listing:
-                        extensions.append(replace(ext, is_allowed=True))
+                        extensions.append(replace(ext, allowed=True))
                     elif ext.installed_version:
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
-                        extensions.append(replace(ext, is_allowed=False))
+                        extensions.append(replace(ext, allowed=False))
 
         return extensions, self._extensions_cache[query].last_page
 

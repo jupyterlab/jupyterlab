@@ -15,6 +15,28 @@
   width: 100%;
 }
 
+.jp-extensionmanager-title {
+  display: flex;
+  margin: 4px 10px 0;
+}
+
+.jp-extensionmanager-title svg {
+  width: 14px;
+}
+
+.jp-extensionmanager-title .jp-icon3[fill] {
+  fill: currentcolor;
+}
+
+.jp-extensionmanager-path {
+  display: inline flex;
+  padding-left: 4px;
+}
+
+.jp-extensionmanager-header .jp-FilterBox {
+  margin: 4px 10px 0;
+}
+
 .jp-extensionmanager-disclaimer {
   padding: 0 8px;
   min-height: 160px;

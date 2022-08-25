@@ -37,9 +37,14 @@ export interface IEntry {
   installed?: boolean | null;
 
   /**
+   * Whether the extension is approved by the system administrators.
+   */
+  approved: boolean;
+
+  /**
    * Whether the extension is allowed or not.
    */
-  is_allowed: boolean;
+  allowed: boolean;
 
   /**
    * Whether the extension is currently enabled.
@@ -114,6 +119,24 @@ export interface IActionReply {
 }
 
 /**
+ * Extension manager metadata
+ */
+interface IExtensionManagerMetadata {
+  /**
+   * Extension manager name.
+   */
+  name: string;
+  /**
+   * Whether the extension manager can un-/install extensions.
+   */
+  can_install: boolean;
+  /**
+   * Extensions installation path.
+   */
+  install_path: string | null;
+}
+
+/**
  * The server API path for querying/modifying installed extensions.
  */
 const EXTENSION_API_PATH = 'lab/api/extensions';
@@ -133,9 +156,13 @@ export class ListModel extends VDomModel {
   ) {
     super();
 
-    this.canInstall =
-      PageConfig.getOption('extensionsManagerCanInstall').toLowerCase() ===
-      'true';
+    const metadata = JSON.parse(
+      PageConfig.getOption('extensionManager')
+    ) as IExtensionManagerMetadata;
+
+    this.name = metadata.name;
+    this.canInstall = metadata.can_install;
+    this.installPath = metadata.install_path;
     this.translator = translator || nullTranslator;
     this._installed = [];
     this._lastSearchResult = [];
@@ -144,9 +171,19 @@ export class ListModel extends VDomModel {
   }
 
   /**
+   * Extension manager name.
+   */
+  readonly name: string;
+
+  /**
    * Whether the extension manager support installation methods or not.
    */
   readonly canInstall: boolean;
+
+  /**
+   * Extensions installation path.
+   */
+  installPath: string | null;
 
   /**
    * A readonly array of the installed extensions.

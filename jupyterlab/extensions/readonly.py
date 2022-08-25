@@ -3,24 +3,26 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import sys
 from typing import Dict, Optional, Tuple
 
 from jupyterlab_server.translation_utils import translator
 
-from .manager import ActionResult, ExtensionManager, ExtensionPackage
+from .manager import (
+    ActionResult,
+    ExtensionManager,
+    ExtensionManagerMetadata,
+    ExtensionPackage,
+)
 
 
 class ReadOnlyExtensionManager(ExtensionManager):
     """Extension manager without installation capabilities."""
 
     @property
-    def can_install(self) -> bool:
-        """Whether the manager can un-/install extensions or not.
-
-        Returns:
-            The installation capability flag
-        """
-        return False
+    def metadata(self) -> ExtensionManagerMetadata:
+        """Extension manager metadata."""
+        return ExtensionManagerMetadata("read-only", install_path=sys.prefix)
 
     async def get_latest_version(self, pkg: str) -> Optional[str]:
         """Return the latest available version for a given extension.
