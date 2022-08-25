@@ -43,7 +43,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
-import { map, some } from '@lumino/algorithm';
+import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -862,8 +862,8 @@ function addCommands(
     caption: trans.__('Save all open documents'),
     isEnabled: () => {
       return some(
-        map(shell.widgets('main'), w => docManager.contextForWidget(w)),
-        c => c?.contentsModel?.writable ?? false
+        shell.widgets('main'),
+        w => docManager.contextForWidget(w)?.contentsModel?.writable ?? false
       );
     },
     execute: () => {
