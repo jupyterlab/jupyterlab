@@ -227,8 +227,8 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       label: () => trans.__('Close All Other Tabs'),
       isEnabled: () => {
         // Ensure there are at least two widgets.
-        const iterator = shell.widgets('main');
-        return !!iterator.next() && !!iterator.next();
+        const it = shell.widgets('main');
+        return !it.next().done && !it.next().done;
       },
       execute: () => {
         const widget = contextMenuWidget();
