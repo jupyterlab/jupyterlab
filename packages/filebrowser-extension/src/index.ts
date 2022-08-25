@@ -1088,7 +1088,7 @@ function addCommands(
     },
     isVisible: () =>
       !!tracker.currentWidget &&
-      tracker.currentWidget.selectedItems().next !== undefined,
+      !tracker.currentWidget.selectedItems().next().done,
     icon: fileIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Copy Path')
   });

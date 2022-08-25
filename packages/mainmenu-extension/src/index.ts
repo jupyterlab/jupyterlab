@@ -534,7 +534,7 @@ export function createKernelMenu(
   commands.addCommand(CommandIDs.shutdownAllKernels, {
     label: trans.__('Shut Down All Kernels…'),
     isEnabled: () => {
-      return app.serviceManager.sessions.running().next() !== undefined;
+      return !app.serviceManager.sessions.running().next().done;
     },
     execute: () => {
       return showDialog({
