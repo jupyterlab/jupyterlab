@@ -49,7 +49,7 @@ import {
   RankedMenu,
   Switch
 } from '@jupyterlab/ui-components';
-import { find } from '@lumino/algorithm';
+import { find, some } from '@lumino/algorithm';
 import {
   JSONExt,
   PromiseDelegate,
@@ -227,8 +227,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       label: () => trans.__('Close All Other Tabs'),
       isEnabled: () => {
         // Ensure there are at least two widgets.
-        const it = shell.widgets('main');
-        return !it.next().done && !it.next().done;
+        return some(shell.widgets('main'), (_, i) => i === 1);
       },
       execute: () => {
         const widget = contextMenuWidget();
