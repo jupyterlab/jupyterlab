@@ -148,7 +148,7 @@ export async function ensurePackage(
 
   const names = Array.from(new Set(imports))
     .sort()
-    .map(function (name) {
+    .map(name => {
       const parts = name.split('/');
       if (name.indexOf('@') === 0) {
         return parts[0] + '/' + parts[1];
