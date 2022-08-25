@@ -111,7 +111,6 @@
     "eslint-plugin-jest": "~26.5.3",
     "eslint-plugin-prettier": "~4.0.0",
     "eslint-plugin-react": "~7.29.4",
-    "hatchling": "^0.2.2",
     "prettier": "~2.6.0",
     "stylelint": "^14.9.1",
     "stylelint-config-prettier": "^9.0.3",
