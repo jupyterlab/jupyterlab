@@ -7287,11 +7287,6 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-hatchling@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.npmjs.org/hatchling/-/hatchling-0.2.2.tgz"
-  integrity sha512-42z6mSTlAzdTAPA8FMLc+uN0Z6bw+LDdZs/7+6C8bX0Of/gAuBXI7H0pyUMU64odUaSM2veIKhn8oldYUTljEw==
-
 he@^1.1.0, he@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/he/-/he-1.2.0.tgz"
