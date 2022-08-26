@@ -15,7 +15,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { Collapser, Styling } from '@jupyterlab/ui-components';
-import { ArrayExt, chain } from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
@@ -237,8 +237,9 @@ export class NotebookTools extends Widget implements INotebookTools {
     }
   }
 
-  private _toolChildren() {
-    return chain(this._commonTools.children(), this._advancedTools.children());
+  private *_toolChildren() {
+    yield* this._commonTools.children();
+    yield* this._advancedTools.children();
   }
 
   translator: ITranslator;

@@ -2223,16 +2223,6 @@
     "@lezer/highlight" "^1.0.0"
     "@lezer/lr" "^1.0.0"
 
-"@lumino/algorithm@^1.9.1":
-  version "1.9.1"
-  resolved "https://registry.npmjs.org/@lumino/algorithm/-/algorithm-1.9.1.tgz"
-  integrity sha512-d0rj7IYRzYj6WbWSrbJbKvrfO4H0NUnXT2yjSWS/sCklpTpSp0IGmndK/X4r6gG+ev5lb5+wBg9ofUDBvoAlAw==
-
-"@lumino/algorithm@^1.9.2":
-  version "1.9.2"
-  resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.9.2.tgz#b95e6419aed58ff6b863a51bfb4add0f795141d3"
-  integrity sha512-Z06lp/yuhz8CtIir3PNTGnuk7909eXt4ukJsCzChsGuot2l5Fbs96RJ/FOHgwCedaX74CtxPjXHXoszFbUA+4A==
-
 "@lumino/algorithm@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-2.0.0-alpha.1.tgz#f370e21570f4943e49aa54974932b8b9a50dc087"
@@ -2247,32 +2237,12 @@
     "@lumino/coreutils" "^2.0.0-alpha.1"
     "@lumino/widgets" "^2.0.0-alpha.1"
 
-"@lumino/collections@^1.9.1":
-  version "1.9.1"
-  resolved "https://registry.npmjs.org/@lumino/collections/-/collections-1.9.1.tgz"
-  integrity sha512-5RaRGUY7BJ/1j173sc9DCfiVf70Z0hopRnBV8/AeAaK9bJJRAYjDhlZ9O8xTyouegh6krkOfiDyjl3pwogLrQw==
-  dependencies:
-    "@lumino/algorithm" "^1.9.1"
-
 "@lumino/collections@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@lumino/collections/-/collections-2.0.0-alpha.1.tgz#c0413aad36a67160154f5e4fdc1d267bce4b921b"
   integrity sha512-rRJbbhvOSBaJCp5IMc0gZOxIdhvgcJvOU3fj5SfEMd7gUAcatmEHlqlmH8tyrm0br3hV95txucTrA0nKdUrYlw==
   dependencies:
     "@lumino/algorithm" "^2.0.0-alpha.1"
-
-"@lumino/commands@^1.20.0":
-  version "1.20.1"
-  resolved "https://registry.yarnpkg.com/@lumino/commands/-/commands-1.20.1.tgz#8a4e4840528e8009c5472dc6b5bb0970d7f27a5f"
-  integrity sha512-7u0vc3qWVAyI3CHGmQ+MXP5bvmj5dtnU5J4u2aRrodtlysU3nLjGhD57bbTq2VUqpmS1bkfBqNFhO1e4PFKSaQ==
-  dependencies:
-    "@lumino/algorithm" "^1.9.2"
-    "@lumino/coreutils" "^1.12.1"
-    "@lumino/disposable" "^1.10.2"
-    "@lumino/domutils" "^1.8.2"
-    "@lumino/keyboard" "^1.8.2"
-    "@lumino/signaling" "^1.10.2"
-    "@lumino/virtualdom" "^1.14.2"
 
 "@lumino/commands@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
@@ -2286,16 +2256,6 @@
     "@lumino/keyboard" "^2.0.0-alpha.1"
     "@lumino/signaling" "^2.0.0-alpha.1"
     "@lumino/virtualdom" "^2.0.0-alpha.1"
-
-"@lumino/coreutils@^1.12.0":
-  version "1.12.0"
-  resolved "https://registry.npmjs.org/@lumino/coreutils/-/coreutils-1.12.0.tgz"
-  integrity sha512-DSglh4ylmLi820CNx9soJmDJCpUgymckdWeGWuN0Ash5g60oQvrQDfosVxEhzmNvtvXv45WZEqSBzDP6E5SEmQ==
-
-"@lumino/coreutils@^1.12.1":
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/@lumino/coreutils/-/coreutils-1.12.1.tgz#79860c9937483ddf6cda87f6c2b9da8eb1a5d768"
-  integrity sha512-JLu3nTHzJk9N8ohZ85u75YxemMrmDzJdNgZztfP7F7T7mxND3YVNCkJG35a6aJ7edu1sIgCjBxOvV+hv27iYvQ==
 
 "@lumino/coreutils@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
@@ -2317,14 +2277,6 @@
     "@lumino/signaling" "^2.0.0-alpha.1"
     "@lumino/widgets" "^2.0.0-alpha.1"
 
-"@lumino/disposable@^1.10.1", "@lumino/disposable@^1.10.2":
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/@lumino/disposable/-/disposable-1.10.2.tgz#8a7e74320f51a48419d92672fe8abcf8cec04818"
-  integrity sha512-jwt8bCw3OU65wJMOCJUZAfVVUdxZdEufRDrDkoG91aSW+/R/VBzt33AqZX81/B0KxddL6R3PdNWI+0fRJBaeYw==
-  dependencies:
-    "@lumino/algorithm" "^1.9.2"
-    "@lumino/signaling" "^1.10.2"
-
 "@lumino/disposable@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@lumino/disposable/-/disposable-2.0.0-alpha.1.tgz#dfc1d3858b297484e5d488fb2e3d23a65d7b7b19"
@@ -2332,28 +2284,10 @@
   dependencies:
     "@lumino/signaling" "^2.0.0-alpha.1"
 
-"@lumino/domutils@^1.8.1":
-  version "1.8.1"
-  resolved "https://registry.npmjs.org/@lumino/domutils/-/domutils-1.8.1.tgz"
-  integrity sha512-QUVXwmDMIfcHC3yslhmyGK4HYBKaJ3xX5MTwDrjsSX7J7AZ4jwL4zfsxyF9ntdqEKraoJhLQ6BaUBY+Ur1cnYw==
-
-"@lumino/domutils@^1.8.2":
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/@lumino/domutils/-/domutils-1.8.2.tgz#d15cdbae12bea52852bbc13c4629360f9f05b7f5"
-  integrity sha512-QIpMfkPJrs4GrWBuJf2Sn1fpyVPmvqUUAeD8xAQo8+4V5JAT0vUDLxZ9HijefMgNCi3+Bs8Z3lQwRCrz+cFP1A==
-
 "@lumino/domutils@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@lumino/domutils/-/domutils-2.0.0-alpha.1.tgz#ed93eec3b54cda666baae9851ddf76ca50d8ae2b"
   integrity sha512-I2LvATvTkkULDPp0JAsTxumKhEnxacoTIz48Cr/Hir8RQgqBjIby2LG59+9WwDTTBDFtBX1dHHJwUEKulfT/gA==
-
-"@lumino/dragdrop@^1.14.0":
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/@lumino/dragdrop/-/dragdrop-1.14.1.tgz#17fbd7de30b0c199fec9c19d50dfb58b11eed6e2"
-  integrity sha512-SeciSUHKBBkkMKqK0l20c7vwGQA7pu/jMFMBK75In2Oz0049qU0OyNk6ngpcKRSBC/VKsbTPBQGI673w7Bd/VQ==
-  dependencies:
-    "@lumino/coreutils" "^1.12.1"
-    "@lumino/disposable" "^1.10.2"
 
 "@lumino/dragdrop@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
@@ -2368,23 +2302,10 @@
   resolved "https://registry.npmjs.org/@lumino/keyboard/-/keyboard-1.8.1.tgz"
   integrity sha512-8x0y2ZQtEvOsblpI2gfTgf+gboftusP+5aukKEsgNQtzFl28RezQXEOSVd8iD3K6+Q1MaPQF0OALYP0ASqBjBg==
 
-"@lumino/keyboard@^1.8.2":
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/@lumino/keyboard/-/keyboard-1.8.2.tgz#714dbe671f0718f516d1ec23188b31a9ccd82fb2"
-  integrity sha512-Dy+XqQ1wXbcnuYtjys5A0pAqf4SpAFl9NY6owyIhXAo0Va7w3LYp3jgiP1xAaBAwMuUppiUAfrbjrysZuZ625g==
-
 "@lumino/keyboard@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@lumino/keyboard/-/keyboard-2.0.0-alpha.1.tgz#e838d6e84cb209805f1e8d1094e7b81812d05ce1"
   integrity sha512-c5jbUppfg78YxxcCdxUHMVBFusq+sys8UbXqOHjW9YEQWSfVGbuQYk4BU5BPOqLxDqLXRZkpcnAConLy/NoORw==
-
-"@lumino/messaging@^1.10.1":
-  version "1.10.1"
-  resolved "https://registry.npmjs.org/@lumino/messaging/-/messaging-1.10.1.tgz"
-  integrity sha512-XZSdt9ih94rdeeLL0cryUw6HHD51D7TP8c+MFf+YRF6VKwOFB9RoajfQWadeqpmH+schTs3EsrFfA9KHduzC7w==
-  dependencies:
-    "@lumino/algorithm" "^1.9.1"
-    "@lumino/collections" "^1.9.1"
 
 "@lumino/messaging@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
@@ -2403,22 +2324,10 @@
     "@lumino/disposable" "^2.0.0-alpha.1"
     "@lumino/signaling" "^2.0.0-alpha.1"
 
-"@lumino/properties@^1.8.1":
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/@lumino/properties/-/properties-1.8.2.tgz#91131f2ca91a902faa138771eb63341db78fc0fd"
-  integrity sha512-EkjI9Cw8R0U+xC9HxdFSu7X1tz1H1vKu20cGvJ2gU+CXlMB1DvoYJCYxCThByHZ+kURTAap4SE5x8HvKwNPbig==
-
 "@lumino/properties@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@lumino/properties/-/properties-2.0.0-alpha.1.tgz#2dcfa59fd4150ad03c634e4d5622b83518acef4a"
   integrity sha512-eNaB1fmH4mDm2BlCRjsbsZw6mSBV6E4+vR1yHO+65t4wledOQHKN+BQGvgwZXF8S/vJHwsQ9plMtF4I84IDCwA==
-
-"@lumino/signaling@^1.10.1", "@lumino/signaling@^1.10.2":
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/@lumino/signaling/-/signaling-1.10.2.tgz#da30a84b8820f2b29e0c176450059711913392d9"
-  integrity sha512-LvnLRb2ngOZbRtFHRcKkMdPSXm0bzfVv/5mbx/hpT1DWHihMtBpGQ+bIfFvnARmFJoI11Wt+DMX77MWPw6tpig==
-  dependencies:
-    "@lumino/algorithm" "^1.9.2"
 
 "@lumino/signaling@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
@@ -2427,36 +2336,12 @@
   dependencies:
     "@lumino/algorithm" "^2.0.0-alpha.1"
 
-"@lumino/virtualdom@^1.14.1", "@lumino/virtualdom@^1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@lumino/virtualdom/-/virtualdom-1.14.2.tgz#bee4fd3cf78c1aa003d9c208f6825969b4321573"
-  integrity sha512-iF20v6s4gP/hAH4VjmBtv2dexr18W4vL/Y5Rx4+U3kS/ZIFU7987NsM+0Yr6W9kdBQ1w6+pJjRBS9sWYnohdoQ==
-  dependencies:
-    "@lumino/algorithm" "^1.9.2"
-
 "@lumino/virtualdom@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@lumino/virtualdom/-/virtualdom-2.0.0-alpha.1.tgz#fd6f50b9a6b96c04b5892afb70a929f933bc7611"
   integrity sha512-HWhXPt3IscZyCGIQ/6vfyN+QDTYhUQyv5V2+K2OFphDbI0YgqOahtEOj/DGFrHKwKfjXrSgFqbTVJZDs0PFm1Q==
   dependencies:
     "@lumino/algorithm" "^2.0.0-alpha.1"
-
-"@lumino/widgets@^1.33.0":
-  version "1.33.0"
-  resolved "https://registry.npmjs.org/@lumino/widgets/-/widgets-1.33.0.tgz"
-  integrity sha512-Kt1zYU0FOZLTcyCAPkCAqFhK6PW+VAB0WIFuGdihO8BblfhY7KRsPn041PwVTXHAZrid1yaB2/aN+HbB2zh4Nw==
-  dependencies:
-    "@lumino/algorithm" "^1.9.1"
-    "@lumino/commands" "^1.20.0"
-    "@lumino/coreutils" "^1.12.0"
-    "@lumino/disposable" "^1.10.1"
-    "@lumino/domutils" "^1.8.1"
-    "@lumino/dragdrop" "^1.14.0"
-    "@lumino/keyboard" "^1.8.1"
-    "@lumino/messaging" "^1.10.1"
-    "@lumino/properties" "^1.8.1"
-    "@lumino/signaling" "^1.10.1"
-    "@lumino/virtualdom" "^1.14.1"
 
 "@lumino/widgets@^2.0.0-alpha.1":
   version "2.0.0-alpha.1"
