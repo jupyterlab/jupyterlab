@@ -956,7 +956,7 @@ export namespace Commands {
         path: model.path,
         factory: FACTORY
       })) as unknown as IDocumentWidget;
-      widget.hasAutoName = true;
+      widget.isUntitled = true;
       return widget;
     }
   }

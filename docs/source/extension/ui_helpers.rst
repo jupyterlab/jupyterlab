@@ -13,7 +13,7 @@ Dialogs
 Generic Dialog
 ^^^^^^^^^^^^^^
 
-The generic way to display a dialog is through ``showDialog`` function from ``@jupyterlab/apputils``.
+To display a generic dialog, use ``showDialog`` function from ``@jupyterlab/apputils``.
 
 The options available are:
 

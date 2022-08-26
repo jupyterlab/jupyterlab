@@ -122,7 +122,7 @@ button.jp-Dialog-close-button {
 }
 
 .jp-Dialog-checkbox > input:focus-visible {
-  outline: 1px solid var(--jp-brand-color1);
+  outline: 1px solid var(--jp-input-active-border-color);
   outline-offset: 1px;
 }
 

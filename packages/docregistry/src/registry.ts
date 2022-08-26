@@ -1519,7 +1519,7 @@ export interface IDocumentWidget<
    * A document has auto-generated name if its name is untitled and up
    * to the instant the user saves it manually for the first time.
    */
-  hasAutoName?: boolean;
+  isUntitled?: boolean;
 
   /**
    * A promise resolving after the content widget is revealed.

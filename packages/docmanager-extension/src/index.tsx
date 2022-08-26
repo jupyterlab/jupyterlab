@@ -790,7 +790,7 @@ function addCommands(
 
           if (
             docManager.renameUntitledFileOnSave &&
-            (widget as IDocumentWidget).hasAutoName === true
+            (widget as IDocumentWidget).isUntitled === true
           ) {
             const result = await InputDialog.getText({
               title: trans.__('Rename file'),
@@ -808,7 +808,7 @@ function addCommands(
 
             if (result.button.accept) {
               newName = result.value ?? oldName;
-              (widget as IDocumentWidget).hasAutoName = false;
+              (widget as IDocumentWidget).isUntitled = false;
               if (typeof result.isChecked === 'boolean') {
                 const currentSetting = (
                   await settingRegistry.get(
