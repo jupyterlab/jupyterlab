@@ -21,8 +21,8 @@ const parameters = [].concat(
 
 test.describe('Benchmark', () => {
   // Generate the files for the benchmark
-  test.beforeAll(async ({ baseURL }) => {
-    const content = galata.newContentsHelper(baseURL);
+  test.beforeAll(async ({ baseURL, context }) => {
+    const content = galata.newContentsHelper(baseURL, undefined, context);
     const codeContent = galata.Notebook.generateNotebook(300, 'code', [
       'for x in range(OUTPUT_LENGTH):\n',
       '    print(f"{PREFIX} {x}")'
@@ -75,8 +75,8 @@ test.describe('Benchmark', () => {
   });
 
   // Remove benchmark files
-  test.afterAll(async ({ baseURL }) => {
-    const content = galata.newContentsHelper(baseURL);
+  test.afterAll(async ({ baseURL, context }) => {
+    const content = galata.newContentsHelper(baseURL, undefined, context);
     await content.deleteDirectory(tmpPath);
   });
 

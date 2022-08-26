@@ -9,8 +9,8 @@ const fileName = 'toc_notebook.ipynb';
 test.use({ tmpPath: 'test-toc' });
 
 test.describe('Table of Contents', () => {
-  test.beforeAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.beforeAll(async ({ baseURL, context, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL, undefined, context);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
@@ -30,8 +30,8 @@ test.describe('Table of Contents', () => {
     await page.notebook.close(true);
   });
 
-  test.afterAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.afterAll(async ({ baseURL, context, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL, undefined, context);
     await contents.deleteDirectory(tmpPath);
   });
 
