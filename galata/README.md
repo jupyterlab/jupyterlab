@@ -423,7 +423,8 @@ The benchmark can be customized using the following environment variables:
 
 - `BENCHMARK_NUMBER_SAMPLES`: Number of samples to compute the execution time distribution; default 20.
 - `BENCHMARK_OUTPUTFILE`: Benchmark result output file; default `benchmark.json`. It is overridden in the [`playwright-benchmark.config.js`](playwright-benchmark.config.js).
-- `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual` for current data and `expected` for the reference.
+- `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual`.
+- `BENCHMARK_EXPECTED_REFERENCE`: Reference name of the reference data; default is `expected`.
 
 ## Development
 
