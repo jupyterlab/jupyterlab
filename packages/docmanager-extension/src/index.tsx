@@ -801,7 +801,7 @@ function addCommands(
               checkbox: {
                 label: trans.__("Don't ask me again."),
                 caption: trans.__(
-                  'If checked, you will no be asked to rename future untitled files when saving them.'
+                  'If checked, you will not be asked to rename future untitled files when saving them.'
                 )
               }
             });

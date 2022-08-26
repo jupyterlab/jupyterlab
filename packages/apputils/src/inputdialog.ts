@@ -178,8 +178,8 @@ export namespace InputDialog {
     /**
      * Selection range
      *
-     * Number of characters to pre-select when displaying the dialog.
-     * Default is to select all default input if defined.
+     * Number of characters to pre-select when dialog opens.
+     * Default is to select the whole input text if present.
      */
     selectionRange?: number;
   }
