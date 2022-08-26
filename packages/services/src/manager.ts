@@ -222,7 +222,7 @@ export namespace ServiceManager {
     /**
      * The builder for the manager.
      *
-     * @deprecated will be removed in v5
+     * @deprecated will be removed in JupyterLab v5
      */
     readonly builder: Builder.IManager;
 
