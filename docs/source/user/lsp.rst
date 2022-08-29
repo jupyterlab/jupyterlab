@@ -87,6 +87,8 @@ By default JupyterLab does not come with any language servers preinstalled, you 
      - `yaml-language-server <https://github.com/redhat-developer/yaml-language-server>`_
      - npm: ``npm install --save-dev yaml-language-server`` :raw-html:`<br />` yarn: ``yarn add --dev yaml-language-server``
 
+For other community-supported language servers, see `the extension documentation <https://jupyterlab-lsp.readthedocs.io/en/latest/Language%20Servers.html>`_.
+
 Settings
 ------------
 

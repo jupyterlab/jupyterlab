@@ -100,7 +100,7 @@ function activate(
     const languageServerSettings = (options.languageServers ||
       {}) as TLanguageServerConfigurations;
     if (options.activate === 'on' && !languageServerManager.isEnabled) {
-      languageServerManager.enable();
+      languageServerManager.enable().catch(console.error);
     } else if (options.activate === 'off' && languageServerManager.isEnabled) {
       languageServerManager.disable();
       return;
