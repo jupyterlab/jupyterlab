@@ -1,4 +1,9 @@
 /*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/*
  * New mode example using https://github.com/codemirror/lang-example
  * Licensed under MIT License, Copyright (C) 2021 by Marijn Haverbeke <marijnh@gmail.com> and others
  */

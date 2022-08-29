@@ -1,4 +1,9 @@
 /*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/*
  * New theme example using https://github.com/codemirror/theme-one-dark
  * Licensed under MIT License, Copyright (C) 2021 by Marijn Haverbeke <marijnh@gmail.com> and others
  */
