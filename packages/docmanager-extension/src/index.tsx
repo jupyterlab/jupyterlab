@@ -407,7 +407,7 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
             return showDialog({
               title: trans.__('Cannot Download'),
               body: trans.__('No context found for current widget!'),
-              buttons: [Dialog.okButton({ label: trans.__('OK') })]
+              buttons: [Dialog.okButton()]
             });
           }
           return context.download();
@@ -593,7 +593,6 @@ function addCommands(
 
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
-      // FIXME-TRANS: Localizing args['error']?
       const errorTitle = (args['error'] as string) || trans.__('Error');
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
@@ -651,7 +650,7 @@ function addCommands(
         return showDialog({
           title: trans.__('Cannot Reload'),
           body: trans.__('No context found for current widget!'),
-          buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+          buttons: [Dialog.okButton()]
         });
       }
       if (context.model.dirty) {
@@ -662,7 +661,7 @@ function addCommands(
             type
           ),
           buttons: [
-            Dialog.cancelButton({ label: trans.__('Cancel') }),
+            Dialog.cancelButton(),
             Dialog.warnButton({ label: trans.__('Reload') })
           ]
         }).then(result => {
@@ -696,7 +695,7 @@ function addCommands(
         return showDialog({
           title: trans.__('Cannot Revert'),
           body: trans.__('No context found for current widget!'),
-          buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+          buttons: [Dialog.okButton()]
         });
       }
       return context.listCheckpoints().then(async checkpoints => {
@@ -720,7 +719,7 @@ function addCommands(
           title: trans.__('Revert %1 to checkpoint', type),
           body: new RevertConfirmWidget(targetCheckpoint, trans, type),
           buttons: [
-            Dialog.cancelButton({ label: trans.__('Cancel') }),
+            Dialog.cancelButton(),
             Dialog.warnButton({ label: trans.__('Revert') })
           ]
         }).then(result => {
@@ -764,14 +763,14 @@ function addCommands(
           return showDialog({
             title: trans.__('Cannot Save'),
             body: trans.__('No context found for current widget!'),
-            buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+            buttons: [Dialog.okButton()]
           });
         } else {
           if (context.model.readOnly) {
             return showDialog({
               title: trans.__('Cannot Save'),
               body: trans.__('Document is read-only'),
-              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+              buttons: [Dialog.okButton()]
             });
           }
 
@@ -830,7 +829,7 @@ function addCommands(
           return showDialog({
             title: trans.__('Cannot Save'),
             body: trans.__('No context found for current widget!'),
-            buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+            buttons: [Dialog.okButton()]
           });
         }
         return context.saveAs();
@@ -966,7 +965,7 @@ function addLabCommands(
           title: trans.__('Delete'),
           body: trans.__('Are you sure you want to delete %1', context.path),
           buttons: [
-            Dialog.cancelButton({ label: trans.__('Cancel') }),
+            Dialog.cancelButton(),
             Dialog.warnButton({ label: trans.__('Delete') })
           ]
         });

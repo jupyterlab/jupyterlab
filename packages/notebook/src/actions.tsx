@@ -2007,7 +2007,7 @@ export namespace NotebookActions {
     if (trusted) {
       return showDialog({
         body: trans.__('Notebook is already trusted'),
-        buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+        buttons: [Dialog.okButton()]
       }).then(() => undefined);
     }
 
@@ -2015,7 +2015,7 @@ export namespace NotebookActions {
       body: trustMessage,
       title: trans.__('Trust this notebook?'),
       buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.cancelButton(),
         Dialog.warnButton({ label: trans.__('Trust') })
       ] // FIXME?
     }).then(result => {
@@ -2088,7 +2088,7 @@ namespace Private {
 Please wait for the complete rendering before invoking that action.`,
           notebook.remainingCellToRenderCount
         ),
-        buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+        buttons: [Dialog.okButton()]
       }).catch(reason => {
         console.error(
           'An error occurred when displaying notebook rendering warning',
@@ -2259,7 +2259,7 @@ Please wait for the complete rendering before invoking that action.`,
                 'The kernel for %1 appears to be terminating. You can not run any cell for now.',
                 sessionContext.session?.path
               ),
-              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+              buttons: [Dialog.okButton()]
             });
             break;
           }
@@ -2269,7 +2269,7 @@ Please wait for the complete rendering before invoking that action.`,
               body: trans.__(
                 'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
               ),
-              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+              buttons: [Dialog.okButton()]
             });
             return Promise.resolve(false);
           }

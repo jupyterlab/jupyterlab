@@ -7,6 +7,7 @@ import {
   classes,
   DockPanelSvg,
   LabIcon,
+  TabBarSvg,
   TabPanelSvg
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
@@ -102,10 +103,6 @@ export namespace ILabShell {
      * It defaults to true
      */
     waitForRestore?: boolean;
-    /**
-     * The application language translator.
-     */
-    translator?: ITranslator;
   };
 
   /**
@@ -302,10 +299,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._userLayout = { 'multiple-document': {}, 'single-document': {} };
     }
 
-    const trans = ((options && options.translator) || nullTranslator).load(
-      'jupyterlab'
-    );
-
     // Skip Links
     const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
       this
@@ -319,7 +312,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const headerPanel = (this._headerPanel = new BoxPanel());
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
     menuHandler.panel.node.setAttribute('role', 'navigation');
-    menuHandler.panel.node.setAttribute('aria-label', trans.__('main'));
     const topHandler = (this._topHandler = new Private.PanelHandler());
     topHandler.panel.node.setAttribute('role', 'banner');
     const bottomPanel = (this._bottomPanel = new BoxPanel());
@@ -328,8 +320,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const vsplitPanel = (this._vsplitPanel =
       new Private.RestorableSplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg({
-      hiddenMode: Widget.HiddenMode.Scale,
-      translator: options?.translator
+      hiddenMode: Widget.HiddenMode.Scale
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
@@ -354,27 +345,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
-    leftHandler.sideBar.node.setAttribute(
-      'aria-label',
-      trans.__('main sidebar')
-    );
-    leftHandler.sideBar.contentNode.setAttribute(
-      'aria-label',
-      trans.__('main sidebar')
-    );
     leftHandler.sideBar.node.setAttribute('role', 'complementary');
     leftHandler.stackedPanel.id = 'jp-left-stack';
 
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
-    rightHandler.sideBar.node.setAttribute(
-      'aria-label',
-      trans.__('alternate sidebar')
-    );
-    rightHandler.sideBar.contentNode.setAttribute(
-      'aria-label',
-      trans.__('alternate sidebar')
-    );
     rightHandler.sideBar.node.setAttribute('role', 'complementary');
     rightHandler.stackedPanel.id = 'jp-right-stack';
 
@@ -475,6 +450,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     } else {
       rootLayout.insertWidget(3, this._menuHandler.panel);
     }
+
+    this.translator = nullTranslator;
 
     // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
@@ -679,6 +656,37 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   get restored(): Promise<ILabShell.ILayout> {
     return this._restored.promise;
+  }
+
+  get translator(): ITranslator {
+    return this._translator ?? nullTranslator;
+  }
+  set translator(value: ITranslator) {
+    if (value !== this._translator) {
+      this._translator = value;
+
+      // Set translator for tab bars
+      TabBarSvg.translator = value;
+
+      const trans = value.load('jupyterlab');
+      this._menuHandler.panel.node.setAttribute('aria-label', trans.__('main'));
+      this._leftHandler.sideBar.node.setAttribute(
+        'aria-label',
+        trans.__('main sidebar')
+      );
+      this._leftHandler.sideBar.contentNode.setAttribute(
+        'aria-label',
+        trans.__('main sidebar')
+      );
+      this._rightHandler.sideBar.node.setAttribute(
+        'aria-label',
+        trans.__('alternate sidebar')
+      );
+      this._rightHandler.sideBar.contentNode.setAttribute(
+        'aria-label',
+        trans.__('alternate sidebar')
+      );
+    }
   }
 
   /**
@@ -1683,6 +1691,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'multiple-document': ILabShell.IUserLayout;
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
+  private _translator: ITranslator;
 }
 
 namespace Private {

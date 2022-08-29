@@ -75,7 +75,6 @@ export class RawEditor extends SplitPanel {
     );
 
     this.addClass(RAW_EDITOR_CLASS);
-    // FIXME-TRANS: onSaveError must have an optional translator?
     this._onSaveError = options.onSaveError;
     this.addWidget(Private.defaultsEditor(defaults, this.translator));
     this.addWidget(
@@ -323,7 +322,7 @@ export namespace RawEditor {
     /**
      * A function the raw editor calls on save errors.
      */
-    onSaveError: (reason: any) => void;
+    onSaveError: (reason: any, translator?: ITranslator) => void;
 
     /**
      * The setting registry used by the editor.

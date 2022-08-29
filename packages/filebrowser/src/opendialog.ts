@@ -79,7 +79,7 @@ export namespace FileDialog {
     const dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
       title: options.title,
       buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.cancelButton(),
         Dialog.okButton({
           label: trans.__('Select')
         })

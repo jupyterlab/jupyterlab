@@ -7,6 +7,11 @@ import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject,
@@ -95,6 +100,7 @@ export class OutputArea extends Widget {
     this.layout = new PanelLayout();
     this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
+    this._translator = options.translator ?? nullTranslator;
 
     const model = (this.model = options.model);
     for (
@@ -395,7 +401,8 @@ export class OutputArea extends Widget {
       parent_header: msg.header,
       prompt: stdinPrompt,
       password,
-      future
+      future,
+      translator: this._translator
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -553,7 +560,8 @@ export class OutputArea extends Widget {
     output.renderModel(model).catch(error => {
       // Manually append error message to output
       const pre = document.createElement('pre');
-      pre.textContent = `Javascript Error: ${error.message}`;
+      const trans = this._translator.load('jupyterlab');
+      pre.textContent = trans.__('Javascript Error: %1', error.message);
       output.node.appendChild(pre);
 
       // Remove mime-type-specific CSS classes
@@ -678,6 +686,7 @@ export class OutputArea extends Widget {
    * output area.
    */
   private _maxNumberOutputs: number;
+  private _translator: ITranslator;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -730,6 +739,11 @@ export namespace OutputArea {
      * The maximum number of output items to display on top and bottom of cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Translator
+     */
+    readonly translator?: ITranslator;
   }
 
   /**
@@ -915,8 +929,9 @@ export class Stdin extends Widget implements IStdin {
     this._historyIndex = 0;
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     // make users aware of the line history feature
-    this._input.placeholder = '↑↓ for history';
+    this._input.placeholder = this._trans.__('↑↓ for history');
     this._future = options.future;
     this._parentHeader = options.parent_header;
     this._value = options.prompt + ' ';
@@ -1014,6 +1029,7 @@ export class Stdin extends Widget implements IStdin {
   private _valueCache: string;
   private _promise = new PromiseDelegate<void>();
   private _password: boolean;
+  private _trans: TranslationBundle;
 }
 
 export namespace Stdin {
@@ -1040,6 +1056,11 @@ export namespace Stdin {
      * The header of the input_request message.
      */
     parent_header: KernelMessage.IInputReplyMsg['parent_header'];
+
+    /**
+     * Translator
+     */
+    readonly translator?: ITranslator;
   }
 }
 

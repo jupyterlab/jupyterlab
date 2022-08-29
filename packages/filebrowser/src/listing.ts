@@ -872,7 +872,7 @@ export class DirListing extends Widget {
         node.classList.add(RUNNING_CLASS);
         if (specs && name) {
           const spec = specs.kernelspecs[name];
-          name = spec ? spec.display_name : 'unknown'; // FIXME-TRANS: Is this localizable?
+          name = spec ? spec.display_name : this._trans.__('unknown');
         }
         node.title = this._trans.__('%1\nKernel: %2', node.title, name);
       }
