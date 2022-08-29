@@ -9,8 +9,8 @@ const fileName = 'simple_notebook.ipynb';
 test.use({ tmpPath: 'notebook-run-test' });
 
 test.describe.serial('Notebook Run', () => {
-  test.beforeAll(async ({ baseURL, context, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL, undefined, context);
+  test.beforeAll(async ({ baseURL, request, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL, undefined, request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
@@ -25,8 +25,8 @@ test.describe.serial('Notebook Run', () => {
     await page.filebrowser.openDirectory(tmpPath);
   });
 
-  test.afterAll(async ({ baseURL, context, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL, undefined, context);
+  test.afterAll(async ({ baseURL, request, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL, undefined, request);
     await contents.deleteDirectory(tmpPath);
   });
 

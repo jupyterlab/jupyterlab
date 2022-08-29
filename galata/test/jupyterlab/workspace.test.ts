@@ -22,8 +22,8 @@ test.use({
 });
 
 test.describe('Workspace', () => {
-  test.beforeAll(async ({ baseURL, context, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL, undefined, context);
+  test.beforeAll(async ({ baseURL, request, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL, undefined, request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${nbFile}`),
       `${tmpPath}/${nbFile}`
@@ -34,8 +34,8 @@ test.describe('Workspace', () => {
     );
   });
 
-  test.afterAll(async ({ baseURL, context, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL, undefined, context);
+  test.afterAll(async ({ baseURL, request, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL, undefined, request);
     await contents.deleteDirectory(tmpPath);
   });
 

@@ -5,7 +5,7 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import { Session, TerminalAPI, Workspace } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { Browser, BrowserContext, Page } from '@playwright/test';
+import { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import fetch from 'node-fetch';
 import { ContentsHelper } from './contents';
@@ -185,15 +185,15 @@ export namespace galata {
    *
    * @param baseURL Application base URL
    * @param page Playwright page model
-   * @param context Playwright browser context
+   * @param request Playwright API request context
    * @returns Contents REST API helpers
    */
   export function newContentsHelper(
     baseURL: string,
     page?: Page,
-    context?: BrowserContext
+    request?: APIRequestContext
   ): ContentsHelper {
-    return new ContentsHelper(baseURL, page, context);
+    return new ContentsHelper(baseURL, page, request);
   }
 
   /**
@@ -489,18 +489,19 @@ export namespace galata {
      * @param baseURL Application base URL
      * @param runners Session or terminal ids to stop
      * @param type Type of runner; session or terminal
+     * @param request API request context
      * @returns Whether the runners were closed or not
      */
     export async function clearRunners(
       baseURL: string,
       runners: string[],
       type: 'sessions' | 'terminals',
-      context?: BrowserContext
+      request?: APIRequestContext
     ): Promise<boolean> {
       const responses = await Promise.all(
         [...new Set(runners)].map(id =>
-          context
-            ? context.request.fetch(`${baseURL}/api/${type}/${id}`, {
+          request
+            ? request.fetch(`/api/${type}/${id}`, {
                 method: 'DELETE'
               })
             : fetch(`${baseURL}/api/${type}/${id}`, { method: 'DELETE' })

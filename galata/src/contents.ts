@@ -4,7 +4,7 @@
 import { URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
-import { APIResponse, BrowserContext, Page } from '@playwright/test';
+import { APIRequestContext, APIResponse, Page } from '@playwright/test';
 import fetch, { RequestInit, Response } from 'node-fetch';
 import * as path from 'path';
 import {
@@ -26,16 +26,17 @@ export class ContentsHelper {
    *
    * @param baseURL Server base URL
    * @param page Playwright page model object
+   * @param request Playwright API request context
    */
   constructor(
     readonly baseURL: string,
     readonly page?: Page,
-    context?: BrowserContext
+    request?: APIRequestContext
   ) {
-    if (context) {
-      this.context = context;
+    if (request) {
+      this.request = request;
     } else if (page) {
-      this.context = page.context();
+      this.request = page.context().request;
     }
   }
 
@@ -402,7 +403,7 @@ export class ContentsHelper {
     const baseUrl = this.page ? await Utils.getBaseUrl(this.page) : '/';
     const token = this.page ? await Utils.getToken(this.page) : '';
 
-    let url = URLExt.join(this.baseURL, baseUrl, 'api/contents', path);
+    let url = URLExt.join(baseUrl, 'api/contents', path);
 
     if (token) {
       request.headers = { Authorization: `Token ${token}` };
@@ -410,8 +411,8 @@ export class ContentsHelper {
 
     let response: APIResponse | Response | null = null;
 
-    if (this.context) {
-      response = await this.context.request.fetch(url, {
+    if (this.request) {
+      response = await this.request.fetch(url, {
         ...(request as any),
         data: request.body
       });
@@ -421,5 +422,5 @@ export class ContentsHelper {
     return response;
   }
 
-  readonly context: BrowserContext | null = null;
+  readonly request: APIRequestContext | null = null;
 }

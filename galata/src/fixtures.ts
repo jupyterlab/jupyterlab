@@ -243,13 +243,13 @@ export const test: TestType<
    * Note: if you override this string, you will need to take care of creating the
    * folder and cleaning it.
    */
-  tmpPath: async ({ baseURL, serverFiles, context }, use, testInfo) => {
+  tmpPath: async ({ baseURL, serverFiles, request }, use, testInfo) => {
     // Remove appended retry part for reproducibility
     const testFolder = path
       .basename(testInfo.outputDir)
       .replace(/-retry\d+$/i, '');
 
-    const contents = new ContentsHelper(baseURL!, undefined, context);
+    const contents = new ContentsHelper(baseURL!, undefined, request);
 
     if (await contents.directoryExists(testFolder)) {
       await contents.deleteDirectory(testFolder);
