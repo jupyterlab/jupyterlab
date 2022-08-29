@@ -97,15 +97,23 @@ export class Dialog<T> extends Widget {
         return renderer.createButtonNode(button);
       })
     );
-    this._checkboxNode = normalized.checkbox
-      ? renderer.createCheckboxNode({
-          label: normalized.checkbox.label ?? '',
-          caption:
-            normalized.checkbox.caption ?? normalized.checkbox.label ?? '',
-          checked: normalized.checkbox.checked ?? false,
-          className: normalized.checkbox.className ?? ''
-        })
-      : null;
+
+    this._checkboxNode = null;
+    if (normalized.checkbox) {
+      const {
+        label = '',
+        caption = '',
+        checked = false,
+        className = ''
+      } = normalized.checkbox;
+      this._checkboxNode = renderer.createCheckboxNode({
+        label,
+        caption: caption ?? label,
+        checked,
+        className
+      });
+    }
+
     this._lastMouseDownInDialog = false;
 
     const layout = (this.layout = new PanelLayout());
