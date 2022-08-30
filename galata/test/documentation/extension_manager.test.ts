@@ -171,9 +171,8 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     ),
     page.click('button:has-text("Enable")')
   ]);
-  await page.waitForSelector('button:has-text("Disable")');
-  await page.click(
-    '.jp-extensionmanager-view >> .jp-AccordionPanel-title >> text=Warning'
+  await page.waitForSelector(
+    '.jp-extensionmanager-view >> .jp-AccordionPanel-title[aria-expanded="false"] >> text=Warning'
   );
 
   await setSidebarWidth(page);
