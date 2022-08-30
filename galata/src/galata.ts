@@ -398,7 +398,6 @@ export namespace galata {
    */
   export namespace Mock {
     /**
->>>>>>> 8c16e7b2a4 (Support stateStorage for API calls (#13015))
      * Clear all wanted sessions or terminals.
      *
      * @param baseURL Application base URL
