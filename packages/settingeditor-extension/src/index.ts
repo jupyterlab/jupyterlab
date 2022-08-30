@@ -157,12 +157,12 @@ function activate(
       query?: string;
       settingEditorType?: SettingEditorType;
     }) => {
-      registry.load(plugin.id).then(settings => {
+      void registry.load(plugin.id).then(settings => {
         args.settingEditorType ??
         (settings.get('settingEditorType').composite as SettingEditorType) ===
           'json'
-          ? commands.execute(CommandIDs.openJSON)
-          : openUi({ query: args.query ?? '' });
+          ? void commands.execute(CommandIDs.openJSON)
+          : void openUi({ query: args.query ?? '' });
       });
     },
     label: args => {

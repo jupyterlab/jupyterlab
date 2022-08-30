@@ -4,7 +4,7 @@
 import { URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
-import { Page } from '@playwright/test';
+import { APIRequestContext, APIResponse, Page } from '@playwright/test';
 import fetch, { RequestInit, Response } from 'node-fetch';
 import * as path from 'path';
 import {
@@ -26,8 +26,19 @@ export class ContentsHelper {
    *
    * @param baseURL Server base URL
    * @param page Playwright page model object
+   * @param request Playwright API request context
    */
-  constructor(readonly baseURL: string, readonly page?: Page) {}
+  constructor(
+    readonly baseURL: string,
+    readonly page?: Page,
+    request?: APIRequestContext
+  ) {
+    if (request) {
+      this.request = request;
+    } else if (page) {
+      this.request = page.context().request;
+    }
+  }
 
   /**
    * Return the model for a path.
@@ -40,36 +51,24 @@ export class ContentsHelper {
     path: string,
     type: 'file' | 'directory' = 'file'
   ): Promise<Contents.IModel | null> {
-    const baseUrl = this.page ? await Utils.getBaseUrl(this.page) : '/';
-    const token = this.page ? await Utils.getToken(this.page) : '';
-    const apiUrl = `${this.baseURL}${baseUrl}api/contents`;
-
     const data = {
       type,
       // Get the content only for directory
       content: type === 'directory' ? 1 : 0
     };
 
-    const request: RequestInit = {
-      method: 'GET'
-    };
-
-    if (token) {
-      request.headers = { Authorization: `Token ${token}` };
-    }
-
-    let response: Response | null = null;
+    let response = null;
 
     try {
-      response = await fetch(
-        `${apiUrl}/${path}` + URLExt.objectToQueryString(data),
-        request
-      );
+      response = await this._fetch(path + URLExt.objectToQueryString(data));
     } catch (error) {
       console.error(`Fail to get content metadata for ${path}`, error);
     }
 
-    const succeeded = response?.status === 200;
+    const succeeded =
+      (typeof response?.status === 'function'
+        ? response.status()
+        : response?.status) === 200;
 
     if (succeeded) {
       return response!.json();
@@ -180,7 +179,7 @@ export class ContentsHelper {
       type: 'file'
     });
 
-    let response: Response | null = null;
+    let response = null;
 
     try {
       response = await this._fetch(destinationPath, {
@@ -194,7 +193,10 @@ export class ContentsHelper {
       );
     }
 
-    const succeeded = response?.status === 201;
+    const succeeded =
+      (typeof response?.status === 'function'
+        ? response.status()
+        : response?.status) === 201;
 
     if (succeeded) {
       return await this.fileExists(destinationPath);
@@ -232,7 +234,7 @@ export class ContentsHelper {
   async deleteFile(filePath: string): Promise<boolean> {
     const fileName = filePath;
 
-    let response: Response | null = null;
+    let response = null;
 
     try {
       response = await this._fetch(fileName, {
@@ -242,7 +244,10 @@ export class ContentsHelper {
       console.error(`Failed to delete file ${filePath}`, error);
     }
 
-    const succeeded = response?.status === 204;
+    const succeeded =
+      (typeof response?.status === 'function'
+        ? response.status()
+        : response?.status) === 204;
 
     if (succeeded) {
       return !(await this.fileExists(fileName));
@@ -313,7 +318,7 @@ export class ContentsHelper {
       );
     }
 
-    let response: Response | null = null;
+    let response = null;
 
     try {
       response = await this._fetch(oldName, {
@@ -324,7 +329,10 @@ export class ContentsHelper {
       console.error(`Failed to rename file ${oldName} to ${newName}`, error);
     }
 
-    const succeeded = response?.status === 200;
+    const succeeded =
+      (typeof response?.status === 'function'
+        ? response.status()
+        : response?.status) === 200;
 
     if (succeeded) {
       return await this.fileExists(newName);
@@ -381,25 +389,38 @@ export class ContentsHelper {
       console.error(`Failed to create directory ${dirPath}`, error);
     }
 
-    return response?.status === 201;
+    return (
+      (typeof response?.status === 'function'
+        ? response.status()
+        : response?.status) === 201
+    );
   }
 
   private async _fetch(
     path: string,
     request: RequestInit = { method: 'GET' }
-  ): Promise<Response | null> {
+  ): Promise<APIResponse | Response | null> {
     const baseUrl = this.page ? await Utils.getBaseUrl(this.page) : '/';
     const token = this.page ? await Utils.getToken(this.page) : '';
 
-    const url = URLExt.join(this.baseURL, baseUrl, 'api/contents', path);
+    let url = URLExt.join(baseUrl, 'api/contents', path);
 
     if (token) {
       request.headers = { Authorization: `Token ${token}` };
     }
 
-    let response: Response | null = null;
+    let response: APIResponse | Response | null = null;
 
-    response = await fetch(url, request);
+    if (this.request) {
+      response = await this.request.fetch(url, {
+        ...(request as any),
+        data: request.body
+      });
+    } else {
+      response = await fetch(url, request);
+    }
     return response;
   }
+
+  readonly request: APIRequestContext | null = null;
 }

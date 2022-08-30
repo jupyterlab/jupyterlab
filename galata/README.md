@@ -132,6 +132,88 @@ jupyter lab --config jupyter_server_test_config.py &
 PWDEBUG=1 jlpm playwright test
 ```
 
+### Dealing with login
+
+If you have set up a custom login handler for your Jupyter application and don't want to remove it
+for your integration tests, you can try the following configuration (inspired by the
+[Playwright documentation](https://playwright.dev/docs/test-advanced#global-setup-and-teardown)):
+
+1. Create a file named `global-setup.ts` at the root of the test folder containing the login steps:
+
+```typescript
+// global-setup.ts
+
+import { chromium, FullConfig } from '@playwright/test';
+
+async function globalSetup(config: FullConfig) {
+  const { baseURL, storageState } = config.projects[0].use;
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  // Here follows the step to log in if you setup a known password
+  // See the server documentation https://jupyter-server.readthedocs.io/en/latest/operators/public-server.html?#automatic-password-setup
+  await page.goto(baseURL ?? process.env.TARGET_URL ?? 'http://localhost:8888');
+  await page.locator('input[name="password"]').fill('test');
+  await page.locator('text=Log in').click();
+
+  // Save signed-in state.
+  await page.context().storageState({ path: storageState as string });
+  await browser.close();
+}
+
+export default globalSetup;
+```
+
+2. Modify the Playwright configuration file to use that global setup and the stored state:
+
+```typescript
+var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
+
+module.exports = {
+  ...baseConfig,
+  globalSetup: require.resolve('./global-setup'),
+  use: {
+    ...baseConfig.use,
+    // Tell all tests to load signed-in state from 'storageState.json'.
+    storageState: 'storageState.json'
+  }
+};
+```
+
+When you will start your test, a file named `storageStage.json` will be generated if the log in
+steps were successful. Its content will look like that:
+
+```json
+{
+  "cookies": [
+    {
+      "name": "_xsrf",
+      "value": "...REDACTED...",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "username-localhost-8888",
+      "value": "...REDACTED...",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1664121119.118241,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}
+```
+
+> This will only work if the authentication is stored in a cookie and you can access the Jupyter
+> app directly when that cookie is set.
+
 ## Fixtures
 
 Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures).
