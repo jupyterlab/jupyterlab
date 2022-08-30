@@ -415,10 +415,12 @@ export namespace galata {
       const responses = await Promise.all(
         [...new Set(runners)].map(id =>
           request
-            ? request.fetch(`/api/${type}/${id}`, {
+            ? (request.fetch(`/api/${type}/${id}`, {
                 method: 'DELETE'
-              })
-            : fetch(`${baseURL}/api/${type}/${id}`, { method: 'DELETE' })
+              }) as any)
+            : (fetch(`${baseURL}/api/${type}/${id}`, {
+                method: 'DELETE'
+              }) as any)
         )
       );
       return responses.every(response =>
