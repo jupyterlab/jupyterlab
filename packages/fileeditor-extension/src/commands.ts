@@ -918,25 +918,24 @@ export namespace Commands {
   /**
    * Function to create a new untitled text file, given the current working directory.
    */
-  function createNew(
+  async function createNew(
     commands: CommandRegistry,
     cwd: string,
     ext: string = 'txt'
   ) {
-    return commands
-      .execute('docmanager:new-untitled', {
-        path: cwd,
-        type: 'file',
-        ext
-      })
-      .then(model => {
-        if (model != undefined) {
-          return commands.execute('docmanager:open', {
-            path: model.path,
-            factory: FACTORY
-          });
-        }
-      });
+    const model = await commands.execute('docmanager:new-untitled', {
+      path: cwd,
+      type: 'file',
+      ext
+    });
+    if (model != undefined) {
+      const widget = ((await commands.execute('docmanager:open', {
+        path: model.path,
+        factory: FACTORY
+      })) as unknown) as IDocumentWidget;
+      widget.isUntitled = true;
+      return widget;
+    }
   }
 
   /**
