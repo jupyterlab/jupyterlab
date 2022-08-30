@@ -1,7 +1,7 @@
-"""Extension manager using pip as package manager and PyPi.org as packages source."""
-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+
+"""Extension manager using pip as package manager and PyPi.org as packages source."""
 
 import asyncio
 import io
