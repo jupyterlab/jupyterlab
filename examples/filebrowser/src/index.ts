@@ -15,6 +15,8 @@ import '../index.css';
 
 import { CommandRegistry } from '@lumino/commands';
 
+import { Signal } from '@lumino/signaling';
+
 import { DockPanel, Menu, SplitPanel, Widget } from '@lumino/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
@@ -28,7 +30,7 @@ import {
 
 import { DocumentManager } from '@jupyterlab/docmanager';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileBrowser, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 
@@ -65,8 +67,8 @@ function createApp(
   const widgets: Widget[] = [];
   let activeWidget: Widget;
 
-  const opener = {
-    open: (widget: Widget) => {
+  const opener = new (class {
+    open(widget: Widget) {
       if (widgets.indexOf(widget) === -1) {
         dock.addWidget(widget, { mode: 'tab-after' });
         widgets.push(widget);
@@ -77,18 +79,12 @@ function createApp(
         const index = widgets.indexOf(w);
         widgets.splice(index, 1);
       });
-    },
-    get opened() {
-      return {
-        connect: () => {
-          return false;
-        },
-        disconnect: () => {
-          return false;
-        }
-      };
     }
-  };
+    get opened() {
+      return this._opened;
+    }
+    private _opened = new Signal<this, IDocumentWidget>(this);
+  })();
 
   const docRegistry = new DocumentRegistry();
   const docManager = new DocumentManager({

@@ -108,8 +108,8 @@
     "react": "^17.0.1"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "~5.28.0",
-    "@typescript-eslint/parser": "~5.28.0",
+    "@typescript-eslint/eslint-plugin": "^5.48.1",
+    "@typescript-eslint/parser": "~5.48.1",
     "eslint": "~8.17.0",
     "eslint-config-prettier": "~8.5.0",
     "eslint-plugin-jest": "~26.5.3",
@@ -124,7 +124,7 @@
   },
   "devDependencies": {
     "lerna": "^6.2.0",
-    "typedoc": "~0.22.10",
+    "typedoc": "^0.23.24",
     "yarn": "1.22.19"
   }
 }

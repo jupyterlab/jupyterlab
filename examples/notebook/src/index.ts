@@ -36,7 +36,7 @@ import { editorServices } from '@jupyterlab/codemirror';
 
 import { DocumentManager } from '@jupyterlab/docmanager';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 
 import {
   standardRendererFactories as initialFactories,
@@ -44,6 +44,8 @@ import {
 } from '@jupyterlab/rendermime';
 
 import { CommandRegistry } from '@lumino/commands';
+
+import { Signal } from '@lumino/signaling';
 
 import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
@@ -78,21 +80,15 @@ function createApp(manager: ServiceManager.IManager): void {
     })
   });
 
-  const opener = {
-    open: (widget: Widget) => {
-      // Do nothing for sibling widgets for now.
-    },
-    get opened() {
-      return {
-        connect: () => {
-          return false;
-        },
-        disconnect: () => {
-          return false;
-        }
-      };
+  const opener = new (class {
+    open(widget: Widget) {
+      // do nothing for sibling widgets
     }
-  };
+    get opened() {
+      return this._opened;
+    }
+    private _opened = new Signal<this, IDocumentWidget>(this);
+  })();
 
   const docRegistry = new DocumentRegistry();
   const docManager = new DocumentManager({

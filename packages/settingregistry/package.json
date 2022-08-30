@@ -37,10 +37,10 @@
   "dependencies": {
     "@jupyterlab/nbformat": "^4.0.0-alpha.17",
     "@jupyterlab/statedb": "^4.0.0-alpha.17",
-    "@lumino/commands": "^2.0.0-alpha.6",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
+    "@lumino/commands": "^2.0.0-alpha.7",
+    "@lumino/coreutils": "^2.0.0-alpha.7",
+    "@lumino/disposable": "^2.0.0-alpha.7",
+    "@lumino/signaling": "^2.0.0-alpha.7",
     "ajv": "^6.12.3",
     "json5": "^2.1.1"
   },
@@ -49,7 +49,7 @@
     "@types/jest": "^29.2.0",
     "@types/json5": "^0.0.30",
     "rimraf": "~3.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "^4.9.4"
   },
   "publishConfig": {
     "access": "public"
