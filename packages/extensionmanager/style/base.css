@@ -118,6 +118,11 @@
   justify-content: center;
 }
 
+.jp-extensionmanager-installedlist,
+.jp-extensionmanager-searchresults {
+  min-height: 100px;
+}
+
 /*
   Entry layout and styling
 */

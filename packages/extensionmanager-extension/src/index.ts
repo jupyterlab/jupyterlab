@@ -52,8 +52,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const model = new ListModel(serviceManager, translator);
 
-    let view: ExtensionsPanel | null = null;
-
     const createView = () => {
       const v = new ExtensionsPanel({ model, translator: translator! });
       v.id = 'extensionmanager.main-view';
@@ -68,6 +66,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
       return v;
     };
+
+    // Create a view by default, so it can be restored when loading the workspace.
+    let view: ExtensionsPanel | null = createView();
 
     // If the extension is enabled or disabled,
     // add or remove it from the left area.
@@ -89,7 +90,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
         enabled = settings.get('enabled').composite as boolean;
 
         if (enabled) {
-          view = createView();
+          view = view ?? createView();
+        } else {
+          view?.dispose();
+          view = null;
         }
 
         settings.changed.connect(async () => {

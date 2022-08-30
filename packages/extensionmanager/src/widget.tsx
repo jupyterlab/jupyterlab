@@ -15,7 +15,7 @@ import {
   ToolbarButtonComponent
 } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
-import { AccordionPanel } from '@lumino/widgets';
+import { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 import { Action, IEntry, ListModel } from './model';
@@ -554,6 +554,7 @@ export class ExtensionsPanel extends SidePanel {
     this.addWidget(warning);
 
     const installed = new PanelWithToolbar();
+    installed.addClass('jp-extensionmanager-installedlist');
     installed.title.label = this.trans.__('Installed');
 
     installed.toolbar.addItem(
@@ -576,12 +577,15 @@ export class ExtensionsPanel extends SidePanel {
     this.addWidget(installed);
 
     if (this.model.canInstall) {
-      this.addWidget(new SearchResult(model, this.trans));
+      const searchResults = new SearchResult(model, this.trans);
+      searchResults.addClass('jp-extensionmanager-searchresults');
+      this.addWidget(searchResults);
     }
 
     this._wasDisclaimed = this.model.isDisclaimed;
     if (this.model.isDisclaimed) {
       (this.content as AccordionPanel).collapse(0);
+      (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
     } else {
       // If warning is not disclaimed expand only the warning panel
       (this.content as AccordionPanel).expand(0);
@@ -667,8 +671,10 @@ export class ExtensionsPanel extends SidePanel {
 
   private _onDisclaimedChanged(): void {
     if (!this._wasDisclaimed && this.model.isDisclaimed) {
+      (this.content as AccordionPanel).collapse(0);
       (this.content as AccordionPanel).expand(1);
       (this.content as AccordionPanel).expand(2);
+      (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
     }
   }
 

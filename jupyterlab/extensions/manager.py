@@ -364,6 +364,8 @@ class ExtensionManager(LoggingConfigurable):
             await self._listing_fetch.callback()
 
         cache = self._extensions_cache[query].cache[page]
+        if cache is None:
+            cache = {}
         extensions = list(cache.values())
         if query is not None and self._listings_cache is not None:
             listing = list(self._listings_cache)
