@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Styling } from '@jupyterlab/ui-components';
+import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
 
@@ -18,7 +19,7 @@ export namespace InputDialog {
    */
   export interface IOptions {
     /**
-     * The top level text for the dialog.  Defaults to an empty string.
+     * The top level text for the dialog. Defaults to an empty string.
      */
     title: Dialog.Header;
 
@@ -33,7 +34,7 @@ export namespace InputDialog {
     label?: string;
 
     /**
-     * An optional renderer for dialog items.  Defaults to a shared
+     * An optional renderer for dialog items. Defaults to a shared
      * default renderer.
      */
     renderer?: Dialog.IRenderer;
@@ -47,6 +48,11 @@ export namespace InputDialog {
      * Label for cancel button.
      */
     cancelLabel?: string;
+
+    /**
+     * The checkbox to display in the footer. Defaults no checkbox.
+     */
+    checkbox?: Partial<Dialog.ICheckbox> | null;
   }
 
   /**
@@ -169,6 +175,13 @@ export namespace InputDialog {
      * Placeholder text
      */
     placeholder?: string;
+    /**
+     * Selection range
+     *
+     * Number of characters to pre-select when dialog opens.
+     * Default is to select the whole input text if present.
+     */
+    selectionRange?: number;
   }
 
   /**
@@ -200,7 +213,7 @@ export namespace InputDialog {
    * @returns A promise that resolves with whether the dialog was accepted
    */
   export function getPassword(
-    options: ITextOptions
+    options: Omit<ITextOptions, 'selectionRange'>
   ): Promise<Dialog.IResult<string>> {
     return showDialog({
       ...options,
@@ -317,6 +330,20 @@ class InputTextDialog extends InputDialogBase<string> {
     if (options.placeholder) {
       this._input.placeholder = options.placeholder;
     }
+    this._initialSelectionRange = Math.min(
+      this._input.value.length,
+      Math.max(0, options.selectionRange ?? this._input.value.length)
+    );
+  }
+
+  /**
+   *  A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    if (this._initialSelectionRange > 0 && this._input.value) {
+      this._input.setSelectionRange(0, this._initialSelectionRange);
+    }
   }
 
   /**
@@ -325,6 +352,8 @@ class InputTextDialog extends InputDialogBase<string> {
   getValue(): string {
     return this._input.value;
   }
+
+  private _initialSelectionRange: number;
 }
 
 /**
@@ -343,6 +372,16 @@ class InputPasswordDialog extends InputDialogBase<string> {
     this._input.value = options.text ? options.text : '';
     if (options.placeholder) {
       this._input.placeholder = options.placeholder;
+    }
+  }
+
+  /**
+   *  A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    if (this._input.value) {
+      this._input.select();
     }
   }
 
