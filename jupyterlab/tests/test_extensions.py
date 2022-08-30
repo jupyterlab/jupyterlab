@@ -1,3 +1,6 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 import json
 from typing import NamedTuple
 from unittest.mock import MagicMock, Mock, patch
