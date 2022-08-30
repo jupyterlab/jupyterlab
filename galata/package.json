@@ -62,7 +62,6 @@
     "fs-extra": "^9.0.1",
     "http-server": "^13.0.0",
     "json5": "^2.1.1",
-    "node-fetch": "^2.6.0",
     "path": "~0.12.7",
     "systeminformation": "^5.8.6",
     "vega": "^5.20.0",
@@ -70,7 +69,6 @@
     "vega-statistics": "^1.7.9"
   },
   "devDependencies": {
-    "@types/node-fetch": "^2.5.4",
     "css-loader": "^6.7.1",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~3.0.0",

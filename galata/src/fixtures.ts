@@ -202,17 +202,13 @@ export const test: TestType<
    *
    * By default the sessions created during a test will be tracked and disposed at the end.
    */
-  sessions: async ({ baseURL }, use) => {
+  sessions: async ({ request }, use) => {
     const sessions = new Map<string, Session.IModel>();
 
     await use(sessions);
 
     if (sessions.size > 0) {
-      await galata.Mock.clearRunners(
-        baseURL!,
-        [...sessions.keys()],
-        'sessions'
-      );
+      await galata.Mock.clearRunners(request, [...sessions.keys()], 'sessions');
     }
   },
   /**
@@ -224,14 +220,14 @@ export const test: TestType<
    *
    * By default the Terminals created during a test will be tracked and disposed at the end.
    */
-  terminals: async ({ baseURL }, use) => {
+  terminals: async ({ request }, use) => {
     const terminals = new Map<string, TerminalAPI.IModel>();
 
     await use(terminals);
 
     if (terminals.size > 0) {
       await galata.Mock.clearRunners(
-        baseURL!,
+        request,
         [...terminals.keys()],
         'terminals'
       );
@@ -243,13 +239,13 @@ export const test: TestType<
    * Note: if you override this string, you will need to take care of creating the
    * folder and cleaning it.
    */
-  tmpPath: async ({ baseURL, serverFiles, request }, use, testInfo) => {
+  tmpPath: async ({ request, serverFiles }, use, testInfo) => {
     // Remove appended retry part for reproducibility
     const testFolder = path
       .basename(testInfo.outputDir)
       .replace(/-retry\d+$/i, '');
 
-    const contents = new ContentsHelper(baseURL!, undefined, request);
+    const contents = new ContentsHelper(request);
 
     if (await contents.directoryExists(testFolder)) {
       await contents.deleteDirectory(testFolder);
