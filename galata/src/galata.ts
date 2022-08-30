@@ -5,7 +5,7 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import { Session, TerminalAPI, Workspace } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { Browser, Page } from '@playwright/test';
+import { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import fetch from 'node-fetch';
 import { ContentsHelper } from './contents';
@@ -177,13 +177,15 @@ export namespace galata {
    *
    * @param baseURL Application base URL
    * @param page Playwright page model
+   * @param request Playwright API request context
    * @returns Contents REST API helpers
    */
   export function newContentsHelper(
     baseURL: string,
-    page?: Page
+    page?: Page,
+    request?: APIRequestContext
   ): ContentsHelper {
-    return new ContentsHelper(baseURL, page);
+    return new ContentsHelper(baseURL, page, request);
   }
 
   /**
@@ -396,24 +398,33 @@ export namespace galata {
    */
   export namespace Mock {
     /**
+>>>>>>> 8c16e7b2a4 (Support stateStorage for API calls (#13015))
      * Clear all wanted sessions or terminals.
      *
      * @param baseURL Application base URL
      * @param runners Session or terminal ids to stop
      * @param type Type of runner; session or terminal
+     * @param request API request context
      * @returns Whether the runners were closed or not
      */
     export async function clearRunners(
       baseURL: string,
       runners: string[],
-      type: 'sessions' | 'terminals'
+      type: 'sessions' | 'terminals',
+      request?: APIRequestContext
     ): Promise<boolean> {
       const responses = await Promise.all(
         [...new Set(runners)].map(id =>
-          fetch(`${baseURL}/api/${type}/${id}`, { method: 'DELETE' })
+          request
+            ? request.fetch(`/api/${type}/${id}`, {
+                method: 'DELETE'
+              })
+            : fetch(`${baseURL}/api/${type}/${id}`, { method: 'DELETE' })
         )
       );
-      return responses.every(response => response.ok);
+      return responses.every(response =>
+        typeof response.ok === 'function' ? response.ok() : response.ok
+      );
     }
 
     /**
@@ -460,14 +471,11 @@ export namespace galata {
             if (id) {
               if (runners.has(id)) {
                 // Proxy the GET request
-                const response = await fetch(request.url(), {
-                  headers: await request.allHeaders(),
-                  method: request.method()
-                });
-                if (!response.ok) {
+                const response = await ctxt.request.fetch(request);
+                if (!response.ok()) {
                   if (!page.isClosed() && !isClosed) {
                     return route.fulfill({
-                      status: response.status,
+                      status: response.status(),
                       body: await response.text()
                     });
                   }
@@ -495,14 +503,11 @@ export namespace galata {
               }
             } else {
               // Proxy the GET request
-              const response = await fetch(request.url(), {
-                headers: await request.allHeaders(),
-                method: request.method()
-              });
-              if (!response.ok) {
+              const response = await ctxt.request.fetch(request);
+              if (!response.ok()) {
                 if (!page.isClosed() && !isClosed) {
                   return route.fulfill({
-                    status: response.status,
+                    status: response.status(),
                     body: await response.text()
                   });
                 }
@@ -539,15 +544,11 @@ export namespace galata {
           }
           case 'PATCH': {
             // Proxy the PATCH request
-            const response = await fetch(request.url(), {
-              body: request.postDataBuffer()!,
-              headers: await request.allHeaders(),
-              method: request.method()
-            });
-            if (!response.ok) {
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
                 return route.fulfill({
-                  status: response.status,
+                  status: response.status(),
                   body: await response.text()
                 });
               }
@@ -568,15 +569,11 @@ export namespace galata {
           }
           case 'POST': {
             // Proxy the POST request
-            const response = await fetch(request.url(), {
-              body: request.postDataBuffer()!,
-              headers: await request.allHeaders(),
-              method: request.method()
-            });
-            if (!response.ok) {
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
                 return route.fulfill({
-                  status: response.status,
+                  status: response.status(),
                   body: await response.text()
                 });
               }
@@ -666,9 +663,7 @@ export namespace galata {
             if (!id) {
               // Get all settings
               if (settings.length === 0) {
-                const response = await fetch(request.url(), {
-                  headers: await request.allHeaders()
-                });
+                const response = await ctxt.request.fetch(request);
                 const loadedSettings = (await response.json())
                   .settings as ISettingRegistry.IPlugin[];
 
@@ -694,9 +689,7 @@ export namespace galata {
               // Get specific settings
               let pluginSettings = settings.find(setting => setting.id === id);
               if (!pluginSettings) {
-                const response = await fetch(request.url(), {
-                  headers: await request.allHeaders()
-                });
+                const response = await ctxt.request.fetch(request);
                 pluginSettings = await response.json();
                 if (pluginSettings) {
                   const mocked = mockedSettings[id] ?? {};

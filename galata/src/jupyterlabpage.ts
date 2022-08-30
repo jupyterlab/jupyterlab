@@ -254,7 +254,7 @@ export class JupyterLabPage implements IJupyterLabPage {
   ) {
     this.waitIsReady = waitForApplication;
     this.activity = new ActivityHelper(page);
-    this.contents = new ContentsHelper(baseURL, page);
+    this.contents = new ContentsHelper(baseURL, page, page.context().request);
     this.filebrowser = new FileBrowserHelper(page, this.contents);
     this.kernel = new KernelHelper(page);
     this.logconsole = new LogConsoleHelper(page);
