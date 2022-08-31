@@ -157,7 +157,8 @@ export class ListModel extends VDomModel {
     super();
 
     const metadata = JSON.parse(
-      PageConfig.getOption('extensionManager')
+      // The page config option may not be defined; e.g. in the federated example
+      PageConfig.getOption('extensionManager') || '{}'
     ) as IExtensionManagerMetadata;
 
     this.name = metadata.name;
