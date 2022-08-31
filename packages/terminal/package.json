@@ -48,7 +48,7 @@
     "@lumino/domutils": "^1.8.1",
     "@lumino/messaging": "^1.10.1",
     "@lumino/widgets": "^1.33.0",
-    "xterm": "~4.18.0",
+    "xterm": "~4.19.0",
     "xterm-addon-fit": "~0.5.0"
   },
   "devDependencies": {
