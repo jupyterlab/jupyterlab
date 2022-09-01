@@ -163,24 +163,18 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       area: DockLayout.AreaConfig,
       widget: Widget
     ): DockLayout.ITabAreaConfig | null => {
-      switch (area.type) {
-        case 'split-area': {
-          const it = area.children[Symbol.iterator]();
-          let tab: DockLayout.ITabAreaConfig | null = null;
-          let item = it.next();
-          while (!tab && !item.done) {
-            tab = findTab(item.value, widget);
-            item = it.next();
-          }
-          return tab;
-        }
-        case 'tab-area': {
-          const { id } = widget;
-          return area.widgets.some(widget => widget.id === id) ? area : null;
-        }
-        default:
-          return null;
+      if (area.type === 'tab-area') {
+        return area.widgets.includes(widget) ? area : null;
       }
+      if (area.type === 'split-area') {
+        for (const child of area.children) {
+          const found = findTab(child, widget);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
     };
 
     // Find the tab area for a widget within the main dock area.
@@ -191,10 +185,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return null;
       }
       const area = mainArea.dock?.main;
-      if (!area) {
-        return null;
-      }
-      return findTab(area, widget);
+      return area ? findTab(area, widget) : null;
     };
 
     // Returns an array of all widgets to the right of a widget in a tab area.
