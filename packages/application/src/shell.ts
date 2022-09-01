@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { WidgetTracker } from '@jupyterlab/apputils';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -609,6 +610,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         this._cachedLayout = null;
       }
 
+      // Restore the widgets not restored in first place because the shell
+      // started in 'single-document' mode.
+      this._delayedRestore.forEach(widgetsTracker => widgetsTracker.restore());
+      this._delayedRestore.length = 0;
+
       // Add any widgets created during single document mode, which have
       // subsequently been removed from the dock panel after the multiple document
       // layout has been restored. If the widget has add options cached for
@@ -1059,11 +1065,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     const { mainArea, downArea, leftArea, rightArea, topArea, relativeSizes } =
       layout;
+
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
 
-      if (dock) {
+      if (dock && mode === 'multiple-document') {
         this._dockPanel.restoreLayout(dock);
       }
       if (mode) {
@@ -1192,7 +1199,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       topArea: { simpleVisibility: !this._topHandlerHiddenByUser },
       relativeSizes: this._hsplitPanel.relativeSizes()
     };
-
     return layout;
   }
 
@@ -1275,6 +1281,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  addDelayedRestore(delayedRestore: WidgetTracker): void {
+    if (this.mode === 'single-document') {
+      this._delayedRestore.push(delayedRestore);
+    }
+  }
   /**
    * Handle `after-attach` messages for the application shell.
    */
@@ -1692,6 +1703,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
   private _translator: ITranslator;
+  private _delayedRestore = new Array<WidgetTracker>();
 }
 
 namespace Private {

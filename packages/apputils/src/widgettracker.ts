@@ -177,7 +177,11 @@ export class WidgetTracker<T extends Widget = Widget>
    * A promise resolved when the tracker has been restored.
    */
   get restored(): Promise<void> {
-    return this._pool.restored;
+    if (this._delayedRestore) {
+      return Promise.resolve();
+    } else {
+      return this._pool.restored;
+    }
   }
 
   /**
@@ -317,8 +321,30 @@ export class WidgetTracker<T extends Widget = Widget>
    * This function should not typically be invoked by client code.
    * Its primary use case is to be invoked by a restorer.
    */
-  async restore(options: IRestorable.IOptions<T>): Promise<any> {
-    return this._pool.restore(options);
+  async restore(options: IRestorable.IOptions<T> | void): Promise<any> {
+    let promise = null;
+    if (this._delayedRestore) {
+      promise = this._pool.restore(this._delayedRestore);
+      this._delayedRestore = null;
+    } else if (options) {
+      promise = this._pool.restore(options);
+    } else {
+      console.warn('No options provided to restore the tracker.');
+    }
+    return promise;
+  }
+
+  /**
+   * Save the restore options for this tracker, but do not restore yet.
+   *
+   * @param options - The configuration options that describe restoration.
+   *
+   * ### Notes
+   * This function is useful when stating the shell in 'single-document' mode,
+   * to avoid restoring all useless widgets.
+   */
+  delayedRestore(options: IRestorable.IOptions<T>): void {
+    this._delayedRestore = options;
   }
 
   /**
@@ -346,6 +372,7 @@ export class WidgetTracker<T extends Widget = Widget>
   private _isDisposed = false;
   private _widgetAdded = new Signal<this, T>(this);
   private _widgetUpdated = new Signal<this, T>(this);
+  private _delayedRestore: IRestorable.IOptions<T> | null = null;
 }
 
 /**

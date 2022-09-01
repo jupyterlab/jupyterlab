@@ -733,8 +733,13 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
     const first = app.started;
     const registry = app.commands;
 
-    const restorer = new LayoutRestorer({ connector: state, first, registry });
-
+    const mode = PageConfig.getOption('mode') as DockPanel.Mode;
+    const restorer = new LayoutRestorer({
+      connector: state,
+      first,
+      registry,
+      mode
+    });
     settingRegistry
       .load(shell.id)
       .then(settings => {
@@ -742,14 +747,16 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
         const customizedLayout = settings.composite['layout'] as any;
 
         void restorer.fetch().then(saved => {
-          labShell.restoreLayout(
-            PageConfig.getOption('mode') as DockPanel.Mode,
-            saved,
-            {
-              'multiple-document': customizedLayout.multiple ?? {},
-              'single-document': customizedLayout.single ?? {}
-            }
+          labShell.restoreLayout(mode, saved, {
+            'multiple-document': customizedLayout.multiple ?? {},
+            'single-document': customizedLayout.single ?? {}
+          });
+
+          const unrestoredTrackers = restorer.unrestoredTracker;
+          unrestoredTrackers.forEach(tracker =>
+            labShell.addDelayedRestore(tracker)
           );
+
           labShell.layoutModified.connect(() => {
             void restorer.save(labShell.saveLayout());
           });
@@ -1139,8 +1146,6 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
           console.error(reason.message);
         });
     }
-
-    modeSwitch.value = labShell.mode === 'single-document';
 
     // Show the current file browser shortcut in its title.
     const updateModeSwitchTitle = () => {

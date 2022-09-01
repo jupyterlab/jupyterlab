@@ -115,6 +115,9 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._connector = options.connector;
     this._first = options.first;
     this._registry = options.registry;
+    if (options.mode) {
+      this._mode = options.mode;
+    }
 
     void this._first
       .then(() => {
@@ -137,6 +140,10 @@ export class LayoutRestorer implements ILayoutRestorer {
    */
   get restored(): Promise<void> {
     return this._restored.promise;
+  }
+
+  get unrestoredTracker(): Array<WidgetTracker> {
+    return this._unrestoredTrackers;
   }
 
   /**
@@ -181,7 +188,12 @@ export class LayoutRestorer implements ILayoutRestorer {
       const fresh = false;
 
       // Rehydrate main area.
-      const mainArea = this._rehydrateMainArea(main);
+      let mainArea = null;
+      if (this._mode !== 'single-document') {
+        mainArea = this._rehydrateMainArea(main);
+      } else {
+        mainArea = null;
+      }
 
       // Rehydrate down area.
       const downArea = this._rehydrateDownArea(down);
@@ -255,21 +267,36 @@ export class LayoutRestorer implements ILayoutRestorer {
     });
 
     const first = this._first;
-    const promise = tracker
-      .restore({
+    if (this._mode == 'multiple-document') {
+      const promise = tracker
+        .restore({
+          args: args || (() => JSONExt.emptyObject),
+          command,
+          connector: this._connector,
+          name,
+          registry: this._registry,
+          when: when ? [first].concat(when) : first
+        })
+        .catch(error => {
+          console.error(error);
+        });
+
+      this._promises.push(promise);
+
+      return promise;
+    } else {
+      tracker.delayedRestore({
         args: args || (() => JSONExt.emptyObject),
         command,
         connector: this._connector,
         name,
         registry: this._registry,
         when: when ? [first].concat(when) : first
-      })
-      .catch(error => {
-        console.error(error);
       });
 
-    this._promises.push(promise);
-    return promise;
+      this._unrestoredTrackers.push(tracker);
+      return Promise.resolve();
+    }
   }
 
   /**
@@ -468,6 +495,8 @@ export class LayoutRestorer implements ILayoutRestorer {
   private _registry: CommandRegistry;
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
+  private _mode: DockPanel.Mode = 'multiple-document';
+  private _unrestoredTrackers = new Array<WidgetTracker>();
 }
 
 /**
@@ -495,6 +524,11 @@ export namespace LayoutRestorer {
      * The application command registry.
      */
     registry: CommandRegistry;
+
+    /**
+     * The DockPanel mode.
+     */
+    mode?: DockPanel.Mode;
   }
 }
 
