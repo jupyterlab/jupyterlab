@@ -262,12 +262,13 @@ function generateConfig({
           path: staticPath,
           publicPath: staticUrl || 'auto'
         },
-        module: {
-          rules: [{ test: /\.html$/, type: 'asset/resource' }]
-        },
         plugins
       },
-      webpackConfig
+      webpackConfig, {
+      module: {
+        rules: [{ test: /\.html$/, type: 'asset/resource' }]
+      }
+    }
     )
   ].concat(extras);
 
