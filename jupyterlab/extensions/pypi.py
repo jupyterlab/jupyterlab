@@ -20,7 +20,7 @@ from zipfile import ZipFile
 
 import tornado
 from async_lru import alru_cache
-from traitlets import CFloat, Unicode, config
+from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab.extensions.manager import (
     ActionResult,
@@ -30,7 +30,6 @@ from jupyterlab.extensions.manager import (
 )
 
 
-@alru_cache(maxsize=500)
 async def _fetch_package_metadata(name: str, latest_version: str, base_url: str) -> dict:
     http_client = tornado.httpclient.AsyncHTTPClient()
     response = await http_client.fetch(
@@ -58,6 +57,10 @@ class PyPiExtensionManager(ExtensionManager):
     # Don't request all extensions candidates more than once every 5 minutes
     cache_timeout = CFloat(5 * 60.0, config=True, help="PyPI extensions list cache timeout.")
 
+    package_metadata_cache_size = CInt(
+        1500, config=True, help="The cache size for package metadata."
+    )
+
     def __init__(
         self,
         app_options: Optional[dict] = None,
@@ -65,6 +68,9 @@ class PyPiExtensionManager(ExtensionManager):
         parent: Optional[config.Configurable] = None,
     ) -> None:
         super(PyPiExtensionManager, self).__init__(app_options, ext_options, parent)
+        # Set configurable cache size to fetch function
+        self._fetch_package_metadata = _fetch_package_metadata
+        self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._http_client = tornado.httpclient.AsyncHTTPClient()
         self._rpc_client = xmlrpc.client.ServerProxy(self.base_url)
@@ -151,6 +157,10 @@ class PyPiExtensionManager(ExtensionManager):
 
         return data
 
+    @observe("package_metadata_cache_size")
+    def _observe_package_metadata_cache_size(self, change):
+        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(_fetch_package_metadata)
+
     async def list_packages(
         self, query: str, page: int, per_page: int
     ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
@@ -178,7 +188,7 @@ class PyPiExtensionManager(ExtensionManager):
 
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
             _, latest_version = list(group)[-1]
-            data = await _fetch_package_metadata(name, latest_version, self.base_url)
+            data = await self._fetch_package_metadata(name, latest_version, self.base_url)
 
             normalized_name = self._normalize_name(name)
             extensions[normalized_name] = ExtensionPackage(
