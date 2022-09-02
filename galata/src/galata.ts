@@ -7,7 +7,6 @@ import { Session, TerminalAPI, Workspace } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
-import fetch from 'node-fetch';
 import { ContentsHelper } from './contents';
 import { PerformanceHelper } from './helpers';
 import {
@@ -183,17 +182,15 @@ export namespace galata {
   /**
    * Create a contents REST API helpers object
    *
-   * @param baseURL Application base URL
-   * @param page Playwright page model
    * @param request Playwright API request context
+   * @param page Playwright page model
    * @returns Contents REST API helpers
    */
   export function newContentsHelper(
-    baseURL: string,
-    page?: Page,
-    request?: APIRequestContext
+    request?: APIRequestContext,
+    page?: Page
   ): ContentsHelper {
-    return new ContentsHelper(baseURL, page, request);
+    return new ContentsHelper(request, page);
   }
 
   /**
@@ -493,23 +490,18 @@ export namespace galata {
      * @returns Whether the runners were closed or not
      */
     export async function clearRunners(
-      baseURL: string,
+      request: APIRequestContext,
       runners: string[],
-      type: 'sessions' | 'terminals',
-      request?: APIRequestContext
+      type: 'sessions' | 'terminals'
     ): Promise<boolean> {
       const responses = await Promise.all(
         [...new Set(runners)].map(id =>
-          request
-            ? request.fetch(`/api/${type}/${id}`, {
-                method: 'DELETE'
-              })
-            : fetch(`${baseURL}/api/${type}/${id}`, { method: 'DELETE' })
+          request.fetch(`/api/${type}/${id}`, {
+            method: 'DELETE'
+          })
         )
       );
-      return responses.every(response =>
-        typeof response.ok === 'function' ? response.ok() : response.ok
-      );
+      return responses.every(response => response.ok());
     }
 
     /**

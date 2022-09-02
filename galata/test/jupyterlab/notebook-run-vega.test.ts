@@ -9,8 +9,8 @@ const fileName = 'vega_notebook.ipynb';
 test.use({ tmpPath: 'notebook-run-vega-test' });
 
 test.describe.serial('Notebook Run Vega', () => {
-  test.beforeAll(async ({ baseURL, request, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL, undefined, request);
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
@@ -21,8 +21,8 @@ test.describe.serial('Notebook Run Vega', () => {
     await page.filebrowser.openDirectory(tmpPath);
   });
 
-  test.afterAll(async ({ baseURL, request, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL, undefined, request);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.deleteDirectory(tmpPath);
   });
 
