@@ -264,11 +264,12 @@ function generateConfig({
         },
         plugins
       },
-      webpackConfig, {
-      module: {
-        rules: [{ test: /\.html$/, type: 'asset/resource' }]
+      webpackConfig, 
+      {
+        module: {
+          rules: [{ test: /\.html$/, type: 'asset/resource' }]
+        }
       }
-    }
     )
   ].concat(extras);
 
