@@ -264,7 +264,7 @@ function generateConfig({
         },
         plugins
       },
-      webpackConfig, 
+      webpackConfig,
       {
         module: {
           rules: [{ test: /\.html$/, type: 'asset/resource' }]
