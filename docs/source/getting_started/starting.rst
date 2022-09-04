@@ -10,7 +10,7 @@ Start JupyterLab using:
 
 .. code:: bash
 
-    jupyter lab
+    python -m jupyterlab
 
 JupyterLab will open automatically in your browser.
 
