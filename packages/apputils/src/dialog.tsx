@@ -9,7 +9,7 @@ import {
   ReactWidget,
   Styling
 } from '@jupyterlab/ui-components';
-import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
@@ -93,13 +93,10 @@ export class Dialog<T> extends Widget {
     this._defaultButton = normalized.defaultButton;
     this._buttons = normalized.buttons;
     this._hasClose = normalized.hasClose;
-    this._buttonNodes = toArray(
-      map(this._buttons, button => {
-        return renderer.createButtonNode(button);
-      })
-    );
-
+    this._buttonNodes = this._buttons.map(b => renderer.createButtonNode(b));
     this._checkboxNode = null;
+    this._lastMouseDownInDialog = false;
+
     if (normalized.checkbox) {
       const {
         label = '',
@@ -114,8 +111,6 @@ export class Dialog<T> extends Widget {
         className
       });
     }
-
-    this._lastMouseDownInDialog = false;
 
     const layout = (this.layout = new PanelLayout());
     const content = new Panel();
@@ -894,6 +889,7 @@ export namespace Dialog {
       checkbox: HTMLElement | null
     ): Widget {
       const footer = new Widget();
+
       footer.addClass('jp-Dialog-footer');
       if (checkbox) {
         footer.node.appendChild(checkbox);
@@ -902,10 +898,11 @@ export namespace Dialog {
           '<div class="jp-Dialog-spacer"></div>'
         );
       }
-      each(buttons, button => {
+      for (const button of buttons) {
         footer.node.appendChild(button);
-      });
+      }
       Styling.styleNode(footer.node);
+
       return footer;
     }
 

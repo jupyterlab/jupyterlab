@@ -7,7 +7,7 @@ import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/ui-components';
-import { findIndex, toArray } from '@lumino/algorithm';
+import { findIndex } from '@lumino/algorithm';
 import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from '../dialog';
@@ -300,7 +300,7 @@ export function createToolbarFactory(
     };
 
     const toolbar = new ObservableList<ToolbarRegistry.IToolbarItem>({
-      values: toArray(items).map(item => {
+      values: Array.from(items).map(item => {
         return {
           name: item.name,
           widget: toolbarRegistry.createWidget(factoryName, widget, item)
@@ -393,7 +393,7 @@ export function setToolbar(
               name => item.name === name
             );
             if (existingIndex >= 0) {
-              toArray(toolbar_.children())[existingIndex].parent = null;
+              Array.from(toolbar_.children())[existingIndex].parent = null;
             }
 
             toolbar_.insertItem(
@@ -408,7 +408,7 @@ export function setToolbar(
 
     updateToolbar(items, {
       newIndex: 0,
-      newValues: toArray(items),
+      newValues: Array.from(items),
       oldIndex: 0,
       oldValues: [],
       type: 'add'

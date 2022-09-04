@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IIterator } from '@lumino/algorithm';
-
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
@@ -271,7 +269,7 @@ export interface IManager extends IDisposable {
    *
    * @returns A new iterator over the running sessions.
    */
-  running(): IIterator<IModel>;
+  running(): IterableIterator<IModel>;
 
   /**
    * Start a new session.

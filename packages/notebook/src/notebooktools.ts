@@ -15,7 +15,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { Collapser, Styling } from '@jupyterlab/ui-components';
-import { ArrayExt, chain, each } from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
@@ -168,9 +168,9 @@ export class NotebookTools extends Widget implements INotebookTools {
         this
       );
     }
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, NotebookTools.ActiveNotebookPanelMessage);
-    });
+    }
   }
 
   /**
@@ -191,18 +191,18 @@ export class NotebookTools extends Widget implements INotebookTools {
         this
       );
     }
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, NotebookTools.ActiveCellMessage);
-    });
+    }
   }
 
   /**
    * Handle a change in the selection.
    */
   private _onSelectionChanged(): void {
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, NotebookTools.SelectionMessage);
-    });
+    }
   }
 
   /**
@@ -216,9 +216,9 @@ export class NotebookTools extends Widget implements INotebookTools {
       'activenotebookpanel-metadata-changed',
       args
     );
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, message);
-    });
+    }
   }
 
   /**
@@ -232,13 +232,14 @@ export class NotebookTools extends Widget implements INotebookTools {
       'activecell-metadata-changed',
       args
     );
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, message);
-    });
+    }
   }
 
-  private _toolChildren() {
-    return chain(this._commonTools.children(), this._advancedTools.children());
+  private *_toolChildren() {
+    yield* this._commonTools.children();
+    yield* this._advancedTools.children();
   }
 
   translator: ITranslator;
@@ -1114,7 +1115,7 @@ namespace Private {
     const optionNodes: VirtualNode[] = [];
     let value: any;
     let option: any;
-    each(options.optionValueArray, item => {
+    for (const item of options.optionValueArray) {
       option = item[0];
       value = JSON.stringify(item[1]);
       const attrs =
@@ -1122,7 +1123,7 @@ namespace Private {
           ? { value, selected: 'selected' }
           : { value };
       optionNodes.push(h.option(attrs, option));
-    });
+    }
     const node = VirtualDOM.realize(
       h.div({}, h.label(title, h.select({}, optionNodes)))
     );

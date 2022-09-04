@@ -5,7 +5,7 @@ import { CodeCellModel } from '@jupyterlab/cells';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ModelDB } from '@jupyterlab/observables';
 import { acceptDialog } from '@jupyterlab/testutils';
-import { ArrayExt, toArray } from '@lumino/algorithm';
+import { findIndex } from '@lumino/algorithm';
 import { NotebookModel } from '..';
 import * as utils from './utils';
 
@@ -67,7 +67,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = model.contentFactory.createCodeCell({});
         model.cells.push(cell);
         model.fromJSON(utils.DEFAULT_CONTENT);
-        expect(ArrayExt.firstIndexOf(toArray(model.cells), cell)).toBe(-1);
+        expect(findIndex(model.cells, c => c === cell)).toBe(-1);
         expect(model.cells.length).toBe(7);
       });
 

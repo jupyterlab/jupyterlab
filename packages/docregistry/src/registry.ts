@@ -28,15 +28,7 @@ import {
   Toolbar,
   yamlIcon
 } from '@jupyterlab/ui-components';
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  empty,
-  find,
-  IIterator,
-  map
-} from '@lumino/algorithm';
+import { ArrayExt, find } from '@lumino/algorithm';
 import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -401,34 +393,34 @@ export class DocumentRegistry implements IDisposable {
     }
 
     // Add the file type factories in registration order.
-    fts.forEach(ft => {
+    for (const ft of fts) {
       if (ft.name in this._widgetFactoriesForFileType) {
-        each(this._widgetFactoriesForFileType[ft.name], n => {
+        for (const n of this._widgetFactoriesForFileType[ft.name]) {
           factories.add(n);
-        });
+        }
       }
-    });
+    }
 
     // Add the rest of the global factories, in registration order.
     if ('*' in this._widgetFactoriesForFileType) {
-      each(this._widgetFactoriesForFileType['*'], n => {
+      for (const n of this._widgetFactoriesForFileType['*']) {
         factories.add(n);
-      });
+      }
     }
 
     // Construct the return list, checking to make sure the corresponding
     // model factories are registered.
     const factoryList: DocumentRegistry.WidgetFactory[] = [];
-    factories.forEach(name => {
+    for (const name of factories) {
       const factory = this._widgetFactories[name];
       if (!factory) {
-        return;
+        continue;
       }
       const modelName = factory.modelName || 'text';
       if (modelName in this._modelFactories) {
         factoryList.push(factory);
       }
-    });
+    }
 
     return factoryList;
   }
@@ -541,10 +533,10 @@ export class DocumentRegistry implements IDisposable {
    *
    * @returns A new iterator of widget factories.
    */
-  widgetFactories(): IIterator<DocumentRegistry.WidgetFactory> {
-    return map(Object.keys(this._widgetFactories), name => {
-      return this._widgetFactories[name];
-    });
+  *widgetFactories(): IterableIterator<DocumentRegistry.WidgetFactory> {
+    for (const name in this._widgetFactories) {
+      yield this._widgetFactories[name];
+    }
   }
 
   /**
@@ -552,10 +544,10 @@ export class DocumentRegistry implements IDisposable {
    *
    * @returns A new iterator of model factories.
    */
-  modelFactories(): IIterator<DocumentRegistry.ModelFactory> {
-    return map(Object.keys(this._modelFactories), name => {
-      return this._modelFactories[name];
-    });
+  *modelFactories(): IterableIterator<DocumentRegistry.ModelFactory> {
+    for (const name in this._modelFactories) {
+      yield this._modelFactories[name];
+    }
   }
 
   /**
@@ -565,14 +557,15 @@ export class DocumentRegistry implements IDisposable {
    *
    * @returns A new iterator over the widget extensions.
    */
-  widgetExtensions(
+  *widgetExtensions(
     widgetName: string
-  ): IIterator<DocumentRegistry.WidgetExtension> {
+  ): IterableIterator<DocumentRegistry.WidgetExtension> {
     widgetName = widgetName.toLowerCase();
-    if (!(widgetName in this._extenders)) {
-      return empty<DocumentRegistry.WidgetExtension>();
+    if (widgetName in this._extenders) {
+      for (const extension of this._extenders[widgetName]) {
+        yield extension;
+      }
     }
-    return new ArrayIterator(this._extenders[widgetName]);
   }
 
   /**
@@ -580,8 +573,10 @@ export class DocumentRegistry implements IDisposable {
    *
    * @returns A new iterator of file types.
    */
-  fileTypes(): IIterator<DocumentRegistry.IFileType> {
-    return new ArrayIterator(this._fileTypes);
+  *fileTypes(): IterableIterator<DocumentRegistry.IFileType> {
+    for (const type of this._fileTypes) {
+      yield type;
+    }
   }
 
   /**

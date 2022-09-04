@@ -19,10 +19,8 @@
     "@jupyterlab/theme-light-extension": "^4.0.0-alpha.12",
     "@jupyterlab/translation": "^4.0.0-alpha.12",
     "@jupyterlab/ui-components": "^4.0.0-alpha.27",
-    "@lumino/algorithm": "^1.9.1",
-    "@lumino/commands": "^1.20.0",
-    "@lumino/widgets": "^1.33.0",
-    "es6-promise": "~4.2.8"
+    "@lumino/commands": "^2.0.0-alpha.1",
+    "@lumino/widgets": "^2.0.0-alpha.1"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",

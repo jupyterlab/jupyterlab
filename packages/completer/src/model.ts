@@ -1,14 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IIterator,
-  iter,
-  IterableOrArrayLike,
-  map,
-  StringExt,
-  toArray
-} from '@lumino/algorithm';
+import { map, StringExt } from '@lumino/algorithm';
 import { JSONExt, ReadonlyPartialJSONArray } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CompletionHandler } from './handler';
@@ -203,15 +196,15 @@ export class CompleterModel implements Completer.IModel {
    * #### Notes
    * This is a read-only property.
    */
-  items(): IIterator<Completer.IItem> {
+  items(): IterableIterator<Completer.IItem> {
     return this._filter();
   }
 
   /**
    * The unfiltered list of all available options in a completer menu.
    */
-  options(): IIterator<string> {
-    return iter(this._options);
+  options(): IterableIterator<string> {
+    return this._options[Symbol.iterator]();
   }
 
   /**
@@ -248,11 +241,8 @@ export class CompleterModel implements Completer.IModel {
   /**
    * Set the available options in the completer menu.
    */
-  setOptions(
-    newValue: IterableOrArrayLike<string>,
-    typeMap?: Completer.TypeMap
-  ): void {
-    const values = toArray(newValue || []);
+  setOptions(newValue: Iterable<string>, typeMap?: Completer.TypeMap): void {
+    const values = Array.from(newValue || []);
     const types = typeMap || {};
 
     if (
@@ -434,7 +424,7 @@ export class CompleterModel implements Completer.IModel {
   /**
    * Apply the query to the complete options list to return the matching subset.
    */
-  private _filter(): IIterator<Completer.IItem> {
+  private _filter(): IterableIterator<Completer.IItem> {
     const options = this._options || [];
     const query = this._query;
     if (!query) {

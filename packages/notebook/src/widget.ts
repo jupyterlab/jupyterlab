@@ -17,10 +17,10 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ArrayExt, each, findIndex } from '@lumino/algorithm';
+import { ArrayExt, findIndex } from '@lumino/algorithm';
 import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
-import { Drag, IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -493,9 +493,10 @@ export class StaticNotebook extends Widget {
       );
     }
 
-    each(cells, (cell: ICellModel, i: number) => {
-      this._insertCell(i, cell, 'set');
-    });
+    let index = -1;
+    for (const cell of cells) {
+      this._insertCell(++index, cell, 'set');
+    }
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
     newValue.metadata.changed.connect(this.onMetadataChanged, this);
@@ -514,17 +515,17 @@ export class StaticNotebook extends Widget {
         index = args.newIndex;
         // eslint-disable-next-line no-case-declarations
         const insertType: InsertType = args.oldIndex == -1 ? 'push' : 'insert';
-        each(args.newValues, value => {
+        for (const value of args.newValues) {
           this._insertCell(index++, value, insertType);
-        });
+        }
         break;
       case 'move':
         this._moveCell(args.oldIndex, args.newIndex);
         break;
       case 'remove':
-        each(args.oldValues, value => {
+        for (let length = args.oldValues.length; length > 0; length--) {
           this._removeCell(args.oldIndex);
-        });
+        }
         // Add default cell if there are no cells remaining.
         if (!sender.length) {
           const model = this.model;
@@ -545,14 +546,14 @@ export class StaticNotebook extends Widget {
       case 'set':
         // TODO: reuse existing widgets if possible.
         index = args.newIndex;
-        each(args.newValues, value => {
+        for (const value of args.newValues) {
           // Note: this ordering (insert then remove)
           // is important for getting the active cell
           // index for the editable notebook correct.
           this._insertCell(index, value, 'set');
           this._removeCell(index + 1);
           index++;
-        });
+        }
         break;
       default:
         return;
@@ -805,11 +806,11 @@ export class StaticNotebook extends Widget {
       return;
     }
     this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
-    each(this.widgets, widget => {
+    for (const widget of this.widgets) {
       if (widget.model.type === 'code') {
         widget.model.mimeType = this._mimetype;
       }
-    });
+    }
   }
 
   /**
@@ -1270,9 +1271,9 @@ export class Notebook extends StaticNotebook {
 
     if (newValue === 'edit') {
       // Edit mode deselects all cells.
-      each(this.widgets, widget => {
+      for (const widget of this.widgets) {
         this.deselect(widget);
-      });
+      }
       //  Edit mode unrenders an active markdown widget.
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
@@ -1408,12 +1409,12 @@ export class Notebook extends StaticNotebook {
    */
   deselectAll(): void {
     let changed = false;
-    each(this.widgets, widget => {
+    for (const widget of this.widgets) {
       if (Private.selectedProperty.get(widget)) {
         changed = true;
       }
       Private.selectedProperty.set(widget, false);
-    });
+    }
     if (changed) {
       this._selectionChanged.emit(void 0);
     }
@@ -1667,16 +1668,16 @@ export class Notebook extends StaticNotebook {
         this._evtFocusOut(event as MouseEvent);
         break;
       case 'lm-dragenter':
-        this._evtDragEnter(event as IDragEvent);
+        this._evtDragEnter(event as Drag.Event);
         break;
       case 'lm-dragleave':
-        this._evtDragLeave(event as IDragEvent);
+        this._evtDragLeave(event as Drag.Event);
         break;
       case 'lm-dragover':
-        this._evtDragOver(event as IDragEvent);
+        this._evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this._evtDrop(event as IDragEvent);
+        this._evtDrop(event as Drag.Event);
         break;
       default:
         break;
@@ -1795,7 +1796,7 @@ export class Notebook extends StaticNotebook {
     }
 
     let count = 0;
-    each(this.widgets, widget => {
+    for (const widget of this.widgets) {
       if (widget !== activeCell) {
         widget.removeClass(ACTIVE_CLASS);
       }
@@ -1806,7 +1807,7 @@ export class Notebook extends StaticNotebook {
       } else {
         widget.removeClass(SELECTED_CLASS);
       }
-    });
+    }
     if (count > 1) {
       activeCell?.addClass(OTHER_SELECTED_CLASS);
     }
@@ -2199,7 +2200,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  private _evtDragEnter(event: IDragEvent): void {
+  private _evtDragEnter(event: Drag.Event): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
@@ -2218,7 +2219,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  private _evtDragLeave(event: IDragEvent): void {
+  private _evtDragLeave(event: Drag.Event): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
@@ -2233,7 +2234,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  private _evtDragOver(event: IDragEvent): void {
+  private _evtDragOver(event: Drag.Event): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
@@ -2256,7 +2257,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  private _evtDrop(event: IDragEvent): void {
+  private _evtDrop(event: Drag.Event): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
@@ -2319,13 +2320,13 @@ export class Notebook extends StaticNotebook {
       // Move the cells one by one
       model.cells.beginCompoundOperation();
       if (fromIndex < toIndex) {
-        each(toMove, cellWidget => {
+        for (let length = toMove.length; length > 0; length--) {
           model.cells.move(fromIndex, toIndex);
-        });
+        }
       } else if (fromIndex > toIndex) {
-        each(toMove, cellWidget => {
+        for (let length = toMove.length; length > 0; length--) {
           model.cells.move(fromIndex++, toIndex++);
-        });
+        }
       }
       model.cells.endCompoundOperation();
     } else {
@@ -2343,7 +2344,7 @@ export class Notebook extends StaticNotebook {
 
       // Insert the copies of the original cells.
       model.cells.beginCompoundOperation();
-      each(values, (cell: nbformat.ICell) => {
+      for (const cell of values) {
         let value: ICellModel;
         switch (cell.cell_type) {
           case 'code':
@@ -2357,7 +2358,7 @@ export class Notebook extends StaticNotebook {
             break;
         }
         model.cells.insert(index++, value);
-      });
+      }
       model.cells.endCompoundOperation();
       // Select the inserted cells.
       this.deselectAll();
@@ -2373,15 +2374,15 @@ export class Notebook extends StaticNotebook {
     const cells = this.model!.cells;
     const selected: nbformat.ICell[] = [];
     const toMove: Cell[] = [];
-
-    each(this.widgets, (widget, i) => {
-      const cell = cells.get(i);
+    let i = -1;
+    for (const widget of this.widgets) {
+      const cell = cells.get(++i);
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
         toMove.push(widget);
       }
-    });
+    }
     const activeCell = this.activeCell;
     let dragImage: HTMLElement | null = null;
     let countString: string;
@@ -2430,9 +2431,9 @@ export class Notebook extends StaticNotebook {
         return;
       }
       this._drag = null;
-      each(toMove, widget => {
+      for (const widget of toMove) {
         widget.removeClass(DROP_SOURCE_CLASS);
-      });
+      }
     });
   }
 

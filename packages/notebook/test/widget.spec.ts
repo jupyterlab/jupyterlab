@@ -157,7 +157,7 @@ function createActiveWidget(): LogNotebook {
 }
 
 function selected(nb: Notebook): number[] {
-  const selected = [];
+  const selected: number[] = [];
   const cells = nb.widgets;
   for (let i = 0; i < cells.length; i++) {
     if (nb.isSelected(cells[i])) {

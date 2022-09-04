@@ -22,8 +22,6 @@ import {
   signalToPromise
 } from '@jupyterlab/testutils';
 
-import { toArray } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
 
 import { UUID } from '@lumino/coreutils';
@@ -364,7 +362,7 @@ describe('Debugger', () => {
 
     it('should display the source code in the body', () => {
       const body = sidebar.sources.widgets[0] as SourcesBody;
-      const children = toArray(body.children());
+      const children = Array.from(body.children());
       const editor = children[0] as CodeEditorWrapper;
       expect(editor.model.value.text).toEqual(code);
     });

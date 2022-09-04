@@ -54,7 +54,6 @@ const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
-  '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/builder': [
     '@lumino/algorithm',
     '@lumino/application',

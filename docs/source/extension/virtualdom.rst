@@ -8,7 +8,7 @@ React
 
 
 Many JupyterLab APIs require `Lumino`
-`Widgets <https://lumino.readthedocs.io/en/1.x/api/widgets/classes/widget.html>`__
+`Widgets <https://lumino.readthedocs.io/en/latest/api/modules/widgets.Widget.html>`__
 which have some additional features over native DOM elements, including:
 
 -  Resize events that propagate down the Widget hierarchy.
@@ -35,7 +35,7 @@ override the ``render`` method to return a React element:
    :force:
 
 
-We use Lumino `Signals <https://lumino.readthedocs.io/en/1.x/api/signaling/interfaces/isignal.html>`__ to represent
+We use Lumino `Signals <https://lumino.readthedocs.io/en/latest/api/interfaces/signaling.ISignal.html>`__ to represent
 data that changes over time in JupyterLab.
 To have your React element change in response to a signal event, use the ``UseSignal`` component from ``@jupyterlab/ui-components``,
 which implements the `"render props" <https://reactjs.org/docs/render-props.html>`__:

@@ -29,6 +29,16 @@ export class AddWidget extends Widget {
   }
 
   /**
+   * Get the parent tag tool widget.
+   */
+  get parent(): TagTool | null {
+    return super.parent as TagTool | null;
+  }
+  set parent(parent: TagTool | null) {
+    super.parent = parent;
+  }
+
+  /**
    * Create input box with icon and attach to this.node.
    */
   buildTag(): void {
@@ -166,7 +176,6 @@ export class AddWidget extends Widget {
     }
   }
 
-  public parent: TagTool | null = null;
   private editing: boolean;
   private input: HTMLInputElement = document.createElement('input');
   protected translator: ITranslator;

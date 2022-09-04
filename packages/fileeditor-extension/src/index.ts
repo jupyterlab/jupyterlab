@@ -53,7 +53,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
-import { find, toArray } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 
@@ -536,7 +536,7 @@ function activateFileEditorCompleterService(
       }
     };
 
-    onRunningChanged(sessionManager, toArray(sessionManager.running()));
+    onRunningChanged(sessionManager, Array.from(sessionManager.running()));
     sessionManager.runningChanged.connect(onRunningChanged);
 
     widget.disposed.connect(() => {

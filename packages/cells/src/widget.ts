@@ -49,9 +49,9 @@ import {
   UUID
 } from '@lumino/coreutils';
 
-import { filter, some, toArray } from '@lumino/algorithm';
+import { some } from '@lumino/algorithm';
 
-import { IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 
 import { Message } from '@lumino/messaging';
 
@@ -1242,10 +1242,10 @@ export abstract class AttachmentsCell<
         this._evtNativeDrop(event as DragEvent);
         break;
       case 'lm-dragover':
-        this._evtDragOver(event as IDragEvent);
+        this._evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this._evtDrop(event as IDragEvent);
+        this._evtDrop(event as Drag.Event);
         break;
       default:
         break;
@@ -1288,7 +1288,7 @@ export abstract class AttachmentsCell<
     node.removeEventListener('lm-drop', this);
   }
 
-  private _evtDragOver(event: IDragEvent) {
+  private _evtDragOver(event: Drag.Event) {
     const supportedMimeType = some(imageRendererFactory.mimeTypes, mimeType => {
       if (!event.mimeData.hasData(CONTENTS_MIME_RICH)) {
         return false;
@@ -1341,20 +1341,18 @@ export abstract class AttachmentsCell<
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  private _evtDrop(event: IDragEvent): void {
-    const supportedMimeTypes = toArray(
-      filter(event.mimeData.types(), mimeType => {
-        if (mimeType === CONTENTS_MIME_RICH) {
-          const data = event.mimeData.getData(
-            CONTENTS_MIME_RICH
-          ) as DirListing.IContentsThunk;
-          return (
-            imageRendererFactory.mimeTypes.indexOf(data.model.mimetype) !== -1
-          );
-        }
-        return imageRendererFactory.mimeTypes.indexOf(mimeType) !== -1;
-      })
-    );
+  private _evtDrop(event: Drag.Event): void {
+    const supportedMimeTypes = event.mimeData.types().filter(mimeType => {
+      if (mimeType === CONTENTS_MIME_RICH) {
+        const data = event.mimeData.getData(
+          CONTENTS_MIME_RICH
+        ) as DirListing.IContentsThunk;
+        return (
+          imageRendererFactory.mimeTypes.indexOf(data.model.mimetype) !== -1
+        );
+      }
+      return imageRendererFactory.mimeTypes.indexOf(mimeType) !== -1;
+    });
     if (supportedMimeTypes.length === 0) {
       return;
     }

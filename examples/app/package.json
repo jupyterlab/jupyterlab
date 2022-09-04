@@ -40,7 +40,6 @@
     "@jupyterlab/translation": "^4.0.0-alpha.12",
     "@jupyterlab/translation-extension": "^4.0.0-alpha.12",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.12",
-    "es6-promise": "~4.2.8",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },

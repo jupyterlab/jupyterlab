@@ -33,8 +33,8 @@
   },
   "dependencies": {
     "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.12",
-    "@lumino/coreutils": "^1.12.0",
-    "@lumino/widgets": "^1.33.0",
+    "@lumino/coreutils": "^2.0.0-alpha.1",
+    "@lumino/widgets": "^2.0.0-alpha.1",
     "vega": "^5.20.0",
     "vega-embed": "^6.2.1",
     "vega-lite": "^5.1.0"

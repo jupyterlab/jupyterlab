@@ -52,14 +52,7 @@ export class RendererUserMenu extends MenuBar.Renderer {
   renderLabel(data: MenuBar.IRenderData): VirtualElement {
     let content = this.formatLabel(data);
     return h.div(
-      {
-        className:
-          'lm-MenuBar-itemLabel' +
-          /* <DEPRECATED> */
-          ' p-MenuBar-itemLabel' +
-          /* </DEPRECATED> */
-          ' jp-MenuBar-label'
-      },
+      { className: 'lm-MenuBar-itemLabel jp-MenuBar-label' },
       content
     );
   }
@@ -73,16 +66,14 @@ export class RendererUserMenu extends MenuBar.Renderer {
     if (this._user.isReady && this._user.avatar_url) {
       return h.div(
         {
-          className:
-            'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-imageIcon'
+          className: 'lm-MenuBar-itemIcon jp-MenuBar-imageIcon'
         },
         h.img({ src: this._user.avatar_url })
       );
     } else if (this._user.isReady) {
       return h.div(
         {
-          className:
-            'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-anonymousIcon',
+          className: 'lm-MenuBar-itemIcon jp-MenuBar-anonymousIcon',
           style: { backgroundColor: this._user.color }
         },
         h.span({}, this._user.initials)
@@ -90,8 +81,7 @@ export class RendererUserMenu extends MenuBar.Renderer {
     } else {
       return h.div(
         {
-          className:
-            'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-anonymousIcon'
+          className: 'lm-MenuBar-itemIcon jp-MenuBar-anonymousIcon'
         },
         userIcon
       );

@@ -9,7 +9,6 @@
  * Notebook widgets.
  */
 
-import { each, IterableOrArrayLike } from '@lumino/algorithm';
 import { ICodeCellModel } from './model';
 import { Cell } from './widget';
 import { h, VirtualDOM } from '@lumino/virtualdom';
@@ -66,18 +65,19 @@ export namespace CellDragUtils {
    */
   export function findCell(
     node: HTMLElement,
-    cells: IterableOrArrayLike<Cell>,
+    cells: Iterable<Cell>,
     isCellNode: (node: HTMLElement) => boolean
   ): number {
-    let cellIndex: number = -1;
+    let cellIndex = -1;
     while (node && node.parentElement) {
       if (isCellNode(node)) {
-        each(cells, (cell, index) => {
+        let index = -1;
+        for (const cell of cells) {
           if (cell.node === node) {
-            cellIndex = index;
-            return false;
+            cellIndex = ++index;
+            break;
           }
-        });
+        }
         break;
       }
       node = node.parentElement;

@@ -7,8 +7,6 @@ import { Cell, CodeCell } from '@jupyterlab/cells';
 
 import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 
-import { each } from '@lumino/algorithm';
-
 import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
@@ -41,7 +39,9 @@ export class ConsoleHandler implements IDisposable {
     });
 
     const addHandlers = (): void => {
-      each(codeConsole.cells, cell => this._addEditorHandler(cell));
+      for (const cell of codeConsole.cells) {
+        this._addEditorHandler(cell);
+      }
     };
     addHandlers();
     this._consolePanel.console.cells.changed.connect(addHandlers);

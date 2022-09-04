@@ -12,7 +12,6 @@ import {
   sleep
 } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { each } from '@lumino/algorithm';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
 import { KernelError, Notebook, NotebookActions, NotebookModel } from '..';
 import * as utils from './utils';
@@ -181,9 +180,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should clear the existing selection', () => {
-        each(widget.widgets, child => {
+        for (const child of widget.widgets) {
           widget.select(child);
-        });
+        }
         NotebookActions.splitCell(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
           if (i === widget.activeCellIndex) {

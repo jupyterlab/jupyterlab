@@ -59,7 +59,7 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-import { find, IIterator, map, reduce, toArray } from '@lumino/algorithm';
+import { find, map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
 
@@ -352,7 +352,7 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
         }
 
         return widget.model.manager.services.contents
-          .getDownloadUrl(widget.selectedItems().next()!.path)
+          .getDownloadUrl(widget.selectedItems().next()!.value.path)
           .then(url => {
             Clipboard.copyToSystem(url);
           });
@@ -435,14 +435,11 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
         } else {
           const areas: ILabShell.Area[] = ['left', 'right'];
           for (const area of areas) {
-            const it = labShell.widgets(area);
-            let widget = it.next();
-            while (widget) {
+            for (const widget of labShell.widgets(area)) {
               if (widget.contains(browserForPath)) {
                 labShell.activateById(widget.id);
                 return;
               }
-              widget = it.next();
             }
           }
         }
@@ -518,21 +515,21 @@ const shareFile: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const widget = tracker.currentWidget;
         const model = widget?.selectedItems().next();
-        if (!model) {
+        if (model === undefined || model.done) {
           return;
         }
 
         Clipboard.copyToSystem(
           PageConfig.getUrl({
             workspace: PageConfig.defaultWorkspace,
-            treePath: model.path,
+            treePath: model.value.path,
             toShare: true
           })
         );
       },
       isVisible: () =>
         !!tracker.currentWidget &&
-        toArray(tracker.currentWidget.selectedItems()).length === 1,
+        Array.from(tracker.currentWidget.selectedItems()).length === 1,
       icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Shareable Link')
     });
@@ -629,7 +626,7 @@ const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
         const mode = args['mode'] as string | undefined;
 
         return Promise.all(
-          toArray(
+          Array.from(
             map(widget.selectedItems(), item => {
               if (mode === 'single-document') {
                 const url = PageConfig.getUrl({
@@ -969,7 +966,7 @@ function addCommands(
 
       const { contents } = widget.model.manager.services;
       return Promise.all(
-        toArray(
+        Array.from(
           map(widget.selectedItems(), item => {
             if (item.type === 'directory') {
               const localPath = contents.localPath(item.path);
@@ -1083,15 +1080,15 @@ function addCommands(
         return;
       }
       const item = widget.selectedItems().next();
-      if (!item) {
+      if (item.done) {
         return;
       }
 
-      Clipboard.copyToSystem(item.path);
+      Clipboard.copyToSystem(item.value.path);
     },
     isVisible: () =>
       !!tracker.currentWidget &&
-      tracker.currentWidget.selectedItems().next !== undefined,
+      !tracker.currentWidget.selectedItems().next().done,
     icon: fileIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Copy Path')
   });
@@ -1349,31 +1346,33 @@ namespace Private {
     }
 
     /**
-     * Return the intersection of multiple arrays.
+     * Return the intersection of multiple iterables.
      *
-     * @param iter Iterator of arrays
-     * @returns Set of common elements to all arrays
+     * @param iterables Iterator of iterables
+     * @returns Set of common elements to all iterables
      */
-    export function intersection<T>(iter: IIterator<Array<T>>): Set<T> {
-      // pop the first element of iter
-      const first = iter.next();
-      // first will be undefined if iter is empty
-      if (!first) {
-        return new Set<T>();
+    export function intersection<T>(iterables: Iterable<Iterable<T>>): Set<T> {
+      let accumulator: Set<T> | undefined = undefined;
+      for (const current of iterables) {
+        // Initialize accumulator.
+        if (accumulator === undefined) {
+          accumulator = new Set(current);
+          continue;
+        }
+        // Return early if empty.
+        if (accumulator.size === 0) {
+          return accumulator;
+        }
+        // Keep the intersection of accumulator and current.
+        let intersection = new Set<T>();
+        for (const value of current) {
+          if (accumulator.has(value)) {
+            intersection.add(value);
+          }
+        }
+        accumulator = intersection;
       }
-
-      // "initialize" the intersection from first
-      const isect = new Set(first);
-      // reduce over the remaining elements of iter
-      return reduce(
-        iter,
-        (isect, subarr) => {
-          // filter out all elements not present in both isect and subarr,
-          // accumulate result in new set
-          return new Set(subarr.filter(x => isect.has(x)));
-        },
-        isect
-      );
+      return accumulator ?? new Set();
     }
   }
 }

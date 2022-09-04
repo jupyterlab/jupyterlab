@@ -10,14 +10,7 @@ import {
   ObservableMap
 } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  IIterator,
-  IterableOrArrayLike,
-  toArray
-} from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import { ISignal, Signal } from '@lumino/signaling';
 import { NotebookModel } from './model';
 
@@ -170,19 +163,11 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Create an iterator over the cells in the cell list.
    *
    * @returns A new iterator starting at the front of the cell list.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * No changes.
    */
-  iter(): IIterator<ICellModel> {
-    const arr: ICellModel[] = [];
-    for (const id of toArray(this._cellOrder)) {
-      arr.push(this._cellMap.get(id)!);
+  *[Symbol.iterator](): IterableIterator<ICellModel> {
+    for (const id of this._cellOrder) {
+      yield this._cellMap.get(id)!;
     }
-    return new ArrayIterator<ICellModel>(arr);
   }
 
   /**
@@ -322,7 +307,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    */
   removeValue(cell: ICellModel): number {
     const index = ArrayExt.findFirstIndex(
-      toArray(this._cellOrder),
+      Array.from(this._cellOrder),
       id => this._cellMap.get(id) === cell
     );
     this.remove(index);
@@ -394,24 +379,17 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    *
    * @returns The new length of the cell list.
    *
-   * #### Complexity
-   * Linear.
-   *
-   * #### Iterator Validity
-   * No changes.
-   *
    * #### Notes
    * This should be considered to transfer ownership of the
    * cells to the `CellList`. As such, `cell.dispose()` should
    * not be called by other actors.
    */
-  pushAll(cells: IterableOrArrayLike<ICellModel>): number {
-    const newValues = toArray(cells);
-    each(newValues, cell => {
+  pushAll(cells: Iterable<ICellModel>): number {
+    for (const cell of cells) {
       // Set the internal data structures.
       this._cellMap.set(cell.id, cell);
       this._cellOrder.push(cell.id);
-    });
+    }
     return this.length;
   }
 
@@ -424,12 +402,6 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    *
    * @returns The new length of the cell list.
    *
-   * #### Complexity.
-   * Linear.
-   *
-   * #### Iterator Validity
-   * No changes.
-   *
    * #### Notes
    * The `index` will be clamped to the bounds of the cell list.
    *
@@ -441,15 +413,14 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * cells to the `CellList`. As such, `cell.dispose()` should
    * not be called by other actors.
    */
-  insertAll(index: number, cells: IterableOrArrayLike<ICellModel>): number {
-    const newValues = toArray(cells);
-    each(newValues, cell => {
+  insertAll(index: number, cells: Iterable<ICellModel>): number {
+    for (const cell of cells) {
       this._cellMap.set(cell.id, cell);
-      // @todo it looks like this compound operation shoult start before the `each` loop.
+      // @todo it looks like this compound operation should start before the `for` loop.
       this._cellOrder.beginCompoundOperation();
       this._cellOrder.insert(index++, cell.id);
       this._cellOrder.endCompoundOperation();
-    });
+    }
     return this.length;
   }
 
@@ -533,7 +504,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     change: IObservableList.IChangedArgs<string>
   ): void {
     if (change.type === 'add' || change.type === 'set') {
-      each(change.newValues, id => {
+      for (const id of change.newValues) {
         const existingCell = this._cellMap.get(id);
         if (existingCell == null) {
           const cellDB = this._factory.modelDB!;
@@ -571,16 +542,16 @@ export class CellList implements IObservableUndoableList<ICellModel> {
             this._cellMap.set(id, freshCell);
           });
         }
-      });
+      }
     }
     const newValues: ICellModel[] = [];
     const oldValues: ICellModel[] = [];
-    each(change.newValues, id => {
+    for (const id of change.newValues) {
       newValues.push(this._cellMap.get(id)!);
-    });
-    each(change.oldValues, id => {
+    }
+    for (const id of change.oldValues) {
       oldValues.push(this._cellMap.get(id)!);
-    });
+    }
     this._changed.emit({
       type: change.type,
       oldIndex: change.oldIndex,

@@ -93,11 +93,10 @@ export class OutputArea extends Widget {
    */
   constructor(options: OutputArea.IOptions) {
     super();
+    super.layout = new PanelLayout();
     this.addClass(OUTPUT_AREA_CLASS);
-
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
-    this.layout = new PanelLayout();
     this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
@@ -121,11 +120,6 @@ export class OutputArea extends Widget {
   readonly contentFactory: OutputArea.IContentFactory;
 
   /**
-   * Narrow the type of OutputArea's layout prop
-   */
-  readonly layout: PanelLayout;
-
-  /**
    * The model used by the widget.
    */
   readonly model: IOutputAreaModel;
@@ -134,6 +128,13 @@ export class OutputArea extends Widget {
    * The rendermime instance used by the widget.
    */
   readonly rendermime: IRenderMimeRegistry;
+
+  /**
+   * Narrow the type of OutputArea's layout prop
+   */
+  get layout(): PanelLayout {
+    return super.layout as PanelLayout;
+  }
 
   /**
    * A read-only sequence of the children widgets in the output area.

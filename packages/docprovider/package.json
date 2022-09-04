@@ -41,7 +41,7 @@
   "dependencies": {
     "@jupyterlab/collaboration": "^4.0.0-alpha.12",
     "@jupyterlab/shared-models": "^4.0.0-alpha.12",
-    "@lumino/coreutils": "^1.12.0",
+    "@lumino/coreutils": "^2.0.0-alpha.1",
     "lib0": "^0.2.42",
     "y-websocket": "^1.3.15"
   },

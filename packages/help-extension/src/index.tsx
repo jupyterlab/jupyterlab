@@ -32,7 +32,6 @@ import {
   Toolbar
 } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { each } from '@lumino/algorithm';
 import { Menu } from '@lumino/widgets';
 import * as React from 'react';
 import { Licenses } from './licenses';
@@ -430,9 +429,9 @@ const resources: JupyterFrontEndPlugin<void> = {
     };
 
     // Create menu items for currently running sessions
-    each(serviceManager.sessions.running(), model => {
+    for (const model of serviceManager.sessions.running()) {
       onSessionRunningChanged(serviceManager.sessions, [model]);
-    });
+    }
     serviceManager.sessions.runningChanged.connect(onSessionRunningChanged);
 
     if (palette) {

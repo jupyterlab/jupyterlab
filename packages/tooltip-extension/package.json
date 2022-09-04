@@ -47,9 +47,9 @@
     "@jupyterlab/services": "^7.0.0-alpha.12",
     "@jupyterlab/tooltip": "^4.0.0-alpha.12",
     "@jupyterlab/translation": "^4.0.0-alpha.12",
-    "@lumino/algorithm": "^1.9.1",
-    "@lumino/coreutils": "^1.12.0",
-    "@lumino/widgets": "^1.33.0"
+    "@lumino/algorithm": "^2.0.0-alpha.1",
+    "@lumino/coreutils": "^2.0.0-alpha.1",
+    "@lumino/widgets": "^2.0.0-alpha.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

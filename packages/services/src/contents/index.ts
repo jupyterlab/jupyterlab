@@ -7,8 +7,6 @@ import { ModelDB } from '@jupyterlab/observables';
 
 import { PartialJSONObject } from '@lumino/coreutils';
 
-import { each } from '@lumino/algorithm';
-
 import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -712,12 +710,9 @@ export class ContentsManager implements Contents.IManager {
     return drive.get(localPath, options).then(contentsModel => {
       const listing: Contents.IModel[] = [];
       if (contentsModel.type === 'directory' && contentsModel.content) {
-        each(contentsModel.content, (item: Contents.IModel) => {
-          listing.push({
-            ...item,
-            path: this._toGlobalPath(drive, item.path)
-          } as Contents.IModel);
-        });
+        for (const item of contentsModel.content) {
+          listing.push({ ...item, path: this._toGlobalPath(drive, item.path) });
+        }
         return {
           ...contentsModel,
           path: this._toGlobalPath(drive, localPath),

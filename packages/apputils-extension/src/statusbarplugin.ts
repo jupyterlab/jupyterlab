@@ -18,7 +18,6 @@ import {
 } from '@jupyterlab/apputils';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
-import { toArray } from '@lumino/algorithm';
 import { Title, Widget } from '@lumino/widgets';
 
 /**
@@ -130,8 +129,10 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
       translator
     });
 
-    item.model.sessions = toArray(app.serviceManager.sessions.running()).length;
-    item.model.terminals = toArray(
+    item.model.sessions = Array.from(
+      app.serviceManager.sessions.running()
+    ).length;
+    item.model.terminals = Array.from(
       app.serviceManager.terminals.running()
     ).length;
 

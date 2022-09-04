@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { every, IIterator, iter } from '@lumino/algorithm';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { ServerConnection } from '..';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
@@ -140,8 +138,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    *
    * @returns A new iterator over the running kernels.
    */
-  running(): IIterator<Kernel.IModel> {
-    return iter([...this._models.values()]);
+  running(): IterableIterator<Kernel.IModel> {
+    return this._models.values();
   }
 
   /**
@@ -258,12 +256,12 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 
     if (
       this._models.size === models.length &&
-      every(models, x => {
-        const existing = this._models.get(x.id);
+      models.every(model => {
+        const existing = this._models.get(model.id);
         if (!existing) {
           return false;
         }
-        return existing.name === x.name;
+        return existing.name === model.name;
       })
     ) {
       // Identical models list (presuming models does not contain duplicate

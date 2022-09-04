@@ -32,7 +32,6 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -180,12 +179,12 @@ async function activateTOC(
         }
 
         if (labShell) {
-          toArray(labShell.widgets('main')).forEach(widget => {
+          for (const widget of labShell.widgets('main')) {
             const model = tracker.get(widget);
             if (model) {
               model.setConfiguration(configuration);
             }
-          });
+          }
         } else {
           if (app.shell.currentWidget) {
             const model = tracker.get(app.shell.currentWidget);

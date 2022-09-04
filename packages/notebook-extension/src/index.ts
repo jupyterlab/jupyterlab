@@ -2175,7 +2175,7 @@ function addCommands(
         return NotebookActions.copy(current.content);
       }
     },
-    icon: args => (args.toolbar ? copyIcon : ''),
+    icon: args => (args.toolbar ? copyIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteBelow, {
@@ -2214,7 +2214,7 @@ function addCommands(
         NotebookActions.duplicate(current.content, 'belowSelected');
       }
     },
-    icon: args => (args.toolbar ? duplicateIcon : ''),
+    icon: args => (args.toolbar ? duplicateIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
