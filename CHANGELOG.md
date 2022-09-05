@@ -18,9 +18,9 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.4.x/CHANGELOG.md'
 
 ### Bugs fixed
 
-- Backport PR #13035: Update Python icon to be PSF Trademark compliant [#13044](https://github.com/jupyterlab/jupyterlab/pull/13044) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #13040: Reorder of webpackConfig merge [#13042](https://github.com/jupyterlab/jupyterlab/pull/13042) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #12974: update xterm.js dependency [#13036](https://github.com/jupyterlab/jupyterlab/pull/13036) ([@fcollonval](https://github.com/fcollonval))
+- Update Python icon to be PSF Trademark compliant [#13044](https://github.com/jupyterlab/jupyterlab/pull/13044) ([@fcollonval](https://github.com/fcollonval))
+- Reorder of webpackConfig merge [#13042](https://github.com/jupyterlab/jupyterlab/pull/13042) ([@fcollonval](https://github.com/fcollonval))
+- Update xterm.js dependency [#13036](https://github.com/jupyterlab/jupyterlab/pull/13036) ([@fcollonval](https://github.com/fcollonval))
 - Support stateStorage for API calls [#13015](https://github.com/jupyterlab/jupyterlab/pull/13015) ([@fcollonval](https://github.com/fcollonval))
 - Conditional call to waitIsReady in reload [#13011](https://github.com/jupyterlab/jupyterlab/pull/13011) ([@fcollonval](https://github.com/fcollonval))
 - Add scrolling to `debugger` variable renderer [#12968](https://github.com/jupyterlab/jupyterlab/pull/12968) ([@firai](https://github.com/firai))
