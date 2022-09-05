@@ -263,6 +263,7 @@ export class ListModel extends VDomModel {
   set query(value: string) {
     if (this._query !== value) {
       this._query = value;
+      this._page = 1;
       void this._debouncedSearch.invoke();
     }
   }
@@ -271,6 +272,9 @@ export class ListModel extends VDomModel {
    * The current search page.
    *
    * Setting its value triggers a new search.
+   *
+   * ### Note
+   * First page is 1.
    */
   get page(): number {
     return this._page;
@@ -298,10 +302,10 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * The total number of results in the current search.
+   * The last page of results in the current search.
    */
-  get totalEntries(): number {
-    return this._totalEntries;
+  get lastPage(): number {
+    return this._lastPage;
   }
 
   /**
@@ -385,7 +389,7 @@ export class ListModel extends VDomModel {
     this._isLoadingInstalledExtensions = true;
     this.stateChanged.emit();
     try {
-      const extensions = await Private.requestAPI<IEntry[]>({
+      const [extensions] = await Private.requestAPI<IEntry[]>({
         refresh: force ? 1 : 0
       });
       this._installed = extensions.sort(Private.comparator);
@@ -413,14 +417,23 @@ export class ListModel extends VDomModel {
     this._isSearching = true;
     this.stateChanged.emit();
     try {
-      const extensions = await Private.requestAPI<IEntry[]>({
+      const [extensions, links] = await Private.requestAPI<IEntry[]>({
         query: this.query ?? '',
         page: this.page,
         per_page: this.pagination,
         refresh: force ? 1 : 0
       });
 
-      this._totalEntries = extensions.length;
+      const lastURL = links['last'];
+      if (lastURL) {
+        const lastPage = URLExt.queryStringToObject(
+          URLExt.parse(lastURL).search ?? ''
+        )['page'];
+
+        if (lastPage) {
+          this._lastPage = parseInt(lastPage, 10);
+        }
+      }
 
       const installedNames = this._installed.map(pkg => pkg.name);
       this._lastSearchResult = extensions
@@ -471,7 +484,7 @@ export class ListModel extends VDomModel {
     );
 
     actionRequest.then(
-      reply => {
+      ([reply]) => {
         const trans = this.translator.load('jupyterlab');
         if (reply.needs_restart.includes('server')) {
           void showDialog({
@@ -507,7 +520,7 @@ export class ListModel extends VDomModel {
       }
     );
     this.addPendingAction(actionRequest);
-    return actionRequest;
+    return actionRequest.then(([reply]) => reply);
   }
 
   /**
@@ -560,9 +573,9 @@ export class ListModel extends VDomModel {
   private _isSearching = false;
 
   private _query: string = '';
-  private _page: number = 0;
-  private _pagination: number = 250;
-  private _totalEntries: number = 0;
+  private _page: number = 1;
+  private _pagination: number = 30;
+  private _lastPage: number = 1;
 
   private _installed: IEntry[];
   private _lastSearchResult: IEntry[];
@@ -602,17 +615,19 @@ namespace Private {
     }
   }
 
+  const LINK_PARSER = /<([^>]+)>; rel="([^"]+)",?/g;
+
   /**
    * Call the API extension
    *
    * @param queryArgs Query arguments
    * @param init Initial values for the request
-   * @returns The response body interpreted as JSON
+   * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(
     queryArgs: { [k: string]: any } = {},
     init: RequestInit = {}
-  ): Promise<T> {
+  ): Promise<[T, { [key: string]: string }]> {
     // Make request to Jupyter API
     const settings = ServerConnection.makeSettings();
     const requestUrl = URLExt.join(
@@ -645,6 +660,13 @@ namespace Private {
       throw new ServerConnection.ResponseError(response, data.message || data);
     }
 
-    return data;
+    const link = response.headers.get('Link') ?? '';
+
+    const links: { [key: string]: string } = {};
+    let match: RegExpExecArray | null = null;
+    while ((match = LINK_PARSER.exec(link)) !== null) {
+      links[match[2]] = match[1];
+    }
+    return [data, links];
   }
 }

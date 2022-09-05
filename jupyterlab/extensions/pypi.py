@@ -6,6 +6,7 @@
 import asyncio
 import io
 import json
+import math
 import re
 import sys
 import xmlrpc.client
@@ -199,14 +200,21 @@ class PyPiExtensionManager(ExtensionManager):
 
         extensions = {}
 
+        counter = -1
+        min_index = (page - 1) * per_page
+        max_index = page * per_page
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
+            counter += 1
+            self.log.info(f"{counter + 1} {name}")
+            if counter < min_index or counter >= max_index:
+                continue
+
             _, latest_version = list(group)[-1]
             data = await self._fetch_package_metadata(name, latest_version, self.base_url)
 
             normalized_name = self._normalize_name(name)
 
-            package_urls = data.get("project_urls", {})
-            self.log.info(package_urls)
+            package_urls = data.get("project_urls") or {}
 
             source_url = package_urls.get("Source Code")
             homepage_url = data.get("home_page") or package_urls.get("Homepage")
@@ -236,7 +244,7 @@ class PyPiExtensionManager(ExtensionManager):
                 repository_url=source_url,
             )
 
-        return extensions, None
+        return extensions, math.ceil((counter + 1) / per_page)
 
     async def __get_all_extensions(self) -> List[Tuple[str, str]]:
         if (

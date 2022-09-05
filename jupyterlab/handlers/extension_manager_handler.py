@@ -35,9 +35,11 @@ class ExtensionHandler(APIHandler):
             await self.manager.refresh(query, page, per_page)
 
         extensions, last_page = await self.manager.list_extensions(query, page, per_page)
+        self.log.info(last_page)
 
         self.set_status(200)
         if last_page is not None:
+            links = []
             queryArgs = {"page": last_page, "per_page": per_page}
             if query is not None:
                 queryArgs["query"] = query
@@ -51,28 +53,33 @@ class ExtensionHandler(APIHandler):
                     "",
                 )
             )
-            queryArgs["page"] = max(1, page - 1)
-            prev = urlunparse(
-                (
-                    self.request.protocol,
-                    self.request.host,
-                    self.request.path,
-                    "",
-                    urlencode(queryArgs, doseq=True),
-                    "",
+            links.append(f'<{last}>; rel="last"')
+            if page > 1:
+                queryArgs["page"] = max(1, page - 1)
+                prev = urlunparse(
+                    (
+                        self.request.protocol,
+                        self.request.host,
+                        self.request.path,
+                        "",
+                        urlencode(queryArgs, doseq=True),
+                        "",
+                    )
                 )
-            )
-            queryArgs["page"] = min(page + 1, last_page)
-            next = urlunparse(
-                (
-                    self.request.protocol,
-                    self.request.host,
-                    self.request.path,
-                    "",
-                    urlencode(queryArgs, doseq=True),
-                    "",
+                links.append(f'<{prev}>; rel="prev"')
+            if page < last_page:
+                queryArgs["page"] = min(page + 1, last_page)
+                next = urlunparse(
+                    (
+                        self.request.protocol,
+                        self.request.host,
+                        self.request.path,
+                        "",
+                        urlencode(queryArgs, doseq=True),
+                        "",
+                    )
                 )
-            )
+                links.append(f'<{next}>; rel="next"')
             queryArgs["page"] = 1
             first = urlunparse(
                 (
@@ -84,10 +91,9 @@ class ExtensionHandler(APIHandler):
                     "",
                 )
             )
-            self.set_header(
-                "Link",
-                f'<{first}>; rel="first", <{prev}>; rel="prev", <{next}>; rel="next", <{last}>; rel="last",',
-            )
+            links.append(f'<{first}>; rel="first"')
+            self.set_header("Link", ", ".join(links))
+
         self.finish(json.dumps(list(map(dataclasses.asdict, extensions))))
 
     @web.authenticated

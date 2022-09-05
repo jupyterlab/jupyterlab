@@ -49,10 +49,9 @@
 .jp-extensionmanager-listview-wrapper {
   margin: 0;
   padding: 0;
-  padding-bottom: 8px;
   display: flex;
   flex-direction: column;
-  flex: 0 0 auto;
+  height: 100%;
 }
 
 .jp-extensionmanager-listview {
@@ -60,6 +59,8 @@
   margin: 0;
   padding: 0;
   min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
 }
 
 /*
@@ -83,6 +84,12 @@
 /*
   List view pagination styling
 */
+
+.jp-extensionmanager-pagination {
+  display: flex;
+  justify-content: center;
+  flex: 0 0 auto;
+}
 
 .jp-extensionmanager-view ul.pagination {
   display: inline-block;
@@ -111,11 +118,6 @@
 
 .jp-extensionmanager-view .pagination .break a {
   cursor: default;
-}
-
-.jp-extensionmanager-pagination {
-  display: flex;
-  justify-content: center;
 }
 
 .jp-extensionmanager-installedlist,

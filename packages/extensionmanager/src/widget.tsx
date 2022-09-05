@@ -234,11 +234,12 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
             nextLabel={'>'}
             breakLabel={<a href="">...</a>}
             breakClassName={'break-me'}
+            initialPage={(props.initialPage ?? 1) - 1}
             pageCount={props.numPages}
             marginPagesDisplayed={2}
             pageRangeDisplayed={5}
             onPageChange={(data: { selected: number }) =>
-              props.onPage(data.selected)
+              props.onPage(data.selected + 1)
             }
             containerClassName={'pagination'}
             activeClassName={'active'}
@@ -258,6 +259,11 @@ namespace ListView {
      * The extension entries to display.
      */
     entries: ReadonlyArray<IEntry>;
+
+    /**
+     * Active page
+     */
+    initialPage?: number;
 
     /**
      * The number of pages that can be viewed via pagination.
@@ -329,7 +335,6 @@ class Header extends ReactWidget {
           placeholder={this.trans.__('Search')}
           disabled={!this.model.isDisclaimed}
           updateFilter={(fn, query) => {
-            console.log(`Query: ${query}`);
             this.model.query = query ?? '';
           }}
           useFuzzyFilter={false}
@@ -509,9 +514,8 @@ class SearchResult extends ReactWidget {
         ) : (
           <ListView
             entries={this.model.searchResult}
-            numPages={Math.ceil(
-              this.model.totalEntries / this.model.pagination
-            )}
+            initialPage={this.model.page}
+            numPages={this.model.lastPage}
             onPage={value => {
               this.onPage(value);
             }}

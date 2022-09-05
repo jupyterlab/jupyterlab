@@ -458,7 +458,7 @@ class ExtensionManager(LoggingConfigurable):
             pkg = ExtensionPackage(
                 name=normalized_name,
                 description=pkg_info.get("description", ""),
-                url=data.get("url", ""),
+                homepage_url=data.get("url", ""),
                 enabled=(name not in info["disabled"]),
                 core=False,
                 latest_version=ExtensionManager.get_semver_version(data["version"]),
@@ -468,6 +468,10 @@ class ExtensionManager(LoggingConfigurable):
                 install=data.get("install", {}),
                 pkg_type="prebuilt",
                 companion=self._get_companion(data),
+                author=data.get("author", {}).get("name", data.get("author")),
+                license=data.get("license"),
+                bug_tracker_url=data.get("bugs", {}).get("url"),
+                repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
 
             if get_latest_version:
@@ -491,7 +495,7 @@ class ExtensionManager(LoggingConfigurable):
             pkg = ExtensionPackage(
                 name=normalized_name,
                 description=data.get("description", ""),
-                url=data["url"],
+                homepage_url=data["url"],
                 enabled=(name not in info["disabled"]),
                 core=False,
                 latest_version=ExtensionManager.get_semver_version(data["version"]),
@@ -500,6 +504,10 @@ class ExtensionManager(LoggingConfigurable):
                 status=status,
                 pkg_type="source",
                 companion=self._get_companion(data),
+                author=data.get("author", {}).get("name", data.get("author")),
+                license=data.get("license"),
+                bug_tracker_url=data.get("bugs", {}).get("url"),
+                repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
             if get_latest_version:
                 pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
@@ -512,7 +520,7 @@ class ExtensionManager(LoggingConfigurable):
                 pkg = ExtensionPackage(
                     name=normalized_name,
                     description=data.get("description", ""),
-                    url=data.get("homepage", ""),
+                    homepage_url=data.get("homepage", ""),
                     installed=False,
                     enabled=False,
                     core=False,
@@ -520,6 +528,10 @@ class ExtensionManager(LoggingConfigurable):
                     installed_version=ExtensionManager.get_semver_version(data["version"]),
                     status="warning",
                     pkg_type="prebuilt",
+                    author=data.get("author", {}).get("name", data.get("author")),
+                    license=data.get("license"),
+                    bug_tracker_url=data.get("bugs", {}).get("url"),
+                    repository_url=data.get("repository", {}).get("url", data.get("repository")),
                 )
                 extensions[normalized_name] = pkg
 
