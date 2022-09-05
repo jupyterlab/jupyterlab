@@ -262,12 +262,14 @@ function generateConfig({
           path: staticPath,
           publicPath: staticUrl || 'auto'
         },
-        module: {
-          rules: [{ test: /\.html$/, use: 'file-loader' }]
-        },
         plugins
       },
-      webpackConfig
+      webpackConfig,
+      {
+        module: {
+          rules: [{ test: /\.html$/, use: 'file-loader' }]
+        }
+      }
     )
   ].concat(extras);
 
