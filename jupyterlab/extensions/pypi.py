@@ -39,7 +39,20 @@ async def _fetch_package_metadata(name: str, latest_version: str, base_url: str)
     data = json.loads(response.body).get("info")
 
     # Keep minimal information to limit cache size
-    return {k: data.get(k) for k in ["summary", "home_page", "package_url", "author", "license"]}
+    return {
+        k: data.get(k)
+        for k in [
+            "author",
+            "bugtrack_url",
+            "docs_url",
+            "home_page",
+            "license",
+            "package_url",
+            "project_url",
+            "project_urls",
+            "summary",
+        ]
+    }
 
 
 class PyPiExtensionManager(ExtensionManager):
@@ -191,14 +204,36 @@ class PyPiExtensionManager(ExtensionManager):
             data = await self._fetch_package_metadata(name, latest_version, self.base_url)
 
             normalized_name = self._normalize_name(name)
+
+            package_urls = data.get("project_urls", {})
+            self.log.info(package_urls)
+
+            source_url = package_urls.get("Source Code")
+            homepage_url = data.get("home_page") or package_urls.get("Homepage")
+            documentation_url = data.get("docs_url") or package_urls.get("Documentation")
+            bug_tracker_url = data.get("bugtrack_url") or package_urls.get("Bug Tracker")
+
+            best_guess_home_url = (
+                homepage_url
+                or data.get("project_url")
+                or data.get("package_url")
+                or documentation_url
+                or source_url
+                or bug_tracker_url
+            )
+
             extensions[normalized_name] = ExtensionPackage(
                 name=normalized_name,
                 description=data.get("summary"),
-                url=data.get("home_page", data.get("package_url")),
+                homepage_url=best_guess_home_url,
                 author=data.get("author"),
                 license=data.get("license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
                 pkg_type="prebuilt",
+                bug_tracker_url=bug_tracker_url,
+                documentation_url=documentation_url,
+                package_manager_url=data.get("package_url"),
+                repository_url=source_url,
             )
 
         return extensions, None

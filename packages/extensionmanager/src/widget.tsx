@@ -26,8 +26,11 @@ const badgeSize = 32;
 const badgeQuerySize = Math.floor(devicePixelRatio * badgeSize);
 
 function getExtensionGitHubUser(entry: IEntry) {
-  if (entry.url && entry.url.startsWith('https://github.com/')) {
-    return entry.url.split('/')[3];
+  if (
+    entry.homepage_url &&
+    entry.homepage_url.startsWith('https://github.com/')
+  ) {
+    return entry.homepage_url.split('/')[3];
   }
   return null;
 }
@@ -67,8 +70,12 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            {entry.url ? (
-              <a href={entry.url} target="_blank" rel="noopener noreferrer">
+            {entry.homepage_url ? (
+              <a
+                href={entry.homepage_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {entry.name}
               </a>
             ) : (

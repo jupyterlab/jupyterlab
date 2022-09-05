@@ -57,7 +57,7 @@ class ExtensionPackage:
     Attributes:
         name: Package name
         description: Package description
-        url: Package home page
+        homepage_url: Package home page
         pkg_type: Type of package - ["prebuilt", "source"]
         allowed: [optional] Whether this extension is allowed or not - default True
         approved: [optional] Whether the package is approved by your administrators - default False
@@ -71,11 +71,15 @@ class ExtensionPackage:
         status: [optional] Package status - ["ok", "warning", "error"]; default "ok"
         author: [optional] Package author - default None
         license: [optional] Package license - default None
+        bug_tracker_url: [optional] Package bug tracker URL - default None
+        documentation_url: [optional] Package documentation URL - default None
+        package_manager_url: Package home page in the package manager - default None
+        repository_url: [optional] Package code repository URL - default None
     """
 
     name: str
     description: str
-    url: str
+    homepage_url: str
     pkg_type: str
     allowed: bool = True
     approved: bool = False
@@ -89,6 +93,10 @@ class ExtensionPackage:
     status: str = "ok"
     author: Optional[str] = None
     license: Optional[str] = None
+    bug_tracker_url: Optional[str] = None
+    documentation_url: Optional[str] = None
+    package_manager_url: Optional[str] = None
+    repository_url: Optional[str] = None
 
 
 @dataclass(frozen=True)

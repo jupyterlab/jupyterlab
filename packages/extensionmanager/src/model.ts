@@ -29,7 +29,7 @@ export interface IEntry {
   /**
    * A representative link of the package.
    */
-  url: string;
+  homepage_url: string;
 
   /**
    * Whether the extension is currently installed.
@@ -37,14 +37,14 @@ export interface IEntry {
   installed?: boolean | null;
 
   /**
-   * Whether the extension is approved by the system administrators.
-   */
-  approved: boolean;
-
-  /**
    * Whether the extension is allowed or not.
    */
   allowed: boolean;
+
+  /**
+   * Whether the extension is approved by the system administrators.
+   */
+  approved: boolean;
 
   /**
    * Whether the extension is currently enabled.
@@ -75,6 +75,36 @@ export interface IEntry {
    * The information about extension installation.
    */
   install?: IInstall | null;
+
+  /**
+   * Package author.
+   */
+  author?: string;
+
+  /**
+   * Package license.
+   */
+  license?: string;
+
+  /**
+   * URL to the package bug tracker.
+   */
+  bug_tracker_url?: string;
+
+  /**
+   * URL to the package documentation.
+   */
+  documentation_url?: string;
+
+  /**
+   * URL to the package URL in the packager website.
+   */
+  package_manager_url?: string;
+
+  /**
+   * URL to the package code source.
+   */
+  repository_url?: string;
 }
 
 /**
