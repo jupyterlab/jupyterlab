@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/inspector",
-  "version": "4.0.0-alpha.12",
+  "version": "4.0.0-alpha.13",
   "description": "JupyterLab - Code Inspector",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,13 +41,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.12",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.12",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.12",
-    "@jupyterlab/services": "^7.0.0-alpha.12",
-    "@jupyterlab/statedb": "^4.0.0-alpha.12",
-    "@jupyterlab/translation": "^4.0.0-alpha.12",
+    "@jupyterlab/apputils": "^4.0.0-alpha.13",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.13",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.13",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.13",
+    "@jupyterlab/services": "^7.0.0-alpha.13",
+    "@jupyterlab/statedb": "^4.0.0-alpha.13",
+    "@jupyterlab/translation": "^4.0.0-alpha.13",
     "@lumino/coreutils": "^2.0.0-alpha.1",
     "@lumino/disposable": "^2.0.0-alpha.1",
     "@lumino/polling": "^2.0.0-alpha.1",
@@ -55,7 +55,7 @@
     "@lumino/widgets": "^2.0.0-alpha.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.12",
+    "@jupyterlab/testutils": "^4.0.0-alpha.13",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

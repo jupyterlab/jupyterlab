@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-federated-md",
-  "version": "3.0.0-alpha.12",
+  "version": "3.0.0-alpha.13",
   "private": true,
   "main": "./index.js",
   "scripts": {
@@ -8,13 +8,13 @@
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-md"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.12",
-    "@jupyterlab/example-federated-middle": "^3.0.0-alpha.12",
-    "@jupyterlab/markdownviewer-extension": "^4.0.0-alpha.12",
+    "@jupyterlab/application": "^4.0.0-alpha.13",
+    "@jupyterlab/example-federated-middle": "^3.0.0-alpha.13",
+    "@jupyterlab/markdownviewer-extension": "^4.0.0-alpha.13",
     "@lumino/widgets": "^2.0.0-alpha.1"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.12",
+    "@jupyterlab/builder": "^4.0.0-alpha.13",
     "rimraf": "~3.0.0"
   },
   "jupyterlab": {

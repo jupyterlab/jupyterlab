@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codeeditor",
-  "version": "4.0.0-alpha.12",
+  "version": "4.0.0-alpha.13",
   "description": "JupyterLab - Abstract Code Editor",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,13 +41,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.12",
-    "@jupyterlab/observables": "^5.0.0-alpha.12",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.12",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.12",
-    "@jupyterlab/translation": "^4.0.0-alpha.12",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.27",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.13",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.13",
+    "@jupyterlab/observables": "^5.0.0-alpha.13",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.13",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.13",
+    "@jupyterlab/translation": "^4.0.0-alpha.13",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.28",
     "@lumino/coreutils": "^2.0.0-alpha.1",
     "@lumino/disposable": "^2.0.0-alpha.1",
     "@lumino/dragdrop": "^2.0.0-alpha.1",
@@ -57,7 +57,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.12",
+    "@jupyterlab/testutils": "^4.0.0-alpha.13",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

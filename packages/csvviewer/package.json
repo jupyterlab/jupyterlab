@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/csvviewer",
-  "version": "4.0.0-alpha.12",
+  "version": "4.0.0-alpha.13",
   "description": "JupyterLab - CSV Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,10 +41,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.12",
-    "@jupyterlab/translation": "^4.0.0-alpha.12",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.27",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.13",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.13",
+    "@jupyterlab/translation": "^4.0.0-alpha.13",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.28",
     "@lumino/coreutils": "^2.0.0-alpha.1",
     "@lumino/datagrid": "^1.0.0-alpha.1",
     "@lumino/disposable": "^2.0.0-alpha.1",
@@ -53,7 +53,7 @@
     "@lumino/widgets": "^2.0.0-alpha.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.12",
+    "@jupyterlab/testutils": "^4.0.0-alpha.13",
     "@types/jest": "^26.0.10",
     "canvas": "^2.9.1",
     "csv-spectrum": "^1.0.0",
