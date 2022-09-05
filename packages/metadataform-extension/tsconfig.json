@@ -13,6 +13,9 @@
       "path": "../apputils"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../notebook"
     },
     {
@@ -26,9 +29,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../nbformat"
     }
   ]
 }

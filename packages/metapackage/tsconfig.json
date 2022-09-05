@@ -187,9 +187,6 @@
       "path": "../mathjax2-extension"
     },
     {
-      "path": "../metadataform-extension"
-    },
-    {
       "path": "../nbformat"
     },
     {
@@ -293,6 +290,9 @@
     },
     {
       "path": "../vega5-extension"
+    },
+    {
+      "path": "../metadataform-extension"
     }
   ]
 }
