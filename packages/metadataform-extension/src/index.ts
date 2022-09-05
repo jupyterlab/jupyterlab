@@ -434,7 +434,7 @@ namespace Private {
       notebookTools.addSection({
         sectionName: schema.label,
         rank: schema.rank,
-        label: schema.label ?? schema.mainKey
+        label: schema.label
       });
 
       // Creates the tool.

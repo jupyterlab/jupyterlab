@@ -18,10 +18,6 @@
     "metadataForm": {
       "type": "object",
       "properties": {
-        "mainKey": {
-          "type": "string",
-          "description": "The main metadata key"
-        },
         "label": {
           "type": "string",
           "description": "The section label"
