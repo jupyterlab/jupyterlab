@@ -1500,6 +1500,34 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.4
 
+## 3.4.6
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.5...76459a67511b1c54df853e52d83a7fbd3badae7b))
+
+### Bugs fixed
+
+- Update Python icon to be PSF Trademark compliant [#13044](https://github.com/jupyterlab/jupyterlab/pull/13044) ([@fcollonval](https://github.com/fcollonval))
+- Reorder of webpackConfig merge [#13042](https://github.com/jupyterlab/jupyterlab/pull/13042) ([@fcollonval](https://github.com/fcollonval))
+- Update xterm.js dependency [#13036](https://github.com/jupyterlab/jupyterlab/pull/13036) ([@fcollonval](https://github.com/fcollonval))
+- Support stateStorage for API calls [#13015](https://github.com/jupyterlab/jupyterlab/pull/13015) ([@fcollonval](https://github.com/fcollonval))
+- Conditional call to waitIsReady in reload [#13011](https://github.com/jupyterlab/jupyterlab/pull/13011) ([@fcollonval](https://github.com/fcollonval))
+- Add scrolling to `debugger` variable renderer [#12968](https://github.com/jupyterlab/jupyterlab/pull/12968) ([@firai](https://github.com/firai))
+- Fix resizing and selection of debugger variable explorer grid [#12943](https://github.com/jupyterlab/jupyterlab/pull/12943) ([@firai](https://github.com/firai))
+
+### Maintenance and upkeep improvements
+
+- Fix lumino API documentation links [#13021](https://github.com/jupyterlab/jupyterlab/pull/13021) ([@fcollonval](https://github.com/fcollonval))
+
+### Documentation improvements
+
+- Fix lumino API documentation links [#13021](https://github.com/jupyterlab/jupyterlab/pull/13021) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-08-10&to=2022-09-05&type=c))
+
+[@ajbozarth](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aajbozarth+updated%3A2022-08-10..2022-09-05&type=Issues) | [@athornton](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aathornton+updated%3A2022-08-10..2022-09-05&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2022-08-10..2022-09-05&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2022-08-10..2022-09-05&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-08-10..2022-09-05&type=Issues) | [@goanpeca](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agoanpeca+updated%3A2022-08-10..2022-09-05&type=Issues) | [@ian-r-rose](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aian-r-rose+updated%3A2022-08-10..2022-09-05&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2022-08-10..2022-09-05&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2022-08-10..2022-09-05&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-08-10..2022-09-05&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2022-08-10..2022-09-05&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-08-10..2022-09-05&type=Issues) | [@jweill-aws](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajweill-aws+updated%3A2022-08-10..2022-09-05&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-08-10..2022-09-05&type=Issues) | [@KrishnaKumarHariprasannan](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AKrishnaKumarHariprasannan+updated%3A2022-08-10..2022-09-05&type=Issues) | [@malemburg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amalemburg+updated%3A2022-08-10..2022-09-05&type=Issues) | [@manfromjupyter](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amanfromjupyter+updated%3A2022-08-10..2022-09-05&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2022-08-10..2022-09-05&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-08-10..2022-09-05&type=Issues) | [@mlucool](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amlucool+updated%3A2022-08-10..2022-09-05&type=Issues) | [@saulshanabrook](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asaulshanabrook+updated%3A2022-08-10..2022-09-05&type=Issues) | [@telamonian](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atelamonian+updated%3A2022-08-10..2022-09-05&type=Issues) | [@tgeorgeux](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atgeorgeux+updated%3A2022-08-10..2022-09-05&type=Issues) | [@trallard](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrallard+updated%3A2022-08-10..2022-09-05&type=Issues) | [@VersBersh](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AVersBersh+updated%3A2022-08-10..2022-09-05&type=Issues) | [@vidartf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Avidartf+updated%3A2022-08-10..2022-09-05&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-08-10..2022-09-05&type=Issues)
+
 ## 3.4.5
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.4...385ea4be3d3e65e1f62d82e8bfedbe554736b2bb))
