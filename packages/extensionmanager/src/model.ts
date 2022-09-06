@@ -497,8 +497,8 @@ export class ListModel extends VDomModel {
         } else {
           const followUps: string[] = [];
           if (reply.needs_restart.includes('frontend')) {
-            // @ts-expect-error isElectron is not a standard attribute
             followUps.push(
+              // @ts-expect-error isElectron is not a standard attribute
               window.isElectron
                 ? trans.__('reload JupyterLab')
                 : trans.__('refresh the web page')
