@@ -662,6 +662,7 @@ export class WindowedList<
     );
     windowContainer.className = 'jp-WindowedPanel-window';
     super({ node });
+    super.layout = options.layout ?? new WindowedLayout();
     this._viewModel = options.model;
     this._innerElement = innerElement;
     this._isScrolling = null;
@@ -670,7 +671,6 @@ export class WindowedList<
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
     this._resizeObserver = null;
-    this.layout = options.layout ?? new WindowedLayout();
 
     this._viewModel.stateChanged.connect(this.onStateChanged, this);
   }
@@ -678,7 +678,9 @@ export class WindowedList<
   /**
    * Widget layout
    */
-  readonly layout: WindowedLayout;
+  get layout(): WindowedLayout {
+    return super.layout as WindowedLayout;
+  }
 
   /**
    * Viewport
@@ -1067,7 +1069,12 @@ export class WindowedLayout extends PanelLayout {
   /**
    * Specialized parent type definition
    */
-  parent: WindowedList | null;
+  get parent(): WindowedList | null {
+    return super.parent as WindowedList | null;
+  }
+  set parent(value: WindowedList | null) {
+    super.parent = value;
+  }
 
   /**
    * Attach a widget to the parent's DOM node.

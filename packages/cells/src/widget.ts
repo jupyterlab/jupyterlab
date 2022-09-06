@@ -889,7 +889,7 @@ export class CodeCellLayout extends PanelLayout {
   protected onBeforeAttach(msg: Message): void {
     let beforeOutputArea = true;
     const outputAreaWrapper = this.parent!.node.firstElementChild;
-    each(this, widget => {
+    for (const widget of this) {
       if (outputAreaWrapper) {
         if (widget.node === outputAreaWrapper) {
           beforeOutputArea = false;
@@ -913,7 +913,7 @@ export class CodeCellLayout extends PanelLayout {
           MessageLoop.sendMessage(widget, Widget.Msg.AfterAttach);
         }
       }
-    });
+    }
   }
 
   /**
@@ -927,7 +927,7 @@ export class CodeCellLayout extends PanelLayout {
    * This may be reimplemented by subclasses as needed.
    */
   protected onAfterDetach(msg: Message): void {
-    each(this, widget => {
+    for (const widget of this) {
       // TODO we could improve this further by removing outputs based
       // on their mime type (for example plain/text or markdown could safely be detached)
       if (!widget.hasClass(CELL_OUTPUT_WRAPPER_CLASS)) {
@@ -938,7 +938,7 @@ export class CodeCellLayout extends PanelLayout {
 
         MessageLoop.sendMessage(widget, msg);
       }
-    });
+    }
   }
 }
 

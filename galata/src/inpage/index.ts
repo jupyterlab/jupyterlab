@@ -548,7 +548,7 @@ export class GalataInpage implements IGalataInpage {
     if (nb) {
       if (nb.model) {
         if (cellIndex === undefined) {
-          each(nb.model.cells, (cell, i) => {
+          for (const cell of nb.model.cells) {
             if (cell.type === 'code') {
               counter +=
                 cell.value.text.length > 0 &&
@@ -556,7 +556,7 @@ export class GalataInpage implements IGalataInpage {
                   ? 1
                   : 0;
             }
-          });
+          }
         } else {
           const cell = nb.model.cells.get(cellIndex);
           if (cell?.type === 'code') {
