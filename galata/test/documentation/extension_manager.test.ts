@@ -166,7 +166,7 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     page.waitForResponse(new RegExp(`${galata.Routes.extensions}?refresh=0`)),
     page.waitForResponse(
       new RegExp(
-        `${galata.Routes.extensions}?query&page=0&per_page=250&refresh=0`
+        `${galata.Routes.extensions}?query&page=1&per_page=30&refresh=0`
       )
     ),
     page.click('button:has-text("Enable")')
