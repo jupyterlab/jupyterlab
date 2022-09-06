@@ -265,6 +265,31 @@ section. These can then be uninstalled or disabled. Disabling an extension will
 prevent it from being activated, but without rebuilding the application.
 
 
+Configuring the Extension Manager
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default there are two extension managers provided by JupyterLab:
+
+- ``pypi``: [default] Allow to un-/install extensions from PyPI.org
+- ``readonly``: Display installed extensions (with the ability to dis-/en-able them)
+
+You can specify the manager with the command line option ``--LabApp.extension_manager``;
+e.g. to use the *read-only* manager:
+
+.. code:: sh
+
+    jupyter lab --LabApp.extension_manager=readonly
+
+PyPI Manager settings
+"""""""""""""""""""""
+
+The ``pypi`` manager have specific options that can be set using command line options:
+
+- ``--PyPIExtensionManager.base_url``: PyPI warehouse base URL - default to https://pypi.org/pypi.
+- ``--PyPIExtensionManager.rpc_request_throttling``: Throttling time between requests to the PyPI XML-RPC API in seconds - default 1.
+- ``--PyPIExtensionManager.cache_timeout``: PyPI extensions list cache timeout in seconds - default 300.
+- ``--PyPIExtensionManager.package_metadata_cache_size``: The cache size for package metadata - default 1500.
+
 .. _extension_listings:
 
 Listings

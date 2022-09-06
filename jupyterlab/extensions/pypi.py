@@ -56,23 +56,23 @@ async def _fetch_package_metadata(name: str, latest_version: str, base_url: str)
     }
 
 
-class PyPiExtensionManager(ExtensionManager):
+class PyPIExtensionManager(ExtensionManager):
     """Extension manager using pip as package manager and PyPi.org as packages source."""
 
-    # Base PyPI server URL
     base_url = Unicode("https://pypi.org/pypi", config=True, help="The base URL of PyPI index.")
-    # PyPi.org XML-RPC API throttling time between request in seconds.
-    rpc_request_throttling = CFloat(
-        1.0,
-        config=True,
-        help="Throttling time between PyPI request using the XML-RPC API.",
-    )
 
-    # Don't request all extensions candidates more than once every 5 minutes
-    cache_timeout = CFloat(5 * 60.0, config=True, help="PyPI extensions list cache timeout.")
+    cache_timeout = CFloat(
+        5 * 60.0, config=True, help="PyPI extensions list cache timeout in seconds."
+    )
 
     package_metadata_cache_size = CInt(
         1500, config=True, help="The cache size for package metadata."
+    )
+
+    rpc_request_throttling = CFloat(
+        1.0,
+        config=True,
+        help="Throttling time in seconds between PyPI requests using the XML-RPC API.",
     )
 
     def __init__(
@@ -81,7 +81,7 @@ class PyPiExtensionManager(ExtensionManager):
         ext_options: Optional[dict] = None,
         parent: Optional[config.Configurable] = None,
     ) -> None:
-        super(PyPiExtensionManager, self).__init__(app_options, ext_options, parent)
+        super(PyPIExtensionManager, self).__init__(app_options, ext_options, parent)
         # Set configurable cache size to fetch function
         self._fetch_package_metadata = _fetch_package_metadata
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})

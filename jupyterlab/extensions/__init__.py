@@ -9,7 +9,7 @@ from typing import Optional
 from traitlets.config import Configurable
 
 from .manager import ActionResult, ExtensionManager, ExtensionPackage  # noqa: F401
-from .pypi import PyPiExtensionManager
+from .pypi import PyPIExtensionManager
 from .readonly import ReadOnlyExtensionManager
 
 # See compatibility note on `group` keyword in https://docs.python.org/3/library/importlib.metadata.html#entry-points
@@ -43,4 +43,4 @@ def get_pypi_manager(
     parent: Optional[Configurable] = None,
 ) -> ExtensionManager:
     """PyPi Extension Manager factory"""
-    return PyPiExtensionManager(app_options, ext_options, parent)
+    return PyPIExtensionManager(app_options, ext_options, parent)

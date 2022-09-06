@@ -15,7 +15,7 @@ import tornado
 from jupyter_server.utils import ensure_async
 from traitlets.config import Config, Configurable
 
-from jupyterlab.extensions import PyPiExtensionManager, ReadOnlyExtensionManager
+from jupyterlab.extensions import PyPIExtensionManager, ReadOnlyExtensionManager
 from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage
 
 
@@ -228,7 +228,7 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
     )
     mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
 
-    manager = PyPiExtensionManager()
+    manager = PyPIExtensionManager()
 
     async def mock_pkg_metadata(n, l, b):  # noqa
         return (
@@ -374,8 +374,8 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
 async def test_PyPiExtensionManager_custom_server_url():
     BASE_URL = "https://mylocal.pypi.server/pypi"
 
-    parent = Configurable(config=Config({"PyPiExtensionManager": {"base_url": BASE_URL}}))
+    parent = Configurable(config=Config({"PyPIExtensionManager": {"base_url": BASE_URL}}))
 
-    manager = PyPiExtensionManager(parent=parent)
+    manager = PyPIExtensionManager(parent=parent)
 
     assert manager.base_url == BASE_URL
