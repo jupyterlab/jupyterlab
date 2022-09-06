@@ -6,7 +6,7 @@
     "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es2017",
+    "target": "ES2018",
     "outDir": "lib",
     "lib": ["DOM", "DOM.iterable"],
     "types": ["jest", "node"],
