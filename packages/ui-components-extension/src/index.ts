@@ -51,8 +51,8 @@ const widgetRegistryPlugin: JupyterFrontEndPlugin<IFormWidgetRegistry> = {
   provides: IFormWidgetRegistry,
   autoStart: true,
   activate: (app: JupyterFrontEnd): IFormWidgetRegistry => {
-    const editorRegistry = new FormWidgetRegistry();
-    return editorRegistry;
+    const formRegistry = new FormWidgetRegistry();
+    return formRegistry;
   }
 };
 
