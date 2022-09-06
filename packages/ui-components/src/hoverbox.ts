@@ -204,7 +204,7 @@ export namespace HoverBox {
 
     // Move left to fit in the window.
     const rect = node.getBoundingClientRect();
-    const hostRect = host.getBoundingClientRect(); // Query together to avoid extra layout shift
+    const hostRect = host.getBoundingClientRect(); // Query together to avoid extra layout recalculation
     const right = rect.right;
     if (right > window.innerWidth) {
       left -= right - window.innerWidth;
