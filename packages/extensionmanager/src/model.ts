@@ -497,7 +497,12 @@ export class ListModel extends VDomModel {
         } else {
           const followUps: string[] = [];
           if (reply.needs_restart.includes('frontend')) {
-            followUps.push(trans.__('refresh the web page'));
+            // @ts-expect-error isElectron is not a standard attribute
+            followUps.push(
+              window.isElectron
+                ? trans.__('reload JupyterLab')
+                : trans.__('refresh the web page')
+            );
           }
           if (reply.needs_restart.includes('kernel')) {
             followUps.push(
