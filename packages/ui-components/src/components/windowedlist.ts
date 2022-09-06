@@ -1,4 +1,9 @@
 /*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/*
  * This code is inspired by
  * - react-window https://github.com/bvaughn/react-window
  * That library is licensed under MIT License (MIT) Copyright (c) 2018 Brian Vaughn
