@@ -20,10 +20,8 @@ import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 import { Action, IEntry, ListModel } from './model';
 
-// TODO: Replace pagination with lazy loading of lower search results
-
-const badgeSize = 32;
-const badgeQuerySize = Math.floor(devicePixelRatio * badgeSize);
+const BADGE_SIZE = 32;
+const BADGE_QUERY_SIZE = Math.floor(devicePixelRatio * BADGE_SIZE);
 
 function getExtensionGitHubUser(entry: IEntry) {
   if (
@@ -31,6 +29,11 @@ function getExtensionGitHubUser(entry: IEntry) {
     entry.homepage_url.startsWith('https://github.com/')
   ) {
     return entry.homepage_url.split('/')[3];
+  } else if (
+    entry.repository_url &&
+    entry.repository_url.startsWith('https://github.com/')
+  ) {
+    return entry.repository_url.split('/')[3];
   }
   return null;
 }
@@ -60,11 +63,13 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div style={{ marginRight: '8px' }}>
         {githubUser ? (
           <img
-            src={`https://github.com/${githubUser}.png?size=${badgeQuerySize}`}
+            src={`https://github.com/${githubUser}.png?size=${BADGE_QUERY_SIZE}`}
             style={{ width: '32px', height: '32px' }}
           />
         ) : (
-          <div style={{ width: `${badgeSize}px`, height: `${badgeSize}px` }} />
+          <div
+            style={{ width: `${BADGE_SIZE}px`, height: `${BADGE_SIZE}px` }}
+          />
         )}
       </div>
       <div className="jp-extensionmanager-entry-description">

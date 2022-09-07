@@ -2,7 +2,7 @@
   {
     "name": "jupyterlab-git",
     "description": "A JupyterLab extension for version control using git",
-    "url": "https://github.com/jupyterlab/jupyterlab-git",
+    "homepage_url": "https://github.com/jupyterlab/jupyterlab-git",
     "pkg_type": "prebuilt",
     "companion": null,
     "core": false,
@@ -19,7 +19,7 @@
   {
     "name": "jupyterlab-github",
     "description": "JupyterLab viewer for GitHub repositories",
-    "url": "https://github.com/jupyterlab/jupyterlab-github",
+    "homepage_url": "https://github.com/jupyterlab/jupyterlab-github",
     "pkg_type": "prebuilt",
     "companion": null,
     "core": false,
@@ -36,7 +36,7 @@
   {
     "name": "jupyterlab-plugin-graph",
     "description": "JupyterLab extension to show an interactive dependency graph of the installed plugins",
-    "url": "https://github.com/jupyterlab-contrib/jupyterlab-plugin-graph.git",
+    "homepage_url": "https://github.com/jupyterlab-contrib/jupyterlab-plugin-graph.git",
     "pkg_type": "prebuilt",
     "companion": null,
     "core": false,
@@ -53,7 +53,7 @@
   {
     "name": "jupyterlab-plugin-playground",
     "description": "A JupyterLab Plugin Playground.",
-    "url": "https://github.com/jupyterlab/jupyterlab-plugin-playground",
+    "homepage_url": "https://github.com/jupyterlab/jupyterlab-plugin-playground",
     "pkg_type": "prebuilt",
     "companion": null,
     "core": false,
@@ -70,7 +70,7 @@
   {
     "name": "jupyterlab-pullrequests",
     "description": "Pull Requests for JupyterLab",
-    "url": "https://github.com/jupyterlab/pull-requests",
+    "homepage_url": "https://github.com/jupyterlab/pull-requests",
     "pkg_type": "prebuilt",
     "companion": null,
     "core": false,
@@ -87,7 +87,7 @@
   {
     "name": "jupyterlab-recents",
     "description": "Track recent files and folders.",
-    "url": "https://github.com/jupyterlab-contrib/jupyterlab-recents",
+    "homepage_url": "https://github.com/jupyterlab-contrib/jupyterlab-recents",
     "pkg_type": "prebuilt",
     "companion": null,
     "core": false,
