@@ -36,9 +36,9 @@
     "@jupyterlab/docregistry": "^4.0.0-alpha.13",
     "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.13",
     "@jupyterlab/services": "^7.0.0-alpha.13",
-    "@lumino/coreutils": "^2.0.0-alpha.1",
-    "@lumino/messaging": "^2.0.0-alpha.1",
-    "@lumino/widgets": "^2.0.0-alpha.1",
+    "@lumino/coreutils": "^2.0.0-alpha.5",
+    "@lumino/messaging": "^2.0.0-alpha.5",
+    "@lumino/widgets": "^2.0.0-alpha.5",
     "@nteract/transform-vdom": "^4.0.16-alpha.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"

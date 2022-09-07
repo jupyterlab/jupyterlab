@@ -48,11 +48,11 @@
     "@jupyterlab/services": "^7.0.0-alpha.13",
     "@jupyterlab/statedb": "^4.0.0-alpha.13",
     "@jupyterlab/translation": "^4.0.0-alpha.13",
-    "@lumino/coreutils": "^2.0.0-alpha.1",
-    "@lumino/disposable": "^2.0.0-alpha.1",
-    "@lumino/polling": "^2.0.0-alpha.1",
-    "@lumino/signaling": "^2.0.0-alpha.1",
-    "@lumino/widgets": "^2.0.0-alpha.1"
+    "@lumino/coreutils": "^2.0.0-alpha.5",
+    "@lumino/disposable": "^2.0.0-alpha.5",
+    "@lumino/polling": "^2.0.0-alpha.5",
+    "@lumino/signaling": "^2.0.0-alpha.5",
+    "@lumino/widgets": "^2.0.0-alpha.5"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.13",

@@ -46,7 +46,7 @@
     "@jupyterlab/statedb": "^4.0.0-alpha.13",
     "@jupyterlab/translation": "^4.0.0-alpha.13",
     "@jupyterlab/ui-components": "^4.0.0-alpha.28",
-    "@lumino/disposable": "^2.0.0-alpha.1"
+    "@lumino/disposable": "^2.0.0-alpha.5"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

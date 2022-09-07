@@ -39,9 +39,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/coreutils": "^2.0.0-alpha.1",
-    "@lumino/disposable": "^2.0.0-alpha.1",
-    "@lumino/signaling": "^2.0.0-alpha.1",
+    "@lumino/coreutils": "^2.0.0-alpha.5",
+    "@lumino/disposable": "^2.0.0-alpha.5",
+    "@lumino/signaling": "^2.0.0-alpha.5",
     "minimist": "~1.2.0",
     "moment": "^2.24.0",
     "path-browserify": "^1.0.0",
