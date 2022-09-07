@@ -410,8 +410,6 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     }
   }
 
-  protected _isDisposed = false;
-
   /**
    * Connect the virtual document with the language server.
    */
@@ -591,6 +589,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    * Signal emitted when the adapter is disposed.
    */
   protected _disposed: Signal<WidgetLSPAdapter<T>, void> = new Signal(this);
+
+  private _isDisposed = false;
 
   /**
    * Callback called when a foreign document is closed,

@@ -201,7 +201,6 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     if (this.isDisposed) {
       return;
     }
-    this._isDisposed = true;
     this.widget.context.sessionContext.kernelChanged.disconnect(
       this.onKernelChanged,
       this
