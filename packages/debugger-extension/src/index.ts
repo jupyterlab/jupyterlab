@@ -785,7 +785,7 @@ const main: JupyterFrontEndPlugin<void> = {
           })
           .forEach(editor => {
             requestAnimationFrame(() => {
-              editor.reveal().then(() => {
+              void editor.reveal().then(() => {
                 const edit = editor.get();
                 if (edit) {
                   Debugger.EditorHandler.showCurrentLine(edit, frame.line);
@@ -813,7 +813,7 @@ const main: JupyterFrontEndPlugin<void> = {
         if (results.length > 0) {
           if (breakpoint && typeof breakpoint.line !== 'undefined') {
             results.forEach(editor => {
-              editor.reveal().then(() => {
+              void editor.reveal().then(() => {
                 editor.get()?.revealPosition({
                   line: (breakpoint.line as number) - 1,
                   column: breakpoint.column || 0

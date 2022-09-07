@@ -137,7 +137,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   setFragment(fragment: string): void {
     void this.context.ready.then(() => {
-      this.content.setFragment(fragment);
+      void this.content.setFragment(fragment);
     });
   }
 

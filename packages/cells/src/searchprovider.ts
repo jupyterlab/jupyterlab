@@ -41,7 +41,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
       this.cell.editor as CodeMirrorEditor | null
     );
     if (!this.cell.inViewport && !this.cell.editor) {
-      signalToPromise(cell.inViewportChanged).then(([, inViewport]) => {
+      void signalToPromise(cell.inViewportChanged).then(([, inViewport]) => {
         if (inViewport) {
           this.cmHandler.setEditor(this.cell.editor as CodeMirrorEditor);
         }

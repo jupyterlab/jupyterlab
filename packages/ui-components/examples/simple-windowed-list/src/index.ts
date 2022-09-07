@@ -211,7 +211,7 @@ function main(): void {
   });
 
   scrollToIndex.addEventListener('change', () => {
-    panel.scrollToItem(scrollToIndex.valueAsNumber);
+    void panel.scrollToItem(scrollToIndex.valueAsNumber);
   });
 
   scrollToOffset.addEventListener('change', () => {

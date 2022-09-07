@@ -1895,7 +1895,7 @@ export class Notebook extends StaticNotebook {
         if (!cell.isDisposed) {
           // Setup the selection style for collaborators.
           const localCollaborator = modelDB.collaborators!.localCollaborator;
-          cell.ready.then(() => {
+          void cell.ready.then(() => {
             cell.editor!.uuid = localCollaborator.sessionId;
             cell.editor!.selectionStyle = {
               ...CodeEditor.defaultSelectionStyle,
@@ -1905,7 +1905,7 @@ export class Notebook extends StaticNotebook {
         }
       });
     }
-    cell.ready.then(() => {
+    void cell.ready.then(() => {
       if (!cell.isDisposed) {
         cell.editor!.edgeRequested.connect(this._onEdgeRequest, this);
       }
@@ -2004,7 +2004,7 @@ export class Notebook extends StaticNotebook {
         } else {
           this.scrollToItem(this.activeCellIndex)
             .then(() => {
-              activeCell.ready.then(() => {
+              void activeCell.ready.then(() => {
                 activeCell.editor?.focus();
               });
             })
