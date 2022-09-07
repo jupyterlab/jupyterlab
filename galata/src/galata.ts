@@ -258,7 +258,7 @@ export namespace galata {
     /**
      * Extensions API
      */
-    export const extensions = /.*\/lab\/api\/extensions/;
+    export const extensions = /.*\/lab\/api\/extensions.*/;
 
     /**
      * Sessions API

@@ -54,6 +54,7 @@
   --jp-icon-home: url('icons/filetype/home.svg');
   --jp-icon-html5: url('icons/filetype/html5.svg');
   --jp-icon-image: url('icons/filetype/image.svg');
+  --jp-icon-info: url('icons/info.svg');
   --jp-icon-inspector: url('icons/filetype/inspector.svg');
   --jp-icon-json: url('icons/filetype/json.svg');
   --jp-icon-julia: url('icons/filetype/julia.svg');
@@ -67,7 +68,6 @@
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
   --jp-icon-link: url('icons/toolbar/link.svg');
   --jp-icon-list: url('icons/statusbar/list.svg');
-  --jp-icon-listings-info: url('icons/listings/listings-info.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
   --jp-icon-move-down: url('icons/toolbar/move-down.svg');
   --jp-icon-move-up: url('icons/toolbar/move-up.svg');
@@ -278,6 +278,10 @@
   background-image: var(--jp-icon-image);
 }
 
+.jp-InfoIcon {
+  background-image: var(--jp-icon-info);
+}
+
 .jp-InspectorIcon {
   background-image: var(--jp-icon-inspector);
 }
@@ -328,10 +332,6 @@
 
 .jp-ListIcon {
   background-image: var(--jp-icon-list);
-}
-
-.jp-ListingsInfoIcon {
-  background-image: var(--jp-icon-listings-info);
 }
 
 .jp-MarkdownIcon {
