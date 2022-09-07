@@ -375,7 +375,8 @@ const resources: JupyterFrontEndPlugin<void> = {
           // Add the kernel banner to the Help Menu.
           const bannerCommand = `help-menu-${name}:banner`;
           const kernelName = spec.display_name;
-          let kernelIconUrl = spec.resources['logo-64x64'];
+          const kernelIconUrl =
+            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
           commands.addCommand(bannerCommand, {
             label: trans.__('About the %1 Kernel', kernelName),
             isVisible: isEnabled,
