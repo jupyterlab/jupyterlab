@@ -603,16 +603,31 @@ export class Completer extends Widget {
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
+    // When the editor is attached to the main area, contain the completer hover box
+    // to the full area available (rather than to the editor itself); the available
+    // area excludes the toolbar, hence the first Widget child between MainAreaWidget
+    // and editor is preferred. The difference is negligible in File Editor, but
+    // substantial for Notebooks.
+    const host =
+      (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
+      editor.host;
+
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
       anchor,
-      host: editor.host,
+      host: host,
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
       node: node,
       offset: { horizontal: borderLeft + paddingLeft },
       privilege: 'below',
-      style: style
+      style: style,
+      outOfViewDisplay: {
+        top: 'hidden-inside',
+        bottom: 'hidden-inside',
+        left: 'stick-inside',
+        right: 'stick-outside'
+      }
     });
   }
 
