@@ -305,7 +305,7 @@ namespace Private {
     registry: ISettingRegistry,
     notebookTools: INotebookTools,
     translator: ITranslator,
-    editorRegistry: IFormWidgetRegistry
+    formWidgetsRegistry: IFormWidgetRegistry
   ): Promise<void> {
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IMetadataForm[] } = {};
@@ -415,13 +415,13 @@ namespace Private {
 
         // Optionally links key to a custom widget.
         if (metadataSchema['customWidget']) {
-          const renderer = editorRegistry.getRenderer(
+          const formWidget = formWidgetsRegistry.getFormWidgets(
             metadataSchema['customWidget'] as string
           );
 
           // If renderer is defined (custom widget has been registered), set it as used widget.
-          if (renderer !== undefined)
-            uiSchema[joinedMetadataKey]['ui:widget'] = renderer;
+          if (formWidget !== undefined)
+            uiSchema[joinedMetadataKey]['ui:widget'] = formWidget.renderer;
         }
 
         // Optionally links key to cell type

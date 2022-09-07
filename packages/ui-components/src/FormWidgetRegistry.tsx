@@ -11,67 +11,80 @@ import type { Widget } from '@rjsf/core';
  */
 export class FormWidgetRegistry implements IFormWidgetRegistry {
   /**
-   * Adds a renderer for a given id - if the id is already in use, returns false.
+   * Adds a formWidget for a given id - if the id is already in use, returns false.
    * Otherwise, returns true.
    * @param id - Unique ID for the given renderer.
-   * @param renderer - A function that takes props and returns a rendered component
-   * @returns - Whether the renderer was added successfully. False if the id is already in use.
+   * @param formWidget - The formWidget to add.
+   * @returns - Whether the formWidget was added successfully. False if the id is already in use.
    */
-  addRenderer(id: string, renderer: Widget): boolean {
-    if (this._renderers[id]) {
+  addFormWidget(id: string, formWidget: IFormWidget): boolean {
+    if (this._formWidgets[id]) {
       return false;
     }
-    this._renderers[id] = renderer;
+    this._formWidgets[id] = formWidget;
     return true;
   }
 
   /**
-   * Returns all registered renderers in dictionary form.
-   * @returns - A dictionary that maps an id to a renderer.
+   * Returns the formWidget for the given id
+   * @param id - The unique id for the formWidget.
+   * @returns - A function that takes props and returns a formWidget containing a rendered component.
    */
-  get renderers(): { [id: string]: Widget } {
-    return this._renderers;
+  getFormWidgets(id: string): IFormWidget {
+    return this._formWidgets[id];
   }
 
   /**
-   * Returns the renderer for the given id
-   * @param id - The unique id for the renderer.
-   * @returns - A function that takes props and returns a rendered component.
+   * Returns all registered formWidgets in dictionary form.
+   * @returns - A dictionary that maps an id to a formWidget.
    */
-  getRenderer(id: string): Widget {
-    return this._renderers[id];
+  get formWidgets(): { [id: string]: IFormWidget } {
+    return this._formWidgets;
   }
 
-  private _renderers: { [id: string]: Widget } = {};
+  private _formWidgets: { [id: string]: IFormWidget } = {};
 }
 
 /**
- *  registry for rendering widget ( used in the metadataform-extension).
+ * A registry for rendering formWidgets ( used in the metadataform-extension).
  */
 export interface IFormWidgetRegistry {
   /**
-   * Adds a renderer for a given id - if the id is already in use, returns false.
+   * Adds a formWidget for a given id - if the id is already in use, returns false.
    * Otherwise, returns true.
    * @param id - Unique ID for the given renderer.
-   * @param renderer - A function that takes props and returns a rendered component
-   * @returns - Whether the renderer was added successfully. False if the id is already in use.
+   * @param formWidget - The formWidget to add.
+   * @returns - Whether the formWidget was added successfully. False if the id is already in use.
    */
-  addRenderer: (id: string, renderer: Widget) => void;
+  addFormWidget: (id: string, formWidget: IFormWidget) => void;
 
   /**
-   * Returns the renderer for the given id
-   * @param id - The unique id for the renderer.
-   * @returns - A function that takes props and returns a rendered component.
+   * Returns the formWidget for the given id
+   * @param id - The unique id for the formWidget.
+   * @returns - A function that takes props and returns a formWidget containing a rendered component.
    */
-  getRenderer: (id: string) => Widget;
+  getFormWidgets: (id: string) => IFormWidget;
 
   /**
-   * Returns all registered renderers in dictionary form.
-   * @returns - A dictionary that maps an id to a renderer.
+   * Returns all registered formWidgets in dictionary form.
+   * @returns - A dictionary that maps an id to a formWidget.
    */
-  renderers: { [id: string]: Widget };
+  formWidgets: { [id: string]: IFormWidget };
 }
 
+/**
+ * The form widget interface.
+ */
+export interface IFormWidget {
+  /**
+   *A function that takes props and returns a rendered component.
+   */
+  renderer: Widget;
+}
+
+/**
+ * The token of the registry.
+ */
 export const IFormWidgetRegistry = new Token<IFormWidgetRegistry>(
   '@jupyterlab/ui-components:IFormWidgetRegistry'
 );
