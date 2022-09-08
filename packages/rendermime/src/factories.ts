@@ -20,7 +20,13 @@ export const htmlRendererFactory: IRenderMime.IRendererFactory = {
  */
 export const imageRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
-  mimeTypes: ['image/bmp', 'image/png', 'image/jpeg', 'image/gif', 'image/webp'],
+  mimeTypes: [
+  'image/bmp',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp'
+],
   defaultRank: 90,
   createRenderer: options => new widgets.RenderedImage(options)
 };
