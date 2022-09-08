@@ -429,7 +429,8 @@ describe('rendermime/factories', () => {
           'image/bmp',
           'image/png',
           'image/jpeg',
-          'image/gif'
+          'image/gif',
+          'image/webp'
         ]);
       });
     });
