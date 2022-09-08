@@ -33,12 +33,9 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     this._editorToCell = new Map();
     this.editor = editorWidget.content;
     this._cellToEditor = new WeakMap();
-    this.ready = new Promise<void>((resolve, reject) => {
+    this._ready = new Promise<void>((resolve, reject) => {
       this.initOnceReady().then(resolve).catch(reject);
     });
-
-    // Dispose the adapter when the notebook is disposed.
-    editorWidget.disposed.connect(() => this.dispose());
   }
 
   /**

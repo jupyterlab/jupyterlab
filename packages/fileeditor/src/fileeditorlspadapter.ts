@@ -39,12 +39,9 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
       reveal: () => Promise.resolve(this.editor.editor)
     });
 
-    this.ready = new Promise<void>((resolve, reject) => {
+    this._ready = new Promise<void>((resolve, reject) => {
       this.initOnceReady().then(resolve).catch(reject);
     });
-
-    // Dispose the adapter when the editor is disposed.
-    editorWidget.disposed.connect(() => this.dispose());
   }
 
   /**
@@ -149,19 +146,6 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   }
 
   /**
-   * Dispose the widget.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-
-    this._virtualEditor = null!;
-
-    super.dispose();
-  }
-
-  /**
    * Get the index of editor from the cursor position in the virtual
    * document. Since there is only one editor, this method always return
    * 0
@@ -215,5 +199,5 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * The document registry instance.
    */
   private readonly _docRegistry: DocumentRegistry;
-  private _virtualEditor: Document.IEditor;
+  private readonly _virtualEditor: Document.IEditor;
 }
