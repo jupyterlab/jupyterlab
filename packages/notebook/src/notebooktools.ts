@@ -308,6 +308,9 @@ export class NotebookTools extends Widget implements INotebookTools {
   private *_toolChildren() {
     yield* this._commonTools.children();
     yield* this._advancedTools.children();
+    for (let extendedTools of this._extendedTools) {
+      yield* extendedTools.panel.children();
+    }
   }
 
   translator: ITranslator;
