@@ -612,8 +612,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
       // Restore the widgets not restored in first place because the shell
       // started in 'single-document' mode.
-      this._delayedRestore.forEach(widgetsTracker => widgetsTracker.restore());
-      this._delayedRestore.length = 0;
+      if (this._delayedRestore) {
+        let currentDockWidget: Widget | null = null;
+        if (widgets.length) {
+          currentDockWidget = widgets[0];
+        }
+        const promises = new Array<Promise<any>>();
+        this._delayedRestore.forEach(widgetsTracker =>
+          promises.push(widgetsTracker.restore())
+        );
+        Promise.all(promises).then(() => {
+          this._delayedRestore.length = 0;
+          if (currentDockWidget) {
+            this.activateById(currentDockWidget.id);
+          }
+        });
+      }
 
       // Add any widgets created during single document mode, which have
       // subsequently been removed from the dock panel after the multiple document
@@ -1281,6 +1295,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  /**
+   * Add trackers that have not been restored when instantiating Layoutrestorer.
+   * The reason is that JupyterLab has started in 'single-document' mode, so no
+   * need to restore all the main area widgets.
+   *
+   * @param delayedRestore - tracker that has not been restored.
+   */
   addDelayedRestore(delayedRestore: WidgetTracker): void {
     if (this.mode === 'single-document') {
       this._delayedRestore.push(delayedRestore);
