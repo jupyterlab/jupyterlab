@@ -20,6 +20,7 @@ import {
   ICommandPalette,
   InputDialog,
   IToolbarWidgetRegistry,
+  MainAreaWidget,
   setToolbar,
   showErrorMessage,
   WidgetTracker
@@ -35,6 +36,7 @@ import {
   IFileBrowserFactory,
   Uploader
 } from '@jupyterlab/filebrowser';
+import { Launcher } from '@jupyterlab/launcher';
 import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -306,8 +308,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       auto: false,
       restore: false
     });
-    void Private.restoreBrowser(defaultBrowser, commands, router, tree);
-
+    void Private.restoreBrowser(defaultBrowser, commands, router, tree, app);
     return { createFileBrowser, defaultBrowser, tracker };
   }
 };
@@ -1279,7 +1280,8 @@ namespace Private {
     browser: FileBrowser,
     commands: CommandRegistry,
     router: IRouter | null,
-    tree: JupyterFrontEnd.ITreeResolver | null
+    tree: JupyterFrontEnd.ITreeResolver | null,
+    app: JupyterFrontEnd
   ): Promise<void> {
     const restoring = 'jp-mod-restoring';
 
@@ -1300,10 +1302,17 @@ namespace Private {
         // Restore the model without populating it.
         await browser.model.restore(browser.id, false);
         if (paths.file) {
-          await commands.execute(CommandIDs.openPath, {
+          let widget = await commands.execute(CommandIDs.openPath, {
             path: paths.file,
             dontShowBrowser: true
           });
+          if (widget !== undefined) {
+            for( let w of app.shell.widgets('main')) {
+              if ((w as MainAreaWidget).content instanceof Launcher) {
+                w.dispose();
+              }
+            }
+          }
         }
         if (paths.browser) {
           await commands.execute(CommandIDs.openPath, {
