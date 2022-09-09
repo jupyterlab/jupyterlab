@@ -417,7 +417,7 @@ export class ContentsHelper {
         data: request.body
       });
     } else {
-      response = await fetch(url, request);
+      response = await fetch(URLExt.join(this.baseURL, url), request);
     }
     return response;
   }
