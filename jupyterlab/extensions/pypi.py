@@ -205,7 +205,6 @@ class PyPIExtensionManager(ExtensionManager):
         max_index = page * per_page
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
             counter += 1
-            self.log.info(f"{counter + 1} {name}")
             if counter < min_index or counter >= max_index:
                 continue
 

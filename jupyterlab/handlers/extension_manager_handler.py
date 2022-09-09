@@ -35,7 +35,6 @@ class ExtensionHandler(APIHandler):
             await self.manager.refresh(query, page, per_page)
 
         extensions, last_page = await self.manager.list_extensions(query, page, per_page)
-        self.log.info(last_page)
 
         self.set_status(200)
         if last_page is not None:
