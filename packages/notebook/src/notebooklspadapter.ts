@@ -4,8 +4,8 @@
 import { Signal } from '@lumino/signaling';
 import { SessionContext } from '@jupyterlab/apputils';
 import { Cell, ICellModel } from '@jupyterlab/cells';
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
+  Document,
   IAdapterOptions,
   IVirtualPosition,
   untilReady,
@@ -22,7 +22,6 @@ import { Session } from '@jupyterlab/services';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
 
-type IEditor = CodeEditor.IEditor;
 type ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 
 export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
@@ -31,15 +30,12 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     protected options: IAdapterOptions
   ) {
     super(editorWidget, options);
-    this._ceEditorToCell = new Map();
+    this._editorToCell = new Map();
     this.editor = editorWidget.content;
-    this._knownEditorsIds = new Set();
-    this.ready = new Promise<void>((resolve, reject) => {
+    this._cellToEditor = new WeakMap();
+    this._ready = new Promise<void>((resolve, reject) => {
       this.initOnceReady().then(resolve).catch(reject);
     });
-
-    // Dispose the adapter when the notebook is disposed.
-    editorWidget.disposed.connect(() => this.dispose());
   }
 
   /**
@@ -87,30 +83,35 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    *  Get the list of CM editor with its type in the document,
    */
-  get editors(): { ceEditor: CodeEditor.IEditor; type: nbformat.CellType }[] {
+  get editors(): Document.ICodeBlockOptions[] {
     if (this.isDisposed) {
       return [];
     }
 
     let notebook = this.widget.content;
 
-    this._ceEditorToCell.clear();
+    this._editorToCell.clear();
 
     if (notebook.isDisposed) {
       return [];
     }
 
     return notebook.widgets.map(cell => {
-      this._ceEditorToCell.set(cell.editor, cell);
-      return { ceEditor: cell.editor, type: cell.model.type };
+      return {
+        ceEditor: this._getCellEditor(cell),
+        type: cell.model.type,
+        value: cell.model.value.text
+      };
     });
   }
 
   /**
    * Get the activated CM editor.
    */
-  get activeEditor(): CodeEditor.IEditor | undefined {
-    return this.widget.content.activeCell?.editor;
+  get activeEditor(): Document.IEditor | undefined {
+    return this.editor.activeCell
+      ? this._getCellEditor(this.editor.activeCell)
+      : undefined;
   }
 
   /**
@@ -132,10 +133,9 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    *
    * @param ceEditor - instance of the code editor
    */
-  getEditorIndex(ceEditor: CodeEditor.IEditor): number {
-    let cell = this._ceEditorToCell.get(ceEditor)!;
-    let notebook = this.widget.content;
-    return notebook.widgets.findIndex(otherCell => {
+  getEditorIndex(ceEditor: Document.IEditor): number {
+    let cell = this._editorToCell.get(ceEditor)!;
+    return this.editor.widgets.findIndex(otherCell => {
       return cell === otherCell;
     });
   }
@@ -145,8 +145,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    *
    * @param ceEditor - instance of the code editor
    */
-  getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement {
-    let cell = this._ceEditorToCell.get(ceEditor)!;
+  getEditorWrapper(ceEditor: Document.IEditor): HTMLElement {
+    let cell = this._editorToCell.get(ceEditor)!;
     return cell.node;
   }
 
@@ -198,7 +198,6 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     if (this.isDisposed) {
       return;
     }
-    this._isDisposed = true;
     this.widget.context.sessionContext.kernelChanged.disconnect(
       this.onKernelChanged,
       this
@@ -211,7 +210,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     super.dispose();
 
     // editors are needed for the parent dispose() to unbind signals, so they are the last to go
-    this._ceEditorToCell.clear();
+    this._editorToCell.clear();
     Signal.clearData(this);
   }
 
@@ -288,27 +287,6 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       await this.updateDocuments();
     }
 
-    for (let cellModel of cellsRemoved) {
-      let cellWidget = this.widget.content.widgets.find(
-        cell => cell.model.id === cellModel.id
-      );
-      if (!cellWidget) {
-        console.warn(
-          `Widget for removed cell with ID: ${cellModel.id} not found!`
-        );
-        continue;
-      }
-      this._knownEditorsIds.delete(cellWidget.editor.uuid);
-      this._ceEditorToCell.delete(cellWidget.editor);
-      // for practical purposes this editor got removed from our consideration;
-      // it might seem that we should instead look for the editor indicated by
-      // the oldValues[i] cellModel, but this one got already transferred to the
-      // markdown cell in newValues[i]
-      this._editorRemoved.emit({
-        editor: cellWidget.editor
-      });
-    }
-
     for (let cellModel of cellsAdded) {
       let cellWidget = this.widget.content.widgets.find(
         cell => cell.model.id === cellModel.id
@@ -319,11 +297,9 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
         );
         continue;
       }
-      this._knownEditorsIds.add(cellWidget.editor.uuid);
 
-      this._editorAdded.emit({
-        editor: cellWidget.editor
-      });
+      // Add editor to the mapping if needed
+      this._getCellEditor(cellWidget);
     }
   }
 
@@ -395,7 +371,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   private _connectModelSignals(notebook: NotebookPanel | Notebook) {
     if (notebook.model === null) {
       console.warn(
-        `Model is missing for notebook ${notebook}, cannot connet cell changed signal!`
+        `Model is missing for notebook ${notebook}, cannot connect cell changed signal!`
       );
     } else {
       notebook.model.cells.changed.connect(this.handleCellChange, this);
@@ -427,14 +403,9 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     if (cell.model.type !== this._type) {
       return;
     }
-    if (!this._knownEditorsIds.has(cell.editor.uuid)) {
-      this._knownEditorsIds.add(cell.editor.uuid);
-      this._editorAdded.emit({
-        editor: cell.editor
-      });
-    }
+
     this._activeEditorChanged.emit({
-      editor: cell.editor
+      editor: this._getCellEditor(cell)
     });
   }
 
@@ -443,19 +414,57 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * @param  pos - Position in the virtual document.
    */
   private _getCellAt(pos: IVirtualPosition): Cell {
-    let ceEditor = this.virtualDocument.getEditorAtVirtualLine(pos);
-    return this._ceEditorToCell.get(ceEditor)!;
+    let editor = this.virtualDocument.getEditorAtVirtualLine(pos);
+    return this._editorToCell.get(editor)!;
   }
 
   /**
-   * A map between the CM editor and the containing cell
+   * Get the cell editor and add new ones to the mappings.
+   *
+   * @param cell Cell widget
+   * @returns Cell editor accessor
    */
-  private _ceEditorToCell: Map<IEditor, Cell>;
+  private _getCellEditor(cell: Cell): Document.IEditor {
+    if (!this._cellToEditor.has(cell)) {
+      const editor = Object.freeze({
+        getEditor: () => cell.editor,
+        ready: async () => {
+          await cell.ready;
+          return cell.editor!;
+        },
+        reveal: async () => {
+          await this.editor.scrollToCell(cell);
+          return cell.editor!;
+        }
+      });
+
+      this._cellToEditor.set(cell, editor);
+      this._editorToCell.set(editor, cell);
+      cell.disposed.connect(() => {
+        this._cellToEditor.delete(cell);
+        this._editorToCell.delete(editor);
+        this._editorRemoved.emit({
+          editor
+        });
+      });
+
+      this._editorAdded.emit({
+        editor
+      });
+    }
+
+    return this._cellToEditor.get(cell)!;
+  }
 
   /**
-   * Set of known editor ids, used to keep track of added editors.
+   * A map between the editor accessor and the containing cell
    */
-  private _knownEditorsIds: Set<string>;
+  private _editorToCell: Map<Document.IEditor, Cell>;
+
+  /**
+   * Mapping of cell to editor accessor to ensure accessor uniqueness.
+   */
+  private _cellToEditor: WeakMap<Cell, Document.IEditor>;
 
   /**
    * Metadata of the notebook

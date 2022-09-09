@@ -18,6 +18,7 @@
 @import './sidepanel.css';
 @import './switch.css';
 @import './toolbar.css';
+@import './windowedlist.css';
 
 body {
   color: var(--jp-ui-font-color1);

@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
-  Cell,
   CellSearchProvider,
+  CodeCell,
   createCellSearchProvider,
   ICellModel,
-  MarkdownCell,
-  SELECTED_HIGHLIGHT_CLASS
+  MarkdownCell
 } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
@@ -25,7 +25,6 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
 
 /**
  * Notebook document search provider
@@ -48,10 +47,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._onActiveCellChanged,
       this
     );
-    this.widget.content.placeholderCellRendered.connect(
-      this._onPlaceholderRendered,
-      this
-    );
+    // this.widget.content.placeholderCellRendered.connect(
+    //   this._onPlaceholderRendered,
+    //   this
+    // );
   }
 
   /**
@@ -140,10 +139,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       return;
     }
 
-    this.widget.content.placeholderCellRendered.disconnect(
-      this._onPlaceholderRendered,
-      this
-    );
     this.widget.content.activeCellChanged.disconnect(
       this._onActiveCellChanged,
       this
@@ -376,6 +371,45 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return replacementOccurred.includes(true);
   }
 
+  async validateFilter(name: string, value: boolean): Promise<boolean> {
+    if (name !== 'output') {
+      // Bail early
+      return value;
+    }
+
+    // If value is true and some cells have never been rendered, ask confirmation.
+    if (
+      value &&
+      this.widget.content.widgets.some(
+        w => w instanceof CodeCell && w.isPlaceholder()
+      )
+    ) {
+      const trans = this.translator.load('jupyterlab');
+
+      const reply = await showDialog({
+        title: trans.__('Confirmation'),
+        body: trans.__(
+          'Searching outputs is expensive and requires to first rendered all outputs. Are you sure you want to search in the cell outputs?'
+        ),
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.okButton({ label: trans.__('Ok') })
+        ]
+      });
+      if (reply.button.accept) {
+        this.widget.content.widgets.forEach((w, i) => {
+          if (w instanceof CodeCell && w.isPlaceholder()) {
+            this.widget.content.renderCellOutputs(i);
+          }
+        });
+      } else {
+        return false;
+      }
+    }
+
+    return value;
+  }
+
   private _addCellProvider(index: number) {
     const cell = this.widget.content.widgets[index];
     const cellSearchProvider = createCellSearchProvider(cell);
@@ -437,49 +471,53 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._onSearchProviderChanged();
   }
 
-  private _onPlaceholderRendered(
-    panel: Notebook,
-    renderedCell: Cell<ICellModel>
-  ): void {
-    const index = panel.widgets.findIndex(cell => cell.id === renderedCell.id);
-    if (index >= 0) {
-      void this._onCellsChanged(panel.model!.cells, {
-        newIndex: index,
-        newValues: [renderedCell.model],
-        oldIndex: index,
-        oldValues: [renderedCell.model],
-        type: 'set'
-      });
-    }
-  }
+  // private _onPlaceholderRendered(
+  //   panel: Notebook,
+  //   renderedCell: Cell<ICellModel>
+  // ): void {
+  //   const index = panel.widgets.findIndex(cell => cell.id === renderedCell.id);
+  //   if (index >= 0) {
+  //     void this._onCellsChanged(panel.model!.cells, {
+  //       newIndex: index,
+  //       newValues: [renderedCell.model],
+  //       oldIndex: index,
+  //       oldValues: [renderedCell.model],
+  //       type: 'set'
+  //     });
+  //   }
+  // }
 
   private async _stepNext(
     reverse = false,
     loop = false
   ): Promise<ISearchMatch | null> {
-    const activateNewMatch = () => {
+    const activateNewMatch = async () => {
       if (this.widget.content.activeCellIndex !== this._currentProviderIndex!) {
         this.widget.content.activeCellIndex = this._currentProviderIndex!;
       }
       const activeCell = this.widget.content.activeCell!;
+
+      if (!activeCell.inViewport) {
+        try {
+          await this.widget.content.scrollToItem(this._currentProviderIndex!);
+        } catch (error) {
+          // no-op
+        }
+      }
+
       // Unhide cell
       if (activeCell.inputHidden) {
         activeCell.inputHidden = false;
       }
-      // scroll to newly activate highlight
-      const containerRect = this.widget.content.node.getBoundingClientRect();
-      const element =
-        activeCell.node.querySelector(`.${SELECTED_HIGHLIGHT_CLASS}`) ??
-        activeCell.node.querySelector('.CodeMirror-selected');
-      if (element) {
-        const elementRect = element.getBoundingClientRect();
-        if (
-          elementRect.top < containerRect.top ||
-          elementRect.top > containerRect.bottom
-        ) {
-          element.scrollIntoView({ block: 'center' });
-        }
+
+      if (!activeCell.inViewport) {
+        // It will not be possible the cell is not in the view
+        return;
       }
+
+      await activeCell.ready;
+      const editor = activeCell.editor! as CodeMirrorEditor;
+      editor.revealSelection(editor.getSelection());
     };
 
     if (this._currentProviderIndex === null) {
@@ -495,7 +533,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         : await searchEngine.highlightNext();
 
       if (match) {
-        activateNewMatch();
+        await activateNewMatch();
         return match;
       } else {
         this._currentProviderIndex =
@@ -526,7 +564,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         : await searchEngine.highlightNext();
 
       if (match) {
-        activateNewMatch();
+        await activateNewMatch();
         return match;
       }
     }

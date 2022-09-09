@@ -30,11 +30,6 @@ const NOTEBOOK_PANEL_TOOLBAR_CLASS = 'jp-NotebookPanel-toolbar';
 const NOTEBOOK_PANEL_NOTEBOOK_CLASS = 'jp-NotebookPanel-notebook';
 
 /**
- * The class name to add when the document is loaded for the search box.
- */
-const SEARCH_DOCUMENT_LOADED_CLASS = 'jp-DocumentSearch-document-loaded';
-
-/**
  * A widget that hosts a notebook toolbar and content area.
  *
  * #### Notes
@@ -65,7 +60,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this._onSessionStatusChanged,
       this
     );
-    this.content.fullyRendered.connect(this._onFullyRendered, this);
+    // this.content.fullyRendered.connect(this._onFullyRendered, this);
     this.context.saveState.connect(this._onSave, this);
     void this.revealed.then(() => {
       if (this.isDisposed) {
@@ -142,7 +137,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   setFragment(fragment: string): void {
     void this.context.ready.then(() => {
-      this.content.setFragment(fragment);
+      void this.content.setFragment(fragment);
     });
   }
 
@@ -172,15 +167,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         })
       );
     };
-  }
-
-  /**
-   * Handle a fully rendered signal notebook.
-   */
-  private _onFullyRendered(notebook: Notebook, fullyRendered: boolean): void {
-    fullyRendered
-      ? this.removeClass(SEARCH_DOCUMENT_LOADED_CLASS)
-      : this.addClass(SEARCH_DOCUMENT_LOADED_CLASS);
   }
 
   /**

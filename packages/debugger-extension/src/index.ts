@@ -785,7 +785,12 @@ const main: JupyterFrontEndPlugin<void> = {
           })
           .forEach(editor => {
             requestAnimationFrame(() => {
-              Debugger.EditorHandler.showCurrentLine(editor, frame.line);
+              void editor.reveal().then(() => {
+                const edit = editor.get();
+                if (edit) {
+                  Debugger.EditorHandler.showCurrentLine(edit, frame.line);
+                }
+              });
             });
           });
       };
@@ -808,9 +813,11 @@ const main: JupyterFrontEndPlugin<void> = {
         if (results.length > 0) {
           if (breakpoint && typeof breakpoint.line !== 'undefined') {
             results.forEach(editor => {
-              editor.revealPosition({
-                line: (breakpoint.line as number) - 1,
-                column: breakpoint.column || 0
+              void editor.reveal().then(() => {
+                editor.get()?.revealPosition({
+                  line: (breakpoint.line as number) - 1,
+                  column: breakpoint.column || 0
+                });
               });
             });
           }
@@ -824,8 +831,10 @@ const main: JupyterFrontEndPlugin<void> = {
         const editor = editorWrapper.editor;
         const editorHandler = new Debugger.EditorHandler({
           debuggerService: service,
-          editor,
-          path
+          editorReady: () => Promise.resolve(editor),
+          getEditor: () => editor,
+          path,
+          src: editor.model.value
         });
         editorWrapper.disposed.connect(() => editorHandler.dispose());
 

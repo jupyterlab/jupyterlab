@@ -291,7 +291,7 @@ describe('console/widget', () => {
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onActivateRequest'])
         );
-        expect(widget.promptCell!.editor.hasFocus()).toBe(true);
+        expect(widget.promptCell!.editor!.hasFocus()).toBe(true);
       });
     });
 

@@ -10,13 +10,17 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import { framePromise, signalToPromise } from '@jupyterlab/testutils';
+import { framePromise, signalToPromise, sleep } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
-import * as nbformat from '@jupyterlab/nbformat';
-import { INotebookModel, Notebook, NotebookModel, StaticNotebook } from '..';
+import {
+  INotebookModel,
+  Notebook,
+  NotebookModel,
+  StaticNotebook
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const server = new JupyterServer();
@@ -33,22 +37,9 @@ afterAll(async () => {
 const contentFactory = utils.createNotebookFactory();
 const editorConfig = utils.defaultEditorConfig;
 const rendermime = utils.defaultRenderMime();
-const notebookConfig = {
-  showHiddenCellsButton: true,
-  scrollPastEnd: true,
-  defaultCell: 'code' as nbformat.CellType,
-  recordTiming: false,
-  numberCellsToRenderDirectly: 9999,
-  remainingTimeBeforeRescheduling: 50,
-  renderCellOnIdle: true,
-  observedTopMargin: '1000px',
-  observedBottomMargin: '1000px',
-  maxNumberOutputs: 50,
-  disableDocumentWideUndoRedo: true,
-  renderingLayout: 'default' as 'default' | 'side-by-side',
-  sideBySideLeftMarginOverride: '10px',
-  sideBySideRightMarginOverride: '10px',
-  sideBySideOutputRatio: 1
+const notebookConfig: StaticNotebook.INotebookConfig = {
+  ...StaticNotebook.defaultNotebookConfig,
+  windowingMode: 'none'
 };
 
 const options: Notebook.IOptions = {
@@ -411,7 +402,7 @@ describe('@jupyter/notebook', () => {
 
       it('should be settable', () => {
         const widget = createWidget();
-        expect(widget.widgets[0].editor.getOption('autoClosingBrackets')).toBe(
+        expect(widget.widgets[0].editor!.getOption('autoClosingBrackets')).toBe(
           false
         );
         const newConfig = {
@@ -423,7 +414,7 @@ describe('@jupyter/notebook', () => {
           }
         };
         widget.editorConfig = newConfig;
-        expect(widget.widgets[0].editor.getOption('autoClosingBrackets')).toBe(
+        expect(widget.widgets[0].editor!.getOption('autoClosingBrackets')).toBe(
           true
         );
       });
@@ -575,8 +566,7 @@ describe('@jupyter/notebook', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
           const model = new CodeCellModel({});
           const codeOptions = { model, rendermime, contentFactory };
-          const parent = new StaticNotebook(options);
-          const widget = contentFactory.createCodeCell(codeOptions, parent);
+          const widget = contentFactory.createCodeCell(codeOptions);
           expect(widget).toBeInstanceOf(CodeCell);
         });
       });
@@ -586,8 +576,7 @@ describe('@jupyter/notebook', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
           const model = new MarkdownCellModel({});
           const mdOptions = { model, rendermime, contentFactory };
-          const parent = new StaticNotebook(options);
-          const widget = contentFactory.createMarkdownCell(mdOptions, parent);
+          const widget = contentFactory.createMarkdownCell(mdOptions);
           expect(widget).toBeInstanceOf(MarkdownCell);
         });
       });
@@ -597,8 +586,7 @@ describe('@jupyter/notebook', () => {
           const contentFactory = new StaticNotebook.ContentFactory();
           const model = new RawCellModel({});
           const rawOptions = { model, contentFactory };
-          const parent = new StaticNotebook(options);
-          const widget = contentFactory.createRawCell(rawOptions, parent);
+          const widget = contentFactory.createRawCell(rawOptions);
           expect(widget).toBeInstanceOf(RawCell);
         });
       });
@@ -1214,12 +1202,15 @@ describe('@jupyter/notebook', () => {
           expect(widget.activeCellIndex).toBe(0);
         });
 
-        it('should preserve "command" mode if in a markdown cell', () => {
+        it('should preserve "command" mode if in a markdown cell', async () => {
           const cell = widget.model!.contentFactory.createMarkdownCell({});
           cell.value.text = '# Hello'; // Should be rendered with content.
           widget.model!.cells.push(cell);
           const count = widget.widgets.length;
           const child = widget.widgets[count - 1] as MarkdownCell;
+          if (!child.inViewport) {
+            await signalToPromise(child.inViewportChanged);
+          }
           expect(child.rendered).toBe(true);
           simulate(child.node, 'mousedown');
           expect(child.rendered).toBe(true);
@@ -1268,7 +1259,7 @@ describe('@jupyter/notebook', () => {
           expect(selected(widget)).toEqual([]);
         });
 
-        it('should leave a markdown cell rendered', () => {
+        it('should leave a markdown cell rendered', async () => {
           const code = widget.model!.contentFactory.createCodeCell({});
           const md = widget.model!.contentFactory.createMarkdownCell({});
           md.value.text = '# Hello'; // Should be rendered with content.
@@ -1277,18 +1268,24 @@ describe('@jupyter/notebook', () => {
           const count = widget.widgets.length;
           const codeChild = widget.widgets[count - 2];
           const mdChild = widget.widgets[count - 1] as MarkdownCell;
+          if (!codeChild.inViewport) {
+            await signalToPromise(codeChild.inViewportChanged);
+          }
+          if (!mdChild.inViewport) {
+            await signalToPromise(mdChild.inViewportChanged);
+          }
           widget.select(codeChild);
           widget.select(mdChild);
           widget.activeCellIndex = count - 2;
           expect(mdChild.rendered).toBe(true);
-          simulate(codeChild.editorWidget.node, 'mousedown');
-          simulate(codeChild.editorWidget.node, 'focusin');
+          simulate(codeChild.editorWidget!.node, 'mousedown');
+          simulate(codeChild.editorWidget!.node, 'focusin');
           expect(mdChild.rendered).toBe(true);
           expect(widget.activeCell).toBe(codeChild);
           expect(widget.mode).toBe('edit');
         });
 
-        it('should remove selection and switch to command mode', () => {
+        it('should remove selection and switch to command mode', async () => {
           const code = widget.model!.contentFactory.createCodeCell({});
           const md = widget.model!.contentFactory.createMarkdownCell({});
           widget.model!.cells.push(code);
@@ -1296,13 +1293,19 @@ describe('@jupyter/notebook', () => {
           const count = widget.widgets.length;
           const codeChild = widget.widgets[count - 2];
           const mdChild = widget.widgets[count - 1] as MarkdownCell;
+          if (!codeChild.inViewport) {
+            await signalToPromise(codeChild.inViewportChanged);
+          }
+          if (!mdChild.inViewport) {
+            await signalToPromise(mdChild.inViewportChanged);
+          }
           widget.select(codeChild);
           widget.select(mdChild);
           widget.activeCellIndex = count - 2;
-          simulate(codeChild.editorWidget.node, 'mousedown');
-          simulate(codeChild.editorWidget.node, 'focusin');
+          simulate(codeChild.editorWidget!.node, 'mousedown');
+          simulate(codeChild.editorWidget!.node, 'focusin');
           expect(widget.mode).toBe('edit');
-          simulate(codeChild.editorWidget.node, 'mousedown', { button: 2 });
+          simulate(codeChild.editorWidget!.node, 'mousedown', { button: 2 });
           expect(widget.isSelected(mdChild)).toBe(false);
           expect(widget.mode).toBe('command');
         });
@@ -1318,7 +1321,7 @@ describe('@jupyter/notebook', () => {
           widget.select(codeChild);
           widget.select(mdChild);
           widget.activeCellIndex = count - 2;
-          simulate(codeChild.editorWidget.node, 'mousedown', {
+          simulate(codeChild.editorWidget!.node, 'mousedown', {
             shiftKey: true,
             button: 2
           });
@@ -1328,13 +1331,16 @@ describe('@jupyter/notebook', () => {
       });
 
       describe('dblclick', () => {
-        it('should unrender a markdown cell', () => {
+        it('should unrender a markdown cell', async () => {
           const cell = widget.model!.contentFactory.createMarkdownCell({});
           cell.value.text = '# Hello'; // Should be rendered with content.
           widget.model!.cells.push(cell);
           const child = widget.widgets[
             widget.widgets.length - 1
           ] as MarkdownCell;
+          if (!child.inViewport) {
+            await signalToPromise(child.inViewportChanged);
+          }
           expect(child.rendered).toBe(true);
           expect(widget.mode).toBe('command');
           simulate(child.node, 'dblclick');
@@ -1346,14 +1352,14 @@ describe('@jupyter/notebook', () => {
       describe('focusin', () => {
         it('should change to edit mode if a child cell takes focus', () => {
           const child = widget.widgets[0];
-          simulate(child.editorWidget.node, 'focusin');
+          simulate(child.editorWidget!.node, 'focusin');
           expect(widget.events).toEqual(expect.arrayContaining(['focusin']));
           expect(widget.mode).toBe('edit');
         });
 
         it('should change to command mode if the widget takes focus', () => {
           const child = widget.widgets[0];
-          simulate(child.editorWidget.node, 'focusin');
+          simulate(child.editorWidget!.node, 'focusin');
           expect(widget.events).toEqual(expect.arrayContaining(['focusin']));
           expect(widget.mode).toBe('edit');
           widget.events = [];
@@ -1373,7 +1379,7 @@ describe('@jupyter/notebook', () => {
           expect(widget.mode).toBe('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
           expect(widget.mode).toBe('command');
-          expect(widget.activeCell!.editor.hasFocus()).toBe(false);
+          expect(widget.activeCell!.editor!.hasFocus()).toBe(false);
         });
 
         it('should set command mode', () => {
@@ -1538,20 +1544,24 @@ describe('@jupyter/notebook', () => {
       });
 
       describe('`edgeRequested` signal', () => {
-        it('should activate the previous cell if top is requested', () => {
+        it('should activate the previous cell if top is requested', async () => {
           const widget = createActiveWidget();
           widget.model!.fromJSON(utils.DEFAULT_CONTENT);
           widget.activeCellIndex = 1;
+          // Wait for the cell to be ready and the signal listener to be set
+          await sleep();
           const child = widget.widgets[widget.activeCellIndex];
-          (child.editor.edgeRequested as any).emit('top');
+          (child.editor!.edgeRequested as any).emit('top');
           expect(widget.activeCellIndex).toBe(0);
         });
 
-        it('should activate the next cell if bottom is requested', () => {
+        it('should activate the next cell if bottom is requested', async () => {
           const widget = createActiveWidget();
           widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+          // Wait for the cell to be ready and the signal listener to be set
+          await sleep();
           const child = widget.widgets[widget.activeCellIndex];
-          (child.editor.edgeRequested as any).emit('bottom');
+          (child.editor!.edgeRequested as any).emit('bottom');
           expect(widget.activeCellIndex).toBe(1);
         });
       });
@@ -1613,23 +1623,6 @@ describe('@jupyter/notebook', () => {
         widget.activeCellIndex = 2;
         widget.model!.cells.remove(1);
         expect(widget.activeCell).toBe(widget.widgets[1]);
-      });
-    });
-
-    // WIP See https://github.com/jupyterlab/jupyterlab/issues/10526
-    describe('#virtualNotebook()', () => {
-      it('should render the last cell widget', () => {
-        const model = new NotebookModel();
-        const widget = new StaticNotebook(options);
-        widget.model = model;
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
-        const cell = widget.widgets[5];
-        expect(
-          cell.inputArea.editorWidget.model.value.text.startsWith(
-            'from IPython.display import Latex'
-          )
-        ).toBe(true);
-        console.log();
       });
     });
   });

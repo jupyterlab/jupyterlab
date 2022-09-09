@@ -6,6 +6,7 @@ import {
   CodeMirrorEditor,
   CodeMirrorSearchHighlighter
 } from '@jupyterlab/codemirror';
+import { signalToPromise } from '@jupyterlab/coreutils';
 import {
   GenericSearchProvider,
   IBaseSearchProvider,
@@ -16,9 +17,8 @@ import {
 import { IObservableString } from '@jupyterlab/observables';
 import { OutputArea } from '@jupyterlab/outputarea';
 import { ISignal, Signal } from '@lumino/signaling';
-import { CodeCell } from '.';
 import { ICellModel } from './model';
-import { Cell, MarkdownCell } from './widget';
+import { Cell, CodeCell, MarkdownCell } from './widget';
 
 /**
  * Class applied on highlighted search matches
@@ -38,8 +38,15 @@ export class CellSearchProvider implements IBaseSearchProvider {
     this.currentIndex = null;
     this._stateChanged = new Signal<IBaseSearchProvider, void>(this);
     this.cmHandler = new CodeMirrorSearchHighlighter(
-      this.cell.editor as CodeMirrorEditor
+      this.cell.editor as CodeMirrorEditor | null
     );
+    if (!this.cell.inViewport && !this.cell.editor) {
+      void signalToPromise(cell.inViewportChanged).then(([, inViewport]) => {
+        if (inViewport) {
+          this.cmHandler.setEditor(this.cell.editor as CodeMirrorEditor);
+        }
+      });
+    }
   }
 
   /**
@@ -161,7 +168,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
       this.currentIndex = null;
     } else {
       if (this._lastReplacementPosition) {
-        this.cell.editor.setCursorPosition(this._lastReplacementPosition);
+        this.cell.editor?.setCursorPosition(this._lastReplacementPosition);
         this._lastReplacementPosition = null;
       }
 
@@ -612,7 +619,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell
       this._unrenderedByHighligh = true;
+      const waitForRendered = signalToPromise(cell.renderedChanged);
       cell.rendered = false;
+      await waitForRendered;
     }
 
     match = await super.highlightNext();
@@ -687,7 +696,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         void this.renderedProvider.startQuery(this.query);
       } else {
         // Force cursor position to ensure reverse search is working as expected
-        cell.editor.setCursorPosition({ column: 0, line: 0 });
+        cell.editor?.setCursorPosition({ column: 0, line: 0 });
         void this.renderedProvider.endQuery();
       }
     }

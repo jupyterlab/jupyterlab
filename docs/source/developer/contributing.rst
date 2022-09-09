@@ -40,6 +40,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    patterns
    internationalization
    css
+   performance
    api
 
 .. contents:: Table of contents

@@ -109,8 +109,10 @@ export class SourcesBody extends Widget {
 
     this._editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
-      editor: this._editor.editor,
-      path
+      editorReady: () => Promise.resolve(this._editor.editor),
+      getEditor: () => this._editor.editor,
+      path,
+      src: this._editor.model.value
     });
 
     this._model.currentSource = {

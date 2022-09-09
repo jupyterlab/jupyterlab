@@ -57,7 +57,7 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.clickToolbarItem('cut');
 
     const imageName = 'paste-cell.png';
-    await page.notebook.selectCells(2);
+    await page.notebook.selectCells(1);
     await page.notebook.clickToolbarItem('paste');
     const nbPanel = await page.notebook.getNotebookInPanel();
 
@@ -79,7 +79,6 @@ test.describe('Notebook Toolbar', () => {
 
     await page.notebook.clickToolbarItem('run');
     await page.waitForSelector('text=8');
-    // await page.notebook.waitForRun();
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 

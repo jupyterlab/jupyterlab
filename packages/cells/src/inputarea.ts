@@ -58,17 +58,14 @@ export class InputArea extends Widget {
     // Editor
     const editorOptions = {
       model,
-      factory: contentFactory.editorFactory,
-      updateOnShow: options.updateOnShow
+      factory: contentFactory.editorFactory
     };
     const editor = (this._editor = new CodeEditorWrapper(editorOptions));
     editor.addClass(INPUT_AREA_EDITOR_CLASS);
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(prompt);
-    if (!options.placeholder) {
-      layout.addWidget(editor);
-    }
+    layout.addWidget(editor);
   }
 
   /**
@@ -177,16 +174,6 @@ export namespace InputArea {
      * Defaults to one that uses CodeMirror.
      */
     contentFactory?: IContentFactory;
-
-    /**
-     * Whether to send an update request to the editor when it is shown.
-     */
-    updateOnShow?: boolean;
-
-    /**
-     * Whether this input area is a placeholder for future rendering.
-     */
-    placeholder?: boolean;
   }
 
   /**

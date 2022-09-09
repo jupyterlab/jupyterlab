@@ -40,7 +40,6 @@ const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_OPTIONS_DISABLED_CLASS =
   'jp-DocumentSearch-search-options-disabled';
-const SEARCH_DOCUMENT_LOADING = 'jp-DocumentSearch-document-loading';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -129,7 +128,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <input
         placeholder={trans.__('Replace')}
         className={REPLACE_ENTRY_CLASS}
-        value={props.replaceText}
+        value={props.replaceText ?? ''}
         onKeyDown={e => props.onReplaceKeydown(e)}
         onChange={e => props.onChange(e)}
         tabIndex={0}
@@ -353,7 +352,7 @@ interface ISearchOverlayProps {
    *
    * The provided filter values are the one changing.
    */
-  onFiltersChanged: (f: IFilters) => void;
+  onFilterChanged: (name: string, value: boolean) => Promise<void>;
   /**
    * Callback on close button click.
    */
@@ -433,16 +432,18 @@ class SearchOverlay extends React.Component<
 
   private _onReplaceToggled() {
     // Deactivate invalid replace filters
-    const filters = { ...this.props.filters };
     if (!this.props.replaceEntryVisible) {
       for (const key in this.props.filtersDefinition) {
         const filter = this.props.filtersDefinition[key];
         if (!filter.supportReplace) {
-          filters[key] = false;
+          this.props.onFilterChanged(key, false).catch(reason => {
+            console.error(
+              `Fail to update filter value for ${filter.title}:\n${reason}`
+            );
+          });
         }
       }
     }
-    this.props.onFiltersChanged(filters);
 
     this.props.onReplaceEntryShown(!this.props.replaceEntryVisible);
   }
@@ -477,10 +478,11 @@ class SearchOverlay extends React.Component<
               title={filter.title}
               description={filter.description}
               isEnabled={!showReplace || filter.supportReplace}
-              onToggle={() => {
-                const newFilter: IFilters = {};
-                newFilter[name] = !this.props.filters[name];
-                this.props.onFiltersChanged(newFilter);
+              onToggle={async () => {
+                await this.props.onFilterChanged(
+                  name,
+                  !this.props.filters[name]
+                );
               }}
               value={this.props.filters[name] ?? filter.default}
             />
@@ -580,11 +582,6 @@ class SearchOverlay extends React.Component<
         {!!this.props.errorMessage && (
           <div className={REGEX_ERROR_CLASS}>{this.props.errorMessage}</div>
         )}
-        <div className={SEARCH_DOCUMENT_LOADING}>
-          {trans.__(
-            'This document is still loading. Only loaded content will appear in search results until the entire document loads.'
-          )}
-        </div>
       </>
     );
   }
@@ -678,8 +675,8 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         onRegexToggled={() => {
           this.model.useRegex = !this.model.useRegex;
         }}
-        onFiltersChanged={(filters: IFilters) => {
-          this.model.filters = { ...this.model.filters, ...filters };
+        onFilterChanged={async (name: string, value: boolean) => {
+          await this.model.setFilter(name, value);
         }}
         onHighlightNext={() => {
           void this.model.highlightNext();

@@ -109,11 +109,12 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
     model.mimeType = mimeType ?? '';
     this._prompt = new CodeCell({
       rendermime,
-      model
+      model,
+      placeholder: false
     }).initializeState();
 
     // explicitly remove the prompt in front of the input area
-    this._prompt.inputArea.promptNode.remove();
+    this._prompt.inputArea!.promptNode.remove();
 
     this.node.appendChild(this._prompt.node);
   }

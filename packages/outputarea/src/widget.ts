@@ -20,7 +20,7 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import { IOutputAreaModel } from './model';
 
@@ -202,6 +202,13 @@ export class OutputArea extends Widget {
         this.onInputRequest(msg, value);
       }
     };
+  }
+
+  /**
+   * Signal emitted when an output area is requesting an input.
+   */
+  get inputRequested(): ISignal<OutputArea, void> {
+    return this._inputRequested;
   }
 
   /**
@@ -413,6 +420,8 @@ export class OutputArea extends Widget {
       this.maxNumberOutputs = this.model.length;
     }
     this.layout.addWidget(panel);
+
+    this._inputRequested.emit();
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
@@ -672,21 +681,21 @@ export class OutputArea extends Widget {
     return panel;
   }
 
-  private _minHeightTimeout: number | null = null;
+  private _displayIdMap = new Map<string, number[]>();
   private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   >;
-  private _displayIdMap = new Map<string, number[]>();
-  private _outputTracker = new WidgetTracker<Widget>({
-    namespace: UUID.uuid4()
-  });
-
   /**
    * The maximum outputs to show in the trimmed
    * output area.
    */
   private _maxNumberOutputs: number;
+  private _minHeightTimeout: number | null = null;
+  private _inputRequested = new Signal<OutputArea, void>(this);
+  private _outputTracker = new WidgetTracker<Widget>({
+    namespace: UUID.uuid4()
+  });
   private _translator: ITranslator;
 }
 
@@ -929,7 +938,6 @@ export class Stdin extends Widget implements IStdin {
     this.addClass(STDIN_CLASS);
     this._historyIndex = 0;
     this._input = this.node.getElementsByTagName('input')[0];
-    this._input.focus();
     this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     // make users aware of the line history feature
     this._input.placeholder = this._trans.__('↑↓ for history');
@@ -1005,13 +1013,6 @@ export class Stdin extends Widget implements IStdin {
    */
   protected onAfterAttach(msg: Message): void {
     this._input.addEventListener('keydown', this);
-    this.update();
-  }
-
-  /**
-   * Handle `update-request` messages sent to the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
     this._input.focus();
   }
 
@@ -1022,15 +1023,15 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _historyIndex: number;
-  private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
   private _future: Kernel.IShellFuture;
+  private _historyIndex: number;
   private _input: HTMLInputElement;
+  private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
+  private _password: boolean;
+  private _promise = new PromiseDelegate<void>();
+  private _trans: TranslationBundle;
   private _value: string;
   private _valueCache: string;
-  private _promise = new PromiseDelegate<void>();
-  private _password: boolean;
-  private _trans: TranslationBundle;
 }
 
 export namespace Stdin {

@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
+  Document,
   IAdapterOptions,
   IVirtualPosition,
   VirtualDocument,
@@ -31,12 +31,17 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
     super(editorWidget, others);
     this.editor = editorWidget.content;
     this._docRegistry = docRegistry;
-    this.ready = new Promise<void>((resolve, reject) => {
-      this.initOnceReady().then(resolve).catch(reject);
+
+    // Ensure editor uniqueness
+    this._virtualEditor = Object.freeze({
+      getEditor: () => this.editor.editor,
+      ready: () => Promise.resolve(this.editor.editor),
+      reveal: () => Promise.resolve(this.editor.editor)
     });
 
-    // Dispose the adapter when the editor is disposed.
-    editorWidget.disposed.connect(() => this.dispose());
+    this._ready = new Promise<void>((resolve, reject) => {
+      this.initOnceReady().then(resolve).catch(reject);
+    });
   }
 
   /**
@@ -92,8 +97,8 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   /**
    * Get the activated CM editor.
    */
-  get activeEditor(): CodeEditor.IEditor {
-    return this.editor.editor;
+  get activeEditor(): Document.IEditor {
+    return this._virtualEditor;
   }
 
   /**
@@ -114,8 +119,14 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    *  Get the list of CM editors in the document, there is only one editor
    * in the case of file editor.
    */
-  get editors(): { ceEditor: CodeEditor.IEditor; type: string }[] {
-    return [{ ceEditor: this.editor.editor, type: 'code' }];
+  get editors(): Document.ICodeBlockOptions[] {
+    return [
+      {
+        ceEditor: this._virtualEditor,
+        type: 'code',
+        value: this.editor?.model.value.text ?? ''
+      }
+    ];
   }
 
   /**
@@ -151,7 +162,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    *
    * @param ceEditor - instance of the code editor
    */
-  getEditorIndex(ceEditor: CodeEditor.IEditor): number {
+  getEditorIndex(ceEditor: Document.IEditor): number {
     return 0;
   }
 
@@ -161,7 +172,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * @param ceEditor
    * @return  {HTMLElement}
    */
-  getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement {
+  getEditorWrapper(ceEditor: Document.IEditor): HTMLElement {
     return this.wrapperElement;
   }
 
@@ -188,4 +199,5 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * The document registry instance.
    */
   private readonly _docRegistry: DocumentRegistry;
+  private readonly _virtualEditor: Document.IEditor;
 }

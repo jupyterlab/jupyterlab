@@ -37,6 +37,12 @@ bumped their major version (following semver convention). We want to point out p
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/cells`` from 3.x to 4.x
    ``MarkdownCell.toggleCollapsedSignal`` renamed ``MarkdownCell.headingCollapsedChanged``
+   To support notebook windowing, cell widget children (e.g. the editor or the output area) are not instantiated
+   when the cell is attached to the notebook. You can test for ``isPlaceholder()`` to see if the cell has been
+   fully instantiated or wait for the promise ``ready`` to be resolved. Additionally an attribute ``inViewport``
+   and a signal ``inViewportChanged`` are available to test if the cell is attached to the DOM.
+   If you instantiate standalone cells outside of a notebook, you will probably need to set the constructor option
+   ``placeholder`` to ``false`` to ensure direct rendering of the cell.
 - ``@jupyterlab/completer`` from 3.x to 4.x
    Major version bumped following the removal of ``ICompletionManager`` token and the replacement
    of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
@@ -82,6 +88,16 @@ bumped their major version (following semver convention). We want to point out p
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
    * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
    * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
+   * To support windowing, a new method ``scrollToItem(index, behavior)`` is available to scroll to any
+     cell that may or may not be in the DOM. And new ``cellInViewportChanged`` signal is available to listen
+     for cells entering or leaving the viewport (in windowing mode). And ``scrollToCell(cell)`` is now returning
+     a ``Promise<void>`` calling internally ``scrollToItem``.
+   * ``fullyRendered``, ``placeholderCellRendered`` and ``remainingCellToRenderCount`` have been removed.
+     The defer rendering mode still exists. It will render some cells during spare CPU Idle time.
+   * Settings ``numberCellsToRenderDirectly``, ``remainingTimeBeforeRescheduling``, ``renderCellOnIdle``,
+     ``observedTopMargin`` and ``observedBottomMargin`` have been removed. Instead a ``windowingMode``
+     with value of *defer*, *full* or *none* and ``overscanCount`` have been added to manage the rendering
+     mode.
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).

@@ -68,18 +68,23 @@ test.describe('Table of Contents', () => {
       await page.sidebar.getTabPosition('table-of-contents')
     );
 
-    await page
-      .locator('.jp-TableOfContents-tree >> text="2. Multiple output types"')
-      .click({
-        button: 'right'
-      });
+    await Promise.all([
+      page.locator(
+        '.jp-TableOfContents-tree >> .jp-tocItem-active >> text="2. Multiple output types"'
+      ),
+      page
+        .locator('.jp-TableOfContents-tree >> text="2. Multiple output types"')
+        .click({
+          button: 'right'
+        })
+    ]);
 
     const menu = await page.menu.getOpenMenu();
 
     await (
       await menu.$('text=Select and Run Cell(s) for this Heading')
     ).click();
-    await page.pause();
+
     await page
       .locator('.jp-TableOfContents-tree >> text="2. HTML title"')
       .waitFor();

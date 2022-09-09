@@ -19,6 +19,48 @@ export interface IHTMLHeading extends TableOfContents.IHeading {
 }
 
 /**
+ * Filter headings for table of contents and compute associated prefix
+ *
+ * @param headings Headings to process
+ * @param options Options
+ * @param initialLevels Initial levels for prefix computation
+ * @returns Extracted headings
+ */
+export function filterHeadings<
+  T extends TableOfContents.IHeading = TableOfContents.IHeading
+>(
+  headings: T[],
+  options?: Partial<TableOfContents.IConfig>,
+  initialLevels: number[] = []
+): T[] {
+  const config = {
+    ...TableOfContents.defaultConfig,
+    ...options
+  } as TableOfContents.IConfig;
+
+  const levels = initialLevels;
+  let previousLevel = levels.length;
+  const filteredHeadings = new Array<T>();
+  for (const heading of headings) {
+    if (heading.skip) {
+      continue;
+    }
+    const level = heading.level;
+
+    if (level > 0 && level <= config.maximalDepth) {
+      const prefix = getPrefix(level, previousLevel, levels, config);
+      previousLevel = level;
+
+      filteredHeadings.push({
+        ...heading,
+        prefix
+      });
+    }
+  }
+  return filteredHeadings;
+}
+
+/**
  * Returns whether a MIME type corresponds to either HTML.
  *
  * @param mime - MIME type string
@@ -43,48 +85,25 @@ export function isHTML(mime: string): boolean {
  * The html string is not sanitized - use with caution
  *
  * @param html HTML string to parse
- * @param options Options
- * @param initialLevels Initial levels for prefix computation
+ * @param force Whether to ignore HTML headings with class jp-toc-ignore and tocSkip or not
  * @returns Extracted headings
  */
-export function getHTMLHeadings(
-  html: string,
-  options?: Partial<TableOfContents.IConfig>,
-  initialLevels: number[] = []
-): IHTMLHeading[] {
-  const config = {
-    ...TableOfContents.defaultConfig,
-    ...options
-  } as TableOfContents.IConfig;
-
+export function getHTMLHeadings(html: string, force = true): IHTMLHeading[] {
   const container: HTMLDivElement = document.createElement('div');
   container.innerHTML = html;
 
-  const levels = initialLevels;
-  let previousLevel = levels.length;
   const headings = new Array<IHTMLHeading>();
   const headers = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
   for (const h of headers) {
-    if (
-      h.classList.contains('jp-toc-ignore') ||
-      h.classList.contains('tocSkip')
-    ) {
-      // skip this element if a special class name is included
-      continue;
-    }
-    let level = parseInt(h.tagName[1], 10);
+    const level = parseInt(h.tagName[1], 10);
 
-    if (level > 0 && level <= config.maximalDepth) {
-      const prefix = getPrefix(level, previousLevel, levels, config);
-      previousLevel = level;
-
-      headings.push({
-        text: h.textContent ?? '',
-        prefix,
-        level,
-        id: h?.getAttribute('id')
-      });
-    }
+    headings.push({
+      text: h.textContent ?? '',
+      level,
+      id: h?.getAttribute('id'),
+      skip:
+        h.classList.contains('jp-toc-ignore') || h.classList.contains('tocSkip')
+    });
   }
   return headings;
 }
@@ -195,7 +214,7 @@ function addNumbering(el: Element, numbering: string): void {
  * @param element Node to clear
  */
 export function clearNumbering(element: Element): void {
-  element.querySelectorAll(`span.${NUMBERING_CLASS}`).forEach(el => {
+  element?.querySelectorAll(`span.${NUMBERING_CLASS}`).forEach(el => {
     el.remove();
   });
 }

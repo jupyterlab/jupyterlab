@@ -138,7 +138,9 @@ export class CellToolbarTracker implements IDisposable {
   private _removeToolbar(model: ICellModel): void {
     const cell = this._getCell(model);
     if (cell) {
-      this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
+      this._findToolbarWidgets(cell).forEach(widget => {
+        widget.dispose();
+      });
       // Attempt to remove the resize and changed event handlers.
       cell.displayChanged.disconnect(this._resizeEventCallback, this);
     }
@@ -226,6 +228,9 @@ export class CellToolbarTracker implements IDisposable {
    */
   private _markdownOverlapsToolbar(activeCell: MarkdownCell): boolean {
     const markdownOutput = activeCell.inputArea; // Rendered markdown appears in the input area
+    if (!markdownOutput) {
+      return false;
+    }
 
     // Get the rendered markdown as a widget.
     const markdownOutputWidget = markdownOutput.renderedInput;
@@ -289,6 +294,10 @@ export class CellToolbarTracker implements IDisposable {
   private _codeOverlapsToolbar(activeCell: Cell<ICellModel>): boolean {
     const editorWidget = activeCell.editorWidget;
     const editor = activeCell.editor;
+    if (!editorWidget || !editor) {
+      return false;
+    }
+
     if (editor.lineCount < 1) {
       return false; // Nothing in the editor
     }
@@ -307,11 +316,11 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellEditorWidgetLeft(activeCell: Cell<ICellModel>): number {
-    return activeCell.editorWidget.node.getBoundingClientRect().left;
+    return activeCell.editorWidget?.node.getBoundingClientRect().left ?? 0;
   }
 
   private _cellEditorWidgetRight(activeCell: Cell<ICellModel>): number {
-    return activeCell.editorWidget.node.getBoundingClientRect().right;
+    return activeCell.editorWidget?.node.getBoundingClientRect().right ?? 0;
   }
 
   private _cellToolbarRect(activeCell: Cell<ICellModel>): DOMRect | null {
