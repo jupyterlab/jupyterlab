@@ -19,7 +19,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.4.x/CHANGELOG.md'
 ### Enhancements made
 
 - Get package name from pyproject if available [#13076](https://github.com/jupyterlab/jupyterlab/pull/13076) ([@blink1073](https://github.com/blink1073))
-- Backport PR #13057: Fix blurry icons in Launcher at 400% Zoom [#13065](https://github.com/jupyterlab/jupyterlab/pull/13065) ([@fcollonval](https://github.com/fcollonval))
+- Fix blurry icons in Launcher at 400% Zoom [#13065](https://github.com/jupyterlab/jupyterlab/pull/13065) ([@fcollonval](https://github.com/fcollonval))
 
 ### Bugs fixed
 
