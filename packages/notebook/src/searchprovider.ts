@@ -47,10 +47,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._onActiveCellChanged,
       this
     );
-    // this.widget.content.placeholderCellRendered.connect(
-    //   this._onPlaceholderRendered,
-    //   this
-    // );
   }
 
   /**
@@ -470,22 +466,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
     this._onSearchProviderChanged();
   }
-
-  // private _onPlaceholderRendered(
-  //   panel: Notebook,
-  //   renderedCell: Cell<ICellModel>
-  // ): void {
-  //   const index = panel.widgets.findIndex(cell => cell.id === renderedCell.id);
-  //   if (index >= 0) {
-  //     void this._onCellsChanged(panel.model!.cells, {
-  //       newIndex: index,
-  //       newValues: [renderedCell.model],
-  //       oldIndex: index,
-  //       oldValues: [renderedCell.model],
-  //       type: 'set'
-  //     });
-  //   }
-  // }
 
   private async _stepNext(
     reverse = false,
