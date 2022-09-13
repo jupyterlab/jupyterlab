@@ -75,17 +75,6 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     this._placeholder = new Widget({ node });
     this._placeholder.addClass('jp-MetadataForm-placeholder');
     layout.widget = this._placeholder;
-
-    // Build the form
-    this.buildWidget({
-      properties: builtProperties,
-      metadataKeys: metadataKeys,
-      uiSchema: this._uiSchema,
-      defaultValues: this._defaultValues,
-      translator: this.translator || null,
-      formData: null,
-      parent: this
-    });
   }
 
   /**
@@ -114,17 +103,24 @@ export class MetadataFormWidget extends NotebookTools.Tool {
   }
 
   /**
+   * Update the form when the widget is displayed.
+   */
+  protected onAfterShow(msg: Message): void {
+    this._update();
+  }
+
+  /**
    * Handle a change to the active cell.
    */
   protected onActiveCellChanged(msg: Message): void {
-    this._update();
+    if (this.isVisible) this._update();
   }
 
   /**
    * Handle a change to the active cell metadata.
    */
   protected onActiveCellMetadataChanged(msg: Message): void {
-    if (!this._updatingMetadata) this._update();
+    if (!this._updatingMetadata && this.isVisible) this._update();
   }
 
   /**
