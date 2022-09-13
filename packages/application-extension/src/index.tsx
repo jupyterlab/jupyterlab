@@ -746,24 +746,20 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
         // Add a layer of customization to support app shell mode
         const customizedLayout = settings.composite['layout'] as any;
 
-        void restorer.fetch().then(saved => {
-          labShell.restoreLayout(mode, saved, {
+        // Restore the layout.
+        labShell
+          .restoreLayout(mode, restorer, {
             'multiple-document': customizedLayout.multiple ?? {},
             'single-document': customizedLayout.single ?? {}
+          })
+          .then(() => {
+            labShell.layoutModified.connect(() => {
+              void restorer.save(labShell.saveLayout());
+            });
+
+            settings.changed.connect(onSettingsChanged);
+            Private.activateSidebarSwitcher(app, labShell, settings, trans);
           });
-
-          const unrestoredTrackers = restorer.unrestoredTracker;
-          unrestoredTrackers.forEach(tracker =>
-            labShell.addDelayedRestore(tracker)
-          );
-
-          labShell.layoutModified.connect(() => {
-            void restorer.save(labShell.saveLayout());
-          });
-
-          settings.changed.connect(onSettingsChanged);
-          Private.activateSidebarSwitcher(app, labShell, settings, trans);
-        });
       })
       .catch(reason => {
         console.error('Fail to load settings for the layout restorer.');

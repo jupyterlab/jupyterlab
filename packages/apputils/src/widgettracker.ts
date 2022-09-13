@@ -340,7 +340,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param options - The configuration options that describe restoration.
    *
    * ### Notes
-   * This function is useful when stating the shell in 'single-document' mode,
+   * This function is useful when starting the shell in 'single-document' mode,
    * to avoid restoring all useless widgets.
    */
   delayedRestore(options: IRestorable.IOptions<T>): void {

@@ -36,9 +36,25 @@ export interface ILayoutRestorer extends IRestorer {
   restored: Promise<void>;
 
   /**
+   * A boolean whether some tracker are still waiting for restoration.
+   * Useful in case the application has started in 'single-document' mode
+   * and the main area has not been restored.
+   */
+  hasUnrestoredTracker: boolean;
+
+  /**
    * Add a widget to be tracked by the layout restorer.
    */
   add(widget: Widget, name: string): void;
+
+  /**
+   * Fetch the layout state for the application.
+   *
+   * #### Notes
+   * Fetching the layout relies on all widget restoration to be complete, so
+   * calls to `fetch` are guaranteed to return after restoration is complete.
+   */
+  fetch(): Promise<ILabShell.ILayout>;
 
   /**
    * Restore the widgets of a particular widget tracker.
@@ -51,6 +67,15 @@ export interface ILayoutRestorer extends IRestorer {
     tracker: WidgetTracker<T>,
     options: IRestorer.IOptions<T>
   ): Promise<any>;
+
+  /**
+   * Restore the main area layout on demand.
+   * This happens when the application has started in 'single-document' mode
+   * (no main area widget loaded) and is switching to 'multiple-document' mode.
+   *
+   * @returns - the rehydrated main area.
+   */
+  restoreDelayed(): ILabShell.IMainArea | null;
 }
 
 /**
@@ -142,8 +167,13 @@ export class LayoutRestorer implements ILayoutRestorer {
     return this._restored.promise;
   }
 
-  get unrestoredTracker(): Array<WidgetTracker> {
-    return this._unrestoredTrackers;
+  /**
+   * A boolean whether some tracker are still waiting for restoration.
+   * Useful in case the application has started in 'single-document' mode
+   * and main area has not been restored.
+   */
+  get hasUnrestoredTracker(): boolean {
+    return this._unrestoredTrackers.length > 0;
   }
 
   /**
@@ -188,11 +218,11 @@ export class LayoutRestorer implements ILayoutRestorer {
       const fresh = false;
 
       // Rehydrate main area.
-      let mainArea = null;
-      if (this._mode !== 'single-document') {
+      let mainArea: ILabShell.IMainArea | null = null;
+      if (this._mode === 'multiple-document') {
         mainArea = this._rehydrateMainArea(main);
       } else {
-        mainArea = null;
+        this._delayedMainAreaLayout = main;
       }
 
       // Rehydrate down area.
@@ -300,6 +330,38 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
+   * Restore the main area layout on demand.
+   * This happens when the application has started in 'single-document' mode
+   * (no main area widget loaded) and is switching to 'multiple-document' mode.
+   *
+   * @returns - the rehydrated main area.
+   */
+  restoreDelayed(): ILabShell.IMainArea | null {
+    const promises = new Array<Promise<any>>();
+
+    // Restore all the main area widgets.
+    this._unrestoredTrackers.forEach(widgetsTracker =>
+      promises.push(widgetsTracker.restore())
+    );
+
+    // Rehydrate the main area layout.
+    let mainArea: ILabShell.IMainArea | null = null;
+    Promise.all(promises)
+      .then(() => {
+        this._unrestoredTrackers.length = 0;
+        if (this._delayedMainAreaLayout) {
+          mainArea = this._rehydrateMainArea(this._delayedMainAreaLayout);
+        }
+      })
+      .catch(reason => {
+        console.error('Fail to restore the layout with delay.');
+        console.error(reason);
+      });
+
+    return mainArea;
+  }
+
+  /**
    * Save the layout state for the application.
    */
   save(data: ILabShell.ILayout): Promise<void> {
@@ -311,7 +373,15 @@ export class LayoutRestorer implements ILayoutRestorer {
     }
 
     const dehydrated: Private.ILayout = {};
-    dehydrated.main = this._dehydrateMainArea(data.mainArea);
+
+    // Save the backup dehydrated main area layout if the main area has not been
+    // restored (application stated in 'single-document' mode).
+    if (!this.hasUnrestoredTracker) {
+      dehydrated.main = this._dehydrateMainArea(data.mainArea);
+    } else {
+      dehydrated.main = this._delayedMainAreaLayout;
+    }
+
     dehydrated.down = this._dehydrateDownArea(data.downArea);
     dehydrated.left = this._dehydrateSideArea(data.leftArea);
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
@@ -497,6 +567,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   private _widgets = new Map<string, Widget>();
   private _mode: DockPanel.Mode = 'multiple-document';
   private _unrestoredTrackers = new Array<WidgetTracker>();
+  private _delayedMainAreaLayout: Private.IMainArea | null | undefined = null;
 }
 
 /**

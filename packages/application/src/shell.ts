@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { WidgetTracker } from '@jupyterlab/apputils';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -31,6 +30,7 @@ import {
   Widget
 } from '@lumino/widgets';
 import { JupyterFrontEnd } from './frontend';
+import { ILayoutRestorer } from './layoutrestorer';
 
 /**
  * The class name added to AppShell instances.
@@ -612,21 +612,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
       // Restore the widgets not restored in first place because the shell
       // started in 'single-document' mode.
-      if (this._delayedRestore) {
+      if (this._layoutRestorer) {
         let currentDockWidget: Widget | null = null;
         if (widgets.length) {
           currentDockWidget = widgets[0];
         }
-        const promises = new Array<Promise<any>>();
-        this._delayedRestore.forEach(widgetsTracker =>
-          promises.push(widgetsTracker.restore())
-        );
-        Promise.all(promises).then(() => {
-          this._delayedRestore.length = 0;
-          if (currentDockWidget) {
-            this.activateById(currentDockWidget.id);
+        const mainArea = this._layoutRestorer.restoreDelayed();
+        if (mainArea) {
+          const { dock } = mainArea;
+          if (dock) {
+            this._dockPanel.restoreLayout(dock);
           }
-        });
+        }
+        if (currentDockWidget) {
+          this.activateById(currentDockWidget.id);
+        }
+        this._layoutRestorer = null;
       }
 
       // Add any widgets created during single document mode, which have
@@ -1058,14 +1059,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * #### Notes
    * This should only be called once.
    */
-  restoreLayout(
+  async restoreLayout(
     mode: DockPanel.Mode,
-    layout: ILabShell.ILayout,
+    layoutRestorer: ILayoutRestorer,
     configuration: {
       [m: string]: ILabShell.IUserLayout;
     } = {}
-  ): void {
-    // Set the configuration
+  ): Promise<void> {
+    // Set the configuration and add widgets added before the shell was ready.
     this._userLayout = {
       'single-document': configuration['single-document'] ?? {},
       'multiple-document': configuration['multiple-document'] ?? {}
@@ -1075,8 +1076,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     });
     this._delayedWidget.length = 0;
 
-    // Reset the layout
+    // Get the layout from the restorer
+    const layout = await layoutRestorer.fetch();
 
+    // Keep the restorer if some tracker has not been restored yet.
+    // Typically is the application has started in 'single-document' mode,
+    // and the main area has not been restored.
+    if (layoutRestorer.hasUnrestoredTracker) {
+      this._layoutRestorer = layoutRestorer;
+    }
+
+    // Reset the layout
     const { mainArea, downArea, leftArea, rightArea, topArea, relativeSizes } =
       layout;
 
@@ -1295,18 +1305,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
-  /**
-   * Add trackers that have not been restored when instantiating Layoutrestorer.
-   * The reason is that JupyterLab has started in 'single-document' mode, so no
-   * need to restore all the main area widgets.
-   *
-   * @param delayedRestore - tracker that has not been restored.
-   */
-  addDelayedRestore(delayedRestore: WidgetTracker): void {
-    if (this.mode === 'single-document') {
-      this._delayedRestore.push(delayedRestore);
-    }
-  }
   /**
    * Handle `after-attach` messages for the application shell.
    */
@@ -1724,7 +1722,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
   private _translator: ITranslator;
-  private _delayedRestore = new Array<WidgetTracker>();
+  private _layoutRestorer: ILayoutRestorer | null = null;
 }
 
 namespace Private {
