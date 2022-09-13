@@ -71,7 +71,10 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * Get the mime type of the document.
    */
   get mimeType(): string {
-    const codeMirrorMimeType = this.editor.model.mimeType;
+    const mimeTypeFromModel = this.editor.model.mimeType;
+    const codeMirrorMimeType: string = Array.isArray(mimeTypeFromModel)
+      ? mimeTypeFromModel[0] ?? 'text/plain'
+      : mimeTypeFromModel;
     const contentsModel = this.editor.context.contentsModel;
 
     // when MIME type is not known it defaults to 'text/plain',

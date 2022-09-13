@@ -59,12 +59,15 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * Get the mime type of the document.
    */
   get mimeType(): string {
+    let mimeType: string | string[];
     let languageMetadata = this.language_info();
     if (!languageMetadata || !languageMetadata.mimetype) {
       // fallback to the code cell mime type if no kernel in use
-      return this.widget.content.codeMimetype;
+      mimeType = this.widget.content.codeMimetype;
+    } else {
+      mimeType = languageMetadata.mimetype;
     }
-    return languageMetadata.mimetype;
+    return Array.isArray(mimeType) ? mimeType[0] ?? 'text/plain' : mimeType;
   }
 
   /**
