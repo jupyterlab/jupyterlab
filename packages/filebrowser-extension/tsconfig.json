@@ -25,6 +25,9 @@
       "path": "../filebrowser"
     },
     {
+      "path": "../launcher"
+    },
+    {
       "path": "../services"
     },
     {
@@ -41,9 +44,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../launcher"
     }
   ]
 }
