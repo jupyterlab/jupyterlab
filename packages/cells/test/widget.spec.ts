@@ -27,6 +27,8 @@ import {
   NBTestUtils,
   signalToPromise
 } from '@jupyterlab/testutils';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
 const rendermime = NBTestUtils.defaultRenderMime();
@@ -143,25 +145,31 @@ describe('cells/widget', () => {
         const model = new CellModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(widget.model).toEqual(model);
       });
     });
 
     describe('#editorWidget', () => {
       it('should be a code editor widget', () => {
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(widget.editorWidget).toBeInstanceOf(CodeEditorWrapper);
       });
     });
 
     describe('#editor', () => {
       it('should be a cell editor', () => {
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
-        expect(widget.editor.uuid).toBeTruthy();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
+        expect(widget.editor!.uuid).toBeTruthy();
       });
     });
 
@@ -177,14 +185,18 @@ describe('cells/widget', () => {
 
     describe('#readOnly', () => {
       it('should be a boolean', () => {
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(typeof widget.readOnly).toEqual('boolean');
       });
 
       it('should default to false', () => {
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(widget.readOnly).toEqual(false);
       });
 
@@ -247,8 +259,10 @@ describe('cells/widget', () => {
         const model = new CellModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(widget.readOnly).toEqual(false);
 
         widget.readOnly = true;
@@ -267,8 +281,10 @@ describe('cells/widget', () => {
         const model = new CellModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(widget.syncEditable).toEqual(false);
         expect(widget.readOnly).toEqual(false);
 
@@ -302,8 +318,10 @@ describe('cells/widget', () => {
         const model = new CellModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(widget.inputHidden).toEqual(false);
 
         model.metadata.set('jupyter', { source_hidden: true });
@@ -321,8 +339,10 @@ describe('cells/widget', () => {
         const model = new CellModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(widget.inputHidden).toEqual(false);
 
         widget.inputHidden = true;
@@ -343,8 +363,10 @@ describe('cells/widget', () => {
         const model = new CellModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
-        const widget = new Cell({ model,
-          placeholder: false }).initializeState();
+        const widget = new Cell({
+          model,
+          placeholder: false
+        }).initializeState();
         expect(widget.syncCollapse).toEqual(false);
         expect(widget.inputHidden).toEqual(false);
 
@@ -968,8 +990,11 @@ describe('cells/widget', () => {
     describe('#constructor()', () => {
       it('should create a raw cell widget', () => {
         const model = new RawCellModel();
-        const widget = new RawCell({ model, contentFactory,
-          placeholder: false }).initializeState();
+        const widget = new RawCell({
+          model,
+          contentFactory,
+          placeholder: false
+        }).initializeState();
         expect(widget).toBeInstanceOf(RawCell);
       });
     });

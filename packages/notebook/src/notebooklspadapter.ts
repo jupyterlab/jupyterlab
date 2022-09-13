@@ -98,7 +98,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       return {
         ceEditor: this._getCellEditor(cell),
         type: cell.model.type,
-        value: cell.model.value.text
+        value: cell.model.sharedModel.getSource()
       };
     });
   }

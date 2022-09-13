@@ -492,7 +492,7 @@ export namespace AttachmentsCellModel {
  */
 export class RawCellModel extends AttachmentsCellModel {
   /**
-   * Construct a markdown cell model from optional shared model.
+   * Construct a raw cell model from optional shared model.
    */
   constructor(options: AttachmentsCellModel.IOptions<ISharedRawCell> = {}) {
     super({

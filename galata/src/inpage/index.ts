@@ -539,7 +539,7 @@ export class GalataInpage implements IGalataInpage {
           for (const cell of nb.model.cells) {
             if (cell.type === 'code') {
               counter +=
-                cell.value.text.length > 0 &&
+                cell.sharedModel.getSource().length > 0 &&
                 (cell as CodeCellModel).executionCount === null
                   ? 1
                   : 0;
@@ -549,7 +549,7 @@ export class GalataInpage implements IGalataInpage {
           const cell = nb.model.cells.get(cellIndex);
           if (cell?.type === 'code') {
             counter +=
-              cell.value.text.length > 0 &&
+              cell.sharedModel.getSource().length > 0 &&
               (cell as CodeCellModel).executionCount === null
                 ? 1
                 : 0;

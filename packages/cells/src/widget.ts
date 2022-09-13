@@ -1855,7 +1855,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (!this._headingsCache) {
       // Use table of content algorithm for consistency
       const headings = TableOfContentsUtils.Markdown.getHeadings(
-        this.model.value.text
+        this.model.sharedModel.getSource()
       );
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
@@ -2102,8 +2102,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (!this.placeholder && !this.isDisposed) {
       this.inputArea!.showEditor();
       // if this is going to be a heading, place the cursor accordingly
-      let numHashAtStart = (this.model.sharedModel.getSource().match(/^#+/g) || [''])[0]
-        .length;
+      let numHashAtStart = (this.model.sharedModel
+        .getSource()
+        .match(/^#+/g) || [''])[0].length;
       if (numHashAtStart > 0) {
         this.inputArea!.editor.setCursorPosition({
           column: numHashAtStart + 1,

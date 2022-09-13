@@ -116,7 +116,7 @@ export class DebuggerSources implements IDebugger.ISources {
           Object.freeze({
             get: () => cell.editor,
             reveal: () => notebook.scrollToItem(i),
-            src: cell.model.value
+            src: cell.model.sharedModel
           })
         );
       });
@@ -161,7 +161,7 @@ export class DebuggerSources implements IDebugger.ISources {
             get: () => cell.editor,
             reveal: () =>
               Promise.resolve(this._shell.activateById(consoleWidget.id)),
-            src: cell.model.value
+            src: cell.model.sharedModel
           })
         );
 
@@ -210,7 +210,7 @@ export class DebuggerSources implements IDebugger.ISources {
         Object.freeze({
           get: () => editor,
           reveal: () => Promise.resolve(this._shell.activateById(doc.id)),
-          src: fileEditor.model.value
+          src: fileEditor.model.sharedModel
         })
       );
 
@@ -251,7 +251,7 @@ export class DebuggerSources implements IDebugger.ISources {
         Object.freeze({
           get: () => editor,
           reveal: () => Promise.resolve(this._shell.activateById(widget.id)),
-          src: editor.model.value
+          src: editor.model.sharedModel
         })
       );
       if (focus) {

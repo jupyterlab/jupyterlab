@@ -3,9 +3,9 @@
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { IObservableString } from '@jupyterlab/observables';
-
 import { KernelMessage, Session } from '@jupyterlab/services';
+
+import { ISharedText } from '@jupyterlab/shared-models';
 
 import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 
@@ -712,7 +712,7 @@ export namespace IDebugger {
       /**
        * Editor source text
        */
-      src: IObservableString;
+      src: ISharedText;
     }
 
     /**

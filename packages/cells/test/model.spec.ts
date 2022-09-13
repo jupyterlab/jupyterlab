@@ -63,26 +63,20 @@ describe('cells/model', () => {
         expect(model.sharedModel.getSource()).toBe('foo\n\nbar\n\nbaz');
       });
 
-      it('should use the id argument', () => {
-        const sharedModel = createStandaloneCell({
-          cell_type: 'raw',
-          source: ['foo\n', 'bar\n', 'baz'],
-          metadata: { trusted: false },
-          id: 'my_id'
-        });
-        const model = new CellModel({ sharedModel });
-        expect(model).toBeInstanceOf(CellModel);
-        expect(model.id).toBe('my_id');
-      });
-
-      it('should use the cell id if an id is not supplied', () => {
+      it('should use the cell id if an id is supplied', () => {
         const sharedModel = createStandaloneCell({
           cell_type: 'raw',
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false },
           id: 'cell_id'
         });
-        const model = new CellModel({ sharedModel });
+        const model = new CellModel({ sharedModel, id: 'my_id' });
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.id).toBe('cell_id');
+      });
+
+      it('should use the id if an cell is not supplied', () => {
+        const model = new CellModel({ id: 'cell_id' });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id).toBe('cell_id');
       });
@@ -291,7 +285,7 @@ describe('cells/model', () => {
         const model = new CellModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
-        expect(toArray(model.metadata.keys())).toHaveLength(0);
+        expect(Array.from(model.metadata.keys())).toHaveLength(0);
         model.metadata.set('foo', 1);
         expect(model.metadata.keys()).toEqual(['foo']);
       });

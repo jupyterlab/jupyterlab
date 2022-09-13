@@ -565,15 +565,14 @@ export class StaticNotebook extends WindowedList {
               index + offset,
               this.model!.cells.get(index + offset),
               insertType
-            );          
-          });
-            this._updateDataWindowedListIndex(
-              index,
-              this.model!.cells.length,
-              delta.insert.length
             );
-            index += delta.insert.length;
-
+          });
+          this._updateDataWindowedListIndex(
+            index,
+            this.model!.cells.length,
+            delta.insert.length
+          );
+          index += delta.insert.length;
         } else if (delta.delete != null) {
           for (let i = 0; i < delta.delete; i++) {
             this._removeCell(index);
@@ -641,19 +640,6 @@ export class StaticNotebook extends WindowedList {
     ArrayExt.insert(this.cellsArray, index, widget);
     this.onCellInserted(index, widget);
 
-  private _renderPlaceholderCells(deadline: any) {
-    if (this.notebookConfig.remainingTimeBeforeRescheduling > 0) {
-      const timeRemaining = deadline.timeRemaining();
-      // In case this got triggered because of timeout or when there are screen updates (https://w3c.github.io/requestidlecallback/#idle-periods),
-      // avoiding the render and rescheduling the place holder cell rendering.
-      if (
-        deadline.didTimeout ||
-        timeRemaining < this.notebookConfig.remainingTimeBeforeRescheduling
-      ) {
-        if (this._idleCallBack) {
-          window.cancelIdleCallback(this._idleCallBack);
-          this._idleCallBack = null;
-        }
     this._scheduleCellRenderOnIdle();
   }
 
@@ -1235,7 +1221,7 @@ export class Notebook extends StaticNotebook {
   protected _onCellsChanged(
     sender: sharedModels.ISharedNotebook,
     args: sharedModels.NotebookChange
-   ):void {
+  ): void {
     const activeCellId = args.cellsChange && this.activeCell?.model.id;
     super._onCellsChanged(sender, args);
     if (activeCellId) {
@@ -2379,13 +2365,13 @@ export class Notebook extends StaticNotebook {
       // Move the cells one by one
       model.sharedModel.transact(() => {
         if (fromIndex < toIndex) {
-        for (let length = toMove.length; length > 0; length--) {
+          for (let length = toMove.length; length > 0; length--) {
             model.sharedModel.moveCell(fromIndex, toIndex);
-        }
+          }
         } else if (fromIndex > toIndex) {
-        for (let length = toMove.length; length > 0; length--) {
+          for (let length = toMove.length; length > 0; length--) {
             model.sharedModel.moveCell(fromIndex++, toIndex++);
-        }
+          }
         }
       });
     } else {

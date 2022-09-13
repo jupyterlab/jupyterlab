@@ -834,7 +834,7 @@ const main: JupyterFrontEndPlugin<void> = {
           editorReady: () => Promise.resolve(editor),
           getEditor: () => editor,
           path,
-          src: editor.model.value
+          src: editor.model.sharedModel
         });
         editorWrapper.disposed.connect(() => editorHandler.dispose());
 

@@ -56,7 +56,7 @@ export class CellList {
         }
       }
     });
-    for(const cell of cellModels){
+    for (const cell of cellModels) {
       this._cellMap.set(cell.id, cell);
       this._cellOrder.insert(index++, cell.id);
     }

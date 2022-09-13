@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
+import { NotebookModel } from '@jupyterlab/notebook';
 import { createCell } from '@jupyterlab/shared-models';
 import { acceptDialog } from '@jupyterlab/testutils';
-import { findIndex } from '@lumino/algorithm';
-import { NotebookModel } from '..';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {

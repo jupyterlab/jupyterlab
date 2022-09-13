@@ -112,7 +112,7 @@ export class SourcesBody extends Widget {
       editorReady: () => Promise.resolve(this._editor.editor),
       getEditor: () => this._editor.editor,
       path,
-      src: this._editor.model.value
+      src: this._editor.model.sharedModel
     });
 
     this._model.currentSource = {

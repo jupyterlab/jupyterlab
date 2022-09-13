@@ -1286,7 +1286,7 @@ describe('@jupyter/notebook', () => {
           expect(widget.mode).toBe('edit');
         });
 
-        it('should remove selection and switch to command mode',async () => {
+        it('should remove selection and switch to command mode', async () => {
           widget.model!.sharedModel.insertCells(0, [
             createCell({ cell_type: 'code' }),
             createCell({ cell_type: 'markdown', source: '# Hello' })

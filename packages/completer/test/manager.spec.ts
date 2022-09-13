@@ -184,7 +184,8 @@ describe('completer/manager', () => {
         const cell = new Cell({
           model: new CellModel({
             sharedModel: createStandaloneCell({ cell_type: 'code' })
-          }), placeholder: false
+          }),
+          placeholder: false
         });
         const newCompleterContext = {
           editor: cell.editor,

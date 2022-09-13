@@ -28,7 +28,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { INotebookTools, INotebookTracker } from './tokens';
-import { createStandaloneCell, ISharedText } from '@jupyterlab/shared-models';
+import { ISharedText } from '@jupyterlab/shared-models';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
@@ -453,14 +453,8 @@ export namespace NotebookTools {
       const activeCell = this.notebookTools.activeCell;
 
       if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.sharedModel.changed.disconnect(
-          this.refresh,
-          this
-        );
-        this._cellModel.mimeTypeChanged.disconnect(
-          this.refresh,
-          this
-        );
+        this._cellModel.sharedModel.changed.disconnect(this.refresh, this);
+        this._cellModel.mimeTypeChanged.disconnect(this.refresh, this);
       }
       if (!activeCell) {
         this._cellModel = null;
@@ -468,13 +462,10 @@ export namespace NotebookTools {
       }
       const cellModel = (this._cellModel = activeCell.model);
       (cellModel.sharedModel as ISharedText).changed.connect(
-        this._onValueChanged,
+        this.refresh,
         this
       );
-      cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-      this._model.sharedModel.setSource(
-        cellModel.sharedModel.getSource().split('\n')[0]
-      );
+      cellModel.mimeTypeChanged.connect(this.refresh, this);
       await this.refresh();
     }
 
@@ -494,7 +485,7 @@ export namespace NotebookTools {
             Mode.findByMIME('text/plain')!
         );
         Mode.run(
-          this._cellModel.value.text.split('\n')[0],
+          this._cellModel.sharedModel.getSource().split('\n')[0],
           spec!,
           this._editorEl
         );

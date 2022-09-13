@@ -47,7 +47,6 @@
     "@jupyterlab/apputils": "^4.0.0-alpha.13",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.13",
     "@jupyterlab/coreutils": "^6.0.0-alpha.13",
-    "@jupyterlab/observables": "^5.0.0-alpha.13",
     "@jupyterlab/rendermime": "^4.0.0-alpha.13",
     "@jupyterlab/services": "^7.0.0-alpha.13",
     "@jupyterlab/shared-models": "^4.0.0-alpha.13",
