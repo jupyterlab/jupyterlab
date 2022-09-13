@@ -170,7 +170,7 @@ exclude = [
 ]
 
 [tool.hatch.build.hooks.jupyter-builder]
-dependencies = ["hatch-jupyter-builder>=0.3.2"]
+dependencies = ["hatch-jupyter-builder>=0.3.2,<0.6.0"]
 build-function = "buildapi.builder"
 ensured-targets = [
     "jupyterlab/static/package.json",
