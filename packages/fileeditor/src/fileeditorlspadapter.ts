@@ -10,6 +10,7 @@ import {
   VirtualDocument,
   WidgetLSPAdapter
 } from '@jupyterlab/lsp';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 import { FileEditor } from './widget';
 
@@ -39,15 +40,25 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
       reveal: () => Promise.resolve(this.editor.editor)
     });
 
-    this._ready = new Promise<void>((resolve, reject) => {
-      this.initOnceReady().then(resolve).catch(reject);
-    });
+    Promise.all([this.editor.context.ready, this.connectionManager.ready])
+      .then(async () => {
+        await this.initOnceReady();
+        this._readyDelegate.resolve();
+      })
+      .catch(console.error);
   }
 
   /**
    * The wrapped `FileEditor` widget.
    */
-  readonly editor: FileEditor;
+  editor: FileEditor;
+
+  /**
+   * Promise that resolves once the adapter is initialized
+   */
+  get ready(): Promise<void> {
+    return this._readyDelegate.promise;
+  }
 
   /**
    * Get current path of the document.
@@ -130,6 +141,14 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   }
 
   /**
+   * Dispose the widget.
+   */
+  dispose(): void {
+    this.editor.model.mimeTypeChanged.disconnect(this.reloadConnection);
+    super.dispose();
+  }
+
+  /**
    * Generate the virtual document associated with the document.
    */
   createVirtualDocument(): VirtualDocument {
@@ -182,15 +201,11 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * connect various signals.
    */
   protected async initOnceReady(): Promise<void> {
-    if (!this.editor.context.isReady) {
-      await this.editor.context.ready;
-    }
-    await this.connectionManager.ready;
     this.initVirtual();
 
     // connect the document, but do not open it as the adapter will handle this
     // after registering all features
-    this.connectDocument(this.virtualDocument, false).catch(console.warn);
+    await this.connectDocument(this.virtualDocument, false);
 
     this.editor.model.mimeTypeChanged.connect(this.reloadConnection, this);
   }
@@ -200,4 +215,5 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    */
   private readonly _docRegistry: DocumentRegistry;
   private readonly _virtualEditor: Document.IEditor;
+  private _readyDelegate = new PromiseDelegate<void>();
 }

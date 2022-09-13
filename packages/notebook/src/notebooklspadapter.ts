@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Signal } from '@lumino/signaling';
 import { SessionContext } from '@jupyterlab/apputils';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import {
@@ -15,6 +14,8 @@ import {
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList } from '@jupyterlab/observables';
 import { Session } from '@jupyterlab/services';
+import { PromiseDelegate } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
@@ -31,9 +32,15 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     this._editorToCell = new Map();
     this.editor = editorWidget.content;
     this._cellToEditor = new WeakMap();
-    this._ready = new Promise<void>((resolve, reject) => {
-      this.initOnceReady().then(resolve).catch(reject);
-    });
+    Promise.all([
+      this.widget.context.sessionContext.ready,
+      this.connectionManager.ready
+    ])
+      .then(async () => {
+        await this.initOnceReady();
+        this._readyDelegate.resolve();
+      })
+      .catch(console.error);
   }
 
   /**
@@ -110,6 +117,13 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     return this.editor.activeCell
       ? this._getCellEditor(this.editor.activeCell)
       : undefined;
+  }
+
+  /**
+   * Promise that resolves once the adapter is initialized
+   */
+  get ready(): Promise<void> {
+    return this._readyDelegate.promise;
   }
 
   /**
@@ -329,8 +343,6 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * connect various signals.
    */
   protected async initOnceReady(): Promise<void> {
-    await this.widget.context.sessionContext.ready;
-    await this.connectionManager.ready;
     await untilReady(this.isReady.bind(this), -1);
     await this._updateLanguageInfo();
     this.initVirtual();
@@ -470,4 +482,6 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   private _languageInfo: ILanguageInfoMetadata;
 
   private _type: nbformat.CellType = 'code';
+
+  private _readyDelegate = new PromiseDelegate<void>();
 }

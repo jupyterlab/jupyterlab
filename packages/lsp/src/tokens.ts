@@ -719,8 +719,7 @@ export interface IClientResult {
 export type ServerNotifications<
   T extends keyof IServerNotifyParams = keyof IServerNotifyParams
 > = {
-  readonly // ISignal does not have emit, which is intended - client cannot emit server notifications.
-  [key in T]: ISignal<ILSPConnection, IServerNotifyParams[key]>;
+  readonly [key in T]: ISignal<ILSPConnection, IServerNotifyParams[key]>;
 };
 
 /**
@@ -730,8 +729,7 @@ export type ServerNotifications<
 export type ClientNotifications<
   T extends keyof IClientNotifyParams = keyof IClientNotifyParams
 > = {
-  readonly // Signal has emit.
-  [key in T]: Signal<ILSPConnection, IClientNotifyParams[key]>;
+  readonly [key in T]: Signal<ILSPConnection, IClientNotifyParams[key]>;
 };
 
 /**

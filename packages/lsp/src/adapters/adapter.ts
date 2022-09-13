@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import mergeWith from 'lodash.mergewith';
+
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
@@ -11,7 +13,6 @@ import {
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import mergeWith from 'lodash.mergewith';
 
 import { ClientCapabilities, LanguageIdentifier } from '../lsp';
 import { IVirtualPosition } from '../positioning';
@@ -201,6 +202,11 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   abstract get editors(): Document.ICodeBlockOptions[];
 
   /**
+   * Promise that resolves once the adapter is initialized
+   */
+  abstract get ready(): Promise<void>;
+
+  /**
    * The virtual document is connected or not
    */
   get isConnected(): boolean {
@@ -226,13 +232,6 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    */
   get updateFinished(): Promise<void> {
     return this._updateFinished;
-  }
-
-  /**
-   * Promise that resolves once the adapter is initialized
-   */
-  get ready(): Promise<void> {
-    return this._ready;
   }
 
   /**
@@ -268,7 +267,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     this.widget.context.saveState.disconnect(this.onSaveState, this);
     this.connectionManager.closed.disconnect(this.onConnectionClosed, this);
     this.widget.disposed.disconnect(this.dispose, this);
-
+    this.virtualDocument.changed.disconnect(this.documentChanged);
     this.disconnect();
     this._disposed.emit();
     Signal.clearData(this);
@@ -279,10 +278,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    */
   disconnect(): void {
     this.connectionManager.unregisterDocument(this.virtualDocument);
-    this.widget.context.model.contentChanged.disconnect(
-      this._onContentChanged,
-      this
-    );
+    this.widget.context.model.contentChanged.disconnect(this._onContentChanged);
 
     // pretend that all editors were removed to trigger the disconnection of even handlers
     // they will be connected again on new connection
@@ -438,12 +434,6 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     // refresh the document on the LSP server
     this.documentChanged(virtualDocument, virtualDocument, true);
 
-    // Note: the logger extension behaves badly with non-default names
-    // as it changes the source to the active file afterwards anyways
-    // const loggerSourceName = virtualDocument.uri;
-    let log: (text: string) => void;
-    log = (text: string) => console.log(text);
-
     data.connection.serverNotifications['$/logTrace'].connect(
       (connection, message) => {
         console.log(
@@ -457,7 +447,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
 
     data.connection.serverNotifications['window/logMessage'].connect(
       (connection, message) => {
-        log(connection.serverIdentifier + ': ' + message.message);
+        console.log(connection.serverIdentifier + ': ' + message.message);
       }
     );
 
@@ -604,6 +594,13 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
 
   private _isDisposed = false;
 
+  private readonly _connectionManager: ILSPDocumentConnectionManager;
+  private readonly _trans: TranslationBundle;
+
+  private _isConnected: boolean;
+  private _updateFinished: Promise<void>;
+  private _virtualDocument: VirtualDocument;
+
   /**
    * Callback called when a foreign document is closed,
    * the associated signals with this virtual document
@@ -704,12 +701,4 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     this._updateFinished = promise.catch(console.warn);
     await this.updateFinished;
   }
-
-  protected _ready: Promise<void>;
-
-  private _connectionManager: ILSPDocumentConnectionManager;
-  private _isConnected: boolean;
-  private _trans: TranslationBundle;
-  private _updateFinished: Promise<void>;
-  private _virtualDocument: VirtualDocument;
 }
