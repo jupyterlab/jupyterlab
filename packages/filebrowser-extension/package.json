@@ -43,6 +43,7 @@
     "@jupyterlab/docmanager": "^4.0.0-alpha.15",
     "@jupyterlab/docregistry": "^4.0.0-alpha.15",
     "@jupyterlab/filebrowser": "^4.0.0-alpha.15",
+    "@jupyterlab/launcher": "^4.0.0-alpha.15",
     "@jupyterlab/services": "^7.0.0-alpha.15",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.15",
     "@jupyterlab/statedb": "^4.0.0-alpha.15",

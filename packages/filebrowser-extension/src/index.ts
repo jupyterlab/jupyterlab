@@ -1307,7 +1307,7 @@ namespace Private {
             dontShowBrowser: true
           });
           if (widget !== undefined) {
-            for( let w of app.shell.widgets('main')) {
+            for (let w of app.shell.widgets('main')) {
               if ((w as MainAreaWidget).content instanceof Launcher) {
                 w.dispose();
               }
