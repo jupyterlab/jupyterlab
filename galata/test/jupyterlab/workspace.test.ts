@@ -126,12 +126,14 @@ test.describe('Workspace', () => {
     tmpPath
   }) => {
     await Promise.all([
-      // Wait for the workspace to be saved
+      // Wait for the workspace to be saved.
+      // The document opened for URL should not be saved in workspace anymore,
+      // to not change the workspace for 'multiple-document' mode.
       page.waitForResponse(
         response =>
           response.request().method() === 'PUT' &&
           /api\/workspaces/.test(response.request().url()) &&
-          response.request().postDataJSON().data[`editor:${tmpPath}/${mdFile}`]
+          response.request().postDataJSON().data['layout-restorer:data']
       ),
       page.goto(`${baseURL}/doc/tree/${tmpPath}/${mdFile}`)
     ]);
