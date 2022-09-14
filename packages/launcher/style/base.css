@@ -171,6 +171,9 @@
 .jp-Launcher-kernelIcon {
   width: var(--jp-private-launcher-large-icon-size);
   height: var(--jp-private-launcher-large-icon-size);
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
+
+  /* Preserve image aspect ratio */
+  object-fit: contain;
 }
