@@ -726,6 +726,12 @@ const main: JupyterFrontEndPlugin<void> = {
       commands.notifyCommandChanged();
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
+      } else if (
+        labShell &&
+        sidebar.isVisible &&
+        event.event === 'terminated'
+      ) {
+        labShell.collapseRight();
       }
     });
 
