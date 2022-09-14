@@ -747,7 +747,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
         const customizedLayout = settings.composite['layout'] as any;
 
         // Restore the layout.
-        labShell
+        void labShell
           .restoreLayout(mode, restorer, {
             'multiple-document': customizedLayout.multiple ?? {},
             'single-document': customizedLayout.single ?? {}
