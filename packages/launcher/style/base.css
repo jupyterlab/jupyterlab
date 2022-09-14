@@ -176,4 +176,6 @@
   height: var(--jp-private-launcher-large-icon-size);
   margin: 0;
   padding: 0;
+  /* Preserve image aspect ratio */
+  object-fit: contain;
 }
