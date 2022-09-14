@@ -32,12 +32,6 @@
   justify-content: flex-end;
 }
 
-.jp-RunningSessions .lm-AccordionPanel-titleLabel {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
 .jp-RunningSessions-section {
   min-height: 50px;
   overflow: auto;
@@ -105,7 +99,6 @@
 }
 
 .jp-RunningSessions-shutdownAll.jp-mod-styled > span {
-  margin: 0 8px;
   color: var(--jp-warn-color1);
   background-color: transparent;
   border-radius: 2px;
