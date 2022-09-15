@@ -38,9 +38,9 @@
   },
   "dependencies": {
     "@jupyterlab/nbformat": "^4.0.0-alpha.13",
-    "@lumino/coreutils": "^2.0.0-alpha.1",
-    "@lumino/disposable": "^2.0.0-alpha.1",
-    "@lumino/signaling": "^2.0.0-alpha.1",
+    "@lumino/coreutils": "^2.0.0-alpha.6",
+    "@lumino/disposable": "^2.0.0-alpha.6",
+    "@lumino/signaling": "^2.0.0-alpha.6",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.34"
   },
