@@ -46,9 +46,9 @@
     "@jupyterlab/settingregistry": "^4.0.0-alpha.13",
     "@jupyterlab/translation": "^4.0.0-alpha.13",
     "@jupyterlab/ui-components": "^4.0.0-alpha.28",
-    "@lumino/coreutils": "^2.0.0-alpha.5",
-    "@lumino/polling": "^2.0.0-alpha.5",
-    "@lumino/signaling": "^2.0.0-alpha.5",
+    "@lumino/coreutils": "^2.0.0-alpha.6",
+    "@lumino/polling": "^2.0.0-alpha.6",
+    "@lumino/signaling": "^2.0.0-alpha.6",
     "@rjsf/core": "^3.1.0",
     "react": "^17.0.1"
   },

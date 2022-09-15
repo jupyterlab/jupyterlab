@@ -43,11 +43,11 @@
     "@jupyterlab/rendermime": "^4.0.0-alpha.13",
     "@jupyterlab/services": "^7.0.0-alpha.13",
     "@jupyterlab/translation": "^4.0.0-alpha.13",
-    "@lumino/coreutils": "^2.0.0-alpha.5",
-    "@lumino/disposable": "^2.0.0-alpha.5",
-    "@lumino/messaging": "^2.0.0-alpha.5",
-    "@lumino/signaling": "^2.0.0-alpha.5",
-    "@lumino/widgets": "^2.0.0-alpha.5"
+    "@lumino/coreutils": "^2.0.0-alpha.6",
+    "@lumino/disposable": "^2.0.0-alpha.6",
+    "@lumino/messaging": "^2.0.0-alpha.6",
+    "@lumino/signaling": "^2.0.0-alpha.6",
+    "@lumino/widgets": "^2.0.0-alpha.6"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.13",
