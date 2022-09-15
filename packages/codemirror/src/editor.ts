@@ -252,7 +252,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     );
 
     // every time the model is switched, we need to re-initialize the editor binding
-    this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
+    this.model.sharedModelSwitched.connect(() => {
+      this._initializeEditorBinding();
+      Private.updateEditor(
+        this._editor,
+        fullConfig,
+        this._yeditorBinding,
+        this._editorConfig,
+        [
+          this._markField,
+          Prec.high(domEventHandlers),
+          updateListener,
+          translation
+        ]
+      );
+    }, this);
 
     this._onMimeTypeChanged();
     this._onCursorActivity();
@@ -1187,13 +1201,12 @@ export namespace CodeMirrorEditor {
  * The namespace for module private data.
  */
 namespace Private {
-  export function createEditor(
-    host: HTMLElement,
+  export function createEditorState(
     config: CodeMirrorEditor.IConfig,
     ybinding: IYCodeMirrorBinding | null,
     editorConfig: Configuration.EditorConfiguration,
     additionalExtensions: Extension[]
-  ): EditorView {
+  ): EditorState {
     const extensions = editorConfig.getInitialExtensions(config);
     if (ybinding) {
       extensions.push(
@@ -1204,11 +1217,26 @@ namespace Private {
     }
     extensions.push(...additionalExtensions);
     const doc = ybinding?.text.toString();
+    return EditorState.create({
+      doc,
+      extensions: extensions
+    });
+  }
+
+  export function createEditor(
+    host: HTMLElement,
+    config: CodeMirrorEditor.IConfig,
+    ybinding: IYCodeMirrorBinding | null,
+    editorConfig: Configuration.EditorConfiguration,
+    additionalExtensions: Extension[]
+  ): EditorView {
     const view = new EditorView({
-      state: EditorState.create({
-        doc,
-        extensions
-      }),
+      state: createEditorState(
+        config,
+        ybinding,
+        editorConfig,
+        additionalExtensions
+      ),
       parent: host
     });
 
@@ -1217,6 +1245,18 @@ namespace Private {
     }
 
     return view;
+  }
+
+  export function updateEditor(
+    editor: EditorView,
+    config: CodeMirrorEditor.IConfig,
+    ybinding: IYCodeMirrorBinding | null,
+    editorConfig: Configuration.EditorConfiguration,
+    additionalExtensions: Extension[]
+  ): void {
+    editor.setState(
+      createEditorState(config, ybinding, editorConfig, additionalExtensions)
+    );
   }
 
   export interface ISelectionText {
