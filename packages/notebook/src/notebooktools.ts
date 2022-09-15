@@ -24,6 +24,7 @@ import {
 } from '@lumino/coreutils';
 import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
 import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
+import { Debouncer } from '@lumino/polling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
@@ -444,6 +445,33 @@ export namespace NotebookTools {
       container.className = 'jp-Cell-Content';
       this._editorEl = editor;
       (this.layout as PanelLayout).addWidget(new Widget({ node }));
+
+      const update = async () => {
+        this._editorEl.innerHTML = '';
+        if (this._cellModel?.type === 'code') {
+          this._inputPrompt.executionCount = `${
+            (this._cellModel as CodeCellModel).executionCount ?? ''
+          }`;
+          this._inputPrompt.show();
+        } else {
+          this._inputPrompt.executionCount = null;
+          this._inputPrompt.hide();
+        }
+
+        if (this._cellModel) {
+          const spec = await Mode.ensure(
+            Mode.findByMIME(this._cellModel.mimeType) ??
+              Mode.findByMIME('text/plain')!
+          );
+          Mode.run(
+            this._cellModel.sharedModel.getSource().split('\n')[0],
+            spec!,
+            this._editorEl
+          );
+        }
+      };
+
+      this._refreshDebouncer = new Debouncer(update);
     }
 
     /**
@@ -470,31 +498,13 @@ export namespace NotebookTools {
     }
 
     protected async refresh(): Promise<void> {
-      this._editorEl.innerHTML = '';
-      if (this._cellModel?.type === 'code') {
-        this._inputPrompt.executionCount = `${
-          (this._cellModel as CodeCellModel).executionCount ?? ''
-        }`;
-      } else {
-        this._inputPrompt.executionCount = null;
-      }
-
-      if (this._cellModel) {
-        const spec = await Mode.ensure(
-          Mode.findByMIME(this._cellModel.mimeType) ??
-            Mode.findByMIME('text/plain')!
-        );
-        Mode.run(
-          this._cellModel.sharedModel.getSource().split('\n')[0],
-          spec!,
-          this._editorEl
-        );
-      }
+      await this._refreshDebouncer.invoke();
     }
 
     private _cellModel: ICellModel | null;
     private _editorEl: HTMLPreElement;
     private _inputPrompt: InputPrompt;
+    private _refreshDebouncer: Debouncer<void, void, null[]>;
   }
 
   /**
