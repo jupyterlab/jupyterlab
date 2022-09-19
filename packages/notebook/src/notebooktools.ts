@@ -440,6 +440,7 @@ export namespace NotebookTools {
 
       // First code line container
       const node = document.createElement('div');
+      node.classList.add('jp-ActiveCell-Content');
       const container = node.appendChild(document.createElement('div'));
       const editor = container.appendChild(document.createElement('pre'));
       container.className = 'jp-Cell-Content';
@@ -460,18 +461,17 @@ export namespace NotebookTools {
 
         if (this._cellModel) {
           const spec = await Mode.ensure(
-            Mode.findByMIME(this._cellModel.mimeType) ??
-              Mode.findByMIME('text/plain')!
+            Mode.findByMIME(this._cellModel.mimeType) ?? 'text/plain'
           );
           Mode.run(
             this._cellModel.sharedModel.getSource().split('\n')[0],
-            spec!,
+            spec,
             this._editorEl
           );
         }
       };
 
-      this._refreshDebouncer = new Debouncer(update);
+      this._refreshDebouncer = new Debouncer(update, 150);
     }
 
     /**
