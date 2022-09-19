@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { expect, test } from '@jupyterlab/galata';
 
 test('Switch back and forth to reference page', async ({ page }) => {
