@@ -704,6 +704,11 @@ export class CodeMirrorSearchHighlighter {
   }
 
   private _refresh(): void {
+    if (!this._cm) {
+      // no-op
+      return;
+    }
+
     let effects: StateEffect<unknown>[] = [
       this._highlightEffect.of({ matches: this.matches })
     ];

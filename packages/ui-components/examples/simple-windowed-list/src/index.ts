@@ -115,10 +115,19 @@ class MyList extends WindowedListModel {
   }
 
   widgetRenderer = (i: number): Widget => {
-    let widget = this.widgetsCache.get(this.itemsList!.get(i));
+    let widget = this.widgetsCache.get(
+      (this.itemsList as ObservableList<{ index: number }>).get(i)
+    );
     if (!widget) {
-      widget = new ContentWidget(`item-${this.itemsList!.get(i).index}`);
-      this.widgetsCache.set(this.itemsList!.get(i), widget);
+      widget = new ContentWidget(
+        `item-${
+          (this.itemsList as ObservableList<{ index: number }>).get(i).index
+        }`
+      );
+      this.widgetsCache.set(
+        (this.itemsList as ObservableList<{ index: number }>).get(i),
+        widget
+      );
     }
     return widget;
   };
@@ -132,7 +141,8 @@ class MyList extends WindowedListModel {
 
 function main(): void {
   const nItems = 1000;
-  const model = new MyList(createList(nItems));
+  let list = createList(nItems);
+  const model = new MyList(list);
 
   const panel = new WindowedList({
     model
@@ -182,7 +192,8 @@ function main(): void {
   count.value = `${nItems}`;
   count.addEventListener('change', ev => {
     const count = parseInt((ev.target! as HTMLInputElement).value, 10);
-    model.itemsList = createList(count);
+    list = createList(count);
+    model.itemsList = list;
   });
   overscan.addEventListener('change', ev => {
     model.overscanCount = parseInt((ev.target! as HTMLInputElement).value, 10);
@@ -203,11 +214,11 @@ function main(): void {
   });
 
   addWidget.addEventListener('click', () => {
-    model.itemsList!.insert(widgetIndex, { index: model.itemsList!.length });
+    list.insert(widgetIndex, { index: list.length });
   });
 
   rmWidget.addEventListener('click', () => {
-    model.itemsList!.remove(widgetIndex);
+    list.remove(widgetIndex);
   });
 
   scrollToIndex.addEventListener('change', () => {

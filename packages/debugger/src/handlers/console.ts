@@ -83,7 +83,7 @@ export class ConsoleHandler implements IDisposable {
         return codeCell.editor!;
       },
       getEditor: () => codeCell.editor,
-      src: cell.model.value
+      src: cell.model.sharedModel
     });
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);

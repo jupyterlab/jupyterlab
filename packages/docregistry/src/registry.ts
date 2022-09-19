@@ -7,7 +7,7 @@ import {
   IChangedArgs as IChangedArgsGeneric,
   PathExt
 } from '@jupyterlab/coreutils';
-import { IModelDB, IObservableList } from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Kernel } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
@@ -819,16 +819,6 @@ export namespace DocumentRegistry {
     readonly defaultKernelLanguage: string;
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     *
-     * ### Notes
-     * Making direct edits to the values stored in the`IModelDB`
-     * is not recommended, and may produce unpredictable results.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
      * The shared notebook model.
      */
     readonly sharedModel: models.ISharedDocument;
@@ -858,15 +848,6 @@ export namespace DocumentRegistry {
      * Should emit a [contentChanged] signal.
      */
     fromJSON(value: ReadonlyPartialJSONValue): void;
-
-    /**
-     * Initialize model state after initial data load.
-     *
-     * #### Notes
-     * This function must be called after the initial data is loaded to set up
-     * initial model state, such as an initial undo stack, etc.
-     */
-    initialize(): void;
   }
 
   /**
@@ -1192,11 +1173,7 @@ export namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(
-      languagePreference?: string,
-      modelDB?: IModelDB,
-      isInitialized?: boolean
-    ): T;
+    createNew(languagePreference?: string): T;
 
     /**
      * Get the preferred kernel language given a file path.

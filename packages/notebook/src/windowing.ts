@@ -47,7 +47,9 @@ export class NotebookViewModel extends WindowedListModel {
    */
   estimateWidgetSize = (index: number): number => {
     // TODO could be improved, takes only into account the editor height
-    const nLines = this.cells[index].model.value.text.split('\n').length;
+    const nLines = this.cells[index].model.sharedModel
+      .getSource()
+      .split('\n').length;
     return (
       NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT * nLines +
       NotebookViewModel.DEFAULT_CELL_MARGIN

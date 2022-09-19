@@ -7,11 +7,11 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
-import { IObservableString } from '@jupyterlab/observables';
-
 import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
+
+import { ISharedText, TextChange } from '@jupyterlab/shared-models';
 
 import {
   Compartment,
@@ -246,7 +246,7 @@ export class EditorHandler implements IDisposable {
     });
 
     void this._debuggerService.updateBreakpoints(
-      this._src.text,
+      this._src.getSource(),
       breakpoints,
       this._path
     );
@@ -286,7 +286,7 @@ export class EditorHandler implements IDisposable {
     });
 
     void this._debuggerService.updateBreakpoints(
-      this._src.text,
+      this._src.getSource(),
       breakpoints,
       this._path
     );
@@ -343,7 +343,7 @@ export class EditorHandler implements IDisposable {
    * or its path (if it exists).
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
-    const code = this._src.text;
+    const code = this._src.getSource();
     return this._debuggerService.model.breakpoints.getBreakpoints(
       this._path || this._debuggerService.getCodeId(code)
     );
@@ -352,17 +352,14 @@ export class EditorHandler implements IDisposable {
   private _id: string;
   private _debuggerService: IDebugger;
   private _editor: () => CodeEditor.IEditor | null;
-  private _editorMonitor: ActivityMonitor<
-    IObservableString,
-    IObservableString.IChangedArgs
-  >;
   private _breakpointEffect: StateEffectType<{ pos: number[] }>;
   private _breakpointState: StateField<RangeSet<GutterMarker>>;
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
   private _highlightState: StateField<DecorationSet>;
+  private _editorMonitor: ActivityMonitor<ISharedText, TextChange>;
   private _path: string;
-  private _src: IObservableString;
+  private _src: ISharedText;
 }
 
 /**
@@ -396,7 +393,7 @@ export namespace EditorHandler {
     /**
      * The code source to debug
      */
-    src: IObservableString;
+    src: ISharedText;
   }
 
   export const _highlightEffect = StateEffect.define<{ pos: number[] }>({

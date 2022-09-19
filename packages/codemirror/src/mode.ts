@@ -1516,9 +1516,12 @@ export namespace Mode {
    * @param mode Code mode
    * @param el HTML element into which the highlighted code will be inserted
    */
-  export function run(code: string, mode: ISpec, el: HTMLElement): void {
-    const language = mode.support?.language;
-    if (!language) return;
+  export function run(code: string, mode: ISpec | null, el: HTMLElement): void {
+    const language = mode?.support?.language;
+    if (!language) {
+      el.appendChild(document.createTextNode(code));
+      return;
+    }
 
     const tree = language.parser.parse(code);
     // position state required because unstyled tokens are not emitted

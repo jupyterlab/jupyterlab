@@ -16,7 +16,13 @@ import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { JSONObject } from '@lumino/coreutils';
-import { YCodeCell } from '@jupyterlab/shared-models';
+import {
+  createStandaloneCell,
+  ISharedCodeCell,
+  YCodeCell,
+  YMarkdownCell,
+  YRawCell
+} from '@jupyterlab/shared-models';
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -28,64 +34,60 @@ describe('cells/model', () => {
   describe('CellModel', () => {
     describe('#constructor()', () => {
       it('should create a cell model', () => {
-        const model = new CellModel({});
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         expect(model).toBeInstanceOf(CellModel);
       });
 
       it('should accept a base cell argument', () => {
-        const cell: nbformat.IRawCell = {
+        const sharedModel = createStandaloneCell({
           cell_type: 'raw',
           source: 'foo',
           metadata: { trusted: false }
-        };
-        const model = new CellModel({ cell });
+        });
+        const model = new CellModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
-        expect(model.value.text).toBe(cell.source);
+        expect(model.sharedModel.getSource()).toBe('foo');
       });
 
       it('should accept a base cell argument with a multiline source', () => {
-        const cell: nbformat.IRawCell = {
+        const sharedModel = createStandaloneCell({
           cell_type: 'raw',
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false },
           id: 'cell_id'
-        };
-        const model = new CellModel({ cell });
+        });
+        const model = new CellModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
-        expect(model.value.text).toBe((cell.source as string[]).join(''));
+        expect(model.sharedModel.getSource()).toBe('foo\n\nbar\n\nbaz');
       });
 
-      it('should use the id argument', () => {
-        const cell: nbformat.IRawCell = {
+      it('should use the cell id if an id is supplied', () => {
+        const sharedModel = createStandaloneCell({
           cell_type: 'raw',
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false },
           id: 'cell_id'
-        };
-        const model = new CellModel({ cell, id: 'my_id' });
+        });
+        const model = new CellModel({ sharedModel, id: 'my_id' });
         expect(model).toBeInstanceOf(CellModel);
-        expect(model.id).toBe('my_id');
+        expect(model.id).toBe('cell_id');
       });
 
-      it('should use the cell id if an id is not supplied', () => {
-        const cell: nbformat.IRawCell = {
-          cell_type: 'raw',
-          source: ['foo\n', 'bar\n', 'baz'],
-          metadata: { trusted: false },
-          id: 'cell_id'
-        };
-        const model = new CellModel({ cell });
+      it('should use the id if an cell is not supplied', () => {
+        const model = new CellModel({ id: 'cell_id' });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id).toBe('cell_id');
       });
 
       it('should generate an id if an id or cell id is not supplied', () => {
-        const cell = {
+        const sharedModel = createStandaloneCell({
           cell_type: 'raw',
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false }
-        };
-        const model = new CellModel({ cell });
+        });
+        const model = new CellModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id.length).toBeGreaterThan(0);
       });
@@ -93,20 +95,22 @@ describe('cells/model', () => {
 
     describe('#contentChanged', () => {
       it('should signal when model content has changed', () => {
-        const model = new CellModel({});
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         let called = false;
         model.contentChanged.connect(() => {
           called = true;
         });
         expect(called).toBe(false);
-        model.value.text = 'foo';
+        model.sharedModel.setSource('foo');
         expect(called).toBe(true);
       });
     });
 
     describe('#stateChanged', () => {
       it('should signal when model state has changed', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         let called = false;
         const listener = (sender: any, args: IChangedArgs<any>) => {
           if (args.name == 'executionCount') {
@@ -121,10 +125,10 @@ describe('cells/model', () => {
       });
 
       it('should not signal when model state has not changed', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         let called = 0;
-        model.stateChanged.connect((model, args) => {
-          if (args.name == 'executionCount') {
+        model.sharedModel.changed.connect((model, change) => {
+          if (change.executionCountChange) {
             called++;
           }
         });
@@ -138,16 +142,18 @@ describe('cells/model', () => {
 
     describe('#trusted', () => {
       it('should be the trusted state of the cell', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         expect(model.trusted).toBe(false);
         model.trusted = true;
         expect(model.trusted).toBe(true);
-        const other = new CodeCellModel({ cell: model.toJSON() });
+        const other = new CodeCellModel({
+          trusted: true
+        });
         expect(other.trusted).toBe(true);
       });
 
       it('should update the trusted state of the output models', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         model.outputs.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         expect(model.outputs.get(0).trusted).toBe(false);
         model.trusted = true;
@@ -157,7 +163,7 @@ describe('cells/model', () => {
 
     describe('#metadataChanged', () => {
       it('should signal when model metadata has changed', () => {
-        const model = new TestModel({});
+        const model = new CodeCellModel();
         const listener = (sender: any, args: any) => {
           value = args.newValue;
         };
@@ -169,7 +175,9 @@ describe('cells/model', () => {
       });
 
       it('should not signal when model metadata has not changed', () => {
-        const model = new TestModel({});
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         let called = 0;
         model.metadata.changed.connect(() => {
           called++;
@@ -184,26 +192,30 @@ describe('cells/model', () => {
 
     describe('#source', () => {
       it('should default to an empty string', () => {
-        const model = new CellModel({});
-        expect(model.value.text).toHaveLength(0);
+        const model = new CodeCellModel();
+        expect(model.sharedModel.getSource()).toHaveLength(0);
       });
 
       it('should be settable', () => {
-        const model = new CellModel({});
-        expect(model.value.text).toHaveLength(0);
-        model.value.text = 'foo';
-        expect(model.value.text).toBe('foo');
+        const model = new CodeCellModel();
+        expect(model.sharedModel.getSource()).toHaveLength(0);
+        model.sharedModel.setSource('foo');
+        expect(model.sharedModel.getSource()).toBe('foo');
       });
     });
 
     describe('#isDisposed', () => {
       it('should be false by default', () => {
-        const model = new CellModel({});
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         expect(model.isDisposed).toBe(false);
       });
 
       it('should be true after model is disposed', () => {
-        const model = new CellModel({});
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         model.dispose();
         expect(model.isDisposed).toBe(true);
       });
@@ -211,13 +223,17 @@ describe('cells/model', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the model', () => {
-        const model = new TestModel({});
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         model.dispose();
         expect(model.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
-        const model = new CellModel({});
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         model.dispose();
         model.dispose();
         expect(model.isDisposed).toBe(true);
@@ -227,23 +243,29 @@ describe('cells/model', () => {
     describe('#toJSON()', () => {
       it('should return a base cell encapsulation of the model value', () => {
         const cell: nbformat.IRawCell = {
+          id: '42',
           cell_type: 'raw',
           source: 'foo',
           metadata: { trusted: false }
         };
-        const model = new TestModel({ cell });
+        const model = new TestModel({
+          sharedModel: createStandaloneCell(cell)
+        });
         expect(model.toJSON()).not.toBe(cell);
         expect(model.toJSON()).toEqual(cell);
       });
 
       it('should always return a string source', () => {
         const cell: nbformat.IRawCell = {
+          id: '42',
           cell_type: 'raw',
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false }
         };
-        const model = new TestModel({ cell });
-        cell.source = (cell.source as string[]).join('');
+        const model = new TestModel({
+          sharedModel: createStandaloneCell(cell)
+        });
+        cell.source = (cell.source as string[]).join('\n');
         expect(model.toJSON()).not.toBe(cell);
         expect(model.toJSON()).toEqual(cell);
       });
@@ -251,21 +273,27 @@ describe('cells/model', () => {
 
     describe('#metadata', () => {
       it('should handle a metadata for the cell', () => {
-        const model = new CellModel({});
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         expect(model.metadata.get('foo')).toBeUndefined();
         model.metadata.set('foo', 1);
         expect(model.metadata.get('foo')).toBe(1);
       });
 
       it('should get a list of user metadata keys', () => {
-        const model = new CellModel({});
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         expect(Array.from(model.metadata.keys())).toHaveLength(0);
         model.metadata.set('foo', 1);
         expect(model.metadata.keys()).toEqual(['foo']);
       });
 
       it('should trigger changed signal', () => {
-        const model = new CellModel({});
+        const model = new CellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         let called = false;
         model.metadata.changed.connect(() => {
           called = true;
@@ -279,7 +307,7 @@ describe('cells/model', () => {
   describe('RawCellModel', () => {
     describe('#type', () => {
       it('should be set with type "raw"', () => {
-        const model = new RawCellModel({});
+        const model = new RawCellModel();
         expect(model.type).toBe('raw');
       });
     });
@@ -291,7 +319,9 @@ describe('cells/model', () => {
           metadata: {},
           id: 'cell_id'
         };
-        const model = new RawCellModel({ cell });
+        const model = new RawCellModel({
+          sharedModel: createStandaloneCell(cell) as YRawCell
+        });
         const serialized = model.toJSON();
         expect(serialized).not.toBe(cell);
         expect(serialized).toEqual(cell);
@@ -302,7 +332,7 @@ describe('cells/model', () => {
   describe('MarkdownCellModel', () => {
     describe('#type', () => {
       it('should be set with type "markdown"', () => {
-        const model = new MarkdownCellModel({});
+        const model = new MarkdownCellModel();
         expect(model.type).toBe('markdown');
       });
     });
@@ -314,7 +344,9 @@ describe('cells/model', () => {
           metadata: {},
           id: 'cell_id'
         };
-        const model = new MarkdownCellModel({ cell });
+        const model = new MarkdownCellModel({
+          sharedModel: createStandaloneCell(cell) as YMarkdownCell
+        });
         const serialized = model.toJSON();
         expect(serialized).not.toBe(cell);
         expect(serialized).toEqual(cell);
@@ -325,12 +357,12 @@ describe('cells/model', () => {
   describe('CodeCellModel', () => {
     describe('#constructor()', () => {
       it('should create a code cell model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         expect(model).toBeInstanceOf(CodeCellModel);
       });
 
       it('should accept a code cell argument', () => {
-        const cell: nbformat.ICodeCell = {
+        const sharedModel = createStandaloneCell({
           cell_type: 'code',
           execution_count: 1,
           outputs: [
@@ -342,10 +374,10 @@ describe('cells/model', () => {
           ],
           source: 'foo',
           metadata: { trusted: false }
-        };
-        const model = new CodeCellModel({ cell });
+        }) as YCodeCell;
+        const model = new CodeCellModel({ sharedModel });
         expect(model).toBeInstanceOf(CodeCellModel);
-        expect(model.value.text).toBe(cell.source);
+        expect(model.sharedModel.getSource()).toBe('foo');
       });
 
       it('should connect the outputs changes to content change signal', () => {
@@ -354,7 +386,7 @@ describe('cells/model', () => {
           data: { 'text/plain': 'foo' },
           metadata: {}
         } as nbformat.IDisplayData;
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         let called = false;
         model.contentChanged.connect(() => {
           called = true;
@@ -370,11 +402,11 @@ describe('cells/model', () => {
 
         // Setting `collapsed` works
         model = new CodeCellModel({
-          cell: {
+          sharedModel: createStandaloneCell({
             cell_type: 'code',
             source: '',
             metadata: { collapsed: true }
-          }
+          }) as YCodeCell
         });
         expect(model.metadata.get('collapsed')).toBe(true);
         jupyter = model.metadata.get('jupyter') as JSONObject;
@@ -382,11 +414,11 @@ describe('cells/model', () => {
 
         // Setting `jupyter.outputs_hidden` works
         model = new CodeCellModel({
-          cell: {
+          sharedModel: createStandaloneCell({
             cell_type: 'code',
             source: '',
             metadata: { jupyter: { outputs_hidden: true } }
-          }
+          }) as YCodeCell
         });
         expect(model.metadata.get('collapsed')).toBe(true);
         jupyter = model.metadata.get('jupyter') as JSONObject;
@@ -394,11 +426,11 @@ describe('cells/model', () => {
 
         // `collapsed` takes precedence
         model = new CodeCellModel({
-          cell: {
+          sharedModel: createStandaloneCell({
             cell_type: 'code',
             source: '',
             metadata: { collapsed: false, jupyter: { outputs_hidden: true } }
-          }
+          }) as YCodeCell
         });
         expect(model.metadata.get('collapsed')).toBe(false);
         jupyter = model.metadata.get('jupyter') as JSONObject;
@@ -408,38 +440,36 @@ describe('cells/model', () => {
 
     describe('#type', () => {
       it('should be set with type "code"', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         expect(model.type).toBe('code');
       });
     });
 
     describe('#executionCount', () => {
       it('should show the execution count of the cell', () => {
-        const cell: nbformat.ICodeCell = {
+        const sharedModel = createStandaloneCell({
           cell_type: 'code',
           execution_count: 1,
           outputs: [],
           source: 'foo',
           metadata: { trusted: false }
-        };
-        const model = new CodeCellModel({ cell });
+        }) as YCodeCell;
+        const model = new CodeCellModel({ sharedModel });
         expect(model.executionCount).toBe(1);
       });
 
       it('should be settable', () => {
-        const model = new CodeCellModel({});
-        expect(model.executionCount).toBeNull();
+        const model = new CodeCellModel();
         model.executionCount = 1;
         expect(model.executionCount).toBe(1);
       });
 
       it('should emit a state change signal when set', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         let called = false;
         model.stateChanged.connect(() => {
           called = true;
         });
-        expect(model.executionCount).toBeNull();
         expect(called).toBe(false);
         model.executionCount = 1;
         expect(model.executionCount).toBe(1);
@@ -447,14 +477,13 @@ describe('cells/model', () => {
       });
 
       it('should not signal when state has not changed', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         let called = 0;
-        model.stateChanged.connect((model, args) => {
-          if (args.name == 'executionCount') {
+        model.sharedModel.changed.connect((model, args) => {
+          if (args.executionCountChange) {
             called++;
           }
         });
-        expect(model.executionCount).toBeNull();
         expect(called).toBe(0);
         model.executionCount = 1;
         expect(model.executionCount).toBe(1);
@@ -463,14 +492,14 @@ describe('cells/model', () => {
       });
 
       it('should set dirty flag and signal', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         let called = 0;
         model.stateChanged.connect((model, args) => {
           if (args.name == 'isDirty') {
             called++;
           }
         });
-        expect(model.executionCount).toBeNull();
+        expect(model.executionCount).toBe(null);
         expect(model.isDirty).toBe(false);
         expect(called).toBe(0);
 
@@ -478,7 +507,7 @@ describe('cells/model', () => {
         expect(model.isDirty).toBe(false);
         expect(called).toBe(0);
 
-        model.value.text = 'foo';
+        model.sharedModel.setSource('foo');
         expect(model.isDirty).toBe(true);
         expect(called).toBe(1);
 
@@ -490,14 +519,14 @@ describe('cells/model', () => {
 
     describe('#outputs', () => {
       it('should be an output area model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         expect(model.outputs).toBeInstanceOf(OutputAreaModel);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the model', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         expect(model.outputs).toBeInstanceOf(OutputAreaModel);
         model.dispose();
         expect(model.isDisposed).toBe(true);
@@ -505,7 +534,7 @@ describe('cells/model', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         model.dispose();
         model.dispose();
         expect(model.isDisposed).toBe(true);
@@ -531,7 +560,9 @@ describe('cells/model', () => {
           metadata: { trusted: false },
           id: 'cell_id'
         };
-        const model = new CodeCellModel({ cell });
+        const model = new CodeCellModel({
+          sharedModel: createStandaloneCell(cell) as ISharedCodeCell
+        });
         const serialized = model.toJSON();
         expect(serialized).not.toBe(cell);
         expect(serialized).toEqual(cell);
@@ -574,7 +605,7 @@ describe('cells/model', () => {
         id: 'cell_id'
       };
       it('should add new items correctly', () => {
-        const model = new CodeCellModel({});
+        const model = new CodeCellModel();
         const sharedModel = model.sharedModel as YCodeCell;
         expect(sharedModel.ymodel.get('outputs').length).toBe(0);
 
@@ -602,7 +633,9 @@ describe('cells/model', () => {
       });
 
       it('should set new items correctly', () => {
-        const model = new CodeCellModel({ cell });
+        const model = new CodeCellModel({
+          sharedModel: createStandaloneCell(cell) as ISharedCodeCell
+        });
         const sharedModel = model.sharedModel as YCodeCell;
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
 
@@ -629,10 +662,11 @@ describe('cells/model', () => {
       });
 
       it('should remove items correctly', () => {
-        const model = new CodeCellModel({ cell });
+        const model = new CodeCellModel({
+          sharedModel: createStandaloneCell(cell) as ISharedCodeCell
+        });
         const sharedModel = model.sharedModel as YCodeCell;
-        expect(sharedModel.ymodel.get('outputs').length).toBe(2);
-
+        expect(sharedModel.getOutputs().length).toBe(2);
         const newEvent0 = {
           type: 'remove',
           newValues: [],
@@ -647,7 +681,7 @@ describe('cells/model', () => {
 
     describe('.metadata', () => {
       it('should sync collapsed and jupyter.outputs_hidden metadata when changed', () => {
-        const metadata = new CodeCellModel({}).metadata;
+        const metadata = new CodeCellModel().metadata;
 
         expect(metadata.get('collapsed')).toBeUndefined();
         expect(metadata.get('jupyter')).toBeUndefined();

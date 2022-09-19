@@ -4,6 +4,7 @@
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { createStandaloneCell } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandToolbarButton, Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
@@ -48,24 +49,31 @@ export class RawEditor extends SplitPanel {
 
     // Create read-only defaults editor.
     const defaults = (this._defaults = new CodeEditorWrapper({
-      model: new CodeEditor.Model(),
+      model: new CodeEditor.Model({
+        sharedModel: createStandaloneCell({
+          cell_type: 'code'
+        })
+      }),
       factory: editorFactory
     }));
 
-    defaults.editor.model.value.text = '';
     defaults.editor.model.mimeType = 'text/javascript';
     defaults.editor.setOption('readOnly', true);
 
     // Create read-write user settings editor.
     const user = (this._user = new CodeEditorWrapper({
-      model: new CodeEditor.Model(),
+      model: new CodeEditor.Model({
+        sharedModel: createStandaloneCell({
+          cell_type: 'code'
+        })
+      }),
       factory: editorFactory,
       config: { lineNumbers: true }
     }));
 
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
-    user.editor.model.value.changed.connect(this._onTextChanged, this);
+    user.editor.model.sharedModel.changed.connect(this._onTextChanged, this);
 
     // Create and set up an inspector.
     this._inspector = createInspector(
@@ -112,7 +120,10 @@ export class RawEditor extends SplitPanel {
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
-    return this._user.editor.model.value.text !== this._settings?.raw ?? '';
+    return (
+      this._user.editor.model.sharedModel.getSource() !== this._settings?.raw ??
+      ''
+    );
   }
 
   /**
@@ -147,8 +158,8 @@ export class RawEditor extends SplitPanel {
       this._onSettingsChanged();
     } else {
       this._settings = null;
-      defaults.editor.model.value.text = '';
-      user.editor.model.value.text = '';
+      defaults.editor.model.sharedModel.setSource('');
+      user.editor.model.sharedModel.setSource('');
     }
 
     this.update();
@@ -188,7 +199,7 @@ export class RawEditor extends SplitPanel {
    * Revert the editor back to original settings.
    */
   revert(): void {
-    this._user.editor.model.value.text = this.settings?.raw ?? '';
+    this._user.editor.model.sharedModel.setSource(this.settings?.raw ?? '');
     this._updateToolbar(false, false);
   }
 
@@ -201,7 +212,7 @@ export class RawEditor extends SplitPanel {
     }
 
     const settings = this._settings;
-    const source = this._user.editor.model.value.text;
+    const source = this._user.editor.model.sharedModel.getSource();
 
     return settings
       .save(source)
@@ -226,7 +237,7 @@ export class RawEditor extends SplitPanel {
    * Handle text changes in the underlying editor.
    */
   private _onTextChanged(): void {
-    const raw = this._user.editor.model.value.text;
+    const raw = this._user.editor.model.sharedModel.getSource();
     const settings = this._settings;
 
     this.removeClass(ERROR_CLASS);
@@ -256,8 +267,10 @@ export class RawEditor extends SplitPanel {
     const defaults = this._defaults;
     const user = this._user;
 
-    defaults.editor.model.value.text = settings?.annotatedDefaults() ?? '';
-    user.editor.model.value.text = settings?.raw ?? '';
+    defaults.editor.model.sharedModel.setSource(
+      settings?.annotatedDefaults() ?? ''
+    );
+    user.editor.model.sharedModel.setSource(settings?.raw ?? '');
   }
 
   private _updateToolbar(revert = this._canRevert, save = this._canSave): void {

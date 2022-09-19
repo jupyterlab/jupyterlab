@@ -124,7 +124,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
       {
         ceEditor: this._virtualEditor,
         type: 'code',
-        value: this.editor?.model.value.text ?? ''
+        value: this.editor?.model.sharedModel.getSource() ?? ''
       }
     ];
   }

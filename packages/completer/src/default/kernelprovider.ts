@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Text } from '@jupyterlab/coreutils';
-import { IObservableString } from '@jupyterlab/observables';
 import { KernelMessage } from '@jupyterlab/services';
+import { TextChange } from '@jupyterlab/shared-models';
 import { JSONObject } from '@lumino/coreutils';
 import { CompletionHandler } from '../handler';
 import { ICompletionContext, ICompletionProvider } from '../tokens';
@@ -83,7 +83,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
   ): Promise<CompletionHandler.ICompletionItem> {
     const { editor, session } = context;
     if (session && editor) {
-      let code = editor.model.value.text;
+      let code = editor.model.sharedModel.getSource();
 
       const position = editor.getCursorPosition();
       let offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
@@ -117,18 +117,21 @@ export class KernelCompleterProvider implements ICompletionProvider {
    * Kernel provider will activate the completer in continuous mode after
    * the `.` character.
    */
-  shouldShowContinuousHint(
-    visible: boolean,
-    changed: IObservableString.IChangedArgs
-  ): boolean {
-    if (changed.type === 'remove') {
-      return false;
-    }
-    if (changed.value === '.') {
+  shouldShowContinuousHint(visible: boolean, changed: TextChange): boolean {
+    const sourceChange = changed.sourceChange;
+    if (sourceChange == null) {
       return true;
     }
 
-    return !visible && changed.value.trim().length > 0;
+    if (sourceChange.some(delta => delta.delete != null)) {
+      return false;
+    }
+
+    return sourceChange.some(
+      delta =>
+        delta.insert != null &&
+        (delta.insert === '.' || (!visible && delta.insert.trim().length > 0))
+    );
   }
 
   readonly identifier = KERNEL_PROVIDER_ID;

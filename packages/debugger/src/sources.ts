@@ -94,7 +94,7 @@ export class DebuggerSources implements IDebugger.ISources {
       const cells = notebookPanel.content.widgets;
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
-        const code = cell.model.value.text;
+        const code = cell.model.sharedModel.getSource();
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
           return;
@@ -116,7 +116,7 @@ export class DebuggerSources implements IDebugger.ISources {
           Object.freeze({
             get: () => cell.editor,
             reveal: () => notebook.scrollToItem(i),
-            src: cell.model.value
+            src: cell.model.sharedModel
           })
         );
       });
@@ -147,7 +147,7 @@ export class DebuggerSources implements IDebugger.ISources {
 
       const cells = consoleWidget.console.cells;
       for (const cell of cells) {
-        const code = cell.model.value.text;
+        const code = cell.model.sharedModel.getSource();
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
           break;
@@ -161,7 +161,7 @@ export class DebuggerSources implements IDebugger.ISources {
             get: () => cell.editor,
             reveal: () =>
               Promise.resolve(this._shell.activateById(consoleWidget.id)),
-            src: cell.model.value
+            src: cell.model.sharedModel
           })
         );
 
@@ -198,7 +198,7 @@ export class DebuggerSources implements IDebugger.ISources {
         return;
       }
 
-      const code = editor.model.value.text;
+      const code = editor.model.sharedModel.getSource();
       const codeId = this._getCodeId(code, kernel);
       if (!codeId) {
         return;
@@ -210,7 +210,7 @@ export class DebuggerSources implements IDebugger.ISources {
         Object.freeze({
           get: () => editor,
           reveal: () => Promise.resolve(this._shell.activateById(doc.id)),
-          src: fileEditor.model.value
+          src: fileEditor.model.sharedModel
         })
       );
 
@@ -238,7 +238,7 @@ export class DebuggerSources implements IDebugger.ISources {
         return;
       }
 
-      const code = editor.model.value.text;
+      const code = editor.model.sharedModel.getSource();
       const codeId = this._getCodeId(code, kernel);
       if (!codeId) {
         return;
@@ -251,7 +251,7 @@ export class DebuggerSources implements IDebugger.ISources {
         Object.freeze({
           get: () => editor,
           reveal: () => Promise.resolve(this._shell.activateById(widget.id)),
-          src: editor.model.value
+          src: editor.model.sharedModel
         })
       );
       if (focus) {

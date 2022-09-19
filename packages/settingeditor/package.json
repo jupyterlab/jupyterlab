@@ -42,6 +42,7 @@
     "@jupyterlab/inspector": "^4.0.0-alpha.13",
     "@jupyterlab/rendermime": "^4.0.0-alpha.13",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.13",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.13",
     "@jupyterlab/statedb": "^4.0.0-alpha.13",
     "@jupyterlab/translation": "^4.0.0-alpha.13",
     "@jupyterlab/ui-components": "^4.0.0-alpha.28",

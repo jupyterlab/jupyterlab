@@ -96,7 +96,7 @@
     "@lumino/widgets": "^2.0.0-alpha.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "yjs": "^13.5.34"
+    "yjs": "^13.5.40"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.13",
