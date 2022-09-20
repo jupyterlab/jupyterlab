@@ -538,7 +538,7 @@ export class CodeMirrorSearchHighlighter {
    *
    * @param editor The CodeMirror editor
    */
-  constructor(editor: CodeMirrorEditor) {
+  constructor(editor: CodeMirrorEditor | null) {
     this._cm = editor;
     this._matches = new Array<ISearchMatch>();
     this._currentIndex = null;
@@ -617,17 +617,17 @@ export class CodeMirrorSearchHighlighter {
     this._currentIndex = null;
     this._matches = [];
 
-    this._cm.editor.dispatch({
+    this._cm!.editor.dispatch({
       effects: this._highlightEffect.of({ matches: [] })
     });
 
-    const selection = this._cm.state.selection.main;
+    const selection = this._cm!.state.selection.main;
     const from = selection.from;
     const to = selection.to;
     // Setting a reverse selection to allow search-as-you-type to maintain the
     // current selected match. See comment in _findNext for more details.
     if (from !== to) {
-      this._cm.editor.dispatch({ selection: { anchor: to, head: from } });
+      this._cm!.editor.dispatch({ selection: { anchor: to, head: from } });
     }
 
     return Promise.resolve();
@@ -663,7 +663,29 @@ export class CodeMirrorSearchHighlighter {
     );
   }
 
+  /**
+   * Set the editor
+   *
+   * @param editor Editor
+   */
+  setEditor(editor: CodeMirrorEditor): void {
+    if (this._cm) {
+      throw new Error('CodeMirrorEditor already set.');
+    } else {
+      this._cm = editor;
+      this._refresh();
+      if (this._currentIndex !== null) {
+        this._highlightCurrentMatch();
+      }
+    }
+  }
+
   private _highlightCurrentMatch(): void {
+    if (!this._cm) {
+      // no-op
+      return;
+    }
+
     // Highlight the current index
     if (this._currentIndex !== null) {
       const match = this.matches[this._currentIndex];
@@ -682,13 +704,18 @@ export class CodeMirrorSearchHighlighter {
   }
 
   private _refresh(): void {
+    if (!this._cm) {
+      // no-op
+      return;
+    }
+
     let effects: StateEffect<unknown>[] = [
       this._highlightEffect.of({ matches: this.matches })
     ];
-    if (!this._cm.state.field(this._highlightField, false)) {
+    if (!this._cm!.state.field(this._highlightField, false)) {
       effects.push(StateEffect.appendConfig.of([this._highlightField]));
     }
-    this._cm.editor.dispatch({ effects });
+    this._cm!.editor.dispatch({ effects });
   }
 
   private _findNext(reverse: boolean): number | null {
@@ -708,11 +735,11 @@ export class CodeMirrorSearchHighlighter {
     // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
     // the search always proceeds from the 'anchor' position, which is at the 'from'.
 
-    const cursor = this._cm.state.selection.main;
+    const cursor = this._cm!.state.selection.main;
     let lastPosition = reverse ? cursor.anchor : cursor.head;
     if (lastPosition === 0 && reverse && this.currentIndex === null) {
       // The default position is (0, 0) but we want to start from the end in that case
-      lastPosition = this._cm.doc.length;
+      lastPosition = this._cm!.doc.length;
     }
 
     const position = lastPosition;
@@ -740,7 +767,7 @@ export class CodeMirrorSearchHighlighter {
     return found;
   }
 
-  private _cm: CodeMirrorEditor;
+  private _cm: CodeMirrorEditor | null;
   private _currentIndex: number | null;
   private _matches: ISearchMatch[];
   private _highlightEffect: StateEffectType<{ matches: ISearchMatch[] }>;

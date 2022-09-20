@@ -14,6 +14,7 @@ dev_mode/static
 dev_mode/themes
 dev_mode/workspaces
 docs/_build
+docs/build
 docs/api
 examples/app/build
 examples/app/themes

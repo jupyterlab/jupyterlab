@@ -3,10 +3,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
-import type { Cell, MarkdownCell } from '@jupyterlab/cells';
+import type { Cell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import { toArray } from '@lumino/algorithm';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import { createCell } from '@jupyterlab/shared-models';
+import { findIndex } from '@lumino/algorithm';
+import { Signal } from '@lumino/signaling';
 import {
   IGalataInpage,
   INotebookRunCallback,
@@ -15,16 +17,6 @@ import {
   PLUGIN_ID_DOC_MANAGER,
   PLUGIN_ID_ROUTER
 } from './tokens';
-
-/**
- * Factory for element containing a given class xpath
- *
- * @param className Class name
- * @returns The selector
- */
-function xpContainsClass(className: string): string {
-  return `contains(concat(" ", normalize-space(@class), " "), " ${className} ")`;
-}
 
 /**
  * In-Page Galata helpers
@@ -50,8 +42,8 @@ export class GalataInpage implements IGalataInpage {
       if (hasPlugin) {
         try {
           const appAny = app as any;
-          const plugin: any = appAny._pluginMap
-            ? appAny._pluginMap[pluginId]
+          const plugin: any = appAny._plugins
+            ? appAny._plugins.get(pluginId)
             : undefined;
           if (plugin.activated) {
             resolve(plugin.service);
@@ -253,21 +245,12 @@ export class GalataInpage implements IGalataInpage {
     if (nb !== null) {
       void this._app.commands.execute('notebook:insert-cell-below');
 
-      const numCells = nb.widgets.length;
-
       if (nb.model) {
-        nb.model.cells.beginCompoundOperation();
-        nb.model.cells.set(
-          numCells - 1,
-          nb.model.contentFactory.createCell(cellType, {
-            cell: {
-              cell_type: cellType,
-              source: source,
-              metadata: {}
-            }
-          })
+        const sharedModel = nb.model.sharedModel;
+        sharedModel.insertCell(
+          sharedModel.cells.length,
+          createCell({ cell_type: cellType, source })
         );
-        nb.model.cells.endCompoundOperation();
       }
       nb.update();
     } else {
@@ -275,6 +258,33 @@ export class GalataInpage implements IGalataInpage {
     }
 
     return true;
+  }
+
+  /**
+   * Reset execution count of one or all cells.
+   *
+   * @param cellIndex Cell index
+   */
+  resetExecutionCount(cellIndex?: number): void {
+    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nb = nbPanel.content;
+
+    if (nb) {
+      if (nb.model) {
+        if (cellIndex === undefined) {
+          for (const cell of nb.model.cells) {
+            switch (cell.type) {
+              case 'code':
+                (cell as CodeCellModel).executionCount = null;
+                break;
+            }
+          }
+        } else if (nb.model.cells.get(cellIndex)?.type === 'code') {
+          (nb.model.cells.get(cellIndex) as CodeCellModel).executionCount =
+            null;
+        }
+      }
+    }
   }
 
   /**
@@ -300,18 +310,14 @@ export class GalataInpage implements IGalataInpage {
       }
 
       if (nb.model) {
-        nb.model.cells.beginCompoundOperation();
-        nb.model.cells.set(
-          cellIndex,
-          nb.model.contentFactory.createCell(cellType, {
-            cell: {
-              cell_type: cellType,
-              source: source,
-              metadata: {}
-            }
-          })
-        );
-        nb.model.cells.endCompoundOperation();
+        const sharedModel = nb.model.sharedModel;
+        sharedModel.transact(() => {
+          sharedModel.deleteCell(cellIndex);
+          sharedModel.insertCell(
+            cellIndex,
+            createCell({ cell_type: cellType, source })
+          );
+        });
       }
       nb.update();
     } else {
@@ -348,104 +354,59 @@ export class GalataInpage implements IGalataInpage {
   }
 
   /**
-   * Run the active notebook
-   */
-  async runActiveNotebook(): Promise<void> {
-    await this._app.commands.execute('notebook:run-all-cells');
-  }
-
-  /**
-   * Wait for the active notebook to be run
-   */
-  async waitForNotebookRun(): Promise<void> {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
-    const notebook = nbPanel.content;
-    if (!notebook.widgets) {
-      console.error('NOTEBOOK CELL PROBLEM', notebook);
-    }
-    const numCells = notebook.widgets.length;
-
-    if (numCells === 0) {
-      return;
-    }
-
-    const promises: Promise<Node | null>[] = [];
-
-    for (let i = 0; i < numCells; ++i) {
-      const cell = notebook.widgets[i];
-      promises.push(this.waitForCellRun(cell));
-    }
-
-    await Promise.all(promises);
-  }
-
-  /**
    * Wait for a Markdown cell to be rendered
    *
    * @param cell Cell
    */
   async waitForMarkdownCellRendered(cell: MarkdownCell): Promise<void> {
+    if (!cell.inViewport) {
+      return;
+    }
+
     await cell.ready;
+
+    if (cell.rendered) {
+      return;
+    }
 
     let resolver: (value: void | PromiseLike<void>) => void;
     const delegate = new Promise<void>(resolve => {
       resolver = resolve;
     });
-    let timer: number | null = window.setInterval(() => {
-      if (cell.rendered) {
-        if (timer) {
-          clearInterval(timer);
-        }
-        timer = null;
-        resolver();
-      }
-    }, 200);
+
+    const onRenderedChanged = () => {
+      Signal.disconnectReceiver(onRenderedChanged);
+      resolver();
+    };
+
+    cell.renderedChanged.connect(onRenderedChanged);
 
     return delegate;
   }
 
   /**
-   * Wait for a cell to be run and return its output element
+   * Wait for a cell to be run
    *
    * @param cell Cell
    * @param timeout Timeout
-   * @returns Output element
    */
-  async waitForCellRun(cell: Cell, timeout = 2000): Promise<Node | null> {
+  async waitForCellRun(cell: Cell, timeout = 2000): Promise<void> {
     const model = cell.model;
-    const code = model.value.text;
+    const code = model.sharedModel.getSource();
     if (!code.trim()) {
-      return null;
+      return;
     }
-
-    const emptyPrompt = '[ ]:';
-    const runningPrompt = '[*]:';
-
-    await this.waitForXPath(
-      `.//div[${xpContainsClass(
-        'jp-InputArea-prompt'
-      )} and text()="${emptyPrompt}"]`,
-      cell.node,
-      { hidden: true }
-    );
-    await this.waitForXPath(
-      `.//div[${xpContainsClass(
-        'jp-InputArea-prompt'
-      )} and text()="${runningPrompt}"]`,
-      cell.node,
-      { hidden: true }
-    );
 
     const cellType = cell.model.type;
     if (cellType === 'markdown') {
       await this.waitForMarkdownCellRendered(cell as MarkdownCell);
-      return null;
+      return;
     } else if (cellType === 'raw') {
-      return null;
+      return;
     } else {
       // 'code'
-      let resolver: (value: Node | null) => void;
-      const delegate = new Promise<Node | null>(resolve => {
+      let resolver: () => void;
+      const delegate = new Promise<void>(resolve => {
         resolver = resolve;
       });
 
@@ -453,37 +414,46 @@ export class GalataInpage implements IGalataInpage {
       let timer: any = null;
       let timeoutTimer: any = null;
 
-      const clearAndResolve = (output: Node | null) => {
+      const clearAndResolve = () => {
         clearInterval(timer);
         timer = null;
         clearTimeout(timeoutTimer);
         timeoutTimer = null;
-        resolver(output);
+        resolver();
       };
 
       const startTimeout = () => {
         if (!timeoutTimer) {
           timeoutTimer = setTimeout(() => {
-            clearAndResolve(null);
+            clearAndResolve();
           }, timeout);
         }
       };
 
       const checkIfDone = () => {
-        const output = cell.node.querySelector(
-          '.jp-Cell-outputArea .jp-OutputArea-output'
-        );
+        if ((cell.model as CodeCellModel).executionCount !== null) {
+          if (!cell.inViewport) {
+            clearAndResolve();
+            return;
+          }
 
-        if (output) {
-          if (output.textContent === 'Loading widget...') {
-            startTimeout();
+          const output = cell.node.querySelector(
+            '.jp-Cell-outputArea .jp-OutputArea-output'
+          );
+
+          if (output) {
+            if (output.textContent === 'Loading widget...') {
+              startTimeout();
+            } else {
+              clearAndResolve();
+            }
           } else {
-            clearAndResolve(output);
+            if (numTries > 0) {
+              clearAndResolve();
+            }
           }
         } else {
-          if (numTries > 0) {
-            clearAndResolve(null);
-          }
+          startTimeout();
         }
         numTries++;
       };
@@ -495,25 +465,6 @@ export class GalataInpage implements IGalataInpage {
       }, 200);
       return delegate;
     }
-  }
-
-  /**
-   * Whether the given notebook will scroll or not
-   *
-   * @param notebook Notebook
-   * @param position Position
-   * @param threshold Threshold
-   * @returns Test result
-   */
-  notebookWillScroll(
-    notebook: Notebook,
-    position: number,
-    threshold = 25
-  ): boolean {
-    const node = notebook.node;
-    const ar = node.getBoundingClientRect();
-    const delta = position - ar.top - ar.height / 2;
-    return Math.abs(delta) > (ar.height * threshold) / 100;
   }
 
   /**
@@ -545,44 +496,69 @@ export class GalataInpage implements IGalataInpage {
 
       await this._app.commands.execute('notebook:run-cell');
 
-      const output = await this.waitForCellRun(cell);
+      await this.waitForCellRun(cell);
 
-      if (callback && callback.onAfterCellRun) {
+      if (callback?.onAfterCellRun) {
         await callback.onAfterCellRun(i);
       }
 
-      const rectNode = output
-        ? cell.node.querySelector('.jp-Cell-outputArea')
-        : cell.inputArea.node;
-      const rect = rectNode?.getBoundingClientRect();
+      await notebook
+        .scrollToItem(
+          i,
+          ((cell.model as CodeCellModel).outputs?.length ?? 0) > 0
+            ? 'end'
+            : 'start'
+        )
+        .catch(reason => {
+          // no-op
+        });
 
-      const scrollThreshold = 45;
-      let prevScroll = notebook.node.scrollTop;
-      let willScroll = false;
-      if (rect) {
-        willScroll = this.notebookWillScroll(
-          notebook,
-          rect.bottom,
-          scrollThreshold
-        );
-        if (willScroll && callback && callback.onBeforeScroll) {
-          await callback.onBeforeScroll();
-        }
-
-        prevScroll = notebook.node.scrollTop;
-        notebook.scrollToPosition(rect.bottom, scrollThreshold);
-      }
-      notebook.update();
-
-      if (willScroll && callback && callback.onAfterScroll) {
-        const newScroll = notebook.node.scrollTop;
-        if (newScroll !== prevScroll) {
-          console.error('Notebook scroll mispredicted!');
-        }
-
+      if (callback?.onAfterScroll) {
         await callback.onAfterScroll();
       }
     }
+  }
+
+  /**
+   * Test if one or all cells have an execution number.
+   *
+   * @param cellIndex Cell index
+   * @returns Whether the cell was executed or not
+   *
+   * ### Notes
+   * It checks that no cells have a `null` execution count.
+   */
+  haveBeenExecuted(cellIndex?: number): boolean {
+    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nb = nbPanel.content;
+
+    let counter = 0;
+    if (nb) {
+      if (nb.model) {
+        if (cellIndex === undefined) {
+          for (const cell of nb.model.cells) {
+            if (cell.type === 'code') {
+              counter +=
+                cell.sharedModel.getSource().length > 0 &&
+                (cell as CodeCellModel).executionCount === null
+                  ? 1
+                  : 0;
+            }
+          }
+        } else {
+          const cell = nb.model.cells.get(cellIndex);
+          if (cell?.type === 'code') {
+            counter +=
+              cell.sharedModel.getSource().length > 0 &&
+              (cell as CodeCellModel).executionCount === null
+                ? 1
+                : 0;
+          }
+        }
+      }
+    }
+
+    return counter === 0;
   }
 
   /**
@@ -593,9 +569,7 @@ export class GalataInpage implements IGalataInpage {
    */
   getNotebookToolbarItemIndex(itemName: string): number {
     const nbPanel = this._app.shell.currentWidget as NotebookPanel;
-    const names = toArray(nbPanel.toolbar.names());
-
-    return names.indexOf(itemName);
+    return findIndex(nbPanel.toolbar.names(), name => name === itemName);
   }
 
   /**

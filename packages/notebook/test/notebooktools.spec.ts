@@ -286,7 +286,7 @@ describe('@jupyterlab/notebook', () => {
         const widget = tracker.currentWidget!;
         widget.content.activeCellIndex++;
         widget.content.activeCell!.model.metadata.set('bar', 1);
-        expect(tool.node.querySelector('.jp-InputArea-editor')).toBeTruthy();
+        expect(tool.node.querySelector('pre')).toBeTruthy();
       });
     });
 
@@ -307,11 +307,11 @@ describe('@jupyterlab/notebook', () => {
         });
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
-        expect(JSON.stringify(model.value.text)).toBeTruthy();
+        expect(JSON.stringify(model.sharedModel.getSource())).toBeTruthy();
         const widget = tracker.currentWidget!;
         widget.content.activeCellIndex++;
         widget.content.activeCell!.model.metadata.set('bar', 1);
-        expect(JSON.stringify(model.value.text)).toContain('bar');
+        expect(JSON.stringify(model.sharedModel.getSource())).toContain('bar');
       });
 
       it('should handle a change to the metadata', () => {
@@ -320,10 +320,10 @@ describe('@jupyterlab/notebook', () => {
         });
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
-        const previous = model.value.text;
+        const previous = model.sharedModel.getSource();
         const metadata = notebookTools.activeCell!.model.metadata;
         metadata.set('foo', 1);
-        expect(model.value.text).not.toBe(previous);
+        expect(model.sharedModel.getSource()).not.toBe(previous);
       });
     });
 
@@ -346,15 +346,23 @@ describe('@jupyterlab/notebook', () => {
         });
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
-        expect(JSON.stringify(model.value.text)).toBeTruthy();
+        expect(JSON.stringify(model.sharedModel.getSource())).toBeTruthy();
 
         simulate(panel0.node, 'focus');
-        expect(JSON.stringify(model.value.text)).toContain('panel0');
-        expect(JSON.stringify(model.value.text)).not.toContain('panel1');
+        expect(JSON.stringify(model.sharedModel.getSource())).toContain(
+          'panel0'
+        );
+        expect(JSON.stringify(model.sharedModel.getSource())).not.toContain(
+          'panel1'
+        );
 
         simulate(panel1.node, 'focus');
-        expect(JSON.stringify(model.value.text)).not.toContain('panel0');
-        expect(JSON.stringify(model.value.text)).toContain('panel1');
+        expect(JSON.stringify(model.sharedModel.getSource())).not.toContain(
+          'panel0'
+        );
+        expect(JSON.stringify(model.sharedModel.getSource())).toContain(
+          'panel1'
+        );
       });
 
       it('should handle a change to the metadata', () => {
@@ -364,9 +372,13 @@ describe('@jupyterlab/notebook', () => {
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
         const widget = tracker.currentWidget!;
-        expect(JSON.stringify(model.value.text)).not.toContain('newvalue');
+        expect(JSON.stringify(model.sharedModel.getSource())).not.toContain(
+          'newvalue'
+        );
         widget.content.model!.metadata.set('newvalue', 1);
-        expect(JSON.stringify(model.value.text)).toContain('newvalue');
+        expect(JSON.stringify(model.sharedModel.getSource())).toContain(
+          'newvalue'
+        );
       });
     });
 

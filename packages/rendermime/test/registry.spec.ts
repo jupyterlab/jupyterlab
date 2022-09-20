@@ -6,7 +6,6 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-import { toArray } from '@lumino/algorithm';
 import { JSONObject, UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import json2html from 'json-to-html';
@@ -263,7 +262,7 @@ describe('rendermime/registry', () => {
     describe('#clone()', () => {
       it('should clone the rendermime instance with shallow copies of data', () => {
         const c = r.clone();
-        expect(toArray(c.mimeTypes)).toEqual(r.mimeTypes);
+        expect(Array.from(c.mimeTypes)).toEqual(r.mimeTypes);
         c.addFactory(fooFactory);
         expect(r).not.toBe(c);
       });

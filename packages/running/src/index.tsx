@@ -228,7 +228,7 @@ function Section(props: {
       title: shutdownTitle,
       body: shutdownAllConfirmationText,
       buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.cancelButton(),
         Dialog.warnButton({ label: shutdownAllLabel })
       ]
     }).then(result => {

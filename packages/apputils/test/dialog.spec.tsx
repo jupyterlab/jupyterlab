@@ -8,7 +8,6 @@ import {
   dismissDialog,
   waitForDialog
 } from '@jupyterlab/testutils';
-import { each } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
@@ -348,6 +347,13 @@ describe('@jupyterlab/apputils', () => {
     describe('.Renderer', () => {
       const renderer = Dialog.defaultRenderer;
 
+      const checkbox: Dialog.ICheckbox = {
+        label: 'foo',
+        caption: 'hello',
+        className: 'baz',
+        checked: false
+      };
+
       const data: Dialog.IButton = {
         label: 'foo',
         iconClass: 'bar',
@@ -408,19 +414,29 @@ describe('@jupyterlab/apputils', () => {
       describe('#createFooter()', () => {
         it('should create the footer of the dialog', () => {
           const buttons = [Dialog.okButton, { label: 'foo' }];
-          const nodes = buttons.map((button: Dialog.IButton) => {
-            return renderer.createButtonNode(button);
+          const nodes = buttons.map(button => {
+            return renderer.createButtonNode(button as Dialog.IButton);
           });
-          const footer = renderer.createFooter(nodes);
+          const footer = renderer.createFooter(nodes, null);
           const buttonNodes = footer.node.querySelectorAll('button');
 
           expect(footer.hasClass('jp-Dialog-footer')).toBe(true);
           expect(footer.node.contains(nodes[0])).toBe(true);
           expect(footer.node.contains(nodes[1])).toBe(true);
           expect(buttonNodes.length).toBeGreaterThan(0);
-          each(buttonNodes, (node: Element) => {
+          for (const node of buttonNodes) {
             expect(node.className).toContain('jp-mod-styled');
+          }
+        });
+
+        it('should create the footer of the dialog with checkbox', () => {
+          const buttons = [Dialog.okButton, { label: 'foo' }];
+          const nodes = buttons.map((button: Dialog.IButton) => {
+            return renderer.createButtonNode(button);
           });
+          const cboxNode = renderer.createCheckboxNode(checkbox);
+          const footer = renderer.createFooter(nodes, cboxNode);
+          expect(footer.node.contains(cboxNode)).toBe(true);
         });
       });
 
@@ -430,6 +446,15 @@ describe('@jupyterlab/apputils', () => {
           expect(node.className).toContain('jp-Dialog-button');
           expect(node.querySelector('.jp-Dialog-buttonIcon')).toBeTruthy();
           expect(node.querySelector('.jp-Dialog-buttonLabel')).toBeTruthy();
+        });
+      });
+
+      describe('#createCheckboxNode()', () => {
+        it('should create a checkbox node for the dialog', () => {
+          const node = renderer.createCheckboxNode(checkbox);
+          expect(node.className).toContain('jp-Dialog-checkbox');
+          expect(node.tagName).toEqual('LABEL');
+          expect(node.querySelector('input')?.type).toEqual('checkbox');
         });
       });
 
@@ -495,6 +520,7 @@ describe('@jupyterlab/apputils', () => {
       const result = await prompt;
 
       expect(result.button.accept).toBe(false);
+      expect(result.isChecked).toBe(null);
       expect(result.value).toBe(null);
       document.body.removeChild(node);
     });
@@ -618,6 +644,95 @@ describe('@jupyterlab/apputils', () => {
 
       expect(result.button.accept).toBe(false);
       expect(result.button.actions).toEqual(['reload']);
+      expect(result.value).toBe(null);
+      document.body.removeChild(node);
+    });
+
+    it('should accept checkbox options', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const prompt = showDialog({
+        title: 'foo',
+        body: 'Hello',
+        host: node,
+        defaultButton: 0,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()],
+        checkbox: {
+          label: 'foo',
+          caption: 'bar',
+          className: 'baz'
+        }
+      });
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).toBe(false);
+      expect(result.isChecked).toBe(false);
+      expect(result.value).toBe(null);
+      document.body.removeChild(node);
+    });
+
+    it('should accept checkbox checked state', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const prompt = showDialog({
+        title: 'foo',
+        body: 'Hello',
+        host: node,
+        defaultButton: 0,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()],
+        checkbox: {
+          label: 'foo',
+          caption: 'bar',
+          className: 'baz',
+          checked: true
+        }
+      });
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).toBe(false);
+      expect(result.isChecked).toBe(true);
+      expect(result.value).toBe(null);
+      document.body.removeChild(node);
+    });
+
+    it('should return the checkbox state', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const prompt = showDialog({
+        title: 'foo',
+        body: 'Hello',
+        host: node,
+        defaultButton: 0,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()],
+        checkbox: {
+          label: 'foo',
+          caption: 'bar',
+          className: 'baz'
+        }
+      });
+
+      await waitForDialog();
+
+      node.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click();
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).toBe(false);
+      expect(result.isChecked).toBe(true);
       expect(result.value).toBe(null);
       document.body.removeChild(node);
     });

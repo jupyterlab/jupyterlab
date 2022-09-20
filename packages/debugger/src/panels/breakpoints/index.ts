@@ -53,7 +53,7 @@ export class Breakpoints extends PanelWithToolbar {
             body: trans.__('Are you sure you want to remove all breakpoints?'),
             buttons: [
               Dialog.okButton({ label: trans.__('Remove breakpoints') }),
-              Dialog.cancelButton({ label: trans.__('Cancel') })
+              Dialog.cancelButton()
             ],
             hasClose: true
           });

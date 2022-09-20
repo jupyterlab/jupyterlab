@@ -50,6 +50,11 @@ export interface IDocumentManager extends IDisposable {
   lastModifiedCheckMargin: number;
 
   /**
+   * Whether to ask the user to rename untitled file on first manual save.
+   */
+  renameUntitledFileOnSave: boolean;
+
+  /**
    * Clone a widget.
    *
    * @param widget - The source widget.
@@ -132,6 +137,16 @@ export interface IDocumentManager extends IDisposable {
    * sessions are using the kernel, the session will be shut down.
    */
   deleteFile(path: string): Promise<void>;
+
+  /**
+   * Duplicate a file.
+   *
+   * @param path - The full path to the file to be duplicated.
+   *
+   * @returns A promise which resolves when the file is duplicated.
+   *
+   */
+  duplicate(path: string): Promise<Contents.IModel>;
 
   /**
    * See if a widget already exists for the given path and widget name.

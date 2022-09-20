@@ -6,6 +6,7 @@ import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
+import { YFile } from '@jupyterlab/shared-models';
 
 import { indentSelection } from '@codemirror/commands';
 
@@ -32,7 +33,9 @@ describe('CodeMirrorEditorFactory', () => {
   beforeEach(() => {
     host = document.createElement('div');
     document.body.appendChild(host);
-    model = new CodeEditor.Model();
+    model = new CodeEditor.Model({
+      sharedModel: new YFile()
+    });
   });
 
   afterEach(() => {

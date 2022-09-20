@@ -105,15 +105,16 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
 
     const { rendermime, mimeType } = options;
 
-    const model = new CodeCellModel({});
+    const model = new CodeCellModel();
     model.mimeType = mimeType ?? '';
     this._prompt = new CodeCell({
       rendermime,
-      model
+      model,
+      placeholder: false
     }).initializeState();
 
     // explicitly remove the prompt in front of the input area
-    this._prompt.inputArea.promptNode.remove();
+    this._prompt.inputArea!.promptNode.remove();
 
     this.node.appendChild(this._prompt.node);
   }
@@ -122,7 +123,7 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
    * Get the text specified by the user
    */
   getValue(): string {
-    return this._prompt.model.value.text;
+    return this._prompt.model.sharedModel.getSource();
   }
 
   /**

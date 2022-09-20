@@ -1510,6 +1510,7 @@ class _AppHandler(object):
                 alias = None
             url = get_package_url(data)
             extensions[alias or name] = dict(
+                description=data.get("description", ""),
                 path=path,
                 filename=osp.basename(path),
                 url=url,

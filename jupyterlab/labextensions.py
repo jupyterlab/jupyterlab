@@ -204,7 +204,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
 
 class DevelopLabExtensionApp(BaseExtensionApp):
-    description = "Develop labextension"
+    description = "(developer) Develop labextension"
     flags = develop_flags
 
     user = Bool(False, config=True, help="Whether to do a user install")
@@ -232,7 +232,7 @@ class DevelopLabExtensionApp(BaseExtensionApp):
 
 
 class BuildLabExtensionApp(BaseExtensionApp):
-    description = "Build labextension"
+    description = "(developer) Build labextension"
 
     static_url = Unicode("", config=True, help="Sets the url for static assets when building")
 
@@ -266,7 +266,7 @@ class BuildLabExtensionApp(BaseExtensionApp):
 
 
 class WatchLabExtensionApp(BaseExtensionApp):
-    description = "Watch labextension"
+    description = "(developer) Watch labextension"
 
     development = Bool(True, config=True, help="Build in development mode")
 
@@ -459,13 +459,13 @@ class CheckLabExtensionsApp(BaseExtensionApp):
             self.exit(1)
 
 
-_examples = """
+_EXAMPLES = """
 jupyter labextension list                        # list all configured labextensions
-jupyter labextension develop                     # develop a prebuilt labextension
-jupyter labextension build                       # build a prebuilt labextension
-jupyter labextension watch                       # watch a prebuilt labextension
 jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
+jupyter labextension develop                     # (developer) develop a prebuilt labextension
+jupyter labextension build                       # (developer) build a prebuilt labextension
+jupyter labextension watch                       # (developer) watch a prebuilt labextension
 """
 
 
@@ -475,13 +475,10 @@ class LabExtensionApp(JupyterApp):
     name = "jupyter labextension"
     version = VERSION
     description = "Work with JupyterLab extensions"
-    examples = _examples
+    examples = _EXAMPLES
 
     subcommands = dict(
         install=(InstallLabExtensionApp, "Install labextension(s)"),
-        develop=(DevelopLabExtensionApp, "Develop labextension(s)"),
-        build=(BuildLabExtensionApp, "Build labextension"),
-        watch=(WatchLabExtensionApp, "Watch labextension"),
         update=(UpdateLabExtensionApp, "Update labextension(s)"),
         uninstall=(UninstallLabExtensionApp, "Uninstall labextension(s)"),
         list=(ListLabExtensionsApp, "List labextensions"),
@@ -490,6 +487,9 @@ class LabExtensionApp(JupyterApp):
         enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
         disable=(DisableLabExtensionsApp, "Disable labextension(s)"),
         check=(CheckLabExtensionsApp, "Check labextension(s)"),
+        develop=(DevelopLabExtensionApp, "(developer) Develop labextension(s)"),
+        build=(BuildLabExtensionApp, "(developer) Build labextension"),
+        watch=(WatchLabExtensionApp, "(developer) Watch labextension"),
     )
 
     def start(self):

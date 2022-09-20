@@ -34,17 +34,19 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
+    "async_lru>=1.0.0",
     "importlib-metadata>=3.6;python_version<\"3.10\"",
     "importlib-resources>=1.4;python_version<\"3.9\"",
     "ipykernel",
     "jinja2>=3.0.3",
     "jupyter_core",
     "jupyter-lsp>=1.5.1",
-    "jupyter_server>=1.16.0,<2",
+    "jupyter_server>=1.16.0,<3",
     "jupyter_server_ydoc>=0.1.9,<0.2.0",
     "jupyterlab_server>=2.11.1,<3",
     "notebook_shim>=0.1",
     "packaging",
+    "traitlets",
     "tornado>=6.1.0",
     "tomli",
     "ypy-websocket",
@@ -58,6 +60,10 @@ jlpm = "jupyterlab.jlpmapp:main"
 jupyter-lab = "jupyterlab.labapp:main"
 jupyter-labextension = "jupyterlab.labextensions:main"
 jupyter-labhub = "jupyterlab.labhubapp:main"
+
+[project.entry-points."jupyterlab.extension_manager_v1"]
+readonly = "jupyterlab.extensions:get_readonly_manager"
+pypi = "jupyterlab.extensions:get_pypi_manager"
 
 [project.urls]
 Homepage = "https://jupyter.org"
@@ -82,10 +88,11 @@ docs = [
 docs-screenshots = [
     "altair==4.2.0",
     "ipython==8.0.0",
-    "ipywidgets==7.6.5",
+    "ipywidgets==7.6.6",
     "jupyterlab-geojson==3.2.0",
     "jupyterlab-language-pack-zh-CN==3.2.post7",
     "matplotlib==3.5.1",
+    "nbconvert>=7.0.0",
     "pandas==1.3.5",
     "scipy==1.7.3",
     "vdom==0.6",

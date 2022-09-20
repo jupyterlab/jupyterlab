@@ -621,7 +621,7 @@ export class DebuggerService implements IDebugger, IDisposable {
           path: this._session?.connection?.path ?? '',
           source: id
         });
-        const tmpCells = editorList.map(e => e.model.value.text);
+        const tmpCells = editorList.map(e => e.src.getSource());
         cells = cells.concat(tmpCells);
       }
     }

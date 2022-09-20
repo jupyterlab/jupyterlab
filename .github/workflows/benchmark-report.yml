@@ -28,7 +28,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            var artifacts = await github.actions.listWorkflowRunArtifacts({
+            var artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
                run_id: ${{ github.event.workflow_run.id }},
@@ -36,7 +36,7 @@ jobs:
             var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "benchmark-assets"
             })[0];
-            var download = await github.actions.downloadArtifact({
+            var download = await github.rest.actions.downloadArtifact({
                owner: context.repo.owner,
                repo: context.repo.repo,
                artifact_id: matchArtifact.id,
@@ -54,10 +54,10 @@ jobs:
             var fs = require('fs');
             var issue_number = Number(fs.readFileSync('./benchmark-results/NR'));
             var report = String(fs.readFileSync('./benchmark-results/lab-benchmark.md'));
-            var memory-report = String(fs.readFileSync('./memory-leak-report.md'));
+            var memory_report = String(fs.readFileSync('./memory-leak-report.md'));
 
             // Get the existing comments.
-            const {data: comments} = await github.issues.listComments({
+            const {data: comments} = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
@@ -66,17 +66,17 @@ jobs:
             // Find any comment already made by the bot.
             const botComment = comments.find(comment => comment.user.id === 41898282)
             if (botComment) {
-              await github.issues.updateComment({
+              await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: botComment.id,
-                body: [report, memory-report].join('\n')
+                body: [report, memory_report].join('\n')
               })
             } else {
-              await github.issues.createComment({
+              await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue_number,
-                body: [report, memory-report].join('\n')
+                body: [report, memory_report].join('\n')
               });
             }

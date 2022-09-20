@@ -7,7 +7,6 @@ import { ISanitizer } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { toArray } from '@lumino/algorithm';
 import escape from 'lodash.escape';
 import { removeMath, replaceMath } from './latex';
 
@@ -718,7 +717,7 @@ namespace Private {
    */
   export function evalInnerHTMLScriptTags(host: HTMLElement): void {
     // Create a snapshot of the current script nodes.
-    const scripts = toArray(host.getElementsByTagName('script'));
+    const scripts = Array.from(host.getElementsByTagName('script'));
 
     // Loop over each script node.
     for (const script of scripts) {

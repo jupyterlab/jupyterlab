@@ -20,8 +20,6 @@
 }
 
 .jp-OutputPrompt {
-  display: table-cell;
-  vertical-align: top;
   width: var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
@@ -45,6 +43,11 @@
   user-select: none;
 }
 
+.jp-OutputArea-prompt {
+  display: table-cell;
+  vertical-align: top;
+}
+
 .jp-OutputArea-output {
   display: table-cell;
   width: 100%;
@@ -65,7 +68,7 @@
 }
 
 /*
-When drag events occur, `p-mod-override-cursor` is added to the body.
+When drag events occur, `lm-mod-override-cursor` is added to the body.
 Because iframes steal all cursor events, the following two rules are necessary
 to suppress pointer events while resize drags are occurring. There may be a
 better solution to this problem.

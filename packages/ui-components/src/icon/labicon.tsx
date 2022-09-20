@@ -496,10 +496,12 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         } else {
           return (
             <Tag
-              className={classes(
-                className,
-                LabIconStyle.styleClass(styleProps)
-              )}
+              className={
+                className || styleProps
+                  ? classes(className, LabIconStyle.styleClass(styleProps))
+                  : undefined
+              }
+              title={title}
             >
               {svgComponent}
               {label}

@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   ITranslator,
@@ -11,19 +9,21 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import mergeWith from 'lodash.mergewith';
 
 import { ClientCapabilities, LanguageIdentifier } from '../lsp';
 import { IVirtualPosition } from '../positioning';
 import {
+  Document,
   IDocumentConnectionData,
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
   ISocketConnectionOptions
 } from '../tokens';
-import { IForeignContext, VirtualDocument } from '../virtual/document';
+import { VirtualDocument } from '../virtual/document';
 
 type IButton = Dialog.IButton;
 const createButton = Dialog.createButton;
@@ -42,7 +42,7 @@ export interface IEditorChangedData {
   /**
    * The CM editor invoking the change event.
    */
-  editor: CodeEditor.IEditor;
+  editor: Document.IEditor;
 }
 
 export interface IAdapterOptions {
@@ -80,9 +80,9 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
   constructor(public widget: T, protected options: IAdapterOptions) {
-    this.connectionManager = options.connectionManager;
-    this.isConnected = false;
-    this.trans = (options.translator || nullTranslator).load('jupyterlab');
+    this._connectionManager = options.connectionManager;
+    this._isConnected = false;
+    this._trans = (options.translator || nullTranslator).load('jupyterlab');
     // set up signal connections
     this.widget.context.saveState.connect(this.onSaveState, this);
     this.connectionManager.closed.connect(this.onConnectionClosed, this);
@@ -121,7 +121,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       let [type, subtype] = withoutParameters.split('/');
       if (type === 'application' || type === 'text') {
         if (subtype.startsWith('x-')) {
-          return subtype.substr(2);
+          return subtype.substring(2);
         } else {
           return subtype;
         }
@@ -192,46 +192,55 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   /**
    * Get the activated CM editor.
    */
-  abstract get activeEditor(): CodeEditor.IEditor | undefined;
+  abstract get activeEditor(): Document.IEditor | undefined;
 
   /**
-   *  Get the list of CM editors in the document, there is only one editor
+   * Get the list of CM editors in the document, there is only one editor
    * in the case of file editor.
    */
-  abstract get editors(): {
-    ceEditor: CodeEditor.IEditor;
-    type: string;
-  }[];
+  abstract get editors(): Document.ICodeBlockOptions[];
 
   /**
    * The virtual document is connected or not
    */
-  isConnected: boolean;
+  get isConnected(): boolean {
+    return this._isConnected;
+  }
 
   /**
    * The LSP document and connection manager instance.
    */
-  connectionManager: ILSPDocumentConnectionManager;
+  get connectionManager(): ILSPDocumentConnectionManager {
+    return this._connectionManager;
+  }
 
   /**
    * The translator provider.
    */
-  trans: TranslationBundle;
+  get trans(): TranslationBundle {
+    return this._trans;
+  }
 
   /**
    * Promise that resolves once the document is updated
    */
-  updateFinished: Promise<void>;
+  get updateFinished(): Promise<void> {
+    return this._updateFinished;
+  }
 
   /**
    * Promise that resolves once the adapter is initialized
    */
-  ready: Promise<void>;
+  get ready(): Promise<void> {
+    return this._ready;
+  }
 
   /**
    * Internal virtual document of the adapter.
    */
-  virtualDocument: VirtualDocument;
+  get virtualDocument(): VirtualDocument {
+    return this._virtualDocument;
+  }
 
   /**
    * Callback on connection closed event.
@@ -254,6 +263,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     }
     this._isDisposed = true;
 
+    this.virtualDocument?.dispose();
+
     this.widget.context.saveState.disconnect(this.onSaveState, this);
     this.connectionManager.closed.disconnect(this.onConnectionClosed, this);
     this.widget.disposed.disconnect(this.dispose, this);
@@ -261,11 +272,6 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     this.disconnect();
     this._disposed.emit();
     Signal.clearData(this);
-
-    // just to be sure
-    this.widget = null as any;
-    this.connectionManager = null as any;
-    this.widget = null as any;
   }
 
   /**
@@ -297,15 +303,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       console.warn('Cannot update documents: adapter disposed');
       return Promise.reject('Cannot update documents: adapter disposed');
     }
-    return this.virtualDocument.updateManager.updateDocuments(
-      this.editors.map(({ ceEditor, type }) => {
-        return {
-          ceEditor: ceEditor,
-          value: ceEditor.model.value.text,
-          type
-        };
-      })
-    );
+    return this.virtualDocument.updateManager.updateDocuments(this.editors);
   }
 
   /**
@@ -340,7 +338,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   /**
    * (re)create virtual document using current path and language
    */
-  abstract createVirtualDocument(): VirtualDocument;
+  protected abstract createVirtualDocument(): VirtualDocument;
 
   /**
    * Get the index of editor from the cursor position in the virtual
@@ -357,14 +355,14 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    *
    * @param ceEditor - instance of the code editor
    */
-  abstract getEditorIndex(ceEditor: CodeEditor.IEditor): number;
+  abstract getEditorIndex(ceEditor: Document.IEditor): number;
 
   /**
    * Get the wrapper of input editor.
    *
    * @param ceEditor
    */
-  abstract getEditorWrapper(ceEditor: CodeEditor.IEditor): HTMLElement;
+  abstract getEditorWrapper(ceEditor: Document.IEditor): HTMLElement;
 
   // equivalent to triggering didClose and didOpen, as per syncing specification,
   // but also reloads the connection; used during file rename (or when it was moved)
@@ -421,8 +419,6 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     }
   }
 
-  protected _isDisposed = false;
-
   /**
    * Connect the virtual document with the language server.
    */
@@ -430,7 +426,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     let { virtualDocument } = data;
 
     this._adapterConnected.emit(data);
-    this.isConnected = true;
+    this._isConnected = true;
 
     try {
       await this.updateDocuments();
@@ -544,7 +540,10 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       );
       return;
     }
-    this.virtualDocument = virtualDocument;
+    if (this._virtualDocument) {
+      this._virtualDocument.dispose();
+    }
+    this._virtualDocument = virtualDocument;
     this._connectContentChangedSignal();
   }
 
@@ -558,7 +557,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    */
   protected async onForeignDocumentOpened(
     _: VirtualDocument,
-    context: IForeignContext
+    context: Document.IForeignContext
   ): Promise<void> {
     const { foreignDocument } = context;
 
@@ -603,6 +602,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    */
   protected _disposed: Signal<WidgetLSPAdapter<T>, void> = new Signal(this);
 
+  private _isDisposed = false;
+
   /**
    * Callback called when a foreign document is closed,
    * the associated signals with this virtual document
@@ -610,7 +611,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    */
   private _onForeignDocumentClosed(
     _: VirtualDocument,
-    context: IForeignContext
+    context: Document.IForeignContext
   ): void {
     const { foreignDocument } = context;
     foreignDocument.foreignDocumentClosed.disconnect(
@@ -700,7 +701,15 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       console.warn('Could not update documents');
       return;
     }
-    this.updateFinished = promise.catch(console.warn);
+    this._updateFinished = promise.catch(console.warn);
     await this.updateFinished;
   }
+
+  protected _ready: Promise<void>;
+
+  private _connectionManager: ILSPDocumentConnectionManager;
+  private _isConnected: boolean;
+  private _trans: TranslationBundle;
+  private _updateFinished: Promise<void>;
+  private _virtualDocument: VirtualDocument;
 }

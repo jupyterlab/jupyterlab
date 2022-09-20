@@ -11,7 +11,8 @@ test.use({
 });
 
 test.describe('General', () => {
-  test('Welcome', async ({ page }) => {
+  // FIXME restore when ipywidgets support lumino 2
+  test.skip('Welcome', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
@@ -298,7 +299,7 @@ test.describe('General', () => {
     ).toMatchSnapshot('file_editor_settings.png');
   });
 
-  test('Notebook', async ({ page }) => {
+  test('Notebook', async ({ page }, testInfo) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
@@ -326,6 +327,11 @@ test.describe('General', () => {
       "import json\nfrom IPython.display import GeoJSON\nwith open('../data/Museums_in_DC.geojson') as f:\ns = GeoJSON(json.load(f), layer_options={'minZoom': 11})"
     );
     await page.notebook.run();
+
+    if (testInfo.config.updateSnapshots !== 'none') {
+      // Wait a bit for the map to load when updating the snapshots
+      await page.waitForTimeout(300);
+    }
 
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {

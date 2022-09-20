@@ -26,19 +26,10 @@ import {
   classes,
   LabIcon
 } from '@jupyterlab/ui-components';
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  filter,
-  find,
-  IIterator,
-  StringExt,
-  toArray
-} from '@lumino/algorithm';
+import { ArrayExt, filter, StringExt } from '@lumino/algorithm';
 import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
-import { Drag, IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
@@ -297,7 +288,7 @@ export class DirListing extends Widget {
    *
    * @returns A new iterator over the listing's selected items.
    */
-  selectedItems(): IIterator<Contents.IModel> {
+  selectedItems(): IterableIterator<Contents.IModel> {
     const items = this._sortedItems;
     return filter(items, item => this.selection[item.path]);
   }
@@ -307,8 +298,8 @@ export class DirListing extends Widget {
    *
    * @returns A new iterator over the listing's sorted items.
    */
-  sortedItems(): IIterator<Contents.IModel> {
-    return new ArrayIterator(this._sortedItems);
+  sortedItems(): IterableIterator<Contents.IModel> {
+    return this._sortedItems[Symbol.iterator]();
   }
 
   /**
@@ -359,7 +350,7 @@ export class DirListing extends Widget {
     const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
-    each(this._clipboard, path => {
+    for (const path of this._clipboard) {
       if (this._isCut) {
         const localPath = this._manager.services.contents.localPath(path);
         const parts = localPath.split('/');
@@ -369,12 +360,12 @@ export class DirListing extends Widget {
       } else {
         promises.push(this._model.manager.copy(path, basePath));
       }
-    });
+    }
 
     // Remove any cut modifiers.
-    each(this._items, item => {
+    for (const item of this._items) {
       item.classList.remove(CUT_CLASS);
-    });
+    }
 
     this._clipboard.length = 0;
     this._isCut = false;
@@ -440,11 +431,11 @@ export class DirListing extends Widget {
     const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
-    each(this.selectedItems(), item => {
+    for (const item of this.selectedItems()) {
       if (item.type !== 'directory') {
         promises.push(this._model.manager.copy(item.path, basePath));
       }
-    });
+    }
     return Promise.all(promises)
       .then(() => {
         return undefined;
@@ -462,7 +453,7 @@ export class DirListing extends Widget {
    */
   async download(): Promise<void> {
     await Promise.all(
-      toArray(this.selectedItems())
+      Array.from(this.selectedItems())
         .filter(item => item.type !== 'directory')
         .map(item => this._model.download(item.path))
     );
@@ -478,7 +469,7 @@ export class DirListing extends Widget {
     const items = this._sortedItems;
     const paths = items.map(item => item.path);
 
-    const promises = toArray(this._model.sessions())
+    const promises = Array.from(this._model.sessions())
       .filter(session => {
         const index = ArrayExt.firstIndexOf(paths, session.path);
         return this.selection[items[index].path];
@@ -587,7 +578,7 @@ export class DirListing extends Widget {
     const items = this._sortedItems;
 
     return (
-      toArray(
+      Array.from(
         filter(items, item => item.name === name && this.selection[item.path])
       ).length !== 0
     );
@@ -688,16 +679,16 @@ export class DirListing extends Widget {
         this._evtScroll(event as MouseEvent);
         break;
       case 'lm-dragenter':
-        this.evtDragEnter(event as IDragEvent);
+        this.evtDragEnter(event as Drag.Event);
         break;
       case 'lm-dragleave':
-        this.evtDragLeave(event as IDragEvent);
+        this.evtDragLeave(event as Drag.Event);
         break;
       case 'lm-dragover':
-        this.evtDragOver(event as IDragEvent);
+        this.evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this.evtDrop(event as IDragEvent);
+        this.evtDrop(event as Drag.Event);
         break;
       default:
         break;
@@ -861,7 +852,7 @@ export class DirListing extends Widget {
 
     // Handle file session statuses.
     const paths = items.map(item => item.path);
-    each(this._model.sessions(), session => {
+    for (const session of this._model.sessions()) {
       const index = ArrayExt.firstIndexOf(paths, session.path);
       const node = nodes[index];
       // Node may have been filtered out.
@@ -872,11 +863,11 @@ export class DirListing extends Widget {
         node.classList.add(RUNNING_CLASS);
         if (specs && name) {
           const spec = specs.kernelspecs[name];
-          name = spec ? spec.display_name : 'unknown'; // FIXME-TRANS: Is this localizable?
+          name = spec ? spec.display_name : this._trans.__('unknown');
         }
         node.title = this._trans.__('%1\nKernel: %2', node.title, name);
       }
-    });
+    }
 
     this._prevPath = this._model.path;
   }
@@ -1225,7 +1216,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  protected evtDragEnter(event: IDragEvent): void {
+  protected evtDragEnter(event: Drag.Event): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
       const index = Private.hitTestNodes(this._items, event);
       if (index === -1) {
@@ -1245,7 +1236,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  protected evtDragLeave(event: IDragEvent): void {
+  protected evtDragLeave(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     const dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
@@ -1257,7 +1248,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  protected evtDragOver(event: IDragEvent): void {
+  protected evtDragOver(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
@@ -1272,7 +1263,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  protected evtDrop(event: IDragEvent): void {
+  protected evtDrop(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     clearTimeout(this._selectTimer);
@@ -1341,7 +1332,7 @@ export class DirListing extends Widget {
     let selectedPaths = Object.keys(this.selection);
     const source = this._items[index];
     const items = this._sortedItems;
-    let selectedItems: Contents.IModel[];
+    let selectedItems: Iterable<Contents.IModel>;
     let item: Contents.IModel | undefined;
 
     // If the source node is not selected, use just that node.
@@ -1351,8 +1342,8 @@ export class DirListing extends Widget {
       selectedItems = [item];
     } else {
       const path = selectedPaths[0];
-      item = find(items, value => value.path === path);
-      selectedItems = toArray(this.selectedItems());
+      item = items.find(value => value.path === path);
+      selectedItems = this.selectedItems();
     }
 
     if (!item) {
@@ -1564,9 +1555,9 @@ export class DirListing extends Widget {
    */
   private _copy(): void {
     this._clipboard.length = 0;
-    each(this.selectedItems(), item => {
+    for (const item of this.selectedItems()) {
       this._clipboard.push(item.path);
-    });
+    }
   }
 
   /**
@@ -1687,12 +1678,12 @@ export class DirListing extends Widget {
     // Update the selection.
     const existing = Object.keys(this.selection);
     this.clearSelectedItems();
-    each(this._model.items(), item => {
+    for (const item of this._model.items()) {
       const path = item.path;
       if (existing.indexOf(path) !== -1) {
         this.selection[path] = true;
       }
-    });
+    }
     if (this.isVisible) {
       // Update the sorted items.
       this.sort(this.sortState);
@@ -2415,10 +2406,10 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export function sort(
-    items: IIterator<Contents.IModel>,
+    items: Iterable<Contents.IModel>,
     state: DirListing.ISortState
   ): Contents.IModel[] {
-    const copy = toArray(items);
+    const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
 
     if (state.key === 'last_modified') {

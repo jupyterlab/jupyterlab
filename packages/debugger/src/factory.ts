@@ -6,6 +6,7 @@ import {
   CodeEditorWrapper,
   IEditorServices
 } from '@jupyterlab/codeeditor';
+import { createStandaloneCell } from '@jupyterlab/shared-models';
 
 import { IDebugger } from '.';
 
@@ -33,7 +34,10 @@ export class ReadOnlyEditorFactory {
     const mimeTypeService = this._services.mimeTypeService;
     const editor = new CodeEditorWrapper({
       model: new CodeEditor.Model({
-        value: content,
+        sharedModel: createStandaloneCell({
+          cell_type: 'code',
+          source: content
+        }),
         mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
       }),
       factory,

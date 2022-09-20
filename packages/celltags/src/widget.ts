@@ -23,6 +23,13 @@ export class TagWidget extends Widget {
   }
 
   /**
+   * Get the parent tag tool widget.
+   */
+  get parent(): TagTool | null {
+    return super.parent as TagTool | null;
+  }
+
+  /**
    * Create tag div with icon and attach to this.node.
    */
   buildTag(): void {
@@ -150,5 +157,4 @@ export class TagWidget extends Widget {
 
   public name: string;
   private applied: boolean;
-  public parent: TagTool | null = null;
 }

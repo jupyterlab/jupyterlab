@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docprovider-extension",
-  "version": "4.0.0-alpha.12",
+  "version": "4.0.0-alpha.13",
   "description": "JupyterLab - Document Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,11 +34,11 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.12",
-    "@jupyterlab/collaboration": "^4.0.0-alpha.12",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
-    "@jupyterlab/docprovider": "^4.0.0-alpha.12",
-    "@jupyterlab/services": "^7.0.0-alpha.12"
+    "@jupyterlab/application": "^4.0.0-alpha.13",
+    "@jupyterlab/collaboration": "^4.0.0-alpha.13",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.13",
+    "@jupyterlab/docprovider": "^4.0.0-alpha.13",
+    "@jupyterlab/services": "^7.0.0-alpha.13"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

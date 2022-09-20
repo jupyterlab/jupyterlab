@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterServer, testEmission } from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
 import {
   ServerConnection,
   Terminal,
@@ -95,7 +94,7 @@ describe('terminal', () => {
       it('should give an iterator over the list of running models', async () => {
         await TerminalAPI.startNew();
         await manager.refreshRunning();
-        const running = toArray(manager.running());
+        const running = Array.from(manager.running());
         expect(running.length).toBeGreaterThan(0);
       });
     });
@@ -148,7 +147,7 @@ describe('terminal', () => {
         const emission = testEmission(manager.runningChanged, {
           test: (sender, args) => {
             expect(sender).toBe(manager);
-            expect(toArray(args).length).toBeGreaterThan(0);
+            expect(Array.from(args).length).toBeGreaterThan(0);
           }
         });
         await manager.startNew();
@@ -158,10 +157,10 @@ describe('terminal', () => {
 
     describe('#refreshRunning()', () => {
       it('should update the running session models', async () => {
-        const before = toArray(manager.running()).length;
+        const before = Array.from(manager.running()).length;
         const model = await TerminalAPI.startNew();
         await manager.refreshRunning();
-        const running = toArray(manager.running());
+        const running = Array.from(manager.running());
         expect(running.length).toBe(before + 1);
         let found = false;
         running.map(m => {
@@ -212,14 +211,14 @@ describe('terminal', () => {
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toEqual(0);
+        expect(Array.from(manager.running()).length).toEqual(0);
       });
     });
 
     describe('#refreshRunning()', () => {
       it('should update the running kernels', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toEqual(0);
+        expect(Array.from(manager.running()).length).toEqual(0);
       });
     });
 

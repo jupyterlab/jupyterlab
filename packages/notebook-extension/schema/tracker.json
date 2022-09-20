@@ -632,6 +632,16 @@
       "command": "notebook:toggle-render-side-by-side-current",
       "keys": ["Shift R"],
       "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:move-cell-up",
+      "keys": ["Ctrl Shift ArrowUp"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:move-cell-down",
+      "keys": ["Ctrl Shift ArrowDown"],
+      "selector": ".jp-Notebook:focus"
     }
   ],
   "title": "Notebook",
@@ -842,35 +852,12 @@
       "type": "boolean",
       "default": false
     },
-    "numberCellsToRenderDirectly": {
-      "title": "Number of cells to render directly",
-      "description": "Define the number of cells to render directly when virtual notebook intersection observer is available",
+    "overscanCount": {
+      "title": "Number of cells to render outside de the viewport",
+      "description": "In 'full' windowing mode, this is the number of cells above and below the viewport.",
       "type": "number",
-      "default": 99999
-    },
-    "remainingTimeBeforeRescheduling": {
-      "title": "Remaining time in milliseconds before virtual notebook rendering is rescheduled",
-      "description": "Define the remaining time in milliseconds before virtual notebook rendering is rescheduled. Set 0 if you want to disable any rescheduling",
-      "type": "number",
-      "default": 50
-    },
-    "renderCellOnIdle": {
-      "title": "Render cell on browser idle time",
-      "description": "Defines if the placeholder cells should be rendered when the browser is idle",
-      "type": "boolean",
-      "default": true
-    },
-    "observedTopMargin": {
-      "title": "Observed top margin",
-      "description": "Defines the observed top margin for the virtual notebook, set a positive number of pixels to render cells above the visible view",
-      "type": "string",
-      "default": "1000px"
-    },
-    "observedBottomMargin": {
-      "title": "Observed bottom margin",
-      "description": "Defines the observed bottom margin for the virtual notebook, set a positive number of pixels to render cells below the visible view",
-      "type": "string",
-      "default": "1000px"
+      "default": 1,
+      "minimum": 1
     },
     "maxNumberOutputs": {
       "title": "The maximum number of output cells to be rendered in the output area.",
@@ -908,7 +895,7 @@
     "renderingLayout": {
       "title": "Rendering Layout",
       "description": "Global setting to define the rendering layout in notebooks. 'default' or 'side-by-side' are supported.",
-      "type": "string",
+      "enum": ["default", "side-by-side"],
       "default": "default"
     },
     "sideBySideLeftMarginOverride": {
@@ -929,6 +916,12 @@
       "type": "number",
       "default": 1,
       "minimum": 0
+    },
+    "windowingMode": {
+      "title": "Windowing mode",
+      "description": "'defer': Wait for idle CPU cycles to attach out of viewport cells - 'full': Attach to the DOM only cells in viewport - 'none': Attach all cells to the viewport",
+      "enum": ["defer", "full", "none"],
+      "default": "full"
     }
   },
   "additionalProperties": false,

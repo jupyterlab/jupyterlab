@@ -4,7 +4,7 @@
 
 import * as path from 'path';
 
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 test.describe('Notebook Tests', () => {
   test('Create New Notebook', async ({ page, tmpPath }) => {
@@ -28,7 +28,7 @@ test.describe('Notebook Tests', () => {
 
     // Wait for kernel to be idle
     expect(
-      await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
+      await page.waitForSelector('#jp-main-statusbar >> text=Idle')
     ).toBeTruthy();
 
     expect(await (await page.$('[role="main"]')).screenshot()).toMatchSnapshot(
@@ -45,7 +45,7 @@ test.describe('Notebook Tests', () => {
 
     // Wait for kernel to be idle and the debug switch to appear
     await Promise.all([
-      page.waitForSelector(`#jp-main-statusbar >> text=Idle`),
+      page.waitForSelector('#jp-main-statusbar >> text=Idle'),
       page.waitForSelector('.jp-DebuggerBugButton')
     ]);
 
@@ -63,7 +63,7 @@ test.describe('Notebook Tests', () => {
 
     // Wait for kernel to be idle
     expect(
-      await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
+      page.waitForSelector('#jp-main-statusbar >> text=Idle')
     ).toBeTruthy();
 
     expect(await (await page.$('[role="main"]')).screenshot()).toMatchSnapshot(
@@ -132,5 +132,61 @@ test.describe('Notebook Tests', () => {
     await page.notebook.close();
 
     expect(await page.waitForSelector(page.launcherSelector)).toBeTruthy();
+  });
+});
+
+test.describe('Access cells in windowed notebook', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_DOCUMENTATION_STATE[
+          '@jupyterlab/notebook-extension:tracker'
+        ],
+        windowingMode: 'full'
+      }
+    }
+  });
+
+  test('get the cell count', async ({ page, tmpPath }) => {
+    const target = `${tmpPath}/windowed_notebook.ipynb`;
+    await page.contents.uploadFile(
+      path.resolve(__dirname, 'notebooks/windowed_notebook.ipynb'),
+      target
+    );
+
+    await page.filebrowser.open(target);
+    await page.waitForSelector(`#jp-main-statusbar >> text=Idle`);
+
+    expect(await page.notebook.getCellCount()).toEqual(14);
+  });
+
+  test('getCell below the viewport', async ({ page, tmpPath }) => {
+    const target = `${tmpPath}/windowed_notebook.ipynb`;
+    await page.contents.uploadFile(
+      path.resolve(__dirname, 'notebooks/windowed_notebook.ipynb'),
+      target
+    );
+
+    await page.filebrowser.open(target);
+    await page.waitForSelector(`#jp-main-statusbar >> text=Idle`);
+
+    expect(await page.notebook.getCell(12)).toBeTruthy();
+  });
+
+  test('getCell above the viewport', async ({ page, tmpPath }) => {
+    const target = `${tmpPath}/windowed_notebook.ipynb`;
+    await page.contents.uploadFile(
+      path.resolve(__dirname, 'notebooks/windowed_notebook.ipynb'),
+      target
+    );
+
+    await page.filebrowser.open(target);
+    await page.waitForSelector(`#jp-main-statusbar >> text=Idle`);
+    await page.waitForTimeout(50);
+
+    await page.notebook.getCell(12);
+
+    expect(await page.notebook.getCell(0)).toBeTruthy();
   });
 });

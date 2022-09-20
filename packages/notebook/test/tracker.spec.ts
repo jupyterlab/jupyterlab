@@ -58,7 +58,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be `null` if a tracked notebook has no active cell', () => {
         const tracker = new NotebookTracker({ namespace });
         const panel = utils.createNotebookPanel(context);
-        panel.content.model!.cells.clear();
+        panel.content.model!.sharedModel.clearUndoHistory();
         void tracker.add(panel);
         expect(tracker.activeCell).toBeNull();
       });

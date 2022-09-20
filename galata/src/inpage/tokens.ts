@@ -1,7 +1,7 @@
 // Copyright (c) Bloomberg Finance LP.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { IRouter } from '@jupyterlab/application';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -15,7 +15,7 @@ export interface INotebookRunCallback {
    */
   onBeforeScroll?: () => Promise<void>;
   /**
-   * Callback after scrolling to teh cell
+   * Callback after scrolling to the cell
    */
   onAfterScroll?: () => Promise<void>;
   /**
@@ -72,6 +72,17 @@ export interface IGalataInpage {
   ): Promise<IPluginNameToInterfaceMap[K] | undefined>;
 
   /**
+   * Test if one or all cells have an execution number.
+   *
+   * @param cellIndex Cell index
+   * @returns Whether the cell was executed or not
+   *
+   * ### Notes
+   * It checks that no cells have a `null` execution count.
+   */
+  haveBeenExecuted(cellIndex?: number): boolean;
+
+  /**
    * Test if a cell is selected in the active notebook
    *
    * @param cellIndex Cell index
@@ -100,9 +111,11 @@ export interface IGalataInpage {
   setTheme(themeName: string): Promise<void>;
 
   /**
-   * Run the active notebook
+   * Reset execution count of one or all cells.
+   *
+   * @param cellIndex Cell index
    */
-  runActiveNotebook(): Promise<void>;
+  resetExecutionCount(cellIndex?: number): void;
 
   /**
    * Run the active notebook cell by cell
@@ -118,13 +131,6 @@ export interface IGalataInpage {
    * @param path Path to monitor
    */
   waitForLaunch(path?: string): Promise<void>;
-
-  /**
-   * Wait for the route to be on path and close all documents
-   *
-   * @param path Path to monitor
-   */
-  waitForNotebookRun(): Promise<void>;
 
   /**
    * Wait for an element to be found from a CSS selector

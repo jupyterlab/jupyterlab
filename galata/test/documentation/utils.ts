@@ -4,7 +4,6 @@
  */
 
 import { Page } from '@playwright/test';
-import { default as extensionsSearchStub } from './data/extensions-search-drawio.json';
 import fs from 'fs';
 import path from 'path';
 
@@ -77,23 +76,7 @@ export async function setSidebarWidth(
   await page.mouse.up();
 }
 
-export async function stubDrawioExtensionsSearch(page: Page): Promise<void> {
-  await page.route(
-    'https://registry.npmjs.org/-/v1/search*text=drawio*',
-    async (route, request) => {
-      switch (request.method()) {
-        case 'GET':
-          return route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(extensionsSearchStub)
-          });
-        default:
-          return route.continue();
-      }
-    }
-  );
-
+export async function stubGitHubUserIcons(page: Page): Promise<void> {
   // stub out github user icons
   // only first and last icon for now
   // logic in @jupyterlab/extensionmanager/src/models::ListEntry#translateSearchResult

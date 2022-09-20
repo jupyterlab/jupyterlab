@@ -7,7 +7,6 @@ import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import { consoleIcon, fileIcon, notebookIcon } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
@@ -29,7 +28,7 @@ export function addKernelRunningSessionManager(
   managers.add({
     name: trans.__('Kernels'),
     running: () => {
-      return toArray(manager.running())
+      return Array.from(manager.running())
         .filter(filterSessions)
         .map(model => new RunningKernel(model));
     },

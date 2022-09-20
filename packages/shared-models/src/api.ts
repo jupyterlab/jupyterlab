@@ -225,7 +225,11 @@ export namespace ISharedNotebook {
      * Wether the the undo/redo logic should be
      * considered on the full document across all cells.
      */
-    disableDocumentWideUndoRedo: boolean;
+    disableDocumentWideUndoRedo?: boolean;
+    /**
+     * Initial cell type.
+     */
+    initialCellType?: 'code' | 'markdown' | 'raw';
   }
 }
 
@@ -254,12 +258,31 @@ export interface ISharedLanguageInfoMetadata
   pygments_lexer?: string;
 }
 
-// Cell Types.
+/** Cell Types. */
 export type ISharedCell =
   | ISharedCodeCell
   | ISharedRawCell
   | ISharedMarkdownCell
   | ISharedUnrecognizedCell;
+
+/**
+ * Shared cell namespace
+ */
+export namespace ISharedCell {
+  /**
+   * Shared cell constructor options.
+   */
+  export interface IOptions {
+    /**
+     * Cell id
+     */
+    id?: string;
+    /**
+     * Whether the cell is standalone or not.
+     */
+    isStandalone?: boolean;
+  }
+}
 
 /**
  * Cell-level metadata.
@@ -293,9 +316,7 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetadata>
   readonly changed: ISignal<this, CellChange<Metadata>>;
 
   /**
-   * Create a new YCodeCell that can be inserted into a YNotebook.
-   *
-   * @todo clone should only be available in the specific implementations i.e. ISharedCodeCell
+   * Create a new Cell that can be inserted into a YNotebook.
    */
   clone(): ISharedBaseCell<Metadata>;
 
@@ -442,8 +463,6 @@ export type Delta<T> = Array<{ insert?: T; delete?: number; retain?: number }>;
 
 /**
  * Implements an API for nbformat.IUnrecognizedCell.
- *
- * @todo Is this needed?
  */
 export interface ISharedUnrecognizedCell
   extends ISharedBaseCell<ISharedBaseCellMetadata>,

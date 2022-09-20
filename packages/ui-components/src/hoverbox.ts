@@ -11,6 +11,12 @@ const HOVERBOX_CLASS = 'jp-HoverBox';
  */
 const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 
+type OutOfViewDisplay =
+  | 'hidden-inside'
+  | 'hidden-outside'
+  | 'stick-inside'
+  | 'stick-outside';
+
 /**
  * A namespace for `HoverBox` members.
  */
@@ -33,8 +39,9 @@ export namespace HoverBox {
      * The node that hosts the anchor.
      *
      * #### Notes
-     * The visibility of the anchor rectangle within this host node is the
-     * heuristic that determines whether the hover box ought to be visible.
+     * The visibility of the elements under hover box edges within this host
+     * node is the heuristic that determines whether the hover box ought to be
+     * visible.
      */
     host: HTMLElement;
 
@@ -89,6 +96,22 @@ export namespace HoverBox {
      * the hover box for geometry calculation.
      */
     style?: CSSStyleDeclaration;
+
+    /**
+     * How to position the hover box if its edges extend beyond the view of the
+     * host element. Value 'sticky' positions the box at the (inner or outer)
+     * edge of the host element.
+     *
+     * #### Notes
+     * The default value for each edge is `'hidden-inside'` for left and top,
+     * and `hidden-outside` for right and bottom edges.
+     */
+    outOfViewDisplay?: {
+      top?: OutOfViewDisplay;
+      bottom?: OutOfViewDisplay;
+      left?: OutOfViewDisplay;
+      right?: OutOfViewDisplay;
+    };
   }
 
   /**
@@ -97,18 +120,13 @@ export namespace HoverBox {
    * @param options - The hover box geometry calculation options.
    */
   export function setGeometry(options: IOptions): void {
-    const { anchor, host, node, privilege } = options;
+    const { anchor, host, node, privilege, outOfViewDisplay } = options;
 
     // Add hover box class if it does not exist.
     node.classList.add(HOVERBOX_CLASS);
 
-    // Hide the hover box before querying the DOM for the anchor coordinates.
-    node.classList.add(OUTOFVIEW_CLASS);
-
-    // If the current coordinates are not visible, bail.
-    if (!host.contains(document.elementFromPoint(anchor.left, anchor.top))) {
-      return;
-    }
+    // Make sure the node is visible so that its dimensions can be queried.
+    node.classList.remove(OUTOFVIEW_CLASS);
 
     // Clear any previously set max-height.
     node.style.maxHeight = '';
@@ -116,14 +134,12 @@ export namespace HoverBox {
     // Clear any programmatically set margin-top.
     node.style.marginTop = '';
 
-    // Make sure the node is visible so that its dimensions can be queried.
-    node.classList.remove(OUTOFVIEW_CLASS);
-
     const style = options.style || window.getComputedStyle(node);
     const innerHeight = window.innerHeight;
     const spaceAbove = anchor.top;
     const spaceBelow = innerHeight - anchor.bottom;
     const marginTop = parseInt(style.marginTop!, 10) || 0;
+    const marginLeft = parseInt(style.marginLeft!, 10) || 0;
     const minHeight = parseInt(style.minHeight!, 10) || options.minHeight;
 
     let maxHeight = parseInt(style.maxHeight!, 10) || options.maxHeight;
@@ -168,7 +184,7 @@ export namespace HoverBox {
         options.offset.vertical &&
         options.offset.vertical.below) ||
       0;
-    const top = renderBelow
+    let top = renderBelow
       ? innerHeight - spaceBelow + offsetBelow
       : spaceAbove - node.getBoundingClientRect().height + offsetAbove;
     node.style.top = `${Math.floor(top)}px`;
@@ -187,10 +203,170 @@ export namespace HoverBox {
     }
 
     // Move left to fit in the window.
-    const right = node.getBoundingClientRect().right;
+    const rect = node.getBoundingClientRect();
+    const hostRect = host.getBoundingClientRect(); // Query together to avoid extra layout recalculation
+    const right = rect.right;
     if (right > window.innerWidth) {
       left -= right - window.innerWidth;
       node.style.left = `${Math.ceil(left)}px`;
+    }
+
+    // Move right to fit in the window
+    if (left < offsetHorizontal - marginLeft) {
+      left = offsetHorizontal - marginLeft;
+      node.style.left = `${Math.ceil(left)}px`;
+    }
+
+    // Hide the hover box before querying the DOM for the anchor coordinates.
+    node.classList.add(OUTOFVIEW_CLASS);
+
+    const bottom = rect.bottom;
+
+    const includesLeftTop = host.contains(document.elementFromPoint(left, top));
+    const includesRightTop = host.contains(
+      document.elementFromPoint(right, top)
+    );
+    const includesRightBottom = host.contains(
+      document.elementFromPoint(right, bottom)
+    );
+    const includesLeftBottom = host.contains(
+      document.elementFromPoint(left, bottom)
+    );
+
+    const topEdgeInside = includesLeftTop || includesRightTop;
+    const bottomEdgeInside = includesLeftBottom || includesRightBottom;
+    const leftEdgeInside = includesLeftTop || includesLeftBottom;
+    const rightEdgeInside = includesRightBottom || includesRightTop;
+
+    const height = bottom - top;
+    const width = right - left;
+
+    const overTheTop = top < hostRect.top;
+    const belowTheBottom = bottom > hostRect.bottom;
+    const beforeTheLeft = left + marginLeft < hostRect.left;
+    const afterTheRight = right > hostRect.right;
+
+    let hide = false;
+    let leftChanged = false;
+    let topChanged = false;
+
+    if (overTheTop) {
+      switch (outOfViewDisplay?.top || 'hidden-inside') {
+        case 'hidden-inside':
+          if (!topEdgeInside) {
+            hide = true;
+          }
+          break;
+        case 'hidden-outside':
+          if (!bottomEdgeInside) {
+            hide = true;
+          }
+          break;
+        case 'stick-inside':
+          if (hostRect.top > top) {
+            top = hostRect.top;
+            topChanged = true;
+          }
+          break;
+        case 'stick-outside':
+          if (hostRect.top > bottom) {
+            top = hostRect.top - height;
+            topChanged = true;
+          }
+          break;
+      }
+    }
+
+    if (belowTheBottom) {
+      switch (outOfViewDisplay?.bottom || 'hidden-outsdie') {
+        case 'hidden-inside':
+          if (!bottomEdgeInside) {
+            hide = true;
+          }
+          break;
+        case 'hidden-outside':
+          if (!topEdgeInside) {
+            hide = true;
+          }
+          break;
+        case 'stick-inside':
+          if (hostRect.bottom < bottom) {
+            top = hostRect.bottom - height;
+            topChanged = true;
+          }
+          break;
+        case 'stick-outside':
+          if (hostRect.bottom < top) {
+            top = hostRect.bottom;
+            topChanged = true;
+          }
+          break;
+      }
+    }
+
+    if (beforeTheLeft) {
+      switch (outOfViewDisplay?.left || 'hidden-inside') {
+        case 'hidden-inside':
+          if (!leftEdgeInside) {
+            hide = true;
+          }
+          break;
+        case 'hidden-outside':
+          if (!rightEdgeInside) {
+            hide = true;
+          }
+          break;
+        case 'stick-inside':
+          if (hostRect.left > left + marginLeft) {
+            left = hostRect.left - marginLeft;
+            leftChanged = true;
+          }
+          break;
+        case 'stick-outside':
+          if (hostRect.left > right) {
+            left = hostRect.left - marginLeft - width;
+            leftChanged = true;
+          }
+          break;
+      }
+    }
+
+    if (afterTheRight) {
+      switch (outOfViewDisplay?.right || 'hidden-outsdie') {
+        case 'hidden-inside':
+          if (!rightEdgeInside) {
+            hide = true;
+          }
+          break;
+        case 'hidden-outside':
+          if (!leftEdgeInside) {
+            hide = true;
+          }
+          break;
+        case 'stick-inside':
+          if (hostRect.right < right) {
+            left = hostRect.right - width;
+            leftChanged = true;
+          }
+          break;
+        case 'stick-outside':
+          if (hostRect.right < left) {
+            left = hostRect.right;
+            leftChanged = true;
+          }
+          break;
+      }
+    }
+
+    if (!hide) {
+      node.classList.remove(OUTOFVIEW_CLASS);
+    }
+
+    if (leftChanged) {
+      node.style.left = `${Math.ceil(left)}px`;
+    }
+    if (topChanged) {
+      node.style.top = `${Math.ceil(top)}px`;
     }
   }
 }

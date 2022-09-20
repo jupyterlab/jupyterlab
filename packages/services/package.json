@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.12",
+  "version": "7.0.0-alpha.13",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -46,21 +46,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.12",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.12",
-    "@jupyterlab/observables": "^5.0.0-alpha.12",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.12",
-    "@jupyterlab/statedb": "^4.0.0-alpha.12",
-    "@lumino/algorithm": "^1.9.1",
-    "@lumino/coreutils": "^1.12.0",
-    "@lumino/disposable": "^1.10.1",
-    "@lumino/polling": "^1.10.0",
-    "@lumino/signaling": "^1.10.1",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.13",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.13",
+    "@jupyterlab/observables": "^5.0.0-alpha.13",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.13",
+    "@jupyterlab/statedb": "^4.0.0-alpha.13",
+    "@lumino/coreutils": "^2.0.0-alpha.6",
+    "@lumino/disposable": "^2.0.0-alpha.6",
+    "@lumino/polling": "^2.0.0-alpha.6",
+    "@lumino/signaling": "^2.0.0-alpha.6",
     "node-fetch": "^2.6.0",
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.12",
+    "@jupyterlab/testutils": "^4.0.0-alpha.13",
     "@types/jest": "^26.0.10",
     "@types/node-fetch": "^2.5.4",
     "@types/text-encoding": "^0.0.35",

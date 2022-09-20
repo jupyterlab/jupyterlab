@@ -54,7 +54,6 @@ const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
-  '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/builder': [
     '@lumino/algorithm',
     '@lumino/application',
@@ -902,7 +901,13 @@ export async function ensureIntegrity(): Promise<boolean> {
       );
       process.exit(1);
     }
-    utils.run('jlpm install');
+    try {
+      utils.run('jlpm install');
+    } catch (error) {
+      // Fallback in case this script is called during editable installation
+      utils.run(`node jupyterlab/staging/yarn.js install`);
+    }
+
     console.debug('\n\nMade integrity changes!');
     console.debug('Please commit the changes by running:');
     console.debug('git commit -a -m "Package integrity updates"');

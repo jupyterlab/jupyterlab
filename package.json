@@ -12,6 +12,7 @@
       "packages/services/examples/node",
       "packages/services/examples/browser",
       "packages/services/examples/typescript-browser-with-output",
+      "packages/ui-components/examples/*",
       "builder",
       "buildutils",
       "buildutils/template",
@@ -119,8 +120,8 @@
     "stylelint-prettier": "^2.0.0"
   },
   "devDependencies": {
-    "lerna": "^4.0.0",
+    "lerna": "^5.4.3",
     "typedoc": "~0.22.10",
-    "yarn": "1.22.17"
+    "yarn": "1.22.19"
   }
 }

@@ -16,6 +16,7 @@ import {
 import { Context } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
+import { createStandaloneCell } from '@jupyterlab/shared-models';
 
 import { createSessionContext } from '@jupyterlab/testutils';
 import { NBTestUtils } from '@jupyterlab/testutils';
@@ -180,7 +181,12 @@ describe('completer/manager', () => {
         const completerContext = { widget };
 
         await manager.updateCompleter(completerContext);
-        const cell = new Cell({ model: new CellModel({}) });
+        const cell = new Cell({
+          model: new CellModel({
+            sharedModel: createStandaloneCell({ cell_type: 'code' })
+          }),
+          placeholder: false
+        });
         const newCompleterContext = {
           editor: cell.editor,
           session: widget.sessionContext.session,

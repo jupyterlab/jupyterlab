@@ -1,6 +1,12 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   CodeExtractorsManager,
+  Document,
   ILSPCodeExtractorsManager,
   isWithinRange,
   TextForeignCodeExtractor,
@@ -74,9 +80,9 @@ describe('@jupyterlab/lsp', () => {
         fileExtension: 'py',
         hasLspSupportedFile: false
       });
-      let editorCode = {} as CodeEditor.IEditor;
-      let editorMarkdown = {} as CodeEditor.IEditor;
-      let editorRaw = {} as CodeEditor.IEditor;
+      let editorCode = {} as Document.IEditor;
+      let editorMarkdown = {} as Document.IEditor;
+      let editorRaw = {} as Document.IEditor;
 
       document.appendCodeBlock({
         value: 'test line in Python 1\ntest line in Python 2',
@@ -105,7 +111,7 @@ describe('@jupyterlab/lsp', () => {
         // appending code block here should work fine
         document.appendCodeBlock({
           value: 'code',
-          ceEditor: {} as CodeEditor.IEditor,
+          ceEditor: {} as Document.IEditor,
           type: 'code'
         });
         document.dispose();
@@ -115,7 +121,7 @@ describe('@jupyterlab/lsp', () => {
         // this one should not raise, but just warn
         document.appendCodeBlock({
           value: 'code',
-          ceEditor: {} as CodeEditor.IEditor,
+          ceEditor: {} as Document.IEditor,
           type: 'code'
         });
         expect((console.warn as jest.Mock).mock.calls[0][0]).toEqual(
@@ -142,7 +148,7 @@ describe('@jupyterlab/lsp', () => {
         expect(document['virtualLines'].size).toEqual(10);
         document.appendCodeBlock({
           value: 'new line',
-          ceEditor: {} as CodeEditor.IEditor,
+          ceEditor: {} as Document.IEditor,
           type: 'code'
         });
         expect(document['virtualLines'].size).toEqual(13);
@@ -154,7 +160,7 @@ describe('@jupyterlab/lsp', () => {
       it('should prepare a code block', () => {
         const { lines, foreignDocumentsMap } = document.prepareCodeBlock({
           value: 'new line',
-          ceEditor: {} as CodeEditor.IEditor,
+          ceEditor: {} as Document.IEditor,
           type: 'code'
         });
         expect(lines).toEqual(['new line']);
@@ -163,7 +169,7 @@ describe('@jupyterlab/lsp', () => {
       it('should prepare a markdown block', () => {
         const { lines, foreignDocumentsMap } = document.prepareCodeBlock({
           value: 'new line',
-          ceEditor: {} as CodeEditor.IEditor,
+          ceEditor: {} as Document.IEditor,
           type: 'markdown'
         });
         expect(lines).toEqual(['']);
@@ -172,7 +178,7 @@ describe('@jupyterlab/lsp', () => {
       it('should prepare a raw text block', () => {
         const { lines, foreignDocumentsMap } = document.prepareCodeBlock({
           value: 'new line',
-          ceEditor: {} as CodeEditor.IEditor,
+          ceEditor: {} as Document.IEditor,
           type: 'raw'
         });
         expect(lines).toEqual(['']);
@@ -185,7 +191,7 @@ describe('@jupyterlab/lsp', () => {
           document.extractForeignCode(
             {
               value: 'new line',
-              ceEditor: {} as CodeEditor.IEditor,
+              ceEditor: {} as Document.IEditor,
               type: 'code'
             },
             { line: 0, column: 0 }
@@ -198,7 +204,7 @@ describe('@jupyterlab/lsp', () => {
           document.extractForeignCode(
             {
               value: 'new line',
-              ceEditor: {} as CodeEditor.IEditor,
+              ceEditor: {} as Document.IEditor,
               type: 'markdown'
             },
             { line: 0, column: 0 }
@@ -211,7 +217,7 @@ describe('@jupyterlab/lsp', () => {
           document.extractForeignCode(
             {
               value: 'new line',
-              ceEditor: {} as CodeEditor.IEditor,
+              ceEditor: {} as Document.IEditor,
               type: 'raw'
             },
             { line: 0, column: 0 }

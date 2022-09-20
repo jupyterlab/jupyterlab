@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { Contents } from '@jupyterlab/services';
-import { Page } from '@playwright/test';
-import fetch, { RequestInit, Response } from 'node-fetch';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import type { Contents } from '@jupyterlab/services';
+import type { APIRequestContext, APIResponse, Page } from '@playwright/test';
+import type { ReadStream } from 'fs-extra';
 import * as path from 'path';
 import {
   IPluginNameToInterfaceMap,
@@ -24,10 +24,22 @@ export class ContentsHelper {
   /**
    * Construct a new instance of ContentsHelper
    *
-   * @param baseURL Server base URL
+   * @param request Playwright API request context
    * @param page Playwright page model object
    */
-  constructor(readonly baseURL: string, readonly page?: Page) {}
+  constructor(request?: APIRequestContext, readonly page?: Page) {
+    if (request) {
+      this.request = request;
+    } else if (page) {
+      this.request = page.context().request;
+    } else {
+      throw new TypeError(
+        'You must provide `request` or `page` to the contents helper.'
+      );
+    }
+  }
+
+  readonly request: APIRequestContext;
 
   /**
    * Return the model for a path.
@@ -40,36 +52,21 @@ export class ContentsHelper {
     path: string,
     type: 'file' | 'directory' = 'file'
   ): Promise<Contents.IModel | null> {
-    const baseUrl = this.page ? await Utils.getBaseUrl(this.page) : '/';
-    const token = this.page ? await Utils.getToken(this.page) : '';
-    const apiUrl = `${this.baseURL}${baseUrl}api/contents`;
-
     const data = {
       type,
       // Get the content only for directory
       content: type === 'directory' ? 1 : 0
     };
 
-    const request: RequestInit = {
-      method: 'GET'
-    };
-
-    if (token) {
-      request.headers = { Authorization: `Token ${token}` };
-    }
-
-    let response: Response | null = null;
+    let response = null;
 
     try {
-      response = await fetch(
-        `${apiUrl}/${path}` + URLExt.objectToQueryString(data),
-        request
-      );
+      response = await this._fetch(path + URLExt.objectToQueryString(data));
     } catch (error) {
       console.error(`Fail to get content metadata for ${path}`, error);
     }
 
-    const succeeded = response?.status === 200;
+    const succeeded = response?.status() === 200;
 
     if (succeeded) {
       return response!.json();
@@ -180,12 +177,12 @@ export class ContentsHelper {
       type: 'file'
     });
 
-    let response: Response | null = null;
+    let response = null;
 
     try {
       response = await this._fetch(destinationPath, {
         method: 'PUT',
-        body: data
+        data
       });
     } catch (error) {
       console.error(
@@ -194,7 +191,7 @@ export class ContentsHelper {
       );
     }
 
-    const succeeded = response?.status === 201;
+    const succeeded = response?.status() === 201;
 
     if (succeeded) {
       return await this.fileExists(destinationPath);
@@ -232,7 +229,7 @@ export class ContentsHelper {
   async deleteFile(filePath: string): Promise<boolean> {
     const fileName = filePath;
 
-    let response: Response | null = null;
+    let response = null;
 
     try {
       response = await this._fetch(fileName, {
@@ -242,7 +239,7 @@ export class ContentsHelper {
       console.error(`Failed to delete file ${filePath}`, error);
     }
 
-    const succeeded = response?.status === 204;
+    const succeeded = response?.status() === 204;
 
     if (succeeded) {
       return !(await this.fileExists(fileName));
@@ -313,18 +310,18 @@ export class ContentsHelper {
       );
     }
 
-    let response: Response | null = null;
+    let response = null;
 
     try {
       response = await this._fetch(oldName, {
         method: 'PATCH',
-        body: JSON.stringify({ path: newName })
+        data: JSON.stringify({ path: newName })
       });
     } catch (error) {
       console.error(`Failed to rename file ${oldName} to ${newName}`, error);
     }
 
-    const succeeded = response?.status === 200;
+    const succeeded = response?.status() === 200;
 
     if (succeeded) {
       return await this.fileExists(newName);
@@ -365,7 +362,7 @@ export class ContentsHelper {
   }
 
   protected async _createDirectory(dirPath: string): Promise<boolean> {
-    const body = JSON.stringify({
+    const data = JSON.stringify({
       format: 'json',
       type: 'directory'
     });
@@ -375,31 +372,103 @@ export class ContentsHelper {
     try {
       response = await this._fetch(dirPath, {
         method: 'PUT',
-        body
+        data
       });
     } catch (error) {
       console.error(`Failed to create directory ${dirPath}`, error);
     }
 
-    return response?.status === 201;
+    return response?.status() === 201;
   }
 
   private async _fetch(
     path: string,
-    request: RequestInit = { method: 'GET' }
-  ): Promise<Response | null> {
+    options: {
+      /**
+       * Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string and
+       * `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will
+       * be set to `application/octet-stream` if not explicitly set.
+       */
+      data?: string | Buffer;
+
+      /**
+       * Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status codes.
+       */
+      failOnStatusCode?: boolean;
+
+      /**
+       * Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
+       * this request body. If this parameter is specified `content-type` header will be set to
+       * `application/x-www-form-urlencoded` unless explicitly provided.
+       */
+      form?: { [key: string]: string | number | boolean };
+
+      /**
+       * Allows to set HTTP headers.
+       */
+      headers?: { [key: string]: string };
+
+      /**
+       * Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+       */
+      ignoreHTTPSErrors?: boolean;
+
+      /**
+       * If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) or
+       * [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)). If not specified, GET method is used.
+       */
+      method?: string;
+
+      /**
+       * Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this request
+       * body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless explicitly
+       * provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+       * or as file-like object containing file name, mime-type and its content.
+       */
+      multipart?: {
+        [key: string]:
+          | string
+          | number
+          | boolean
+          | ReadStream
+          | {
+              /**
+               * File name
+               */
+              name: string;
+
+              /**
+               * File type
+               */
+              mimeType: string;
+
+              /**
+               * File content
+               */
+              buffer: Buffer;
+            };
+      };
+
+      /**
+       * Query parameters to be sent with the URL.
+       */
+      params?: { [key: string]: string | number | boolean };
+
+      /**
+       * Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+       */
+      timeout?: number;
+    } = { method: 'GET' }
+  ): Promise<APIResponse> {
     const baseUrl = this.page ? await Utils.getBaseUrl(this.page) : '/';
     const token = this.page ? await Utils.getToken(this.page) : '';
 
-    const url = URLExt.join(this.baseURL, baseUrl, 'api/contents', path);
+    let url = URLExt.join(baseUrl, 'api/contents', path);
 
     if (token) {
-      request.headers = { Authorization: `Token ${token}` };
+      options.headers = { Authorization: `Token ${token}` };
     }
 
-    let response: Response | null = null;
-
-    response = await fetch(url, request);
-    return response;
+    return this.request.fetch(url, options);
   }
 }

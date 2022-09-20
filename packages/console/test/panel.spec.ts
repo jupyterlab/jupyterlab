@@ -96,7 +96,7 @@ describe('console/panel', () => {
       it('should give the focus to the console prompt', () => {
         Widget.attach(panel, document.body);
         MessageLoop.sendMessage(panel, Widget.Msg.ActivateRequest);
-        expect(panel.console.promptCell!.editor.hasFocus()).toBe(true);
+        expect(panel.console.promptCell!.editor!.hasFocus()).toBe(true);
         return dismissDialog();
       });
     });

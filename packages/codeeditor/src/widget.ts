@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MimeData } from '@lumino/coreutils';
-import { IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './';
@@ -83,16 +83,16 @@ export class CodeEditorWrapper extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'lm-dragenter':
-        this._evtDragEnter(event as IDragEvent);
+        this._evtDragEnter(event as Drag.Event);
         break;
       case 'lm-dragleave':
-        this._evtDragLeave(event as IDragEvent);
+        this._evtDragLeave(event as Drag.Event);
         break;
       case 'lm-dragover':
-        this._evtDragOver(event as IDragEvent);
+        this._evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this._evtDrop(event as IDragEvent);
+        this._evtDrop(event as Drag.Event);
         break;
       default:
         break;
@@ -168,7 +168,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  private _evtDragEnter(event: IDragEvent): void {
+  private _evtDragEnter(event: Drag.Event): void {
     if (this.editor.getOption('readOnly') === true) {
       return;
     }
@@ -184,7 +184,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  private _evtDragLeave(event: IDragEvent): void {
+  private _evtDragLeave(event: Drag.Event): void {
     this.removeClass(DROP_TARGET_CLASS);
     if (this.editor.getOption('readOnly') === true) {
       return;
@@ -200,7 +200,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  private _evtDragOver(event: IDragEvent): void {
+  private _evtDragOver(event: Drag.Event): void {
     this.removeClass(DROP_TARGET_CLASS);
     if (this.editor.getOption('readOnly') === true) {
       return;
@@ -218,7 +218,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  private _evtDrop(event: IDragEvent): void {
+  private _evtDrop(event: Drag.Event): void {
     if (this.editor.getOption('readOnly') === true) {
       return;
     }
@@ -248,7 +248,7 @@ export class CodeEditorWrapper extends Widget {
       return;
     }
     const offset = this.editor.getOffsetAt(position);
-    this.model.value.insert(offset, data);
+    this.model.sharedModel.updateSource(offset, offset, data);
   }
 }
 

@@ -166,6 +166,11 @@ export namespace TableOfContents {
      * Whether the heading is collapsed or not
      */
     collapsed?: boolean;
+
+    /**
+     * Whether the heading is marked to skip or not
+     */
+    skip?: boolean;
   }
 
   /**

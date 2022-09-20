@@ -7,7 +7,7 @@ import { IPosition } from '../positioning';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ILSPCodeExtractorsManager } from '../';
+import { Document, ILSPCodeExtractorsManager } from '../tokens';
 import { DocumentConnectionManager } from '../connection_manager';
 import { IForeignCodeExtractor } from '../extractors/types';
 import { LanguageIdentifier } from '../lsp';
@@ -37,54 +37,22 @@ interface IVirtualLine {
   /**
    * The editor holding this virtual line
    */
-  editor: CodeEditor.IEditor;
+  editor: Document.IEditor;
 }
 
-export interface ICodeBlockOptions {
-  /**
-   * The editor holding this code block
-   */
-  ceEditor: CodeEditor.IEditor;
-
-  /**
-   * The value of code block
-   */
-  value: string;
-
-  /**
-   * Type of the cell holding this block
-   */
-  type: string;
-}
-
-export interface IVirtualDocumentBlock {
-  /**
-   * Line corresponding to the block in the entire foreign document
-   */
-  virtualLine: number;
-
-  /**
-   * The virtual document holding this virtual line.
-   */
-  virtualDocument: VirtualDocument;
-
-  /**
-   * The CM editor associated with this virtual line.
-   */
-  editor: CodeEditor.IEditor;
-}
-
-export type ForeignDocumentsMap = Map<IRange, IVirtualDocumentBlock>;
+export type ForeignDocumentsMap = Map<IRange, Document.IVirtualDocumentBlock>;
 
 interface ISourceLine {
   /**
    * Line corresponding to the block in the entire foreign document
    */
   virtualLine: number;
+
   /**
    * The CM editor associated with this virtual line.
    */
-  editor: CodeEditor.IEditor;
+  editor: Document.IEditor;
+
   /**
    * Line in the CM editor corresponding to the virtual line.
    */
@@ -99,18 +67,6 @@ interface ISourceLine {
    * Everything which is not in the range of foreign documents belongs to the host.
    */
   foreignDocumentsMap: ForeignDocumentsMap;
-}
-
-export interface IForeignContext {
-  /**
-   * The virtual document
-   */
-  foreignDocument: VirtualDocument;
-
-  /**
-   * The document holding the virtual document.
-   */
-  parentHost: VirtualDocument;
 }
 
 /**
@@ -395,14 +351,20 @@ export class VirtualDocument implements IDisposable {
   /**
    * Signal emitted when the foreign document is closed
    */
-  get foreignDocumentClosed(): ISignal<VirtualDocument, IForeignContext> {
+  get foreignDocumentClosed(): ISignal<
+    VirtualDocument,
+    Document.IForeignContext
+  > {
     return this._foreignDocumentClosed;
   }
 
   /**
    * Signal emitted when the foreign document is opened
    */
-  get foreignDocumentOpened(): ISignal<VirtualDocument, IForeignContext> {
+  get foreignDocumentOpened(): ISignal<
+    VirtualDocument,
+    Document.IForeignContext
+  > {
     return this._foreignDocumentOpened;
   }
 
@@ -597,7 +559,7 @@ export class VirtualDocument implements IDisposable {
    * @param position - position in the active editor.
    */
   transformFromEditorToRoot(
-    editor: CodeEditor.IEditor,
+    editor: Document.IEditor,
     position: IEditorPosition
   ): IRootPosition | null {
     if (!this._editorToSourceLine.has(editor)) {
@@ -666,7 +628,7 @@ export class VirtualDocument implements IDisposable {
    * virtual document.
    */
   appendCodeBlock(
-    block: ICodeBlockOptions,
+    block: Document.ICodeBlockOptions,
     editorShift: CodeEditor.IPosition = { line: 0, column: 0 },
     virtualShift?: CodeEditor.IPosition
   ): void {
@@ -733,11 +695,11 @@ export class VirtualDocument implements IDisposable {
    * @param  editorShift - position shift in source document
    */
   prepareCodeBlock(
-    block: ICodeBlockOptions,
+    block: Document.ICodeBlockOptions,
     editorShift: CodeEditor.IPosition = { line: 0, column: 0 }
   ): {
     lines: string[];
-    foreignDocumentsMap: Map<CodeEditor.IRange, IVirtualDocumentBlock>;
+    foreignDocumentsMap: Map<CodeEditor.IRange, Document.IVirtualDocumentBlock>;
   } {
     let { cellCodeKept, foreignDocumentsMap } = this.extractForeignCode(
       block,
@@ -754,15 +716,15 @@ export class VirtualDocument implements IDisposable {
    * @param  editorShift - position shift in source document
    */
   extractForeignCode(
-    block: ICodeBlockOptions,
+    block: Document.ICodeBlockOptions,
     editorShift: CodeEditor.IPosition
   ): {
     cellCodeKept: string;
-    foreignDocumentsMap: Map<CodeEditor.IRange, IVirtualDocumentBlock>;
+    foreignDocumentsMap: Map<CodeEditor.IRange, Document.IVirtualDocumentBlock>;
   } {
     let foreignDocumentsMap = new Map<
       CodeEditor.IRange,
-      IVirtualDocumentBlock
+      Document.IVirtualDocumentBlock
     >();
 
     let cellCode = block.value;
@@ -924,7 +886,7 @@ export class VirtualDocument implements IDisposable {
   /**
    * Get the corresponding editor of the virtual line.
    */
-  getEditorAtVirtualLine(pos: IVirtualPosition): CodeEditor.IEditor {
+  getEditorAtVirtualLine(pos: IVirtualPosition): Document.IEditor {
     let line = pos.line;
     // tolerate overshot by one (the hanging blank line at the end)
     if (!this.virtualLines.has(line)) {
@@ -936,7 +898,7 @@ export class VirtualDocument implements IDisposable {
   /**
    * Get the corresponding editor of the source line
    */
-  getEditorAtSourceLine(pos: ISourcePosition): CodeEditor.IEditor {
+  getEditorAtSourceLine(pos: ISourcePosition): Document.IEditor {
     return this.sourceLines.get(pos.line)!.editor;
   }
 
@@ -989,8 +951,8 @@ export class VirtualDocument implements IDisposable {
 
   private _isDisposed = false;
   private _remainingLifetime: number;
-  private _editorToSourceLine: Map<CodeEditor.IEditor, number>;
-  private _editorToSourceLineNew: Map<CodeEditor.IEditor, number>;
+  private _editorToSourceLine: Map<Document.IEditor, number>;
+  private _editorToSourceLineNew: Map<Document.IEditor, number>;
   private _foreignCodeExtractors: ILSPCodeExtractorsManager;
   private previousValue: string;
   private static instancesCount = 0;
@@ -1038,7 +1000,7 @@ export class VirtualDocument implements IDisposable {
       fileExtension: fileExtension,
       language: language
     });
-    const context: IForeignContext = {
+    const context: Document.IForeignContext = {
       foreignDocument: document,
       parentHost: this
     };
@@ -1056,7 +1018,10 @@ export class VirtualDocument implements IDisposable {
    * Forward the closed signal from the foreign document to the host document's
    * signal
    */
-  private forwardClosedSignal(host: VirtualDocument, context: IForeignContext) {
+  private forwardClosedSignal(
+    host: VirtualDocument,
+    context: Document.IForeignContext
+  ) {
     this._foreignDocumentClosed.emit(context);
   }
 
@@ -1064,16 +1029,21 @@ export class VirtualDocument implements IDisposable {
    * Forward the opened signal from the foreign document to the host document's
    * signal
    */
-  private forwardOpenedSignal(host: VirtualDocument, context: IForeignContext) {
+  private forwardOpenedSignal(
+    host: VirtualDocument,
+    context: Document.IForeignContext
+  ) {
     this._foreignDocumentOpened.emit(context);
   }
 
-  private _foreignDocumentClosed = new Signal<VirtualDocument, IForeignContext>(
-    this
-  );
-  private _foreignDocumentOpened = new Signal<VirtualDocument, IForeignContext>(
-    this
-  );
+  private _foreignDocumentClosed = new Signal<
+    VirtualDocument,
+    Document.IForeignContext
+  >(this);
+  private _foreignDocumentOpened = new Signal<
+    VirtualDocument,
+    Document.IForeignContext
+  >(this);
   private _changed = new Signal<VirtualDocument, VirtualDocument>(this);
 }
 
@@ -1122,15 +1092,20 @@ export interface IBlockAddedInfo {
   /**
    * Option of the code block.
    */
-  block: ICodeBlockOptions;
+  block: Document.ICodeBlockOptions;
 }
 
 export class UpdateManager implements IDisposable {
   constructor(private virtualDocument: VirtualDocument) {
     this._blockAdded = new Signal<UpdateManager, IBlockAddedInfo>(this);
     this._documentUpdated = new Signal<UpdateManager, VirtualDocument>(this);
-    this._updateBegan = new Signal<UpdateManager, ICodeBlockOptions[]>(this);
-    this._updateFinished = new Signal<UpdateManager, ICodeBlockOptions[]>(this);
+    this._updateBegan = new Signal<UpdateManager, Document.ICodeBlockOptions[]>(
+      this
+    );
+    this._updateFinished = new Signal<
+      UpdateManager,
+      Document.ICodeBlockOptions[]
+    >(this);
     this.documentUpdated.connect(this._onUpdated, this);
   }
 
@@ -1165,14 +1140,14 @@ export class UpdateManager implements IDisposable {
   /**
    * Signal emitted when the update is started
    */
-  get updateBegan(): ISignal<UpdateManager, ICodeBlockOptions[]> {
+  get updateBegan(): ISignal<UpdateManager, Document.ICodeBlockOptions[]> {
     return this._updateBegan;
   }
 
   /**
    * Signal emitted when the update is finished
    */
-  get updateFinished(): ISignal<UpdateManager, ICodeBlockOptions[]> {
+  get updateFinished(): ISignal<UpdateManager, Document.ICodeBlockOptions[]> {
     return this._updateFinished;
   }
 
@@ -1210,7 +1185,7 @@ export class UpdateManager implements IDisposable {
    * and resolve a void promise. The promise does not contain the text value of the root document,
    * as to avoid an easy trap of ignoring the changes in the virtual documents.
    */
-  async updateDocuments(blocks: ICodeBlockOptions[]): Promise<void> {
+  async updateDocuments(blocks: Document.ICodeBlockOptions[]): Promise<void> {
     let update = new Promise<void>((resolve, reject) => {
       // defer the update by up to 50 ms (10 retrials * 5 ms break),
       // awaiting for the previous update to complete.
@@ -1275,8 +1250,8 @@ export class UpdateManager implements IDisposable {
 
   private _blockAdded: Signal<UpdateManager, IBlockAddedInfo>;
   private _documentUpdated: Signal<UpdateManager, VirtualDocument>;
-  private _updateBegan: Signal<UpdateManager, ICodeBlockOptions[]>;
-  private _updateFinished: Signal<UpdateManager, ICodeBlockOptions[]>;
+  private _updateBegan: Signal<UpdateManager, Document.ICodeBlockOptions[]>;
+  private _updateFinished: Signal<UpdateManager, Document.ICodeBlockOptions[]>;
 
   /**
    * Once all the foreign documents were refreshed, the unused documents (and their connections)

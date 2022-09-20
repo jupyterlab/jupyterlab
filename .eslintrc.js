@@ -12,7 +12,8 @@ module.exports = {
     JSX: 'readonly',
     NodeJS: 'readonly',
     RequestInit: 'readonly',
-    RequestInfo: 'readonly'
+    RequestInfo: 'readonly',
+    ScrollLogicalPosition: 'readonly'
   },
   root: true,
   extends: [
@@ -108,6 +109,7 @@ module.exports = {
           'hist_access_type',
           'implementation_version',
           'installed_version',
+          'is_allowed',
           'jlab_core',
           'jupyterlab_extensions',
           'jupyterlab_mime_extensions',
@@ -127,6 +129,7 @@ module.exports = {
           'output_type',
           'outputs_hidden',
           'parent_header',
+          'per_page',
           'pf_re',
           'pkg_type',
           'protocol_version',

@@ -1,15 +1,16 @@
 name: Fix License Headers
 
 on:
-  pull_request:
-
-permissions:
-  contents: write
-  pull-requests: write
+  pull_request_target:
 
 jobs:
   header-license-fix:
     runs-on: ubuntu-20.04
+
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -29,23 +30,35 @@ jobs:
         with:
           mode: fix
 
-      - name: Get modified files in the staging directory
-        id: changed-files
-        uses: tj-actions/changed-files@v24
-
-      - name: Apply Changes
-        if: steps.changed-files.outputs.any_changed == 'true'
+      - name: Commit any changes
         shell: bash -l {0}
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git pull --no-tags
           git add *
-          git commit -m "Automatic application of license header"
+          git commit --allow-empty -m "Automatic application of license header"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get modified files
+        id: changed-files
+        uses: tj-actions/changed-files@v29.0.7
+        with:
+          base_sha: 'HEAD~1'
+          sha: 'HEAD'
 
       - name: Push fixes
         if: steps.changed-files.outputs.any_changed == 'true'
         shell: bash -l {0}
         run: |
+          echo "Changed files"
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "  $file"
+          done
+          git diff HEAD~1
+
           git config push.default upstream
           git push
         env:

@@ -8,6 +8,7 @@
 import {
   ILabShell,
   ILayoutRestorer,
+  IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -37,7 +38,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
@@ -68,10 +69,7 @@ import {
   StaticNotebook,
   ToolbarItems
 } from '@jupyterlab/notebook';
-import {
-  IObservableList,
-  IObservableUndoableList
-} from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -322,15 +320,17 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory, ITranslator],
+  requires: [INotebookWidgetFactory],
   optional: [
     ICommandPalette,
     IFileBrowserFactory,
     ILauncher,
     ILayoutRestorer,
     IMainMenu,
+    IRouter,
     ISettingRegistry,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    ITranslator
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -751,7 +751,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     let previousWidget: NotebookPanel | null = null;
 
-    const provider = (widget: Widget | null) => {
+    const provider = async (widget: Widget | null) => {
       let editor: CodeEditor.IEditor | null = null;
       if (widget !== previousWidget) {
         previousWidget?.content.activeCellChanged.disconnect(
@@ -763,11 +763,21 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
           (widget as NotebookPanel).content.activeCellChanged.connect(
             positionModel.update
           );
-          editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
+          const activeCell = (widget as NotebookPanel).content.activeCell;
+          editor = null;
+          if (activeCell) {
+            await activeCell.ready;
+            editor = activeCell.editor;
+          }
           previousWidget = widget as NotebookPanel;
         }
       } else if (widget) {
-        editor = (widget as NotebookPanel).content.activeCell?.editor ?? null;
+        const activeCell = (widget as NotebookPanel).content.activeCell;
+        editor = null;
+        if (activeCell) {
+          await activeCell.ready;
+          editor = activeCell.editor;
+        }
       }
       return editor;
     };
@@ -1205,6 +1215,9 @@ function activateCodeConsole(
 
       let code: string;
       const editor = cell.editor;
+      if (!editor) {
+        return;
+      }
       const selection = editor.getSelection();
       const { start, end } = selection;
       const selected = start.column !== end.column || start.line !== end.line;
@@ -1213,11 +1226,11 @@ function activateCodeConsole(
         // Get the selected code from the editor.
         const start = editor.getOffsetAt(selection.start);
         const end = editor.getOffsetAt(selection.end);
-        code = editor.model.value.text.substring(start, end);
+        code = editor.model.sharedModel.getSource().substring(start, end);
       } else {
         // no selection, find the complete statement around the current line
         const cursor = editor.getCursorPosition();
-        const srcLines = editor.model.value.text.split('\n');
+        const srcLines = editor.model.sharedModel.getSource().split('\n');
         let curLine = selection.start.line;
         while (
           curLine < editor.lineCount &&
@@ -1381,20 +1394,34 @@ function activateCopyOutput(
 function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
-  translator: ITranslator,
   palette: ICommandPalette | null,
   browserFactory: IFileBrowserFactory | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
+  router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  translator: ITranslator | null
 ): INotebookTracker {
+  translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab');
   const services = app.serviceManager;
 
   const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
+
+  // Use the router to deal with hash navigation on windowed notebook
+  function onRouted(router: IRouter, location: IRouter.ILocation): void {
+    if (
+      factory.notebookConfig.windowingMode === 'full' &&
+      location.hash &&
+      tracker.currentWidget
+    ) {
+      tracker.currentWidget.setFragment(location.hash);
+    }
+  }
+  router?.routed.connect(onRouted);
 
   const isEnabled = (): boolean => {
     return Private.isEnabled(shell, tracker);
@@ -1552,15 +1579,7 @@ function activateNotebookHandler(
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
-      numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
-        .composite as number,
-      remainingTimeBeforeRescheduling: settings.get(
-        'remainingTimeBeforeRescheduling'
-      ).composite as number,
-      renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
-      observedTopMargin: settings.get('observedTopMargin').composite as string,
-      observedBottomMargin: settings.get('observedBottomMargin')
-        .composite as string,
+      overscanCount: settings.get('overscanCount').composite as number,
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
@@ -1577,7 +1596,11 @@ function activateNotebookHandler(
         'sideBySideRightMarginOverride'
       ).composite as string,
       sideBySideOutputRatio: settings.get('sideBySideOutputRatio')
-        .composite as number
+        .composite as number,
+      windowingMode: settings.get('windowingMode').composite as
+        | 'defer'
+        | 'full'
+        | 'none'
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
@@ -1612,18 +1635,20 @@ function activateNotebookHandler(
   }
 
   // Utility function to create a new notebook.
-  const createNew = (cwd: string, kernelName?: string) => {
-    return commands
-      .execute('docmanager:new-untitled', { path: cwd, type: 'notebook' })
-      .then(model => {
-        if (model != undefined) {
-          return commands.execute('docmanager:open', {
-            path: model.path,
-            factory: FACTORY,
-            kernel: { name: kernelName }
-          });
-        }
-      });
+  const createNew = async (cwd: string, kernelName?: string) => {
+    const model = await commands.execute('docmanager:new-untitled', {
+      path: cwd,
+      type: 'notebook'
+    });
+    if (model != undefined) {
+      const widget = (await commands.execute('docmanager:open', {
+        path: model.path,
+        factory: FACTORY,
+        kernel: { name: kernelName }
+      })) as unknown as IDocumentWidget;
+      widget.isUntitled = true;
+      return widget;
+    }
   };
 
   // Add a command for creating a new notebook.
@@ -1670,7 +1695,8 @@ function activateNotebookHandler(
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
-          let kernelIconUrl = spec.resources['logo-64x64'];
+          const kernelIconUrl =
+            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
           disposables.add(
             launcher.add({
               command: CommandIDs.createNew,
@@ -1746,20 +1772,30 @@ function activateNotebookCompleterService(
     };
     await manager.updateCompleter(completerContext);
     notebook.content.activeCellChanged.connect((_, cell) => {
-      const newCompleterContext = {
-        editor: cell.editor,
-        session: notebook.sessionContext.session,
-        widget: notebook
-      };
-      manager.updateCompleter(newCompleterContext).catch(console.error);
+      // Ensure the editor will exist on the cell before adding the completer
+      cell?.ready
+        .then(() => {
+          const newCompleterContext = {
+            editor: cell.editor,
+            session: notebook.sessionContext.session,
+            widget: notebook
+          };
+          return manager.updateCompleter(newCompleterContext);
+        })
+        .catch(console.error);
     });
     notebook.sessionContext.sessionChanged.connect(() => {
-      const newCompleterContext = {
-        editor: notebook.content.activeCell?.editor ?? null,
-        session: notebook.sessionContext.session,
-        widget: notebook
-      };
-      manager.updateCompleter(newCompleterContext).catch(console.error);
+      // Ensure the editor will exist on the cell before adding the completer
+      notebook.content.activeCell?.ready
+        .then(() => {
+          const newCompleterContext = {
+            editor: notebook.content.activeCell?.editor ?? null,
+            session: notebook.sessionContext.session,
+            widget: notebook
+          };
+          return manager.updateCompleter(newCompleterContext);
+        })
+        .catch(console.error);
     });
   };
   notebooks.widgetAdded.connect(updateCompleter);
@@ -1847,10 +1883,7 @@ function addCommands(
         return;
       }
       panel.content.model.cells.changed.connect(
-        (
-          list: IObservableUndoableList<ICellModel>,
-          args: IObservableList.IChangedArgs<ICellModel>
-        ) => {
+        (list: any, args: IObservableList.IChangedArgs<ICellModel>) => {
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);
@@ -2173,7 +2206,7 @@ function addCommands(
         return NotebookActions.copy(current.content);
       }
     },
-    icon: args => (args.toolbar ? copyIcon : ''),
+    icon: args => (args.toolbar ? copyIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteBelow, {
@@ -2212,7 +2245,7 @@ function addCommands(
         NotebookActions.duplicate(current.content, 'belowSelected');
       }
     },
-    icon: args => (args.toolbar ? duplicateIcon : ''),
+    icon: args => (args.toolbar ? duplicateIcon : undefined),
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
@@ -2448,7 +2481,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.moveUp(current.content);
+        NotebookActions.moveUp(current.content);
+        Private.raiseSilentNotification(
+          trans.__('Notebook cell shifted up successfully'),
+          current.node
+        );
       }
     },
     isEnabled,
@@ -2460,7 +2497,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.moveDown(current.content);
+        NotebookActions.moveDown(current.content);
+        Private.raiseSilentNotification(
+          trans.__('Notebook cell shifted down successfully'),
+          current.node
+        );
       }
     },
     isEnabled,
@@ -2540,7 +2581,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor.redo();
+        return current.content.activeCell?.editor?.redo();
       }
     }
   });
@@ -2550,7 +2591,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor.undo();
+        return current.content.activeCell?.editor?.undo();
       }
     }
   });
@@ -3186,6 +3227,42 @@ namespace Private {
       script: trans.__('Executable Script'),
       slides: trans.__('Reveal.js Slides')
     };
+  }
+
+  /**
+   * Raises a silent notification that is read by screen readers
+   *
+   * FIXME: Once a notificatiom API is introduced (https://github.com/jupyterlab/jupyterlab/issues/689),
+   * this can be refactored to use the same.
+   *
+   * More discussion at https://github.com/jupyterlab/jupyterlab/pull/9031#issuecomment-773541469
+   *
+   *
+   * @param message Message to be relayed to screen readers
+   * @param notebookNode DOM node to which the notification container is attached
+   */
+  export function raiseSilentNotification(
+    message: string,
+    notebookNode: HTMLElement
+  ) {
+    const hiddenAlertContainerId = `sr-message-container-${notebookNode.id}`;
+
+    const hiddenAlertContainer =
+      document.getElementById(hiddenAlertContainerId) ||
+      document.createElement('div');
+
+    // If the container is not available, append the newly created container
+    // to the current notebook panel and set related properties
+    if (hiddenAlertContainer.getAttribute('id') !== hiddenAlertContainerId) {
+      hiddenAlertContainer.classList.add('sr-only');
+      hiddenAlertContainer.setAttribute('id', hiddenAlertContainerId);
+      hiddenAlertContainer.setAttribute('role', 'alert');
+      hiddenAlertContainer.hidden = true;
+      notebookNode.appendChild(hiddenAlertContainer);
+    }
+
+    // Insert/Update alert container with the notification message
+    hiddenAlertContainer.innerText = message;
   }
 
   /**

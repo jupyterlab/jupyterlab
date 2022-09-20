@@ -41,7 +41,7 @@ import {
   textEditorIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONObject,
@@ -551,9 +551,9 @@ export namespace Commands {
           const start = editor.getOffsetAt(selection.start);
           const end = editor.getOffsetAt(selection.end);
 
-          code = editor.model.value.text.substring(start, end);
+          code = editor.model.sharedModel.getSource().substring(start, end);
         } else if (MarkdownCodeBlocks.isMarkdown(extension)) {
-          const { text } = editor.model.value;
+          const text = editor.model.sharedModel.getSource();
           const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
 
           for (const block of blocks) {
@@ -570,8 +570,8 @@ export namespace Commands {
           code = editor.getLine(selection.start.line);
           const cursor = editor.getCursorPosition();
           if (cursor.line + 1 === editor.lineCount) {
-            const text = editor.model.value.text;
-            editor.model.value.text = text + '\n';
+            const text = editor.model.sharedModel.getSource();
+            editor.model.sharedModel.setSource(text + '\n');
           }
           editor.setCursorPosition({
             line: cursor.line + 1,
@@ -603,7 +603,7 @@ export namespace Commands {
 
         let code = '';
         const editor = widget.editor;
-        const text = editor.model.value.text;
+        const text = editor.model.sharedModel.getSource();
         const path = widget.context.path;
         const extension = PathExt.extname(path);
 
@@ -933,7 +933,7 @@ export namespace Commands {
     const selectionObj = editor.getSelection();
     const start = editor.getOffsetAt(selectionObj.start);
     const end = editor.getOffsetAt(selectionObj.end);
-    const text = editor.model.value.text.substring(start, end);
+    const text = editor.model.sharedModel.getSource().substring(start, end);
 
     return text;
   }
@@ -941,25 +941,24 @@ export namespace Commands {
   /**
    * Function to create a new untitled text file, given the current working directory.
    */
-  function createNew(
+  async function createNew(
     commands: CommandRegistry,
     cwd: string,
     ext: string = 'txt'
   ) {
-    return commands
-      .execute('docmanager:new-untitled', {
-        path: cwd,
-        type: 'file',
-        ext
-      })
-      .then(model => {
-        if (model != undefined) {
-          return commands.execute('docmanager:open', {
-            path: model.path,
-            factory: FACTORY
-          });
-        }
-      });
+    const model = await commands.execute('docmanager:new-untitled', {
+      path: cwd,
+      type: 'file',
+      ext
+    });
+    if (model != undefined) {
+      const widget = (await commands.execute('docmanager:open', {
+        path: model.path,
+        factory: FACTORY
+      })) as unknown as IDocumentWidget;
+      widget.isUntitled = true;
+      return widget;
+    }
   }
 
   /**
@@ -1247,9 +1246,9 @@ export namespace Commands {
       widget.title.caption = widget.title.label;
 
       // Get the fileType based on the mimetype to determine the icon
-      const fileType = toArray(app.docRegistry.fileTypes()).find(fileType => {
-        return mimetype ? fileType.mimeTypes.includes(mimetype) : undefined;
-      });
+      const fileType = find(app.docRegistry.fileTypes(), fileType =>
+        mimetype ? fileType.mimeTypes.includes(mimetype) : false
+      );
       widget.title.icon = fileType?.icon ?? textEditorIcon;
 
       if (args.widgetId) {

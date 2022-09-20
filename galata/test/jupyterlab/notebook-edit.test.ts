@@ -69,7 +69,7 @@ test.describe('Notebook Edit', () => {
     const imageName = 'cut-paste-cell.png';
     await page.notebook.selectCells(0);
     await page.menu.clickMenuItem('Edit>Cut Cells');
-    await page.notebook.selectCells(2);
+    await page.notebook.selectCells(0);
     await page.menu.clickMenuItem('Edit>Paste Cells Below');
     const nbPanel = await page.notebook.getNotebookInPanel();
 

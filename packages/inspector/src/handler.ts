@@ -66,7 +66,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       // the active cell
       this.onEditorChange();
       editor.model.selections.changed.connect(this._onChange, this);
-      editor.model.value.changed.connect(this._onChange, this);
+      editor.model.sharedModel.changed.connect(this._onChange, this);
     }
   }
 
@@ -124,7 +124,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     if (!editor) {
       return;
     }
-    const text = customText ? customText : editor.model.value.text;
+    const text = customText ? customText : editor.model.sharedModel.getSource();
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const update: IInspector.IInspectorUpdate = { content: null };

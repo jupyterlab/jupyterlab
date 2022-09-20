@@ -344,6 +344,9 @@ class BenchmarkReporter implements Reporter {
 
     this._comparison = options.comparison ?? 'snapshot';
 
+    this._expectedReference =
+      process.env['BENCHMARK_EXPECTED_REFERENCE'] ??
+      benchmark.DEFAULT_EXPECTED_REFERENCE;
     this._reference =
       process.env['BENCHMARK_REFERENCE'] ?? benchmark.DEFAULT_REFERENCE;
 
@@ -434,7 +437,10 @@ class BenchmarkReporter implements Reporter {
         if (!hasExpectations || this.config.updateSnapshots === 'all') {
           expectations = {
             values: report.values.map(d => {
-              return { ...d, reference: benchmark.DEFAULT_EXPECTED_REFERENCE };
+              return {
+                ...d,
+                reference: this._expectedReference
+              };
             }),
             metadata: report.metadata
           };
@@ -582,7 +588,7 @@ class BenchmarkReporter implements Reporter {
     reportContent.push(new Array(nFiles + 2).fill('|').join(' --- '));
     const filler = new Array(nFiles).fill('|').join(' ');
 
-    let changeReference = benchmark.DEFAULT_EXPECTED_REFERENCE;
+    let changeReference = this._expectedReference;
 
     for (const [test, testGroup] of groups) {
       reportContent.push(`| **${test}** | ` + filler);
@@ -596,10 +602,7 @@ class BenchmarkReporter implements Reporter {
             const [q1, median, q3] = vs.quartiles(dataGroup);
 
             if (compare) {
-              if (
-                reference === benchmark.DEFAULT_REFERENCE ||
-                !actual.has(filename)
-              ) {
+              if (reference === this._reference || !actual.has(filename)) {
                 actual.set(filename, dataGroup);
               } else {
                 changeReference = reference;
@@ -737,6 +740,7 @@ class BenchmarkReporter implements Reporter {
   protected config: FullConfig;
   protected suite: Suite;
   private _comparison: 'snapshot' | 'project';
+  private _expectedReference: string;
   private _outputFile: string;
   private _reference: string;
   private _report: IReportRecord[];

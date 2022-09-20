@@ -3,7 +3,6 @@
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Styling } from '@jupyterlab/ui-components';
-import { each } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -140,7 +139,7 @@ namespace Private {
     const select = document.createElement('select');
     label.textContent = trans.__('Delimiter: ');
     label.className = CSV_DELIMITER_LABEL_CLASS;
-    each(delimiters, ([delimiter, label]) => {
+    for (const [delimiter, label] of delimiters) {
       const option = document.createElement('option');
       option.value = delimiter;
       option.textContent = label;
@@ -148,7 +147,7 @@ namespace Private {
         option.selected = true;
       }
       select.appendChild(option);
-    });
+    }
     div.appendChild(label);
     const node = Styling.wrapSelect(select);
     node.classList.add(CSV_DELIMITER_DROPDOWN_CLASS);

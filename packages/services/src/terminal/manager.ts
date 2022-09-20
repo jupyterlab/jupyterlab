@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IIterator, iter } from '@lumino/algorithm';
-
 import { Poll } from '@lumino/polling';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -143,8 +141,8 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    *
    * @returns A new iterator over the running terminals.
    */
-  running(): IIterator<Terminal.IModel> {
-    return iter(this._models);
+  running(): IterableIterator<Terminal.IModel> {
+    return this._models[Symbol.iterator]();
   }
 
   /**

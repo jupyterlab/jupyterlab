@@ -47,7 +47,7 @@ test.describe('Export Notebook', () => {
     await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
 
     await page.click('[title="Property Inspector"]');
-    await page.pause();
+
     await page.selectOption(
       '.jp-PropertyInspector >> text=Slide Type >> select',
       { label: 'Slide' }

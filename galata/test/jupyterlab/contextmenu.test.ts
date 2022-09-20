@@ -15,8 +15,8 @@ test.use({
 });
 
 test.describe('Application Context Menu', () => {
-  test.beforeAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
 
     // Create some dummy content
     await contents.uploadFile(
@@ -42,8 +42,8 @@ test.describe('Application Context Menu', () => {
     await page.filebrowser.openHomeDirectory();
   });
 
-  test.afterAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.deleteDirectory(tmpPath);
   });
 

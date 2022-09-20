@@ -5,7 +5,7 @@ import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IModelDB, IObservableList } from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -24,13 +24,9 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
-    super({ modelDB });
+  constructor(languagePreference?: string) {
+    super({ sharedModel: new models.YFile() as models.ISharedText });
     this._defaultLang = languagePreference || '';
-    const filemodel = new models.YFile() as models.ISharedFile;
-    this.switchSharedModel(filemodel, true);
-    this.value.changed.connect(this.triggerContentChange, this);
-
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
 
@@ -106,7 +102,7 @@ export class DocumentModel
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.value.text;
+    return this.sharedModel.getSource();
   }
 
   /**
@@ -116,14 +112,14 @@ export class DocumentModel
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.value.text = value;
+    this.sharedModel.setSource(value);
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): PartialJSONValue {
-    return JSON.parse(this.value.text || 'null');
+    return JSON.parse(this.sharedModel.getSource() || 'null');
   }
 
   /**
@@ -160,8 +156,11 @@ export class DocumentModel
 
   private _onStateChanged(
     sender: models.ISharedFile,
-    changes: models.NotebookChange
+    changes: models.NotebookChange | models.FileChange
   ): void {
+    if (changes.contextChange || (changes as models.FileChange).sourceChange) {
+      this.triggerContentChange();
+    }
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
         if (value.name !== 'dirty' || this._dirty !== value.newValue) {
@@ -239,12 +238,8 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(
-    languagePreference?: string,
-    modelDB?: IModelDB,
-    isInitialized?: boolean
-  ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB);
+  createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
+    return new DocumentModel(languagePreference);
   }
 
   /**

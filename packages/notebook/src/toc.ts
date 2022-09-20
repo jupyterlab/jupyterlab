@@ -2,14 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-import {
-  Cell,
-  CodeCell,
-  CodeCellModel,
-  ICellModel,
-  MarkdownCell
-} from '@jupyterlab/cells';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
+import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
+import { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
 import {
   TableOfContents,
   TableOfContentsFactory,
@@ -40,20 +34,6 @@ export enum RunningStatus {
 }
 
 /**
- * Type of headings
- */
-export enum HeadingType {
-  /**
-   * Heading from HTML output
-   */
-  HTML,
-  /**
-   * Heading from Markdown cell or Markdown output
-   */
-  Markdown
-}
-
-/**
  * Interface describing a notebook cell heading.
  */
 export interface INotebookHeading extends TableOfContents.IHeading {
@@ -75,7 +55,7 @@ export interface INotebookHeading extends TableOfContents.IHeading {
   /**
    * Type of heading
    */
-  type: HeadingType;
+  type: Cell.HeadingType;
 }
 
 /**
@@ -155,29 +135,28 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   /**
-   * Get the first heading of a given cell.
-   *
-   * It will be `null` if the cell has no headings.
+   * Get the headings of a given cell.
    *
    * @param cell Cell
-   * @returns The associated heading
+   * @returns The associated headings
    */
-  getCellHeading(cell: Cell): INotebookHeading | null {
+  getCellHeadings(cell: Cell): INotebookHeading[] {
+    const headings = new Array<INotebookHeading>();
     let headingIndex = this._cellToHeadingIndex.get(cell);
 
     if (headingIndex !== undefined) {
       const candidate = this.headings[headingIndex];
-      // Highlight the first title as active (if multiple titles are in the same cell)
+      headings.push(candidate);
       while (
         this.headings[headingIndex - 1] &&
         this.headings[headingIndex - 1].cellRef === candidate.cellRef
       ) {
         headingIndex--;
+        headings.unshift(this.headings[headingIndex]);
       }
-      return this.headings[headingIndex];
-    } else {
-      return null;
     }
+
+    return headings;
   }
 
   /**
@@ -255,66 +234,27 @@ export class NotebookToCModel extends TableOfContentsModel<
             !this.configuration.syncCollapseState &&
             this.configuration.includeOutput
           ) {
-            // Iterate over the code cell outputs to check for Markdown or HTML from which we can generate ToC headings...
-            const outputs = (model as CodeCellModel).outputs;
-            for (let j = 0; j < outputs.length; j++) {
-              const m = outputs.get(j);
-
-              let htmlType: string | null = null;
-              let mdType: string | null = null;
-
-              Object.keys(m.data).forEach(t => {
-                if (!mdType && TableOfContentsUtils.Markdown.isMarkdown(t)) {
-                  mdType = t;
-                } else if (!htmlType && TableOfContentsUtils.isHTML(t)) {
-                  htmlType = t;
-                }
-              });
-
-              // Parse HTML output
-              if (htmlType) {
-                headings.push(
-                  ...TableOfContentsUtils.getHTMLHeadings(
-                    this.sanitizer.sanitize(m.data[htmlType] as string),
-                    this.configuration,
-                    documentLevels
-                  ).map(heading => {
-                    return {
-                      ...heading,
-                      cellRef: cell,
-                      outputIndex: j,
-                      collapsed: false,
-                      isRunning: RunningStatus.Idle,
-                      type: HeadingType.HTML
-                    };
-                  })
-                );
-              } else if (mdType) {
-                headings.push(
-                  ...TableOfContentsUtils.Markdown.getHeadings(
-                    m.data[mdType] as string,
-                    this.configuration,
-                    documentLevels
-                  ).map(heading => {
-                    return {
-                      ...heading,
-                      cellRef: cell,
-                      outputIndex: j,
-                      collapsed: false,
-                      isRunning: RunningStatus.Idle,
-                      type: HeadingType.Markdown
-                    };
-                  })
-                );
-              }
-            }
+            headings.push(
+              ...TableOfContentsUtils.filterHeadings(
+                cell.headings,
+                this.configuration,
+                documentLevels
+              ).map(heading => {
+                return {
+                  ...heading,
+                  cellRef: cell,
+                  collapsed: false,
+                  isRunning: RunningStatus.Idle
+                };
+              })
+            );
           }
 
           break;
         }
         case 'markdown': {
-          const cellHeadings = TableOfContentsUtils.Markdown.getHeadings(
-            cell.model.value.text,
+          const cellHeadings = TableOfContentsUtils.filterHeadings(
+            cell.headings,
             this.configuration,
             documentLevels
           ).map((heading, index) => {
@@ -322,8 +262,7 @@ export class NotebookToCModel extends TableOfContentsModel<
               ...heading,
               cellRef: cell,
               collapsed: false,
-              isRunning: RunningStatus.Idle,
-              type: HeadingType.Markdown
+              isRunning: RunningStatus.Idle
             };
           });
           // If there are multiple headings, only collapse the highest heading (i.e. minimal level)
@@ -390,21 +329,9 @@ export class NotebookToCModel extends TableOfContentsModel<
     notebook: Notebook,
     cell: Cell<ICellModel>
   ): void {
-    let activeHeadingIndex = this._cellToHeadingIndex.get(cell);
-
-    if (activeHeadingIndex !== undefined) {
-      const candidate = this.headings[activeHeadingIndex];
-      // Highlight the first title as active (if multiple titles are in the same cell)
-      while (
-        this.headings[activeHeadingIndex - 1] &&
-        this.headings[activeHeadingIndex - 1].cellRef === candidate.cellRef
-      ) {
-        activeHeadingIndex--;
-      }
-      this.setActiveHeading(this.headings[activeHeadingIndex], false);
-    } else {
-      this.setActiveHeading(null, false);
-    }
+    // Highlight the first title as active (if multiple titles are in the same cell)
+    const activeHeading = this.getCellHeadings(cell)[0];
+    this.setActiveHeading(activeHeading ?? null, false);
   }
 
   protected onHeadingsChanged(): void {
@@ -582,58 +509,56 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     let headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
     const onActiveHeadingChanged = (
-      model: TableOfContentsModel<INotebookHeading, NotebookPanel>,
+      model: NotebookToCModel,
       heading: INotebookHeading | null
     ) => {
       if (heading) {
-        // Set active cell
+        const onCellInViewport = (cell: Cell): void => {
+          if (!cell.inViewport) {
+            // Bail early
+            return;
+          }
+
+          const el = headingToElement.get(heading);
+
+          if (el) {
+            const widgetBox = widget.content.node.getBoundingClientRect();
+            const elementBox = el.getBoundingClientRect();
+
+            if (
+              elementBox.top > widgetBox.bottom ||
+              elementBox.bottom < widgetBox.top
+            ) {
+              el.scrollIntoView({ block: 'center' });
+            }
+          }
+        };
+
+        const cell = heading.cellRef;
         const cells = widget.content.widgets;
-        const idx = cells.indexOf(heading.cellRef);
+        const idx = cells.indexOf(cell);
         widget.content.activeCellIndex = idx;
 
-        // Scroll to heading
-        const el = headingToElement.get(heading);
-
-        if (el) {
-          const widgetBox = widget.content.node.getBoundingClientRect();
-          const elementBox = el.getBoundingClientRect();
-
-          if (
-            elementBox.top > widgetBox.bottom ||
-            elementBox.bottom < widgetBox.top ||
-            elementBox.left > widgetBox.right ||
-            elementBox.right < widgetBox.left
-          ) {
-            el.scrollIntoView({ inline: 'center' });
-          }
+        if (cell.inViewport) {
+          onCellInViewport(cell);
+        } else {
+          widget.content
+            .scrollToItem(idx)
+            .then(() => {
+              onCellInViewport(cell);
+            })
+            .catch(reason => {
+              console.error(
+                'Fail to scroll to cell to display the required heading.'
+              );
+            });
         }
       }
     };
 
-    const onHeadingsChanged = (
-      model: TableOfContentsModel<INotebookHeading, NotebookPanel>
-    ) => {
-      if (!this.parser) {
-        return;
-      }
-      // Clear all numbering items
-      TableOfContentsUtils.clearNumbering(widget.content.node);
-
-      // Create a new mapping
-      headingToElement = new WeakMap<INotebookHeading, Element | null>();
-      model.headings.forEach(async heading => {
-        let elementId: string | null = null;
-        if (heading.type === HeadingType.Markdown) {
-          elementId = await TableOfContentsUtils.Markdown.getHeadingId(
-            this.parser!,
-            // Type from TableOfContentsUtils.Markdown.IMarkdownHeading
-            (heading as any).raw,
-            heading.level
-          );
-        } else if (heading.type === HeadingType.HTML) {
-          // Type from TableOfContentsUtils.IHTMLHeading
-          elementId = (heading as any).id;
-        }
+    const findHeadingElement = (cell: Cell): void => {
+      model.getCellHeadings(cell).forEach(async heading => {
+        const elementId = await getIdForHeading(heading, this.parser!);
 
         const selector = elementId
           ? `h${heading.level}[id="${elementId}"]`
@@ -664,6 +589,21 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       });
     };
 
+    const onHeadingsChanged = (model: NotebookToCModel) => {
+      if (!this.parser) {
+        return;
+      }
+      // Clear all numbering items
+      TableOfContentsUtils.clearNumbering(widget.content.node);
+
+      // Create a new mapping
+      headingToElement = new WeakMap<INotebookHeading, Element | null>();
+
+      widget.content.widgets.forEach(cell => {
+        findHeadingElement(cell);
+      });
+    };
+
     const onHeadingCollapsed = (
       _: NotebookToCModel,
       heading: INotebookHeading | null
@@ -688,13 +628,22 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
     const onCellCollapsed = (_: unknown, cell: MarkdownCell) => {
       if (model.configuration.syncCollapseState) {
-        const h = model.getCellHeading(cell);
+        const h = model.getCellHeadings(cell)[0];
         if (h) {
           model.toggleCollapse({
             heading: h,
             collapsed: cell.headingCollapsed
           });
         }
+      }
+    };
+
+    const onCellInViewportChanged = (_: unknown, cell: Cell) => {
+      if (cell.inViewport) {
+        findHeadingElement(cell);
+      } else {
+        // Needed to remove prefix in cell outputs
+        TableOfContentsUtils.clearNumbering(cell.node);
       }
     };
 
@@ -705,15 +654,44 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       model.headingsChanged.connect(onHeadingsChanged);
       model.collapseChanged.connect(onHeadingCollapsed);
       widget.content.cellCollapsed.connect(onCellCollapsed);
+      widget.content.cellInViewportChanged.connect(onCellInViewportChanged);
       // widget.content.
       widget.disposed.connect(() => {
         model.activeHeadingChanged.disconnect(onActiveHeadingChanged);
         model.headingsChanged.disconnect(onHeadingsChanged);
         model.collapseChanged.disconnect(onHeadingCollapsed);
         widget.content.cellCollapsed.disconnect(onCellCollapsed);
+        widget.content.cellInViewportChanged.disconnect(
+          onCellInViewportChanged
+        );
       });
     });
 
     return model;
   }
+}
+
+/**
+ * Get the element id for an heading
+ * @param heading Heading
+ * @param parser The markdownparser
+ * @returns The element id
+ */
+export async function getIdForHeading(
+  heading: INotebookHeading,
+  parser: IRenderMime.IMarkdownParser
+) {
+  let elementId: string | null = null;
+  if (heading.type === Cell.HeadingType.Markdown) {
+    elementId = await TableOfContentsUtils.Markdown.getHeadingId(
+      parser,
+      // Type from TableOfContentsUtils.Markdown.IMarkdownHeading
+      (heading as any).raw,
+      heading.level
+    );
+  } else if (heading.type === Cell.HeadingType.HTML) {
+    // Type from TableOfContentsUtils.IHTMLHeading
+    elementId = (heading as any).id;
+  }
+  return elementId;
 }

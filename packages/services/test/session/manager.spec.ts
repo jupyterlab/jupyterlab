@@ -6,7 +6,6 @@ import {
   JupyterServer,
   testEmission
 } from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import {
   KernelManager,
@@ -103,7 +102,7 @@ describe('session/manager', () => {
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
-        const running = toArray(manager.running());
+        const running = Array.from(manager.running());
         expect(running.length).toBeGreaterThan(0);
       });
     });
@@ -113,7 +112,7 @@ describe('session/manager', () => {
         const promise = testEmission(manager.runningChanged, {
           test: (sender, args) => {
             expect(sender).toBe(manager);
-            expect(toArray(args).length).toBeGreaterThan(0);
+            expect(Array.from(args).length).toBeGreaterThan(0);
           }
         });
         await startNew(manager);
@@ -157,7 +156,7 @@ describe('session/manager', () => {
       // future is prematurely disposed.
       it('should refresh the list of session ids', async () => {
         await manager.refreshRunning();
-        const running = toArray(manager.running());
+        const running = Array.from(manager.running());
         expect(running.length).toBeGreaterThan(0);
       });
     });
@@ -284,14 +283,14 @@ describe('session/manager', () => {
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toEqual(0);
+        expect(Array.from(manager.running()).length).toEqual(0);
       });
     });
 
     describe('#refreshRunning()', () => {
       it('should update the running kernels', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toEqual(0);
+        expect(Array.from(manager.running()).length).toEqual(0);
       });
     });
 

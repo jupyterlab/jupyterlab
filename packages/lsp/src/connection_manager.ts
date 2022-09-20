@@ -10,6 +10,7 @@ import { LSPConnection } from './connection';
 import { ClientCapabilities } from './lsp';
 import { AskServersToSendTraceNotifications } from './plugin';
 import {
+  Document,
   IDocumentConnectionData,
   ILanguageServerManager,
   ILSPConnection,
@@ -20,7 +21,7 @@ import {
   TServerKeys
 } from './tokens';
 import { expandDottedPaths, sleep, untilReady } from './utils';
-import { IForeignContext, VirtualDocument } from './virtual/document';
+import { VirtualDocument } from './virtual/document';
 
 import type * as protocol from 'vscode-languageserver-protocol';
 
@@ -180,7 +181,7 @@ export class DocumentConnectionManager
    */
   onForeignDocumentOpened(
     _host: VirtualDocument,
-    context: IForeignContext
+    context: Document.IForeignContext
   ): void {
     /** no-op */
   }
@@ -190,7 +191,7 @@ export class DocumentConnectionManager
    */
   onForeignDocumentClosed(
     _host: VirtualDocument,
-    context: IForeignContext
+    context: Document.IForeignContext
   ): void {
     const { foreignDocument } = context;
     this.unregisterDocument(foreignDocument, false);
@@ -446,11 +447,9 @@ export class DocumentConnectionManager
     this.connectDocumentSignals(virtualDocument);
 
     const uris = DocumentConnectionManager.solveUris(virtualDocument, language);
-
     const matchingServers = this.languageServerManager.getMatchingServers({
       language
     });
-    console.debug('Matching servers: ', matchingServers);
 
     // for now use only the server with the highest rank.
     const languageServerId =

@@ -21,7 +21,7 @@ export class KernelHelper {
   async isAnyRunning(): Promise<boolean> {
     return await this.page.evaluate(() => {
       const app = window.jupyterlab ?? window.jupyterapp;
-      return app.serviceManager.sessions.running().next() !== undefined;
+      return !app.serviceManager.sessions.running().next().done;
     });
   }
 

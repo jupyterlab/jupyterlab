@@ -134,6 +134,17 @@ export class DocumentManager implements IDocumentManager {
   }
 
   /**
+   * Whether to ask the user to rename untitled file on first manual save.
+   */
+  get renameUntitledFileOnSave(): boolean {
+    return this._renameUntitledFileOnSave;
+  }
+
+  set renameUntitledFileOnSave(value: boolean) {
+    this._renameUntitledFileOnSave = value;
+  }
+
+  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -273,6 +284,18 @@ export class DocumentManager implements IDocumentManager {
         );
         return Promise.resolve(void 0);
       });
+  }
+
+  /**
+   * Duplicate a file.
+   *
+   * @param path - The full path to the file to be duplicated.
+   *
+   * @returns A promise which resolves when the file is duplicated.
+   */
+  duplicate(path: string): Promise<Contents.IModel> {
+    const basePath = PathExt.dirname(path);
+    return this.services.contents.copy(path, basePath);
   }
 
   /**
@@ -482,15 +505,12 @@ export class DocumentManager implements IDocumentManager {
       // TODO should we pass the type for layout customization
       this._opener.open(widget, options);
     };
-    const modelDBFactory =
-      this.services.contents.getModelDBFactory(path) || undefined;
     const context = new Context({
       opener: adopter,
       manager: this.services,
       factory,
       path,
       kernelPreference,
-      modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
@@ -626,6 +646,7 @@ export class DocumentManager implements IDocumentManager {
   private _autosave = true;
   private _autosaveInterval = 120;
   private _lastModifiedCheckMargin = 500;
+  private _renameUntitledFileOnSave = true;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;

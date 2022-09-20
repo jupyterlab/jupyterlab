@@ -318,4 +318,14 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * TODO For now it only supports boolean filters (represented with checkboxes)
    */
   getFilters?(): { [key: string]: IFilter };
+
+  /**
+   * Validate a new filter value for the widget.
+   *
+   * @param name The filter name
+   * @param value The filter value candidate
+   *
+   * @returns The valid filter value
+   */
+  validateFilter?(name: string, value: boolean): Promise<boolean>;
 }

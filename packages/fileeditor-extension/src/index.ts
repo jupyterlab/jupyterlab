@@ -53,7 +53,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
-import { find, toArray } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
 
@@ -173,9 +173,11 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
     positionModel: IPositionModel
   ) => {
     positionModel.addEditorProvider((widget: Widget | null) =>
-      widget && tracker.has(widget)
-        ? (widget as IDocumentWidget<FileEditor>).content.editor
-        : null
+      Promise.resolve(
+        widget && tracker.has(widget)
+          ? (widget as IDocumentWidget<FileEditor>).content.editor
+          : null
+      )
     );
   },
   requires: [IEditorTracker, IPositionModel],
@@ -536,7 +538,7 @@ function activateFileEditorCompleterService(
       }
     };
 
-    onRunningChanged(sessionManager, toArray(sessionManager.running()));
+    onRunningChanged(sessionManager, Array.from(sessionManager.running()));
     sessionManager.runningChanged.connect(onRunningChanged);
 
     widget.disposed.connect(() => {

@@ -492,6 +492,12 @@
     "shortcuts": []
   },
   {
+    "id": "docmanager:duplicate",
+    "label": "Duplicate ",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "docmanager:new-untitled",
     "label": "New undefined",
     "caption": "",
@@ -1602,13 +1608,17 @@
     "id": "notebook:move-cell-down",
     "label": "Move Cells Down",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl Shift ArrowDown"
+    ]
   },
   {
     "id": "notebook:move-cell-up",
     "label": "Move Cells Up",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl Shift ArrowUp"
+    ]
   },
   {
     "id": "notebook:move-cursor-down",

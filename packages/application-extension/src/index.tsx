@@ -49,7 +49,7 @@ import {
   RankedMenu,
   Switch
 } from '@jupyterlab/ui-components';
-import { find, iter, toArray } from '@lumino/algorithm';
+import { find, some } from '@lumino/algorithm';
 import {
   JSONExt,
   PromiseDelegate,
@@ -147,15 +147,10 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return shell.currentWidget;
       }
 
-      const matches = toArray(shell.widgets('main')).filter(
-        widget => widget.id === node.dataset.id
+      return (
+        find(shell.widgets('main'), widget => widget.id === node.dataset.id) ||
+        shell.currentWidget
       );
-
-      if (matches.length < 1) {
-        return shell.currentWidget;
-      }
-
-      return matches[0];
     };
 
     // Closes an array of widgets.
@@ -168,26 +163,18 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       area: DockLayout.AreaConfig,
       widget: Widget
     ): DockLayout.ITabAreaConfig | null => {
-      switch (area.type) {
-        case 'split-area': {
-          const iterator = iter(area.children);
-          let tab: DockLayout.ITabAreaConfig | null = null;
-          let value: DockLayout.AreaConfig | undefined;
-          do {
-            value = iterator.next();
-            if (value) {
-              tab = findTab(value, widget);
-            }
-          } while (!tab && value);
-          return tab;
-        }
-        case 'tab-area': {
-          const { id } = widget;
-          return area.widgets.some(widget => widget.id === id) ? area : null;
-        }
-        default:
-          return null;
+      if (area.type === 'tab-area') {
+        return area.widgets.includes(widget) ? area : null;
       }
+      if (area.type === 'split-area') {
+        for (const child of area.children) {
+          const found = findTab(child, widget);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
     };
 
     // Find the tab area for a widget within the main dock area.
@@ -198,10 +185,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return null;
       }
       const area = mainArea.dock?.main;
-      if (!area) {
-        return null;
-      }
-      return findTab(area, widget);
+      return area ? findTab(area, widget) : null;
     };
 
     // Returns an array of all widgets to the right of a widget in a tab area.
@@ -234,8 +218,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       label: () => trans.__('Close All Other Tabs'),
       isEnabled: () => {
         // Ensure there are at least two widgets.
-        const iterator = shell.widgets('main');
-        return !!iterator.next() && !!iterator.next();
+        return some(shell.widgets('main'), (_, i) => i === 1);
       },
       execute: () => {
         const widget = contextMenuWidget();
@@ -243,10 +226,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return;
         }
         const { id } = widget;
-        const otherWidgets = toArray(shell.widgets('main')).filter(
-          widget => widget.id !== id
-        );
-        closeWidgets(otherWidgets);
+        for (const widget of shell.widgets('main')) {
+          if (widget.id !== id) {
+            widget.close();
+          }
+        }
       }
     });
 

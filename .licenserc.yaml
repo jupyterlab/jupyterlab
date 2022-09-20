@@ -25,6 +25,7 @@ header:
     - '*.map.js'
     - '*.bundle.js'
     - '**/.*'
+    - '.gitpod.yml'
     - 'binder/postBuild'
     - 'binder/start'
     - 'coverage'

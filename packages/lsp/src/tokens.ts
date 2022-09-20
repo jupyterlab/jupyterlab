@@ -26,6 +26,7 @@ import {
 
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 export { IDocumentInfo };
 
 /**
@@ -142,6 +143,96 @@ export interface ILanguageServerManager extends IDisposable {
    * Send a request to language server handler to get the session information.
    */
   fetchSessions(): Promise<void>;
+}
+
+/**
+ * Virtual document namespace
+ */
+export namespace Document {
+  /**
+   * Code block description.
+   */
+  export interface ICodeBlockOptions {
+    /**
+     * CodeEditor accessor
+     */
+    ceEditor: IEditor;
+
+    /**
+     * Type of the cell holding this block
+     */
+    type: string;
+
+    /**
+     * Editor text
+     *
+     * #### Notes
+     * This must always be available and should come from the document model directly.
+     */
+    value: string;
+  }
+
+  /**
+   * Code editor accessor.
+   */
+  export interface IEditor {
+    /**
+     * CodeEditor getter.
+     *
+     * It will return `null` if the editor is not yet instantiated;
+     * e.g. to support windowed notebook.
+     */
+    getEditor(): CodeEditor.IEditor | null;
+
+    /**
+     * Promise getter that resolved when the editor is instantiated.
+     */
+    ready(): Promise<CodeEditor.IEditor>;
+
+    /**
+     * Reveal the code editor in viewport.
+     *
+     * ### Notes
+     * The promise will resolve when the editor is instantiated and in
+     * the viewport.
+     */
+    reveal(): Promise<CodeEditor.IEditor>;
+  }
+
+  /**
+   * Foreign context within code block.
+   */
+  export interface IForeignContext {
+    /**
+     * The virtual document
+     */
+    foreignDocument: VirtualDocument;
+
+    /**
+     * The document holding the virtual document.
+     */
+    parentHost: VirtualDocument;
+  }
+
+  /**
+   * Virtual document block.
+   */
+  export interface IVirtualDocumentBlock {
+    /**
+     * Line corresponding to the block in the entire foreign document
+     */
+    virtualLine: number;
+
+    /**
+     * The virtual document holding this virtual line.
+     */
+    virtualDocument: VirtualDocument;
+
+    /**
+     * The CM editor associated with this virtual line.
+     */
+    editor: IEditor;
+  }
 }
 
 export namespace ILanguageServerManager {

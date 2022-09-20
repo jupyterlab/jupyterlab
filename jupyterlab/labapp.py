@@ -4,6 +4,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import dataclasses
 import json
 import os
 
@@ -43,11 +44,12 @@ from .commands import (
 )
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
+from .extensions import MANAGERS as EXT_MANAGERS
+from .extensions.readonly import ReadOnlyExtensionManager
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import (
     ExtensionHandler,
-    ExtensionManager,
     extensions_handler_path,
 )
 
@@ -76,7 +78,10 @@ build_aliases["debug-log-path"] = "DebugLogFileMixin.debug_log_path"
 
 build_flags = dict(base_flags)
 
-build_flags["dev-build"] = ({"LabBuildApp": {"dev_build": True}}, "Build in development mode.")
+build_flags["dev-build"] = (
+    {"LabBuildApp": {"dev_build": True}},
+    "Build in development mode.",
+)
 build_flags["no-minimize"] = (
     {"LabBuildApp": {"minimize": False}},
     "Do not minimize a production build.",
@@ -159,7 +164,9 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
     )
 
     minimize = Bool(
-        True, config=True, help="Whether to minimize a production build (defaults to True)."
+        True,
+        config=True,
+        help="Whether to minimize a production build (defaults to True).",
     )
 
     pre_clean = Bool(
@@ -206,8 +213,14 @@ clean_flags["extensions"] = (
     {"LabCleanApp": {"extensions": True}},
     "Also delete <app-dir>/extensions.\n%s" % ext_warn_msg,
 )
-clean_flags["settings"] = ({"LabCleanApp": {"settings": True}}, "Also delete <app-dir>/settings")
-clean_flags["static"] = ({"LabCleanApp": {"static": True}}, "Also delete <app-dir>/static")
+clean_flags["settings"] = (
+    {"LabCleanApp": {"settings": True}},
+    "Also delete <app-dir>/settings",
+)
+clean_flags["static"] = (
+    {"LabCleanApp": {"static": True}},
+    "Also delete <app-dir>/static",
+)
 clean_flags["all"] = (
     {"LabCleanApp": {"all": True}},
     "Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
@@ -443,7 +456,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     aliases["app-dir"] = "LabApp.app_dir"
 
     flags = flags
-    flags["core-mode"] = ({"LabApp": {"core_mode": True}}, "Start the app in core mode.")
+    flags["core-mode"] = (
+        {"LabApp": {"core_mode": True}},
+        "Start the app in core mode.",
+    )
     flags["dev-mode"] = (
         {"LabApp": {"dev_mode": True}},
         "Start the app in dev mode for running from source.",
@@ -484,7 +500,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
 
     override_theme_url = Unicode(
-        config=True, help=("The override url for static lab theme assets, typically a CDN.")
+        config=True,
+        help=("The override url for static lab theme assets, typically a CDN."),
     )
 
     app_dir = Unicode(None, config=True, help="The app directory to launch JupyterLab from.")
@@ -524,6 +541,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         JupyterLab. APIs in a JupyterLab development install may be
         incompatible with published packages, so prebuilt extensions compiled
         against published packages may not work correctly.""",
+    )
+
+    extension_manager = Unicode(
+        "pypi",
+        config=True,
+        help="""The extension manager factory to use. The default options are:
+        "readonly" for a manager without installation capability or "pypi" for
+        a manager using PyPi.org and pip to install extensions.""",
     )
 
     watch = Bool(False, config=True, help="Whether to serve the app in watch mode")
@@ -713,8 +738,59 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.cache_files = False
 
         if not self.core_mode and not errored:
-            ext_manager = ExtensionManager(app_options=build_handler_options)
-            ext_handler = (extensions_handler_path, ExtensionHandler, {"manager": ext_manager})
+            provider = self.extension_manager
+            entry_point = EXT_MANAGERS.get(provider)
+            if entry_point is None:
+                self.log.error(f"Extension Manager: No manager defined for provider '{provider}'.")
+                raise NotImplementedError()
+            else:
+                self.log.info(f"Extension Manager is '{provider}'.")
+            manager_factory = entry_point.load()
+            config = self.settings.get("config", {}).get("LabServerApp", {})
+
+            blocked_extensions_uris = config.get("blocked_extensions_uris", "")
+            allowed_extensions_uris = config.get("allowed_extensions_uris", "")
+
+            if (blocked_extensions_uris) and (allowed_extensions_uris):
+                self.log.error(
+                    "Simultaneous LabServerApp.blocked_extensions_uris and LabServerApp.allowed_extensions_uris is not supported. Please define only one of those."
+                )
+                import sys
+
+                sys.exit(-1)
+
+            listings_config = {
+                "blocked_extensions_uris": set(
+                    filter(lambda uri: len(uri) > 0, blocked_extensions_uris.split(","))
+                ),
+                "allowed_extensions_uris": set(
+                    filter(lambda uri: len(uri) > 0, allowed_extensions_uris.split(","))
+                ),
+                "listings_refresh_seconds": config.get("listings_refresh_seconds", 60 * 60),
+                "listings_tornado_options": config.get("listings_tornado_options", {}),
+            }
+            if len(listings_config["blocked_extensions_uris"]) or len(
+                listings_config["allowed_extensions_uris"]
+            ):
+                self.log.debug(f"Extension manager will be constrained by {listings_config}")
+
+            try:
+                ext_manager = manager_factory(build_handler_options, listings_config, self)
+                metadata = dataclasses.asdict(ext_manager.metadata)
+            except Exception as err:
+                self.log.warning(
+                    f"Failed to instantiate the extension manager {provider}. Falling back to read-only manager.",
+                    exc_info=err,
+                )
+                ext_manager = ReadOnlyExtensionManager(build_handler_options, listings_config, self)
+                metadata = dataclasses.asdict(ext_manager.metadata)
+
+            page_config["extensionManager"] = metadata
+            ext_handler = (
+                extensions_handler_path,
+                ExtensionHandler,
+                {"manager": ext_manager},
+            )
             handlers.append(ext_handler)
 
         # If running under JupyterHub, add more metadata.

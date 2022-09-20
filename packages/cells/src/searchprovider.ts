@@ -6,6 +6,7 @@ import {
   CodeMirrorEditor,
   CodeMirrorSearchHighlighter
 } from '@jupyterlab/codemirror';
+import { signalToPromise } from '@jupyterlab/coreutils';
 import {
   GenericSearchProvider,
   IBaseSearchProvider,
@@ -13,12 +14,15 @@ import {
   ISearchMatch,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
-import { IObservableString } from '@jupyterlab/observables';
 import { OutputArea } from '@jupyterlab/outputarea';
+import {
+  CellChange,
+  ISharedBaseCell,
+  ISharedBaseCellMetadata
+} from '@jupyterlab/shared-models';
 import { ISignal, Signal } from '@lumino/signaling';
-import { CodeCell } from '.';
 import { ICellModel } from './model';
-import { Cell, MarkdownCell } from './widget';
+import { Cell, CodeCell, MarkdownCell } from './widget';
 
 /**
  * Class applied on highlighted search matches
@@ -38,8 +42,15 @@ export class CellSearchProvider implements IBaseSearchProvider {
     this.currentIndex = null;
     this._stateChanged = new Signal<IBaseSearchProvider, void>(this);
     this.cmHandler = new CodeMirrorSearchHighlighter(
-      this.cell.editor as CodeMirrorEditor
+      this.cell.editor as CodeMirrorEditor | null
     );
+    if (!this.cell.inViewport && !this.cell.editor) {
+      void signalToPromise(cell.inViewportChanged).then(([, inViewport]) => {
+        if (inViewport) {
+          this.cmHandler.setEditor(this.cell.editor as CodeMirrorEditor);
+        }
+      });
+    }
   }
 
   /**
@@ -138,9 +149,12 @@ export class CellSearchProvider implements IBaseSearchProvider {
     this.filters = filters;
 
     // Search input
-    const content = this.cell.model.modelDB.get('value') as IObservableString;
+    const content = this.cell.model.sharedModel.getSource();
     await this._updateCodeMirror(content);
-    content.changed.connect(this.onInputChanged, this);
+    this.cell.model.sharedModel.changed.connect(
+      this.onSharedModelChanged,
+      this
+    );
   }
 
   /**
@@ -161,7 +175,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
       this.currentIndex = null;
     } else {
       if (this._lastReplacementPosition) {
-        this.cell.editor.setCursorPosition(this._lastReplacementPosition);
+        this.cell.editor?.setCursorPosition(this._lastReplacementPosition);
         this._lastReplacementPosition = null;
       }
 
@@ -234,12 +248,11 @@ export class CellSearchProvider implements IBaseSearchProvider {
         this.currentIndex = null;
         // Store the current position to highlight properly the next search hit
         this._lastReplacementPosition = editor.getCursorPosition();
-        this.cell.model.value.text =
-          this.cell.model.value.text.slice(0, match!.position) +
-          newText +
-          this.cell.model.value.text.slice(
-            match!.position + match!.text.length
-          );
+        this.cell.model.sharedModel.updateSource(
+          match!.position,
+          match!.position + match!.text.length,
+          newText
+        );
         occurred = true;
       }
     }
@@ -259,7 +272,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
     }
 
     let occurred = this.cmHandler.matches.length > 0;
-    let src = this.cell.model.value.text;
+    let src = this.cell.model.sharedModel.getSource();
     let lastEnd = 0;
     const finalSrc = this.cmHandler.matches.reduce((agg, match) => {
       const start = match.position as number;
@@ -272,7 +285,7 @@ export class CellSearchProvider implements IBaseSearchProvider {
     if (occurred) {
       this.cmHandler.matches = [];
       this.currentIndex = null;
-      this.cell.model.value.text = `${finalSrc}${src.slice(lastEnd)}`;
+      this.cell.model.sharedModel.setSource(`${finalSrc}${src.slice(lastEnd)}`);
     }
     return Promise.resolve(occurred);
   }
@@ -297,23 +310,25 @@ export class CellSearchProvider implements IBaseSearchProvider {
   /**
    * Callback on source change
    *
-   * @param content Cell source
+   * @param cell Cell source
    * @param changes Source change
    */
-  protected async onInputChanged(
-    content: IObservableString,
-    changes?: IObservableString.IChangedArgs
+  protected async onSharedModelChanged(
+    cell: ISharedBaseCell<ISharedBaseCellMetadata>,
+    changes: CellChange<ISharedBaseCellMetadata>
   ): Promise<void> {
-    await this._updateCodeMirror(content);
-    this._stateChanged.emit();
+    if (changes.sourceChange) {
+      await this._updateCodeMirror(cell.getSource());
+      this._stateChanged.emit();
+    }
   }
 
-  private async _updateCodeMirror(content: IObservableString) {
+  private async _updateCodeMirror(content: string) {
     if (this.query !== null) {
       if (this.isActive) {
         this.cmHandler.matches = await TextSearchEngine.search(
           this.query,
-          content.text
+          content
         );
       } else {
         this.cmHandler.matches = [];
@@ -612,7 +627,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell
       this._unrenderedByHighligh = true;
+      const waitForRendered = signalToPromise(cell.renderedChanged);
       cell.rendered = false;
+      await waitForRendered;
     }
 
     match = await super.highlightNext();
@@ -687,7 +704,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         void this.renderedProvider.startQuery(this.query);
       } else {
         // Force cursor position to ensure reverse search is working as expected
-        cell.editor.setCursorPosition({ column: 0, line: 0 });
+        cell.editor?.setCursorPosition({ column: 0, line: 0 });
         void this.renderedProvider.endQuery();
       }
     }
