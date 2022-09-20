@@ -16,9 +16,9 @@ import {
 } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { GroupItem, IStatusBar, TextItem } from '@jupyterlab/statusbar';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { buildIcon, closeIcon } from '@jupyterlab/ui-components';
-import { ReadonlyJSONValue } from '@lumino/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import type {
@@ -31,6 +31,10 @@ import type {
   ToastOptions,
   UpdateOptions
 } from 'react-toastify';
+
+namespace CommandIDs {
+  export const notify = 'apputils:notify';
+}
 
 /**
  * Half spacing between subitems in a status item.
@@ -100,7 +104,7 @@ function NotificationStatus(props: IPropsNotification): JSX.Element {
             const actions = options.actions;
 
             const autoClose =
-              options.autoClose ||
+              options.autoClose ??
               (actions && actions.length > 0 ? false : null);
 
             if (toast.isActive(id)) {
@@ -176,6 +180,40 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    app.commands.addCommand(CommandIDs.notify, {
+      label: trans.__('Emit a notification'),
+      caption: trans.__(
+        'Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
+      ),
+      execute: args => {
+        const { message, type } = args as any;
+        const options = (args.options as any) ?? {};
+
+        Notification.manager.notify(message, type ?? 'default', {
+          ...options,
+          actions: options.actions
+            ? options.actions.forEach(
+                (
+                  action: Omit<Notification.IAction, 'callback'> & {
+                    commandId: string;
+                    args?: ReadonlyJSONObject;
+                  }
+                ) => {
+                  return {
+                    ...action,
+                    callback: () => {
+                      app.commands.execute(action.commandId, action.args);
+                    }
+                  } as Notification.IAction;
+                }
+              )
+            : null
+        });
+      }
+    });
+
     statusBar.registerStatusItem(notificationPlugin.id, {
       item: ReactWidget.create(
         <NotificationStatus manager={Notification.manager}></NotificationStatus>
@@ -399,7 +437,8 @@ namespace Private {
       ({ closeToast }: { closeToast: () => void }) =>
         createContent(message, closeToast, actions, TYPE2ICON.get(type)),
       {
-        autoClose,
+        autoClose:
+          autoClose ?? (actions && actions.length > 0 ? false : undefined),
         data: data as any,
         className: `jp-toast-${type}`,
         toastId

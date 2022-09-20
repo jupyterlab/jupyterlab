@@ -77,7 +77,11 @@ export class NotificationManager implements IDisposable {
       modifiedAt: now,
       message,
       type,
-      options
+      options: {
+        // By default notification will be silent
+        autoClose: 0,
+        ...options
+      }
     });
 
     this._changed.emit({
@@ -266,7 +270,7 @@ export namespace Notification {
 
   export interface IAction {
     /**
-     * The label for the button.
+     * The label for the action.
      */
     label: string;
 
@@ -276,12 +280,12 @@ export namespace Notification {
     callback: () => void;
 
     /**
-     * The caption for the button.
+     * The caption for the action component.
      */
     caption?: string;
 
     /**
-     * The extra class name for the button.
+     * The extra class name for the action component.
      */
     className?: string;
   }
