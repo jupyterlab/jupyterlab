@@ -1,0 +1,107 @@
+@import '~react-toastify/dist/ReactToastify.min.css';
+
+:root {
+  --toastify-color-light: var(--jp-layout-color1);
+  --toastify-color-dark: var(--jp-layout-color1);
+  --toastify-color-info: var(--jp-info-color1);
+  --toastify-color-success: var(--jp-success-color1);
+  --toastify-color-warning: var(--jp-warning-color1);
+  --toastify-color-error: var(--jp-error-color1);
+  --toastify-color-transparent: rgba(255, 255, 255, 0.7);
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-icon-color-error: var(--toastify-color-error);
+  --toastify-toast-width: 320px;
+  --toastify-toast-background: var(--jp-layout-color1);
+  --toastify-toast-min-height: 64px;
+  --toastify-toast-max-height: 800px;
+  --toastify-font-family: var(--jp-ui-font-family);
+  --toastify-z-index: 9999;
+  --toastify-text-color-light: var(--jp-ui-font-color1);
+  --toastify-text-color-dark: var(--jp-ui-font-color1);
+  --toastify-text-color-info: var(--jp-ui-font-color1);
+  --toastify-text-color-success: var(--jp-ui-font-color1);
+  --toastify-text-color-warning: var(--jp-ui-font-color1);
+  --toastify-text-color-error: var(--jp-ui-font-color1);
+  --toastify-spinner-color: #616161;
+  --toastify-spinner-color-empty-area: #e0e0e0;
+  --toastify-color-progress-light: linear-gradient(
+    to right,
+    #4cd964,
+    #5ac8fa,
+    #007aff,
+    #34aadc,
+    #5856d6,
+    #ff2d55
+  );
+  --toastify-color-progress-dark: #bb86fc;
+  --toastify-color-progress-info: var(--toastify-color-info);
+  --toastify-color-progress-success: var(--toastify-color-success);
+  --toastify-color-progress-warning: var(--toastify-color-warning);
+  --toastify-color-progress-error: var(--toastify-color-error);
+}
+
+/* .Toastify__toast {
+  min-height: unset;
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+  color: var(--jp-ui-font-color1);
+  border-width: var(--jp-border-width);
+  border-radius: var(--jp-border-radius);
+  border-color: var(--jp-border-color1);
+  background: var(--jp-layout-color1);
+  box-shadow: var(--jp-elevation-z4);
+  cursor: default;
+} */
+
+.Toastify__toast-body > svg.svg-inline--fa {
+  margin-top: 0.2em;
+}
+
+/* .Toastify__toast--error {
+  border-top: 5px solid var(--jp-error-color1);
+}
+
+.Toastify__toast--warning {
+  border-top: 5px solid var(--jp-warn-color1);
+}
+
+.Toastify__toast--info {
+  border-top: 5px solid var(--jp-info-color1);
+}
+
+.Toastify__toast--success {
+  border-top: 5px solid var(--jp-success-color1);
+}
+
+.Toastify__toast--default.jp-toast-in-progress {
+  border-top: 5px solid var(--jp-layout-color1);
+} */
+
+.jp-toast-buttonBar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
+}
+
+.jp-toast-spacer {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.jp-toast-button {
+  border: solid var(--jp-border-width) var(--jp-border-color2);
+  font-size: var(--jp-ui-font-size0);
+  margin-top: 1px;
+  margin-bottom: 1px;
+  margin-right: 0;
+  margin-left: 3px;
+  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-toast-button:hover {
+  background-color: var(--jp-layout-color3);
+}
