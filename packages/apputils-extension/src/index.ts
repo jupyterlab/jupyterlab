@@ -34,6 +34,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
+import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
 import { settingsPlugin } from './settingsplugin';
 import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
@@ -623,6 +624,7 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelStatus,
+  notificationPlugin,
   palette,
   paletteRestorer,
   print,
