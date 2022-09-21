@@ -9,7 +9,6 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import * as nbformat from '@jupyterlab/nbformat';
 import { INotebookTools, NotebookTools } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
@@ -47,20 +46,16 @@ export class MetadataFormWidget extends NotebookTools.Tool {
    */
   constructor(
     builtProperties: MetadataForm.IProperties,
-    metadataKeys: MetadataForm.IMetadataKeys,
+    metaInformation: MetadataForm.IMetaInformation,
     uiSchema: MetadataForm.IUiSchema,
-    defaultValues?: any,
-    cellTypes?: Private.ICellTypes,
     pluginId?: string,
     translator?: ITranslator
   ) {
     super();
 
     this._properties = builtProperties;
-    this._metadataKeys = metadataKeys;
+    this._metaInformation = metaInformation;
     this._uiSchema = uiSchema;
-    this._defaultValues = defaultValues;
-    this._cellTypes = cellTypes;
     this._pluginId = pluginId;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
@@ -131,23 +126,21 @@ export class MetadataFormWidget extends NotebookTools.Tool {
 
     if (cell == undefined) return;
 
-    const metadataKeys: MetadataForm.IMetadataKeys = {};
     const builtProperties: MetadataForm.IProperties = {
       type: 'object',
       properties: {}
     };
     const formData = {} as PartialJSONObject;
 
-    for (let [key, nestedKeys] of Object.entries(this._metadataKeys)) {
+    for (let [key, metaInfo] of Object.entries(this._metaInformation)) {
       if (
-        this._cellTypes &&
-        this._cellTypes[key] &&
-        !this._cellTypes[key].includes(cell.model.type)
+        metaInfo.cellTypes &&
+        !metaInfo.cellTypes?.includes(cell.model.type)
       ) {
         continue;
       }
 
-      metadataKeys[key] = nestedKeys;
+      let nestedKeys = metaInfo.metadataKey;
       builtProperties.properties[key] = this._properties.properties[key];
       let workingObject: PartialJSONObject = cell.model.metadata.toJSON();
       let hasValue = true;
@@ -168,9 +161,8 @@ export class MetadataFormWidget extends NotebookTools.Tool {
 
     this.buildWidget({
       properties: builtProperties,
-      metadataKeys: metadataKeys,
+      metaInformation: this._metaInformation,
       uiSchema: this._uiSchema,
-      defaultValues: this._defaultValues,
       translator: this.translator || null,
       formData: formData,
       parent: this
@@ -187,9 +179,8 @@ export class MetadataFormWidget extends NotebookTools.Tool {
    * in metadata before performing update.
    */
   public updateMetadata(
-    metadataKeys: MetadataForm.IMetadataKeys,
-    formData: ReadonlyPartialJSONObject,
-    defaultValues: MetadataForm.IDefaultValues
+    metaInformation: MetadataForm.IMetaInformation,
+    formData: ReadonlyPartialJSONObject
   ) {
     if (this.notebookTools == undefined) return;
 
@@ -204,21 +195,23 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     } = {};
 
     for (let [key, value] of Object.entries(formData)) {
-      let baseMetadataKey = metadataKeys[key][0];
+      let metadataKey = metaInformation[key].metadataKey;
+      let baseMetadataKey = metadataKey[0];
       if (baseMetadataKey == undefined) continue;
 
-      let writeFinalData = value !== undefined && value !== defaultValues[key];
+      let writeFinalData =
+        value !== undefined && value !== metaInformation[key].default;
 
       // If metadata key is at root of metadata no need to go further.
-      if (metadataKeys[key].length == 1) {
+      if (metaInformation[key].metadataKey.length == 1) {
         if (writeFinalData)
           metadataObject[baseMetadataKey] = value as PartialJSONValue;
         else metadataObject[baseMetadataKey] = undefined;
         continue;
       }
 
-      let intermediateMetadataKeys = metadataKeys[key].slice(1, -1);
-      let finalMetadataKey = metadataKeys[key][metadataKeys[key].length - 1];
+      let intermediateMetadataKeys = metadataKey.slice(1, -1);
+      let finalMetadataKey = metadataKey[metadataKey.length - 1];
 
       // Deep copy of the metadata if not already done.
       if (!(baseMetadataKey in metadataObject))
@@ -260,7 +253,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
       if (!writeFinalData) {
         metadataObject[baseMetadataKey] = Private.deleteEmptyNested(
           metadataObject[baseMetadataKey] as PartialJSONObject,
-          metadataKeys[key].slice(1)
+          metadataKey.slice(1)
         );
         if (
           !Object.keys(metadataObject[baseMetadataKey] as PartialJSONObject)
@@ -280,21 +273,15 @@ export class MetadataFormWidget extends NotebookTools.Tool {
 
   protected translator: ITranslator;
   private _properties: MetadataForm.IProperties;
-  private _metadataKeys: MetadataForm.IMetadataKeys;
+  private _metaInformation: MetadataForm.IMetaInformation;
   private _uiSchema: MetadataForm.IUiSchema;
-  private _defaultValues: MetadataForm.IDefaultValues;
   private _trans: TranslationBundle;
   private _placeholder: Widget;
   private _updatingMetadata: boolean;
   private _pluginId: string | undefined;
-  private _cellTypes: Private.ICellTypes | undefined;
 }
 
 namespace Private {
-  export interface ICellTypes {
-    [metadataKey: string]: nbformat.CellType[];
-  }
-
   export async function loadSettingsMetadataForm(
     app: JupyterFrontEnd,
     tools: MetadataFormWidget[],
@@ -381,24 +368,25 @@ namespace Private {
         type: 'object',
         properties: {}
       };
-      let metadataKeys: MetadataForm.IMetadataKeys = {};
+      let metaInformation: MetadataForm.IMetaInformation = {};
       let uiSchema: MetadataForm.IUiSchema = {};
-      let defaultValues: MetadataForm.IDefaultValues = {};
-      let cellTypes: ICellTypes = {};
 
       for (let metadataSchema of schema.metadataKeys) {
         // Name of the key in RJSF schema.
         const joinedMetadataKey = metadataSchema.metadataKey.join('.');
 
         // Links the key to the path of the data in metadata.
-        metadataKeys[joinedMetadataKey] = metadataSchema.metadataKey;
+        metaInformation[joinedMetadataKey] = {
+          metadataKey: metadataSchema.metadataKey
+        };
 
         // Links the key to its singular property.
         builtProperties.properties[joinedMetadataKey] =
           metadataSchema.properties;
 
         // Set the default value.
-        defaultValues[joinedMetadataKey] = metadataSchema.properties.default;
+        metaInformation[joinedMetadataKey].default =
+          metadataSchema.properties.default;
 
         // Initialize an uiSchema for that key.
         uiSchema[joinedMetadataKey] = {};
@@ -420,9 +408,10 @@ namespace Private {
             uiSchema[joinedMetadataKey]['ui:widget'] = formWidget.renderer;
         }
 
-        // Optionally links key to cell type
-        if (metadataSchema['cellType']) {
-          cellTypes[joinedMetadataKey] = metadataSchema['cellType'];
+        // Optionally links key to cell type.
+        if (metadataSchema['cellTypes']) {
+          metaInformation[joinedMetadataKey].cellTypes =
+            metadataSchema['cellTypes'];
         }
       }
 
@@ -436,10 +425,8 @@ namespace Private {
       // Creates the tool.
       const tool = new MetadataFormWidget(
         builtProperties,
-        metadataKeys,
+        metaInformation,
         uiSchema,
-        defaultValues,
-        cellTypes,
         schema._origin,
         translator
       );

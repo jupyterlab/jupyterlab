@@ -57,6 +57,13 @@
           "items": {
             "type": "string"
           }
+        },
+        "cellTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["code", "markdown", "raw"]
+          }
         }
       },
       "type": "object",

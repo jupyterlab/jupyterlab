@@ -12,19 +12,44 @@ import {
   PartialJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 import { ITranslator } from '@jupyterlab/translation';
 
 import { MetadataFormWidget } from './index';
 import { RJSFTemplatesFactory } from '@jupyterlab/ui-components';
 
 export namespace MetadataForm {
+  /**
+   * The properties formatted for React jSON schema form use.
+   */
   export interface IProperties {
     type: string;
     properties: { [metadataKey: string]: PartialJSONObject };
   }
 
-  export interface IMetadataKeys {
-    [metadataKey: string]: Array<string>;
+  /**
+   * The meta information associated to all properties.
+   */
+  export interface IMetaInformation {
+    [metadataKey: string]: ISingleMetaInformation;
+  }
+
+  /**
+   * The meta information associated to a property.
+   */
+  export interface ISingleMetaInformation {
+    /**
+     * The (nested) metadata key as an array of keys.
+     */
+    metadataKey: Array<string>;
+    /**
+     * The default value for this metadata.
+     */
+    default?: any;
+    /**
+     * The cell types to display this metadata field.
+     */
+    cellTypes?: nbformat.CellType[];
   }
 
   /**
@@ -42,14 +67,7 @@ export namespace MetadataForm {
   }
 
   /**
-   * Default values
-   */
-  export interface IDefaultValues {
-    [metadataKey: string]: any;
-  }
-
-  /**
-   * Props passed to the FormWidget component
+   * Props passed to the FormWidget component.
    */
   export interface IProps {
     /**
@@ -58,9 +76,9 @@ export namespace MetadataForm {
     properties: IProperties;
 
     /**
-     *  Metadata keys associated to properties.
+     * Meta information associated to properties.
      */
-    metadataKeys: IMetadataKeys;
+    metaInformation: IMetaInformation;
 
     /**
      * Current data of the form.
@@ -86,11 +104,6 @@ export namespace MetadataForm {
      * The uiSchema built when loading schemas.
      */
     uiSchema: IUiSchema;
-
-    /**
-     * The default values for each key.
-     */
-    defaultValues: IDefaultValues;
   }
 }
 
@@ -130,9 +143,8 @@ export class FormWidget extends ReactWidget {
         idPrefix={`jp-MetadataForm-${this.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
           this._props.parent.updateMetadata(
-            this._props.metadataKeys,
-            e.formData,
-            this._props.defaultValues
+            this._props.metaInformation,
+            e.formData
           );
         }}
       />
