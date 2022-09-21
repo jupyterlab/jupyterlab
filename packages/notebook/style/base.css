@@ -237,6 +237,11 @@
 
 .jp-ActiveCellTool {
   padding: 12px;
+  display: flex;
+}
+
+.jp-ActiveCell-Content {
+  flex: 1 1 auto;
 }
 
 .jp-ActiveCellTool .jp-Cell-Content {
@@ -244,6 +249,10 @@
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 0;
   min-height: 29px;
+}
+
+.jp-ActiveCellTool .jp-InputPrompt {
+  min-width: calc(var(--jp-cell-prompt-width) * 0.75);
 }
 
 .jp-Cell-Content > pre {

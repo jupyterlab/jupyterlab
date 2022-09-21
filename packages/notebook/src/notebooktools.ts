@@ -24,10 +24,12 @@ import {
 } from '@lumino/coreutils';
 import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
 import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
+import { Debouncer } from '@lumino/polling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { INotebookTools, INotebookTracker } from './tokens';
+import { ISharedText } from '@jupyterlab/shared-models';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
@@ -438,11 +440,38 @@ export namespace NotebookTools {
 
       // First code line container
       const node = document.createElement('div');
+      node.classList.add('jp-ActiveCell-Content');
       const container = node.appendChild(document.createElement('div'));
       const editor = container.appendChild(document.createElement('pre'));
       container.className = 'jp-Cell-Content';
       this._editorEl = editor;
       (this.layout as PanelLayout).addWidget(new Widget({ node }));
+
+      const update = async () => {
+        this._editorEl.innerHTML = '';
+        if (this._cellModel?.type === 'code') {
+          this._inputPrompt.executionCount = `${
+            (this._cellModel as CodeCellModel).executionCount ?? ''
+          }`;
+          this._inputPrompt.show();
+        } else {
+          this._inputPrompt.executionCount = null;
+          this._inputPrompt.hide();
+        }
+
+        if (this._cellModel) {
+          const spec = await Mode.ensure(
+            Mode.findByMIME(this._cellModel.mimeType) ?? 'text/plain'
+          );
+          Mode.run(
+            this._cellModel.sharedModel.getSource().split('\n')[0],
+            spec,
+            this._editorEl
+          );
+        }
+      };
+
+      this._refreshDebouncer = new Debouncer(update, 150);
     }
 
     /**
@@ -452,7 +481,7 @@ export namespace NotebookTools {
       const activeCell = this.notebookTools.activeCell;
 
       if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.value.changed.disconnect(this.refresh, this);
+        this._cellModel.sharedModel.changed.disconnect(this.refresh, this);
         this._cellModel.mimeTypeChanged.disconnect(this.refresh, this);
       }
       if (!activeCell) {
@@ -460,37 +489,22 @@ export namespace NotebookTools {
         return;
       }
       const cellModel = (this._cellModel = activeCell.model);
-      cellModel.value.changed.connect(this.refresh, this);
+      (cellModel.sharedModel as ISharedText).changed.connect(
+        this.refresh,
+        this
+      );
       cellModel.mimeTypeChanged.connect(this.refresh, this);
       await this.refresh();
     }
 
     protected async refresh(): Promise<void> {
-      this._editorEl.innerHTML = '';
-      if (this._cellModel?.type === 'code') {
-        this._inputPrompt.executionCount = `${
-          (this._cellModel as CodeCellModel).executionCount ?? ''
-        }`;
-      } else {
-        this._inputPrompt.executionCount = null;
-      }
-
-      if (this._cellModel) {
-        const spec = await Mode.ensure(
-          Mode.findByMIME(this._cellModel.mimeType) ??
-            Mode.findByMIME('text/plain')!
-        );
-        Mode.run(
-          this._cellModel.value.text.split('\n')[0],
-          spec!,
-          this._editorEl
-        );
-      }
+      await this._refreshDebouncer.invoke();
     }
 
     private _cellModel: ICellModel | null;
     private _editorEl: HTMLPreElement;
     private _inputPrompt: InputPrompt;
+    private _refreshDebouncer: Debouncer<void, void, null[]>;
   }
 
   /**

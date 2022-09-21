@@ -7,9 +7,6 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../apputils"
-    },
-    {
       "path": "../codeeditor"
     },
     {

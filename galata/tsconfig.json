@@ -32,6 +32,9 @@
     },
     {
       "path": "../packages/settingregistry"
+    },
+    {
+      "path": "../packages/shared-models"
     }
   ]
 }

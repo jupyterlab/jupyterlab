@@ -551,9 +551,9 @@ export namespace Commands {
           const start = editor.getOffsetAt(selection.start);
           const end = editor.getOffsetAt(selection.end);
 
-          code = editor.model.value.text.substring(start, end);
+          code = editor.model.sharedModel.getSource().substring(start, end);
         } else if (MarkdownCodeBlocks.isMarkdown(extension)) {
-          const { text } = editor.model.value;
+          const text = editor.model.sharedModel.getSource();
           const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
 
           for (const block of blocks) {
@@ -570,8 +570,8 @@ export namespace Commands {
           code = editor.getLine(selection.start.line);
           const cursor = editor.getCursorPosition();
           if (cursor.line + 1 === editor.lineCount) {
-            const text = editor.model.value.text;
-            editor.model.value.text = text + '\n';
+            const text = editor.model.sharedModel.getSource();
+            editor.model.sharedModel.setSource(text + '\n');
           }
           editor.setCursorPosition({
             line: cursor.line + 1,
@@ -603,7 +603,7 @@ export namespace Commands {
 
         let code = '';
         const editor = widget.editor;
-        const text = editor.model.value.text;
+        const text = editor.model.sharedModel.getSource();
         const path = widget.context.path;
         const extension = PathExt.extname(path);
 
@@ -933,7 +933,7 @@ export namespace Commands {
     const selectionObj = editor.getSelection();
     const start = editor.getOffsetAt(selectionObj.start);
     const end = editor.getOffsetAt(selectionObj.end);
-    const text = editor.model.value.text.substring(start, end);
+    const text = editor.model.sharedModel.getSource().substring(start, end);
 
     return text;
   }

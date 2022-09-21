@@ -5,15 +5,27 @@ import { YCodeCell, YNotebook } from '../src';
 
 describe('@jupyterlab/shared-models', () => {
   describe('ynotebook', () => {
-    it('should create a notebook', () => {
-      const notebook = YNotebook.create(false);
-      expect(notebook.cells.length).toBe(0);
+    it('should create a notebook without arguments', () => {
+      const notebook = YNotebook.create();
+      expect(notebook.cells.length).toBe(1);
+      expect(notebook.cells[0].cell_type).toBe('code');
     });
+
+    it.each(['code', 'markdown', 'raw'])(
+      'should create a %s initialized notebook',
+      cellType => {
+        const notebook = YNotebook.create({
+          initialCellType: cellType as 'code' | 'markdown' | 'raw'
+        });
+        expect(notebook.cells.length).toBe(1);
+        expect(notebook.cells[0].cell_type).toBe(cellType);
+      }
+    );
   });
 
   describe('ynotebook metadata', () => {
     it('should update metadata', () => {
-      const notebook = YNotebook.create(false);
+      const notebook = YNotebook.create();
       const metadata = notebook.getMetadata();
       expect(metadata).toBeTruthy();
       metadata.orig_nbformat = 1;
@@ -40,20 +52,20 @@ describe('@jupyterlab/shared-models', () => {
 
   describe('ycell shared', () => {
     it('should insert a cell', () => {
-      const notebook = YNotebook.create(false);
+      const notebook = YNotebook.create();
       const codeCell = YCodeCell.create();
       notebook.insertCell(0, codeCell);
-      expect(notebook.cells.length).toBe(1);
+      expect(notebook.cells.length).toBe(2);
     });
     it('should set cell source', () => {
-      const notebook = YNotebook.create(false);
+      const notebook = YNotebook.create();
       const codeCell = YCodeCell.create();
       notebook.insertCell(0, codeCell);
       codeCell.setSource('test');
       expect(notebook.cells[0].getSource()).toBe('test');
     });
     it('should update source', () => {
-      const notebook = YNotebook.create(false);
+      const notebook = YNotebook.create();
       const codeCell = YCodeCell.create();
       notebook.insertCell(0, codeCell);
       codeCell.setSource('test');
@@ -64,7 +76,7 @@ describe('@jupyterlab/shared-models', () => {
 
   describe('ycell standalone', () => {
     it('should not insert a standalone cell', () => {
-      const notebook = YNotebook.create(false);
+      const notebook = YNotebook.create();
       const codeCell = YCodeCell.createStandalone();
       let failed = false;
       try {

@@ -105,7 +105,7 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
 
     const { rendermime, mimeType } = options;
 
-    const model = new CodeCellModel({});
+    const model = new CodeCellModel();
     model.mimeType = mimeType ?? '';
     this._prompt = new CodeCell({
       rendermime,
@@ -123,7 +123,7 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
    * Get the text specified by the user
    */
   getValue(): string {
-    return this._prompt.model.value.text;
+    return this._prompt.model.sharedModel.getSource();
   }
 
   /**

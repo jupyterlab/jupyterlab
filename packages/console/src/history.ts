@@ -101,14 +101,14 @@ export class ConsoleHistory implements IConsoleHistory {
     const prev = this._editor;
     if (prev) {
       prev.edgeRequested.disconnect(this.onEdgeRequest, this);
-      prev.model.value.changed.disconnect(this.onTextChange, this);
+      prev.model.sharedModel.changed.disconnect(this.onTextChange, this);
     }
 
     this._editor = value;
 
     if (value) {
       value.edgeRequested.connect(this.onEdgeRequest, this);
-      value.model.value.changed.connect(this.onTextChange, this);
+      value.model.sharedModel.changed.connect(this.onTextChange, this);
     }
   }
 
@@ -253,19 +253,19 @@ export class ConsoleHistory implements IConsoleHistory {
     editor: CodeEditor.IEditor,
     location: CodeEditor.EdgeLocation
   ): void {
-    const model = editor.model;
-    const source = model.value.text;
+    const sharedModel = editor.model.sharedModel;
+    const source = sharedModel.getSource();
 
     if (location === 'top' || location === 'topLine') {
       void this.back(source).then(value => {
         if (this.isDisposed || !value) {
           return;
         }
-        if (model.value.text === value) {
+        if (sharedModel.getSource() === value) {
           return;
         }
         this._setByHistory = true;
-        model.value.text = value;
+        sharedModel.setSource(value);
         let columnPos = 0;
         columnPos = value.indexOf('\n');
         if (columnPos < 0) {
@@ -279,11 +279,11 @@ export class ConsoleHistory implements IConsoleHistory {
           return;
         }
         const text = value || this.placeholder;
-        if (model.value.text === text) {
+        if (sharedModel.getSource() === text) {
           return;
         }
         this._setByHistory = true;
-        model.value.text = text;
+        sharedModel.setSource(text);
         const pos = editor.getPositionAt(text.length);
         if (pos) {
           editor.setCursorPosition(pos);

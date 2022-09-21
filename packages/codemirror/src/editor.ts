@@ -4,7 +4,6 @@
 // / <reference types="codemirror"/>
 // / <reference types="codemirror/searchcursor"/>
 
-import { showDialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
@@ -13,11 +12,9 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { SyntaxNodeRef } from '@lezer/common';
 import { ArrayExt } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { Poll } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 
 import {
@@ -27,7 +24,6 @@ import {
 } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
 import {
-  ChangeSet,
   EditorSelection,
   EditorState,
   Extension,
@@ -48,14 +44,14 @@ import {
   ViewUpdate,
   WidgetType
 } from '@codemirror/view';
-
-import * as Y from 'yjs';
+import { SyntaxNodeRef } from '@lezer/common';
 import { yCollab } from 'y-codemirror.next';
 import { Awareness } from 'y-protocols/awareness';
-import { Mode } from './mode';
-import { Configuration } from './editorconfiguration';
+import * as Y from 'yjs';
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
+import { Configuration } from './editorconfiguration';
+import { Mode } from './mode';
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -256,16 +252,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
 
     this._onMimeTypeChanged();
     this._onCursorActivity();
-    this._poll = new Poll({
-      factory: async () => {
-        this._checkSync();
-      },
-      frequency: { interval: 3000, backoff: false },
-      standby: () => {
-        // If changed, only stand by when hidden, otherwise always stand by.
-        return this._lastChange ? 'when-hidden' : true;
-      }
-    });
 
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
@@ -376,7 +362,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
     this._keydownHandlers.length = 0;
-    this._poll.dispose();
     Signal.clearData(this);
     this.editor.destroy();
   }
@@ -843,9 +828,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // If we can id the selection to a specific collaborator,
     // use that information.
     let collaborator: ICollaborator | undefined;
-    if (this._model.modelDB.collaborators) {
-      collaborator = this._model.modelDB.collaborators.get(uuid);
-    }
 
     // Style each selection for the uuid.
     selections.forEach(selection => {
@@ -981,10 +963,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (update.transactions.length && update.transactions[0].selection) {
       this._onCursorActivity();
     }
-
-    if (update.docChanged) {
-      this._lastChange = update.changes;
-    }
   }
 
   /**
@@ -1053,41 +1031,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
   }
 
-  /**
-   * Check for an out of sync editor.
-   */
-  private _checkSync(): void {
-    const change = this._lastChange;
-    if (!change) {
-      return;
-    }
-    this._lastChange = null;
-    const doc = this.doc;
-    if (doc.toString() === this._model.value.text) {
-      return;
-    }
-
-    void showDialog({
-      title: this._trans.__('Code Editor out of Sync'),
-      body: this._trans.__(
-        'Please open your browser JavaScript console for bug report instructions'
-      )
-    });
-    console.warn(
-      'If you are able and willing to publicly share the text or code in your editor, you can help us debug the "Code Editor out of Sync" message by pasting the following to the public issue at https://github.com/jupyterlab/jupyterlab/issues/2951. Please note that the data below includes the text/code in your editor.'
-    );
-    console.warn(
-      JSON.stringify({
-        model: this._model.value.text,
-        view: doc.toString(),
-        selections: this.getSelections(),
-        cursor: this.getCursorPosition(),
-        lineSep: this.state.facet(EditorState.lineSeparator),
-        change
-      })
-    );
-  }
-
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
@@ -1103,8 +1046,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
   private _isDisposed = false;
-  private _lastChange: ChangeSet | null = null;
-  private _poll: Poll;
   private _yeditorBinding: IYCodeMirrorBinding | null;
   private _editorConfig: Configuration.EditorConfiguration;
   private _addMark: StateEffectType<Private.ICollabSelectionText>;

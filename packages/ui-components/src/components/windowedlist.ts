@@ -402,6 +402,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       for (const item of sizes) {
         const key = item.index;
         const size = item.size;
+        if (!this._widgetSizers[key]) {
+          this._getItemMetadata(key);
+        }
+
         if (this._widgetSizers[key].size != size) {
           this._widgetSizers[key].size = size;
           minIndex = Math.min(minIndex, key);
@@ -1265,7 +1269,10 @@ export namespace WindowedList {
     /**
      * Items list to be rendered
      */
-    itemsList: IObservableList<any> | null;
+    itemsList: {
+      length: number;
+      changed: ISignal<any, IObservableList.IChangedArgs<any>>;
+    } | null;
 
     /**
      * Number of widgets to render in addition to those

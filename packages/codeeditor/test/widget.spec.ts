@@ -3,6 +3,7 @@
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { YFile } from '@jupyterlab/shared-models';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -54,7 +55,7 @@ describe('CodeEditorWrapper', () => {
   };
 
   beforeEach(() => {
-    const model = new CodeEditor.Model();
+    const model = new CodeEditor.Model({ sharedModel: new YFile() });
     widget = new LogWidget({ factory: editorFactory, model });
   });
 

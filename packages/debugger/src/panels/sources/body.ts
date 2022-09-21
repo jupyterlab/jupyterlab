@@ -104,7 +104,7 @@ export class SourcesBody extends Widget {
     const editorMimeType =
       mimeType || this._mimeTypeService.getMimeTypeByFilePath(path ?? '');
 
-    this._editor.model.value.text = content;
+    this._editor.model.sharedModel.setSource(content);
     this._editor.model.mimeType = editorMimeType;
 
     this._editorHandler = new EditorHandler({
@@ -112,7 +112,7 @@ export class SourcesBody extends Widget {
       editorReady: () => Promise.resolve(this._editor.editor),
       getEditor: () => this._editor.editor,
       path,
-      src: this._editor.model.value
+      src: this._editor.model.sharedModel
     });
 
     this._model.currentSource = {

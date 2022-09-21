@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { IObservableString } from '@jupyterlab/observables';
+import { ISharedText, TextChange } from '@jupyterlab/shared-models';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
@@ -67,7 +67,7 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.value.changed.disconnect(this.onTextChanged, this);
+      model.sharedModel.changed.disconnect(this.onTextChanged, this);
     }
 
     // Reset completer state.
@@ -81,7 +81,7 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.value.changed.connect(this.onTextChanged, this);
+      model.sharedModel.changed.connect(this.onTextChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
     }
@@ -144,7 +144,7 @@ export class CompletionHandler implements IDisposable {
     position: CodeEditor.IPosition
   ): Completer.ITextState {
     return {
-      text: editor.model.value.text,
+      text: editor.model.sharedModel.getSource(),
       lineHeight: editor.lineHeight,
       charWidth: editor.charWidth,
       line: position.line,
@@ -283,10 +283,7 @@ export class CompletionHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(
-    str: IObservableString,
-    changed: IObservableString.IChangedArgs
-  ): void {
+  protected onTextChanged(str: ISharedText, changed: TextChange): void {
     const model = this.completer.model;
     if (!model || !this._enabled) {
       return;
@@ -344,7 +341,7 @@ export class CompletionHandler implements IDisposable {
       return Promise.reject(new Error('No active editor'));
     }
 
-    const text = editor.model.value.text;
+    const text = editor.model.sharedModel.getSource();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };

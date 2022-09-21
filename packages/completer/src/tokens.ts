@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IObservableString } from '@jupyterlab/observables';
 import { Session } from '@jupyterlab/services';
+import { TextChange } from '@jupyterlab/shared-models';
 import { Token } from '@lumino/coreutils';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -101,7 +101,7 @@ export interface ICompletionProvider<
    */
   shouldShowContinuousHint?(
     completerIsVisible: boolean,
-    changed: IObservableString.IChangedArgs
+    changed: TextChange
   ): boolean;
 }
 
@@ -169,6 +169,6 @@ export interface IConnectorProxy {
    */
   shouldShowContinuousHint(
     completerIsVisible: boolean,
-    changed: IObservableString.IChangedArgs
+    changed: TextChange
   ): boolean;
 }

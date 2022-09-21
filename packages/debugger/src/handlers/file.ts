@@ -31,7 +31,7 @@ export class FileHandler implements IDisposable {
       debuggerService: this._debuggerService,
       editorReady: () => Promise.resolve(this._fileEditor.editor),
       getEditor: () => this._fileEditor.editor,
-      src: this._fileEditor.model.value
+      src: this._fileEditor.model.sharedModel
     });
   }
 

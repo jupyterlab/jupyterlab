@@ -16,6 +16,11 @@ import {
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';
+import {
+  createStandaloneCell,
+  ISharedText,
+  TextChange
+} from '@jupyterlab/shared-models';
 
 /**
  * The class name added to a JSONEditor instance.
@@ -73,11 +78,13 @@ export class JSONEditor extends Widget {
     this.node.appendChild(this.headerNode);
     this.node.appendChild(this.editorHostNode);
 
-    const model = new CodeEditor.Model();
+    const model = new CodeEditor.Model({
+      sharedModel: createStandaloneCell({ cell_type: 'code' })
+    });
 
-    model.value.text = this._trans.__('No data!');
     model.mimeType = 'application/json';
-    model.value.changed.connect(this._onValueChanged, this);
+    model.sharedModel.changed.connect(this._onModelChanged, this);
+
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
     this.editor.setOption('readOnly', true);
@@ -206,20 +213,22 @@ export class JSONEditor extends Widget {
   /**
    * Handle change events.
    */
-  private _onValueChanged(): void {
-    let valid = true;
-    try {
-      const value = JSON.parse(this.editor.model.value.text);
-      this.removeClass(ERROR_CLASS);
-      this._inputDirty =
-        !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
-    } catch (err) {
-      this.addClass(ERROR_CLASS);
-      this._inputDirty = true;
-      valid = false;
+  private _onModelChanged(model: ISharedText, change: TextChange): void {
+    if (change.sourceChange) {
+      let valid = true;
+      try {
+        const value = JSON.parse(this.editor.model.sharedModel.getSource());
+        this.removeClass(ERROR_CLASS);
+        this._inputDirty =
+          !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
+      } catch (err) {
+        this.addClass(ERROR_CLASS);
+        this._inputDirty = true;
+        valid = false;
+      }
+      this.revertButtonNode.hidden = !this._inputDirty;
+      this.commitButtonNode.hidden = !valid || !this._inputDirty;
     }
-    this.revertButtonNode.hidden = !this._inputDirty;
-    this.commitButtonNode.hidden = !valid || !this._inputDirty;
   }
 
   /**
@@ -257,7 +266,7 @@ export class JSONEditor extends Widget {
   private _mergeContent(): void {
     const model = this.editor.model;
     const old = this._originalValue;
-    const user = JSON.parse(model.value.text) as JSONObject;
+    const user = JSON.parse(model.sharedModel.getSource()) as JSONObject;
     const source = this.source;
     if (!source) {
       return;
@@ -291,11 +300,11 @@ export class JSONEditor extends Widget {
     const content = this._source ? this._source.toJSON() : {};
     this._changeGuard = true;
     if (content === void 0) {
-      model.value.text = this._trans.__('No data!');
+      model.sharedModel.setSource(this._trans.__('No data!'));
       this._originalValue = JSONExt.emptyObject;
     } else {
       const value = JSON.stringify(content, null, 4);
-      model.value.text = value;
+      model.sharedModel.setSource(value);
       this._originalValue = content;
       // Move the cursor to within the brace.
       if (value.length > 1 && value[0] === '{') {

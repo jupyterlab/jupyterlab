@@ -373,8 +373,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Save view editable state to model
    */
   saveEditableState(): void {
-    const { metadata } = this.model;
-    const current = metadata.get('editable');
+    const { sharedModel } = this.model;
+    const metadata = sharedModel.getMetadata();
+    const current = metadata['editable'];
 
     if (
       (this.readOnly && current === false) ||
@@ -382,19 +383,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     ) {
       return;
     }
-
     if (this.readOnly) {
-      this.model.metadata.set('editable', false);
+      metadata.editable = false;
     } else {
-      this.model.metadata.delete('editable');
+      delete metadata.editable;
     }
+    sharedModel.setMetadata(metadata);
   }
 
   /**
    * Load view editable state from model.
    */
   loadEditableState(): void {
-    this.readOnly = this.model.metadata.get('editable') === false;
+    this.readOnly = this.model.sharedModel.getMetadata().editable === false;
   }
 
   /**
@@ -1427,12 +1428,12 @@ export namespace CodeCell {
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     const model = cell.model;
-    const code = model.value.text;
+    const code = model.sharedModel.getSource();
     if (!code.trim() || !sessionContext.session?.kernel) {
       model.clearExecution();
       return;
     }
-    const cellId = { cellId: model.id };
+    const cellId = { cellId: model.sharedModel.getId() };
     metadata = {
       ...model.metadata.toJSON(),
       ...metadata,
@@ -1854,7 +1855,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (!this._headingsCache) {
       // Use table of content algorithm for consistency
       const headings = TableOfContentsUtils.Markdown.getHeadings(
-        this.model.value.text
+        this.model.sharedModel.getSource()
       );
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
@@ -2101,8 +2102,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (!this.placeholder && !this.isDisposed) {
       this.inputArea!.showEditor();
       // if this is going to be a heading, place the cursor accordingly
-      let numHashAtStart = (this.model.value.text.match(/^#+/g) || [''])[0]
-        .length;
+      let numHashAtStart = (this.model.sharedModel
+        .getSource()
+        .match(/^#+/g) || [''])[0].length;
       if (numHashAtStart > 0) {
         this.inputArea!.editor.setCursorPosition({
           column: numHashAtStart + 1,
@@ -2160,7 +2162,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   private _updateRenderedInput(): Promise<void> {
     const model = this.model;
-    const text = (model && model.value.text) || DEFAULT_MARKDOWN_TEXT;
+    const text =
+      (model && model.sharedModel.getSource()) || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
