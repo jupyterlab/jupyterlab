@@ -4,5 +4,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import './notification.css';
 @import './redirect.css';
 @import './splash.css';

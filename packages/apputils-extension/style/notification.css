@@ -47,6 +47,11 @@
   --toastify-color-progress-error: var(--toastify-color-error);
 }
 
+.jp-Notification-Status.jp-mod-selected {
+  background-color: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1) !important;
+}
+
 .Toastify__toast {
   min-height: unset;
   font-size: var(--jp-ui-font-size1);

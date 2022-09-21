@@ -14,10 +14,22 @@ import {
   ReactWidget
 } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { GroupItem, IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import {
+  GroupItem,
+  IStatusBar,
+  showPopup,
+  TextItem
+} from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { bellIcon, Button, closeIcon } from '@jupyterlab/ui-components';
+import {
+  bellIcon,
+  Button,
+  closeIcon,
+  UseSignal,
+  VDomModel
+} from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import type {
@@ -42,131 +54,86 @@ namespace CommandIDs {
  */
 const HALF_SPACING = 4;
 
-function NotificationCenter(props: IPropsNotification): JSX.Element {
-  return (
-    <div>
-      <div>Header</div>
-      <ul>
-        {props.manager.notifications.map(notification => (
-          <li key={notification.id}>{notification.message}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-interface IPropsNotification {
+function NotificationCenter(props: {
   manager: NotificationManager;
+}): JSX.Element {
+  return (
+    <ul>
+      {props.manager.notifications.map(notification => (
+        <li key={notification.id}>{notification.message}</li>
+      ))}
+    </ul>
+  );
 }
 
-function NotificationStatus(props: IPropsNotification): JSX.Element {
-  const [open, setOpen] = React.useState<boolean>(false);
-  const [hasUnread, setHasUnread] = React.useState<boolean>(
-    props.manager.notifications.length > 0
-  );
-  const [count, setCount] = React.useState<number>(props.manager.count);
-
-  if (open) {
-    // Dismiss all toasts when opening the notification center
-    Private.toast()
-      .then(t => {
-        t.dismiss();
-      })
-      .catch(r => {
-        console.error(`Failed to dismiss all toasts:\n${r}`);
-      });
+class NotificationStatusModel extends VDomModel {
+  constructor(protected manager: NotificationManager) {
+    super();
+    this._count = manager.count;
+    this.manager.changed.connect(this.onNotificationChanged, this);
   }
 
-  React.useEffect(() => {
-    const onNotification = async (
-      manager: NotificationManager,
-      change: Notification.IChange
-    ) => {
-      setCount(manager.count);
-      if (open) {
-        // If all notifications are displayed, bail early.
-        setHasUnread(false);
-        return;
-      }
+  get count(): number {
+    return this._count;
+  }
 
-      const { message, type, options, id } = change.notification;
+  get highlight(): boolean {
+    return this._highlight;
+  }
 
-      if (typeof options.autoClose === 'number' && options.autoClose <= 0) {
-        // If the notification is silent, bail early.
-        return;
-      }
+  get listOpened(): boolean {
+    return this._listOpened;
+  }
+  set listOpened(v: boolean) {
+    this._listOpened = v;
+    if (this._listOpened || this._highlight) {
+      this._highlight = false;
+      this.stateChanged.emit();
+    }
+  }
 
-      switch (change.type) {
-        case 'added':
-          await Private.createToast(id, message, type, options);
-          setHasUnread(true);
-          break;
-        case 'updated':
-          {
-            const toast = await Private.toast();
-            const actions = options.actions;
+  protected onNotificationChanged(
+    manager: NotificationManager,
+    change: Notification.IChange
+  ): void {
+    // Set private attribute to trigger only once the signal emission
+    this._count = this.manager.count;
 
-            const autoClose =
-              options.autoClose ??
-              (actions && actions.length > 0 ? false : null);
+    const { autoClose } = change.notification.options;
+    const noToast = typeof autoClose === 'number' && autoClose <= 0;
 
-            if (toast.isActive(id)) {
-              // Update existing toast
-              const closeToast = (): void => {
-                toast.dismiss(id);
-              };
-              toast.update(id, {
-                type: type === 'in-progress' ? null : type,
-                isLoading: type === 'in-progress',
-                autoClose: autoClose,
-                render: Private.createContent(
-                  message,
-                  closeToast,
-                  options.actions
-                )
-              });
-            } else {
-              // Needs to recreate a closed toast
-              await Private.createToast(id, message, type, options);
-            }
-            setHasUnread(true);
-          }
-          break;
-        case 'removed':
-          await Private.toast().then(t => {
-            t.dismiss(id);
-          });
-          break;
-      }
-    };
-    Notification.manager.changed.connect(onNotification);
+    // Highlight if
+    //   the list is not opened (the style change if list is opened due to clickedItem style in statusbar.)
+    //   the change type is not removed
+    //   the notification will be hidden
+    if (!this._listOpened && change.type !== 'removed' && noToast) {
+      this._highlight = true;
+    }
+    this.stateChanged.emit();
+  }
 
-    return () => {
-      Notification.manager.changed.disconnect(onNotification);
-    };
-  }, []);
+  private _count: number;
+  private _highlight = false;
+  private _listOpened = false;
+}
 
+interface INotificationStatusProps {
+  count: number;
+  highlight: boolean;
+  onClick: () => void;
+}
+
+function NotificationStatus(props: INotificationStatusProps): JSX.Element {
   return (
-    <>
-      <GroupItem
-        className={
-          hasUnread
-            ? 'jp-Notification-Status jp-mod-highlight'
-            : 'jp-Notification-Status'
-        }
-        spacing={HALF_SPACING}
-        onClick={() => {
-          setOpen(!open);
-        }}
-      >
-        <TextItem source={count}></TextItem>
-        <bellIcon.react top={'2px'} stylesheet={'statusBar'}></bellIcon.react>
-      </GroupItem>
-
-      {open && (
-        <NotificationCenter manager={props.manager}></NotificationCenter>
-      )}
-    </>
+    <GroupItem
+      spacing={HALF_SPACING}
+      onClick={() => {
+        props.onClick();
+      }}
+    >
+      <TextItem source={`${props.count}`}></TextItem>
+      <bellIcon.react top={'2px'} stylesheet={'statusBar'}></bellIcon.react>
+    </GroupItem>
   );
 }
 
@@ -228,12 +195,118 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    const notificationList = ReactWidget.create(
+      <NotificationCenter manager={Notification.manager}></NotificationCenter>
+    );
+    let popup: Widget | null = null;
+
+    async function onNotification(
+      manager: NotificationManager,
+      change: Notification.IChange
+    ): Promise<void> {
+      if (popup?.isDisposed) {
+        return;
+      }
+
+      const { message, type, options, id } = change.notification;
+
+      if (typeof options.autoClose === 'number' && options.autoClose <= 0) {
+        // If the notification is silent, bail early.
+        return;
+      }
+
+      switch (change.type) {
+        case 'added':
+          await Private.createToast(id, message, type, options);
+          break;
+        case 'updated':
+          {
+            const toast = await Private.toast();
+            const actions = options.actions;
+
+            const autoClose =
+              options.autoClose ??
+              (actions && actions.length > 0 ? false : null);
+
+            if (toast.isActive(id)) {
+              // Update existing toast
+              const closeToast = (): void => {
+                toast.dismiss(id);
+              };
+              toast.update(id, {
+                type: type === 'in-progress' ? null : type,
+                isLoading: type === 'in-progress',
+                autoClose: autoClose,
+                render: Private.createContent(
+                  message,
+                  closeToast,
+                  options.actions
+                )
+              });
+            } else {
+              // Needs to recreate a closed toast
+              await Private.createToast(id, message, type, options);
+            }
+          }
+          break;
+        case 'removed':
+          await Private.toast().then(t => {
+            t.dismiss(id);
+          });
+          break;
+      }
+    }
+    Notification.manager.changed.connect(onNotification);
+
+    const model = new NotificationStatusModel(Notification.manager);
+    model.listOpened = popup !== null;
+    const notificationStatus = ReactWidget.create(
+      <UseSignal signal={model.stateChanged}>
+        {() => {
+          if (model.highlight) {
+            notificationStatus.addClass('jp-mod-selected');
+          } else {
+            notificationStatus.removeClass('jp-mod-selected');
+          }
+          return (
+            <NotificationStatus
+              count={model.count}
+              highlight={model.highlight}
+              onClick={() => {
+                if (popup) {
+                  popup.dispose();
+                  popup = null;
+                } else {
+                  // Dismiss all toasts when opening the notification center
+                  Private.toast()
+                    .then(t => {
+                      t.dismiss();
+                    })
+                    .catch(r => {
+                      console.error(`Failed to dismiss all toasts:\n${r}`);
+                    });
+
+                  popup = showPopup({
+                    body: notificationList,
+                    anchor: notificationStatus,
+                    align: 'right'
+                  });
+                }
+
+                model.listOpened = popup !== null;
+              }}
+            ></NotificationStatus>
+          );
+        }}
+      </UseSignal>
+    );
+
+    notificationStatus.addClass('jp-Notification-Status');
+
     statusBar.registerStatusItem(notificationPlugin.id, {
-      item: ReactWidget.create(
-        <NotificationStatus manager={Notification.manager}></NotificationStatus>
-      ),
+      item: notificationStatus,
       align: 'right',
-      rank: 1000
+      rank: -1
     });
   }
 };
@@ -249,16 +322,40 @@ namespace Private {
     );
   }
 
+  /**
+   * Helper interface for 'react-toastify'.toast
+   */
   export interface IToast {
+    /**
+     * Helper generic function
+     */
     (content: ToastContent, options?: ToastOptions): Id;
+    /**
+     * Helper function for a toast with loading animation
+     */
     loading(content: ToastContent, options?: ToastOptions): Id;
+    /**
+     * Helper function for a toast with success style
+     */
     success(content: ToastContent, options?: ToastOptions): Id;
+    /**
+     * Helper function for a toast with info style
+     */
     info(content: ToastContent, options?: ToastOptions | undefined): Id;
+    /**
+     * Helper function for a toast with error style
+     */
     error(content: ToastContent, options?: ToastOptions | undefined): Id;
+    /**
+     * Helper function for a toast with warning style
+     */
     warning(content: ToastContent, options?: ToastOptions | undefined): Id;
+    /**
+     * Helper function for a toast with dark style
+     */
     dark(content: ToastContent, options?: ToastOptions | undefined): Id;
     /**
-     * Maybe I should remove warning in favor of warn, I don't know
+     * Helper function for a toast with warning style
      */
     warn: (content: ToastContent, options?: ToastOptions | undefined) => Id;
     /**
@@ -273,6 +370,9 @@ namespace Private {
      * return true if one container is displaying the toast
      */
     isActive(id: Id): boolean;
+    /**
+     * Update a toast
+     */
     update(toastId: Id, options?: UpdateOptions): void;
     /**
      * Used for controlled progress bar.
@@ -280,11 +380,15 @@ namespace Private {
     done(id: React.ReactText): void;
     /**
      * Track changes. The callback get the number of toast displayed
-     *
      */
     onChange(callback: (toast: ToastItem) => void): () => void;
   }
 
+  /**
+   * Asynchronously load the toast container
+   *
+   * @returns The toast object
+   */
   export async function toast(): Promise<IToast> {
     if (toastify === null) {
       toastify = await import('react-toastify');
@@ -318,7 +422,7 @@ namespace Private {
     /**
      * User specification for the button
      */
-    button: Notification.IAction;
+    action: Notification.IAction;
 
     /**
      * Function closing the notification
@@ -329,23 +433,22 @@ namespace Private {
   /**
    * Create a button with customized callback in a toast
    */
-  const ToastButton = ({
-    button,
-    closeToast
-  }: {
-    button: Notification.IAction;
-    closeToast: () => void;
-  }): React.ReactElement<IToastButtonProps> => {
+  function ToastButton({ action, closeToast }: IToastButtonProps): JSX.Element {
     const clickHandler = (): void => {
       closeToast();
-      button.callback();
+      action.callback();
     };
     return (
-      <Button className={'jp-toast-button'} onClick={clickHandler} small={true}>
-        {button.label}
+      <Button
+        title={action.caption ?? action.label}
+        className={'jp-toast-button'}
+        onClick={clickHandler}
+        small={true}
+      >
+        {action.label}
       </Button>
     );
-  };
+  }
 
   /**
    * Helper function to construct the notification content
@@ -361,24 +464,24 @@ namespace Private {
   ): React.ReactNode {
     if (actions && actions.length > 0) {
       return (
-        <div>
+        <>
           {message}
           <div className="jp-toast-buttonBar">
             <div className="jp-toast-spacer" />
-            {actions.map((button, idx) => {
+            {actions.map((action, idx) => {
               return (
                 <ToastButton
                   key={'button-' + idx}
-                  button={button}
+                  action={action}
                   closeToast={closeHandler}
                 />
               );
             })}
           </div>
-        </div>
+        </>
       );
     } else {
-      return <div>{message}</div>;
+      return <>{message}</>;
     }
   }
 
