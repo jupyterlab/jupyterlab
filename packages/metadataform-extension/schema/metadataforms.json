@@ -58,6 +58,11 @@
             "type": "string"
           }
         },
+        "metadataLevel": {
+          "type": "string",
+          "enum": ["cell", "notebook"],
+          "default": "cell"
+        },
         "cellTypes": {
           "type": "array",
           "items": {

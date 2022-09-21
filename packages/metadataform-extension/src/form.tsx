@@ -43,6 +43,10 @@ export namespace MetadataForm {
      */
     metadataKey: Array<string>;
     /**
+     * The metadata level, 'cell' or 'notebook'.
+     */
+    level?: 'cell' | 'notebook';
+    /**
      * The default value for this metadata.
      */
     default?: any;
