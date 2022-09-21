@@ -15,6 +15,7 @@
   --jp-icon-add-above: url('icons/toolbar/add-above.svg');
   --jp-icon-add-below: url('icons/toolbar/add-below.svg');
   --jp-icon-add: url('icons/toolbar/add.svg');
+  --jp-icon-bell: url('icons/statusbar/bell.svg');
   --jp-icon-bug-dot: url('icons/toolbar/bug-dot.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
@@ -120,6 +121,10 @@
 
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
+}
+
+.jp-BellIcon {
+  background-image: var(--jp-icon-bell);
 }
 
 .jp-BugDotIcon {

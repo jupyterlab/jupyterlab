@@ -57,7 +57,6 @@
     "@rjsf/core": "^4.2.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "react-toastify": "^9.0.8",
     "typestyle": "^2.0.4"
   },
   "devDependencies": {

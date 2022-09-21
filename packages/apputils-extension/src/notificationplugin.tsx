@@ -1,9 +1,3 @@
-import { faBell } from '@fortawesome/free-solid-svg-icons/faBell';
-import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
-import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle';
-import { faSpinner } from '@fortawesome/free-solid-svg-icons/faSpinner';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -17,7 +11,7 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { GroupItem, IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { buildIcon, closeIcon } from '@jupyterlab/ui-components';
+import { bellIcon, Button, closeIcon } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -34,6 +28,8 @@ import type {
 
 namespace CommandIDs {
   export const notify = 'apputils:notify';
+
+  export const dismiss = 'apputils:dismiss-notification';
 }
 
 /**
@@ -63,6 +59,7 @@ function NotificationStatus(props: IPropsNotification): JSX.Element {
   const [hasUnread, setHasUnread] = React.useState<boolean>(
     props.manager.notifications.length > 0
   );
+  const [count, setCount] = React.useState<number>(props.manager.count);
 
   if (open) {
     // Dismiss all toasts when opening the notification center
@@ -80,6 +77,7 @@ function NotificationStatus(props: IPropsNotification): JSX.Element {
       manager: NotificationManager,
       change: Notification.IChange
     ) => {
+      setCount(manager.count);
       if (open) {
         // If all notifications are displayed, bail early.
         setHasUnread(false);
@@ -114,12 +112,12 @@ function NotificationStatus(props: IPropsNotification): JSX.Element {
               };
               toast.update(id, {
                 type: type === 'in-progress' ? null : type,
+                isLoading: type === 'in-progress',
                 autoClose: autoClose,
                 render: Private.createContent(
                   message,
                   closeToast,
-                  options.actions,
-                  Private.TYPE2ICON.get(type)
+                  options.actions
                 )
               });
             } else {
@@ -144,7 +142,7 @@ function NotificationStatus(props: IPropsNotification): JSX.Element {
   }, []);
 
   return (
-    <div>
+    <>
       <GroupItem
         className={
           hasUnread
@@ -156,13 +154,14 @@ function NotificationStatus(props: IPropsNotification): JSX.Element {
           setOpen(!open);
         }}
       >
-        <TextItem source={props.manager.count}></TextItem>
-        <buildIcon.react top={'2px'} stylesheet={'statusBar'}></buildIcon.react>
+        <TextItem source={count}></TextItem>
+        <bellIcon.react top={'2px'} stylesheet={'statusBar'}></bellIcon.react>
       </GroupItem>
+
       {open && (
         <NotificationCenter manager={props.manager}></NotificationCenter>
       )}
-    </div>
+    </>
   );
 }
 
@@ -171,6 +170,7 @@ function NotificationStatus(props: IPropsNotification): JSX.Element {
  */
 export const notificationPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:notification',
+  autoStart: true,
   requires: [IStatusBar, ISanitizer],
   optional: [ISettingRegistry, ITranslator],
   activate: (
@@ -191,10 +191,10 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         const { message, type } = args as any;
         const options = (args.options as any) ?? {};
 
-        Notification.manager.notify(message, type ?? 'default', {
+        return Notification.manager.notify(message, type ?? 'default', {
           ...options,
           actions: options.actions
-            ? options.actions.forEach(
+            ? options.actions.map(
                 (
                   action: Omit<Notification.IAction, 'callback'> & {
                     commandId: string;
@@ -214,6 +214,15 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    app.commands.addCommand(CommandIDs.dismiss, {
+      label: trans.__('Dismiss a notification'),
+      execute: args => {
+        const { id } = args as any;
+
+        Notification.manager.dismiss(id);
+      }
+    });
+
     statusBar.registerStatusItem(notificationPlugin.id, {
       item: ReactWidget.create(
         <NotificationStatus manager={Notification.manager}></NotificationStatus>
@@ -225,71 +234,19 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 namespace Private {
-  export const TYPE2ICON = new Map<
-    Notification.TypeOptions,
-    JSX.Element | null
-  >([
-    ['default', null],
-    [
-      'in-progress',
-      // eslint-disable-next-line react/jsx-key
-      <FontAwesomeIcon
-        icon={faSpinner}
-        pull="left"
-        spin
-        style={{ color: 'var(--jp-inverse-layout-color3)' }}
-      />
-    ],
-    [
-      'error',
-      // eslint-disable-next-line react/jsx-key
-      <FontAwesomeIcon
-        icon={faExclamationCircle}
-        pull="left"
-        style={{ color: 'var(--jp-error-color1)' }}
-      />
-    ],
-    [
-      'warning',
-      // eslint-disable-next-line react/jsx-key
-      <FontAwesomeIcon
-        icon={faExclamationTriangle}
-        pull="left"
-        style={{ color: 'var(--jp-warn-color1)' }}
-      />
-    ],
-    [
-      'info',
-      // eslint-disable-next-line react/jsx-key
-      <FontAwesomeIcon
-        icon={faBell}
-        pull="left"
-        style={{ color: 'var(--jp-info-color1)' }}
-      />
-    ],
-    [
-      'success',
-      // eslint-disable-next-line react/jsx-key
-      <FontAwesomeIcon
-        icon={faCheck}
-        pull="left"
-        style={{ color: 'var(--jp-success-color1)' }}
-      />
-    ]
-  ]);
-
   let toastify: typeof ReactToastify | null = null;
 
   function CloseButton(props: CloseButtonProps): JSX.Element {
     return (
       <i onClick={props.closeToast}>
-        <span className="jp-icon-hover">{closeIcon.react}</span>
+        <closeIcon.react className="jp-icon-hover" tag="span"></closeIcon.react>
       </i>
     );
   }
 
   export interface IToast {
     (content: ToastContent, options?: ToastOptions): Id;
+    loading(content: ToastContent, options?: ToastOptions): Id;
     success(content: ToastContent, options?: ToastOptions): Id;
     info(content: ToastContent, options?: ToastOptions | undefined): Id;
     error(content: ToastContent, options?: ToastOptions | undefined): Id;
@@ -327,6 +284,11 @@ namespace Private {
     if (toastify === null) {
       toastify = await import('react-toastify');
 
+      const container = document.body.appendChild(
+        document.createElement('div')
+      );
+      container.id = 'react-toastify-container';
+
       ReactDOM.render(
         <toastify.ToastContainer
           draggable={false}
@@ -340,7 +302,7 @@ namespace Private {
           transition={toastify.Slide}
           closeButton={CloseButton}
         ></toastify.ToastContainer>,
-        document.body
+        container
       );
     }
 
@@ -369,17 +331,14 @@ namespace Private {
     button: Notification.IAction;
     closeToast: () => void;
   }): React.ReactElement<IToastButtonProps> => {
-    const fullClassName = button.className
-      ? `jp-toast-button ${button.className}`
-      : 'jp-toast-button';
     const clickHandler = (): void => {
       closeToast();
       button.callback();
     };
     return (
-      <button className={fullClassName} onClick={clickHandler}>
+      <Button className={'jp-toast-button'} onClick={clickHandler} small={true}>
         {button.label}
-      </button>
+      </Button>
     );
   };
 
@@ -393,13 +352,11 @@ namespace Private {
   export function createContent(
     message: React.ReactNode,
     closeHandler: () => void,
-    actions?: Notification.IAction[],
-    icon?: JSX.Element | null
+    actions?: Notification.IAction[]
   ): React.ReactNode {
     if (actions && actions.length > 0) {
       return (
-        <>
-          {icon ? icon : null}
+        <div>
           {message}
           <div className="jp-toast-buttonBar">
             <div className="jp-toast-spacer" />
@@ -413,15 +370,10 @@ namespace Private {
               );
             })}
           </div>
-        </>
+        </div>
       );
     } else {
-      return (
-        <>
-          {icon ? icon : null}
-          {message}
-        </>
-      );
+      return <div>{message}</div>;
     }
   }
 
@@ -433,16 +385,20 @@ namespace Private {
   ): Promise<Id> {
     const { actions, autoClose, data } = options;
     const t = await toast();
+    const toastOptions = {
+      autoClose:
+        autoClose ?? (actions && actions.length > 0 ? false : undefined),
+      data: data as any,
+      className: `jp-toast-${type}`,
+      toastId,
+      type: type === 'in-progress' ? null : type,
+      isLoading: type === 'in-progress'
+    } as any;
+
     return t(
       ({ closeToast }: { closeToast: () => void }) =>
-        createContent(message, closeToast, actions, TYPE2ICON.get(type)),
-      {
-        autoClose:
-          autoClose ?? (actions && actions.length > 0 ? false : undefined),
-        data: data as any,
-        className: `jp-toast-${type}`,
-        toastId
-      }
+        createContent(message, closeToast, actions),
+      toastOptions
     );
   }
 }

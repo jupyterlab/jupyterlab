@@ -2,33 +2,48 @@ import { ReadonlyJSONValue, UUID } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
+/**
+ * Notification manager
+ */
 export class NotificationManager implements IDisposable {
   constructor() {
     this._isDisposed = false;
+    this._queue = [];
     this._changed = new Signal<NotificationManager, Notification.IChange>(this);
   }
 
+  /**
+   * Signal emitted whenever a notification changes.
+   */
   get changed(): ISignal<NotificationManager, Notification.IChange> {
     return this._changed;
   }
 
+  /**
+   * Total number of notifications.
+   */
   get count(): number {
     return this._queue.length;
   }
 
+  /**
+   * Whether the manager is disposed or not.
+   */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
+  /**
+   * The list of notifications.
+   */
   get notifications(): Notification.INotification[] {
     return this._queue.slice();
   }
 
   /**
-   * Dismiss one toast (specified by its id) or all if no id provided
+   * Dismiss one notification (specified by its id) or all if no id provided.
    *
-   * @param id Toast id
-   * @returns False or void
+   * @param id Notification id
    */
   dismiss(id?: string): void {
     if (typeof id === 'undefined') {
@@ -52,6 +67,9 @@ export class NotificationManager implements IDisposable {
     }
   }
 
+  /**
+   * Dispose the manager.
+   */
   dispose(): void {
     if (this._isDisposed) {
       return;
@@ -61,11 +79,27 @@ export class NotificationManager implements IDisposable {
     Signal.clearData(this);
   }
 
+  /**
+   * Test whether a notification exists or not.
+   *
+   * @param id Notification id
+   * @returns Notification status
+   */
   has(id: string): boolean {
     return this._queue.findIndex(n => n.id === id) > -1;
   }
 
-  notify<T extends ReadonlyJSONValue>(
+  /**
+   * Add a new notification.
+   *
+   * This will trigger the `changed` signal with an `added` event.
+   *
+   * @param message Notification message
+   * @param type Notification type
+   * @param options Notification option
+   * @returns Notification unique id
+   */
+  notify<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     message: string,
     type: Notification.TypeOptions,
     options: Notification.IOptions<T>
@@ -84,6 +118,8 @@ export class NotificationManager implements IDisposable {
       }
     });
 
+    this._queue.unshift(notification);
+
     this._changed.emit({
       type: 'added',
       notification
@@ -93,14 +129,15 @@ export class NotificationManager implements IDisposable {
   }
 
   /**
-   * Update an existing toast.
+   * Update an existing notification.
    *
-   * If the toast is inactive (i.e. closed), a new one with the provided id
-   * will be created with the new content.
+   * If the notification does not exists this won't do anything.
    *
    * @param args Update options
    */
-  update<T extends ReadonlyJSONValue>(args: Notification.IUpdate<T>): void {
+  update<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
+    args: Notification.IUpdate<T>
+  ): void {
     const { id, message, actions, autoClose, data, type } = args;
     const notificationIndex = this._queue.findIndex(n => n.id === id);
     if (notificationIndex > -1) {
@@ -117,6 +154,10 @@ export class NotificationManager implements IDisposable {
         },
         modifiedAt: Date.now()
       });
+
+      this._queue.splice(notificationIndex, 1);
+      this._queue.unshift(notification);
+
       this._changed.emit({
         type: 'updated',
         notification
@@ -129,16 +170,175 @@ export class NotificationManager implements IDisposable {
   private _queue: Notification.INotification[];
 }
 
+/**
+ * Notification namespace
+ */
 export namespace Notification {
+  /**
+   * Interface describing an action linked to a notification.
+   */
+  export interface IAction {
+    /**
+     * The action label.
+     *
+     * This should be a short description.
+     */
+    label: string;
+
+    /**
+     * Callback function to trigger
+     */
+    callback: () => void;
+
+    /**
+     * The action caption.
+     *
+     * This can be a longer description of the action.
+     */
+    caption?: string;
+  }
+
+  /**
+   * Notification interface
+   */
+  export interface INotification<
+    T extends ReadonlyJSONValue = ReadonlyJSONValue
+  > {
+    /**
+     * Notification unique identifier
+     */
+    id: string;
+    /**
+     * Notification message
+     */
+    message: string;
+    /**
+     * Notification creation date
+     */
+    createAt: number;
+    /**
+     * Notification modification date
+     */
+    modifiedAt: number;
+    /**
+     * Notification type
+     */
+    type: TypeOptions;
+    /**
+     * Notification options
+     */
+    options: IOptions<T>;
+  }
+
+  /**
+   * Notification change interface
+   */
+  export interface IChange {
+    /**
+     * Change type
+     */
+    type: 'added' | 'removed' | 'updated';
+    /**
+     * Notification that changed
+     */
+    notification: INotification;
+  }
+
+  /**
+   * Notification options
+   */
+  export interface IOptions<T extends ReadonlyJSONValue> {
+    /**
+     * Autoclosing behavior - undefined (not closing automatically)
+     * or number (time in milliseconds before hiding the notification)
+     *
+     * Set to zero if you want the notification to be retained in the notification
+     * center but not displayed as toast.
+     */
+    autoClose?: number | false;
+
+    /**
+     * List of associated actions
+     */
+    actions?: Array<IAction>;
+
+    /**
+     * Data associated with a notification
+     */
+    data?: T;
+  }
+
+  /**
+   * Parameters for notification depending on a promise.
+   */
+  export interface IPromiseOptions<
+    Pending extends ReadonlyJSONValue,
+    Success extends ReadonlyJSONValue = Pending,
+    Error extends ReadonlyJSONValue = Pending
+  > {
+    /**
+     * Promise pending message and options
+     */
+    pending: { message: string; options: IOptions<Pending> };
+    /**
+     * Message when promise resolves and options
+     */
+    success: { message: string; options: IOptions<Success> };
+    /**
+     * Message when promise rejects and options
+     */
+    error: { message: string; options: IOptions<Error> };
+  }
+
+  /**
+   * Type of notifications
+   */
+  export type TypeOptions =
+    | 'info'
+    | 'in-progress'
+    | 'success'
+    | 'warning'
+    | 'error'
+    | 'default';
+
+  /**
+   * Options for updating a notification
+   */
+  export interface IUpdate<T extends ReadonlyJSONValue> extends IOptions<T> {
+    /**
+     * Notification unique id
+     */
+    id: string;
+    /**
+     * New notification message
+     */
+    message: string;
+    /**
+     * New notification type
+     */
+    type?: TypeOptions;
+  }
+
+  /**
+   * The global notification manager.
+   */
   export const manager = new NotificationManager();
 
   /**
-   * Helper function to show an error notification. Those
-   * notifications need an user action to close.
+   * Dismiss one notification (specified by its id) or all if no id provided
    *
-   * @param message Message to be printed in the notification
+   * @param id notification id
+   */
+  export function dismiss(id?: string): void {
+    manager.dismiss(id);
+  }
+
+  /**
+   * Helper function to emit an error notification.
+   *
+   * @param message Notification message
    * @param options Options for the error notification
-   * @returns ToastId
+   * @returns Notification unique id
    */
   export function error<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     message: string,
@@ -146,28 +346,13 @@ export namespace Notification {
   ): string {
     return manager.notify<T>(message, 'error', options);
   }
-  /**
-   * Helper function to show a warning notification. Those
-   * notifications need an user action to close.
-   *
-   * @param message Message to be printed in the notification
-   * @param options Options for the warning notification
-   * @returns ToastId
-   */
-  export function warning<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
-    message: string,
-    options: IOptions<T> = {}
-  ): string {
-    return manager.notify<T>(message, 'warning', options);
-  }
 
   /**
-   * Helper function to show an informative notification. Those
-   * notifications close automatically.
+   * Helper function to emit an info notification.
    *
-   * @param message Message to be printed in the notification
-   * @param options Options for the error notification
-   * @returns ToastId
+   * @param message Notification message
+   * @param options Options for the info notification
+   * @returns Notification unique id
    */
   export function info<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     message: string,
@@ -177,12 +362,11 @@ export namespace Notification {
   }
 
   /**
-   * Helper function to show a success notification. Those
-   * notifications close automatically.
+   * Helper function to emit an success notification.
    *
-   * @param message Message to be printed in the notification
-   * @param options Options for the error notification
-   * @returns ToastId
+   * @param message Notification message
+   * @param options Options for the success notification
+   * @returns Notification unique id
    */
   export function success<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     message: string,
@@ -192,11 +376,11 @@ export namespace Notification {
   }
 
   /**
-   * Helper function to show a in progress notification. Those
-   * notifications do not close automatically.
+   * Helper function to show a in-progress notification.
    *
-   * @param options Options for the error notification
-   * @returns ToastId
+   * @param promise Promise to wait for
+   * @param options Options for the in-progress notification
+   * @returns Notification unique id
    */
   export function promise<
     Pending extends ReadonlyJSONValue = ReadonlyJSONValue,
@@ -234,21 +418,10 @@ export namespace Notification {
     return id;
   }
 
-  /** Options needed to update an existing toast */
-  export interface IUpdate<T extends ReadonlyJSONValue> extends IOptions<T> {
-    /** Id of the toast to be updated */
-    id: string;
-    /** New message to be displayed */
-    message: string;
-    /** New type of the toast */
-    type?: TypeOptions;
-  }
-
   /**
-   * Update an existing toast.
+   * Helper function to update a notification.
    *
-   * If the toast is inactive (i.e. closed), a new one with the provided id
-   * will be created with the new content.
+   * If the notification does not exists, nothing will happen.
    *
    * @param args Update options
    */
@@ -259,100 +432,16 @@ export namespace Notification {
   }
 
   /**
-   * Dismiss one toast (specified by its id) or all if no id provided
+   * Helper function to emit an warning notification.
    *
-   * @param id Toast id
-   * @returns False or void
+   * @param message Notification message
+   * @param options Options for the warning notification
+   * @returns Notification unique id
    */
-  export function dismiss(id?: string): void {
-    manager.dismiss(id);
+  export function warning<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
+    message: string,
+    options: IOptions<T> = {}
+  ): string {
+    return manager.notify<T>(message, 'warning', options);
   }
-
-  export interface IAction {
-    /**
-     * The label for the action.
-     */
-    label: string;
-
-    /**
-     * Callback function
-     */
-    callback: () => void;
-
-    /**
-     * The caption for the action component.
-     */
-    caption?: string;
-
-    /**
-     * The extra class name for the action component.
-     */
-    className?: string;
-  }
-
-  /**
-   * Notification description
-   */
-  export interface INotification<
-    T extends ReadonlyJSONValue = ReadonlyJSONValue
-  > {
-    id: string;
-    message: string;
-    createAt: number;
-    modifiedAt: number;
-    type: TypeOptions;
-    options: IOptions<T>;
-  }
-
-  export interface IChange {
-    type: 'added' | 'removed' | 'updated';
-    notification: INotification;
-  }
-
-  /**
-   * Notification options
-   */
-  export interface IOptions<T extends ReadonlyJSONValue> {
-    /**
-     * Autoclosing behavior - undefined (not closing automatically)
-     * or number (time in milliseconds before hiding the notification)
-     *
-     * Set to zero if you want the notification to be retained in the notification
-     * center but not displayed as toast.
-     */
-    autoClose?: number | false;
-    /**
-     * List of associated actions
-     */
-    actions?: Array<IAction>;
-
-    data?: T;
-  }
-
-  export interface IPromiseOptions<
-    Pending extends ReadonlyJSONValue,
-    Success extends ReadonlyJSONValue = Pending,
-    Error extends ReadonlyJSONValue = Pending
-  > {
-    /**
-     * Pending message and options
-     */
-    pending: { message: string; options: IOptions<Pending> };
-    /**
-     * Message when promise resolves and options
-     */
-    success: { message: string; options: IOptions<Success> };
-    /**
-     * Message when promise rejects and options
-     */
-    error: { message: string; options: IOptions<Error> };
-  }
-
-  export type TypeOptions =
-    | 'info'
-    | 'in-progress'
-    | 'success'
-    | 'warning'
-    | 'error'
-    | 'default';
 }
