@@ -106,6 +106,12 @@
       "description": "A regular expression filter to apply by default when showing the kernel sources",
       "type": "string",
       "default": ""
+    },
+    "AutoCollapseDebuggerSidebar": {
+      "title": "Auto Collapse Debugger Sidebar",
+      "description": "collapse debugger sidebar when disabling debugger",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,
