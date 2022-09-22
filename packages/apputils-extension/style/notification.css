@@ -47,9 +47,38 @@
   --toastify-color-progress-error: var(--toastify-color-error);
 }
 
+.jp-Notification-List {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  width: var(--toastify-toast-width);
+  overflow-y: auto;
+  max-height: 55vh;
+  box-sizing: border-box;
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-Notification-Header {
+  width: 100%;
+  padding: 0 4px;
+  margin: 0;
+  align-items: center;
+}
+
+.jp-Notification-List li {
+  padding: 2px 0;
+}
+
+.jp-Notification-List .Toastify__toast {
+  margin: 0;
+}
+
 .jp-Notification-Status.jp-mod-selected {
   background-color: var(--jp-brand-color1);
-  color: var(--jp-ui-inverse-font-color1) !important;
+}
+
+.jp-Notification-Status.jp-mod-selected span {
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 .Toastify__toast {

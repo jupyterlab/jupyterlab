@@ -20,11 +20,16 @@ import {
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import {
   bellIcon,
   Button,
   closeIcon,
+  ToolbarButtonComponent,
   UseSignal,
   VDomModel
 } from '@jupyterlab/ui-components';
@@ -35,6 +40,7 @@ import * as ReactDOM from 'react-dom';
 import type {
   ClearWaitingQueueParams,
   CloseButtonProps,
+  Icons,
   Id,
   default as ReactToastify,
   ToastContent,
@@ -56,16 +62,96 @@ const HALF_SPACING = 4;
 
 function NotificationCenter(props: {
   manager: NotificationManager;
+  trans: TranslationBundle;
 }): JSX.Element {
+  const [icons, setIcons] = React.useState<typeof Icons | null>(null);
+  React.useEffect(() => {
+    Private.getIcons().then(toastifyIcons => {
+      setIcons(toastifyIcons);
+    });
+  }, []);
+
+  const { manager, trans } = props;
+
   return (
-    <ul>
-      {props.manager.notifications.map(notification => (
-        <li key={notification.id}>{notification.message}</li>
-      ))}
-    </ul>
+    <UseSignal signal={manager.changed}>
+      {() => (
+        <>
+          <h2 className="jp-Notification-Header jp-Toolbar">
+            <span className="jp-Toolbar-item">
+              {manager.count > 0
+                ? trans._n('%1 notification', '%1 notifications', manager.count)
+                : trans.__('No notifications')}
+            </span>
+            <span className="jp-Toolbar-item jp-Toolbar-spacer"></span>
+            <ToolbarButtonComponent
+              actualOnClick={true}
+              onClick={() => {
+                manager.dismiss();
+              }}
+              icon={closeIcon}
+              tooltip={trans.__('Dismiss all notifications')}
+              enabled={manager.count > 0}
+            ></ToolbarButtonComponent>
+          </h2>
+          <ol className="jp-Notification-List">
+            {manager.notifications.map(notification => {
+              const { id, message, type, options } = notification;
+              const toastType = type === 'in-progress' ? 'default' : type;
+              const closeNotification = () => {
+                manager.dismiss(id);
+              };
+              const icon =
+                type === 'default'
+                  ? null
+                  : type === 'in-progress'
+                  ? icons?.spinner ?? null
+                  : icons && icons[type];
+              return (
+                <li
+                  key={notification.id}
+                  onClick={event => {
+                    // Stop propagation to avoid closing the popup on click
+                    event.stopPropagation();
+                  }}
+                >
+                  {/* This reuses the react-toastify elements to get a similar look and feel. */}
+                  <div
+                    className={`Toastify__toast Toastify__toast-theme--light Toastify__toast--${toastType} jp-toast-${toastType}`}
+                  >
+                    <div className="Toastify__toast-body">
+                      {icon && (
+                        <div className="Toastify__toast-icon">
+                          {icon({ theme: 'light', type: toastType })}
+                        </div>
+                      )}
+                      <div>
+                        {Private.createContent(
+                          message,
+                          closeNotification,
+                          options.actions
+                        )}
+                      </div>
+                    </div>
+                    <Private.CloseButton
+                      closeToast={closeNotification}
+                      type={toastType}
+                      theme={'light'}
+                    ></Private.CloseButton>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </>
+      )}
+    </UseSignal>
   );
 }
 
+/**
+ * Status widget model
+ */
 class NotificationStatusModel extends VDomModel {
   constructor(protected manager: NotificationManager) {
     super();
@@ -73,14 +159,23 @@ class NotificationStatusModel extends VDomModel {
     this.manager.changed.connect(this.onNotificationChanged, this);
   }
 
+  /**
+   * Number of notifications.
+   */
   get count(): number {
     return this._count;
   }
 
+  /**
+   * Whether to highlight the status widget or not.
+   */
   get highlight(): boolean {
     return this._highlight;
   }
 
+  /**
+   * Whether the popup is opened or not.
+   */
   get listOpened(): boolean {
     return this._listOpened;
   }
@@ -88,8 +183,8 @@ class NotificationStatusModel extends VDomModel {
     this._listOpened = v;
     if (this._listOpened || this._highlight) {
       this._highlight = false;
-      this.stateChanged.emit();
     }
+    this.stateChanged.emit();
   }
 
   protected onNotificationChanged(
@@ -121,6 +216,7 @@ interface INotificationStatusProps {
   count: number;
   highlight: boolean;
   onClick: () => void;
+  trans: TranslationBundle;
 }
 
 function NotificationStatus(props: INotificationStatusProps): JSX.Element {
@@ -130,6 +226,11 @@ function NotificationStatus(props: INotificationStatusProps): JSX.Element {
       onClick={() => {
         props.onClick();
       }}
+      title={
+        props.count > 0
+          ? props.trans._n('%1 notification', '%1 notifications', props.count)
+          : props.trans.__('No notifications')
+      }
     >
       <TextItem source={`${props.count}`}></TextItem>
       <bellIcon.react top={'2px'} stylesheet={'statusBar'}></bellIcon.react>
@@ -152,7 +253,8 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
-    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Private.translator = translator ?? nullTranslator;
+    const trans = Private.translator.load('jupyterlab');
 
     app.commands.addCommand(CommandIDs.notify, {
       label: trans.__('Emit a notification'),
@@ -196,7 +298,10 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     });
 
     const notificationList = ReactWidget.create(
-      <NotificationCenter manager={Notification.manager}></NotificationCenter>
+      <NotificationCenter
+        manager={Notification.manager}
+        trans={trans}
+      ></NotificationCenter>
     );
     let popup: Widget | null = null;
 
@@ -204,7 +309,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       manager: NotificationManager,
       change: Notification.IChange
     ): Promise<void> {
-      if (popup?.isDisposed) {
+      if (popup !== null && !popup.isDisposed) {
         return;
       }
 
@@ -263,7 +368,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     const notificationStatus = ReactWidget.create(
       <UseSignal signal={model.stateChanged}>
         {() => {
-          if (model.highlight) {
+          if (model.highlight || (popup && !popup.isDisposed)) {
             notificationStatus.addClass('jp-mod-selected');
           } else {
             notificationStatus.removeClass('jp-mod-selected');
@@ -272,6 +377,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
             <NotificationStatus
               count={model.count}
               highlight={model.highlight}
+              trans={trans}
               onClick={() => {
                 if (popup) {
                   popup.dispose();
@@ -289,7 +395,13 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
                   popup = showPopup({
                     body: notificationList,
                     anchor: notificationStatus,
-                    align: 'right'
+                    align: 'right',
+                    hasDynamicSize: true
+                  });
+
+                  popup.disposed.connect(() => {
+                    model.listOpened = false;
+                    popup = null;
                   });
                 }
 
@@ -312,11 +424,14 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 namespace Private {
+  export let translator: ITranslator = nullTranslator;
+
   let toastify: typeof ReactToastify | null = null;
 
-  function CloseButton(props: CloseButtonProps): JSX.Element {
+  export function CloseButton(props: CloseButtonProps): JSX.Element {
+    const trans = translator.load('jupyterlab');
     return (
-      <i onClick={props.closeToast}>
+      <i title={trans.__('Close notification')} onClick={props.closeToast}>
         <closeIcon.react className="jp-icon-hover" tag="span"></closeIcon.react>
       </i>
     );
@@ -416,6 +531,14 @@ namespace Private {
     }
 
     return toastify.toast;
+  }
+
+  export async function getIcons(): Promise<typeof Icons> {
+    if (toastify === null) {
+      await toast();
+    }
+
+    return toastify!.Icons;
   }
 
   interface IToastButtonProps {
