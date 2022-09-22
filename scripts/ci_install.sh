@@ -40,5 +40,5 @@ fi
 
 # The debugger tests require a kernel that supports debugging
 if [[ $GROUP == js-debugger ]]; then
-    pip install xeus-python">=0.9.0,<0.10.0"
+    pip install xeus-python">=0.14.0,<0.15.0"
 fi
