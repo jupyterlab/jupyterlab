@@ -19,6 +19,9 @@
       "path": "../notebook"
     },
     {
+      "path": "../observables"
+    },
+    {
       "path": "../settingregistry"
     },
     {
@@ -26,9 +29,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../observables"
     }
   ]
 }
