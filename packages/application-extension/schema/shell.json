@@ -5,9 +5,9 @@
     "hiddenMode": {
       "type": "string",
       "title": "Hidden mode of main panel widgets",
-      "description": "The method for hiding widgets in the main dock panel. Using `scale` will often increase performance as most browsers will not trigger style computation for the transform action.",
+      "description": "The method for hiding widgets in the main dock panel. Using `scale` will increase performance on Firefox but don't use it with Chrome, Chromium or Edge.",
       "enum": ["display", "scale"],
-      "default": "scale"
+      "default": "display"
     }
   },
   "additionalProperties": false,
