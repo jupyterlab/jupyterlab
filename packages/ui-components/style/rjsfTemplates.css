@@ -12,9 +12,9 @@ form.rjsf button[type='submit'] {
   padding: 0;
 }
 
-.jp-FormGroup-content fieldset input,
-.jp-FormGroup-content fieldset select,
-.jp-FormGroup-content fieldset textarea {
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper input,
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper select,
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper textarea {
   font-size: var(--jp-content-font-size2);
   border-color: var(--jp-input-border-color);
   border-style: solid;

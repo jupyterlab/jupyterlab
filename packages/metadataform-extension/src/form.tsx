@@ -139,6 +139,7 @@ export class FormWidget extends ReactWidget {
       <Form
         schema={this._props.properties as JSONSchema7}
         formData={this._props.formData}
+        formContext={this._props.metaInformation}
         FieldTemplate={this._templateFactory.fieldTemplate}
         ArrayFieldTemplate={this._templateFactory.arrayTemplate}
         ObjectFieldTemplate={this._templateFactory.objectTemplate}

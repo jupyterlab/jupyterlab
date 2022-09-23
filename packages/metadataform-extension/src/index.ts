@@ -16,7 +16,10 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { IFormWidgetRegistry } from '@jupyterlab/ui-components';
+import {
+  IFormComponentRegistry,
+  IFormWidgetRegistry
+} from '@jupyterlab/ui-components';
 import {
   JSONExt,
   PartialJSONArray,
@@ -332,6 +335,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     }
 
     this._updatingMetadata = false;
+    this._update();
   }
 
   protected translator: ITranslator;
@@ -359,7 +363,8 @@ namespace Private {
     registry: ISettingRegistry,
     notebookTools: INotebookTools,
     translator: ITranslator,
-    formWidgetsRegistry: IFormWidgetRegistry
+    formWidgetsRegistry: IFormWidgetRegistry,
+    formComponentRegistry: IFormComponentRegistry
   ): Promise<void> {
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IMetadataForm[] } = {};
@@ -468,6 +473,18 @@ namespace Private {
             uiSchema[joinedMetadataKey][key] = metadataSchema[key];
         }
 
+        // Optionally links key to cell type.
+        if (metadataSchema['cellTypes']) {
+          metaInformation[joinedMetadataKey].cellTypes =
+            metadataSchema['cellTypes'];
+        }
+
+        // Optionally links key to metadata level.
+        if (metadataSchema['metadataLevel']) {
+          metaInformation[joinedMetadataKey].level =
+            metadataSchema['metadataLevel'];
+        }
+
         // Optionally links key to a custom widget.
         if (metadataSchema['customWidget']) {
           const formWidget = formWidgetsRegistry.getFormWidgets(
@@ -479,16 +496,15 @@ namespace Private {
             uiSchema[joinedMetadataKey]['ui:widget'] = formWidget.renderer;
         }
 
-        // Optionally links key to cell type.
-        if (metadataSchema['cellTypes']) {
-          metaInformation[joinedMetadataKey].cellTypes =
-            metadataSchema['cellTypes'];
-        }
+        // Optionally links key to a custom field.
+        if (metadataSchema['customField']) {
+          const formField = formComponentRegistry.getRenderer(
+            metadataSchema['customField'] as string
+          );
 
-        // Optionally links key to metadata level.
-        if (metadataSchema['metadataLevel']) {
-          metaInformation[joinedMetadataKey].level =
-            metadataSchema['metadataLevel'];
+          // If renderer is defined (custom widget has been registered), set it as used widget.
+          if (formField !== undefined)
+            uiSchema[joinedMetadataKey]['ui:field'] = formField;
         }
       }
 
@@ -547,14 +563,20 @@ namespace Private {
 const metadataForm: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
-  requires: [INotebookTools, ITranslator, IFormWidgetRegistry],
+  requires: [
+    INotebookTools,
+    ITranslator,
+    IFormWidgetRegistry,
+    IFormComponentRegistry
+  ],
   optional: [ISettingRegistry],
   provides: IMetadataFormProvider,
   activate: async (
     app: JupyterFrontEnd,
     notebookTools: INotebookTools,
     translator: ITranslator,
-    editorRegistry: IFormWidgetRegistry,
+    widgetsRegistry: IFormWidgetRegistry,
+    componentsRegistry: IFormComponentRegistry,
     settings: ISettingRegistry | null
   ) => {
     console.log('Activating Metadata form');
@@ -567,7 +589,8 @@ const metadataForm: JupyterFrontEndPlugin<void> = {
         settings,
         notebookTools,
         translator,
-        editorRegistry
+        widgetsRegistry,
+        componentsRegistry
       );
     }
 
