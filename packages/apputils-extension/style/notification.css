@@ -59,7 +59,6 @@
 }
 
 .jp-Notification-Header {
-  width: 100%;
   padding: 0 4px;
   margin: 0;
   align-items: center;
@@ -91,24 +90,36 @@
   cursor: default;
 }
 
-.Toastify__toast.jp-toast-error {
+.jp-Notification-Toast-Close {
+  cursor: pointer;
+}
+
+.Toastify__toast.jp-Notification-Toast-error {
   border-top: 5px solid var(--jp-error-color1);
 }
 
-.Toastify__toast.jp-toast-warning {
+.Toastify__toast.jp-Notification-Toast-warning {
   border-top: 5px solid var(--jp-warn-color1);
 }
 
-.Toastify__toast.jp-toast-info {
+.Toastify__toast.jp-Notification-Toast-info {
   border-top: 5px solid var(--jp-info-color1);
 }
 
-.Toastify__toast.jp-toast-success {
+.Toastify__toast.jp-Notification-Toast-success {
   border-top: 5px solid var(--jp-success-color1);
 }
 
-.Toastify__toast.jp-toast-in-progress {
+.Toastify__toast.jp-Notification-Toast-in-progress {
   border-top: 5px solid var(--jp-layout-color1);
+}
+
+.Toastify__toast a {
+  color: var(--jp-content-link-color);
+}
+
+.Toastify__toast a:hover {
+  color: var(--jp-content-link-color);
 }
 
 .jp-toast-buttonBar {
