@@ -68,14 +68,20 @@ namespace CommandIDs {
 const HALF_SPACING = 4;
 
 /**
- * Notification center view
+ * Notification center properties
  */
-function NotificationCenter(props: {
+interface INotificationCenterProps {
   manager: NotificationManager;
+  onClose: () => void;
   parser: (message: string) => Promise<string>;
   trans: TranslationBundle;
-}): JSX.Element {
-  const { manager, parser, trans } = props;
+}
+
+/**
+ * Notification center view
+ */
+function NotificationCenter(props: INotificationCenterProps): JSX.Element {
+  const { manager, onClose, parser, trans } = props;
 
   // Markdown parsed notifications
   const [notifications, setNotifications] = React.useState<
@@ -134,6 +140,12 @@ function NotificationCenter(props: {
               icon={deleteIcon}
               tooltip={trans.__('Dismiss all notifications')}
               enabled={manager.count > 0}
+            ></ToolbarButtonComponent>
+            <ToolbarButtonComponent
+              actualOnClick={true}
+              onClick={onClose}
+              icon={closeIcon}
+              tooltip={trans.__('Hide notifications')}
             ></ToolbarButtonComponent>
           </h2>
           <ol className="jp-Notification-List">
@@ -432,14 +444,17 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    let popup: Widget | null = null;
     const notificationList = ReactWidget.create(
       <NotificationCenter
         manager={Notification.manager}
+        onClose={() => {
+          popup?.dispose();
+        }}
         parser={parse}
         trans={trans}
       ></NotificationCenter>
     );
-    let popup: Widget | null = null;
 
     async function onNotification(
       manager: NotificationManager,
