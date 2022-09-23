@@ -335,7 +335,6 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     }
 
     this._updatingMetadata = false;
-    this._update();
   }
 
   protected translator: ITranslator;
@@ -487,13 +486,13 @@ namespace Private {
 
         // Optionally links key to a custom widget.
         if (metadataSchema['customWidget']) {
-          const formWidget = formWidgetsRegistry.getFormWidgets(
+          const formWidget = formWidgetsRegistry.getRenderer(
             metadataSchema['customWidget'] as string
           );
 
           // If renderer is defined (custom widget has been registered), set it as used widget.
           if (formWidget !== undefined)
-            uiSchema[joinedMetadataKey]['ui:widget'] = formWidget.renderer;
+            uiSchema[joinedMetadataKey]['ui:widget'] = formWidget;
         }
 
         // Optionally links key to a custom field.

@@ -7,79 +7,69 @@ import { Token } from '@lumino/coreutils';
 import type { Widget } from '@rjsf/core';
 
 /**
- * A registry for rendering widget ( used in the metadataform-extension).
+ * A registry for rendering widget (used in the metadataform-extension).
  */
 export class FormWidgetRegistry implements IFormWidgetRegistry {
   /**
-   * Adds a formWidget for a given id - if the id is already in use, returns false.
+   * Adds a Widget renderer for a given id - if the id is already in use, returns false.
    * Otherwise, returns true.
    * @param id - Unique ID for the given renderer.
-   * @param formWidget - The formWidget to add.
-   * @returns - Whether the formWidget was added successfully. False if the id is already in use.
+   * @param renderer - A function that takes props and returns a rendered widget.
+   * @returns - Whether the renderer was added successfully. False if the id is already in use.
    */
-  addFormWidget(id: string, formWidget: IFormWidget): boolean {
-    if (this._formWidgets[id]) {
+  addRenderer(id: string, renderer: Widget): boolean {
+    if (this._renderers[id]) {
       return false;
     }
-    this._formWidgets[id] = formWidget;
+    this._renderers[id] = renderer;
     return true;
   }
 
   /**
    * Returns the formWidget for the given id
    * @param id - The unique id for the formWidget.
-   * @returns - A function that takes props and returns a formWidget containing a rendered component.
+   * @returns - A function that takes props and returns a rendered widget.
    */
-  getFormWidgets(id: string): IFormWidget {
-    return this._formWidgets[id];
+  getRenderer(id: string): Widget {
+    return this._renderers[id];
   }
 
   /**
-   * Returns all registered formWidgets in dictionary form.
-   * @returns - A dictionary that maps an id to a formWidget.
+   * Returns all registered renderer in dictionary form.
+   * @returns - A dictionary that maps an id to a rendered Widget.
    */
-  get formWidgets(): { [id: string]: IFormWidget } {
-    return this._formWidgets;
+  get renderers(): { [id: string]: Widget } {
+    return this._renderers;
   }
 
-  private _formWidgets: { [id: string]: IFormWidget } = {};
+  private _renderers: { [id: string]: Widget } = {};
 }
 
 /**
- * A registry for rendering formWidgets ( used in the metadataform-extension).
+ * A registry for rendering Widgets (used in the metadataform-extension).
  */
 export interface IFormWidgetRegistry {
   /**
-   * Adds a formWidget for a given id - if the id is already in use, returns false.
+   * Adds a Widget renderer for a given id - if the id is already in use, returns false.
    * Otherwise, returns true.
    * @param id - Unique ID for the given renderer.
-   * @param formWidget - The formWidget to add.
-   * @returns - Whether the formWidget was added successfully. False if the id is already in use.
+   * @param renderer - A function that takes props and returns a rendered widget.
+   * @returns - Whether the renderer was added successfully. False if the id is already in use.
    */
-  addFormWidget: (id: string, formWidget: IFormWidget) => void;
+  addRenderer: (id: string, renderer: Widget) => void;
 
   /**
    * Returns the formWidget for the given id
    * @param id - The unique id for the formWidget.
-   * @returns - A function that takes props and returns a formWidget containing a rendered component.
+   * @returns - A function that takes props and returns a rendered widget.
    */
-  getFormWidgets: (id: string) => IFormWidget;
+  getRenderer: (id: string) => Widget;
 
   /**
-   * Returns all registered formWidgets in dictionary form.
-   * @returns - A dictionary that maps an id to a formWidget.
+   * Returns all registered renderer in dictionary form.
+   * @returns - A dictionary that maps an id to a rendered Widget.
    */
-  formWidgets: { [id: string]: IFormWidget };
-}
-
-/**
- * The form widget interface.
- */
-export interface IFormWidget {
-  /**
-   *A function that takes props and returns a rendered component.
-   */
-  renderer: Widget;
+  renderers: { [id: string]: Widget };
 }
 
 /**
