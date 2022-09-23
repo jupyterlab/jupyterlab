@@ -406,8 +406,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         'Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
       execute: args => {
-        const { id, message, type } = args as any;
-        const options = (args.options as any) ?? {};
+        const { id, message, type, ...options } = args as any;
 
         return Notification.manager.update({
           id,
@@ -455,6 +454,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         trans={trans}
       ></NotificationCenter>
     );
+    notificationList.addClass('jp-Notification-Center');
 
     async function onNotification(
       manager: NotificationManager,
@@ -753,13 +753,13 @@ namespace Private {
     closeHandler: () => void,
     actions?: Notification.IAction[]
   ): React.ReactNode {
-    if (actions && actions.length > 0) {
-      return (
-        <>
-          <div dangerouslySetInnerHTML={{ __html: message }}></div>
+    return (
+      <>
+        <div dangerouslySetInnerHTML={{ __html: message }}></div>
+        {(actions?.length ?? 0) > 0 && (
           <div className="jp-toast-buttonBar">
             <div className="jp-toast-spacer" />
-            {actions.map((action, idx) => {
+            {actions!.map((action, idx) => {
               return (
                 <ToastButton
                   key={'button-' + idx}
@@ -769,11 +769,9 @@ namespace Private {
               );
             })}
           </div>
-        </>
-      );
-    } else {
-      return <div dangerouslySetInnerHTML={{ __html: message }}></div>;
-    }
+        )}
+      </>
+    );
   }
 
   /**

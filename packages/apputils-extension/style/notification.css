@@ -114,12 +114,40 @@
   border-top: 5px solid var(--jp-layout-color1);
 }
 
-.Toastify__toast a {
+.Toastify__toast-body a {
   color: var(--jp-content-link-color);
 }
 
-.Toastify__toast a:hover {
+.Toastify__toast-body a:hover {
   color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
+/* p elements are added by the markdown rendering.
+ * Removing its default margin allows to reduce toast size.
+ */
+.Toastify__toast-body p:first-child,
+.Toastify__toast-body h1:first-child,
+.Toastify__toast-body h2:first-child,
+.Toastify__toast-body h3:first-child,
+.Toastify__toast-body h4:first-child,
+.Toastify__toast-body h5:first-child,
+.Toastify__toast-body h6:first-child,
+.Toastify__toast-body ol:first-child,
+.Toastify__toast-body ul:first-child {
+  margin-top: 0;
+}
+
+.Toastify__toast-body p:last-child,
+.Toastify__toast-body h1:last-child,
+.Toastify__toast-body h2:last-child,
+.Toastify__toast-body h3:last-child,
+.Toastify__toast-body h4:last-child,
+.Toastify__toast-body h5:last-child,
+.Toastify__toast-body h6:last-child,
+.Toastify__toast-body ol:last-child,
+.Toastify__toast-body ul:last-child {
+  margin-bottom: 0;
 }
 
 .jp-toast-buttonBar {
@@ -135,8 +163,6 @@
 }
 
 .jp-toast-button {
-  border: solid var(--jp-border-width) var(--jp-border-color2);
-  font-size: var(--jp-ui-font-size0);
   margin-top: 1px;
   margin-bottom: 1px;
   margin-right: 0;

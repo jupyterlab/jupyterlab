@@ -139,10 +139,11 @@ export class NotificationManager implements IDisposable {
    * If the notification does not exists this won't do anything.
    *
    * @param args Update options
+   * @returns Whether the update was successful or not.
    */
   update<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     args: Notification.IUpdate<T>
-  ): void {
+  ): boolean {
     const { id, message, actions, autoClose, data, type } = args;
     const notificationIndex = this._queue.findIndex(n => n.id === id);
     if (notificationIndex > -1) {
@@ -167,7 +168,10 @@ export class NotificationManager implements IDisposable {
         type: 'updated',
         notification
       });
+      return true;
     }
+
+    return false;
   }
 
   private _isDisposed: boolean;
@@ -254,11 +258,11 @@ export namespace Notification {
    */
   export interface IOptions<T extends ReadonlyJSONValue> {
     /**
-     * Autoclosing behavior - undefined (not closing automatically)
+     * Autoclosing behavior - false (not closing automatically)
      * or number (time in milliseconds before hiding the notification)
      *
      * Set to zero if you want the notification to be retained in the notification
-     * center but not displayed as toast.
+     * center but not displayed as toast. This is the default behavior.
      */
     autoClose?: number | false;
 
@@ -284,15 +288,27 @@ export namespace Notification {
     /**
      * Promise pending message and options
      */
-    pending: { message: string; options: IOptions<Pending> };
+    pending: { message: string; options?: IOptions<Pending> };
     /**
      * Message when promise resolves and options
+     *
+     * The message factory receives as first argument the result
+     * of the promise and as second the success `options.data`.
      */
-    success: { message: string; options: IOptions<Success> };
+    success: {
+      message: (result: unknown, data?: Success) => string;
+      options?: IOptions<Success>;
+    };
     /**
      * Message when promise rejects and options
+     *
+     * The message factory receives as first argument the error
+     * of the promise and as second the error `options.data`.
      */
-    error: { message: string; options: IOptions<Error> };
+    error: {
+      message: (reason: unknown, data?: Error) => string;
+      options?: IOptions<Error>;
+    };
   }
 
   /**
@@ -339,6 +355,22 @@ export namespace Notification {
   }
 
   /**
+   * Helper function to emit a notification.
+   *
+   * @param message Notification message
+   * @param type Notification type
+   * @param options Options for the error notification
+   * @returns Notification unique id
+   */
+  export function emit<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
+    message: string,
+    type: TypeOptions = 'default',
+    options: IOptions<T> = {}
+  ): string {
+    return manager.notify<T>(message, type, options);
+  }
+
+  /**
    * Helper function to emit an error notification.
    *
    * @param message Notification message
@@ -367,7 +399,7 @@ export namespace Notification {
   }
 
   /**
-   * Helper function to emit an success notification.
+   * Helper function to emit a success notification.
    *
    * @param message Notification message
    * @param options Options for the success notification
@@ -381,7 +413,7 @@ export namespace Notification {
   }
 
   /**
-   * Helper function to show a in-progress notification.
+   * Helper function to show an in-progress notification.
    *
    * @param promise Promise to wait for
    * @param options Options for the in-progress notification
@@ -399,25 +431,25 @@ export namespace Notification {
     const id = manager.notify<Pending>(
       pending.message,
       'in-progress',
-      pending.options
+      pending.options ?? {}
     );
     promise
-      .then(data => {
+      .then(result => {
         manager.update<Success>({
           id,
-          message: success.message,
+          message: success.message(result, success.options?.data),
           type: 'success',
           ...success.options,
-          data: success.options.data ?? data
+          data: success.options?.data ?? result
         });
       })
       .catch(reason => {
         manager.update<Error>({
           id,
-          message: error.message,
+          message: error.message(reason, error.options?.data),
           type: 'error',
           ...error.options,
-          data: error.options.data ?? reason
+          data: error.options?.data ?? reason
         });
       });
     return id;
@@ -429,15 +461,16 @@ export namespace Notification {
    * If the notification does not exists, nothing will happen.
    *
    * @param args Update options
+   * @returns Whether the update was successful or not.
    */
   export function update<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     args: IUpdate<T>
-  ): void {
-    manager.update(args);
+  ): boolean {
+    return manager.update(args);
   }
 
   /**
-   * Helper function to emit an warning notification.
+   * Helper function to emit a warning notification.
    *
    * @param message Notification message
    * @param options Options for the warning notification
