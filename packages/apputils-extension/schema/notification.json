@@ -1,0 +1,15 @@
+{
+  "title": "Notifications",
+  "description": "Notifications settings.",
+  "jupyter.lab.setting-icon": "ui-components:bell",
+  "additionalProperties": false,
+  "properties": {
+    "doNotDisturbMode": {
+      "title": "Silence all notifications",
+      "description": "If `true`, no toast notifications will be automatically displayed.",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "type": "object"
+}

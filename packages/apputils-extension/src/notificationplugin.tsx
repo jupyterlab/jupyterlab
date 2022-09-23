@@ -214,6 +214,16 @@ class NotificationStatusModel extends VDomModel {
   }
 
   /**
+   * Whether to silence all notifications or not.
+   */
+  get doNotDisturbMode(): boolean {
+    return this._doNotDisturbMode;
+  }
+  set doNotDisturbMode(v: boolean) {
+    this._doNotDisturbMode = v;
+  }
+
+  /**
    * Whether to highlight the status widget or not.
    */
   get highlight(): boolean {
@@ -242,7 +252,9 @@ class NotificationStatusModel extends VDomModel {
     this._count = this.manager.count;
 
     const { autoClose } = change.notification.options;
-    const noToast = typeof autoClose === 'number' && autoClose <= 0;
+    const noToast =
+      this.doNotDisturbMode ||
+      (typeof autoClose === 'number' && autoClose <= 0);
 
     // Highlight if
     //   the list is not opened (the style change if list is opened due to clickedItem style in statusbar.)
@@ -257,6 +269,7 @@ class NotificationStatusModel extends VDomModel {
   private _count: number;
   private _highlight = false;
   private _listOpened = false;
+  private _doNotDisturbMode = false;
 }
 
 /**
@@ -321,6 +334,23 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
   ): void => {
     Private.translator = translator ?? nullTranslator;
     const trans = Private.translator.load('jupyterlab');
+
+    const model = new NotificationStatusModel(Notification.manager);
+    model.doNotDisturbMode = false;
+
+    if (settingRegistry) {
+      Promise.all([
+        settingRegistry.load(notificationPlugin.id),
+        app.restored
+      ]).then(([plugin]) => {
+        const updateSettings = () => {
+          model.doNotDisturbMode = plugin.get('doNotDisturbMode')
+            .composite as boolean;
+        };
+        updateSettings();
+        plugin.changed.connect(updateSettings);
+      });
+    }
 
     // Parse and sanitize the string.
     const parse = async (message: string) =>
@@ -415,7 +445,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       manager: NotificationManager,
       change: Notification.IChange
     ): Promise<void> {
-      if (popup !== null && !popup.isDisposed) {
+      if (model.doNotDisturbMode || (popup !== null && !popup.isDisposed)) {
         return;
       }
 
@@ -474,7 +504,6 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     }
     Notification.manager.changed.connect(onNotification);
 
-    const model = new NotificationStatusModel(Notification.manager);
     model.listOpened = popup !== null;
     const notificationStatus = ReactWidget.create(
       <UseSignal signal={model.stateChanged}>
