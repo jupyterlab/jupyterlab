@@ -29,6 +29,7 @@ import {
   bellIcon,
   Button,
   closeIcon,
+  deleteIcon,
   ToolbarButtonComponent,
   UseSignal,
   VDomModel
@@ -50,9 +51,11 @@ import type {
 } from 'react-toastify';
 
 namespace CommandIDs {
+  export const dismiss = 'apputils:dismiss-notification';
+
   export const notify = 'apputils:notify';
 
-  export const dismiss = 'apputils:dismiss-notification';
+  export const update = 'apputils:update-notification';
 }
 
 /**
@@ -64,6 +67,7 @@ function NotificationCenter(props: {
   manager: NotificationManager;
   trans: TranslationBundle;
 }): JSX.Element {
+  // Load asynchronously react-toastify icons
   const [icons, setIcons] = React.useState<typeof Icons | null>(null);
   React.useEffect(() => {
     Private.getIcons().then(toastifyIcons => {
@@ -89,7 +93,7 @@ function NotificationCenter(props: {
               onClick={() => {
                 manager.dismiss();
               }}
-              icon={closeIcon}
+              icon={deleteIcon}
               tooltip={trans.__('Dismiss all notifications')}
               enabled={manager.count > 0}
             ></ToolbarButtonComponent>
@@ -133,11 +137,15 @@ function NotificationCenter(props: {
                         )}
                       </div>
                     </div>
-                    <Private.CloseButton
-                      closeToast={closeNotification}
-                      type={toastType}
-                      theme={'light'}
-                    ></Private.CloseButton>
+                    <i
+                      title={trans.__('Dismiss notification')}
+                      onClick={closeNotification}
+                    >
+                      <deleteIcon.react
+                        className="jp-icon-hover"
+                        tag="span"
+                      ></deleteIcon.react>
+                    </i>
                   </div>
                 </li>
               );
@@ -266,6 +274,41 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         const options = (args.options as any) ?? {};
 
         return Notification.manager.notify(message, type ?? 'default', {
+          ...options,
+          actions: options.actions
+            ? options.actions.map(
+                (
+                  action: Omit<Notification.IAction, 'callback'> & {
+                    commandId: string;
+                    args?: ReadonlyJSONObject;
+                  }
+                ) => {
+                  return {
+                    ...action,
+                    callback: () => {
+                      app.commands.execute(action.commandId, action.args);
+                    }
+                  } as Notification.IAction;
+                }
+              )
+            : null
+        });
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.update, {
+      label: trans.__('Update a notification'),
+      caption: trans.__(
+        'Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
+      ),
+      execute: args => {
+        const { id, message, type } = args as any;
+        const options = (args.options as any) ?? {};
+
+        return Notification.manager.update({
+          id,
+          message,
+          type: type ?? 'default',
           ...options,
           actions: options.actions
             ? options.actions.map(
@@ -428,7 +471,7 @@ namespace Private {
 
   let toastify: typeof ReactToastify | null = null;
 
-  export function CloseButton(props: CloseButtonProps): JSX.Element {
+  function CloseButton(props: CloseButtonProps): JSX.Element {
     const trans = translator.load('jupyterlab');
     return (
       <i title={trans.__('Close notification')} onClick={props.closeToast}>
