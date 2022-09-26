@@ -37,8 +37,3 @@ if [[ $GROUP == nonode ]]; then
     sudo rm -rf $(which node)
     ! node
 fi
-
-# The debugger tests require a kernel that supports debugging
-if [[ $GROUP == js-debugger ]]; then
-    pip install xeus-python">=0.9.0,<0.10.0"
-fi
