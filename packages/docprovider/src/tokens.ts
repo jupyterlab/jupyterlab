@@ -13,27 +13,9 @@ export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
  */
 export interface IDocumentProvider {
   /**
-   * Resolves to true if the initial content has been initialized on the server. false otherwise.
+   * Returns a Promise that resolves when renaming is ackownledged.
    */
-  requestInitialContent(): Promise<boolean>;
-
-  /**
-   * Put the initialized state.
-   */
-  putInitializedState(): void;
-
-  /**
-   * Acquire a lock.
-   * Returns a Promise that resolves to the lock number.
-   */
-  acquireLock(): Promise<number>;
-
-  /**
-   * Release a lock.
-   *
-   * @param lock The lock to release.
-   */
-  releaseLock(lock: number): void;
+  readonly renameAck: Promise<boolean>;
 
   /**
    * This should be called by the docregistry when the file has been renamed to update the websocket connection url
@@ -66,6 +48,7 @@ export namespace IDocumentProviderFactory {
      */
     path: string;
     contentType: string;
+    format: string;
 
     /**
      * The YNotebook.
