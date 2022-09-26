@@ -2435,17 +2435,6 @@ namespace Private {
         toDelete.reverse().forEach(index => {
           sharedModel.deleteCell(index);
         });
-        // Add a new cell if the notebook is empty. This is done
-        // within the compound operation to make the deletion of
-        // a notebook's last cell undoable.
-        if (!sharedModel.cells.length) {
-          sharedModel.insertCell(
-            sharedModel.cells.length,
-            sharedModels.createCell({
-              cell_type: notebook.notebookConfig.defaultCell
-            })
-          );
-        }
       });
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.

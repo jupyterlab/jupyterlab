@@ -226,10 +226,6 @@ export namespace ISharedNotebook {
      * considered on the full document across all cells.
      */
     disableDocumentWideUndoRedo?: boolean;
-    /**
-     * Initial cell type.
-     */
-    initialCellType?: 'code' | 'markdown' | 'raw';
   }
 }
 
