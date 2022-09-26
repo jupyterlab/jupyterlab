@@ -10,7 +10,7 @@ import { ServerConnection } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
 
 export const KERNELSPECS: JSONObject = {
-  default: 'xpython',
+  default: 'python3',
   kernelspecs: {
     python3: {
       name: 'Python',
@@ -18,18 +18,18 @@ export const KERNELSPECS: JSONObject = {
         language: 'python',
         argv: [],
         display_name: 'Python 3',
-        env: {}
+        env: {},
+        metadata: { debugger: true }
       },
       resources: {}
     },
-    xpython: {
-      name: 'xpython',
+    nopydebug: {
+      name: 'nopydebug',
       spec: {
         language: 'python',
         argv: [],
-        display_name: 'xpython',
-        env: {},
-        metadata: { debugger: true }
+        display_name: 'Python No Debug',
+        env: {}
       },
       resources: {}
     }
