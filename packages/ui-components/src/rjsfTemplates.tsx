@@ -37,9 +37,9 @@ export namespace RJSFTemplates {
      */
     compact?: boolean;
     /**
-     * Whether to display a '*' on modified field title.
+     * Whether to display if the current value is not the default one.
      */
-    showModified?: boolean;
+    showModifiedFromDefault?: boolean;
     /**
      * Translator for button text.
      */
@@ -51,9 +51,9 @@ export namespace RJSFTemplates {
    */
   export interface IFieldProps {
     /**
-     * Whether to display a '*' on modified field title.
+     * Whether to display if the current value is not the default one.
      */
-    showModified?: boolean;
+    showModifiedFromDefault?: boolean;
     /**
      * Translator for button text.
      */
@@ -445,7 +445,7 @@ export class RJSFFieldTemplate {
    * @param options - the field template options.
    */
   constructor(options: RJSFTemplates.IFieldProps = {}) {
-    this._showModified = options.showModified ?? true;
+    this._showModifiedFromDefault = options.showModifiedFromDefault ?? false;
     this._translator = options.translator;
     this._compact = options.compact ?? false;
   }
@@ -472,7 +472,7 @@ export class RJSFFieldTemplate {
       schemaIds.shift();
       const schemaId = schemaIds.join('.');
 
-      if (this._showModified) {
+      if (this._showModifiedFromDefault) {
         /**
          * Determine if the field has been modified.
          * Schema Id is formatted as 'root_<field name>.<nexted field name>'
@@ -616,7 +616,7 @@ export class RJSFFieldTemplate {
     return factory;
   }
 
-  private _showModified: boolean;
+  private _showModifiedFromDefault: boolean;
   private _translator: ITranslator | undefined;
   private _compact: boolean;
 }
@@ -628,7 +628,7 @@ export class RJSFFieldTemplate {
 export class RJSFTemplatesFactory {
   constructor(options: RJSFTemplates.IProps) {
     this._fieldTemplate = new RJSFFieldTemplate({
-      showModified: options.showModified ?? true,
+      showModifiedFromDefault: options.showModifiedFromDefault ?? false,
       compact: options.compact ?? false,
       translator: options.translator
     });

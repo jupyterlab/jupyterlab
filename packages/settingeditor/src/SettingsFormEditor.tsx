@@ -139,7 +139,8 @@ export class SettingsFormEditor extends React.Component<
     const { settings } = props;
     this._formData = settings.composite;
     this._templateFactory = new RJSFTemplatesFactory({
-      translator: this.props.translator
+      translator: this.props.translator,
+      showModifiedFromDefault: true
     });
     this.state = {
       isModified: settings.isModified,

@@ -126,7 +126,7 @@ export class FormWidget extends ReactWidget {
     this._templateFactory = new RJSFTemplatesFactory({
       translator: this._props.translator,
       compact: true,
-      showModified: false
+      showModifiedFromDefault: false
     });
   }
 
