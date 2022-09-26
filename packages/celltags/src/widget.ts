@@ -23,10 +23,13 @@ export class TagWidget extends Widget {
   }
 
   /**
-   * Get the parent tag tool widget.
+   * Get/set the parent tag tool widget.
    */
   get parent(): TagTool | null {
     return super.parent as TagTool | null;
+  }
+  set parent(tagTool: TagTool | null) {
+    super.parent = tagTool;
   }
 
   /**
