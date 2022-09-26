@@ -618,6 +618,10 @@ export namespace ISettingRegistry {
    */
   export interface IMetadataForm extends PartialJSONObject {
     /**
+     * The section unique ID.
+     */
+    id: string;
+    /**
      * The section label.
      */
     label: string;

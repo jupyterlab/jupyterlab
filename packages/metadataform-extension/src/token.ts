@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { NotebookTools } from '@jupyterlab/notebook';
-import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import {
+  PartialJSONObject,
+  ReadonlyPartialJSONObject,
+  Token
+} from '@lumino/coreutils';
+import { MetadataForm } from './form';
 
 /**
  * A metadata form interface provided when registering
@@ -12,13 +16,41 @@ import { Widget } from '@lumino/widgets';
  */
 
 export interface IMetadataForm extends NotebookTools.Tool {
-  /*
-   * Update the metadata.
-   *
-   * @param formData - the data to write into metadata.
-   * @reload - whether to reload the form or not after updating metadata.
+  /**
+   * Get the list of existing metadataKey (array of array of string).
    */
+  get metadataKeys(): MetadataForm.IMetadataKey[];
 
+  /**
+   * Get the properties of a MetadataKey.
+   * @param metadataKey - metadataKey (array of string).
+   */
+  getProperties(
+    metadataKey: MetadataForm.IMetadataKey
+  ): PartialJSONObject | null;
+
+  /**
+   * Set properties to a metadataKey.
+   * @param metadataKey - metadataKey (array of string).
+   * @param properties - the properties to add or modify.
+   */
+  setProperties(
+    metadataKey: MetadataForm.IMetadataKey,
+    properties: PartialJSONObject
+  ): void;
+
+  /**
+   * Update the metadata of the current cell or notebook.
+   *
+   * @param formData: the cell metadata set in the form.
+   * @param reload: whether to update the form after updating the metadata.
+   *
+   * ## Notes
+   * Metadata are updated from root only. If some metadata is nested,
+   * the whole root object must be updated.
+   * This function build an object with all the root object to update
+   * in metadata before performing update.
+   */
   updateMetadata(formData: ReadonlyPartialJSONObject, reload?: boolean): void;
 }
 
@@ -27,17 +59,9 @@ export interface IMetadataForm extends NotebookTools.Tool {
  */
 export interface IMetadataFormProvider {
   /**
-   * Register a widget in the metadata form provider.
-   *
-   * @param widget The owner widget whose properties will be inspected.
-   *
-   * ## Notes
-   * Only one metadata form can be provided for each widget.
-   * Registering the same widget twice will result in an error.
-   * A widget can be unregistered by disposing of its metadata
-   * form.
+   * Each ID must be described in schema.
    */
-  register(widget: Widget): IMetadataForm;
+  [id: string]: IMetadataForm;
 }
 
 /**

@@ -18,6 +18,10 @@
     "metadataForm": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "The section ID"
+        },
         "label": {
           "type": "string",
           "description": "The section label"
@@ -33,7 +37,7 @@
           }
         }
       },
-      "required": ["label", "metadataKeys"]
+      "required": ["id", "metadataKeys"]
     },
     "userProperties": {
       "properties": {

@@ -24,14 +24,14 @@ export namespace MetadataForm {
    */
   export interface IProperties {
     type: string;
-    properties: { [metadataKey: string]: PartialJSONObject };
+    properties: { [formKey: string]: PartialJSONObject };
   }
 
   /**
    * The meta information associated to all properties.
    */
   export interface IMetaInformation {
-    [metadataKey: string]: ISingleMetaInformation;
+    [formKey: string]: ISingleMetaInformation;
   }
 
   /**
@@ -41,7 +41,7 @@ export namespace MetadataForm {
     /**
      * The (nested) metadata key as an array of keys.
      */
-    metadataKey: Array<string>;
+    metadataKey: IMetadataKey;
     /**
      * The metadata level, 'cell' or 'notebook'.
      */
@@ -55,6 +55,11 @@ export namespace MetadataForm {
      */
     cellTypes?: nbformat.CellType[];
   }
+
+  /**
+   * The (nested) metadata key, as an array of keys.
+   */
+  export type IMetadataKey = Array<string>;
 
   /**
    * RJSF ui:schema.
