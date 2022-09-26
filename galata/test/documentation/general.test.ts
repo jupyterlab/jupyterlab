@@ -516,6 +516,8 @@ test.describe('General', () => {
 
     await page.notebook.run();
 
+    await page.waitForLoadState('networkidle');
+
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_nteract_vdom.png'
     );
