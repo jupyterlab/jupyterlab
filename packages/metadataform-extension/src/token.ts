@@ -1,27 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import { NotebookTools } from '@jupyterlab/notebook';
+import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import * as React from 'react';
 
 /**
  * A metadata form interface provided when registering
  * to a metadata form provider.  Allows an owner widget
  * to set the metadata form content for itself.
  */
-export interface IMetadataForm extends IDisposable {
+
+export interface IMetadataForm extends NotebookTools.Tool {
   /*
-   * Render the metadata form content.
+   * Update the metadata.
    *
-   * If the owner widget is not the most recently focused,
-   * The content will not be shown until that widget
-   * is focused.
-   *
-   * @param content - the widget or react element to render.
+   * @param formData - the data to write into metadata.
+   * @reload - whether to reload the form or not after updating metadata.
    */
-  render(content: Widget | React.ReactElement): void;
+
+  updateMetadata(formData: ReadonlyPartialJSONObject, reload?: boolean): void;
 }
 
 /**

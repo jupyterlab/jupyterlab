@@ -102,7 +102,7 @@ export namespace MetadataForm {
     /**
      * The parent object of the form.
      */
-    parent: MetadataFormWidget;
+    formWidget: MetadataFormWidget;
 
     /**
      * The uiSchema built when loading schemas.
@@ -139,7 +139,7 @@ export class FormWidget extends ReactWidget {
       <Form
         schema={this._props.properties as JSONSchema7}
         formData={this._props.formData}
-        formContext={this._props.metaInformation}
+        formContext={this._props}
         FieldTemplate={this._templateFactory.fieldTemplate}
         ArrayFieldTemplate={this._templateFactory.arrayTemplate}
         ObjectFieldTemplate={this._templateFactory.objectTemplate}
@@ -147,10 +147,7 @@ export class FormWidget extends ReactWidget {
         liveValidate
         idPrefix={`jp-MetadataForm-${this.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this._props.parent.updateMetadata(
-            this._props.metaInformation,
-            e.formData
-          );
+          this._props.formWidget.updateMetadata(e.formData);
         }}
       />
     );

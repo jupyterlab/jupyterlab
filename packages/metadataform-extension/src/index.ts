@@ -44,7 +44,10 @@ const UI_SCHEMA_PATTERN = /^ui\:.*/;
 /**
  * A class that create a metadata form widget
  */
-export class MetadataFormWidget extends NotebookTools.Tool {
+export class MetadataFormWidget
+  extends NotebookTools.Tool
+  implements IMetadataForm
+{
   /**
    * Construct an empty widget.
    */
@@ -202,7 +205,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
       uiSchema: this._uiSchema,
       translator: this.translator || null,
       formData: formData,
-      parent: this
+      formWidget: this
     });
   }
 
@@ -215,10 +218,7 @@ export class MetadataFormWidget extends NotebookTools.Tool {
    * This function build an object with all the root object to update
    * in metadata before performing update.
    */
-  public updateMetadata(
-    metaInformation: MetadataForm.IMetaInformation,
-    formData: ReadonlyPartialJSONObject
-  ) {
+  public updateMetadata(formData: ReadonlyPartialJSONObject, reload?: boolean) {
     if (this.notebookTools == undefined) return;
 
     const notebook = this.notebookTools.activeNotebookPanel;
@@ -234,14 +234,17 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     const notebookMetadataObject: Private.IMetadataRepresentation = {};
 
     for (let [key, value] of Object.entries(formData)) {
-      if (metaInformation[key].level === 'notebook' && this._notebookModelNull)
+      if (
+        this._metaInformation[key]?.level === 'notebook' &&
+        this._notebookModelNull
+      )
         continue;
 
       let currentMetadata: IObservableJSON;
       let metadataObject: Private.IMetadataRepresentation;
 
       // Linking the working variable to the corresponding metadata and representation.
-      if (metaInformation[key].level === 'notebook') {
+      if (this._metaInformation[key]?.level === 'notebook') {
         // Working on notebook metadata.
         currentMetadata = notebook!.model!.metadata;
         metadataObject = notebookMetadataObject;
@@ -251,15 +254,15 @@ export class MetadataFormWidget extends NotebookTools.Tool {
         metadataObject = cellMetadataObject;
       }
 
-      let metadataKey = metaInformation[key].metadataKey;
+      let metadataKey = this._metaInformation[key].metadataKey;
       let baseMetadataKey = metadataKey[0];
       if (baseMetadataKey == undefined) continue;
 
       let writeFinalData =
-        value !== undefined && value !== metaInformation[key].default;
+        value !== undefined && value !== this._metaInformation[key].default;
 
       // If metadata key is at root of metadata no need to go further.
-      if (metaInformation[key].metadataKey.length == 1) {
+      if (this._metaInformation[key].metadataKey.length == 1) {
         if (writeFinalData)
           metadataObject[baseMetadataKey] = value as PartialJSONValue;
         else metadataObject[baseMetadataKey] = undefined;
@@ -335,6 +338,10 @@ export class MetadataFormWidget extends NotebookTools.Tool {
     }
 
     this._updatingMetadata = false;
+
+    if (reload) {
+      this._update();
+    }
   }
 
   protected translator: ITranslator;
