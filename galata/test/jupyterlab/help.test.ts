@@ -28,5 +28,5 @@ test('Switch back and forth to reference page', async ({ page }) => {
 
   await expect(
     page.locator('.jp-MarkdownCell .jp-InputArea-editor')
-  ).toHaveText(cellContent);
+  ).toHaveText(`xxxxxxxxxx ${cellContent}`);
 });
