@@ -44,7 +44,7 @@ describe('Debugger.Session', () => {
       type: 'test',
       path
     });
-    await connection.changeKernel({ name: 'xpython' });
+    await connection.changeKernel({ name: 'python3' });
   });
 
   afterEach(async () => {
@@ -141,7 +141,7 @@ describe('protocol', () => {
       type: 'test',
       path
     });
-    await connection.changeKernel({ name: 'xpython' });
+    await connection.changeKernel({ name: 'python3' });
     debugSession = new Debugger.Session({
       connection
     });

@@ -80,7 +80,7 @@ describe('Debugger', () => {
       type: 'test',
       path: UUID.uuid4()
     });
-    await connection.changeKernel({ name: 'xpython' });
+    await connection.changeKernel({ name: 'python3' });
 
     session = new Debugger.Session({ connection });
     service.session = session;
