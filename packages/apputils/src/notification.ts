@@ -399,20 +399,6 @@ export namespace Notification {
   }
 
   /**
-   * Helper function to emit a success notification.
-   *
-   * @param message Notification message
-   * @param options Options for the success notification
-   * @returns Notification unique id
-   */
-  export function success<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
-    message: string,
-    options: IOptions<T> = {}
-  ): string {
-    return manager.notify<T>(message, 'success', options);
-  }
-
-  /**
    * Helper function to show an in-progress notification.
    *
    * @param promise Promise to wait for
@@ -453,6 +439,20 @@ export namespace Notification {
         });
       });
     return id;
+  }
+
+  /**
+   * Helper function to emit a success notification.
+   *
+   * @param message Notification message
+   * @param options Options for the success notification
+   * @returns Notification unique id
+   */
+  export function success<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
+    message: string,
+    options: IOptions<T> = {}
+  ): string {
+    return manager.notify<T>(message, 'success', options);
   }
 
   /**
