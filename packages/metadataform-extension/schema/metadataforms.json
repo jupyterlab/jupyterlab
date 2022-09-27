@@ -79,6 +79,9 @@
         },
         "customField": {
           "type": "string"
+        },
+        "rank": {
+          "type": "integer"
         }
       },
       "type": "object",

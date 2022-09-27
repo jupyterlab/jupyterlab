@@ -56,6 +56,13 @@
       },
       "additionalProperties": false
     },
+    "jupyter.lab.metadataforms": {
+      "items": {
+        "$ref": "#/definitions/metadataForm"
+      },
+      "type": "array",
+      "default": []
+    },
     "jupyter.lab.setting-deprecated": {
       "type": "boolean",
       "default": false
@@ -95,13 +102,6 @@
     "jupyter.lab.transform": {
       "type": "boolean",
       "default": false
-    },
-    "jupyter.lab.metadataforms": {
-      "items": {
-        "$ref": "#/definitions/metadataForm"
-      },
-      "type": "array",
-      "default": []
     }
   },
   "definitions": {
@@ -306,9 +306,9 @@
     "metadataForm": {
       "type": "object",
       "properties": {
-        "mainKey": {
+        "id": {
           "type": "string",
-          "description": "The main metadata key"
+          "description": "The section ID"
         },
         "label": {
           "type": "string",
@@ -325,7 +325,7 @@
           }
         }
       },
-      "required": ["label", "metadataKeys"]
+      "required": ["id", "metadataKeys"]
     },
     "userProperties": {
       "properties": {
@@ -349,6 +349,24 @@
           "items": {
             "type": "string"
           }
+        },
+        "metadataLevel": {
+          "type": "string",
+          "enum": ["cell", "notebook"],
+          "default": "cell"
+        },
+        "cellTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["code", "markdown", "raw"]
+          }
+        },
+        "customWidget": {
+          "type": "string"
+        },
+        "customField": {
+          "type": "string"
         }
       },
       "type": "object",

@@ -420,6 +420,27 @@ namespace Private {
     [metadata: string]: PartialJSONObject | PartialJSONValue | undefined;
   }
 
+  /**
+   *  This function reorders the metadataKeys using their rank if it is provided.
+   *
+   * @param metadataKeys - the array of metadataKeys to reorder.
+   * @returns - the array of metadataKeys reordered
+   */
+  function reorderingFields(
+    metadataKeys: ISettingRegistry.IMetadataKey[]
+  ): ISettingRegistry.IMetadataKey[] {
+    const ranked = metadataKeys
+      .filter(metadataKey => metadataKey?.rank !== undefined)
+      .sort((a, b) => (a.rank as number) - (b.rank as number));
+    const orderedFields = metadataKeys.filter(
+      metadataKey => metadataKey?.rank === undefined
+    );
+    ranked.forEach(metadataKey => {
+      orderedFields.splice(metadataKey.rank as number, 0, metadataKey);
+    });
+    return orderedFields;
+  }
+
   export async function loadSettingsMetadataForm(
     app: JupyterFrontEnd,
     tools: MetadataFormWidget[],
@@ -450,7 +471,22 @@ namespace Private {
         })
         .concat([schema['jupyter.lab.metadataforms'] as any[]])
         .reduce((acc, val) => {
-          return acc.concat(val);
+          // If a MetadataForm with the same ID already exists,
+          // the metadataKeys will be concatenated to this MetadataForm's metadataKeys .
+          // Otherwise, the whole MetadataForm setting will be pushed as a new form.
+          val.forEach(value => {
+            const metadataForm = acc.find(addedValue => {
+              return addedValue.id === value.id;
+            });
+            if (metadataForm) {
+              metadataForm.metadataKeys = metadataForm.metadataKeys.concat(
+                value.metadataKeys
+              );
+            } else {
+              acc.push(value);
+            }
+          });
+          return acc;
         }, []); // flatten one level;
     }
 
@@ -462,11 +498,9 @@ namespace Private {
           canonical = JSONExt.deepCopy(plugin.schema);
           populate(canonical);
         }
-
         const defaults =
           (canonical.properties?.metadataforms?.default as PartialJSONArray) ??
           [];
-
         const user = {
           metadataforms: plugin.data.user.metadataforms ?? []
         };
@@ -499,7 +533,6 @@ namespace Private {
     canonical = null;
 
     const settings = await registry.load(PLUGIN_ID);
-
     const metadataForms: { [section: string]: MetadataFormWidget } = {};
 
     // Creates all the forms from extensions settings.
@@ -511,6 +544,8 @@ namespace Private {
       };
       let metaInformation: MetadataForm.IMetaInformation = {};
       let uiSchema: MetadataForm.IUiSchema = {};
+
+      schema.metadataKeys = reorderingFields(schema.metadataKeys);
 
       for (let metadataSchema of schema.metadataKeys) {
         // Name of the key in RJSF schema.

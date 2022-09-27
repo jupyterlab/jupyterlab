@@ -632,11 +632,6 @@ export namespace ISettingRegistry {
     metadataKeys: IMetadataKey[];
 
     /**
-     * The main metadata key.
-     */
-    mainKey?: string;
-
-    /**
      * The section rank in notebooktools panel.
      */
     rank?: number;
@@ -659,9 +654,29 @@ export namespace ISettingRegistry {
     properties: PartialJSONObject;
 
     /**
-     * Name of a custom registered react widget.
+     * Name of a custom react widget registered.
      */
-    customWidget: string;
+    customWidget?: string;
+
+    /**
+     * Name of a custom react field registered.
+     */
+    customField?: string;
+
+    /**
+     * Metadata applied to notebook or cell.
+     */
+    metadataLevel?: 'cell' | 'notebook';
+
+    /**
+     * Cells which should have this metadata.
+     */
+    cellTypes?: ('code' | 'markdown' | 'raw')[];
+
+    /**
+     * Rank of the field in form.
+     */
+    rank?: number;
 
     /**
      * ui:schema options.
