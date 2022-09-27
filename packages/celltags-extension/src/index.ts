@@ -5,6 +5,7 @@
  * @module celltags-extension
  */
 
+import type { FieldProps } from '@rjsf/utils';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -15,6 +16,9 @@ import { INotebookTools, INotebookTracker } from '@jupyterlab/notebook';
 import { TagTool } from '@jupyterlab/celltags';
 
 import { ITranslator } from '@jupyterlab/translation';
+
+import { CustomCellTagClass } from './celltag';
+import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 
 /**
  * Initialization data for the celltags extension.
@@ -34,4 +38,26 @@ const celltags: JupyterFrontEndPlugin<void> = {
   }
 };
 
-export default celltags;
+/**
+ * Registering cell tag field.
+ */
+const customCellTag: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/celltags-extension:plugin',
+  autoStart: true,
+  requires: [INotebookTracker],
+  optional: [IFormComponentRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    formRegistry?: IFormComponentRegistry
+  ) => {
+    // Register the custom field
+    if (formRegistry) {
+      formRegistry.addRenderer('custom-cellTag', (props: FieldProps) => {
+        return new CustomCellTagClass(tracker).render(props);
+      });
+    }
+  }
+};
+
+export default [celltags, customCellTag];

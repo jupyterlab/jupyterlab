@@ -55,6 +55,9 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../metadataform"
+    },
+    {
       "path": "../nbformat"
     },
     {

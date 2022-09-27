@@ -53,6 +53,7 @@
     "@jupyterlab/logconsole": "^4.0.0-alpha.20",
     "@jupyterlab/lsp": "^4.0.0-alpha.20",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.20",
+    "@jupyterlab/metadataform": "^4.0.0-alpha.20",
     "@jupyterlab/nbformat": "^4.0.0-alpha.20",
     "@jupyterlab/notebook": "^4.0.0-alpha.20",
     "@jupyterlab/observables": "^5.0.0-alpha.20",

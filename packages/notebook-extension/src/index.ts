@@ -54,6 +54,7 @@ import {
   ILSPFeatureManager
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IMetadataFormProvider } from '@jupyterlab/metadataform';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
@@ -867,6 +868,44 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+const updateRawMimetype: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:update-raw-mimetype',
+  autoStart: true,
+  requires: [IMetadataFormProvider, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    metadataForms: IMetadataFormProvider,
+    translator: ITranslator
+  ) => {
+    const trans = translator.load('jupyterlab');
+    if (metadataForms.commonTools) {
+      const properties =
+        metadataForms.commonTools.getProperties('/raw_mimetype');
+      if (!properties) return;
+
+      const services = app.serviceManager;
+      void services.nbconvert.getExportFormats().then(response => {
+        if (response) {
+          // convert exportList to palette and menu items
+          const formatList = Object.keys(response);
+          const formatLabels = Private.getFormatLabels(translator);
+          formatList.forEach(function (key) {
+            if ((properties!.enum as Array<string>)!.indexOf(key) === -1) {
+              const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+              const option = formatLabels[key] ? formatLabels[key] : altOption;
+              const mimeTypeValue = response[key].output_mimetype;
+
+              (properties!.enum as Array<string>)!.push(mimeTypeValue);
+              (properties!.enumNames as Array<string>)!.push(option);
+            }
+          });
+        }
+        metadataForms.commonTools.setProperties('/raw_mimetype', properties);
+      });
+    }
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -888,7 +927,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   completerPlugin,
   searchProvider,
   tocPlugin,
-  languageServerPlugin
+  languageServerPlugin,
+  updateRawMimetype
 ];
 export default plugins;
 

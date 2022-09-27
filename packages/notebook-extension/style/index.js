@@ -25,4 +25,5 @@ import '@jupyterlab/logconsole/style/index.js';
 import '@jupyterlab/lsp/style/index.js';
 import '@jupyterlab/mainmenu/style/index.js';
 import '@jupyterlab/notebook/style/index.js';
+import '@jupyterlab/metadataform/style/index.js';
 import '@jupyterlab/property-inspector/style/index.js';

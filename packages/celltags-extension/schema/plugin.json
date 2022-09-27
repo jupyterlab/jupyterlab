@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "title": "Common tools",
+  "description": "Setting for the common tools",
+  "jupyter.lab.metadataforms": [
+    {
+      "id": "commonTools",
+      "label": "Common tools from schema",
+      "metadataSchema": {
+        "type": "object",
+        "properties": {
+          "/tags": {
+            "title": "Cell tag",
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "uiSchema": {
+        "ui:order": ["/tags", "*"]
+      },
+      "metadataOptions": {
+        "/tags": {
+          "customField": "custom-cellTag"
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
