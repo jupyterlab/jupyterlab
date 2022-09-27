@@ -402,9 +402,6 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       for (const item of sizes) {
         const key = item.index;
         const size = item.size;
-        if (!this._widgetSizers[key]) {
-          this._getItemMetadata(key);
-        }
 
         if (this._widgetSizers[key].size != size) {
           this._widgetSizers[key].size = size;
@@ -911,6 +908,9 @@ export class WindowedList<
     }
     for (const widget of this.layout.widgets) {
       this._resizeObserver.observe(widget.node);
+      widget.disposed.connect(() =>
+        this._resizeObserver?.unobserve(widget.node)
+      );
     }
     this.node.addEventListener('scroll', this, passiveIfSupported);
     this._windowElement.style.position = 'absolute';
@@ -953,8 +953,11 @@ export class WindowedList<
 
       for (let index = 0; index < toAdd.length; index++) {
         const item = toAdd[index];
-        if (!this.layout.widgets.includes(item)) {
-          this._resizeObserver?.observe(item.node);
+        if (this._resizeObserver && !this.layout.widgets.includes(item)) {
+          this._resizeObserver.observe(item.node);
+          item.disposed.connect(() =>
+            this._resizeObserver?.unobserve(item.node)
+          );
         }
 
         // The widget may have moved due to drag-and-drop
@@ -1013,15 +1016,18 @@ export class WindowedList<
 
     const newSizes: { index: number; size: number }[] = [];
     for (let entry of entries) {
-      // Rely on the data attribute as some nodes may be hidden instead of detach
-      // to preserve state.
-      newSizes.push({
-        index: parseInt(
-          (entry.target as HTMLElement).dataset.windowedListIndex!,
-          10
-        ),
-        size: entry.borderBoxSize[0].blockSize
-      });
+      // Update size only if item is attached to the DOM
+      if (entry.target.isConnected) {
+        // Rely on the data attribute as some nodes may be hidden instead of detach
+        // to preserve state.
+        newSizes.push({
+          index: parseInt(
+            (entry.target as HTMLElement).dataset.windowedListIndex!,
+            10
+          ),
+          size: entry.borderBoxSize[0].blockSize
+        });
+      }
     }
 
     // If some sizes changed
