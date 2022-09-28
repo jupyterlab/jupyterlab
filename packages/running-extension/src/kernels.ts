@@ -25,23 +25,6 @@ export function addKernelRunningSessionManager(
     );
   }
 
-  managers.add({
-    name: trans.__('Kernels'),
-    running: () => {
-      return Array.from(manager.running())
-        .filter(filterSessions)
-        .map(model => new RunningKernel(model));
-    },
-    shutdownAll: () => manager.shutdownAll(),
-    refreshRunning: () => manager.refreshRunning(),
-    runningChanged: manager.runningChanged,
-    shutdownLabel: trans.__('Shut Down'),
-    shutdownAllLabel: trans.__('Shut Down All'),
-    shutdownAllConfirmationText: trans.__(
-      'Are you sure you want to permanently shut down all running kernels?'
-    )
-  });
-
   class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(model: Session.IModel) {
       this._model = model;
@@ -81,4 +64,21 @@ export function addKernelRunningSessionManager(
 
     private _model: Session.IModel;
   }
+
+  managers.add({
+    name: trans.__('Kernels'),
+    running: () => {
+      return Array.from(manager.running())
+        .filter(filterSessions)
+        .map(model => new RunningKernel(model));
+    },
+    shutdownAll: () => manager.shutdownAll(),
+    refreshRunning: () => manager.refreshRunning(),
+    runningChanged: manager.runningChanged,
+    shutdownLabel: trans.__('Shut Down'),
+    shutdownAllLabel: trans.__('Shut Down All'),
+    shutdownAllConfirmationText: trans.__(
+      'Are you sure you want to permanently shut down all running kernels?'
+    )
+  });
 }
