@@ -59,7 +59,7 @@
     "@lumino/algorithm": "^2.0.0-alpha.6",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
-    "@playwright/test": "^1.17.0",
+    "@playwright/test": "^1.26.1",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^9.0.1",
     "http-server": "^13.0.0",

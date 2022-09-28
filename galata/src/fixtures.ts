@@ -149,7 +149,7 @@ export const test: TestType<
    *
    * Default: /lab
    */
-  appPath: '/lab',
+  appPath: ['/lab', { option: true }],
   /**
    * Whether to go to JupyterLab page within the fixture or not.
    *
@@ -157,7 +157,7 @@ export const test: TestType<
    *
    * Note: Setting it to false allows to register new route mock-ups for example.
    */
-  autoGoto: true,
+  autoGoto: [true, { option: true }],
   /**
    * Mock JupyterLab state in-memory or not.
    *
@@ -168,7 +168,7 @@ export const test: TestType<
    *
    * By default the state is stored in-memory
    */
-  mockState: true,
+  mockState: [true, { option: true }],
   /**
    * Mock JupyterLab settings in-memory or not.
    *
@@ -182,7 +182,7 @@ export const test: TestType<
    * By default the settings are stored in-memory. However the
    * they are still initialized with the hard drive values.
    */
-  mockSettings: galata.DEFAULT_SETTINGS,
+  mockSettings: [galata.DEFAULT_SETTINGS, { option: true }],
   /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are
@@ -192,7 +192,7 @@ export const test: TestType<
    * - 'on' - ``tmpPath`` is never deleted
    * - 'only-on-failure' - ``tmpPath`` is deleted except if a test failed or timed out.
    */
-  serverFiles: 'off',
+  serverFiles: ['off', { option: true }],
   /**
    * Sessions created during the test.
    *
