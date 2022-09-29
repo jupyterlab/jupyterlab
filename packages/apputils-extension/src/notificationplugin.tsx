@@ -107,7 +107,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
     }
 
     if (notifications.length !== manager.count) {
-      onChanged();
+      void onChanged();
     }
     manager.changed.connect(onChanged);
 
@@ -116,9 +116,13 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
     };
   }, [manager]);
   React.useEffect(() => {
-    Private.getIcons().then(toastifyIcons => {
-      setIcons(toastifyIcons);
-    });
+    Private.getIcons()
+      .then(toastifyIcons => {
+        setIcons(toastifyIcons);
+      })
+      .catch(r => {
+        console.error(`Failed to get react-toastify icons:\n${r}`);
+      });
   }, []);
 
   return (
@@ -351,7 +355,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     model.doNotDisturbMode = false;
 
     if (settingRegistry) {
-      Promise.all([
+      void Promise.all([
         settingRegistry.load(notificationPlugin.id),
         app.restored
       ]).then(([plugin]) => {
@@ -392,7 +396,13 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
                   return {
                     ...action,
                     callback: (data?: ReadonlyJSONObject) => {
-                      app.commands.execute(action.commandId, data ?? {});
+                      app.commands
+                        .execute(action.commandId, data ?? {})
+                        .catch(r => {
+                          console.error(
+                            `Failed to executed '${action.commandId}':\n${r}`
+                          );
+                        });
                     }
                   } as Notification.IAction<ReadonlyJSONValue>;
                 }
@@ -428,7 +438,13 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
                   return {
                     ...action,
                     callback: (data?: ReadonlyJSONObject) => {
-                      app.commands.execute(action.commandId, data ?? {});
+                      app.commands
+                        .execute(action.commandId, data ?? {})
+                        .catch(r => {
+                          console.error(
+                            `Failed to executed '${action.commandId}':\n${r}`
+                          );
+                        });
                     }
                   } as Notification.IAction<ReadonlyJSONValue>;
                 }

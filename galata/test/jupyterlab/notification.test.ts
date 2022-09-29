@@ -18,7 +18,7 @@ test.describe('Toast', () => {
   for (const type of NOTIFICATION_TYPE) {
     test(`should display a ${type} notification`, async ({ page }) => {
       await page.evaluate(kind => {
-        window.jupyterapp.commands.execute('apputils:notify', {
+        return window.jupyterapp.commands.execute('apputils:notify', {
           message: 'This is a test message',
           type: kind,
           options: { autoClose: false }
@@ -40,7 +40,7 @@ test.describe('Toast', () => {
 
   test('should display a notification with actions', async ({ page }) => {
     await page.evaluate(() => {
-      window.jupyterapp.commands.execute('apputils:notify', {
+      return window.jupyterapp.commands.execute('apputils:notify', {
         message: 'This is a test message',
         options: {
           autoClose: false,
@@ -86,7 +86,7 @@ test.describe('Toast', () => {
 
   test('should display a markdown notification', async ({ page }) => {
     await page.evaluate(() => {
-      window.jupyterapp.commands.execute('apputils:notify', {
+      return window.jupyterapp.commands.execute('apputils:notify', {
         message:
           'This _is_ a **Markdown** [message](https://jupyter.org).\n\n- Item 1\n- Item 2',
         options: { autoClose: false }
@@ -116,11 +116,14 @@ test.describe('Toast', () => {
     await page.waitForSelector('.Toastify__toast >> text=Simple note');
 
     await page.evaluate(id => {
-      window.jupyterapp.commands.execute('apputils:update-notification', {
-        id,
-        message: 'Updated message',
-        type: 'success'
-      });
+      return window.jupyterapp.commands.execute(
+        'apputils:update-notification',
+        {
+          id,
+          message: 'Updated message',
+          type: 'success'
+        }
+      );
     }, id);
 
     await expect(page.locator('.Toastify__toast')).toHaveText(
@@ -143,9 +146,12 @@ test.describe('Toast', () => {
         state: 'detached'
       }),
       page.evaluate(id => {
-        window.jupyterapp.commands.execute('apputils:dismiss-notification', {
-          id
-        });
+        return window.jupyterapp.commands.execute(
+          'apputils:dismiss-notification',
+          {
+            id
+          }
+        );
       }, id)
     ]);
   });
@@ -168,7 +174,7 @@ test.describe('Notification center', () => {
 
   test('should be highlighted for silent notification', async ({ page }) => {
     await page.evaluate(() => {
-      window.jupyterapp.commands.execute('apputils:notify', {
+      return window.jupyterapp.commands.execute('apputils:notify', {
         message: 'Simple note'
       });
     });
@@ -188,7 +194,7 @@ test.describe('Notification center', () => {
     page
   }) => {
     await page.evaluate(() => {
-      window.jupyterapp.commands.execute('apputils:notify', {
+      return window.jupyterapp.commands.execute('apputils:notify', {
         message: 'Simple note'
       });
     });
@@ -212,11 +218,11 @@ test.describe('Notification center', () => {
   });
 
   test('should forget dismissed notification', async ({ page }) => {
-    await page.evaluate(() => {
-      window.jupyterapp.commands.execute('apputils:notify', {
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('apputils:notify', {
         message: 'Simple note 1'
       });
-      window.jupyterapp.commands.execute('apputils:notify', {
+      await window.jupyterapp.commands.execute('apputils:notify', {
         message: 'Simple note 2'
       });
     });
@@ -241,7 +247,7 @@ test.describe('Notification center', () => {
   test(`should display all kinds of notification`, async ({ page }) => {
     for (const type of NOTIFICATION_TYPE) {
       await page.evaluate(kind => {
-        window.jupyterapp.commands.execute('apputils:notify', {
+        return window.jupyterapp.commands.execute('apputils:notify', {
           message: 'This is a _test_ [message](http://jupyter.org)',
           type: kind
         });
@@ -249,7 +255,7 @@ test.describe('Notification center', () => {
     }
 
     await page.evaluate(() => {
-      window.jupyterapp.commands.execute('apputils:notify', {
+      return window.jupyterapp.commands.execute('apputils:notify', {
         message: 'This is a test message',
         options: {
           autoClose: false,
