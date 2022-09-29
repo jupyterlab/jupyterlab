@@ -270,6 +270,7 @@ export class Context<
       } else {
         await this._revert();
       }
+      this._model.initialize();
     }
     this.model.sharedModel.clearUndoHistory();
   }
