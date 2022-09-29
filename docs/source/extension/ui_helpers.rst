@@ -202,10 +202,8 @@ A notification is described by the following element:
        actions?: Array<IAction>;
        /**
         * Data associated with a notification
-        *
-        * It will be passed as first argument of action callback
         */
-       data?: ReadonlyJsonValue;
+       data?: T;
      };
    }
 
@@ -289,7 +287,7 @@ When using the API, an action is defined by:
     /**
      * Callback function to trigger
      */
-    callback: (data?: ReadonlyJsonValue) => void;
+    callback: () => void;
     /**
      * The action caption.
      *
@@ -339,7 +337,7 @@ There are three commands available.
      options?: {
        autoClose?: number | false;
        actions?: Array<IAction>;
-       data?: ReadonlyJsonObject;
+       data?: T;
      };
   });
 
@@ -361,16 +359,16 @@ An action is defined by:
      */
     commandId: string;
     /**
+     * Command arguments
+     */
+    args?: ReadonlyJsonObject;
+    /**
      * The action caption.
      *
      * This can be a longer description of the action.
      */
     caption?: string;
   }
-
-.. note::
-
-   The notification data will be passed as arguments to the command.
 
 ``'apputils:update-notification'`` to update a notification:
 
@@ -382,7 +380,7 @@ An action is defined by:
      type?: 'info' | 'in-progress' | 'success' | 'warning' | 'error' | 'default';
      autoClose?: number | false;
      actions?: Array<IAction>;
-     data?: ReadonlyJsonObject;
+     data?: T;
    });
 
 The result is a boolean indicating if the update was successful. In particular

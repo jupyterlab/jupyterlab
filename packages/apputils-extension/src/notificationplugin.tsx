@@ -375,7 +375,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.notify, {
       label: trans.__('Emit a notification'),
       caption: trans.__(
-        'Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, caption?: string, className?: string}[], data?: ReadOnlyJSONObject}}.'
+        'Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
       execute: args => {
         const { message, type } = args as any;
@@ -386,25 +386,23 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
           actions: options.actions
             ? options.actions.map(
                 (
-                  action: Omit<
-                    Notification.IAction<ReadonlyJSONValue>,
-                    'callback'
-                  > & {
+                  action: Omit<Notification.IAction, 'callback'> & {
                     commandId: string;
+                    args?: ReadonlyJSONObject;
                   }
                 ) => {
                   return {
                     ...action,
-                    callback: (data?: ReadonlyJSONObject) => {
+                    callback: () => {
                       app.commands
-                        .execute(action.commandId, data ?? {})
+                        .execute(action.commandId, action.args)
                         .catch(r => {
                           console.error(
                             `Failed to executed '${action.commandId}':\n${r}`
                           );
                         });
                     }
-                  } as Notification.IAction<ReadonlyJSONValue>;
+                  } as Notification.IAction;
                 }
               )
             : null
@@ -415,7 +413,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.update, {
       label: trans.__('Update a notification'),
       caption: trans.__(
-        'Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, caption?: string, className?: string}[], data?: ReadOnlyJSONObject}}.'
+        'Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
       execute: args => {
         const { id, message, type, ...options } = args as any;
@@ -428,25 +426,23 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
           actions: options.actions
             ? options.actions.map(
                 (
-                  action: Omit<
-                    Notification.IAction<ReadonlyJSONValue>,
-                    'callback'
-                  > & {
+                  action: Omit<Notification.IAction, 'callback'> & {
                     commandId: string;
+                    args?: ReadonlyJSONObject;
                   }
                 ) => {
                   return {
                     ...action,
-                    callback: (data?: ReadonlyJSONObject) => {
+                    callback: () => {
                       app.commands
-                        .execute(action.commandId, data ?? {})
+                        .execute(action.commandId, action.args)
                         .catch(r => {
                           console.error(
                             `Failed to executed '${action.commandId}':\n${r}`
                           );
                         });
                     }
-                  } as Notification.IAction<ReadonlyJSONValue>;
+                  } as Notification.IAction;
                 }
               )
             : null
@@ -516,8 +512,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
                 render: Private.createContent(
                   await parse(message),
                   closeToast,
-                  options.actions,
-                  options.data
+                  options.actions
                 )
               });
             } else {
@@ -734,30 +729,21 @@ namespace Private {
     /**
      * User specification for the button
      */
-    action: Notification.IAction<ReadonlyJSONValue>;
+    action: Notification.IAction;
 
     /**
      * Function closing the notification
      */
     closeToast: () => void;
-
-    /**
-     * Notification data
-     */
-    data?: ReadonlyJSONValue;
   }
 
   /**
    * Create a button with customized callback in a toast
    */
-  function ToastButton({
-    action,
-    closeToast,
-    data
-  }: IToastButtonProps): JSX.Element {
+  function ToastButton({ action, closeToast }: IToastButtonProps): JSX.Element {
     const clickHandler = (): void => {
       closeToast();
-      action.callback(data);
+      action.callback();
     };
     return (
       <Button
@@ -781,8 +767,7 @@ namespace Private {
   export function createContent(
     message: string,
     closeHandler: () => void,
-    actions?: Notification.IAction<ReadonlyJSONValue>[],
-    data?: ReadonlyJSONValue
+    actions?: Notification.IAction[]
   ): React.ReactNode {
     return (
       <>
@@ -796,7 +781,6 @@ namespace Private {
                   key={'button-' + idx}
                   action={action}
                   closeToast={closeHandler}
-                  data={data}
                 />
               );
             })}
@@ -835,7 +819,7 @@ namespace Private {
 
     return t(
       ({ closeToast }: { closeToast: () => void }) =>
-        createContent(message, closeToast, actions, data),
+        createContent(message, closeToast, actions),
       toastOptions
     );
   }
