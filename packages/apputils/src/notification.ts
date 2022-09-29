@@ -186,7 +186,7 @@ export namespace Notification {
   /**
    * Interface describing an action linked to a notification.
    */
-  export interface IAction {
+  export interface IAction<T extends ReadonlyJSONValue> {
     /**
      * The action label.
      *
@@ -197,7 +197,7 @@ export namespace Notification {
     /**
      * Callback function to trigger
      */
-    callback: () => void;
+    callback: (data?: T) => void;
 
     /**
      * The action caption.
@@ -269,7 +269,7 @@ export namespace Notification {
     /**
      * List of associated actions
      */
-    actions?: Array<IAction>;
+    actions?: Array<IAction<T>>;
 
     /**
      * Data associated with a notification

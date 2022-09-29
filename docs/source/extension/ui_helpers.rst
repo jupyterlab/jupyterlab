@@ -202,8 +202,10 @@ A notification is described by the following element:
        actions?: Array<IAction>;
        /**
         * Data associated with a notification
+        *
+        * It will be passed as first argument of action callback
         */
-       data?: T;
+       data?: ReadonlyJsonValue;
      };
    }
 
@@ -253,7 +255,13 @@ to set the type automatically (or use ``notify`` to set the type manually):
     promise: Promise,
     {
       pending: { message: string, options?: IOptions },
+      /**
+       * If not set `options.data` will be set to the promise result.
+       */
       success: { message: (result, data) => string, options?: IOptions },
+      /**
+       * If not set `options.data` will be set to the promise rejection error.
+       */
       error: { message: (reason, data) => string, options?: IOptions }
     }
   ): string;
@@ -281,7 +289,7 @@ When using the API, an action is defined by:
     /**
      * Callback function to trigger
      */
-    callback: () => void;
+    callback: (data?: ReadonlyJsonValue) => void;
     /**
      * The action caption.
      *
@@ -331,7 +339,7 @@ There are three commands available.
      options?: {
        autoClose?: number | false;
        actions?: Array<IAction>;
-       data?: T;
+       data?: ReadonlyJsonObject;
      };
   });
 
@@ -353,16 +361,16 @@ An action is defined by:
      */
     commandId: string;
     /**
-     * Command arguments
-     */
-    args?: ReadonlyJsonObject;
-    /**
      * The action caption.
      *
      * This can be a longer description of the action.
      */
     caption?: string;
   }
+
+.. note::
+
+   The notification data will be passed as arguments to the command.
 
 ``'apputils:update-notification'`` to update a notification:
 
@@ -374,7 +382,7 @@ An action is defined by:
      type?: 'info' | 'in-progress' | 'success' | 'warning' | 'error' | 'default';
      autoClose?: number | false;
      actions?: Array<IAction>;
-     data?: T;
+     data?: ReadonlyJsonObject;
    });
 
 The result is a boolean indicating if the update was successful. In particular
