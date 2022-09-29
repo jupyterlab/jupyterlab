@@ -152,3 +152,76 @@ test.describe('Workspace', () => {
     await expect(page.menu.getMenuItem(`Tabs>${mdFile}`)).toBeDefined();
   });
 });
+
+test('should clone the default workspace', async ({ page, tmpPath }) => {
+  // Given
+  await page.goto();
+
+  await page.filebrowser.open(`${tmpPath}/${nbFile}`);
+  await page.filebrowser.open(`${tmpPath}/${mdFile}`);
+  await Promise.all([
+    page.waitForResponse(
+      response =>
+        response.request().method() === 'PUT' &&
+        /api\/workspaces/.test(response.request().url()) &&
+        response.request().postDataJSON().data['terminal:1']
+    ),
+    page.waitForSelector('[role="main"] >> .jp-Terminal'),
+    page.menu.clickMenuItem('File>New>Terminal')
+  ]);
+
+  // When
+  await Promise.all([
+    // Wait for the workspace to be saved
+    page.waitForResponse(
+      response =>
+        response.request().method() === 'PUT' &&
+        /api\/workspaces/.test(response.request().url()) &&
+        response.request().postDataJSON().metadata['id'] === 'foo'
+    ),
+    page.goto('workspaces/foo?clone')
+  ]);
+
+  await expect(page.locator('[role="main"] >> .lm-TabBar-tab')).toHaveCount(
+    3
+  );
+  await expect(page.locator(`[role="main"] >> text=${mdFile}`)).toBeVisible();
+  await expect(page.locator(`[role="main"] >> text=${nbFile}`)).toBeVisible();
+});
+
+test('should clone the current workspace', async ({ page, tmpPath }) => {
+  // Given
+  await page.goto('workspaces/foo');
+
+  await page.filebrowser.open(`${tmpPath}/${nbFile}`);
+  await page.filebrowser.open(`${tmpPath}/${mdFile}`);
+  await Promise.all([
+    page.waitForResponse(
+      response =>
+        response.request().method() === 'PUT' &&
+        /api\/workspaces/.test(response.request().url()) &&
+        response.request().postDataJSON().data['terminal:1']
+    ),
+    page.waitForSelector('[role="main"] >> .jp-Terminal'),
+    page.menu.clickMenuItem('File>New>Terminal')
+  ]);
+
+  // When
+  await Promise.all([
+    // Wait for the workspace to be saved
+    page.waitForResponse(
+      response =>
+        response.request().method() === 'PUT' &&
+        /api\/workspaces/.test(response.request().url()) &&
+        response.request().postDataJSON().metadata['id'] === 'bar'
+    ),
+    page.goto('workspaces/bar?clone')
+  ]);
+
+  // Then
+  await expect(page.locator('[role="main"] >> .lm-TabBar-tab')).toHaveCount(
+    3
+  );
+  await expect(page.locator(`[role="main"] >> text=${mdFile}`)).toBeVisible();
+  await expect(page.locator(`[role="main"] >> text=${nbFile}`)).toBeVisible();
+});
