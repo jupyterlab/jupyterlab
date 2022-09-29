@@ -34,7 +34,7 @@
 /* Overrides for mobile view: Move cell toolbar up, don't hide it if it overlaps */
 @media only screen and (max-width: 760px) {
   .jp-toolbar-overlap .jp-cell-toolbar {
-    display: block;
+    display: flex;
   }
 
   .jp-cell-toolbar {

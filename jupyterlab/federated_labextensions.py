@@ -14,11 +14,13 @@ import platform
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 try:
     from importlib.metadata import PackageNotFoundError, version
 except ImportError:
     from importlib_metadata import PackageNotFoundError, version
+
 from os.path import basename
 from os.path import join as pjoin
 from os.path import normpath
@@ -197,7 +199,10 @@ def build_labextension(
     """Build a labextension in the given path"""
     if core_path is None:
         core_path = osp.join(HERE, "staging")
-    ext_path = osp.abspath(path)
+    else:
+        core_path = str(Path(core_path).resolve())
+
+    ext_path = str(Path(path).resolve())
 
     if logger:
         logger.info("Building extension in %s" % path)
@@ -221,7 +226,9 @@ def watch_labextension(
     """Watch a labextension in a given path"""
     if core_path is None:
         core_path = osp.join(HERE, "staging")
-    ext_path = osp.abspath(path)
+    else:
+        core_path = str(Path(core_path).resolve())
+    ext_path = str(Path(path).resolve())
 
     if logger:
         logger.info("Building extension in %s" % path)

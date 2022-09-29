@@ -24,7 +24,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
    * Construct the main menu bar.
    */
   constructor(commands: CommandRegistry) {
-    super();
+    let options = { forceItemsPosition: { forceX: false, forceY: true } };
+    super(options);
     this._commands = commands;
   }
 
