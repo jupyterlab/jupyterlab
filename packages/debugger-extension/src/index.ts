@@ -729,7 +729,7 @@ const main: JupyterFrontEndPlugin<void> = {
     if (settingRegistry) {
       const setting = await settingRegistry.load(main.id);
       const updateSettings = (): void => {
-        autoCollapseSidebar = setting.get('AutoCollapseDebuggerSidebar')
+        autoCollapseSidebar = setting.get('autoCollapseDebuggerSidebar')
           .composite as boolean;
       };
       updateSettings();
