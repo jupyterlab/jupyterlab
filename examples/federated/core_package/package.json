@@ -55,6 +55,7 @@
     "@jupyterlab/lsp-extension": "~4.0.0-alpha.15",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.2",
     "@jupyterlab/mainmenu-extension": "~4.0.0-alpha.15",
+    "@jupyterlab/markedparser-extension": "~4.0.0-alpha.15",
     "@jupyterlab/mathjax2-extension": "~4.0.0-alpha.15",
     "@jupyterlab/notebook": "^4.0.0-alpha.2",
     "@jupyterlab/notebook-extension": "~4.0.0-alpha.15",

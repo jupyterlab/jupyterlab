@@ -349,13 +349,13 @@ function NotificationStatus(props: INotificationStatusProps): JSX.Element {
 export const notificationPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:notification',
   autoStart: true,
-  requires: [IStatusBar, IMarkdownParser, ISanitizer],
-  optional: [ISettingRegistry, ITranslator],
+  requires: [IStatusBar],
+  optional: [IMarkdownParser, ISanitizer, ISettingRegistry, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
-    parser: IMarkdownParser,
-    sanitizer: ISanitizer,
+    parser: IMarkdownParser | null,
+    sanitizer: ISanitizer | null,
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
@@ -380,8 +380,11 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     }
 
     // Parse and sanitize the string.
-    const parse = async (message: string) =>
-      sanitizer.sanitize(await parser.render(message));
+    const parse =
+      sanitizer && parser
+        ? async (message: string) =>
+            sanitizer.sanitize(await parser.render(message))
+        : (message: string) => Promise.resolve(message);
 
     app.commands.addCommand(CommandIDs.notify, {
       label: trans.__('Emit a notification'),
