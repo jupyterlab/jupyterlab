@@ -155,7 +155,7 @@ test.describe('Workspace', () => {
   test('should clone the default workspace', async ({ page, tmpPath }) => {
     // Given
     await page.goto();
-  
+
     await page.filebrowser.open(`${tmpPath}/${nbFile}`);
     await page.filebrowser.open(`${tmpPath}/${mdFile}`);
     await Promise.all([
@@ -168,7 +168,7 @@ test.describe('Workspace', () => {
       page.waitForSelector('[role="main"] >> .jp-Terminal'),
       page.menu.clickMenuItem('File>New>Terminal')
     ]);
-  
+
     // When
     await Promise.all([
       // Wait for the workspace to be saved
@@ -180,18 +180,18 @@ test.describe('Workspace', () => {
       ),
       page.goto('workspaces/foo?clone')
     ]);
-  
+
     await expect(page.locator('[role="main"] >> .lm-TabBar-tab')).toHaveCount(
       3
     );
     await expect(page.locator(`[role="main"] >> text=${mdFile}`)).toBeVisible();
     await expect(page.locator(`[role="main"] >> text=${nbFile}`)).toBeVisible();
   });
-  
+
   test('should clone the current workspace', async ({ page, tmpPath }) => {
     // Given
     await page.goto('workspaces/foo');
-  
+
     await page.filebrowser.open(`${tmpPath}/${nbFile}`);
     await page.filebrowser.open(`${tmpPath}/${mdFile}`);
     await Promise.all([
@@ -204,7 +204,7 @@ test.describe('Workspace', () => {
       page.waitForSelector('[role="main"] >> .jp-Terminal'),
       page.menu.clickMenuItem('File>New>Terminal')
     ]);
-  
+
     // When
     await Promise.all([
       // Wait for the workspace to be saved
@@ -216,7 +216,7 @@ test.describe('Workspace', () => {
       ),
       page.goto('workspaces/bar?clone')
     ]);
-  
+
     // Then
     await expect(page.locator('[role="main"] >> .lm-TabBar-tab')).toHaveCount(
       3
