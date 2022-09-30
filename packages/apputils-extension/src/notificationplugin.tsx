@@ -55,10 +55,21 @@ import type {
 const TOAST_CLOSE_BUTTON_CLASS = 'jp-Notification-Toast-Close';
 
 namespace CommandIDs {
+  /**
+   * Dismiss a notification
+   */
   export const dismiss = 'apputils:dismiss-notification';
-
+  /**
+   * Display all notifications
+   */
+  export const display = 'apputils:display-notifications';
+  /**
+   * Create a notification
+   */
   export const notify = 'apputils:notify';
-
+  /**
+   * Update a notification
+   */
   export const update = 'apputils:update-notification';
 }
 
@@ -460,6 +471,8 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     });
 
     let popup: Widget | null = null;
+    model.listOpened = false;
+
     const notificationList = ReactWidget.create(
       <NotificationCenter
         manager={Notification.manager}
@@ -535,7 +548,44 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     }
     Notification.manager.changed.connect(onNotification);
 
-    model.listOpened = popup !== null;
+    const displayNotifications = (): void => {
+      if (popup) {
+        popup.dispose();
+        popup = null;
+      } else {
+        // Dismiss all toasts when opening the notification center
+        Private.toast()
+          .then(t => {
+            t.dismiss();
+          })
+          .catch(r => {
+            console.error(`Failed to dismiss all toasts:\n${r}`);
+          });
+
+        popup = showPopup({
+          body: notificationList,
+          anchor: notificationStatus,
+          align: 'right',
+          hasDynamicSize: true
+        });
+
+        // Focus on the pop-up
+        notificationList.node.focus();
+
+        popup.disposed.connect(() => {
+          model.listOpened = false;
+          popup = null;
+        });
+      }
+
+      model.listOpened = popup !== null;
+    };
+
+    app.commands.addCommand(CommandIDs.display, {
+      label: trans.__('Show Notifications'),
+      execute: displayNotifications
+    });
+
     const notificationStatus = ReactWidget.create(
       <UseSignal signal={model.stateChanged}>
         {() => {
@@ -549,35 +599,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
               count={model.count}
               highlight={model.highlight}
               trans={trans}
-              onClick={() => {
-                if (popup) {
-                  popup.dispose();
-                  popup = null;
-                } else {
-                  // Dismiss all toasts when opening the notification center
-                  Private.toast()
-                    .then(t => {
-                      t.dismiss();
-                    })
-                    .catch(r => {
-                      console.error(`Failed to dismiss all toasts:\n${r}`);
-                    });
-
-                  popup = showPopup({
-                    body: notificationList,
-                    anchor: notificationStatus,
-                    align: 'right',
-                    hasDynamicSize: true
-                  });
-
-                  popup.disposed.connect(() => {
-                    model.listOpened = false;
-                    popup = null;
-                  });
-                }
-
-                model.listOpened = popup !== null;
-              }}
+              onClick={displayNotifications}
             ></NotificationStatus>
           );
         }}
