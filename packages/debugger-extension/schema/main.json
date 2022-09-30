@@ -107,9 +107,9 @@
       "type": "string",
       "default": ""
     },
-    "AutoCollapseDebuggerSidebar": {
+    "autoCollapseDebuggerSidebar": {
       "title": "Auto Collapse Debugger Sidebar",
-      "description": "collapse debugger sidebar when disabling debugger",
+      "description": "Collapse the debugger sidebar when disabling the debugger on a document.",
       "type": "boolean",
       "default": false
     }
