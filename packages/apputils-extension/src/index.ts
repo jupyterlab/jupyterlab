@@ -417,13 +417,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         const { hash, path, search } = args;
-        const { urls } = paths;
         const query = URLExt.queryStringToObject(search || '');
         const clone =
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
-              ? URLExt.join(urls.base, urls.app)
-              : URLExt.join(urls.base, urls.app, 'workspaces', query['clone'])
+              ? PageConfig.defaultWorkspace
+              : query['clone']
             : null;
         const source = clone || workspace || null;
 
