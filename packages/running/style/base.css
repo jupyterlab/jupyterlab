@@ -98,7 +98,8 @@
   background: var(--jp-layout-color3);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled > span {
+.jp-RunningSessions-shutdownAll.jp-mod-styled
+  > .jp-ToolbarButtonComponent-label {
   color: var(--jp-warn-color1);
   background-color: transparent;
   border-radius: 2px;
@@ -107,20 +108,24 @@
   text-overflow: ellipsis;
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled:hover > span {
+.jp-RunningSessions-shutdownAll.jp-mod-styled:hover
+  > .jp-ToolbarButtonComponent-label {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled:focus > span {
+.jp-RunningSessions-shutdownAll.jp-mod-styled:focus
+  > .jp-ToolbarButtonComponent-label {
   border: none;
   box-shadow: none;
   background-color: var(--jp-layout-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled > span {
+.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled
+  > .jp-ToolbarButtonComponent-label {
   color: var(--jp-ui-font-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled:hover > span {
+.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled:hover
+  > .jp-ToolbarButtonComponent-label {
   background: none;
 }
