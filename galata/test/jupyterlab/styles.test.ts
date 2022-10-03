@@ -186,6 +186,14 @@ test.describe('CSS Selectors', () => {
       for (const selectorGroup of selectors) {
         for (const selector of selectorGroup.split(',')) {
           if (selector.match(matcher)) {
+            if (
+              selector.includes('.bp3-control') ||
+              selector.includes('.bp3-interactive')
+            ) {
+              // Ignore problematic Blueprint styles on 3.4.x - those were removed in 4.0,
+              // and are not as problematic since they only match against `input` and `td`.
+              continue;
+            }
             matchedSelectors.push(selector);
           }
         }
