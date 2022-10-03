@@ -5,6 +5,8 @@
  * @module notebook-extension
  */
 
+import type { FieldProps } from '@rjsf/core';
+
 import {
   ILabShell,
   ILayoutRestorer,
@@ -112,6 +114,10 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
+import {
+  CustomCellMetadata,
+  CustomNotebookMetadata
+} from './metadataEditorFields';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -907,6 +913,47 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Registering cell tag field.
+ */
+const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:cell-metadata',
+  autoStart: true,
+  requires: [INotebookTracker, IEditorServices],
+  optional: [IFormComponentRegistry, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    editorServices: IEditorServices,
+    formRegistry?: IFormComponentRegistry,
+    translator?: ITranslator
+  ) => {
+    const editorFactory = editorServices.factoryService.newInlineEditor;
+    // Register the custom field
+    if (formRegistry) {
+      formRegistry.addRenderer('custom-cellMetadata', (props: FieldProps) => {
+        return new CustomCellMetadata({
+          editorFactory,
+          tracker,
+          label: 'Cell metadata',
+          translator: translator
+        }).render(props);
+      });
+      formRegistry.addRenderer(
+        'custom-notebookMetadata',
+        (props: FieldProps) => {
+          return new CustomNotebookMetadata({
+            editorFactory,
+            tracker,
+            label: 'Notebook metadata',
+            translator: translator
+          }).render(props);
+        }
+      );
+    }
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -928,7 +975,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   searchProvider,
   tocPlugin,
   languageServerPlugin,
-  updateRawMimetype
+  updateRawMimetype,
+  customMetadataEditorFields
 ];
 export default plugins;
 

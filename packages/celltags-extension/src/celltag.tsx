@@ -9,7 +9,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
-export class CustomCellTagClass {
+export class CustomCellTag {
   constructor(tracker: INotebookTracker, translator?: ITranslator) {
     this._tracker = tracker;
     this._translator = translator || nullTranslator;

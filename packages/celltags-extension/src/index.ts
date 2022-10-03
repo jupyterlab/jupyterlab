@@ -17,7 +17,7 @@ import { TagTool } from '@jupyterlab/celltags';
 
 import { ITranslator } from '@jupyterlab/translation';
 
-import { CustomCellTagClass } from './celltag';
+import { CustomCellTag } from './celltag';
 import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 
 /**
@@ -54,7 +54,7 @@ const customCellTag: JupyterFrontEndPlugin<void> = {
     // Register the custom field
     if (formRegistry) {
       formRegistry.addRenderer('custom-cellTag', (props: FieldProps) => {
-        return new CustomCellTagClass(tracker).render(props);
+        return new CustomCellTag(tracker).render(props);
       });
     }
   }

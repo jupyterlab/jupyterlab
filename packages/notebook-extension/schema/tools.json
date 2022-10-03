@@ -55,6 +55,31 @@
           "metadataLevel": "notebook"
         }
       }
+    },
+    {
+      "id": "extendedTools",
+      "label": "Extended tools from schema",
+      "metadataSchema": {
+        "type": "object",
+        "properties": {
+          "UNUSED": {
+            "title": "Cell metadata",
+            "type": "null"
+          },
+          "UNUSED_": {
+            "title": "Notebook metadata",
+            "type": "null"
+          }
+        }
+      },
+      "metadataOptions": {
+        "UNUSED": {
+          "customField": "custom-cellMetadata"
+        },
+        "UNUSED_": {
+          "customField": "custom-notebookMetadata"
+        }
+      }
     }
   ],
   "additionalProperties": false
