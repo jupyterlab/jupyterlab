@@ -270,7 +270,10 @@
   opacity: 0;
 }
 
-.jp-CodeMirrorEditor .remote-caret:hover > div {
+/* Use `div[style]` as more specific selector on 3.4.x to reduce the impact of
+ * Chromium style invalidation strategy on performance when many divs are present.
+ */
+.jp-CodeMirrorEditor .remote-caret:hover > div[style] {
   opacity: 1;
   transition-delay: 0s;
 }
