@@ -3,7 +3,7 @@
 
 import { expect, test } from '@jupyterlab/galata';
 
-// posssibly incomplete (as new tags get added) list of HTML tags as defined in HTML standards (including deprecated elements)
+// possibly incomplete (as new tags get added) list of HTML tags as defined in HTML standards (including deprecated elements)
 const standardHTMLTags = new Set([
   'a',
   'abbr',
