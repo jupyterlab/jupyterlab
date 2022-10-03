@@ -931,7 +931,11 @@ export class CodeCellLayout extends PanelLayout {
     for (const widget of this) {
       // TODO we could improve this further by removing outputs based
       // on their mime type (for example plain/text or markdown could safely be detached)
-      if (!widget.hasClass(CELL_OUTPUT_WRAPPER_CLASS)) {
+      // If the cell is out of the view port, its children are already detached -> skip detaching
+      if (
+        !widget.hasClass(CELL_OUTPUT_WRAPPER_CLASS) &&
+        widget.node.isConnected
+      ) {
         // Not called in NotebookWindowedLayout for windowed notebook
         MessageLoop.sendMessage(widget, Widget.Msg.BeforeDetach);
 
