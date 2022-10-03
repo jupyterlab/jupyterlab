@@ -230,7 +230,7 @@ export class Tooltip extends Widget {
     // Calculate the geometry of the tooltip.
     HoverBox.setGeometry({
       anchor,
-      host: host,
+      host,
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
       node: this.node,
