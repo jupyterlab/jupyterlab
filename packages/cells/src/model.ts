@@ -24,6 +24,7 @@ import {
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
+
 import {
   createStandaloneCell,
   ISharedCell,
@@ -31,6 +32,7 @@ import {
   ISharedMarkdownCell,
   ISharedRawCell
 } from '@jupyterlab/shared-models';
+
 const globalModelDBMutex = models.createMutex();
 
 /**
@@ -183,7 +185,11 @@ export function isRawCellModel(model: ICellModel): model is IRawCellModel {
  */
 export class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions<ISharedCell> = {}) {
-    super(options);
+    super({
+      sharedModel: createStandaloneCell({ cell_type: 'raw', id: options.id }),
+      ...options
+    });
+    this._standaloneModel = typeof options.sharedModel === 'undefined';
 
     this.sharedModel.changed.connect(this.onGenericChange, this);
     this.sharedModel.changed.connect(this.onSharedModelChanged, this);
@@ -257,6 +263,16 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     this.modelDB.setValue('trusted', newValue);
   }
 
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this._standaloneModel) {
+      this.sharedModel.dispose();
+    }
+    super.dispose();
+  }
+
   /**
    * Handle a change to the trusted state.
    *
@@ -318,15 +334,15 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
   protected onSharedModelChanged(
     sender: models.ISharedCell,
-    change: models.CellChange<models.ISharedBaseCellMetadata>
+    change: models.CellChange<nbformat.IBaseCellMetadata>
   ) {
     if (change.metadataChange) {
-      const newValue = change.metadataChange.newValue || {};
-      const oldValue = change.metadataChange.oldValue || {};
+      const newValue = change.metadataChange.newValue ?? {};
+      const oldValue = change.metadataChange.oldValue ?? {};
       for (const key in newValue) {
         if (
           oldValue[key] === undefined ||
-          !JSONExt.deepEqual(newValue[key], oldValue[key])
+          !JSONExt.deepEqual(newValue[key]!, oldValue[key]!)
         ) {
           this.metadata.set(key, newValue[key]);
         }
@@ -346,7 +362,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * @param event The event to handle.
    */
   private _changeCellMetadata(
-    metadata: Partial<models.ISharedBaseCellMetadata>,
+    metadata: Partial<nbformat.IBaseCellMetadata>,
     event: IObservableJSON.IChangedArgs
   ): void {
     switch (event.key) {
@@ -380,6 +396,8 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
         metadata[event.key] = event.newValue as any;
     }
   }
+
+  private readonly _standaloneModel: boolean;
 }
 
 /**
@@ -626,9 +644,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this.outputs.clear();
     this.executionCount = null;
     this._setDirty(false);
-    const metadata = this.sharedModel.getMetadata();
-    delete metadata.execution;
-    this.sharedModel.setMetadata(metadata);
+    this.sharedModel.deleteMetadata('execution');
   }
 
   /**
@@ -711,12 +727,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   protected onSharedModelChanged(
     sender: models.ISharedCodeCell,
-    change: models.CellChange<models.ISharedBaseCellMetadata>
+    change: models.CellChange<nbformat.ICodeCellMetadata>
   ): void {
     super.onSharedModelChanged(sender, change);
     globalModelDBMutex(() => {
       if (change.outputsChange) {
-        this.clearExecution();
+        this.outputs.clear();
         sender.getOutputs().forEach(output => this._outputs.add(output));
       }
     });
@@ -727,7 +743,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   private _onValueChanged(
     slot: models.ISharedCodeCell,
-    change: models.CellChange<models.ISharedBaseCellMetadata>
+    change: models.CellChange<nbformat.ICodeCellMetadata>
   ): void {
     if (change.executionCountChange) {
       if (

@@ -165,7 +165,11 @@ export class DocumentModel
       changes.stateChange.forEach(value => {
         if (value.name !== 'dirty' || this._dirty !== value.newValue) {
           this._dirty = value.newValue;
-          this.triggerStateChange(value);
+          this.triggerStateChange({
+            newValue: undefined,
+            oldValue: undefined,
+            ...value
+          });
         }
       });
     }

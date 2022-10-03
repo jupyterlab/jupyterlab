@@ -66,8 +66,8 @@ export class CodeEditorWrapper extends Widget {
     if (this.isDisposed) {
       return;
     }
-    super.dispose();
     this.editor.dispose();
+    super.dispose();
   }
 
   /**

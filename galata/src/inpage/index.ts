@@ -6,7 +6,6 @@ import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import type { Cell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
-import { createCell } from '@jupyterlab/shared-models';
 import { findIndex } from '@lumino/algorithm';
 import { Signal } from '@lumino/signaling';
 import {
@@ -247,10 +246,10 @@ export class GalataInpage implements IGalataInpage {
 
       if (nb.model) {
         const sharedModel = nb.model.sharedModel;
-        sharedModel.insertCell(
-          sharedModel.cells.length,
-          createCell({ cell_type: cellType, source })
-        );
+        sharedModel.insertCell(sharedModel.cells.length, {
+          cell_type: cellType,
+          source
+        });
       }
       nb.update();
     } else {
@@ -313,10 +312,7 @@ export class GalataInpage implements IGalataInpage {
         const sharedModel = nb.model.sharedModel;
         sharedModel.transact(() => {
           sharedModel.deleteCell(cellIndex);
-          sharedModel.insertCell(
-            cellIndex,
-            createCell({ cell_type: cellType, source })
-          );
+          sharedModel.insertCell(cellIndex, { cell_type: cellType, source });
         });
       }
       nb.update();

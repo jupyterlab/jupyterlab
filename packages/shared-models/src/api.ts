@@ -14,10 +14,17 @@
  * It also defines the shared changes to be used in the events.
  */
 
-import * as nbformat from '@jupyterlab/nbformat';
-import { PartialJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { PartialJSONValue } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+
+/**
+ * Changes on Sequence-like data are expressed as Quill-inspired deltas.
+ *
+ * @source https://quilljs.com/docs/delta/
+ */
+export type Delta<T> = Array<{ insert?: T; delete?: number; retain?: number }>;
 
 /**
  * ISharedBase defines common operations that can be performed on any shared object.
@@ -42,10 +49,12 @@ export interface ISharedBase extends IDisposable {
    * Whether the object can undo changes.
    */
   canRedo(): boolean;
+
   /**
    * Clear the change stack.
    */
   clearUndoHistory(): void;
+
   /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
@@ -71,18 +80,24 @@ export interface ISharedText extends ISharedBase {
   /**
    * The changed signal.
    */
-  readonly changed: ISignal<this, TextChange>;
+  readonly changed: ISignal<this, SourceChange>;
+
   /**
-   * Gets cell's source.
+   * Text
+   */
+  source: string;
+
+  /**
+   * Get text.
    *
-   * @returns Cell's source.
+   * @returns Text.
    */
   getSource(): string;
 
   /**
-   * Sets cell's source.
+   * Set text.
    *
-   * @param value: New source.
+   * @param value New text.
    */
   setSource(value: string): void;
 
@@ -90,9 +105,7 @@ export interface ISharedText extends ISharedBase {
    * Replace content from `start' to `end` with `value`.
    *
    * @param start: The start index of the range to replace (inclusive).
-   *
    * @param end: The end index of the range to replace (exclusive).
-   *
    * @param value: New source (optional).
    */
   updateSource(start: number, end: number, value?: string): void;
@@ -118,6 +131,32 @@ export interface ISharedNotebook extends ISharedDocument {
   readonly changed: ISignal<this, NotebookChange>;
 
   /**
+   * Signal triggered when a metadata changes.
+   */
+  readonly metadataChanged: ISignal<this, IMapChange>;
+
+  /**
+   * The list of shared cells in the notebook.
+   */
+  readonly cells: ISharedCell[];
+
+  /**
+   * Signal triggered when the cells list changes.
+   */
+  readonly cellsChanged: ISignal<this, IListChange>;
+
+  /**
+   * Wether the undo/redo logic should be
+   * considered on the full document across all cells.
+   */
+  readonly disableDocumentWideUndoRedo?: boolean;
+
+  /**
+   * Notebook metadata.
+   */
+  metadata: nbformat.INotebookMetadata;
+
+  /**
    * The minor version number of the nbformat.
    */
   readonly nbformat_minor: number;
@@ -128,23 +167,36 @@ export interface ISharedNotebook extends ISharedDocument {
   readonly nbformat: number;
 
   /**
-   * The list of shared cells in the notebook.
+   * Delete a metadata notebook.
+   *
+   * @param key The key to delete
    */
-  readonly cells: ISharedCell[];
+  deleteMetadata(key: string): void;
 
   /**
-   * Returns the metadata associated with the notebook.
+   * Returns some metadata associated with the notebook.
    *
+   * If no `key` is provided, it will return all metadata.
+   * Else it will return the value for that key.
+   *
+   * @param key Key to get from the metadata
    * @returns Notebook's metadata.
    */
-  getMetadata(): nbformat.INotebookMetadata;
+  getMetadata(key?: string): nbformat.INotebookMetadata;
 
   /**
-   * Sets the metadata associated with the notebook.
+   * Sets some metadata associated with the notebook.
    *
-   * @param metadata: Notebook's metadata.
+   * If only one argument is provided, it will override all notebook metadata.
+   * Otherwise a single key will be set to a new value.
+   *
+   * @param metadata All Notebook's metadata or the key to set.
+   * @param value New metadata value
    */
-  setMetadata(metadata: nbformat.INotebookMetadata): void;
+  setMetadata(
+    metadata: nbformat.INotebookMetadata | string,
+    value?: PartialJSONValue
+  ): void;
 
   /**
    * Updates the metadata associated with the notebook.
@@ -152,6 +204,15 @@ export interface ISharedNotebook extends ISharedDocument {
    * @param value: Metadata's attribute to update.
    */
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void;
+
+  /**
+   * Add a shared cell at the notebook bottom.
+   *
+   * @param cell Cell to add.
+   *
+   * @returns The added cell.
+   */
+  addCell(cell: SharedCell.Cell): ISharedCell;
 
   /**
    * Get a shared cell by index.
@@ -165,20 +226,22 @@ export interface ISharedNotebook extends ISharedDocument {
   /**
    * Insert a shared cell into a specific position.
    *
-   * @param index: Cell's position.
+   * @param index Cell's position.
+   * @param cell Cell to insert.
    *
-   * @param cell: Cell to insert.
+   * @returns The inserted cell.
    */
-  insertCell(index: number, cell: ISharedCell): void;
+  insertCell(index: number, cell: SharedCell.Cell): ISharedCell;
 
   /**
    * Insert a list of shared cells into a specific position.
    *
-   * @param index: Position to insert the cells.
+   * @param index Position to insert the cells.
+   * @param cells Array of shared cells to insert.
    *
-   * @param cells: Array of shared cells to insert.
+   * @returns The inserted cells.
    */
-  insertCells(index: number, cells: Array<ISharedCell>): void;
+  insertCells(index: number, cells: Array<SharedCell.Cell>): ISharedCell[];
 
   /**
    * Move a cell.
@@ -230,31 +293,6 @@ export namespace ISharedNotebook {
   }
 }
 
-/**
- * The Shared kernelspec metadata.
- */
-export interface ISharedKernelspecMetadata
-  extends nbformat.IKernelspecMetadata,
-    IDisposable {
-  [key: string]: any;
-  name: string;
-  display_name: string;
-}
-
-/**
- * The Shared language info metatdata.
- */
-export interface ISharedLanguageInfoMetadata
-  extends nbformat.ILanguageInfoMetadata,
-    IDisposable {
-  [key: string]: any;
-  name: string;
-  codemirror_mode?: string | PartialJSONObject;
-  file_extension?: string;
-  mimetype?: string;
-  pygments_lexer?: string;
-}
-
 /** Cell Types. */
 export type ISharedCell =
   | ISharedCodeCell
@@ -265,43 +303,36 @@ export type ISharedCell =
 /**
  * Shared cell namespace
  */
-export namespace ISharedCell {
+export namespace SharedCell {
+  /**
+   * Cell data
+   */
+  export type Cell = (
+    | Partial<nbformat.IRawCell>
+    | Partial<nbformat.ICodeCell>
+    | Partial<nbformat.IMarkdownCell>
+    | Partial<nbformat.IBaseCell>
+  ) & { cell_type: string };
+
   /**
    * Shared cell constructor options.
    */
   export interface IOptions {
     /**
-     * Cell id
+     * Optional notebook to which this cell belongs.
+     *
+     * If not provided the cell will be standalone.
      */
-    id?: string;
-    /**
-     * Whether the cell is standalone or not.
-     */
-    isStandalone?: boolean;
+    notebook?: ISharedNotebook;
   }
-}
-
-/**
- * Cell-level metadata.
- */
-export interface ISharedBaseCellMetadata extends nbformat.IBaseCellMetadata {
-  [key: string]: any;
 }
 
 /**
  * Implements an API for nbformat.IBaseCell.
  */
-export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetadata>
-  extends ISharedText {
-  /**
-   * Whether the cell is standalone or not.
-   *
-   * If the cell is standalone. It cannot be
-   * inserted into a YNotebook because the Yjs model is already
-   * attached to an anonymous Y.Doc instance.
-   */
-  readonly isStandalone: boolean;
-
+export interface ISharedBaseCell<
+  Metadata extends nbformat.IBaseCellMetadata = nbformat.IBaseCellMetadata
+> extends ISharedText {
   /**
    * The type of the cell.
    */
@@ -313,9 +344,33 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetadata>
   readonly changed: ISignal<this, CellChange<Metadata>>;
 
   /**
-   * Create a new Cell that can be inserted into a YNotebook.
+   * Cell id.
    */
-  clone(): ISharedBaseCell<Metadata>;
+  readonly id: string;
+
+  /**
+   * Whether the cell is standalone or not.
+   *
+   * If the cell is standalone. It cannot be
+   * inserted into a YNotebook because the Yjs model is already
+   * attached to an anonymous Y.Doc instance.
+   */
+  readonly isStandalone: boolean;
+
+  /**
+   * Cell metadata.
+   */
+  metadata: Partial<Metadata>;
+
+  /**
+   * Signal triggered when the cell metadata changes.
+   */
+  readonly metadataChanged: ISignal<this, IMapChange>;
+
+  /**
+   * The notebook that this cell belongs to.
+   */
+  readonly notebook: ISharedNotebook | null;
 
   /**
    * Get Cell id.
@@ -325,18 +380,35 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetadata>
   getId(): string;
 
   /**
-   * Returns the metadata associated with the notebook.
+   * Delete a metadata cell.
    *
-   * @returns Notebook's metadata.
+   * @param key The key to delete
    */
-  getMetadata(): Partial<Metadata>;
+  deleteMetadata(key: string): void;
 
   /**
-   * Sets the metadata associated with the notebook.
+   * Returns some metadata associated with the cell.
    *
-   * @param metadata: Notebook's metadata.
+   * If a `key` is provided, returns the metadata value.
+   * Otherwise returns all metadata
+   *
+   * @returns Cell's metadata.
    */
-  setMetadata(metadata: Partial<Metadata>): void;
+  getMetadata(key?: string): Partial<Metadata>;
+
+  /**
+   * Sets some cell metadata.
+   *
+   * If only one argument is provided, it will override all cell metadata.
+   * Otherwise a single key will be set to a new value.
+   *
+   * @param metadata Cell's metadata or key.
+   * @param value Metadata value
+   */
+  setMetadata(
+    metadata: Partial<Metadata> | string,
+    value?: PartialJSONValue
+  ): void;
 
   /**
    * Serialize the model to JSON.
@@ -348,7 +420,7 @@ export interface ISharedBaseCell<Metadata extends ISharedBaseCellMetadata>
  * Implements an API for nbformat.ICodeCell.
  */
 export interface ISharedCodeCell
-  extends ISharedBaseCell<ISharedBaseCellMetadata> {
+  extends ISharedBaseCell<nbformat.IBaseCellMetadata> {
   /**
    * The type of the cell.
    */
@@ -358,6 +430,11 @@ export interface ISharedCodeCell
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   execution_count: nbformat.ExecutionCount;
+
+  /**
+   * Cell outputs
+   */
+  outputs: Array<nbformat.IOutput>;
 
   /**
    * Execution, display, or stream outputs.
@@ -391,14 +468,14 @@ export interface ISharedCodeCell
 }
 
 /**
- * Implements an API for nbformat.IMarkdownCell.
+ * Cell with attachment interface.
  */
-export interface ISharedMarkdownCell
-  extends ISharedBaseCell<ISharedBaseCellMetadata> {
+export interface ISharedAttachmentsCell
+  extends ISharedBaseCell<nbformat.IBaseCellMetadata> {
   /**
-   * String identifying the type of cell.
+   * Cell attachments
    */
-  cell_type: 'markdown';
+  attachments?: nbformat.IAttachments;
 
   /**
    * Gets the cell attachments.
@@ -413,6 +490,16 @@ export interface ISharedMarkdownCell
    * @param attachments: The cell attachments.
    */
   setAttachments(attachments: nbformat.IAttachments | undefined): void;
+}
+
+/**
+ * Implements an API for nbformat.IMarkdownCell.
+ */
+export interface ISharedMarkdownCell extends ISharedAttachmentsCell {
+  /**
+   * String identifying the type of cell.
+   */
+  cell_type: 'markdown';
 
   /**
    * Serialize the model to JSON.
@@ -423,27 +510,11 @@ export interface ISharedMarkdownCell
 /**
  * Implements an API for nbformat.IRawCell.
  */
-export interface ISharedRawCell
-  extends ISharedBaseCell<ISharedBaseCellMetadata>,
-    IDisposable {
+export interface ISharedRawCell extends ISharedAttachmentsCell {
   /**
    * String identifying the type of cell.
    */
   cell_type: 'raw';
-
-  /**
-   * Gets the cell attachments.
-   *
-   * @returns The cell attachments.
-   */
-  getAttachments(): nbformat.IAttachments | undefined;
-
-  /**
-   * Sets the cell attachments
-   *
-   * @param attachments: The cell attachments.
-   */
-  setAttachments(attachments: nbformat.IAttachments | undefined): void;
 
   /**
    * Serialize the model to JSON.
@@ -452,86 +523,213 @@ export interface ISharedRawCell
 }
 
 /**
- * Changes on Sequence-like data are expressed as Quill-inspired deltas.
- *
- * @source https://quilljs.com/docs/delta/
- */
-export type Delta<T> = Array<{ insert?: T; delete?: number; retain?: number }>;
-
-/**
  * Implements an API for nbformat.IUnrecognizedCell.
  */
 export interface ISharedUnrecognizedCell
-  extends ISharedBaseCell<ISharedBaseCellMetadata>,
-    IDisposable {
+  extends ISharedBaseCell<nbformat.IBaseCellMetadata> {
   /**
    * The type of the cell.
+   *
+   * The notebook format specified the type will not be 'markdown' | 'raw' | 'code'
    */
-  cell_type: 'raw';
+  cell_type: string;
 
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): nbformat.ICodeCell;
+  toJSON(): nbformat.IUnrecognizedCell;
 }
 
-export type TextChange = {
+export type StateChange<T> = {
+  /**
+   * Key changed
+   */
+  name: string;
+  /**
+   * Old value
+   */
+  oldValue?: T;
+  /**
+   * New value
+   */
+  newValue?: T;
+};
+
+/**
+ * Generic document change
+ */
+export type DocumentChange = {
+  // Is used???
+  contextChange?: MapChange;
+  /**
+   * Change occurring in the document state.
+   */
+  stateChange?: StateChange<any>[];
+};
+
+/**
+ * The change types which occur on a list.
+ */
+export type ListChangeType =
+  /**
+   * Item(s) were added to the list.
+   */
+  | 'add'
+
+  /**
+   * Item(s) were removed from the list.
+   */
+  | 'remove';
+
+/**
+ * The changed object which is emitted by a list.
+ */
+export interface IListChange<T = any> {
+  /**
+   * The type of change undergone by the vector.
+   */
+  type: ListChangeType;
+
+  /**
+   * The new index associated with the change.
+   */
+  newIndex: number;
+
+  /**
+   * The new values associated with the change.
+   *
+   * #### Notes
+   * The values will be contiguous starting at the `newIndex`.
+   */
+  newValues: T[];
+
+  /**
+   * The old index associated with the change.
+   */
+  oldIndex: number;
+
+  /**
+   * The old values associated with the change.
+   *
+   * #### Notes
+   * The values will be contiguous starting at the `oldIndex`.
+   */
+  oldValues: T[];
+}
+
+/**
+ * The change types which occur on an observable map.
+ */
+export type MapChangeType =
+  /**
+   * An entry was added.
+   */
+  | 'add'
+
+  /**
+   * An entry was removed.
+   */
+  | 'remove'
+
+  /**
+   * An entry was changed.
+   */
+  | 'change';
+
+/**
+ * The changed args object which is emitted by an observable map.
+ */
+export interface IMapChange<T = any> {
+  /**
+   * The type of change undergone by the map.
+   */
+  type: MapChangeType;
+
+  /**
+   * The key of the change.
+   */
+  key: string;
+
+  /**
+   * The old value of the change.
+   */
+  oldValue?: T;
+
+  /**
+   * The new value of the change.
+   */
+  newValue?: T;
+}
+
+/**
+ * Text source change
+ */
+export type SourceChange = {
+  /**
+   * Text source change
+   */
   sourceChange?: Delta<string>;
 };
 
 /**
  * Definition of the shared Notebook changes.
  */
-export type NotebookChange = {
+export type NotebookChange = DocumentChange & {
+  /**
+   * Cell changes
+   */
   cellsChange?: Delta<ISharedCell[]>;
+  /**
+   * Notebook metadata changes
+   */
   metadataChange?: {
     oldValue: nbformat.INotebookMetadata;
-    newValue: nbformat.INotebookMetadata | undefined;
+    newValue?: nbformat.INotebookMetadata;
   };
+  /**
+   * nbformat version change
+   */
   nbformatChanged?: {
     key: string;
-    oldValue: number | undefined;
-    newValue: number | undefined;
+    oldValue?: number;
+    newValue?: number;
   };
-  contextChange?: MapChange;
-  stateChange?: Array<{
-    name: string;
-    oldValue: any;
-    newValue: any;
-  }>;
 };
 
-export type FileChange = {
-  sourceChange?: Delta<string>;
-  contextChange?: MapChange;
-  stateChange?: Array<{
-    name: string;
-    oldValue: any;
-    newValue: any;
-  }>;
-};
+/**
+ * File change
+ */
+export type FileChange = DocumentChange & SourceChange;
 
 /**
  * Definition of the shared Cell changes.
  */
-export type CellChange<MetadataType> = {
-  sourceChange?: Delta<string>;
+export type CellChange<
+  MetadataType extends nbformat.IBaseCellMetadata = nbformat.IBaseCellMetadata
+> = SourceChange & {
+  /**
+   * Cell attachment change
+   */
+  attachmentsChange?: {
+    oldValue?: nbformat.IAttachments;
+    newValue?: nbformat.IAttachments;
+  };
+  /**
+   * Cell output changes
+   */
   outputsChange?: Delta<nbformat.IOutput[]>;
+  /**
+   * Cell execution count change
+   */
   executionCountChange?: {
-    oldValue: number | undefined;
-    newValue: number | undefined;
+    oldValue?: number;
+    newValue?: number;
   };
+  /**
+   * Cell metadata change
+   */
   metadataChange?: {
-    oldValue: Partial<MetadataType> | undefined;
-    newValue: Partial<MetadataType> | undefined;
+    oldValue?: Partial<MetadataType>;
+    newValue?: Partial<MetadataType>;
   };
-};
-
-export type DocumentChange = {
-  contextChange?: MapChange;
-  stateChange?: Array<{
-    name: string;
-    oldValue: any;
-    newValue: any;
-  }>;
 };

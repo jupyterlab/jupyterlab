@@ -258,7 +258,7 @@ export class NotebookModel implements INotebookModel {
         if (!useId) {
           delete cell.id;
         }
-        return sharedModels.createCell(cell);
+        return cell;
       });
       if (!ycells.length) {
         // Create cell when notebook is empty
@@ -364,7 +364,11 @@ close the notebook without saving it.`,
       changes.stateChange.forEach(value => {
         if (value.name !== 'dirty' || this._dirty !== value.newValue) {
           this._dirty = value.newValue;
-          this.triggerStateChange(value);
+          this.triggerStateChange({
+            newValue: undefined,
+            oldValue: undefined,
+            ...value
+          });
         }
       });
     }

@@ -3,7 +3,7 @@
 
 import { Text } from '@jupyterlab/coreutils';
 import { KernelMessage } from '@jupyterlab/services';
-import { TextChange } from '@jupyterlab/shared-models';
+import { SourceChange } from '@jupyterlab/shared-models';
 import { JSONObject } from '@lumino/coreutils';
 import { CompletionHandler } from '../handler';
 import { ICompletionContext, ICompletionProvider } from '../tokens';
@@ -117,7 +117,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
    * Kernel provider will activate the completer in continuous mode after
    * the `.` character.
    */
-  shouldShowContinuousHint(visible: boolean, changed: TextChange): boolean {
+  shouldShowContinuousHint(visible: boolean, changed: SourceChange): boolean {
     const sourceChange = changed.sourceChange;
     if (sourceChange == null) {
       return true;

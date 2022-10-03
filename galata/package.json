@@ -55,7 +55,6 @@
     "@jupyterlab/notebook": "^4.0.0-alpha.15",
     "@jupyterlab/services": "^7.0.0-alpha.15",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.15",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.15",
     "@lumino/algorithm": "^2.0.0-alpha.6",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",

@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { ISharedText, TextChange } from '@jupyterlab/shared-models';
+import { ISharedText, SourceChange } from '@jupyterlab/shared-models';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
@@ -283,7 +283,7 @@ export class CompletionHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(str: ISharedText, changed: TextChange): void {
+  protected onTextChanged(str: ISharedText, changed: SourceChange): void {
     const model = this.completer.model;
     if (!model || !this._enabled) {
       return;
