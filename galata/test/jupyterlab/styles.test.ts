@@ -146,7 +146,7 @@ test.describe('CSS Selectors', () => {
           await page.theme.setLightTheme();
           break;
         default:
-          expect(false);
+          throw new Error(`Unknown theme ${theme}`);
       }
 
       // Create a new notebook and add a MathJax 2 element to ensure that
