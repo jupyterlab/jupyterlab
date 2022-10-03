@@ -8,7 +8,8 @@ import { classes } from '../../utils';
 import { checkIcon, filterListIcon } from '../iconimports';
 
 const searchHeaderIcon = filterListIcon.bindprops({
-  stylesheet: 'commandPaletteHeader'
+  stylesheet: 'commandPaletteHeader',
+  className: 'jp-icon-hoverShow-content'
 });
 
 export namespace CommandPaletteSvg {
