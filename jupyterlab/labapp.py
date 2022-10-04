@@ -711,8 +711,11 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             # Assume the server_name property indicates running JupyterHub 1.0.
             if hasattr(self.serverapp, "server_name"):
                 page_config["hubServerName"] = self.serverapp.server_name
-            api_token = os.getenv("JUPYTERHUB_API_TOKEN", "")
-            page_config["token"] = api_token
+            # avoid setting API token in page config
+            # $JUPYTERHUB_API_TOKEN identifies the server, not the client
+            # but at least make sure we don't use the token
+            # if the serverapp set one
+            page_config["token"] = ""
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config
