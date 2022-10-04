@@ -278,7 +278,7 @@ export namespace HoverBox {
     }
 
     if (belowTheBottom) {
-      switch (outOfViewDisplay?.bottom || 'hidden-outsdie') {
+      switch (outOfViewDisplay?.bottom || 'hidden-outside') {
         case 'hidden-inside':
           if (!bottomEdgeInside) {
             hide = true;
@@ -332,7 +332,7 @@ export namespace HoverBox {
     }
 
     if (afterTheRight) {
-      switch (outOfViewDisplay?.right || 'hidden-outsdie') {
+      switch (outOfViewDisplay?.right || 'hidden-outside') {
         case 'hidden-inside':
           if (!rightEdgeInside) {
             hide = true;
