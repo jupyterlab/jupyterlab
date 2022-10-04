@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mainmenu-extension",
-  "version": "3.4.7",
+  "version": "3.4.8",
   "description": "JupyterLab - Main Menu Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,14 +37,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.4.7",
-    "@jupyterlab/apputils": "^3.4.7",
-    "@jupyterlab/coreutils": "^5.4.7",
-    "@jupyterlab/mainmenu": "^3.4.7",
-    "@jupyterlab/services": "^6.4.7",
-    "@jupyterlab/settingregistry": "^3.4.7",
-    "@jupyterlab/translation": "^3.4.7",
-    "@jupyterlab/ui-components": "^3.4.7",
+    "@jupyterlab/application": "^3.4.8",
+    "@jupyterlab/apputils": "^3.4.8",
+    "@jupyterlab/coreutils": "^5.4.8",
+    "@jupyterlab/mainmenu": "^3.4.8",
+    "@jupyterlab/services": "^6.4.8",
+    "@jupyterlab/settingregistry": "^3.4.8",
+    "@jupyterlab/translation": "^3.4.8",
+    "@jupyterlab/ui-components": "^3.4.8",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/disposable": "^1.10.0",

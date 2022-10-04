@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/builder",
-  "version": "3.4.7",
+  "version": "3.4.8",
   "description": "JupyterLab - Extension Builder",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,7 +33,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/buildutils": "^3.4.7",
+    "@jupyterlab/buildutils": "^3.4.8",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/application": "^1.27.0",
     "@lumino/commands": "^1.19.0",

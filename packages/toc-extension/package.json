@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc-extension",
-  "version": "5.4.7",
+  "version": "5.4.8",
   "description": "JupyterLab - Table of Contents widget extension",
   "keywords": [
     "jupyter",
@@ -40,17 +40,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.4.7",
-    "@jupyterlab/cells": "^3.4.7",
-    "@jupyterlab/docmanager": "^3.4.7",
-    "@jupyterlab/fileeditor": "^3.4.7",
-    "@jupyterlab/markdownviewer": "^3.4.7",
-    "@jupyterlab/notebook": "^3.4.7",
-    "@jupyterlab/rendermime": "^3.4.7",
-    "@jupyterlab/settingregistry": "^3.4.7",
-    "@jupyterlab/toc": "^5.4.7",
-    "@jupyterlab/translation": "^3.4.7",
-    "@jupyterlab/ui-components": "^3.4.7"
+    "@jupyterlab/application": "^3.4.8",
+    "@jupyterlab/cells": "^3.4.8",
+    "@jupyterlab/docmanager": "^3.4.8",
+    "@jupyterlab/fileeditor": "^3.4.8",
+    "@jupyterlab/markdownviewer": "^3.4.8",
+    "@jupyterlab/notebook": "^3.4.8",
+    "@jupyterlab/rendermime": "^3.4.8",
+    "@jupyterlab/settingregistry": "^3.4.8",
+    "@jupyterlab/toc": "^5.4.8",
+    "@jupyterlab/translation": "^3.4.8",
+    "@jupyterlab/ui-components": "^3.4.8"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
