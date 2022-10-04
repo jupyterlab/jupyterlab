@@ -9,7 +9,7 @@ export default {
   height: 'var(--jp-statusbar-height)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontFamily: 'var(--jp-ui-font-family)',
-  textColor: 'var(--jp-ui-font-color1)',
+  textColor: 'var(--jp-ui-font-color2)',
   textClickColor: 'white',
   itemMargin: '2px',
   itemPadding: '6px',
