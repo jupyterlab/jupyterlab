@@ -102,6 +102,19 @@ export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
       skipStartupTypeset: true,
       messageStyle: 'none'
     });
+
+    MathJax.Hub.Register.StartupHook('End Config', () => {
+      // Disable `:hover span` styles which cause performance issues in Chromium browsers
+      // c-f https://github.com/jupyterlab/jupyterlab/issues/9757
+      // Note that we cannot overwrite them in config earlier due to how `CombineConfig`
+      // is implemented in MathJax 2 (it does not allow removing styles, just expanding).
+      delete MathJax.Hub?.config?.MathEvents?.styles[
+        '.MathJax_Hover_Arrow:hover span'
+      ];
+      delete MathJax.Hub?.config?.MathMenu?.styles[
+        '.MathJax_MenuClose:hover span'
+      ];
+    });
     MathJax.Hub.Configured();
     this._initPromise.resolve(void 0);
   }

@@ -28,7 +28,9 @@ export class ShortcutTitleItem extends React.Component<
         onClick={() => this.props.updateSort(this.props.title.toLowerCase())}
       >
         {this.props.title}
-        <div className={SortButtonStyle}>⌃</div>
+        <div className={`${SortButtonStyle} jp-ShortcutTitleItem-sortButton`}>
+          ⌃
+        </div>
       </div>
     );
   }
