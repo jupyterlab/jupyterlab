@@ -25,7 +25,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.4.x/CHANGELOG.md'
 - Always show tooltip in hover box even if edges are out of view [#13161](https://github.com/jupyterlab/jupyterlab/pull/13161) ([@krassowski](https://github.com/krassowski))
 - Fix workspace URL while cloning a workspace [#12794](https://github.com/jupyterlab/jupyterlab/pull/12794) ([@aditya211935](https://github.com/aditya211935))
 - Switch back to `display` to hide tabs [#13103](https://github.com/jupyterlab/jupyterlab/pull/13103) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #13090 (Preserve kernel icon aspect ratio) [#13122](https://github.com/jupyterlab/jupyterlab/pull/13122) ([@fcollonval](https://github.com/fcollonval))
+- Preserve kernel icon aspect ratio [#13122](https://github.com/jupyterlab/jupyterlab/pull/13122) ([@fcollonval](https://github.com/fcollonval))
 - Fix cell toolbar layout [#13059](https://github.com/jupyterlab/jupyterlab/pull/13059) ([@kulsoomzahra](https://github.com/kulsoomzahra))
 - Avoid menus overflowing in small screens [#13109](https://github.com/jupyterlab/jupyterlab/pull/13109) ([@steff456](https://github.com/steff456))
 
