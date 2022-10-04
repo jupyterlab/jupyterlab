@@ -4,6 +4,26 @@
 Performance tricks
 ==================
 
+Windowed list
+-------------
+
+A list windowing algorithm is coded in a dedicated widget ``WindowedList`` provided by ``@jupyterlab/ui-components``.
+
+This widget will have a DOM structure like this:
+
+.. code::html
+
+   <div class="jp-WindowedPanel-outer">
+      <div class="jp-WindowedPanel-inner">
+         <div class="jp-WindowedPanel-window">
+            <!-- Here will be the list of items in the viewport -->
+         </div>
+      </div>
+   </div>
+
+The reason for encapsulating the visible items in such tree comes from the need to position the
+current view correctly in a fake document that has the real height.
+
 Notebook documents
 ------------------
 
