@@ -31,7 +31,7 @@ To internationalize your extension, the following tasks are required:
 
     Domain are normalized by replacing ``-`` with ``_`` characters.
 
-3. Wraps all translatable strings with one of the `gettext functions <https://jupyterlab.readthedocs.io/en/3.4.x/api/modules/translation.html#translationbundle>`_.
+3. Wraps all translatable strings with one of the `gettext functions <https://jupyterlab.readthedocs.io/en/3.5.x/api/modules/translation.html#translationbundle>`_.
 
 Examples:
 
