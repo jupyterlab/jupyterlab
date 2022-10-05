@@ -1,8 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { jupyterHighlightStyle } from '@jupyterlab/codemirror';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
+import { Tag, tags } from '@lezer/highlight';
 import { JSONArray, JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import * as React from 'react';
 import Highlight from 'react-highlighter';
@@ -27,6 +29,13 @@ export interface IProps {
 export interface IState {
   filter?: string;
   value: string;
+}
+
+/**
+ * Get the CodeMirror style for a given tag.
+ */
+function getStyle(tag: Tag): string {
+  return jupyterHighlightStyle.style([tag]) ?? '';
 }
 
 /**
@@ -70,9 +79,9 @@ export class Component extends React.Component<IProps, IState> {
           collectionLimit={100}
           theme={{
             extend: theme,
-            valueLabel: 'cm-variable',
-            valueText: 'cm-string',
-            nestedNodeItemString: 'cm-comment'
+            valueLabel: getStyle(tags.variableName),
+            valueText: getStyle(tags.string),
+            nestedNodeItemString: getStyle(tags.comment)
           }}
           invertTheme={false}
           keyPath={[root]}
@@ -90,18 +99,8 @@ export class Component extends React.Component<IProps, IState> {
             )
           }
           labelRenderer={([label, type]) => {
-            // let className = 'cm-variable';
-            // if (type === 'root') {
-            //   className = 'cm-variable-2';
-            // }
-            // if (type === 'array') {
-            //   className = 'cm-variable-2';
-            // }
-            // if (type === 'Object') {
-            //   className = 'cm-variable-3';
-            // }
             return (
-              <span className="cm-keyword">
+              <span className={getStyle(tags.keyword)}>
                 <Highlight
                   search={this.state.filter}
                   matchStyle={{ backgroundColor: 'yellow' }}
@@ -112,12 +111,12 @@ export class Component extends React.Component<IProps, IState> {
             );
           }}
           valueRenderer={raw => {
-            let className = 'cm-string';
+            let className = getStyle(tags.string);
             if (typeof raw === 'number') {
-              className = 'cm-number';
+              className = getStyle(tags.number);
             }
             if (raw === 'true' || raw === 'false') {
-              className = 'cm-keyword';
+              className = getStyle(tags.keyword);
             }
             return (
               <span className={className}>
