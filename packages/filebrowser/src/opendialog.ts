@@ -113,7 +113,7 @@ export namespace FileDialog {
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
     return getOpenFiles({
       ...options,
-      filter: model => null
+      filter: model => model.type === 'directory'
     });
   }
 }
@@ -127,7 +127,8 @@ class OpenDialog
   constructor(
     manager: IDocumentManager,
     filter?: (value: Contents.IModel) => boolean | Partial<IScore> | null,
-    translator?: ITranslator
+    translator?: ITranslator,
+    filterDirectories?: boolean
   ) {
     super();
     translator = translator ?? nullTranslator;
@@ -139,7 +140,8 @@ class OpenDialog
       manager,
       filter,
       {},
-      translator
+      translator,
+      filterDirectories
     );
 
     // Add toolbar items
@@ -235,15 +237,17 @@ namespace Private {
     manager: IDocumentManager,
     filter?: (value: Contents.IModel) => boolean | Partial<IScore> | null,
     options: IFileBrowserFactory.IOptions = {},
-    translator?: ITranslator
-  ) => {
+    translator?: ITranslator,
+    filterDirectories?: boolean
+  ): FileBrowser => {
     translator = translator || nullTranslator;
     const model = new FilterFileBrowserModel({
       manager,
       filter,
       translator,
       driveName: options.driveName,
-      refreshInterval: options.refreshInterval
+      refreshInterval: options.refreshInterval,
+      filterDirectories
     });
     const widget = new FileBrowser({
       id,

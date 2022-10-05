@@ -206,6 +206,12 @@
       "description": "Whether to apply fuzzy algorithm while filtering on file names",
       "default": true
     },
+    "filterDirectories": {
+      "type": "boolean",
+      "title": "Filter directories",
+      "description": "Whether to apply the search on directories",
+      "default": true
+    },
     "showLastModifiedColumn": {
       "type": "boolean",
       "title": "Show last modified column",
