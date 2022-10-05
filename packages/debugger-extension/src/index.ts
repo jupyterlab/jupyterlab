@@ -556,7 +556,8 @@ const main: JupyterFrontEndPlugin<void> = {
     IDebuggerSources,
     ILabShell,
     ILayoutRestorer,
-    ILoggerRegistry
+    ILoggerRegistry,
+    ISettingRegistry
   ],
   autoStart: true,
   activate: async (
@@ -569,7 +570,8 @@ const main: JupyterFrontEndPlugin<void> = {
     debuggerSources: IDebugger.ISources | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
-    loggerRegistry: ILoggerRegistry | null
+    loggerRegistry: ILoggerRegistry | null,
+    settingRegistry: ISettingRegistry | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
@@ -719,10 +721,29 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    let autoCollapseSidebar = false;
+
+    if (settingRegistry) {
+      const setting = await settingRegistry.load(main.id);
+      const updateSettings = (): void => {
+        autoCollapseSidebar = setting.get('autoCollapseDebuggerSidebar')
+          .composite as boolean;
+      };
+      updateSettings();
+      setting.changed.connect(updateSettings);
+    }
+
     service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
+      } else if (
+        labShell &&
+        sidebar.isVisible &&
+        event.event === 'terminated' &&
+        autoCollapseSidebar
+      ) {
+        labShell.collapseRight();
       }
     });
 
