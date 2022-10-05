@@ -273,6 +273,9 @@ describe('@jupyter/notebook', () => {
       it('should add a default cell if the notebook model is empty', () => {
         const widget = new LogStaticNotebook(options);
         const model1 = new NotebookModel();
+        expect(model1.cells.length).toBe(0);
+
+        widget.model = model1;
         expect(model1.cells.length).toBe(1);
         expect(model1.cells.get(0).type).toBe('code');
 
@@ -283,6 +286,9 @@ describe('@jupyter/notebook', () => {
         const model2 = new NotebookModel({
           defaultCell: 'markdown'
         });
+        expect(model2.cells.length).toBe(0);
+
+        widget.model = model2;
         expect(model2.cells.length).toBe(1);
         expect(model2.cells.get(0).type).toBe('markdown');
       });

@@ -69,7 +69,7 @@ describe('@jupyterlab/notebook', () => {
         model.sharedModel.clearUndoHistory();
         model.sharedModel.deleteCell(0);
         model.sharedModel.undo();
-        expect(model.cells.length).toBe(2);
+        expect(model.cells.length).toBe(1);
         expect(model.cells.get(0).sharedModel.getSource()).toBe('foo');
         // Previous model matches the restored model
         expect(model.cells.get(0).toJSON()).toEqual(cellJSON);
@@ -347,10 +347,9 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#initialize()', () => {
-      it('should add one code cell if the model is empty', () => {
+      it('should be an empty model', () => {
         const model = new NotebookModel();
-        expect(model.cells.length).toBe(1);
-        expect(model.cells.get(0).type).toBe('code');
+        expect(model.cells.length).toBe(0);
       });
     });
   });

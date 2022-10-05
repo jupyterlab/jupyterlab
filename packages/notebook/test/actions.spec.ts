@@ -422,16 +422,6 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
       });
 
-      it('should add a code cell if all cells are deleted', async () => {
-        for (let i = 0; i < widget.widgets.length; i++) {
-          widget.select(widget.widgets[i]);
-        }
-        NotebookActions.deleteCells(widget);
-        await sleep();
-        expect(widget.widgets.length).toBe(1);
-        expect(widget.activeCell).toBeInstanceOf(CodeCell);
-      });
-
       it('should be undo-able', () => {
         const next = widget.widgets[1];
         widget.select(next);
@@ -1345,16 +1335,6 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.cut(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets[0].model.sharedModel.getSource()).toBe(source);
-      });
-
-      it('should add a new code cell if all cells were cut', async () => {
-        for (let i = 0; i < widget.widgets.length; i++) {
-          widget.select(widget.widgets[i]);
-        }
-        NotebookActions.cut(widget);
-        await sleep();
-        expect(widget.widgets.length).toBe(1);
-        expect(widget.activeCell).toBeInstanceOf(CodeCell);
       });
     });
 
