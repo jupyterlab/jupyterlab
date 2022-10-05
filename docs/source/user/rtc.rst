@@ -41,7 +41,7 @@ represent the document's content, what we call ``DocumentModel``. If you
 modify a Notebook with both editors simultaneously, JupyterLab will prompt
 a warning message indicating that the document's content changed. For more
 information, you can read the section of
-`Documents <https://jupyterlab.readthedocs.io/en/3.4.x/extension/documents.html#documents>`_.
+`Documents <https://jupyterlab.readthedocs.io/en/3.5.x/extension/documents.html#documents>`_.
 
 .. image:: images/sync_editors.png
    :align: center

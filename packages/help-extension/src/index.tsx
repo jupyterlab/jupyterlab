@@ -248,12 +248,12 @@ const resources: JupyterFrontEndPlugin<void> = {
     const resources = [
       {
         text: trans.__('JupyterLab Reference'),
-        url: 'https://jupyterlab.readthedocs.io/en/3.4.x/'
+        url: 'https://jupyterlab.readthedocs.io/en/3.5.x/'
       },
       {
         text: trans.__('JupyterLab FAQ'),
         url:
-          'https://jupyterlab.readthedocs.io/en/3.4.x/getting_started/faq.html'
+          'https://jupyterlab.readthedocs.io/en/3.5.x/getting_started/faq.html'
       },
       {
         text: trans.__('Jupyter Reference'),

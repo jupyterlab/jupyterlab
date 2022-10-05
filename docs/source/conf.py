@@ -179,7 +179,7 @@ html_context = {
     "display_github": True,  # Integrate GitHub
     "github_user": "jupyterlab",  # Username
     "github_repo": "jupyterlab",  # Repo name
-    "github_version": "3.4.x",  # Version
+    "github_version": "3.5.x",  # Version
     "conf_py_path": "/docs/source/",  # Path in the checkout to the docs root
 }
 
