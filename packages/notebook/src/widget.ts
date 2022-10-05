@@ -12,7 +12,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -529,6 +529,15 @@ export class StaticNotebook extends WindowedList {
     }
     this._updateMimetype();
     const cells = newValue.cells;
+    const collab = PageConfig.getOption('collaborative');
+    if ((!collab || collab == 'false') && !cells.length) {
+      newValue.sharedModel.insertCell(
+        0,
+        sharedModels.createCell({
+          cell_type: this.notebookConfig.defaultCell
+        })
+      );
+    }
     let index = -1;
     for (const cell of cells) {
       this._insertCell(++index, cell, 'set');
@@ -575,6 +584,29 @@ export class StaticNotebook extends WindowedList {
             this.model!.cells.length + delta.delete,
             -1 * delta.delete
           );
+          // Add default cell if there are no cells remaining.
+          // @todo this should probably be handled by shared-notebook
+          // @todo this is duplicatively implemented (see other occurrences of notebookconfig.defaultCell)
+          const collab = PageConfig.getOption('collaborative');
+          if ((!collab || collab == 'false') && !sender.cells.length) {
+            const model = this.model;
+            // Add the cell in a new context to avoid triggering another
+            // cell changed event during the handling of this signal.
+            requestAnimationFrame(() => {
+              if (
+                model &&
+                !model.isDisposed &&
+                !model.sharedModel.cells.length
+              ) {
+                model.sharedModel.insertCell(
+                  0,
+                  sharedModels.createCell({
+                    cell_type: this.notebookConfig.defaultCell
+                  })
+                );
+              }
+            });
+          }
         }
       });
     }

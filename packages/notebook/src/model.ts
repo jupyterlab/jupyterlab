@@ -260,6 +260,11 @@ export class NotebookModel implements INotebookModel {
         }
         return sharedModels.createCell(cell);
       });
+      if (!ycells.length) {
+        // Create cell when notebook is empty
+        // (non collaborative)
+        ycells.push(sharedModels.createCell({ cell_type: 'code' }));
+      }
       this.sharedModel.insertCells(this.sharedModel.cells.length, ycells);
       this.sharedModel.deleteCellRange(0, this.sharedModel.cells.length);
     });
