@@ -47,6 +47,11 @@ export interface IDocumentManager extends IDisposable {
   autosaveInterval: number;
 
   /**
+   * Whether to ask the user to rename untitled file on first manual save.
+   */
+  renameUntitledFileOnSave: boolean;
+
+  /**
    * Clone a widget.
    *
    * @param widget - The source widget.

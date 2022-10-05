@@ -132,6 +132,12 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "renameUntitledFileOnSave": {
+      "type": "boolean",
+      "title": "Rename Untitled File On First Save",
+      "description": "Whether to prompt to rename untitled file on first manual save.",
+      "default": true
     }
   },
   "additionalProperties": false,

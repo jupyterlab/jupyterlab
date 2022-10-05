@@ -133,6 +133,17 @@ export class DocumentManager implements IDocumentManager {
   }
 
   /**
+   * Whether to ask the user to rename untitled file on first manual save.
+   */
+  get renameUntitledFileOnSave(): boolean {
+    return this._renameUntitledFileOnSave;
+  }
+
+  set renameUntitledFileOnSave(value: boolean) {
+    this._renameUntitledFileOnSave = value;
+  }
+
+  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -620,6 +631,7 @@ export class DocumentManager implements IDocumentManager {
   private _autosave = true;
   private _autosaveInterval = 120;
   private _lastModifiedCheckMargin = 500;
+  private _renameUntitledFileOnSave = true;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;

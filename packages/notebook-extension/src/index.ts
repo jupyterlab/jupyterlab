@@ -30,7 +30,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import {
@@ -1440,18 +1440,20 @@ function activateNotebookHandler(
   }
 
   // Utility function to create a new notebook.
-  const createNew = (cwd: string, kernelName?: string) => {
-    return commands
-      .execute('docmanager:new-untitled', { path: cwd, type: 'notebook' })
-      .then(model => {
-        if (model != undefined) {
-          return commands.execute('docmanager:open', {
-            path: model.path,
-            factory: FACTORY,
-            kernel: { name: kernelName }
-          });
-        }
-      });
+  const createNew = async (cwd: string, kernelName?: string) => {
+    const model = await commands.execute('docmanager:new-untitled', {
+      path: cwd,
+      type: 'notebook'
+    });
+    if (model != undefined) {
+      const widget = ((await commands.execute('docmanager:open', {
+        path: model.path,
+        factory: FACTORY,
+        kernel: { name: kernelName }
+      })) as unknown) as IDocumentWidget;
+      widget.isUntitled = true;
+      return widget;
+    }
   };
 
   // Add a command for creating a new notebook.

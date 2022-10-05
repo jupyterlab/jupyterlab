@@ -109,10 +109,24 @@ button.jp-Dialog-close-button {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  align-items: center;
   flex: 0 0 auto;
   margin-left: -12px;
   margin-right: -12px;
   padding: 12px;
+}
+
+.jp-Dialog-checkbox {
+  padding-right: 5px;
+}
+
+.jp-Dialog-checkbox > input:focus-visible {
+  outline: 1px solid var(--jp-input-active-border-color);
+  outline-offset: 1px;
+}
+
+.jp-Dialog-spacer {
+  flex: 1 1 auto;
 }
 
 .jp-Dialog-title {
