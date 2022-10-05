@@ -16,6 +16,7 @@ import {
   CommandToolbarButtonComponent,
   Dialog,
   ICommandPalette,
+  InputDialog,
   ISessionContextDialogs,
   ReactWidget,
   showDialog,
