@@ -39,7 +39,6 @@ export class RenderedJSON
     super();
     this.addClass(CSS_CLASS);
     this.addClass('CodeMirror');
-    this.addClass('cm-s-jupyter');
     this._mimeType = options.mimeType;
     this.translator = options.translator || nullTranslator;
   }
