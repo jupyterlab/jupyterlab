@@ -51,7 +51,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   /**
    * The wrapped `FileEditor` widget.
    */
-  editor: FileEditor;
+  readonly editor: FileEditor;
 
   /**
    * Promise that resolves once the adapter is initialized
@@ -147,6 +147,9 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * Dispose the widget.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this.editor.model.mimeTypeChanged.disconnect(this.reloadConnection);
     super.dispose();
   }

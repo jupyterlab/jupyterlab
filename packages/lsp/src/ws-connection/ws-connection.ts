@@ -11,7 +11,7 @@
 
 import { ConsoleLogger, listen, MessageConnection } from 'vscode-ws-jsonrpc';
 
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   registerServerCapability,
@@ -45,6 +45,20 @@ export class LspWsConnection implements ILspConnection {
    */
   get isReady() {
     return this._isConnected && this._isInitialized;
+  }
+
+  /**
+   * A signal emitted when the connection is disposed.
+   */
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
+  }
+
+  /**
+   * Check if the connection is disposed
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   /**
@@ -267,10 +281,6 @@ export class LspWsConnection implements ILspConnection {
    */
   protected _disposables: Array<protocol.Disposable> = [];
 
-  protected _disposed = new Signal<this, void>(this);
-
-  protected _isDisposed = false;
-
   /**
    * Callback called when the server is initialized.
    */
@@ -302,4 +312,8 @@ export class LspWsConnection implements ILspConnection {
    * URI of the LSP handler enpoint.
    */
   private _rootUri: string;
+
+  private _disposed = new Signal<this, void>(this);
+
+  private _isDisposed = false;
 }

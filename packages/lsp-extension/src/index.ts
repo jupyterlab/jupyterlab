@@ -194,7 +194,7 @@ function activate(
   return connectionManager;
 }
 
-export class RunningLanguageServers implements IRunningSessions.IRunningItem {
+export class RunningLanguageServer implements IRunningSessions.IRunningItem {
   constructor(
     connection: ILSPConnection,
     manager: ILSPDocumentConnectionManager
@@ -245,14 +245,14 @@ function addRunningSessionManager(
   lsManager.disconnected.connect(() => signal.emit(lsManager));
   lsManager.closed.connect(() => signal.emit(lsManager));
   lsManager.documentsChanged.connect(() => signal.emit(lsManager));
-  let currentRunning: RunningLanguageServers[] = [];
+  let currentRunning: RunningLanguageServer[] = [];
   managers.add({
     name: trans.__('Language servers'),
     running: () => {
       const connections = new Set([...lsManager.connections.values()]);
 
       currentRunning = [...connections].map(
-        conn => new RunningLanguageServers(conn, lsManager)
+        conn => new RunningLanguageServer(conn, lsManager)
       );
       return currentRunning;
     },

@@ -237,13 +237,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   logAllCommunication: boolean;
 
   /**
-   * Check if the connection is disposed
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * Signal emitted when the connection is closed.
    */
   get closeSignal(): ISignal<ILSPConnection, boolean> {
@@ -269,17 +262,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   }
 
   /**
-   * A signal emitted when the connection is disposed.
-   */
-  get disposed(): ISignal<this, void> {
-    return this._disposed;
-  }
-
-  /**
    * Dispose the connection.
    */
   dispose(): void {
-    if (this._isDisposed) {
+    if (this.isDisposed) {
       return;
     }
     Object.values(this.serverRequests).forEach(request =>

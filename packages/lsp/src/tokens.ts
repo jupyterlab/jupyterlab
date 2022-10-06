@@ -4,7 +4,7 @@
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { WidgetLSPAdapter } from './adapters/adapter';
@@ -783,7 +783,7 @@ export type ServerRequests<
  *
  * Interface describing he connection to the language server.
  */
-export interface ILSPConnection extends ILspConnection, IDisposable {
+export interface ILSPConnection extends ILspConnection, IObservableDisposable {
   /**
    * @alpha
    *
