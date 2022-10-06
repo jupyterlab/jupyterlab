@@ -47,7 +47,7 @@
     "@jupyterlab/translation": "^3.4.8",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/coreutils": "^1.11.0",
-    "@lumino/datagrid": "^0.34.0",
+    "@lumino/datagrid": "^0.36.0",
     "@lumino/disposable": "^1.10.0",
     "@lumino/messaging": "^1.10.0",
     "@lumino/signaling": "^1.10.0",
