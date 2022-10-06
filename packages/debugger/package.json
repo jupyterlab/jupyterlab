@@ -66,7 +66,7 @@
     "@lumino/algorithm": "^1.9.0",
     "@lumino/commands": "^1.19.0",
     "@lumino/coreutils": "^1.11.0",
-    "@lumino/datagrid": "^0.34.0",
+    "@lumino/datagrid": "^0.36.0",
     "@lumino/disposable": "^1.10.0",
     "@lumino/messaging": "^1.10.0",
     "@lumino/polling": "^1.9.0",
