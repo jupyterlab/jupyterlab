@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application",
-  "version": "3.4.8",
+  "version": "3.5.0-alpha.0",
   "description": "JupyterLab - Application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,15 +42,15 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.0",
-    "@jupyterlab/apputils": "^3.4.8",
-    "@jupyterlab/coreutils": "^5.4.8",
-    "@jupyterlab/docregistry": "^3.4.8",
-    "@jupyterlab/rendermime": "^3.4.8",
-    "@jupyterlab/rendermime-interfaces": "^3.4.8",
-    "@jupyterlab/services": "^6.4.8",
-    "@jupyterlab/statedb": "^3.4.8",
-    "@jupyterlab/translation": "^3.4.8",
-    "@jupyterlab/ui-components": "^3.4.8",
+    "@jupyterlab/apputils": "^3.5.0-alpha.0",
+    "@jupyterlab/coreutils": "^5.5.0-alpha.0",
+    "@jupyterlab/docregistry": "^3.5.0-alpha.0",
+    "@jupyterlab/rendermime": "^3.5.0-alpha.0",
+    "@jupyterlab/rendermime-interfaces": "^3.5.0-alpha.0",
+    "@jupyterlab/services": "^6.5.0-alpha.0",
+    "@jupyterlab/statedb": "^3.5.0-alpha.0",
+    "@jupyterlab/translation": "^3.5.0-alpha.0",
+    "@jupyterlab/ui-components": "^3.5.0-alpha.0",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/application": "^1.27.0",
     "@lumino/commands": "^1.19.0",
@@ -63,7 +63,7 @@
     "@lumino/widgets": "^1.33.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.4.8",
+    "@jupyterlab/testutils": "^3.5.0-alpha.0",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
