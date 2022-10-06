@@ -12,6 +12,12 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.5.x/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.5.0b0
+
+No merged PRs
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.5.0a0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.8...a2e4a9a7e867e34ed664d97a672cdae8a9ea2b02))
@@ -38,8 +44,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.5.x/CHANGELOG.md'
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-10-04&to=2022-10-06&type=c))
 
 [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-10-04..2022-10-06&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-10-04..2022-10-06&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-10-04..2022-10-06&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## v3.4
 
