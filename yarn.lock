@@ -2708,10 +2708,10 @@
   resolved "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.21.tgz"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@rjsf/core@^3.1.0":
-  version "3.2.1"
-  resolved "https://registry.npmjs.org/@rjsf/core/-/core-3.2.1.tgz"
-  integrity sha512-dk8ihvxFbcuIwU7G+HiJbFgwyIvaumPt5g5zfnuC26mwTUPlaDGFXKK2yITp8tJ3+hcwS5zEXtAN9wUkfuM4jA==
+"@rjsf/core@^4.2.0":
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/@rjsf/core/-/core-4.2.3.tgz#7ff2fb593f0af20485dc267391a8971378eec655"
+  integrity sha512-dRXhd1Tac/9OcG0VDrYDF2boNTyKINEEITEtJ4L1Yce2iMVk66U52BhWKIFp/WXDM27vwnOfwQo4NwGiqeQeHw==
   dependencies:
     "@types/json-schema" "^7.0.7"
     ajv "^6.7.0"
@@ -2719,9 +2719,10 @@
     json-schema-merge-allof "^0.6.0"
     jsonpointer "^5.0.0"
     lodash "^4.17.15"
+    lodash-es "^4.17.15"
     nanoid "^3.1.23"
     prop-types "^15.7.2"
-    react-is "^16.9.0"
+    react-is "16.9.0"
 
 "@sindresorhus/is@^4.0.0":
   version "4.6.0"
@@ -9004,6 +9005,11 @@ lockfile@1.0.4:
   dependencies:
     signal-exit "^3.0.2"
 
+lodash-es@^4.17.15:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
+  integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
+
 lodash.clonedeep@^4.5.0:
   version "4.5.0"
   resolved "https://registry.npmjs.org/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz"
@@ -10859,7 +10865,12 @@ react-highlighter@^0.4.3:
     escape-string-regexp "^1.0.5"
     prop-types "^15.6.0"
 
-react-is@^16.13.1, react-is@^16.9.0:
+react-is@16.9.0:
+  version "16.9.0"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.9.0.tgz#21ca9561399aad0ff1a7701c01683e8ca981edcb"
+  integrity sha512-tJBzzzIgnnRfEm046qRcURvwQnZVXmuCbscxUO5RWrGTXpon2d4c8mI0D8WE6ydVIm29JiLB6+RslkIvym9Rjw==
+
+react-is@^16.13.1:
   version "16.13.1"
   resolved "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
