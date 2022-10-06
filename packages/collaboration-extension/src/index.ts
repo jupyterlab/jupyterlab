@@ -170,6 +170,7 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
     const userPanel = new SidePanel();
     userPanel.id = DOMUtils.createDomID();
     userPanel.title.icon = usersIcon;
+    userPanel.title.caption = trans.__('Collaboration');
     userPanel.addClass('jp-RTCPanel');
     app.shell.add(userPanel, 'left', { rank: 300 });
 
