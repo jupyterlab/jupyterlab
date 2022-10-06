@@ -58,7 +58,7 @@ The recommended way to make a release is to use [`jupyter_releaser`](https://git
 
 ### Workflow
 
-The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#making-your-first-release. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
+The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_releaser.html#making-your-first-release-from-jupyter-releaser. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
 
 Here is a quick summary of the different steps.
 
@@ -69,11 +69,11 @@ It is good practice to let other maintainers and users know when starting a new 
 For this we usually leave a small message in the `jupyterlab` room on Gitter: https://gitter.im/jupyterlab/jupyterlab.
 Once the release is done, we also post a message with a link to the release notes, which include the changelog.
 
-#### Draft Changelog
+#### Prep Release
 
 The first step is to generate a new changelog entry for the upcoming release.
 
-We use the "Draft Changelog" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#draft-changelog
+We use the "Prep Release" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_releaser.html#prep-release
 
 The workflow takes a couple of input parameters. Here is an overview with example values:
 
@@ -103,7 +103,7 @@ Before running the "Full Release" workflow, make sure you have been added to:
 - the `jupyterlab` project on PyPI: https://pypi.org/project/jupyterlab/
 - the `@jupyterlab` organization on npm: https://www.npmjs.com/settings/jupyterlab/packages
 
-Then create the PyPI and npm tokens. Check out the links in the [Jupyter Releaser Setup Documentation](https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#set-up) for more information.
+Then create the PyPI and npm tokens. Check out the links in the [Jupyter Releaser Setup Documentation](https://jupyter-releaser.readthedocs.io/en/stable/get_started/making_release_from_releaser.html#set-up) for more information.
 
 #### Running the workflow
 
