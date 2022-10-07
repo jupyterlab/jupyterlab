@@ -678,6 +678,11 @@ export namespace ISettingRegistry {
     properties: { [option: string]: any };
 
     /**
+     * The required fields.
+     */
+    required?: string[];
+
+    /**
      * Support for allOf feature of JSON schema (useful for if/then/else).
      */
     allOf?: Array<PartialJSONObject>;

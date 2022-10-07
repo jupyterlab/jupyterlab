@@ -329,21 +329,21 @@ export class MetadataFormWidget
     const cell = this.notebookTools.activeCell;
     if (cell == undefined) return;
 
-    const builtProperties: MetadataForm.IMetadataSchema = {
-      type: 'object',
-      properties: {}
-    };
+    const formProperties: MetadataForm.IMetadataSchema = JSONExt.deepCopy(
+      this._metadataSchema
+    );
+
     const formData = {} as PartialJSONObject;
 
-    for (let [metadataKey, properties] of Object.entries(
-      this._metadataSchema.properties
-    )) {
+    for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
       // Do not display the field if it's Notebook metadata and the notebook model is null.
       if (
         this._metaInformation[metadataKey]?.level === 'notebook' &&
         this._notebookModelNull
-      )
+      ) {
+        delete formProperties.properties[metadataKey];
         continue;
+      }
 
       // Do not display the field if the active cell's type is not involved.
       if (
@@ -352,6 +352,7 @@ export class MetadataFormWidget
           cell.model.type
         )
       ) {
+        delete formProperties.properties[metadataKey];
         continue;
       }
 
@@ -360,9 +361,8 @@ export class MetadataFormWidget
         .replace(/^\/+/, '')
         .replace(/\/+$/, '')
         .split('/');
-      builtProperties.properties[metadataKey] = properties;
 
-      // Associates the correct metadata to the working object.
+      // Associates the correct metadata object to the working object.
       if (this._metaInformation[metadataKey]?.level === 'notebook') {
         workingObject = notebook!.model!.metadata.toJSON();
       } else {
@@ -371,7 +371,7 @@ export class MetadataFormWidget
 
       let hasValue = true;
 
-      // Navigate to the value
+      // Navigate to the value.
       for (let nested of nestedKeys.slice(0, -1)) {
         if (nested in workingObject)
           workingObject = workingObject[nested] as PartialJSONObject;
@@ -381,18 +381,14 @@ export class MetadataFormWidget
         }
       }
 
-      // Fill the formData with the current metadata value
+      // Fill the formData with the current metadata value.
       if (hasValue)
         formData[metadataKey] =
           workingObject[nestedKeys[nestedKeys.length - 1]];
     }
 
-    if (this._metadataSchema.allOf) {
-      builtProperties.allOf = this._metadataSchema.allOf;
-    }
-
     this.buildWidget({
-      properties: builtProperties,
+      properties: formProperties,
       metaInformation: this._metaInformation,
       uiSchema: this._uiSchema,
       translator: this.translator || null,
@@ -458,6 +454,12 @@ namespace Private {
               return addedValue.id === value.id;
             });
             if (metadataForm) {
+              // TODO do insertion of metadataSchema properties in a generic way.
+              // Currently this only support properties, allOf and required.
+              //  - add or replace entries if it is an object.
+              //  - concat if it is an array.
+              //  - replace if it is a primitive ?
+
               // Includes new metadataKey in the existing metadataSchema.
               // Overwrites if the metadataKey already exists.
               for (let [metadataKey, properties] of Object.entries(
@@ -465,6 +467,18 @@ namespace Private {
               )) {
                 metadataForm.metadataSchema.properties[metadataKey] =
                   properties;
+              }
+
+              // Includes required fields.
+              if (value.metadataSchema.required) {
+                if (!metadataForm.metadataSchema.required) {
+                  metadataForm.metadataSchema.required =
+                    value.metadataSchema.required;
+                } else {
+                  metadataForm.metadataSchema.required.concat(
+                    value.metadataSchema.required
+                  );
+                }
               }
 
               // Includes allOf array in the existing metadataSchema.
