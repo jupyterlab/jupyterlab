@@ -53,7 +53,7 @@ test('should reattached a code code cell when scrolling back into the viewport',
   expect(await firstCell.waitForSelector('.jp-InputArea')).toBeDefined();
 });
 
-test('should detached a markdown code cell when scrolling out of the viewport', async ({
+test('should detach a markdown code cell when scrolling out of the viewport', async ({
   page
 }) => {
   const h = await page.notebook.getNotebookInPanel();
@@ -76,7 +76,7 @@ test('should detached a markdown code cell when scrolling out of the viewport', 
   expect(found).toEqual(false);
 });
 
-test('should reattached a markdown code cell when scrolling back into the viewport', async ({
+test('should reattach a markdown code cell when scrolling back into the viewport', async ({
   page
 }) => {
   const h = await page.notebook.getNotebookInPanel();

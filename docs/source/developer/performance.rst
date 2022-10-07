@@ -7,7 +7,7 @@ Performance tricks
 Windowed list
 -------------
 
-A list windowing algorithm is coded in a dedicated widget ``WindowedList`` provided by ``@jupyterlab/ui-components``.
+A list windowing algorithm is implemented in a dedicated widget ``WindowedList`` provided by ``@jupyterlab/ui-components``.
 
 This widget will have a DOM structure like this:
 
