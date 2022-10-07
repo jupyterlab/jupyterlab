@@ -412,8 +412,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * @param  notebook - The notebook that emitted event
    * @param cell - Changed cell.
    */
-  private _activeCellChanged(notebook: Notebook, cell: Cell) {
-    if (cell.model.type !== this._type) {
+  private _activeCellChanged(notebook: Notebook, cell: Cell | null) {
+    if (!cell || cell.model.type !== this._type) {
       return;
     }
 
