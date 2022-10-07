@@ -75,7 +75,7 @@ export interface ILayoutRestorer extends IRestorer {
    *
    * @returns - the rehydrated main area.
    */
-  restoreDelayed(): ILabShell.IMainArea | null;
+  restoreDelayed(): Promise<ILabShell.IMainArea | null>;
 }
 
 /**
@@ -336,7 +336,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    *
    * @returns - the rehydrated main area.
    */
-  restoreDelayed(): ILabShell.IMainArea | null {
+  async restoreDelayed(): Promise<ILabShell.IMainArea | null> {
     const promises = new Array<Promise<any>>();
 
     // Restore all the main area widgets.
@@ -346,7 +346,7 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     // Rehydrate the main area layout.
     let mainArea: ILabShell.IMainArea | null = null;
-    Promise.all(promises)
+    await Promise.all(promises)
       .then(() => {
         this._unrestoredTrackers.length = 0;
         if (this._delayedMainAreaLayout) {
@@ -354,7 +354,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         }
       })
       .catch(reason => {
-        console.error('Fail to restore the layout with delay.');
+        console.error('Fail to restore the layout delayed.');
         console.error(reason);
       });
 
