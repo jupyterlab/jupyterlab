@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { CellType } from '@jupyterlab/nbformat';
 import { IDataConnector } from '@jupyterlab/statedb';
 import {
   PartialJSONObject,
@@ -621,15 +622,26 @@ export namespace ISettingRegistry {
      * The section unique ID.
      */
     id: string;
+
+    /**
+     * The metadata schema.
+     */
+    metadataSchema: IMetadataSchema;
+
+    /**
+     * The ui schema as used by react-JSON-schema-form.
+     */
+    uiSchema?: { [metadataKey: string]: PartialJSONObject };
+
+    /**
+     * The jupyter properties.
+     */
+    metadataOptions?: { [metadataKey: string]: IMetadataOptions };
+
     /**
      * The section label.
      */
-    label: string;
-
-    /**
-     * The metadataKeys array
-     */
-    metadataKeys: IMetadataKey[];
+    label?: string;
 
     /**
      * The section rank in notebooktools panel.
@@ -642,17 +654,25 @@ export namespace ISettingRegistry {
     _origin?: string;
   }
 
-  export interface IMetadataKey extends PartialJSONObject {
+  /**
+   * The metadata schema as defined in JSON schema.
+   */
+  export interface IMetadataSchema extends PartialJSONObject {
     /**
-     * List of key to reach a sub metadata.
+     * The type of data (should be object at first level).
      */
-    metadataKey: string[];
+    type: string;
 
     /**
-     * Property associated to that metadata, formatted as React JSON schema.
+     * The properties as defined in JSON schema, and interpretable by react-JSON-schema-form.
      */
-    properties: PartialJSONObject;
+    properties: { [option: string]: any };
+  }
 
+  /**
+   * Options to customize the widget, the field and the relevant metadata.
+   */
+  export interface IMetadataOptions extends PartialJSONObject {
     /**
      * Name of a custom react widget registered.
      */
@@ -671,17 +691,7 @@ export namespace ISettingRegistry {
     /**
      * Cells which should have this metadata.
      */
-    cellTypes?: ('code' | 'markdown' | 'raw')[];
-
-    /**
-     * Rank of the field in form.
-     */
-    rank?: number;
-
-    /**
-     * ui:schema options.
-     */
-    [option: string]: any;
+    cellTypes?: CellType[];
   }
 
   /**

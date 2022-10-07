@@ -35,6 +35,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyterlab/nbformat": "^4.0.0-alpha.16",
     "@jupyterlab/statedb": "^4.0.0-alpha.16",
     "@lumino/commands": "^2.0.0-alpha.6",
     "@lumino/coreutils": "^2.0.0-alpha.6",

@@ -19,3 +19,7 @@
 .jp-MetadataForm-placeholderContent {
   padding: 8px;
 }
+
+.jp-MetadataForm .panel-danger.errors {
+  display: none;
+}

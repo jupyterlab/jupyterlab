@@ -10,6 +10,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { INotebookTools, NotebookTools } from '@jupyterlab/notebook';
+import { IObservableJSON } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
@@ -20,7 +21,6 @@ import {
   IFormComponentRegistry,
   IFormWidgetRegistry
 } from '@jupyterlab/ui-components';
-import { ArrayExt } from '@lumino/algorithm';
 import {
   JSONExt,
   PartialJSONArray,
@@ -34,13 +34,10 @@ import { SingletonLayout, Widget } from '@lumino/widgets';
 
 import { IMetadataForm, IMetadataFormProvider } from './token';
 import { FormWidget, MetadataForm } from './form';
-import { IObservableJSON } from '@jupyterlab/observables';
 
 export { IMetadataForm, IMetadataFormProvider };
 
 const PLUGIN_ID = '@jupyterlab/metadataform-extension:metadataforms';
-
-const UI_SCHEMA_PATTERN = /^ui\:.*/;
 
 /**
  * A class that create a metadata form widget
@@ -53,15 +50,14 @@ export class MetadataFormWidget
    * Construct an empty widget.
    */
   constructor(
-    builtProperties: MetadataForm.IProperties,
+    metadataSchema: MetadataForm.IMetadataSchema,
     metaInformation: MetadataForm.IMetaInformation,
     uiSchema: MetadataForm.IUiSchema,
     pluginId?: string,
     translator?: ITranslator
   ) {
     super();
-
-    this._properties = builtProperties;
+    this._metadataSchema = metadataSchema;
     this._metaInformation = metaInformation;
     this._uiSchema = uiSchema;
     this._pluginId = pluginId;
@@ -83,45 +79,42 @@ export class MetadataFormWidget
   /**
    * Get the list of existing metadataKey (array of array of string).
    */
-  get metadataKeys(): MetadataForm.IMetadataKey[] {
-    const metadataKeys: MetadataForm.IMetadataKey[] = [];
-    for (let metaInfo of Object.values(this._metaInformation)) {
-      metadataKeys.push(metaInfo.metadataKey);
+  get metadataKeys(): string[] {
+    const metadataKeys: string[] = [];
+    for (let metadataKey of Object.keys(this._metaInformation)) {
+      metadataKeys.push(metadataKey);
     }
     return metadataKeys;
   }
 
   /**
    * Get the properties of a MetadataKey.
-   * @param metadataKey - metadataKey (array of string).
+   *
+   * @param metadataKey - metadataKey (string).
    */
-  getProperties(
-    metadataKey: MetadataForm.IMetadataKey
-  ): PartialJSONObject | null {
-    const formKey = this.getFormKey(metadataKey);
-    return JSONExt.deepCopy(this._properties.properties[formKey]) || null;
+  getProperties(metadataKey: string): PartialJSONObject | null {
+    return (
+      JSONExt.deepCopy(this._metadataSchema.properties[metadataKey]) || null
+    );
   }
 
   /**
    * Set properties to a metadataKey.
-   * @param metadataKey - metadataKey (array of string).
+   *
+   * @param metadataKey - metadataKey (string).
    * @param properties - the properties to add or modify.
    */
-  setProperties(
-    metadataKey: MetadataForm.IMetadataKey,
-    properties: PartialJSONObject
-  ): void {
-    const formKey = this.getFormKey(metadataKey);
+  setProperties(metadataKey: string, properties: PartialJSONObject): void {
     Object.entries(properties).forEach(([key, value]) => {
-      this._properties.properties[formKey][key] = value;
+      this._metadataSchema.properties[metadataKey][key] = value;
     });
   }
 
   /**
    * Update the metadata of the current cell or notebook.
    *
-   * @param formData: the cell metadata set in the form.
-   * @param reload: whether to update the form after updating the metadata.
+   * @param formData - the cell metadata set in the form.
+   * @param reload - whether to update the form after updating the metadata.
    *
    * ## Notes
    * Metadata are updated from root only. If some metadata is nested,
@@ -141,12 +134,13 @@ export class MetadataFormWidget
 
     // An object representing the cell metadata to modify.
     const cellMetadataObject: Private.IMetadataRepresentation = {};
+
     // An object representing the notebook metadata to modify.
     const notebookMetadataObject: Private.IMetadataRepresentation = {};
 
-    for (let [formKey, value] of Object.entries(formData)) {
+    for (let [metadataKey, value] of Object.entries(formData)) {
       if (
-        this._metaInformation[formKey]?.level === 'notebook' &&
+        this._metaInformation[metadataKey]?.level === 'notebook' &&
         this._notebookModelNull
       )
         continue;
@@ -155,7 +149,7 @@ export class MetadataFormWidget
       let metadataObject: Private.IMetadataRepresentation;
 
       // Linking the working variable to the corresponding metadata and representation.
-      if (this._metaInformation[formKey]?.level === 'notebook') {
+      if (this._metaInformation[metadataKey]?.level === 'notebook') {
         // Working on notebook metadata.
         currentMetadata = notebook!.model!.metadata;
         metadataObject = notebookMetadataObject;
@@ -165,23 +159,29 @@ export class MetadataFormWidget
         metadataObject = cellMetadataObject;
       }
 
-      let metadataKey = this._metaInformation[formKey].metadataKey;
-      let baseMetadataKey = metadataKey[0];
+      // Remove first and last '/' if necessary and split the path.
+      let nestedKey = metadataKey
+        .replace(/^\/+/, '')
+        .replace(/\/+$/, '')
+        .split('/');
+
+      let baseMetadataKey = nestedKey[0];
       if (baseMetadataKey == undefined) continue;
 
       let writeFinalData =
-        value !== undefined && value !== this._metaInformation[formKey].default;
+        value !== undefined &&
+        value !== this._metaInformation[metadataKey]?.default;
 
       // If metadata key is at root of metadata no need to go further.
-      if (this._metaInformation[formKey].metadataKey.length == 1) {
+      if (nestedKey.length == 1) {
         if (writeFinalData)
           metadataObject[baseMetadataKey] = value as PartialJSONValue;
         else metadataObject[baseMetadataKey] = undefined;
         continue;
       }
 
-      let intermediateMetadataKeys = metadataKey.slice(1, -1);
-      let finalMetadataKey = metadataKey[metadataKey.length - 1];
+      let intermediateMetadataKeys = nestedKey.slice(1, -1);
+      let finalMetadataKey = nestedKey[nestedKey.length - 1];
 
       // Deep copy of the metadata if not already done.
       if (!(baseMetadataKey in metadataObject)) {
@@ -200,8 +200,8 @@ export class MetadataFormWidget
       let finalObjectReached = true;
 
       for (let nested of intermediateMetadataKeys) {
-        // If one of the nested object does not exist, this object is created only
-        // if the aim is to write data at the end.
+        // If one of the nested object does not exist, this object is created
+        // only if there is a final data to write.
         if (!(nested in workingObject)) {
           if (!writeFinalData) {
             finalObjectReached = false;
@@ -223,7 +223,7 @@ export class MetadataFormWidget
       if (!writeFinalData) {
         metadataObject[baseMetadataKey] = Private.deleteEmptyNested(
           metadataObject[baseMetadataKey] as PartialJSONObject,
-          metadataKey.slice(1)
+          nestedKey.slice(1)
         );
         if (
           !Object.keys(metadataObject[baseMetadataKey] as PartialJSONObject)
@@ -256,21 +256,6 @@ export class MetadataFormWidget
   }
 
   /**
-   * Get the formKey (the one used in form properties) corresponding to the metadataKey.
-   * @param metadataKey - metadataKey (array of string).
-   * @returns - the corresponding formKey (string).
-   */
-  protected getFormKey(metadataKey: MetadataForm.IMetadataKey): string {
-    const entrySought = Object.entries(this._metaInformation).find(
-      ([formKey, metaInfo]) => {
-        return ArrayExt.shallowEqual(metadataKey, metaInfo.metadataKey);
-      }
-    );
-    if (entrySought) return entrySought[0];
-    return '';
-  }
-
-  /**
    * Set the content of the widget.
    */
   protected setContent(content: Widget | null): void {
@@ -287,7 +272,7 @@ export class MetadataFormWidget
   }
 
   /**
-   * Build widget
+   * Build widget.
    */
   protected buildWidget(props: MetadataForm.IProps): void {
     const formWidget = new FormWidget(props, this._pluginId);
@@ -344,31 +329,41 @@ export class MetadataFormWidget
     const cell = this.notebookTools.activeCell;
     if (cell == undefined) return;
 
-    const builtProperties: MetadataForm.IProperties = {
+    const builtProperties: MetadataForm.IMetadataSchema = {
       type: 'object',
       properties: {}
     };
     const formData = {} as PartialJSONObject;
 
-    for (let [formKey, metaInfo] of Object.entries(this._metaInformation)) {
+    for (let [metadataKey, properties] of Object.entries(
+      this._metadataSchema.properties
+    )) {
       // Do not display the field if it's Notebook metadata and the notebook model is null.
-      if (metaInfo.level === 'notebook' && this._notebookModelNull) continue;
+      if (
+        this._metaInformation[metadataKey]?.level === 'notebook' &&
+        this._notebookModelNull
+      )
+        continue;
 
       // Do not display the field if the active cell's type is not involved.
       if (
-        metaInfo.cellTypes &&
-        !metaInfo.cellTypes?.includes(cell.model.type)
+        this._metaInformation[metadataKey]?.cellTypes &&
+        !this._metaInformation[metadataKey]?.cellTypes?.includes(
+          cell.model.type
+        )
       ) {
         continue;
       }
 
       let workingObject: PartialJSONObject;
-      let nestedKeys = metaInfo.metadataKey;
-      builtProperties.properties[formKey] =
-        this._properties.properties[formKey];
+      let nestedKeys = metadataKey
+        .replace(/^\/+/, '')
+        .replace(/\/+$/, '')
+        .split('/');
+      builtProperties.properties[metadataKey] = properties;
 
       // Associates the correct metadata to the working object.
-      if (metaInfo.level === 'notebook') {
+      if (this._metaInformation[metadataKey]?.level === 'notebook') {
         workingObject = notebook!.model!.metadata.toJSON();
       } else {
         workingObject = cell.model.metadata.toJSON();
@@ -388,7 +383,8 @@ export class MetadataFormWidget
 
       // Fill the formData with the current metadata value
       if (hasValue)
-        formData[formKey] = workingObject[nestedKeys[nestedKeys.length - 1]];
+        formData[metadataKey] =
+          workingObject[nestedKeys[nestedKeys.length - 1]];
     }
 
     this.buildWidget({
@@ -402,7 +398,7 @@ export class MetadataFormWidget
   }
 
   protected translator: ITranslator;
-  private _properties: MetadataForm.IProperties;
+  private _metadataSchema: MetadataForm.IMetadataSchema;
   private _metaInformation: MetadataForm.IMetaInformation;
   private _uiSchema: MetadataForm.IUiSchema;
   private _trans: TranslationBundle;
@@ -418,27 +414,6 @@ namespace Private {
    */
   export interface IMetadataRepresentation {
     [metadata: string]: PartialJSONObject | PartialJSONValue | undefined;
-  }
-
-  /**
-   *  This function reorders the metadataKeys using their rank if it is provided.
-   *
-   * @param metadataKeys - the array of metadataKeys to reorder.
-   * @returns - the array of metadataKeys reordered
-   */
-  function reorderingFields(
-    metadataKeys: ISettingRegistry.IMetadataKey[]
-  ): ISettingRegistry.IMetadataKey[] {
-    const ranked = metadataKeys
-      .filter(metadataKey => metadataKey?.rank !== undefined)
-      .sort((a, b) => (a.rank as number) - (b.rank as number));
-    const orderedFields = metadataKeys.filter(
-      metadataKey => metadataKey?.rank === undefined
-    );
-    ranked.forEach(metadataKey => {
-      orderedFields.splice(metadataKey.rank as number, 0, metadataKey);
-    });
-    return orderedFields;
   }
 
   export async function loadSettingsMetadataForm(
@@ -473,15 +448,41 @@ namespace Private {
         .reduce((acc, val) => {
           // If a MetadataForm with the same ID already exists,
           // the metadataKeys will be concatenated to this MetadataForm's metadataKeys .
-          // Otherwise, the whole MetadataForm setting will be pushed as a new form.
+          // Otherwise, the whole MetadataForm will be pushed as a new form.
           val.forEach(value => {
             const metadataForm = acc.find(addedValue => {
               return addedValue.id === value.id;
             });
             if (metadataForm) {
-              metadataForm.metadataKeys = metadataForm.metadataKeys.concat(
-                value.metadataKeys
-              );
+              // Includes new metadataKey in the existing metadataSchema.
+              // Overwrites if the metadataKey already exists.
+              for (let [metadataKey, properties] of Object.entries(
+                value.metadataSchema.properties
+              )) {
+                metadataForm.metadataSchema.properties[metadataKey] =
+                  properties;
+              }
+
+              // Includes uiSchema in the existing uiSchema.
+              // Overwrites if the uiSchema already exists for that metadataKey.
+              if (value.uiSchema) {
+                if (!metadataForm.uiSchema) metadataForm.uiSchema = {};
+                for (let [metadataKey, ui] of Object.entries(value.uiSchema)) {
+                  metadataForm.uiSchema[metadataKey] = ui;
+                }
+              }
+
+              // Includes metadataOptions in the existing uiSchema.
+              // Overwrites if options already exists for that metadataKey.
+              if (value.metadataOptions) {
+                if (!metadataForm.metadataOptions)
+                  metadataForm.metadataOptions = {};
+                for (let [metadataKey, options] of Object.entries(
+                  value.metadataOptions
+                )) {
+                  metadataForm.metadataOptions[metadataKey] = options;
+                }
+              }
             } else {
               acc.push(value);
             }
@@ -538,69 +539,66 @@ namespace Private {
     // Creates all the forms from extensions settings.
     for (let schema of settings.composite
       .metadataforms as ISettingRegistry.IMetadataForm[]) {
-      let builtProperties: MetadataForm.IProperties = {
-        type: 'object',
-        properties: {}
-      };
       let metaInformation: MetadataForm.IMetaInformation = {};
+      let metadataSchema: ISettingRegistry.IMetadataSchema = JSONExt.deepCopy(
+        schema.metadataSchema
+      );
       let uiSchema: MetadataForm.IUiSchema = {};
 
-      schema.metadataKeys = reorderingFields(schema.metadataKeys);
+      if (schema.uiSchema) {
+        uiSchema = JSONExt.deepCopy(schema.uiSchema) as MetadataForm.IUiSchema;
+      }
 
-      for (let metadataSchema of schema.metadataKeys) {
-        // Name of the key in RJSF schema.
-        const formKey = metadataSchema.metadataKey.join('.');
-
-        // Links the key to the path of the data in metadata.
-        metaInformation[formKey] = {
-          metadataKey: metadataSchema.metadataKey
-        };
-
-        // Links the key to its singular property.
-        builtProperties.properties[formKey] = metadataSchema.properties;
-
-        // Set the default value.
-        metaInformation[formKey].default = metadataSchema.properties.default;
-
-        // Initialize an uiSchema for that key.
-        uiSchema[formKey] = {};
-
-        // Get all ui:schema properties from the JSON file.
-        for (let key in metadataSchema) {
-          if (UI_SCHEMA_PATTERN.test(key))
-            uiSchema[formKey][key] = metadataSchema[key];
+      for (let [metadataKey, properties] of Object.entries(
+        metadataSchema.properties
+      )) {
+        if (properties.default) {
+          if (!metaInformation[metadataKey]) metaInformation[metadataKey] = {};
+          metaInformation[metadataKey].default = properties.default;
         }
+      }
 
-        // Optionally links key to cell type.
-        if (metadataSchema['cellTypes']) {
-          metaInformation[formKey].cellTypes = metadataSchema['cellTypes'];
-        }
+      if (schema.metadataOptions) {
+        for (let [metadataKey, options] of Object.entries(
+          schema.metadataOptions
+        )) {
+          // Optionally links key to cell type.
+          if (options.cellTypes) {
+            if (!metaInformation[metadataKey])
+              metaInformation[metadataKey] = {};
+            metaInformation[metadataKey].cellTypes = options.cellTypes;
+          }
 
-        // Optionally links key to metadata level.
-        if (metadataSchema['metadataLevel']) {
-          metaInformation[formKey].level = metadataSchema['metadataLevel'];
-        }
+          // Optionally links key to metadata level.
+          if (options.metadataLevel) {
+            if (!metaInformation[metadataKey])
+              metaInformation[metadataKey] = {};
+            metaInformation[metadataKey].level = options.metadataLevel;
+          }
 
-        // Optionally links key to a custom widget.
-        if (metadataSchema['customWidget']) {
-          const formWidget = formWidgetsRegistry.getRenderer(
-            metadataSchema['customWidget'] as string
-          );
+          // Optionally links key to a custom widget.
+          if (options.customWidget) {
+            const formWidget = formWidgetsRegistry.getRenderer(
+              options.customWidget as string
+            );
 
-          // If renderer is defined (custom widget has been registered), set it as used widget.
-          if (formWidget !== undefined)
-            uiSchema[formKey]['ui:widget'] = formWidget;
-        }
+            // If renderer is defined (custom widget has been registered), set it as used widget.
+            if (formWidget !== undefined)
+              if (!uiSchema[metadataKey]) uiSchema[metadataKey] = {};
+            uiSchema[metadataKey]['ui:widget'] = formWidget;
+          }
 
-        // Optionally links key to a custom field.
-        if (metadataSchema['customField']) {
-          const formField = formComponentRegistry.getRenderer(
-            metadataSchema['customField'] as string
-          );
+          // Optionally links key to a custom field.
+          if (options.customField) {
+            const formField = formComponentRegistry.getRenderer(
+              options.customField as string
+            );
 
-          // If renderer is defined (custom widget has been registered), set it as used widget.
-          if (formField !== undefined)
-            uiSchema[formKey]['ui:field'] = formField;
+            // If renderer is defined (custom widget has been registered), set it as used widget.
+            if (formField !== undefined)
+              if (!uiSchema[metadataKey]) uiSchema[metadataKey] = {};
+            uiSchema[metadataKey]['ui:field'] = formField;
+          }
         }
       }
 
@@ -613,7 +611,7 @@ namespace Private {
 
       // Creates the tool.
       const tool = new MetadataFormWidget(
-        builtProperties,
+        metadataSchema,
         metaInformation,
         uiSchema,
         schema._origin,

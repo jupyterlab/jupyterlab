@@ -7,7 +7,6 @@ import {
   ReadonlyPartialJSONObject,
   Token
 } from '@lumino/coreutils';
-import { MetadataForm } from './form';
 
 /**
  * A metadata form interface provided when registering
@@ -19,25 +18,20 @@ export interface IMetadataForm extends NotebookTools.Tool {
   /**
    * Get the list of existing metadataKey (array of array of string).
    */
-  get metadataKeys(): MetadataForm.IMetadataKey[];
+  get metadataKeys(): string[];
 
   /**
    * Get the properties of a MetadataKey.
    * @param metadataKey - metadataKey (array of string).
    */
-  getProperties(
-    metadataKey: MetadataForm.IMetadataKey
-  ): PartialJSONObject | null;
+  getProperties(metadataKey: string): PartialJSONObject | null;
 
   /**
    * Set properties to a metadataKey.
    * @param metadataKey - metadataKey (array of string).
    * @param properties - the properties to add or modify.
    */
-  setProperties(
-    metadataKey: MetadataForm.IMetadataKey,
-    properties: PartialJSONObject
-  ): void;
+  setProperties(metadataKey: string, properties: PartialJSONObject): void;
 
   /**
    * Update the metadata of the current cell or notebook.

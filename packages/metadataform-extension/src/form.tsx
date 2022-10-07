@@ -3,45 +3,44 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ReactWidget } from '@jupyterlab/apputils';
 import React from 'react';
 import Form, { IChangeEvent } from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
-import {
-  PartialJSONObject,
-  PartialJSONValue,
-  ReadonlyPartialJSONObject
-} from '@lumino/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
+import { PartialJSONValue, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { ReactWidget } from '@jupyterlab/apputils';
+import { CellType } from '@jupyterlab/nbformat';
 import { ITranslator } from '@jupyterlab/translation';
+import { RJSFTemplatesFactory } from '@jupyterlab/ui-components';
 
 import { MetadataFormWidget } from './index';
-import { RJSFTemplatesFactory } from '@jupyterlab/ui-components';
 
 export namespace MetadataForm {
   /**
-   * The properties formatted for React jSON schema form use.
+   * The metadata schema as defined in JSON schema.
    */
-  export interface IProperties {
+  export interface IMetadataSchema {
+    /**
+     * The type of data (should be object at first level).
+     */
     type: string;
-    properties: { [formKey: string]: PartialJSONObject };
+
+    /**
+     * The properties as defined in JSON schema, and interpretable by react-JSON-schema-form.
+     */
+    properties: { [option: string]: any };
   }
 
   /**
    * The meta information associated to all properties.
    */
   export interface IMetaInformation {
-    [formKey: string]: ISingleMetaInformation;
+    [metadataKey: string]: ISingleMetaInformation;
   }
 
   /**
    * The meta information associated to a property.
    */
   export interface ISingleMetaInformation {
-    /**
-     * The (nested) metadata key as an array of keys.
-     */
-    metadataKey: IMetadataKey;
     /**
      * The metadata level, 'cell' or 'notebook'.
      */
@@ -53,13 +52,8 @@ export namespace MetadataForm {
     /**
      * The cell types to display this metadata field.
      */
-    cellTypes?: nbformat.CellType[];
+    cellTypes?: CellType[];
   }
-
-  /**
-   * The (nested) metadata key, as an array of keys.
-   */
-  export type IMetadataKey = Array<string>;
 
   /**
    * RJSF ui:schema.
@@ -82,7 +76,7 @@ export namespace MetadataForm {
     /**
      * Properties defined from the settings.
      */
-    properties: IProperties;
+    properties: IMetadataSchema;
 
     /**
      * Meta information associated to properties.
@@ -135,10 +129,10 @@ export class FormWidget extends ReactWidget {
     });
   }
 
-  public set props(newProps: MetadataForm.IProps) {
-    this._props = newProps;
-  }
-
+  /**
+   * Render the form.
+   * @returns - The rendered form
+   */
   render(): JSX.Element {
     return (
       <Form

@@ -22,6 +22,21 @@
           "type": "string",
           "description": "The section ID"
         },
+        "metadataSchema": {
+          "type": "object",
+          "items": {
+            "$ref": "#/definitions/metadataSchema"
+          }
+        },
+        "uiSchema": {
+          "type": "object"
+        },
+        "metadataOptions": {
+          "type": "object",
+          "items": {
+            "$ref": "#/definitions/metadataOptions"
+          }
+        },
         "label": {
           "type": "string",
           "description": "The section label"
@@ -29,17 +44,11 @@
         "rank": {
           "type": "integer",
           "description": "The rank of the section in the right panel"
-        },
-        "metadataKeys": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/userProperties"
-          }
         }
       },
-      "required": ["id", "metadataKeys"]
+      "required": ["id", "metadataSchema"]
     },
-    "userProperties": {
+    "metadataSchema": {
       "properties": {
         "properties": {
           "type": "object",
@@ -55,12 +64,18 @@
               "type": "string"
             }
           }
+        }
+      },
+      "type": "object",
+      "required": ["properties"]
+    },
+    "metadataOptions": {
+      "properties": {
+        "customWidget": {
+          "type": "string"
         },
-        "metadataKey": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "customField": {
+          "type": "string"
         },
         "metadataLevel": {
           "type": "string",
@@ -73,19 +88,9 @@
             "type": "string",
             "enum": ["code", "markdown", "raw"]
           }
-        },
-        "customWidget": {
-          "type": "string"
-        },
-        "customField": {
-          "type": "string"
-        },
-        "rank": {
-          "type": "integer"
         }
       },
-      "type": "object",
-      "required": ["metadataKey", "properties"]
+      "type": "object"
     }
   }
 }
