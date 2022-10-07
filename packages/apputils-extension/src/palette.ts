@@ -138,7 +138,7 @@ export namespace Palette {
         b => b.command === CommandIDs.activate
       );
       if (binding) {
-        const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
         palette.title.caption = trans.__('Commands (%1)', ks);
       } else {
         palette.title.caption = trans.__('Commands');

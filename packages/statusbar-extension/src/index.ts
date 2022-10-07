@@ -377,7 +377,7 @@ const modeSwitch: JupyterFrontEndPlugin<void> = {
         b => b.command === 'application:toggle-mode'
       );
       if (binding) {
-        const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
         modeSwitch.caption = trans.__('Simple Interface (%1)', ks);
       } else {
         modeSwitch.caption = trans.__('Simple Interface');
