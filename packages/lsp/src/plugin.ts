@@ -10,6 +10,10 @@
  */
 
 /**
+ * Enable or disable the language server services.
+ */
+export type Activate = 'off' | 'on';
+/**
  * When multiple servers match specific document/language, the server with the highest rank will be used
  */
 export type RankOfTheServer = number;
@@ -25,7 +29,8 @@ export type LogCommunication = boolean;
 /**
  * Language Server Protocol settings.
  */
-export interface LanguageServers {
+export interface LanguageServersExperimental {
+  activate?: Activate;
   languageServers?: LanguageServer;
   setTrace?: AskServersToSendTraceNotifications;
   logAllCommunication?: LogCommunication;
@@ -41,7 +46,7 @@ export interface LanguageServer {
  * This interface was referenced by `LanguageServer`'s JSON-Schema definition
  * via the `patternProperty` ".*".
  *
- * This interface was referenced by `LanguageServers`'s JSON-Schema
+ * This interface was referenced by `LanguageServersExperimental`'s JSON-Schema
  * via the `definition` "languageServer".
  */
 export interface LanguageServer1 {

@@ -210,6 +210,7 @@ export class DocumentConnectionManager
   ): void {
     this.adapters.set(path, adapter);
     adapter.disposed.connect(() => {
+      this.documents.delete(adapter.virtualDocument.uri);
       this.adapters.delete(path);
     });
   }
@@ -260,11 +261,9 @@ export class DocumentConnectionManager
    * singletons).
    */
   onNewConnection = (connection: LSPConnection): void => {
-    connection.errorSignal.connect((_, e) => {
+    const errorSignalSlot = (_: ILSPConnection, e: any): void => {
       console.error(e);
-      // TODO invalid now
       let error: Error = e.length && e.length >= 1 ? e[0] : new Error();
-      // TODO: those codes may be specific to my proxy client, need to investigate
       if (error.message.indexOf('code = 1005') !== -1) {
         console.error(`Connection failed for ${connection}`);
         this._forEachDocumentOfConnection(connection, virtualDocument => {
@@ -280,17 +279,20 @@ export class DocumentConnectionManager
       } else {
         console.error('Connection error:', e);
       }
-    });
+    };
+    connection.errorSignal.connect(errorSignalSlot);
 
-    connection.serverInitialized.connect(() => {
+    const serverInitializedSlot = (): void => {
       // Initialize using settings stored in the SettingRegistry
       this._forEachDocumentOfConnection(connection, virtualDocument => {
         // TODO: is this still necessary, e.g. for status bar to update responsively?
         this._initialized.emit({ connection, virtualDocument });
       });
       this.updateServerConfigurations(this.initialConfigurations);
-    });
-    connection.closeSignal.connect((_, closedManually) => {
+    };
+    connection.serverInitialized.connect(serverInitializedSlot);
+
+    const closeSignalSlot = (_: ILSPConnection, closedManually: boolean) => {
       if (!closedManually) {
         console.error('Connection unexpectedly disconnected');
       } else {
@@ -299,14 +301,15 @@ export class DocumentConnectionManager
           this._closed.emit({ connection, virtualDocument });
         });
       }
-    });
+    };
+    connection.closeSignal.connect(closeSignalSlot);
   };
 
   /**
    * Retry to connect to the server each `reconnectDelay` seconds
    * and for `retrialsLeft` times.
    * TODO: presently no longer referenced. A failing connection would close
-   * the socket, triggering the language server on the other end to exit
+   * the socket, triggering the language server on the other end to exit.
    */
   async retryToConnect(
     options: ISocketConnectionOptions,
@@ -409,6 +412,7 @@ export class DocumentConnectionManager
     if (connection) {
       this.connections.delete(virtualDocument.uri);
       const allConnection = new Set(this.connections.values());
+
       if (!allConnection.has(connection)) {
         this.disconnect(connection.serverIdentifier as TLanguageServerId);
         connection.dispose();
@@ -444,6 +448,7 @@ export class DocumentConnectionManager
     options: ISocketConnectionOptions
   ): Promise<LSPConnection | undefined> {
     let { language, capabilities, virtualDocument } = options;
+
     this.connectDocumentSignals(virtualDocument);
 
     const uris = DocumentConnectionManager.solveUris(virtualDocument, language);

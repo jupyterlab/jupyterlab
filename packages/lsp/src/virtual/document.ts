@@ -244,21 +244,9 @@ export class VirtualDocument implements IDisposable {
     this.unusedDocuments = new Set();
     this.documentInfo = new VirtualDocumentInfo(this);
     this.updateManager = new UpdateManager(this);
-    this.updateManager.updateBegan.connect(() => {
-      this._editorToSourceLineNew = new Map();
-    }, this);
-    this.updateManager.blockAdded.connect(
-      (_: UpdateManager, blockData: IBlockAddedInfo) => {
-        this._editorToSourceLineNew.set(
-          blockData.block.ceEditor,
-          blockData.virtualDocument.lastSourceLine
-        );
-      },
-      this
-    );
-    this.updateManager.updateFinished.connect(() => {
-      this._editorToSourceLine = this._editorToSourceLineNew;
-    }, this);
+    this.updateManager.updateBegan.connect(this._updateBeganSlot, this);
+    this.updateManager.blockAdded.connect(this._blockAddedSlot, this);
+    this.updateManager.updateFinished.connect(this._updateFinishedSlot, this);
     this.clear();
   }
 
@@ -457,7 +445,6 @@ export class VirtualDocument implements IDisposable {
     this.closeAllForeignDocuments();
 
     this.updateManager.dispose();
-
     // clear all the maps
 
     this.foreignDocuments.clear();
@@ -1036,6 +1023,33 @@ export class VirtualDocument implements IDisposable {
     this._foreignDocumentOpened.emit(context);
   }
 
+  /**
+   * Slot of the `updateBegan` signal.
+   */
+  private _updateBeganSlot(): void {
+    this._editorToSourceLineNew = new Map();
+  }
+
+  /**
+   * Slot of the `blockAdded` signal.
+   */
+  private _blockAddedSlot(
+    updateManager: UpdateManager,
+    blockData: IBlockAddedInfo
+  ): void {
+    this._editorToSourceLineNew.set(
+      blockData.block.ceEditor,
+      blockData.virtualDocument.lastSourceLine
+    );
+  }
+
+  /**
+   * Slot of the `updateFinished` signal.
+   */
+  private _updateFinishedSlot(): void {
+    this._editorToSourceLine = this._editorToSourceLineNew;
+  }
+
   private _foreignDocumentClosed = new Signal<
     VirtualDocument,
     Document.IForeignContext
@@ -1159,8 +1173,8 @@ export class UpdateManager implements IDisposable {
       return;
     }
     this._isDisposed = true;
+    this.documentUpdated.disconnect(this._onUpdated);
     Signal.clearData(this);
-    this.documentUpdated.disconnect(this._onUpdated, this);
   }
 
   /**

@@ -18,7 +18,7 @@ import {
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
   LanguageServerManager,
-  LanguageServers,
+  LanguageServersExperimental,
   TextForeignCodeExtractor,
   TLanguageServerConfigurations,
   TLanguageServerId
@@ -96,10 +96,15 @@ function activate(
   });
 
   const updateOptions = (settings: ISettingRegistry.ISettings) => {
-    const options = settings.composite as Required<LanguageServers>;
+    const options = settings.composite as Required<LanguageServersExperimental>;
     const languageServerSettings = (options.languageServers ||
       {}) as TLanguageServerConfigurations;
-
+    if (options.activate === 'on' && !languageServerManager.isEnabled) {
+      languageServerManager.enable().catch(console.error);
+    } else if (options.activate === 'off' && languageServerManager.isEnabled) {
+      languageServerManager.disable();
+      return;
+    }
     connectionManager.initialConfigurations = languageServerSettings;
     // TODO: if priorities changed reset connections
     connectionManager.updateConfiguration(languageServerSettings);
@@ -162,10 +167,12 @@ function activate(
       settings.changed.connect(() => {
         updateOptions(settings);
       });
+      languageServerManager.disable();
     })
     .catch((reason: Error) => {
       console.error(reason.message);
     });
+
   // Add a sessions manager if the running extension is available
   if (runningSessionManagers) {
     addRunningSessionManager(
@@ -187,13 +194,15 @@ function activate(
   return connectionManager;
 }
 
-export class RunningLanguageServers implements IRunningSessions.IRunningItem {
+export class RunningLanguageServer implements IRunningSessions.IRunningItem {
   constructor(
     connection: ILSPConnection,
     manager: ILSPDocumentConnectionManager
   ) {
-    this._connection = connection;
+    this._connection = new WeakSet([connection]);
     this._manager = manager;
+    this._serverIdentifier = connection.serverIdentifier;
+    this._serverLanguage = connection.serverLanguage;
   }
   /**
    * This is no-op because we do not do anything on server click event
@@ -205,23 +214,21 @@ export class RunningLanguageServers implements IRunningSessions.IRunningItem {
     return pythonIcon;
   }
   label(): string {
-    return `${this._connection.serverIdentifier ?? ''} (${
-      this._connection.serverLanguage ?? ''
-    })`;
+    return `${this._serverIdentifier ?? ''} (${this._serverLanguage ?? ''})`;
   }
   shutdown(): void {
     for (const [key, value] of this._manager.connections.entries()) {
-      if (value === this._connection) {
+      if (this._connection.has(value)) {
         const document = this._manager.documents.get(key)!;
         this._manager.unregisterDocument(document);
       }
     }
-    this._manager.disconnect(
-      this._connection.serverIdentifier as TLanguageServerId
-    );
+    this._manager.disconnect(this._serverIdentifier as TLanguageServerId);
   }
-  private _connection: ILSPConnection;
+  private _connection: WeakSet<ILSPConnection>;
   private _manager: ILSPDocumentConnectionManager;
+  private _serverIdentifier: string | undefined;
+  private _serverLanguage: string | undefined;
 }
 
 /**
@@ -238,13 +245,14 @@ function addRunningSessionManager(
   lsManager.disconnected.connect(() => signal.emit(lsManager));
   lsManager.closed.connect(() => signal.emit(lsManager));
   lsManager.documentsChanged.connect(() => signal.emit(lsManager));
-  let currentRunning: RunningLanguageServers[] = [];
+  let currentRunning: RunningLanguageServer[] = [];
   managers.add({
     name: trans.__('Language servers'),
     running: () => {
       const connections = new Set([...lsManager.connections.values()]);
+
       currentRunning = [...connections].map(
-        conn => new RunningLanguageServers(conn, lsManager)
+        conn => new RunningLanguageServer(conn, lsManager)
       );
       return currentRunning;
     },

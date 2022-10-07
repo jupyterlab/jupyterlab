@@ -28,6 +28,12 @@ export class LanguageServerManager implements ILanguageServerManager {
   }
 
   /**
+   * Check if the manager is enabled or disabled
+   */
+  get isEnabled(): boolean {
+    return this._enabled;
+  }
+  /**
    * Check if the manager is disposed.
    */
   get isDisposed(): boolean {
@@ -77,6 +83,23 @@ export class LanguageServerManager implements ILanguageServerManager {
   }
 
   /**
+   * Enable the language server services
+   */
+  async enable(): Promise<void> {
+    this._enabled = true;
+    await this.fetchSessions();
+  }
+
+  /**
+   * Disable the language server services
+   */
+  disable(): void {
+    this._enabled = false;
+    this._sessions = new Map();
+    this._sessionsChanged.emit(void 0);
+  }
+
+  /**
    * Dispose the manager.
    */
   dispose(): void {
@@ -87,6 +110,7 @@ export class LanguageServerManager implements ILanguageServerManager {
 
     Signal.clearData(this);
   }
+
   /**
    * Update the language server configuration.
    */
@@ -139,6 +163,9 @@ export class LanguageServerManager implements ILanguageServerManager {
    * manager is ready once this method finishes.
    */
   async fetchSessions(): Promise<void> {
+    if (!this._enabled) {
+      return;
+    }
     let response = await ServerConnection.makeRequest(
       this.statusUrl,
       { method: 'GET' },
@@ -147,9 +174,6 @@ export class LanguageServerManager implements ILanguageServerManager {
 
     this._statusCode = response.status;
     if (!response.ok) {
-      // if(response.status === 404){
-      //   this._retries = -1
-      // }
       if (this._retries > 0) {
         this._retries -= 1;
         setTimeout(this.fetchSessions.bind(this), this._retriesInterval);
@@ -304,4 +328,9 @@ export class LanguageServerManager implements ILanguageServerManager {
   );
 
   private _isDisposed = false;
+
+  /**
+   * Check if the manager is enabled or disabled
+   */
+  private _enabled = true;
 }

@@ -237,13 +237,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   logAllCommunication: boolean;
 
   /**
-   * Check if the connection is disposed
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * Signal emitted when the connection is closed.
    */
   get closeSignal(): ISignal<ILSPConnection, boolean> {
@@ -272,12 +265,14 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    * Dispose the connection.
    */
   dispose(): void {
-    if (this._isDisposed) {
+    if (this.isDisposed) {
       return;
     }
-    this._isDisposed = true;
+    Object.values(this.serverRequests).forEach(request =>
+      request.clearHandler()
+    );
     this.close();
-    Signal.clearData(this);
+    super.dispose();
   }
 
   /**
@@ -347,10 +342,11 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
       return this.isConnected;
     }, -1)
       .then(() => {
-        this.connection.onClose(() => {
+        const disposable = this.connection.onClose(() => {
           this._isConnected = false;
           this._closeSignal.emit(this._closingManually);
         });
+        this._disposables.push(disposable);
       })
       .catch(() => {
         console.error('Could not connect onClose signal');
@@ -387,10 +383,8 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   >(
     methods: typeof Method.ServerNotification | typeof Method.ClientNotification
   ): T {
-    return createMethodMap<T, Signal<any, any>>(
-      methods,
-      () => new Signal<any, any>(this)
-    );
+    const factory = () => new Signal<any, any>(this);
+    return createMethodMap<T, Signal<any, any>>(methods, factory);
   }
 
   /**
@@ -452,19 +446,20 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    * client and server handlers
    */
   protected afterInitialized(): void {
-    this.connection.onError(e => this._errorSignal.emit(e));
-
+    const disposable = this.connection.onError(e => this._errorSignal.emit(e));
+    this._disposables.push(disposable);
     for (const method of Object.values(
       Method.ServerNotification
     ) as (keyof ServerNotifications)[]) {
       const signal = this.serverNotifications[method] as Signal<any, any>;
-      this.connection.onNotification(method, params => {
+      const disposable = this.connection.onNotification(method, params => {
         this.log(MessageKind.serverNotifiedClient, {
           method,
           message: params
         });
         signal.emit(params);
       });
+      this._disposables.push(disposable);
     }
 
     for (const method of Object.values(
@@ -550,7 +545,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     lsp.ServerCapabilities<any>
   > = new Signal(this);
 
-  private _isDisposed = false;
   /**
    * Send the document changed data to the server.
    */

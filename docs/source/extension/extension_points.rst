@@ -1030,3 +1030,38 @@ a plugin:
         return foo;
       }
     };
+
+LSP Features
+--------------
+
+JupyterLab provides an infrastructure to communicate with the language servers. If the LSP services are activated and users have language servers installed, JupyterLab will start the language servers for the language of the opened notebook or file. Extension authors can access the virtual documents and the associated LSP connection of opened document by requiring the ``ILSPDocumentConnectionManager`` token from ``@jupyterlab/lsp``.
+
+Here is an example for making requests to the language server.
+
+.. code:: typescript
+
+  const plugin: JupyterFrontEndPlugin<void> = {
+    id,
+    autoStart: true,
+    requires: [ILSPDocumentConnectionManager],
+    activate: async (app: JupyterFrontEnd, manager: ILSPDocumentConnectionManager): Promise<void> => {
+
+      // Get the path to the opened notebook of file
+      const path = ...
+
+      // Get the widget adapter of opened document
+      const adapter = manager.adapters.get(path);
+      if (!adapter) {
+        return
+      }
+      // Get the associated virtual document of the opened document
+      const virtualDocument = adapter.virtualDocument;
+
+      // Get the LSP connection of the virtual document.
+      const connection = manager.connections.get(document.uri);
+      ...
+      // Send completion request to the language server
+      const response = await connection.clientRequests['textDocument/completion'].request(params);
+      ...
+    }
+  };

@@ -4,7 +4,7 @@
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { WidgetLSPAdapter } from './adapters/adapter';
@@ -111,6 +111,27 @@ export interface ILanguageServerManager extends IDisposable {
    * Status code of the `fetchSession` request.
    */
   readonly statusCode: number;
+
+  /**
+   * @alpha
+   *
+   * Check if the manager is enabled or disabled
+   */
+  readonly isEnabled: boolean;
+
+  /**
+   * @alpha
+   *
+   * Enable the language server services
+   */
+  enable(): void;
+
+  /**
+   * @alpha
+   *
+   * Disable the language server services
+   */
+  disable(): void;
 
   /**
    * @alpha
@@ -698,8 +719,7 @@ export interface IClientResult {
 export type ServerNotifications<
   T extends keyof IServerNotifyParams = keyof IServerNotifyParams
 > = {
-  readonly // ISignal does not have emit, which is intended - client cannot emit server notifications.
-  [key in T]: ISignal<ILSPConnection, IServerNotifyParams[key]>;
+  readonly [key in T]: ISignal<ILSPConnection, IServerNotifyParams[key]>;
 };
 
 /**
@@ -709,8 +729,7 @@ export type ServerNotifications<
 export type ClientNotifications<
   T extends keyof IClientNotifyParams = keyof IClientNotifyParams
 > = {
-  readonly // Signal has emit.
-  [key in T]: Signal<ILSPConnection, IClientNotifyParams[key]>;
+  readonly [key in T]: Signal<ILSPConnection, IClientNotifyParams[key]>;
 };
 
 /**
@@ -764,7 +783,7 @@ export type ServerRequests<
  *
  * Interface describing he connection to the language server.
  */
-export interface ILSPConnection extends ILspConnection, IDisposable {
+export interface ILSPConnection extends ILspConnection, IObservableDisposable {
   /**
    * @alpha
    *

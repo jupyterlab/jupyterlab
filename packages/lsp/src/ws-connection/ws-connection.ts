@@ -11,6 +11,8 @@
 
 import { ConsoleLogger, listen, MessageConnection } from 'vscode-ws-jsonrpc';
 
+import { ISignal, Signal } from '@lumino/signaling';
+
 import {
   registerServerCapability,
   unregisterServerCapability
@@ -19,14 +21,6 @@ import { IDocumentInfo, ILspConnection, ILspOptions } from './types';
 
 import type * as protocol from 'vscode-languageserver-protocol';
 
-/**
- * Changes as compared to upstream:
- *  - markdown is preferred over plaintext
- *  - informative members are public and others are protected, not private
- *  - onServerInitialized() was extracted; it also emits a message once connected
- *  - initializeParams() was extracted, and can be modified by subclasses
- *  - typescript 3.7 was adopted to clean up deep references
- */
 export class LspWsConnection implements ILspConnection {
   constructor(options: ILspOptions) {
     this._rootUri = options.rootUri;
@@ -54,6 +48,20 @@ export class LspWsConnection implements ILspConnection {
   }
 
   /**
+   * A signal emitted when the connection is disposed.
+   */
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
+  }
+
+  /**
+   * Check if the connection is disposed
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
    * Initialize a connection over a web socket that speaks the LSP protocol
    */
   connect(socket: WebSocket): void {
@@ -69,7 +77,7 @@ export class LspWsConnection implements ILspConnection {
         this.connection = connection;
         this.sendInitialize();
 
-        this.connection.onRequest(
+        const registerCapabilityDisposable = this.connection.onRequest(
           'client/registerCapability',
           (params: protocol.RegistrationParams) => {
             params.registrations.forEach(
@@ -86,8 +94,9 @@ export class LspWsConnection implements ILspConnection {
             );
           }
         );
+        this._disposables.push(registerCapabilityDisposable);
 
-        this.connection.onRequest(
+        const unregisterCapabilityDisposable = this.connection.onRequest(
           'client/unregisterCapability',
           (params: protocol.UnregistrationParams) => {
             params.unregisterations.forEach(
@@ -100,10 +109,12 @@ export class LspWsConnection implements ILspConnection {
             );
           }
         );
+        this._disposables.push(unregisterCapabilityDisposable);
 
-        this.connection.onClose(() => {
+        const disposable = this.connection.onClose(() => {
           this._isConnected = false;
         });
+        this._disposables.push(disposable);
       }
     });
   }
@@ -220,6 +231,21 @@ export class LspWsConnection implements ILspConnection {
   }
 
   /**
+   * Dispose the connection.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._disposables.forEach(disposable => {
+      disposable.dispose();
+    });
+    this._disposed.emit();
+    Signal.clearData(this);
+  }
+
+  /**
    * The internal websocket connection to the LSP handler
    */
   protected socket: WebSocket;
@@ -239,8 +265,21 @@ export class LspWsConnection implements ILspConnection {
    */
   protected serverCapabilities: protocol.ServerCapabilities;
 
+  /**
+   * The connection is connected?
+   */
   protected _isConnected = false;
+
+  /**
+   * The connection is initialized?
+   */
   protected _isInitialized = false;
+
+  /**
+   * Array of LSP callback disposables, it is used to
+   * clear the callbacks when the connection is disposed.
+   */
+  protected _disposables: Array<protocol.Disposable> = [];
 
   /**
    * Callback called when the server is initialized.
@@ -269,5 +308,12 @@ export class LspWsConnection implements ILspConnection {
     };
   }
 
+  /**
+   * URI of the LSP handler enpoint.
+   */
   private _rootUri: string;
+
+  private _disposed = new Signal<this, void>(this);
+
+  private _isDisposed = false;
 }
