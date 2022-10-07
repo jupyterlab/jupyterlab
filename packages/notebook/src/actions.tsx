@@ -17,7 +17,7 @@ import {
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import { signalToPromise } from '@jupyterlab/coreutils';
+import { PageConfig, signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -2447,6 +2447,21 @@ namespace Private {
         toDelete.reverse().forEach(index => {
           sharedModel.deleteCell(index);
         });
+        // Add a new cell if the notebook is empty. This is done
+        // within the compound operation to make the deletion of
+        // a notebook's last cell undoable.
+        // The property `sharedModel.cells` is updated after the transaction is completed.
+        // Compare lengths to know whether the notebook will be empty or not.
+        const collab = PageConfig.getOption('collaborative');
+        const empty = toDelete.length == sharedModel.cells.length;
+        if ((!collab || collab == 'false') && empty) {
+          sharedModel.insertCell(
+            0,
+            sharedModels.createCell({
+              cell_type: notebook.notebookConfig.defaultCell
+            })
+          );
+        }
       });
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.

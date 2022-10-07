@@ -584,29 +584,6 @@ export class StaticNotebook extends WindowedList {
             this.model!.cells.length + delta.delete,
             -1 * delta.delete
           );
-          // Add default cell if there are no cells remaining.
-          // @todo this should probably be handled by shared-notebook
-          // @todo this is duplicatively implemented (see other occurrences of notebookconfig.defaultCell)
-          const collab = PageConfig.getOption('collaborative');
-          if ((!collab || collab == 'false') && !sender.cells.length) {
-            const model = this.model;
-            // Add the cell in a new context to avoid triggering another
-            // cell changed event during the handling of this signal.
-            requestAnimationFrame(() => {
-              if (
-                model &&
-                !model.isDisposed &&
-                !model.sharedModel.cells.length
-              ) {
-                model.sharedModel.insertCell(
-                  0,
-                  sharedModels.createCell({
-                    cell_type: this.notebookConfig.defaultCell
-                  })
-                );
-              }
-            });
-          }
         }
       });
     }
