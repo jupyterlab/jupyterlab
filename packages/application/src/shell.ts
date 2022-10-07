@@ -613,17 +613,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // Restore the widgets not restored in first place because the shell
       // started in 'single-document' mode.
       if (this._layoutRestorer) {
-        this._layoutRestorer.restoreDelayed().then(mainArea => {
-          if (mainArea) {
-            const { currentWidget, dock } = mainArea;
-            if (dock) {
-              this._dockPanel.restoreLayout(dock);
+        this._layoutRestorer
+          .restoreDelayed()
+          .then(mainArea => {
+            if (mainArea) {
+              const { currentWidget, dock } = mainArea;
+              if (dock) {
+                this._dockPanel.restoreLayout(dock);
+              }
+              if (currentWidget) {
+                this.activateById(currentWidget.id);
+              }
             }
-            if (currentWidget) {
-              this.activateById(currentWidget.id);
-            }
-          }
-        });
+          })
+          .catch(reason => {
+            console.error('Fail to restore the layout delayed.');
+            console.error(reason);
+          });
         this._layoutRestorer = null;
       }
 

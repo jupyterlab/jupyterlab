@@ -354,7 +354,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         }
       })
       .catch(reason => {
-        console.error('Fail to restore the layout delayed.');
+        console.error('Fail to rehydrate the main area.');
         console.error(reason);
       });
 
