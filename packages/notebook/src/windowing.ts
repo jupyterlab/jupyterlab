@@ -71,6 +71,21 @@ export class NotebookViewModel extends WindowedListModel {
  * Windowed list layout for the notebook.
  */
 export class NotebookWindowedLayout extends WindowedLayout {
+  private _header: Widget | null = null;
+
+  public get header(): Widget | null {
+    return this._header;
+  }
+  public set header(v: Widget | null) {
+    if (this._header && this._header.isAttached) {
+      Widget.detach(this._header);
+    }
+    this._header = v;
+    if (this._header && this.parent?.isAttached) {
+      Widget.attach(this._header, this.parent!.node);
+    }
+  }
+
   /**
    * Remove a widget from the layout.
    *

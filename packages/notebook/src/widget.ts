@@ -232,6 +232,10 @@ export class StaticNotebook extends WindowedList {
     this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
+
+    this._emptyNotebookMessage = new Widget();
+    this._emptyNotebookMessage.node.textContent =
+      'The notebook is empty. Click the + button on the toolbar to add a new cell.';
   }
 
   get cellCollapsed(): ISignal<this, Cell> {
@@ -555,6 +559,8 @@ export class StaticNotebook extends WindowedList {
     args: sharedModels.NotebookChange
   ): void {
     if (args.cellsChange) {
+      (this.layout as NotebookWindowedLayout).header = null;
+
       let index = 0;
       args.cellsChange.forEach(delta => {
         if (delta.retain != null) {
@@ -586,6 +592,11 @@ export class StaticNotebook extends WindowedList {
           );
         }
       });
+
+      if (!this.model!.sharedModel.cells.length) {
+        (this.layout as NotebookWindowedLayout).header =
+          this._emptyNotebookMessage;
+      }
     }
 
     this.update();
@@ -890,6 +901,7 @@ export class StaticNotebook extends WindowedList {
 
   protected cellsArray: Array<Cell>;
 
+  private _emptyNotebookMessage: Widget;
   private _cellCollapsed = new Signal<this, Cell>(this);
   private _cellInViewportChanged = new Signal<this, Cell>(this);
   private _editorConfig: StaticNotebook.IEditorConfig;
