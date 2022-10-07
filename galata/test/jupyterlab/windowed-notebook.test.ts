@@ -7,7 +7,7 @@ const fileName = 'windowed_notebook.ipynb';
 
 test.beforeEach(async ({ page, tmpPath }) => {
   await page.contents.uploadFile(
-    path.resolve(__dirname, `./notebooks/${fileName}`),
+    path.resolve(__dirname, `../galata/notebooks/${fileName}`),
     `${tmpPath}/${fileName}`
   );
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
