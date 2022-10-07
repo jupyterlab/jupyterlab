@@ -554,14 +554,99 @@ function splitShallowNode<T extends Node>(
   at: number
 ): { pre: T; post: T } {
   const pre = node.cloneNode() as T;
-  pre.textContent = node.textContent?.substr(0, at) as string;
+  pre.textContent = node.textContent?.slice(0, at) as string;
   const post = node.cloneNode() as T;
-  post.textContent = node.textContent?.substr(at) as string;
+  post.textContent = node.textContent?.slice(at) as string;
   return {
-    pre: pre,
-    post: post
+    pre,
+    post
   };
 }
+
+
+/**
+ * Iterate over some nodes, while tracking cumulative start and end position.
+ */
+function* nodeIter<T extends Node>(nodes: T[]): IterableIterator<{node: T, start: number, end: number, isText: boolean}> {
+  let start = 0;
+  let end;
+  for (let node of nodes) {
+    end = start + (node.textContent?.length || 0);
+    yield {
+      node,
+      start,
+      end,
+      isText: node.nodeType === Node.TEXT_NODE,
+    };
+    start = end;
+  }
+}
+
+
+/**
+ * Align two collections of nodes.
+ *
+ * If a text node in one collections spans an element in the other, yield the spanned elements.
+ * Otherwise, split the nodes such that yielded pair start and stop on the same position.
+ */
+function* alignedNodes<T extends Node, U extends Node>(a: T[], b: U[]): IterableIterator<[T, null] | [null, U] | [T, U]> {
+  let iterA = nodeIter(a);
+  let iterB = nodeIter(b);
+  let nA = iterA.next();
+  let nB = iterB.next();
+  while (!nA.done && !nB.done) {
+    let A = nA.value;
+    let B = nB.value;
+
+    if (A.isText && A.start <= B.start && A.end >= B.end) {
+      // A is a text element that spans all of B, simply yield B
+      yield [null, B.node];
+      nB = iterB.next();
+    } else if (B.isText && B.start <= A.start && B.end >= A.end) {
+      // B is a text element that spans all of A, simply yield A
+      yield [A.node, null];
+      nA = iterA.next();
+    } else {
+      // There is some intersection, split one, unless they match exactly
+      if (A.end === B.end && A.start === B.start) {
+        yield [A.node, B.node];
+        nA = iterA.next();
+        nB = iterB.next();
+      } else if (A.end > B.end) {
+        /*
+        A |-----[======]---|
+        B |--[======]------|
+                    | <- Split A here
+                | <- trim B to start from here if needed
+        */
+        let { pre, post } = splitShallowNode(A.node, B.end - A.start);
+        if (B.start < A.start) {
+          // this node should not be yielded anywhere else, so ok to modify in-place
+          B.node.textContent = B.node.textContent?.slice(B.start - A.start) as string;
+        }
+        yield [pre, B.node];
+        // Modify iteration result in-place:
+        A.node = post;
+        A.start = B.end;
+        nB = iterB.next();
+      } else if (B.end > A.end) {
+        let { pre, post } = splitShallowNode(B.node, A.end - B.start);
+        if (A.start < B.start) {
+          // this node should not be yielded anywhere else, so ok to modify in-place
+          A.node.textContent = A.node.textContent?.slice(A.start - B.start) as string;
+        }
+        yield [A.node, pre];
+        // Modify iteration result in-place:
+        B.node = post;
+        B.start = A.end;
+        nA = iterA.next();
+      } else {
+        throw new Error(`Unexpected intersection: ${JSON.stringify(A)} ${JSON.stringify(B)}`);
+      }
+    }
+  }
+}
+
 
 /**
  * Render text into a host node.
@@ -593,43 +678,18 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
     const combinedNodes: (HTMLAnchorElement | Text | HTMLSpanElement)[] = [];
     const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
 
-    while (preNodes.length && linkedNodes.length) {
-      // Use non-null assertions to workaround TypeScript context awareness limitation
-      // (if any of the arrays were empty, we would not enter the body of the loop).
-      let preNode = preNodes.shift()!;
-      let linkNode = linkedNodes.shift()!;
+    for (let nodes of alignedNodes(preNodes, linkedNodes)) {
 
-      // This should never happen because we modify the arrays in flight so they should end simultaneously,
-      // but this makes the coding assistance happy and might make it easier to conceptualize.
-      if (typeof preNode === 'undefined') {
-        combinedNodes.push(linkNode);
-        break;
+      if (!nodes[0]) {
+        combinedNodes.push(nodes[1]);
+        inAnchorElement = nodes[1].nodeType !== Node.TEXT_NODE;
+        continue
+      } else if(!nodes[1]) {
+        combinedNodes.push(nodes[0]);
+        inAnchorElement = false;
+        continue;
       }
-      if (typeof linkNode === 'undefined') {
-        combinedNodes.push(preNode);
-        break;
-      }
-
-      let preLen = preNode.textContent?.length;
-      let linkLen = linkNode.textContent?.length;
-      if (preLen && linkLen) {
-        if (preLen > linkLen) {
-          // Split pre node and only keep the shorter part
-          let { pre: keep, post: postpone } = splitShallowNode(
-            preNode,
-            linkLen
-          );
-          preNodes.unshift(postpone);
-          preNode = keep;
-        } else if (linkLen > preLen) {
-          let { pre: keep, post: postpone } = splitShallowNode(
-            linkNode,
-            preLen
-          );
-          linkedNodes.unshift(postpone);
-          linkNode = keep;
-        }
-      }
+      let [preNode, linkNode] = nodes;
 
       const lastCombined = combinedNodes[combinedNodes.length - 1];
 
@@ -660,11 +720,7 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
         }
       }
     }
-    // TODO: replace with `.replaceChildren()` once the target ES version allows it
-    pre.innerHTML = '';
-    for (const child of combinedNodes) {
-      pre.appendChild(child);
-    }
+    pre.replaceChildren(...combinedNodes);
   }
 
   host.appendChild(pre);
