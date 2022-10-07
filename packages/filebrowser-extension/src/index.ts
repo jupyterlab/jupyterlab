@@ -190,7 +190,7 @@ const browser: JupyterFrontEndPlugin<void> = {
         b => b.command === CommandIDs.toggleBrowser
       );
       if (binding) {
-        const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
         browser.title.caption = trans.__('File Browser (%1)', ks);
       } else {
         browser.title.caption = trans.__('File Browser');
