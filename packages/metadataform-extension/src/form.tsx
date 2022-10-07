@@ -9,6 +9,7 @@ import { JSONSchema7 } from 'json-schema';
 import { PartialJSONValue, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { CellType } from '@jupyterlab/nbformat';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { RJSFTemplatesFactory } from '@jupyterlab/ui-components';
 
@@ -18,17 +19,7 @@ export namespace MetadataForm {
   /**
    * The metadata schema as defined in JSON schema.
    */
-  export interface IMetadataSchema {
-    /**
-     * The type of data (should be object at first level).
-     */
-    type: string;
-
-    /**
-     * The properties as defined in JSON schema, and interpretable by react-JSON-schema-form.
-     */
-    properties: { [option: string]: any };
-  }
+  export type IMetadataSchema = ISettingRegistry.IMetadataSchema;
 
   /**
    * The meta information associated to all properties.

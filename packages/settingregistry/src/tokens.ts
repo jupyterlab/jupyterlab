@@ -625,11 +625,17 @@ export namespace ISettingRegistry {
 
     /**
      * The metadata schema.
+     *
+     * ## Notes:
+     * To change to type @rjsf/utils -> RJSFSchema when upgrading rjsf to v5.
      */
     metadataSchema: IMetadataSchema;
 
     /**
      * The ui schema as used by react-JSON-schema-form.
+     *
+     * ## Notes:
+     * To change to type @rjsf/utils -> UiSchema when upgrading rjsf to v5.
      */
     uiSchema?: { [metadataKey: string]: PartialJSONObject };
 
@@ -656,6 +662,9 @@ export namespace ISettingRegistry {
 
   /**
    * The metadata schema as defined in JSON schema.
+   *
+   * ## Notes:
+   * To remove in favour of @rjsf/utils -> RJSFSchema when upgrading rjsf to v5.
    */
   export interface IMetadataSchema extends PartialJSONObject {
     /**
@@ -667,6 +676,11 @@ export namespace ISettingRegistry {
      * The properties as defined in JSON schema, and interpretable by react-JSON-schema-form.
      */
     properties: { [option: string]: any };
+
+    /**
+     * Support for allOf feature of JSON schema (useful for if/then/else).
+     */
+    allOf?: Array<PartialJSONObject>;
   }
 
   /**

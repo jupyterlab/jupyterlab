@@ -387,6 +387,10 @@ export class MetadataFormWidget
           workingObject[nestedKeys[nestedKeys.length - 1]];
     }
 
+    if (this._metadataSchema.allOf) {
+      builtProperties.allOf = this._metadataSchema.allOf;
+    }
+
     this.buildWidget({
       properties: builtProperties,
       metaInformation: this._metaInformation,
@@ -461,6 +465,18 @@ namespace Private {
               )) {
                 metadataForm.metadataSchema.properties[metadataKey] =
                   properties;
+              }
+
+              // Includes allOf array in the existing metadataSchema.
+              if (value.metadataSchema.allOf) {
+                if (!metadataForm.metadataSchema.allOf) {
+                  metadataForm.metadataSchema.allOf =
+                    value.metadataSchema.allOf;
+                } else {
+                  metadataForm.metadataSchema.allOf.concat(
+                    value.metadataSchema.allOf
+                  );
+                }
               }
 
               // Includes uiSchema in the existing uiSchema.
