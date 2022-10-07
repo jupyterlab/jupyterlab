@@ -665,6 +665,7 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
   });
 
   // Set the sanitized content for the host node.
+  const ret = document.createElement('pre');
   const pre = document.createElement('pre');
   pre.innerHTML = content;
 
@@ -720,10 +721,13 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
         }
       }
     }
-    pre.replaceChildren(...combinedNodes);
+    // Do not reuse `pre` element. Clearing out previous children is too slow...
+    for (const child of combinedNodes) {
+      ret.appendChild(child);
+    }
   }
 
-  host.appendChild(pre);
+  host.appendChild(ret);
 
   // Return the rendered promise.
   return Promise.resolve(undefined);
