@@ -33,8 +33,6 @@ import { UUID } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@lumino/widgets';
-
 // The default kernel name
 export const DEFAULT_NAME = 'python3';
 
@@ -894,7 +892,7 @@ export class DocumentWidgetOpenerMock {
     return this._opened;
   }
 
-  open(widget: Widget): void {
+  open(widget: IDocumentWidget): void {
     // no-op
   }
 
