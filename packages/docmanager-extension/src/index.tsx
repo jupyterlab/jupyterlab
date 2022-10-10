@@ -94,6 +94,10 @@ namespace CommandIDs {
  */
 const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
+/**
+ * A plugin to open documents in the main area.
+ *
+ */
 const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
   id: '@jupyterlab/docmanager-extension:opener',
   autoStart: true,
@@ -126,6 +130,9 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
   }
 };
 
+/**
+ * A plugin to handle dirty states for open documents.
+ */
 const contextsPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:contexts',
   autoStart: true,
