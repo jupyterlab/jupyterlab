@@ -15,10 +15,6 @@ import '@jupyterlab/notebook/style/index.css';
 import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
-
 import { ServiceManager } from '@jupyterlab/services';
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 
@@ -38,14 +34,20 @@ import {
 
 import { editorServices } from '@jupyterlab/codemirror';
 
-import { DocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager, IDocumentWidgetOpener } from '@jupyterlab/docmanager';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 
 import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
+import { CommandRegistry } from '@lumino/commands';
+
+import { Signal } from '@lumino/signaling';
+
+import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
 import { SetupCommands } from './commands';
 
@@ -81,6 +83,13 @@ function createApp(manager: ServiceManager.IManager): void {
   const opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.
+    },
+    get opened() {
+      if (this._signal) {
+        return this._signal;
+      }
+      this._signal = new Signal<IDocumentWidgetOpener, IDocumentWidget>(this);
+      return this._signal;
     }
   };
 
