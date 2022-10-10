@@ -38,7 +38,8 @@
     "@jupyterlab/collaboration": "^4.0.0-alpha.14",
     "@jupyterlab/coreutils": "^6.0.0-alpha.14",
     "@jupyterlab/docprovider": "^4.0.0-alpha.14",
-    "@jupyterlab/services": "^7.0.0-alpha.14"
+    "@jupyterlab/services": "^7.0.0-alpha.14",
+    "@jupyterlab/shared-models": "^4.0.0-alpha.14"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
