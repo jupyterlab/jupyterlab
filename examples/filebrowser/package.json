@@ -20,7 +20,6 @@
     "@jupyterlab/translation": "^4.0.0-alpha.14",
     "@jupyterlab/ui-components": "^4.0.0-alpha.29",
     "@lumino/commands": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
     "@lumino/widgets": "^2.0.0-alpha.6"
   },
   "devDependencies": {
