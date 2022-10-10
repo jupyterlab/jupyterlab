@@ -72,6 +72,31 @@ export class NotebookViewModel extends WindowedListModel {
  */
 export class NotebookWindowedLayout extends WindowedLayout {
   /**
+   * Remove a widget from the layout.
+   *
+   * @param widget - The widget to remove from the layout.
+   *
+   * #### Notes
+   * A widget is automatically removed from the layout when its `parent`
+   * is set to `null`. This method should only be invoked directly when
+   * removing a widget from a layout which has yet to be installed on a
+   * parent widget.
+   *
+   * This method does *not* modify the widget's `parent`.
+   */
+  removeWidget(widget: Widget): void {
+    const index = this.widgets.indexOf(widget);
+    // We need to deal with code cell widget not in viewport (aka not in this.widgets) but still
+    // partly attached
+    if (index >= 0) {
+      this.removeWidgetAt(index);
+    } // If the layout is parented, detach the widget from the DOM.
+    else if (widget === this._willBeRemoved && this.parent) {
+      this.detachWidget(index, widget);
+    }
+  }
+
+  /**
    * Attach a widget to the parent's DOM node.
    *
    * @param index - The current index of the widget in the layout.
