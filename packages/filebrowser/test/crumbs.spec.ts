@@ -57,11 +57,7 @@ describe('filebrowser/model', () => {
   let path: string;
 
   beforeAll(async () => {
-    const opener: IDocumentWidgetOpener = {
-      open: widget => {
-        /* no op */
-      }
-    };
+    const opener = new Mock.DocumentWidgetOpenerMock();
 
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
