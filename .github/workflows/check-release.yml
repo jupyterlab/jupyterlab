@@ -25,14 +25,14 @@ jobs:
 
       - name: Check Release
         if: ${{ matrix.group == 'check_release' }}
-        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: next
 
       - name: Run Link Check
         if: ${{ matrix.group == 'link_check' }}
-        uses: jupyter-server/jupyter_releaser/.github/actions/check-links@v1
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-links@v2
 
       - name: Upload Assets
         if: ${{ matrix.group == 'check_release' }}
