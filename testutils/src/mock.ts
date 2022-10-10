@@ -505,9 +505,6 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       (files.get(path) as any).content = checkPointContent.get(path);
       return Promise.resolve();
     }),
-    getModelDBFactory: jest.fn(() => {
-      return null;
-    }),
     normalize: jest.fn(path => {
       return dummy.normalize(path);
     }),

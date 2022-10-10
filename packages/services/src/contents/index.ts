@@ -277,13 +277,6 @@ export namespace Contents {
     driveName(path: string): string;
 
     /**
-     * Given a path, get a ModelDB.IFactory from the
-     * relevant backend. Returns `null` if the backend
-     * does not provide one.
-     */
-    getModelDBFactory(path: string): ModelDB.IFactory | null;
-
-    /**
      * Get a file or directory.
      *
      * @param path: The path to the file.
@@ -420,12 +413,6 @@ export namespace Contents {
     readonly serverSettings: ServerConnection.ISettings;
 
     /**
-     * An optional ModelDB.IFactory instance for the
-     * drive.
-     */
-    readonly modelDBFactory?: ModelDB.IFactory;
-
-    /**
      * A signal emitted when a file operation takes place.
      */
     fileChanged: ISignal<IDrive, IChangedArgs>;
@@ -444,7 +431,7 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param A promise which resolves with the absolute POSIX
+     * @returns A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -608,16 +595,6 @@ export class ContentsManager implements Contents.IManager {
   addDrive(drive: Contents.IDrive): void {
     this._additionalDrives.set(drive.name, drive);
     drive.fileChanged.connect(this._onFileChanged, this);
-  }
-
-  /**
-   * Given a path, get a ModelDB.IFactory from the
-   * relevant backend. Returns `undefined` if the backend
-   * does not provide one.
-   */
-  getModelDBFactory(path: string): ModelDB.IFactory | null {
-    const [drive] = this._driveForPath(path);
-    return drive?.modelDBFactory ?? null;
   }
 
   /**

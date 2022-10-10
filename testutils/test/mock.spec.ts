@@ -374,13 +374,6 @@ describe('mock', () => {
       });
     });
 
-    describe('.getModelDBFactory()', () => {
-      it('should return null', () => {
-        const manager = new Mock.ContentsManagerMock();
-        expect(manager.getModelDBFactory('foo')).toBe(null);
-      });
-    });
-
     describe('.normalize()', () => {
       it('should normalize a path', () => {
         const manager = new Mock.ContentsManagerMock();
