@@ -3,8 +3,6 @@
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
-import { ModelDB } from '@jupyterlab/observables';
-
 import { PartialJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
