@@ -8,7 +8,13 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
-import { Context, TextModelFactory } from '@jupyterlab/docregistry';
+import { PathExt } from '@jupyterlab/coreutils';
+
+import {
+  Context,
+  IDocumentWidget,
+  TextModelFactory
+} from '@jupyterlab/docregistry';
 
 import {
   Contents,
@@ -25,9 +31,9 @@ import { AttachedProperty } from '@lumino/properties';
 
 import { UUID } from '@lumino/coreutils';
 
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { Widget } from '@lumino/widgets';
 
 // The default kernel name
 export const DEFAULT_NAME = 'python3';
@@ -878,4 +884,19 @@ namespace Private {
     name: 'lastMessageId',
     create: () => ''
   });
+}
+
+/**
+ * A mock document widget opener.
+ */
+export class DocumentWidgetOpenerMock {
+  get opened(): ISignal<DocumentWidgetOpenerMock, IDocumentWidget> {
+    return this._opened;
+  }
+
+  open(widget: Widget): void {
+    // no-op
+  }
+
+  private _opened = new Signal<this, IDocumentWidget>(this);
 }

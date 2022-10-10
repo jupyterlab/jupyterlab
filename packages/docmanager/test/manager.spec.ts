@@ -75,6 +75,7 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   beforeEach(() => {
+    const opener = new Mock.DocumentWidgetOpenerMock();
     const registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
     registry.addWidgetFactory(widgetFactoryShared);
@@ -84,11 +85,7 @@ describe('@jupyterlab/docmanager', () => {
     manager = new DocumentManager({
       registry,
       manager: services,
-      opener: {
-        open: (widget: Widget) => {
-          // no-op
-        }
-      }
+      opener
     });
   });
 
