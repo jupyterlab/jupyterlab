@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import {
-  DocumentManager,
-  IDocumentManager,
-  IDocumentWidgetOpener
-} from '@jupyterlab/docmanager';
+import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { Contents, ServiceManager } from '@jupyterlab/services';
 import { StateDB } from '@jupyterlab/statedb';
