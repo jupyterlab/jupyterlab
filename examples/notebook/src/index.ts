@@ -34,9 +34,9 @@ import {
 
 import { editorServices } from '@jupyterlab/codemirror';
 
-import { DocumentManager, IDocumentWidgetOpener } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
   standardRendererFactories as initialFactories,
@@ -44,8 +44,6 @@ import {
 } from '@jupyterlab/rendermime';
 
 import { CommandRegistry } from '@lumino/commands';
-
-import { Signal } from '@lumino/signaling';
 
 import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
@@ -85,11 +83,14 @@ function createApp(manager: ServiceManager.IManager): void {
       // Do nothing for sibling widgets for now.
     },
     get opened() {
-      if (this._signal) {
-        return this._signal;
-      }
-      this._signal = new Signal<IDocumentWidgetOpener, IDocumentWidget>(this);
-      return this._signal;
+      return {
+        connect: () => {
+          return false;
+        },
+        disconnect: () => {
+          return false;
+        }
+      };
     }
   };
 

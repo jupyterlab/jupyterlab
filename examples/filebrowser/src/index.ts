@@ -26,9 +26,9 @@ import {
   CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
 
-import { DocumentManager, IDocumentWidgetOpener } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { FileBrowser, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 
@@ -41,8 +41,6 @@ import {
 } from '@jupyterlab/translation';
 
 import { addIcon, ToolbarButton } from '@jupyterlab/ui-components';
-
-import { Signal } from '@lumino/signaling';
 
 const LANG = 'en';
 
@@ -81,11 +79,14 @@ function createApp(
       });
     },
     get opened() {
-      if (this._signal) {
-        return this._signal;
-      }
-      this._signal = new Signal<IDocumentWidgetOpener, IDocumentWidget>(this);
-      return this._signal;
+      return {
+        connect: () => {
+          return false;
+        },
+        disconnect: () => {
+          return false;
+        }
+      };
     }
   };
 
