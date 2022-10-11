@@ -669,6 +669,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this._outputs) {
       this._outputs.trusted = args.newValue as boolean;
     }
+    if (args.newValue as boolean) {
+      const codeCell = this.sharedModel as models.YCodeCell;
+      const metadata = codeCell.getMetadata();
+      metadata.trusted = true;
+      codeCell.setMetadata(metadata);
+    }
     this.stateChanged.emit({
       name: 'trusted',
       oldValue: args.oldValue as boolean,
