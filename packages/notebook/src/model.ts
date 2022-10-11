@@ -65,7 +65,8 @@ export class NotebookModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     this.sharedModel = sharedModels.YNotebook.create({
-      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
+      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false,
+      defaultCell: options.defaultCell
     }) as sharedModels.ISharedNotebook;
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');

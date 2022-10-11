@@ -268,6 +268,7 @@ export class YNotebook
     super();
     this._disableDocumentWideUndoRedo =
       options.disableDocumentWideUndoRedo ?? false;
+    this._defaultCell = options.defaultCell ?? 'code';
     this.undoManager.addToScope(this.ycells);
     this.ycells.observe(this._onYCellsChanged);
     this.cells = this.ycells.toArray().map(ycell => {
@@ -297,6 +298,24 @@ export class YNotebook
    */
   get disableDocumentWideUndoRedo(): boolean {
     return this._disableDocumentWideUndoRedo;
+  }
+
+  /**
+   * Returns the default cell type
+   *
+   * @returns cell type.
+   */
+  get defaultCell(): nbformat.CellType {
+    return this._defaultCell;
+  }
+
+  /**
+   * Set the default cell type.
+   *
+   * @param value 'code' | 'markdown' | 'raw'.
+   */
+  set defaultCell(value: nbformat.CellType) {
+    this._defaultCell = value;
   }
 
   /**
@@ -416,6 +435,10 @@ export class YNotebook
   deleteCellRange(from: number, to: number): void {
     this.transact(() => {
       this.ycells.delete(from, to - from);
+
+      if (!this.ycells.length) {
+        this.insertCell(0, createCell({ cell_type: this._defaultCell }));
+      }
     });
   }
 
@@ -551,6 +574,7 @@ export class YNotebook
   };
 
   private _disableDocumentWideUndoRedo: boolean;
+  private _defaultCell: nbformat.CellType;
   private _ycellMapping: WeakMap<Y.Map<any>, YCellType> = new WeakMap();
 }
 

@@ -73,10 +73,21 @@ export class NotebookViewModel extends WindowedListModel {
 export class NotebookWindowedLayout extends WindowedLayout {
   private _header: Widget | null = null;
 
-  public get header(): Widget | null {
+  /**
+   * Returns Notebook's header
+   *
+   * @return Widget | null
+   */
+  get header(): Widget | null {
     return this._header;
   }
-  public set header(v: Widget | null) {
+
+  /**
+   * Set Notebook's header
+   *
+   * @param v: Widget | null
+   */
+  set header(v: Widget | null) {
     if (this._header && this._header.isAttached) {
       Widget.detach(this._header);
     }

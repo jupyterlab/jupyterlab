@@ -33,6 +33,7 @@ import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
 import * as sharedModels from '@jupyterlab/shared-models';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
+import { YNotebook } from '@jupyterlab/shared-models';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -232,10 +233,6 @@ export class StaticNotebook extends WindowedList {
     this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
-
-    this._emptyNotebookMessage = new Widget();
-    this._emptyNotebookMessage.node.textContent =
-      'The notebook is empty. Click the + button on the toolbar to add a new cell.';
   }
 
   get cellCollapsed(): ISignal<this, Cell> {
@@ -365,6 +362,7 @@ export class StaticNotebook extends WindowedList {
       return;
     }
     this._notebookModel = null;
+    (this.layout as NotebookWindowedLayout).header?.dispose();
     super.dispose();
   }
 
@@ -422,6 +420,26 @@ export class StaticNotebook extends WindowedList {
         });
       }
     }
+  }
+
+  /**
+   * Adds a message to the notebook as a header.
+   */
+  protected addHeader(): void {
+    const trans = this.translator.load('jupyterlab');
+    const info = new Widget();
+    info.node.textContent = trans.__(
+      'The notebook is empty. Click the + button on the toolbar to add a new cell.'
+    );
+    (this.layout as NotebookWindowedLayout).header = info;
+  }
+
+  /**
+   * Removes the header.
+   */
+  protected removeHeader(): void {
+    (this.layout as NotebookWindowedLayout).header?.dispose();
+    (this.layout as NotebookWindowedLayout).header = null;
   }
 
   /**
@@ -533,8 +551,9 @@ export class StaticNotebook extends WindowedList {
     }
     this._updateMimetype();
     const cells = newValue.cells;
-    const collab = PageConfig.getOption('collaborative');
-    if ((!collab || collab == 'false') && !cells.length) {
+    const collab =
+      (PageConfig.getOption('collaborative') ?? '').toLowerCase() === 'true';
+    if (!collab && !cells.length) {
       newValue.sharedModel.insertCell(
         0,
         sharedModels.createCell({
@@ -559,7 +578,7 @@ export class StaticNotebook extends WindowedList {
     args: sharedModels.NotebookChange
   ): void {
     if (args.cellsChange) {
-      (this.layout as NotebookWindowedLayout).header = null;
+      this.removeHeader();
 
       let index = 0;
       args.cellsChange.forEach(delta => {
@@ -594,8 +613,7 @@ export class StaticNotebook extends WindowedList {
       });
 
       if (!this.model!.sharedModel.cells.length) {
-        (this.layout as NotebookWindowedLayout).header =
-          this._emptyNotebookMessage;
+        this.addHeader();
       }
     }
 
@@ -897,11 +915,15 @@ export class StaticNotebook extends WindowedList {
 
     this.viewModel.windowingActive =
       this._notebookConfig.windowingMode === 'full';
+
+    if (this.model) {
+      const sharedModel = this.model.sharedModel as YNotebook;
+      sharedModel.defaultCell = this._notebookConfig.defaultCell;
+    }
   }
 
   protected cellsArray: Array<Cell>;
 
-  private _emptyNotebookMessage: Widget;
   private _cellCollapsed = new Signal<this, Cell>(this);
   private _cellInViewportChanged = new Signal<this, Cell>(this);
   private _editorConfig: StaticNotebook.IEditorConfig;
