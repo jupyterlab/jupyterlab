@@ -1,5 +1,5 @@
 ---
-github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.5.x/CHANGELOG.md'
+github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
 ---
 
 <!-- The line below is MyST syntax for creating a reference to changelog -->
@@ -822,7 +822,7 @@ No merged PRs
 
 ### Enhancements made
 
-- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/3.5.x/user/files.html#displaying-hidden-files)
+- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/3.6.x/user/files.html#displaying-hidden-files)
 - Restore Copy shareable link use of `shareUrl` [#11188](https://github.com/jupyterlab/jupyterlab/pull/11188) ([@fcollonval](https://github.com/fcollonval))
 - Add Galata in JupyterLab [#11179](https://github.com/jupyterlab/jupyterlab/pull/11179) ([@fcollonval](https://github.com/fcollonval))
 - Responsive Toolbar [#11178](https://github.com/jupyterlab/jupyterlab/pull/11178) ([@3coins](https://github.com/3coins))
@@ -1268,9 +1268,9 @@ No merged PRs
 - From JupyterLab 3.1, file documents and notebooks have collaborative
   editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
   Editors are not collaborative by default; to activate it, start JupyterLab
-  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/3.5.x/user/rtc.html).
+  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/3.6.x/user/rtc.html).
 - The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
-- Table of Contents recieved multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/3.5.x/user/toc.html).
+- Table of Contents recieved multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/3.6.x/user/toc.html).
 - The debugger recived many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
 - A new visual indicator was introduced to highlight cells in which the code changed in the editor since last execution:
@@ -1891,21 +1891,21 @@ extensions does not require rebuilding JupyterLab and does not require
 having NodeJS installed. The previous way of distributing extensions as
 npm packages requiring rebuilding JupyterLab is still available as well.
 See the
-[documentation](https://jupyterlab.readthedocs.io/en/3.5.x/user/extensions.html#extensions)
+[documentation](https://jupyterlab.readthedocs.io/en/3.6.x/user/extensions.html#extensions)
 for more details.
 
 #### The JupyterLab interface supports multiple languages
 
 JupyterLab now provides the ability to set the display language of the
 user interface. See the
-[documentation](https://jupyterlab.readthedocs.io/en/3.5.x/user/language.html)
+[documentation](https://jupyterlab.readthedocs.io/en/3.6.x/user/language.html)
 for more details.
 
 #### A new visual debugger
 
 JupyterLab now ships with a debugger front-end by default, available for
 kernels that support the new debugging protocol. See the
-[documentation](https://jupyterlab.readthedocs.io/en/3.5.x/user/debugger.html)
+[documentation](https://jupyterlab.readthedocs.io/en/3.6.x/user/debugger.html)
 for more details.
 
 #### Improvements to Simple Interface mode and Mobile
@@ -2855,7 +2855,7 @@ closed.
   notebook toolbar
   ([#8024](https://github.com/jupyterlab/jupyterlab/pull/8024))
 
-<img alt="The main JupyterLab toolbar with focus on the Restart Kernel and Run All Cells button." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.5.x/docs/source/getting_started/changelog_restartrunallbutton.png" class="jp-screenshot">
+<img alt="The main JupyterLab toolbar with focus on the Restart Kernel and Run All Cells button." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.6.x/docs/source/getting_started/changelog_restartrunallbutton.png" class="jp-screenshot">
 
 - Added a context menu item for opening a Markdown editor from the
   Markdown preview
@@ -2979,18 +2979,18 @@ closed.
   ([#7407](https://github.com/jupyterlab/jupyterlab/pull/7407),
   [#7786](https://github.com/jupyterlab/jupyterlab/pull/7786))
 
-<img alt="Notebook cell tags in the left sidebar next to an open notebook." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.5.x/docs/source/getting_started/changelog_celltags.png" class="jp-screenshot">
+<img alt="Notebook cell tags in the left sidebar next to an open notebook." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.6.x/docs/source/getting_started/changelog_celltags.png" class="jp-screenshot">
 
 - File info display when hovering on a file in the file browser
   ([#7485](https://github.com/jupyterlab/jupyterlab/pull/7485),
   [#7352](https://github.com/jupyterlab/jupyterlab/issues/7352))
 
-<img alt="The file browser with a tooltip describing a notebook's info like the name, size, and kernel." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.5.x/docs/source/getting_started/changelog_fileinfo.png" class="jp-screenshot">
+<img alt="The file browser with a tooltip describing a notebook's info like the name, size, and kernel." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.6.x/docs/source/getting_started/changelog_fileinfo.png" class="jp-screenshot">
 
 - Support for searching outputs in notebooks
   ([#7258](https://github.com/jupyterlab/jupyterlab/pull/7258))
 
-<img alt="A notebook with multiple cells and the cell output searching in the upper right." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.5.x/docs/source/getting_started/changelog_searchoutput.png" class="jp-screenshot">
+<img alt="A notebook with multiple cells and the cell output searching in the upper right." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.6.x/docs/source/getting_started/changelog_searchoutput.png" class="jp-screenshot">
 
 - `Ctrl Shift .` and `Ctrl Shift ,` shortcuts move focus to the next
   and previous tab bar in the main area, respectively
@@ -3524,7 +3524,7 @@ in 1.0.0, and other 1.0.x milestones for bugs fixed in patch releases.
 
 ### Find and Replace
 
-<img alt="A notebook with multiple cells and the find and replace interface in the upper right." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.5.x/docs/source/getting_started/find.png" class="jp-screenshot">
+<img alt="A notebook with multiple cells and the find and replace interface in the upper right." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.6.x/docs/source/getting_started/find.png" class="jp-screenshot">
 
 We have added first class support for find and replace across
 JupyterLab. It is currently supported in notebooks and text files and is
@@ -3547,7 +3547,7 @@ extensible for other widgets who wish to support it.
 
 ### Status Bar
 
-<img alt="A screenshot of the updated JupyterLab status bar." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.5.x/docs/source/getting_started/statusbar.png" class="jp-screenshot">
+<img alt="A screenshot of the updated JupyterLab status bar." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/3.6.x/docs/source/getting_started/statusbar.png" class="jp-screenshot">
 
 We have integrated the [JupyterLab Status Bar
 package](https://github.com/jupyterlab/jupyterlab-statusbar) package

@@ -7,7 +7,7 @@ about: Create a report to help us improve
 Welcome! Before creating a new issue:
 * Search for relevant issues
 * Follow the issue reporting guidelines:
-https://jupyterlab.readthedocs.io/en/3.5.x/getting_started/issue.html
+https://jupyterlab.readthedocs.io/en/3.6.x/getting_started/issue.html
 -->
 
 ## Description
@@ -24,7 +24,7 @@ https://jupyterlab.readthedocs.io/en/3.5.x/getting_started/issue.html
 4. See error '...'
 
 <!--Describe how you diagnosed the issue. See the guidelines at
- https://jupyterlab.readthedocs.io/en/3.5.x/getting_started/issue.html -->
+ https://jupyterlab.readthedocs.io/en/3.6.x/getting_started/issue.html -->
 
 ## Expected behavior
 

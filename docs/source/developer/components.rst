@@ -8,7 +8,7 @@ IDE-like experience. However, developers are encouraged to use these to bring
 to life their own visions of what a computational environment should look
 like.
 
-The JupyterLab repository has `many examples <https://github.com/jupyterlab/jupyterlab/tree/3.5.x/examples>`_
+The JupyterLab repository has `many examples <https://github.com/jupyterlab/jupyterlab/tree/3.6.x/examples>`_
 to get you started.
 
 The ``examples`` directory contains:
