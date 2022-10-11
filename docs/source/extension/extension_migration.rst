@@ -58,9 +58,11 @@ bumped their major version (following semver convention). We want to point out p
      by a new plugin ``@jupyterlab/docmanager-extension:opener``.
      The ``IDocumentWidgetOpener`` interface also now defines an ```opened``` signal that is emitted when a widget is opened.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
-   ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-   ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
-   ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+     ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
+     ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument``.
+     And the ``ymodel`` attribute has been renamed ``model`` typed ``T`` (relaxing typing from ``YDocument`` to ``ISharedDocument``).
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
