@@ -213,7 +213,7 @@ Actions can be linked to a notification but the interface depends on how the not
 is handled.
 
 There is two ways of interacting with notifications: through an API or through commands. The only
-difference is that actions linked to a notification can have arbitrary callback when using the API.
+difference is that actions linked to a notification can have an arbitrary callback when using the API.
 But only a command can be set as an action when using the command call for creating a notification.
 
 Using the API
@@ -383,7 +383,7 @@ An action is defined by:
      data?: T;
    });
 
-The result is a boolean indicating if the update was successful. In particular
+The result is a boolean indicating if the update was successful. In particular,
 updating an absent notification will fail.
 
 ``'apputils:dismiss-notification'`` to dismiss a notification:

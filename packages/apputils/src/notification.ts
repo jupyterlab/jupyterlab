@@ -224,7 +224,7 @@ export namespace Notification {
     /**
      * Notification creation date
      */
-    createAt: number;
+    createdAt: number;
     /**
      * Notification modification date
      */
