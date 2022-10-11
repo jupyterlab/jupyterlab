@@ -893,7 +893,8 @@ export class DocumentWidgetOpenerMock {
   }
 
   open(widget: IDocumentWidget): void {
-    // no-op
+    // no-op, just emit the signal
+    this._opened.emit(widget);
   }
 
   private _opened = new Signal<this, IDocumentWidget>(this);
