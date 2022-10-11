@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 import { UserManager } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
@@ -28,9 +29,9 @@ export class WebSocketProvider
     super(
       options.url,
       options.format + ':' + options.contentType + ':' + options.path,
-      options.ymodel.ydoc,
+      options.model.ydoc,
       {
-        awareness: options.ymodel.awareness
+        awareness: options.model.awareness
       }
     );
     this._path = options.path;
@@ -51,7 +52,7 @@ export class WebSocketProvider
       );
     };
 
-    const awareness = options.ymodel.awareness;
+    const awareness = options.model.awareness;
     const user = options.user;
     const userChanged = () => {
       awareness.setLocalStateField('user', user.identity);
@@ -135,7 +136,8 @@ export namespace WebSocketProvider {
   /**
    * The instantiation options for a WebSocketProvider.
    */
-  export interface IOptions extends IDocumentProviderFactory.IOptions {
+  export interface IOptions
+    extends IDocumentProviderFactory.IOptions<YDocument<DocumentChange>> {
     /**
      * The server URL
      */

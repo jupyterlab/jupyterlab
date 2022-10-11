@@ -24,6 +24,7 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
+import { DocumentChange, ISharedDocument } from '@jupyterlab/shared-models';
 import * as ymodels from '@jupyterlab/shared-models';
 import {
   ITranslator,
@@ -69,7 +70,7 @@ export class Context<
       this._model = this._factory.createNew(lang, undefined, false);
     }
 
-    const ymodel = this._model.sharedModel as ymodels.YDocument<any>; // translate to the concrete Yjs implementation
+    const ymodel = this._model.sharedModel as ymodels.YDocument<DocumentChange>; // translate to the concrete Yjs implementation
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
@@ -79,7 +80,7 @@ export class Context<
           path: this._path,
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
-          ymodel
+          model: this._model.sharedModel
         })
       : new ProviderMock();
 
@@ -969,7 +970,7 @@ export namespace Context {
     /**
      * An factory method for the document provider.
      */
-    docProviderFactory?: IDocumentProviderFactory;
+    docProviderFactory?: IDocumentProviderFactory<ISharedDocument>;
 
     /**
      * An IModelDB factory method which may be used for the document.
