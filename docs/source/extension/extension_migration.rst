@@ -105,6 +105,8 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/rendermime-interfaces`` from 3.x to 4.x
   Remove ``IRenderMime.IRenderer.translator?`` attribute; the translator object is still passed to
   the constructor if needed by the renderer factory.
+- ``@jupyterlab/services`` from 6.x to 7.x
+   * Remove ``Contents.IDrive.modelDBFactory`` and ``Contents.IManager.getModelDBFactory``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
