@@ -48,7 +48,6 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^6.0.0-alpha.14",
     "@jupyterlab/nbformat": "^4.0.0-alpha.14",
-    "@jupyterlab/observables": "^5.0.0-alpha.14",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.14",
     "@jupyterlab/statedb": "^4.0.0-alpha.14",
     "@lumino/coreutils": "^2.0.0-alpha.6",
