@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal-extension",
-  "version": "4.0.0-alpha.14",
+  "version": "4.0.0-alpha.15",
   "description": "JupyterLab - Terminal Emulator Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,16 +37,16 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.14",
-    "@jupyterlab/apputils": "^4.0.0-alpha.14",
-    "@jupyterlab/launcher": "^4.0.0-alpha.14",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.14",
-    "@jupyterlab/running": "^4.0.0-alpha.14",
-    "@jupyterlab/services": "^7.0.0-alpha.14",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.14",
-    "@jupyterlab/terminal": "^4.0.0-alpha.14",
-    "@jupyterlab/translation": "^4.0.0-alpha.14",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.29",
+    "@jupyterlab/application": "^4.0.0-alpha.15",
+    "@jupyterlab/apputils": "^4.0.0-alpha.15",
+    "@jupyterlab/launcher": "^4.0.0-alpha.15",
+    "@jupyterlab/mainmenu": "^4.0.0-alpha.15",
+    "@jupyterlab/running": "^4.0.0-alpha.15",
+    "@jupyterlab/services": "^7.0.0-alpha.15",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.15",
+    "@jupyterlab/terminal": "^4.0.0-alpha.15",
+    "@jupyterlab/translation": "^4.0.0-alpha.15",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.30",
     "@lumino/widgets": "^2.0.0-alpha.6"
   },
   "devDependencies": {
