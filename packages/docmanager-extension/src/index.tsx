@@ -124,9 +124,7 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
         return this._opened;
       }
 
-      private _opened = new Signal<IDocumentWidgetOpener, IDocumentWidget>(
-        opener
-      );
+      private _opened = new Signal<this, IDocumentWidget>(this);
     })();
   }
 };
