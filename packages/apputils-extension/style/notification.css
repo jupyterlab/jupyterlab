@@ -65,7 +65,7 @@
   user-select: none;
 }
 
-.jp-Notification-List li {
+.jp-Notification-List-Item {
   padding: 2px 0;
 }
 
@@ -77,7 +77,7 @@
   background-color: var(--jp-brand-color1);
 }
 
-.jp-Notification-Status.jp-mod-selected span {
+.jp-Notification-Status.jp-mod-selected .jp-Notification-Status-Text {
   color: var(--jp-ui-inverse-font-color1);
 }
 

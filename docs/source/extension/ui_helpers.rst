@@ -212,7 +212,7 @@ At creation, a notification will receive an unique identifier.
 Actions can be linked to a notification but the interface depends on how the notification
 is handled.
 
-There is two ways of interacting with notifications: through an API or through commands. The only
+There are two ways of interacting with notifications: through an API or through commands. The only
 difference is that actions linked to a notification can have an arbitrary callback when using the API.
 But only a command can be set as an action when using the command call for creating a notification.
 
@@ -308,6 +308,10 @@ You can update a notification using:
     actions?: Array<IAction>;
     data?: ReadonlyJsonValue;
   }): boolean;
+
+.. note::
+
+   Once updated the notification will be moved at the begin of the notification stack.
 
 And you can dismiss a notification (if you provide an ``id``) or all
 notifications using:

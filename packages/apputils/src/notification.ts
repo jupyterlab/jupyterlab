@@ -110,16 +110,21 @@ export class NotificationManager implements IDisposable {
     options: Notification.IOptions<T>
   ): string {
     const now = Date.now();
+    const { progress, ...othersOptions } = options;
     const notification: Notification.INotification = Object.freeze({
       id: UUID.uuid4(),
-      createAt: now,
+      createdAt: now,
       modifiedAt: now,
       message,
       type,
       options: {
         // By default notification will be silent
         autoClose: 0,
-        ...options
+        progress:
+          typeof progress === 'number'
+            ? Math.min(Math.max(0, progress), 1)
+            : progress,
+        ...othersOptions
       }
     });
 
@@ -138,25 +143,33 @@ export class NotificationManager implements IDisposable {
    *
    * If the notification does not exists this won't do anything.
    *
+   * Once updated the notification will be moved at the begin
+   * of the notification stack.
+   *
    * @param args Update options
    * @returns Whether the update was successful or not.
    */
   update<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     args: Notification.IUpdate<T>
   ): boolean {
-    const { id, message, actions, autoClose, data, type } = args;
+    const { id, message, actions, autoClose, data, progress, type } = args;
+    const newProgress =
+      typeof progress === 'number'
+        ? Math.min(Math.max(0, progress), 1)
+        : progress;
     const notificationIndex = this._queue.findIndex(n => n.id === id);
     if (notificationIndex > -1) {
       const oldNotification = this._queue[notificationIndex];
       // We need to create a new object as notification are frozen; i.e. cannot be edited
       const notification = Object.freeze({
         ...oldNotification,
-        message,
+        message: message ?? oldNotification.message,
         type: type ?? oldNotification.type,
         options: {
           actions: actions ?? oldNotification.options.actions,
           autoClose: autoClose ?? oldNotification.options.autoClose,
-          data: data ?? oldNotification.options.data
+          data: data ?? oldNotification.options.data,
+          progress: newProgress ?? oldNotification.options.progress
         },
         modifiedAt: Date.now()
       });
@@ -275,6 +288,14 @@ export namespace Notification {
      * Data associated with a notification
      */
     data?: T;
+
+    /**
+     * Task progression
+     *
+     * ### Notes
+     * This should be a number between 0 (not started) and 1 (completed).
+     */
+    progress?: number;
   }
 
   /**
@@ -333,7 +354,7 @@ export namespace Notification {
     /**
      * New notification message
      */
-    message: string;
+    message?: string;
     /**
      * New notification type
      */
@@ -459,6 +480,9 @@ export namespace Notification {
    * Helper function to update a notification.
    *
    * If the notification does not exists, nothing will happen.
+   *
+   * Once updated the notification will be moved at the begin
+   * of the notification stack.
    *
    * @param args Update options
    * @returns Whether the update was successful or not.

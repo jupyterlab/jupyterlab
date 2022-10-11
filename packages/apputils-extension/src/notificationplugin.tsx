@@ -178,6 +178,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                   : icons && icons[type];
               return (
                 <li
+                  className="jp-Notification-List-Item"
                   key={notification.id}
                   onClick={event => {
                     // Stop propagation to avoid closing the popup on click
@@ -202,7 +203,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                         )}
                       </div>
                     </div>
-                    <i
+                    <button
                       className={TOAST_CLOSE_BUTTON_CLASS}
                       title={trans.__('Dismiss notification')}
                       onClick={closeNotification}
@@ -211,7 +212,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                         className="jp-icon-hover"
                         tag="span"
                       ></deleteIcon.react>
-                    </i>
+                    </button>
                   </div>
                 </li>
               );
@@ -337,7 +338,10 @@ function NotificationStatus(props: INotificationStatusProps): JSX.Element {
           : props.trans.__('No notifications')
       }
     >
-      <TextItem source={`${props.count}`}></TextItem>
+      <TextItem
+        className="jp-Notification-Status-Text"
+        source={`${props.count}`}
+      ></TextItem>
       <bellIcon.react top={'2px'} stylesheet={'statusBar'}></bellIcon.react>
     </GroupItem>
   );
@@ -633,13 +637,13 @@ namespace Private {
   function CloseButton(props: CloseButtonProps): JSX.Element {
     const trans = translator.load('jupyterlab');
     return (
-      <i
+      <button
         className={TOAST_CLOSE_BUTTON_CLASS}
         title={trans.__('Close notification')}
         onClick={props.closeToast}
       >
         <closeIcon.react className="jp-icon-hover" tag="span"></closeIcon.react>
-      </i>
+      </button>
     );
   }
 

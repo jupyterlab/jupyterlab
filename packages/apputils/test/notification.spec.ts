@@ -72,12 +72,27 @@ describe('@jupyterlab/apputils', () => {
           data: {
             a: 1,
             b: 'data'
-          }
+          },
+          progress: 0.2
         };
         Notification.emit('dummy 1', 'default', options);
 
         expect(Notification.manager.notifications[0].options).toEqual(options);
       });
+    });
+
+    it.each([
+      [-1, 0],
+      [0, 0],
+      [0.2, 0.2],
+      [1, 1],
+      [2, 1]
+    ])('should bound the progress %s', (progress, expected) => {
+      Notification.emit('dummy message', 'in-progress', { progress });
+
+      expect(Notification.manager.notifications[0].options.progress).toEqual(
+        expected
+      );
     });
 
     describe('#error', () => {
@@ -222,6 +237,20 @@ describe('@jupyterlab/apputils', () => {
         );
         expect(Notification.manager.notifications[0].type).toEqual('success');
         expect(Notification.manager.notifications[0].options).toEqual(options);
+      });
+
+      it('should update only the progress', () => {
+        const id = Notification.emit('dummy message', 'in-progress', {
+          progress: 0
+        });
+
+        Notification.update({
+          id,
+          progress: 0.5
+        });
+        expect(Notification.manager.notifications[0].options.progress).toEqual(
+          0.5
+        );
       });
     });
 
