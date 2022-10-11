@@ -6,6 +6,8 @@ import os
 import sys
 import shutil
 
+# using jupyter_notebook_config.py for now since Binder is still starting the
+# classic notebook server
 argv = sys.argv[1:] + [
     "--debug",
     "--dev-mode",
