@@ -250,7 +250,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               )}
               onClick={() =>
                 window.open(
-                  'https://jupyterlab.readthedocs.io/en/3.5.x/user/extensions.html'
+                  'https://jupyterlab.readthedocs.io/en/3.6.x/user/extensions.html'
                 )
               }
             />
@@ -266,7 +266,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 )}
                 onClick={() =>
                   window.open(
-                    'https://jupyterlab.readthedocs.io/en/3.5.x/user/extensions.html'
+                    'https://jupyterlab.readthedocs.io/en/3.6.x/user/extensions.html'
                   )
                 }
               />
@@ -396,11 +396,11 @@ function getPrebuiltUninstallInstruction(
       </p>
       <p>
         <a
-          href="https://jupyterlab.readthedocs.io/en/3.5.x/user/extensions.html"
+          href="https://jupyterlab.readthedocs.io/en/3.6.x/user/extensions.html"
           target="_blank"
           rel="noopener noreferrer"
         >
-          https://jupyterlab.readthedocs.io/en/3.5.x/user/extensions.html
+          https://jupyterlab.readthedocs.io/en/3.6.x/user/extensions.html
         </a>
       </p>
     </div>
@@ -725,7 +725,7 @@ administrator to verify the listings configuration.`)}
           </div>
           <div>
             <a
-              href="https://jupyterlab.readthedocs.io/en/3.5.x/user/extensions.html"
+              href="https://jupyterlab.readthedocs.io/en/3.6.x/user/extensions.html"
               target="_blank"
               rel="noopener noreferrer"
             >

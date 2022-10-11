@@ -2,9 +2,9 @@ name: Linux JS Flaky Tests
 
 on:
   push:
-    branches: [3.5.x]
+    branches: [3.6.x]
   pull_request:
-    branches: [3.5.x]
+    branches: [3.6.x]
   release:
     types: [published]
 

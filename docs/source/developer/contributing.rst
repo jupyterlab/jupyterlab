@@ -207,7 +207,7 @@ Installing Node.js and jlpm
 Building JupyterLab from its GitHub source code requires Node.js. The
 development version requires Node.js version 12+, as defined in the
 ``engines`` specification in
-`dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/3.5.x/dev_mode/package.json>`__.
+`dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/3.6.x/dev_mode/package.json>`__.
 
 If you use ``conda``, you can get it with:
 
@@ -659,7 +659,7 @@ Main reasons for UI test failures are:
 
 1. **A visual regression caused by code changes**:
 
-   Sometimes unintentional UI changes are introduced by modifications to project source code. Goal of visual regression testing is to detect this kind of UI changes. If your PR / commit is causing visual regression, then debug and fix the regression caused. You can locally run and debug the UI tests to fix the visual regression. Follow the instructions in steps 5-7 of ``Adding a new UI test suite guide`` in `UI Testing documentation <https://github.com/jupyterlab/jupyterlab/blob/3.5.x/galata/README.md#adding-a-new-ui-test-suite>`__ to locally debug and fix UI tests. Once you have a fix, you can push the change to your GitHub branch and test with GitHub actions.
+   Sometimes unintentional UI changes are introduced by modifications to project source code. Goal of visual regression testing is to detect this kind of UI changes. If your PR / commit is causing visual regression, then debug and fix the regression caused. You can locally run and debug the UI tests to fix the visual regression. Follow the instructions in steps 5-7 of ``Adding a new UI test suite guide`` in `UI Testing documentation <https://github.com/jupyterlab/jupyterlab/blob/3.6.x/galata/README.md#adding-a-new-ui-test-suite>`__ to locally debug and fix UI tests. Once you have a fix, you can push the change to your GitHub branch and test with GitHub actions.
 
 2. **An intended update to user interface**:
 
@@ -671,7 +671,7 @@ Main reasons for UI test failures are:
      test snaphsots.
    - ``please update snapshots``: Combine the two previous comments effects.
 
-For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/3.5.x/galata/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
+For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/3.6.x/galata/README.md>`__ and `Galata documentation <https://github.com/jupyterlab/galata/blob/main/README.md>`__.
 
 Good Practices for Integration tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

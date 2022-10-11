@@ -156,7 +156,7 @@ A mime renderer plugin is an object with the fields listed in the
 `rendermime-interfaces IExtension <../api/interfaces/rendermime_interfaces.irendermime.iextension.html>`__
 object.
 
-JupyterLab has a `pdf mime renderer extension <https://github.com/jupyterlab/jupyterlab/tree/3.5.x/packages/pdf-extension>`__, for example. In core JupyterLab, this is used to view pdf files and view pdf data mime data in a notebook.
+JupyterLab has a `pdf mime renderer extension <https://github.com/jupyterlab/jupyterlab/tree/3.6.x/packages/pdf-extension>`__, for example. In core JupyterLab, this is used to view pdf files and view pdf data mime data in a notebook.
 
 We have a `mime renderer tutorial <https://github.com/jupyterlab/jupyterlab-mp4>`__  walking through creating a mime renderer extension which adds mp4 video rendering to JupyterLab. We also have a `cookiecutter for mime renderer extensions <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`__  in TypeScript.
 
@@ -175,7 +175,7 @@ A theme is a special application plugin that registers a theme with the ``ThemeM
 
 The extension package containing the theme plugin must include all static assets that are referenced by ``@import`` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or ``url('../foo/bar.css')`` can be used to refer local files in the theme. Absolute URLs (starting with a ``/``) or external URLs (e.g. ``https:``) can be used to refer to external assets.
 
-See the `JupyterLab Light Theme <https://github.com/jupyterlab/jupyterlab/tree/3.5.x/packages/theme-light-extension>`__ for an example.
+See the `JupyterLab Light Theme <https://github.com/jupyterlab/jupyterlab/tree/3.6.x/packages/theme-light-extension>`__ for an example.
 
 See the `TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__ for a quick start to developing a theme plugin.
 
@@ -186,7 +186,7 @@ Source Extensions
 
 A source extension is a JavaScript (npm) package that exports one or more plugins. All JupyterLab extensions are developed as source extensions (for example, prebuilt extensions are built from source extensions).
 
-A source extension has metadata in the ``jupyterlab`` field of its ``package.json`` file. The `JSON schema <https://github.com/jupyterlab/jupyterlab/blob/3.5.x/builder/metadata_schema.json>`__ for the metadata is distributed in the ``@jupyterlab/builder`` package.
+A source extension has metadata in the ``jupyterlab`` field of its ``package.json`` file. The `JSON schema <https://github.com/jupyterlab/jupyterlab/blob/3.6.x/builder/metadata_schema.json>`__ for the metadata is distributed in the ``@jupyterlab/builder`` package.
 
 If you would like publish your source extension to npm and want users to be able to install your source extension, we recommend including the npm keyword ``jupyterlab-extension`` in ``package.json``. This enables JupyterLab's extension manager to find your extension and display it for users in its graphical interface::
 
@@ -257,10 +257,10 @@ For example, the JupyterLab ``filebrowser-extension`` package exports the ``@jup
           "schemaDir": "schema",
         }
 
-The file browser setting schema file (which specifies some default keyboard shortcuts and other settings for the filebrowser) is located in ``schema/browser.json`` (see `here <https://github.com/jupyterlab/jupyterlab/blob/3.5.x/packages/filebrowser-extension/schema/browser.json>`__).
+The file browser setting schema file (which specifies some default keyboard shortcuts and other settings for the filebrowser) is located in ``schema/browser.json`` (see `here <https://github.com/jupyterlab/jupyterlab/blob/3.6.x/packages/filebrowser-extension/schema/browser.json>`__).
 
 See the
-`fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/3.5.x/packages/fileeditor-extension>`__
+`fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/3.6.x/packages/fileeditor-extension>`__
 for another example of an extension that uses settings.
 
 Please ensure that the schema files are included in the ``files`` metadata in ``package.json``.
@@ -503,7 +503,7 @@ Custom webpack configuration can be used to enable webpack features, configure a
       }
     };
 
-This custom config will be merged with the `prebuilt extension config <https://github.com/jupyterlab/jupyterlab/blob/3.5.x/builder/src/extensionConfig.ts>`_
+This custom config will be merged with the `prebuilt extension config <https://github.com/jupyterlab/jupyterlab/blob/3.6.x/builder/src/extensionConfig.ts>`_
 when building the prebuilt extension.
 
 .. _prebuilt_dev_workflow:
