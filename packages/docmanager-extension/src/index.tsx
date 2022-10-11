@@ -104,7 +104,7 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
   provides: IDocumentWidgetOpener,
   activate: (app: JupyterFrontEnd) => {
     const { shell } = app;
-    return {
+    return Object.freeze({
       open(widget: IDocumentWidget, options?: DocumentRegistry.IOpenOptions) {
         if (!widget.id) {
           widget.id = `document-manager-${++Private.id}`;
@@ -126,7 +126,7 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
         this._signal = new Signal<IDocumentWidgetOpener, IDocumentWidget>(this);
         return this._signal;
       }
-    };
+    });
   }
 };
 
