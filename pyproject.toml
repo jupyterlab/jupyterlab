@@ -101,8 +101,8 @@ docs-screenshots = [
 ]
 test = [
     "jupyterlab_server[test]>=2.11.1,<3",
-    "pytest>=6.0",
-    "pytest-check-links>=0.5",
+    "pytest>=7.0",
+    "pytest-check-links>=0.7",
     "pytest-console-scripts",
     "requests",
     "requests_cache",
