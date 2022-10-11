@@ -12,21 +12,16 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "sideEffects": [
-    "style/**/*"
-  ],
+  "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js",
-    "style/index.css",
-    "style/index.js"
+    "lib/*.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -96,6 +91,7 @@
     "@jupyterlab/markedparser-extension": "^4.0.0-alpha.16",
     "@jupyterlab/mathjax2": "^4.0.0-alpha.16",
     "@jupyterlab/mathjax2-extension": "^4.0.0-alpha.16",
+    "@jupyterlab/metadataform": "^4.0.0-alpha.16",
     "@jupyterlab/metadataform-extension": "^4.0.0-alpha.16",
     "@jupyterlab/nbconvert-css": "^4.0.0-alpha.16",
     "@jupyterlab/nbformat": "^4.0.0-alpha.16",
@@ -142,6 +138,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "styleModule": "style/index.js"
+  }
 }

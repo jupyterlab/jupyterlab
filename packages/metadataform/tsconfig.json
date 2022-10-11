@@ -7,13 +7,16 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../application"
+      "path": "../apputils"
     },
     {
-      "path": "../metadataform"
+      "path": "../nbformat"
     },
     {
       "path": "../notebook"
+    },
+    {
+      "path": "../observables"
     },
     {
       "path": "../settingregistry"
