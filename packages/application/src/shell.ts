@@ -602,7 +602,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       const widgets = Array.from(dock.widgets());
       dock.mode = mode;
 
-      // Restore the original layout.
+      // Restore cached layout if possible.
       if (this._cachedLayout) {
         // Remove any disposed widgets in the cached layout and restore.
         Private.normalizeAreaConfig(dock, this._cachedLayout.main);
@@ -610,11 +610,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         this._cachedLayout = null;
       }
 
-      // Restore the widgets not restored in first place because the shell
-      // started in 'single-document' mode.
-      if (this._layoutRestorer) {
+      // If layout restoration has been deferred, restore layout now.
+      if (this._layoutRestorer.isDeferred) {
         this._layoutRestorer
-          .restoreDelayed()
+          .restoreDeferred()
           .then(mainArea => {
             if (mainArea) {
               const { currentWidget, dock } = mainArea;
@@ -627,10 +626,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
             }
           })
           .catch(reason => {
-            console.error('Fail to restore the layout delayed.');
+            console.error('Failed to restore the deferred layout.');
             console.error(reason);
           });
-        this._layoutRestorer = null;
       }
 
       // Add any widgets created during single document mode, which have
@@ -1078,16 +1076,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this.add(widget, area, options);
     });
     this._delayedWidget.length = 0;
+    this._layoutRestorer = layoutRestorer;
 
     // Get the layout from the restorer
     const layout = await layoutRestorer.fetch();
-
-    // Keep the restorer if some tracker has not been restored yet.
-    // Typically is the application has started in 'single-document' mode,
-    // and the main area has not been restored.
-    if (layoutRestorer.hasUnrestoredTracker) {
-      this._layoutRestorer = layoutRestorer;
-    }
 
     // Reset the layout
     const { mainArea, downArea, leftArea, rightArea, topArea, relativeSizes } =
@@ -1725,7 +1717,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
   private _translator: ITranslator;
-  private _layoutRestorer: ILayoutRestorer | null = null;
+  private _layoutRestorer: ILayoutRestorer;
 }
 
 namespace Private {

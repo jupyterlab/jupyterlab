@@ -36,11 +36,13 @@ export interface ILayoutRestorer extends IRestorer {
   restored: Promise<void>;
 
   /**
-   * A boolean whether some tracker are still waiting for restoration.
-   * Useful in case the application has started in 'single-document' mode
-   * and the main area has not been restored.
+   * Whether full layout restoration is deferred and is currently incomplete.
+   *
+   * #### Notes
+   * This flag is useful for tracking when the application has started in
+   * 'single-document' mode and the main area has not yet been restored.
    */
-  hasUnrestoredTracker: boolean;
+  isDeferred: boolean;
 
   /**
    * Add a widget to be tracked by the layout restorer.
@@ -75,7 +77,7 @@ export interface ILayoutRestorer extends IRestorer {
    *
    * @returns - the rehydrated main area.
    */
-  restoreDelayed(): Promise<ILabShell.IMainArea | null>;
+  restoreDeferred(): Promise<ILabShell.IMainArea | null>;
 }
 
 /**
@@ -161,19 +163,21 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
+   * Whether full layout restoration is deferred and is currently incomplete.
+   *
+   * #### Notes
+   * This flag is useful for tracking when the application has started in
+   * 'single-document' mode and the main area has not yet been restored.
+   */
+  get isDeferred(): boolean {
+    return this._deferred.length > 0;
+  }
+
+  /**
    * A promise resolved when the layout restorer is ready to receive signals.
    */
   get restored(): Promise<void> {
     return this._restored.promise;
-  }
-
-  /**
-   * A boolean whether some tracker are still waiting for restoration.
-   * Useful in case the application has started in 'single-document' mode
-   * and main area has not been restored.
-   */
-  get hasUnrestoredTracker(): boolean {
-    return this._unrestoredTrackers.length > 0;
   }
 
   /**
@@ -222,7 +226,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       if (this._mode === 'multiple-document') {
         mainArea = this._rehydrateMainArea(main);
       } else {
-        this._delayedMainAreaLayout = main;
+        this._deferredMainArea = main;
       }
 
       // Rehydrate down area.
@@ -255,22 +259,17 @@ export class LayoutRestorer implements ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(
+  async restore(
     tracker: WidgetTracker,
     options: IRestorer.IOptions<Widget>
   ): Promise<any> {
-    const warning = 'restore() can only be called before `first` has resolved.';
-
     if (this._firstDone) {
-      console.warn(warning);
-      return Promise.reject(warning);
+      throw new Error('restore() must be called before `first` has resolved.');
     }
 
     const { namespace } = tracker;
     if (this._trackers.has(namespace)) {
-      const warning = `A tracker namespaced ${namespace} was already restored.`;
-      console.warn(warning);
-      return Promise.reject(warning);
+      throw new Error(`The tracker "${namespace}" is already restored.`);
     }
 
     const { args, command, name, when } = options;
@@ -314,57 +313,43 @@ export class LayoutRestorer implements ILayoutRestorer {
       this._promises.push(promise);
 
       return promise;
-    } else {
-      tracker.delayedRestore({
-        args: args || (() => JSONExt.emptyObject),
-        command,
-        connector: this._connector,
-        name,
-        registry: this._registry,
-        when: when ? [first].concat(when) : first
-      });
-
-      this._unrestoredTrackers.push(tracker);
-      return Promise.resolve();
     }
+
+    tracker.defer({
+      args: args || (() => JSONExt.emptyObject),
+      command,
+      connector: this._connector,
+      name,
+      registry: this._registry,
+      when: when ? [first].concat(when) : first
+    });
+    this._deferred.push(tracker);
   }
 
   /**
-   * Restore the main area layout on demand.
-   * This happens when the application has started in 'single-document' mode
-   * (no main area widget loaded) and is switching to 'multiple-document' mode.
+   * Restore the application layout if its restoration has been deferred.
    *
    * @returns - the rehydrated main area.
    */
-  async restoreDelayed(): Promise<ILabShell.IMainArea | null> {
-    const promises = new Array<Promise<any>>();
+  async restoreDeferred(): Promise<ILabShell.IMainArea | null> {
+    if (!this.isDeferred) {
+      return null;
+    }
 
-    // Restore all the main area widgets.
-    this._unrestoredTrackers.forEach(widgetsTracker =>
-      promises.push(widgetsTracker.restore())
-    );
+    // Empty the deferred list and wait for all trackers to restore.
+    const wait = Promise.resolve();
+    const promises = this._deferred.map(t => wait.then(() => t.restore()));
+    this._deferred.length = 0;
+    await Promise.all(promises);
 
     // Rehydrate the main area layout.
-    let mainArea: ILabShell.IMainArea | null = null;
-    await Promise.all(promises)
-      .then(() => {
-        this._unrestoredTrackers.length = 0;
-        if (this._delayedMainAreaLayout) {
-          mainArea = this._rehydrateMainArea(this._delayedMainAreaLayout);
-        }
-      })
-      .catch(reason => {
-        console.error('Fail to rehydrate the main area.');
-        console.error(reason);
-      });
-
-    return mainArea;
+    return this._rehydrateMainArea(this._deferredMainArea);
   }
 
   /**
    * Save the layout state for the application.
    */
-  save(data: ILabShell.ILayout): Promise<void> {
+  save(layout: ILabShell.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (!this._promisesDone) {
       const warning = 'save() was called prematurely.';
@@ -374,19 +359,15 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     const dehydrated: Private.ILayout = {};
 
-    // Save the backup dehydrated main area layout if the main area has not been
-    // restored (application stated in 'single-document' mode).
-    if (!this.hasUnrestoredTracker) {
-      dehydrated.main = this._dehydrateMainArea(data.mainArea);
-    } else {
-      dehydrated.main = this._delayedMainAreaLayout;
-    }
-
-    dehydrated.down = this._dehydrateDownArea(data.downArea);
-    dehydrated.left = this._dehydrateSideArea(data.leftArea);
-    dehydrated.right = this._dehydrateSideArea(data.rightArea);
-    dehydrated.relativeSizes = data.relativeSizes;
-    dehydrated.top = { ...data.topArea };
+    // Save the cached main area layout if restoration is deferred.
+    dehydrated.main = this.isDeferred
+      ? this._deferredMainArea
+      : this._dehydrateMainArea(layout.mainArea);
+    dehydrated.down = this._dehydrateDownArea(layout.downArea);
+    dehydrated.left = this._dehydrateSideArea(layout.leftArea);
+    dehydrated.right = this._dehydrateSideArea(layout.rightArea);
+    dehydrated.relativeSizes = layout.relativeSizes;
+    dehydrated.top = { ...layout.topArea };
 
     return this._connector.save(KEY, dehydrated);
   }
@@ -557,6 +538,8 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   private _connector: IDataConnector<ReadonlyPartialJSONValue>;
+  private _deferred = new Array<WidgetTracker>();
+  private _deferredMainArea?: Private.IMainArea | null = null;
   private _first: Promise<any>;
   private _firstDone = false;
   private _promisesDone = false;
@@ -566,8 +549,6 @@ export class LayoutRestorer implements ILayoutRestorer {
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
   private _mode: DockPanel.Mode = 'multiple-document';
-  private _unrestoredTrackers = new Array<WidgetTracker>();
-  private _delayedMainAreaLayout: Private.IMainArea | null | undefined = null;
 }
 
 /**

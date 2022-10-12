@@ -177,7 +177,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * A promise resolved when the tracker has been restored.
    */
   get restored(): Promise<void> {
-    if (this._delayedRestore) {
+    if (this._deferred) {
       return Promise.resolve();
     } else {
       return this._pool.restored;
@@ -321,17 +321,16 @@ export class WidgetTracker<T extends Widget = Widget>
    * This function should not typically be invoked by client code.
    * Its primary use case is to be invoked by a restorer.
    */
-  async restore(options: IRestorable.IOptions<T> | void): Promise<any> {
-    let promise = null;
-    if (this._delayedRestore) {
-      promise = this._pool.restore(this._delayedRestore);
-      this._delayedRestore = null;
-    } else if (options) {
-      promise = this._pool.restore(options);
-    } else {
-      console.warn('No options provided to restore the tracker.');
+  async restore(options?: IRestorable.IOptions<T>): Promise<any> {
+    const deferred = this._deferred;
+    if (deferred) {
+      this._deferred = null;
+      return this._pool.restore(deferred);
     }
-    return promise;
+    if (options) {
+      return this._pool.restore(options);
+    }
+    console.warn('No options provided to restore the tracker.');
   }
 
   /**
@@ -343,8 +342,8 @@ export class WidgetTracker<T extends Widget = Widget>
    * This function is useful when starting the shell in 'single-document' mode,
    * to avoid restoring all useless widgets.
    */
-  delayedRestore(options: IRestorable.IOptions<T>): void {
-    this._delayedRestore = options;
+  defer(options: IRestorable.IOptions<T>): void {
+    this._deferred = options;
   }
 
   /**
@@ -367,12 +366,12 @@ export class WidgetTracker<T extends Widget = Widget>
   }
 
   private _currentChanged = new Signal<this, T | null>(this);
+  private _deferred: IRestorable.IOptions<T> | null = null;
   private _focusTracker: FocusTracker<T>;
   private _pool: RestorablePool<T>;
   private _isDisposed = false;
   private _widgetAdded = new Signal<this, T>(this);
   private _widgetUpdated = new Signal<this, T>(this);
-  private _delayedRestore: IRestorable.IOptions<T> | null = null;
 }
 
 /**
