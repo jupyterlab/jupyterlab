@@ -506,7 +506,7 @@ export namespace NotebookTools {
     protected onActiveNotebookPanelChanged(msg: Message): void {
       if (!this.notebookTools.activeNotebookPanel) {
         // Force cleaning up the signal
-        this.onActiveCellChanged();
+        void this.onActiveCellChanged();
       }
     }
 

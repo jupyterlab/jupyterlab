@@ -1034,7 +1034,7 @@ function activateWidgetFactory(
         loadingSettings
       );
 
-      loadingSettings?.then(settings => {
+      void loadingSettings?.then(settings => {
         panel.disposed.connect(() => {
           settings.dispose();
         });
