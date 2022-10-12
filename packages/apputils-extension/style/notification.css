@@ -92,7 +92,14 @@
 }
 
 .jp-Notification-Toast-Close {
+  align-self: start;
+  padding: 0;
   cursor: pointer;
+}
+
+.jp-toastContainer .jp-Notification-Toast-Close:hover {
+  /* The close button has its own hover style */
+  background: none;
 }
 
 .Toastify__toast.jp-Notification-Toast-error {
