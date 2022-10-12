@@ -666,7 +666,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * @param text The text to be inserted.
    */
   replaceSelection(text: string): void {
-    this.editor.dispatch(this.state.replaceSelection(text));
+    this.state.replaceSelection(text);
   }
 
   /**
