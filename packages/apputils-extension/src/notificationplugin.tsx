@@ -682,15 +682,15 @@ namespace Private {
     /**
      * Helper function for a toast with warning style
      */
-    warn: (content: ToastContent, options?: ToastOptions | undefined) => Id;
+    warn(content: ToastContent, options?: ToastOptions | undefined): Id;
     /**
      * Remove toast programmatically
      */
-    dismiss(id?: Id): false | void;
+    dismiss(id?: Id): void;
     /**
      * Clear waiting queue when limit is used
      */
-    clearWaitingQueue(params?: ClearWaitingQueueParams): false | void;
+    clearWaitingQueue(params?: ClearWaitingQueueParams): void;
     /**
      * return true if one container is displaying the toast
      */
@@ -702,7 +702,7 @@ namespace Private {
     /**
      * Used for controlled progress bar.
      */
-    done(id: React.ReactText): void;
+    done(id: Id): void;
     /**
      * Track changes. The callback get the number of toast displayed
      */
