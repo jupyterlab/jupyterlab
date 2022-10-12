@@ -311,7 +311,9 @@ describe('@jupyterlab/notebook', () => {
         const widget = tracker.currentWidget!;
         widget.content.activeCellIndex++;
         widget.content.activeCell!.model.metadata.set('bar', 1);
-        expect(JSON.stringify(model.sharedModel.getSource())).toContain('bar');
+        expect(
+          JSON.stringify(tool.editor.model.sharedModel.getSource())
+        ).toContain('bar');
       });
 
       it('should handle a change to the metadata', () => {
@@ -345,24 +347,25 @@ describe('@jupyterlab/notebook', () => {
           editorFactory
         });
         notebookTools.addItem({ tool });
-        const model = tool.editor.model;
-        expect(JSON.stringify(model.sharedModel.getSource())).toBeTruthy();
+        expect(
+          JSON.stringify(tool.editor.model.sharedModel.getSource())
+        ).toBeTruthy();
 
         simulate(panel0.node, 'focus');
-        expect(JSON.stringify(model.sharedModel.getSource())).toContain(
-          'panel0'
-        );
-        expect(JSON.stringify(model.sharedModel.getSource())).not.toContain(
-          'panel1'
-        );
+        expect(
+          JSON.stringify(tool.editor.model.sharedModel.getSource())
+        ).toContain('panel0');
+        expect(
+          JSON.stringify(tool.editor.model.sharedModel.getSource())
+        ).not.toContain('panel1');
 
         simulate(panel1.node, 'focus');
-        expect(JSON.stringify(model.sharedModel.getSource())).not.toContain(
-          'panel0'
-        );
-        expect(JSON.stringify(model.sharedModel.getSource())).toContain(
-          'panel1'
-        );
+        expect(
+          JSON.stringify(tool.editor.model.sharedModel.getSource())
+        ).not.toContain('panel0');
+        expect(
+          JSON.stringify(tool.editor.model.sharedModel.getSource())
+        ).toContain('panel1');
       });
 
       it('should handle a change to the metadata', () => {
