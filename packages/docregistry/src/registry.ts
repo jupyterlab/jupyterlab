@@ -11,6 +11,7 @@ import { IObservableList } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Kernel } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
+import { ISharedDocument } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   fileIcon,
@@ -821,7 +822,7 @@ export namespace DocumentRegistry {
     /**
      * The shared notebook model.
      */
-    readonly sharedModel: models.ISharedDocument;
+    readonly sharedModel: ISharedDocument;
 
     /**
      * Serialize the model to a string.
@@ -1168,8 +1169,6 @@ export namespace DocumentRegistry {
      * Create a new model for a given path.
      *
      * @param languagePreference - An optional kernel language preference.
-     * @param modelDB - An optional modelDB.
-     * @param isInitialized - An optional flag to check if the model is initialized.
      *
      * @returns A new document model.
      */

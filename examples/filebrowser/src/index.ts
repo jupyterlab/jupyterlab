@@ -77,6 +77,16 @@ function createApp(
         const index = widgets.indexOf(w);
         widgets.splice(index, 1);
       });
+    },
+    get opened() {
+      return {
+        connect: () => {
+          return false;
+        },
+        disconnect: () => {
+          return false;
+        }
+      };
     }
   };
 

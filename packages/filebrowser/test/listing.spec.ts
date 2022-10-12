@@ -15,11 +15,7 @@ const createOptionsForConstructor: () => DirListing.IOptions = () => ({
   model: new FilterFileBrowserModel({
     manager: new DocumentManager({
       registry: new DocumentRegistry(),
-      opener: {
-        open: () => {
-          /* noop */
-        }
-      },
+      opener: new Mock.DocumentWidgetOpenerMock(),
       manager: new Mock.ServiceManagerMock()
     })
   })

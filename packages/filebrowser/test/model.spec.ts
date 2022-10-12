@@ -49,11 +49,7 @@ describe('filebrowser/model', () => {
   let subDir: string;
   let subSubDir: string;
   let state: StateDB;
-  const opener: DocumentManager.IWidgetOpener = {
-    open: widget => {
-      /* no op */
-    }
-  };
+  const opener = new Mock.DocumentWidgetOpenerMock();
 
   beforeAll(() => {
     registry = new DocumentRegistry({

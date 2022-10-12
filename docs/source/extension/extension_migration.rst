@@ -53,11 +53,16 @@ bumped their major version (following semver convention). We want to point out p
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
    in particular those with the strict null checks enabled.
 - ``@jupyterlab/docmanager`` from 3.x to 4.x
-   The ``renameDialog`` now receives the ``DocumentRegistry.Context`` instead of a path.
+   * The ``renameDialog`` now receives the ``DocumentRegistry.Context`` instead of a path.
+   * The interface ``DocumentManager.IWidgetOpener`` is now ``IDocumentWidgetOpener`` and is provided
+     by a new plugin ``@jupyterlab/docmanager-extension:opener``.
+     The ``IDocumentWidgetOpener`` interface also now defines an ```opened``` signal that is emitted when a widget is opened.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
-   ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-   ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
-   ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+     ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
+     ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument``.
+     And the ``ymodel`` attribute has been renamed ``model`` typed ``T`` (relaxing typing from ``YDocument`` to ``ISharedDocument``).
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
@@ -105,6 +110,8 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/rendermime-interfaces`` from 3.x to 4.x
   Remove ``IRenderMime.IRenderer.translator?`` attribute; the translator object is still passed to
   the constructor if needed by the renderer factory.
+- ``@jupyterlab/services`` from 6.x to 7.x
+   * Remove ``Contents.IDrive.modelDBFactory`` and ``Contents.IManager.getModelDBFactory``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/statusbar`` from 3.x to 4.x

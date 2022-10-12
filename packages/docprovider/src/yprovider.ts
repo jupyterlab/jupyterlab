@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { ICurrentUser } from '@jupyterlab/collaboration';
+import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
@@ -33,9 +34,9 @@ export class WebSocketProvider
     super(
       options.url,
       options.format + ':' + options.contentType + ':' + options.path,
-      options.ymodel.ydoc,
+      options.model.ydoc,
       {
-        awareness: options.ymodel.awareness
+        awareness: options.model.awareness
       }
     );
     this._path = options.path;
@@ -56,7 +57,7 @@ export class WebSocketProvider
       );
     };
 
-    const awareness = options.ymodel.awareness;
+    const awareness = options.model.awareness;
     const user = options.user;
     const userChanged = () => {
       const name = user.displayName !== '' ? user.displayName : user.name;
@@ -141,7 +142,8 @@ export namespace WebSocketProvider {
   /**
    * The instantiation options for a WebSocketProvider.
    */
-  export interface IOptions extends IDocumentProviderFactory.IOptions {
+  export interface IOptions
+    extends IDocumentProviderFactory.IOptions<YDocument<DocumentChange>> {
     /**
      * The server URL
      */

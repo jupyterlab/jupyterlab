@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
+import { ISharedDocument } from '@jupyterlab/shared-models';
 import { Token } from '@lumino/coreutils';
 
 /**
@@ -36,9 +36,9 @@ export interface IDocumentProvider {
 /**
  * The type for the document provider factory.
  */
-export type IDocumentProviderFactory = (
-  options: IDocumentProviderFactory.IOptions
-) => IDocumentProvider;
+export type IDocumentProviderFactory<
+  T extends ISharedDocument = ISharedDocument
+> = (options: IDocumentProviderFactory.IOptions<T>) => IDocumentProvider;
 
 /**
  * A namespace for IDocumentProviderFactory statics.
@@ -47,17 +47,25 @@ export namespace IDocumentProviderFactory {
   /**
    * The instantiation options for a IDocumentProviderFactory.
    */
-  export interface IOptions {
+  export interface IOptions<T extends ISharedDocument> {
     /**
      * The name (id) of the room
      */
     path: string;
+
+    /**
+     * Content type
+     */
     contentType: string;
+
+    /**
+     * The source format
+     */
     format: string;
 
     /**
-     * The YNotebook.
+     * The document model
      */
-    ymodel: YDocument<DocumentChange>;
+    model: T;
   }
 }

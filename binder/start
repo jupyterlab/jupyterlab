@@ -3,6 +3,8 @@ import sys
 import shutil
 import os
 
+# using jupyter_notebook_config.py for now since Binder is still starting the
+# classic notebook server
 argv = sys.argv[1:] + ["--config", "binder/jupyter_notebook_config.py"]
 print(argv)
 
