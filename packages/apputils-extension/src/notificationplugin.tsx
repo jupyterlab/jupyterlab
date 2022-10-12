@@ -567,22 +567,23 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
           })
           .catch(r => {
             console.error(`Failed to dismiss all toasts:\n${r}`);
+          })
+          .finally(() => {
+            popup = showPopup({
+              body: notificationList,
+              anchor: notificationStatus,
+              align: 'right',
+              hasDynamicSize: true
+            });
+
+            // Focus on the pop-up
+            notificationList.node.focus();
+
+            popup.disposed.connect(() => {
+              model.listOpened = false;
+              popup = null;
+            });
           });
-
-        popup = showPopup({
-          body: notificationList,
-          anchor: notificationStatus,
-          align: 'right',
-          hasDynamicSize: true
-        });
-
-        // Focus on the pop-up
-        notificationList.node.focus();
-
-        popup.disposed.connect(() => {
-          model.listOpened = false;
-          popup = null;
-        });
       }
 
       model.listOpened = popup !== null;
