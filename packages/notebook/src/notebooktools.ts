@@ -497,6 +497,19 @@ export namespace NotebookTools {
       await this.refresh();
     }
 
+    /**
+     * Handle a change to the notebook panel.
+     *
+     * #### Notes
+     * The default implementation is a no-op.
+     */
+    protected onActiveNotebookPanelChanged(msg: Message): void {
+      if (!this.notebookTools.activeNotebookPanel) {
+        // Force cleaning up the signal
+        this.onActiveCellChanged();
+      }
+    }
+
     protected async refresh(): Promise<void> {
       await this._refreshDebouncer.invoke();
     }
@@ -519,10 +532,10 @@ export namespace NotebookTools {
       const { editorFactory } = options;
       this.addClass('jp-MetadataEditorTool');
       const layout = (this.layout = new PanelLayout());
-      this.editor = new JSONEditor({
-        editorFactory
-      });
-      this.editor.title.label = options.label || 'Edit Metadata';
+
+      this._editorFactory = editorFactory;
+      this._editorLabel = options.label || 'Edit Metadata';
+      this._createEditor();
       const titleNode = new Widget({ node: document.createElement('label') });
       titleNode.node.textContent = options.label || 'Edit Metadata';
       layout.addWidget(titleNode);
@@ -532,7 +545,42 @@ export namespace NotebookTools {
     /**
      * The editor used by the tool.
      */
-    readonly editor: JSONEditor;
+    get editor(): JSONEditor {
+      return this._editor;
+    }
+
+    /**
+     * Handle a change to the notebook.
+     */
+    protected onActiveNotebookPanelChanged(msg: Message): void {
+      this.editor.dispose();
+      if (this.notebookTools.activeNotebookPanel) {
+        this._createEditor();
+      }
+    }
+
+    /**
+     * Handle a change to the notebook.
+     */
+    protected onActiveCellChanged(msg: Message): void {
+      this.editor.dispose();
+      if (this.notebookTools.activeCell) {
+        this._createEditor();
+      }
+    }
+
+    private _createEditor() {
+      this._editor = new JSONEditor({
+        editorFactory: this._editorFactory
+      });
+      this.editor.title.label = this._editorLabel;
+
+      (this.layout as PanelLayout).addWidget(this.editor);
+    }
+
+    private _editor: JSONEditor;
+    private _editorLabel: string;
+    private _editorFactory: CodeEditor.Factory;
   }
 
   /**
@@ -580,6 +628,7 @@ export namespace NotebookTools {
      * Handle a change to the notebook.
      */
     protected onActiveNotebookPanelChanged(msg: Message): void {
+      super.onActiveNotebookPanelChanged(msg);
       this._update();
     }
 
@@ -613,6 +662,7 @@ export namespace NotebookTools {
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(msg: Message): void {
+      super.onActiveCellChanged(msg);
       this._update();
     }
 
