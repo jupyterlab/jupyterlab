@@ -142,6 +142,12 @@
     "shortcuts": []
   },
   {
+    "id": "apputils:display-notifications",
+    "label": "Show Notifications",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "apputils:incr-font-size",
     "label": "Increase Font Size",
     "caption": "",
