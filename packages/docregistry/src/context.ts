@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -77,6 +78,7 @@ export class Context<
       ? docProviderFactory({
           path: this._path,
           contentType: this._factory.contentType,
+          format: this._factory.fileFormat!,
           ymodel
         })
       : new ProviderMock();
@@ -259,27 +261,18 @@ export class Context<
    *
    * @returns a promise that resolves upon initialization.
    */
-  async initialize(isNew: boolean): Promise<void> {
-    const lock = await this._provider.acquireLock();
-    const contentIsInitialized = await this._provider.requestInitialContent();
-    let promise;
-    if (isNew || contentIsInitialized) {
-      promise = this._save();
+  async initialize(isNew: boolean) {
+    if (PageConfig.getOption('collaborative') == 'true') {
+      await this._loadContext();
     } else {
-      promise = this._revert();
+      if (isNew) {
+        await this._save();
+      } else {
+        await this._revert();
+      }
+      this._model.initialize();
     }
-    // make sure that the lock is released after the above operations are completed.
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    // if save/revert completed successfully, we set the initialized content in the rtc server.
-    promise
-      .then(() => {
-        this._provider.putInitializedState();
-        this._model.initialize();
-      })
-      .then(finally_, finally_);
-    return promise;
+    this.model.sharedModel.clearUndoHistory();
   }
 
   /**
@@ -299,21 +292,8 @@ export class Context<
    * Save the document contents to disk.
    */
   async save(): Promise<void> {
-    const [lock] = await Promise.all([
-      this._provider.acquireLock(),
-      this.ready
-    ]);
-    let promise: Promise<void>;
-    promise = this._save();
-    // if save completed successfully, we set the initialized content in the rtc server.
-    promise = promise.then(() => {
-      this._provider.putInitializedState();
-    });
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    promise.then(finally_, finally_);
-    return await promise;
+    await this.ready;
+    await this._save();
   }
 
   /**
@@ -371,16 +351,8 @@ export class Context<
    * Revert the document contents to disk contents.
    */
   async revert(): Promise<void> {
-    const [lock] = await Promise.all([
-      this._provider.acquireLock(),
-      this.ready
-    ]);
-    const promise = this._revert();
-    const finally_ = () => {
-      this._provider.releaseLock(lock);
-    };
-    promise.then(finally_, finally_);
-    return await promise;
+    await this.ready;
+    await this._revert();
   }
 
   /**
@@ -518,12 +490,14 @@ export class Context<
    * Update our contents model, without the content.
    */
   private _updateContentsModel(model: Contents.IModel): void {
+    const writable =
+      model.writable && PageConfig.getOption('collaborative') != 'true';
     const newModel: Contents.IModel = {
       path: model.path,
       name: model.name,
       type: model.type,
       content: undefined,
-      writable: model.writable,
+      writable,
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
@@ -576,9 +550,13 @@ export class Context<
    * @param newName - the new name for the document.
    */
   private async _rename(newName: string): Promise<void> {
-    const splitPath = this.path.split('/');
+    const splitPath = this.localPath.split('/');
     splitPath[splitPath.length - 1] = newName;
-    const newPath = splitPath.join('/');
+    let newPath = PathExt.join(...splitPath);
+    const driveName = this._manager.contents.driveName(this.path);
+    if (driveName) {
+      newPath = `${driveName}:${newPath}`;
+    }
 
     await this._manager.contents.rename(this.path, newPath);
     await this.sessionContext.session?.setPath(newPath);
@@ -592,9 +570,14 @@ export class Context<
    * Save the document contents to disk.
    */
   private async _save(): Promise<void> {
+    // if collaborative mode is enabled, saving happens in the back-end
+    // after each change to the document
+    if (PageConfig.getOption('collaborative') === 'true') {
+      return;
+    }
     this._saveState.emit('started');
     const model = this._model;
-    let content: PartialJSONValue;
+    let content: PartialJSONValue = null;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
     } else {
@@ -612,11 +595,7 @@ export class Context<
     try {
       let value: Contents.IModel;
       await this._manager.ready;
-      if (!model.modelDB.isCollaborative) {
-        value = await this._maybeSave(options);
-      } else {
-        value = await this._manager.contents.save(this._path, options);
-      }
+      value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
       }
@@ -656,6 +635,47 @@ export class Context<
   }
 
   /**
+   * Load the metadata of the document without the content.
+   */
+  private _loadContext(): Promise<void> {
+    const opts: Contents.IFetchOptions = {
+      type: this._factory.contentType,
+      content: false,
+      ...(this._factory.fileFormat !== null
+        ? { format: this._factory.fileFormat }
+        : {})
+    };
+    const path = this._path;
+    return this._manager.ready
+      .then(() => {
+        return this._manager.contents.get(path, opts);
+      })
+      .then(contents => {
+        if (this.isDisposed) {
+          return;
+        }
+        const model = {
+          ...contents,
+          format: this._factory.fileFormat
+        };
+        this._updateContentsModel(model);
+        this._model.dirty = false;
+        if (!this._isPopulated) {
+          return this._populate();
+        }
+      })
+      .catch(async err => {
+        const localPath = this._manager.contents.localPath(this._path);
+        const name = PathExt.basename(localPath);
+        void this._handleError(
+          err,
+          this._trans.__('File Load Error for %1', name)
+        );
+        throw err;
+      });
+  }
+
+  /**
    * Revert the document contents to disk contents.
    *
    * @param initializeModel - call the model's initialization function after
@@ -681,9 +701,6 @@ export class Context<
         }
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
-          if (initializeModel) {
-            model.initialize();
-          }
         } else {
           let content = contents.content;
           // Convert line endings if necessary, marking the file
@@ -698,9 +715,6 @@ export class Context<
             this._lineEnding = null;
           }
           model.fromString(content);
-          if (initializeModel) {
-            model.initialize();
-          }
         }
         this._updateContentsModel(contents);
         model.dirty = false;
@@ -882,8 +896,10 @@ or load the version on disk (revert)?`,
     this._path = newPath;
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
-    await this.save();
+    // we must rename the document before saving with the new path
     this._ycontext.set('path', this._path);
+    await this._provider.renameAck;
+    await this.save();
     await this._maybeCheckpoint(true);
   }
 
