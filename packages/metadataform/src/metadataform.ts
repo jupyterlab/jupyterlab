@@ -63,6 +63,13 @@ export class MetadataFormWidget
   }
 
   /**
+   * Get the form object itself.
+   */
+  get form(): FormWidget | undefined {
+    return this._form;
+  }
+
+  /**
    * Get the list of existing metadataKey (array of array of string).
    */
   get metadataKeys(): string[] {
@@ -125,12 +132,25 @@ export class MetadataFormWidget
     const notebookMetadataObject: Private.IMetadataRepresentation = {};
 
     for (let [metadataKey, value] of Object.entries(formData)) {
+      // Continue if the metadataKey does not exist in schema.
+      if (!this.metadataKeys.includes(metadataKey)) continue;
+
+      // Continue if the metadataKey is a notebook level one and there is no NotebookModel.
       if (
         this._metaInformation[metadataKey]?.level === 'notebook' &&
         this._notebookModelNull
       )
         continue;
 
+      // Continue if the metadataKey is not applicable to the cell type.
+      if (
+        this._metaInformation[metadataKey]?.cellTypes &&
+        !this._metaInformation[metadataKey]?.cellTypes?.includes(
+          cell.model.type
+        )
+      ) {
+        continue;
+      }
       let currentMetadata: IObservableJSON;
       let metadataObject: Private.IMetadataRepresentation;
 
@@ -261,9 +281,9 @@ export class MetadataFormWidget
    * Build widget.
    */
   protected buildWidget(props: MetadataForm.IProps): void {
-    const formWidget = new FormWidget(props, this._pluginId);
-    formWidget.addClass('jp-MetadataForm');
-    this.setContent(formWidget);
+    this._form = new FormWidget(props, this._pluginId);
+    this._form.addClass('jp-MetadataForm');
+    this.setContent(this._form);
   }
 
   /**
@@ -379,11 +399,12 @@ export class MetadataFormWidget
       uiSchema: this._uiSchema,
       translator: this.translator || null,
       formData: formData,
-      formWidget: this
+      metadataFormWidget: this
     });
   }
 
   protected translator: ITranslator;
+  private _form: FormWidget | undefined = undefined;
   private _metadataSchema: MetadataForm.IMetadataSchema;
   private _metaInformation: MetadataForm.IMetaInformation;
   private _uiSchema: MetadataForm.IUiSchema;

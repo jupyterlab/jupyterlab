@@ -1,0 +1,33 @@
+{
+  "extends": "../../tsconfigbase.test.json",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
+}

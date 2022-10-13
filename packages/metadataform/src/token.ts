@@ -93,7 +93,7 @@ export namespace MetadataForm {
     /**
      * The parent object of the form.
      */
-    formWidget: MetadataFormWidget;
+    metadataFormWidget: MetadataFormWidget;
 
     /**
      * The uiSchema built when loading schemas.

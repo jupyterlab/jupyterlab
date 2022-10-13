@@ -50,7 +50,7 @@ export class FormWidget extends ReactWidget {
         liveValidate
         idPrefix={`jp-MetadataForm-${this.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this._props.formWidget.updateMetadata(e.formData);
+          this._props.metadataFormWidget.updateMetadata(e.formData);
         }}
       />
     );

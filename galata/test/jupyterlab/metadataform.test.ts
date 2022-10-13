@@ -165,7 +165,9 @@ test.describe('Required metadata', () => {
     expect(await form.screenshot()).toMatchSnapshot(
       'metadata-collapsed-form.png'
     );
-    expect(form.locator('.jp-Collapse-contents.lm-mod-hidden')).toHaveCount(1);
+    await expect(
+      form.locator('.jp-Collapse-contents.lm-mod-hidden')
+    ).toHaveCount(1);
 
     // Expand the form.
     await form.click();
