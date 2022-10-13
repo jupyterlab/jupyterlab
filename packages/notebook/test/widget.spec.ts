@@ -318,9 +318,15 @@ describe('@jupyter/notebook', () => {
 
         it('should handle changes to the model cell list', async () => {
           widget = createWidget();
-          widget.model!.cells.clear();
+          widget.model!.cells.insert(
+            widget.model!.sharedModel.cells.length,
+            widget.model!.contentFactory.createCell(
+              'code',
+              {}
+            )
+          );
           await framePromise();
-          expect(widget.widgets.length).toBe(1);
+          expect(widget.widgets.length).toBe(2);
         });
 
         it('should handle a remove', () => {
@@ -367,21 +373,6 @@ describe('@jupyter/notebook', () => {
           widget.model!.cells.push(cell);
           widget.model!.cells.clear();
           expect(widget.widgets.length).toBe(0);
-        });
-
-        it('should add a new default cell when cells are cleared', async () => {
-          const model = widget.model!;
-          widget.notebookConfig = {
-            ...widget.notebookConfig,
-            defaultCell: 'raw'
-          };
-          const promise = signalToPromise(model.cells.changed);
-          model.cells.clear();
-          await promise;
-          expect(model.cells.length).toBe(0);
-          await signalToPromise(model.cells.changed);
-          expect(model.cells.length).toBe(1);
-          expect(model.cells.get(0)).toBeInstanceOf(RawCellModel);
         });
       });
     });
