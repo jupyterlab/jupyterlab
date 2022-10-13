@@ -326,10 +326,11 @@ test.describe('Workspace in doc mode', () => {
 
     // Ensure that there is only the document opened, no matter the workspace content.
     await expect(
-      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
-    ).toHaveCount(1);
-    await expect(
       page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
     ).toHaveCount(1);
 
     // Switch to lab mode, which should restore the loaded workspace.
@@ -357,10 +358,11 @@ test.describe('Workspace in doc mode', () => {
 
     // Ensure that the document opened by URL is closed, and that the one from workspace file is restored.
     await expect(
-      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
-    ).toHaveCount(1);
-    await expect(
       page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
     ).toHaveCount(1);
   });
 });

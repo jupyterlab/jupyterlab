@@ -20,7 +20,6 @@ import {
   ICommandPalette,
   InputDialog,
   IToolbarWidgetRegistry,
-  MainAreaWidget,
   setToolbar,
   showErrorMessage,
   WidgetTracker
@@ -36,7 +35,6 @@ import {
   IFileBrowserFactory,
   Uploader
 } from '@jupyterlab/filebrowser';
-import { Launcher } from '@jupyterlab/launcher';
 import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -260,7 +258,8 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     IStateDB,
     IRouter,
     JupyterFrontEnd.ITreeResolver,
-    JupyterLab.IInfo
+    JupyterLab.IInfo,
+    ILabShell
   ],
   activate: async (
     app: JupyterFrontEnd,
@@ -269,7 +268,8 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     state: IStateDB | null,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    info: JupyterLab.IInfo | null
+    info: JupyterLab.IInfo | null,
+    labShell: ILabShell | null
   ): Promise<IFileBrowserFactory> => {
     const { commands } = app;
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
@@ -308,7 +308,14 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       auto: false,
       restore: false
     });
-    void Private.restoreBrowser(defaultBrowser, commands, router, tree, app);
+    void Private.restoreBrowser(
+      defaultBrowser,
+      commands,
+      router,
+      tree,
+      app,
+      labShell
+    );
     return { createFileBrowser, defaultBrowser, tracker };
   }
 };
@@ -1281,7 +1288,8 @@ namespace Private {
     commands: CommandRegistry,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    app: JupyterFrontEnd
+    app: JupyterFrontEnd,
+    labShell: ILabShell | null
   ): Promise<void> {
     const restoring = 'jp-mod-restoring';
 
@@ -1302,17 +1310,10 @@ namespace Private {
         // Restore the model without populating it.
         await browser.model.restore(browser.id, false);
         if (paths.file) {
-          let widget = await commands.execute(CommandIDs.openPath, {
+          await commands.execute(CommandIDs.openPath, {
             path: paths.file,
             dontShowBrowser: true
           });
-          if (widget !== undefined) {
-            for (let w of app.shell.widgets('main')) {
-              if ((w as MainAreaWidget).content instanceof Launcher) {
-                w.dispose();
-              }
-            }
-          }
         }
         if (paths.browser) {
           await commands.execute(CommandIDs.openPath, {
@@ -1325,6 +1326,10 @@ namespace Private {
         await browser.model.refresh();
       }
       browser.removeClass(restoring);
+
+      if (labShell?.isEmpty('main')) {
+        void commands.execute('launcher:create');
+      }
     };
     router.routed.connect(listener);
   }
