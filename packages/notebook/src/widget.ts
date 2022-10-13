@@ -33,7 +33,6 @@ import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
 import * as sharedModels from '@jupyterlab/shared-models';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
-import { YNotebook } from '@jupyterlab/shared-models';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -915,11 +914,6 @@ export class StaticNotebook extends WindowedList {
 
     this.viewModel.windowingActive =
       this._notebookConfig.windowingMode === 'full';
-
-    if (this.model) {
-      const sharedModel = this.model.sharedModel as YNotebook;
-      sharedModel.defaultCell = this._notebookConfig.defaultCell;
-    }
   }
 
   protected cellsArray: Array<Cell>;

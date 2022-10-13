@@ -118,11 +118,6 @@ export interface ISharedNotebook extends ISharedDocument {
   readonly changed: ISignal<this, NotebookChange>;
 
   /**
-   * Default cell type.
-   */
-  defaultCell: nbformat.CellType;
-
-  /**
    * The minor version number of the nbformat.
    */
   readonly nbformat_minor: number;
@@ -232,10 +227,6 @@ export namespace ISharedNotebook {
      * considered on the full document across all cells.
      */
     disableDocumentWideUndoRedo?: boolean;
-    /**
-     * Default cell type.
-     */
-    defaultCell?: nbformat.CellType;
   }
 }
 

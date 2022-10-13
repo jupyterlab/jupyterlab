@@ -370,20 +370,7 @@ describe('@jupyter/notebook', () => {
             0,
             widget.model!.sharedModel.cells.length
           );
-          expect(widget.widgets.length).toBe(1);
-        });
-
-        it('should add a new default cell when cells are cleared', async () => {
-          const model = widget.model!;
-          widget.notebookConfig = {
-            ...widget.notebookConfig,
-            defaultCell: 'raw'
-          };
-          const promise = signalToPromise(model.cells.changed);
-          model.sharedModel.deleteCellRange(0, model.sharedModel.cells.length);
-          await promise;
-          expect(model.cells.length).toBe(1);
-          expect(model.cells.get(0)).toBeInstanceOf(RawCellModel);
+          expect(widget.widgets.length).toBe(0);
         });
       });
     });
@@ -1072,7 +1059,7 @@ describe('@jupyter/notebook', () => {
           0,
           widget.model!.sharedModel.cells.length
         );
-        expect(widget.widgets.length).toBe(1);
+        expect(widget.widgets.length).toBe(0);
 
         // Set up a selection event listener.
         let selectionChanged = 0;
@@ -1082,7 +1069,7 @@ describe('@jupyter/notebook', () => {
 
         widget.extendContiguousSelectionTo(3);
 
-        expect(widget.activeCellIndex).toBe(0);
+        expect(widget.activeCellIndex).toBe(-1);
         expect(selectionChanged).toBe(0);
       });
     });
@@ -1136,7 +1123,7 @@ describe('@jupyter/notebook', () => {
           0,
           widget.model!.sharedModel.cells.length
         );
-        expect(widget.widgets.length).toBe(1);
+        expect(widget.widgets.length).toBe(0);
 
         const selection = widget.getContiguousSelection();
         expect(selection).toEqual({ head: null, anchor: null });
