@@ -692,8 +692,8 @@ export class StaticNotebook extends WindowedList {
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
       rendermime,
-      showEditorForReadOnlyMarkdown: this._notebookConfig
-        .showEditorForReadOnlyMarkdown
+      showEditorForReadOnlyMarkdown:
+        this._notebookConfig.showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options);
     cell.syncCollapse = true;
@@ -901,12 +901,13 @@ export class StaticNotebook extends WindowedList {
       this._notebookConfig.showHiddenCellsButton
     );
     // Control editor visibility for read-only Markdown cells
-    const showEditorForReadOnlyMarkdown = this._notebookConfig
-      .showEditorForReadOnlyMarkdown;
+    const showEditorForReadOnlyMarkdown =
+      this._notebookConfig.showEditorForReadOnlyMarkdown;
     if (showEditorForReadOnlyMarkdown !== undefined) {
       for (const cell of this.cellsArray) {
         if (cell.model.type === 'markdown') {
-          (cell as MarkdownCell).showEditorForReadOnly = showEditorForReadOnlyMarkdown;
+          (cell as MarkdownCell).showEditorForReadOnly =
+            showEditorForReadOnlyMarkdown;
         }
       }
     }
@@ -1147,7 +1148,8 @@ export namespace StaticNotebook {
    */
   export class ContentFactory
     extends Cell.ContentFactory
-    implements IContentFactory {
+    implements IContentFactory
+  {
     /**
      * Create a new code cell widget.
      *
@@ -1631,7 +1633,8 @@ export class Notebook extends StaticNotebook {
             break;
           case Cell.HeadingType.Markdown:
             {
-              const mdHeading = (heading as any) as TableOfContentsUtils.Markdown.IMarkdownHeading;
+              const mdHeading =
+                heading as any as TableOfContentsUtils.Markdown.IMarkdownHeading;
               id = await TableOfContentsUtils.Markdown.getHeadingId(
                 this.rendermime.markdownParser!,
                 mdHeading.raw,

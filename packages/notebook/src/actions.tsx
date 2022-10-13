@@ -881,11 +881,12 @@ export namespace NotebookActions {
       notebook
     );
     headingLevel = headingLevel > -1 ? headingLevel : 1;
-    let cellIdxOfHeadingBelow = Private.Headings.findLowerEqualLevelHeadingBelow(
-      notebook.activeCell,
-      notebook,
-      true
-    ) as number;
+    let cellIdxOfHeadingBelow =
+      Private.Headings.findLowerEqualLevelHeadingBelow(
+        notebook.activeCell,
+        notebook,
+        true
+      ) as number;
     await Private.Headings.insertHeadingAboveCellIndex(
       cellIdxOfHeadingBelow == -1
         ? notebook.model.cells.length
@@ -917,11 +918,12 @@ export namespace NotebookActions {
     if (hInfoActiveCell.isHeading && !hInfoActiveCell.collapsed) {
       setHeadingCollapse(notebook.activeCell, true, notebook);
     } else {
-      let targetHeadingCellIdx = Private.Headings.findLowerEqualLevelParentHeadingAbove(
-        notebook.activeCell,
-        notebook,
-        true
-      ) as number;
+      let targetHeadingCellIdx =
+        Private.Headings.findLowerEqualLevelParentHeadingAbove(
+          notebook.activeCell,
+          notebook,
+          true
+        ) as number;
       if (targetHeadingCellIdx > -1) {
         notebook.activeCellIndex = targetHeadingCellIdx;
       }
@@ -1910,9 +1912,7 @@ export namespace NotebookActions {
    *
    * @param cell - The target cell widget.
    */
-  export function getHeadingInfo(
-    cell: Cell
-  ): {
+  export function getHeadingInfo(cell: Cell): {
     isHeading: boolean;
     headingLevel: number;
     collapsed?: boolean;
