@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror",
-  "version": "3.5.0-beta.0",
+  "version": "3.5.0-rc.0",
   "description": "JupyterLab - CodeMirror Editor Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -39,14 +39,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.5.0-beta.0",
-    "@jupyterlab/codeeditor": "^3.5.0-beta.0",
-    "@jupyterlab/coreutils": "^5.5.0-beta.0",
-    "@jupyterlab/nbformat": "^3.5.0-beta.0",
-    "@jupyterlab/observables": "^4.5.0-beta.0",
-    "@jupyterlab/shared-models": "^3.5.0-beta.0",
-    "@jupyterlab/statusbar": "^3.5.0-beta.0",
-    "@jupyterlab/translation": "^3.5.0-beta.0",
+    "@jupyterlab/apputils": "^3.5.0-rc.0",
+    "@jupyterlab/codeeditor": "^3.5.0-rc.0",
+    "@jupyterlab/coreutils": "^5.5.0-rc.0",
+    "@jupyterlab/nbformat": "^3.5.0-rc.0",
+    "@jupyterlab/observables": "^4.5.0-rc.0",
+    "@jupyterlab/shared-models": "^3.5.0-rc.0",
+    "@jupyterlab/statusbar": "^3.5.0-rc.0",
+    "@jupyterlab/translation": "^3.5.0-rc.0",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/commands": "^1.19.0",
     "@lumino/coreutils": "^1.11.0",
@@ -59,7 +59,7 @@
     "y-codemirror": "^3.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.5.0-beta.0",
+    "@jupyterlab/testutils": "^3.5.0-rc.0",
     "@types/codemirror": "^0.0.109",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
