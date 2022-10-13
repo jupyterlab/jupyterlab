@@ -35,6 +35,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
+import { DocumentChange, ISharedDocument } from '@jupyterlab/shared-models';
 
 /**
  * An implementation of a document context.
@@ -60,7 +61,7 @@ export class Context<
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
     this._model = this._factory.createNew(lang);
-    const ymodel = this._model.sharedModel as ymodels.YDocument<any>; // translate to the concrete Yjs implementation
+    const ymodel = this._model.sharedModel as ymodels.YDocument<DocumentChange>; // translate to the concrete Yjs implementation
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('context');
@@ -70,7 +71,7 @@ export class Context<
           path: this._path,
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
-          ymodel
+          model: this._model.sharedModel
         })
       : new ProviderMock();
 
@@ -960,7 +961,7 @@ export namespace Context {
     /**
      * An factory method for the document provider.
      */
-    docProviderFactory?: IDocumentProviderFactory;
+    docProviderFactory?: IDocumentProviderFactory<ISharedDocument>;
 
     /**
      * An optional callback for opening sibling widgets.

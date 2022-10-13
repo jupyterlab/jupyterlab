@@ -566,7 +566,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     collaborative_file_poll_interval = Int(
         1,
         config=True,
-        help="""The period in seconds to check for file changes in the back-end (relevant only
+        help="""The period in seconds to check for file changes on disk (relevant only
         in collaborative mode). Defaults to 1s, if 0 then file changes will only be checked when
         saving changes from the front-end.""",
     )
