@@ -25,6 +25,9 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../rendermime"
+    },
+    {
       "path": "../services"
     },
     {
@@ -32,6 +35,9 @@
     },
     {
       "path": "../statedb"
+    },
+    {
+      "path": "../statusbar"
     },
     {
       "path": "../translation"

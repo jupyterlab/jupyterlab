@@ -16,6 +16,7 @@ export * from './iframe';
 export * from './inputdialog';
 export * from './mainareawidget';
 export * from './menufactory';
+export * from './notification';
 export * from './printing';
 export * from './sanitizer';
 export * from './search';

@@ -32,6 +32,7 @@ const extensions = [
   import('@jupyterlab/launcher-extension'),
   import('@jupyterlab/mainmenu-extension'),
   import('@jupyterlab/markdownviewer-extension'),
+  import('@jupyterlab/markedparser-extension'),
   import('@jupyterlab/mathjax2-extension'),
   import('@jupyterlab/notebook-extension'),
   import('@jupyterlab/rendermime-extension'),
