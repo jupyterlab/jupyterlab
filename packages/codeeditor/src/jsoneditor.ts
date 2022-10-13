@@ -149,6 +149,22 @@ export class JSONEditor extends Widget {
   }
 
   /**
+   * Dispose of the editor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    // The model does not dispose the shared model by default
+    this.model.sharedModel.dispose();
+    this.model.dispose();
+    this.editor.dispose();
+
+    super.dispose();
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
