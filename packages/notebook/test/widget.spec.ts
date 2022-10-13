@@ -273,6 +273,9 @@ describe('@jupyter/notebook', () => {
       it('should add a default cell if the notebook model is empty', () => {
         const widget = new LogStaticNotebook(options);
         const model1 = new NotebookModel();
+        expect(model1.cells.length).toBe(0);
+
+        widget.model = model1;
         expect(model1.cells.length).toBe(1);
         expect(model1.cells.get(0).type).toBe('code');
 
@@ -283,6 +286,9 @@ describe('@jupyter/notebook', () => {
         const model2 = new NotebookModel({
           defaultCell: 'markdown'
         });
+        expect(model2.cells.length).toBe(0);
+
+        widget.model = model2;
         expect(model2.cells.length).toBe(1);
         expect(model2.cells.get(0).type).toBe('markdown');
       });
@@ -311,12 +317,12 @@ describe('@jupyter/notebook', () => {
 
         it('should handle changes to the model cell list', async () => {
           widget = createWidget();
-          widget.model!.sharedModel.deleteCellRange(
-            0,
-            widget.model!.sharedModel.cells.length
+          widget.model!.sharedModel.insertCell(
+            widget.model!.sharedModel.cells.length,
+            createCell({ cell_type: 'code' })
           );
           await framePromise();
-          expect(widget.widgets.length).toBe(1);
+          expect(widget.widgets.length).toBe(2);
         });
 
         it('should handle a remove', () => {
@@ -365,21 +371,6 @@ describe('@jupyter/notebook', () => {
             widget.model!.sharedModel.cells.length
           );
           expect(widget.widgets.length).toBe(0);
-        });
-
-        it('should add a new default cell when cells are cleared', async () => {
-          const model = widget.model!;
-          widget.notebookConfig = {
-            ...widget.notebookConfig,
-            defaultCell: 'raw'
-          };
-          const promise = signalToPromise(model.cells.changed);
-          model.sharedModel.deleteCellRange(0, model.sharedModel.cells.length);
-          await promise;
-          expect(model.cells.length).toBe(0);
-          await signalToPromise(model.cells.changed);
-          expect(model.cells.length).toBe(1);
-          expect(model.cells.get(0)).toBeInstanceOf(RawCellModel);
         });
       });
     });

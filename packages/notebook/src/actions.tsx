@@ -359,7 +359,7 @@ export namespace NotebookActions {
   }
 
   /**
-   * Insert a new code cell above the active cell.
+   * Insert a new code cell above the active cell or in index 0 if the notebook is empty.
    *
    * @param notebook - The target notebook widget.
    *
@@ -370,7 +370,7 @@ export namespace NotebookActions {
    * The new cell will the active cell.
    */
   export function insertAbove(notebook: Notebook): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!notebook.model) {
       return;
     }
 
@@ -379,18 +379,24 @@ export namespace NotebookActions {
     const cell = sharedModels.createCell({
       cell_type: notebook.notebookConfig.defaultCell
     });
-    const active = notebook.activeCellIndex;
 
-    model.sharedModel.insertCell(active, cell);
+    if (notebook.activeCell) {
+      const active = notebook.activeCellIndex;
+      model.sharedModel.insertCell(active, cell);
+      // Make the newly inserted cell active.
+      notebook.activeCellIndex = active;
+    } else {
+      model.sharedModel.insertCell(0, cell);
+      // Make the newly inserted cell active.
+      notebook.activeCellIndex = 0;
+    }
 
-    // Make the newly inserted cell active.
-    notebook.activeCellIndex = active;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
   }
 
   /**
-   * Insert a new code cell below the active cell.
+   * Insert a new code cell below the active cell or in index 0 if the notebook is empty.
    *
    * @param notebook - The target notebook widget.
    *
@@ -401,7 +407,7 @@ export namespace NotebookActions {
    * The new cell will be the active cell.
    */
   export function insertBelow(notebook: Notebook): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!notebook.model) {
       return;
     }
 
@@ -411,10 +417,16 @@ export namespace NotebookActions {
       cell_type: notebook.notebookConfig.defaultCell
     });
 
-    model.sharedModel.insertCell(notebook.activeCellIndex + 1, cell);
+    if (notebook.activeCell) {
+      model.sharedModel.insertCell(notebook.activeCellIndex + 1, cell);
+      // Make the newly inserted cell active.
+      notebook.activeCellIndex++;
+    } else {
+      model.sharedModel.insertCell(0, cell);
+      // Make the newly inserted cell active.
+      notebook.activeCellIndex = 0;
+    }
 
-    // Make the newly inserted cell active.
-    notebook.activeCellIndex++;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
   }
@@ -2435,12 +2447,13 @@ namespace Private {
         toDelete.reverse().forEach(index => {
           sharedModel.deleteCell(index);
         });
+
         // Add a new cell if the notebook is empty. This is done
         // within the compound operation to make the deletion of
         // a notebook's last cell undoable.
-        if (!sharedModel.cells.length) {
+        if (sharedModel.cells.length == toDelete.length) {
           sharedModel.insertCell(
-            sharedModel.cells.length,
+            0,
             sharedModels.createCell({
               cell_type: notebook.notebookConfig.defaultCell
             })

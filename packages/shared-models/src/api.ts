@@ -116,6 +116,7 @@ export interface ISharedNotebook extends ISharedDocument {
    * The changed signal.
    */
   readonly changed: ISignal<this, NotebookChange>;
+
   /**
    * The minor version number of the nbformat.
    */
@@ -226,10 +227,6 @@ export namespace ISharedNotebook {
      * considered on the full document across all cells.
      */
     disableDocumentWideUndoRedo?: boolean;
-    /**
-     * Initial cell type.
-     */
-    initialCellType?: 'code' | 'markdown' | 'raw';
   }
 }
 

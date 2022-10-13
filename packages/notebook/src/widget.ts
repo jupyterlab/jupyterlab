@@ -12,7 +12,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -361,6 +361,7 @@ export class StaticNotebook extends WindowedList {
       return;
     }
     this._notebookModel = null;
+    (this.layout as NotebookWindowedLayout).header?.dispose();
     super.dispose();
   }
 
@@ -418,6 +419,26 @@ export class StaticNotebook extends WindowedList {
         });
       }
     }
+  }
+
+  /**
+   * Adds a message to the notebook as a header.
+   */
+  protected addHeader(): void {
+    const trans = this.translator.load('jupyterlab');
+    const info = new Widget();
+    info.node.textContent = trans.__(
+      'The notebook is empty. Click the + button on the toolbar to add a new cell.'
+    );
+    (this.layout as NotebookWindowedLayout).header = info;
+  }
+
+  /**
+   * Removes the header.
+   */
+  protected removeHeader(): void {
+    (this.layout as NotebookWindowedLayout).header?.dispose();
+    (this.layout as NotebookWindowedLayout).header = null;
   }
 
   /**
@@ -529,13 +550,16 @@ export class StaticNotebook extends WindowedList {
     }
     this._updateMimetype();
     const cells = newValue.cells;
-    if (!cells.length) {
+    const collab =
+      (PageConfig.getOption('collaborative') ?? '').toLowerCase() === 'true';
+    if (!collab && !cells.length) {
       newValue.sharedModel.insertCell(
         0,
-        sharedModels.createCell({ cell_type: this.notebookConfig.defaultCell })
+        sharedModels.createCell({
+          cell_type: this.notebookConfig.defaultCell
+        })
       );
     }
-
     let index = -1;
     for (const cell of cells) {
       this._insertCell(++index, cell, 'set');
@@ -553,6 +577,8 @@ export class StaticNotebook extends WindowedList {
     args: sharedModels.NotebookChange
   ): void {
     if (args.cellsChange) {
+      this.removeHeader();
+
       let index = 0;
       args.cellsChange.forEach(delta => {
         if (delta.retain != null) {
@@ -582,30 +608,12 @@ export class StaticNotebook extends WindowedList {
             this.model!.cells.length + delta.delete,
             -1 * delta.delete
           );
-          // Add default cell if there are no cells remaining.
-          // @todo this should probably be handled by shared-notebook
-          // @todo this is duplicatively implemented (see other occurrences of notebookconfig.defaultCell)
-          if (!sender.cells.length) {
-            const model = this.model;
-            // Add the cell in a new context to avoid triggering another
-            // cell changed event during the handling of this signal.
-            requestAnimationFrame(() => {
-              if (
-                model &&
-                !model.isDisposed &&
-                !model.sharedModel.cells.length
-              ) {
-                model.sharedModel.insertCell(
-                  0,
-                  sharedModels.createCell({
-                    cell_type: this.notebookConfig.defaultCell
-                  })
-                );
-              }
-            });
-          }
         }
       });
+
+      if (!this.model!.sharedModel.cells.length) {
+        this.addHeader();
+      }
     }
 
     this.update();

@@ -65,8 +65,7 @@ export class NotebookModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     this.sharedModel = sharedModels.YNotebook.create({
-      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false,
-      initialCellType: options.defaultCell
+      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
     }) as sharedModels.ISharedNotebook;
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
@@ -261,6 +260,11 @@ export class NotebookModel implements INotebookModel {
         }
         return sharedModels.createCell(cell);
       });
+      if (!ycells.length) {
+        // Create cell when notebook is empty
+        // (non collaborative)
+        ycells.push(sharedModels.createCell({ cell_type: 'code' }));
+      }
       this.sharedModel.insertCells(this.sharedModel.cells.length, ycells);
       this.sharedModel.deleteCellRange(0, this.sharedModel.cells.length);
     });

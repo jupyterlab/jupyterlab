@@ -197,8 +197,8 @@ export namespace NotebookTrustStatus {
         this._notebook.modelContentChanged.connect(this._onModelChanged, this);
 
         // Derive values
-        if (this._notebook.activeCell !== undefined) {
-          this._activeCellTrusted = this._notebook!.activeCell!.model.trusted;
+        if (this._notebook.activeCell) {
+          this._activeCellTrusted = this._notebook.activeCell.model.trusted;
         } else {
           this._activeCellTrusted = false;
         }
