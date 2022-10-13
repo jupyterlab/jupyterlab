@@ -307,7 +307,7 @@ describe('@jupyterlab/notebook', () => {
         const widget = tracker.currentWidget!;
         widget.content.activeCellIndex++;
         widget.content.activeCell!.model.metadata.set('bar', 1);
-        expect(JSON.stringify(model.value.text)).toContain('bar');
+        expect(JSON.stringify(tool.editor.model.value.text)).toContain('bar');
       });
 
       it('should handle a change to the metadata', () => {
@@ -345,12 +345,20 @@ describe('@jupyterlab/notebook', () => {
         expect(JSON.stringify(model.value.text)).toBeTruthy();
 
         simulate(panel0.node, 'focus');
-        expect(JSON.stringify(model.value.text)).toContain('panel0');
-        expect(JSON.stringify(model.value.text)).not.toContain('panel1');
+        expect(JSON.stringify(tool.editor.model.value.text)).toContain(
+          'panel0'
+        );
+        expect(JSON.stringify(tool.editor.model.value.text)).not.toContain(
+          'panel1'
+        );
 
         simulate(panel1.node, 'focus');
-        expect(JSON.stringify(model.value.text)).not.toContain('panel0');
-        expect(JSON.stringify(model.value.text)).toContain('panel1');
+        expect(JSON.stringify(tool.editor.model.value.text)).not.toContain(
+          'panel0'
+        );
+        expect(JSON.stringify(tool.editor.model.value.text)).toContain(
+          'panel1'
+        );
       });
 
       it('should handle a change to the metadata', () => {
