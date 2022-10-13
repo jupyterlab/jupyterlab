@@ -856,11 +856,20 @@ function activateWidgetFactory(
     FACTORY,
     'executionProgress',
     panel => {
-      return ExecutionIndicator.createExecutionIndicatorItem(
+      const loadingSettings = settingRegistry?.load(trackerPlugin.id);
+      const indicator = ExecutionIndicator.createExecutionIndicatorItem(
         panel,
         translator,
-        settingRegistry?.load(trackerPlugin.id)
+        loadingSettings
       );
+
+      void loadingSettings?.then(settings => {
+        panel.disposed.connect(() => {
+          settings.dispose();
+        });
+      });
+
+      return indicator;
     }
   );
 
