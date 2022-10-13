@@ -53,6 +53,9 @@ test.describe('Debugger', () => {
 
     await setBreakpoint(page);
 
+    // Wait for breakpoint to finish appearing
+    await page.waitForTimeout(150);
+
     expect(
       await page.screenshot({
         clip: { y: 100, x: 300, width: 300, height: 80 }

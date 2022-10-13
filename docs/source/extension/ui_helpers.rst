@@ -152,3 +152,254 @@ And for a folder.
 .. note:: The document manager can be obtained in a plugin by
     requesting ``IFileBrowserFactory`` token. The ``manager`` will be accessed through
     ``factory.defaultBrowser.model.manager``.
+
+Notifications
+-------------
+
+JupyterLab has a notifications manager that can add, update or dismiss notifications. That feature
+is provided by the ``@jupyterlab/apputils`` package.
+
+.. warning::
+
+  It is a good practice to limit the number of notifications sent to respect the user's focus.
+  Therefore by default, the notification won't be displayed to the user. But the status bar will
+  indicate that a new notification arrived. So the user can click on the indicator to see all
+  notifications.
+
+  Try adding a button `Do not show me again` for recurrent notifications to allow users to quickly
+  filter notifications that matters for them.
+
+A notification is described by the following element:
+
+.. code:: typescript
+
+   {
+     /**
+      * Notification message
+      *
+      * It supports Markdown syntax.
+      */
+     message: string;
+     /**
+      * Notification type
+      */
+     type?:  'info' | 'in-progress' | 'success' | 'warning' | 'error' | 'default';
+     /**
+      * Notification options
+      */
+     options?: {
+       /**
+        * Autoclosing behavior - false (not closing automatically)
+        * or number (time in milliseconds before hiding the notification)
+        *
+        * Set to zero if you want the notification to be retained in the notification
+        * center but not displayed as toast. This is the default behavior.
+        */
+       autoClose?: number | false;
+       /**
+        * List of associated actions
+        */
+       actions?: Array<IAction>;
+       /**
+        * Data associated with a notification
+        */
+       data?: T;
+     };
+   }
+
+At creation, a notification will receive an unique identifier.
+
+Actions can be linked to a notification but the interface depends on how the notification
+is handled.
+
+There are two ways of interacting with notifications: through an API or through commands. The only
+difference is that actions linked to a notification can have an arbitrary callback when using the API.
+But only a command can be set as an action when using the command call for creating a notification.
+
+Using the API
+^^^^^^^^^^^^^
+
+To create notification, you need to provide a message and you can use the following helpers
+to set the type automatically (or use ``notify`` to set the type manually):
+
+.. code:: typescript
+
+  /**
+   * Helper function to emit an error notification.
+   */
+  Notification.error(message: string, options?: IOptions): string;
+
+  /**
+   * Helper function to emit an info notification.
+   */
+  Notification.info(message: string, options?: IOptions): string;
+
+  /**
+   * Helper function to emit a success notification.
+   */
+  Notification.success(message: string, options?: IOptions): string;
+
+  /**
+   * Helper function to emit a warning notification.
+   */
+  Notification.warning(message: string, options?: IOptions): string;
+
+  /**
+   * Helper function to emit a in-progress notification. Then
+   * it will update it with a error or success notification
+   * depending on the promise resolution.
+   */
+  Notification.promise(
+    promise: Promise,
+    {
+      pending: { message: string, options?: IOptions },
+      /**
+       * If not set `options.data` will be set to the promise result.
+       */
+      success: { message: (result, data) => string, options?: IOptions },
+      /**
+       * If not set `options.data` will be set to the promise rejection error.
+       */
+      error: { message: (reason, data) => string, options?: IOptions }
+    }
+  ): string;
+
+  /**
+   * Helper function to emit a notification.
+   */
+  Notification.emit(
+    message: string,
+    type: 'info' | 'in-progress' | 'success' | 'warning' | 'error' | 'default' = 'default',
+    options?: IOptions
+  ): string;
+
+When using the API, an action is defined by:
+
+.. code:: typescript
+
+  {
+    /**
+     * The action label.
+     *
+     * This should be a short description.
+     */
+    label: string;
+    /**
+     * Callback function to trigger
+     */
+    callback: () => void;
+    /**
+     * The action caption.
+     *
+     * This can be a longer description of the action.
+     */
+    caption?: string;
+  }
+
+You can update a notification using:
+
+.. code:: typescript
+
+  Notification.update({
+    id: string;
+    message: string;
+    type?:  'info' | 'in-progress' | 'success' | 'warning' | 'error' | 'default';
+    autoClose?: number | false;
+    actions?: Array<IAction>;
+    data?: ReadonlyJsonValue;
+  }): boolean;
+
+.. note::
+
+   Once updated the notification will be moved at the begin of the notification stack.
+
+And you can dismiss a notification (if you provide an ``id``) or all
+notifications using:
+
+.. code:: typescript
+
+  Notification.dimiss(id?: string): void;
+
+.. note::
+
+  Dismissing a notification will remove it from the list of notifications without
+  knowing if the user has seen it or not. Therefore it is recommended to not
+  dismiss a notification.
+
+Using commands
+^^^^^^^^^^^^^^
+
+There are three commands available.
+
+``'apputils:notify'`` to create a notification:
+
+.. code:: typescript
+
+  commands.execute('apputils:notify', {
+     message: string;
+     type?: 'info' | 'in-progress' | 'success' | 'warning' | 'error' | 'default';
+     options?: {
+       autoClose?: number | false;
+       actions?: Array<IAction>;
+       data?: T;
+     };
+  });
+
+The result is the notification unique identifier.
+
+An action is defined by:
+
+.. code:: typescript
+
+  {
+    /**
+     * The action label.
+     *
+     * This should be a short description.
+     */
+    label: string;
+    /**
+     * Callback command id to trigger
+     */
+    commandId: string;
+    /**
+     * Command arguments
+     */
+    args?: ReadonlyJsonObject;
+    /**
+     * The action caption.
+     *
+     * This can be a longer description of the action.
+     */
+    caption?: string;
+  }
+
+``'apputils:update-notification'`` to update a notification:
+
+.. code:: typescript
+
+   commands.execute('apputils:update-notification', {
+     id: string;
+     message: string;
+     type?: 'info' | 'in-progress' | 'success' | 'warning' | 'error' | 'default';
+     autoClose?: number | false;
+     actions?: Array<IAction>;
+     data?: T;
+   });
+
+The result is a boolean indicating if the update was successful. In particular,
+updating an absent notification will fail.
+
+``'apputils:dismiss-notification'`` to dismiss a notification:
+
+.. code:: typescript
+
+   commands.execute('apputils:dismiss-notification', {
+     id: string;
+   });
+
+.. note::
+
+  Dismissing a notification will remove it from the list of notifications without
+  knowing if the user has seen it or not. Therefore it is recommended to not
+  dismiss a notification.

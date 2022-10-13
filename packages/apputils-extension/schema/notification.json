@@ -1,0 +1,36 @@
+{
+  "title": "Notifications",
+  "description": "Notifications settings.",
+  "jupyter.lab.setting-icon": "ui-components:bell",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 9.9
+          },
+          {
+            "command": "apputils:display-notifications",
+            "rank": 9.92
+          },
+          {
+            "type": "separator",
+            "rank": 9.99
+          }
+        ]
+      }
+    ]
+  },
+  "additionalProperties": false,
+  "properties": {
+    "doNotDisturbMode": {
+      "title": "Silence all notifications",
+      "description": "If `true`, no toast notifications will be automatically displayed.",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "type": "object"
+}

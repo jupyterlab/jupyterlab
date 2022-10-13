@@ -136,6 +136,18 @@
     "shortcuts": []
   },
   {
+    "id": "apputils:dismiss-notification",
+    "label": "Dismiss a notification",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:display-notifications",
+    "label": "Show Notifications",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "apputils:incr-font-size",
     "label": "Increase Font Size",
     "caption": "",
@@ -145,6 +157,12 @@
     "id": "apputils:load-statedb",
     "label": "Load state for the current workspace.",
     "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:notify",
+    "label": "Emit a notification",
+    "caption": "Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
     "shortcuts": []
   },
   {
@@ -189,6 +207,12 @@
     "id": "apputils:toggle-header",
     "label": "Show Header Above Content",
     "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:update-notification",
+    "label": "Update a notification",
+    "caption": "Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
     "shortcuts": []
   },
   {
