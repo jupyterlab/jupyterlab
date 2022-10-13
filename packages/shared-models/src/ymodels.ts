@@ -1135,51 +1135,6 @@ export class YMarkdownCell
 export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
 
 /**
- * These are "templates" that can be used as initial content. All clients will start with the same template which prevents that every joining client will create another "initial" cell.
- *
- * Note that initialization must not be done dynamically. Hence you need to create a static update message that doesn't change.
- *
- * You may creates templates by creating an empty shared notebook model, insert some content (e.g. an initial code cell), and then encoding the update to base64:
- *
- * ```typescript
- * import * as buffer from 'lib0/buffer';
- * import * as Y from 'yjs';
- * import { YCodeCell, YNotebook } from '@jupyterlab/shared-models';
- *
- * const ynotebook = new YNotebook();
- * const ycell = ynotebook.insertCell(0, { cell_type: 'code' });
- * ycell.execution_count = null;
- * // Delete the initial cell
- * ynotebook.deleteCell(1);
- * console.log(ynotebook.cells.length);
- * console.log(ynotebook.cells[0].toJSON());
- * const template = buffer.toBase64(Y.encodeStateAsUpdateV2(ynotebook.ydoc));
- * console.log(template);
- * ```
- *
- * The JSON-representation of the generated Y.Doc would look like this:
- *
- * ```json
- * cells: [
- *   {
- *     source: '',
- *     metadata: {},
- *     cell_type: 'code',
- *     id: 'e513e796-386b-487f-a4ac-4926d572dbb5',
- *     execution_count: null,
- *     outputs: []
- *   }
- * ],
- * ```
- */
-const yCodeCellTemplate =
-  'AAAWo+3Yxg2IqMqfBePt2MYNBMioyp8FBQIBCgEAD0cAJwAoAycABwAnACgDJ3Fjc291cmNlbWV0YWRhdGFjZWxsX3R5cGVpZGV4ZWN1dGlvbl9jb3VudG91dHB1dHNjZWxsc3NvdXJjZW1ldGFkYXRhY2VsbF90eXBlaWRleGVjdXRpb25fY291bnRvdXRwdXRzBggJAg8HBQYICQIPBwUABQEAAAYBAgABAgACQQYCBwB2AHcEY29kZXckNTZhODQwMTItZWRlNS00MmVjLTg1OTAtMTQyMWVlNjE3NDk3fQAHAHYAdwRjb2RldyRlNTEzZTc5Ni0zODZiLTQ4N2YtYTRhYy00OTI2ZDU3MmRiYjV9AAGIlOXPAgEABg==';
-const yMdCellTemplate =
-  'AAAF+8KuWAMCAQIABQcAJwAoJB5jZWxsc3NvdXJjZW1ldGFkYXRhY2VsbF90eXBlaWQFBggJAgMBAAACAQICQQEBBQB2AHcIbWFya2Rvd253JDE2MWUyNDFjLTI3ZWEtNDQ3NC1hMTljLWI5NzZkZDJhN2YxZQA=';
-const yRawCellTemplate =
-  'AAAGyp/SnR8DAgECAAUHACcAKCQeY2VsbHNzb3VyY2VtZXRhZGF0YWNlbGxfdHlwZWlkBQYICQIDAQAAAgECAkEBAQUAdgB3A3Jhd3ckN2M4MGMyMWYtNjIxZi00MWFlLTg5YTAtZGE2YzAzOGE2NjQzAA==';
-
-/**
  * Shared implementation of the Shared Document types.
  *
  * Shared cells can be inserted into a SharedNotebook.
@@ -1217,23 +1172,6 @@ export class YNotebook
     this.undoManager.addToScope(this._ycells);
     this._ycells.observe(this._onYCellsChanged);
     this.ymeta.observe(this._onMetaChanged);
-
-    // Initialize the document with a template
-    let template: string | null = null;
-    switch (options.initialCellType ?? 'code') {
-      case 'raw':
-        template = yRawCellTemplate;
-        break;
-      case 'markdown':
-        template = yMdCellTemplate;
-        break;
-      case 'code':
-        template = yCodeCellTemplate;
-        break;
-    }
-    if (template) {
-      Y.applyUpdateV2(this.ydoc, buffer.fromBase64(template));
-    }
   }
 
   /**
@@ -1573,9 +1511,8 @@ export class YNotebook
       }
     });
     let index = 0;
-    // this reflects the event.changes.delta, but replaces the content of delta.insert with ycells
 
-    // Q why not remapping from ycells?  this.cells = this.ycells.map(yc => this._ycellMapping.get(yc))
+    // this reflects the event.changes.delta, but replaces the content of delta.insert with ycells
     const cellsChange: Delta<ISharedCell[]> = [];
     event.changes.delta.forEach((d: any) => {
       if (d.insert != null) {
