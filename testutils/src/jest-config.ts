@@ -8,9 +8,9 @@ import path from 'path';
 const esModules = [
   '@codemirror',
   'lib0',
-  'vscode\\-ws\\-jsonrpc',
-  'y\\-protocols',
-  'y\\-websocket',
+  'vscode-ws-jsonrpc',
+  'y-protocols',
+  'y-websocket',
   'yjs'
 ].join('|');
 
