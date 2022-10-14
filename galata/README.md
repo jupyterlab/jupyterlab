@@ -109,7 +109,7 @@ Test assets (including test videos) will be saved in a `test-results` folder and
 report will be created in `playwright-report` folder. That report can be see by running:
 
 ```bash
-http-server ./playwright-report -a localhost -o
+jlpm playwright show-report
 ```
 
 ## User advices

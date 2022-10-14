@@ -14,7 +14,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { DOMUtils } from '@jupyterlab/apputils';
 import {
   AwarenessMock,
   CollaboratorsPanel,
@@ -145,7 +144,7 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
 
     const userPanel = new SidePanel();
-    userPanel.id = DOMUtils.createDomID();
+    userPanel.id = 'jp-collaboration-panel';
     userPanel.title.icon = usersIcon;
     userPanel.title.caption = trans.__('Collaboration');
     userPanel.addClass('jp-RTCPanel');

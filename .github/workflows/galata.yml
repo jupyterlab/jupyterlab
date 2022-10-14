@@ -8,6 +8,9 @@ on:
       - master
   pull_request:
 
+env:
+  PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+
 jobs:
   test:
     name: Visual Regression Tests
@@ -20,6 +23,13 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |
@@ -48,7 +58,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test
+          jlpm run test --project galata jupyterlab
           mv galata/test-results galata/test-jupyterlab-results || true
           # Run once benchmark tests to ensure they have no regression
           BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
@@ -69,6 +79,85 @@ jobs:
           name: jupyterlab-galata-report
           path: |
             galata/playwright-report
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log
+
+  test-rtc:
+    name: Visual Regression for Realtime Collaboration
+    timeout-minutes: 80
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout JupyterLab
+        uses: actions/checkout@v3
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+
+      - name: Install dependencies
+        run: |
+          set -ex
+          bash ./scripts/ci_install.sh
+
+          # Build dev-mode
+          jlpm run build
+
+      - name: Launch JupyterLab
+        env:
+          JUPYTERLAB_GALATA_ROOT_DIR: ${{ env.DEMO_DIR }}
+        run: |
+          set -ex
+          cd galata
+          (jupyter lab --config jupyter_server_test_config.py --collaborative > /tmp/jupyterlab_server.log 2>&1) &
+
+      - name: Install browser
+        run: |
+          set -ex
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 360000
+
+      - name: Test
+        run: |
+          cd galata
+          jlpm run test:rtc
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: jupyterlab-rtc-test-assets
+          path: |
+            galata/test-results
+
+      - name: Upload Galata Test report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: jupyterlab-rtc-report
+          path: |
+            galata/playwright-report
+
+      - name: Stop JupyterLab
+        if: always()
+        run: |
+          kill -s SIGTERM $(pgrep jupyter-lab)
 
       - name: Print JupyterLab logs
         if: always()
@@ -107,6 +196,13 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |
