@@ -684,7 +684,7 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
       if (!nodes[0]) {
         combinedNodes.push(nodes[1]);
         inAnchorElement = nodes[1].nodeType !== Node.TEXT_NODE;
-        continue
+        continue;
       } else if(!nodes[1]) {
         combinedNodes.push(nodes[0]);
         inAnchorElement = false;
