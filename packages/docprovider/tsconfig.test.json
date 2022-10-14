@@ -6,10 +6,10 @@
   ],
   "references": [
     {
-      "path": "../shared-models"
+      "path": "../collaboration"
     },
     {
-      "path": "../collaboration"
+      "path": "../shared-models"
     },
     {
       "path": "."
@@ -18,10 +18,10 @@
       "path": "../../testutils"
     },
     {
-      "path": "../shared-models"
+      "path": "../collaboration"
     },
     {
-      "path": "../collaboration"
+      "path": "../shared-models"
     }
   ]
 }
