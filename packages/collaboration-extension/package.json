@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/collaboration-extension",
-  "version": "^3.5.0-beta.0",
+  "version": "3.5.0-beta.0",
   "description": "JupyterLab - Collaboration Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
