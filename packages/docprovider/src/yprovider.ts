@@ -9,7 +9,6 @@ import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
 import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
-import { getAnonymousUserName, getRandomColor } from './awareness';
 
 /**
  * A class to provide Yjs synchronization over WebSocket.
@@ -42,21 +41,8 @@ export class WebSocketProvider
     this._contentType = options.contentType;
     this._format = options.format;
     this._serverUrl = options.url;
-    const searchParams = new URL(options.url).searchParams;
-    const color =
-      '#' + searchParams.get('usercolor') ?? getRandomColor().slice(1);
-    const name = searchParams.get('username') ?? getAnonymousUserName();
-    const awareness = options.ymodel.awareness;
-    const currState = awareness.getLocalState();
-    // only set if this was not already set by another plugin
-    if (currState && currState.user?.name == null) {
-      options.ymodel.awareness.setLocalStateField('user', {
-        name,
-        color
-      });
-    }
 
-    // Message handler that confirms when a lock has been acquired
+    // Message handler that receives the rename acknowledge
     this.messageHandlers[127] = (
       encoder,
       decoder,
@@ -69,6 +55,7 @@ export class WebSocketProvider
       );
     };
 
+    const awareness = options.ymodel.awareness;
     const user = options.user;
     const userChanged = () => {
       const name = user.displayName !== '' ? user.displayName : user.name;
@@ -82,7 +69,7 @@ export class WebSocketProvider
   }
 
   get renameAck(): Promise<boolean> {
-    return this._renameAck.promise; 969fa5d674 (Add a user package to represent the current connected user (#11443))
+    return this._renameAck.promise;
   }
 
   setPath(newPath: string): void {
