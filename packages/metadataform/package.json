@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/metadataform",
-  "version": "4.0.0-alpha.14",
+  "version": "4.0.0-alpha.15",
   "description": "A helper to build form for metadata",
   "keywords": [
     "jupyter",
