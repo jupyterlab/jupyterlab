@@ -559,7 +559,10 @@ export type StateChange<T> = {
  * Generic document change
  */
 export type DocumentChange = {
-  // Is used???
+  /**
+   * The context a map => should be part of the document state map
+   */
+  // FIXME to remove at some point
   contextChange?: MapChange;
   /**
    * Change occurring in the document state.
