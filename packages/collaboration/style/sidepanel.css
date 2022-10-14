@@ -117,3 +117,19 @@
   position: absolute;
   right: 0;
 }
+
+.jp-RTCPanel .lm-AccordionPanel-title {
+  box-sizing: border-box;
+  background: #e5e5e500;
+  font: 12px Helvetica, Arial, sans-serif;
+  min-height: 22px;
+  max-height: 22px;
+  min-width: 35px;
+  line-height: 25px;
+  margin: 0;
+  display: flex;
+  background-color: var(--jp-layout-color2);
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  border-top: solid var(--jp-border-width) var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
