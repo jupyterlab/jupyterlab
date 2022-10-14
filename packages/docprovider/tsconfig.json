@@ -4,13 +4,15 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
-      "path": "../collaboration"
+      "path": "../shared-models"
     },
     {
-      "path": "../shared-models"
+      "path": "../collaboration"
     }
   ]
 }

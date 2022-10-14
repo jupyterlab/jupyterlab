@@ -1,12 +1,15 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": [
+    "src/*",
+    "test/*"
+  ],
   "references": [
     {
-      "path": "../collaboration"
+      "path": "../shared-models"
     },
     {
-      "path": "../shared-models"
+      "path": "../collaboration"
     },
     {
       "path": "."
@@ -16,6 +19,9 @@
     },
     {
       "path": "../shared-models"
+    },
+    {
+      "path": "../collaboration"
     }
   ]
 }
