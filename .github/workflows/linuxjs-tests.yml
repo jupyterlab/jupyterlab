@@ -37,7 +37,7 @@ jobs:
             js-logconsole,
             js-lsp,
             js-mainmenu,
-            js-meatadataform,
+            js-metadataform,
             js-nbformat,
             js-notebook,
             js-observables,
