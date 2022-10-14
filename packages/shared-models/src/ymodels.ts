@@ -1272,7 +1272,7 @@ export class YNotebook
    * @returns The added cell.
    */
   addCell(cell: SharedCell.Cell): YBaseCell<nbformat.IBaseCellMetadata> {
-    return this.insertCell(this._ycells.length - 1, cell);
+    return this.insertCell(this._ycells.length, cell);
   }
 
   /**

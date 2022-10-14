@@ -8,20 +8,8 @@ describe('@jupyterlab/shared-models', () => {
     describe('#constructor', () => {
       it('should create a notebook without arguments', () => {
         const notebook = YNotebook.create();
-        expect(notebook.cells.length).toBe(1);
-        expect(notebook.cells[0].cell_type).toBe('code');
+        expect(notebook.cells.length).toBe(0);
       });
-
-      it.each(['code', 'markdown', 'raw'])(
-        'should create a %s initialized notebook',
-        cellType => {
-          const notebook = YNotebook.create({
-            initialCellType: cellType as 'code' | 'markdown' | 'raw'
-          });
-          expect(notebook.cells.length).toBe(1);
-          expect(notebook.cells[0].cell_type).toBe(cellType);
-        }
-      );
     });
 
     describe('metadata', () => {
@@ -240,7 +228,7 @@ describe('@jupyterlab/shared-models', () => {
       it('should insert a cell', () => {
         const notebook = YNotebook.create();
         notebook.insertCell(0, { cell_type: 'code' });
-        expect(notebook.cells.length).toBe(2);
+        expect(notebook.cells.length).toBe(1);
       });
       it('should set cell source', () => {
         const notebook = YNotebook.create();
