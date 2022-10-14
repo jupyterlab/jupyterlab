@@ -622,7 +622,7 @@ function* alignedNodes<T extends Node, U extends Node>(a: T[], b: U[]): Iterable
         let { pre, post } = splitShallowNode(A.node, B.end - A.start);
         if (B.start < A.start) {
           // this node should not be yielded anywhere else, so ok to modify in-place
-          B.node.textContent = B.node.textContent?.slice(B.start - A.start) as string;
+          B.node.textContent = B.node.textContent?.slice(A.start - B.start) as string;
         }
         yield [pre, B.node];
         // Modify iteration result in-place:
@@ -633,7 +633,7 @@ function* alignedNodes<T extends Node, U extends Node>(a: T[], b: U[]): Iterable
         let { pre, post } = splitShallowNode(B.node, A.end - B.start);
         if (A.start < B.start) {
           // this node should not be yielded anywhere else, so ok to modify in-place
-          A.node.textContent = A.node.textContent?.slice(A.start - B.start) as string;
+          A.node.textContent = A.node.textContent?.slice(B.start - A.start) as string;
         }
         yield [A.node, pre];
         // Modify iteration result in-place:
