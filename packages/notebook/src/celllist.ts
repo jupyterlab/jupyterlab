@@ -41,12 +41,12 @@ export class CellList {
       switch (nbcell.cell_type) {
         case 'code': {
           return new CodeCellModel({
-            sharedModel: nbcell
+            sharedModel: nbcell as models.ISharedCodeCell
           });
         }
         case 'markdown': {
           return new MarkdownCellModel({
-            sharedModel: nbcell
+            sharedModel: nbcell as models.ISharedMarkdownCell
           });
         }
         default: {

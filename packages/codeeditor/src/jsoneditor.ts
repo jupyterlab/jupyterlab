@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IObservableJSON } from '@jupyterlab/observables';
+import { ISharedText, SourceChange } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -16,11 +17,6 @@ import {
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';
-import {
-  createStandaloneCell,
-  ISharedText,
-  TextChange
-} from '@jupyterlab/shared-models';
 
 /**
  * The class name added to a JSONEditor instance.
@@ -78,9 +74,7 @@ export class JSONEditor extends Widget {
     this.node.appendChild(this.headerNode);
     this.node.appendChild(this.editorHostNode);
 
-    const model = new CodeEditor.Model({
-      sharedModel: createStandaloneCell({ cell_type: 'code' })
-    });
+    const model = new CodeEditor.Model();
 
     model.mimeType = 'application/json';
     model.sharedModel.changed.connect(this._onModelChanged, this);
@@ -229,7 +223,7 @@ export class JSONEditor extends Widget {
   /**
    * Handle change events.
    */
-  private _onModelChanged(model: ISharedText, change: TextChange): void {
+  private _onModelChanged(model: ISharedText, change: SourceChange): void {
     if (change.sourceChange) {
       let valid = true;
       try {

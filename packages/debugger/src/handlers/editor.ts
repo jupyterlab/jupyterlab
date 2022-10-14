@@ -11,7 +11,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { ISharedText, TextChange } from '@jupyterlab/shared-models';
+import { ISharedText, SourceChange } from '@jupyterlab/shared-models';
 
 import {
   Compartment,
@@ -357,7 +357,7 @@ export class EditorHandler implements IDisposable {
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
   private _highlightState: StateField<DecorationSet>;
-  private _editorMonitor: ActivityMonitor<ISharedText, TextChange>;
+  private _editorMonitor: ActivityMonitor<ISharedText, SourceChange>;
   private _path: string;
   private _src: ISharedText;
 }

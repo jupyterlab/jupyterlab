@@ -15,11 +15,7 @@ import {
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { OutputArea } from '@jupyterlab/outputarea';
-import {
-  CellChange,
-  ISharedBaseCell,
-  ISharedBaseCellMetadata
-} from '@jupyterlab/shared-models';
+import { CellChange, ISharedBaseCell } from '@jupyterlab/shared-models';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ICellModel } from './model';
 import { Cell, CodeCell, MarkdownCell } from './widget';
@@ -314,8 +310,8 @@ export class CellSearchProvider implements IBaseSearchProvider {
    * @param changes Source change
    */
   protected async onSharedModelChanged(
-    cell: ISharedBaseCell<ISharedBaseCellMetadata>,
-    changes: CellChange<ISharedBaseCellMetadata>
+    cell: ISharedBaseCell,
+    changes: CellChange
   ): Promise<void> {
     if (changes.sourceChange) {
       await this._updateCodeMirror(cell.getSource());

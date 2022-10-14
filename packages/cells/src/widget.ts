@@ -1434,7 +1434,9 @@ export namespace CodeCell {
     const model = cell.model;
     const code = model.sharedModel.getSource();
     if (!code.trim() || !sessionContext.session?.kernel) {
-      model.clearExecution();
+      model.sharedModel.transact(() => {
+        model.clearExecution();
+      });
       return;
     }
     const cellId = { cellId: model.sharedModel.getId() };
@@ -1444,8 +1446,10 @@ export namespace CodeCell {
       ...cellId
     };
     const { recordTiming } = metadata;
-    model.clearExecution();
-    cell.outputHidden = false;
+    model.sharedModel.transact(() => {
+      model.clearExecution();
+      cell.outputHidden = false;
+    });
     cell.setPrompt('*');
     model.trusted = true;
     let future:

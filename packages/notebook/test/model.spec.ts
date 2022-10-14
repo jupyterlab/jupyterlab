@@ -3,7 +3,6 @@
 
 import * as nbformat from '@jupyterlab/nbformat';
 import { NotebookModel } from '@jupyterlab/notebook';
-import { createCell } from '@jupyterlab/shared-models';
 import { acceptDialog } from '@jupyterlab/testutils';
 import * as utils from './utils';
 
@@ -54,7 +53,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#cells', () => {
       it('should be reset when loading from disk', () => {
         const model = new NotebookModel();
-        model.sharedModel.insertCell(0, createCell({ cell_type: 'code' }));
+        model.sharedModel.insertCell(0, { cell_type: 'code' });
         model.fromJSON(utils.DEFAULT_CONTENT);
         expect(model.cells.length).toBe(7);
       });
@@ -63,8 +62,10 @@ describe('@jupyterlab/notebook', () => {
         const model = new NotebookModel({
           disableDocumentWideUndoRedo: true
         });
-        const cell = createCell({ cell_type: 'code', source: 'foo' });
-        model.sharedModel.insertCell(0, cell);
+        const cell = model.sharedModel.insertCell(0, {
+          cell_type: 'code',
+          source: 'foo'
+        });
         const cellJSON = cell.toJSON();
         model.sharedModel.clearUndoHistory();
         model.sharedModel.deleteCell(0);
@@ -82,13 +83,13 @@ describe('@jupyterlab/notebook', () => {
           model.contentChanged.connect(() => {
             called = true;
           });
-          model.sharedModel.insertCell(0, createCell({ cell_type: 'code' }));
+          model.sharedModel.insertCell(0, { cell_type: 'code' });
           expect(called).toBe(true);
         });
 
         it('should emit a `contentChanged` signal upon cell removal', () => {
           const model = new NotebookModel();
-          model.sharedModel.insertCell(0, createCell({ cell_type: 'code' }));
+          model.sharedModel.insertCell(0, { cell_type: 'code' });
           let called = false;
           model.contentChanged.connect(() => {
             called = true;
@@ -100,8 +101,8 @@ describe('@jupyterlab/notebook', () => {
         it('should emit a `contentChanged` signal upon cell move', () => {
           const model = new NotebookModel();
           model.sharedModel.insertCells(0, [
-            createCell({ cell_type: 'code' }),
-            createCell({ cell_type: 'code' })
+            { cell_type: 'code' },
+            { cell_type: 'code' }
           ]);
           let called = false;
           model.contentChanged.connect(() => {
@@ -113,7 +114,7 @@ describe('@jupyterlab/notebook', () => {
 
         it('should set the dirty flag', () => {
           const model = new NotebookModel();
-          model.sharedModel.insertCell(0, createCell({ cell_type: 'code' }));
+          model.sharedModel.insertCell(0, { cell_type: 'code' });
           expect(model.dirty).toBe(true);
         });
       });
@@ -121,8 +122,7 @@ describe('@jupyterlab/notebook', () => {
       describe('cell `changed` signal', () => {
         it('should be called when a cell content changes', () => {
           const model = new NotebookModel();
-          const cell = createCell({ cell_type: 'code' });
-          model.sharedModel.insertCell(0, cell);
+          const cell = model.sharedModel.insertCell(0, { cell_type: 'code' });
           expect(() => {
             cell.setSource('foo');
           }).not.toThrow();
@@ -130,7 +130,7 @@ describe('@jupyterlab/notebook', () => {
 
         it('should emit the `contentChanged` signal', () => {
           const model = new NotebookModel();
-          model.sharedModel.insertCell(0, createCell({ cell_type: 'code' }));
+          model.sharedModel.insertCell(0, { cell_type: 'code' });
           let called = false;
           model.contentChanged.connect(() => {
             called = true;
@@ -141,8 +141,7 @@ describe('@jupyterlab/notebook', () => {
 
         it('should set the dirty flag', () => {
           const model = new NotebookModel();
-          const cell = createCell({ cell_type: 'code' });
-          model.sharedModel.insertCell(0, cell);
+          const cell = model.sharedModel.insertCell(0, { cell_type: 'code' });
           model.dirty = false;
           cell.setSource('foo');
           expect(model.dirty).toBe(true);

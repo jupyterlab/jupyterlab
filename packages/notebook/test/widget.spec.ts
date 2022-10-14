@@ -22,7 +22,6 @@ import {
   StaticNotebook
 } from '@jupyterlab/notebook';
 import * as utils from './utils';
-import { createCell } from '@jupyterlab/shared-models';
 
 const server = new JupyterServer();
 
@@ -206,10 +205,7 @@ describe('@jupyter/notebook', () => {
         widget.modelContentChanged.connect(() => {
           called = true;
         });
-        widget.model!.sharedModel.insertCell(
-          0,
-          createCell({ cell_type: 'code' })
-        );
+        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         expect(called).toBe(true);
       });
 
@@ -319,7 +315,7 @@ describe('@jupyter/notebook', () => {
           widget = createWidget();
           widget.model!.sharedModel.insertCell(
             widget.model!.sharedModel.cells.length,
-            createCell({ cell_type: 'code' })
+            { cell_type: 'code' }
           );
           await framePromise();
           expect(widget.widgets.length).toBe(2);
@@ -334,10 +330,7 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should handle an add', () => {
-          widget.model!.sharedModel.insertCell(
-            0,
-            createCell({ cell_type: 'code' })
-          );
+          widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
           expect(widget.widgets.length).toBe(widget.model!.cells.length);
           const child = widget.widgets[0];
           expect(child.hasClass('jp-Notebook-cell')).toBe(true);
@@ -345,8 +338,8 @@ describe('@jupyter/notebook', () => {
 
         it('should initially render markdown cells with content', () => {
           widget.model!.sharedModel.insertCells(0, [
-            createCell({ cell_type: 'markdown', source: '# Hello' }),
-            createCell({ cell_type: 'markdown' })
+            { cell_type: 'markdown', source: '# Hello' },
+            { cell_type: 'markdown' }
           ]);
           expect(widget.widgets.length).toBe(widget.model!.cells.length);
           const child1 = widget.widgets[0] as MarkdownCell;
@@ -362,10 +355,7 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should handle a clear', () => {
-          widget.model!.sharedModel.insertCell(
-            0,
-            createCell({ cell_type: 'code' })
-          );
+          widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
           widget.model!.sharedModel.deleteCellRange(
             0,
             widget.model!.sharedModel.cells.length
@@ -712,10 +702,10 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-        widget.model!.sharedModel.insertCell(
-          0,
-          createCell({ cell_type: 'markdown', source: '# Hello' })
-        ); // Should be rendered with content.
+        widget.model!.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '# Hello'
+        }); // Should be rendered with content.
         const child = widget.widgets[0] as MarkdownCell;
         expect(child.rendered).toBe(true);
         widget.activeCellIndex = 0;
@@ -1197,10 +1187,10 @@ describe('@jupyter/notebook', () => {
         });
 
         it('should preserve "command" mode if in a markdown cell', async () => {
-          widget.model!.sharedModel.insertCell(
-            0,
-            createCell({ cell_type: 'markdown', source: '# Hello' })
-          );
+          widget.model!.sharedModel.insertCell(0, {
+            cell_type: 'markdown',
+            source: '# Hello'
+          });
           const child = widget.widgets[0] as MarkdownCell;
           if (!child.inViewport) {
             await signalToPromise(child.inViewportChanged);
@@ -1255,8 +1245,8 @@ describe('@jupyter/notebook', () => {
 
         it('should leave a markdown cell rendered', async () => {
           widget.model!.sharedModel.insertCells(0, [
-            createCell({ cell_type: 'code' }),
-            createCell({ cell_type: 'markdown', source: '# Hello' })
+            { cell_type: 'code' },
+            { cell_type: 'markdown', source: '# Hello' }
           ]);
           const codeChild = widget.widgets[0];
           const mdChild = widget.widgets[1] as MarkdownCell;
@@ -1279,8 +1269,8 @@ describe('@jupyter/notebook', () => {
 
         it('should remove selection and switch to command mode', async () => {
           widget.model!.sharedModel.insertCells(0, [
-            createCell({ cell_type: 'code' }),
-            createCell({ cell_type: 'markdown', source: '# Hello' })
+            { cell_type: 'code' },
+            { cell_type: 'markdown', source: '# Hello' }
           ]);
           const codeChild = widget.widgets[0];
           const mdChild = widget.widgets[1] as MarkdownCell;
@@ -1303,8 +1293,8 @@ describe('@jupyter/notebook', () => {
 
         it('should have no effect on shift right click', () => {
           widget.model!.sharedModel.insertCells(0, [
-            createCell({ cell_type: 'code' }),
-            createCell({ cell_type: 'markdown', source: '# Hello' })
+            { cell_type: 'code' },
+            { cell_type: 'markdown', source: '# Hello' }
           ]);
           const codeChild = widget.widgets[0];
           const mdChild = widget.widgets[1] as MarkdownCell;
@@ -1322,10 +1312,10 @@ describe('@jupyter/notebook', () => {
 
       describe('dblclick', () => {
         it('should unrender a markdown cell', async () => {
-          widget.model!.sharedModel.insertCell(
-            0,
-            createCell({ cell_type: 'markdown', source: '# Hello' })
-          );
+          widget.model!.sharedModel.insertCell(0, {
+            cell_type: 'markdown',
+            source: '# Hello'
+          });
           const child = widget.widgets[0] as MarkdownCell;
           if (!child.inViewport) {
             await signalToPromise(child.inViewportChanged);
@@ -1527,10 +1517,7 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
-        widget.model!.sharedModel.insertCell(
-          0,
-          createCell({ cell_type: 'code' })
-        );
+        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         expect(widget.activeCell).toBe(widget.widgets[2]);
       });
 

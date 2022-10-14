@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { createStandaloneCell } from '@jupyterlab/shared-models';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';
 import { CodeEditorWrapper } from './widget';
@@ -29,11 +28,14 @@ export class CodeViewerWidget extends Widget {
     options: CodeViewerWidget.INoModelOptions
   ): CodeViewerWidget {
     const model = new CodeEditor.Model({
-      mimeType: options.mimeType,
-      sharedModel: createStandaloneCell({ cell_type: 'code' })
+      mimeType: options.mimeType
     });
     model.sharedModel.setSource(options.content);
-    return new CodeViewerWidget({ factory: options.factory, model });
+    const widget = new CodeViewerWidget({ factory: options.factory, model });
+    widget.disposed.connect(() => {
+      model.dispose();
+    });
+    return widget;
   }
 
   get content(): string {
@@ -44,8 +46,8 @@ export class CodeViewerWidget extends Widget {
     return this.model.mimeType;
   }
 
-  model: CodeEditor.IModel;
-  editor: CodeEditor.IEditor;
+  readonly model: CodeEditor.IModel;
+  readonly editor: CodeEditor.IEditor;
 }
 
 /**

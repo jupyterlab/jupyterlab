@@ -10,7 +10,7 @@ import {
   CompletionHandler,
   ConnectorProxy
 } from '@jupyterlab/completer';
-import { ISharedText, TextChange, YFile } from '@jupyterlab/shared-models';
+import { ISharedText, SourceChange, YFile } from '@jupyterlab/shared-models';
 import { createSessionContext } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
@@ -38,7 +38,7 @@ class TestCompleterModel extends CompleterModel {
 class TestCompletionHandler extends CompletionHandler {
   methods: string[] = [];
 
-  onTextChanged(str: ISharedText, changed: TextChange): void {
+  onTextChanged(str: ISharedText, changed: SourceChange): void {
     super.onTextChanged(str, changed);
     this.methods.push('onTextChanged');
   }

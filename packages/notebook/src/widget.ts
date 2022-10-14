@@ -16,6 +16,10 @@ import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type {
+  ISharedNotebook,
+  NotebookChange
+} from '@jupyterlab/shared-models';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { WindowedList } from '@jupyterlab/ui-components';
@@ -31,7 +35,6 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
-import * as sharedModels from '@jupyterlab/shared-models';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 
 /**
@@ -553,12 +556,9 @@ export class StaticNotebook extends WindowedList {
     const collab =
       (PageConfig.getOption('collaborative') ?? '').toLowerCase() === 'true';
     if (!collab && !cells.length) {
-      newValue.sharedModel.insertCell(
-        0,
-        sharedModels.createCell({
-          cell_type: this.notebookConfig.defaultCell
-        })
-      );
+      newValue.sharedModel.insertCell(0, {
+        cell_type: this.notebookConfig.defaultCell
+      });
     }
     let index = -1;
     for (const cell of cells) {
@@ -573,8 +573,8 @@ export class StaticNotebook extends WindowedList {
    * Handle a change cells event.
    */
   protected _onCellsChanged(
-    sender: sharedModels.ISharedNotebook,
-    args: sharedModels.NotebookChange
+    sender: ISharedNotebook,
+    args: NotebookChange
   ): void {
     if (args.cellsChange) {
       this.removeHeader();
@@ -1227,8 +1227,8 @@ export class Notebook extends StaticNotebook {
    * Handle a change cells event.
    */
   protected _onCellsChanged(
-    sender: sharedModels.ISharedNotebook,
-    args: sharedModels.NotebookChange
+    sender: ISharedNotebook,
+    args: NotebookChange
   ): void {
     const activeCellId = args.cellsChange && this.activeCell?.model.id;
     super._onCellsChanged(sender, args);
@@ -2394,10 +2394,7 @@ export class Notebook extends StaticNotebook {
       const start = index;
       const values = event.mimeData.getData(JUPYTER_CELL_MIME);
       // Insert the copies of the original cells.
-      const ycells = values.map((value: nbformat.ICell) =>
-        sharedModels.createCell(value)
-      );
-      model.sharedModel.insertCells(index, ycells);
+      model.sharedModel.insertCells(index, values);
       // Select the inserted cells.
       this.deselectAll();
       this.activeCellIndex = start;

@@ -11,7 +11,7 @@ import {
   ObservableValue
 } from '@jupyterlab/observables';
 import * as models from '@jupyterlab/shared-models';
-import { ISharedText } from '@jupyterlab/shared-models';
+import { ISharedText, YFile } from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -207,12 +207,7 @@ export namespace CodeEditor {
      */
     constructor(options: Model.IOptions = {}) {
       this.modelDB = new ModelDB();
-      this.sharedModel =
-        options?.sharedModel ||
-        (models.createStandaloneCell({
-          cell_type: this.type,
-          id: options?.id
-        }) as models.ISharedText);
+      this.sharedModel = options?.sharedModel || YFile.create();
       const mimeType = this.modelDB.createValue('mimeType');
       mimeType.changed.connect(this._onModelDBMimeTypeChanged, this);
       mimeType.set(options?.mimeType || 'text/plain');
@@ -227,7 +222,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    sharedModel: models.ISharedText;
+    readonly sharedModel: models.ISharedText;
 
     /**
      * The underlying `IModelDB` instance in which state is
