@@ -18,18 +18,6 @@ export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
  */
 export interface IDocumentProvider {
   /**
-   * Returns a Promise that resolves when renaming is ackownledged.
-   * This is a necessary synchronization mechanism in collaborative mode,
-   * since renaming is done through an HTTP request, not the Y WebSocket.
-   */
-  readonly renameAck: Promise<boolean>;
-
-  /**
-   * This should be called by the docregistry when the file has been renamed to update the websocket connection url
-   */
-  setPath(newPath: string): void;
-
-  /**
    * Destroy the provider.
    */
   destroy(): void;
