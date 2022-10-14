@@ -563,11 +563,12 @@ function splitShallowNode<T extends Node>(
   };
 }
 
-
 /**
  * Iterate over some nodes, while tracking cumulative start and end position.
  */
-function* nodeIter<T extends Node>(nodes: T[]): IterableIterator<{node: T, start: number, end: number, isText: boolean}> {
+function* nodeIter<T extends Node>(
+  nodes: T[]
+): IterableIterator<{ node: T; start: number; end: number; isText: boolean }> {
   let start = 0;
   let end;
   for (let node of nodes) {
@@ -576,12 +577,11 @@ function* nodeIter<T extends Node>(nodes: T[]): IterableIterator<{node: T, start
       node,
       start,
       end,
-      isText: node.nodeType === Node.TEXT_NODE,
+      isText: node.nodeType === Node.TEXT_NODE
     };
     start = end;
   }
 }
-
 
 /**
  * Align two collections of nodes.
@@ -589,7 +589,10 @@ function* nodeIter<T extends Node>(nodes: T[]): IterableIterator<{node: T, start
  * If a text node in one collections spans an element in the other, yield the spanned elements.
  * Otherwise, split the nodes such that yielded pair start and stop on the same position.
  */
-function* alignedNodes<T extends Node, U extends Node>(a: T[], b: U[]): IterableIterator<[T, null] | [null, U] | [T, U]> {
+function* alignedNodes<T extends Node, U extends Node>(
+  a: T[],
+  b: U[]
+): IterableIterator<[T, null] | [null, U] | [T, U]> {
   let iterA = nodeIter(a);
   let iterB = nodeIter(b);
   let nA = iterA.next();
@@ -622,7 +625,9 @@ function* alignedNodes<T extends Node, U extends Node>(a: T[], b: U[]): Iterable
         let { pre, post } = splitShallowNode(A.node, B.end - A.start);
         if (B.start < A.start) {
           // this node should not be yielded anywhere else, so ok to modify in-place
-          B.node.textContent = B.node.textContent?.slice(A.start - B.start) as string;
+          B.node.textContent = B.node.textContent?.slice(
+            A.start - B.start
+          ) as string;
         }
         yield [pre, B.node];
         // Modify iteration result in-place:
@@ -633,7 +638,9 @@ function* alignedNodes<T extends Node, U extends Node>(a: T[], b: U[]): Iterable
         let { pre, post } = splitShallowNode(B.node, A.end - B.start);
         if (A.start < B.start) {
           // this node should not be yielded anywhere else, so ok to modify in-place
-          A.node.textContent = A.node.textContent?.slice(B.start - A.start) as string;
+          A.node.textContent = A.node.textContent?.slice(
+            B.start - A.start
+          ) as string;
         }
         yield [A.node, pre];
         // Modify iteration result in-place:
@@ -641,12 +648,13 @@ function* alignedNodes<T extends Node, U extends Node>(a: T[], b: U[]): Iterable
         B.start = A.end;
         nA = iterA.next();
       } else {
-        throw new Error(`Unexpected intersection: ${JSON.stringify(A)} ${JSON.stringify(B)}`);
+        throw new Error(
+          `Unexpected intersection: ${JSON.stringify(A)} ${JSON.stringify(B)}`
+        );
       }
     }
   }
 }
-
 
 /**
  * Render text into a host node.
@@ -680,12 +688,11 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
     const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
 
     for (let nodes of alignedNodes(preNodes, linkedNodes)) {
-
       if (!nodes[0]) {
         combinedNodes.push(nodes[1]);
         inAnchorElement = nodes[1].nodeType !== Node.TEXT_NODE;
         continue;
-      } else if(!nodes[1]) {
+      } else if (!nodes[1]) {
         combinedNodes.push(nodes[0]);
         inAnchorElement = false;
         continue;
