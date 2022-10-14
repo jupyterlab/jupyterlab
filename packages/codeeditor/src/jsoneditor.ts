@@ -150,8 +150,6 @@ export class JSONEditor extends Widget {
       return;
     }
 
-    // The model does not dispose the shared model by default
-    this.model.sharedModel.dispose();
     this.model.dispose();
     this.editor.dispose();
 

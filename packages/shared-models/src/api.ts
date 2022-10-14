@@ -20,7 +20,10 @@ import type {
   JSONValue,
   PartialJSONValue
 } from '@lumino/coreutils';
-import type { IDisposable } from '@lumino/disposable';
+import type {
+  IDisposable,
+  IObservableDisposable
+} from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 
 /**
@@ -165,11 +168,6 @@ export interface ISharedNotebook extends ISharedDocument {
   readonly cells: ISharedCell[];
 
   /**
-   * Signal triggered when the cells list changes.
-   */
-  readonly cellsChanged: ISignal<this, IListChange>;
-
-  /**
    * Wether the undo/redo logic should be
    * considered on the full document across all cells.
    */
@@ -291,6 +289,11 @@ export interface ISharedNotebook extends ISharedDocument {
    * @param to: The end index of the range to remove (exclusive).
    */
   deleteCellRange(from: number, to: number): void;
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.INotebookContent;
 }
 
 /**
@@ -356,7 +359,8 @@ export namespace SharedCell {
  */
 export interface ISharedBaseCell<
   Metadata extends nbformat.IBaseCellMetadata = nbformat.IBaseCellMetadata
-> extends ISharedText {
+> extends ISharedText,
+    IObservableDisposable {
   /**
    * The type of the cell.
    */
@@ -588,56 +592,6 @@ export type DocumentChange = {
    */
   stateChange?: StateChange<any>[];
 };
-
-/**
- * The change types which occur on a list.
- */
-export type ListChangeType =
-  /**
-   * Item(s) were added to the list.
-   */
-  | 'add'
-
-  /**
-   * Item(s) were removed from the list.
-   */
-  | 'remove';
-
-/**
- * The changed object which is emitted by a list.
- */
-export interface IListChange<T = any> {
-  /**
-   * The type of change undergone by the vector.
-   */
-  type: ListChangeType;
-
-  /**
-   * The new index associated with the change.
-   */
-  newIndex: number;
-
-  /**
-   * The new values associated with the change.
-   *
-   * #### Notes
-   * The values will be contiguous starting at the `newIndex`.
-   */
-  newValues: T[];
-
-  /**
-   * The old index associated with the change.
-   */
-  oldIndex: number;
-
-  /**
-   * The old values associated with the change.
-   *
-   * #### Notes
-   * The values will be contiguous starting at the `oldIndex`.
-   */
-  oldValues: T[];
-}
 
 /**
  * The change types which occur on an observable map.

@@ -15,8 +15,6 @@ import { DirListing } from '@jupyterlab/filebrowser';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableJSON, IObservableMap } from '@jupyterlab/observables';
-
 import {
   IOutputPrompt,
   IStdin,
@@ -35,19 +33,15 @@ import {
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
+import { IMapChange } from '@jupyterlab/shared-models';
+
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { addIcon } from '@jupyterlab/ui-components';
 
-import {
-  JSONObject,
-  JSONValue,
-  PartialJSONValue,
-  PromiseDelegate,
-  UUID
-} from '@lumino/coreutils';
+import { JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { some } from '@lumino/algorithm';
 
@@ -73,6 +67,7 @@ import {
 import { IInputPrompt, InputArea, InputPrompt } from './inputarea';
 
 import {
+  CellModel,
   IAttachmentsCellModel,
   ICellModel,
   ICodeCellModel,
@@ -213,7 +208,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this._inViewport = false;
     this.placeholder = options.placeholder ?? true;
 
-    model.metadata.changed.connect(this.onMetadataChanged, this);
+    model.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
   /**
@@ -374,8 +369,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    */
   saveEditableState(): void {
     const { sharedModel } = this.model;
-    const metadata = sharedModel.getMetadata();
-    const current = metadata['editable'];
+    const current = sharedModel.getMetadata('editable') as unknown as boolean;
 
     if (
       (this.readOnly && current === false) ||
@@ -384,18 +378,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       return;
     }
     if (this.readOnly) {
-      metadata.editable = false;
+      sharedModel.setMetadata('editable', false);
     } else {
-      delete metadata.editable;
+      sharedModel.deleteMetadata('editable');
     }
-    sharedModel.setMetadata(metadata);
   }
 
   /**
    * Load view editable state from model.
    */
   loadEditableState(): void {
-    this.readOnly = this.model.sharedModel.getMetadata().editable === false;
+    this.readOnly =
+      (this.model.sharedModel.getMetadata('editable') as unknown as boolean) ===
+      false;
   }
 
   /**
@@ -444,7 +439,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState(): void {
-    const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
+    const jupyter = { ...(this.model.getMetadata('jupyter') as any) };
 
     if (
       (this.inputHidden && jupyter.source_hidden === true) ||
@@ -459,9 +454,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       delete jupyter.source_hidden;
     }
     if (Object.keys(jupyter).length === 0) {
-      this.model.metadata.delete('jupyter');
+      this.model.deleteMetadata('jupyter');
     } else {
-      this.model.metadata.set('jupyter', jupyter);
+      this.model.setMetadata('jupyter', jupyter);
     }
   }
 
@@ -469,7 +464,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Revert view collapse state from model.
    */
   loadCollapseState(): void {
-    const jupyter = (this.model.metadata.get('jupyter') as any) || {};
+    const jupyter = (this.model.getMetadata('jupyter') as any) ?? {};
     this.inputHidden = !!jupyter.source_hidden;
   }
 
@@ -634,10 +629,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(
-    model: IObservableJSON,
-    args: IObservableMap.IChangedArgs<PartialJSONValue | undefined>
-  ): void {
+  protected onMetadataChanged(model: CellModel, args: IMapChange): void {
     switch (args.key) {
       case 'jupyter':
         if (this.syncCollapse) {
@@ -1167,8 +1159,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     try {
       super.saveCollapseState();
 
-      const metadata = this.model.metadata;
-      const collapsed = this.model.metadata.get('collapsed');
+      const collapsed = this.model.getMetadata('collapsed');
 
       if (
         (this.outputHidden && collapsed === true) ||
@@ -1180,9 +1171,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
       // Do not set jupyter.outputs_hidden since it is redundant. See
       // and https://github.com/jupyter/nbformat/issues/137
       if (this.outputHidden) {
-        metadata.set('collapsed', true);
+        this.model.setMetadata('collapsed', true);
       } else {
-        metadata.delete('collapsed');
+        this.model.deleteMetadata('collapsed');
       }
     } finally {
       this._savingMetadata = false;
@@ -1197,7 +1188,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
    */
   loadCollapseState(): void {
     super.loadCollapseState();
-    this.outputHidden = !!this.model.metadata.get('collapsed');
+    this.outputHidden = !!this.model.getMetadata('collapsed');
   }
 
   /**
@@ -1218,8 +1209,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Save view collapse state to model
    */
   saveScrolledState(): void {
-    const { metadata } = this.model;
-    const current = metadata.get('scrolled');
+    const current = this.model.getMetadata('scrolled');
 
     if (
       (this.outputsScrolled && current === true) ||
@@ -1228,9 +1218,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
       return;
     }
     if (this.outputsScrolled) {
-      metadata.set('scrolled', true);
+      this.model.setMetadata('scrolled', true);
     } else {
-      metadata.delete('scrolled');
+      this.model.deleteMetadata('scrolled');
     }
   }
 
@@ -1238,13 +1228,11 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Revert view collapse state from model.
    */
   loadScrolledState(): void {
-    const metadata = this.model.metadata;
-
     // We don't have the notion of 'auto' scrolled, so we make it false.
-    if (metadata.get('scrolled') === 'auto') {
+    if (this.model.getMetadata('scrolled') === 'auto') {
       this.outputsScrolled = false;
     } else {
-      this.outputsScrolled = !!metadata.get('scrolled');
+      this.outputsScrolled = !!this.model.getMetadata('scrolled');
     }
   }
 
@@ -1356,10 +1344,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(
-    model: IObservableJSON,
-    args: IObservableMap.IChangedArgs<JSONValue>
-  ): void {
+  protected onMetadataChanged(model: CellModel, args: IMapChange): void {
     if (this._savingMetadata) {
       // We are in middle of a metadata transaction, so don't react to it.
       return;
@@ -1441,7 +1426,7 @@ export namespace CodeCell {
     }
     const cellId = { cellId: model.sharedModel.getId() };
     metadata = {
-      ...model.metadata.toJSON(),
+      ...model.metadata,
       ...metadata,
       ...cellId
     };
@@ -1486,15 +1471,15 @@ export namespace CodeCell {
           const value = msg.header.date || new Date().toISOString();
           const timingInfo: any = Object.assign(
             {},
-            model.metadata.get('execution')
+            model.getMetadata('execution')
           );
           timingInfo[`iopub.${label}`] = value;
-          model.metadata.set('execution', timingInfo);
+          model.setMetadata('execution', timingInfo);
           return true;
         };
         cell.outputArea.future.registerMessageHook(recordTimingHook);
       } else {
-        model.metadata.delete('execution');
+        model.deleteMetadata('execution');
       }
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
@@ -1503,7 +1488,7 @@ export namespace CodeCell {
       if (recordTiming) {
         const timingInfo = Object.assign(
           {},
-          model.metadata.get('execution') as any
+          model.getMetadata('execution') as any
         );
         const started = msg.metadata.started as string;
         // Started is not in the API, but metadata IPyKernel sends
@@ -1514,7 +1499,7 @@ export namespace CodeCell {
         const finished = msg.header.date as string;
         timingInfo['shell.execute_reply'] =
           finished || new Date().toISOString();
-        model.metadata.set('execution', timingInfo);
+        model.setMetadata('execution', timingInfo);
       }
       return msg;
     } catch (e) {
@@ -1805,7 +1790,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
 
     // Check if heading cell is set to be collapsed
-    this._headingCollapsed = (this.model.metadata.get(
+    this._headingCollapsed = (this.model.getMetadata(
       MARKDOWN_HEADING_COLLAPSED
     ) ?? false) as boolean;
 
@@ -1883,9 +1868,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (this._headingCollapsed !== value) {
       this._headingCollapsed = value;
       if (value) {
-        this.model.metadata.set(MARKDOWN_HEADING_COLLAPSED, value);
-      } else if (this.model.metadata.has(MARKDOWN_HEADING_COLLAPSED)) {
-        this.model.metadata.delete(MARKDOWN_HEADING_COLLAPSED);
+        this.model.setMetadata(MARKDOWN_HEADING_COLLAPSED, value);
+      } else if (
+        this.model.getMetadata(MARKDOWN_HEADING_COLLAPSED) !== 'undefined'
+      ) {
+        this.model.deleteMetadata(MARKDOWN_HEADING_COLLAPSED);
       }
       const collapseButton = this.inputArea?.promptNode.getElementsByClassName(
         HEADING_COLLAPSER_CLASS

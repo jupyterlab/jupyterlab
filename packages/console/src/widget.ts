@@ -343,7 +343,7 @@ export class CodeConsole extends Widget {
     const cell = this.createCodeCell();
     cell.model.sharedModel.setSource(code);
     for (const key of Object.keys(metadata)) {
-      cell.model.metadata.set(key, metadata[key]);
+      cell.model.setMetadata(key, metadata[key]);
     }
     this.addCell(cell);
     return this._execute(cell);

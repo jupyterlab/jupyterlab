@@ -1203,7 +1203,9 @@ export namespace NotebookActions {
 
           notebook.widgets.forEach((child, index) => {
             const deletable =
-              child.model.sharedModel.getMetadata().deletable !== false;
+              (child.model.sharedModel.getMetadata(
+                'deletable'
+              ) as unknown as boolean) !== false;
 
             if (notebook.isSelectedOrActive(child) && deletable) {
               toDelete.push(index);
@@ -1606,7 +1608,7 @@ export namespace NotebookActions {
     let latestCellIdx: number | null = null;
     notebook.widgets.forEach((cell, cellIndx) => {
       if (cell.model.type === 'code') {
-        const execution = (cell as CodeCell).model.metadata.get('execution');
+        const execution = cell.model.getMetadata('execution');
         if (
           execution &&
           JSONExt.isObject(execution) &&
@@ -2421,7 +2423,7 @@ namespace Private {
 
     // Find the cells to delete.
     notebook.widgets.forEach((child, index) => {
-      const deletable = child.model.metadata.get('deletable') !== false;
+      const deletable = child.model.getMetadata('deletable') !== false;
 
       if (notebook.isSelectedOrActive(child) && deletable) {
         toDelete.push(index);

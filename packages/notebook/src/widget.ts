@@ -14,17 +14,14 @@ import {
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableMap } from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import type {
-  ISharedNotebook,
-  NotebookChange
-} from '@jupyterlab/shared-models';
+import type { IMapChange } from '@jupyterlab/shared-models';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { WindowedList } from '@jupyterlab/ui-components';
 import { ArrayExt, findIndex } from '@lumino/algorithm';
-import { MimeData, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { MimeData } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
@@ -33,6 +30,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
+import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
@@ -133,11 +131,6 @@ const DRAG_THRESHOLD = 5;
  * Ref: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#getting_the_most_out_of_idle_callbacks
  */
 const MAXIMUM_TIME_REMAINING = 50;
-
-/*
- * The type of cell insert provided via signal.
- */
-type InsertType = 'push' | 'insert' | 'set';
 
 /*
  * The rendering mode for the notebook.
@@ -476,10 +469,7 @@ export class StaticNotebook extends WindowedList {
    * The default implementation updates the mimetypes of the code cells
    * when the `language_info` metadata changes.
    */
-  protected onMetadataChanged(
-    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
-    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
-  ): void {
+  protected onMetadataChanged(sender: INotebookModel, args: IMapChange): void {
     switch (args.key) {
       case 'language_info':
         this._updateMimetype();
@@ -538,11 +528,9 @@ export class StaticNotebook extends WindowedList {
     newValue: INotebookModel | null
   ): void {
     if (oldValue) {
-      oldValue.sharedModel.changed.disconnect(this._onCellsChanged, this);
-      oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
-      // TODO: reuse existing cell widgets if possible. Remember to initially
-      // clear the history of each cell if we do this.
+      oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
+      oldValue.cells.changed.disconnect(this._onCellsChanged, this);
       while (this.cellsArray.length) {
         this._removeCell(0);
       }
@@ -562,58 +550,64 @@ export class StaticNotebook extends WindowedList {
     }
     let index = -1;
     for (const cell of cells) {
-      this._insertCell(++index, cell, 'set');
+      this._insertCell(++index, cell);
     }
-    newValue.sharedModel.changed.connect(this._onCellsChanged, this);
+    newValue.cells.changed.connect(this._onCellsChanged, this);
+    newValue.metadataChanged.connect(this.onMetadataChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
-    newValue.metadata.changed.connect(this.onMetadataChanged, this);
   }
 
   /**
    * Handle a change cells event.
    */
   protected _onCellsChanged(
-    sender: ISharedNotebook,
-    args: NotebookChange
+    sender: CellList,
+    args: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    if (args.cellsChange) {
-      this.removeHeader();
-
-      let index = 0;
-      args.cellsChange.forEach(delta => {
-        if (delta.retain != null) {
-          index += delta.retain;
-        } else if (delta.insert) {
-          const insertType: InsertType =
-            index === this.widgets.length ? 'push' : 'insert';
-          delta.insert.forEach((val, offset) => {
-            this._insertCell(
-              index + offset,
-              this.model!.cells.get(index + offset),
-              insertType
-            );
-          });
-          this._updateDataWindowedListIndex(
-            index,
-            this.model!.cells.length,
-            delta.insert.length
-          );
-          index += delta.insert.length;
-        } else if (delta.delete != null) {
-          for (let i = 0; i < delta.delete; i++) {
-            this._removeCell(index);
-          }
-          this._updateDataWindowedListIndex(
-            index,
-            this.model!.cells.length + delta.delete,
-            -1 * delta.delete
-          );
+    this.removeHeader();
+    switch (args.type) {
+      case 'add': {
+        let index = 0;
+        index = args.newIndex;
+        for (const value of args.newValues) {
+          this._insertCell(index++, value);
         }
-      });
-
-      if (!this.model!.sharedModel.cells.length) {
-        this.addHeader();
+        this._updateDataWindowedListIndex(
+          args.newIndex,
+          this.model!.cells.length,
+          args.newValues.length
+        );
+        break;
       }
+      case 'remove':
+        for (let length = args.oldValues.length; length > 0; length--) {
+          this._removeCell(args.oldIndex);
+        }
+        this._updateDataWindowedListIndex(
+          args.oldIndex,
+          this.model!.cells.length + args.oldValues.length,
+          -1 * args.oldValues.length
+        );
+        // Add default cell if there are no cells remaining.
+        if (!sender.length) {
+          const model = this.model;
+          // Add the cell in a new context to avoid triggering another
+          // cell changed event during the handling of this signal.
+          requestAnimationFrame(() => {
+            if (model && !model.isDisposed && !model.sharedModel.cells.length) {
+              model.sharedModel.insertCell(0, {
+                cell_type: this.notebookConfig.defaultCell
+              });
+            }
+          });
+        }
+        break;
+      default:
+        return;
+    }
+
+    if (!this.model!.sharedModel.cells.length) {
+      this.addHeader();
     }
 
     this.update();
@@ -622,11 +616,7 @@ export class StaticNotebook extends WindowedList {
   /**
    * Create a cell widget and insert into the notebook.
    */
-  private _insertCell(
-    index: number,
-    cell: ICellModel,
-    insertType: InsertType
-  ): void {
+  private _insertCell(index: number, cell: ICellModel): void {
     let widget: Cell;
     switch (cell.type) {
       case 'code':
@@ -736,9 +726,7 @@ export class StaticNotebook extends WindowedList {
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
-    const info = this._notebookModel?.metadata.get(
-      'language_info'
-    ) as nbformat.ILanguageInfoMetadata;
+    const info = this._notebookModel?.getMetadata('language_info');
     if (!info) {
       return;
     }
@@ -1227,10 +1215,10 @@ export class Notebook extends StaticNotebook {
    * Handle a change cells event.
    */
   protected _onCellsChanged(
-    sender: ISharedNotebook,
-    args: NotebookChange
+    sender: CellList,
+    args: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    const activeCellId = args.cellsChange && this.activeCell?.model.id;
+    const activeCellId = this.activeCell?.model.id;
     super._onCellsChanged(sender, args);
     if (activeCellId) {
       const newActiveCellIndex = this.model?.sharedModel.cells.findIndex(
@@ -2571,7 +2559,7 @@ export class Notebook extends StaticNotebook {
     for (let i = 0; i < this.widgets.length; i++) {
       if (i !== this._activeCellIndex) {
         const cell = this.widgets[i];
-        if (cell.editor) {
+        if (!cell.model.isDisposed && cell.editor) {
           cell.model.selections.delete(cell.editor.uuid);
         }
       }

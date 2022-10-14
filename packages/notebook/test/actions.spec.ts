@@ -349,10 +349,12 @@ describe('@jupyterlab/notebook', () => {
             const markdownCell = widget.widgets[i] as MarkdownCell;
             const attachment: IMimeBundle = { 'text/plain': 'test' };
             markdownCell.model.attachments.set(UUID.uuid4(), attachment);
+            console.log(markdownCell.model.attachments);
             widget.select(markdownCell);
           }
           NotebookActions.mergeCells(widget);
           const model = (widget.activeCell as MarkdownCell).model;
+          console.log(model.attachments);
           expect(model.attachments.length).toBe(2);
         }
       );
@@ -1315,7 +1317,7 @@ describe('@jupyterlab/notebook', () => {
       it('should delete metadata.deletable', () => {
         const next = widget.widgets[1];
         widget.select(next);
-        next.model.metadata.set('deletable', false);
+        next.model.setMetadata('deletable', false);
         NotebookActions.copy(widget);
         const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
         data.map(cell => {

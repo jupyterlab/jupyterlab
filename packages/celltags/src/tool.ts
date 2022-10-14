@@ -62,7 +62,7 @@ export class TagTool extends NotebookTools.Tool {
   checkApplied(name: string): boolean {
     const activeCell = this.tracker?.activeCell;
     if (activeCell) {
-      const tags = activeCell.model.metadata.get('tags') as string[];
+      const tags = activeCell.model.getMetadata('tags') as string[];
       if (tags) {
         return tags.includes(name);
       }
@@ -78,12 +78,10 @@ export class TagTool extends NotebookTools.Tool {
   addTag(name: string): void {
     const cell = this.tracker?.activeCell;
     if (cell) {
-      const oldTags = [
-        ...((cell.model.metadata.get('tags') as string[]) ?? [])
-      ];
+      const oldTags = [...((cell.model.getMetadata('tags') as string[]) ?? [])];
       let tagsToAdd = name.split(/[,\s]+/);
       tagsToAdd = tagsToAdd.filter(tag => tag !== '' && !oldTags.includes(tag));
-      cell.model.metadata.set('tags', oldTags.concat(tagsToAdd));
+      cell.model.setMetadata('tags', oldTags.concat(tagsToAdd));
       this.refreshTags();
       this.loadActiveTags();
     }
@@ -97,13 +95,11 @@ export class TagTool extends NotebookTools.Tool {
   removeTag(name: string): void {
     const cell = this.tracker?.activeCell;
     if (cell) {
-      const oldTags = [
-        ...((cell.model.metadata.get('tags') as string[]) ?? [])
-      ];
+      const oldTags = [...((cell.model.getMetadata('tags') as string[]) ?? [])];
       let tags = oldTags.filter(tag => tag !== name);
-      cell.model.metadata.set('tags', tags);
+      cell.model.setMetadata('tags', tags);
       if (tags.length === 0) {
-        cell.model.metadata.delete('tags');
+        cell.model.deleteMetadata('tags');
       }
       this.refreshTags();
       this.loadActiveTags();
@@ -131,7 +127,7 @@ export class TagTool extends NotebookTools.Tool {
     const allTags = reduce(
       cells,
       (allTags: string[], cell) => {
-        const tags = (cell.metadata.get('tags') as string[]) ?? [];
+        const tags = (cell.getMetadata('tags') as string[]) ?? [];
         return [...allTags, ...tags];
       },
       []
@@ -175,7 +171,7 @@ export class TagTool extends NotebookTools.Tool {
       []
     );
     const validTags = [...new Set(tags)].filter(tag => tag !== '');
-    cell.model.metadata.set('tags', validTags);
+    cell.model.setMetadata('tags', validTags);
     this.refreshTags();
     this.loadActiveTags();
   }
@@ -223,9 +219,7 @@ export class TagTool extends NotebookTools.Tool {
    * Handle a change to active cell metadata.
    */
   protected onActiveCellMetadataChanged(): void {
-    const tags = this.tracker.activeCell!.model.metadata.get(
-      'tags'
-    ) as string[];
+    const tags = this.tracker.activeCell!.model.getMetadata('tags') as string[];
     let taglist: string[] = [];
     if (tags) {
       if (typeof tags === 'string') {

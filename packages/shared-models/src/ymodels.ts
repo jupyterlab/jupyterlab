@@ -19,7 +19,6 @@ import type {
   Delta,
   DocumentChange,
   FileChange,
-  IListChange,
   IMapChange,
   ISharedAttachmentsCell,
   ISharedBaseCell,
@@ -416,8 +415,7 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
    * attached to an anonymous Y.Doc instance.
    */
   static createStandalone(id?: string): YBaseCell<any> {
-    const cell = createCell({ id, cell_type: this.prototype.cell_type });
-    return cell;
+    return createCell({ id, cell_type: this.prototype.cell_type });
   }
 
   /**
@@ -482,6 +480,13 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
    */
   get changed(): ISignal<this, CellChange<Metadata>> {
     return this._changed;
+  }
+
+  /**
+   * Signal emitted when the cell is disposed.
+   */
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
   }
 
   /**
@@ -634,6 +639,7 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
         this._undoManager.destroy();
       }
     }
+    this._disposed.emit();
     Signal.clearData(this);
   }
 
@@ -696,6 +702,14 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
   deleteMetadata(key: string): void {
     const allMetadata = JSONExt.deepCopy(this.ymodel.get('metadata'));
     delete allMetadata[key];
+    if (key === 'collapsed' && allMetadata.jupyter) {
+      delete allMetadata.jupyter.outputs_hidden;
+      if (Object.keys(allMetadata.jupyter).length === 0) {
+        delete allMetadata.jupyter;
+      }
+    } else if (key === 'jupyter') {
+      delete allMetadata.collapsed;
+    }
     this.setMetadata(allMetadata);
   }
 
@@ -709,7 +723,10 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
     const metadata = this.ymodel.get('metadata');
 
     if (typeof key === 'string') {
-      return JSONExt.deepCopy(metadata[key]);
+      const value = metadata[key];
+      return typeof value === 'undefined'
+        ? undefined // undefined is converted to `{}` by `JSONExt.deepCopy`
+        : JSONExt.deepCopy(metadata[key]);
     } else {
       return JSONExt.deepCopy(metadata);
     }
@@ -735,25 +752,38 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
         );
       }
       const key = metadata;
-      metadata = this.getMetadata();
-      // @ts-expect-error metadata type is changed at runtime.
-      metadata[key] = value;
-    }
-
-    const clone = JSONExt.deepCopy(metadata) as any;
-    if (clone.collapsed != null) {
-      clone.jupyter = clone.jupyter || {};
-      (clone as any).jupyter.outputs_hidden = clone.collapsed;
-    } else if (clone?.jupyter?.outputs_hidden != null) {
-      clone.collapsed = clone.jupyter.outputs_hidden;
-    }
-    if (
-      this.ymodel.doc == null ||
-      !JSONExt.deepEqual(clone, this.getMetadata())
-    ) {
+      const clone = this.getMetadata() as nbformat.ICellMetadata;
+      clone[key] = value;
+      if (key === 'collapsed' && clone.jupyter?.outputs_hidden !== value) {
+        clone.jupyter = {
+          ...clone.jupyter,
+          outputs_hidden: value
+        };
+      } else if (key === 'jupyter') {
+        if (typeof (value as JSONObject)['outputs_hidden'] !== 'undefined') {
+          if (clone.collapsed !== (value as JSONObject)['outputs_hidden']) {
+            clone.collapsed = (value as JSONObject)['outputs_hidden'];
+          }
+        } else {
+          delete clone.collapsed;
+        }
+      }
       this.transact(() => {
         this.ymodel.set('metadata', clone);
       });
+    } else {
+      const clone = JSONExt.deepCopy(metadata) as any;
+      if (clone.collapsed != null) {
+        clone.jupyter = clone.jupyter || {};
+        (clone as any).jupyter.outputs_hidden = clone.collapsed;
+      } else if (clone?.jupyter?.outputs_hidden != null) {
+        clone.collapsed = clone.jupyter.outputs_hidden;
+      }
+      if (!JSONExt.deepEqual(clone, this.getMetadata())) {
+        this.transact(() => {
+          this.ymodel.set('metadata', clone);
+        });
+      }
     }
   }
 
@@ -864,6 +894,7 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
   protected _notebook: YNotebook | null = null;
   private _awareness: Awareness | null;
   private _changed = new Signal<this, CellChange<Metadata>>(this);
+  private _disposed = new Signal<this, void>(this);
   private _isDisposed = false;
   private _prevSourceLength: number;
   private _undoManager: Y.UndoManager | null = null;
@@ -1192,7 +1223,13 @@ export class YNotebook
    * Create a new YNotebook.
    */
   static create(options: ISharedNotebook.IOptions = {}): ISharedNotebook {
-    return new YNotebook(options);
+    const notebook = new YNotebook(options);
+    notebook.nbformat = nbformat.MAJOR_VERSION;
+    notebook.nbformat_minor = nbformat.MINOR_VERSION;
+    if (!notebook.ymeta.get('metadata')) {
+      notebook.ymeta.set('metadata', {});
+    }
+    return notebook;
   }
 
   constructor(options: ISharedNotebook.IOptions = {}) {
@@ -1222,13 +1259,6 @@ export class YNotebook
    * Cells list
    */
   readonly cells: YCellType[];
-
-  /**
-   * Signal triggered when the cells list changes.
-   */
-  get cellsChanged(): ISignal<this, IListChange> {
-    return this._cellsChanged;
-  }
 
   /**
    * Wether the undo/redo logic should be
@@ -1423,9 +1453,12 @@ export class YNotebook
     const meta = this.ymeta.get('metadata');
 
     if (typeof key === 'string') {
-      return JSONExt.deepCopy(meta[key]);
+      const value = meta[key];
+      return typeof value === 'undefined'
+        ? undefined // undefined is converted to `{}` by `JSONExt.deepCopy`
+        : JSONExt.deepCopy(meta[key]);
     } else {
-      return JSONExt.deepCopy(meta ?? {});
+      return JSONExt.deepCopy(meta);
     }
   }
 
@@ -1464,6 +1497,27 @@ export class YNotebook
   updateMetadata(value: Partial<nbformat.INotebookMetadata>): void {
     // TODO: Maybe modify only attributes instead of replacing the whole metadata?
     this.ymeta.set('metadata', { ...this.getMetadata(), ...value });
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.INotebookContent {
+    // strip cell ids if we have notebook format 4.0-4.4
+    const pruneCellId = this.nbformat === 4 && this.nbformat_minor <= 4;
+
+    return {
+      metadata: this.metadata,
+      nbformat_minor: this.nbformat_minor,
+      nbformat: this.nbformat,
+      cells: this.cells.map(c => {
+        const raw = c.toJSON();
+        if (pruneCellId) {
+          delete raw.id;
+        }
+        return raw;
+      })
+    };
   }
 
   /**
@@ -1562,26 +1616,10 @@ export class YNotebook
         cellsChange.push({ insert: insertedCells });
         this.cells.splice(index, 0, ...insertedCells);
 
-        this._cellsChanged.emit({
-          type: 'add',
-          newIndex: index,
-          newValues: insertedCells,
-          oldIndex: -2,
-          oldValues: []
-        });
-
         index += d.insert.length;
       } else if (d.delete != null) {
         cellsChange.push(d);
-        const oldValues = this.cells.splice(index, d.delete);
-
-        this._cellsChanged.emit({
-          type: 'remove',
-          newIndex: -1,
-          newValues: [],
-          oldIndex: index,
-          oldValues
-        });
+        this.cells.splice(index, d.delete);
       } else if (d.retain != null) {
         cellsChange.push(d);
         index += d.retain;
@@ -1593,7 +1631,6 @@ export class YNotebook
     });
   };
 
-  protected _cellsChanged = new Signal<this, IListChange>(this);
   protected _metadataChanged = new Signal<this, IMapChange>(this);
   /**
    * Internal Yjs cells list
