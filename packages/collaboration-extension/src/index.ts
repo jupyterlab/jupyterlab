@@ -25,10 +25,11 @@ import {
   RendererUserMenu,
   User,
   UserInfoPanel,
-  UserMenu
+  UserMenu,
+  RTCPanel
 } from '@jupyterlab/collaboration';
-import { SidePanel, usersIcon } from '@jupyterlab/ui-components';
-import { Menu, MenuBar } from '@lumino/widgets';
+import { usersIcon } from '@jupyterlab/ui-components';
+import { AccordionPanel, Menu, MenuBar } from '@lumino/widgets';
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
@@ -167,7 +168,9 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
 
     const trans = translator.load('jupyterlab');
 
-    const userPanel = new SidePanel();
+    const userPanel = new AccordionPanel({
+      renderer: new RTCPanel.Renderer()
+    });
     userPanel.id = DOMUtils.createDomID();
     userPanel.title.icon = usersIcon;
     userPanel.addClass('jp-RTCPanel');
