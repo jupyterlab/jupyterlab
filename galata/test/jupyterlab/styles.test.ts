@@ -170,13 +170,7 @@ test.describe('CSS Selectors', () => {
 
       const allTags = new Set([...standardHTMLTags, ...detectedTags]);
 
-      const selectors: string[] = await page.evaluate(() =>
-        [...document.querySelectorAll('style')]
-          .map(style => [...style.sheet.cssRules])
-          .flat()
-          .filter((rule: CSSRule) => rule instanceof CSSStyleRule)
-          .map((rule: CSSStyleRule) => rule.selectorText)
-      );
+      const selectors: string[] = await page.style.collectAllSelectors();
       const matcher = new RegExp(
         ':hover.*\\s+(' + [...allTags].join('|') + ')($|\\s)'
       );

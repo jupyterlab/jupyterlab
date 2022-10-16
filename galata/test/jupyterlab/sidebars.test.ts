@@ -26,6 +26,35 @@ test.describe('Sidebars', () => {
     });
   });
 
+  test('File Browser has no unused rules', async ({ page }) => {
+    await page.sidebar.openTab('filebrowser');
+    const contextmenu = await page.menu.openContextMenu(
+      '.jp-DirListing-headerItem'
+    );
+    const item = await page.menu.getMenuItemInMenu(
+      contextmenu,
+      'Show File Checkboxes'
+    );
+    await item.click();
+    await page.notebook.createNew('notebook.ipynb');
+
+    const unusedRules = await page.style.findUnusedStyleRules({
+      page,
+      fragments: ['jp-DirListing', 'jp-FileBrowser'],
+      exclude: [
+        // active during renaming
+        'jp-DirListing-editor',
+        // hidden files
+        '[data-is-dot]',
+        // filtering results
+        '.jp-DirListing-content mark',
+        // only added after resizing
+        'jp-DirListing-narrow'
+      ]
+    });
+    expect(unusedRules.length).toEqual(0);
+  });
+
   test('Toggle Light theme', async ({ page }) => {
     await page.theme.setDarkTheme();
 
