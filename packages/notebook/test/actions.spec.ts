@@ -349,12 +349,10 @@ describe('@jupyterlab/notebook', () => {
             const markdownCell = widget.widgets[i] as MarkdownCell;
             const attachment: IMimeBundle = { 'text/plain': 'test' };
             markdownCell.model.attachments.set(UUID.uuid4(), attachment);
-            console.log(markdownCell.model.attachments);
             widget.select(markdownCell);
           }
           NotebookActions.mergeCells(widget);
           const model = (widget.activeCell as MarkdownCell).model;
-          console.log(model.attachments);
           expect(model.attachments.length).toBe(2);
         }
       );

@@ -34,7 +34,7 @@ describe('cells/model', () => {
   describe('CellModel', () => {
     describe('#constructor()', () => {
       it('should create a cell model', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         expect(model).toBeInstanceOf(CellModel);
@@ -46,7 +46,7 @@ describe('cells/model', () => {
           source: 'foo',
           metadata: { trusted: false }
         }) as YRawCell;
-        const model = new RawCellModel({ sharedModel });
+        const model = new TestModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.sharedModel.getSource()).toBe('foo');
       });
@@ -58,7 +58,7 @@ describe('cells/model', () => {
           metadata: { trusted: false },
           id: 'cell_id'
         }) as YRawCell;
-        const model = new RawCellModel({ sharedModel });
+        const model = new TestModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.sharedModel.getSource()).toBe('foo\n\nbar\n\nbaz');
       });
@@ -70,13 +70,13 @@ describe('cells/model', () => {
           metadata: { trusted: false },
           id: 'cell_id'
         }) as YRawCell;
-        const model = new RawCellModel({ sharedModel, id: 'my_id' });
+        const model = new TestModel({ sharedModel, id: 'my_id' });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id).toBe('cell_id');
       });
 
       it('should use the id if an cell is not supplied', () => {
-        const model = new RawCellModel({ id: 'cell_id' });
+        const model = new TestModel({ id: 'cell_id' });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id).toBe('cell_id');
       });
@@ -87,7 +87,7 @@ describe('cells/model', () => {
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false }
         }) as YRawCell;
-        const model = new RawCellModel({ sharedModel });
+        const model = new TestModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id.length).toBeGreaterThan(0);
       });
@@ -95,7 +95,7 @@ describe('cells/model', () => {
 
     describe('#contentChanged', () => {
       it('should signal when model content has changed', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         let called = false;
@@ -154,7 +154,6 @@ describe('cells/model', () => {
 
       it('should update the trusted state of the output models', () => {
         const model = new CodeCellModel();
-        console.log(model.trusted);
         model.outputs.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         expect(model.outputs.get(0).trusted).toBe(false);
         model.trusted = true;
@@ -207,14 +206,14 @@ describe('cells/model', () => {
 
     describe('#isDisposed', () => {
       it('should be false by default', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         expect(model.isDisposed).toBe(false);
       });
 
       it('should be true after model is disposed', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         model.dispose();
@@ -232,7 +231,7 @@ describe('cells/model', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         model.dispose();
@@ -274,7 +273,7 @@ describe('cells/model', () => {
 
     describe('#metadata', () => {
       it('should handle a metadata for the cell', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         expect(model.getMetadata('foo')).toBeUndefined();
@@ -283,7 +282,7 @@ describe('cells/model', () => {
       });
 
       it('should get a list of user metadata keys', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         expect(Array.from(Object.keys(model.metadata))).toHaveLength(0);
@@ -292,7 +291,7 @@ describe('cells/model', () => {
       });
 
       it('should trigger changed signal', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         let called = false;

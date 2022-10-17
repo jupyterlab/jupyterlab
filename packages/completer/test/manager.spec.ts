@@ -43,6 +43,12 @@ function contextFactory(): Context<INotebookModel> {
   return context;
 }
 
+class TestCellModel extends CellModel {
+  get type(): string {
+    return 'code';
+  }
+}
+
 class CustomCompleterModel extends CompleterModel {}
 
 class FooCompletionProvider implements ICompletionProvider {
@@ -182,7 +188,7 @@ describe('completer/manager', () => {
 
         await manager.updateCompleter(completerContext);
         const cell = new Cell({
-          model: new CellModel({
+          model: new TestCellModel({
             sharedModel: createStandaloneCell({ cell_type: 'code' })
           }),
           placeholder: false

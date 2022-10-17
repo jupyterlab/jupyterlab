@@ -6,6 +6,7 @@ import {
   Cell,
   CellFooter,
   CellHeader,
+  CellModel,
   CodeCell,
   CodeCellModel,
   InputArea,
@@ -32,12 +33,18 @@ import { Widget } from '@lumino/widgets';
 const RENDERED_CLASS = 'jp-mod-rendered';
 const rendermime = NBTestUtils.defaultRenderMime();
 
+class TestModel extends CellModel {
+  get type(): 'raw' {
+    return 'raw';
+  }
+}
+
 class LogBaseCell extends Cell {
   methods: string[] = [];
 
   constructor() {
     super({
-      model: new CodeCellModel({
+      model: new TestModel({
         sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
       }),
       placeholder: false
@@ -105,7 +112,7 @@ describe('cells/widget', () => {
   const editorFactory = NBTestUtils.editorFactory;
 
   describe('Cell', () => {
-    const model = new CodeCellModel({
+    const model = new TestModel({
       sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
     });
 
@@ -141,7 +148,7 @@ describe('cells/widget', () => {
 
     describe('#model', () => {
       it('should be the model used by the widget', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         const widget = new Cell({
@@ -237,7 +244,7 @@ describe('cells/widget', () => {
 
     describe('#loadEditableState()', () => {
       it('should load the editable state from the model', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         const widget = new Cell({ model }).initializeState();
@@ -255,7 +262,7 @@ describe('cells/widget', () => {
 
     describe('#saveEditableState()', () => {
       it('should save the editable state to the model', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         const widget = new Cell({
@@ -277,7 +284,7 @@ describe('cells/widget', () => {
 
     describe('#syncEditable', () => {
       it('should control automatic syncing of editable state with model', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         const widget = new Cell({
@@ -314,7 +321,7 @@ describe('cells/widget', () => {
 
     describe('#loadCollapseState()', () => {
       it('should load the input collapse state from the model', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         const widget = new Cell({
@@ -335,7 +342,7 @@ describe('cells/widget', () => {
 
     describe('#saveCollapseState()', () => {
       it('should save the collapse state to the model', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         const widget = new Cell({
@@ -359,7 +366,7 @@ describe('cells/widget', () => {
 
     describe('#syncCollapse', () => {
       it('should control automatic syncing of collapse state with model', () => {
-        const model = new CodeCellModel({
+        const model = new TestModel({
           sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         const widget = new Cell({
