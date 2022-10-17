@@ -669,7 +669,7 @@ export class YBaseCell<Metadata extends models.ISharedBaseCellMetadata>
   /**
    * Handle a change to the ymodel.
    */
-  private _modelObserver = (events: Y.YEvent<any>[]) => {
+  private _modelObserver = (events: Y.YEvent[]) => {
     const changes: models.CellChange<Metadata> = {};
     const sourceEvent = events.find(
       event => event.target === this.ymodel.get('source')
