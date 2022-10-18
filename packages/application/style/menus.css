@@ -94,9 +94,11 @@
 
 .lm-Menu-item.lm-mod-active {
   background: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color2);
 }
 
 .lm-Menu-item.lm-mod-disabled {
+  background: var(--jp-layout-color3);
   color: var(--jp-ui-font-color3);
 }
 
