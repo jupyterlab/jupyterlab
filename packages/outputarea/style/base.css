@@ -180,12 +180,6 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 | The Stdin output
 |----------------------------------------------------------------------------*/
 
-.jp-OutputArea-stdin {
-  line-height: var(--jp-code-line-height);
-  padding-top: var(--jp-code-padding);
-  display: flex;
-}
-
 .jp-Stdin-prompt {
   color: var(--jp-content-font-color0);
   padding-right: var(--jp-code-padding);
