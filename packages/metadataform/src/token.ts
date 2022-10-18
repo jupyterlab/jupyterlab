@@ -11,6 +11,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   PartialJSONObject,
+  PartialJSONValue,
   ReadonlyPartialJSONObject,
   Token
 } from '@lumino/coreutils';
@@ -21,6 +22,22 @@ export namespace MetadataForm {
    * The metadata schema as defined in JSON schema.
    */
   export type IMetadataSchema = ISettingRegistry.IMetadataSchema;
+
+  /**
+   * The settings to send to RJSF templates in formContext.
+   */
+  export interface ISettings {
+    /**
+     * Returns the default value for a specific key.
+     * @param metadataKey - the key for which we expect default value.
+     */
+    default(metadataKey: string): PartialJSONValue | undefined;
+
+    /**
+     * The meta information associated to all properties.
+     */
+    metaInformation: IMetaInformation;
+  }
 
   /**
    * The meta information associated to all properties.
@@ -37,14 +54,21 @@ export namespace MetadataForm {
      * The metadata level, 'cell' or 'notebook'.
      */
     level?: 'cell' | 'notebook';
-    /**
-     * The default value for this metadata.
-     */
-    default?: any;
+
     /**
      * The cell types to display this metadata field.
      */
     cellTypes?: CellType[];
+
+    /**
+     * The default value for this metadata.
+     */
+    default?: any;
+
+    /**
+     * Whether to avoid writing default value in metadata.
+     */
+    writeDefault?: boolean;
   }
 
   /**
@@ -73,7 +97,7 @@ export namespace MetadataForm {
     /**
      * Meta information associated to properties.
      */
-    metaInformation: IMetaInformation;
+    settings: ISettings;
 
     /**
      * Current data of the form.
@@ -99,6 +123,11 @@ export namespace MetadataForm {
      * The uiSchema built when loading schemas.
      */
     uiSchema: IUiSchema;
+
+    /**
+     * Whether to show the modified field from default value.
+     */
+    showModified: boolean;
   }
 
   /**

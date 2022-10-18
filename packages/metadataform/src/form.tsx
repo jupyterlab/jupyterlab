@@ -29,7 +29,7 @@ export class FormWidget extends ReactWidget {
     this._templateFactory = new RJSFTemplatesFactory({
       translator: this._props.translator,
       compact: true,
-      showModifiedFromDefault: false
+      showModifiedFromDefault: props.showModified
     });
   }
 

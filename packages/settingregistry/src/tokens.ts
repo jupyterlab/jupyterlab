@@ -655,6 +655,11 @@ export namespace ISettingRegistry {
     rank?: number;
 
     /**
+     * Whether to show the modified field from default value.
+     */
+    showModified?: boolean;
+
+    /**
      * Keep the plugin at origin of the metadata form.
      */
     _origin?: string;
@@ -711,6 +716,11 @@ export namespace ISettingRegistry {
      * Cells which should have this metadata.
      */
     cellTypes?: CellType[];
+
+    /**
+     * Whether to avoid writing default value in metadata.
+     */
+    writeDefault?: boolean;
   }
 
   /**

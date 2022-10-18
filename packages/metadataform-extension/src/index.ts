@@ -217,6 +217,13 @@ namespace Private {
             metaInformation[metadataKey].level = options.metadataLevel;
           }
 
+          // Optionally set the writeDefault flag.
+          if (options.writeDefault !== undefined) {
+            if (!metaInformation[metadataKey])
+              metaInformation[metadataKey] = {};
+            metaInformation[metadataKey].writeDefault = options.writeDefault;
+          }
+
           // Optionally links key to a custom widget.
           if (options.customWidget) {
             const formWidget = formWidgetsRegistry.getRenderer(
@@ -256,7 +263,8 @@ namespace Private {
         metaInformation,
         uiSchema,
         schema._origin,
-        translator
+        translator,
+        schema.showModified
       );
 
       // Adds the form to the section.
@@ -293,9 +301,7 @@ const metadataForm: JupyterFrontEndPlugin<
     componentsRegistry: IFormComponentRegistry,
     settings: ISettingRegistry | null
   ): Promise<{ [section: string]: MetadataFormWidget } | undefined> => {
-    console.log('Activating Metadata form');
     let tools: MetadataFormWidget[] = [];
-
     if (settings) {
       return await Private.loadSettingsMetadataForm(
         app,
@@ -307,8 +313,6 @@ const metadataForm: JupyterFrontEndPlugin<
         componentsRegistry
       );
     }
-
-    console.log('Metadata form activated');
   }
 };
 

@@ -40,13 +40,15 @@ export class MetadataFormWidget
     metaInformation: MetadataForm.IMetaInformation,
     uiSchema: MetadataForm.IUiSchema,
     pluginId?: string,
-    translator?: ITranslator
+    translator?: ITranslator,
+    showModified?: boolean
   ) {
     super();
     this._metadataSchema = metadataSchema;
     this._metaInformation = metaInformation;
     this._uiSchema = uiSchema;
     this._pluginId = pluginId;
+    this._showModified = showModified || false;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._updatingMetadata = false;
@@ -74,7 +76,7 @@ export class MetadataFormWidget
    */
   get metadataKeys(): string[] {
     const metadataKeys: string[] = [];
-    for (let metadataKey of Object.keys(this._metaInformation)) {
+    for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
       metadataKeys.push(metadataKey);
     }
     return metadataKeys;
@@ -176,7 +178,8 @@ export class MetadataFormWidget
 
       let writeFinalData =
         value !== undefined &&
-        value !== this._metaInformation[metadataKey]?.default;
+        ((this._metaInformation[metadataKey]?.writeDefault ?? true) ||
+          value !== this._metaInformation[metadataKey]?.default);
 
       // If metadata key is at root of metadata no need to go further.
       if (nestedKey.length == 1) {
@@ -363,6 +366,8 @@ export class MetadataFormWidget
       }
 
       let workingObject: PartialJSONObject;
+
+      // Remove the first and last '/' if exist, nad split the path.
       let nestedKeys = metadataKey
         .replace(/^\/+/, '')
         .replace(/\/+$/, '')
@@ -378,7 +383,7 @@ export class MetadataFormWidget
       let hasValue = true;
 
       // Navigate to the value.
-      for (let nested of nestedKeys.slice(0, -1)) {
+      for (let nested of nestedKeys) {
         if (nested in workingObject)
           workingObject = workingObject[nested] as PartialJSONObject;
         else {
@@ -388,18 +393,17 @@ export class MetadataFormWidget
       }
 
       // Fill the formData with the current metadata value.
-      if (hasValue)
-        formData[metadataKey] =
-          workingObject[nestedKeys[nestedKeys.length - 1]];
+      if (hasValue) formData[metadataKey] = workingObject as PartialJSONValue;
     }
 
     this.buildWidget({
       properties: formProperties,
-      metaInformation: this._metaInformation,
+      settings: new Private.Settings(this._metaInformation),
       uiSchema: this._uiSchema,
       translator: this.translator || null,
       formData: formData,
-      metadataFormWidget: this
+      metadataFormWidget: this,
+      showModified: this._showModified
     });
   }
 
@@ -412,6 +416,7 @@ export class MetadataFormWidget
   private _placeholder: Widget;
   private _updatingMetadata: boolean;
   private _pluginId: string | undefined;
+  private _showModified: boolean;
   private _notebookModelNull: boolean = false;
 }
 
@@ -423,6 +428,24 @@ namespace Private {
     [metadata: string]: PartialJSONObject | PartialJSONValue | undefined;
   }
 
+  /**
+   * The settings to send to RJSF templates in formContext.
+   */
+  export class Settings implements MetadataForm.ISettings {
+    constructor(metaInformation: MetadataForm.IMetaInformation) {
+      this.metaInformation = metaInformation;
+    }
+
+    /**
+     * Returns the default value for a specific key.
+     * @param metadataKey - the key for which we expect default value.
+     */
+    default(metadataKey: string) {
+      return this.metaInformation[metadataKey]?.default;
+    }
+
+    metaInformation: MetadataForm.IMetaInformation;
+  }
   /**
    * Recursive function to clean the empty nested metadata before updating real metadata.
    * this function is called when a nested metadata is undefined (or default), so maybe some

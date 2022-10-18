@@ -44,6 +44,10 @@
         "rank": {
           "type": "integer",
           "description": "The rank of the section in the right panel"
+        },
+        "showModified": {
+          "type": "boolean",
+          "description": "Whether to show that values have been modified from defaults"
         }
       },
       "required": ["id", "metadataSchema"]
@@ -88,6 +92,9 @@
             "type": "string",
             "enum": ["code", "markdown", "raw"]
           }
+        },
+        "writeDefault": {
+          "type": "boolean"
         }
       },
       "type": "object"

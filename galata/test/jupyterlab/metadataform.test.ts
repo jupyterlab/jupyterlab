@@ -131,7 +131,7 @@ test.describe('Required metadata', () => {
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
-            id: 'Extension_metadata',
+            id: 'Extension-metadata',
             label: 'Extension metadata',
             metadataSchema: {
               type: 'object',
@@ -227,13 +227,13 @@ test.describe('Required metadata', () => {
   });
 });
 
-test.describe('Default and nested metadata', () => {
+test.describe('Nested metadata', () => {
   test.use({
     mockSettings: {
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
-            id: 'Extension_metadata',
+            id: 'Extension-metadata',
             label: 'Extension metadata',
             metadataSchema: {
               type: 'object',
@@ -244,8 +244,7 @@ test.describe('Default and nested metadata', () => {
                 },
                 '/level1/level2/nested': {
                   title: 'Nested metadata 2',
-                  type: 'integer',
-                  default: 1
+                  type: 'integer'
                 }
               }
             }
@@ -255,7 +254,7 @@ test.describe('Default and nested metadata', () => {
     }
   });
 
-  test('should fill nested metadata and remove it if default', async ({
+  test('should fill nested metadata and remove the all tree if empty value', async ({
     page,
     baseURL,
     tmpPath
@@ -272,17 +271,6 @@ test.describe('Default and nested metadata', () => {
     expect(cellMetadata['level1']).toBeUndefined();
 
     // Replace the default value by 0, should write in metadata.
-    await formGroup.locator('input').last().fill('0');
-
-    cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['level1']['level2']['nested']).toBe(0);
-
-    // If the value is the default, the metadata tree should be removed.
-    await formGroup.locator('input').last().fill('1');
-    cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['level1']).toBeUndefined();
-
-    // replace again the default value by 0, should write in metadata.
     await formGroup.locator('input').last().fill('0');
 
     cellMetadata = await getCellMetadata(page, 0);
@@ -310,23 +298,170 @@ test.describe('Default and nested metadata', () => {
     let cellMetadata = await getCellMetadata(page, 0);
     expect(cellMetadata['level1']).toBeUndefined();
 
-    // Fill the first level nested metadata.
+    // Set the first level nested metadata.
     await formGroup.locator('input').first().fill('1');
     cellMetadata = await getCellMetadata(page, 0);
     expect(cellMetadata['level1']['nested']).toBe(1);
     expect(cellMetadata['level1']['level2']).toBeUndefined();
 
-    // replace the default value by 0, should write in metadata.
-    await formGroup.locator('input').last().fill('0');
+    // Set the second level nested metadata.
+    await formGroup.locator('input').last().fill('1');
 
     cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['level1']['level2']['nested']).toBe(0);
+    expect(cellMetadata['level1']['level2']['nested']).toBe(1);
 
-    // If the value of level2 is the default, only the level2 should be removed.
-    await formGroup.locator('input').last().fill('1');
+    // If the value of level2 is deleted, only the level2 metadata should be removed.
+    await formGroup.locator('input').last().fill('');
     cellMetadata = await getCellMetadata(page, 0);
     expect(cellMetadata['level1']['nested']).toBe(1);
     expect(cellMetadata['level1']['level2']).toBeUndefined();
+  });
+});
+
+test.describe('Default metadata without "showModified" flag', () => {
+  test.use({
+    mockSettings: {
+      '@jupyterlab/metadataform-extension:metadataforms': {
+        metadataforms: [
+          {
+            id: 'Extension-metadata',
+            label: 'Extension metadata',
+            metadataSchema: {
+              type: 'object',
+              properties: {
+                '/default-written': {
+                  title: 'Default written',
+                  type: 'integer',
+                  default: 1
+                },
+                '/default-not-written': {
+                  title: 'Default not written',
+                  type: 'integer',
+                  default: 1
+                }
+              }
+            },
+            metadataOptions: {
+              '/default-not-written': {
+                writeDefault: false
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  test('should not fill metadata with "writeDefault" flag to false', async ({
+    page,
+    baseURL,
+    tmpPath
+  }) => {
+    // Open the Notebook.
+    await page.goto(baseURL);
+    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+
+    // Open and get the form DOM.
+    const { formGroup } = await getFormGroup(page);
+
+    // Metadata should contains written default value.
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBe(1);
+
+    // Empty value should remove the metadata.
+    await formGroup.locator('input').first().fill('');
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBeUndefined();
+
+    // Fill the first one with default should be written in metadata.
+    await formGroup.locator('input').first().fill('1');
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBe(1);
+
+    // Fill the second one with non default value should write metadata.
+    await formGroup.locator('input').last().fill('0');
+
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-not-written']).toBe(0);
+
+    // Fill the second one with default value should remove the metadata.
+    await formGroup.locator('input').last().fill('1');
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-not-written']).toBeUndefined();
+  });
+
+  test('should not display the modified field', async ({
+    page,
+    baseURL,
+    tmpPath
+  }) => {
+    // Open the Notebook.
+    await page.goto(baseURL);
+    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+
+    // Open and get the form DOM.
+    const { formGroup } = await getFormGroup(page);
+
+    // Metadata should contains written default value.
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBe(1);
+
+    // Fill the first one with default should be written in metadata.
+    await formGroup.locator('input').first().fill('2');
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBe(2);
+
+    expect(formGroup.locator('.jp-FormGroup-default')).toHaveCount(0);
+  });
+});
+
+test.describe('Default metadata with "showModified" flag', () => {
+  test.use({
+    mockSettings: {
+      '@jupyterlab/metadataform-extension:metadataforms': {
+        metadataforms: [
+          {
+            id: 'Extension-metadata',
+            label: 'Extension metadata',
+            showModified: true,
+            metadataSchema: {
+              type: 'object',
+              properties: {
+                '/value-with-default': {
+                  title: 'value with default',
+                  type: 'integer',
+                  default: 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  test('should display the modified field', async ({
+    page,
+    baseURL,
+    tmpPath
+  }) => {
+    // Open the Notebook.
+    await page.goto(baseURL);
+    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+
+    // Open and get the form DOM.
+    const { formGroup } = await getFormGroup(page);
+
+    // Metadata should contains the default value.
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['value-with-default']).toBe(1);
+
+    // Fill the field with non default value should display that value is different from default.
+    await formGroup.locator('input').first().fill('2');
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['value-with-default']).toBe(2);
+    await expect(formGroup.locator('.jp-FormGroup-default')).toHaveCount(1);
+    expect(formGroup.locator('.jp-FormGroup-default')).toContainText('1');
   });
 });
 
@@ -336,7 +471,7 @@ test.describe('Notebook level and cell type metadata', () => {
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
-            id: 'Extension_metadata',
+            id: 'Extension-metadata',
             label: 'Extension metadata',
             metadataSchema: {
               type: 'object',
@@ -444,7 +579,7 @@ test.describe('Conditional metadata', () => {
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
-            id: 'Extension_metadata',
+            id: 'Extension-metadata',
             label: 'Extension metadata',
             metadataSchema: {
               type: 'object',
@@ -518,7 +653,7 @@ test.describe('UISchema', () => {
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
-            id: 'Extension_metadata',
+            id: 'Extension-metadata',
             label: 'Extension metadata',
             metadataSchema: {
               type: 'object',
