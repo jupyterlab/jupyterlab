@@ -55,10 +55,6 @@
   contain: strict;
 }
 
-.jp-Notebook-render * {
-  contain: none !important;
-}
-
 .jp-Notebook .jp-Cell {
   overflow: visible;
 }
