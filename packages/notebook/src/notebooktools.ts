@@ -535,7 +535,7 @@ export namespace NotebookTools {
 
       this._editorFactory = editorFactory;
       this._editorLabel = options.label || 'Edit Metadata';
-      this._createEditor();
+      this.createEditor();
       const titleNode = new Widget({ node: document.createElement('label') });
       titleNode.node.textContent = options.label || 'Edit Metadata';
       layout.addWidget(titleNode);
@@ -555,21 +555,11 @@ export namespace NotebookTools {
     protected onActiveNotebookPanelChanged(msg: Message): void {
       this.editor.dispose();
       if (this.notebookTools.activeNotebookPanel) {
-        this._createEditor();
+        this.createEditor();
       }
     }
 
-    /**
-     * Handle a change to the notebook.
-     */
-    protected onActiveCellChanged(msg: Message): void {
-      this.editor.dispose();
-      if (this.notebookTools.activeCell) {
-        this._createEditor();
-      }
-    }
-
-    private _createEditor() {
+    protected createEditor() {
       this._editor = new JSONEditor({
         editorFactory: this._editorFactory
       });
@@ -662,7 +652,10 @@ export namespace NotebookTools {
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(msg: Message): void {
-      super.onActiveCellChanged(msg);
+      this.editor.dispose();
+      if (this.notebookTools.activeCell) {
+        this.createEditor();
+      }
       this._update();
     }
 
