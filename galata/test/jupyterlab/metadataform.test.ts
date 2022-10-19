@@ -411,7 +411,7 @@ test.describe('Default metadata without "showModified" flag', () => {
     cellMetadata = await getCellMetadata(page, 0);
     expect(cellMetadata['default-written']).toBe(2);
 
-    expect(formGroup.locator('.jp-FormGroup-default')).toHaveCount(0);
+    await expect(formGroup.locator('.jp-FormGroup-default')).toHaveCount(0);
   });
 });
 
@@ -461,7 +461,7 @@ test.describe('Default metadata with "showModified" flag', () => {
     cellMetadata = await getCellMetadata(page, 0);
     expect(cellMetadata['value-with-default']).toBe(2);
     await expect(formGroup.locator('.jp-FormGroup-default')).toHaveCount(1);
-    expect(formGroup.locator('.jp-FormGroup-default')).toContainText('1');
+    await expect(formGroup.locator('.jp-FormGroup-default')).toContainText('1');
   });
 });
 
