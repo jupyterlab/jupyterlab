@@ -700,6 +700,10 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
    * @param key The key to delete
    */
   deleteMetadata(key: string): void {
+    if (typeof this.getMetadata(key) === 'undefined') {
+      return;
+    }
+
     const allMetadata = JSONExt.deepCopy(this.ymodel.get('metadata'));
     delete allMetadata[key];
     if (key === 'collapsed' && allMetadata.jupyter) {
@@ -752,6 +756,13 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
         );
       }
       const key = metadata;
+
+      // Only set metadata if we change something to avoid infinite
+      // loop of signal changes.
+      if (JSONExt.deepEqual((this.getMetadata(key) as any) ?? null, value)) {
+        return;
+      }
+
       const clone = this.getMetadata() as nbformat.ICellMetadata;
       clone[key] = value;
       if (key === 'collapsed' && clone.jupyter?.outputs_hidden !== value) {
@@ -1435,6 +1446,10 @@ export class YNotebook
    * @param key The key to delete
    */
   deleteMetadata(key: string): void {
+    if (typeof this.getMetadata(key) === 'undefined') {
+      return;
+    }
+
     const allMetadata = JSONExt.deepCopy(this.ymeta.get('metadata'));
     delete allMetadata[key];
     this.setMetadata(allMetadata);
@@ -1481,11 +1496,18 @@ export class YNotebook
           `Metadata value for ${metadata} cannot be 'undefined'; use deleteMetadata.`
         );
       }
+
+      if (JSONExt.deepEqual(this.getMetadata(metadata) ?? null, value)) {
+        return;
+      }
+
       const update: Partial<nbformat.INotebookMetadata> = {};
       update[metadata] = value;
       this.updateMetadata(update);
     } else {
-      this.ymeta.set('metadata', JSONExt.deepCopy(metadata));
+      if (!JSONExt.deepEqual(this.metadata, metadata)) {
+        this.ymeta.set('metadata', JSONExt.deepCopy(metadata));
+      }
     }
   }
 

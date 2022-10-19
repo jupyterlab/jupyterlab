@@ -35,7 +35,7 @@ export function convertYMapEventToMapChange(
  */
 export const createMutex = (): ((f: () => void) => void) => {
   let token = true;
-  return (f: any): void => {
+  return (f: () => void): void => {
     if (token) {
       token = false;
       try {

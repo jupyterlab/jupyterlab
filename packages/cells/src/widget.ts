@@ -1154,9 +1154,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     // to changes in metadata until we have fully committed our changes.
     // Otherwise setting one key can trigger a write to the other key to
     // maintain the synced consistency.
-    this._savingMetadata = true;
-
-    try {
+    this.model.sharedModel.transact(() => {
       super.saveCollapseState();
 
       const collapsed = this.model.getMetadata('collapsed');
@@ -1175,9 +1173,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       } else {
         this.model.deleteMetadata('collapsed');
       }
-    } finally {
-      this._savingMetadata = false;
-    }
+    });
   }
 
   /**
@@ -1345,10 +1341,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(model: CellModel, args: IMapChange): void {
-    if (this._savingMetadata) {
-      // We are in middle of a metadata transaction, so don't react to it.
-      return;
-    }
     switch (args.key) {
       case 'scrolled':
         if (this.syncScrolled) {
@@ -1387,7 +1379,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _outputPlaceholder: OutputPlaceholder | null = null;
   private _output: OutputArea;
   private _syncScrolled = false;
-  private _savingMetadata = false;
 }
 
 /**
