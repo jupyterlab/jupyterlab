@@ -104,10 +104,6 @@ export namespace MetadataForm {
      */
     formData: ReadonlyPartialJSONObject | null;
 
-    // /**
-    //  *  Errors on the form.
-    //  */
-    // errors?: {[keyError: string]: {__errors: string}};
 
     /**
      * Translator object
