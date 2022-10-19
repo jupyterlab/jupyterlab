@@ -40,11 +40,13 @@
 
 .lm-MenuBar-item.lm-mod-active {
   background: var(--jp-layout-color2);
+  color: var(--jp-layout-color2);
 }
 
 .lm-MenuBar.lm-mod-active .lm-MenuBar-item.lm-mod-active {
   z-index: 10001;
   background: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color0);
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: var(--jp-elevation-z6);
@@ -57,6 +59,7 @@
 }
 
 .lm-MenuBar-item.lm-mod-disabled {
+  /*background: var(--jp-layout-color3);*/
   color: var(--jp-ui-font-color3);
 }
 
@@ -79,7 +82,7 @@
   z-index: 10000;
   padding: 4px 0;
   background: var(--jp-layout-color0);
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color0);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   font-size: var(--jp-ui-font-size1);
   box-shadow: var(--jp-elevation-z6);

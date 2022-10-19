@@ -80,7 +80,7 @@
 .jp-Launcher-sectionTitle {
   font-size: var(--jp-ui-font-size2);
   font-weight: normal;
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color0);
   box-sizing: border-box;
 }
 
@@ -162,7 +162,7 @@
   height: 28px;
   word-break: break-word;
   text-align: center;
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color0);
   line-height: 14px;
   font-size: 12px;
   overflow: hidden;
