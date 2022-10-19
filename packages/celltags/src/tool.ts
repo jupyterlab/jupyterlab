@@ -12,6 +12,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { reduce } from '@lumino/algorithm';
+import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout } from '@lumino/widgets';
@@ -171,7 +172,9 @@ export class TagTool extends NotebookTools.Tool {
       []
     );
     const validTags = [...new Set(tags)].filter(tag => tag !== '');
-    cell.model.setMetadata('tags', validTags);
+    if (!JSONExt.deepEqual(cell.model.getMetadata('tags') ?? [], validTags)) {
+      cell.model.setMetadata('tags', validTags);
+    }
     this.refreshTags();
     this.loadActiveTags();
   }
