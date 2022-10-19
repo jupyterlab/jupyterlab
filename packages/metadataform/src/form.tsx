@@ -57,6 +57,6 @@ export class FormWidget extends ReactWidget {
   }
 
   private _props: MetadataForm.IProps;
-  private pluginId?: PartialJSONValue;
+  private _pluginId?: PartialJSONValue;
   private _templateFactory: RJSFTemplatesFactory;
 }
