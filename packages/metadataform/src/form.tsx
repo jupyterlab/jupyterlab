@@ -23,7 +23,7 @@ export class FormWidget extends ReactWidget {
    */
   constructor(props: MetadataForm.IProps, pluginId?: string) {
     super();
-    this.addClass('jp-ReactWidget');
+    this.addClass('jp-FormWidget');
     this._props = props;
     this.pluginId = pluginId;
     this._templateFactory = new RJSFTemplatesFactory({
