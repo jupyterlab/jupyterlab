@@ -1,9 +1,6 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": [
-    "src/*",
-    "test/*"
-  ],
+  "include": ["src/*", "test/*"],
   "references": [
     {
       "path": "../collaboration"

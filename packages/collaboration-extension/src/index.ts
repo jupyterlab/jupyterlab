@@ -88,6 +88,7 @@ const menuBarPlugin: JupyterFrontEndPlugin<void> = {
     });
     menuBar.id = 'jp-UserMenu';
     user.changed.connect(() => menuBar.update());
+    // toolbar.addItem('spacer', Toolbar.createSpacerItem());
     menuBar.addMenu(menu as Menu);
     shell.add(menuBar, 'top', { rank: 1000 });
   }
