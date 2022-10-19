@@ -86,6 +86,41 @@ export namespace MetadataForm {
   }
 
   /**
+   * Options passed to MetadataFormWidget.
+   */
+  export interface IOptions {
+    /**
+     * MetadataSchema defined from the settings.
+     */
+    metadataSchema: IMetadataSchema;
+
+    /**
+     * The meta information associated to all properties.
+     */
+    metaInformation: IMetaInformation;
+
+    /**
+     * The uiSchema built when loading schemas.
+     */
+    uiSchema?: IUiSchema;
+
+    /**
+     * The plugin ID.
+     */
+    pluginId?: string;
+
+    /**
+     * Translator object.
+     */
+    translator?: ITranslator;
+
+    /**
+     * Whether to show the modified field from default value.
+     */
+    showModified?: boolean;
+  }
+
+  /**
    * Props passed to the FormWidget component.
    */
   export interface IProps {
@@ -104,9 +139,8 @@ export namespace MetadataForm {
      */
     formData: ReadonlyPartialJSONObject | null;
 
-
     /**
-     * Translator object
+     * Translator object.
      */
     translator: ITranslator;
 
@@ -124,6 +158,11 @@ export namespace MetadataForm {
      * Whether to show the modified field from default value.
      */
     showModified: boolean;
+
+    /**
+     * The plugin ID.
+     */
+    pluginId?: string;
   }
 
   /**

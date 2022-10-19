@@ -258,14 +258,14 @@ namespace Private {
       });
 
       // Creates the tool.
-      const tool = new MetadataFormWidget(
-        metadataSchema,
-        metaInformation,
-        uiSchema,
-        schema._origin,
-        translator,
-        schema.showModified
-      );
+      const tool = new MetadataFormWidget({
+        metadataSchema: metadataSchema,
+        metaInformation: metaInformation,
+        uiSchema: uiSchema,
+        pluginId: schema._origin,
+        translator: translator,
+        showModified: schema.showModified
+      });
 
       // Adds the form to the section.
       notebookTools.addItem({ section: schema.id, tool: tool });

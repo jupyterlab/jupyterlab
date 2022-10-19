@@ -70,12 +70,11 @@ describe('metadataform/form', () => {
   });
 
   async function buildForm(): Promise<MetadataFormWidget> {
-    const metadataForm = new MetadataFormWidget(
-      JSONExt.deepCopy(simpleSchema),
-      metaInformation,
-      {},
-      'test-plugin'
-    );
+    const metadataForm = new MetadataFormWidget({
+      metadataSchema: JSONExt.deepCopy(simpleSchema),
+      metaInformation: metaInformation,
+      pluginId: 'test-plugin'
+    });
     // add the metadataForm in a section of the notebookTools.
     notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });
     // associate notebook to metadataForm.
@@ -93,12 +92,11 @@ describe('metadataform/form', () => {
   }
 
   it('should have only placeholder as no notebook is associated', () => {
-    const metadataForm = new MetadataFormWidget(
-      simpleSchema,
-      metaInformation,
-      {},
-      'test-plugin'
-    );
+    const metadataForm = new MetadataFormWidget({
+      metadataSchema: simpleSchema,
+      metaInformation: metaInformation,
+      pluginId: 'test-plugin'
+    });
     metadataForm.updateMetadata({}, true);
     const node = metadataForm.node as HTMLElement;
     expect(node.children).toHaveLength(1);

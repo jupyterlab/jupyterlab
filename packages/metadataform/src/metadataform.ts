@@ -35,21 +35,14 @@ export class MetadataFormWidget
   /**
    * Construct an empty widget.
    */
-  constructor(
-    metadataSchema: MetadataForm.IMetadataSchema,
-    metaInformation: MetadataForm.IMetaInformation,
-    uiSchema: MetadataForm.IUiSchema,
-    pluginId?: string,
-    translator?: ITranslator,
-    showModified?: boolean
-  ) {
+  constructor(options: MetadataForm.IOptions) {
     super();
-    this._metadataSchema = metadataSchema;
-    this._metaInformation = metaInformation;
-    this._uiSchema = uiSchema;
-    this._pluginId = pluginId;
-    this._showModified = showModified || false;
-    this.translator = translator || nullTranslator;
+    this._metadataSchema = options.metadataSchema;
+    this._metaInformation = options.metaInformation;
+    this._uiSchema = options.uiSchema || {};
+    this._pluginId = options.pluginId;
+    this._showModified = options.showModified || false;
+    this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._updatingMetadata = false;
     const layout = (this.layout = new SingletonLayout());
@@ -284,7 +277,7 @@ export class MetadataFormWidget
    * Build widget.
    */
   protected buildWidget(props: MetadataForm.IProps): void {
-    this._form = new FormWidget(props, this._pluginId);
+    this._form = new FormWidget(props);
     this._form.addClass('jp-MetadataForm');
     this.setContent(this._form);
   }
@@ -403,7 +396,8 @@ export class MetadataFormWidget
       translator: this.translator || null,
       formData: formData,
       metadataFormWidget: this,
-      showModified: this._showModified
+      showModified: this._showModified,
+      pluginId: this._pluginId
     });
   }
 

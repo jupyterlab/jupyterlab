@@ -8,7 +8,7 @@
 import React from 'react';
 import Form, { IChangeEvent } from '@rjsf/core';
 import { JSONSchema7 } from 'json-schema';
-import { PartialJSONValue, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { RJSFTemplatesFactory } from '@jupyterlab/ui-components';
 
@@ -21,11 +21,10 @@ export class FormWidget extends ReactWidget {
   /**
    * Constructs a new FormWidget.
    */
-  constructor(props: MetadataForm.IProps, pluginId?: string) {
+  constructor(props: MetadataForm.IProps) {
     super();
     this.addClass('jp-FormWidget');
     this._props = props;
-    this.pluginId = pluginId;
     this._templateFactory = new RJSFTemplatesFactory({
       translator: this._props.translator,
       compact: true,
@@ -48,7 +47,7 @@ export class FormWidget extends ReactWidget {
         ObjectFieldTemplate={this._templateFactory.objectTemplate}
         uiSchema={this._props.uiSchema}
         liveValidate
-        idPrefix={`jp-MetadataForm-${this.pluginId}`}
+        idPrefix={`jp-MetadataForm-${this._props.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
           this._props.metadataFormWidget.updateMetadata(e.formData);
         }}
@@ -57,6 +56,5 @@ export class FormWidget extends ReactWidget {
   }
 
   private _props: MetadataForm.IProps;
-  private _pluginId?: PartialJSONValue;
   private _templateFactory: RJSFTemplatesFactory;
 }
