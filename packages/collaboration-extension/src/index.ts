@@ -14,7 +14,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { Toolbar, DOMUtils } from '@jupyterlab/apputils';
+import { DOMUtils, Toolbar } from '@jupyterlab/apputils';
 import {
   AwarenessMock,
   CollaboratorsPanel,
@@ -23,10 +23,10 @@ import {
   IGlobalAwareness,
   IUserMenu,
   RendererUserMenu,
+  RTCPanel,
   User,
   UserInfoPanel,
-  UserMenu,
-  RTCPanel
+  UserMenu
 } from '@jupyterlab/collaboration';
 import { usersIcon } from '@jupyterlab/ui-components';
 import { AccordionPanel, Menu, MenuBar } from '@lumino/widgets';
@@ -188,7 +188,7 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
     userPanel.addWidget(currentUserPanel);
 
     const fileopener = (path: string) => {
-      app.commands.execute('docmanager:open', { path });
+      void app.commands.execute('docmanager:open', { path });
     };
 
     const collaboratorsPanel = new CollaboratorsPanel(
