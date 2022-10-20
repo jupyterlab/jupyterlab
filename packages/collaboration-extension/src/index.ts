@@ -14,7 +14,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { DOMUtils } from '@jupyterlab/apputils';
+import { Toolbar, DOMUtils } from '@jupyterlab/apputils';
 import {
   AwarenessMock,
   CollaboratorsPanel,
@@ -88,8 +88,13 @@ const menuBarPlugin: JupyterFrontEndPlugin<void> = {
     });
     menuBar.id = 'jp-UserMenu';
     user.changed.connect(() => menuBar.update());
-    // toolbar.addItem('spacer', Toolbar.createSpacerItem());
     menuBar.addMenu(menu as Menu);
+
+    const spacer = Toolbar.createSpacerItem();
+    spacer.id = DOMUtils.createDomID();
+    spacer.addClass('jp-UserMenu-Spacer');
+
+    shell.add(spacer, 'top', { rank: 900 });
     shell.add(menuBar, 'top', { rank: 1000 });
   }
 };

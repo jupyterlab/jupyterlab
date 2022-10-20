@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-#jp-topbar-spacer {
+.jp-UserMenu-Spacer {
   flex-grow: 1;
   flex-shrink: 1;
 }
