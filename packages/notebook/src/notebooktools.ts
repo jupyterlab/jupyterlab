@@ -624,7 +624,7 @@ export namespace NotebookTools {
       await this._refreshDebouncer.invoke();
     }
 
-    private _cellModel: ICellModel | null;
+    protected _cellModel: ICellModel | null;
     private _editorEl: HTMLPreElement;
     private _inputPrompt: InputPrompt;
     private _refreshDebouncer: Debouncer<void, void, null[]>;

@@ -9,6 +9,10 @@
       "metadataSchema": {
         "type": "object",
         "properties": {
+          "_CELL-TOOL": {
+            "title": "Cell tool",
+            "type": "null"
+          },
           "/editable": {
             "title": "Editable",
             "type": "boolean",
@@ -48,6 +52,9 @@
         }
       },
       "metadataOptions": {
+        "_CELL-TOOL": {
+          "customField": "activeCellTool"
+        },
         "/raw_mimetype": {
           "cellTypes": ["raw"]
         },
@@ -62,21 +69,21 @@
       "metadataSchema": {
         "type": "object",
         "properties": {
-          "UNUSED": {
+          "_CELL-METADATA": {
             "title": "Cell metadata",
             "type": "null"
           },
-          "UNUSED_": {
+          "_NOTEBOOK-METADATA": {
             "title": "Notebook metadata",
             "type": "null"
           }
         }
       },
       "metadataOptions": {
-        "UNUSED": {
+        "_CELL-METADATA": {
           "customField": "custom-cellMetadata"
         },
-        "UNUSED_": {
+        "_NOTEBOOK-METADATA": {
           "customField": "custom-notebookMetadata"
         }
       }

@@ -118,6 +118,7 @@ import {
   CustomCellMetadata,
   CustomNotebookMetadata
 } from './metadataEditorFields';
+import { ActiveCellTool } from './activeCellToolWidget';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -913,43 +914,59 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * Registering cell tag field.
+ * Registering metadata editor fields.
  */
 const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:cell-metadata',
+  id: '@jupyterlab/notebook-extension:metadata-editor',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices],
-  optional: [IFormComponentRegistry, ITranslator],
+  requires: [INotebookTracker, IEditorServices, IFormComponentRegistry],
+  optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     editorServices: IEditorServices,
-    formRegistry?: IFormComponentRegistry,
+    formRegistry: IFormComponentRegistry,
     translator?: ITranslator
   ) => {
     const editorFactory = editorServices.factoryService.newInlineEditor;
-    // Register the custom field
-    if (formRegistry) {
-      formRegistry.addRenderer('custom-cellMetadata', (props: FieldProps) => {
-        return new CustomCellMetadata({
-          editorFactory,
-          tracker,
-          label: 'Cell metadata',
-          translator: translator
-        }).render(props);
-      });
-      formRegistry.addRenderer(
-        'custom-notebookMetadata',
-        (props: FieldProps) => {
-          return new CustomNotebookMetadata({
-            editorFactory,
-            tracker,
-            label: 'Notebook metadata',
-            translator: translator
-          }).render(props);
-        }
-      );
-    }
+    // Register the custom fields.
+    formRegistry.addRenderer('custom-cellMetadata', (props: FieldProps) => {
+      return new CustomCellMetadata({
+        editorFactory,
+        tracker,
+        label: 'Cell metadata',
+        translator: translator
+      }).render(props);
+    });
+    formRegistry.addRenderer('custom-notebookMetadata', (props: FieldProps) => {
+      return new CustomNotebookMetadata({
+        editorFactory,
+        tracker,
+        label: 'Notebook metadata',
+        translator: translator
+      }).render(props);
+    });
+  }
+};
+
+/**
+ * Registering active cell field.
+ */
+const activeCellTool: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:active-cell-tool',
+  autoStart: true,
+  requires: [INotebookTracker, IFormComponentRegistry],
+  activate: (
+    // Register the custom field.
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    formRegistry: IFormComponentRegistry
+  ) => {
+    formRegistry.addRenderer('activeCellTool', (props: FieldProps) => {
+      return new ActiveCellTool({
+        tracker
+      }).render(props);
+    });
   }
 };
 
@@ -976,7 +993,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tocPlugin,
   languageServerPlugin,
   updateRawMimetype,
-  customMetadataEditorFields
+  customMetadataEditorFields,
+  activeCellTool
 ];
 export default plugins;
 

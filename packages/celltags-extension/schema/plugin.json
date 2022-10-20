@@ -20,7 +20,7 @@
         }
       },
       "uiSchema": {
-        "ui:order": ["/tags", "*"]
+        "ui:order": ["_CELL-TOOL", "/tags", "*"]
       },
       "metadataOptions": {
         "/tags": {
