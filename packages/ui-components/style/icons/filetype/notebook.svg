@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 22 22">
-  <g class="jp-icon-warn0 jp-icon-selectable" fill="#EF6C00">
+  <g class="jp-icon-selectable" fill= "var(--md-orange-900)">
     <path d="M18.7 3.3v15.4H3.3V3.3h15.4m1.5-1.5H1.8v18.3h18.3l.1-18.3z"/>
     <path d="M16.5 16.5l-5.4-4.3-5.6 4.3v-11h11z"/>
   </g>
