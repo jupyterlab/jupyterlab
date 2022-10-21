@@ -666,10 +666,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     trusted: IObservableValue,
     args: ObservableValue.IChangedArgs
   ): void {
+    const newTrusted = args.newValue as boolean;
     if (this._outputs) {
-      this._outputs.trusted = args.newValue as boolean;
+      this._outputs.trusted = newTrusted;
     }
-    if (args.newValue as boolean) {
+    if (newTrusted) {
       const codeCell = this.sharedModel as models.YCodeCell;
       const metadata = codeCell.getMetadata();
       metadata.trusted = true;
@@ -678,7 +679,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this.stateChanged.emit({
       name: 'trusted',
       oldValue: args.oldValue as boolean,
-      newValue: args.newValue as boolean
+      newValue: newTrusted
     });
   }
 
