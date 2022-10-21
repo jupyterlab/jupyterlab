@@ -681,16 +681,9 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     def initialize_handlers(self):
 
-        get_path = self.settings["file_id_manager"].get_path
-        root_dir = Path(self.settings["server_root_dir"]).expanduser()
-
-        def file_id2path(file_id: str) -> str:
-            file_path = get_path(file_id)
-            # jupyter-server needs paths relative to its root directory
-            file_path = str(Path(file_path).relative_to(root_dir))
-            return file_path
-
-        self.serverapp.web_app.settings["file_id2path"] = file_id2path
+        file_id_manager = self.settings.get("file_id_manager")
+        if file_id_manager:
+            self.serverapp.web_app.settings["fileid2path"] = file_id_manager.get_path
 
         handlers = []
 
