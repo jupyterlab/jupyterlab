@@ -3,6 +3,9 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
+      "path": "../collaboration"
+    },
+    {
       "path": "../shared-models"
     },
     {
@@ -10,6 +13,9 @@
     },
     {
       "path": "../../testutils"
+    },
+    {
+      "path": "../collaboration"
     },
     {
       "path": "../shared-models"

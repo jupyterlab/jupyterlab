@@ -1,3 +1,48 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { URLExt } from '@jupyterlab/coreutils';
+import { ServerConnection } from '@jupyterlab/services';
+import { IUser } from './tokens';
+
+/**
+ * Call the API extension
+ *
+ * @param endPoint API REST end point for the extension
+ * @param init Initial values for the request
+ * @returns The response body interpreted as JSON
+ */
+export async function requestAPI<T>(
+  endPoint = '',
+  init: RequestInit = {}
+): Promise<T> {
+  const settings = ServerConnection.makeSettings();
+  const requestUrl = URLExt.join(settings.baseUrl, endPoint);
+
+  let response: Response;
+  try {
+    response = await ServerConnection.makeRequest(requestUrl, init, settings);
+  } catch (error) {
+    throw new ServerConnection.NetworkError(error);
+  }
+
+  let data: any = await response.text();
+
+  if (data.length > 0) {
+    try {
+      data = JSON.parse(data);
+    } catch (error) {
+      console.log('Not a JSON response body.', response);
+    }
+  }
+
+  if (!response.ok) {
+    throw new ServerConnection.ResponseError(response, data.message || data);
+  }
+
+  return data;
+}
+
 // From https://en.wikipedia.org/wiki/Moons_of_Jupiter
 export const moonsOfJupyter = [
   'Metis',
@@ -86,19 +131,19 @@ export const moonsOfJupyter = [
  * This function returns names like "Anonymous Io" or "Anonymous Metis".
  */
 export const getAnonymousUserName = (): string =>
-  'Anonymous ' +
   moonsOfJupyter[Math.floor(Math.random() * moonsOfJupyter.length)];
 
-export const userColors = [
-  '#12A0D3',
-  '#17AB30',
-  '#CC8500',
-  '#A79011',
-  '#ee6352',
-  '#609DA9',
-  '#4BA749',
-  '#00A1B3'
-];
+/**
+ * Global awareness for JupyterLab scopped shared data.
+ */
+export interface ICollaboratorAwareness {
+  /**
+   * The User owning theses data.
+   */
+  user: IUser.User;
 
-export const getRandomColor = (): string =>
-  userColors[Math.floor(Math.random() * userColors.length)];
+  /**
+   * The current file/context the user is working on.
+   */
+  current?: string;
+}

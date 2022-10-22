@@ -64,6 +64,12 @@ pkg:codeeditor:
   - packages/codeeditor/**/*
   - packages/codeeditor/*
 
+pkg:collaboration:
+  - packages/collaboration/**/*
+  - packages/collaboration/*
+  - packages/collaboration-extension/**/*
+  - packages/collaboration-extension/*
+
 pkg:codemirror:
   - packages/codemirror/**/*
   - packages/codemirror/*

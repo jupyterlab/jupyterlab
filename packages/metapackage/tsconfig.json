@@ -46,6 +46,12 @@
       "path": "../codemirror-extension"
     },
     {
+      "path": "../collaboration"
+    },
+    {
+      "path": "../collaboration-extension"
+    },
+    {
       "path": "../completer"
     },
     {

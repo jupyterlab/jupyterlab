@@ -12,6 +12,8 @@ const packages = [
   'codeeditor',
   'codemirror-extension',
   'codemirror',
+  'collaboration',
+  'collaboration-extension',
   'completer-extension',
   'completer',
   'console-extension',
