@@ -70,9 +70,11 @@ test.describe('Toast', () => {
 
     const handle = await page.waitForSelector('.Toastify__toast');
 
-    expect(await handle.screenshot()).toMatchSnapshot({
-      name: `notification-with-actions.png`
-    });
+    expect(await handle.screenshot({ animations: 'disabled' })).toMatchSnapshot(
+      {
+        name: `notification-with-actions.png`
+      }
+    );
 
     await Promise.all([
       handle.waitForElementState('hidden'),

@@ -309,15 +309,6 @@
   transform: translateX(-40%) translateY(-58%);
 }
 
-.jp-DirListing-deadSpace {
-  flex: 1 1 auto;
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-  overflow: auto;
-  background-color: var(--jp-layout-color1);
-}
-
 .jp-Document {
   min-width: 120px;
   min-height: 120px;
