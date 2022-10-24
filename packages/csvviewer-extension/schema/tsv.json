@@ -1,6 +1,8 @@
 {
   "title": "TSV Viewer",
   "description": "TSV Viewer settings.",
+  "jupyter.lab.setting-icon": "ui-components:spreadsheet",
+  "jupyter.lab.setting-icon-label": "TSV Viewer",
   "jupyter.lab.toolbars": {
     "TSVTable": [{ "name": "delimiter", "rank": 10 }]
   },
