@@ -32,7 +32,7 @@ ignore-glob = ["packages/ui-components/docs/source/ui_components.rst"]
 ignore-links = ["../api/*.*", "https://docs.github.com/en/.*"]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
-npm-cmd = "npm publish --tag next"
+npm-cmd = "npm publish --tag latest"
 release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
 
