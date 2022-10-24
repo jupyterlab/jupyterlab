@@ -724,7 +724,8 @@ export class YBaseCell<Metadata extends nbformat.IBaseCellMetadata>
    * @returns Cell metadata.
    */
   getMetadata(key?: string): Partial<Metadata> {
-    const metadata = this.ymodel.get('metadata');
+    // Transiently the metadata can be missing - like during destruction
+    const metadata = this.ymodel.get('metadata') ?? {};
 
     if (typeof key === 'string') {
       const value = metadata[key];
