@@ -18,11 +18,11 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.5.x/CHANGELOG.md'
 
 ### Enhancements made
 
-- Optimize text mimerenderer: ansi vs autolink  [#13202](https://github.com/jupyterlab/jupyterlab/pull/13202) ([@vidartf](https://github.com/vidartf))
+- Optimize text mimerenderer: ansi vs autolink [#13202](https://github.com/jupyterlab/jupyterlab/pull/13202) ([@vidartf](https://github.com/vidartf))
 - Collapse debugger panel when disabling debugger [#13088](https://github.com/jupyterlab/jupyterlab/pull/13088) ([@yanmulin](https://github.com/yanmulin))
 - File Browser: add support for filtering directories on search [#12342](https://github.com/jupyterlab/jupyterlab/pull/12342) ([@jtpio](https://github.com/jtpio))
 - Prompt for renaming at first manual save [#12953](https://github.com/jupyterlab/jupyterlab/pull/12953) ([@fcollonval](https://github.com/fcollonval))
-- Raise ceiling on jupyter_server dependency to < 3 [#13068](https://github.com/jupyterlab/jupyterlab/pull/13068) ([@Zsailer](https://github.com/Zsailer))
+- Raise ceiling on `jupyter_server` dependency to < 3 [#13068](https://github.com/jupyterlab/jupyterlab/pull/13068) ([@Zsailer](https://github.com/Zsailer))
 
 ### Bugs fixed
 
@@ -33,7 +33,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.5.x/CHANGELOG.md'
 ### Maintenance and upkeep improvements
 
 - Fix memory leaks [#13229](https://github.com/jupyterlab/jupyterlab/pull/13229) ([@fcollonval](https://github.com/fcollonval))
-- Bump to latest Lumino 1.x [#13190](https://github.com/jupyterlab/jupyterlab/pull/13190) ([@fcollonval](https://github.com/fcollonval))
+- Bump to the latest Lumino 1.x [#13190](https://github.com/jupyterlab/jupyterlab/pull/13190) ([@fcollonval](https://github.com/fcollonval))
 - Update branch configuration [#13184](https://github.com/jupyterlab/jupyterlab/pull/13184) ([@fcollonval](https://github.com/fcollonval))
 
 ### Documentation improvements
