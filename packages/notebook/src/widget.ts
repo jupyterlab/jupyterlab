@@ -2083,7 +2083,6 @@ export class Notebook extends StaticNotebook {
    * Find heading with given ID in any of the cells.
    */
   async _findHeading(queryId: string): Promise<Private.IScrollTarget | null> {
-    queryId = CSS.escape(queryId);
     // Loop on cells, get headings and search for first matching id.
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
