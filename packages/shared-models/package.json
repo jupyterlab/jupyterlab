@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/shared-models",
-  "version": "3.5.0-rc.0",
+  "version": "3.5.0",
   "description": "JupyterLab - Shared Models",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,7 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/nbformat": "^3.5.0-rc.0",
+    "@jupyterlab/nbformat": "^3.5.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/disposable": "^1.10.0",
     "@lumino/signaling": "^1.10.0",
@@ -45,7 +45,7 @@
     "yjs": "^13.5.17"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.5.0-rc.0",
+    "@jupyterlab/testutils": "^3.5.0",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

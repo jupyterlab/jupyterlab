@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/vdom",
-  "version": "3.5.0-rc.0",
+  "version": "3.5.0",
   "description": "A viewer for VDOM documents.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,10 +32,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.5.0-rc.0",
-    "@jupyterlab/docregistry": "^3.5.0-rc.0",
-    "@jupyterlab/rendermime-interfaces": "^3.5.0-rc.0",
-    "@jupyterlab/services": "^6.5.0-rc.0",
+    "@jupyterlab/apputils": "^3.5.0",
+    "@jupyterlab/docregistry": "^3.5.0",
+    "@jupyterlab/rendermime-interfaces": "^3.5.0",
+    "@jupyterlab/services": "^6.5.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/messaging": "^1.10.0",
     "@lumino/widgets": "^1.33.0",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/property-inspector",
-  "version": "3.5.0-rc.0",
+  "version": "3.5.0",
   "description": "A property inspector display for widgets",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,9 +33,9 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.5.0-rc.0",
-    "@jupyterlab/apputils": "^3.5.0-rc.0",
-    "@jupyterlab/translation": "^3.5.0-rc.0",
+    "@jupyterlab/application": "^3.5.0",
+    "@jupyterlab/apputils": "^3.5.0",
+    "@jupyterlab/translation": "^3.5.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/disposable": "^1.10.0",
     "@lumino/signaling": "^1.10.0",
