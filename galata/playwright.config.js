@@ -8,11 +8,13 @@ module.exports = {
   projects: [
     {
       name: 'galata',
-      testMatch: 'test/galata/**'
+      testMatch: 'test/galata/**',
+      testIgnore: '**/.ipynb_checkpoints/**'
     },
     {
       name: 'jupyterlab',
-      testMatch: 'test/jupyterlab/**'
+      testMatch: 'test/jupyterlab/**',
+      testIgnore: '**/.ipynb_checkpoints/**'
     }
   ],
   // Switch to 'always' to keep raw assets for all tests
