@@ -398,7 +398,7 @@ export class PluginList extends ReactWidget {
         key={id}
         title={itemTitle}
       >
-        <div className="jp-pluginList-entry-label" role="tab">
+        <div className="jp-PluginList-entry-label" role="tab">
           <div className="jp-SelectedIndicator" />
           <LabIcon.resolveReact
             icon={icon || (iconClass ? undefined : settingsIcon)}
@@ -407,7 +407,9 @@ export class PluginList extends ReactWidget {
             tag="span"
             stylesheet="settingsEditor"
           />
-          <span>{hightlightedTitle}</span>
+          <span className="jp-PluginList-entry-label-text">
+            {hightlightedTitle}
+          </span>
         </div>
         <ul>{filteredProperties}</ul>
       </div>

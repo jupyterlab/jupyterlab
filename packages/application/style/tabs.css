@@ -152,10 +152,6 @@
   margin-bottom: var(--jp-border-width);
 }
 
-.lm-TabBar-WindowTabLabel {
-  margin-top: 4px;
-}
-
 .lm-TabBar-tab.lm-mod-drag-image {
   background: var(--jp-layout-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);

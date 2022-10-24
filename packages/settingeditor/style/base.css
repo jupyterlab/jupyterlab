@@ -89,16 +89,6 @@
   right: 0;
 }
 
-.jp-PluginList .jp-SettingsHeader {
-  display: flex;
-  flex-basis: 100%;
-}
-
-.jp-PluginList .jp-SettingsHeader button {
-  color: var(--jp-private-notebook-selected-color);
-  white-space: nowrap;
-}
-
 .jp-PluginList .jp-PluginList-header {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
@@ -142,11 +132,6 @@
   color: var(--jp-brand-color1);
 }
 
-.jp-PluginList button span {
-  color: var(--jp-content-font-color1);
-  line-height: var(--jp-cell-collapser-min-height);
-}
-
 .jp-FormComponent li span {
   overflow: hidden;
 }
@@ -161,10 +146,6 @@
   top: 0;
   z-index: 999;
   background-color: var(--jp-layout-color0);
-}
-
-.jp-PluginList-Searcher {
-  margin: 5px;
 }
 
 ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
@@ -361,31 +342,6 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   margin: 2px;
 }
 
-.jp-openJSONSettingsEditor {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-.jp-openJSONSettingsEditor button {
-  border: 1px solid var(--jp-border-color1);
-  color: var(--jp-ui-font-color0);
-  padding: 5px;
-  margin: 5px;
-  cursor: pointer;
-  background-color: var(--jp-border-color2);
-  display: flex;
-  align-items: center;
-}
-
-.jp-openJSONSettingsEditor button > div {
-  display: flex;
-}
-
-.jp-openJSONSettingsEditor svg#icon {
-  height: 1.5em;
-}
-
 .jp-SettingsPanel .array-item {
   border: 1px solid var(--jp-border-color2);
   border-radius: 4px;
@@ -489,14 +445,16 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   text-overflow: ellipsis;
 }
 
-.jp-pluginList-entry-label {
+.jp-PluginList-entry-label {
   display: flex;
 }
 
-.jp-pluginList-entry-label span {
+.jp-PluginList-entry-label-text {
   text-overflow: ellipsis;
   overflow-x: hidden;
   white-space: nowrap;
+  color: var(--jp-content-font-color1);
+  line-height: var(--jp-cell-collapser-min-height);
 }
 
 .jp-SettingsPanel .jp-SettingsHeader-Name {
