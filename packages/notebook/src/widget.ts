@@ -1643,7 +1643,7 @@ export class Notebook extends StaticNotebook {
     cell.activate();
   }
 
-  private _parseFragment(fragment: string) {
+  private _parseFragment(fragment: string): Private.IFragmentData | undefined {
     const cleanedFragment = fragment.slice(1);
 
     if (!cleanedFragment) {
@@ -1653,14 +1653,14 @@ export class Notebook extends StaticNotebook {
 
     const parts = cleanedFragment.split('=');
     if (parts.length === 1) {
-      // Default to heading if no prefix is given
+      // Default to heading if no prefix is given.
       return {
         kind: 'heading',
-        value: CSS.escape(cleanedFragment)
+        value: cleanedFragment
       };
     }
     return {
-      kind: parts[0],
+      kind: parts[0] as any,
       value: parts.slice(1).join('=')
     };
   }
@@ -1686,7 +1686,12 @@ export class Notebook extends StaticNotebook {
         result = this._findCellById(parsedFragment.value);
         break;
       default:
-        console.warn(`Unknown target type for URI fragment ${fragment}`);
+        console.warn(
+          `Unknown target type for URI fragment ${fragment}, interpreting as a heading`
+        );
+        result = await this._findHeading(
+          parsedFragment.kind + '=' + parsedFragment.value
+        );
         break;
     }
 
@@ -2078,6 +2083,7 @@ export class Notebook extends StaticNotebook {
    * Find heading with given ID in any of the cells.
    */
   async _findHeading(queryId: string): Promise<Private.IScrollTarget | null> {
+    queryId = CSS.escape(queryId);
     // Loop on cells, get headings and search for first matching id.
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
@@ -2839,8 +2845,22 @@ namespace Private {
      */
     cell: Cell;
     /**
-     * Element to scroll to within the cell
+     * Element to scroll to within the cell.
      */
     element?: HTMLElement;
+  }
+
+  /**
+   * Parsed fragment identifier data.
+   */
+  export interface IFragmentData {
+    /**
+     * The kind of notebook element targetted by the fragment identifier.
+     */
+    kind: 'heading' | 'cell-id';
+    /*
+     * The value of the fragment query.
+     */
+    value: string;
   }
 }
