@@ -258,7 +258,8 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     IStateDB,
     IRouter,
     JupyterFrontEnd.ITreeResolver,
-    JupyterLab.IInfo
+    JupyterLab.IInfo,
+    ILabShell
   ],
   activate: async (
     app: JupyterFrontEnd,
@@ -267,7 +268,8 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     state: IStateDB | null,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    info: JupyterLab.IInfo | null
+    info: JupyterLab.IInfo | null,
+    labShell: ILabShell | null
   ): Promise<IFileBrowserFactory> => {
     const { commands } = app;
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
@@ -306,8 +308,14 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       auto: false,
       restore: false
     });
-    void Private.restoreBrowser(defaultBrowser, commands, router, tree);
-
+    void Private.restoreBrowser(
+      defaultBrowser,
+      commands,
+      router,
+      tree,
+      app,
+      labShell
+    );
     return { createFileBrowser, defaultBrowser, tracker };
   }
 };
@@ -1279,7 +1287,9 @@ namespace Private {
     browser: FileBrowser,
     commands: CommandRegistry,
     router: IRouter | null,
-    tree: JupyterFrontEnd.ITreeResolver | null
+    tree: JupyterFrontEnd.ITreeResolver | null,
+    app: JupyterFrontEnd,
+    labShell: ILabShell | null
   ): Promise<void> {
     const restoring = 'jp-mod-restoring';
 
@@ -1316,6 +1326,10 @@ namespace Private {
         await browser.model.refresh();
       }
       browser.removeClass(restoring);
+
+      if (labShell?.isEmpty('main')) {
+        void commands.execute('launcher:create');
+      }
     };
     router.routed.connect(listener);
   }

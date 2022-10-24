@@ -177,7 +177,11 @@ export class WidgetTracker<T extends Widget = Widget>
    * A promise resolved when the tracker has been restored.
    */
   get restored(): Promise<void> {
-    return this._pool.restored;
+    if (this._deferred) {
+      return Promise.resolve();
+    } else {
+      return this._pool.restored;
+    }
   }
 
   /**
@@ -317,8 +321,29 @@ export class WidgetTracker<T extends Widget = Widget>
    * This function should not typically be invoked by client code.
    * Its primary use case is to be invoked by a restorer.
    */
-  async restore(options: IRestorable.IOptions<T>): Promise<any> {
-    return this._pool.restore(options);
+  async restore(options?: IRestorable.IOptions<T>): Promise<any> {
+    const deferred = this._deferred;
+    if (deferred) {
+      this._deferred = null;
+      return this._pool.restore(deferred);
+    }
+    if (options) {
+      return this._pool.restore(options);
+    }
+    console.warn('No options provided to restore the tracker.');
+  }
+
+  /**
+   * Save the restore options for this tracker, but do not restore yet.
+   *
+   * @param options - The configuration options that describe restoration.
+   *
+   * ### Notes
+   * This function is useful when starting the shell in 'single-document' mode,
+   * to avoid restoring all useless widgets.
+   */
+  defer(options: IRestorable.IOptions<T>): void {
+    this._deferred = options;
   }
 
   /**
@@ -341,6 +366,7 @@ export class WidgetTracker<T extends Widget = Widget>
   }
 
   private _currentChanged = new Signal<this, T | null>(this);
+  private _deferred: IRestorable.IOptions<T> | null = null;
   private _focusTracker: FocusTracker<T>;
   private _pool: RestorablePool<T>;
   private _isDisposed = false;

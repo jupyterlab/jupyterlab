@@ -30,6 +30,7 @@ import {
   Widget
 } from '@lumino/widgets';
 import { JupyterFrontEnd } from './frontend';
+import { ILayoutRestorer } from './layoutrestorer';
 
 /**
  * The class name added to AppShell instances.
@@ -601,12 +602,33 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       const widgets = Array.from(dock.widgets());
       dock.mode = mode;
 
-      // Restore the original layout.
+      // Restore cached layout if possible.
       if (this._cachedLayout) {
         // Remove any disposed widgets in the cached layout and restore.
         Private.normalizeAreaConfig(dock, this._cachedLayout.main);
         dock.restoreLayout(this._cachedLayout);
         this._cachedLayout = null;
+      }
+
+      // If layout restoration has been deferred, restore layout now.
+      if (this._layoutRestorer.isDeferred) {
+        this._layoutRestorer
+          .restoreDeferred()
+          .then(mainArea => {
+            if (mainArea) {
+              const { currentWidget, dock } = mainArea;
+              if (dock) {
+                this._dockPanel.restoreLayout(dock);
+              }
+              if (currentWidget) {
+                this.activateById(currentWidget.id);
+              }
+            }
+          })
+          .catch(reason => {
+            console.error('Failed to restore the deferred layout.');
+            console.error(reason);
+          });
       }
 
       // Add any widgets created during single document mode, which have
@@ -1038,14 +1060,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * #### Notes
    * This should only be called once.
    */
-  restoreLayout(
+  async restoreLayout(
     mode: DockPanel.Mode,
-    layout: ILabShell.ILayout,
+    layoutRestorer: ILayoutRestorer,
     configuration: {
       [m: string]: ILabShell.IUserLayout;
     } = {}
-  ): void {
-    // Set the configuration
+  ): Promise<void> {
+    // Set the configuration and add widgets added before the shell was ready.
     this._userLayout = {
       'single-document': configuration['single-document'] ?? {},
       'multiple-document': configuration['multiple-document'] ?? {}
@@ -1054,16 +1076,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this.add(widget, area, options);
     });
     this._delayedWidget.length = 0;
+    this._layoutRestorer = layoutRestorer;
+
+    // Get the layout from the restorer
+    const layout = await layoutRestorer.fetch();
 
     // Reset the layout
-
     const { mainArea, downArea, leftArea, rightArea, topArea, relativeSizes } =
       layout;
+
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
 
-      if (dock) {
+      if (dock && mode === 'multiple-document') {
         this._dockPanel.restoreLayout(dock);
       }
       if (mode) {
@@ -1192,7 +1218,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       topArea: { simpleVisibility: !this._topHandlerHiddenByUser },
       relativeSizes: this._hsplitPanel.relativeSizes()
     };
-
     return layout;
   }
 
@@ -1692,6 +1717,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
   private _translator: ITranslator;
+  private _layoutRestorer: ILayoutRestorer;
 }
 
 namespace Private {
