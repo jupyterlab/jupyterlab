@@ -21,6 +21,11 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
+    // Wait for kernel to settle on idle
+    await page.waitForSelector('#jp-main-statusbar >> text=Idle');
+    await page.waitForSelector('#jp-main-statusbar >> text=Busy');
+    await page.waitForSelector('#jp-main-statusbar >> text=Idle');
+
     expect(
       await page.screenshot({
         clip: { x: 1050, y: 62, width: 190, height: 28 }
