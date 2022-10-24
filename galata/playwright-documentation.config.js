@@ -9,7 +9,8 @@ module.exports = {
   projects: [
     {
       name: 'documentation',
-      testMatch: 'test/documentation/**'
+      testMatch: 'test/documentation/**',
+      testIgnore: '**/.ipynb_checkpoints/**'
     }
   ],
   use: {
