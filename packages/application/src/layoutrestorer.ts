@@ -36,27 +36,9 @@ export interface ILayoutRestorer extends IRestorer {
   restored: Promise<void>;
 
   /**
-   * Whether full layout restoration is deferred and is currently incomplete.
-   *
-   * #### Notes
-   * This flag is useful for tracking when the application has started in
-   * 'single-document' mode and the main area has not yet been restored.
-   */
-  isDeferred: boolean;
-
-  /**
    * Add a widget to be tracked by the layout restorer.
    */
   add(widget: Widget, name: string): void;
-
-  /**
-   * Fetch the layout state for the application.
-   *
-   * #### Notes
-   * Fetching the layout relies on all widget restoration to be complete, so
-   * calls to `fetch` are guaranteed to return after restoration is complete.
-   */
-  fetch(): Promise<ILabShell.ILayout>;
 
   /**
    * Restore the widgets of a particular widget tracker.
@@ -69,15 +51,6 @@ export interface ILayoutRestorer extends IRestorer {
     tracker: WidgetTracker<T>,
     options: IRestorer.IOptions<T>
   ): Promise<any>;
-
-  /**
-   * Restore the main area layout on demand.
-   * This happens when the application has started in 'single-document' mode
-   * (no main area widget loaded) and is switching to 'multiple-document' mode.
-   *
-   * @returns - the rehydrated main area.
-   */
-  restoreDeferred(): Promise<ILabShell.IMainArea | null>;
 }
 
 /**
