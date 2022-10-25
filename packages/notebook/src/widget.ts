@@ -370,27 +370,39 @@ export class StaticNotebook extends WindowedList {
    *
    * @param from The index of the cell to move
    * @param to The new index of the cell
+   * @param n Number of cells to move
    */
-  moveCell(from: number, to: number): void {
+  moveCell(from: number, to: number, n = 1): void {
     if (!this.model) {
       return;
     }
 
-    const oldCell = this.widgets[from];
-    const viewModel: { [k: string]: any } = {};
-    if (oldCell.model.type === 'markdown') {
-      for (const k of ['rendered', 'headingCollapsed']) {
-        // @ts-expect-error Cell has no index signature
-        viewModel[k] = oldCell[k];
+    const boundedTo = Math.min(this.model.cells.length - 1, Math.max(0, to));
+
+    if (boundedTo === from) {
+      return;
+    }
+
+    const viewModel: { [k: string]: any }[] = new Array(n);
+    for (let i = 0; i < n; i++) {
+      viewModel[i] = {};
+      const oldCell = this.widgets[from + i];
+      if (oldCell.model.type === 'markdown') {
+        for (const k of ['rendered', 'headingCollapsed']) {
+          // @ts-expect-error Cell has no index signature
+          viewModel[i][k] = oldCell[k];
+        }
       }
     }
 
-    this.model.sharedModel.moveCell(from, to);
+    this.model!.sharedModel.moveCell(from, boundedTo, n);
 
-    const newCell = this.widgets[to];
-    for (const state in viewModel) {
-      // @ts-expect-error Cell has no index signature
-      newCell[state] = viewModel[state];
+    for (let i = 0; i < n; i++) {
+      const newCell = this.widgets[to + i];
+      for (const state in viewModel) {
+        // @ts-expect-error Cell has no index signature
+        newCell[state] = viewModel[i][state];
+      }
     }
   }
 
@@ -485,15 +497,6 @@ export class StaticNotebook extends WindowedList {
    * The default implementation is a no-op
    */
   protected onCellInserted(index: number, cell: Cell): void {
-    // This is a no-op.
-  }
-
-  /**
-   * Handle a cell being moved.
-   *
-   * The default implementation is a no-op
-   */
-  protected onCellMoved(fromIndex: number, toIndex: number): void {
     // This is a no-op.
   }
 
@@ -1362,6 +1365,47 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Move a cell preserving widget view state.
+   *
+   * #### Notes
+   * This is required because at the model level a move is a deletion
+   * followed by an insertion. Hence the view state is not preserved.
+   *
+   * @param from The index of the cell to move
+   * @param to The new index of the cell
+   * @param n Number of cells to move
+   */
+  moveCell(from: number, to: number, n = 1): void {
+    // Save active cell id to be restored
+    const newActiveCellIndex =
+      from <= this.activeCellIndex && this.activeCellIndex < from + n
+        ? this.activeCellIndex + to - from - (from > to ? 0 : n - 1)
+        : -1;
+    const isSelected = this.widgets
+      .slice(from, from + n)
+      .map(w => this.isSelected(w));
+
+    super.moveCell(from, to, n);
+
+    if (newActiveCellIndex >= 0) {
+      this.activeCellIndex = newActiveCellIndex;
+    }
+    if (from > to) {
+      isSelected.forEach((selected, idx) => {
+        if (selected) {
+          this.select(this.widgets[to + idx]);
+        }
+      });
+    } else {
+      isSelected.forEach((selected, idx) => {
+        if (selected) {
+          this.select(this.widgets[to - n + 1 + idx]);
+        }
+      });
+    }
+  }
+
+  /**
    * Select a cell widget.
    *
    * #### Notes
@@ -1685,7 +1729,10 @@ export class Notebook extends StaticNotebook {
         if (event.eventPhase === Event.CAPTURING_PHASE) {
           this._evtMouseDownCapture(event as MouseEvent);
         } else {
-          this._evtMouseDown(event as MouseEvent);
+          // Skip processing the event when it resulted from a toolbar button click
+          if (!event.defaultPrevented) {
+            this._evtMouseDown(event as MouseEvent);
+          }
         }
         break;
       case 'mouseup':
@@ -1879,20 +1926,6 @@ export class Notebook extends StaticNotebook {
       index <= this.activeCellIndex
         ? this.activeCellIndex + 1
         : this.activeCellIndex;
-  }
-
-  /**
-   * Handle a cell being moved.
-   */
-  protected onCellMoved(fromIndex: number, toIndex: number): void {
-    const i = this.activeCellIndex;
-    if (fromIndex === i) {
-      this.activeCellIndex = toIndex;
-    } else if (fromIndex < i && i <= toIndex) {
-      this.activeCellIndex--;
-    } else if (toIndex <= i && i < fromIndex) {
-      this.activeCellIndex++;
-    }
   }
 
   /**
@@ -2359,17 +2392,7 @@ export class Notebook extends StaticNotebook {
       }
 
       // Move the cells one by one
-      model.sharedModel.transact(() => {
-        if (fromIndex < toIndex) {
-          for (let length = toMove.length; length > 0; length--) {
-            model.sharedModel.moveCell(fromIndex, toIndex);
-          }
-        } else if (fromIndex > toIndex) {
-          for (let length = toMove.length; length > 0; length--) {
-            model.sharedModel.moveCell(fromIndex++, toIndex++);
-          }
-        }
-      });
+      this.moveCell(fromIndex, toIndex, toMove.length);
     } else {
       // Handle the case where we are copying cells between
       // notebooks.

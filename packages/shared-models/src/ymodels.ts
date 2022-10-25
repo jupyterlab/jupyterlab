@@ -1409,13 +1409,19 @@ export class YNotebook
    *
    * @param fromIndex: Index of the cell to move.
    * @param toIndex: New position of the cell.
+   * @param n: Number of cells to move
    */
-  moveCell(fromIndex: number, toIndex: number): void {
+  moveCell(fromIndex: number, toIndex: number, n = 1): void {
+    // FIXME we need to use yjs move feature to preserve undo history
+    const clones = new Array(n)
+      .fill(true)
+      .map((_, idx) => this.getCell(fromIndex + idx).toJSON());
     this.transact(() => {
-      // FIXME we need to use yjs move feature to preserve undo history
-      const clone = createCell(this.getCell(fromIndex).toJSON(), this);
-      this._ycells.delete(fromIndex, 1);
-      this._ycells.insert(toIndex, [clone.ymodel]);
+      this._ycells.delete(fromIndex, n);
+      this._ycells.insert(
+        fromIndex > toIndex ? toIndex : toIndex - n + 1,
+        clones.map(clone => createCell(clone, this).ymodel)
+      );
     });
   }
 

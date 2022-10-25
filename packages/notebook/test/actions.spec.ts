@@ -1237,6 +1237,13 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(0);
       });
 
+      it('should move the last cell up', () => {
+        const lastIndex = widget.model!.cells.length - 1;
+        widget.activeCellIndex = lastIndex;
+        NotebookActions.moveUp(widget);
+        expect(widget.activeCellIndex).toBe(lastIndex - 1);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.moveUp(widget);

@@ -83,11 +83,6 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onCellInserted');
   }
 
-  protected onCellMoved(fromIndex: number, toIndex: number): void {
-    super.onCellMoved(fromIndex, toIndex);
-    this.methods.push('onCellMoved');
-  }
-
   protected onCellRemoved(index: number, cell: Cell): void {
     super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
@@ -127,11 +122,6 @@ class LogNotebook extends Notebook {
   protected onCellInserted(index: number, cell: Cell): void {
     super.onCellInserted(index, cell);
     this.methods.push('onCellInserted');
-  }
-
-  protected onCellMoved(fromIndex: number, toIndex: number): void {
-    super.onCellMoved(fromIndex, toIndex);
-    this.methods.push('onCellMoved');
   }
 
   protected onCellRemoved(index: number, cell: Cell): void {
