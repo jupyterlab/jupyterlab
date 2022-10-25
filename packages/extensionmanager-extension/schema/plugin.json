@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon": "ui-components:settings",
+  "jupyter.lab.setting-icon": "ui-components:extension",
   "jupyter.lab.setting-icon-label": "Extension Manager",
   "jupyter.lab.menus": {
     "main": [
