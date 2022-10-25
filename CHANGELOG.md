@@ -12,11 +12,51 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.6.0a0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/d3316552294b1667d809805a1829f33c62701cc8...a960bd68b83d392a8697019adbffa748fda1be0a))
+
+### Enhancements made
+
+- Backport PR #13284: Use settings icons for 6 plugins [#13298](https://github.com/jupyterlab/jupyterlab/pull/13298) ([@krassowski](https://github.com/krassowski))
+- Backport PR #13286: Do not run galata in `.ipynb_checkpoints` [#13297](https://github.com/jupyterlab/jupyterlab/pull/13297) ([@krassowski](https://github.com/krassowski))
+- Optimize text mimerenderer: ansi vs autolink  [#13202](https://github.com/jupyterlab/jupyterlab/pull/13202) ([@vidartf](https://github.com/vidartf))
+- Remove Yjs locking mechanism [#13222](https://github.com/jupyterlab/jupyterlab/pull/13222) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Bugs fixed
+
+- Set `isUntitled` to false on document path changes [#13268](https://github.com/jupyterlab/jupyterlab/pull/13268) ([@fcollonval](https://github.com/fcollonval))
+- Remove some unused CSS styles and fix icon alignment in plugin list [#13255](https://github.com/jupyterlab/jupyterlab/pull/13255) ([@krassowski](https://github.com/krassowski))
+- Fix notebook trust in RTC [#13274](https://github.com/jupyterlab/jupyterlab/pull/13274) ([@davidbrochart](https://github.com/davidbrochart))
+- Don't dispose the notebook metadata editor on active cell change [#13259](https://github.com/jupyterlab/jupyterlab/pull/13259) ([@fcollonval](https://github.com/fcollonval))
+
+### Maintenance and upkeep improvements
+
+- Fix memory leaks [#13229](https://github.com/jupyterlab/jupyterlab/pull/13229) ([@fcollonval](https://github.com/fcollonval))
+- Update branch configuration [#13220](https://github.com/jupyterlab/jupyterlab/pull/13220) ([@fcollonval](https://github.com/fcollonval))
+
+### Documentation improvements
+
+- Backporting IUser/Collaboration PRs [#13242](https://github.com/jupyterlab/jupyterlab/pull/13242) ([@martinRenou](https://github.com/martinRenou))
+- Update example documentation: `lab -> app` [#13223](https://github.com/jupyterlab/jupyterlab/pull/13223) ([@davidbrochart](https://github.com/davidbrochart))
+- Remove Yjs locking mechanism [#13222](https://github.com/jupyterlab/jupyterlab/pull/13222) ([@davidbrochart](https://github.com/davidbrochart))
+- Update branch configuration [#13220](https://github.com/jupyterlab/jupyterlab/pull/13220) ([@fcollonval](https://github.com/fcollonval))
+
+### API and Breaking Changes
+
+- Remove Yjs locking mechanism [#13222](https://github.com/jupyterlab/jupyterlab/pull/13222) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2000-03-05&to=2022-10-25&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2000-03-05..2022-10-25&type=Issues) | [@agoose77](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aagoose77+updated%3A2000-03-05..2022-10-25&type=Issues) | [@aiqc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aaiqc+updated%3A2000-03-05..2022-10-25&type=Issues) | [@ajbozarth](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aajbozarth+updated%3A2000-03-05..2022-10-25&type=Issues) | [@andrewfulton9](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrewfulton9+updated%3A2000-03-05..2022-10-25&type=Issues) | [@athornton](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aathornton+updated%3A2000-03-05..2022-10-25&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2000-03-05..2022-10-25&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2000-03-05..2022-10-25&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2000-03-05..2022-10-25&type=Issues) | [@damianavila](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adamianavila+updated%3A2000-03-05..2022-10-25&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2000-03-05..2022-10-25&type=Issues) | [@dlqqq](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adlqqq+updated%3A2000-03-05..2022-10-25&type=Issues) | [@dmonad](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Admonad+updated%3A2000-03-05..2022-10-25&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2000-03-05..2022-10-25&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2000-03-05..2022-10-25&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2000-03-05..2022-10-25&type=Issues) | [@firai](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afirai+updated%3A2000-03-05..2022-10-25&type=Issues) | [@fperez](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afperez+updated%3A2000-03-05..2022-10-25&type=Issues) | [@gabalafou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agabalafou+updated%3A2000-03-05..2022-10-25&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2000-03-05..2022-10-25&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2000-03-05..2022-10-25&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2000-03-05..2022-10-25&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2000-03-05..2022-10-25&type=Issues) | [@jess-x](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajess-x+updated%3A2000-03-05..2022-10-25&type=Issues) | [@JohanMabille](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJohanMabille+updated%3A2000-03-05..2022-10-25&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2000-03-05..2022-10-25&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2000-03-05..2022-10-25&type=Issues) | [@jweill-aws](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajweill-aws+updated%3A2000-03-05..2022-10-25&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2000-03-05..2022-10-25&type=Issues) | [@malemburg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amalemburg+updated%3A2000-03-05..2022-10-25&type=Issues) | [@marthacryan](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amarthacryan+updated%3A2000-03-05..2022-10-25&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2000-03-05..2022-10-25&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2000-03-05..2022-10-25&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2000-03-05..2022-10-25&type=Issues) | [@mlucool](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amlucool+updated%3A2000-03-05..2022-10-25&type=Issues) | [@rccern](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Arccern+updated%3A2000-03-05..2022-10-25&type=Issues) | [@schmidi314](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aschmidi314+updated%3A2000-03-05..2022-10-25&type=Issues) | [@siddartha-10](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asiddartha-10+updated%3A2000-03-05..2022-10-25&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2000-03-05..2022-10-25&type=Issues) | [@thesinepainter](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Athesinepainter+updated%3A2000-03-05..2022-10-25&type=Issues) | [@trallard](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrallard+updated%3A2000-03-05..2022-10-25&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2000-03-05..2022-10-25&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2000-03-05..2022-10-25&type=Issues) | [@williamstein](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awilliamstein+updated%3A2000-03-05..2022-10-25&type=Issues) | [@yuvipanda](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayuvipanda+updated%3A2000-03-05..2022-10-25&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AZsailer+updated%3A2000-03-05..2022-10-25&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.5.0b0
 
 No merged PRs
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 3.5.0a0
 
