@@ -210,9 +210,19 @@ export namespace MetadataForm {
  */
 export interface IMetadataFormProvider {
   /**
+   * Add a MetadataFormWidget to the provider.
+   */
+  add(id: string, widget: MetadataForm.IMetadataForm): void;
+
+  /**
+   * Get a MetadataFormWidget from id.
+   */
+  get(id: string): MetadataForm.IMetadataForm | undefined;
+
+  /**
    * Each ID must be described in schema.
    */
-  [id: string]: MetadataForm.IMetadataForm;
+  _items: { [id: string]: MetadataForm.IMetadataForm };
 }
 
 /**

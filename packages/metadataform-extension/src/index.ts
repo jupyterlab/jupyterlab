@@ -21,6 +21,7 @@ import { JSONExt, PartialJSONArray } from '@lumino/coreutils';
 import {
   IMetadataFormProvider,
   MetadataForm,
+  MetadataFormProvider,
   MetadataFormWidget
 } from '@jupyterlab/metadataform';
 
@@ -29,13 +30,12 @@ const PLUGIN_ID = '@jupyterlab/metadataform-extension:metadataforms';
 namespace Private {
   export async function loadSettingsMetadataForm(
     app: JupyterFrontEnd,
-    tools: MetadataFormWidget[],
     registry: ISettingRegistry,
     notebookTools: INotebookTools,
     translator: ITranslator,
     formWidgetsRegistry: IFormWidgetRegistry,
     formComponentRegistry: IFormComponentRegistry
-  ): Promise<{ [section: string]: MetadataFormWidget }> {
+  ): Promise<IMetadataFormProvider> {
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IMetadataForm[] } = {};
 
@@ -175,7 +175,7 @@ namespace Private {
     canonical = null;
 
     const settings = await registry.load(PLUGIN_ID);
-    const metadataForms: { [section: string]: MetadataFormWidget } = {};
+    const metadataForms: IMetadataFormProvider = new MetadataFormProvider();
 
     // Creates all the forms from extensions settings.
     for (let schema of settings.composite
@@ -270,8 +270,7 @@ namespace Private {
       // Adds the form to the section.
       notebookTools.addItem({ section: schema.id, tool: tool });
 
-      tools.push(tool);
-      metadataForms[schema.id] = tool;
+      metadataForms.add(schema.id, tool);
     }
     return metadataForms;
   }
@@ -280,18 +279,16 @@ namespace Private {
 /**
  * The metadata form plugin.
  */
-const metadataForm: JupyterFrontEndPlugin<
-  { [section: string]: MetadataFormWidget } | undefined
-> = {
+const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
   id: PLUGIN_ID,
   autoStart: true,
   requires: [
     INotebookTools,
     ITranslator,
     IFormWidgetRegistry,
-    IFormComponentRegistry
+    IFormComponentRegistry,
+    ISettingRegistry
   ],
-  optional: [ISettingRegistry],
   provides: IMetadataFormProvider,
   activate: async (
     app: JupyterFrontEnd,
@@ -299,20 +296,16 @@ const metadataForm: JupyterFrontEndPlugin<
     translator: ITranslator,
     widgetsRegistry: IFormWidgetRegistry,
     componentsRegistry: IFormComponentRegistry,
-    settings: ISettingRegistry | null
-  ): Promise<{ [section: string]: MetadataFormWidget } | undefined> => {
-    let tools: MetadataFormWidget[] = [];
-    if (settings) {
-      return await Private.loadSettingsMetadataForm(
-        app,
-        tools,
-        settings,
-        notebookTools,
-        translator,
-        widgetsRegistry,
-        componentsRegistry
-      );
-    }
+    settings: ISettingRegistry
+  ): Promise<IMetadataFormProvider> => {
+    return await Private.loadSettingsMetadataForm(
+      app,
+      settings,
+      notebookTools,
+      translator,
+      widgetsRegistry,
+      componentsRegistry
+    );
   }
 };
 

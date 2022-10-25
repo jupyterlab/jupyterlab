@@ -7,4 +7,5 @@
 
 export * from './form';
 export * from './metadataform';
+export * from './metadataformProvider';
 export * from './token';
