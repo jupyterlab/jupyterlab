@@ -65,7 +65,7 @@ export class Context<
     const ymodel = this._model.sharedModel as ymodels.YDocument<DocumentChange>; // translate to the concrete Yjs implementation
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
-    this._ycontext = ydoc.getMap('context');
+    this._ycontext = ydoc.getMap('state');
     this._docProviderFactory = options.docProviderFactory;
     this._provider = new ProviderMock();
 
