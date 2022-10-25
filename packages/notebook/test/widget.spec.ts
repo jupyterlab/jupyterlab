@@ -10,7 +10,7 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import { framePromise, signalToPromise } from '@jupyterlab/testutils';
+import { framePromise } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
