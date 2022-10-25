@@ -320,10 +320,7 @@ describe('@jupyter/notebook', () => {
           widget = createWidget();
           widget.model!.cells.insert(
             widget.model!.sharedModel.cells.length,
-            widget.model!.contentFactory.createCell(
-              'code',
-              {}
-            )
+            widget.model!.contentFactory.createCell('code', {})
           );
           await framePromise();
           expect(widget.widgets.length).toBe(2);
