@@ -37,7 +37,7 @@ import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
 import { DocumentChange, ISharedDocument } from '@jupyterlab/shared-models';
 
-const FILE_PATH2ID_URL = 'api/fileid/id';
+const FILE_PATH2ID_URL = 'api/yjs/roomid';
 /**
  * An implementation of a document context.
  *
@@ -505,7 +505,7 @@ export class Context<
       );
       const response = await ServerConnection.makeRequest(
         url,
-        { method: 'PUT' },
+        { method: 'GET' },
         serverSettings
       );
       if (response.status !== 200 && response.status !== 201) {

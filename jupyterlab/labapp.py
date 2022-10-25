@@ -7,7 +7,6 @@
 import dataclasses
 import json
 import os
-from pathlib import Path
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
@@ -680,10 +679,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.template_paths = [self.templates_dir]
 
     def initialize_handlers(self):
-
-        file_id_manager = self.settings.get("file_id_manager")
-        if file_id_manager:
-            self.serverapp.web_app.settings["fileid2path"] = file_id_manager.get_path
 
         handlers = []
 
