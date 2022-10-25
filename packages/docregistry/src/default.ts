@@ -541,6 +541,8 @@ export class DocumentWidget<
     path: string
   ): void {
     this.title.label = PathExt.basename(sender.localPath);
+    // The document is not untitled any more.
+    this.isUntitled = false;
   }
 
   /**
@@ -570,6 +572,15 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
+
+  /**
+   * Whether the document has an auto-generated name or not.
+   *
+   * #### Notes
+   * A document has auto-generated name if its name is untitled and up
+   * to the instant the user saves it manually for the first time.
+   */
+  isUntitled?: boolean;
 }
 
 export namespace DocumentWidget {
