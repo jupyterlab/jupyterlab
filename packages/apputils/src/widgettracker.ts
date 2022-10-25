@@ -340,7 +340,8 @@ export class WidgetTracker<T extends Widget = Widget>
    *
    * ### Notes
    * This function is useful when starting the shell in 'single-document' mode,
-   * to avoid restoring all useless widgets.
+   * to avoid restoring all useless widgets. It should not ordinarily be called
+   * by client code.
    */
   defer(options: IRestorable.IOptions<T>): void {
     this._deferred = options;
