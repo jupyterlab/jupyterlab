@@ -65,13 +65,45 @@ export class MetadataFormWidget
   }
 
   /**
-   * Get the list of existing metadataKey (array of array of string).
+   * Get the list of existing metadataKey (array of string).
+   *
+   * ## NOTE:
+   * The list contains also the conditional fields, which are not necessary
+   * displayed and filled.
    */
   get metadataKeys(): string[] {
     const metadataKeys: string[] = [];
+
+    // MetadataKey from schema.
     for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
       metadataKeys.push(metadataKey);
     }
+
+    // Possible additional metadataKeys from conditional schema.
+    this._metadataSchema.allOf?.forEach(conditional => {
+      if (conditional.then !== undefined) {
+        if ((conditional.then as PartialJSONObject).properties !== undefined) {
+          let properties = (conditional.then as PartialJSONObject)
+            .properties as PartialJSONObject;
+          for (let metadataKey of Object.keys(properties)) {
+            if (!metadataKeys.includes(metadataKey))
+              metadataKeys.push(metadataKey);
+          }
+        }
+      }
+
+      if (conditional.else !== undefined) {
+        if ((conditional.else as PartialJSONObject).properties !== undefined) {
+          let properties = (conditional.else as PartialJSONObject)
+            .properties as PartialJSONObject;
+          for (let metadataKey of Object.keys(properties)) {
+            if (!metadataKeys.includes(metadataKey))
+              metadataKeys.push(metadataKey);
+          }
+        }
+      }
+    });
+
     return metadataKeys;
   }
 

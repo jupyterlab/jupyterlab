@@ -21,16 +21,16 @@ afterAll(async () => {
   await server.shutdown();
 });
 
-describe('metadataform/form', () => {
+describe('metadataform/form simple', () => {
   let notebookTools: NotebookTools;
   let tracker: NotebookTracker;
   let context: Context<INotebookModel>;
   let panel: NotebookPanel;
-  let simpleSchema: MetadataForm.IMetadataSchema;
+  let schema: MetadataForm.IMetadataSchema;
   let metaInformation: MetadataForm.IMetaInformation;
 
   beforeEach(async () => {
-    simpleSchema = {
+    schema = {
       type: 'object',
       properties: {
         '/cell-metadata': {
@@ -71,7 +71,7 @@ describe('metadataform/form', () => {
 
   async function buildForm(): Promise<MetadataFormWidget> {
     const metadataForm = new MetadataFormWidget({
-      metadataSchema: JSONExt.deepCopy(simpleSchema),
+      metadataSchema: JSONExt.deepCopy(schema),
       metaInformation: metaInformation,
       pluginId: 'test-plugin'
     });
@@ -93,7 +93,7 @@ describe('metadataform/form', () => {
 
   it('should have only placeholder as no notebook is associated', () => {
     const metadataForm = new MetadataFormWidget({
-      metadataSchema: simpleSchema,
+      metadataSchema: schema,
       metaInformation: metaInformation,
       pluginId: 'test-plugin'
     });
@@ -104,6 +104,49 @@ describe('metadataform/form', () => {
     expect(formNode.className.split(' ')).toContain(
       'jp-MetadataForm-placeholder'
     );
+  });
+
+  it('should return the metadataKeys', async () => {
+    const metadataForm = await buildForm();
+    expect(metadataForm.metadataKeys).toEqual([
+      '/cell-metadata',
+      '/notebook-metadata'
+    ]);
+  });
+
+  it('should return the properties', async () => {
+    const metadataForm = await buildForm();
+    expect(metadataForm.getProperties('/cell-metadata')).toEqual(
+      schema.properties['/cell-metadata']
+    );
+    expect(metadataForm.getProperties('/notebook-metadata')).toEqual(
+      schema.properties['/notebook-metadata']
+    );
+  });
+
+  it('should set the properties', async () => {
+    const metadataForm = await buildForm();
+    const node = metadataForm.node as HTMLElement;
+    expect(
+      node
+        .getElementsByClassName('jp-inputFieldWrapper')[0]
+        .children[0].getAttribute('type')
+    ).toBe('text');
+
+    metadataForm.setProperties('/cell-metadata', { type: 'integer' });
+    expect(metadataForm.getProperties('/cell-metadata')).not.toEqual(
+      schema.properties['/cell-metadata']
+    );
+
+    // Force the form to update and expect the text input has been changed to number input.
+    metadataForm.updateMetadata({}, true);
+    metadataForm.form?.update();
+    await sleep(100);
+    expect(
+      node
+        .getElementsByClassName('jp-inputFieldWrapper')[0]
+        .children[0].getAttribute('type')
+    ).toBe('number');
   });
 
   it('should build the form', async () => {
@@ -155,7 +198,7 @@ describe('metadataform/form', () => {
     ).toBeUndefined();
   });
 
-  it('should not update the cell metadata if the type is not the good one', async () => {
+  it('should not update the cell metadata if the cell type is not a valid one', async () => {
     const metadataForm = await buildForm();
 
     // Switch to a markdown cell.
@@ -188,47 +231,95 @@ describe('metadataform/form', () => {
     await sleep(100);
     expect(node.getElementsByClassName('jp-inputFieldWrapper')).toHaveLength(1);
   });
+});
 
-  it('should return the metadataKeys', async () => {
-    const metadataForm = await buildForm();
-    expect(metadataForm.metadataKeys).toEqual([
-      '/cell-metadata',
-      '/notebook-metadata'
-    ]);
+describe('metadataform/form conditional', () => {
+  let notebookTools: NotebookTools;
+  let tracker: NotebookTracker;
+  let context: Context<INotebookModel>;
+  let panel: NotebookPanel;
+  let schema: MetadataForm.IMetadataSchema;
+  let metaInformation: MetadataForm.IMetaInformation;
+
+  beforeEach(async () => {
+    schema = {
+      type: 'object',
+      properties: {
+        '/condition': {
+          type: 'string'
+        }
+      },
+      allOf: [
+        {
+          if: {
+            properties: {
+              '/condition': {
+                const: 'condition'
+              }
+            }
+          },
+          then: {
+            properties: {
+              '/then': {
+                type: 'string'
+              }
+            }
+          },
+          else: {
+            properties: {
+              '/else': {
+                type: 'string'
+              }
+            }
+          }
+        }
+      ]
+    };
+
+    metaInformation = {};
+
+    context = await initNotebookContext();
+    panel = NBTestUtils.createNotebookPanel(context);
+    NBTestUtils.populateNotebook(panel.content);
+
+    tracker = new NotebookTracker({ namespace: 'notebook' });
+    await tracker.add(panel);
+    notebookTools = new NotebookTools({ tracker });
+
+    // Give the posted messages a chance to be handled.
+    await sleep();
   });
 
-  it('should return the properties', async () => {
-    const metadataForm = await buildForm();
-    expect(metadataForm.getProperties('/cell-metadata')).toEqual(
-      simpleSchema.properties['/cell-metadata']
-    );
-    expect(metadataForm.getProperties('/notebook-metadata')).toEqual(
-      simpleSchema.properties['/notebook-metadata']
-    );
+  afterEach(() => {
+    notebookTools.dispose();
+    panel.dispose();
+    context.dispose();
   });
 
-  it('should set the properties', async () => {
-    const metadataForm = await buildForm();
-    const node = metadataForm.node as HTMLElement;
-    expect(
-      node
-        .getElementsByClassName('jp-inputFieldWrapper')[0]
-        .children[0].getAttribute('type')
-    ).toBe('text');
-
-    metadataForm.setProperties('/cell-metadata', { type: 'integer' });
-    expect(metadataForm.getProperties('/cell-metadata')).not.toEqual(
-      simpleSchema.properties['/cell-metadata']
-    );
-
-    // Force the form to update and expect the text input has been changed to number input.
+  async function buildForm(): Promise<MetadataFormWidget> {
+    const metadataForm = new MetadataFormWidget({
+      metadataSchema: JSONExt.deepCopy(schema),
+      metaInformation: metaInformation,
+      pluginId: 'test-plugin'
+    });
+    // add the metadataForm in a section of the notebookTools.
+    notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });
+    // associate notebook to metadataForm.
+    metadataForm.notebookTools = notebookTools;
+    // Fake update metadata to force build.
     metadataForm.updateMetadata({}, true);
+    // Manually update the form (force render).
     metadataForm.form?.update();
+    // Wait for the message to be received, and the promise to be updated.
     await sleep(100);
-    expect(
-      node
-        .getElementsByClassName('jp-inputFieldWrapper')[0]
-        .children[0].getAttribute('type')
-    ).toBe('number');
+    // Wait for the rendering to be over.
+    await metadataForm.form?.renderPromise;
+
+    return metadataForm;
+  }
+
+  it('should return the conditional metadataKeys', async () => {
+    const metadataForm = await buildForm();
+    expect(metadataForm.metadataKeys).toEqual(['/condition', '/then', '/else']);
   });
 });

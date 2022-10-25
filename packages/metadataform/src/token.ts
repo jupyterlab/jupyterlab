@@ -172,7 +172,11 @@ export namespace MetadataForm {
    */
   export interface IMetadataForm extends NotebookTools.Tool {
     /**
-     * Get the list of existing metadataKey (array of array of string).
+     * Get the list of existing metadataKey (array of string).
+     *
+     * ## NOTE:
+     * The list contains also the conditional fields, which are not necessary
+     * displayed and filled.
      */
     get metadataKeys(): string[];
 

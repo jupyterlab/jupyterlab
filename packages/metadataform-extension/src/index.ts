@@ -66,7 +66,7 @@ namespace Private {
             });
             if (metadataForm) {
               // TODO do insertion of metadataSchema properties in a generic way.
-              // Currently this only support properties, allOf and required.
+              // Currently this only support 'properties', 'allOf' and 'required'.
               //  - add or replace entries if it is an object.
               //  - concat if it is an array.
               //  - replace if it is a primitive ?
