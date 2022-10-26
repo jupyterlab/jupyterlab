@@ -20,7 +20,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
 
 - Use settings icons for 6 plugins [#13298](https://github.com/jupyterlab/jupyterlab/pull/13298) ([@krassowski](https://github.com/krassowski))
 - Do not run galata in `.ipynb_checkpoints` [#13297](https://github.com/jupyterlab/jupyterlab/pull/13297) ([@krassowski](https://github.com/krassowski))
-- Optimize text mimerenderer: ansi vs autolink  [#13202](https://github.com/jupyterlab/jupyterlab/pull/13202) ([@vidartf](https://github.com/vidartf))
+- Optimize text mimerenderer: ansi vs autolink [#13202](https://github.com/jupyterlab/jupyterlab/pull/13202) ([@vidartf](https://github.com/vidartf))
 - Remove Yjs locking mechanism [#13222](https://github.com/jupyterlab/jupyterlab/pull/13222) ([@davidbrochart](https://github.com/davidbrochart))
 
 ### Bugs fixed
