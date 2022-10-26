@@ -2031,12 +2031,12 @@ namespace Private {
     wasFocused: boolean;
 
     /**
-     * The active cell model before the action.
+     * The active cell id before the action.
      *
-     * We cannot rely on the Cell widget as it may be
+     * We cannot rely on the Cell widget or model as it may be
      * discarded by action such as move.
      */
-    activeCellModel: ICellModel | null;
+    activeCellId: string | null;
   }
 
   /**
@@ -2045,7 +2045,7 @@ namespace Private {
   export function getState(notebook: Notebook): IState {
     return {
       wasFocused: notebook.node.contains(document.activeElement),
-      activeCellModel: notebook.activeCell?.model ?? null
+      activeCellId: notebook.activeCell?.model.id ?? null
     };
   }
 
@@ -2081,9 +2081,9 @@ namespace Private {
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-    if (scroll && state.activeCellModel) {
+    if (scroll && state.activeCellId) {
       const index = notebook.widgets.findIndex(
-        w => w.model === state.activeCellModel
+        w => w.model.id === state.activeCellId
       );
       if (notebook.widgets[index]?.inputArea) {
         notebook.scrollToItem(index).catch(reason => {
