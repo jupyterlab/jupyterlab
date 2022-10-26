@@ -208,11 +208,11 @@ tag-message = "[ci skip] Release {tag_name}"
 
 [tool.jupyter-releaser.hooks]
 before-bump-version = [
+    "pip install -e .",
     "git checkout .",
     "pip install bump2version",
 ]
 before-build-npm = [
-    "pip install -e .",
     "jlpm",
     "jlpm run build:all",
 ]
