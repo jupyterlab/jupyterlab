@@ -30,7 +30,7 @@ import {
   Widget
 } from '@lumino/widgets';
 import { JupyterFrontEnd } from './frontend';
-import { ILayoutRestorer } from './layoutrestorer';
+import { LayoutRestorer } from './layoutrestorer';
 
 /**
  * The class name added to AppShell instances.
@@ -1062,7 +1062,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   async restoreLayout(
     mode: DockPanel.Mode,
-    layoutRestorer: ILayoutRestorer,
+    layoutRestorer: LayoutRestorer,
     configuration: {
       [m: string]: ILabShell.IUserLayout;
     } = {}
@@ -1717,7 +1717,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
   private _translator: ITranslator;
-  private _layoutRestorer: ILayoutRestorer;
+  private _layoutRestorer: LayoutRestorer;
 }
 
 namespace Private {
