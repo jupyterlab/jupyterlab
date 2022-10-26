@@ -37,7 +37,8 @@ import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
 import { DocumentChange, ISharedDocument } from '@jupyterlab/shared-models';
 
-const FILE_PATH2ID_URL = 'api/yjs/roomid';
+const FILE_PATH_TO_ROOM_ID_URL = 'api/yjs/roomid';
+
 /**
  * An implementation of a document context.
  *
@@ -500,21 +501,28 @@ export class Context<
       const serverSettings = ServerConnection.makeSettings();
       const url = URLExt.join(
         serverSettings.baseUrl,
-        FILE_PATH2ID_URL,
+        FILE_PATH_TO_ROOM_ID_URL,
         encodeURIComponent(this._path)
       );
+      const data = {
+        format: this._factory.fileFormat!,
+        type: this._factory.contentType
+      };
       const response = await ServerConnection.makeRequest(
         url,
-        { method: 'GET' },
+        {
+          method: 'PUT',
+          body: JSON.stringify(data)
+        },
         serverSettings
       );
       if (response.status !== 200 && response.status !== 201) {
         const err = await ServerConnection.ResponseError.create(response);
         throw err;
       }
-      this._fileId = await response.text();
+      const roomId = await response.text();
       this._provider = this._docProviderFactory({
-        path: this._fileId,
+        path: roomId,
         contentType: this._factory.contentType,
         format: this._factory.fileFormat!,
         model: this._model.sharedModel
@@ -920,7 +928,6 @@ or load the version on disk (revert)?`,
   ) => void;
   private _model: T;
   private _path = '';
-  private _fileId = '';
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;

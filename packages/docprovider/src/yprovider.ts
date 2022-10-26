@@ -24,14 +24,9 @@ export class WebSocketProvider
    * @param options The instantiation options for a WebSocketProvider
    */
   constructor(options: WebSocketProvider.IOptions) {
-    super(
-      options.url,
-      options.format + ':' + options.contentType + ':' + options.path,
-      options.model.ydoc,
-      {
-        awareness: options.model.awareness
-      }
-    );
+    super(options.url, options.path, options.model.ydoc, {
+      awareness: options.model.awareness
+    });
 
     const awareness = options.model.awareness;
     const user = options.user;
