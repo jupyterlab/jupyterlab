@@ -204,8 +204,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
         self.deprecation_warning(
             """Installing extensions with the jupyter labextension install command is now deprecated and will be removed in a future major version of JupyterLab.
 
-Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to
-distribute their extensions as Python packages.
+Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to distribute their extensions as Python packages.
 """
         )
         pinned_versions = self.pin.split(",")
@@ -334,8 +333,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
         self.deprecation_warning(
             """Updating extensions with the jupyter labextension update command is now deprecated and will be removed in a future major version of JupyterLab.
 
-Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to
-distribute their extensions as Python packages.
+Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to distribute their extensions as Python packages.
 """
         )
         if not self.all and not self.extra_args:
@@ -399,8 +397,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
         self.deprecation_warning(
             """Uninstalling extensions with the jupyter labextension uninstall command is now deprecated and will be removed in a future major version of JupyterLab.
 
-Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to
-distribute their extensions as Python packages.
+Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to distribute their extensions as Python packages.
 """
         )
         self.extra_args = self.extra_args or [os.getcwd()]
