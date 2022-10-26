@@ -50,59 +50,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.5.x/CHANGELOG.md'
 
 <!-- <END NEW CHANGELOG ENTRY> -->
 
-## 3.5.0rc0
-
-([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.5.0b0...a73108b4652bcb183ad75bdd67ca433ac60900f1))
-
-### Bugs fixed
-
-- Use keystroke format consistent with menus [#13200](https://github.com/jupyterlab/jupyterlab/pull/13200) ([@fcollonval](https://github.com/fcollonval))
-
-### Maintenance and upkeep improvements
-
-- Fix memory leaks [#13229](https://github.com/jupyterlab/jupyterlab/pull/13229) ([@fcollonval](https://github.com/fcollonval))
-
-### Documentation improvements
-
-- Update example documentation: `lab -> app` [#13223](https://github.com/jupyterlab/jupyterlab/pull/13223) ([@davidbrochart](https://github.com/davidbrochart))
-
-### Contributors to this release
-
-([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-10-06&to=2022-10-13&type=c))
-
-[@Carreau](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACarreau+updated%3A2022-10-06..2022-10-13&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2022-10-06..2022-10-13&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2022-10-06..2022-10-13&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-10-06..2022-10-13&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2022-10-06..2022-10-13&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-10-06..2022-10-13&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-10-06..2022-10-13&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-10-06..2022-10-13&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2022-10-06..2022-10-13&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-10-06..2022-10-13&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2022-10-06..2022-10-13&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2022-10-06..2022-10-13&type=Issues)
-
-## 3.5.0b0
-
-No merged PRs
-
-## 3.5.0a0
-
-([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.8...a2e4a9a7e867e34ed664d97a672cdae8a9ea2b02))
-
-### Enhancements made
-
-- Collapse debugger panel when disabling debugger [#13088](https://github.com/jupyterlab/jupyterlab/pull/13088) ([@yanmulin](https://github.com/yanmulin))
-- File Browser: add support for filtering directories on search [#12342](https://github.com/jupyterlab/jupyterlab/pull/12342) ([@jtpio](https://github.com/jtpio))
-- Prompt for renaming at first manual save [#12953](https://github.com/jupyterlab/jupyterlab/pull/12953) ([@fcollonval](https://github.com/fcollonval))
-- Raise ceiling on jupyter_server dependency to < 3 [#13068](https://github.com/jupyterlab/jupyterlab/pull/13068) ([@Zsailer](https://github.com/Zsailer))
-
-### Maintenance and upkeep improvements
-
-- Bump to latest Lumino 1.x [#13190](https://github.com/jupyterlab/jupyterlab/pull/13190) ([@fcollonval](https://github.com/fcollonval))
-- Update branch configuration [#13184](https://github.com/jupyterlab/jupyterlab/pull/13184) ([@fcollonval](https://github.com/fcollonval))
-
-### Documentation improvements
-
-- Prompt for renaming at first manual save [#12953](https://github.com/jupyterlab/jupyterlab/pull/12953) ([@fcollonval](https://github.com/fcollonval))
-- Update branch configuration [#13184](https://github.com/jupyterlab/jupyterlab/pull/13184) ([@fcollonval](https://github.com/fcollonval))
-
-### Contributors to this release
-
-([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-10-04&to=2022-10-06&type=c))
-
-[@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-10-04..2022-10-06&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-10-04..2022-10-06&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2022-10-04..2022-10-06&type=Issues)
-
 ## v3.4
 
 ## 3.4.8
