@@ -29,6 +29,7 @@ import {
   Widget
 } from '@lumino/widgets';
 import { JupyterFrontEnd } from './frontend';
+import { LayoutRestorer } from './layoutrestorer';
 
 /**
  * The class name added to AppShell instances.
@@ -555,12 +556,33 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       const widgets = toArray(dock.widgets());
       dock.mode = mode;
 
-      // Restore the original layout.
+      // Restore cached layout if possible.
       if (this._cachedLayout) {
         // Remove any disposed widgets in the cached layout and restore.
         Private.normalizeAreaConfig(dock, this._cachedLayout.main);
         dock.restoreLayout(this._cachedLayout);
         this._cachedLayout = null;
+      }
+
+      // If layout restoration has been deferred, restore layout now.
+      if (this._layoutRestorer.isDeferred) {
+        this._layoutRestorer
+          .restoreDeferred()
+          .then(mainArea => {
+            if (mainArea) {
+              const { currentWidget, dock } = mainArea;
+              if (dock) {
+                this._dockPanel.restoreLayout(dock);
+              }
+              if (currentWidget) {
+                this.activateById(currentWidget.id);
+              }
+            }
+          })
+          .catch(reason => {
+            console.error('Failed to restore the deferred layout.');
+            console.error(reason);
+          });
       }
 
       // Add any widgets created during single document mode, which have
@@ -864,13 +886,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Restore the layout state for the application shell.
    */
-  restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
+  async restoreLayout(
+    mode: DockPanel.Mode,
+    layoutRestorer: LayoutRestorer
+  ): Promise<ILabShell.ILayout> {
+    this._layoutRestorer = layoutRestorer;
+
+    // Get the layout from the restorer
+    const layout = await layoutRestorer.fetch();
+
+    // Reset the layout
     const { mainArea, downArea, leftArea, rightArea, relativeSizes } = layout;
+
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
 
-      if (dock) {
+      if (dock && mode === 'multiple-document') {
         this._dockPanel.restoreLayout(dock);
       }
       if (mode) {
@@ -966,6 +998,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       MessageLoop.flush();
       this._restored.resolve(layout);
     }
+
+    return layout;
   }
 
   /**
@@ -991,7 +1025,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       rightArea: this._rightHandler.dehydrate(),
       relativeSizes: this._hsplitPanel.relativeSizes()
     };
-
     return layout;
   }
   /**
@@ -1441,6 +1474,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
+  private _layoutRestorer: LayoutRestorer;
 }
 
 namespace Private {
