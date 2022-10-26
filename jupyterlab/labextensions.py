@@ -173,12 +173,12 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     def run_task(self):
         pass
 
+    def deprecation_warning(self, msg):
+        return self.log.warning("\033[33m(Deprecated) %s \033[0m", msg)
+
     def _log_format_default(self):
         """A default format for messages"""
         return "%(message)s"
-
-    def deprecate_warning(self, msg):
-        return self.log.warning("\033[33m(Deprecated) %s \033[0m", msg)
 
 
 class InstallLabExtensionApp(BaseExtensionApp):
@@ -201,7 +201,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
     pin = Unicode("", config=True, help="Pin this version with a certain alias")
 
     def run_task(self):
-        self.deprecate_warning(
+        self.deprecation_warning(
             """Installing extensions with the jupyter labextension install command is now deprecated and will be removed in a future major version of JupyterLab.
 
 Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to
@@ -331,7 +331,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
     all = Bool(False, config=True, help="Whether to update all extensions")
 
     def run_task(self):
-        self.deprecate_warning(
+        self.deprecation_warning(
             """Updating extensions with the jupyter labextension update command is now deprecated and will be removed in a future major version of JupyterLab.
 
 Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to
@@ -396,7 +396,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     all = Bool(False, config=True, help="Whether to uninstall all extensions")
 
     def run_task(self):
-        self.deprecate_warning(
+        self.deprecation_warning(
             """Uninstalling extensions with the jupyter labextension uninstall command is now deprecated and will be removed in a future major version of JupyterLab.
 
 Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to
