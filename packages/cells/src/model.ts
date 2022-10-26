@@ -624,7 +624,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       this._outputs.trusted = newTrusted;
     }
     if (newTrusted) {
-      const codeCell = this.sharedModel as models.YCodeCell;
+      const codeCell = this.sharedModel as YCodeCell;
       const metadata = codeCell.getMetadata();
       metadata.trusted = true;
       codeCell.setMetadata(metadata);
