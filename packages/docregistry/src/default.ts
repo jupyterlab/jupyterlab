@@ -156,9 +156,13 @@ export class DocumentModel
 
   private _onStateChanged(
     sender: models.ISharedFile,
-    changes: models.NotebookChange | models.FileChange
+    changes: models.DocumentChange
   ): void {
-    if (changes.contextChange || (changes as models.FileChange).sourceChange) {
+    if (
+      (changes.stateChange &&
+        changes.stateChange.find(change => change.name === 'path')) ||
+      (changes as models.FileChange).sourceChange
+    ) {
       this.triggerContentChange();
     }
     if (changes.stateChange) {

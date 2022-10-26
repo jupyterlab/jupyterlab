@@ -4,7 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import { JSONExt, PartialJSONValue, UUID } from '@lumino/coreutils';
+import {
+  JSONExt,
+  JSONObject,
+  JSONValue,
+  PartialJSONValue,
+  UUID
+} from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
@@ -61,10 +67,12 @@ export class YDocument<T extends DocumentChange> implements ISharedDocument {
    * YJS document
    */
   readonly ydoc = new Y.Doc();
+
   /**
    * Shared state
    */
   readonly ystate: Y.Map<any> = this.ydoc.getMap('state');
+
   /**
    * YJS document undo manager
    */
@@ -72,6 +80,7 @@ export class YDocument<T extends DocumentChange> implements ISharedDocument {
     trackedOrigins: new Set([this]),
     doc: this.ydoc
   });
+
   /**
    * Shared awareness
    */
@@ -89,6 +98,13 @@ export class YDocument<T extends DocumentChange> implements ISharedDocument {
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * Document state
+   */
+  get state(): JSONObject {
+    return JSONExt.deepCopy(this.ystate.toJSON());
   }
 
   /**
@@ -118,6 +134,30 @@ export class YDocument<T extends DocumentChange> implements ISharedDocument {
     this.undoManager.destroy();
     this.ydoc.destroy();
     Signal.clearData(this);
+  }
+
+  /**
+   * Get the value for a state attribute
+   *
+   * @param key Key to get
+   */
+  getState(key: string): JSONValue | undefined {
+    const value = this.ystate.get(key);
+    return typeof value === 'undefined'
+      ? value
+      : (JSONExt.deepCopy(value) as unknown as JSONValue);
+  }
+
+  /**
+   * Set the value of a state attribute
+   *
+   * @param key Key to set
+   * @param value New attribute value
+   */
+  setState(key: string, value: JSONValue): void {
+    if (!JSONExt.deepEqual(this.ystate.get(key), value)) {
+      this.ystate.set(key, value);
+    }
   }
 
   /**

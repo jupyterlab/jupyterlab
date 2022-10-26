@@ -15,7 +15,11 @@
  */
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { PartialJSONValue } from '@lumino/coreutils';
+import type {
+  JSONObject,
+  JSONValue,
+  PartialJSONValue
+} from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 
@@ -67,6 +71,26 @@ export interface ISharedBase extends IDisposable {
  * This is used by, for example, docregistry to share the file-path of the edited content.
  */
 export interface ISharedDocument extends ISharedBase {
+  /**
+   * Document state
+   */
+  readonly state: JSONObject;
+
+  /**
+   * Get the value for a state attribute
+   *
+   * @param key Key to get
+   */
+  getState(key: string): JSONValue | undefined;
+
+  /**
+   * Set the value of a state attribute
+   *
+   * @param key Key to set
+   * @param value New attribute value
+   */
+  setState(key: string, value: JSONValue): void;
+
   /**
    * The changed signal.
    */
@@ -559,11 +583,6 @@ export type StateChange<T> = {
  * Generic document change
  */
 export type DocumentChange = {
-  /**
-   * The context a map => should be part of the document state map
-   */
-  // FIXME to remove at some point
-  contextChange?: MapChange;
   /**
    * Change occurring in the document state.
    */
