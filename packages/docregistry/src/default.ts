@@ -7,7 +7,11 @@ import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import * as models from '@jupyterlab/shared-models';
+import {
+  DocumentChange,
+  FileChange,
+  ISharedFile
+} from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -25,7 +29,7 @@ export class DocumentModel
    * Construct a new document model.
    */
   constructor(languagePreference?: string) {
-    super({ sharedModel: new models.YFile() as models.ISharedText });
+    super();
     this._defaultLang = languagePreference || '';
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
@@ -155,10 +159,10 @@ export class DocumentModel
   }
 
   private _onStateChanged(
-    sender: models.ISharedFile,
-    changes: models.DocumentChange
+    sender: ISharedFile,
+    changes: DocumentChange
   ): void {
-    if ((changes as models.FileChange).sourceChange) {
+    if ((changes as FileChange).sourceChange) {
       this.triggerContentChange();
     }
     if (changes.stateChange) {
@@ -182,7 +186,7 @@ export class DocumentModel
   /**
    * The shared notebook model.
    */
-  readonly sharedModel: models.ISharedFile;
+  readonly sharedModel: ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
