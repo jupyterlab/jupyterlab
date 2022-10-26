@@ -498,8 +498,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
           }
         }
       });
-
-      maybeCreate();
     });
   }
 };

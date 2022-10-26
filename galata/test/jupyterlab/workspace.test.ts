@@ -231,8 +231,8 @@ test.describe('Workspace', () => {
 });
 
 test.describe('Workspace in doc mode', () => {
-  test.beforeAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
+  test.beforeAll(async ({ baseURL, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${nbFile}`),
       `${tmpPath}/${nbFile}`
@@ -243,8 +243,8 @@ test.describe('Workspace in doc mode', () => {
     );
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
+  test.afterAll(async ({ baseURL, tmpPath }) => {
+    const contents = galata.newContentsHelper(baseURL);
     await contents.deleteDirectory(tmpPath);
   });
 
