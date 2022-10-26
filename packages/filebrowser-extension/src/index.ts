@@ -1333,8 +1333,8 @@ namespace Private {
       }
       browser.removeClass(restoring);
 
-      if (labShell?.isEmpty('main')) {
-        void commands.execute('launcher:create');
+      if (labShell?.isEmpty('main') && commands.hasCommand('launcher:create')) {
+        void Private.createLauncher(commands, browser);
       }
     };
     router.routed.connect(listener);
