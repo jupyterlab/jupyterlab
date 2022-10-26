@@ -357,7 +357,7 @@ export namespace NotebookActions {
   }
 
   /**
-   * Insert a new code cell above the active cell.
+   * Insert a new code cell above the active cell or in index 0 if the notebook is empty.
    *
    * @param notebook - The target notebook widget.
    *
@@ -368,7 +368,7 @@ export namespace NotebookActions {
    * The new cell will the active cell.
    */
   export function insertAbove(notebook: Notebook): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!notebook.model) {
       return;
     }
 
@@ -381,18 +381,24 @@ export namespace NotebookActions {
       notebook.notebookConfig.defaultCell,
       {}
     );
-    const active = notebook.activeCellIndex;
 
-    model.cells.insert(active, cell);
+    if (notebook.activeCell) {
+      const active = notebook.activeCellIndex;
+      model.cells.insert(active, cell);
+      // Make the newly inserted cell active.
+      notebook.activeCellIndex = active;
+    } else {
+      model.cells.insert(0, cell);
+      // Make the newly inserted cell active.
+      notebook.activeCellIndex = 0;
+    }
 
-    // Make the newly inserted cell active.
-    notebook.activeCellIndex = active;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
   }
 
   /**
-   * Insert a new code cell below the active cell.
+   * Insert a new code cell below the active cell or in index 0 if the notebook is empty.
    *
    * @param notebook - The target notebook widget.
    *
@@ -403,7 +409,7 @@ export namespace NotebookActions {
    * The new cell will be the active cell.
    */
   export function insertBelow(notebook: Notebook): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!notebook.model) {
       return;
     }
 
@@ -417,10 +423,16 @@ export namespace NotebookActions {
       {}
     );
 
-    model.cells.insert(notebook.activeCellIndex + 1, cell);
+    if (notebook.activeCell) {
+      model.cells.insert(notebook.activeCellIndex + 1, cell);
+      // Make the newly inserted cell active.
+      notebook.activeCellIndex++;
+    } else {
+      model.cells.insert(0, cell);
+      // Make the newly inserted cell active.
+      notebook.activeCellIndex = 0;
+    }
 
-    // Make the newly inserted cell active.
-    notebook.activeCellIndex++;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
   }

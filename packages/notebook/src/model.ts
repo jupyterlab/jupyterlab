@@ -90,7 +90,7 @@ export class NotebookModel implements INotebookModel {
       this.modelDB = new ModelDB();
     }
     this.sharedModel = models.YNotebook.create(
-      options.disableDocumentWideUndoRedo || false
+      options.disableDocumentWideUndoRedo ?? false
     ) as models.ISharedNotebook;
     this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
@@ -308,6 +308,9 @@ export class NotebookModel implements INotebookModel {
         default:
           continue;
       }
+    }
+    if (!cells.length) {
+      cells.push(factory.createCodeCell({}));
     }
     this.cells.beginCompoundOperation();
     this.cells.clear();

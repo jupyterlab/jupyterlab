@@ -121,6 +121,7 @@ export interface ISharedNotebook extends ISharedDocument {
    * The changed signal.
    */
   readonly changed: ISignal<this, NotebookChange>;
+
   /**
    * The minor version number of the nbformat.
    */

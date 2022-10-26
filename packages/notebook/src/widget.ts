@@ -12,7 +12,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -475,7 +475,9 @@ export class StaticNotebook extends Widget {
     }
     this._updateMimetype();
     const cells = newValue.cells;
-    if (!cells.length && newValue.isInitialized) {
+    const collab =
+      (PageConfig.getOption('collaborative') ?? '').toLowerCase() === 'true';
+    if (!collab && !cells.length && newValue.isInitialized) {
       cells.push(
         newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
       );
@@ -513,22 +515,6 @@ export class StaticNotebook extends Widget {
         each(args.oldValues, value => {
           this._removeCell(args.oldIndex);
         });
-        // Add default cell if there are no cells remaining.
-        if (!sender.length) {
-          const model = this.model;
-          // Add the cell in a new context to avoid triggering another
-          // cell changed event during the handling of this signal.
-          requestAnimationFrame(() => {
-            if (model && !model.isDisposed && !model.cells.length) {
-              model.cells.push(
-                model.contentFactory.createCell(
-                  this.notebookConfig.defaultCell,
-                  {}
-                )
-              );
-            }
-          });
-        }
         break;
       case 'set':
         // TODO: reuse existing widgets if possible.

@@ -371,12 +371,9 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#initialize()', () => {
-      it('should add one code cell if the model is empty', () => {
+      it('should be an empty model', () => {
         const model = new NotebookModel();
         expect(model.cells.length).toBe(0);
-        model.initialize();
-        expect(model.cells.length).toBe(1);
-        expect(model.cells.get(0).type).toBe('code');
       });
 
       it('should clear undo state', () => {
