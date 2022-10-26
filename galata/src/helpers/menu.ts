@@ -42,6 +42,21 @@ export class MenuHelper {
   }
 
   /**
+   * Open a context menu and get its handle.
+   *
+   * @param selector Element over which the menu should be opened
+   * @returns Handle to the menu or null
+   */
+  async openContextMenu(
+    selector: string
+  ): Promise<ElementHandle<Element> | null> {
+    await this.page.click(selector, {
+      button: 'right'
+    });
+    return await this.page.$('.lm-Menu');
+  }
+
+  /**
    * Get the handle on a menu item from its path.
    *
    * The separator used is '>'; e.g. to look for the new Notebook item 'File>New>Notebook'.

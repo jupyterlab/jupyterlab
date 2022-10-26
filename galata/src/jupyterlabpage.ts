@@ -16,6 +16,7 @@ import {
   PerformanceHelper,
   SidebarHelper,
   StatusBarHelper,
+  StyleHelper,
   ThemeHelper
 } from './helpers';
 import { IPluginNameToInterfaceMap, PLUGIN_ID_SETTINGS } from './inpage/tokens';
@@ -77,6 +78,10 @@ export interface IJupyterLabPage {
    * JupyterLab sidebar helpers
    */
   readonly sidebar: SidebarHelper;
+  /**
+   * JupyterLab style helpers
+   */
+  readonly style: StyleHelper;
   /**
    * JupyterLab theme helpers
    */
@@ -277,6 +282,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     this.performance = new PerformanceHelper(page);
     this.statusbar = new StatusBarHelper(page, this.menu);
     this.sidebar = new SidebarHelper(page, this.menu);
+    this.style = new StyleHelper(page);
     this.theme = new ThemeHelper(page);
     this.debugger = new DebuggerHelper(page, this.sidebar, this.notebook);
   }
@@ -330,6 +336,12 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab sidebar helpers
    */
   readonly sidebar: SidebarHelper;
+
+  /**
+   * JupyterLab style helpers
+   */
+  readonly style: StyleHelper;
+
   /**
    * JupyterLab theme helpers
    */
