@@ -20,14 +20,12 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Check Release
-        if: ${{ matrix.group == 'check_release' }}
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: next
 
       - name: Upload Assets
-        if: ${{ matrix.group == 'check_release' }}
         uses: actions/upload-artifact@v3
         with:
           name: jupyterlab-releaser-dist-${{ github.run_number }}
