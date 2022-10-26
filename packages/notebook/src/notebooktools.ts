@@ -620,7 +620,9 @@ export namespace NotebookTools {
      */
     protected onActiveNotebookPanelChanged(msg: Message): void {
       super.onActiveNotebookPanelChanged(msg);
-      this._update();
+      if (this.notebookTools.activeNotebookPanel) {
+        this._update();
+      }
     }
 
     /**
@@ -656,8 +658,8 @@ export namespace NotebookTools {
       this.editor.dispose();
       if (this.notebookTools.activeCell) {
         this.createEditor();
+        this._update();
       }
-      this._update();
     }
 
     /**
