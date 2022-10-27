@@ -91,6 +91,7 @@ export class Context<
       contents: manager.contents
     });
     this.model.sharedModel.setState('path', this._path);
+    this.model.sharedModel.changed.connect(this.onStateChanged, this);
   }
 
   /**

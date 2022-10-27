@@ -158,11 +158,7 @@ export class DocumentModel
     sender: models.ISharedFile,
     changes: models.DocumentChange
   ): void {
-    if (
-      (changes.stateChange &&
-        changes.stateChange.find(change => change.name === 'path')) ||
-      (changes as models.FileChange).sourceChange
-    ) {
+    if ((changes as models.FileChange).sourceChange) {
       this.triggerContentChange();
     }
     if (changes.stateChange) {
