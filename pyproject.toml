@@ -108,7 +108,7 @@ test = [
     "requests_cache",
     "virtualenv",
 ]
-dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatchling"]
+dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch"]
 ui-tests = ["build"]
 
 [tool.hatch.version]

@@ -31,7 +31,7 @@ def builder(target_name, version, *args, **kwargs):
     with open(target) as fid:
         npm_version = json.load(fid)["jupyterlab"]["version"]
 
-    py_version = subprocess.check_output(["hatchling", "version"])
+    py_version = subprocess.check_output(["hatch", "version"])
     py_version = py_version.decode("utf-8").strip()
 
     if Version(npm_version) != Version(py_version):
