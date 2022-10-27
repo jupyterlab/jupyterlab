@@ -1618,8 +1618,6 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/master/CHANGELOG.md'
 
 ## v3.5
 
-<!-- <START NEW CHANGELOG ENTRY> -->
-
 ## 3.5.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.4.8...225e7ab0844a0284bf50a567de505eb4650ec122))

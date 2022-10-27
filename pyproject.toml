@@ -108,7 +108,7 @@ test = [
     "requests_cache",
     "virtualenv",
 ]
-dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch"]
+dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
 ui-tests = ["build"]
 
 [tool.hatch.version]
@@ -210,7 +210,6 @@ tag-message = "[ci skip] Release {tag_name}"
 before-bump-version = [
     "pip install -e .[dev]",
     "git checkout .",
-    "pip install bump2version",
 ]
 before-build-npm = [
     "jlpm",
