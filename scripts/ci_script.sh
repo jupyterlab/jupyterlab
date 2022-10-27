@@ -109,8 +109,7 @@ if [[ $GROUP == integrity3 ]]; then
     jlpm bumpversion release --force # switch to rc
     jlpm bumpversion build --force
     jlpm bumpversion next --force
-    pip install hatchling
-    VERSION=$(hatchling version)
+    VERSION=$(hatch version)
     if [[ $VERSION != *rc2 ]]; then exit 1; fi
 
     # make sure we can patch release

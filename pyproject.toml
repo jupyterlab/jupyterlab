@@ -108,7 +108,7 @@ test = [
     "requests_cache",
     "virtualenv",
 ]
-dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatchling"]
+dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
 ui-tests = ["build"]
 
 [tool.hatch.version]
@@ -199,19 +199,7 @@ norecursedirs = "node_modules .git _build"
 addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
 ignore = "tests examples"
 
-[tool.jupyter-releaser]
-skip = ["check-links", "check-manifest"]
-
 [tool.jupyter-releaser.options]
-ignore-glob = [
-    "packages/ui-components/docs/source/ui_components.rst",
-    "images",
-]
-ignore-links = [
-    "../api/*.*",
-    ".*/images/[\\w-]+.png",
-    "https://docs.github.com/en/.*",
-]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 npm-cmd = "npm publish --tag next"
@@ -220,11 +208,10 @@ tag-message = "[ci skip] Release {tag_name}"
 
 [tool.jupyter-releaser.hooks]
 before-bump-version = [
+    "pip install -e .[dev]",
     "git checkout .",
-    "pip install bump2version",
 ]
 before-build-npm = [
-    "git commit -am '[ci skip] Bump version'",
     "jlpm",
     "jlpm run build:all",
 ]
