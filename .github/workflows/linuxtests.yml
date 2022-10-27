@@ -146,7 +146,7 @@ jobs:
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
         with:
           ignore_glob: "packages/ui-components/docs/source/ui_components.rst images"
-          ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.*"
+          ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.* https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906"
 
   pre-commit:
     runs-on: ubuntu-latest
