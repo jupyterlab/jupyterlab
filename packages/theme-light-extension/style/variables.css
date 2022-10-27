@@ -411,10 +411,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* File icons semantic variables */
   --jp-jupyter-icon-color: var(--md-orange-900);
   --jp-notebook-icon-color: var(--md-orange-700);
-  --jp-svg-icon-color: var(--md-orange-700);
+  --jp-json-icon-color: var(--md-orange-700);
   --jp-console-icon-color: var(--md-blue-700);
+  --jp-console-icon-background-color: white;
   --jp-terminal-icon-color: var(--md-grey-800);
-  --jp-terminal-icon-background_color: var(--md-grey-200);
+  --jp-terminal-icon-background-color: var(--md-grey-200);
   --jp-text-editor-icon-color: var(--md-grey-700);
   --jp-inspector-icon-color: var(--md-grey-700);
 }
