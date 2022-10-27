@@ -1,7 +1,3 @@
-______________________________________________________________________
-
-## github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
-
 <!-- The line below is MyST syntax for creating a reference to changelog -->
 
 (changelog)=
