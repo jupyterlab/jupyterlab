@@ -32,6 +32,7 @@ jupyterlab/staging/webpack.config.js
 packages/ui-components/src/icon/iconimports.ts
 tsconfigdoc.json
 typedoc-theme
+CHANGELOG.md
 
 # jetbrains IDE stuff
 .idea/
