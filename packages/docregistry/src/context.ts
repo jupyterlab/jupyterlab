@@ -498,31 +498,36 @@ export class Context<
    */
   private async _populate(): Promise<void> {
     if (this._docProviderFactory) {
-      const serverSettings = ServerConnection.makeSettings();
-      const url = URLExt.join(
-        serverSettings.baseUrl,
-        FILE_PATH_TO_ROOM_ID_URL,
-        encodeURIComponent(this._path)
-      );
-      const data = {
-        format: this._factory.fileFormat!,
-        type: this._factory.contentType
-      };
-      const response = await ServerConnection.makeRequest(
-        url,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data)
-        },
-        serverSettings
-      );
-      if (response.status !== 200 && response.status !== 201) {
-        const err = await ServerConnection.ResponseError.create(response);
-        throw err;
+      let path: string;
+      if (PageConfig.getOption('collaborative') == 'true') {
+        const serverSettings = ServerConnection.makeSettings();
+        const url = URLExt.join(
+          serverSettings.baseUrl,
+          FILE_PATH_TO_ROOM_ID_URL,
+          encodeURIComponent(this._path)
+        );
+        const data = {
+          format: this._factory.fileFormat!,
+          type: this._factory.contentType
+        };
+        const response = await ServerConnection.makeRequest(
+          url,
+          {
+            method: 'PUT',
+            body: JSON.stringify(data)
+          },
+          serverSettings
+        );
+        if (response.status !== 200 && response.status !== 201) {
+          const err = await ServerConnection.ResponseError.create(response);
+          throw err;
+        }
+        path = await response.text();
+      } else {
+        path = this._path;
       }
-      const roomId = await response.text();
       this._provider = this._docProviderFactory({
-        path: roomId,
+        path,
         contentType: this._factory.contentType,
         format: this._factory.fileFormat!,
         model: this._model.sharedModel
