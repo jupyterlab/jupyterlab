@@ -637,16 +637,21 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   ) => {
     const first = app.started;
     const registry = app.commands;
-    const restorer = new LayoutRestorer({ connector: state, first, registry });
 
-    void restorer.fetch().then(saved => {
-      labShell.restoreLayout(
-        PageConfig.getOption('mode') as DockPanel.Mode,
-        saved
-      );
+    const mode = PageConfig.getOption('mode') as DockPanel.Mode;
+    const restorer = new LayoutRestorer({
+      connector: state,
+      first,
+      registry,
+      mode
+    });
+
+    // Restore the layout.
+    void labShell.restoreLayout(mode, restorer).then(saved => {
       labShell.layoutModified.connect(() => {
         void restorer.save(labShell.saveLayout());
       });
+
       Private.activateSidebarSwitcher(
         app,
         labShell,

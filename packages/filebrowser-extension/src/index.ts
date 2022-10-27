@@ -258,14 +258,15 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, ITranslator],
-  optional: [IStateDB, IRouter, JupyterFrontEnd.ITreeResolver],
+  optional: [IStateDB, IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
   activate: async (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     translator: ITranslator,
     state: IStateDB | null,
     router: IRouter | null,
-    tree: JupyterFrontEnd.ITreeResolver | null
+    tree: JupyterFrontEnd.ITreeResolver | null,
+    labShell: ILabShell | null
   ): Promise<IFileBrowserFactory> => {
     const { commands } = app;
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
@@ -298,8 +299,14 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       auto: false,
       restore: false
     });
-    void Private.restoreBrowser(defaultBrowser, commands, router, tree);
-
+    void Private.restoreBrowser(
+      defaultBrowser,
+      commands,
+      router,
+      tree,
+      app,
+      labShell
+    );
     return { createFileBrowser, defaultBrowser, tracker };
   }
 };
@@ -491,8 +498,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
           }
         }
       });
-
-      maybeCreate();
     });
   }
 };
@@ -1288,7 +1293,9 @@ namespace Private {
     browser: FileBrowser,
     commands: CommandRegistry,
     router: IRouter | null,
-    tree: JupyterFrontEnd.ITreeResolver | null
+    tree: JupyterFrontEnd.ITreeResolver | null,
+    app: JupyterFrontEnd,
+    labShell: ILabShell | null
   ): Promise<void> {
     const restoring = 'jp-mod-restoring';
 
@@ -1325,6 +1332,10 @@ namespace Private {
         await browser.model.refresh();
       }
       browser.removeClass(restoring);
+
+      if (labShell?.isEmpty('main') && commands.hasCommand('launcher:create')) {
+        void Private.createLauncher(commands, browser);
+      }
     };
     router.routed.connect(listener);
   }
