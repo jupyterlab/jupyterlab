@@ -5,6 +5,7 @@
  * @module services
  */
 
+export * from './basemanager';
 export * from './config';
 export * from './contents';
 export * from './kernel';
