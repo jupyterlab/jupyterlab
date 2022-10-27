@@ -220,20 +220,20 @@ Here are the new test fixture introduced by Galata on top of [Playwright fixture
 
 ### baseURL
 
-- type: < string >
+- type: \< string >
 
 Application base URL without `/lab`. It defaults to environment variable `TARGET_URL` or `http://localhost:8888` if nothing
 is defined.
 
 ### appPath
 
-- type: < string >
+- type: \< string >
 
 Application URL path fragment; default `"/lab"`
 
 ### autoGoto
 
-- type: < boolean >
+- type: \< boolean >
 
 Whether to go to JupyterLab page within the fixture or not; default `true`.
 
@@ -264,7 +264,7 @@ test('Open language menu', async ({ page }) => {
 
 ### serverFiles
 
-- type: <'on' | 'off' | 'only-on-failure'>
+- type: \<'on' | 'off' | 'only-on-failure'>
 
 Galata can keep the uploaded and created files in `tmpPath` on
 the server root for debugging purpose. By default the files are kept
@@ -276,14 +276,14 @@ on failure.
 
 ### mockState
 
-- type: < boolean | Record<string, unknown> >
+- type: \< boolean | Record\<string, unknown> >
 
 Mock JupyterLab state in-memory or not.
 Possible values are:
 
 - true (default): JupyterLab state will be mocked on a per test basis
 - false: JupyterLab state won't be mocked (Be careful it will write state in local files)
-- Record<string, unknown>: Initial JupyterLab data state - Mapping (state key, value).
+- Record\<string, unknown>: Initial JupyterLab data state - Mapping (state key, value).
   By default the state is stored in-memory.
 
 Example:
@@ -337,14 +337,16 @@ test('should return the mocked state', async ({ page }) => {
 
 ### mockSettings
 
-- type: < boolean | Record<string, unknown> >
+- type: \< boolean | Record\<string, unknown> >
 
 Mock JupyterLab settings in-memory or not.
 Possible values are:
 
 - true: JupyterLab settings will be mocked on a per test basis
+
 - false: JupyterLab settings won't be mocked (Be careful it will read & write settings local files)
-- Record<string, unknown>: Mapping {pluginId: settings} that will be default user settings
+
+- Record\<string, unknown>: Mapping {pluginId: settings} that will be default user settings
 
   The default value is `galata.DEFAULT_SETTINGS`
 
@@ -370,13 +372,13 @@ test('should return mocked settings', async ({ page }) => {
 
 ### sessions
 
-- type: <Map<string, Session.IModel> | null>
+- type: \<Map\<string, Session.IModel> | null>
 
 Sessions created during the test.
 Possible values are:
 
 - null: The sessions API won't be mocked
-- Map<string, Session.IModel>: The sessions created during a test.
+- Map\<string, Session.IModel>: The sessions created during a test.
   By default the sessions created during a test will be tracked and disposed at the end.
 
 Example:
@@ -400,13 +402,13 @@ test('should return the active sessions', async ({ page, sessions }) => {
 
 ### terminals
 
-- type: < Map<string, TerminalAPI.IModel> | null >
+- type: \< Map\<string, TerminalAPI.IModel> | null >
 
 Terminals created during the test.
 Possible values are:
 
 - null: The Terminals API won't be mocked
-- Map<string, TerminalsAPI.IModel>: The Terminals created during a test.
+- Map\<string, TerminalsAPI.IModel>: The Terminals created during a test.
   By default the Terminals created during a test will be tracked and disposed at the end.
 
 Example:
@@ -437,7 +439,7 @@ test('should return the active terminals', async ({ page, terminals }) => {
 
 ### tmpPath
 
-- type: < string >
+- type: \< string >
 
 Unique test temporary path created on the server.
 

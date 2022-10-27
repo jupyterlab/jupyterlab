@@ -7,10 +7,14 @@ This example uses typescript.
 
 Steps to build the example:
 
-    cd path/to/example
-    npm install
-    npm run build
+```
+cd path/to/example
+npm install
+npm run build
+```
 
 Steps to run the example:
 
-    python main.py
+```
+python main.py
+```
