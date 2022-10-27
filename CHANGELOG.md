@@ -1,6 +1,6 @@
----
-github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
----
+______________________________________________________________________
+
+## github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
 
 <!-- The line below is MyST syntax for creating a reference to changelog -->
 
@@ -66,7 +66,7 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
 - Collapse debugger panel when disabling debugger [#13088](https://github.com/jupyterlab/jupyterlab/pull/13088) ([@yanmulin](https://github.com/yanmulin))
 - File Browser: add support for filtering directories on search [#12342](https://github.com/jupyterlab/jupyterlab/pull/12342) ([@jtpio](https://github.com/jtpio))
 - Prompt for renaming at first manual save [#12953](https://github.com/jupyterlab/jupyterlab/pull/12953) ([@fcollonval](https://github.com/fcollonval))
-- Raise ceiling on `jupyter_server` dependency to < 3 [#13068](https://github.com/jupyterlab/jupyterlab/pull/13068) ([@Zsailer](https://github.com/Zsailer))
+- Raise ceiling on `jupyter_server` dependency to \< 3 [#13068](https://github.com/jupyterlab/jupyterlab/pull/13068) ([@Zsailer](https://github.com/Zsailer))
 
 ### Bugs fixed
 
@@ -238,8 +238,8 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
 
 - Update verdaccio, start registry on 0.0.0.0 [#12825](https://github.com/jupyterlab/jupyterlab/pull/12825) ([@fcollonval](https://github.com/fcollonval))
 - Use Vega SVG renderer to drop canvas dependency [#12811](https://github.com/jupyterlab/jupyterlab/pull/12811) ([@fcollonval](https://github.com/fcollonval))
-- Bump moment from 2.29.2 to 2.29.4 [#12781](https://github.com/jupyterlab/jupyterlab/pull/12781) ([@dependabot[bot]](https://github.com/apps/dependabot))
-- [memory-leaks] Fixes following cell addition analysis [#12774](https://github.com/jupyterlab/jupyterlab/pull/12774) ([@fcollonval](https://github.com/fcollonval))
+- Bump moment from 2.29.2 to 2.29.4 [#12781](https://github.com/jupyterlab/jupyterlab/pull/12781) ([@dependabot\[bot\]](https://github.com/apps/dependabot))
+- \[memory-leaks\] Fixes following cell addition analysis [#12774](https://github.com/jupyterlab/jupyterlab/pull/12774) ([@fcollonval](https://github.com/fcollonval))
 - Bump @lumino/widgets to 1.33.0 [#12777](https://github.com/jupyterlab/jupyterlab/pull/12777) ([@fcollonval](https://github.com/fcollonval))
 - Fix memory leaks [#12750](https://github.com/jupyterlab/jupyterlab/pull/12750) ([@fcollonval](https://github.com/fcollonval))
 - Bump version of `marked` and `@types/marked` [#12747](https://github.com/jupyterlab/jupyterlab/pull/12747) ([@krassowski](https://github.com/krassowski))
@@ -456,14 +456,14 @@ github_url: 'https://github.com/jupyterlab/jupyterlab/blob/3.6.x/CHANGELOG.md'
 
 ### Maintenance and upkeep improvements
 
-- [3.3.x] Add git-blame-ignore-revs file [#12289](https://github.com/jupyterlab/jupyterlab/pull/12289) ([@blink1073](https://github.com/blink1073))
-- [3.3.x] Run black [#12282](https://github.com/jupyterlab/jupyterlab/pull/12282) ([@blink1073](https://github.com/blink1073))
+- \[3.3.x\] Add git-blame-ignore-revs file [#12289](https://github.com/jupyterlab/jupyterlab/pull/12289) ([@blink1073](https://github.com/blink1073))
+- \[3.3.x\] Run black [#12282](https://github.com/jupyterlab/jupyterlab/pull/12282) ([@blink1073](https://github.com/blink1073))
 - Stop using py.test [#12262](https://github.com/jupyterlab/jupyterlab/pull/12262) ([@fcollonval](https://github.com/fcollonval))
 - Inline `expected_http_error` function from `jupyterlab_server.tests` [#12228](https://github.com/jupyterlab/jupyterlab/pull/12228) ([@jtpio](https://github.com/jtpio))
 
 ### Documentation improvements
 
-- [3.3.x] Run black [#12282](https://github.com/jupyterlab/jupyterlab/pull/12282) ([@blink1073](https://github.com/blink1073))
+- \[3.3.x\] Run black [#12282](https://github.com/jupyterlab/jupyterlab/pull/12282) ([@blink1073](https://github.com/blink1073))
 - Stop using py.test [#12262](https://github.com/jupyterlab/jupyterlab/pull/12262) ([@fcollonval](https://github.com/fcollonval))
 - Update link to `jupyterlab-some-package` in docs [#12248](https://github.com/jupyterlab/jupyterlab/pull/12248) ([@jtpio](https://github.com/jtpio))
 - Update command in Performance Testing to use the right option [#12215](https://github.com/jupyterlab/jupyterlab/pull/12215) ([@jweill-aws](https://github.com/jweill-aws))
@@ -735,9 +735,9 @@ No merged PRs
 - Explicitly build JupyterLab in dev-mode [#11585](https://github.com/jupyterlab/jupyterlab/pull/11585) ([@fcollonval](https://github.com/fcollonval))
 - Fix markdown benchmark snapshot [#11575](https://github.com/jupyterlab/jupyterlab/pull/11575) ([@fcollonval](https://github.com/fcollonval))
 - postcss 8.4.0 breaks integrity 2 CI test [#11552](https://github.com/jupyterlab/jupyterlab/pull/11552) ([@fcollonval](https://github.com/fcollonval))
-- Bump tmpl from 1.0.4 to 1.0.5 [#11512](https://github.com/jupyterlab/jupyterlab/pull/11512) ([@dependabot[bot]](https://github.com/dependabot))
+- Bump tmpl from 1.0.4 to 1.0.5 [#11512](https://github.com/jupyterlab/jupyterlab/pull/11512) ([@dependabot\[bot\]](https://github.com/dependabot))
 - Increase notebook markdown test robustness [#11524](https://github.com/jupyterlab/jupyterlab/pull/11524) ([@fcollonval](https://github.com/fcollonval))
-- Bump semver-regex from 3.1.2 to 3.1.3 [#11511](https://github.com/jupyterlab/jupyterlab/pull/11511) ([@dependabot[bot]](https://github.com/dependabot))
+- Bump semver-regex from 3.1.2 to 3.1.3 [#11511](https://github.com/jupyterlab/jupyterlab/pull/11511) ([@dependabot\[bot\]](https://github.com/dependabot))
 - Run UI test on 3.2.x push [#11521](https://github.com/jupyterlab/jupyterlab/pull/11521) ([@fcollonval](https://github.com/fcollonval))
 - Enforce labels on PRs [#11496](https://github.com/jupyterlab/jupyterlab/pull/11496) ([@blink1073](https://github.com/blink1073))
 
@@ -786,7 +786,7 @@ No merged PRs
 
 ### Enhancements made
 
-- [3.2.x] Expose `window.jupyterapp` [#11417](https://github.com/jupyterlab/jupyterlab/pull/11417) ([@jtpio](https://github.com/jtpio))
+- \[3.2.x\] Expose `window.jupyterapp` [#11417](https://github.com/jupyterlab/jupyterlab/pull/11417) ([@jtpio](https://github.com/jtpio))
 
 ### Bugs fixed
 
@@ -916,7 +916,7 @@ No merged PRs
 
 ### Documentation improvements
 
-- Fix typo in docs: `page_config.json` [#11152]https://github.com/jupyterlab/jupyterlab/pull/11152) ([@achimgaedke](https://github.com/achimgaedke))
+- Fix typo in docs: `page_config.json` \[#11152\]https://github.com/jupyterlab/jupyterlab/pull/11152) ([@achimgaedke](https://github.com/achimgaedke))
 - Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder))
 - Fix the "Edit on GitHub" link [#11149](https://github.com/jupyterlab/jupyterlab/pull/11149) ([@krassowski](https://github.com/krassowski))
 - Clarify sidebar switching settings [#11270](https://github.com/jupyterlab/jupyterlab/pull/11270) ([@joelostblom](https://github.com/joelostblom))
@@ -935,7 +935,7 @@ No merged PRs
 
 ### Bugs fixed
 
-- Added handling of '\r' ended files [#11310](https://github.com/jupyterlab/jupyterlab/pull/11310) ([@lucabarcelos](https://github.com/lucabarcelos))
+- Added handling of '\\r' ended files [#11310](https://github.com/jupyterlab/jupyterlab/pull/11310) ([@lucabarcelos](https://github.com/lucabarcelos))
 
 ### Maintenance and upkeep improvements
 
@@ -1010,7 +1010,7 @@ No merged PRs
 
 ### Bugs fixed
 
-- Normalize notebook cell line endings to \n [#11141](https://github.com/jupyterlab/jupyterlab/pull/11141) ([@jasongrout](https://github.com/jasongrout))
+- Normalize notebook cell line endings to \\n [#11141](https://github.com/jupyterlab/jupyterlab/pull/11141) ([@jasongrout](https://github.com/jasongrout))
 
 ### Maintenance and upkeep improvements
 
@@ -1366,7 +1366,7 @@ No merged PRs
 - Add icon for .jl files in explorer [#10397](https://github.com/jupyterlab/jupyterlab/pull/10397) ([@shngt](https://github.com/shngt))
 - Support arrow keys for button navigation [#10349](https://github.com/jupyterlab/jupyterlab/pull/10349) ([@jahn96](https://github.com/jahn96))
 - Feature: select all cells with tags in toc [#10346](https://github.com/jupyterlab/jupyterlab/pull/10346) ([@NPetz](https://github.com/NPetz))
-- [licenses] use serverSettings from serviceManager, style tweaks [#10329](https://github.com/jupyterlab/jupyterlab/pull/10329) ([@bollwyvl](https://github.com/bollwyvl))
+- \[licenses\] use serverSettings from serviceManager, style tweaks [#10329](https://github.com/jupyterlab/jupyterlab/pull/10329) ([@bollwyvl](https://github.com/bollwyvl))
 - Filebrowser ContextMenu: Use separators [#10293](https://github.com/jupyterlab/jupyterlab/pull/10293) ([@martinRenou](https://github.com/martinRenou))
 - Add a plugin to be able to swap the doc provider [#10256](https://github.com/jupyterlab/jupyterlab/pull/10256) ([@jtpio](https://github.com/jtpio))
 - Completer: expose `activeIndex` and `indexChanged` [#10244](https://github.com/jupyterlab/jupyterlab/pull/10244) ([@hbcarlos](https://github.com/hbcarlos))
@@ -1439,7 +1439,7 @@ No merged PRs
 - Fix contrast issues in command palette and file browser [#10531](https://github.com/jupyterlab/jupyterlab/pull/10531) ([@krassowski](https://github.com/krassowski))
 - fix running cell when focused on output [#10517](https://github.com/jupyterlab/jupyterlab/pull/10517) ([@cameron-toy](https://github.com/cameron-toy))
 - Check to make sure process.argv exists before using it. [#10507](https://github.com/jupyterlab/jupyterlab/pull/10507) ([@jasongrout](https://github.com/jasongrout))
-- [HOTFIX] Render the correct index placeholder cell [#10505](https://github.com/jupyterlab/jupyterlab/pull/10505) ([@echarles](https://github.com/echarles))
+- \[HOTFIX\] Render the correct index placeholder cell [#10505](https://github.com/jupyterlab/jupyterlab/pull/10505) ([@echarles](https://github.com/echarles))
 - Remove content-visibility css prop to avoid jumpy scrollbar [#10503](https://github.com/jupyterlab/jupyterlab/pull/10503) ([@echarles](https://github.com/echarles))
 - Fix checkbox styling [#10483](https://github.com/jupyterlab/jupyterlab/pull/10483) ([@fcollonval](https://github.com/fcollonval))
 - Fix icons code for TOC and listings-info [#10476](https://github.com/jupyterlab/jupyterlab/pull/10476) ([@krassowski](https://github.com/krassowski))
@@ -1463,7 +1463,7 @@ No merged PRs
 - Fix dry run logic in publish script [#10068](https://github.com/jupyterlab/jupyterlab/pull/10068) ([@jtpio](https://github.com/jtpio))
 - Fix #7525 by setting yarn.lock permissions [#10063](https://github.com/jupyterlab/jupyterlab/pull/10063) ([@jluttine](https://github.com/jluttine))
 - Add cell id per notebook format 4.5 [#10018](https://github.com/jupyterlab/jupyterlab/pull/10018) ([@jayqi](https://github.com/jayqi))
-- [Fix] `Copy shareable link` command - fix the filename encoding (for files with spaces in the name) [#10015](https://github.com/jupyterlab/jupyterlab/pull/10015) ([@ognjenjevremovic](https://github.com/ognjenjevremovic))
+- \[Fix\] `Copy shareable link` command - fix the filename encoding (for files with spaces in the name) [#10015](https://github.com/jupyterlab/jupyterlab/pull/10015) ([@ognjenjevremovic](https://github.com/ognjenjevremovic))
 - fixed ellipsis character after menu items in UI [#10000](https://github.com/jupyterlab/jupyterlab/pull/10000) ([@RodyLipson](https://github.com/RodyLipson))
 - Fix js-apputils session context tests [#9997](https://github.com/jupyterlab/jupyterlab/pull/9997) ([@jtpio](https://github.com/jtpio))
 - Fix escaping of urls and paths [#9978](https://github.com/jupyterlab/jupyterlab/pull/9978) ([@jasongrout](https://github.com/jasongrout))
@@ -1490,7 +1490,7 @@ No merged PRs
 - Fix mimerender test example and test in CI [#9782](https://github.com/jupyterlab/jupyterlab/pull/9782) ([@afshin](https://github.com/afshin))
 - Correct synchronization of tags between metadata and tags widget [#9773](https://github.com/jupyterlab/jupyterlab/pull/9773) ([@fcollonval](https://github.com/fcollonval))
 - Fix race condition in session startup [#9766](https://github.com/jupyterlab/jupyterlab/pull/9766) ([@afshin](https://github.com/afshin))
-- [BugFix] `ArgumentConflict` is not defined [#9760](https://github.com/jupyterlab/jupyterlab/pull/9760) ([@andrewfulton9](https://github.com/andrewfulton9))
+- \[BugFix\] `ArgumentConflict` is not defined [#9760](https://github.com/jupyterlab/jupyterlab/pull/9760) ([@andrewfulton9](https://github.com/andrewfulton9))
 - Fix search provider not recognising text nodes [#9746](https://github.com/jupyterlab/jupyterlab/pull/9746) ([@krassowski](https://github.com/krassowski))
 - Do not take focus away from search panel (for navigateToCurrentDirectory) [#9745](https://github.com/jupyterlab/jupyterlab/pull/9745) ([@krassowski](https://github.com/krassowski))
 - Fix uninstallation of packages in extension manager [#9744](https://github.com/jupyterlab/jupyterlab/pull/9744) ([@afshin](https://github.com/afshin))
@@ -1733,11 +1733,11 @@ closed.
 
 ### Maintenance and upkeep improvements
 
-- [3.0.x] Remove Dependency on Jupyter Packaging [#10218](https://github.com/jupyterlab/jupyterlab/pull/10218) ([@jtpio](https://github.com/jtpio))
+- \[3.0.x\] Remove Dependency on Jupyter Packaging [#10218](https://github.com/jupyterlab/jupyterlab/pull/10218) ([@jtpio](https://github.com/jtpio))
 
 ### Documentation improvements
 
-- [3.0.x] Fix changelong entries for 3.0.13 [#10087](https://github.com/jupyterlab/jupyterlab/pull/10087) ([@blink1073](https://github.com/blink1073))
+- \[3.0.x\] Fix changelong entries for 3.0.13 [#10087](https://github.com/jupyterlab/jupyterlab/pull/10087) ([@blink1073](https://github.com/blink1073))
 - chore: update extension_tutorial [#10026](https://github.com/jupyterlab/jupyterlab/pull/10026) [@0618](https://github.com/0618)
 
 ### Other merged PRs
@@ -2058,7 +2058,7 @@ federated module capability in Webpack 5.
   ([#9310](https://github.com/jupyterlab/jupyterlab/pull/9310))
 - Update upgrade script to use labextension for outputdir
   ([#9306](https://github.com/jupyterlab/jupyterlab/pull/9306))
-- Require \'package\' instead of \'package/\' so webpack activates
+- Require 'package' instead of 'package/' so webpack activates
   sharing
   ([#9300](https://github.com/jupyterlab/jupyterlab/pull/9300))
 - Enable using federated extensions in dev mode when a flag is set.
@@ -2106,7 +2106,7 @@ federated module capability in Webpack 5.
 - Update release test script to also install federated extensions
   ([#9166](https://github.com/jupyterlab/jupyterlab/pull/9166),
   [#8818](https://github.com/jupyterlab/jupyterlab/issues/8818))
-- Remove \@types/webpack (shipped with webpack 5)
+- Remove @types/webpack (shipped with webpack 5)
   ([#9167](https://github.com/jupyterlab/jupyterlab/pull/9167))
 - Mention jupyter-packaging and cookiecutter in migration guide
   ([#9199](https://github.com/jupyterlab/jupyterlab/pull/9199))
@@ -2287,7 +2287,7 @@ The JupyterLab UI now supports translation.
   ([#9088](https://github.com/jupyterlab/jupyterlab/pull/9088))
 - Fix invisible breakpoint in debugger
   ([#8908](https://github.com/jupyterlab/jupyterlab/pull/8908))
-- Port `jupyterlab/debugger` PR \#527 to JupyterLab
+- Port `jupyterlab/debugger` PR #527 to JupyterLab
   ([#8878](https://github.com/jupyterlab/jupyterlab/pull/8878))
 - Add jupyterlab debugger to core
   ([#8747](https://github.com/jupyterlab/jupyterlab/pull/8747),
@@ -2313,7 +2313,7 @@ The JupyterLab UI now supports translation.
 
 #### Other
 
-- Resolve \'restarting\' state on reconnect
+- Resolve 'restarting' state on reconnect
   ([#9484](https://github.com/jupyterlab/jupyterlab/pull/9484),
   [#9008](https://github.com/jupyterlab/jupyterlab/issues/9008))
 - Upgrade typedoc
@@ -2326,9 +2326,9 @@ The JupyterLab UI now supports translation.
   [#48](https://github.com/jtpio/jupyterlab-classic/issues/48))
 - Make some dependencies optional for the code console plugin
   ([#9467](https://github.com/jupyterlab/jupyterlab/pull/9467))
-- Require tornado\>=6.1.0
+- Require tornado>=6.1.0
   ([#9453](https://github.com/jupyterlab/jupyterlab/pull/9453))
-- Pin to tornado\>=6.1 on binder
+- Pin to tornado>=6.1 on binder
   ([#9449](https://github.com/jupyterlab/jupyterlab/pull/9449))
 - Fix some of the ui-components dependency warnings
   ([#9448](https://github.com/jupyterlab/jupyterlab/pull/9448))
@@ -2349,7 +2349,7 @@ The JupyterLab UI now supports translation.
   ([#9419](https://github.com/jupyterlab/jupyterlab/pull/9419))
 - Remove unused requires for the tree-resolver plugin
   ([#9412](https://github.com/jupyterlab/jupyterlab/pull/9412))
-- Update \@types/react to \^17.0.0
+- Update @types/react to ^17.0.0
   ([#9409](https://github.com/jupyterlab/jupyterlab/pull/9409))
 - Make css dependency graph of js modules
   ([#9407](https://github.com/jupyterlab/jupyterlab/pull/9407))
@@ -2394,8 +2394,8 @@ The JupyterLab UI now supports translation.
 - Eager share only core packages and their dependencies
   ([#9332](https://github.com/jupyterlab/jupyterlab/pull/9332),
   [#9329](https://github.com/jupyterlab/jupyterlab/issues/9329))
-- Changed the expression to \"server unavailable or unreachable\"
-  instead of \"server not running\"
+- Changed the expression to "server unavailable or unreachable"
+  instead of "server not running"
   ([#9325](https://github.com/jupyterlab/jupyterlab/pull/9325))
 - Increase the pause between publishing and using npm packages to 5
   minutes
@@ -2436,7 +2436,7 @@ The JupyterLab UI now supports translation.
   [#9280](https://github.com/jupyterlab/jupyterlab/issues/9280))
 - Add a new menu shell area
   ([#9274](https://github.com/jupyterlab/jupyterlab/pull/9274))
-- Fix \#9255
+- Fix #9255
   ([#9273](https://github.com/jupyterlab/jupyterlab/pull/9273),
   [#9255](https://github.com/jupyterlab/jupyterlab/issues/9255))
 - Fix theme path in jupyterlab builder
@@ -2503,7 +2503,7 @@ The JupyterLab UI now supports translation.
 - Increase size of docstring pop up tooltip
   ([#9134](https://github.com/jupyterlab/jupyterlab/pull/9134),
   [#9085](https://github.com/jupyterlab/jupyterlab/issues/9085))
-- Add a 2.x -\> 3.x migration guide
+- Add a 2.x -> 3.x migration guide
   ([#9162](https://github.com/jupyterlab/jupyterlab/pull/9162),
   [#9118](https://github.com/jupyterlab/jupyterlab/issues/9118))
 - Add an offline circle icon for disconnected or unknown kernel state
@@ -2548,7 +2548,7 @@ The JupyterLab UI now supports translation.
   ([#8739](https://github.com/jupyterlab/jupyterlab/pull/8739))
 - Rename the logconsole:nboutput plugin id
   ([#8729](https://github.com/jupyterlab/jupyterlab/pull/8729))
-- Rename the celltags plugin id to \@jupyterlab/celltags
+- Rename the celltags plugin id to @jupyterlab/celltags
   ([#8728](https://github.com/jupyterlab/jupyterlab/pull/8728))
 - Uncaught typeerror when switching kernels
   ([#8727](https://github.com/jupyterlab/jupyterlab/pull/8727))
@@ -2564,7 +2564,7 @@ The JupyterLab UI now supports translation.
 - Updated puppeteer version to v4.0.0
   ([#8707](https://github.com/jupyterlab/jupyterlab/pull/8707))
 - Update the singleton packages to include at least every package with
-  a \'tokens.ts\' file
+  a 'tokens.ts' file
   ([#8703](https://github.com/jupyterlab/jupyterlab/pull/8703))
 - Update link to jupyter contributing guide
   ([#8697](https://github.com/jupyterlab/jupyterlab/pull/8697),
@@ -2605,7 +2605,7 @@ The JupyterLab UI now supports translation.
 - Implement a simple checkbox for single-document mode in the menu
   bar. ([#9100](https://github.com/jupyterlab/jupyterlab/pull/9100),
   [#8292](https://github.com/jupyterlab/jupyterlab/issues/8292))
-- Followup \#9100: made sdm switch pretty, accessible
+- Followup #9100: made sdm switch pretty, accessible
   ([#9104](https://github.com/jupyterlab/jupyterlab/pull/9104))
 - Improved url scheme, state, interactions for single document mode
   ([#8715](https://github.com/jupyterlab/jupyterlab/pull/8715))
@@ -2898,7 +2898,7 @@ closed.
 - Automatically link URLs in notebook output text
   ([#8075](https://github.com/jupyterlab/jupyterlab/pull/8075),
   [#7393](https://github.com/jupyterlab/jupyterlab/issues/7393))
-- Added a \"Restart Kernel and Run All Cells...\" button to the
+- Added a "Restart Kernel and Run All Cells..." button to the
   notebook toolbar
   ([#8024](https://github.com/jupyterlab/jupyterlab/pull/8024))
 
@@ -2960,7 +2960,7 @@ closed.
   header area will display if its children set their minimum height
   ([#8059](https://github.com/jupyterlab/jupyterlab/pull/8059),
   [#7279](https://github.com/jupyterlab/jupyterlab/issues/7279))
-- JupyterLab\'s custom context menu is now disabled on all descendants
+- JupyterLab's custom context menu is now disabled on all descendants
   of a DOM element with a `data-jp-suppress-context-menu` attribute
   ([#7877](https://github.com/jupyterlab/jupyterlab/pull/7877),
   [#7670](https://github.com/jupyterlab/jupyterlab/issues/7670))
@@ -2983,7 +2983,7 @@ closed.
 - Fix build errors by distributing the `.yarnrc` configuration with
   the Python package
   ([#8045](https://github.com/jupyterlab/jupyterlab/pull/8045))
-- Throttle fetch requests in the setting registry\'s data connector
+- Throttle fetch requests in the setting registry's data connector
   ([#7927](https://github.com/jupyterlab/jupyterlab/pull/7927))
 - Close the gap between lines in notebook output
   ([#7832](https://github.com/jupyterlab/jupyterlab/pull/7832),
@@ -3048,7 +3048,7 @@ closed.
   respectively
   ([#7177](https://github.com/jupyterlab/jupyterlab/pull/7177))
 
-- Explicit \"No Kernel\" button in the kernel selection dialog for new
+- Explicit "No Kernel" button in the kernel selection dialog for new
   notebooks
   ([#7647](https://github.com/jupyterlab/jupyterlab/pull/7647))
 
@@ -3056,7 +3056,7 @@ closed.
   execution timing information is stored in notebook files
   ([#7578](https://github.com/jupyterlab/jupyterlab/pull/7578))
 
-- \"Select current running or last run cell\" command added (requires
+- "Select current running or last run cell" command added (requires
   notebook `recordTiming` advanced setting to be set to true)
   ([#7551](https://github.com/jupyterlab/jupyterlab/pull/7551))
 
@@ -3074,19 +3074,19 @@ closed.
   [#7718](https://github.com/jupyterlab/jupyterlab/pull/7718),
   [#7686](https://github.com/jupyterlab/jupyterlab/issues/7686))
 
-- \"New File\" and \"New Markdown File\" items in file browser context
+- "New File" and "New Markdown File" items in file browser context
   menu ([#7483](https://github.com/jupyterlab/jupyterlab/pull/7483),
   [#4280](https://github.com/jupyterlab/jupyterlab/issues/4280))
 
-- \"Download\" item in File menu
+- "Download" item in File menu
   ([#7480](https://github.com/jupyterlab/jupyterlab/pull/7480))
 
-- \"Restart Kernel and Run up to Selected Cell\" item in notebook
+- "Restart Kernel and Run up to Selected Cell" item in notebook
   Kernel menu
   ([#7789](https://github.com/jupyterlab/jupyterlab/pull/7789),
   [#6746](https://github.com/jupyterlab/jupyterlab/issues/6746))
 
-- In extension manager, the \"enable\" button is now only shown for
+- In extension manager, the "enable" button is now only shown for
   installed extensions
   ([#7482](https://github.com/jupyterlab/jupyterlab/pull/7482))
 
@@ -3282,7 +3282,7 @@ migrating extensions to JupyterLab 2.0.
 
 ### Bugfixes
 
-- \"Copy Shareable Link\" in the file browser context menu now
+- "Copy Shareable Link" in the file browser context menu now
   properly works in JupyterHub
   ([#7906](https://github.com/jupyterlab/jupyterlab/pull/7906))
 - Update Mathjax CDN in the cell and console examples
@@ -3365,7 +3365,7 @@ migrating extensions to JupyterLab 2.0.
 - Changes to setting editor should trigger application dirty state
   ([#7774](https://github.com/jupyterlab/jupyterlab/pull/7774),
   [#7757](https://github.com/jupyterlab/jupyterlab/issues/7757))
-- Move vega from \"devdependencies\" to \"dependencies\"
+- Move vega from "devdependencies" to "dependencies"
   ([#7699](https://github.com/jupyterlab/jupyterlab/pull/7699),
   [#7689](https://github.com/jupyterlab/jupyterlab/issues/7689))
 - Restore default file browser manually.
@@ -3482,7 +3482,7 @@ closed.
 - Fix workspace reset functionality
   ([#7106](https://github.com/jupyterlab/jupyterlab/pull/7106),
   [#7105](https://github.com/jupyterlab/jupyterlab/issues/7105))
-- Restore behavior of the \"raises-exception\" cell tag
+- Restore behavior of the "raises-exception" cell tag
   ([#7020](https://github.com/jupyterlab/jupyterlab/pull/7020),
   [#7015](https://github.com/jupyterlab/jupyterlab/issues/7015))
 - Add settings to override theme font sizes
@@ -3613,7 +3613,7 @@ well ([#5577](https://github.com/jupyterlab/jupyterlab/pull/5577),
   no longer need to install `@jupyterlab/hub-extension`.
   ([#6451](https://github.com/jupyterlab/jupyterlab/pull/6451),
   [#6428](https://github.com/jupyterlab/jupyterlab/issues/6428))
-- JupyterLab now has a File \> Logout menu entry when running with
+- JupyterLab now has a File > Logout menu entry when running with
   JupyterHub
   ([#6087](https://github.com/jupyterlab/jupyterlab/pull/6087),
   [#5966](https://github.com/jupyterlab/jupyterlab/issues/5966))
@@ -3639,8 +3639,8 @@ documents and activities are printed.
   ([#6552](https://github.com/jupyterlab/jupyterlab/pull/6552))
 - Downloading a file will no longer open a new browser window
   ([#6546](https://github.com/jupyterlab/jupyterlab/pull/6546))
-- Rename the help \"Inspector\" to \"Contextual Help\" and move it to
-  the \"Help\" menu
+- Rename the help "Inspector" to "Contextual Help" and move it to
+  the "Help" menu
   ([#6493](https://github.com/jupyterlab/jupyterlab/pull/6493),
   [#6488](https://github.com/jupyterlab/jupyterlab/issues/6488),
   [#6678](https://github.com/jupyterlab/jupyterlab/pull/6678),
@@ -3682,7 +3682,7 @@ documents and activities are printed.
 - Add ability to tell between hover and selected command palette items
   ([#6407](https://github.com/jupyterlab/jupyterlab/pull/6407),
   [#279](https://github.com/jupyterlab/jupyterlab/issues/279))
-- Hide the \"Last Modified\" column when the file browser is narrow
+- Hide the "Last Modified" column when the file browser is narrow
   ([#6406](https://github.com/jupyterlab/jupyterlab/pull/6406),
   [#6093](https://github.com/jupyterlab/jupyterlab/issues/6093))
 - Support copy/paste in terminal and Mac OS using `Ctrl+C` and
@@ -3693,7 +3693,7 @@ documents and activities are printed.
 - Support scrolling in running kernels panel
   ([#6383](https://github.com/jupyterlab/jupyterlab/pull/6383),
   [#6371](https://github.com/jupyterlab/jupyterlab/issues/6371))
-- Adds ability to \"Merge Selected Cells\" in the context menu in the
+- Adds ability to "Merge Selected Cells" in the context menu in the
   notebook
   ([#6375](https://github.com/jupyterlab/jupyterlab/pull/6375),
   [#6318](https://github.com/jupyterlab/jupyterlab/issues/6318))
@@ -3745,8 +3745,8 @@ documents and activities are printed.
   reload
   ([#5981](https://github.com/jupyterlab/jupyterlab/pull/5981),
   [#5976](https://github.com/jupyterlab/jupyterlab/issues/5976))
-- Add support for managing notebook metadata under a new \"Advanced
-  Tools\" section in the cell tools area. The cell and notebook
+- Add support for managing notebook metadata under a new "Advanced
+  Tools" section in the cell tools area. The cell and notebook
   metadata now always reflect the current state of the notebook
   ([#5968](https://github.com/jupyterlab/jupyterlab/pull/5968),
   [#5200](https://github.com/jupyterlab/jupyterlab/issues/5200))
@@ -3801,8 +3801,8 @@ documents and activities are printed.
 - The vdom extension now supports event handling, so that you can have
   kernel code run in response to user interaction with the UI
   ([#5670](https://github.com/jupyterlab/jupyterlab/pull/5670))
-- Adds the ability to run \"Run All Code\" and \"Restart Kernel and
-  Run All Code\" in code and markdown files
+- Adds the ability to run "Run All Code" and "Restart Kernel and
+  Run All Code" in code and markdown files
   ([#5641](https://github.com/jupyterlab/jupyterlab/pull/5641),
   [#5579](https://github.com/jupyterlab/jupyterlab/issues/5579))
 - We now remember what line ending a text file has when loading it, so
@@ -3833,7 +3833,7 @@ documents and activities are printed.
   launcher and command palette
   ([#5512](https://github.com/jupyterlab/jupyterlab/pull/5512),
   [#5511](https://github.com/jupyterlab/jupyterlab/pull/5511))
-- A \"New Folder\" option has been added to the file browser context
+- A "New Folder" option has been added to the file browser context
   menu ([#5447](https://github.com/jupyterlab/jupyterlab/pull/5447))
 - The ANSI colors are now the same as those in the classic notebook
   ([#5336](https://github.com/jupyterlab/jupyterlab/pull/5336),
@@ -4097,7 +4097,7 @@ closed.
   metadata.
   ([#5401](https://github.com/jupyterlab/jupyterlab/pull/5401),
   [#1312](https://github.com/jupyterlab/jupyterlab/issues/1312))
-- Add \"Go To Line\" in the Edit menu for text editors.
+- Add "Go To Line" in the Edit menu for text editors.
   ([#5377](https://github.com/jupyterlab/jupyterlab/pull/5377))
 - Sidebar panels can now be switched between left and right sidebars.
   Right-click on a sidebar tab to move it to the other sidebar.
@@ -4107,7 +4107,7 @@ closed.
 - Make the sidebar a bit narrower, and make the minimum width
   adjustable from a theme.
   ([#5245](https://github.com/jupyterlab/jupyterlab/pull/5245))
-- Populate the File, Export Notebook As\... submenu from the server
+- Populate the File, Export Notebook As... submenu from the server
   nbconvert capabilities.
   ([#5217](https://github.com/jupyterlab/jupyterlab/pull/5217))
 - Server contents managers can now tell JupyterLab to open files as
@@ -4184,7 +4184,7 @@ closed.
   ([#5360](https://github.com/jupyterlab/jupyterlab/pull/5360))
 - Use Lerna 3.2.1.
   ([#5262](https://github.com/jupyterlab/jupyterlab/pull/5262))
-- Node \>=6.11.5 is now required.
+- Node >=6.11.5 is now required.
   ([#5227](https://github.com/jupyterlab/jupyterlab/pull/5227))
 - Pin vega-embed version to 3.18.2.
   ([#5342](https://github.com/jupyterlab/jupyterlab/pull/5342))
@@ -4236,8 +4236,8 @@ closed.
 - Python 3.5+ is now required to use JupyterLab. Python 2 kernels can
   still be run within JupyterLab.
 - Added the pipe (`|`) character as a CSV delimiter option.
-- Added \"Open From Path\...\"\" to top level `File` menu.
-- Added \"Copy Download Link\" to context menu for files.
+- Added "Open From Path..."" to top level `File` menu.
+- Added "Copy Download Link" to context menu for files.
 
 ### Changes for Developers
 
@@ -4356,7 +4356,7 @@ closed.
   ([#5108](https://github.com/jupyterlab/jupyterlab/pull/5108))
 - Added a `saveState` signal to the document context object.
   ([#5096](https://github.com/jupyterlab/jupyterlab/pull/5096))
-- Added \"Copy Download Link\" to context menu for files.
+- Added "Copy Download Link" to context menu for files.
   ([#5089](https://github.com/jupyterlab/jupyterlab/pull/5089))
 - Extensions marked as `deprecated` are no longer shown in the
   extension manager.
@@ -4371,7 +4371,7 @@ closed.
 
 ### Bug Fixes
 
-- Fixed a bug in the rendering of the \"New Notebook\" item of the
+- Fixed a bug in the rendering of the "New Notebook" item of the
   command palette.
   ([#5079](https://github.com/jupyterlab/jupyterlab/pull/5079))
 - We only create the extension manager widget if it is enabled. This
@@ -4484,7 +4484,7 @@ layouts, including in different browser windows. See the
   a console. A default keyboard shortcut for this command is not yet
   provided, but can be added by users with the
   `notebook:run-in-console` command. To add a keyboard shortcut
-  `Ctrl G` for this command, use the "Settings" \| "Advanced Settings
+  `Ctrl G` for this command, use the "Settings" | "Advanced Settings
   Editor" menu item to open the "Keyboard Shortcuts" advanced
   settings, and add the following JSON in the shortcut JSON object in
   the User Overrides pane (adjust the actual keyboard shortcut if you
@@ -4516,8 +4516,8 @@ layouts, including in different browser windows. See the
 
 ### Larger file uploads
 
-- Support for larger file uploads (\>15MB) when using Jupyter notebook
-  server version \>= 5.1.
+- Support for larger file uploads (>15MB) when using Jupyter notebook
+  server version >= 5.1.
   ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224))
 
 ### Extension management and installation
@@ -4891,7 +4891,7 @@ enhancements and general bug fixes.
   [#3061](https://github.com/jupyterlab/jupyterlab/issues/3061)
 - Enhancements to enabling and disabling of extensions.
   [#3078](https://github.com/jupyterlab/jupyterlab/issues/3078)
-- Mime extensions API change (`name` -\> `id` and new naming
+- Mime extensions API change (`name` -> `id` and new naming
   convention).
   [#3078](https://github.com/jupyterlab/jupyterlab/issues/3078)
 - Added a `jupyter lab --watch` mode for extension authors.
@@ -4922,10 +4922,10 @@ enhancements and general bug fixes.
 
 - Implemented server side handling of users settings:
   <https://github.com/jupyterlab/jupyterlab/pull/2585>
-- Revamped the handling of file types in the application \* affects
+- Revamped the handling of file types in the application * affects
   document and mime renderers:
   <https://github.com/jupyterlab/jupyterlab/pull/2701>
-- Updated dialog API \* uses virtual DOM instead of raw DOM nodes and
+- Updated dialog API * uses virtual DOM instead of raw DOM nodes and
   better use of the widget lifecycle:
   <https://github.com/jupyterlab/jupyterlab/pull/2661>
 
@@ -5026,7 +5026,7 @@ Release Notes:
   <https://github.com/jupyterlab/jupyterlab/pull/2023>
 - Added single document mode and a `Tabs` sidebar.
   <https://github.com/jupyterlab/jupyterlab/pull/2037>
-- More work toward real time collaboration \* implemented a model
+- More work toward real time collaboration * implemented a model
   database interface that can be in-memory by real time backends.
   <https://github.com/jupyterlab/jupyterlab/pull/2039>
 
@@ -5061,7 +5061,7 @@ big split.
 
 ### Mar 01, 2017
 
-- Upgrade to new `@phosphor` packages \* brings a new Command Palette
+- Upgrade to new `@phosphor` packages * brings a new Command Palette
   interaction that should be more intuitive, and restores the ability
   to drag to dock panel edges
   <https://github.com/jupyterlab/jupyterlab/pull/1762>.
