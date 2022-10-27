@@ -501,38 +501,34 @@ export class Context<
   /**
    * Handle an initial population.
    */
-  private _populate(): Promise<void> {
-    return this._provider.ready.then(() => {
-      this._isPopulated = true;
-      this._isReady = true;
-      this._populatedPromise.resolve(void 0);
+  private async _populate(): Promise<void> {
+    await this._provider.ready;
 
-      // Add a checkpoint if none exists and the file is writable.
-      return this._maybeCheckpoint(false).then(() => {
-        if (this.isDisposed) {
-          return;
-        }
-        // Update the kernel preference.
-        const name =
-          this._model.defaultKernelName ||
-          this.sessionContext.kernelPreference.name;
-        this.sessionContext.kernelPreference = {
-          ...this.sessionContext.kernelPreference,
-          name,
-          language: this._model.defaultKernelLanguage
-        };
-        // Note: we don't wait on the session to initialize
-        // so that the user can be shown the content before
-        // any kernel has started.
-        void this.sessionContext.initialize().then(shouldSelect => {
-          if (shouldSelect) {
-            void this._dialogs.selectKernel(
-              this.sessionContext,
-              this.translator
-            );
-          }
-        });
-      });
+    this._isPopulated = true;
+    this._isReady = true;
+    this._populatedPromise.resolve(void 0);
+
+    // Add a checkpoint if none exists and the file is writable.
+    await this._maybeCheckpoint(false);
+    if (this.isDisposed) {
+      return;
+    }
+    // Update the kernel preference.
+    const name =
+      this._model.defaultKernelName ||
+      this.sessionContext.kernelPreference.name;
+    this.sessionContext.kernelPreference = {
+      ...this.sessionContext.kernelPreference,
+      name,
+      language: this._model.defaultKernelLanguage
+    };
+    // Note: we don't wait on the session to initialize
+    // so that the user can be shown the content before
+    // any kernel has started.
+    void this.sessionContext.initialize().then(shouldSelect => {
+      if (shouldSelect) {
+        void this._dialogs.selectKernel(this.sessionContext, this.translator);
+      }
     });
   }
 

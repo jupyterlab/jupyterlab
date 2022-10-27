@@ -25,6 +25,7 @@ export class WebSocketProvider implements IDocumentProvider {
    * @param options The instantiation options for a WebSocketProvider
    */
   constructor(options: WebSocketProvider.IOptions) {
+    this._ready = false;
     this._path = options.path;
     this._contentType = options.contentType;
     this._format = options.format;
@@ -44,6 +45,9 @@ export class WebSocketProvider implements IDocumentProvider {
   }
 
   get ready(): Promise<boolean> {
+    if (this._ready) {
+      return Promise.resolve(true);
+    }
     const serverSettings = ServerConnection.makeSettings();
     const url = URLExt.join(
       serverSettings.baseUrl,
@@ -77,6 +81,7 @@ export class WebSocketProvider implements IDocumentProvider {
             awareness: this._awareness
           }
         );
+        this._ready = true;
         return true;
       });
     return promise;
@@ -93,6 +98,7 @@ export class WebSocketProvider implements IDocumentProvider {
   private _ydoc: any;
   private _awareness: Awareness;
   private _yWebsocketProvider: YWebsocketProvider;
+  private _ready: boolean;
 }
 
 /**
