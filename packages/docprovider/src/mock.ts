@@ -6,6 +6,10 @@
 import { IDocumentProvider } from './index';
 
 export class ProviderMock implements IDocumentProvider {
+  get ready(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
   destroy(): void {
     /* nop */
   }

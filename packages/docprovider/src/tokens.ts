@@ -18,6 +18,11 @@ export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
  */
 export interface IDocumentProvider {
   /**
+   * Returns a Promise that resolves when the document is ready.
+   */
+  readonly ready: Promise<boolean>;
+
+  /**
    * Destroy the provider.
    */
   destroy(): void;

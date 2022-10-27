@@ -6,6 +6,12 @@
       "path": "../services"
     },
     {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../services"
+    },
+    {
       "path": "../shared-models"
     },
     {

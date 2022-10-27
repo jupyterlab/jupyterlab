@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -37,8 +37,6 @@ import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
 import { DocumentChange, ISharedDocument } from '@jupyterlab/shared-models';
 
-const FILE_PATH_TO_ROOM_ID_URL = 'api/yjs/roomid';
-
 /**
  * An implementation of a document context.
  *
@@ -67,8 +65,15 @@ export class Context<
     const ydoc = ymodel.ydoc;
     this._ydoc = ydoc;
     this._ycontext = ydoc.getMap('state');
-    this._docProviderFactory = options.docProviderFactory;
-    this._provider = new ProviderMock();
+    const docProviderFactory = options.docProviderFactory;
+    this._provider = docProviderFactory
+      ? docProviderFactory({
+          path: this._path,
+          contentType: this._factory.contentType,
+          format: this._factory.fileFormat!,
+          model: this._model.sharedModel
+        })
+      : new ProviderMock();
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -496,68 +501,37 @@ export class Context<
   /**
    * Handle an initial population.
    */
-  private async _populate(): Promise<void> {
-    if (this._docProviderFactory) {
-      let path: string;
-      if (PageConfig.getOption('collaborative') == 'true') {
-        const serverSettings = ServerConnection.makeSettings();
-        const url = URLExt.join(
-          serverSettings.baseUrl,
-          FILE_PATH_TO_ROOM_ID_URL,
-          encodeURIComponent(this._path)
-        );
-        const data = {
-          format: this._factory.fileFormat!,
-          type: this._factory.contentType
-        };
-        const response = await ServerConnection.makeRequest(
-          url,
-          {
-            method: 'PUT',
-            body: JSON.stringify(data)
-          },
-          serverSettings
-        );
-        if (response.status !== 200 && response.status !== 201) {
-          const err = await ServerConnection.ResponseError.create(response);
-          throw err;
-        }
-        path = await response.text();
-      } else {
-        path = this._path;
-      }
-      this._provider = this._docProviderFactory({
-        path,
-        contentType: this._factory.contentType,
-        format: this._factory.fileFormat!,
-        model: this._model.sharedModel
-      });
-    }
-    this._isPopulated = true;
-    this._isReady = true;
-    this._populatedPromise.resolve(void 0);
+  private _populate(): Promise<void> {
+    return this._provider.ready.then(() => {
+      this._isPopulated = true;
+      this._isReady = true;
+      this._populatedPromise.resolve(void 0);
 
-    // Add a checkpoint if none exists and the file is writable.
-    return this._maybeCheckpoint(false).then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      // Update the kernel preference.
-      const name =
-        this._model.defaultKernelName ||
-        this.sessionContext.kernelPreference.name;
-      this.sessionContext.kernelPreference = {
-        ...this.sessionContext.kernelPreference,
-        name,
-        language: this._model.defaultKernelLanguage
-      };
-      // Note: we don't wait on the session to initialize
-      // so that the user can be shown the content before
-      // any kernel has started.
-      void this.sessionContext.initialize().then(shouldSelect => {
-        if (shouldSelect) {
-          void this._dialogs.selectKernel(this.sessionContext, this.translator);
+      // Add a checkpoint if none exists and the file is writable.
+      return this._maybeCheckpoint(false).then(() => {
+        if (this.isDisposed) {
+          return;
         }
+        // Update the kernel preference.
+        const name =
+          this._model.defaultKernelName ||
+          this.sessionContext.kernelPreference.name;
+        this.sessionContext.kernelPreference = {
+          ...this.sessionContext.kernelPreference,
+          name,
+          language: this._model.defaultKernelLanguage
+        };
+        // Note: we don't wait on the session to initialize
+        // so that the user can be shown the content before
+        // any kernel has started.
+        void this.sessionContext.initialize().then(shouldSelect => {
+          if (shouldSelect) {
+            void this._dialogs.selectKernel(
+              this.sessionContext,
+              this.translator
+            );
+          }
+        });
       });
     });
   }
@@ -951,7 +925,6 @@ or load the version on disk (revert)?`,
   private _ycontext: Y.Map<string>;
   private _lastModifiedCheckMargin = 500;
   private _timeConflictModalIsOpen = false;
-  private _docProviderFactory;
 }
 
 /**

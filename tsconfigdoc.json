@@ -12,7 +12,11 @@
         "./packages/*/src"
       ]
     },
-    "lib": ["DOM", "DOM.iterable", "es2019.array"],
+    "lib": [
+      "DOM",
+      "DOM.iterable",
+      "es2019.array"
+    ],
     "moduleResolution": "node",
     "types": [
       "jest",
@@ -295,6 +299,12 @@
     },
     {
       "path": "./packages/ui-components-extension"
+    },
+    {
+      "path": "./packages/user"
+    },
+    {
+      "path": "./packages/user-extension"
     },
     {
       "path": "./packages/vdom"
