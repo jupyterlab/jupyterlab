@@ -658,7 +658,7 @@ export class SessionContext implements ISessionContext {
     if (preference.id) {
       options = { id: preference.id };
     } else {
-      const name = SessionContext.getDefaultKernel({
+      const name = Private.getDefaultKernel({
         specs: this.specsManager.specs,
         sessions: this.sessionManager.running(),
         preference
