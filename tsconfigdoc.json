@@ -12,7 +12,11 @@
         "./packages/*/src"
       ]
     },
-    "lib": ["DOM", "DOM.iterable", "es2019.array"],
+    "lib": [
+      "DOM",
+      "DOM.iterable",
+      "es2019.array"
+    ],
     "moduleResolution": "node",
     "types": [
       "jest",
