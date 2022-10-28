@@ -1277,6 +1277,13 @@ export namespace SessionContext {
    * Get the default kernel name given select options.
    */
   export function getDefaultKernel(options: IKernelSearch): string | null {
+    const { preference } = options;
+    const { shouldStart } = preference;
+
+    if (shouldStart) {
+      return null;
+    }
+
     return Private.getDefaultKernel(options);
   }
 }
