@@ -1,7 +1,6 @@
----
-name: Bug report
-about: Create a report to help us improve
----
+______________________________________________________________________
+
+## name: Bug report about: Create a report to help us improve
 
 <!--
 Welcome! Before creating a new issue:
@@ -19,9 +18,9 @@ https://jupyterlab.readthedocs.io/en/3.6.x/getting_started/issue.html
 <!--Describe step-by-step instructions to reproduce the behavior-->
 
 1. Go to '...'
-2. Click on '...'
-3. Scroll down to '...'
-4. See error '...'
+1. Click on '...'
+1. Scroll down to '...'
+1. See error '...'
 
 <!--Describe how you diagnosed the issue. See the guidelines at
  https://jupyterlab.readthedocs.io/en/3.6.x/getting_started/issue.html -->

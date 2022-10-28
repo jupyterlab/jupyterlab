@@ -1,8 +1,6 @@
----
-name: Feature Request
-about: Suggest something to add to JupyterLab
-labels: enhancement
----
+______________________________________________________________________
+
+## name: Feature Request about: Suggest something to add to JupyterLab labels: enhancement
 
 <!--
 Welcome! Thanks for thinking of a way to improve JupyterLab. If this solves a problem for you, then it probably solves that problem for lots of people! So the whole community will benefit from this request.

@@ -44,7 +44,7 @@ evolve for JupyterLab extension developers.
 
 Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/stable/).
 
----
+______________________________________________________________________
 
 ## Getting started
 
@@ -109,7 +109,7 @@ The latest versions of the following browsers are currently _known to work_:
 
 See our [documentation](http://jupyterlab.readthedocs.io/en/3.6.x/getting_started/installation.html) for additional details.
 
----
+______________________________________________________________________
 
 ## Getting help
 
@@ -123,7 +123,7 @@ To report a bug please read the [guidelines](https://jupyterlab.readthedocs.io/e
 
 We also welcome suggestions for new features as they help make the project more useful for everyone. To request a feature please use the [feature request template](https://github.com/jupyterlab/jupyterlab/issues/new?template=feature_request.md).
 
----
+______________________________________________________________________
 
 ## Development
 
@@ -182,7 +182,7 @@ Maintainer emeritus:
 This list is provided to give the reader context on who we are and how our team functions.
 To be listed, please submit a pull request with your information.
 
----
+______________________________________________________________________
 
 ### Weekly Dev Meeting
 

@@ -13,6 +13,11 @@ repos:
       - id: check-case-conflict
       - id: debug-statements
 
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.16
+    hooks:
+      - id: mdformat
+
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.14.2
     hooks:
@@ -28,7 +33,7 @@ repos:
         name: prettier
         entry: 'npm run prettier:files'
         language: node
-        types_or: [json, markdown, ts, tsx, javascript, jsx, css]
+        types_or: [json, ts, tsx, javascript, jsx, css]
       - id: eslint
         name: eslint
         entry: 'npm run eslint:files'

@@ -24,12 +24,7 @@ ignore="tests examples"
 [tool.check-manifest]
 ignore = ["binder/**", "builder/**", "buildutils/**", "design/**", "dev_mode/**", "examples/**", "packages/**", "scripts/**", "testutils/**", "*.json", "yarn.lock", "readthedocs.yml", ".bumpversion.cfg", ".*", "clean.py", "*.config.js", "release/*", "typedoc-theme/**", "typedoc.js", "jupyterlab/schemas/**", "jupyterlab/static/**", "jupyterlab/themes/**", "jupyterlab/style.js"]
 
-[tool.jupyter-releaser]
-skip = ["check-links"]
-
 [tool.jupyter-releaser.options]
-ignore-glob = ["packages/ui-components/docs/source/ui_components.rst"]
-ignore-links = ["../api/*.*", "https://docs.github.com/en/.*"]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 npm-cmd = "npm publish --tag next"
@@ -37,7 +32,7 @@ release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
 
 [tool.jupyter-releaser.hooks]
-before-bump-version = ["git checkout .", "pip install bump2version"]
-before-build-npm = ["jlpm run build:all"]
+before-bump-version = ["pip install -e .[test]"]
+before-build-npm = ["jlpm", "jlpm run build:all"]
 before-build-python = ["node buildutils/lib/local-repository start; true", "jlpm run before:build:python", "node buildutils/lib/local-repository stop", "node buildutils/lib/local-repository fix-links --path jupyterlab/staging"]
 after-publish-assets = "npm run after:publish:assets"
