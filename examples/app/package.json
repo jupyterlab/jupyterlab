@@ -84,7 +84,6 @@
       "@jupyterlab/settingeditor-extension",
       "@jupyterlab/shortcuts-extension",
       "@jupyterlab/statusbar-extension",
-      "@jupyterlab/terminal-extension",
       "@jupyterlab/theme-dark-extension",
       "@jupyterlab/theme-light-extension",
       "@jupyterlab/toc-extension",
