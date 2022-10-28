@@ -3,6 +3,9 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../services"
     },
     {
@@ -13,6 +16,9 @@
     },
     {
       "path": "../../testutils"
+    },
+    {
+      "path": "../coreutils"
     },
     {
       "path": "../services"

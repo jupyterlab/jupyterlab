@@ -113,7 +113,6 @@ export class Context<
         if (newPath && newPath !== pathChanged.oldValue) {
           urlResolver.path = newPath;
           this._path = newPath;
-          this._provider.setPath(newPath);
           this._pathChanged.emit(this.path);
           this.sessionContext.session?.setPath(newPath) as any;
         }
@@ -229,7 +228,7 @@ export class Context<
       this._modelDB.dispose();
     }
     this._model.dispose();
-    this._provider.destroy();
+    this._provider.dispose();
     this._model.sharedModel.dispose();
     this._ydoc.destroy();
     this._disposed.emit(void 0);
@@ -515,33 +514,34 @@ export class Context<
   /**
    * Handle an initial population.
    */
-  private _populate(): Promise<void> {
+  private async _populate(): Promise<void> {
+    await this._provider.ready;
+
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
 
     // Add a checkpoint if none exists and the file is writable.
-    return this._maybeCheckpoint(false).then(() => {
-      if (this.isDisposed) {
-        return;
+    await this._maybeCheckpoint(false);
+    if (this.isDisposed) {
+      return;
+    }
+    // Update the kernel preference.
+    const name =
+      this._model.defaultKernelName ||
+      this.sessionContext.kernelPreference.name;
+    this.sessionContext.kernelPreference = {
+      ...this.sessionContext.kernelPreference,
+      name,
+      language: this._model.defaultKernelLanguage
+    };
+    // Note: we don't wait on the session to initialize
+    // so that the user can be shown the content before
+    // any kernel has started.
+    void this.sessionContext.initialize().then(shouldSelect => {
+      if (shouldSelect) {
+        void this._dialogs.selectKernel(this.sessionContext, this.translator);
       }
-      // Update the kernel preference.
-      const name =
-        this._model.defaultKernelName ||
-        this.sessionContext.kernelPreference.name;
-      this.sessionContext.kernelPreference = {
-        ...this.sessionContext.kernelPreference,
-        name,
-        language: this._model.defaultKernelLanguage
-      };
-      // Note: we don't wait on the session to initialize
-      // so that the user can be shown the content before
-      // any kernel has started.
-      void this.sessionContext.initialize().then(shouldSelect => {
-        if (shouldSelect) {
-          void this._dialogs.selectKernel(this.sessionContext, this.translator);
-        }
-      });
     });
   }
 
@@ -897,9 +897,7 @@ or load the version on disk (revert)?`,
     this._path = newPath;
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
-    // we must rename the document before saving with the new path
     this._ycontext.set('path', this._path);
-    await this._provider.renameAck;
     await this.save();
     await this._maybeCheckpoint(true);
   }
