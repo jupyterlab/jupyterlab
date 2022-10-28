@@ -32,7 +32,6 @@
     "@jupyterlab/settingeditor-extension": "^4.0.0-alpha.15",
     "@jupyterlab/shortcuts-extension": "^4.0.0-alpha.15",
     "@jupyterlab/statusbar-extension": "^4.0.0-alpha.15",
-    "@jupyterlab/terminal-extension": "^4.0.0-alpha.15",
     "@jupyterlab/theme-dark-extension": "^4.0.0-alpha.15",
     "@jupyterlab/theme-light-extension": "^4.0.0-alpha.15",
     "@jupyterlab/toc-extension": "^6.0.0-alpha.15",
