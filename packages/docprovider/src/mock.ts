@@ -19,8 +19,8 @@ export class ProviderMock implements IDocumentProvider {
   /**
    * Returns a Promise that resolves when the document provider is ready.
    */
-  get ready(): Promise<boolean> {
-    return Promise.resolve(true);
+  get ready(): Promise<void> {
+    return Promise.resolve();
   }
 
   /**
