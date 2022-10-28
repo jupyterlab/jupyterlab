@@ -107,7 +107,7 @@ const rtcGlobalAwarenessPlugin: JupyterFrontEndPlugin<IAwareness> = {
     if (user.isReady) {
       userChanged();
     }
-    user.ready.then(userChanged);
+    user.ready.then(userChanged).catch(e => console.error(e));
     user.userChanged.connect(userChanged);
 
     state.changed.connect(async () => {

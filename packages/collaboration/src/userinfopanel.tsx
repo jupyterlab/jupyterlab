@@ -26,11 +26,13 @@ export class UserInfoPanel extends Panel {
       this.addWidget(this._body);
       this.update();
     } else {
-      this._profile.ready.then(() => {
-        this._body = new UserInfoBody(this._profile.identity!);
-        this.addWidget(this._body);
-        this.update();
-      });
+      this._profile.ready
+        .then(() => {
+          this._body = new UserInfoBody(this._profile.identity!);
+          this.addWidget(this._body);
+          this.update();
+        })
+        .catch(e => console.error(e));
     }
   }
 }

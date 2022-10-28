@@ -102,9 +102,11 @@ export class UserMenu extends Menu {
     this.title.icon = caretDownIcon;
     this.title.iconClass = 'jp-UserMenu-caretDownIcon';
 
-    this._user.ready.then(() => {
-      this.title.label = this._user.identity!.display_name;
-    });
+    this._user.ready
+      .then(() => {
+        this.title.label = this._user.identity!.display_name;
+      })
+      .catch(e => console.error(e));
 
     this._user.userChanged.connect(this._updateLabel, this);
   }
