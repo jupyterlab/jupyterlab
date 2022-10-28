@@ -38,7 +38,6 @@ class ExampleApp(LabServerApp):
     themes_dir = os.path.join(HERE, "build", "themes")
     user_settings_dir = os.path.join(HERE, "build", "user_settings")
     workspaces_dir = os.path.join(HERE, "build", "workspaces")
-    # full_static_url = os.path.join(HERE, "static")
 
 
 if __name__ == "__main__":
