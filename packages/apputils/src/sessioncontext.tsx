@@ -1280,7 +1280,7 @@ export namespace SessionContext {
     const { preference } = options;
     const { shouldStart } = preference;
 
-    if (shouldStart) {
+    if (shouldStart === false) {
       return null;
     }
 
