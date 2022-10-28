@@ -39,7 +39,6 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/collaboration": "^4.0.0-alpha.15",
     "@jupyterlab/coreutils": "^6.0.0-alpha.15",
     "@jupyterlab/services": "^7.0.0-alpha.15",
     "@jupyterlab/shared-models": "^4.0.0-alpha.15",

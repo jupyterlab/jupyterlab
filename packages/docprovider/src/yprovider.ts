@@ -48,14 +48,6 @@ export class WebSocketProvider implements IDocumentProvider {
       })
       .catch(e => console.error(e));
     user.userChanged.connect(this._onUserChanged, this);
-  }
-
-  get ready(): Promise<boolean> {
-    if (this._ready) {
-      return this._ready.promise;
-    } else {
-      this._ready = new PromiseDelegate();
-    }
 
     const serverSettings = ServerConnection.makeSettings();
     const url = URLExt.join(
