@@ -13,6 +13,10 @@ import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
 import type { Doc } from 'yjs';
 import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 
+/**
+ * Room Id endpoint provided by `jupyter-server-ydoc`
+ * See https://github.com/jupyter-server/jupyter_server_ydoc
+ */
 const FILE_PATH_TO_ROOM_ID_URL = 'api/yjs/roomid';
 
 /**
