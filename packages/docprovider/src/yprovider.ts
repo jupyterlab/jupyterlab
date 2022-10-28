@@ -34,7 +34,6 @@ export class WebSocketProvider implements IDocumentProvider {
     this._format = options.format;
     this._serverUrl = options.url;
     this._ydoc = options.model.ydoc;
-    this._ready = new PromiseDelegate();
     this._awareness = options.model.awareness;
 
     const user = options.user;
@@ -61,17 +60,10 @@ export class WebSocketProvider implements IDocumentProvider {
       encodeURIComponent(this._path)
     );
     const data = {
-      format: this._format,
-      type: this._contentType
+      method: 'PUT',
+      body: JSON.stringify({ format: this._format, type: this._contentType })
     };
-    ServerConnection.makeRequest(
-      url,
-      {
-        method: 'PUT',
-        body: JSON.stringify(data)
-      },
-      serverSettings
-    )
+    ServerConnection.makeRequest(url, data, serverSettings)
       .then(response => {
         if (response.status !== 200 && response.status !== 201) {
           throw new ServerConnection.ResponseError(response);
@@ -88,11 +80,8 @@ export class WebSocketProvider implements IDocumentProvider {
           }
         );
       })
-      .then(() => this._ready.resolve(true))
-      .catch(reason => {
-        console.warn(reason);
-        this._ready.resolve(false);
-      });
+      .then(() => this._ready.resolve())
+      .catch(reason => console.warn(reason));
   }
 
   /**
@@ -103,9 +92,9 @@ export class WebSocketProvider implements IDocumentProvider {
   }
 
   /**
-   * Returns a Promise that resolves when the document provider is ready.
+   * A promise that resolves when the document provider is ready.
    */
-  get ready(): Promise<boolean> {
+  get ready(): Promise<void> {
     return this._ready.promise;
   }
 
@@ -130,7 +119,7 @@ export class WebSocketProvider implements IDocumentProvider {
   private _format: string;
   private _isDisposed: boolean;
   private _path: string;
-  private _ready: PromiseDelegate<boolean>;
+  private _ready = new PromiseDelegate<void>();
   private _serverUrl: string;
   private _ydoc: Doc;
   private _yWebsocketProvider: YWebsocketProvider;

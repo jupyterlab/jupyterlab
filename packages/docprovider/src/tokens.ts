@@ -21,7 +21,7 @@ export interface IDocumentProvider extends IDisposable {
   /**
    * Returns a Promise that resolves when the document provider is ready.
    */
-  readonly ready: Promise<boolean>;
+  readonly ready: Promise<void>;
 }
 
 /**
