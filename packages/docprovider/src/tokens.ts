@@ -5,6 +5,7 @@
 
 import { ISharedDocument } from '@jupyterlab/shared-models';
 import { Token } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 
 /**
  * The default document provider token.
@@ -16,16 +17,11 @@ export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
 /**
  * An interface for a document provider.
  */
-export interface IDocumentProvider {
+export interface IDocumentProvider extends IDisposable {
   /**
-   * Returns a Promise that resolves when the document is ready.
+   * Returns a Promise that resolves when the document provider is ready.
    */
   readonly ready: Promise<boolean>;
-
-  /**
-   * Destroy the provider.
-   */
-  destroy(): void;
 }
 
 /**
@@ -44,7 +40,7 @@ export namespace IDocumentProviderFactory {
    */
   export interface IOptions<T extends ISharedDocument> {
     /**
-     * The name (id) of the room
+     * The document file path
      */
     path: string;
 

@@ -7,8 +7,10 @@ import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection, UserManager } from '@jupyterlab/services';
 import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
+import { Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
+import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
+import type { Doc } from 'yjs';
 import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 
 const FILE_PATH_TO_ROOM_ID_URL = 'api/yjs/roomid';
@@ -26,6 +28,7 @@ export class WebSocketProvider implements IDocumentProvider {
    * @param options The instantiation options for a WebSocketProvider
    */
   constructor(options: WebSocketProvider.IOptions) {
+    this._isDisposed = false;
     this._path = options.path;
     this._contentType = options.contentType;
     this._format = options.format;
@@ -35,15 +38,13 @@ export class WebSocketProvider implements IDocumentProvider {
     this._awareness = options.model.awareness;
 
     const user = options.user;
-    const userChanged = () => {
-      this._awareness.setLocalStateField('user', user.identity);
-    };
-    if (user.isReady) {
-      userChanged();
-    }
 
-    user.ready.then(userChanged).catch(e => console.error(e));
-    user.userChanged.connect(userChanged);
+    user.ready
+      .then(() => {
+        this._onUserChanged(user);
+      })
+      .catch(e => console.error(e));
+    user.userChanged.connect(this._onUserChanged, this);
   }
 
   get ready(): Promise<boolean> {
@@ -94,21 +95,44 @@ export class WebSocketProvider implements IDocumentProvider {
       });
   }
 
+  /**
+   * Test whether the object has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Returns a Promise that resolves when the document provider is ready.
+   */
   get ready(): Promise<boolean> {
     return this._ready.promise;
   }
 
-  destroy(): void {
+  /**
+   * Dispose of the resources held by the object.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
     this._yWebsocketProvider.destroy();
+    Signal.clearData(this);
+  }
+
+  private _onUserChanged(user: UserManager.IManager): void {
+    this._awareness.setLocalStateField('user', user.identity);
   }
 
   private _awareness: Awareness;
   private _contentType: string;
   private _format: string;
+  private _isDisposed: boolean;
   private _path: string;
   private _ready: PromiseDelegate<boolean>;
   private _serverUrl: string;
-  private _ydoc: any;
+  private _ydoc: Doc;
   private _yWebsocketProvider: YWebsocketProvider;
 }
 

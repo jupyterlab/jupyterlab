@@ -216,7 +216,7 @@ export class Context<
     this._isDisposed = true;
     this.sessionContext.dispose();
     this._model.dispose();
-    this._provider.destroy();
+    this._provider.dispose();
     this._model.sharedModel.dispose();
     this._ydoc.destroy();
     this._disposed.emit(void 0);
