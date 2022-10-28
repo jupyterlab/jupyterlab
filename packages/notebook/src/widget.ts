@@ -362,7 +362,7 @@ export class StaticNotebook extends WindowedList {
   }
 
   /**
-   * Move a cell preserving widget view state.
+   * Move cells preserving widget view state.
    *
    * #### Notes
    * This is required because at the model level a move is a deletion
@@ -395,13 +395,14 @@ export class StaticNotebook extends WindowedList {
       }
     }
 
-    this.model!.sharedModel.moveCell(from, boundedTo, n);
+    this.model!.sharedModel.moveCells(from, boundedTo, n);
 
     for (let i = 0; i < n; i++) {
       const newCell = this.widgets[to + i];
-      for (const state in viewModel) {
+      const view = viewModel[i];
+      for (const state in view) {
         // @ts-expect-error Cell has no index signature
-        newCell[state] = viewModel[i][state];
+        newCell[state] = view[state];
       }
     }
   }
