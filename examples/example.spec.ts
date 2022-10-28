@@ -7,7 +7,7 @@ import { ConsoleMessage, expect, test } from '@playwright/test';
 
 const URL = process.env['BASE_URL'];
 
-test.setTimeout(120000);
+test.setTimeout(240000);
 
 test('should load the example', async ({ page }) => {
   console.info('Navigating to page:', URL);

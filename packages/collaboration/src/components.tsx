@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { User } from '@jupyterlab/services';
+
 import * as React from 'react';
 
-import { IUser } from './tokens';
-
 type Props = {
-  user: IUser.User;
+  user: User.IIdentity;
 };
 
 /**
@@ -20,7 +20,7 @@ export const UserIconComponent: React.FC<Props> = props => {
   return (
     <div className="jp-UserInfo-Container">
       <div
-        title={user.displayName}
+        title={user.display_name}
         className="jp-UserInfo-Icon"
         style={{ backgroundColor: user.color }}
       >

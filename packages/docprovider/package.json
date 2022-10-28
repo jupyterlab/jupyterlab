@@ -39,7 +39,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/collaboration": "^4.0.0-alpha.15",
+    "@jupyterlab/services": "^7.0.0-alpha.15",
     "@jupyterlab/shared-models": "^4.0.0-alpha.15",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "lib0": "^0.2.42",
