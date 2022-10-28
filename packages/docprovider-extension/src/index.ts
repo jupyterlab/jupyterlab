@@ -24,7 +24,6 @@ import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
  */
 const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docprovider-extension:plugin',
-  requires: [],
   provides: IDocumentProviderFactory,
   activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
     const server = ServerConnection.makeSettings();
