@@ -6,6 +6,9 @@
       "path": "../collaboration"
     },
     {
+      "path": "../services"
+    },
+    {
       "path": "../shared-models"
     },
     {
@@ -16,6 +19,9 @@
     },
     {
       "path": "../collaboration"
+    },
+    {
+      "path": "../services"
     },
     {
       "path": "../shared-models"
