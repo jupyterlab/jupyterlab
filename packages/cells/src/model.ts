@@ -217,9 +217,15 @@ export function isRawCellModel(model: ICellModel): model is IRawCellModel {
  */
 export abstract class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions<ISharedCell> = {}) {
+    const { cell_type, sharedModel, ...others } = options;
     super({
-      sharedModel: createStandaloneCell({ cell_type: 'raw', id: options.id }),
-      ...options
+      sharedModel:
+        sharedModel ??
+        createStandaloneCell({
+          cell_type: cell_type ?? 'raw',
+          id: options.id
+        }),
+      ...others
     });
     this.standaloneModel = typeof options.sharedModel === 'undefined';
     this.trusted = !!this.getMetadata('trusted') || !!options.trusted;
@@ -369,6 +375,12 @@ export namespace CellModel {
      * The cell shared model.
      */
     sharedModel?: T;
+
+    /**
+     * The cell type
+     */
+    cell_type?: string;
+
     /**
      * Whether the cell is trusted or not.
      */
@@ -464,15 +476,15 @@ export class RawCellModel extends AttachmentsCellModel {
   /**
    * Construct a raw cell model from optional shared model.
    */
-  constructor(options: AttachmentsCellModel.IOptions<ISharedRawCell> = {}) {
+  constructor(
+    options: Omit<
+      AttachmentsCellModel.IOptions<ISharedRawCell>,
+      'cell_type'
+    > = {}
+  ) {
     super({
-      ...options,
-      sharedModel:
-        options?.sharedModel ||
-        (createStandaloneCell({
-          cell_type: 'raw',
-          id: options.id
-        }) as ISharedRawCell)
+      cell_type: 'raw',
+      ...options
     });
   }
 
@@ -499,16 +511,14 @@ export class MarkdownCellModel extends AttachmentsCellModel {
    * Construct a markdown cell model from optional shared model.
    */
   constructor(
-    options: AttachmentsCellModel.IOptions<ISharedMarkdownCell> = {}
+    options: Omit<
+      AttachmentsCellModel.IOptions<ISharedMarkdownCell>,
+      'cell_type'
+    > = {}
   ) {
     super({
-      ...options,
-      sharedModel:
-        options?.sharedModel ||
-        (createStandaloneCell({
-          cell_type: 'markdown',
-          id: options.id
-        }) as ISharedMarkdownCell)
+      cell_type: 'markdown',
+      ...options
     });
     // Use the Github-flavored markdown mode.
     this.mimeType = 'text/x-ipythongfm';
@@ -538,10 +548,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   constructor(options: CodeCellModel.IOptions = {}) {
     super({
-      ...options,
-      sharedModel:
-        options?.sharedModel ??
-        createStandaloneCell({ cell_type: 'code', id: options.id })
+      cell_type: 'code',
+      ...options
     });
 
     const factory =
@@ -740,7 +748,8 @@ export namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions extends CellModel.IOptions<ISharedCodeCell> {
+  export interface IOptions
+    extends Omit<CellModel.IOptions<ISharedCodeCell>, 'cell_type'> {
     /**
      * The factory for output area model creation.
      */

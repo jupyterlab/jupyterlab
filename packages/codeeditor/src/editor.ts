@@ -196,7 +196,7 @@ export namespace CodeEditor {
     constructor(options: Model.IOptions = {}) {
       // Track if we need to dispose the model or not.
       this.standaloneModel = typeof options.sharedModel === 'undefined';
-      this.sharedModel = options.sharedModel ?? YFile.create();
+      this.sharedModel = options.sharedModel ?? new YFile();
       this._mimeType = options.mimeType ?? 'text/plain';
     }
 

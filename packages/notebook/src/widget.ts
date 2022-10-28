@@ -1365,7 +1365,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Move a cell preserving widget view state.
+   * Move cells preserving widget view state.
    *
    * #### Notes
    * This is required because at the model level a move is a deletion

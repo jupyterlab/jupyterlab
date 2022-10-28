@@ -100,7 +100,7 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    this.sharedModel = YNotebook.create({
+    this.sharedModel = new YNotebook({
       disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
     });
     this._cells = new CellList(this.sharedModel);

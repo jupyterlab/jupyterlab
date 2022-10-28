@@ -1,28 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { IMapChange, NotebookChange, YCodeCell, YNotebook } from '../src';
+import {
+  IMapChange,
+  NotebookChange,
+  YCodeCell,
+  YNotebook
+} from '@jupyterlab/shared-models';
 
 describe('@jupyterlab/shared-models', () => {
   describe('YNotebook', () => {
     describe('#constructor', () => {
       it('should create a notebook without arguments', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         expect(notebook.cells.length).toBe(0);
-      });
-
-      it('should have the default nbformat', () => {
-        const notebook = YNotebook.create();
-        expect(notebook.nbformat).toEqual(nbformat.MAJOR_VERSION);
-        expect(notebook.nbformat_minor).toEqual(nbformat.MINOR_VERSION);
       });
     });
 
     describe('metadata', () => {
       it('should get metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -37,7 +34,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should get all metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -52,7 +49,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should get one metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -67,7 +64,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should set one metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -85,7 +82,7 @@ describe('@jupyterlab/shared-models', () => {
       it.each([null, undefined, 1, true, 'string', { a: 1 }, [1, 2]])(
         'should get single metadata %s',
         value => {
-          const nb = YNotebook.create();
+          const nb = new YNotebook();
           const metadata = {
             orig_nbformat: 1,
             kernelspec: {
@@ -102,7 +99,7 @@ describe('@jupyterlab/shared-models', () => {
       );
 
       it('should update metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = notebook.getMetadata();
         expect(metadata).toBeTruthy();
         metadata.orig_nbformat = 1;
@@ -127,7 +124,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit all metadata changes', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -162,7 +159,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit a add metadata change', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -187,7 +184,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit a delete metadata change', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -219,7 +216,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit an update metadata change', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -253,18 +250,18 @@ describe('@jupyterlab/shared-models', () => {
 
     describe('#insertCell', () => {
       it('should insert a cell', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         notebook.insertCell(0, { cell_type: 'code' });
         expect(notebook.cells.length).toBe(1);
       });
       it('should set cell source', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const codeCell = notebook.insertCell(0, { cell_type: 'code' });
         codeCell.setSource('test');
         expect(notebook.cells[0].getSource()).toBe('test');
       });
       it('should update source', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const codeCell = notebook.insertCell(0, { cell_type: 'code' });
         codeCell.setSource('test');
         codeCell.updateSource(0, 0, 'hello');
@@ -272,7 +269,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit a add cells change', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const changes: NotebookChange[] = [];
         notebook.changed.connect((_, c) => {
           changes.push(c);
@@ -290,7 +287,7 @@ describe('@jupyterlab/shared-models', () => {
 
     describe('#deleteCell', () => {
       it('should emit a delete cells change', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const changes: NotebookChange[] = [];
         const codeCell = notebook.insertCell(0, { cell_type: 'code' });
 
@@ -307,7 +304,7 @@ describe('@jupyterlab/shared-models', () => {
 
     describe('#moveCell', () => {
       it('should emit add and delete cells changes when moving a cell', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const changes: NotebookChange[] = [];
         const codeCell = notebook.addCell({ cell_type: 'code' });
         notebook.addCell({ cell_type: 'markdown' });
@@ -419,7 +416,7 @@ describe('@jupyterlab/shared-models', () => {
     });
 
     it('should emit all metadata changes', () => {
-      const notebook = YNotebook.create();
+      const notebook = new YNotebook();
       const metadata = {
         collapsed: true,
         editable: false,

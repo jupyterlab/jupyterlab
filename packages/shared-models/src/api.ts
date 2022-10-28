@@ -269,12 +269,18 @@ export interface ISharedNotebook extends ISharedDocument {
    * Move a cell.
    *
    * @param fromIndex: Index of the cell to move.
-   *
    * @param toIndex: New position of the cell.
+   */
+  moveCell(fromIndex: number, toIndex: number): void;
+
+  /**
+   * Move cells.
    *
+   * @param fromIndex: Index of the first cells to move.
+   * @param toIndex: New position of the first cell (in the current array).
    * @param n: Number of cells to move (default 1)
    */
-  moveCell(fromIndex: number, toIndex: number, n?: number): void;
+  moveCells(fromIndex: number, toIndex: number, n?: number): void;
 
   /**
    * Remove a cell.

@@ -219,20 +219,11 @@ export class YFile
   implements ISharedFile, ISharedText, IYText
 {
   /**
-   * Instantiate a new shareable file.
+   * Create a new file
    *
-   * @param source The initial file content
-   *
-   * @returns The file model
+   * #### Notes
+   * The document is empty and must be populated
    */
-  static create(source?: string): YFile {
-    const model = new YFile();
-    if (source) {
-      model.source = source;
-    }
-    return model;
-  }
-
   constructor() {
     super();
     this.undoManager.addToScope(this.ysource);
@@ -1232,18 +1223,13 @@ export class YNotebook
   implements ISharedNotebook
 {
   /**
-   * Create a new YNotebook.
+   * Create a new notebook
+   *
+   * #### Notes
+   * The document is empty and must be populated
+   *
+   * @param options
    */
-  static create(options: ISharedNotebook.IOptions = {}): ISharedNotebook {
-    const notebook = new YNotebook(options);
-    notebook.nbformat = nbformat.MAJOR_VERSION;
-    notebook.nbformat_minor = nbformat.MINOR_VERSION;
-    if (!notebook.ymeta.get('metadata')) {
-      notebook.ymeta.set('metadata', {});
-    }
-    return notebook;
-  }
-
   constructor(options: ISharedNotebook.IOptions = {}) {
     super();
     this._disableDocumentWideUndoRedo =
@@ -1409,9 +1395,19 @@ export class YNotebook
    *
    * @param fromIndex: Index of the cell to move.
    * @param toIndex: New position of the cell.
-   * @param n: Number of cells to move
    */
-  moveCell(fromIndex: number, toIndex: number, n = 1): void {
+  moveCell(fromIndex: number, toIndex: number): void {
+    this.moveCells(fromIndex, toIndex);
+  }
+
+  /**
+   * Move cells.
+   *
+   * @param fromIndex: Index of the first cells to move.
+   * @param toIndex: New position of the first cell (in the current array).
+   * @param n: Number of cells to move (default 1)
+   */
+  moveCells(fromIndex: number, toIndex: number, n = 1): void {
     // FIXME we need to use yjs move feature to preserve undo history
     const clones = new Array(n)
       .fill(true)
@@ -1472,7 +1468,7 @@ export class YNotebook
    * @returns Notebook's metadata.
    */
   getMetadata(key?: string): nbformat.INotebookMetadata {
-    const meta = this.ymeta.get('metadata');
+    const meta = this.ymeta.get('metadata') ?? {};
 
     if (typeof key === 'string') {
       const value = meta[key];
