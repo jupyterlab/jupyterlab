@@ -31,8 +31,9 @@ export class WebSocketProvider implements IDocumentProvider {
     this._format = options.format;
     this._serverUrl = options.url;
     this._ydoc = options.model.ydoc;
-
+    this._ready = new PromiseDelegate();
     this._awareness = options.model.awareness;
+
     const user = options.user;
     const userChanged = () => {
       this._awareness.setLocalStateField('user', user.identity);
@@ -40,6 +41,7 @@ export class WebSocketProvider implements IDocumentProvider {
     if (user.isReady) {
       userChanged();
     }
+
     user.ready.then(userChanged).catch(e => console.error(e));
     user.userChanged.connect(userChanged);
   }
@@ -90,7 +92,9 @@ export class WebSocketProvider implements IDocumentProvider {
         console.warn(reason);
         this._ready.resolve(false);
       });
+  }
 
+  get ready(): Promise<boolean> {
     return this._ready.promise;
   }
 
