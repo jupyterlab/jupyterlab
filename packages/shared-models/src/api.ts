@@ -14,10 +14,14 @@
  * It also defines the shared changes to be used in the events.
  */
 
-import * as nbformat from '@jupyterlab/nbformat';
-import { PartialJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type {
+  JSONObject,
+  JSONValue,
+  PartialJSONObject
+} from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
 
 /**
  * ISharedBase defines common operations that can be performed on any shared object.
@@ -62,6 +66,26 @@ export interface ISharedDocument extends ISharedBase {
    * Whether the document is saved to disk or not.
    */
   readonly dirty: boolean;
+
+  /**
+   * Document state
+   */
+  readonly state: JSONObject;
+
+  /**
+   * Get the value for a state attribute
+   *
+   * @param key Key to get
+   */
+  getState(key: string): JSONValue | undefined;
+
+  /**
+   * Set the value of a state attribute
+   *
+   * @param key Key to set
+   * @param value New attribute value
+   */
+  setState(key: string, value: JSONValue): void;
 
   /**
    * The changed signal.
