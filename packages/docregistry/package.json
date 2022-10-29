@@ -58,8 +58,7 @@
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/messaging": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
-    "@lumino/widgets": "^2.0.0-alpha.6",
-    "yjs": "^13.5.40"
+    "@lumino/widgets": "^2.0.0-alpha.6"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.15",

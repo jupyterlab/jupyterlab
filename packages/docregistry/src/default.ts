@@ -156,20 +156,24 @@ export class DocumentModel
 
   private _onStateChanged(
     sender: models.ISharedFile,
-    changes: models.NotebookChange | models.FileChange
+    changes: models.DocumentChange
   ): void {
-    if (changes.contextChange || (changes as models.FileChange).sourceChange) {
+    if ((changes as models.FileChange).sourceChange) {
       this.triggerContentChange();
     }
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
-          this._dirty = value.newValue;
-          this.triggerStateChange({
-            newValue: undefined,
-            oldValue: undefined,
-            ...value
-          });
+        if (value.oldValue !== value.newValue) {
+          if (value.name === 'dirty') {
+            // Setting `dirty` will trigger the state change.
+            this.dirty = value.newValue;
+          } else {
+            this.triggerStateChange({
+              newValue: undefined,
+              oldValue: undefined,
+              ...value
+            });
+          }
         }
       });
     }
