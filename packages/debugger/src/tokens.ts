@@ -5,6 +5,8 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
+import { ISharedText } from '@jupyterlab/shared-models';
+
 import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
@@ -396,7 +398,7 @@ export namespace IDebugger {
      *
      * @param params - The editor find parameters.
      */
-    find(params: ISources.FindParams): CodeEditor.IEditor[];
+    find(params: ISources.FindParams): ISources.IEditor[];
 
     /**
      * Open a read-only editor in the main area.
@@ -695,6 +697,24 @@ export namespace IDebugger {
    * A utility to find text editors used by the debugger.
    */
   export namespace ISources {
+    /**
+     * Source editor interface
+     */
+    export interface IEditor {
+      /**
+       * Editor getter
+       */
+      get(): CodeEditor.IEditor | null;
+      /**
+       * Reveal editor
+       */
+      reveal(): Promise<void>;
+      /**
+       * Editor source text
+       */
+      src: ISharedText;
+    }
+
     /**
      * Unified parameters for the find method
      */

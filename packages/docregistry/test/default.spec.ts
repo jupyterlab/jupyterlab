@@ -14,7 +14,6 @@ import {
 import { ServiceManager } from '@jupyterlab/services';
 import { sleep } from '@jupyterlab/testutils';
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-import { toArray } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
@@ -189,18 +188,18 @@ describe('docregistry/default', () => {
         const context = await Mock.createFileContext();
         const widget = factory.createNew(context);
         const widget2 = factory.createNew(context);
-        expect(toArray(widget.toolbar.names())).toEqual([
+        expect(Array.from(widget.toolbar.names())).toEqual([
           'foo',
           'bar',
           'toolbar-popup-opener'
         ]);
-        expect(toArray(widget2.toolbar.names())).toEqual([
+        expect(Array.from(widget2.toolbar.names())).toEqual([
           'foo',
           'bar',
           'toolbar-popup-opener'
         ]);
-        expect(toArray(widget.toolbar.children()).length).toBe(3);
-        expect(toArray(widget2.toolbar.children()).length).toBe(3);
+        expect(Array.from(widget.toolbar.children()).length).toBe(3);
+        expect(Array.from(widget2.toolbar.children()).length).toBe(3);
       });
     });
 
@@ -539,8 +538,8 @@ describe('docregistry/default', () => {
     describe('#preferredLanguage()', () => {
       it('should get the preferred kernel language given an extension', () => {
         const factory = new TextModelFactory();
-        expect(factory.preferredLanguage('.py')).toBe('python');
-        expect(factory.preferredLanguage('.jl')).toBe('julia');
+        expect(factory.preferredLanguage('.py')).toBe('Python');
+        expect(factory.preferredLanguage('.jl')).toBe('Julia');
       });
     });
   });

@@ -3,7 +3,6 @@
 
 import * as Mock from '../src/mock';
 import { KernelMessage } from '@jupyterlab/services';
-import { toArray } from '@lumino/algorithm';
 
 describe('mock', () => {
   describe('createSimpleSessionContext()', () => {
@@ -375,13 +374,6 @@ describe('mock', () => {
       });
     });
 
-    describe('.getModelDBFactory()', () => {
-      it('should return null', () => {
-        const manager = new Mock.ContentsManagerMock();
-        expect(manager.getModelDBFactory('foo')).toBe(null);
-      });
-    });
-
     describe('.normalize()', () => {
       it('should normalize a path', () => {
         const manager = new Mock.ContentsManagerMock();
@@ -522,9 +514,9 @@ describe('mock', () => {
           type: 'bar',
           kernel: { name: Mock.DEFAULT_NAME }
         });
-        expect(toArray(manager.running()).length).toBe(1);
+        expect(Array.from(manager.running()).length).toBe(1);
         await manager.stopIfNeeded(session.path);
-        expect(toArray(manager.running()).length).toBe(0);
+        expect(Array.from(manager.running()).length).toBe(0);
       });
     });
 
@@ -544,7 +536,7 @@ describe('mock', () => {
           type: 'bar',
           kernel: { name: Mock.DEFAULT_NAME }
         });
-        expect(toArray(manager.running()).length).toBe(1);
+        expect(Array.from(manager.running()).length).toBe(1);
       });
     });
   });

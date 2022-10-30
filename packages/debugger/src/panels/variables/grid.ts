@@ -522,6 +522,9 @@ namespace Private {
       let hit = grid.hitTest(clientX, clientY);
 
       this._selected.emit(hit);
+
+      // Propagate event to Lumino DataGrid BasicMouseHandler.
+      super.onMouseDown(grid, event);
     }
 
     /**

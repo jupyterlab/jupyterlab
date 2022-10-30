@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc-extension",
-  "version": "6.0.0-alpha.11",
+  "version": "6.0.0-alpha.15",
   "description": "JupyterLab - Table of Contents widget extension",
   "keywords": [
     "jupyter",
@@ -40,12 +40,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.11",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.11",
-    "@jupyterlab/toc": "^6.0.0-alpha.11",
-    "@jupyterlab/translation": "^4.0.0-alpha.11",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.26",
-    "@lumino/algorithm": "^1.9.1"
+    "@jupyterlab/application": "^4.0.0-alpha.15",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.15",
+    "@jupyterlab/toc": "^6.0.0-alpha.15",
+    "@jupyterlab/translation": "^4.0.0-alpha.15",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.30"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

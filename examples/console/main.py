@@ -60,7 +60,8 @@ class ExampleApp(LabServerApp):
     extension_url = "/example"
     default_url = "/example"
     app_url = "/example"
-    load_other_extensions = False
+    # In jupyter-server v2 terminals are an extension
+    load_other_extensions = True
     name = __name__
     app_name = "JupyterLab Example Console"
     app_settings_dir = os.path.join(HERE, "build", "application_settings")

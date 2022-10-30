@@ -5,7 +5,7 @@ import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IModelDB, IObservableList } from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
 import * as models from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -24,13 +24,9 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
-    super({ modelDB });
+  constructor(languagePreference?: string) {
+    super({ sharedModel: new models.YFile() as models.ISharedText });
     this._defaultLang = languagePreference || '';
-    const filemodel = new models.YFile() as models.ISharedFile;
-    this.switchSharedModel(filemodel, true);
-    this.value.changed.connect(this.triggerContentChange, this);
-
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
 
@@ -106,7 +102,7 @@ export class DocumentModel
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.value.text;
+    return this.sharedModel.getSource();
   }
 
   /**
@@ -116,14 +112,14 @@ export class DocumentModel
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.value.text = value;
+    this.sharedModel.setSource(value);
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): PartialJSONValue {
-    return JSON.parse(this.value.text || 'null');
+    return JSON.parse(this.sharedModel.getSource() || 'null');
   }
 
   /**
@@ -160,13 +156,24 @@ export class DocumentModel
 
   private _onStateChanged(
     sender: models.ISharedFile,
-    changes: models.NotebookChange
+    changes: models.DocumentChange
   ): void {
+    if ((changes as models.FileChange).sourceChange) {
+      this.triggerContentChange();
+    }
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
-          this._dirty = value.newValue;
-          this.triggerStateChange(value);
+        if (value.oldValue !== value.newValue) {
+          if (value.name === 'dirty') {
+            // Setting `dirty` will trigger the state change.
+            this.dirty = value.newValue;
+          } else {
+            this.triggerStateChange({
+              newValue: undefined,
+              oldValue: undefined,
+              ...value
+            });
+          }
         }
       });
     }
@@ -239,12 +246,8 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(
-    languagePreference?: string,
-    modelDB?: IModelDB,
-    isInitialized?: boolean
-  ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB);
+  createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
+    return new DocumentModel(languagePreference);
   }
 
   /**
@@ -252,7 +255,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    */
   preferredLanguage(path: string): string {
     const mode = Mode.findByFileName(path);
-    return mode && mode.mode;
+    return mode?.name ?? '';
   }
 
   private _isDisposed = false;
@@ -546,7 +549,9 @@ export class DocumentWidget<
   private async _onTitleChanged(_sender: Title<this>) {
     const validNameExp = /[\/\\:]/;
     const name = this.title.label;
-    const filename = this.context.path.split('/').pop()!;
+    // Use localPath to avoid the drive name
+    const filename =
+      this.context.localPath.split('/').pop() || this.context.localPath;
 
     if (name === filename) {
       return;
@@ -571,6 +576,8 @@ export class DocumentWidget<
     path: string
   ): void {
     this.title.label = PathExt.basename(sender.localPath);
+    // The document is not untitled any more.
+    this.isUntitled = false;
   }
 
   /**
@@ -600,6 +607,15 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
+
+  /**
+   * Whether the document has an auto-generated name or not.
+   *
+   * #### Notes
+   * A document has auto-generated name if its name is untitled and up
+   * to the instant the user saves it manually for the first time.
+   */
+  isUntitled?: boolean;
 }
 
 export namespace DocumentWidget {

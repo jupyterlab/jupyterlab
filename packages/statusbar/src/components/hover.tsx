@@ -32,6 +32,12 @@ export class Popup extends Widget {
     this._body.addClass(hoverItem);
     this._anchor = options.anchor;
     this._align = options.align;
+    if (options.hasDynamicSize) {
+      this._observer = new ResizeObserver(() => {
+        this.update();
+      });
+      this._observer.observe(this._body.node);
+    }
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(options.body);
     this._body.node.addEventListener('resize', () => {
@@ -87,6 +93,7 @@ export class Popup extends Widget {
    * Dispose of the widget.
    */
   dispose(): void {
+    this._observer?.disconnect();
     super.dispose();
     this._anchor.removeClass(clickedItem);
     this._anchor.addClass(interactiveItem);
@@ -161,6 +168,7 @@ export class Popup extends Widget {
   private _body: Widget;
   private _anchor: Widget;
   private _align: 'left' | 'right' | undefined;
+  private _observer: ResizeObserver | null;
 }
 
 /**
@@ -185,5 +193,11 @@ export namespace Popup {
      * Whether to align the popup to the left or the right of the anchor.
      */
     align?: 'left' | 'right';
+
+    /**
+     * Whether the body has dynamic size or not.
+     * By default, this is `false`.
+     */
+    hasDynamicSize?: boolean;
   }
 }

@@ -22,8 +22,6 @@ import {
   signalToPromise
 } from '@jupyterlab/testutils';
 
-import { toArray } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
 
 import { UUID } from '@lumino/coreutils';
@@ -82,7 +80,7 @@ describe('Debugger', () => {
       type: 'test',
       path: UUID.uuid4()
     });
-    await connection.changeKernel({ name: 'xpython' });
+    await connection.changeKernel({ name: 'python3' });
 
     session = new Debugger.Session({ connection });
     service.session = session;
@@ -364,9 +362,9 @@ describe('Debugger', () => {
 
     it('should display the source code in the body', () => {
       const body = sidebar.sources.widgets[0] as SourcesBody;
-      const children = toArray(body.children());
+      const children = Array.from(body.children());
       const editor = children[0] as CodeEditorWrapper;
-      expect(editor.model.value.text).toEqual(code);
+      expect(editor.model.sharedModel.getSource()).toEqual(code);
     });
   });
 });

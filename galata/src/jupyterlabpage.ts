@@ -16,6 +16,7 @@ import {
   PerformanceHelper,
   SidebarHelper,
   StatusBarHelper,
+  StyleHelper,
   ThemeHelper
 } from './helpers';
 import { IPluginNameToInterfaceMap, PLUGIN_ID_SETTINGS } from './inpage/tokens';
@@ -77,6 +78,10 @@ export interface IJupyterLabPage {
    * JupyterLab sidebar helpers
    */
   readonly sidebar: SidebarHelper;
+  /**
+   * JupyterLab style helpers
+   */
+  readonly style: StyleHelper;
   /**
    * JupyterLab theme helpers
    */
@@ -262,7 +267,7 @@ export class JupyterLabPage implements IJupyterLabPage {
   ) {
     this.waitIsReady = waitForApplication;
     this.activity = new ActivityHelper(page);
-    this.contents = new ContentsHelper(baseURL, page);
+    this.contents = new ContentsHelper(page.context().request, page);
     this.filebrowser = new FileBrowserHelper(page, this.contents);
     this.kernel = new KernelHelper(page);
     this.logconsole = new LogConsoleHelper(page);
@@ -277,6 +282,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     this.performance = new PerformanceHelper(page);
     this.statusbar = new StatusBarHelper(page, this.menu);
     this.sidebar = new SidebarHelper(page, this.menu);
+    this.style = new StyleHelper(page);
     this.theme = new ThemeHelper(page);
     this.debugger = new DebuggerHelper(page, this.sidebar, this.notebook);
   }
@@ -330,6 +336,12 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab sidebar helpers
    */
   readonly sidebar: SidebarHelper;
+
+  /**
+   * JupyterLab style helpers
+   */
+  readonly style: StyleHelper;
+
   /**
    * JupyterLab theme helpers
    */
@@ -492,16 +504,26 @@ export class JupyterLabPage implements IJupyterLabPage {
      * - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
      * - `'load'` - consider operation to be finished when the `load` event is fired.
      * - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+     * - `'commit'` - consider operation to be finished when network response is received and the document started loading.
      */
-    waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+    waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' | 'commit';
+
+    /**
+     * Whether to wait for fixture `waitIsReady` or not when reloading.
+     *
+     * Default is true.
+     */
+    waitForIsReady?: boolean;
   }): Promise<Response | null> {
     const response = await this.page.reload({
-      ...(options ?? {}),
+      timeout: options?.timeout,
       waitUntil: options?.waitUntil ?? 'domcontentloaded'
     });
     await this.waitForAppStarted();
     await this.hookHelpersUp();
-    await this.waitIsReady(this.page, this);
+    if (options?.waitForIsReady ?? true) {
+      await this.waitIsReady(this.page, this);
+    }
     return response;
   }
 

@@ -134,7 +134,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       _: Session.ISessionConnection,
       status: Kernel.Status
     ): void => {
-      // FIXME-TRANS: Localizable?
       if (status.endsWith('restarting')) {
         void this.updateWidget(widget, connection);
       }

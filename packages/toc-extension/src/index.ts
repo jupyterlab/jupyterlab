@@ -32,7 +32,6 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -54,7 +53,7 @@ namespace CommandIDs {
  *
  * @private
  * @param app - Jupyter application
- * @param registry - Table of contents registry
+ * @param tocRegistry - Table of contents registry
  * @param translator - translator
  * @param restorer - application layout restorer
  * @param labShell - Jupyter lab shell
@@ -180,12 +179,12 @@ async function activateTOC(
         }
 
         if (labShell) {
-          toArray(labShell.widgets('main')).forEach(widget => {
+          for (const widget of labShell.widgets('main')) {
             const model = tracker.get(widget);
             if (model) {
               model.setConfiguration(configuration);
             }
-          });
+          }
         } else {
           if (app.shell.currentWidget) {
             const model = tracker.get(app.shell.currentWidget);
@@ -259,7 +258,7 @@ async function activateTOC(
   }
 
   // Connect to current widget
-  app.restored.then(() => {
+  void app.restored.then(() => {
     onConnect();
   });
 
@@ -288,11 +287,15 @@ async function activateTOC(
     }
 
     if (toc.model) {
+      toc.model.headingsChanged.disconnect(onCollapseChange);
       toc.model.collapseChanged.disconnect(onCollapseChange);
     }
 
     toc.model = model;
-    toc.model?.collapseChanged.connect(onCollapseChange);
+    if (toc.model) {
+      toc.model.headingsChanged.connect(onCollapseChange);
+      toc.model.collapseChanged.connect(onCollapseChange);
+    }
     setToolbarButtonsState();
   }
 

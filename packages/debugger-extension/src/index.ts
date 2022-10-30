@@ -19,7 +19,6 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
@@ -465,7 +464,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         const refreshWidget = () => {
           // Refresh the widget only if the active element is the same.
           if (handler.activeWidget === activeWidget) {
-            widget.refresh();
+            void widget.refresh();
           }
         };
         widget.disposed.connect(disposeWidget);
@@ -560,7 +559,8 @@ const main: JupyterFrontEndPlugin<void> = {
     IDebuggerSources,
     ILabShell,
     ILayoutRestorer,
-    ILoggerRegistry
+    ILoggerRegistry,
+    ISettingRegistry
   ],
   autoStart: true,
   activate: async (
@@ -573,7 +573,8 @@ const main: JupyterFrontEndPlugin<void> = {
     debuggerSources: IDebugger.ISources | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
-    loggerRegistry: ILoggerRegistry | null
+    loggerRegistry: ILoggerRegistry | null,
+    settingRegistry: ISettingRegistry | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
@@ -723,10 +724,29 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    let autoCollapseSidebar = false;
+
+    if (settingRegistry) {
+      const setting = await settingRegistry.load(main.id);
+      const updateSettings = (): void => {
+        autoCollapseSidebar = setting.get('autoCollapseDebuggerSidebar')
+          .composite as boolean;
+      };
+      updateSettings();
+      setting.changed.connect(updateSettings);
+    }
+
     service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
+      } else if (
+        labShell &&
+        sidebar.isVisible &&
+        event.event === 'terminated' &&
+        autoCollapseSidebar
+      ) {
+        labShell.collapseRight();
       }
     });
 
@@ -740,6 +760,8 @@ const main: JupyterFrontEndPlugin<void> = {
 
     sidebar.node.setAttribute('role', 'region');
     sidebar.node.setAttribute('aria-label', trans.__('Debugger section'));
+
+    sidebar.title.caption = trans.__('Debugger');
 
     shell.add(sidebar, 'right', { type: 'Debugger' });
 
@@ -784,7 +806,12 @@ const main: JupyterFrontEndPlugin<void> = {
           })
           .forEach(editor => {
             requestAnimationFrame(() => {
-              Debugger.EditorHandler.showCurrentLine(editor, frame.line);
+              void editor.reveal().then(() => {
+                const edit = editor.get();
+                if (edit) {
+                  Debugger.EditorHandler.showCurrentLine(edit, frame.line);
+                }
+              });
             });
           });
       };
@@ -807,17 +834,12 @@ const main: JupyterFrontEndPlugin<void> = {
         if (results.length > 0) {
           if (breakpoint && typeof breakpoint.line !== 'undefined') {
             results.forEach(editor => {
-              if (editor instanceof CodeMirrorEditor) {
-                (editor as CodeMirrorEditor).scrollIntoViewCentered({
-                  line: (breakpoint.line as number) - 1,
-                  ch: breakpoint.column || 0
-                });
-              } else {
-                editor.revealPosition({
+              void editor.reveal().then(() => {
+                editor.get()?.revealPosition({
                   line: (breakpoint.line as number) - 1,
                   column: breakpoint.column || 0
                 });
-              }
+              });
             });
           }
           return;
@@ -830,8 +852,10 @@ const main: JupyterFrontEndPlugin<void> = {
         const editor = editorWrapper.editor;
         const editorHandler = new Debugger.EditorHandler({
           debuggerService: service,
-          editor,
-          path
+          editorReady: () => Promise.resolve(editor),
+          getEditor: () => editor,
+          path,
+          src: editor.model.sharedModel
         });
         editorWrapper.disposed.connect(() => editorHandler.dispose());
 

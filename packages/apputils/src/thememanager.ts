@@ -8,7 +8,6 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { each } from '@lumino/algorithm';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -512,7 +511,9 @@ namespace Private {
    * Fit a widget and all of its children, recursively.
    */
   export function fitAll(widget: Widget): void {
-    each(widget.children(), fitAll);
+    for (const child of widget.children()) {
+      fitAll(child);
+    }
     widget.fit();
   }
 }

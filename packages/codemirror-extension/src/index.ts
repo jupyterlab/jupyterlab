@@ -20,7 +20,6 @@ import {
   CodeMirrorEditor,
   editorServices,
   EditorSyntaxStatus,
-  ICodeMirror,
   Mode
 } from '@jupyterlab/codemirror';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
@@ -30,7 +29,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
-import CodeMirror from 'codemirror';
+import { findNext, gotoLine } from '@codemirror/search';
 
 /**
  * The command IDs used by the codemirror plugin.
@@ -47,13 +46,6 @@ namespace CommandIDs {
   export const goToLine = 'codemirror:go-to-line';
 }
 
-/** The CodeMirror singleton. */
-const codemirrorSingleton: JupyterFrontEndPlugin<ICodeMirror> = {
-  id: '@jupyterlab/codemirror-extension:codemirror',
-  provides: ICodeMirror,
-  activate: activateCodeMirror
-};
-
 /**
  * The editor services.
  */
@@ -68,7 +60,7 @@ const services: JupyterFrontEndPlugin<IEditorServices> = {
  */
 const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, ISettingRegistry, ITranslator, ICodeMirror],
+  requires: [IEditorTracker, ISettingRegistry, ITranslator],
   optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
@@ -135,7 +127,7 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
     const item = new LineCol(translator);
 
     const providers = new Set<
-      (widget: Widget | null) => CodeEditor.IEditor | null
+      (widget: Widget | null) => Promise<CodeEditor.IEditor | null>
     >();
 
     if (statusBar) {
@@ -149,7 +141,7 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
     }
 
     const addEditorProvider = (
-      provider: (widget: Widget | null) => CodeEditor.IEditor | null
+      provider: (widget: Widget | null) => Promise<CodeEditor.IEditor | null>
     ): void => {
       providers.add(provider);
 
@@ -172,10 +164,14 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
       shell: JupyterFrontEnd.IShell,
       changes: ILabShell.IChangedArgs
     ) {
-      item.model.editor =
-        [...providers]
-          .map(provider => provider(changes.newValue))
-          .filter(editor => editor !== null)[0] ?? null;
+      Promise.all([...providers].map(provider => provider(changes.newValue)))
+        .then(editors => {
+          item.model.editor =
+            editors.filter(editor => editor !== null)[0] ?? null;
+        })
+        .catch(reason => {
+          console.error('Get editors', reason);
+        });
     }
 
     if (labShell) {
@@ -193,8 +189,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus,
-  lineColItem,
-  codemirrorSingleton
+  lineColItem
 ];
 export default plugins;
 
@@ -207,33 +202,10 @@ const id = commands.id;
  * Set up the editor services.
  */
 function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
-  CodeMirror.prototype.save = () => {
+  CodeMirrorEditor.prototype.save = () => {
     void app.commands.execute('docmanager:save');
   };
   return editorServices;
-}
-
-/**
- * Simplest implementation of the CodeMirror singleton provider.
- */
-class CodeMirrorSingleton implements ICodeMirror {
-  get CodeMirror() {
-    return CodeMirror;
-  }
-
-  async ensureVimKeymap() {
-    if (!('Vim' in (CodeMirror as any))) {
-      // @ts-expect-error Import non typed package
-      await import('codemirror/keymap/vim.js');
-    }
-  }
-}
-
-/**
- * Set up the CodeMirror singleton.
- */
-function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
-  return new CodeMirrorSingleton();
 }
 
 /**
@@ -244,7 +216,6 @@ function activateEditorCommands(
   tracker: IEditorTracker,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
-  codeMirror: ICodeMirror,
   mainMenu: IMainMenu | null
 ): void {
   const trans = translator.load('jupyterlab');
@@ -267,30 +238,13 @@ function activateEditorCommands(
   ): Promise<void> {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
 
-    // Lazy loading of vim mode
-    if (keyMap === 'vim') {
-      await codeMirror.ensureVimKeymap();
-    }
-
     theme = (settings.get('theme').composite as string | null) || theme;
-
-    // Lazy loading of theme stylesheets
-    if (theme !== 'jupyter' && theme !== 'default') {
-      const filename =
-        theme === 'solarized light' || theme === 'solarized dark'
-          ? 'solarized'
-          : theme;
-
-      await import(`codemirror/theme/${filename}.css`);
-    }
 
     scrollPastEnd =
       (settings.get('scrollPastEnd').composite as boolean | null) ??
       scrollPastEnd;
     styleActiveLine =
-      (settings.get('styleActiveLine').composite as
-        | boolean
-        | CodeMirror.StyleActiveLine) ?? styleActiveLine;
+      (settings.get('styleActiveLine').composite as boolean) ?? styleActiveLine;
     styleSelectedText =
       (settings.get('styleSelectedText').composite as boolean) ??
       styleSelectedText;
@@ -368,10 +322,7 @@ function activateEditorCommands(
    * Create a menu for the editor.
    */
   commands.addCommand(CommandIDs.changeTheme, {
-    label: args =>
-      args.theme === 'default'
-        ? trans.__('codemirror')
-        : trans.__((args.theme as string) ?? theme),
+    label: args => (args.theme as string) ?? theme,
     execute: args => {
       const key = 'theme';
       const value = (theme = (args['theme'] as string) ?? theme);
@@ -409,7 +360,7 @@ function activateEditorCommands(
         return;
       }
       const editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('find');
+      editor.execCommand(findNext);
     },
     isEnabled
   });
@@ -421,19 +372,18 @@ function activateEditorCommands(
       if (!widget) {
         return;
       }
+      const editor = widget.content.editor as CodeMirrorEditor;
+
       const line = args['line'] as number | undefined;
       const column = args['column'] as number | undefined;
-
-      const editor = widget.content.editor as CodeMirrorEditor;
       if (line !== undefined || column !== undefined) {
         editor.setCursorPosition({
           line: (line ?? 1) - 1,
           column: (column ?? 1) - 1
         });
       } else {
-        editor.execCommand('jumpToLine');
+        editor.execCommand(gotoLine);
       }
-      editor.focus();
     },
     isEnabled
   });
@@ -448,7 +398,7 @@ function activateEditorCommands(
       if (name && widget) {
         const spec = Mode.findByName(name);
         if (spec) {
-          widget.content.model.mimeType = spec.mime;
+          widget.content.model.mimeType = spec.mime as string;
         }
       }
     },
@@ -481,7 +431,7 @@ function activateEditorCommands(
         })
         .forEach(spec => {
           // Avoid mode name with a curse word.
-          if (spec.mode.indexOf('brainf') === 0) {
+          if (spec.name.indexOf('brainf') === 0) {
             return;
           }
           modeMenu.addItem({

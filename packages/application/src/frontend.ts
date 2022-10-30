@@ -5,7 +5,6 @@ import { CommandLinker } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
 import { ContextMenuSvg } from '@jupyterlab/ui-components';
-import { IIterator } from '@lumino/algorithm';
 import { Application, IPlugin } from '@lumino/application';
 import { Token } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -282,7 +281,7 @@ export namespace JupyterFrontEnd {
      *
      * @param area - Optional regions in the shell whose widgets are iterated.
      */
-    widgets(area?: string): IIterator<Widget>;
+    widgets(area?: string): IterableIterator<Widget>;
   }
 
   /**

@@ -8,7 +8,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { Toolbar } from '@jupyterlab/ui-components';
-import { each, toArray } from '@lumino/algorithm';
+import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
@@ -50,7 +50,7 @@ export class CellToolbarTracker implements IDisposable {
     this._toolbar.changed.connect(this._onToolbarChanged, this);
 
     // Only add the toolbar to the notebook's active cell (if any) once it has fully rendered and been revealed.
-    panel.revealed.then(() => this._onActiveCellChanged(panel.content));
+    void panel.revealed.then(() => this._onActiveCellChanged(panel.content));
 
     // Check whether the toolbar should be rendered upon a layout change
     panel.content.renderingLayoutChanged.connect(
@@ -63,7 +63,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   _onActiveCellChanged(notebook: Notebook): void {
-    if (this._previousActiveCell) {
+    if (this._previousActiveCell?.model) {
       this._removeToolbar(this._previousActiveCell.model);
     }
 
@@ -92,7 +92,9 @@ export class CellToolbarTracker implements IDisposable {
 
     const cells = this._panel?.context.model.cells;
     if (cells) {
-      each(cells.iter(), model => this._removeToolbar(model));
+      for (const model of cells) {
+        this._removeToolbar(model);
+      }
     }
 
     this._panel = null;
@@ -107,9 +109,9 @@ export class CellToolbarTracker implements IDisposable {
       const toolbarWidget = new Toolbar();
       toolbarWidget.addClass(CELL_MENU_CLASS);
 
-      toArray(this._toolbar).forEach(({ name, widget }) => {
+      for (const { name, widget } of this._toolbar) {
         toolbarWidget.addItem(name, widget);
-      });
+      }
 
       toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
       (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
@@ -136,7 +138,9 @@ export class CellToolbarTracker implements IDisposable {
   private _removeToolbar(model: ICellModel): void {
     const cell = this._getCell(model);
     if (cell) {
-      this._findToolbarWidgets(cell).forEach(widget => widget.dispose());
+      this._findToolbarWidgets(cell).forEach(widget => {
+        widget.dispose();
+      });
       // Attempt to remove the resize and changed event handlers.
       cell.displayChanged.disconnect(this._resizeEventCallback, this);
     }
@@ -224,6 +228,9 @@ export class CellToolbarTracker implements IDisposable {
    */
   private _markdownOverlapsToolbar(activeCell: MarkdownCell): boolean {
     const markdownOutput = activeCell.inputArea; // Rendered markdown appears in the input area
+    if (!markdownOutput) {
+      return false;
+    }
 
     // Get the rendered markdown as a widget.
     const markdownOutputWidget = markdownOutput.renderedInput;
@@ -256,7 +263,7 @@ export class CellToolbarTracker implements IDisposable {
       const toolbarRect = this._cellToolbarRect(activeCell);
       if (toolbarRect) {
         const { left: toolbarLeft, bottom: toolbarBottom } = toolbarRect;
-        return Array.from(outputs).some(output => {
+        return some(outputs, output => {
           const node = output.firstElementChild;
           if (node) {
             const range = new Range();
@@ -287,6 +294,10 @@ export class CellToolbarTracker implements IDisposable {
   private _codeOverlapsToolbar(activeCell: Cell<ICellModel>): boolean {
     const editorWidget = activeCell.editorWidget;
     const editor = activeCell.editor;
+    if (!editorWidget || !editor) {
+      return false;
+    }
+
     if (editor.lineCount < 1) {
       return false; // Nothing in the editor
     }
@@ -305,11 +316,11 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellEditorWidgetLeft(activeCell: Cell<ICellModel>): number {
-    return activeCell.editorWidget.node.getBoundingClientRect().left;
+    return activeCell.editorWidget?.node.getBoundingClientRect().left ?? 0;
   }
 
   private _cellEditorWidgetRight(activeCell: Cell<ICellModel>): number {
-    return activeCell.editorWidget.node.getBoundingClientRect().right;
+    return activeCell.editorWidget?.node.getBoundingClientRect().right ?? 0;
   }
 
   private _cellToolbarRect(activeCell: Cell<ICellModel>): DOMRect | null {

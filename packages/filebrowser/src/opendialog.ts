@@ -7,7 +7,6 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IScore, newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { FileBrowser } from './browser';
 import { FilterFileBrowserModel } from './model';
@@ -79,7 +78,7 @@ export namespace FileDialog {
     const dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
       title: options.title,
       buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.cancelButton(),
         Dialog.okButton({
           label: trans.__('Select')
         })
@@ -183,7 +182,7 @@ class OpenDialog
    * Get the selected items.
    */
   getValue(): Contents.IModel[] {
-    const selection = toArray(this._browser.selectedItems());
+    const selection = Array.from(this._browser.selectedItems());
     if (selection.length === 0) {
       // Return current path
       return [

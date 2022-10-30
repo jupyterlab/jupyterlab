@@ -87,7 +87,7 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
           python_version: "3.7"
-      - name: Install miniumum versions
+      - name: Install minimum versions
         uses: jupyterlab/maintainer-tools/.github/actions/install-minimums@v1
       - name: Install dependencies
         run: |
@@ -132,16 +132,27 @@ jobs:
           mkdir test
           tar --strip-components=1 -zxvf *.tar.gz -C ./test
           cd test
-          pip install -e .[test]
+          pip install -e .[dev,test]
           pip install pytest-github-actions-annotate-failures
       - name: Run Test
         run: |
           cd sdist/test
           pytest -vv || pytest -vv --lf
 
+  check_links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
+        with:
+          ignore_glob: "packages/ui-components/docs/source/ui_components.rst images"
+          ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.*"
+
   pre-commit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
       - name: Base Setup

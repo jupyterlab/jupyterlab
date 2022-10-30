@@ -4,7 +4,7 @@
 import { Widget } from '@lumino/widgets';
 
 /**
- * A phosphor widget which wraps an IFrame.
+ * A Lumino widget which wraps an IFrame.
  */
 export class IFrame extends Widget {
   /**

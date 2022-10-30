@@ -40,7 +40,7 @@ import {
   runIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
-import { each, find } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Menu, Widget } from '@lumino/widgets';
@@ -534,7 +534,7 @@ export function createKernelMenu(
   commands.addCommand(CommandIDs.shutdownAllKernels, {
     label: trans.__('Shut Down All Kernels…'),
     isEnabled: () => {
-      return app.serviceManager.sessions.running().next() !== undefined;
+      return !app.serviceManager.sessions.running().next().done;
     },
     execute: () => {
       return showDialog({
@@ -705,7 +705,7 @@ export function createTabsMenu(
         tabGroup.length = 0;
 
         let isPreviouslyUsedTabAttached = false;
-        each(app.shell.widgets('main'), widget => {
+        for (const widget of app.shell.widgets('main')) {
           if (widget.id === previousId) {
             isPreviouslyUsedTabAttached = true;
           }
@@ -713,7 +713,7 @@ export function createTabsMenu(
             command: CommandIDs.activateById,
             args: { id: widget.id }
           });
-        });
+        }
         disposable = menu.addGroup(tabGroup, 1);
         previousId = isPreviouslyUsedTabAttached ? previousId : '';
       };

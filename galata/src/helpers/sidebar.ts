@@ -208,7 +208,7 @@ export class SidebarHelper {
     side: galata.SidebarPosition = 'left'
   ): Promise<ElementHandle<Element> | null> {
     return await this.page.$(
-      `#jp-${side}-stack .p-StackedPanel-child:not(.lm-mod-hidden)`
+      `#jp-${side}-stack .lm-StackedPanel-child:not(.lm-mod-hidden)`
     );
   }
 

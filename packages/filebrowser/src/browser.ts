@@ -11,7 +11,6 @@ import {
   ReactWidget,
   SidePanel
 } from '@jupyterlab/ui-components';
-import { IIterator } from '@lumino/algorithm';
 import { Panel } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
@@ -215,7 +214,7 @@ export class FileBrowser extends SidePanel {
    *
    * @returns A new iterator over the listing's selected items.
    */
-  selectedItems(): IIterator<Contents.IModel> {
+  selectedItems(): IterableIterator<Contents.IModel> {
     return this.listing.selectedItems();
   }
 

@@ -1,35 +1,208 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 [build-system]
-requires=["jupyter_packaging>=0.9,<2"]
-build-backend = "jupyter_packaging.build_api"
+requires = ["hatchling>=1.2.0"]
+build-backend = "hatchling.build"
 
-[license]
-file="LICENSE"
+[project]
+name = "jupyterlab"
+description = "JupyterLab computational environment"
+readme = "README.md"
+license = ""
+requires-python = ">=3.7"
+authors = [
+    { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
+]
+keywords = [
+    "ipython",
+    "jupyter",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Jupyter",
+    "Framework :: Jupyter :: JupyterLab",
+    "Framework :: Jupyter :: JupyterLab :: 4",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "async_lru>=1.0.0",
+    "importlib-metadata>=4.8.3;python_version<\"3.10\"",
+    "importlib-resources>=1.4;python_version<\"3.9\"",
+    "ipykernel",
+    "jinja2>=3.0.3",
+    "jupyter_core",
+    "jupyter-lsp>=1.5.1",
+    "jupyter_server>=2.0.0rc3,<3",
+    "jupyter_ydoc>=0.2.2,<0.3.0",
+    "jupyter_server_ydoc>=0.1.14,<0.2.0",
+    "jupyterlab_server>=2.16.0,<3",
+    "notebook_shim>=0.2",
+    "packaging",
+    "traitlets",
+    "tornado>=6.1.0",
+    "tomli",
+    "ypy-websocket",
+]
+dynamic = [
+    "version",
+]
 
-[tool.jupyter-packaging.builder]
-factory = "jupyter_packaging.npm_builder"
+[project.scripts]
+jlpm = "jupyterlab.jlpmapp:main"
+jupyter-lab = "jupyterlab.labapp:main"
+jupyter-labextension = "jupyterlab.labextensions:main"
+jupyter-labhub = "jupyterlab.labhubapp:main"
 
-[tool.jupyter-packaging.build-args]
+[project.entry-points."jupyterlab.extension_manager_v1"]
+readonly = "jupyterlab.extensions:get_readonly_manager"
+pypi = "jupyterlab.extensions:get_pypi_manager"
+
+[project.urls]
+Homepage = "https://jupyter.org"
+Changelog = "https://jupyterlab.readthedocs.io/en/stable/getting_started/changelog.html"
+Documentation = "https://jupyterlab.readthedocs.io"
+Source = "https://github.com/jupyterlab/jupyterlab"
+Issues = "https://github.com/jupyterlab/jupyterlab/issues/new/choose"
+Gitter = "https://gitter.im/jupyterlab/jupyterlab"
+Pypi = "https://pypi.org/project/jupyterlab"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx>=1.8",
+    "sphinx-copybutton",
+    "pydata-sphinx-theme",
+    "pytest",
+    "pytest-tornasync",
+    "pytest-check-links",
+    "jsx-lexer",
+    "myst-parser",
+]
+docs-screenshots = [
+    "altair==4.2.0",
+    "ipython==8.0.0",
+    "ipywidgets==7.6.6",
+    "jupyterlab-geojson==3.2.0",
+    "jupyterlab-language-pack-zh-CN==3.2.post7",
+    "matplotlib==3.5.1",
+    "nbconvert>=7.0.0",
+    "pandas==1.3.5",
+    "scipy==1.7.3",
+    "vdom==0.6",
+    "vega_datasets==0.9.0",
+]
+test = [
+    "coverage",
+    "pytest>=7.0",
+    "pytest-check-links>=0.7",
+    "pytest-console-scripts",
+    "pytest-cov",
+    "pytest-timeout",
+    "pytest-tornasync",
+    "requests",
+    "requests_cache",
+    "virtualenv",
+]
+dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
+ui-tests = ["build"]
+
+[tool.hatch.version]
+path = "jupyterlab/_version.py"
+source = "code"
+
+[tool.hatch.build.targets.wheel.shared-data]
+"jupyterlab/static" = "share/jupyter/lab/static"
+"jupyterlab/schemas" = "share/jupyter/lab/schemas"
+"jupyterlab/themes" = "share/jupyter/lab/themes"
+"jupyter-config" = "etc/jupyter"
+
+[tool.hatch.build]
+ignore-vcs = true
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/*.md",
+    "/buildapi.py",
+    "/conftest.py",
+    "/docs",
+    "/docker",
+    "/Dockerfile",
+    "/.dockerignore",
+    "/galata",
+    "/jupyter-config",
+    "/jupyterlab",
+    "/package.json"
+]
+exclude = [
+    "/.github",
+    "*.js.map",
+    "node_modules",
+    "/clean.py",
+    "/binder",
+    "/builder",
+    "/buildutils",
+    "/dist",
+    "/docs/build",
+    "/docs/api",
+    "/design",
+    "/dev_mode",
+    "/examples",
+    "/galata/lib",
+    "/jupyterlab/staging/build",
+    "/packages",
+    "/release",
+    "/testutils",
+    "/typedoc-theme"
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/jupyterlab",
+]
+exclude = [
+    "*.js.map",
+    "/jupyterlab/staging/build",
+    "node_modules"
+]
+
+[tool.hatch.build.hooks.jupyter-builder]
+dependencies = ["hatch-jupyter-builder>=0.3.2"]
+build-function = "buildapi.builder"
+ensured-targets = [
+    "jupyterlab/static/package.json",
+    "jupyterlab/schemas/@jupyterlab/shortcuts-extension/shortcuts.json",
+    "jupyterlab/themes/@jupyterlab/theme-light-extension/index.css"
+]
+install-pre-commit-hook = true
+
+[tool.hatch.build.hooks.jupyter-builder.editable-build-kwargs]
+build_cmd = "build"
+source_dir = "packages"
+build_dir = "dev_mode/static"
+npm = ["node", "jupyterlab/staging/yarn.js"]
+
+[tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:prod:minimize"
 path = "jupyterlab/staging"
-source_dir= "jupyterlab/staging"
+source_dir = "jupyterlab/staging"
 build_dir = "jupyterlab/static"
 npm = ["node", "yarn.js"]
 
 [tool.pytest.ini_options]
-testpaths="jupyterlab/tests"
-norecursedirs="node_modules .git _build"
-addopts="--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
-ignore="tests examples"
-
-[tool.check-manifest]
-ignore = ["binder/**", "builder/**", "buildutils/**", "design/**", "dev_mode/**", "examples/**", "packages/**", "scripts/**", "testutils/**", "*.json", "yarn.lock", "readthedocs.yml", ".bumpversion.cfg", ".*", "clean.py", "*.config.js", "release/*", "typedoc-theme/**", "typedoc.js", "jupyterlab/schemas/**", "jupyterlab/static/**", "jupyterlab/themes/**", "jupyterlab/style.js"]
-
-[tool.jupyter-releaser]
-skip = ["check-links"]
+testpaths = "jupyterlab/tests"
+norecursedirs = "node_modules .git _build"
+addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
+ignore = "tests examples"
 
 [tool.jupyter-releaser.options]
-ignore-glob = ["packages/ui-components/docs/source/ui_components.rst", "images"]
-ignore-links = ["../api/*.*", ".*/images/[\\w-]+.png", "https://docs.github.com/en/.*"]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 npm-cmd = "npm publish --tag next"
@@ -37,7 +210,21 @@ release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
 
 [tool.jupyter-releaser.hooks]
-before-bump-version = ["git checkout .", "pip install bump2version"]
-before-build-npm = ["git commit -am '[ci skip] Bump version'", "jlpm", "jlpm run build:all"]
-before-build-python = ["node buildutils/lib/local-repository start", "jlpm run before:build:python", "node buildutils/lib/local-repository stop", "node buildutils/lib/local-repository fix-links --path jupyterlab/staging"]
+before-bump-version = [
+    "pip install -e .[dev]",
+    "git checkout .",
+]
+before-build-npm = [
+    "jlpm",
+    "jlpm run build:all",
+]
+before-build-python = [
+    "node buildutils/lib/local-repository start",
+    "jlpm run before:build:python",
+    "node buildutils/lib/local-repository stop",
+    "node buildutils/lib/local-repository fix-links --path jupyterlab/staging",
+]
 after-publish-assets = "npm run after:publish:assets"
+
+[license]
+file = "LICENSE"

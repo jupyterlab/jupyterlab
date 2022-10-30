@@ -14,11 +14,13 @@ import platform
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 try:
     from importlib.metadata import PackageNotFoundError, version
 except ImportError:
     from importlib_metadata import PackageNotFoundError, version
+
 from os.path import basename
 from os.path import join as pjoin
 from os.path import normpath
@@ -27,6 +29,7 @@ from jupyter_core.paths import ENV_JUPYTER_PATH, SYSTEM_JUPYTER_PATH, jupyter_da
 from jupyter_core.utils import ensure_dir_exists
 from jupyter_server.extension.serverextension import ArgumentConflict
 from jupyterlab_server.config import get_federated_extensions
+from tomli import load
 
 from .commands import _test_overlap
 
@@ -196,7 +199,10 @@ def build_labextension(
     """Build a labextension in the given path"""
     if core_path is None:
         core_path = osp.join(HERE, "staging")
-    ext_path = osp.abspath(path)
+    else:
+        core_path = str(Path(core_path).resolve())
+
+    ext_path = str(Path(path).resolve())
 
     if logger:
         logger.info("Building extension in %s" % path)
@@ -220,7 +226,9 @@ def watch_labextension(
     """Watch a labextension in a given path"""
     if core_path is None:
         core_path = osp.join(HERE, "staging")
-    ext_path = osp.abspath(path)
+    else:
+        core_path = str(Path(core_path).resolve())
+    ext_path = str(Path(path).resolve())
 
     if logger:
         logger.info("Building extension in %s" % path)
@@ -424,18 +432,28 @@ def _get_labextension_metadata(module):
     except Exception as exc:
         errors.append(exc)
 
+    # Try to get the package name
+    package = None
+
+    # Try getting the package name from pyproject.toml
+    if os.path.exists(os.path.join(mod_path, "pyproject.toml")):
+        with open(os.path.join(mod_path, "pyproject.toml"), "rb") as fid:
+            data = load(fid)
+        package = data.get("project", {}).get("name")
+
     # Try getting the package name from setup.py
-    try:
-        package = (
-            subprocess.check_output([sys.executable, "setup.py", "--name"], cwd=mod_path)
-            .decode("utf8")
-            .strip()
-        )
-    except subprocess.CalledProcessError:
-        raise FileNotFoundError(
-            "The Python package `{}` is not a valid package, "
-            "it is missing the `setup.py` file.".format(module)
-        )
+    if not package:
+        try:
+            package = (
+                subprocess.check_output([sys.executable, "setup.py", "--name"], cwd=mod_path)
+                .decode("utf8")
+                .strip()
+            )
+        except subprocess.CalledProcessError:
+            raise FileNotFoundError(
+                "The Python package `{}` is not a valid package, "
+                "it is missing the `setup.py` file.".format(module)
+            )
 
     # Make sure the package is installed
     try:

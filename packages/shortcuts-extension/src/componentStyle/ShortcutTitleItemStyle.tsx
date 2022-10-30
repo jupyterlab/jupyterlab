@@ -1,17 +1,22 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { style } from 'typestyle';
 
 export const HeaderStyle = style({
   display: 'flex',
 
   $nest: {
-    '&:hover div': {
+    '&:hover .jp-ShortcutTitleItem-sortButton': {
       fontWeight: 600,
       color: 'var(--jp-ui-font-color0)'
     },
-    '&:focus div': {
+    '&:focus .jp-ShortcutTitleItem-sortButton': {
       outline: 'none'
     },
-    '&:active div': {
+    '&:active .jp-ShortcutTitleItem-sortButton': {
       fontWeight: 600,
       color: 'var(--jp-ui-font-color0)'
     }

@@ -16,32 +16,28 @@ import {
   ProviderMock,
   WebSocketProvider
 } from '@jupyterlab/docprovider';
-import { ICurrentUser } from '@jupyterlab/user';
 import { ServerConnection } from '@jupyterlab/services';
+import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 
 /**
  * The default document provider plugin
  */
 const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docprovider-extension:plugin',
-  requires: [ICurrentUser],
   provides: IDocumentProviderFactory,
-  activate: (
-    app: JupyterFrontEnd,
-    user: ICurrentUser
-  ): IDocumentProviderFactory => {
+  activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
     const collaborative =
       PageConfig.getOption('collaborative') == 'true' ? true : false;
     const factory = (
-      options: IDocumentProviderFactory.IOptions
+      options: IDocumentProviderFactory.IOptions<YDocument<DocumentChange>>
     ): IDocumentProvider => {
       return collaborative
         ? new WebSocketProvider({
             ...options,
             url,
-            user
+            user: app.serviceManager.user
           })
         : new ProviderMock();
     };

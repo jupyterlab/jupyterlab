@@ -1,12 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, ICellModel } from '@jupyterlab/cells';
 import {
-  CodeEditor,
-  CodeEditorWrapper,
-  JSONEditor
-} from '@jupyterlab/codeeditor';
+  Cell,
+  CodeCellModel,
+  ICellModel,
+  InputPrompt
+} from '@jupyterlab/cells';
+import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
+import { Mode } from '@jupyterlab/codemirror';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 import {
@@ -15,17 +17,19 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { Collapser, Styling } from '@jupyterlab/ui-components';
-import { ArrayExt, chain, each } from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
 import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
+import { Debouncer } from '@lumino/polling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { INotebookTools, INotebookTracker } from './tokens';
+import { ISharedText } from '@jupyterlab/shared-models';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
@@ -168,9 +172,9 @@ export class NotebookTools extends Widget implements INotebookTools {
         this
       );
     }
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, NotebookTools.ActiveNotebookPanelMessage);
-    });
+    }
   }
 
   /**
@@ -191,18 +195,18 @@ export class NotebookTools extends Widget implements INotebookTools {
         this
       );
     }
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, NotebookTools.ActiveCellMessage);
-    });
+    }
   }
 
   /**
    * Handle a change in the selection.
    */
   private _onSelectionChanged(): void {
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, NotebookTools.SelectionMessage);
-    });
+    }
   }
 
   /**
@@ -216,9 +220,9 @@ export class NotebookTools extends Widget implements INotebookTools {
       'activenotebookpanel-metadata-changed',
       args
     );
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, message);
-    });
+    }
   }
 
   /**
@@ -232,13 +236,14 @@ export class NotebookTools extends Widget implements INotebookTools {
       'activecell-metadata-changed',
       args
     );
-    each(this._toolChildren(), widget => {
+    for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, message);
-    });
+    }
   }
 
-  private _toolChildren() {
-    return chain(this._commonTools.children(), this._advancedTools.children());
+  private *_toolChildren() {
+    yield* this._commonTools.children();
+    yield* this._advancedTools.children();
   }
 
   translator: ITranslator;
@@ -428,82 +433,91 @@ export namespace NotebookTools {
     constructor() {
       super();
       this.addClass('jp-ActiveCellTool');
-      this.addClass('jp-InputArea');
       this.layout = new PanelLayout();
-    }
 
-    /**
-     * Dispose of the resources used by the tool.
-     */
-    dispose(): void {
-      if (this._model === null) {
-        return;
-      }
-      this._model.dispose();
-      this._model = null!;
-      super.dispose();
+      this._inputPrompt = new InputPrompt();
+      (this.layout as PanelLayout).addWidget(this._inputPrompt);
+
+      // First code line container
+      const node = document.createElement('div');
+      node.classList.add('jp-ActiveCell-Content');
+      const container = node.appendChild(document.createElement('div'));
+      const editor = container.appendChild(document.createElement('pre'));
+      container.className = 'jp-Cell-Content';
+      this._editorEl = editor;
+      (this.layout as PanelLayout).addWidget(new Widget({ node }));
+
+      const update = async () => {
+        this._editorEl.innerHTML = '';
+        if (this._cellModel?.type === 'code') {
+          this._inputPrompt.executionCount = `${
+            (this._cellModel as CodeCellModel).executionCount ?? ''
+          }`;
+          this._inputPrompt.show();
+        } else {
+          this._inputPrompt.executionCount = null;
+          this._inputPrompt.hide();
+        }
+
+        if (this._cellModel) {
+          const spec = await Mode.ensure(
+            Mode.findByMIME(this._cellModel.mimeType) ?? 'text/plain'
+          );
+          Mode.run(
+            this._cellModel.sharedModel.getSource().split('\n')[0],
+            spec,
+            this._editorEl
+          );
+        }
+      };
+
+      this._refreshDebouncer = new Debouncer(update, 150);
     }
 
     /**
      * Handle a change to the active cell.
      */
-    protected onActiveCellChanged(): void {
+    protected async onActiveCellChanged(): Promise<void> {
       const activeCell = this.notebookTools.activeCell;
-      const layout = this.layout as PanelLayout;
-      const count = layout.widgets.length;
-      for (let i = 0; i < count; i++) {
-        layout.widgets[0].dispose();
-      }
+
       if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.value.changed.disconnect(this._onValueChanged, this);
-        this._cellModel.mimeTypeChanged.disconnect(
-          this._onMimeTypeChanged,
-          this
-        );
+        this._cellModel.sharedModel.changed.disconnect(this.refresh, this);
+        this._cellModel.mimeTypeChanged.disconnect(this.refresh, this);
       }
       if (!activeCell) {
-        const cell = new Widget();
-        cell.addClass('jp-InputArea-editor');
-        layout.addWidget(cell);
         this._cellModel = null;
         return;
       }
-      const promptNode = activeCell.promptNode
-        ? (activeCell.promptNode.cloneNode(true) as HTMLElement)
-        : undefined;
-      const prompt = new Widget({ node: promptNode });
-      const factory = activeCell.contentFactory.editorFactory;
-
       const cellModel = (this._cellModel = activeCell.model);
-      cellModel.value.changed.connect(this._onValueChanged, this);
-      cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-      this._model.value.text = cellModel.value.text.split('\n')[0];
-      this._model.mimeType = cellModel.mimeType;
-
-      const model = this._model;
-      const editorWidget = new CodeEditorWrapper({ model, factory });
-      editorWidget.addClass('jp-InputArea-editor');
-      editorWidget.editor.setOption('readOnly', true);
-      layout.addWidget(prompt);
-      layout.addWidget(editorWidget);
+      (cellModel.sharedModel as ISharedText).changed.connect(
+        this.refresh,
+        this
+      );
+      cellModel.mimeTypeChanged.connect(this.refresh, this);
+      await this.refresh();
     }
 
     /**
-     * Handle a change to the current editor value.
+     * Handle a change to the notebook panel.
+     *
+     * #### Notes
+     * The default implementation is a no-op.
      */
-    private _onValueChanged(): void {
-      this._model.value.text = this._cellModel!.value.text.split('\n')[0];
+    protected onActiveNotebookPanelChanged(msg: Message): void {
+      if (!this.notebookTools.activeNotebookPanel) {
+        // Force cleaning up the signal
+        void this.onActiveCellChanged();
+      }
     }
 
-    /**
-     * Handle a change to the current editor mimetype.
-     */
-    private _onMimeTypeChanged(): void {
-      this._model.mimeType = this._cellModel!.mimeType;
+    protected async refresh(): Promise<void> {
+      await this._refreshDebouncer.invoke();
     }
 
-    private _model = new CodeEditor.Model();
-    private _cellModel: CodeEditor.IModel | null;
+    private _cellModel: ICellModel | null;
+    private _editorEl: HTMLPreElement;
+    private _inputPrompt: InputPrompt;
+    private _refreshDebouncer: Debouncer<void, void, null[]>;
   }
 
   /**
@@ -518,10 +532,10 @@ export namespace NotebookTools {
       const { editorFactory } = options;
       this.addClass('jp-MetadataEditorTool');
       const layout = (this.layout = new PanelLayout());
-      this.editor = new JSONEditor({
-        editorFactory
-      });
-      this.editor.title.label = options.label || 'Edit Metadata';
+
+      this._editorFactory = editorFactory;
+      this._editorLabel = options.label || 'Edit Metadata';
+      this.createEditor();
       const titleNode = new Widget({ node: document.createElement('label') });
       titleNode.node.textContent = options.label || 'Edit Metadata';
       layout.addWidget(titleNode);
@@ -531,7 +545,32 @@ export namespace NotebookTools {
     /**
      * The editor used by the tool.
      */
-    readonly editor: JSONEditor;
+    get editor(): JSONEditor {
+      return this._editor;
+    }
+
+    /**
+     * Handle a change to the notebook.
+     */
+    protected onActiveNotebookPanelChanged(msg: Message): void {
+      this.editor.dispose();
+      if (this.notebookTools.activeNotebookPanel) {
+        this.createEditor();
+      }
+    }
+
+    protected createEditor() {
+      this._editor = new JSONEditor({
+        editorFactory: this._editorFactory
+      });
+      this.editor.title.label = this._editorLabel;
+
+      (this.layout as PanelLayout).addWidget(this.editor);
+    }
+
+    private _editor: JSONEditor;
+    private _editorLabel: string;
+    private _editorFactory: CodeEditor.Factory;
   }
 
   /**
@@ -579,7 +618,10 @@ export namespace NotebookTools {
      * Handle a change to the notebook.
      */
     protected onActiveNotebookPanelChanged(msg: Message): void {
-      this._update();
+      super.onActiveNotebookPanelChanged(msg);
+      if (this.notebookTools.activeNotebookPanel) {
+        this._update();
+      }
     }
 
     /**
@@ -612,7 +654,11 @@ export namespace NotebookTools {
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(msg: Message): void {
-      this._update();
+      this.editor.dispose();
+      if (this.notebookTools.activeCell) {
+        this.createEditor();
+        this._update();
+      }
     }
 
     /**
@@ -1114,7 +1160,7 @@ namespace Private {
     const optionNodes: VirtualNode[] = [];
     let value: any;
     let option: any;
-    each(options.optionValueArray, item => {
+    for (const item of options.optionValueArray) {
       option = item[0];
       value = JSON.stringify(item[1]);
       const attrs =
@@ -1122,7 +1168,7 @@ namespace Private {
           ? { value, selected: 'selected' }
           : { value };
       optionNodes.push(h.option(attrs, option));
-    });
+    }
     const node = VirtualDOM.realize(
       h.div({}, h.label(title, h.select({}, optionNodes)))
     );

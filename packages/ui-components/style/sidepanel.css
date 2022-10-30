@@ -1,7 +1,13 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 .jp-SidePanel {
   display: flex;
   flex-direction: column;
   min-width: var(--jp-sidebar-min-width);
+  overflow-y: auto;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size1);
@@ -49,6 +55,7 @@
 }
 
 .jp-AccordionPanel-title {
+  cursor: pointer;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -64,6 +71,9 @@
 
 .jp-AccordionPanel-title .lm-AccordionPanel-titleLabel {
   user-select: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .jp-AccordionPanel-title .lm-AccordionPanel-titleCollapser {

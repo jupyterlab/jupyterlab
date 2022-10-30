@@ -12,6 +12,11 @@
         "./packages/*/src"
       ]
     },
+    "lib": [
+      "DOM",
+      "DOM.iterable",
+      "es2019.array"
+    ],
     "moduleResolution": "node",
     "types": [
       "jest",
@@ -54,6 +59,12 @@
     },
     {
       "path": "./packages/codemirror-extension"
+    },
+    {
+      "path": "./packages/collaboration"
+    },
+    {
+      "path": "./packages/collaboration-extension"
     },
     {
       "path": "./packages/completer"
@@ -162,6 +173,12 @@
     },
     {
       "path": "./packages/logconsole-extension"
+    },
+    {
+      "path": "./packages/lsp"
+    },
+    {
+      "path": "./packages/lsp-extension"
     },
     {
       "path": "./packages/mainmenu"
@@ -282,12 +299,6 @@
     },
     {
       "path": "./packages/ui-components-extension"
-    },
-    {
-      "path": "./packages/user"
-    },
-    {
-      "path": "./packages/user-extension"
     },
     {
       "path": "./packages/vdom"

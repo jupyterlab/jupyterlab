@@ -8,7 +8,13 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
-import { Context, TextModelFactory } from '@jupyterlab/docregistry';
+import { PathExt } from '@jupyterlab/coreutils';
+
+import {
+  Context,
+  IDocumentWidget,
+  TextModelFactory
+} from '@jupyterlab/docregistry';
 
 import {
   Contents,
@@ -21,15 +27,11 @@ import {
   Session
 } from '@jupyterlab/services';
 
-import { ArrayIterator } from '@lumino/algorithm';
-
 import { AttachedProperty } from '@lumino/properties';
 
 import { UUID } from '@lumino/coreutils';
 
-import { Signal } from '@lumino/signaling';
-
-import { PathExt } from '@jupyterlab/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
 
 // The default kernel name
 export const DEFAULT_NAME = 'python3';
@@ -507,9 +509,6 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       (files.get(path) as any).content = checkPointContent.get(path);
       return Promise.resolve();
     }),
-    getModelDBFactory: jest.fn(() => {
-      return null;
-    }),
     normalize: jest.fn(path => {
       return dummy.normalize(path);
     }),
@@ -659,7 +658,7 @@ export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
       return Promise.resolve(void 0);
     }),
     refreshRunning: jest.fn(() => Promise.resolve(void 0)),
-    running: jest.fn(() => new ArrayIterator(sessions))
+    running: jest.fn(() => sessions[Symbol.iterator]())
   };
 
   const runningChangedSignal = new Signal<Session.IManager, Session.IModel[]>(
@@ -883,4 +882,20 @@ namespace Private {
     name: 'lastMessageId',
     create: () => ''
   });
+}
+
+/**
+ * A mock document widget opener.
+ */
+export class DocumentWidgetOpenerMock {
+  get opened(): ISignal<DocumentWidgetOpenerMock, IDocumentWidget> {
+    return this._opened;
+  }
+
+  open(widget: IDocumentWidget): void {
+    // no-op, just emit the signal
+    this._opened.emit(widget);
+  }
+
+  private _opened = new Signal<this, IDocumentWidget>(this);
 }

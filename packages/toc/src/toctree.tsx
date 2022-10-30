@@ -73,7 +73,7 @@ export class TableOfContentsTree extends React.PureComponent<ITableOfContentsTre
 
           nested.push(
             <TableOfContentsItem
-              key={`${current.level}-${current.text}`}
+              key={`${current.level}-${globalIndex}-${current.text}`}
               isActive={
                 !!this.props.activeHeading &&
                 current === this.props.activeHeading

@@ -16,6 +16,13 @@ export const IDocumentManager = new Token<IDocumentManager>(
 );
 
 /**
+ * The document widget opener token.
+ */
+export const IDocumentWidgetOpener = new Token<IDocumentWidgetOpener>(
+  '@jupyterlab/docmanager:IDocumentWidgetOpener'
+);
+
+/**
  * The interface for a document manager.
  */
 export interface IDocumentManager extends IDisposable {
@@ -48,6 +55,11 @@ export interface IDocumentManager extends IDisposable {
    * Defines max acceptable difference, in milliseconds, between last modified timestamps on disk and client.
    */
   lastModifiedCheckMargin: number;
+
+  /**
+   * Whether to ask the user to rename untitled file on first manual save.
+   */
+  renameUntitledFileOnSave: boolean;
 
   /**
    * Clone a widget.
@@ -132,6 +144,16 @@ export interface IDocumentManager extends IDisposable {
    * sessions are using the kernel, the session will be shut down.
    */
   deleteFile(path: string): Promise<void>;
+
+  /**
+   * Duplicate a file.
+   *
+   * @param path - The full path to the file to be duplicated.
+   *
+   * @returns A promise which resolves when the file is duplicated.
+   *
+   */
+  duplicate(path: string): Promise<Contents.IModel>;
 
   /**
    * See if a widget already exists for the given path and widget name.
@@ -226,4 +248,19 @@ export interface IDocumentManager extends IDisposable {
    * a file.
    */
   rename(oldPath: string, newPath: string): Promise<Contents.IModel>;
+}
+
+/**
+ * The interface for a widget opener.
+ */
+export interface IDocumentWidgetOpener {
+  /**
+   * Open the given widget.
+   */
+  open(widget: IDocumentWidget, options?: DocumentRegistry.IOpenOptions): void;
+
+  /**
+   * A signal emitted when a widget is opened
+   */
+  readonly opened: ISignal<IDocumentWidgetOpener, IDocumentWidget>;
 }

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { Cell } from '@jupyterlab/cells';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -6,7 +11,6 @@ import {
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 import React from 'react';
 import { INotebookModel, Notebook } from '.';
 
@@ -193,8 +197,8 @@ export namespace NotebookTrustStatus {
         this._notebook.modelContentChanged.connect(this._onModelChanged, this);
 
         // Derive values
-        if (this._notebook.activeCell !== undefined) {
-          this._activeCellTrusted = this._notebook!.activeCell!.model.trusted;
+        if (this._notebook.activeCell) {
+          this._activeCellTrusted = this._notebook.activeCell.model.trusted;
         } else {
           this._activeCellTrusted = false;
         }
@@ -245,22 +249,13 @@ export namespace NotebookTrustStatus {
       if (model === null) {
         return { total: 0, trusted: 0 };
       }
-      const cells = toArray(model.cells);
-
-      const trusted = cells.reduce((accum, current) => {
-        if (current.trusted) {
-          return accum + 1;
-        } else {
-          return accum;
+      let trusted = 0;
+      for (const cell of model.cells) {
+        if (cell.trusted) {
+          trusted++;
         }
-      }, 0);
-
-      const total = cells.length;
-
-      return {
-        total,
-        trusted
-      };
+      }
+      return { total: model.cells.length, trusted };
     }
 
     /**

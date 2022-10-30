@@ -11,7 +11,8 @@ test.use({
 });
 
 test.describe('General', () => {
-  test('Welcome', async ({ page }) => {
+  // FIXME restore when ipywidgets support lumino 2
+  test.skip('Welcome', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
@@ -209,12 +210,15 @@ test.describe('General', () => {
     await page.click('text=Lorenz.ipynb', { button: 'right' });
     await page.hover('text=Copy Shareable Link');
 
+    const itemHandle = await page.$('text=Copy Shareable Link');
+    const itemBBox = await itemHandle.boundingBox();
+
     // Inject mouse
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 260, y: 350 })]
+      [positionMouse({ x: 260, y: itemBBox.y + itemBBox.height * 0.5 })]
     );
 
     expect(
@@ -295,7 +299,7 @@ test.describe('General', () => {
     ).toMatchSnapshot('file_editor_settings.png');
   });
 
-  test('Notebook', async ({ page }) => {
+  test('Notebook', async ({ page }, testInfo) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
@@ -323,6 +327,11 @@ test.describe('General', () => {
       "import json\nfrom IPython.display import GeoJSON\nwith open('../data/Museums_in_DC.geojson') as f:\ns = GeoJSON(json.load(f), layer_options={'minZoom': 11})"
     );
     await page.notebook.run();
+
+    if (testInfo.config.updateSnapshots !== 'none') {
+      // Wait a bit for the map to load when updating the snapshots
+      await page.waitForTimeout(300);
+    }
 
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
@@ -447,7 +456,7 @@ test.describe('General', () => {
     await page.click('text=File');
     await page.click('ul[role="menu"] >> text=New Console for Notebook');
 
-    await page.click('.jp-CodeConsole-input >> pre[role="presentation"]');
+    await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
       "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
     );
@@ -505,7 +514,12 @@ test.describe('General', () => {
       "from IPython.display import display\nfrom vdom.helpers import h1, p, img, div, b\n\ndisplay(\ndiv(\nh1('Our Incredibly Declarative Example'),\np('Can you believe we wrote this ', b('in Python'), '?'),\nimg(src='https://turnoff.us/image/en/death-and-the-programmer.png', style={'height': '268px'}),\np('What will ', b('you'), ' create next?')))"
     );
 
-    await page.notebook.run();
+    await Promise.all([
+      page.waitForResponse(
+        'https://turnoff.us/image/en/death-and-the-programmer.png'
+      ),
+      page.notebook.run()
+    ]);
 
     expect(await page.screenshot()).toMatchSnapshot(
       'file_formats_nteract_vdom.png'

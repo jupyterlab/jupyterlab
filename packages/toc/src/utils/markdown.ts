@@ -3,7 +3,6 @@
 
 import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
 import { TableOfContents } from '../tokens';
-import { getPrefix } from './common';
 
 /**
  * Markdown heading
@@ -13,6 +12,7 @@ export interface IMarkdownHeading extends TableOfContents.IHeading {
    * Heading line
    */
   line: number;
+
   /**
    * Raw string containing the heading
    */
@@ -56,30 +56,17 @@ export async function getHeadingId(
  * Parses the provided string and returns a list of headings.
  *
  * @param text - Input text
- * @param options - Parser configuration
- * @param initialLevels - Initial levels to use for computing the prefix
  * @returns List of headings
  */
-export function getHeadings(
-  text: string,
-  options?: Partial<TableOfContents.IConfig>,
-  initialLevels: number[] = []
-): IMarkdownHeading[] {
-  const config = {
-    ...TableOfContents.defaultConfig,
-    ...options
-  } as TableOfContents.IConfig;
-
+export function getHeadings(text: string): IMarkdownHeading[] {
   // Split the text into lines:
   const lines = text.split('\n');
 
   // Iterate over the lines to get the header level and text for each line:
-  const levels = initialLevels;
-  let previousLevel = levels.length;
-  let headings = new Array<IMarkdownHeading>();
+  const headings = new Array<IMarkdownHeading>();
   let isCodeBlock;
   for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-    let line = lines[lineIdx];
+    const line = lines[lineIdx];
 
     if (line === '') {
       // Bail early
@@ -97,20 +84,10 @@ export function getHeadings(
     const heading = parseHeading(line, lines[lineIdx + 1]); // append the next line to capture alternative style Markdown headings
 
     if (heading) {
-      let level = heading.level;
-
-      if (level > 0 && level <= config.maximalDepth) {
-        const prefix = getPrefix(level, previousLevel, levels, config);
-        previousLevel = level;
-
-        headings.push({
-          text: heading.text,
-          prefix,
-          level,
-          line: lineIdx,
-          raw: heading.raw
-        });
-      }
+      headings.push({
+        ...heading,
+        line: lineIdx
+      });
     }
   }
   return headings;
@@ -161,6 +138,11 @@ interface IHeader {
    * Raw string containing the heading
    */
   raw: string;
+
+  /**
+   * Whether the heading is marked to skip or not
+   */
+  skip: boolean;
 }
 
 /**
@@ -219,37 +201,34 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
   // Case: Markdown heading
   let match = line.match(/^([#]{1,6}) (.*)/);
   if (match) {
-    if (!skipHeading.test(match[0])) {
-      return {
-        text: cleanTitle(match[2]),
-        level: match[1].length,
-        raw: line
-      };
-    }
+    return {
+      text: cleanTitle(match[2]),
+      level: match[1].length,
+      raw: line,
+      skip: skipHeading.test(match[0])
+    };
   }
   // Case: Markdown heading (alternative style)
   if (nextLine) {
     match = nextLine.match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
     if (match) {
-      if (!skipHeading.test(line)) {
-        return {
-          text: cleanTitle(line),
-          level: match[1][0] === '=' ? 1 : 2,
-          raw: [line, nextLine].join('\n')
-        };
-      }
+      return {
+        text: cleanTitle(line),
+        level: match[1][0] === '=' ? 1 : 2,
+        raw: [line, nextLine].join('\n'),
+        skip: skipHeading.test(line)
+      };
     }
   }
   // Case: HTML heading (WARNING: this is not particularly robust, as HTML headings can span multiple lines)
   match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i);
   if (match) {
-    if (!skipHeading.test(match[0])) {
-      return {
-        text: match[2],
-        level: parseInt(match[1], 10),
-        raw: line
-      };
-    }
+    return {
+      text: match[2],
+      level: parseInt(match[1], 10),
+      skip: skipHeading.test(match[0]),
+      raw: line
+    };
   }
 
   return null;

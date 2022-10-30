@@ -44,6 +44,10 @@
           {
             "command": "docmanager:rename",
             "rank": 5
+          },
+          {
+            "command": "docmanager:duplicate",
+            "rank": 5
           }
         ]
       },
@@ -72,19 +76,24 @@
         "rank": 20
       },
       {
-        "command": "docmanager:delete",
+        "command": "docmanager:duplicate",
         "selector": "[data-type=\"document-title\"]",
         "rank": 21
       },
       {
-        "command": "docmanager:clone",
+        "command": "docmanager:delete",
         "selector": "[data-type=\"document-title\"]",
         "rank": 22
       },
       {
-        "command": "docmanager:show-in-file-browser",
+        "command": "docmanager:clone",
         "selector": "[data-type=\"document-title\"]",
         "rank": 23
+      },
+      {
+        "command": "docmanager:show-in-file-browser",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 24
       }
     ]
   },
@@ -128,6 +137,12 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "renameUntitledFileOnSave": {
+      "type": "boolean",
+      "title": "Rename Untitled File On First Save",
+      "description": "Whether to prompt to rename untitled file on first manual save.",
+      "default": true
     }
   },
   "additionalProperties": false,

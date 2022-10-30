@@ -22,6 +22,7 @@ jupyterhub
 export
 language
 rtc
+lsp
 interface_customization
 directories
 ```

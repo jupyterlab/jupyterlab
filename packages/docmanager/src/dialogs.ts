@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { PathExt } from '@jupyterlab/coreutils';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -38,18 +39,21 @@ export interface IFileContainer extends JSONObject {
  */
 export function renameDialog(
   manager: IDocumentManager,
-  oldPath: string,
+  context: DocumentRegistry.Context,
   translator?: ITranslator
-): Promise<Contents.IModel | null> {
+): Promise<void | null> {
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
 
+  const localPath = context.localPath.split('/');
+  const fileName = localPath.pop() || context.localPath;
+
   return showDialog({
     title: trans.__('Rename File'),
-    body: new RenameHandler(oldPath),
+    body: new RenameHandler(fileName),
     focusNodeSelector: 'input',
     buttons: [
-      Dialog.cancelButton({ label: trans.__('Cancel') }),
+      Dialog.cancelButton(),
       Dialog.okButton({ label: trans.__('Rename') })
     ]
   }).then(result => {
@@ -68,9 +72,7 @@ export function renameDialog(
       );
       return null;
     }
-    const basePath = PathExt.dirname(oldPath);
-    const newPath = PathExt.join(basePath, result.value);
-    return renameFile(manager, oldPath, newPath);
+    return context.rename(result.value);
   });
 }
 
@@ -112,7 +114,7 @@ export function shouldOverwrite(
     title: trans.__('Overwrite file?'),
     body: trans.__('"%1" already exists, overwrite?', path),
     buttons: [
-      Dialog.cancelButton({ label: trans.__('Cancel') }),
+      Dialog.cancelButton(),
       Dialog.warnButton({ label: trans.__('Overwrite') })
     ]
   };

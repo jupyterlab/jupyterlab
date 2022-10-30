@@ -5,6 +5,7 @@ import { ISessionContext } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { KernelMessage } from '@jupyterlab/services';
+import { createStandaloneCell } from '@jupyterlab/shared-models';
 import { createSessionContext, signalToPromise } from '@jupyterlab/testutils';
 import { ConsoleHistory } from '../src';
 
@@ -161,11 +162,13 @@ describe('console/history', () => {
         expect(history.methods).toEqual(
           expect.not.arrayContaining(['onTextChange'])
         );
-        const model = new CodeEditor.Model();
+        const model = new CodeEditor.Model({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         const host = document.createElement('div');
         const editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
-        model.value.text = 'foo';
+        model.sharedModel.setSource('foo');
         expect(history.methods).toEqual(
           expect.arrayContaining(['onTextChange'])
         );
@@ -179,17 +182,19 @@ describe('console/history', () => {
           expect.not.arrayContaining(['onEdgeRequest'])
         );
         const host = document.createElement('div');
-        const model = new CodeEditor.Model();
+        const model = new CodeEditor.Model({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         const editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
         history.push('foo');
-        const promise = signalToPromise(editor.model.value.changed);
+        const promise = signalToPromise(editor.model.sharedModel.changed);
         editor.edgeRequested.emit('top');
         expect(history.methods).toEqual(
           expect.arrayContaining(['onEdgeRequest'])
         );
         await promise;
-        expect(editor.model.value.text).toBe('foo');
+        expect(editor.model.sharedModel.getSource()).toBe('foo');
       });
     });
   });

@@ -520,11 +520,19 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
     }
 
+    // Removes duplicated breakpoints. It is better to do it here than
+    // in the editor, because the kernel can change the line of a
+    // breakpoint (when you attemp to set a breakpoint on an empty
+    // line for instance).
+    let addedLines = new Set<number>();
     // Set the kernel's breakpoints for this path.
     const reply = await this._setBreakpoints(localBreakpoints, path);
-    const updatedBreakpoints = reply.body.breakpoints.filter(
-      (val, _, arr) => arr.findIndex(el => el.line === val.line) > -1
-    );
+    const updatedBreakpoints = reply.body.breakpoints.filter((val, _, arr) => {
+      const cond1 = arr.findIndex(el => el.line === val.line) > -1;
+      const cond2 = !addedLines.has(val.line!);
+      addedLines.add(val.line!);
+      return cond1 && cond2;
+    });
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
@@ -613,7 +621,7 @@ export class DebuggerService implements IDebugger, IDisposable {
           path: this._session?.connection?.path ?? '',
           source: id
         });
-        const tmpCells = editorList.map(e => e.model.value.text);
+        const tmpCells = editorList.map(e => e.src.getSource());
         cells = cells.concat(tmpCells);
       }
     }

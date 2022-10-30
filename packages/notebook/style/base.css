@@ -55,10 +55,6 @@
   contain: strict;
 }
 
-.jp-Notebook-render * {
-  contain: none !important;
-}
-
 .jp-Notebook .jp-Cell {
   overflow: visible;
 }
@@ -237,23 +233,28 @@
 
 .jp-ActiveCellTool {
   padding: 12px;
-  background-color: var(--jp-layout-color1);
-  border-top: none !important;
+  display: flex;
 }
 
-.jp-ActiveCellTool .jp-InputArea-prompt {
-  flex: 0 0 auto;
-  padding-left: 0;
-}
-
-.jp-ActiveCellTool .jp-InputArea-editor {
+.jp-ActiveCell-Content {
   flex: 1 1 auto;
-  background: var(--jp-cell-editor-background);
-  border-color: var(--jp-cell-editor-border-color);
 }
 
-.jp-ActiveCellTool .jp-InputArea-editor .CodeMirror {
-  background: transparent;
+.jp-ActiveCellTool .jp-Cell-Content {
+  background: var(--jp-cell-editor-background);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0;
+  min-height: 29px;
+}
+
+.jp-ActiveCellTool .jp-InputPrompt {
+  min-width: calc(var(--jp-cell-prompt-width) * 0.75);
+}
+
+.jp-Cell-Content > pre {
+  padding: 5px 4px;
+  margin: 0;
+  white-space: normal;
 }
 
 .jp-MetadataEditorTool {

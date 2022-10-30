@@ -3,10 +3,13 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
-      "path": "../shared-models"
+      "path": "../coreutils"
     },
     {
-      "path": "../user"
+      "path": "../services"
+    },
+    {
+      "path": "../shared-models"
     },
     {
       "path": "."

@@ -7,7 +7,6 @@ import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import { consoleIcon, fileIcon, notebookIcon } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
@@ -25,23 +24,6 @@ export function addKernelRunningSessionManager(
       (m.name || PathExt.basename(m.path)).indexOf('.') !== -1 || m.name
     );
   }
-
-  managers.add({
-    name: trans.__('Kernels'),
-    running: () => {
-      return toArray(manager.running())
-        .filter(filterSessions)
-        .map(model => new RunningKernel(model));
-    },
-    shutdownAll: () => manager.shutdownAll(),
-    refreshRunning: () => manager.refreshRunning(),
-    runningChanged: manager.runningChanged,
-    shutdownLabel: trans.__('Shut Down'),
-    shutdownAllLabel: trans.__('Shut Down All'),
-    shutdownAllConfirmationText: trans.__(
-      'Are you sure you want to permanently shut down all running kernels?'
-    )
-  });
 
   class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(model: Session.IModel) {
@@ -82,4 +64,21 @@ export function addKernelRunningSessionManager(
 
     private _model: Session.IModel;
   }
+
+  managers.add({
+    name: trans.__('Kernels'),
+    running: () => {
+      return Array.from(manager.running())
+        .filter(filterSessions)
+        .map(model => new RunningKernel(model));
+    },
+    shutdownAll: () => manager.shutdownAll(),
+    refreshRunning: () => manager.refreshRunning(),
+    runningChanged: manager.runningChanged,
+    shutdownLabel: trans.__('Shut Down'),
+    shutdownAllLabel: trans.__('Shut Down All'),
+    shutdownAllConfirmationText: trans.__(
+      'Are you sure you want to permanently shut down all running kernels?'
+    )
+  });
 }

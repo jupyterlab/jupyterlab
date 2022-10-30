@@ -72,7 +72,7 @@ describe('Debugging support', () => {
   describe('#isAvailable', () => {
     it('should return true for kernels that have support for debugging', async () => {
       const enabled = await service.isAvailable({
-        kernel: { name: 'xpython' }
+        kernel: { name: 'python3' }
       } as any);
       expect(enabled).toBe(true);
     });
@@ -80,7 +80,7 @@ describe('Debugging support', () => {
     it.skip('should return false for kernels that do not have support for debugging', async () => {
       // The kernel spec are mocked in KERNELSPECS
       const enabled = await service.isAvailable({
-        kernel: { name: 'python3' }
+        kernel: { name: 'nopydebug' }
       } as any);
       expect(enabled).toBe(false);
     });
@@ -100,7 +100,7 @@ describe('DebuggerService', () => {
       type: 'test',
       path: UUID.uuid4()
     });
-    await connection.changeKernel({ name: 'xpython' });
+    await connection.changeKernel({ name: 'python3' });
     session = new Debugger.Session({ connection });
     config = new Debugger.Config();
     service = new Debugger.Service({ specsManager, config });

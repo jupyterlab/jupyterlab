@@ -7,6 +7,11 @@ import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject,
@@ -15,7 +20,7 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import { IOutputAreaModel } from './model';
 
@@ -88,13 +93,13 @@ export class OutputArea extends Widget {
    */
   constructor(options: OutputArea.IOptions) {
     super();
+    super.layout = new PanelLayout();
     this.addClass(OUTPUT_AREA_CLASS);
-
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
-    this.layout = new PanelLayout();
     this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
+    this._translator = options.translator ?? nullTranslator;
 
     const model = (this.model = options.model);
     for (
@@ -115,11 +120,6 @@ export class OutputArea extends Widget {
   readonly contentFactory: OutputArea.IContentFactory;
 
   /**
-   * Narrow the type of OutputArea's layout prop
-   */
-  readonly layout: PanelLayout;
-
-  /**
    * The model used by the widget.
    */
   readonly model: IOutputAreaModel;
@@ -128,6 +128,13 @@ export class OutputArea extends Widget {
    * The rendermime instance used by the widget.
    */
   readonly rendermime: IRenderMimeRegistry;
+
+  /**
+   * Narrow the type of OutputArea's layout prop
+   */
+  get layout(): PanelLayout {
+    return super.layout as PanelLayout;
+  }
 
   /**
    * A read-only sequence of the children widgets in the output area.
@@ -195,6 +202,13 @@ export class OutputArea extends Widget {
         this.onInputRequest(msg, value);
       }
     };
+  }
+
+  /**
+   * Signal emitted when an output area is requesting an input.
+   */
+  get inputRequested(): ISignal<OutputArea, void> {
+    return this._inputRequested;
   }
 
   /**
@@ -395,7 +409,8 @@ export class OutputArea extends Widget {
       parent_header: msg.header,
       prompt: stdinPrompt,
       password,
-      future
+      future,
+      translator: this._translator
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -405,6 +420,8 @@ export class OutputArea extends Widget {
       this.maxNumberOutputs = this.model.length;
     }
     this.layout.addWidget(panel);
+
+    this._inputRequested.emit();
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
@@ -553,7 +570,8 @@ export class OutputArea extends Widget {
     output.renderModel(model).catch(error => {
       // Manually append error message to output
       const pre = document.createElement('pre');
-      pre.textContent = `Javascript Error: ${error.message}`;
+      const trans = this._translator.load('jupyterlab');
+      pre.textContent = trans.__('Javascript Error: %1', error.message);
       output.node.appendChild(pre);
 
       // Remove mime-type-specific CSS classes
@@ -663,21 +681,22 @@ export class OutputArea extends Widget {
     return panel;
   }
 
-  private _minHeightTimeout: number | null = null;
+  private _displayIdMap = new Map<string, number[]>();
   private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   >;
-  private _displayIdMap = new Map<string, number[]>();
-  private _outputTracker = new WidgetTracker<Widget>({
-    namespace: UUID.uuid4()
-  });
-
   /**
    * The maximum outputs to show in the trimmed
    * output area.
    */
   private _maxNumberOutputs: number;
+  private _minHeightTimeout: number | null = null;
+  private _inputRequested = new Signal<OutputArea, void>(this);
+  private _outputTracker = new WidgetTracker<Widget>({
+    namespace: UUID.uuid4()
+  });
+  private _translator: ITranslator;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -730,6 +749,11 @@ export namespace OutputArea {
      * The maximum number of output items to display on top and bottom of cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Translator
+     */
+    readonly translator?: ITranslator;
   }
 
   /**
@@ -914,9 +938,9 @@ export class Stdin extends Widget implements IStdin {
     this.addClass(STDIN_CLASS);
     this._historyIndex = 0;
     this._input = this.node.getElementsByTagName('input')[0];
-    this._input.focus();
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     // make users aware of the line history feature
-    this._input.placeholder = '↑↓ for history';
+    this._input.placeholder = this._trans.__('↑↓ for history');
     this._future = options.future;
     this._parentHeader = options.parent_header;
     this._value = options.prompt + ' ';
@@ -989,13 +1013,6 @@ export class Stdin extends Widget implements IStdin {
    */
   protected onAfterAttach(msg: Message): void {
     this._input.addEventListener('keydown', this);
-    this.update();
-  }
-
-  /**
-   * Handle `update-request` messages sent to the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
     this._input.focus();
   }
 
@@ -1006,14 +1023,15 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _historyIndex: number;
-  private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
   private _future: Kernel.IShellFuture;
+  private _historyIndex: number;
   private _input: HTMLInputElement;
+  private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
+  private _password: boolean;
+  private _promise = new PromiseDelegate<void>();
+  private _trans: TranslationBundle;
   private _value: string;
   private _valueCache: string;
-  private _promise = new PromiseDelegate<void>();
-  private _password: boolean;
 }
 
 export namespace Stdin {
@@ -1040,6 +1058,11 @@ export namespace Stdin {
      * The header of the input_request message.
      */
     parent_header: KernelMessage.IInputReplyMsg['parent_header'];
+
+    /**
+     * Translator
+     */
+    readonly translator?: ITranslator;
   }
 }
 

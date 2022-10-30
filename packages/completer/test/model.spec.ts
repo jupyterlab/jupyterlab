@@ -6,7 +6,6 @@ import {
   CompleterModel,
   CompletionHandler
 } from '@jupyterlab/completer';
-import { toArray } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 
 function makeState(text: string): Completer.ITextState {
@@ -266,7 +265,7 @@ describe('completer/model', () => {
           { raw: 'baz', text: 'baz' }
         ];
         model.setOptions(['foo', 'bar', 'baz']);
-        expect(toArray(model.items())).toEqual(want);
+        expect(Array.from(model.items())).toEqual(want);
       });
 
       it('should return a filtered list of items if query is set', () => {
@@ -276,7 +275,7 @@ describe('completer/model', () => {
         ];
         model.setOptions(['foo', 'bar', 'baz']);
         model.query = 'f';
-        expect(toArray(model.items())).toEqual(want);
+        expect(Array.from(model.items())).toEqual(want);
       });
 
       it('should order list based on score', () => {
@@ -287,7 +286,7 @@ describe('completer/model', () => {
         ];
         model.setOptions(['foo', 'bar', 'baz', 'quux', 'qux']);
         model.query = 'qux';
-        expect(toArray(model.items())).toEqual(want);
+        expect(Array.from(model.items())).toEqual(want);
       });
 
       it('should break ties in score by locale sort', () => {
@@ -298,22 +297,22 @@ describe('completer/model', () => {
         ];
         model.setOptions(['foo', 'bar', 'baz', 'qux', 'quux']);
         model.query = 'qu';
-        expect(toArray(model.items())).toEqual(want);
+        expect(Array.from(model.items())).toEqual(want);
       });
     });
 
     describe('#options()', () => {
       it('should default to an empty iterator', () => {
         const model = new CompleterModel();
-        expect(model.options().next()).toBeUndefined();
+        expect(model.options().next().done).toBe(true);
       });
 
       it('should return model options', () => {
         const model = new CompleterModel();
         const options = ['foo'];
         model.setOptions(options, {});
-        expect(toArray(model.options())).not.toBe(options);
-        expect(toArray(model.options())).toEqual(options);
+        expect(Array.from(model.options())).not.toBe(options);
+        expect(Array.from(model.options())).toEqual(options);
       });
 
       it('should return the typeMap', () => {
@@ -391,7 +390,7 @@ describe('completer/model', () => {
         model.current = change;
         expect(model.current).toBeNull();
         expect(model.original).toBeNull();
-        expect(model.options().next()).toBeUndefined();
+        expect(model.options().next().done).toBe(true);
       });
     });
 

@@ -122,7 +122,7 @@ export namespace NBTestUtils {
    */
   export function createCellEditor(model?: CodeCellModel): CodeEditorWrapper {
     return new CodeEditorWrapper({
-      model: model || new CodeCellModel({}),
+      model: model || new CodeCellModel(),
       factory: editorFactory
     });
   }
@@ -148,7 +148,11 @@ export namespace NBTestUtils {
     return new Notebook({
       rendermime: defaultRenderMime(),
       contentFactory: createNotebookFactory(),
-      mimeTypeService
+      mimeTypeService,
+      notebookConfig: {
+        ...StaticNotebook.defaultNotebookConfig,
+        windowingMode: 'none'
+      }
     });
   }
 

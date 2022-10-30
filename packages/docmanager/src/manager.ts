@@ -18,7 +18,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { SaveHandler } from './savehandler';
-import { IDocumentManager } from './tokens';
+import { IDocumentManager, IDocumentWidgetOpener } from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
 
 /**
@@ -131,6 +131,17 @@ export class DocumentManager implements IDocumentManager {
     this._contexts.forEach(context => {
       context.lastModifiedCheckMargin = value;
     });
+  }
+
+  /**
+   * Whether to ask the user to rename untitled file on first manual save.
+   */
+  get renameUntitledFileOnSave(): boolean {
+    return this._renameUntitledFileOnSave;
+  }
+
+  set renameUntitledFileOnSave(value: boolean) {
+    this._renameUntitledFileOnSave = value;
   }
 
   /**
@@ -273,6 +284,18 @@ export class DocumentManager implements IDocumentManager {
         );
         return Promise.resolve(void 0);
       });
+  }
+
+  /**
+   * Duplicate a file.
+   *
+   * @param path - The full path to the file to be duplicated.
+   *
+   * @returns A promise which resolves when the file is duplicated.
+   */
+  duplicate(path: string): Promise<Contents.IModel> {
+    const basePath = PathExt.dirname(path);
+    return this.services.contents.copy(path, basePath);
   }
 
   /**
@@ -482,15 +505,12 @@ export class DocumentManager implements IDocumentManager {
       // TODO should we pass the type for layout customization
       this._opener.open(widget, options);
     };
-    const modelDBFactory =
-      this.services.contents.getModelDBFactory(path) || undefined;
     const context = new Context({
       opener: adopter,
       manager: this.services,
       factory,
       path,
       kernelPreference,
-      modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
       collaborative: this._collaborative,
@@ -620,12 +640,13 @@ export class DocumentManager implements IDocumentManager {
   protected translator: ITranslator;
   private _activateRequested = new Signal<this, string>(this);
   private _contexts: Private.IContext[] = [];
-  private _opener: DocumentManager.IWidgetOpener;
+  private _opener: IDocumentWidgetOpener;
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
   private _autosaveInterval = 120;
   private _lastModifiedCheckMargin = 500;
+  private _renameUntitledFileOnSave = true;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
@@ -655,7 +676,7 @@ export namespace DocumentManager {
     /**
      * A widget opener for sibling widgets.
      */
-    opener: IWidgetOpener;
+    opener: IDocumentWidgetOpener;
 
     /**
      * A promise for when to start using the manager.
@@ -693,19 +714,6 @@ export namespace DocumentManager {
      * By default, it always returns `true`.
      */
     isConnectedCallback?: () => boolean;
-  }
-
-  /**
-   * An interface for a widget opener.
-   */
-  export interface IWidgetOpener {
-    /**
-     * Open the given widget.
-     */
-    open(
-      widget: IDocumentWidget,
-      options?: DocumentRegistry.IOpenOptions
-    ): void;
   }
 }
 

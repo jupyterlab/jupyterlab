@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel } from '@jupyterlab/ui-components';
-import { JSONExt } from '@lumino/coreutils';
 import { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -76,13 +75,6 @@ export class SearchDocumentModel
    */
   get filters(): IFilters {
     return this._filters;
-  }
-  set filters(v: IFilters) {
-    if (!JSONExt.deepEqual(this._filters, v)) {
-      this._filters = v;
-      this.stateChanged.emit();
-      this.refresh();
-    }
   }
 
   /**
@@ -235,6 +227,29 @@ export class SearchDocumentModel
     await this.searchProvider.replaceCurrentMatch(this._replaceText);
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
+  }
+
+  /**
+   * Set the value of a given filter.
+   *
+   * @param name Filter name
+   * @param v Filter value
+   */
+  async setFilter(name: string, v: boolean): Promise<void> {
+    if (this._filters[name] !== v) {
+      if (this.searchProvider.validateFilter) {
+        this._filters[name] = await this.searchProvider.validateFilter(name, v);
+        // If the value was changed
+        if (this._filters[name] === v) {
+          this.stateChanged.emit();
+          this.refresh();
+        }
+      } else {
+        this._filters[name] = v;
+        this.stateChanged.emit();
+        this.refresh();
+      }
+    }
   }
 
   private async _updateSearch(): Promise<void> {

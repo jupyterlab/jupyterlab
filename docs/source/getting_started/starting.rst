@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _starting:
 
 Starting JupyterLab
@@ -18,9 +21,9 @@ Example:
 .. code:: bash
 
     #Windows Example
-    jupyter lab --app_dir=E:/ --preferred_dir E:/Documents/Somewhere/Else
+    jupyter lab --notebook-dir=E:/ --preferred-dir E:/Documents/Somewhere/Else
     #Linux Example
-    jupyter lab --app_dir=/var/ --preferred_dir /var/www/html/example-app/
+    jupyter lab --notebook-dir=/var/ --preferred-dir /var/www/html/example-app/
 
 You may access JupyterLab by entering the notebook server's :ref:`URL <urls>`
 into the browser. JupyterLab sessions always reside in a

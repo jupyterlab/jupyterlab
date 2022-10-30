@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _user_extensions:
 
 Extensions
@@ -149,13 +152,22 @@ Managing Extensions Using the Extension Manager
 
 .. _extension_manager:
 
-You can use the Extension Manager in JupyterLab to manage extensions.
+You can use the Extension Manager in JupyterLab to manage extensions. That feature
+may have been disabled by your system administrator for security reasons.
+
+.. note::
+
+   Since JupyterLab v4, the default manager uses PyPI.org as source for the available
+   extensions and ``pip`` to install them.
+
+   An extension will be listed if the Python package has the classifier:
+   `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt>`__
+   Moreover it is advised for extension author to provide the ``install.json`` file
+   to specify the exact Python package name.
 
 .. warning::
-
-   Since JupyterLab v4, the core manager does not handle searching, installing or
-   uninstalling extensions. This is due to the multiple managers available to
-   distribute extensions.
+   There is no check to ensure the extension is compatible with the current JupyterLab
+   version.
 
 The Extension Manager is in the :ref:`left sidebar <left-sidebar>`.
 
@@ -209,27 +221,23 @@ Finding Extensions
 
 You can use the extension manager to find extensions for JupyterLab. To discovery
 freely among the currently available extensions, expand the "Discovery" section.
-This triggers a search for all JupyterLab extensions on the NPM registry, and
-the results are listed according to the `registry's sort order
-<https://docs.npmjs.com/searching-for-and-choosing-packages-to-download#package-search-rank-criteria>`__.
-An exception to this sort order is that extensions released by the Jupyter
-organization are always placed first. These extensions are distinguished by
-a small Jupyter icon next to their name.
+This triggers a search for all JupyterLab extensions on the PyPI.org registry, and
+the results are listed alphabetically.
 
 
 .. figure:: ../images/extensions-default.png
    :align: center
    :class: jp-screenshot
-   :alt: Screenshot showing the discovery extension listing.
+   :alt: The discovery extension listing.
 
 
 Alternatively, you can limit your discovery by using the search bar. This
-performs a free-text search of JupyterLab extensions on the NPM registry.
+performs a free-text search of JupyterLab extensions on the PyPI.org registry.
 
 .. image:: ../images/extensions-search.png
    :align: center
    :class: jp-screenshot
-   :alt: Screenshot showing an example search result
+   :alt: An example search result in the discovery extension listing.
 
 
 Installing an Extension
@@ -246,10 +254,7 @@ it by clicking the "Install" button of the extension list entry.
     avoid installing extensions you do not trust, and watch out for
     any extensions trying to masquerade as a trusted extension.
 
-
-A short while after starting the install of an extension, a drop-down should
-appear under the search bar indicating that the extension has been
-downloaded. The newly installed extension may require to restart JupyterLab.
+The newly installed extension may require JupyterLab to be restarted.
 
 
 Managing Installed Extensions
@@ -259,6 +264,31 @@ When there are some installed extensions, they will be shown in the "Installed"
 section. These can then be uninstalled or disabled. Disabling an extension will
 prevent it from being activated, but without rebuilding the application.
 
+
+Configuring the Extension Manager
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default there are two extension managers provided by JupyterLab:
+
+- ``pypi``: [default] Allow to un-/install extensions from PyPI.org
+- ``readonly``: Display installed extensions (with the ability to dis-/en-able them)
+
+You can specify the manager with the command line option ``--LabApp.extension_manager``;
+e.g. to use the *read-only* manager:
+
+.. code:: sh
+
+    jupyter lab --LabApp.extension_manager=readonly
+
+PyPI Manager settings
+"""""""""""""""""""""
+
+The ``pypi`` manager have specific options that can be set using command line options:
+
+- ``--PyPIExtensionManager.base_url``: PyPI warehouse base URL - default to https://pypi.org/pypi.
+- ``--PyPIExtensionManager.rpc_request_throttling``: Throttling time between requests to the PyPI XML-RPC API in seconds - default 1.
+- ``--PyPIExtensionManager.cache_timeout``: PyPI extensions list cache timeout in seconds - default 300.
+- ``--PyPIExtensionManager.package_metadata_cache_size``: The cache size for package metadata - default 1500.
 
 .. _extension_listings:
 
@@ -274,14 +304,7 @@ mode. JupyterLab will check the extensions against the defined listings.
 .. warning::
 
     Only one mode at a time is allowed. If you or your server administrator configures
-    both block and allow listings, the JupyterLab server will not start.
-
-
-.. figure:: ../images/extensions-simultaneous-block-allow.png
-   :align: center
-   :class: jp-screenshot
-
-   **Figure:** Simultaneous block and allow listings
+    both block and allow listings, the allow listing takes precedence.
 
 
 The following details the behavior for the :ref:`blocklist_mode` and the :ref:`allowlist_mode`.
@@ -358,15 +381,15 @@ You or your administrator can use the following traits to define the listings lo
 - ``blocked_extensions_uris``: A list of comma-separated URIs to fetch a blocklist file from
 - ``allowed_extensions_uris``: A list of comma-separated URIs to fetch an allowlist file from
 - ``listings_refresh_seconds``: The interval delay in seconds to refresh the lists
-- ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
+- ``listings_tornado_options``: The optional kwargs to use for the listings HTTP requests
 
 For example, to set blocked extensions, launch the server with
 ``--LabServerApp.blocked_extensions_uris=http://example.com/blocklist.json`` where
 ``http://example.com/blocklist.json`` is a JSON file as described below.
 
-The details for the listings_request_options are listed
-on `this page <https://requests.readthedocs.io/en/stable/api/#requests.request>`__
-(for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
+The details for the ``listings_tornado_options`` are listed
+on `this page <https://www.tornadoweb.org/en/stable/httpclient.html#tornado.httpclient.HTTPRequest>`__
+(for example, you could pass ``{'request_timeout': 10}`` to change the HTTP request timeout value).
 
 The listings are json files hosted on the URIs you have given.
 

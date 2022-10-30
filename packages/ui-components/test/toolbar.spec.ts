@@ -12,7 +12,6 @@ import {
   ToolbarButton
 } from '@jupyterlab/ui-components';
 import { framePromise, JupyterServer } from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PanelLayout, Widget } from '@lumino/widgets';
@@ -150,7 +149,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('foo', new Widget());
         widget.addItem('bar', new Widget());
         widget.addItem('baz', new Widget());
-        expect(toArray(widget.names())).toEqual(['foo', 'bar', 'baz']);
+        expect(Array.from(widget.names())).toEqual(['foo', 'bar', 'baz']);
       });
     });
 
@@ -158,7 +157,7 @@ describe('@jupyterlab/ui-components', () => {
       it('should add an item to the toolbar', () => {
         const item = new Widget();
         expect(widget.addItem('test', item)).toBe(true);
-        expect(toArray(widget.names())).toContain('test');
+        expect(Array.from(widget.names())).toContain('test');
       });
 
       it('should add the `jp-Toolbar-item` class to the widget', () => {
@@ -178,14 +177,14 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
-        expect(toArray(widget.names())).toEqual(['a', 'c', 'b']);
+        expect(Array.from(widget.names())).toEqual(['a', 'c', 'b']);
       });
 
       it('should clamp the bounds', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(10, 'c', new Widget());
-        expect(toArray(widget.names())).toEqual(['a', 'b', 'c']);
+        expect(Array.from(widget.names())).toEqual(['a', 'b', 'c']);
       });
     });
 
@@ -195,7 +194,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertAfter('c', 'd', new Widget());
-        expect(toArray(widget.names())).toEqual(['a', 'c', 'd', 'b']);
+        expect(Array.from(widget.names())).toEqual(['a', 'c', 'd', 'b']);
       });
 
       it('should return false if the target item does not exist', () => {
@@ -212,7 +211,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertBefore('c', 'd', new Widget());
-        expect(toArray(widget.names())).toEqual(['a', 'd', 'c', 'b']);
+        expect(Array.from(widget.names())).toEqual(['a', 'd', 'c', 'b']);
       });
 
       it('should return false if the target item does not exist', () => {

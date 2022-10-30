@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IObservableJSON } from '@jupyterlab/observables';
+import { ISharedText, SourceChange } from '@jupyterlab/shared-models';
 import {
   ITranslator,
   nullTranslator,
@@ -75,9 +76,9 @@ export class JSONEditor extends Widget {
 
     const model = new CodeEditor.Model();
 
-    model.value.text = this._trans.__('No data!');
     model.mimeType = 'application/json';
-    model.value.changed.connect(this._onValueChanged, this);
+    model.sharedModel.changed.connect(this._onModelChanged, this);
+
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
     this.editor.setOption('readOnly', true);
@@ -142,6 +143,22 @@ export class JSONEditor extends Widget {
   }
 
   /**
+   * Dispose of the editor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    // The model does not dispose the shared model by default
+    this.model.sharedModel.dispose();
+    this.model.dispose();
+    this.editor.dispose();
+
+    super.dispose();
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -174,23 +191,6 @@ export class JSONEditor extends Widget {
     this.revertButtonNode.hidden = true;
     this.commitButtonNode.hidden = true;
     this.headerNode.addEventListener('click', this);
-    if (this.isVisible) {
-      this.update();
-    }
-  }
-
-  /**
-   * Handle `after-show` messages for the widget.
-   */
-  protected onAfterShow(msg: Message): void {
-    this.update();
-  }
-
-  /**
-   * Handle `update-request` messages for the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    this.editor.refresh();
   }
 
   /**
@@ -223,20 +223,22 @@ export class JSONEditor extends Widget {
   /**
    * Handle change events.
    */
-  private _onValueChanged(): void {
-    let valid = true;
-    try {
-      const value = JSON.parse(this.editor.model.value.text);
-      this.removeClass(ERROR_CLASS);
-      this._inputDirty =
-        !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
-    } catch (err) {
-      this.addClass(ERROR_CLASS);
-      this._inputDirty = true;
-      valid = false;
+  private _onModelChanged(model: ISharedText, change: SourceChange): void {
+    if (change.sourceChange) {
+      let valid = true;
+      try {
+        const value = JSON.parse(this.editor.model.sharedModel.getSource());
+        this.removeClass(ERROR_CLASS);
+        this._inputDirty =
+          !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
+      } catch (err) {
+        this.addClass(ERROR_CLASS);
+        this._inputDirty = true;
+        valid = false;
+      }
+      this.revertButtonNode.hidden = !this._inputDirty;
+      this.commitButtonNode.hidden = !valid || !this._inputDirty;
     }
-    this.revertButtonNode.hidden = !this._inputDirty;
-    this.commitButtonNode.hidden = !valid || !this._inputDirty;
   }
 
   /**
@@ -274,7 +276,7 @@ export class JSONEditor extends Widget {
   private _mergeContent(): void {
     const model = this.editor.model;
     const old = this._originalValue;
-    const user = JSON.parse(model.value.text) as JSONObject;
+    const user = JSON.parse(model.sharedModel.getSource()) as JSONObject;
     const source = this.source;
     if (!source) {
       return;
@@ -308,18 +310,17 @@ export class JSONEditor extends Widget {
     const content = this._source ? this._source.toJSON() : {};
     this._changeGuard = true;
     if (content === void 0) {
-      model.value.text = this._trans.__('No data!');
+      model.sharedModel.setSource(this._trans.__('No data!'));
       this._originalValue = JSONExt.emptyObject;
     } else {
       const value = JSON.stringify(content, null, 4);
-      model.value.text = value;
+      model.sharedModel.setSource(value);
       this._originalValue = content;
       // Move the cursor to within the brace.
       if (value.length > 1 && value[0] === '{') {
         this.editor.setCursorPosition({ line: 0, column: 1 });
       }
     }
-    this.editor.refresh();
     this._changeGuard = false;
     this.commitButtonNode.hidden = true;
     this.revertButtonNode.hidden = true;

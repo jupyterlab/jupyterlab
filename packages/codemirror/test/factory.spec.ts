@@ -6,6 +6,9 @@ import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
+import { YFile } from '@jupyterlab/shared-models';
+
+import { indentSelection } from '@codemirror/commands';
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {
   public inlineCodeMirrorConfig: CodeMirrorEditor.IConfig;
@@ -19,15 +22,20 @@ describe('CodeMirrorEditorFactory', () => {
   const options: Partial<CodeMirrorEditor.IConfig> = {
     lineNumbers: false,
     lineWrap: 'on',
-    extraKeys: {
-      'Ctrl-Tab': 'indentAuto'
-    }
+    extraKeys: [
+      {
+        key: 'Ctrl-Tab',
+        run: indentSelection
+      }
+    ]
   };
 
   beforeEach(() => {
     host = document.createElement('div');
     document.body.appendChild(host);
-    model = new CodeEditor.Model();
+    model = new CodeEditor.Model({
+      sharedModel: new YFile()
+    });
   });
 
   afterEach(() => {

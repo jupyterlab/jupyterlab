@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { Cell } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';

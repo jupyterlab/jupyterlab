@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _extension_migration:
 
 Extension Migration Guide
@@ -34,6 +37,12 @@ bumped their major version (following semver convention). We want to point out p
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/cells`` from 3.x to 4.x
    ``MarkdownCell.toggleCollapsedSignal`` renamed ``MarkdownCell.headingCollapsedChanged``
+   To support notebook windowing, cell widget children (e.g. the editor or the output area) are not instantiated
+   when the cell is attached to the notebook. You can test for ``isPlaceholder()`` to see if the cell has been
+   fully instantiated or wait for the promise ``ready`` to be resolved. Additionally an attribute ``inViewport``
+   and a signal ``inViewportChanged`` are available to test if the cell is attached to the DOM.
+   If you instantiate standalone cells outside of a notebook, you will probably need to set the constructor option
+   ``placeholder`` to ``false`` to ensure direct rendering of the cell.
 - ``@jupyterlab/completer`` from 3.x to 4.x
    Major version bumped following the removal of ``ICompletionManager`` token and the replacement
    of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
@@ -43,10 +52,17 @@ bumped their major version (following semver convention). We want to point out p
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
    in particular those with the strict null checks enabled.
+- ``@jupyterlab/docmanager`` from 3.x to 4.x
+   * The ``renameDialog`` now receives the ``DocumentRegistry.Context`` instead of a path.
+   * The interface ``DocumentManager.IWidgetOpener`` is now ``IDocumentWidgetOpener`` and is provided
+     by a new plugin ``@jupyterlab/docmanager-extension:opener``.
+     The ``IDocumentWidgetOpener`` interface also now defines an ```opened``` signal that is emitted when a widget is opened.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
-   ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-   ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
-   ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+     ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
+     ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument``.
+     And the ``ymodel`` attribute has been renamed ``model`` typed ``T`` (relaxing typing from ``YDocument`` to ``ISharedDocument``).
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
@@ -55,17 +71,38 @@ bumped their major version (following semver convention). We want to point out p
    The search provider API has been fully reworked. But the logic is similar, for new type of documents
    you will need to register a ``ISearchProviderFactory`` to the ``ISearchProviderRegistry``. The
    factory will build a ``ISearchProvider`` for the document widget.
+- ``@jupyterlab/extensionmanager`` from 3.x to 4.x
+   The frontend API has been drastically reduced to fetch all information from the backend. It is now advised
+   that you implement a custom ``ExtensionManager`` class for your needs rather than overriding the frontend plugins.
+   See ``jupyterlab/extensions/pypi.py`` for an example using PyPI.org and pip. You can then register your manager
+   by defining an entry point in the Python package; see ``pyproject.toml::project.entry-points."jupyterlab.extension_manager_v1"``.
 - ``@jupyterlab/fileeditor`` from 3.x to 4.x
    Remove the class ``FileEditorCodeWrapper``, instead, you can use ``CodeEditorWrapper`` from ``@jupyterlab/codeeditor``.
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
+- ``@jupyterlab/galata`` from 4.x to 5.x
+   * ``ContentsHelper`` and ``galata.newContentsHelper`` have new constructor arguments to use Playwright API request object:
+     ``new ContentsHelper(baseURL, page?, request?)`` -> ``new ContentsHelper(request?, page?)``
+     ``galata.newContentsHelper(baseURL, page?, request?)`` -> ``galata.newContentsHelper(request?, page?)``
+     you need to provide ``request`` or ``page``; they both are fixtures provided by Playwright.
+   * ``galata.Mock.clearRunners(baseURL, runners, type)`` -> ``galata.Mock.clearRunners(request, runners, type)``
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
    * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
    * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
+   * To support windowing, a new method ``scrollToItem(index, behavior)`` is available to scroll to any
+     cell that may or may not be in the DOM. And new ``cellInViewportChanged`` signal is available to listen
+     for cells entering or leaving the viewport (in windowing mode). And ``scrollToCell(cell)`` is now returning
+     a ``Promise<void>`` calling internally ``scrollToItem``.
+   * ``fullyRendered``, ``placeholderCellRendered`` and ``remainingCellToRenderCount`` have been removed.
+     The defer rendering mode still exists. It will render some cells during spare CPU Idle time.
+   * Settings ``numberCellsToRenderDirectly``, ``remainingTimeBeforeRescheduling``, ``renderCellOnIdle``,
+     ``observedTopMargin`` and ``observedBottomMargin`` have been removed. Instead a ``windowingMode``
+     with value of *defer*, *full* or *none* and ``overscanCount`` have been added to manage the rendering
+     mode.
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
@@ -73,6 +110,8 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/rendermime-interfaces`` from 3.x to 4.x
   Remove ``IRenderMime.IRenderer.translator?`` attribute; the translator object is still passed to
   the constructor if needed by the renderer factory.
+- ``@jupyterlab/services`` from 6.x to 7.x
+   * Remove ``Contents.IDrive.modelDBFactory`` and ``Contents.IManager.getModelDBFactory``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
@@ -97,8 +136,9 @@ bumped their major version (following semver convention). We want to point out p
    from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
    need to switch to the Blueprint components as the interfaces of those components in JupyterLab
    do not match those of Blueprint JS.
-- TypeScript 4.6 update
-   As a result of the update to TypeScript 4.5+, a couple of interfaces have had their definitions changed.
+   Remove ``Collapse`` React component.
+- TypeScript 4.7 update
+   As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 

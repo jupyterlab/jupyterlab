@@ -10,14 +10,17 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   closeIcon,
   LabIcon,
+  PanelWithToolbar,
   ReactWidget,
   refreshIcon,
+  SidePanel,
+  ToolbarButton,
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
 
 /**
@@ -26,19 +29,9 @@ import * as React from 'react';
 const RUNNING_CLASS = 'jp-RunningSessions';
 
 /**
- * The class name added to a running widget header.
- */
-const HEADER_CLASS = 'jp-RunningSessions-header';
-
-/**
  * The class name added to the running terminal sessions section.
  */
 const SECTION_CLASS = 'jp-RunningSessions-section';
-
-/**
- * The class name added to the running sessions section header.
- */
-const SECTION_HEADER_CLASS = 'jp-RunningSessions-sectionHeader';
 
 /**
  * The class name added to a section container.
@@ -93,6 +86,12 @@ export interface IRunningSessionManagers {
    *
    */
   add(manager: IRunningSessions.IManager): IDisposable;
+
+  /**
+   * Signal emitted when a new manager is added.
+   */
+  added: ISignal<IRunningSessionManagers, IRunningSessions.IManager>;
+
   /**
    * Return an array of managers.
    */
@@ -101,6 +100,13 @@ export interface IRunningSessionManagers {
 
 export class RunningSessionManagers implements IRunningSessionManagers {
   /**
+   * Signal emitted when a new manager is added.
+   */
+  get added(): ISignal<this, IRunningSessions.IManager> {
+    return this._added;
+  }
+
+  /**
    * Add a running item manager.
    *
    * @param manager - The running item manager.
@@ -108,6 +114,7 @@ export class RunningSessionManagers implements IRunningSessionManagers {
    */
   add(manager: IRunningSessions.IManager): IDisposable {
     this._managers.push(manager);
+    this._added.emit(manager);
     return new DisposableDelegate(() => {
       const i = this._managers.indexOf(manager);
 
@@ -124,6 +131,7 @@ export class RunningSessionManagers implements IRunningSessionManagers {
     return this._managers;
   }
 
+  private _added = new Signal<this, IRunningSessions.IManager>(this);
   private _managers: IRunningSessions.IManager[] = [];
 }
 
@@ -162,7 +170,7 @@ function Item(props: {
   );
 }
 
-function ListView(props: {
+function List(props: {
   runningItems: IRunningSessions.IRunningItem[];
   shutdownLabel?: string;
   shutdownAllLabel?: string;
@@ -184,150 +192,163 @@ function ListView(props: {
   );
 }
 
-function List(props: {
-  manager: IRunningSessions.IManager;
-  shutdownLabel?: string;
-  shutdownAllLabel?: string;
-  translator?: ITranslator;
-}) {
-  return (
-    <UseSignal signal={props.manager.runningChanged}>
-      {() => (
-        <ListView
-          runningItems={props.manager.running()}
-          shutdownLabel={props.shutdownLabel}
-          shutdownAllLabel={props.shutdownAllLabel}
-          shutdownItemIcon={props.manager.shutdownItemIcon}
-          translator={props.translator}
-        />
-      )}
-    </UseSignal>
-  );
-}
-
 /**
  * The Section component contains the shared look and feel for an interactive
  * list of kernels and sessions.
  *
  * It is specialized for each based on its props.
  */
-function Section(props: {
-  manager: IRunningSessions.IManager;
-  translator?: ITranslator;
-}) {
-  const translator = props.translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
-  const shutdownAllLabel =
-    props.manager.shutdownAllLabel || trans.__('Shut Down All');
-  const shutdownTitle = `${shutdownAllLabel}?`;
-  const shutdownAllConfirmationText =
-    props.manager.shutdownAllConfirmationText ||
-    `${shutdownAllLabel} ${props.manager.name}`;
-  function onShutdown() {
-    void showDialog({
-      title: shutdownTitle,
-      body: shutdownAllConfirmationText,
-      buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
-        Dialog.warnButton({ label: shutdownAllLabel })
-      ]
-    }).then(result => {
-      if (result.button.accept) {
-        props.manager.shutdownAll();
-      }
+class Section extends PanelWithToolbar {
+  constructor(options: {
+    manager: IRunningSessions.IManager;
+    translator?: ITranslator;
+  }) {
+    super();
+    this._manager = options.manager;
+    const translator = options.translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    const shutdownAllLabel =
+      options.manager.shutdownAllLabel || trans.__('Shut Down All');
+    const shutdownTitle = `${shutdownAllLabel}?`;
+    const shutdownAllConfirmationText =
+      options.manager.shutdownAllConfirmationText ||
+      `${shutdownAllLabel} ${options.manager.name}`;
+
+    this.addClass(SECTION_CLASS);
+    this.title.label = options.manager.name;
+
+    function onShutdown() {
+      void showDialog({
+        title: shutdownTitle,
+        body: shutdownAllConfirmationText,
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: shutdownAllLabel })
+        ]
+      }).then(result => {
+        if (result.button.accept) {
+          options.manager.shutdownAll();
+        }
+      });
+    }
+
+    const enabled = options.manager.running().length > 0;
+    this._button = new ToolbarButton({
+      label: shutdownAllLabel,
+      className: `${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled ${
+        !enabled && 'jp-mod-disabled'
+      }`,
+      enabled,
+      onClick: onShutdown
     });
+    this._manager.runningChanged.connect(this._updateButton, this);
+
+    this.toolbar.addItem('shutdown-all', this._button);
+
+    this.addWidget(
+      ReactWidget.create(
+        <UseSignal signal={options.manager.runningChanged}>
+          {() => {
+            return (
+              <div className={CONTAINER_CLASS}>
+                <List
+                  runningItems={options.manager.running()}
+                  shutdownLabel={options.manager.shutdownLabel}
+                  shutdownAllLabel={shutdownAllLabel}
+                  shutdownItemIcon={options.manager.shutdownItemIcon}
+                  translator={options.translator}
+                />
+              </div>
+            );
+          }}
+        </UseSignal>
+      )
+    );
   }
 
-  return (
-    <div className={SECTION_CLASS}>
-      <>
-        <div className={`${SECTION_HEADER_CLASS} jp-stack-panel-header`}>
-          <h2>{props.manager.name}</h2>
-          <UseSignal signal={props.manager.runningChanged}>
-            {() => {
-              const disabled = props.manager.running().length === 0;
-              return (
-                <button
-                  className={`${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled ${
-                    disabled && 'jp-mod-disabled'
-                  }`}
-                  disabled={disabled}
-                  onClick={onShutdown}
-                >
-                  {shutdownAllLabel}
-                </button>
-              );
-            }}
-          </UseSignal>
-        </div>
+  /**
+   * Dispose the resources held by the widget
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._manager.runningChanged.disconnect(this._updateButton, this);
+    super.dispose();
+  }
 
-        <div className={CONTAINER_CLASS}>
-          <List
-            manager={props.manager}
-            shutdownLabel={props.manager.shutdownLabel}
-            shutdownAllLabel={shutdownAllLabel}
-            translator={props.translator}
-          />
-        </div>
-      </>
-    </div>
-  );
-}
+  private _updateButton(): void {
+    this._button.enabled = this._manager.running().length > 0;
+    if (this._button.enabled) {
+      this._button.node
+        .querySelector('button')
+        ?.classList.remove('jp-mod-disabled');
+    } else {
+      this._button.node
+        .querySelector('button')
+        ?.classList.add('jp-mod-disabled');
+    }
+  }
 
-function RunningSessionsComponent(props: {
-  managers: IRunningSessionManagers;
-  translator?: ITranslator;
-}) {
-  const translator = props.translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
-  return (
-    <>
-      <div className={HEADER_CLASS}>
-        <ToolbarButtonComponent
-          tooltip={trans.__('Refresh List')}
-          icon={refreshIcon}
-          onClick={() =>
-            props.managers.items().forEach(manager => manager.refreshRunning())
-          }
-        />
-      </div>
-      {props.managers.items().map(manager => (
-        <Section
-          key={manager.name}
-          manager={manager}
-          translator={props.translator}
-        />
-      ))}
-    </>
-  );
+  private _button: ToolbarButton;
+  private _manager: IRunningSessions.IManager;
 }
 
 /**
  * A class that exposes the running terminal and kernel sessions.
  */
-export class RunningSessions extends ReactWidget {
+export class RunningSessions extends SidePanel {
   /**
    * Construct a new running widget.
    */
   constructor(managers: IRunningSessionManagers, translator?: ITranslator) {
     super();
     this.managers = managers;
-    this.translator = translator || nullTranslator;
+    this.translator = translator ?? nullTranslator;
+    const trans = this.translator.load('jupyterlab');
 
-    // this can't be in the react element, because then it would be too nested
     this.addClass(RUNNING_CLASS);
-  }
 
-  protected render(): JSX.Element {
-    return (
-      <RunningSessionsComponent
-        managers={this.managers}
-        translator={this.translator}
-      />
+    this.toolbar.addItem(
+      'refresh',
+      new ToolbarButton({
+        tooltip: trans.__('Refresh List'),
+        icon: refreshIcon,
+        onClick: () =>
+          managers.items().forEach(manager => manager.refreshRunning())
+      })
     );
+
+    managers.items().forEach(manager => this.addSection(managers, manager));
+
+    managers.added.connect(this.addSection, this);
   }
 
-  private managers: IRunningSessionManagers;
+  /**
+   * Dispose the resources held by the widget
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.managers.added.disconnect(this.addSection, this);
+    super.dispose();
+  }
+
+  /**
+   * Add a section for a new manager.
+   *
+   * @param managers Managers
+   * @param manager New manager
+   */
+  protected addSection(
+    managers: IRunningSessionManagers,
+    manager: IRunningSessions.IManager
+  ) {
+    this.addWidget(new Section({ manager, translator: this.translator }));
+  }
+
+  protected managers: IRunningSessionManagers;
   protected translator: ITranslator;
 }
 

@@ -1,17 +1,15 @@
 {
   "name": "@jupyterlab/example-federated",
-  "version": "3.0.0-alpha.11",
+  "version": "3.0.0-alpha.15",
   "private": true,
   "scripts": {
-    "build": "npm run build:core && npm run build:middle && npm run build:md && npm run build:phosphor",
+    "build": "npm run build:core && npm run build:middle && npm run build:md",
     "build:core": "cd core_package && npm run build",
     "build:md": "cd md_package && npm run build",
     "build:middle": "cd middle_package && npm run build",
-    "build:phosphor": "cd phosphor_package && npm run build",
-    "install:all": "npm run install:core && npm run install:middle && npm run install:md && npm run install:phosphor",
+    "install:all": "npm run install:core && npm run install:middle && npm run install:md",
     "install:core": "cd core_package && npm install",
     "install:md": "cd md_package && npm install",
-    "install:middle": "cd middle_package && npm install",
-    "install:phosphor": "cd phosphor_package && npm install"
+    "install:middle": "cd middle_package && npm install"
   }
 }

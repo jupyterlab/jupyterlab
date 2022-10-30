@@ -1,7 +1,7 @@
 {
   "title": "Extension Manager",
   "description": "Extension manager settings.",
-  "jupyter.lab.setting-icon": "ui-components:settings",
+  "jupyter.lab.setting-icon": "ui-components:extension",
   "jupyter.lab.setting-icon-label": "Extension Manager",
   "jupyter.lab.menus": {
     "main": [
@@ -51,24 +51,6 @@
       "title": "Disclaimed Status",
       "description": "Whether the user understand that extensions managed through this interface run arbitrary code that may be dangerous",
       "default": false,
-      "type": "boolean"
-    },
-    "npmRegistry": {
-      "title": "NPM Registry",
-      "description": "The URI of the NPM registry to use for searching for jupyterlab extensions",
-      "default": "https://registry.npmjs.org/-/v1/",
-      "type": "string"
-    },
-    "npmCdn": {
-      "title": "NPM CDN",
-      "description": "The URI of the CDN to use for fetching full package data",
-      "default": "https://unpkg.com",
-      "type": "string"
-    },
-    "enableCdn": {
-      "title": "Enable CDN",
-      "description": "Enables using the CDN to fetch full package data.  Otherwise, the configured NPM registry will be used. Due to a lack of CORS support by NPM registry, only disable if supplying a custom registry",
-      "default": true,
       "type": "boolean"
     }
   },

@@ -1,0 +1,71 @@
+{
+  "name": "@jupyterlab/lsp-extension",
+  "version": "4.0.0-alpha.15",
+  "description": "",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/*.json",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "build:all": "npm run build",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^4.0.0-alpha.15",
+    "@jupyterlab/lsp": "^4.0.0-alpha.15",
+    "@jupyterlab/running": "^4.0.0-alpha.15",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.15",
+    "@jupyterlab/translation": "^4.0.0-alpha.15",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.30",
+    "@lumino/coreutils": "^2.0.0-alpha.6",
+    "@lumino/polling": "^2.0.0-alpha.6",
+    "@lumino/signaling": "^2.0.0-alpha.6",
+    "@rjsf/core": "^4.2.0",
+    "react": "^17.0.1"
+  },
+  "devDependencies": {
+    "@jupyterlab/testutils": "^4.0.0-alpha.15",
+    "@types/jest": "^26.0.10",
+    "jest": "^26.4.2",
+    "rimraf": "~3.0.0",
+    "ts-jest": "^26.3.0",
+    "typescript": "~4.7.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "schemaDir": "schema"
+  },
+  "styleModule": "style/index.js"
+}

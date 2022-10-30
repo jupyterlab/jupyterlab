@@ -21,6 +21,11 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
+    // Wait for kernel to settle on idle
+    await page.waitForSelector('#jp-main-statusbar >> text=Idle');
+    await page.waitForSelector('#jp-main-statusbar >> text=Busy');
+    await page.waitForSelector('#jp-main-statusbar >> text=Idle');
+
     expect(
       await page.screenshot({
         clip: { x: 1050, y: 62, width: 190, height: 28 }
@@ -52,6 +57,9 @@ test.describe('Debugger', () => {
     await setSidebarWidth(page, 251, 'right');
 
     await setBreakpoint(page);
+
+    // Wait for breakpoint to finish appearing
+    await page.waitForTimeout(150);
 
     expect(
       await page.screenshot({
@@ -90,7 +98,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -139,7 +147,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -165,7 +173,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -196,7 +204,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -228,7 +236,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();

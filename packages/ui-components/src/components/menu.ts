@@ -354,11 +354,7 @@ class DisposableMenuItem implements IDisposableMenuItem {
   /**
    * The icon renderer for the menu item.
    */
-  get icon():
-    | VirtualElement.IRenderer
-    | undefined
-    /* <DEPRECATED> */
-    | string /* </DEPRECATED> */ {
+  get icon(): VirtualElement.IRenderer | undefined {
     return this._item.deref()!.icon;
   }
 

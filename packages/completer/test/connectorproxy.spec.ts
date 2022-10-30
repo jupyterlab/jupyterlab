@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import {
   CompletionHandler,
   ConnectorProxy,
@@ -6,7 +11,6 @@ import {
 } from '@jupyterlab/completer';
 import { Context } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
-import { IObservableString } from '@jupyterlab/observables';
 import { ServiceManager } from '@jupyterlab/services';
 import { NBTestUtils } from '@jupyterlab/testutils';
 
@@ -52,10 +56,7 @@ class FooCompletionProvider implements ICompletionProvider {
   async isApplicable(context: ICompletionContext): Promise<boolean> {
     return true;
   }
-  shouldShowContinuousHint(
-    completerIsVisible: boolean,
-    changed: IObservableString.IChangedArgs
-  ) {
+  shouldShowContinuousHint(completerIsVisible: boolean, changed: any) {
     return true;
   }
 }

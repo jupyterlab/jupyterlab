@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import {
   ITranslator,
   nullTranslator,
@@ -21,6 +26,16 @@ export class AddWidget extends Widget {
     this.addClass('tag');
     this.editing = false;
     this.buildTag();
+  }
+
+  /**
+   * Get the parent tag tool widget.
+   */
+  get parent(): TagTool | null {
+    return super.parent as TagTool | null;
+  }
+  set parent(parent: TagTool | null) {
+    super.parent = parent;
   }
 
   /**
@@ -161,7 +176,6 @@ export class AddWidget extends Widget {
     }
   }
 
-  public parent: TagTool | null = null;
   private editing: boolean;
   private input: HTMLInputElement = document.createElement('input');
   protected translator: ITranslator;

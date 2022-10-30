@@ -52,7 +52,6 @@ export class RawEditor extends SplitPanel {
       factory: editorFactory
     }));
 
-    defaults.editor.model.value.text = '';
     defaults.editor.model.mimeType = 'text/javascript';
     defaults.editor.setOption('readOnly', true);
 
@@ -65,7 +64,7 @@ export class RawEditor extends SplitPanel {
 
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
-    user.editor.model.value.changed.connect(this._onTextChanged, this);
+    user.editor.model.sharedModel.changed.connect(this._onTextChanged, this);
 
     // Create and set up an inspector.
     this._inspector = createInspector(
@@ -75,7 +74,6 @@ export class RawEditor extends SplitPanel {
     );
 
     this.addClass(RAW_EDITOR_CLASS);
-    // FIXME-TRANS: onSaveError must have an optional translator?
     this._onSaveError = options.onSaveError;
     this.addWidget(Private.defaultsEditor(defaults, this.translator));
     this.addWidget(
@@ -113,7 +111,10 @@ export class RawEditor extends SplitPanel {
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
-    return this._user.editor.model.value.text !== this._settings?.raw ?? '';
+    return (
+      this._user.editor.model.sharedModel.getSource() !== this._settings?.raw ??
+      ''
+    );
   }
 
   /**
@@ -148,8 +149,8 @@ export class RawEditor extends SplitPanel {
       this._onSettingsChanged();
     } else {
       this._settings = null;
-      defaults.editor.model.value.text = '';
-      user.editor.model.value.text = '';
+      defaults.editor.model.sharedModel.setSource('');
+      user.editor.model.sharedModel.setSource('');
     }
 
     this.update();
@@ -180,16 +181,18 @@ export class RawEditor extends SplitPanel {
       return;
     }
 
-    super.dispose();
+    this._defaults.model.dispose();
     this._defaults.dispose();
+    this._user.model.dispose();
     this._user.dispose();
+    super.dispose();
   }
 
   /**
    * Revert the editor back to original settings.
    */
   revert(): void {
-    this._user.editor.model.value.text = this.settings?.raw ?? '';
+    this._user.editor.model.sharedModel.setSource(this.settings?.raw ?? '');
     this._updateToolbar(false, false);
   }
 
@@ -202,7 +205,7 @@ export class RawEditor extends SplitPanel {
     }
 
     const settings = this._settings;
-    const source = this._user.editor.model.value.text;
+    const source = this._user.editor.model.sharedModel.getSource();
 
     return settings
       .save(source)
@@ -224,24 +227,10 @@ export class RawEditor extends SplitPanel {
   }
 
   /**
-   * Handle `'update-request'` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    const settings = this._settings;
-    const defaults = this._defaults;
-    const user = this._user;
-
-    if (settings) {
-      defaults.editor.refresh();
-      user.editor.refresh();
-    }
-  }
-
-  /**
    * Handle text changes in the underlying editor.
    */
   private _onTextChanged(): void {
-    const raw = this._user.editor.model.value.text;
+    const raw = this._user.editor.model.sharedModel.getSource();
     const settings = this._settings;
 
     this.removeClass(ERROR_CLASS);
@@ -271,8 +260,10 @@ export class RawEditor extends SplitPanel {
     const defaults = this._defaults;
     const user = this._user;
 
-    defaults.editor.model.value.text = settings?.annotatedDefaults() ?? '';
-    user.editor.model.value.text = settings?.raw ?? '';
+    defaults.editor.model.sharedModel.setSource(
+      settings?.annotatedDefaults() ?? ''
+    );
+    user.editor.model.sharedModel.setSource(settings?.raw ?? '');
   }
 
   private _updateToolbar(revert = this._canRevert, save = this._canSave): void {
@@ -337,7 +328,7 @@ export namespace RawEditor {
     /**
      * A function the raw editor calls on save errors.
      */
-    onSaveError: (reason: any) => void;
+    onSaveError: (reason: any, translator?: ITranslator) => void;
 
     /**
      * The setting registry used by the editor.

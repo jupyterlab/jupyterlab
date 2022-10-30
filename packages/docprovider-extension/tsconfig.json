@@ -19,7 +19,7 @@
       "path": "../services"
     },
     {
-      "path": "../user"
+      "path": "../shared-models"
     }
   ]
 }

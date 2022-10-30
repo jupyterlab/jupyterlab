@@ -3,8 +3,10 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISharedCodeCell } from '@jupyterlab/shared-models';
 import {
   acceptDialog,
   createSessionContext,
@@ -12,9 +14,14 @@ import {
   sleep
 } from '@jupyterlab/testutils';
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { each } from '@lumino/algorithm';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
-import { KernelError, Notebook, NotebookActions, NotebookModel } from '..';
+import {
+  KernelError,
+  Notebook,
+  NotebookActions,
+  NotebookModel,
+  StaticNotebook
+} from '..';
 import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';
@@ -60,7 +67,11 @@ describe('@jupyterlab/notebook', () => {
       widget = new Notebook({
         rendermime,
         contentFactory: utils.createNotebookFactory(),
-        mimeTypeService: utils.mimeTypeService
+        mimeTypeService: utils.mimeTypeService,
+        notebookConfig: {
+          ...StaticNotebook.defaultNotebookConfig,
+          windowingMode: 'none'
+        }
       });
       const model = new NotebookModel({
         disableDocumentWideUndoRedo: true
@@ -73,6 +84,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     afterEach(() => {
+      widget.model?.dispose();
       widget.dispose();
       utils.clipboard.clear();
     });
@@ -119,10 +131,10 @@ describe('@jupyterlab/notebook', () => {
             cellError = error;
           }
         });
-
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        cell.value.text = ERROR_INPUT;
-        widget.model!.cells.push(cell);
+        widget.model!.sharedModel.insertCell(widget.widgets.length, {
+          cell_type: 'code',
+          source: ERROR_INPUT
+        });
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.run(widget, ipySessionContext);
         expect(result).toBe(false);
@@ -132,7 +144,6 @@ describe('@jupyterlab/notebook', () => {
         expect(cellError!.errorName).toBe('NameError');
         expect(cellError!.errorValue).toBe("name 'foo' is not defined");
         expect(cellError!.traceback).not.toBeNull();
-        await ipySessionContext.session!.kernel!.restart();
       });
     });
 
@@ -141,7 +152,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         const next = widget.widgets[1] as MarkdownCell;
         let emitted = 0;
-        widget.activeCell!.model.value.text = "print('hello')";
+        widget.activeCell!.model.sharedModel.setSource("print('hello')");
         widget.select(next);
         cell.model.outputs.clear();
         next.rendered = false;
@@ -159,31 +170,34 @@ describe('@jupyterlab/notebook', () => {
       it('should split the active cell into two cells', () => {
         const cell = widget.activeCell!;
         const source = 'thisisasamplestringwithnospaces';
-        cell.model.value.text = source;
+        cell.model.sharedModel.setSource(source);
         const index = widget.activeCellIndex;
-        const editor = cell.editor;
+        const editor = cell.editor as CodeEditor.IEditor;
         editor.setCursorPosition(editor.getPositionAt(10)!);
         NotebookActions.splitCell(widget);
         const cells = widget.model!.cells;
         const newSource =
-          cells.get(index).value.text + cells.get(index + 1).value.text;
+          cells.get(index).sharedModel.getSource() +
+          cells.get(index + 1).sharedModel.getSource();
         expect(newSource).toBe(source);
       });
 
       it('should preserve leading white space in the second cell', () => {
         const cell = widget.activeCell!;
         const source = 'this\n\n   is a test';
-        cell.model.value.text = source;
-        const editor = cell.editor;
+        cell.model.sharedModel.setSource(source);
+        const editor = cell.editor as CodeEditor.IEditor;
         editor.setCursorPosition(editor.getPositionAt(4)!);
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell!.model.value.text).toBe('   is a test');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          '   is a test'
+        );
       });
 
       it('should clear the existing selection', () => {
-        each(widget.widgets, child => {
+        for (const child of widget.widgets) {
           widget.select(child);
-        });
+        }
         NotebookActions.splitCell(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
           if (i === widget.activeCellIndex) {
@@ -207,17 +221,17 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should create two empty cells if there is no content', () => {
-        widget.activeCell!.model.value.text = '';
+        widget.activeCell!.model.sharedModel.setSource('');
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell!.model.value.text).toBe('');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('');
         const prev = widget.widgets[0];
-        expect(prev.model.value.text).toBe('');
+        expect(prev.model.sharedModel.getSource()).toBe('');
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should preserve the widget mode', () => {
@@ -229,60 +243,60 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be undo-able', () => {
-        const source = widget.activeCell!.model.value.text;
+        const source = widget.activeCell!.model.sharedModel.getSource();
         const count = widget.widgets.length;
         NotebookActions.splitCell(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count);
         const cell = widget.widgets[0];
-        expect(cell.model.value.text).toBe(source);
+        expect(cell.model.sharedModel.getSource()).toBe(source);
       });
     });
 
     describe('#mergeCells', () => {
       it('should merge the selected cells', () => {
-        let source = widget.activeCell!.model.value.text + '\n\n';
+        let source = widget.activeCell!.model.sharedModel.getSource() + '\n\n';
         let next = widget.widgets[1];
         widget.select(next);
-        source += next.model.value.text + '\n\n';
+        source += next.model.sharedModel.getSource() + '\n\n';
         next = widget.widgets[2];
         widget.select(next);
-        source += next.model.value.text;
+        source += next.model.sharedModel.getSource();
         const count = widget.widgets.length;
         NotebookActions.mergeCells(widget);
         expect(widget.widgets.length).toBe(count - 2);
-        expect(widget.activeCell!.model.value.text).toBe(source);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should select the next cell if there is only one cell selected', () => {
-        let source = widget.activeCell!.model.value.text + '\n\n';
+        let source = widget.activeCell!.model.sharedModel.getSource() + '\n\n';
         const next = widget.widgets[1];
-        source += next.model.value.text;
+        source += next.model.sharedModel.getSource();
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell!.model.value.text).toBe(source);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
       it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
         widget.activeCellIndex = 1;
-        let source = widget.activeCell!.model.value.text;
+        let source = widget.activeCell!.model.sharedModel.getSource();
         const previous = widget.widgets[0];
-        source = previous.model.value.text + '\n\n' + source;
+        source = previous.model.sharedModel.getSource() + '\n\n' + source;
         NotebookActions.mergeCells(widget, true);
-        expect(widget.activeCell!.model.value.text).toBe(source);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
       it('should do nothing if first cell selected and mergeAbove is true', () => {
-        let source = widget.activeCell!.model.value.text;
+        let source = widget.activeCell!.model.sharedModel.getSource();
         const cellNumber = widget.widgets.length;
         NotebookActions.mergeCells(widget, true);
         expect(widget.widgets.length).toBe(cellNumber);
-        expect(widget.activeCell!.model.value.text).toBe(source);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
       it('should clear the outputs of a code cell', () => {
@@ -301,13 +315,13 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be undo-able', () => {
-        const source = widget.activeCell!.model.value.text;
+        const source = widget.activeCell!.model.sharedModel.getSource();
         const count = widget.widgets.length;
         NotebookActions.mergeCells(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count);
         const cell = widget.widgets[0];
-        expect(cell.model.value.text).toBe(source);
+        expect(cell.model.sharedModel.getSource()).toBe(source);
       });
 
       it('should unrender a markdown cell', () => {
@@ -385,7 +399,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.deleteCells(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should switch to command mode', () => {
@@ -421,13 +435,13 @@ describe('@jupyterlab/notebook', () => {
       it('should be undo-able', () => {
         const next = widget.widgets[1];
         widget.select(next);
-        const source = widget.activeCell!.model.value.text;
+        const source = widget.activeCell!.model.sharedModel.getSource();
         const count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count);
         const cell = widget.widgets[0];
-        expect(cell.model.value.text).toBe(source);
+        expect(cell.model.sharedModel.getSource()).toBe(source);
       });
 
       it('should be undo-able if all the cells are deleted', () => {
@@ -435,11 +449,11 @@ describe('@jupyterlab/notebook', () => {
           widget.select(widget.widgets[i]);
         }
         const count = widget.widgets.length;
-        const source = widget.widgets[1].model.value.text;
+        const source = widget.widgets[1].model.sharedModel.getSource();
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count);
-        expect(widget.widgets[1].model.value.text).toBe(source);
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe(source);
       });
     });
 
@@ -455,7 +469,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.insertAbove(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should widget mode should be preserved', () => {
@@ -488,7 +502,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be the new active cell', () => {
         NotebookActions.insertAbove(widget);
-        expect(widget.activeCell!.model.value.text).toBe('');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('');
       });
     });
 
@@ -504,7 +518,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.insertBelow(widget);
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should widget mode should be preserved', () => {
@@ -537,7 +551,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be the new active cell', () => {
         NotebookActions.insertBelow(widget);
-        expect(widget.activeCell!.model.value.text).toBe('');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('');
       });
     });
 
@@ -554,7 +568,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.changeCellType(widget, 'code');
-        expect(widget.activeCell).toBeUndefined();
+        expect(widget.activeCell).toBeNull();
       });
 
       it('should preserve the widget mode', () => {
@@ -642,7 +656,7 @@ describe('@jupyterlab/notebook', () => {
           emitted += 1;
         });
         widget.select(other);
-        other.model.value.text = 'a = 1';
+        other.model.sharedModel.setSource('a = 1');
         const result = await NotebookActions.run(widget, sessionContext);
         expect(result).toBe(true);
         expect(widget.activeCell).toBe(other);
@@ -682,7 +696,7 @@ describe('@jupyterlab/notebook', () => {
         const result = await NotebookActions.run(widget, undefined);
         expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;
-        expect(cell.model.executionCount).toBeNull();
+        expect(cell.model.executionCount).toBe(null);
         expect(emitted).toBe(1);
       });
 
@@ -691,17 +705,20 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        let cell = widget.model!.contentFactory.createCodeCell({});
-        cell.value.text = ERROR_INPUT;
-        widget.model!.cells.insert(2, cell);
+        widget.model!.sharedModel.insertCell(2, {
+          cell_type: 'code',
+          source: ERROR_INPUT
+        });
         widget.select(widget.widgets[2]);
-        cell = widget.model!.contentFactory.createCodeCell({});
-        widget.model!.cells.push(cell);
+        const cell = widget.model!.sharedModel.insertCell(
+          widget.widgets.length,
+          { cell_type: 'code' }
+        ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.run(widget, ipySessionContext);
+        await sleep(400);
         expect(result).toBe(false);
-        expect(cell.executionCount).toBeNull();
-        await ipySessionContext.session!.kernel!.restart();
+        expect(cell.execution_count).toBeNull();
         expect(emitted).toBe(1);
       });
 
@@ -710,20 +727,20 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        const cell = widget.model!.contentFactory.createMarkdownCell({});
-        widget.model!.cells.push(cell);
+        widget.model!.sharedModel.insertCell(widget.widgets.length, {
+          cell_type: 'markdown'
+        });
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         child.rendered = false;
         widget.select(child);
-        widget.activeCell!.model.value.text = ERROR_INPUT;
+        widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
         const result = await NotebookActions.run(widget, ipySessionContext);
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
-        await sleep(100);
+        await sleep(400);
         expect(result).toBe(false);
         expect(child.rendered).toBe(true);
-        await ipySessionContext.session!.kernel!.restart();
         expect(emitted).toBe(1);
       });
     });
@@ -762,7 +779,6 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).toBe(false);
         expect(widget.isSelected(widget.widgets[0])).toBe(false);
-        await ipySessionContext.session!.kernel!.restart();
       });
 
       it('should change to command mode', async () => {
@@ -812,21 +828,22 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should stop executing code cells on an error', async () => {
-        widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        widget.model!.cells.push(cell);
+        widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
+        const cell = widget.model!.sharedModel.insertCell(
+          widget.widgets.length,
+          { cell_type: 'code' }
+        ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndAdvance(
           widget,
           ipySessionContext
         );
         expect(result).toBe(false);
-        expect(cell.executionCount).toBeNull();
-        await ipySessionContext.session!.kernel!.restart();
+        expect(cell.execution_count).toBeNull();
       });
 
       it('should render all markdown cells on an error', async () => {
-        widget.activeCell!.model.value.text = ERROR_INPUT;
+        widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
@@ -837,11 +854,10 @@ describe('@jupyterlab/notebook', () => {
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
-        await sleep(100);
+        await sleep(400);
         expect(result).toBe(false);
         expect(cell.rendered).toBe(true);
         expect(widget.activeCellIndex).toBe(2);
-        await ipySessionContext.session!.kernel!.restart();
       });
     });
 
@@ -884,7 +900,7 @@ describe('@jupyterlab/notebook', () => {
       it('should insert a new code cell in edit mode after the last selected cell', async () => {
         const next = widget.widgets[2];
         widget.select(next);
-        next.model.value.text = 'a = 1';
+        next.model.sharedModel.setSource('a = 1');
         const count = widget.widgets.length;
         const result = await NotebookActions.runAndInsert(
           widget,
@@ -899,7 +915,7 @@ describe('@jupyterlab/notebook', () => {
       it('should allow an undo of the cell insert', async () => {
         const next = widget.widgets[2];
         widget.select(next);
-        next.model.value.text = 'a = 1';
+        next.model.sharedModel.setSource('a = 1');
         const count = widget.widgets.length;
         const result = await NotebookActions.runAndInsert(
           widget,
@@ -911,21 +927,23 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should stop executing code cells on an error', async () => {
-        widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        widget.model!.cells.push(cell);
+        widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
+        const cell = widget.model!.sharedModel.insertCell(
+          widget.widgets.length,
+          { cell_type: 'code' }
+        ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndInsert(
           widget,
           ipySessionContext
         );
+        await sleep(400);
         expect(result).toBe(false);
-        expect(cell.executionCount).toBeNull();
-        await ipySessionContext.session!.kernel!.restart();
+        expect(cell.execution_count).toBeNull();
       });
 
       it('should render all markdown cells on an error', async () => {
-        widget.activeCell!.model.value.text = ERROR_INPUT;
+        widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
@@ -936,18 +954,17 @@ describe('@jupyterlab/notebook', () => {
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
-        await sleep(100);
+        await sleep(500);
         expect(result).toBe(false);
         expect(cell.rendered).toBe(true);
         expect(widget.activeCellIndex).toBe(2);
-        await ipySessionContext.session!.kernel!.restart();
       });
     });
 
     describe('#runAll()', () => {
       beforeEach(() => {
         // Make sure all cells have valid code.
-        widget.widgets[2].model.value.text = 'a = 1';
+        widget.widgets[2].model.sharedModel.setSource('a = 1');
       });
 
       it('should run all of the cells in the notebook', async () => {
@@ -988,28 +1005,29 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should stop executing code cells on an error', async () => {
-        widget.activeCell!.model.value.text = ERROR_INPUT;
-        const cell = widget.model!.contentFactory.createCodeCell({});
-        widget.model!.cells.push(cell);
+        widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
+        const cell = widget.model!.sharedModel.insertCell(
+          widget.widgets.length,
+          { cell_type: 'code' }
+        ) as ISharedCodeCell;
+        widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAll(widget, ipySessionContext);
         expect(result).toBe(false);
-        expect(cell.executionCount).toBeNull();
+        expect(cell.execution_count).toBeNull();
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
-        await ipySessionContext.session!.kernel!.restart();
       });
 
       it('should render all markdown cells on an error', async () => {
-        widget.activeCell!.model.value.text = ERROR_INPUT;
+        widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         const result = await NotebookActions.runAll(widget, ipySessionContext);
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
-        await sleep(100);
+        await sleep(400);
         expect(result).toBe(false);
         expect(cell.rendered).toBe(true);
-        await ipySessionContext.session!.kernel!.restart();
       });
     });
 
@@ -1233,11 +1251,11 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be undo-able', () => {
         widget.activeCellIndex++;
-        const source = widget.activeCell!.model.value.text;
+        const source = widget.activeCell!.model.sharedModel.getSource();
         NotebookActions.moveUp(widget);
-        expect(widget.model!.cells.get(0).value.text).toBe(source);
+        expect(widget.model!.cells.get(0).sharedModel.getSource()).toBe(source);
         NotebookActions.undo(widget);
-        expect(widget.model!.cells.get(1).value.text).toBe(source);
+        expect(widget.model!.cells.get(1).sharedModel.getSource()).toBe(source);
       });
     });
 
@@ -1264,11 +1282,11 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be undo-able', () => {
-        const source = widget.activeCell!.model.value.text;
+        const source = widget.activeCell!.model.sharedModel.getSource();
         NotebookActions.moveDown(widget);
-        expect(widget.model!.cells.get(1).value.text).toBe(source);
+        expect(widget.model!.cells.get(1).sharedModel.getSource()).toBe(source);
         NotebookActions.undo(widget);
-        expect(widget.model!.cells.get(0).value.text).toBe(source);
+        expect(widget.model!.cells.get(0).sharedModel.getSource()).toBe(source);
       });
     });
 
@@ -1330,10 +1348,10 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be undo-able', () => {
-        const source = widget.activeCell!.model.value.text;
+        const source = widget.activeCell!.model.sharedModel.getSource();
         NotebookActions.cut(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets[0].model.value.text).toBe(source);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe(source);
       });
 
       it('should add a new code cell if all cells were cut', async () => {
@@ -1349,7 +1367,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#paste()', () => {
       it('should paste cells from a utils.clipboard', () => {
-        const source = widget.activeCell!.model.value.text;
+        const source = widget.activeCell!.model.sharedModel.getSource();
         const next = widget.widgets[1];
         widget.select(next);
         const count = widget.widgets.length;
@@ -1357,7 +1375,7 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = 1;
         NotebookActions.paste(widget);
         expect(widget.widgets.length).toBe(count);
-        expect(widget.widgets[2].model.value.text).toBe(source);
+        expect(widget.widgets[2].model.sharedModel.getSource()).toBe(source);
         expect(widget.activeCellIndex).toBe(3);
       });
 
@@ -1419,7 +1437,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there are no cell actions to undo', () => {
         const count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
-        widget.model!.cells.clearUndo();
+        widget.model!.sharedModel.clearUndoHistory();
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 1);
       });
@@ -1459,22 +1477,24 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#toggleAllLineNumbers()', () => {
       it('should toggle line numbers on all cells', () => {
-        const state = widget.activeCell!.editor.getOption('lineNumbers');
+        const state = widget.activeCell!.editor!.getOption('lineNumbers');
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          const lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
+          const lineNumbers =
+            widget.widgets[i].editor!.getOption('lineNumbers');
           expect(lineNumbers).toBe(!state);
         }
       });
 
       it('should be based on the state of the active cell', () => {
-        const state = widget.activeCell!.editor.getOption('lineNumbers');
+        const state = widget.activeCell!.editor!.getOption('lineNumbers');
         for (let i = 1; i < widget.widgets.length; i++) {
-          widget.widgets[i].editor.setOption('lineNumbers', !state);
+          widget.widgets[i].editor!.setOption('lineNumbers', !state);
         }
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          const lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
+          const lineNumbers =
+            widget.widgets[i].editor!.getOption('lineNumbers');
           expect(lineNumbers).toBe(!state);
         }
       });
@@ -1562,8 +1582,10 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         widget.select(next);
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell!.model.value.text.slice(0, 3)).toBe('## ');
-        expect(next.model.value.text.slice(0, 3)).toBe('## ');
+        expect(
+          widget.activeCell!.model.sharedModel.getSource().slice(0, 3)
+        ).toBe('## ');
+        expect(next.model.sharedModel.getSource().slice(0, 3)).toBe('## ');
       });
 
       it('should convert the cells to markdown type', () => {
@@ -1573,9 +1595,13 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
-        expect(widget.activeCell!.model.value.text.slice(0, 2)).toBe('# ');
+        expect(
+          widget.activeCell!.model.sharedModel.getSource().slice(0, 2)
+        ).toBe('# ');
         NotebookActions.setMarkdownHeader(widget, 10);
-        expect(widget.activeCell!.model.value.text.slice(0, 7)).toBe('###### ');
+        expect(
+          widget.activeCell!.model.sharedModel.getSource().slice(0, 7)
+        ).toBe('###### ');
       });
 
       it('should be a no-op if there is no model', () => {
@@ -1585,15 +1611,15 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should replace an existing header', () => {
-        widget.activeCell!.model.value.text = '# foo';
+        widget.activeCell!.model.sharedModel.setSource('# foo');
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell!.model.value.text).toBe('## foo');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('## foo');
       });
 
       it('should replace leading white space', () => {
-        widget.activeCell!.model.value.text = '      foo';
+        widget.activeCell!.model.sharedModel.setSource('      foo');
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell!.model.value.text).toBe('## foo');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('## foo');
       });
 
       it('should unrender the cells', () => {

@@ -1,6 +1,8 @@
 {
   "title": "HTML Viewer",
   "description": "HTML Viewer settings.",
+  "jupyter.lab.setting-icon": "ui-components:html5",
+  "jupyter.lab.setting-icon-label": "HTML Viewer",
   "jupyter.lab.toolbars": {
     "HTML Viewer": [
       { "name": "refresh", "rank": 10 },
@@ -17,6 +19,12 @@
       },
       "type": "array",
       "default": []
+    },
+    "trustByDefault": {
+      "type": "boolean",
+      "title": "Trust HTML by default",
+      "description": "Whether to trust HTML files upon opening",
+      "default": false
     }
   },
   "additionalProperties": false,

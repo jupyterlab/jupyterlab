@@ -172,7 +172,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     let previousWidget: ConsolePanel | null = null;
 
-    const provider = (widget: Widget | null) => {
+    const provider = async (widget: Widget | null) => {
       let editor: CodeEditor.IEditor | null = null;
       if (widget !== previousWidget) {
         previousWidget?.console.promptCellCreated.disconnect(
@@ -184,11 +184,21 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
           (widget as ConsolePanel).console.promptCellCreated.connect(
             positionModel.update
           );
-          editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
+          const promptCell = (widget as ConsolePanel).console.promptCell;
+          editor = null;
+          if (promptCell) {
+            await promptCell.ready;
+            editor = promptCell.editor;
+          }
           previousWidget = widget as ConsolePanel;
         }
       } else if (widget) {
-        editor = (widget as ConsolePanel).console.promptCell?.editor ?? null;
+        const promptCell = (widget as ConsolePanel).console.promptCell;
+        editor = null;
+        if (promptCell) {
+          await promptCell.ready;
+          editor = promptCell.editor;
+        }
       }
       return editor;
     };
@@ -281,7 +291,8 @@ async function activateConsole(
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
-          let kernelIconUrl = spec.resources['logo-64x64'];
+          const kernelIconUrl =
+            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
           disposables.add(
             launcher.add({
               command: CommandIDs.create,
@@ -482,7 +493,10 @@ async function activateConsole(
       // Update future promptCells
       widget.console.editorConfig = promptCellConfig;
       // Update promptCell already on screen
-      setOption(widget.console.promptCell?.editor, promptCellConfig);
+      setOption(
+        widget.console.promptCell?.editor ?? undefined,
+        promptCellConfig
+      );
     };
 
     if (panel) {

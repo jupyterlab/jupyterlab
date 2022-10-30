@@ -28,22 +28,26 @@ export class CodeViewerWidget extends Widget {
     options: CodeViewerWidget.INoModelOptions
   ): CodeViewerWidget {
     const model = new CodeEditor.Model({
-      value: options.content,
       mimeType: options.mimeType
     });
-    return new CodeViewerWidget({ factory: options.factory, model });
+    model.sharedModel.setSource(options.content);
+    const widget = new CodeViewerWidget({ factory: options.factory, model });
+    widget.disposed.connect(() => {
+      model.dispose();
+    });
+    return widget;
   }
 
   get content(): string {
-    return this.model.value.text;
+    return this.model.sharedModel.getSource();
   }
 
   get mimeType(): string {
     return this.model.mimeType;
   }
 
-  model: CodeEditor.IModel;
-  editor: CodeEditor.IEditor;
+  readonly model: CodeEditor.IModel;
+  readonly editor: CodeEditor.IEditor;
 }
 
 /**

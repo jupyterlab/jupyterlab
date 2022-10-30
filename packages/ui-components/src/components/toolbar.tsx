@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator } from '@jupyterlab/translation';
-import { find, IIterator, map, some } from '@lumino/algorithm';
+import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
@@ -175,7 +175,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    *
    * @returns An iterator over the toolbar item names.
    */
-  names(): IIterator<string> {
+  names(): IterableIterator<string> {
     const layout = this.layout as ToolbarLayout;
     return map(layout.widgets, widget => {
       return Private.nameProperty.get(widget);
@@ -1056,10 +1056,7 @@ namespace Private {
 
     const iconClass = commands.iconClass(id, args);
     const iconLabel = commands.iconLabel(id, args);
-    // DEPRECATED: remove _icon when lumino 2.0 is adopted
-    // if icon is aliasing iconClass, don't use it
-    const _icon = options.icon ?? commands.icon(id, args);
-    const icon = _icon === iconClass ? undefined : _icon;
+    const icon = options.icon ?? commands.icon(id, args);
 
     const label = commands.label(id, args);
     let className = commands.className(id, args);
@@ -1076,7 +1073,7 @@ namespace Private {
     // Shows hot keys in tooltips
     const binding = commands.keyBindings.find(b => b.command === id);
     if (binding) {
-      const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+      const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
       tooltip = `${tooltip} (${ks})`;
     }
     const onClick = () => {

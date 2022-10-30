@@ -7,8 +7,11 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { setSidebarWidth, stubExtensionsSearch } from './utils';
+import { setSidebarWidth, stubGitHubUserIcons } from './utils';
 import { default as extensionsList } from './data/extensions.json';
+import { default as allExtensionsList } from './data/extensions-search-all.json';
+import { default as drawioExtensionsList } from './data/extensions-search-drawio.json';
+import { JSONExt } from '@lumino/coreutils';
 
 test.use({
   autoGoto: false,
@@ -20,13 +23,28 @@ test.describe('Extension Manager', () => {
   test.beforeEach(async ({ page }) => {
     // Mock get extensions list
     await page.route(galata.Routes.extensions, async (route, request) => {
+      const url = request.url();
       switch (request.method()) {
         case 'GET':
-          return route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(extensionsList)
-          });
+          if (!url.includes('query')) {
+            return route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(extensionsList)
+            });
+          } else if (url.includes('query=drawio')) {
+            return route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(drawioExtensionsList)
+            });
+          } else {
+            return route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(allExtensionsList)
+            });
+          }
         default:
           return route.continue();
       }
@@ -35,7 +53,6 @@ test.describe('Extension Manager', () => {
 
   test('Sidebar', async ({ page }) => {
     await page.goto();
-
     await openExtensionSidebar(page);
 
     expect(
@@ -63,14 +80,14 @@ test.describe('Extension Manager', () => {
   });
 
   test('Search', async ({ page }) => {
-    await stubExtensionsSearch(page);
+    await stubGitHubUserIcons(page);
 
     await page.goto();
 
     await openExtensionSidebar(page);
 
     await page.fill(
-      '.jp-extensionmanager-view >> [placeholder="SEARCH"]',
+      '.jp-extensionmanager-view >> [placeholder="Search"]',
       'drawio'
     );
 
@@ -83,91 +100,60 @@ test.describe('Extension Manager', () => {
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_search.png');
   });
+});
 
-  test('With allowed and blocked list', async ({ page }) => {
-    await page.route(
-      /.*\/api\/listings\/.*\/listings\.json.*/,
-      (route, request) => {
-        if (request.method() === 'GET') {
-          return route.fulfill({
-            status: 200,
-            body: `{
-                "blocked_extensions_uris": ["http://banana.json"],
-                "allowed_extensions_uris": ["http://orange.json"],
-                "blocked_extensions": [{"name":"banana","type":"jupyterlab"}],
-                "allowed_extensions": [{"name":"orange","type":"jupyterlab"}]
-              }`
-          });
-        } else {
-          return route.continue();
-        }
-      }
-    );
-    await page.goto();
-
-    await page.click('[title="Extension Manager"]');
-
-    expect(
-      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 160 } })
-    ).toMatchSnapshot('extensions_simultaneous_block_allow.png');
-  });
-
+test.describe('Filtered Extension Manager', () => {
   test('Blocked installed extension', async ({ page }) => {
-    await page.route(
-      /.*\/api\/listings\/.*\/listings\.json.*/,
-      (route, request) => {
-        if (request.method() === 'GET') {
+    // Mock get extensions list
+    const extensions = JSONExt.deepCopy(extensionsList);
+    extensions[0]['is_allowed'] = false;
+    await page.route(galata.Routes.extensions, async (route, request) => {
+      switch (request.method()) {
+        case 'GET':
           return route.fulfill({
             status: 200,
-            body: `{
-                "blocked_extensions_uris": ["http://banana.json"],
-                "allowed_extensions_uris": [],
-                "blocked_extensions": [{"name":"@jupyter-widgets/jupyterlab-manager","type":"jupyterlab"}],
-                "allowed_extensions": []
-              }`
+            contentType: 'application/json',
+            body: JSON.stringify(extensions)
           });
-        } else {
+        default:
           return route.continue();
-        }
       }
-    );
+    });
     await page.goto();
 
     await openExtensionSidebar(page);
 
+    await page.pause();
     expect(
       await page.screenshot({
-        clip: { y: 110, x: 33, width: 250, height: 280 }
+        clip: { x: 33, y: 100, width: 250, height: 280 }
       })
     ).toMatchSnapshot('extensions_blocked_list.png');
   });
 
   test('Allowed installed extension', async ({ page }) => {
-    await page.route(
-      /.*\/api\/listings\/.*\/listings\.json.*/,
-      (route, request) => {
-        if (request.method() === 'GET') {
+    // Mock get extensions list
+    const extensions = JSONExt.deepCopy(extensionsList);
+    extensions[1]['is_allowed'] = false;
+    await page.route(galata.Routes.extensions, async (route, request) => {
+      switch (request.method()) {
+        case 'GET':
           return route.fulfill({
             status: 200,
-            body: `{
-                "blocked_extensions_uris": [],
-                "allowed_extensions_uris": ["http://banana.json"],
-                "blocked_extensions": [],
-                "allowed_extensions": [{"name":"@jupyter-widgets/jupyterlab-manager","type":"jupyterlab"}]
-              }`
+            contentType: 'application/json',
+            body: JSON.stringify(extensions)
           });
-        } else {
+        default:
           return route.continue();
-        }
       }
-    );
+    });
     await page.goto();
 
     await openExtensionSidebar(page);
 
     expect(
       await page.screenshot({
-        clip: { y: 110, x: 33, width: 250, height: 280 }
+        clip: { x: 33, y: 100, width: 250, height: 280 }
       })
     ).toMatchSnapshot('extensions_allowed_list.png');
   });
@@ -176,10 +162,17 @@ test.describe('Extension Manager', () => {
 async function openExtensionSidebar(page: IJupyterLabPageFixture) {
   await page.click('[title="Extension Manager"]');
 
-  await page.click('button:has-text("Enable")');
-  await page.waitForSelector('button:has-text("Disable")');
-  await page.click(
-    '.jp-extensionmanager-view >> .jp-stack-panel-header >> button'
+  await Promise.all([
+    page.waitForResponse(new RegExp(`${galata.Routes.extensions}?refresh=0`)),
+    page.waitForResponse(
+      new RegExp(
+        `${galata.Routes.extensions}?query&page=1&per_page=30&refresh=0`
+      )
+    ),
+    page.click('button:has-text("Enable")')
+  ]);
+  await page.waitForSelector(
+    '.jp-extensionmanager-view >> .jp-AccordionPanel-title[aria-expanded="false"] >> text=Warning'
   );
 
   await setSidebarWidth(page);

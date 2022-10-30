@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import {
   IEditorHeading,
   PythonTableOfContentsModel
@@ -120,10 +125,10 @@ describe('@jupyterlab/fileeditor', () => {
           content: {
             model: {
               mimeType: 'text/x-python',
-              value: {
-                text
-              } as any
-            } as any
+              sharedModel: {
+                getSource: () => text
+              }
+            }
           } as any
         } as any);
 

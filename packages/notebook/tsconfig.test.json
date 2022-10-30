@@ -24,6 +24,9 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../nbformat"
     },
     {

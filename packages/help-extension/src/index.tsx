@@ -32,7 +32,6 @@ import {
   Toolbar
 } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { each } from '@lumino/algorithm';
 import { Menu } from '@lumino/widgets';
 import * as React from 'react';
 import { Licenses } from './licenses';
@@ -376,7 +375,8 @@ const resources: JupyterFrontEndPlugin<void> = {
           // Add the kernel banner to the Help Menu.
           const bannerCommand = `help-menu-${name}:banner`;
           const kernelName = spec.display_name;
-          let kernelIconUrl = spec.resources['logo-64x64'];
+          const kernelIconUrl =
+            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
           commands.addCommand(bannerCommand, {
             label: trans.__('About the %1 Kernel', kernelName),
             isVisible: isEnabled,
@@ -430,9 +430,9 @@ const resources: JupyterFrontEndPlugin<void> = {
     };
 
     // Create menu items for currently running sessions
-    each(serviceManager.sessions.running(), model => {
+    for (const model of serviceManager.sessions.running()) {
       onSessionRunningChanged(serviceManager.sessions, [model]);
-    });
+    }
     serviceManager.sessions.runningChanged.connect(onSessionRunningChanged);
 
     if (palette) {

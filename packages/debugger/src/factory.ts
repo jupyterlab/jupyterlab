@@ -6,7 +6,6 @@ import {
   CodeEditorWrapper,
   IEditorServices
 } from '@jupyterlab/codeeditor';
-
 import { IDebugger } from '.';
 
 /**
@@ -31,11 +30,12 @@ export class ReadOnlyEditorFactory {
     const { content, mimeType, path } = source;
     const factory = this._services.factoryService.newInlineEditor;
     const mimeTypeService = this._services.mimeTypeService;
+    const model = new CodeEditor.Model({
+      mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
+    });
+    model.sharedModel.source = content;
     const editor = new CodeEditorWrapper({
-      model: new CodeEditor.Model({
-        value: content,
-        mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
-      }),
+      model,
       factory,
       config: {
         readOnly: true,
@@ -43,6 +43,11 @@ export class ReadOnlyEditorFactory {
       }
     });
     editor.node.setAttribute('data-jp-debugger', 'true');
+
+    editor.disposed.connect(() => {
+      model.dispose();
+    });
+
     return editor;
   }
 

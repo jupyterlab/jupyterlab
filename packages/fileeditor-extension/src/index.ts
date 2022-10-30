@@ -31,6 +31,7 @@ import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
+  FileEditorAdapter,
   FileEditorFactory,
   FileEditorSearchProvider,
   IEditorTracker,
@@ -40,6 +41,11 @@ import {
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
+import {
+  ILSPCodeExtractorsManager,
+  ILSPDocumentConnectionManager,
+  ILSPFeatureManager
+} from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
 import { Session } from '@jupyterlab/services';
@@ -47,9 +53,10 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
-import { find, toArray } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu, Widget } from '@lumino/widgets';
+
 import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
 
 export { Commands } from './commands';
@@ -166,9 +173,11 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
     positionModel: IPositionModel
   ) => {
     positionModel.addEditorProvider((widget: Widget | null) =>
-      widget && tracker.has(widget)
-        ? (widget as IDocumentWidget<FileEditor>).content.editor
-        : null
+      Promise.resolve(
+        widget && tracker.has(widget)
+          ? (widget as IDocumentWidget<FileEditor>).content.editor
+          : null
+      )
     );
   },
   requires: [IEditorTracker, IPositionModel],
@@ -195,6 +204,19 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const languageServerPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:language-server',
+  requires: [
+    IEditorTracker,
+    ILSPDocumentConnectionManager,
+    ILSPFeatureManager,
+    ILSPCodeExtractorsManager
+  ],
+
+  activate: activateFileEditorLanguageServer,
+  autoStart: true
+};
+
 /**
  * Export the plugins as default.
  */
@@ -202,6 +224,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   plugin,
   lineColStatus,
   completerPlugin,
+  languageServerPlugin,
   searchProvider,
   tabSpaceStatus
 ];
@@ -515,7 +538,7 @@ function activateFileEditorCompleterService(
       }
     };
 
-    onRunningChanged(sessionManager, toArray(sessionManager.running()));
+    onRunningChanged(sessionManager, Array.from(sessionManager.running()));
     sessionManager.runningChanged.connect(onRunningChanged);
 
     widget.disposed.connect(() => {
@@ -532,5 +555,23 @@ function activateFileEditorCompleterService(
     editorTracker.forEach(editorWidget => {
       updateCompleter(editorTracker, editorWidget).catch(console.error);
     });
+  });
+}
+
+function activateFileEditorLanguageServer(
+  app: JupyterFrontEnd,
+  editors: IEditorTracker,
+  connectionManager: ILSPDocumentConnectionManager,
+  featureManager: ILSPFeatureManager,
+  extractorManager: ILSPCodeExtractorsManager
+): void {
+  editors.widgetAdded.connect(async (_, editor) => {
+    const adapter = new FileEditorAdapter(editor, {
+      connectionManager,
+      featureManager,
+      foreignCodeExtractorsManager: extractorManager,
+      docRegistry: app.docRegistry
+    });
+    connectionManager.registerAdapter(editor.context.path, adapter);
   });
 }

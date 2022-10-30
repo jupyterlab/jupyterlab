@@ -3,11 +3,7 @@
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
-import { ModelDB } from '@jupyterlab/observables';
-
 import { PartialJSONObject } from '@lumino/coreutils';
-
-import { each } from '@lumino/algorithm';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -116,9 +112,11 @@ export namespace Contents {
   }
 
   /**
-   * A contents file type.
+   * A contents file type. It can be anything but `jupyter-server`
+   * has special treatment for `notebook` and `directory` types.
+   * Anything else is considered as `file` type.
    */
-  export type ContentType = 'notebook' | 'file' | 'directory';
+  export type ContentType = string;
 
   /**
    * A contents file format.
@@ -277,13 +275,6 @@ export namespace Contents {
     driveName(path: string): string;
 
     /**
-     * Given a path, get a ModelDB.IFactory from the
-     * relevant backend. Returns `null` if the backend
-     * does not provide one.
-     */
-    getModelDBFactory(path: string): ModelDB.IFactory | null;
-
-    /**
      * Get a file or directory.
      *
      * @param path: The path to the file.
@@ -420,12 +411,6 @@ export namespace Contents {
     readonly serverSettings: ServerConnection.ISettings;
 
     /**
-     * An optional ModelDB.IFactory instance for the
-     * drive.
-     */
-    readonly modelDBFactory?: ModelDB.IFactory;
-
-    /**
      * A signal emitted when a file operation takes place.
      */
     fileChanged: ISignal<IDrive, IChangedArgs>;
@@ -444,7 +429,7 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param A promise which resolves with the absolute POSIX
+     * @returns A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -611,16 +596,6 @@ export class ContentsManager implements Contents.IManager {
   }
 
   /**
-   * Given a path, get a ModelDB.IFactory from the
-   * relevant backend. Returns `undefined` if the backend
-   * does not provide one.
-   */
-  getModelDBFactory(path: string): ModelDB.IFactory | null {
-    const [drive] = this._driveForPath(path);
-    return drive?.modelDBFactory ?? null;
-  }
-
-  /**
    * Given a path of the form `drive:local/portion/of/it.txt`
    * get the local part of it.
    *
@@ -710,12 +685,9 @@ export class ContentsManager implements Contents.IManager {
     return drive.get(localPath, options).then(contentsModel => {
       const listing: Contents.IModel[] = [];
       if (contentsModel.type === 'directory' && contentsModel.content) {
-        each(contentsModel.content, (item: Contents.IModel) => {
-          listing.push({
-            ...item,
-            path: this._toGlobalPath(drive, item.path)
-          } as Contents.IModel);
-        });
+        for (const item of contentsModel.content) {
+          listing.push({ ...item, path: this._toGlobalPath(drive, item.path) });
+        }
         return {
           ...contentsModel,
           path: this._toGlobalPath(drive, localPath),

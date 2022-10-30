@@ -5,7 +5,6 @@ import { defaultSanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { renderText } from '@jupyterlab/rendermime';
 import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
-import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
@@ -328,7 +327,7 @@ export class Completer extends Widget {
   }
 
   private _createIItemNode(model: Completer.IModel): HTMLElement | null {
-    const items = toArray(model.items());
+    const items = Array.from(model.items());
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
@@ -345,7 +344,7 @@ export class Completer extends Widget {
     // We don't test the filtered `items`, as that
     // is too aggressive of completer behavior, it can
     // lead to double typing of an option.
-    const options = toArray(model.options());
+    const options = Array.from(model.options());
     if (options.length === 1) {
       this._selected.emit(options[0]);
       this.reset();
@@ -604,16 +603,31 @@ export class Completer extends Widget {
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
+    // When the editor is attached to the main area, contain the completer hover box
+    // to the full area available (rather than to the editor itself); the available
+    // area excludes the toolbar, hence the first Widget child between MainAreaWidget
+    // and editor is preferred. The difference is negligible in File Editor, but
+    // substantial for Notebooks.
+    const host =
+      (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
+      editor.host;
+
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
       anchor,
-      host: editor.host,
+      host: host,
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
       node: node,
       offset: { horizontal: borderLeft + paddingLeft },
       privilege: 'below',
-      style: style
+      style: style,
+      outOfViewDisplay: {
+        top: 'hidden-inside',
+        bottom: 'hidden-inside',
+        left: 'stick-inside',
+        right: 'stick-outside'
+      }
     });
   }
 
@@ -786,7 +800,7 @@ export namespace Completer {
     /**
      * Get the of visible items in the completer menu.
      */
-    items(): IIterator<IItem>;
+    items(): IterableIterator<IItem>;
 
     /**
      * Lazy load missing data of item at `activeIndex`.
@@ -802,7 +816,7 @@ export namespace Completer {
     /**
      * Get the unfiltered options in a completer menu.
      */
-    options(): IIterator<string>;
+    options(): IterableIterator<string>;
 
     /**
      * The map from identifiers (`a.b`) to their types (function, module, class,
@@ -818,10 +832,7 @@ export namespace Completer {
     /**
      * Set the available options in the completer menu.
      */
-    setOptions(
-      options: IterableOrArrayLike<string>,
-      typeMap?: JSONObject
-    ): void;
+    setOptions(options: Iterable<string>, typeMap?: JSONObject): void;
 
     /**
      * Handle a cursor change.

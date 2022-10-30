@@ -13,7 +13,6 @@ import {
   sleep
 } from '@jupyterlab/testutils';
 import * as Mock from '@jupyterlab/testutils/lib/mock';
-import { toArray } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import expect from 'expect';
 import { CHUNK_SIZE, FileBrowserModel, LARGE_FILE_SIZE } from '../src';
@@ -50,11 +49,7 @@ describe('filebrowser/model', () => {
   let subDir: string;
   let subSubDir: string;
   let state: StateDB;
-  const opener: DocumentManager.IWidgetOpener = {
-    open: widget => {
-      /* no op */
-    }
-  };
+  const opener = new Mock.DocumentWidgetOpenerMock();
 
   beforeAll(() => {
     registry = new DocumentRegistry({
@@ -196,7 +191,7 @@ describe('filebrowser/model', () => {
     describe('#items()', () => {
       it('should get an iterator of items in the current path', () => {
         const items = model.items();
-        expect(items.next()).toBeTruthy();
+        expect(!items.next().done).toBe(true);
       });
     });
 
@@ -217,7 +212,7 @@ describe('filebrowser/model', () => {
           type: 'test'
         });
         await model.cd();
-        expect(model.sessions().next()).toBeTruthy();
+        expect(!model.sessions().next().done).toBe(true);
         await session.shutdown();
       });
     });
@@ -452,7 +447,7 @@ describe('filebrowser/model', () => {
           );
 
           const uploaded = model.upload(file);
-          expect(toArray(model.uploads())).toEqual([]);
+          expect(Array.from(model.uploads())).toEqual([]);
           expect(await start).toEqual([
             model,
             {
@@ -461,7 +456,7 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 0 }
             }
           ]);
-          expect(toArray(model.uploads())).toEqual([
+          expect(Array.from(model.uploads())).toEqual([
             { path: fname, progress: 0 }
           ]);
           expect(await first).toEqual([
@@ -472,7 +467,7 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 0 }
             }
           ]);
-          expect(toArray(model.uploads())).toEqual([
+          expect(Array.from(model.uploads())).toEqual([
             { path: fname, progress: 0 }
           ]);
           expect(await second).toEqual([
@@ -483,7 +478,7 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 1 / 2 }
             }
           ]);
-          expect(toArray(model.uploads())).toEqual([
+          expect(Array.from(model.uploads())).toEqual([
             { path: fname, progress: 1 / 2 }
           ]);
           expect(await finished).toEqual([
@@ -494,7 +489,7 @@ describe('filebrowser/model', () => {
               newValue: null
             }
           ]);
-          expect(toArray(model.uploads())).toEqual([]);
+          expect(Array.from(model.uploads())).toEqual([]);
           await uploaded;
         });
 

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { checkIcon } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import { TagTool } from './tool';
@@ -15,6 +20,16 @@ export class TagWidget extends Widget {
     this.name = name;
     this.addClass('tag');
     this.buildTag();
+  }
+
+  /**
+   * Get/set the parent tag tool widget.
+   */
+  get parent(): TagTool | null {
+    return super.parent as TagTool | null;
+  }
+  set parent(tagTool: TagTool | null) {
+    super.parent = tagTool;
   }
 
   /**
@@ -145,5 +160,4 @@ export class TagWidget extends Widget {
 
   public name: string;
   private applied: boolean;
-  public parent: TagTool | null = null;
 }

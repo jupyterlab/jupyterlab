@@ -1,6 +1,10 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { ITranslator } from '@jupyterlab/translation';
 import { VDomRenderer } from '@jupyterlab/ui-components';
-import { IIterator } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -39,7 +43,7 @@ export namespace ILauncher {
     /**
      * Return an iterator of launcher items.
      */
-    items(): IIterator<ILauncher.IItemOptions>;
+    items(): IterableIterator<ILauncher.IItemOptions>;
   }
 
   /**

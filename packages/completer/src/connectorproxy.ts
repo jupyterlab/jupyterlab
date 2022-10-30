@@ -1,4 +1,7 @@
-import { IObservableString } from '@jupyterlab/observables';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { SourceChange } from '@jupyterlab/shared-models';
 import { CompletionHandler } from './handler';
 import {
   ICompletionContext,
@@ -72,7 +75,7 @@ export class ConnectorProxy implements IConnectorProxy {
    */
   public shouldShowContinuousHint(
     completerIsVisible: boolean,
-    changed: IObservableString.IChangedArgs
+    changed: SourceChange
   ): boolean {
     if (this._providers[0].shouldShowContinuousHint) {
       return this._providers[0].shouldShowContinuousHint(
@@ -85,12 +88,14 @@ export class ConnectorProxy implements IConnectorProxy {
 
   private _defaultShouldShowContinuousHint(
     completerIsVisible: boolean,
-    changed: IObservableString.IChangedArgs
+    changed: SourceChange
   ): boolean {
     return (
       !completerIsVisible &&
-      changed.type !== 'remove' &&
-      changed.value.trim().length > 0
+      (changed.sourceChange == null ||
+        changed.sourceChange.some(
+          delta => delta.insert != null && delta.insert.length > 0
+        ))
     );
   }
 
