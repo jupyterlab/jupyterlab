@@ -1,0 +1,17 @@
+{
+  "title": "HTML Sanitizer",
+  "description": "HTML Sanitizer settings.",
+  "jupyter.lab.setting-icon": "ui-components:html5",
+  "additionalProperties": false,
+  "properties": {
+    "additionalSchemes": {
+      "title": "Additional Scheme",
+      "description": "Add an additional scheme to the sanitizer.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "type": "object"
+}

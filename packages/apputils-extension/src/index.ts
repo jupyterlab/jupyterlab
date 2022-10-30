@@ -611,10 +611,34 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
  * The default HTML sanitizer.
  */
 const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
-  id: '@jupyter/apputils-extension:sanitizer',
+  id: '@jupyterlab/apputils-extension:sanitizer',
   autoStart: true,
   provides: ISanitizer,
-  activate: () => {
+  requires: [ISettingRegistry],
+  activate: (app: JupyterFrontEnd, settings: ISettingRegistry) => {
+    const loadSetting = (setting: ISettingRegistry.ISettings): void => {
+      const schemesArray = setting.get('additionalSchemes')
+        .composite as Array<string>;
+
+      schemesArray.forEach(scheme => {
+        if (defaultSanitizer.addScheme) {
+          defaultSanitizer.addScheme(scheme);
+        }
+      });
+    };
+
+    // Wait for the application to be restored and
+    // for the settings for this plugin to be loaded
+    Promise.all([
+      app.restored,
+      settings.load('@jupyterlab/apputils-extension:sanitizer')
+    ]).then(([, setting]) => {
+      // Read the settings
+      loadSetting(setting);
+
+      // Listen for your plugin setting changes using Signal
+      setting.changed.connect(loadSetting);
+    });
     return defaultSanitizer;
   }
 };

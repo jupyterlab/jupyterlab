@@ -447,6 +447,12 @@ export class Sanitizer implements ISanitizer {
     return sanitize(dirty, { ...this._options, ...(options || {}) });
   }
 
+  addScheme(scheme: string): void {
+    if (Array.isArray(this._options.allowedSchemes)) {
+      this._options.allowedSchemes.push(scheme);
+    }
+  }
+
   private _options: sanitize.IOptions = {
     // HTML tags that are allowed to be used. Tags were extracted from Google Caja
     allowedTags: [
@@ -952,7 +958,8 @@ export class Sanitizer implements ISanitizer {
     // 'src' Attributes are validated to be URIs, which does not allow for embedded (image) data.
     // Since embedded data is no longer deemed to be a threat, validation can be skipped.
     // See https://github.com/jupyterlab/jupyterlab/issues/5183
-    allowedSchemesAppliedToAttributes: ['href', 'cite']
+    allowedSchemesAppliedToAttributes: ['href', 'cite'],
+    allowedSchemes: []
   };
 }
 
