@@ -638,7 +638,7 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
 
       // Listen for your plugin setting changes using Signal
       setting.changed.connect(loadSetting);
-    });
+    }).catch((reason) => { console.error(`Failed to load sanitizer settings:`, reason) });
     return defaultSanitizer;
   }
 };
