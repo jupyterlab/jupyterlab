@@ -1,12 +1,4 @@
-import { URLExt } from '@jupyterlab/coreutils';
-
-import {
-  JSONExt,
-  PartialJSONObject,
-  ReadonlyJSONObject
-} from '@lumino/coreutils';
-
-import { Poll } from '@lumino/polling';
+import { PartialJSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -18,11 +10,6 @@ import {
 } from '@jupyterlab/services';
 
 /**
- * The url for the lab workspaces service.
- */
-const SERVICE_USER_URL = 'api/me';
-
-/**
  * The user API service manager.
  */
 export class FakeUserManager
@@ -30,13 +17,9 @@ export class FakeUserManager
   implements UserManager.IManager {
   private _isReady = false;
   private _ready: Promise<void>;
-  private _pollSpecs: Poll;
 
   private _identity: User.IIdentity;
   private _permissions: ReadonlyJSONObject;
-
-  private _fakeIdentity: Partial<User.IIdentity>;
-  private _fakePermissions: ReadonlyJSONObject;
 
   private _userChanged = new Signal<this, User.IUser>(this);
   private _connectionFailure = new Signal<this, Error>(this);
@@ -46,39 +29,33 @@ export class FakeUserManager
    */
   constructor(
     options: UserManager.IOptions = {},
-    identity: Partial<User.IIdentity>,
+    identity: User.IIdentity,
     permissions: ReadonlyJSONObject
   ) {
     super(options);
-    this._fakeIdentity = identity;
-    this._fakePermissions = permissions;
 
     // Initialize internal data.
-    this._ready = Promise.all([this.requestUser()])
-      .then(_ => undefined)
-      .catch(_ => undefined)
+    this._ready = new Promise<void>(resolve => {
+      // Schedule updating the user to the next macro task queue.
+      setTimeout(() => {
+        this._identity = identity;
+        this._permissions = permissions;
+
+        this._userChanged.emit({
+          identity: this._identity,
+          permissions: this._permissions as PartialJSONObject
+        });
+
+        resolve();
+      }, 0);
+    })
       .then(() => {
         if (this.isDisposed) {
           return;
         }
         this._isReady = true;
-      });
-
-    this._pollSpecs = new Poll({
-      auto: false,
-      factory: () => this.requestUser(),
-      frequency: {
-        interval: 61 * 1000,
-        backoff: true,
-        max: 300 * 1000
-      },
-      name: `@jupyterlab/services:UserManager#user`,
-      standby: options.standby ?? 'when-hidden'
-    });
-
-    void this.ready.then(() => {
-      void this._pollSpecs.start();
-    });
+      })
+      .catch(_ => undefined);
   }
 
   /**
@@ -132,7 +109,6 @@ export class FakeUserManager
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
-    this._pollSpecs.dispose();
     super.dispose();
   }
 
@@ -146,62 +122,6 @@ export class FakeUserManager
    * since the manager maintains its internal state.
    */
   async refreshUser(): Promise<void> {
-    await this._pollSpecs.refresh();
-    await this._pollSpecs.tick;
-  }
-
-  /**
-   * Execute a request to the server to poll the user and update state.
-   */
-  protected async requestUser(): Promise<void> {
-    if (this.isDisposed) {
-      return;
-    }
-
-    const { baseUrl } = this.serverSettings;
-    const { makeRequest, ResponseError } = ServerConnection;
-    const url = URLExt.join(baseUrl, SERVICE_USER_URL);
-    const response: Response = await makeRequest(url, {}, this.serverSettings);
-
-    if (response.status !== 200) {
-      const err = await ResponseError.create(response);
-      throw err;
-    }
-
-    const oldUser = {
-      identity: this._identity,
-      permissions: this._permissions
-    };
-    const newUser = await response.json();
-    const identity = newUser.identity;
-
-    // store the color and initials for the user
-    // this info is not provided by the server
-    const { localStorage } = window;
-    const data = localStorage.getItem(identity.username);
-
-    if (data && (!identity.initials || !identity.color)) {
-      const localUser = JSON.parse(data);
-      const identity = newUser.identity;
-      identity.initials =
-        identity.initials ||
-        localUser.initials ||
-        identity.name.substring(0, 1);
-      identity.color =
-        identity.color || localUser.color || 'var(--jp-collaborator-color1)';
-    }
-
-    if (!JSONExt.deepEqual(newUser, oldUser)) {
-      this._identity = { ...identity, ...this._fakeIdentity };
-      this._permissions = { ...newUser.permissions, ...this._fakePermissions };
-      localStorage.setItem(
-        this._identity.username,
-        JSON.stringify(this._identity)
-      );
-      this._userChanged.emit({
-        identity: this._identity,
-        permissions: this._permissions as PartialJSONObject
-      });
-    }
+    return Promise.resolve();
   }
 }
