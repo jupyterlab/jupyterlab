@@ -39,7 +39,6 @@ const extensions = [
   import('@jupyterlab/settingeditor-extension'),
   import('@jupyterlab/shortcuts-extension'),
   import('@jupyterlab/statusbar-extension'),
-  import('@jupyterlab/terminal-extension'),
   import('@jupyterlab/theme-dark-extension'),
   import('@jupyterlab/theme-light-extension'),
   import('@jupyterlab/toc-extension'),
