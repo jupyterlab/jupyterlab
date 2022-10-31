@@ -222,7 +222,7 @@
 }
 
 .jp-console-icon-background-color[fill] {
-  stroke: var(--jp-console-icon-background-color);
+  fill: var(--jp-console-icon-background-color);
 }
 
 .jp-terminal-icon-color[fill] {
@@ -230,7 +230,7 @@
 }
 
 .jp-terminal-icon-background-color[fill] {
-  stroke: var(--jp-terminal-icon-background-color);
+  fill: var(--jp-terminal-icon-background-color);
 }
 
 .jp-text-editor-icon-color[fill] {
