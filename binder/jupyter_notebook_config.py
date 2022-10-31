@@ -9,19 +9,6 @@ common = [
     "--ServerApp.allow_remote_access=True",
 ]
 
-lab_command = " ".join(
-    [
-        "jupyter",
-        "lab",
-        "--dev-mode",
-        "--extensions-in-dev-mode",
-        "--collaborative",
-        "--ServerApp.base_url={base_url}lab-dev",
-    ]
-    + common
-    + [">jupyterlab-dev.log 2>&1"]
-)
-
 
 lab_splice_command = " ".join(
     [
@@ -44,7 +31,6 @@ lab_splice_command = " ".join(
 
 
 c.ServerProxy.servers = {
-    "lab-dev": {"command": ["/bin/bash", "-c", lab_command], "timeout": 60, "absolute_url": True},
     "lab-spliced": {
         "command": ["/bin/bash", "-c", lab_splice_command],
         "timeout": 300,
@@ -52,8 +38,6 @@ c.ServerProxy.servers = {
     },
 }
 
-c.NotebookApp.default_url = "/lab-dev"
-
 import logging
 
-c.NotebookApp.log_level = logging.DEBUG
+c.ServerApp.log_level = logging.DEBUG
