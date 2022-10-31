@@ -17,6 +17,7 @@ import {
   WebSocketProvider
 } from '@jupyterlab/docprovider';
 import { ServerConnection } from '@jupyterlab/services';
+import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 
 /**
  * The default document provider plugin
@@ -30,7 +31,7 @@ const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
     const collaborative =
       PageConfig.getOption('collaborative') == 'true' ? true : false;
     const factory = (
-      options: IDocumentProviderFactory.IOptions
+      options: IDocumentProviderFactory.IOptions<YDocument<DocumentChange>>
     ): IDocumentProvider => {
       return collaborative
         ? new WebSocketProvider({
