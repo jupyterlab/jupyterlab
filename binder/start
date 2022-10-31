@@ -17,6 +17,7 @@ argv = sys.argv[1:] + [
 ]
 print(argv)
 
+
 # Convert from jupyter-notebook based to jupyter-lab based start-up
 def nb2jps(s):
     return s.replace("jupyter-notebook", "jupyter-lab").replace("--NotebookApp.", "--ServerApp.")
