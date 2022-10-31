@@ -362,13 +362,17 @@ close the notebook without saving it.`,
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
-          this._dirty = value.newValue;
-          this.triggerStateChange({
-            newValue: undefined,
-            oldValue: undefined,
-            ...value
-          });
+        if (value.oldValue !== value.newValue) {
+          if (value.name === 'dirty') {
+            // Setting `dirty` will trigger the state change.
+            this.dirty = value.newValue;
+          } else {
+            this.triggerStateChange({
+              newValue: undefined,
+              oldValue: undefined,
+              ...value
+            });
+          }
         }
       });
     }
