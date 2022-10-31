@@ -7,7 +7,7 @@ https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab
 To check out a different version, just replace "master" with the desired
 branch/tag name or commit hash.
 
-If there is an error with the launched application, you can look at 
+If there is an error with the launched application, you can look at
 `~/jupyterlab-dev.log` in a terminal to see the log.
 
 Please note that this setup is developer focused.
