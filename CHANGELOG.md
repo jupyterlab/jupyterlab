@@ -18,9 +18,9 @@
 - Use file ID [#13246](https://github.com/jupyterlab/jupyterlab/pull/13246) ([@davidbrochart](https://github.com/davidbrochart))
 - Relax doc provider API [#13214](https://github.com/jupyterlab/jupyterlab/pull/13214) ([@fcollonval](https://github.com/fcollonval))
 - User service [#12926](https://github.com/jupyterlab/jupyterlab/pull/12926) ([@hbcarlos](https://github.com/hbcarlos))
-- Backport PRs #13037 and #13300 [#13314](https://github.com/jupyterlab/jupyterlab/pull/13314) ([@brichet](https://github.com/brichet))
+- Avoids restoring widget in dock panel when first loading in 'single-document' mode [#13314](https://github.com/jupyterlab/jupyterlab/pull/13314) ([@brichet](https://github.com/brichet))
 - Fix illegible white on yellow text of stacktrace in dark theme [#13249](https://github.com/jupyterlab/jupyterlab/pull/13249) ([@NikolayXHD](https://github.com/NikolayXHD))
-- Backport of "Allow empty notebook" (#13141) [#13296](https://github.com/jupyterlab/jupyterlab/pull/13296) ([@martinRenou](https://github.com/martinRenou))
+- Allow empty notebook [#13296](https://github.com/jupyterlab/jupyterlab/pull/13296) ([@martinRenou](https://github.com/martinRenou))
 
 ### Bugs fixed
 
