@@ -2,23 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { caretDownIcon, userIcon } from '@jupyterlab/ui-components';
+import { User, UserManager } from '@jupyterlab/services';
 import { Menu, MenuBar } from '@lumino/widgets';
 import { h, VirtualElement } from '@lumino/virtualdom';
-
-import { ICurrentUser } from './tokens';
 
 /**
  * Custom renderer for the user menu.
  */
 export class RendererUserMenu extends MenuBar.Renderer {
-  private _user: ICurrentUser;
+  private _user: UserManager.IManager;
 
   /**
    * Constructor of the class RendererUserMenu.
    *
    * @argument user Current user object.
    */
-  constructor(user: ICurrentUser) {
+  constructor(user: UserManager.IManager) {
     super();
     this._user = user;
   }
@@ -70,22 +69,22 @@ export class RendererUserMenu extends MenuBar.Renderer {
    * @returns A virtual element representing the item label.
    */
   private _createUserIcon(): VirtualElement {
-    if (this._user.isReady && this._user.avatar_url) {
+    if (this._user.isReady && this._user.identity!.avatar_url) {
       return h.div(
         {
           className:
             'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-imageIcon'
         },
-        h.img({ src: this._user.avatar_url })
+        h.img({ src: this._user.identity!.avatar_url })
       );
     } else if (this._user.isReady) {
       return h.div(
         {
           className:
             'lm-MenuBar-itemIcon p-MenuBar-itemIcon jp-MenuBar-anonymousIcon',
-          style: { backgroundColor: this._user.color }
+          style: { backgroundColor: this._user.identity!.color }
         },
-        h.span({}, this._user.initials)
+        h.span({}, this._user.identity!.initials)
       );
     } else {
       return h.div(
@@ -103,30 +102,33 @@ export class RendererUserMenu extends MenuBar.Renderer {
  * Custom lumino Menu for the user menu.
  */
 export class UserMenu extends Menu {
-  private _user: ICurrentUser;
+  private _user: UserManager.IManager;
 
   constructor(options: UserMenu.IOptions) {
     super(options);
     this._user = options.user;
-    const name =
-      this._user.displayName !== '' ? this._user.displayName : this._user.name;
-    this.title.label = this._user.isReady ? name : '';
+
+    this.title.label = '';
     this.title.icon = caretDownIcon;
     this.title.iconClass = 'jp-UserMenu-caretDownIcon';
-    this._user.ready.connect(this._updateLabel);
-    this._user.changed.connect(this._updateLabel);
+
+    this._user.ready
+      .then(() => {
+        this.title.label = this._user.identity!.display_name;
+      })
+      .catch(e => console.error(e));
+
+    this._user.userChanged.connect(this._updateLabel, this);
   }
 
   dispose() {
-    this._user.ready.disconnect(this._updateLabel);
-    this._user.changed.disconnect(this._updateLabel);
+    this._user.userChanged.disconnect(this._updateLabel, this);
   }
 
-  private _updateLabel = (user: ICurrentUser) => {
-    const name = user.displayName !== '' ? user.displayName : user.name;
-    this.title.label = name;
+  private _updateLabel(sender: UserManager.IManager, user: User.IUser): void {
+    this.title.label = user.identity.display_name;
     this.update();
-  };
+  }
 }
 
 /**
@@ -138,8 +140,8 @@ export namespace UserMenu {
    */
   export interface IOptions extends Menu.IOptions {
     /**
-     * Current user object.
+     * Current user manager.
      */
-    user: ICurrentUser;
+    user: UserManager.IManager;
   }
 }

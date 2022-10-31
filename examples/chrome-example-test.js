@@ -20,7 +20,8 @@ async function main() {
 
   const handleMessage = async msg => {
     const text = msg.text();
-    if (msg.type() === 'error') {
+    const url = msg.location().url ?? '';
+    if (msg.type() === 'error' && !url.includes('/api/me')) {
       errored = true;
     }
     console.log(msg.type(), '>>', text);

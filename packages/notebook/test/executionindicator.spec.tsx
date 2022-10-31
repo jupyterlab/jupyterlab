@@ -15,6 +15,7 @@ import {
 import * as utils from './utils';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 const fastCellModel = {
   cell_type: 'code',
@@ -114,7 +115,8 @@ describe('@jupyterlab/notebook', () => {
         let scheduledCell: number | undefined = 0;
 
         indicator.model.stateChanged.connect(state => {
-          scheduledCell = state.executionState(widget)!.scheduledCellNumber;
+          scheduledCell =
+            state.executionState(widget)?.scheduledCellNumber ?? 0;
         });
 
         await NotebookActions.run(widget, ipySessionContext);
@@ -125,10 +127,15 @@ describe('@jupyterlab/notebook', () => {
         let elapsedTime: number | undefined = 0;
 
         indicator.model.stateChanged.connect(state => {
-          elapsedTime = state.executionState(widget)!.totalTime;
+          elapsedTime = state.executionState(widget)?.totalTime ?? 0;
         });
 
         await NotebookActions.run(widget, ipySessionContext);
+        const delegate = new PromiseDelegate<void>();
+        setTimeout(() => {
+          delegate.resolve();
+        }, 150);
+        await delegate.promise;
         expect(elapsedTime).toBeGreaterThanOrEqual(6);
       });
 
@@ -136,10 +143,18 @@ describe('@jupyterlab/notebook', () => {
         let tick: Array<number> = [];
 
         indicator.model.stateChanged.connect(state => {
-          tick.push(state.executionState(widget)!.totalTime);
+          const indicatorState = state.executionState(widget);
+          if (indicatorState) {
+            tick.push(indicatorState.totalTime);
+          }
         });
 
         await NotebookActions.run(widget, ipySessionContext);
+        const delegate = new PromiseDelegate<void>();
+        setTimeout(() => {
+          delegate.resolve();
+        }, 150);
+        await delegate.promise;
         expect(tick).toEqual(expect.arrayContaining([1, 2, 3, 4, 5, 6, 6]));
       });
 

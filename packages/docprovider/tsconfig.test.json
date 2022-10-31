@@ -3,7 +3,7 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
-      "path": "../collaboration"
+      "path": "../services"
     },
     {
       "path": "../shared-models"
@@ -15,7 +15,7 @@
       "path": "../../testutils"
     },
     {
-      "path": "../collaboration"
+      "path": "../services"
     },
     {
       "path": "../shared-models"

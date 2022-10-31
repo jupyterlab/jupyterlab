@@ -6,7 +6,6 @@
  */
 
 export * from './tokens';
-export * from './model';
 export * from './awarenessmock';
 export * from './menu';
 export * from './sidepanel';

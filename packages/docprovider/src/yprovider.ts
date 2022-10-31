@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ICurrentUser } from '@jupyterlab/collaboration';
+import { UserManager } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
@@ -12,10 +12,6 @@ import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
 
 /**
  * A class to provide Yjs synchronization over WebSocket.
- *
- * The user can specify their own user-name and user-color by adding url parameters:
- *   ?username=Alice&usercolor=007007
- * where usercolor must be a six-digit hexadecimal encoded RGB value without the hash token.
  *
  * We specify custom messages that the server can interpret. For reference please look in yjs_ws_server.
  *
@@ -58,14 +54,13 @@ export class WebSocketProvider
     const awareness = options.ymodel.awareness;
     const user = options.user;
     const userChanged = () => {
-      const name = user.displayName !== '' ? user.displayName : user.name;
-      awareness.setLocalStateField('user', { ...user.toJSON(), name });
+      awareness.setLocalStateField('user', user.identity);
     };
     if (user.isReady) {
       userChanged();
     }
-    user.ready.connect(userChanged);
-    user.changed.connect(userChanged);
+    user.ready.then(userChanged).catch(e => console.error(e));
+    user.userChanged.connect(userChanged);
   }
 
   get renameAck(): Promise<boolean> {
@@ -149,6 +144,6 @@ export namespace WebSocketProvider {
     /**
      * The user data
      */
-    user: ICurrentUser;
+    user: UserManager.IManager;
   }
 }

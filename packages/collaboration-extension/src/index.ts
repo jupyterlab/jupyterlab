@@ -19,12 +19,10 @@ import {
   AwarenessMock,
   CollaboratorsPanel,
   IAwareness,
-  ICurrentUser,
   IGlobalAwareness,
   IUserMenu,
   RendererUserMenu,
   RTCPanel,
-  User,
   UserInfoPanel,
   UserMenu
 } from '@jupyterlab/collaboration';
@@ -36,27 +34,16 @@ import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
- * Jupyter plugin providing the ICurrentUser.
- */
-const userPlugin: JupyterFrontEndPlugin<ICurrentUser> = {
-  id: '@jupyterlab/collaboration-extension:user',
-  autoStart: true,
-  provides: ICurrentUser,
-  activate: (app: JupyterFrontEnd): ICurrentUser => {
-    return new User();
-  }
-};
-
-/**
  * Jupyter plugin providing the IUserMenu.
  */
 const userMenuPlugin: JupyterFrontEndPlugin<IUserMenu> = {
   id: '@jupyterlab/collaboration-extension:userMenu',
   autoStart: true,
-  requires: [ICurrentUser],
+  requires: [],
   provides: IUserMenu,
-  activate: (app: JupyterFrontEnd, user: ICurrentUser): IUserMenu => {
+  activate: (app: JupyterFrontEnd): IUserMenu => {
     const { commands } = app;
+    const { user } = app.serviceManager;
     return new UserMenu({ commands, user });
   }
 };
@@ -67,13 +54,10 @@ const userMenuPlugin: JupyterFrontEndPlugin<IUserMenu> = {
 const menuBarPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/collaboration-extension:userMenuBar',
   autoStart: true,
-  requires: [ICurrentUser, IUserMenu],
-  activate: (
-    app: JupyterFrontEnd,
-    user: ICurrentUser,
-    menu: IUserMenu
-  ): void => {
+  requires: [IUserMenu],
+  activate: async (app: JupyterFrontEnd, menu: IUserMenu): Promise<void> => {
     const { shell } = app;
+    const { user } = app.serviceManager;
 
     if (PageConfig.getOption('collaborative') !== 'true') {
       return;
@@ -87,7 +71,7 @@ const menuBarPlugin: JupyterFrontEndPlugin<void> = {
       renderer: new RendererUserMenu(user)
     });
     menuBar.id = 'jp-UserMenu';
-    user.changed.connect(() => menuBar.update());
+    user.userChanged.connect(() => menuBar.update());
     menuBar.addMenu(menu as Menu);
 
     const spacer = Toolbar.createSpacerItem();
@@ -105,13 +89,10 @@ const menuBarPlugin: JupyterFrontEndPlugin<void> = {
 const rtcGlobalAwarenessPlugin: JupyterFrontEndPlugin<IAwareness> = {
   id: '@jupyterlab/collaboration-extension:rtcGlobalAwareness',
   autoStart: true,
-  requires: [ICurrentUser, IStateDB],
+  requires: [IStateDB],
   provides: IGlobalAwareness,
-  activate: (
-    app: JupyterFrontEnd,
-    currentUser: User,
-    state: StateDB
-  ): IAwareness => {
+  activate: (app: JupyterFrontEnd, state: StateDB): IAwareness => {
+    const { user } = app.serviceManager;
     const ydoc = new Y.Doc();
 
     if (PageConfig.getOption('collaborative') !== 'true') {
@@ -128,17 +109,13 @@ const rtcGlobalAwarenessPlugin: JupyterFrontEndPlugin<IAwareness> = {
     });
 
     const userChanged = () => {
-      const name =
-        currentUser.displayName !== ''
-          ? currentUser.displayName
-          : currentUser.name;
-      awareness.setLocalStateField('user', { ...currentUser.toJSON(), name });
+      awareness.setLocalStateField('user', user.identity);
     };
-    if (currentUser.isReady) {
+    if (user.isReady) {
       userChanged();
     }
-    currentUser.ready.connect(userChanged);
-    currentUser.changed.connect(userChanged);
+    user.ready.then(userChanged).catch(e => console.error(e));
+    user.userChanged.connect(userChanged);
 
     state.changed.connect(async () => {
       const data: any = await state.toJSON();
@@ -161,16 +138,16 @@ const rtcGlobalAwarenessPlugin: JupyterFrontEndPlugin<IAwareness> = {
 const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/collaboration-extension:rtcPanel',
   autoStart: true,
-  requires: [ICurrentUser, IGlobalAwareness, ITranslator],
+  requires: [IGlobalAwareness, ITranslator],
   activate: (
     app: JupyterFrontEnd,
-    currentUser: User,
     awareness: Awareness,
     translator: ITranslator
   ): void => {
     if (PageConfig.getOption('collaborative') !== 'true') {
       return;
     }
+    const { user } = app.serviceManager;
 
     const trans = translator.load('jupyterlab');
 
@@ -182,7 +159,7 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
     userPanel.addClass('jp-RTCPanel');
     app.shell.add(userPanel, 'left', { rank: 300 });
 
-    const currentUserPanel = new UserInfoPanel(currentUser);
+    const currentUserPanel = new UserInfoPanel(user);
     currentUserPanel.title.label = trans.__('User info');
     currentUserPanel.title.caption = trans.__('User information');
     userPanel.addWidget(currentUserPanel);
@@ -192,7 +169,7 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
     };
 
     const collaboratorsPanel = new CollaboratorsPanel(
-      currentUser,
+      user,
       awareness,
       fileopener
     );
@@ -205,7 +182,6 @@ const rtcPanelPlugin: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
-  userPlugin,
   userMenuPlugin,
   menuBarPlugin,
   rtcGlobalAwarenessPlugin,

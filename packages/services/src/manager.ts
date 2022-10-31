@@ -13,6 +13,8 @@ import { NbConvert, NbConvertManager } from './nbconvert';
 
 import { Contents, ContentsManager } from './contents';
 
+import { KernelManager } from './kernel';
+
 import { KernelSpec, KernelSpecManager } from './kernelspec';
 
 import { Session, SessionManager } from './session';
@@ -23,8 +25,9 @@ import { Terminal, TerminalManager } from './terminal';
 
 import { ServerConnection } from './serverconnection';
 
+import { UserManager } from './user';
+
 import { Workspace, WorkspaceManager } from './workspace';
-import { KernelManager } from './kernel';
 
 /**
  * A Jupyter services manager.
@@ -53,6 +56,7 @@ export class ServiceManager implements ServiceManager.IManager {
     this.workspaces = new WorkspaceManager(normalized);
     this.nbconvert = new NbConvertManager(normalized);
     this.kernelspecs = new KernelSpecManager(normalized);
+    this.user = new UserManager(normalized);
 
     // Relay connection failures from the service managers that poll
     // the server for current information.
@@ -133,6 +137,11 @@ export class ServiceManager implements ServiceManager.IManager {
    * Get the terminal manager instance.
    */
   readonly terminals: TerminalManager;
+
+  /**
+   * Get the user manager instance.
+   */
+  readonly user: UserManager.IManager;
 
   /**
    * Get the workspace manager instance.
@@ -220,6 +229,11 @@ export namespace ServiceManager {
      * The terminals manager for the manager.
      */
     readonly terminals: Terminal.IManager;
+
+    /**
+     * The user manager for the manager.
+     */
+    readonly user: UserManager.IManager;
 
     /**
      * The workspace manager for the manager.
