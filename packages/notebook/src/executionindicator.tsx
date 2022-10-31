@@ -505,7 +505,7 @@ export namespace ExecutionIndicator {
      *
      * @param  data - the state to be updated.
      */
-    private _tick(data: Private.IExecutionState): void {
+    private _tick(data: IExecutionState): void {
       data.totalTime += 1;
       this.stateChanged.emit(void 0);
     }
@@ -515,7 +515,7 @@ export namespace ExecutionIndicator {
      *
      * @param  data - the state to be rested.
      */
-    private _resetTime(data: Private.IExecutionState): void {
+    private _resetTime(data: IExecutionState): void {
       data.totalTime = 0;
       data.scheduledCellNumber = 0;
       data.executionStatus = 'idle';
@@ -559,7 +559,7 @@ export namespace ExecutionIndicator {
      */
     private _notebookExecutionProgress = new WeakMap<
       Notebook,
-      Private.IExecutionState
+      IExecutionState
     >();
 
     /**
