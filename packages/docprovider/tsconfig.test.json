@@ -3,9 +3,6 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
-      "path": "../collaboration"
-    },
-    {
       "path": "../services"
     },
     {
@@ -16,9 +13,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../collaboration"
     },
     {
       "path": "../services"
