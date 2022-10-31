@@ -56,7 +56,16 @@ export function getLernaPaths(basePath = '.'): string[] {
  */
 export function getCorePaths(): string[] {
   const spec = path.resolve(path.join('.', 'packages', '*'));
-  return glob.sync(spec);
+  return (
+    glob
+      .sync(spec)
+      // Git versioned only files - so we check for package.json
+      // to ensure a package really exists and is not a ghost from
+      // another branch
+      .filter(packagePath =>
+        fs.existsSync(path.join(packagePath, 'package.json'))
+      )
+  );
 }
 
 /**
