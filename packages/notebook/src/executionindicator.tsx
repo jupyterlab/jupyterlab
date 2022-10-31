@@ -167,7 +167,7 @@ namespace ExecutionIndicatorComponent {
     /**
      * Execution state of selected notebook.
      */
-    state?: Private.IExecutionState;
+    state?: ExecutionIndicator.IExecutionState;
 
     /**
      * The application language translator.
@@ -225,6 +225,57 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
  * A namespace for ExecutionIndicator statics.
  */
 export namespace ExecutionIndicator {
+  /**
+   * Execution state of a notebook.
+   */
+  export interface IExecutionState {
+    /**
+     * Execution status of kernel, this status is deducted from the
+     * number of scheduled code cells.
+     */
+    executionStatus: string;
+
+    /**
+     * Current status of kernel.
+     */
+    kernelStatus: ISessionContext.KernelDisplayStatus;
+
+    /**
+     * Total execution time.
+     */
+    totalTime: number;
+
+    /**
+     * Id of `setInterval`, it is used to start / stop the elapsed time
+     * counter.
+     */
+    interval: number;
+
+    /**
+     * Id of `setTimeout`, it is used to create / clear the state
+     * resetting request.
+     */
+    timeout: number;
+
+    /**
+     * Set of messages scheduled for executing, `executionStatus` is set
+     *  to `idle if the length of this set is 0 and to `busy` otherwise.
+     */
+    scheduledCell: Set<string>;
+
+    /**
+     * Total number of cells requested for executing, it is used to compute
+     * the execution progress in progress bar.
+     */
+    scheduledCellNumber: number;
+
+    /**
+     * Flag to reset the execution state when a code cell is scheduled for
+     * executing.
+     */
+    needReset: boolean;
+  }
+
   /**
    * A VDomModel for the execution status indicator.
    */
@@ -370,7 +421,7 @@ export namespace ExecutionIndicator {
      *
      * @returns - The associated execution state.
      */
-    public executionState(nb: Notebook): Private.IExecutionState | undefined {
+    executionState(nb: Notebook): IExecutionState | undefined {
       return this._notebookExecutionProgress.get(nb);
     }
 
@@ -478,7 +529,7 @@ export namespace ExecutionIndicator {
       return this._renderFlag;
     }
 
-    public updateRenderOption(options: {
+    updateRenderOption(options: {
       showOnToolBar: boolean;
       showProgress: boolean;
     }): void {
@@ -571,54 +622,6 @@ export namespace ExecutionIndicator {
  * A namespace for module-private data.
  */
 namespace Private {
-  export interface IExecutionState {
-    /**
-     * Execution status of kernel, this status is deducted from the
-     * number of scheduled code cells.
-     */
-    executionStatus: string;
-
-    /**
-     * Current status of kernel.
-     */
-    kernelStatus: ISessionContext.KernelDisplayStatus;
-
-    /**
-     * Total execution time.
-     */
-    totalTime: number;
-
-    /**
-     * Id of `setInterval`, it is used to start / stop the elapsed time
-     * counter.
-     */
-    interval: number;
-
-    /**
-     * Id of `setTimeout`, it is used to create / clear the state
-     * resetting request.
-     */
-    timeout: number;
-
-    /**
-     * Set of messages scheduled for executing, `executionStatus` is set
-     *  to `idle if the length of this set is 0 and to `busy` otherwise.
-     */
-    scheduledCell: Set<string>;
-
-    /**
-     * Total number of cells requested for executing, it is used to compute
-     * the execution progress in progress bar.
-     */
-    scheduledCellNumber: number;
-
-    /**
-     * Flag to reset the execution state when a code cell is scheduled for
-     * executing.
-     */
-    needReset: boolean;
-  }
-
   export type DisplayOption = {
     /**
      * The option to show the indicator on status bar or toolbar.
