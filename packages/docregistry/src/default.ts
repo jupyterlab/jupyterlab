@@ -162,12 +162,7 @@ export class DocumentModel
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
         if (value.oldValue !== value.newValue) {
-          if (value.name === 'dirty') {
-            // Setting `dirty` will trigger the state change.
-            this.dirty = value.newValue;
-          } else {
-            this.triggerStateChange(value);
-          }
+          this.triggerStateChange(value);
         }
       });
     }
