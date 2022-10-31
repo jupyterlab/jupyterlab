@@ -43,15 +43,20 @@ export class UserManager extends BaseManager implements UserManager.IManager {
     super(options);
 
     // Initialize internal data.
-    this._ready = Promise.all([this.requestUser()])
-      .then(_ => undefined)
-      .catch(_ => undefined)
+    this._ready = this.requestUser()
       .then(() => {
         if (this.isDisposed) {
           return;
         }
         this._isReady = true;
-      });
+      })
+      .catch(
+        _ =>
+          // Return a promise that will never resolve, so user service is never ready
+          new Promise(() => {
+            // no-op
+          })
+      );
 
     this._pollSpecs = new Poll({
       auto: false,
