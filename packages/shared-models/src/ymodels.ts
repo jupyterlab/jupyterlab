@@ -3,8 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as nbformat from '@jupyterlab/nbformat';
-import { UUID } from '@lumino/coreutils';
+import type * as nbformat from '@jupyterlab/nbformat';
+import { JSONExt, JSONObject, JSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
@@ -43,12 +43,20 @@ export class YDocument<T> implements models.ISharedDocument {
   transact(f: () => void, undoable = true): void {
     this.ydoc.transact(f, undoable ? this : null);
   }
+
   /**
    * Dispose of the resources.
    */
   dispose(): void {
     this.isDisposed = true;
     this.ydoc.destroy();
+  }
+
+  /**
+   * Document state
+   */
+  get state(): JSONObject {
+    return JSONExt.deepCopy(this.ystate.toJSON());
   }
 
   /**
@@ -63,6 +71,30 @@ export class YDocument<T> implements models.ISharedDocument {
    */
   canRedo(): boolean {
     return this.undoManager.redoStack.length > 0;
+  }
+
+  /**
+   * Get the value for a state attribute
+   *
+   * @param key Key to get
+   */
+  getState(key: string): JSONValue | undefined {
+    const value = this.ystate.get(key);
+    return typeof value === 'undefined'
+      ? value
+      : ((JSONExt.deepCopy(value) as unknown) as JSONValue);
+  }
+
+  /**
+   * Set the value of a state attribute
+   *
+   * @param key Key to set
+   * @param value New attribute value
+   */
+  setState(key: string, value: JSONValue): void {
+    if (!JSONExt.deepEqual(this.ystate.get(key), value)) {
+      this.ystate.set(key, value);
+    }
   }
 
   /**
