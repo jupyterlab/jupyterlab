@@ -35,14 +35,6 @@ class ListingsApp(LabApp):
         ]
         self.web_app.add_handlers(".*$", default_handlers)
 
-    def start(self):
-        settings = self.web_app.settings
-
-        # By default, make terminals available.
-        settings.setdefault("terminals_available", True)
-
-        super().start()
-
 
 if __name__ == "__main__":
     ListingsApp.launch_instance()
