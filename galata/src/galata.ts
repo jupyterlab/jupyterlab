@@ -221,6 +221,7 @@ export namespace galata {
     mockConfig: boolean | Record<string, unknown>,
     mockSettings: boolean | Record<string, unknown>,
     mockState: boolean | Record<string, unknown>,
+    mockUser: boolean | Record<string, unknown>,
     sessions: Map<string, Session.IModel> | null,
     terminals: Map<string, TerminalAPI.IModel> | null,
     tmpPath: string,
@@ -324,6 +325,11 @@ export namespace galata {
      * The id will be prefixed by '/'.
      */
     export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
+
+    /**
+     * User API
+     */
+    export const user = /.*\/api\/me.*/;
   }
 
   /**
@@ -887,5 +893,25 @@ export namespace galata {
         }
       });
     }
+  }
+
+  /**
+   * Mock user route.
+   *
+   * @param page Page model object
+   * @param user In-memory user
+   */
+  export function mockUser(page: Page, user: {}): Promise<void> {
+    return page.route(Routes.user, (route, request) => {
+      switch (request.method()) {
+        case 'GET':
+          return route.fulfill({
+            status: 200,
+            body: JSON.stringify(user)
+          });
+        default:
+          return route.continue();
+      }
+    });
   }
 }
