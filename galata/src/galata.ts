@@ -3,9 +3,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { Session, TerminalAPI, Workspace } from '@jupyterlab/services';
+import type { Session, TerminalAPI, User, Workspace } from '@jupyterlab/services';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { JSONObject } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import { ContentsHelper } from './contents';
@@ -131,6 +132,7 @@ export namespace galata {
     mockConfig: boolean | Record<string, unknown>,
     mockSettings: boolean | Record<string, unknown>,
     mockState: boolean | Record<string, unknown>,
+    mockUser: boolean | Record<string, unknown>,
     page: Page,
     sessions: Map<string, Session.IModel> | null,
     terminals: Map<string, TerminalAPI.IModel> | null,
@@ -172,6 +174,24 @@ export namespace galata {
       }
       // State will be stored in-memory (after loading the initial version from disk)
       await Mock.mockState(page, workspace);
+    }
+
+    let user: User.IUser = {
+      identity: {
+        username: UUID.uuid4(),
+        name: 'jovyan',
+        display_name: 'jovyan',
+        initials: 'JP',
+        color: 'var(--jp-collaborator-color1)'
+      },
+      permissions: {}
+    };
+    if (mockUser) {
+      if (typeof mockUser !== 'boolean') {
+        user = { ...mockUser } as any;
+      }
+      // The user will be stored in-memory
+      await Mock.mockUser(page, user);
     }
 
     // Add sessions and terminals trackers
@@ -221,7 +241,7 @@ export namespace galata {
     mockConfig: boolean | Record<string, unknown>,
     mockSettings: boolean | Record<string, unknown>,
     mockState: boolean | Record<string, unknown>,
-    mockUser: boolean | Record<string, unknown>,
+    mockUser: boolean | Record<string, unknown> = false,
     sessions: Map<string, Session.IModel> | null,
     terminals: Map<string, TerminalAPI.IModel> | null,
     tmpPath: string,
@@ -237,6 +257,7 @@ export namespace galata {
       mockConfig,
       mockSettings,
       mockState,
+      mockUser,
       page,
       sessions,
       terminals,
@@ -893,25 +914,25 @@ export namespace galata {
         }
       });
     }
-  }
 
-  /**
-   * Mock user route.
-   *
-   * @param page Page model object
-   * @param user In-memory user
-   */
-  export function mockUser(page: Page, user: {}): Promise<void> {
-    return page.route(Routes.user, (route, request) => {
-      switch (request.method()) {
-        case 'GET':
-          return route.fulfill({
-            status: 200,
-            body: JSON.stringify(user)
-          });
-        default:
-          return route.continue();
-      }
-    });
+    /**
+     * Mock user route.
+     *
+     * @param page Page model object
+     * @param user In-memory user
+     */
+    export function mockUser(page: Page, user: User.IUser): Promise<void> {
+      return page.route(Routes.user, (route, request) => {
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(user)
+            });
+          default:
+            return route.continue();
+        }
+      });
+    }
   }
 }

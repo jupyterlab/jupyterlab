@@ -566,7 +566,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "Save and create checkpoint",
+    "caption": "In collaborative mode, the document is saved automatically after every change",
     "shortcuts": [
       "Ctrl S"
     ]
@@ -1199,12 +1199,6 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "English",
-    "shortcuts": []
-  },
-  {
-    "id": "jupyterlab-translation:zh_CN",
-    "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
-    "caption": "Chinese (Simplified, China) - 中文 (简体, 中国)",
     "shortcuts": []
   },
   {

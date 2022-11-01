@@ -93,6 +93,17 @@ export type GalataOptions = {
    */
   mockSettings: boolean | Record<string, unknown>;
   /**
+   * Mock JupyterLab user in-memory or not.
+   *
+   * Possible values are:
+   * - true (default): JupyterLab state will be mocked on a per test basis
+   * - false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
+   * - Record<string, unknown>: Initial JupyterLab user - Mapping (user key, value).
+   *
+   * By default the user is stored in-memory.
+   */
+  mockUser: boolean | Record<string, unknown>;
+  /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are
    * always deleted
@@ -206,6 +217,17 @@ export const test: TestType<
    */
   mockSettings: [galata.DEFAULT_SETTINGS, { option: true }],
   /**
+   * Mock JupyterLab user in-memory or not.
+   *
+   * Possible values are:
+   * - true (default): JupyterLab state will be mocked on a per test basis
+   * - false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
+   * - Record<string, unknown>: Initial JupyterLab user - Mapping (user key, value).
+   *
+   * By default the user is stored in-memory.
+   */
+  mockUser: [true, { option: true }],
+  /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are
    * always deleted.
@@ -305,7 +327,6 @@ export const test: TestType<
       await helpers.waitForCondition(() => {
         return helpers.activity.isTabActive('Launcher');
       });
-
       // Oddly current tab is not always set to active
       if (!(await helpers.isInSimpleMode())) {
         await helpers.activity.activateTab('Launcher');
@@ -337,6 +358,7 @@ export const test: TestType<
       mockConfig,
       mockSettings,
       mockState,
+      mockUser,
       page,
       sessions,
       terminals,
@@ -353,6 +375,7 @@ export const test: TestType<
         mockConfig,
         mockSettings,
         mockState,
+        mockUser,
         page,
         sessions,
         terminals,
