@@ -94,7 +94,7 @@ test.describe('With existing notebook', () => {
     await guestPage.notebook.openByPath(`${tmpPath}/${exampleNotebook}`);
 
     if (await guestPage.isVisible('text=Select Kernel')) {
-      guestPage.keyboard.press('Enter');
+      await guestPage.keyboard.press('Enter');
     }
 
     await guestPage.sidebar.openTab('jp-collaboration-panel');
