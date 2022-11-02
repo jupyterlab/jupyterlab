@@ -2,7 +2,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { Session, TerminalAPI } from '@jupyterlab/services';
+import type { Session, TerminalAPI, User } from '@jupyterlab/services';
 import {
   test as base,
   Page,
@@ -102,7 +102,7 @@ export type GalataOptions = {
    *
    * By default the user is stored in-memory.
    */
-  mockUser: boolean | Record<string, unknown>;
+  mockUser: boolean | Partial<User.IUser>;
   /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are
@@ -226,7 +226,7 @@ export const test: TestType<
    *
    * By default the user is stored in-memory.
    */
-  mockUser: [true, { option: true }],
+  mockUser: true,
   /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are
