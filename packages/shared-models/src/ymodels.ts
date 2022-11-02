@@ -9,7 +9,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import * as models from './api';
-import { Delta, ISharedNotebook } from './api';
+import { Delta, DocumentChange, ISharedNotebook } from './api';
 
 const deepCopy = (o: any) => JSON.parse(JSON.stringify(o));
 
@@ -25,7 +25,7 @@ export interface IYText extends models.ISharedText {
 
 export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
 
-export class YDocument<T> implements models.ISharedDocument {
+export class YDocument<T extends DocumentChange> implements models.ISharedDocument {
   /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
