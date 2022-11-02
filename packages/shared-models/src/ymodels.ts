@@ -25,7 +25,8 @@ export interface IYText extends models.ISharedText {
 
 export type YCellType = YRawCell | YCodeCell | YMarkdownCell;
 
-export class YDocument<T extends DocumentChange> implements models.ISharedDocument {
+export class YDocument<T extends DocumentChange>
+  implements models.ISharedDocument {
   /**
    * Perform a transaction. While the function f is called, all changes to the shared
    * document are bundled into a single event.
