@@ -537,7 +537,6 @@ export type CellChange<MetadataType> = {
 };
 
 export type DocumentChange = {
-  contextChange?: MapChange;
   stateChange?: Array<{
     name: string;
     oldValue: any;
