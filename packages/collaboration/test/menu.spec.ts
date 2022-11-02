@@ -25,7 +25,13 @@ describe('user/menu', () => {
   beforeAll(() => {
     manager = new FakeUserManager(
       { serverSettings: ServerConnection.makeSettings({ appUrl: 'lab' }) },
-      { display_name: name },
+      {
+        username: name,
+        name,
+        display_name: name,
+        initials: name.slice(0, 1),
+        color: 'var(--jp-collaborator-color1)'
+      },
       {}
     );
   });
