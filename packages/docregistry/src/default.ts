@@ -30,7 +30,6 @@ export class DocumentModel
     this.switchSharedModel(filemodel, true);
     this.value.changed.connect(this.triggerContentChange, this);
 
-    (this.sharedModel as models.YFile).dirty = false;
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
 
@@ -52,13 +51,19 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this.sharedModel.dirty;
+    return this._dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this.dirty) {
+    const oldValue = this._dirty;
+    if (newValue === oldValue) {
       return;
     }
-    (this.sharedModel as models.YFile).dirty = newValue;
+    this._dirty = newValue;
+    this.triggerStateChange({
+      name: 'dirty',
+      oldValue,
+      newValue
+    });
   }
 
   /**
@@ -162,7 +167,12 @@ export class DocumentModel
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
         if (value.oldValue !== value.newValue) {
-          this.triggerStateChange(value);
+          if (value.name === 'dirty') {
+            // Setting `dirty` will trigger the state change.
+            this.dirty = value.newValue;
+          } else {
+            this.triggerStateChange(value);
+          }
         }
       });
     }
@@ -173,6 +183,7 @@ export class DocumentModel
    */
   readonly sharedModel: models.ISharedFile;
   private _defaultLang = '';
+  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
