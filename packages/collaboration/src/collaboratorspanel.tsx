@@ -68,7 +68,7 @@ export class CollaboratorsPanel extends Panel {
     state.forEach((value: ICollaboratorAwareness, key: any) => {
       if (
         this._currentUser.isReady &&
-        value.user.name !== this._currentUser.identity!.name
+        value.user.username !== this._currentUser.identity!.username
       ) {
         collaborators.push(value);
       }
