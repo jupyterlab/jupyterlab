@@ -107,7 +107,11 @@ export class NotebookModel implements INotebookModel {
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._deletedCells = [];
 
-    // Handle initial metadata.
+    // Initialize the notebook
+    // In collaboration mode, this will be overridden by the initialization coming
+    // from the document provider.
+    (this.sharedModel as YNotebook).nbformat_minor = nbformat.MINOR_VERSION;
+    (this.sharedModel as YNotebook).nbformat = nbformat.MAJOR_VERSION;
     this._ensureMetadata(options.languagePreference ?? '');
 
     this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
