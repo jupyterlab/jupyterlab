@@ -44,6 +44,11 @@ from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
 from .extensions import MANAGERS as EXT_MANAGERS
 from .extensions.readonly import ReadOnlyExtensionManager
+from .handlers.announcements import (
+    AnnouncementHandler,
+    CheckForUpdate,
+    announcement_handler_path,
+)
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import (
@@ -561,6 +566,20 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
+    announcements_url = Unicode(
+        "https://jupyterlab-contrib.github.io/assets/feed.xml",
+        allow_none=True,
+        help="""URL that serves announcements as Atom feed; by default the JupyterLab organization announcements will be fetched. Set to None to turn off fetching announcements.""",
+        config=True,
+    )
+
+    check_for_update = Instance(
+        klass=CheckForUpdate,
+        args=(__version__,),
+        config=True,
+        help="""A callable class that receives the current version at instantiation and calling it must return asynchronously a string indicating which version is available and how to install or None if no update is available. The string supports Markdown format.""",
+    )
+
     @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -710,6 +729,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.cache_files = False
 
         if not self.core_mode and not errored:
+            # Add extension management handlers
             provider = self.extension_manager
             entry_point = EXT_MANAGERS.get(provider)
             if entry_point is None:
@@ -764,6 +784,18 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 {"manager": ext_manager},
             )
             handlers.append(ext_handler)
+
+            # Add announcement handlers
+            handlers.append(
+                (
+                    announcement_handler_path,
+                    AnnouncementHandler,
+                    {
+                        "announcements_url": self.announcements_url,
+                        "update_checker": self.check_for_update,
+                    },
+                )
+            )
 
         # If running under JupyterHub, add more metadata.
         if "hub_prefix" in self.serverapp.tornado_settings:
