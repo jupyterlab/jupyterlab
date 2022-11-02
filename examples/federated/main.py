@@ -10,9 +10,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 # Turn off the Jupyter configuration system so configuration files on disk do
 # not affect this app. This helps this app to truly be standalone.
-# In jupyter-server v2 terminals are an extension. We need the config
-# to load the extension
-# os.environ["JUPYTER_NO_CONFIG"] = "1"
+os.environ["JUPYTER_NO_CONFIG"] = "1"
 
 with open(os.path.join(HERE, "package.json")) as fid:
     version = json.load(fid)["version"]
@@ -24,8 +22,7 @@ def _jupyter_server_extension_points():
 
 class ExampleApp(LabServerApp):
     name = "lab"
-    # In jupyter-server v2 terminals are an extension
-    load_other_extensions = True
+    load_other_extensions = False
     app_name = "JupyterLab Example App with Prebuilt Extensions"
     app_settings_dir = os.path.join(HERE, "data", "application_settings")
     app_version = version

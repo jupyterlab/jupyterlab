@@ -1,14 +1,32 @@
 #!/usr/bin/env python3
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 import sys
 import shutil
 import os
 
-# using jupyter_notebook_config.py for now since Binder is still starting the
-# classic notebook server
-argv = sys.argv[1:] + ["--config", "binder/jupyter_notebook_config.py"]
+argv = sys.argv[1:] + [
+    "--debug",
+    "--dev-mode",
+    "--extensions-in-dev-mode",
+    "--collaborative",
+    "--ContentsManager.allow_hidden=True",
+    "--config",
+    "binder/jupyter_notebook_config.py",
+]
 print(argv)
 
-with open("startup_args.txt", "w") as fid:
-    fid.write(str(argv))
 
-os.execv(shutil.which(argv[0]), argv)
+# Convert from jupyter-notebook based to jupyter-lab based start-up
+def nb2jps(s):
+    return s.replace("jupyter-notebook", "jupyter-lab").replace("--NotebookApp.", "--ServerApp.")
+
+
+new_argv = list(map(nb2jps, argv.copy()))
+print(new_argv)
+
+with open(".startup_args.txt", "w") as fid:
+    fid.write(str(new_argv))
+
+os.execv(shutil.which(new_argv[0]), new_argv)

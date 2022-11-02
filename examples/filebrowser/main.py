@@ -61,8 +61,7 @@ class ExampleApp(LabServerApp):
     extension_url = "/example"
     default_url = "/example"
     app_url = "/example"
-    # In jupyter-server v2 terminals are an extension.
-    load_other_extensions = True
+    load_other_extensions = False
     name = __name__
     app_name = "JupyterLab Example File Browser"
     static_dir = os.path.join(HERE, "build")
