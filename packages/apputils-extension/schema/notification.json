@@ -25,6 +25,12 @@
   },
   "additionalProperties": false,
   "properties": {
+    "checkForUpdates": {
+      "title": "Check for JupyterLab updates",
+      "description": "Whether to check for newer version of JupyterLab or not.",
+      "type": "boolean",
+      "default": true
+    },
     "doNotDisturbMode": {
       "title": "Silence all notifications",
       "description": "If `true`, no toast notifications will be automatically displayed.",
