@@ -2649,11 +2649,14 @@ namespace Private {
       headingLevel: number,
       notebook: Notebook
     ): Promise<void> {
+      headingLevel = Math.min(Math.max(headingLevel, 1), 6);
       const state = Private.getState(notebook);
       const model = notebook.model!;
       const sharedModel = model!.sharedModel;
-      sharedModel.insertCell(cellIndex, { cell_type: 'markdown' });
-      Private.setMarkdownHeader(model.cells.get(cellIndex), headingLevel);
+      sharedModel.insertCell(cellIndex, {
+        cell_type: 'markdown',
+        source: '#'.repeat(headingLevel) + ' '
+      });
       notebook.activeCellIndex = cellIndex;
       if (notebook.activeCell?.inViewport === false) {
         await signalToPromise(notebook.activeCell.inViewportChanged, 200).catch(
