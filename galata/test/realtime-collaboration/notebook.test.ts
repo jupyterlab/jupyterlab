@@ -64,26 +64,38 @@ test.describe('Initialization', () => {
     }
   );
 
-  test.afterEach(async ({ request, tmpPath }) => {
+  test.afterEach(async ({ page, request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
     await contents.deleteFile(`${tmpPath}/${exampleNotebook}`);
     // Make sure to close the page to remove the client
     // from the awareness
     await guestPage.close();
+    await page.close();
   });
 
-  test('Create a notebook', async ({ page }) => {
+  test('Create a notebook', async ({ page, request, tmpPath }) => {
     // Renaming does not work
     await page.notebook.createNew();
+    await page.notebook.activate(pathUntitled);
+    await guestPage.filebrowser.refresh();
     await guestPage.notebook.open(pathUntitled);
+    await guestPage.notebook.activate(pathUntitled);
 
     // wait for kernel to be idle
-    await guestPage.waitForTimeout(1000);
-    expect(await guestPage.screenshot()).toMatchSnapshot();
+    //await guestPage.waitForSelector('text=| Idle');
+    const nbPanel = await page.notebook.getNotebookInPanel();
+    expect(await nbPanel?.screenshot()).toMatchSnapshot(
+      'initialization-create-notebook-host.png'
+    );
+    const nbPanelGuest = await guestPage.notebook.getNotebookInPanel();
+    expect(await nbPanelGuest?.screenshot()).toMatchSnapshot(
+      'initialization-create-notebook-guest.png'
+    );
 
-    // Make sure to close the page to remove the client
-    // from the awareness
-    await guestPage.close();
+    await page.notebook.close(true);
+    await guestPage.notebook.close(true);
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteFile(`${tmpPath}/${pathUntitled}`);
   });
 
   test('Open a notebook', async ({ page }) => {
@@ -96,112 +108,33 @@ test.describe('Initialization', () => {
     if (await page.isVisible('text=Select Kernel')) {
       await page.keyboard.press('Enter');
     }
-
-    // wait for kernel to be idle
-    await page.waitForTimeout(2000);
-    expect(await page.screenshot()).toMatchSnapshot();
+    await page.notebook.activate(exampleNotebook);
 
     await guestPage.filebrowser.refresh();
     await guestPage.notebook.open(exampleNotebook);
-    if (await guestPage.isVisible('text=Select Kernel')) {
-      await guestPage.keyboard.press('Enter');
-    }
+    await guestPage.notebook.activate(exampleNotebook);
 
     // wait for kernel to be idle
-    await guestPage.waitForTimeout(1000);
-    expect(await guestPage.screenshot()).toMatchSnapshot();
-
-    // Make sure to close the page to remove the client
-    // from the awareness
-    await guestPage.close();
-  });
-});
-
-test.describe('With 2 clients', () => {
-  const pathUntitled = 'Untitled.ipynb';
-  let guestPage: IJupyterLabPageFixture;
-
-  test.beforeEach(
-    async ({
-      page,
-      appPath,
-      autoGoto,
-      baseURL,
-      browser,
-      mockSettings,
-      mockState,
-      sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
-    }) => {
-      // Renaming does not work
-      await page.notebook.createNew();
-
-      // Create a new client
-      const user: Partial<User.IUser> = {
-        identity: {
-          username: 'jovyan_2',
-          name: 'jovyan_2',
-          display_name: 'jovyan_2',
-          initials: 'JP',
-          color: 'var(--jp-collaborator-color2)'
-        }
-      };
-      guestPage = await galata.newPage(
-        appPath,
-        autoGoto,
-        baseURL!,
-        browser,
-        mockSettings,
-        mockState,
-        user,
-        sessions,
-        terminals,
-        tmpPath,
-        waitForApplication
-      );
-      await guestPage.notebook.open(pathUntitled);
-    }
-  );
-
-  test.afterEach(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteFile(`${tmpPath}/${pathUntitled}`);
-    // Make sure to close the page to remove the client
-    // from the awareness
-    await guestPage.close();
-  });
-
-  test('Writes in the first cell', async ({ page }) => {
-    await guestPage.notebook.writeCell(0, 'Guest client');
-
-    await page.waitForCondition(() => page.isVisible('text=Guest client'));
-
-    expect(await page.screenshot()).toMatchSnapshot();
-  });
-
-  test('Adds a new cell', async ({ page }) => {
-    const numCells = await page.notebook.getCellCount();
-
-    await guestPage.notebook.addCell('code', 'Guest client');
-    await page.waitForCondition(
-      async () => (await page.notebook.getCellCount()) === numCells + 1
+    //await page.waitForSelector('text=| Idle');
+    const nbPanel = await page.notebook.getNotebookInPanel();
+    expect(await nbPanel?.screenshot()).toMatchSnapshot(
+      'initialization-open-notebook-host.png'
     );
 
-    expect(await page.screenshot()).toMatchSnapshot();
-  });
+    // wait for kernel to be idle
+    //await guestPage.waitForSelector('text=| Idle');
+    const nbPanelGuest = await guestPage.notebook.getNotebookInPanel();
+    expect(await nbPanelGuest?.screenshot()).toMatchSnapshot(
+      'initialization-open-notebook-guest.png'
+    );
 
-  test('Sets the first cell', async ({ page }) => {
-    await guestPage.notebook.setCell(0, 'raw', 'Guest client');
-
-    await page.waitForCondition(() => page.isVisible('text=Guest client'));
-
-    expect(await page.screenshot()).toMatchSnapshot();
+    await page.notebook.close(true);
+    await guestPage.notebook.close(true);
   });
 });
 
-test.describe('With 10 clients', () => {
+test.describe('Ten clients', () => {
+  const numClients = 5;
   const pathUntitled = 'Untitled.ipynb';
   let guestPages: Array<IJupyterLabPageFixture> = [];
 
@@ -222,7 +155,7 @@ test.describe('With 10 clients', () => {
       // Renaming does not work
       await page.notebook.createNew();
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < numClients; i++) {
         // Create a new client
         const user: Partial<User.IUser> = {
           identity: {
@@ -246,30 +179,94 @@ test.describe('With 10 clients', () => {
           tmpPath,
           waitForApplication
         );
-        await guestPage.notebook.open(pathUntitled);
         guestPages.push(guestPage);
       }
     }
   );
 
-  test.afterEach(async ({ request, tmpPath }) => {
+  test.afterEach(async ({ page, request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
     await contents.deleteFile(`${tmpPath}/${pathUntitled}`);
     // Make sure to close the page to remove the client
     // from the awareness
-    guestPages.forEach(async page => await page.close());
+    for (let i = 0; i < numClients; i++) {
+      await guestPages[i].close();
+    }
+    guestPages = [];
+    page.close();
   });
 
   test('Adds a new cell', async ({ page }) => {
-    const numCells = (await page.notebook.getCellCount()) + guestPages.length;
-    for (let i = 0; i < guestPages.length; i++) {
+    await page.filebrowser.refresh();
+    await page.notebook.open(pathUntitled);
+    await page.notebook.activate(pathUntitled);
+    const numCells = await page.notebook.getCellCount();
+
+    for (let i = 0; i < numClients; i++) {
+      await guestPages[i].filebrowser.refresh();
+      await guestPages[i].notebook.open(pathUntitled);
+      await guestPages[i].notebook.activate(pathUntitled);
       await guestPages[i].notebook.newCell();
     }
 
     await page.waitForCondition(
-      async () => numCells == (await page.notebook.getCellCount())
+      async () => (await page.notebook.getCellCount()) === numCells + numClients
     );
 
-    expect(await page.screenshot()).toMatchSnapshot();
+    // wait for kernel to be idle
+    //await page.waitForSelector('text=| Idle');
+    const nbPanel = await page.notebook.getNotebookInPanel();
+    expect(await nbPanel?.screenshot()).toMatchSnapshot(
+      'ten-clients-add-a-new-cell.png'
+    );
+  });
+
+  test('Creates a cell and write on it', async ({ page }) => {
+    await page.filebrowser.refresh();
+    await page.notebook.open(pathUntitled);
+    await page.notebook.activate(pathUntitled);
+
+    for (let i = 0; i < numClients; i++) {
+      await guestPages[i].filebrowser.refresh();
+      await guestPages[i].notebook.open(pathUntitled);
+      await guestPages[i].notebook.activate(pathUntitled);
+
+      await guestPages[i].notebook.selectCells(i);
+      await guestPages[i].notebook.newCell();
+      await guestPages[i].notebook.writeCell(i + 1, `Guest client ${i}`);
+    }
+
+    for (let i = 0; i < numClients; i++) {
+      await page.waitForSelector(`text=Guest client ${i}`);
+    }
+
+    // wait for kernel to be idle
+    //await page.waitForSelector('text=| Idle');
+    const nbPanel = await page.notebook.getNotebookInPanel();
+    expect(await nbPanel?.screenshot()).toMatchSnapshot(
+      'ten-clients-create-a-cell-and-write-on-it.png'
+    );
+  });
+
+  test('Sets the first cell', async ({ page }) => {
+    await page.filebrowser.refresh();
+    await page.notebook.open(pathUntitled);
+    await page.notebook.activate(pathUntitled);
+
+    for (let i = 0; i < numClients; i++) {
+      await guestPages[i].filebrowser.refresh();
+      await guestPages[i].notebook.open(pathUntitled);
+      await guestPages[i].notebook.activate(pathUntitled);
+      await guestPages[i].notebook.setCell(0, 'raw', `Guest client ${i}`);
+
+      await page.waitForSelector(`text=Guest client ${i}`);
+    }
+
+    // wait for kernel to be idle
+    //await page.waitForSelector('text=| Idle');
+    const nbPanel = await page.notebook.getNotebookInPanel();
+    expect(await nbPanel?.screenshot()).toMatchSnapshot(
+      'ten-clients-set-the-first-cell.png'
+    );
   });
 });
