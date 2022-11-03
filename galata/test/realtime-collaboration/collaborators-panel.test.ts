@@ -1,143 +1,202 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
 import { User } from '@jupyterlab/services';
 
-test.describe('Panel', () => {
-  test.beforeEach(async ({ page, request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteFile(`${tmpPath}/Untitled.ipynb`);
-    // Renaming does not work
-    await page.notebook.createNew();
-  });
+test.describe('One client', () => {
+  let guestPage: IJupyterLabPageFixture;
 
-  test.afterEach(async ({ page, request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteFile(`${tmpPath}/Untitled.ipynb`);
-    // Make sure to close the page to remove the client
-    // from the awareness
-    await page.close();
-  });
-
-  test('Two clients', async ({
-    appPath,
-    autoGoto,
-    baseURL,
-    browser,
-    mockSettings,
-    mockState,
-    page,
-    sessions,
-    terminals,
-    tmpPath,
-    waitForApplication
-  }) => {
-    const user2: Partial<User.IUser> = {
-      identity: {
-        username: 'jovyan_2',
-        name: 'jovyan_2',
-        display_name: 'jovyan_2',
-        initials: 'JP',
-        color: 'var(--jp-collaborator-color2)'
-      }
-    };
-    const guestPage = await galata.newPage(
+  test.beforeEach(
+    async ({
       appPath,
       autoGoto,
-      baseURL!,
+      baseURL,
       browser,
       mockSettings,
       mockState,
-      user2,
       sessions,
       terminals,
       tmpPath,
       waitForApplication
+    }) => {
+      const user2: Partial<User.IUser> = {
+        identity: {
+          username: 'jovyan_2',
+          name: 'jovyan_2',
+          display_name: 'jovyan_2',
+          initials: 'JP',
+          color: 'var(--jp-collaborator-color2)'
+        }
+      };
+      guestPage = await galata.newPage(
+        appPath,
+        autoGoto,
+        baseURL!,
+        browser,
+        mockSettings,
+        mockState,
+        user2,
+        sessions,
+        terminals,
+        tmpPath,
+        waitForApplication
+      );
+    }
+  );
+
+  test.afterEach(async ({ page }) => {
+    // Make sure to close the page to remove the client
+    // from the awareness
+    await guestPage.close();
+    await page.close();
+  });
+
+  test('Without document', async ({ page }) => {
+    await page.sidebar.openTab('jp-collaboration-panel');
+
+    // wait for guest client
+    await page.waitForSelector('text=jovyan_2');
+    const tab = await page.sidebar.getContentPanel('left');
+    expect(await tab?.screenshot()).toMatchSnapshot(
+      'one-client-without-document.png'
     );
+  });
+
+  test('With document', async ({ page, request, tmpPath }) => {
+    // Renaming does not work
+    await page.notebook.createNew();
+    await page.notebook.open('Untitled.ipynb');
+    await guestPage.filebrowser.refresh();
     await guestPage.notebook.open('Untitled.ipynb');
 
     await page.sidebar.openTab('jp-collaboration-panel');
 
-    // wait for kernel to be idle
-    await page.waitForTimeout(1000);
-    expect(await page.screenshot()).toMatchSnapshot();
+    await page.notebook.activate('Untitled.ipynb');
+    await guestPage.notebook.activate('Untitled.ipynb');
 
+    // wait for guest client
+    await page.waitForSelector('text=/jovyan_2 . Untitled.ipynb/');
+
+    const tab = await page.sidebar.getContentPanel('left');
+    expect(await tab?.screenshot()).toMatchSnapshot(
+      'one-client-with-document.png'
+    );
+
+    await page.notebook.close(true);
+    await guestPage.notebook.close(true);
+
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteFile(`${tmpPath}/Untitled.ipynb`);
+  });
+});
+
+test.describe('Three clients', () => {
+  let numClients = 3;
+  let guestPages: Array<IJupyterLabPageFixture> = [];
+
+  test.beforeEach(
+    async ({
+      appPath,
+      autoGoto,
+      baseURL,
+      browser,
+      mockSettings,
+      mockState,
+      sessions,
+      terminals,
+      tmpPath,
+      waitForApplication
+    }) => {
+      for (let i = 0; i < numClients; i++) {
+        // Create a new client
+        const user: Partial<User.IUser> = {
+          identity: {
+            username: 'jovyan_' + i,
+            name: 'jovyan_' + i,
+            display_name: 'jovyan_' + i,
+            initials: 'JP',
+            color: 'var(--jp-collaborator-color2)'
+          }
+        };
+        const guestPage = await galata.newPage(
+          appPath,
+          autoGoto,
+          baseURL!,
+          browser,
+          mockSettings,
+          mockState,
+          user,
+          sessions,
+          terminals,
+          tmpPath,
+          waitForApplication
+        );
+        guestPages.push(guestPage);
+      }
+    }
+  );
+
+  test.afterEach(async ({ page }) => {
     // Make sure to close the page to remove the client
     // from the awareness
-    await guestPage.close();
+    for (let i = 0; i < numClients; i++) {
+      await guestPages[i].close();
+    }
+    guestPages = [];
+    await page.close();
   });
 
-  test('Three clients', async ({
-    appPath,
-    autoGoto,
-    baseURL,
-    browser,
-    mockSettings,
-    mockState,
-    page,
-    sessions,
-    terminals,
-    tmpPath,
-    waitForApplication
-  }) => {
-    const user2: Partial<User.IUser> = {
-      identity: {
-        username: 'jovyan_2',
-        name: 'jovyan_2',
-        display_name: 'jovyan_2',
-        initials: 'JP',
-        color: 'var(--jp-collaborator-color2)'
-      }
-    };
-    const guest2Page = await galata.newPage(
-      appPath,
-      autoGoto,
-      baseURL!,
-      browser,
-      mockSettings,
-      mockState,
-      user2,
-      sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
-    );
-    await guest2Page.notebook.open('Untitled.ipynb');
+  test('Without document', async ({ page }) => {
+    await page.sidebar.openTab('jp-collaboration-panel');
 
-    const user3: Partial<User.IUser> = {
-      identity: {
-        username: 'jovyan_3',
-        name: 'jovyan_3',
-        display_name: 'jovyan_3',
-        initials: 'JP',
-        color: 'var(--jp-collaborator-color3)'
-      }
-    };
-    const guest3Page = await galata.newPage(
-      appPath,
-      autoGoto,
-      baseURL!,
-      browser,
-      mockSettings,
-      mockState,
-      user3,
-      sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
+    // wait for guest clients
+    for (let i = 0; i < numClients; i++) {
+      await page.waitForSelector(`text=jovyan_${i}`);
+    }
+
+    const tab = await page.sidebar.getContentPanel('left');
+    expect(await tab?.screenshot()).toMatchSnapshot(
+      'three-client-without-document.png'
     );
-    await guest3Page.notebook.open('Untitled.ipynb');
+  });
+
+  test('With document', async ({ page, request, tmpPath }) => {
+    // Renaming does not work
+    await page.notebook.createNew();
+    await page.notebook.open('Untitled.ipynb');
+    for (let i = 0; i < numClients; i++) {
+      await guestPages[i].filebrowser.refresh();
+      await guestPages[i].notebook.open('Untitled.ipynb');
+    }
 
     await page.sidebar.openTab('jp-collaboration-panel');
 
-    // wait for kernel to be idle
-    await page.waitForTimeout(1000);
-    expect(await page.screenshot()).toMatchSnapshot();
+    await page.notebook.activate('Untitled.ipynb');
+    for (let i = 0; i < numClients; i++) {
+      await guestPages[i].notebook.activate('Untitled.ipynb');
+    }
 
-    // Make sure to close the page to remove the client
-    // from the awareness
-    await guest2Page.close();
-    await guest3Page.close();
+    // wait for guest clients
+    for (let i = 0; i < numClients; i++) {
+      await page.waitForSelector('text=/jovyan_. . Untitled.ipynb/');
+    }
+
+    const tab = await page.sidebar.getContentPanel('left');
+    expect(await tab?.screenshot()).toMatchSnapshot(
+      'three-client-with-document.png'
+    );
+
+    await page.notebook.close(true);
+    for (let i = 0; i < numClients; i++) {
+      await guestPages[i].notebook.close(true);
+    }
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteFile(`${tmpPath}/Untitled.ipynb`);
   });
 });
