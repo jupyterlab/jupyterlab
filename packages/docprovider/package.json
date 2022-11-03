@@ -17,7 +17,6 @@
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
@@ -59,6 +58,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "styleModule": "style/index.js"
+  }
 }
