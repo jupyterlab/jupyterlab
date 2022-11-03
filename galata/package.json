@@ -37,7 +37,7 @@
     "start": "jupyter lab --config ./jupyter_server_test_config.py",
     "start:detached": "(npm run start&)",
     "start:doc": "jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
-    "start:rtc": "jupyter lab --config ./jupyter_server_test_config.py --collaborative --LabApp.collaborative_document_save_delay=0",
+    "start:rtc": "jupyter lab --config ./jupyter_server_test_config.py --collaborative",
     "test": "playwright test",
     "test:base": "playwright test --project galata jupyterlab",
     "test:base:update": "playwright test --project galata jupyterlab --update-snapshots",
