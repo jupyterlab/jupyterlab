@@ -177,60 +177,62 @@ export async function ensurePackage(
 
   await Promise.all(promises);
 
-  // Template the CSS index file.
-  if (
-    usesTS &&
-    (cssImports.length > 0 ||
-      fs.existsSync(path.join(pkgPath, 'style/base.css')))
-  ) {
-    const funcName = 'ensurePackage';
-    const cssIndexContents = [
-      utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
-      ...cssImports.map(x => `@import url('~${x}');`),
-      ''
-    ];
-    if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-      cssIndexContents.push("@import url('./base.css');\n");
-    }
-
-    // write out cssIndexContents, if needed
-    const cssIndexPath = path.join(pkgPath, 'style/index.css');
-    if (!fs.existsSync(cssIndexPath)) {
-      fs.ensureFileSync(cssIndexPath);
-    }
-    messages.push(
-      ...ensureFile(cssIndexPath, cssIndexContents.join('\n'), false)
-    );
-  }
-
-  // Template the style module index file.
-  if (
-    usesTS &&
-    (cssModuleImports.length > 0 ||
-      fs.existsSync(path.join(pkgPath, 'style/base.css')))
-  ) {
-    const funcName = 'ensurePackage';
-    const jsIndexContents = [
-      utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
-      ...cssModuleImports.map(x => `import '${x}';`),
-      ''
-    ];
-    if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-      jsIndexContents.push("import './base.css';\n");
-    }
-
-    // write out jsIndexContents, if needed
-    const jsIndexPath = path.join(pkgPath, 'style/index.js');
-    if (!fs.existsSync(jsIndexPath)) {
-      fs.ensureFileSync(jsIndexPath);
-    }
-    messages.push(
-      ...ensureFile(jsIndexPath, jsIndexContents.join('\n'), false)
-    );
-  }
-
-  // Look for unused packages
   if (usesTS) {
+    if (
+      cssImports.length > 0 ||
+      fs.existsSync(path.join(pkgPath, 'style/base.css'))
+    ) {
+      const funcName = 'ensurePackage';
+
+      // Template the CSS index file.
+      const cssIndexContents = [
+        utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
+        ...cssImports.map(x => `@import url('~${x}');`),
+        ''
+      ];
+      if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
+        cssIndexContents.push("@import url('./base.css');\n");
+      }
+
+      // write out cssIndexContents, if needed
+      const cssIndexPath = path.join(pkgPath, 'style/index.css');
+      if (!fs.existsSync(cssIndexPath)) {
+        fs.ensureFileSync(cssIndexPath);
+      }
+      messages.push(
+        ...ensureFile(cssIndexPath, cssIndexContents.join('\n'), false)
+      );
+
+      // Template the style module index file.
+      const jsIndexContents = [
+        utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
+        ...cssModuleImports.map(x => `import '${x}';`),
+        ''
+      ];
+      if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
+        jsIndexContents.push("import './base.css';\n");
+      }
+
+      // write out jsIndexContents, if needed
+      const jsIndexPath = path.join(pkgPath, 'style/index.js');
+      if (!fs.existsSync(jsIndexPath)) {
+        fs.ensureFileSync(jsIndexPath);
+      }
+      messages.push(
+        ...ensureFile(jsIndexPath, jsIndexContents.join('\n'), false)
+      );
+    } else {
+      if (
+        fs.existsSync(path.join(pkgPath, 'style')) &&
+        fs
+          .readdirSync(path.join(pkgPath, 'style'))
+          .filter(f => !['index.css', 'index.js'].includes(f)).length === 0
+      ) {
+        fs.removeSync(path.join(pkgPath, 'style'));
+      }
+    }
+
+    // Look for unused packages
     Object.keys(deps).forEach(name => {
       if (options.noUnused === false) {
         return;
