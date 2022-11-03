@@ -226,7 +226,7 @@ export const test: TestType<
    *
    * By default the user is stored in-memory.
    */
-  mockUser: true,
+  mockUser: [true, { option: true }],
   /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are
