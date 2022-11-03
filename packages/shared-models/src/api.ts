@@ -20,10 +20,7 @@ import type {
   JSONValue,
   PartialJSONValue
 } from '@lumino/coreutils';
-import type {
-  IDisposable,
-  IObservableDisposable
-} from '@lumino/disposable';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 
 /**

@@ -158,10 +158,7 @@ export class DocumentModel
     this.dirty = true;
   }
 
-  private _onStateChanged(
-    sender: ISharedFile,
-    changes: DocumentChange
-  ): void {
+  private _onStateChanged(sender: ISharedFile, changes: DocumentChange): void {
     if ((changes as FileChange).sourceChange) {
       this.triggerContentChange();
     }
