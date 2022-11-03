@@ -1213,7 +1213,7 @@ export class NotebookHelper {
     const keyboard = this.page.keyboard;
     await keyboard.press('Control+A');
     // give CodeMirror time to style properly
-    await keyboard.type(source, { delay: cellType === 'code' ? 100 : 0 });
+    await keyboard.type(source, { delay: 0 });
 
     await this.leaveCellEditingMode(cellIndex);
 

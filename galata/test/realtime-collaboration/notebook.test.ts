@@ -81,8 +81,6 @@ test.describe('Initialization', () => {
     await guestPage.notebook.open(pathUntitled);
     await guestPage.notebook.activate(pathUntitled);
 
-    // wait for kernel to be idle
-    //await guestPage.waitForSelector('text=| Idle');
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
       'initialization-create-notebook-host.png'
@@ -114,15 +112,11 @@ test.describe('Initialization', () => {
     await guestPage.notebook.open(exampleNotebook);
     await guestPage.notebook.activate(exampleNotebook);
 
-    // wait for kernel to be idle
-    //await page.waitForSelector('text=| Idle');
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
       'initialization-open-notebook-host.png'
     );
 
-    // wait for kernel to be idle
-    //await guestPage.waitForSelector('text=| Idle');
     const nbPanelGuest = await guestPage.notebook.getNotebookInPanel();
     expect(await nbPanelGuest?.screenshot()).toMatchSnapshot(
       'initialization-open-notebook-guest.png'
@@ -134,7 +128,7 @@ test.describe('Initialization', () => {
 });
 
 test.describe('Ten clients', () => {
-  const numClients = 5;
+  const numClients = 10;
   const pathUntitled = 'Untitled.ipynb';
   let guestPages: Array<IJupyterLabPageFixture> = [];
 
@@ -193,7 +187,7 @@ test.describe('Ten clients', () => {
       await guestPages[i].close();
     }
     guestPages = [];
-    page.close();
+    await page.close();
   });
 
   test('Adds a new cell', async ({ page }) => {
@@ -213,8 +207,6 @@ test.describe('Ten clients', () => {
       async () => (await page.notebook.getCellCount()) === numCells + numClients
     );
 
-    // wait for kernel to be idle
-    //await page.waitForSelector('text=| Idle');
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
       'ten-clients-add-a-new-cell.png'
@@ -226,22 +218,19 @@ test.describe('Ten clients', () => {
     await page.notebook.open(pathUntitled);
     await page.notebook.activate(pathUntitled);
 
-    for (let i = 0; i < numClients; i++) {
-      await guestPages[i].filebrowser.refresh();
-      await guestPages[i].notebook.open(pathUntitled);
-      await guestPages[i].notebook.activate(pathUntitled);
+    guestPages.forEach(async (p, i) => {
+      await p.filebrowser.refresh();
+      await p.notebook.open(pathUntitled);
+      await p.notebook.activate(pathUntitled);
 
-      await guestPages[i].notebook.selectCells(i);
-      await guestPages[i].notebook.newCell();
-      await guestPages[i].notebook.writeCell(i + 1, `Guest client ${i}`);
-    }
+      await p.notebook.clickToolbarItem('insert');
+      await p.notebook.writeCell(i, `Guest client ${i}`);
+    });
 
     for (let i = 0; i < numClients; i++) {
       await page.waitForSelector(`text=Guest client ${i}`);
     }
 
-    // wait for kernel to be idle
-    //await page.waitForSelector('text=| Idle');
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
       'ten-clients-create-a-cell-and-write-on-it.png'
@@ -262,8 +251,6 @@ test.describe('Ten clients', () => {
       await page.waitForSelector(`text=Guest client ${i}`);
     }
 
-    // wait for kernel to be idle
-    //await page.waitForSelector('text=| Idle');
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
       'ten-clients-set-the-first-cell.png'
