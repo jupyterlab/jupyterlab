@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { defaultSanitizer } from '@jupyterlab/apputils';
+import { ISanitizer, Sanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { renderText } from '@jupyterlab/rendermime';
 import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
@@ -65,7 +65,13 @@ export class Completer extends Widget {
     this.model = options.model || null;
     this.editor = options.editor || null;
     this.addClass('jp-Completer');
+    this.sanitizer = options.sanitizer ?? new Sanitizer();
   }
+
+  /**
+   * The sanitizer used to sanitize untrusted html inputs.
+   */
+  readonly sanitizer: ISanitizer;
 
   /**
    * The active index.
@@ -721,6 +727,11 @@ export namespace Completer {
      * Flag to show or hide the document panel.
      */
     showDoc?: boolean;
+
+    /**
+     * Sanitizer used to sanitize html strings
+     */
+    sanitizer?: Sanitizer;
   }
 
   /**
@@ -1010,7 +1021,8 @@ export namespace Completer {
       const matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(result, {
+      const sanitizer = new Sanitizer();
+      matchNode.innerHTML = sanitizer.sanitize(result, {
         allowedTags: ['mark']
       });
       return matchNode;

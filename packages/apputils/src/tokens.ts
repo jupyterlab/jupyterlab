@@ -206,7 +206,6 @@ export interface ISanitizer {
    * @returns The sanitized string.
    */
   sanitize(dirty: string, options?: ISanitizer.IOptions): string;
-  addScheme?(scheme: string): void;
 }
 
 /**

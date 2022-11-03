@@ -433,7 +433,7 @@ class CssProp {
 /**
  * A class to sanitize HTML strings.
  */
-export class Sanitizer implements ISanitizer {
+export class Sanitizer {
   /**
    * Sanitize an HTML string.
    *
@@ -447,9 +447,9 @@ export class Sanitizer implements ISanitizer {
     return sanitize(dirty, { ...this._options, ...(options || {}) });
   }
 
-  addScheme(scheme: string): void {
+  setSchemes(scheme: Array<string>): void {
     if (Array.isArray(this._options.allowedSchemes)) {
-      this._options.allowedSchemes.push(scheme);
+      this._options.allowedSchemes = scheme;
     }
   }
 
@@ -962,8 +962,3 @@ export class Sanitizer implements ISanitizer {
     allowedSchemes: []
   };
 }
-
-/**
- * The default instance of an `ISanitizer` meant for use by user code.
- */
-export const defaultSanitizer: ISanitizer = new Sanitizer();

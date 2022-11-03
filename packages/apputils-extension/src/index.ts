@@ -14,7 +14,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  defaultSanitizer,
   Dialog,
   ICommandPalette,
   ISanitizer,
@@ -23,6 +22,7 @@ import {
   IWindowResolver,
   MainAreaWidget,
   Printing,
+  Sanitizer,
   sessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
@@ -616,15 +616,14 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
   provides: ISanitizer,
   requires: [ISettingRegistry],
   activate: (app: JupyterFrontEnd, settings: ISettingRegistry) => {
+    const userSanitizer: Sanitizer = new Sanitizer();
     const loadSetting = (setting: ISettingRegistry.ISettings): void => {
       const schemesArray = setting.get('additionalSchemes')
         .composite as Array<string>;
 
-      schemesArray.forEach(scheme => {
-        if (defaultSanitizer.addScheme) {
-          defaultSanitizer.addScheme(scheme);
-        }
-      });
+      if (userSanitizer.setSchemes) {
+        userSanitizer.setSchemes(schemesArray);
+      }
     };
 
     // Wait for the application to be restored and
@@ -632,14 +631,18 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
     Promise.all([
       app.restored,
       settings.load('@jupyterlab/apputils-extension:sanitizer')
-    ]).then(([, setting]) => {
-      // Read the settings
-      loadSetting(setting);
+    ])
+      .then(([, setting]) => {
+        // Read the settings
+        loadSetting(setting);
 
-      // Listen for your plugin setting changes using Signal
-      setting.changed.connect(loadSetting);
-    }).catch((reason) => { console.error(`Failed to load sanitizer settings:`, reason) });
-    return defaultSanitizer;
+        // Listen for your plugin setting changes using Signal
+        setting.changed.connect(loadSetting);
+      })
+      .catch(reason => {
+        console.error(`Failed to load sanitizer settings:`, reason);
+      });
+    return userSanitizer;
   }
 };
 
