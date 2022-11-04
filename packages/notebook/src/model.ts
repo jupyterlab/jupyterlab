@@ -362,17 +362,17 @@ close the notebook without saving it.`,
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.oldValue !== value.newValue) {
-          if (value.name === 'dirty') {
-            // Setting `dirty` will trigger the state change.
-            this.dirty = value.newValue;
-          } else {
-            this.triggerStateChange({
-              newValue: undefined,
-              oldValue: undefined,
-              ...value
-            });
-          }
+        if (value.name === 'dirty') {
+          // Setting `dirty` will trigger the state change.
+          // We always set `dirty` because the shared model state
+          // and the local attribute are synchronized one way shared model -> _dirty
+          this.dirty = value.newValue;
+        } else if (value.oldValue !== value.newValue) {
+          this.triggerStateChange({
+            newValue: undefined,
+            oldValue: undefined,
+            ...value
+          });
         }
       });
     }
@@ -390,6 +390,7 @@ close the notebook without saving it.`,
     if (changes.metadataChange) {
       const metadata = changes.metadataChange.newValue as JSONObject;
       this._modelDBMutex(() => {
+        this.metadata.clear();
         Object.entries(metadata).forEach(([key, value]) => {
           this.metadata.set(key, value);
         });
@@ -402,7 +403,7 @@ close the notebook without saving it.`,
     change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
   ): void {
     this._modelDBMutex(() => {
-      this.sharedModel.updateMetadata(metadata.toJSON());
+      this.sharedModel.setMetadata(metadata.toJSON());
     });
     this.triggerContentChange();
   }
