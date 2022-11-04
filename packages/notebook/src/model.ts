@@ -33,8 +33,6 @@ import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
-const UNSHARED_KEYS = ['kernelspec', 'language_info'];
-
 /**
  * The definition of a model object for a notebook widget.
  */
@@ -440,6 +438,7 @@ close the notebook without saving it.`,
     if (changes.metadataChange) {
       const metadata = changes.metadataChange.newValue as JSONObject;
       this._modelDBMutex(() => {
+        this.metadata.clear();
         Object.entries(metadata).forEach(([key, value]) => {
           this.metadata.set(key, value);
         });
@@ -451,11 +450,9 @@ close the notebook without saving it.`,
     metadata: IObservableJSON,
     change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
   ): void {
-    if (!UNSHARED_KEYS.includes(change.key)) {
-      this._modelDBMutex(() => {
-        this.sharedModel.updateMetadata(metadata.toJSON());
-      });
-    }
+    this._modelDBMutex(() => {
+      this.sharedModel.setMetadata(metadata.toJSON());
+    });
     this.triggerContentChange();
   }
 
