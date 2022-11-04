@@ -23,6 +23,7 @@ import {
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
+  Sanitizer,
   sessionContextDialogs,
   showDialog,
   Toolbar,
@@ -1777,7 +1778,8 @@ function activateNotebookCompleterService(
     const completerContext = {
       editor: notebook.content.activeCell?.editor ?? null,
       session: notebook.sessionContext.session,
-      widget: notebook
+      widget: notebook,
+      sanitizer: new Sanitizer()
     };
     await manager.updateCompleter(completerContext);
     notebook.content.activeCellChanged.connect((_, cell) => {
@@ -1787,7 +1789,8 @@ function activateNotebookCompleterService(
           const newCompleterContext = {
             editor: cell.editor,
             session: notebook.sessionContext.session,
-            widget: notebook
+            widget: notebook,
+            sanitizer: new Sanitizer()
           };
           return manager.updateCompleter(newCompleterContext);
         })

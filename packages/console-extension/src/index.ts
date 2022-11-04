@@ -17,6 +17,7 @@ import {
   IKernelStatusModel,
   ISessionContext,
   ISessionContextDialogs,
+  Sanitizer,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
@@ -946,7 +947,8 @@ function activateConsoleCompleterService(
       const newContext = {
         editor: cell.editor,
         session: codeConsole.sessionContext.session,
-        widget: consolePanel
+        widget: consolePanel,
+        sanitzer: new Sanitizer()
       };
       manager.updateCompleter(newContext).catch(console.error);
     });
@@ -954,7 +956,8 @@ function activateConsoleCompleterService(
       const newContext = {
         editor: consolePanel.console.promptCell?.editor ?? null,
         session: consolePanel.console.sessionContext.session,
-        widget: consolePanel
+        widget: consolePanel,
+        sanitizer: new Sanitizer()
       };
       manager.updateCompleter(newContext).catch(console.error);
     });

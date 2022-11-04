@@ -16,6 +16,7 @@ import {
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
+  Sanitizer,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -523,7 +524,8 @@ function activateFileEditorCompleterService(
         const newCompleterContext = {
           editor: widget.content.editor,
           widget,
-          session
+          session,
+          sanitizer: new Sanitizer()
         };
         manager.updateCompleter(newCompleterContext).catch(console.error);
         _activeSessions.set(widget.id, session);
