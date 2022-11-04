@@ -204,7 +204,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                       </div>
                     </div>
                     <button
-                      className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
+                      className={`bp3-button bp3-minimal jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
                       title={trans.__('Dismiss notification')}
                       onClick={closeNotification}
                     >
@@ -640,7 +640,7 @@ namespace Private {
     const trans = translator.load('jupyterlab');
     return (
       <button
-        className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
+        className={`bp3-button bp3-minimal jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
         title={trans.__('Close notification')}
         onClick={props.closeToast}
       >

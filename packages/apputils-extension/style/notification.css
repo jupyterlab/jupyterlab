@@ -175,10 +175,13 @@
   margin-bottom: 1px;
   margin-right: 0;
   margin-left: 3px;
-  color: var(--jp-ui-font-color1);
-  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1) !important;
+  background-color: var(--jp-layout-color2) !important;
+  background-image: none !important;
+  box-shadow: none !important;
 }
 
 .jp-toast-button:hover {
-  background-color: var(--jp-layout-color3);
+  background-color: var(--jp-layout-color3) !important;
+  box-shadow: none !important;
 }
