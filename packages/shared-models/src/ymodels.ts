@@ -260,12 +260,12 @@ export class YNotebook
   }
 
   get nbformat_minor(): number {
-    return this.ymeta.get('nbformatMinor');
+    return this.ymeta.get('nbformat_minor');
   }
 
   set nbformat_minor(value: number) {
     this.transact(() => {
-      this.ymeta.set('nbformatMinor', value);
+      this.ymeta.set('nbformat_minor', value);
     }, false);
   }
 
