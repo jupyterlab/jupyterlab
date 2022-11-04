@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/cell-toolbar",
-  "version": "3.6.0-alpha.1",
+  "version": "3.6.0-alpha.2",
   "description": "Contextual cell toolbar adapted from jlab-enhanced-cell-toolbar",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,11 +40,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.6.0-alpha.1",
-    "@jupyterlab/cells": "^3.6.0-alpha.1",
-    "@jupyterlab/docregistry": "^3.6.0-alpha.1",
-    "@jupyterlab/notebook": "^3.6.0-alpha.1",
-    "@jupyterlab/observables": "^4.6.0-alpha.1",
+    "@jupyterlab/apputils": "^3.6.0-alpha.2",
+    "@jupyterlab/cells": "^3.6.0-alpha.2",
+    "@jupyterlab/docregistry": "^3.6.0-alpha.2",
+    "@jupyterlab/notebook": "^3.6.0-alpha.2",
+    "@jupyterlab/observables": "^4.6.0-alpha.2",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/commands": "^1.19.0",
     "@lumino/disposable": "^1.10.0",
@@ -52,7 +52,7 @@
     "@lumino/widgets": "^1.33.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.6.0-alpha.1",
+    "@jupyterlab/testutils": "^3.6.0-alpha.2",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

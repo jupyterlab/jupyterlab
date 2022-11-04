@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statusbar-extension",
-  "version": "3.6.0-alpha.1",
+  "version": "3.6.0-alpha.2",
   "description": "JupyterLab - Statusbar Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,17 +36,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.6.0-alpha.1",
-    "@jupyterlab/apputils": "^3.6.0-alpha.1",
-    "@jupyterlab/cells": "^3.6.0-alpha.1",
-    "@jupyterlab/console": "^3.6.0-alpha.1",
-    "@jupyterlab/docregistry": "^3.6.0-alpha.1",
-    "@jupyterlab/fileeditor": "^3.6.0-alpha.1",
-    "@jupyterlab/notebook": "^3.6.0-alpha.1",
-    "@jupyterlab/settingregistry": "^3.6.0-alpha.1",
-    "@jupyterlab/statusbar": "^3.6.0-alpha.1",
-    "@jupyterlab/translation": "^3.6.0-alpha.1",
-    "@jupyterlab/ui-components": "^3.6.0-alpha.1",
+    "@jupyterlab/application": "^3.6.0-alpha.2",
+    "@jupyterlab/apputils": "^3.6.0-alpha.2",
+    "@jupyterlab/cells": "^3.6.0-alpha.2",
+    "@jupyterlab/console": "^3.6.0-alpha.2",
+    "@jupyterlab/docregistry": "^3.6.0-alpha.2",
+    "@jupyterlab/fileeditor": "^3.6.0-alpha.2",
+    "@jupyterlab/notebook": "^3.6.0-alpha.2",
+    "@jupyterlab/settingregistry": "^3.6.0-alpha.2",
+    "@jupyterlab/statusbar": "^3.6.0-alpha.2",
+    "@jupyterlab/translation": "^3.6.0-alpha.2",
+    "@jupyterlab/ui-components": "^3.6.0-alpha.2",
     "@lumino/commands": "^1.19.0",
     "@lumino/widgets": "^1.33.0"
   },
