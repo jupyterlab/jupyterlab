@@ -262,6 +262,24 @@ describe('contents', () => {
       const get = contents.get('/foo');
       await expectFailure(get, 'Invalid response: 201 Created');
     });
+
+    it('should store original server path for directory', async () => {
+      const drive = new Drive({ name: 'other', serverSettings });
+      contents.addDrive(drive);
+      handleRequest(drive, 200, DEFAULT_DIR);
+      const options: Contents.IFetchOptions = { type: 'directory' };
+      const model = await contents.get('other:/foo', options);
+      expect(model.serverPath).toBe('foo/bar');
+    });
+
+    it('should store original server path for a file', async () => {
+      const drive = new Drive({ name: 'other', serverSettings });
+      contents.addDrive(drive);
+      handleRequest(drive, 200, DEFAULT_FILE);
+      const options: Contents.IFetchOptions = { type: 'file' };
+      const model = await contents.get('other:/foo', options);
+      expect(model.serverPath).toBe('foo/test');
+    });
   });
 
   describe('#getDownloadUrl()', () => {

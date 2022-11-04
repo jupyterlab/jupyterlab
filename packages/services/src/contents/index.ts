@@ -52,6 +52,14 @@ export namespace Contents {
     readonly path: string;
 
     /**
+     * The path as returned by the server contents API.
+     *
+     * #### Notes
+     * Differently to `path` it does not include IDrive API prefix.
+     */
+    readonly serverPath?: string;
+
+    /**
      * The type of file.
      */
     readonly type: ContentType;
@@ -719,12 +727,14 @@ export class ContentsManager implements Contents.IManager {
         return {
           ...contentsModel,
           path: this._toGlobalPath(drive, localPath),
-          content: listing
+          content: listing,
+          serverPath: contentsModel.path
         } as Contents.IModel;
       } else {
         return {
           ...contentsModel,
-          path: this._toGlobalPath(drive, localPath)
+          path: this._toGlobalPath(drive, localPath),
+          serverPath: contentsModel.path
         } as Contents.IModel;
       }
     });
@@ -762,7 +772,8 @@ export class ContentsManager implements Contents.IManager {
         .then(contentsModel => {
           return {
             ...contentsModel,
-            path: PathExt.join(globalPath, contentsModel.name)
+            path: PathExt.join(globalPath, contentsModel.name),
+            serverPath: contentsModel.path
           } as Contents.IModel;
         });
     } else {
@@ -801,7 +812,8 @@ export class ContentsManager implements Contents.IManager {
     return drive1.rename(path1, path2).then(contentsModel => {
       return {
         ...contentsModel,
-        path: this._toGlobalPath(drive1, path2)
+        path: this._toGlobalPath(drive1, path2),
+        serverPath: contentsModel.path
       } as Contents.IModel;
     });
   }
@@ -828,7 +840,11 @@ export class ContentsManager implements Contents.IManager {
     return drive
       .save(localPath, { ...options, path: localPath })
       .then(contentsModel => {
-        return { ...contentsModel, path: globalPath } as Contents.IModel;
+        return {
+          ...contentsModel,
+          path: globalPath,
+          serverPath: contentsModel.path
+        } as Contents.IModel;
       });
   }
 
@@ -852,7 +868,8 @@ export class ContentsManager implements Contents.IManager {
       return drive1.copy(path1, path2).then(contentsModel => {
         return {
           ...contentsModel,
-          path: this._toGlobalPath(drive1, contentsModel.path)
+          path: this._toGlobalPath(drive1, contentsModel.path),
+          serverPath: contentsModel.path
         } as Contents.IModel;
       });
     } else {
