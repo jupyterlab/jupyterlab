@@ -63,11 +63,6 @@ export interface ISharedBase extends IDisposable {
  */
 export interface ISharedDocument extends ISharedBase {
   /**
-   * Whether the document is saved to disk or not.
-   */
-  readonly dirty: boolean;
-
-  /**
    * Document state
    */
   readonly state: JSONObject;
@@ -502,6 +497,11 @@ export type NotebookChange = {
     oldValue: nbformat.INotebookMetadata;
     newValue: nbformat.INotebookMetadata | undefined;
   };
+  nbformatChanged?: {
+    key: string;
+    oldValue: number | undefined;
+    newValue: number | undefined;
+  };
   contextChange?: MapChange;
   stateChange?: Array<{
     name: string;
@@ -537,7 +537,6 @@ export type CellChange<MetadataType> = {
 };
 
 export type DocumentChange = {
-  contextChange?: MapChange;
   stateChange?: Array<{
     name: string;
     oldValue: any;
