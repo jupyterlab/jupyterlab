@@ -6,7 +6,7 @@ import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISharedCodeCell } from '@jupyterlab/shared-models';
+import { ISharedCodeCell } from '@jupyter-notebook/ydoc';
 import {
   acceptDialog,
   createSessionContext,

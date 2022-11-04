@@ -3,8 +3,7 @@
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
-import { ISharedText, YFile } from '@jupyterlab/shared-models';
+import { ISharedText, YFile } from '@jupyter-notebook/ydoc';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -183,7 +182,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    readonly sharedModel: models.ISharedText;
+    readonly sharedModel: ISharedText;
   }
 
   /**
@@ -203,7 +202,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    readonly sharedModel: models.ISharedText;
+    readonly sharedModel: ISharedText;
 
     /**
      * A signal emitted when a mimetype changes.

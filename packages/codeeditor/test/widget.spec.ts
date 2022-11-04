@@ -3,7 +3,7 @@
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { YFile } from '@jupyterlab/shared-models';
+import { YFile } from '@jupyter-notebook/ydoc';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';

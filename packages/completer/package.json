@@ -44,12 +44,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyter-notebook/ydoc": "~0.2.0-alpha.0",
     "@jupyterlab/apputils": "^4.0.0-alpha.15",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.15",
     "@jupyterlab/coreutils": "^6.0.0-alpha.15",
     "@jupyterlab/rendermime": "^4.0.0-alpha.15",
     "@jupyterlab/services": "^7.0.0-alpha.15",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.15",
     "@jupyterlab/statedb": "^4.0.0-alpha.15",
     "@jupyterlab/ui-components": "^4.0.0-alpha.30",
     "@lumino/algorithm": "^2.0.0-alpha.6",

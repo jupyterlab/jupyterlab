@@ -19,7 +19,7 @@ import {
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
-import { createStandaloneCell, YCodeCell } from '@jupyterlab/shared-models';
+import { createStandaloneCell, YCodeCell } from '@jupyter-notebook/ydoc';
 import {
   createSessionContext,
   framePromise,

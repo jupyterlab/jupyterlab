@@ -7,6 +7,7 @@
     "clean": "rimraf build"
   },
   "dependencies": {
+    "@jupyter-notebook/ydoc": "~0.2.0-alpha.0",
     "@jupyterlab/application": "^4.0.0-alpha.15",
     "@jupyterlab/apputils": "^4.0.0-alpha.15",
     "@jupyterlab/cells": "^4.0.0-alpha.15",
@@ -15,7 +16,6 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.15",
     "@jupyterlab/rendermime": "^4.0.0-alpha.15",
     "@jupyterlab/services": "^7.0.0-alpha.15",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.15",
     "@jupyterlab/theme-light-extension": "^4.0.0-alpha.15",
     "@jupyterlab/ui-components": "^4.0.0-alpha.30",
     "@lumino/commands": "^2.0.0-alpha.6",

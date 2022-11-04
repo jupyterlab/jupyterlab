@@ -41,10 +41,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyter-notebook/ydoc": "~0.2.0-alpha.0",
     "@jupyterlab/coreutils": "^6.0.0-alpha.15",
     "@jupyterlab/nbformat": "^4.0.0-alpha.15",
     "@jupyterlab/observables": "^5.0.0-alpha.15",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.15",
     "@jupyterlab/statusbar": "^4.0.0-alpha.15",
     "@jupyterlab/translation": "^4.0.0-alpha.15",
     "@jupyterlab/ui-components": "^4.0.0-alpha.30",

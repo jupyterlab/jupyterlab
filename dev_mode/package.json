@@ -16,6 +16,7 @@
     "watch": "webpack --watch"
   },
   "resolutions": {
+    "@jupyter-notebook/ydoc": "~0.2.0-alpha.0",
     "@jupyterlab/application": "~4.0.0-alpha.15",
     "@jupyterlab/application-extension": "~4.0.0-alpha.15",
     "@jupyterlab/apputils": "~4.0.0-alpha.15",
@@ -94,7 +95,6 @@
     "@jupyterlab/settingeditor": "~4.0.0-alpha.15",
     "@jupyterlab/settingeditor-extension": "~4.0.0-alpha.15",
     "@jupyterlab/settingregistry": "~4.0.0-alpha.15",
-    "@jupyterlab/shared-models": "~4.0.0-alpha.15",
     "@jupyterlab/shortcuts-extension": "~4.0.0-alpha.15",
     "@jupyterlab/statedb": "~4.0.0-alpha.15",
     "@jupyterlab/statusbar": "~4.0.0-alpha.15",
@@ -266,6 +266,7 @@
     "buildDir": "./static",
     "outputDir": ".",
     "singletonPackages": [
+      "@jupyter-notebook/ydoc",
       "@jupyterlab/application",
       "@jupyterlab/apputils",
       "@jupyterlab/cell-toolbar",
@@ -295,7 +296,6 @@
       "@jupyterlab/services",
       "@jupyterlab/settingeditor",
       "@jupyterlab/settingregistry",
-      "@jupyterlab/shared-models",
       "@jupyterlab/statedb",
       "@jupyterlab/statusbar",
       "@jupyterlab/terminal",
@@ -398,7 +398,6 @@
       "@jupyterlab/settingeditor": "../packages/settingeditor",
       "@jupyterlab/settingeditor-extension": "../packages/settingeditor-extension",
       "@jupyterlab/settingregistry": "../packages/settingregistry",
-      "@jupyterlab/shared-models": "../packages/shared-models",
       "@jupyterlab/shortcuts-extension": "../packages/shortcuts-extension",
       "@jupyterlab/statedb": "../packages/statedb",
       "@jupyterlab/statusbar": "../packages/statusbar",

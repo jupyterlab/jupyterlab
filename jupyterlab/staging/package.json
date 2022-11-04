@@ -94,7 +94,6 @@
     "@jupyterlab/settingeditor": "~4.0.0-alpha.15",
     "@jupyterlab/settingeditor-extension": "~4.0.0-alpha.15",
     "@jupyterlab/settingregistry": "~4.0.0-alpha.15",
-    "@jupyterlab/shared-models": "~4.0.0-alpha.15",
     "@jupyterlab/shortcuts-extension": "~4.0.0-alpha.15",
     "@jupyterlab/statedb": "~4.0.0-alpha.15",
     "@jupyterlab/statusbar": "~4.0.0-alpha.15",
@@ -266,6 +265,7 @@
     "buildDir": "./build",
     "outputDir": "..",
     "singletonPackages": [
+      "@jupyter-notebook/ydoc",
       "@jupyterlab/application",
       "@jupyterlab/apputils",
       "@jupyterlab/cell-toolbar",
@@ -295,7 +295,6 @@
       "@jupyterlab/services",
       "@jupyterlab/settingeditor",
       "@jupyterlab/settingregistry",
-      "@jupyterlab/shared-models",
       "@jupyterlab/statedb",
       "@jupyterlab/statusbar",
       "@jupyterlab/terminal",

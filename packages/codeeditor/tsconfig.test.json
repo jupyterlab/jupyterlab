@@ -12,9 +12,6 @@
       "path": "../observables"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../statusbar"
     },
     {

@@ -5,7 +5,7 @@ import { ISessionContext } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { KernelMessage } from '@jupyterlab/services';
-import { createStandaloneCell } from '@jupyterlab/shared-models';
+import { createStandaloneCell } from '@jupyter-notebook/ydoc';
 import { createSessionContext, signalToPromise } from '@jupyterlab/testutils';
 import { ConsoleHistory } from '../src';
 
