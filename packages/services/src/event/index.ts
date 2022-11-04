@@ -3,8 +3,8 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { IDisposable } from '@lumino/disposable';
-import { Poll } from '@lumino/polling';
-import { Signal } from '@lumino/signaling';
+import { Poll, RateLimiter } from '@lumino/polling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
 
 /**
@@ -20,30 +20,24 @@ export class EventManager implements IDisposable {
    * Create a new event manager.
    */
   constructor(options: EventManager.IOptions = {}) {
-    const serverSettings =
+    this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    this.serverSettings = serverSettings;
+    this._ticker = new Private.Ticker((tick: MessageEvent) => tick.data);
+    this._connect();
+  }
 
-    // Create a poll instance,
-    const poll = new Poll({
-      factory: async tick => tick.payload,
-      frequency: { backoff: false, interval: Poll.NEVER },
-      name: `@jupyterlab/services:EventManager`
-    });
-    this._poll = poll;
+  /**
+   * A signal that emits each new event in the application.
+   */
+  get emitted(): ISignal<this, Event> {
+    return this._emitted;
+  }
 
-    // Open the WebSocket to the server.
-    const { WebSocket, wsUrl } = serverSettings;
-    const token = encodeURIComponent(serverSettings.token);
-    const url =
-      URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
-      (token ? `?token=${token}` : '');
-    const ws = new WebSocket(url);
-    ws.onclose = event => console.log('close', event);
-    ws.onerror = event => console.log('error', event);
-    ws.onmessage = event => console.log('message', event);
-    ws.onopen = event => console.log('open', event);
-    this._ws = ws;
+  /**
+   * An async iterable that yields each new event in the application.
+   */
+  get events(): AsyncIterable<Event> {
+    return this._ticker;
   }
 
   /**
@@ -51,41 +45,44 @@ export class EventManager implements IDisposable {
    */
   readonly serverSettings: ServerConnection.ISettings;
 
+  /**
+   * Whether the event manager is disposed.
+   */
   get isDisposed(): boolean {
-    return this._isDisposed;
+    return this._ws === null;
   }
 
+  /**
+   * Dispose the event manager.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
 
-    this._isDisposed = true;
-    this._poll.dispose();
-    Signal.clearData(this);
-
-    // Clean up WebSocket.
     const ws = this._ws;
-    if (ws) {
-      ws.onopen = () => undefined;
-      ws.onerror = () => undefined;
-      ws.onmessage = () => undefined;
-      ws.onclose = () => undefined;
-      ws.close();
-    }
+    this._ws = null;
+    ws!.onopen = () => undefined;
+    ws!.onerror = () => undefined;
+    ws!.onmessage = () => undefined;
+    ws!.onclose = () => undefined;
+    ws!.close();
+
+    this._ticker.dispose();
+    Signal.clearData(this);
   }
 
   /**
-   * Record an event in the server event bus.
+   * Emit an event to be broadcast by the application event bus.
    */
-  async record(event: Event): Promise<void> {
+  async emit(event: Event): Promise<void> {
     const { serverSettings } = this;
     const { baseUrl, token } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
     const url =
       URLExt.join(baseUrl, SERVICE_EVENTS_URL) +
       (token ? `?token=${token}` : '');
-    const init = { body: '', method: 'POST' };
+    const init = { body: JSON.stringify(event), method: 'POST' };
     const response = await makeRequest(url, init, serverSettings);
 
     if (response.status !== 204) {
@@ -93,8 +90,25 @@ export class EventManager implements IDisposable {
     }
   }
 
-  private _isDisposed = false;
-  private _poll: Poll<Event>;
+  /**
+   * Open the WebSocket to the server.
+   */
+  private _connect(): void {
+    const { token, WebSocket, wsUrl } = this.serverSettings;
+    const url =
+      URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
+      (token ? `?token=${encodeURIComponent(token)}` : '');
+    const ws = new WebSocket(url);
+    ws.onclose = () => this._connect();
+    ws.onmessage = event => {
+      this._emitted.emit(event.data);
+      this._ticker.invoke(event);
+    };
+    this._ws = ws;
+  }
+
+  private _emitted = new Signal<this, Event>(this);
+  private _ticker: Private.Ticker<Event, unknown, [MessageEvent]>;
   private _ws: WebSocket | null = null;
 }
 
@@ -126,3 +140,23 @@ export namespace Event {
 export type Event = {
   schema_name: string;
 };
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  export class Ticker<T, U, V extends unknown[]> extends RateLimiter<T, U, V> {
+    async *[Symbol.asyncIterator]() {
+      for await (const tick of this.poll) {
+        if (tick.phase !== 'rejected' && tick.payload) {
+          yield tick.payload as T;
+        }
+      }
+    }
+    invoke(...args: V) {
+      this.args = args;
+      void this.poll.schedule({ interval: Poll.IMMEDIATE, phase: 'invoked' });
+      return this.payload!.promise;
+    }
+  }
+}

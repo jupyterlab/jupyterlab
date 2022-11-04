@@ -24,6 +24,10 @@ module.exports = {
     'plugin:react/recommended'
   ],
   parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 'ES2018',
+    project: ['./tsconfig.eslint.json']
+  },
   plugins: ['@typescript-eslint'],
   overrides: [
     {
