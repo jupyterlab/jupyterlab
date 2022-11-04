@@ -10,10 +10,12 @@
             "type": "separator"
           },
           {
-            "command": "logconsole:open"
+            "command": "logconsole:open",
+            "rank": 9.95
           },
           {
-            "type": "separator"
+            "type": "separator",
+            "rank": 9.99
           }
         ]
       }

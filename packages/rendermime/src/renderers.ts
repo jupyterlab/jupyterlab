@@ -333,7 +333,7 @@ export async function renderMarkdown(
   const parts = removeMath(source);
 
   // Convert the markdown to HTML.
-  let html = await Private.renderMarked(parts['text']);
+  let html = await renderMarkdown.renderMarked(parts['text']);
 
   // Replace math.
   html = replaceMath(html, parts['math']);
@@ -401,6 +401,29 @@ export namespace renderMarkdown {
      * The application language translator.
      */
     translator?: ITranslator;
+  }
+
+  /**
+   * Render markdown for the specified content.
+   *
+   * @param content - The string of markdown to render.
+   *
+   * @return A promise which resolves with the rendered content.
+   *
+   * @deprecated This will be remove in 4.0.0 as a new plugin `'@jupyterlab/markedparser-extension:plugin'`
+   * will be exporting `IMarkdownParser` token for customization and reuse by other plugins.
+   */
+  export function renderMarked(content: string): Promise<string> {
+    Private.initializeMarked();
+    return new Promise<string>((resolve, reject) => {
+      marked(content, (err: any, content: string) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(content);
+        }
+      });
+    });
   }
 }
 
@@ -801,26 +824,6 @@ namespace Private {
   }
 
   /**
-   * Render markdown for the specified content.
-   *
-   * @param content - The string of markdown to render.
-   *
-   * @return A promise which resolves with the rendered content.
-   */
-  export function renderMarked(content: string): Promise<string> {
-    initializeMarked();
-    return new Promise<string>((resolve, reject) => {
-      marked(content, (err: any, content: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(content);
-        }
-      });
-    });
-  }
-
-  /**
    * Handle the default behavior of nodes.
    */
   export function handleDefaults(
@@ -1011,7 +1014,7 @@ namespace Private {
   /**
    * Support GitHub flavored Markdown, leave sanitizing to external library.
    */
-  function initializeMarked(): void {
+  export function initializeMarked(): void {
     if (markedInitialized) {
       return;
     }

@@ -54,6 +54,7 @@
   "devDependencies": {
     "@jupyterlab/testutils": "^3.6.0-alpha.1",
     "@types/jest": "^26.0.10",
+    "@types/resize-observer-browser": "^0.1.7",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",

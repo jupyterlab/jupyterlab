@@ -2,7 +2,9 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "lib",
-    "rootDir": "src"
+    "rootDir": "src",
+    "lib": ["DOM", "ES2017"],
+    "types": ["resize-observer-browser"]
   },
   "include": ["src/**/*"],
   "references": [

@@ -34,6 +34,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
+import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
 import { settingsPlugin } from './settingsplugin';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
@@ -617,6 +618,7 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  notificationPlugin,
   palette,
   paletteRestorer,
   print,
