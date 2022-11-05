@@ -2,7 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { generateArrow, positionMouse, setSidebarWidth } from './utils';
+import {
+  generateArrow,
+  positionMouse,
+  positionMouseOver,
+  setSidebarWidth
+} from './utils';
 
 test.use({
   autoGoto: false,
@@ -178,14 +183,24 @@ test.describe('General', () => {
 
     await page.click('text=File');
     await page.mouse.move(70, 40);
-    await page.click('ul[role="menu"] >> text=New');
+    const fileMenuNewItem = await page.waitForSelector(
+      'ul[role="menu"] >> text=New'
+    );
+    await fileMenuNewItem.click();
 
     // Inject mouse
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 35, y: 35 })]
+      [
+        await positionMouseOver(fileMenuNewItem, {
+          left: 0,
+          // small negative offset to place the cursor before "New"
+          offsetLeft: -17,
+          top: 0.5
+        })
+      ]
     );
 
     expect(
@@ -211,14 +226,13 @@ test.describe('General', () => {
     await page.hover('text=Copy Shareable Link');
 
     const itemHandle = await page.$('text=Copy Shareable Link');
-    const itemBBox = await itemHandle.boundingBox();
 
     // Inject mouse
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 260, y: itemBBox.y + itemBBox.height * 0.5 })]
+      [await positionMouseOver(itemHandle, { top: 0.5, left: 0.55 })]
     );
 
     expect(
@@ -354,7 +368,6 @@ test.describe('General', () => {
     );
     const anchor = await heading.$('text=¶');
     await heading.hover();
-    const bBox = await anchor.boundingBox();
 
     // Get parent cell which includes the heading
     const cell = await heading.evaluateHandle(node => node.closest('.jp-Cell'));
@@ -365,9 +378,10 @@ test.describe('General', () => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
       [
-        positionMouse({
-          x: bBox.x + bBox.width + 10,
-          y: bBox.y + bBox.height * 0.25
+        await positionMouseOver(anchor, {
+          left: 1,
+          offsetLeft: 5,
+          top: 0.25
         })
       ]
     );

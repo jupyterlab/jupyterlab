@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Page } from '@playwright/test';
+import { ElementHandle, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
@@ -47,6 +47,52 @@ export function positionMouse(position: { x: number; y: number }): string {
   <use xlink:href="#c" style="fill:#fafbfc"/>
   <circle id="hot" class="left(-1,22)" cx="1" cy="1" r="1" style="fill:#f00;opacity:.5"/>
 </svg>`;
+}
+
+interface IPositionInElement {
+  /**
+   * X-coordinate multiplier for the element's width.
+   */
+  top?: number;
+  /**
+   * Y-coordinate multiplier for the element's height.
+   */
+  left?: number;
+  /**
+   * Offset added to x-coordinate after calculating position with multipliers.
+   */
+  offsetLeft?: number;
+  /**
+   * Offset added to y-coordinate after calculating position with multipliers.
+   */
+  offsetTop?: number;
+}
+
+/**
+ * Generate a SVG mouse pointer to inject in a HTML document over an Element.
+ *
+ * @param element A playwright handle for the target Element
+ * @param position A position within the target Element (default: bottom right quarter).
+ * @returns The svg to inject in the page
+ */
+export async function positionMouseOver(
+  element: ElementHandle,
+  position: IPositionInElement = {
+    top: 0.75,
+    left: 0.75,
+    offsetLeft: 0,
+    offsetTop: 0
+  }
+): Promise<string> {
+  const top = position.top ?? 0.75;
+  const left = position.left ?? 0.75;
+  const offsetTop = position.offsetTop ?? 0;
+  const offsetLeft = position.offsetLeft ?? 0;
+  const bBox = await element.boundingBox();
+  return positionMouse({
+    x: bBox.x + bBox.width * left + offsetLeft,
+    y: bBox.y + bBox.height * top + offsetTop
+  });
 }
 
 /**
