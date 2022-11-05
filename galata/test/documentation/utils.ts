@@ -49,7 +49,10 @@ export function positionMouse(position: { x: number; y: number }): string {
 </svg>`;
 }
 
-interface IPositionInElement {
+/**
+ * Position of an injected sprint in a DOM element.
+ */
+export interface IPositionInElement {
   /**
    * X-coordinate multiplier for the element's width.
    */
@@ -69,20 +72,15 @@ interface IPositionInElement {
 }
 
 /**
- * Generate a SVG mouse pointer to inject in a HTML document over an Element.
+ * Generate a SVG mouse pointer to inject in a HTML document over a DOM element.
  *
- * @param element A playwright handle for the target Element
- * @param position A position within the target Element (default: bottom right quarter).
+ * @param element A playwright handle for the target DOM element
+ * @param position A position within the target element (default: bottom right quarter).
  * @returns The svg to inject in the page
  */
 export async function positionMouseOver(
   element: ElementHandle,
-  position: IPositionInElement = {
-    top: 0.75,
-    left: 0.75,
-    offsetLeft: 0,
-    offsetTop: 0
-  }
+  position: IPositionInElement = {}
 ): Promise<string> {
   const top = position.top ?? 0.75;
   const left = position.left ?? 0.75;
