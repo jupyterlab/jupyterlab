@@ -944,12 +944,18 @@ export namespace Completer {
      * documentation panel.
      */
     createDocumentationNode?(activeItem: T): HTMLElement;
+
+    /**
+     * The sanitizer used to sanitize untrusted html inputs.
+     */
+    sanitizer: Sanitizer;
   }
 
   /**
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
+    sanitizer: Sanitizer = new Sanitizer();
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
      */
@@ -1021,8 +1027,7 @@ export namespace Completer {
       const matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      const sanitizer = new Sanitizer();
-      matchNode.innerHTML = sanitizer.sanitize(result, {
+      matchNode.innerHTML = this.sanitizer.sanitize(result, {
         allowedTags: ['mark']
       });
       return matchNode;
