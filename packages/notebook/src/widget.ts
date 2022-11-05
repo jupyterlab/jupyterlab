@@ -1700,7 +1700,6 @@ export class Notebook extends StaticNotebook {
     }
     let { cell, element } = result;
 
-    console.log(cell, cell.inViewport);
     if (!cell.inViewport) {
       await this.scrollToCell(cell, 'center');
     }
