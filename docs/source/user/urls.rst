@@ -35,8 +35,8 @@ Entering the above URL will show the workspace root directory instead of the ``/
 directory in the file browser.
 
 
-Scrolling to Notebook Sections
-------------------------------
+Linking Notebook Sections
+-------------------------
 
 To create an URL which will scroll to a specific heading in the notebook append
 a hash (``#``) followed by the heading text with spaces replaced by minus
@@ -49,7 +49,7 @@ characters (``-``), for example:
 To get a link for a specific heading, hover over it in a rendered markdown cell
 until you see a pilcrow mark (``¶``) which will contain the desired anchor link:
 
-.. image:: ./images/notebook-heading-anchor-link.png
+.. image:: ../images/notebook-heading-anchor-link.png
    :alt: A markdown cell with pilcrow mark (¶) which serves as an anchor link and is placed after a heading
    :class: jp-screenshot
 
@@ -59,7 +59,7 @@ until you see a pilcrow mark (``¶``) which will contain the desired anchor link
     Currently disambiguation of headings with identical text is not supported.
 
 JupyterLab experimentally supports scrolling to a specified cell by identifier
-using `#cell-id=<cell-id>` Fragment Identification Syntax.
+using ``#cell-id=<cell-id>`` Fragment Identification Syntax.
 
 .. code-block:: none
 
