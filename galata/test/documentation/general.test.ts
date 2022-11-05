@@ -339,6 +339,44 @@ test.describe('General', () => {
     });
   });
 
+  test('Heading anchor', async ({ page }, testInfo) => {
+    await page.goto();
+    await setSidebarWidth(page);
+
+    // Open Data.ipynb
+    await page.dblclick(
+      '[aria-label="File Browser Section"] >> text=notebooks'
+    );
+    await page.dblclick('text=Data.ipynb');
+
+    const heading = await page.waitForSelector(
+      'h2[id="Open-a-CSV-file-using-Pandas"]'
+    );
+    const anchor = await heading.$('text=¶');
+    await heading.hover();
+    const bBox = await anchor.boundingBox();
+
+    // Get parent cell which includes the heading
+    const cell = await heading.evaluateHandle(node => node.closest('.jp-Cell'));
+
+    // Inject mouse
+    await page.evaluate(
+      ([mouse]) => {
+        document.body.insertAdjacentHTML('beforeend', mouse);
+      },
+      [
+        positionMouse({
+          x: bBox.x + bBox.width + 10,
+          y: bBox.y + bBox.height * 0.25
+        })
+      ]
+    );
+
+    expect(await cell.screenshot()).toMatchSnapshot(
+      'notebook_heading_anchor_link.png'
+    );
+  });
+
   test('Terminals', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
