@@ -4,7 +4,7 @@
 import { URLExt } from '@jupyterlab/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Poll, RateLimiter } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import { ISignal, Signal, Slot } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
 
 /**
@@ -22,22 +22,8 @@ export class EventManager implements IDisposable {
   constructor(options: EventManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    this._ticker = new Private.Ticker((tick: MessageEvent) => tick.data);
+    this._stream = new Private.Stream((tick: MessageEvent) => tick.data, this);
     this._connect();
-  }
-
-  /**
-   * A signal that emits each new event in the application.
-   */
-  get emitted(): ISignal<this, Event> {
-    return this._emitted;
-  }
-
-  /**
-   * An async iterable that yields each new event in the application.
-   */
-  get events(): AsyncIterable<Event> {
-    return this._ticker;
   }
 
   /**
@@ -50,6 +36,13 @@ export class EventManager implements IDisposable {
    */
   get isDisposed(): boolean {
     return this._ws === null;
+  }
+
+  /**
+   * A signal and async iterable that yields each new event in the application.
+   */
+  get stream(): AsyncIterable<Event> & ISignal<EventManager, Event> {
+    return this._stream;
   }
 
   /**
@@ -68,7 +61,7 @@ export class EventManager implements IDisposable {
     ws!.onclose = () => undefined;
     ws!.close();
 
-    this._ticker.dispose();
+    this._stream.dispose();
     Signal.clearData(this);
   }
 
@@ -100,15 +93,11 @@ export class EventManager implements IDisposable {
       (token ? `?token=${encodeURIComponent(token)}` : '');
     const ws = new WebSocket(url);
     ws.onclose = () => this._connect();
-    ws.onmessage = event => {
-      this._emitted.emit(event.data);
-      this._ticker.invoke(event);
-    };
+    ws.onmessage = event => void this._stream.invoke(event);
     this._ws = ws;
   }
 
-  private _emitted = new Signal<this, Event>(this);
-  private _ticker: Private.Ticker<Event, unknown, [MessageEvent]>;
+  private _stream: Private.Stream<Event, unknown, [MessageEvent]>;
   private _ws: WebSocket | null = null;
 }
 
@@ -145,18 +134,45 @@ export type Event = {
  * A namespace for private module data.
  */
 namespace Private {
-  export class Ticker<T, U, V extends unknown[]> extends RateLimiter<T, U, V> {
+  export class Stream<Event, U, V extends unknown[]>
+    extends RateLimiter<Event, U, V>
+    implements ISignal<EventManager, Event>
+  {
+    constructor(fn: (...args: V) => Event, manager: EventManager) {
+      super(fn);
+      this._signal = new Signal(manager);
+    }
+
     async *[Symbol.asyncIterator]() {
       for await (const tick of this.poll) {
         if (tick.phase !== 'rejected' && tick.payload) {
-          yield tick.payload as T;
+          this._signal.emit(tick.payload as Event);
+          yield tick.payload as Event;
         }
       }
     }
+
+    connect(slot: Slot<EventManager, Event>, thisArg?: any): boolean {
+      return this._signal.connect(slot, thisArg);
+    }
+
+    disconnect(slot: Slot<EventManager, Event>, thisArg?: any): boolean {
+      return this._signal.disconnect(slot, thisArg);
+    }
+
+    dispose(): void {
+      if (!this.isDisposed) {
+        super.dispose();
+        Signal.clearData(this);
+      }
+    }
+
     invoke(...args: V) {
       this.args = args;
       void this.poll.schedule({ interval: Poll.IMMEDIATE, phase: 'invoked' });
       return this.payload!.promise;
     }
+
+    private _signal: Signal<EventManager, Event>;
   }
 }
