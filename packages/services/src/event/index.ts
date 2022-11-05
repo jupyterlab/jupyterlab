@@ -134,15 +134,24 @@ export type Event = {
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * A stream with the characteristics of a Lumino signal and an async iterator.
+   */
   export class Stream<Event, U, V extends unknown[]>
     extends RateLimiter<Event, U, V>
     implements ISignal<EventManager, Event>
   {
+    /**
+     * Instantiate a new stream of events.
+     */
     constructor(fn: (...args: V) => Event, manager: EventManager) {
       super(fn);
       this._signal = new Signal(manager);
     }
 
+    /**
+     * Create an async iterator over the stream of events.
+     */
     async *[Symbol.asyncIterator]() {
       for await (const tick of this.poll) {
         if (tick.phase !== 'rejected' && tick.payload) {
@@ -152,21 +161,34 @@ namespace Private {
       }
     }
 
+    /**
+     * Connect to the stream of events.
+     */
     connect(slot: Slot<EventManager, Event>, thisArg?: any): boolean {
       return this._signal.connect(slot, thisArg);
     }
 
+    /**
+     * Disconnect from the stream of events.
+     */
     disconnect(slot: Slot<EventManager, Event>, thisArg?: any): boolean {
       return this._signal.disconnect(slot, thisArg);
     }
 
+    /**
+     * Dispose the stream.
+     */
     dispose(): void {
-      if (!this.isDisposed) {
-        super.dispose();
-        Signal.clearData(this);
+      if (this.isDisposed) {
+        return;
       }
+      Signal.clearData(this._signal);
+      super.dispose();
     }
 
+    /**
+     * Invoke the underlying function that generates stream events.
+     */
     invoke(...args: V) {
       this.args = args;
       void this.poll.schedule({ interval: Poll.IMMEDIATE, phase: 'invoked' });
