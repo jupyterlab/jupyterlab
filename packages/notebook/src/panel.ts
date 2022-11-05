@@ -226,7 +226,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    this.model!.metadata.set('language_info', language);
+    this.model!.setMetadata('language_info', language);
   }
 
   /**
@@ -237,7 +237,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
-    this.model!.metadata.set('kernelspec', {
+    this.model!.setMetadata('kernelspec', {
       name: kernel.name,
       display_name: spec?.display_name,
       language: spec?.language

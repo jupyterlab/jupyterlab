@@ -1,20 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IListChange, IMapChange, YCodeCell, YNotebook } from '../src';
+import {
+  IMapChange,
+  NotebookChange,
+  YCodeCell,
+  YNotebook
+} from '@jupyterlab/shared-models';
 
 describe('@jupyterlab/shared-models', () => {
   describe('YNotebook', () => {
     describe('#constructor', () => {
       it('should create a notebook without arguments', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         expect(notebook.cells.length).toBe(0);
       });
     });
 
     describe('metadata', () => {
       it('should get metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -29,7 +34,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should get all metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -44,7 +49,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should get one metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -59,7 +64,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should set one metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -74,8 +79,27 @@ describe('@jupyterlab/shared-models', () => {
         expect(notebook.getMetadata('test')).toEqual('banana');
       });
 
+      it.each([null, undefined, 1, true, 'string', { a: 1 }, [1, 2]])(
+        'should get single metadata %s',
+        value => {
+          const nb = new YNotebook();
+          const metadata = {
+            orig_nbformat: 1,
+            kernelspec: {
+              display_name: 'python',
+              name: 'python'
+            },
+            test: value
+          };
+
+          nb.setMetadata(metadata);
+
+          expect(nb.getMetadata('test')).toEqual(value);
+        }
+      );
+
       it('should update metadata', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = notebook.getMetadata();
         expect(metadata).toBeTruthy();
         metadata.orig_nbformat = 1;
@@ -100,7 +124,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit all metadata changes', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -135,7 +159,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit a add metadata change', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -160,7 +184,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit a delete metadata change', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -192,7 +216,7 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit an update metadata change', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const metadata = {
           orig_nbformat: 1,
           kernelspec: {
@@ -226,18 +250,18 @@ describe('@jupyterlab/shared-models', () => {
 
     describe('#insertCell', () => {
       it('should insert a cell', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         notebook.insertCell(0, { cell_type: 'code' });
         expect(notebook.cells.length).toBe(1);
       });
       it('should set cell source', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const codeCell = notebook.insertCell(0, { cell_type: 'code' });
         codeCell.setSource('test');
         expect(notebook.cells[0].getSource()).toBe('test');
       });
       it('should update source', () => {
-        const notebook = YNotebook.create();
+        const notebook = new YNotebook();
         const codeCell = notebook.insertCell(0, { cell_type: 'code' });
         codeCell.setSource('test');
         codeCell.updateSource(0, 0, 'hello');
@@ -245,21 +269,17 @@ describe('@jupyterlab/shared-models', () => {
       });
 
       it('should emit a add cells change', () => {
-        const notebook = YNotebook.create();
-        const changes: IListChange[] = [];
-        notebook.cellsChanged.connect((_, c) => {
+        const notebook = new YNotebook();
+        const changes: NotebookChange[] = [];
+        notebook.changed.connect((_, c) => {
           changes.push(c);
         });
         const codeCell = notebook.insertCell(0, { cell_type: 'code' });
 
         expect(changes).toHaveLength(1);
-        expect(changes).toEqual([
+        expect(changes[0].cellsChange).toEqual([
           {
-            type: 'add',
-            newIndex: 0,
-            newValues: [codeCell],
-            oldIndex: -2,
-            oldValues: []
+            insert: [codeCell]
           }
         ]);
       });
@@ -267,59 +287,41 @@ describe('@jupyterlab/shared-models', () => {
 
     describe('#deleteCell', () => {
       it('should emit a delete cells change', () => {
-        const notebook = YNotebook.create();
-        const changes: IListChange[] = [];
+        const notebook = new YNotebook();
+        const changes: NotebookChange[] = [];
         const codeCell = notebook.insertCell(0, { cell_type: 'code' });
 
-        notebook.cellsChanged.connect((_, c) => {
+        notebook.changed.connect((_, c) => {
           changes.push(c);
         });
         notebook.deleteCell(0);
 
         expect(changes).toHaveLength(1);
         expect(codeCell.isDisposed).toEqual(true);
-        expect(changes).toEqual([
-          {
-            type: 'remove',
-            oldIndex: 0,
-            oldValues: [codeCell],
-            newIndex: -1,
-            newValues: []
-          }
-        ]);
+        expect(changes[0].cellsChange).toEqual([{ delete: 1 }]);
       });
     });
 
     describe('#moveCell', () => {
       it('should emit add and delete cells changes when moving a cell', () => {
-        const notebook = YNotebook.create();
-        const changes: IListChange[] = [];
+        const notebook = new YNotebook();
+        const changes: NotebookChange[] = [];
         const codeCell = notebook.addCell({ cell_type: 'code' });
         notebook.addCell({ cell_type: 'markdown' });
         const raw = codeCell.toJSON();
-        notebook.cellsChanged.connect((_, c) => {
+        notebook.changed.connect((_, c) => {
           changes.push(c);
         });
         notebook.moveCell(0, 1);
 
         expect(notebook.getCell(1)).not.toEqual(codeCell);
         expect(notebook.getCell(1).toJSON()).toEqual(raw);
-        expect(changes).toHaveLength(2);
-        expect(changes).toEqual([
+        expect(changes[0].cellsChange).toHaveLength(3);
+        expect(changes[0].cellsChange).toEqual([
+          { delete: 1 },
+          { retain: 1 },
           {
-            type: 'remove',
-            oldIndex: 0,
-            // The id is already gone as the cell is disposed
-            oldValues: [codeCell],
-            newIndex: -1,
-            newValues: []
-          },
-          {
-            type: 'add',
-            newIndex: 1,
-            newValues: [notebook.getCell(1)],
-            oldIndex: -2,
-            oldValues: []
+            insert: [notebook.getCell(1)]
           }
         ]);
       });
@@ -382,6 +384,23 @@ describe('@jupyterlab/shared-models', () => {
       expect(cell.getMetadata('editable')).toEqual(metadata.editable);
     });
 
+    it.each([null, undefined, 1, true, 'string', { a: 1 }, [1, 2]])(
+      'should get single metadata %s',
+      value => {
+        const cell = YCodeCell.createStandalone();
+        const metadata = {
+          collapsed: true,
+          editable: false,
+          name: 'cell-name',
+          test: value
+        };
+
+        cell.setMetadata(metadata);
+
+        expect(cell.getMetadata('test')).toEqual(value);
+      }
+    );
+
     it('should set one metadata', () => {
       const cell = YCodeCell.createStandalone();
       const metadata = {
@@ -397,7 +416,7 @@ describe('@jupyterlab/shared-models', () => {
     });
 
     it('should emit all metadata changes', () => {
-      const notebook = YNotebook.create();
+      const notebook = new YNotebook();
       const metadata = {
         collapsed: true,
         editable: false,

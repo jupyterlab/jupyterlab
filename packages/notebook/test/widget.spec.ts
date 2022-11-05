@@ -83,11 +83,6 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onCellInserted');
   }
 
-  protected onCellMoved(fromIndex: number, toIndex: number): void {
-    super.onCellMoved(fromIndex, toIndex);
-    this.methods.push('onCellMoved');
-  }
-
   protected onCellRemoved(index: number, cell: Cell): void {
     super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
@@ -127,11 +122,6 @@ class LogNotebook extends Notebook {
   protected onCellInserted(index: number, cell: Cell): void {
     super.onCellInserted(index, cell);
     this.methods.push('onCellInserted');
-  }
-
-  protected onCellMoved(fromIndex: number, toIndex: number): void {
-    super.onCellMoved(fromIndex, toIndex);
-    this.methods.push('onCellMoved');
   }
 
   protected onCellRemoved(index: number, cell: Cell): void {
@@ -216,7 +206,7 @@ describe('@jupyter/notebook', () => {
         widget.modelContentChanged.connect(() => {
           called = true;
         });
-        widget.model!.metadata.set('foo', 1);
+        widget.model!.setMetadata('foo', 1);
         expect(called).toBe(true);
       });
     });
@@ -293,7 +283,7 @@ describe('@jupyter/notebook', () => {
         const widget = new LogStaticNotebook(options);
         const model = new NotebookModel();
         const value = { name: 'python', codemirror_mode: 'python' };
-        model.metadata.set('language_info', value);
+        model.setMetadata('language_info', value);
         widget.model = model;
         const child = widget.widgets[0];
         expect(child.model.mimeType).toBe('text/x-python');
@@ -325,7 +315,7 @@ describe('@jupyter/notebook', () => {
           const cell = widget.model!.cells.get(1);
           const child = widget.widgets[1];
           widget.model!.sharedModel.deleteCell(1);
-          expect(cell.isDisposed).toBe(false);
+          expect(cell.isDisposed).toBe(true);
           expect(child.isDisposed).toBe(true);
         });
 
@@ -417,7 +407,7 @@ describe('@jupyter/notebook', () => {
         const widget = new LogStaticNotebook(options);
         const model = new NotebookModel();
         const value = { name: 'python', codemirror_mode: 'python' };
-        model.metadata.set('language_info', value);
+        model.setMetadata('language_info', value);
         widget.model = model;
         expect(widget.codeMimetype).toBe('text/x-python');
       });
@@ -481,7 +471,7 @@ describe('@jupyter/notebook', () => {
     describe('#onMetadataChanged()', () => {
       it('should be called when the metadata on the notebook changes', () => {
         const widget = createWidget();
-        widget.model!.metadata.set('foo', 1);
+        widget.model!.setMetadata('foo', 1);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onMetadataChanged'])
         );
@@ -490,7 +480,7 @@ describe('@jupyter/notebook', () => {
       it('should update the `codeMimetype`', () => {
         const widget = createWidget();
         const value = { name: 'python', codemirror_mode: 'python' };
-        widget.model!.metadata.set('language_info', value);
+        widget.model!.setMetadata('language_info', value);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onMetadataChanged'])
         );
@@ -500,7 +490,7 @@ describe('@jupyter/notebook', () => {
       it('should update the cell widget mimetype', () => {
         const widget = createWidget();
         const value = { name: 'python', mimetype: 'text/x-python' };
-        widget.model!.metadata.set('language_info', value);
+        widget.model!.setMetadata('language_info', value);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onMetadataChanged'])
         );

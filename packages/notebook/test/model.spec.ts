@@ -16,7 +16,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should accept an optional language preference', () => {
         const model = new NotebookModel({ languagePreference: 'python' });
-        const lang = model.metadata.get(
+        const lang = model.getMetadata(
           'language_info'
         ) as nbformat.ILanguageInfoMetadata;
         expect(lang.name).toBe('python');
@@ -27,25 +27,25 @@ describe('@jupyterlab/notebook', () => {
       it('should be emitted when a metadata field changes', () => {
         const model = new NotebookModel();
         let called = false;
-        model.metadata.changed.connect((sender, args) => {
-          expect(sender).toBe(model.metadata);
+        model.metadataChanged.connect((sender, args) => {
+          expect(sender).toBe(model);
           expect(args.key).toBe('foo');
           expect(args.oldValue).toBeUndefined();
           expect(args.newValue).toBe(1);
           called = true;
         });
-        model.metadata.set('foo', 1);
+        model.setMetadata('foo', 1);
         expect(called).toBe(true);
       });
 
       it('should not be emitted when the value does not change', () => {
         const model = new NotebookModel();
         let called = false;
-        model.metadata.set('foo', 1);
-        model.metadata.changed.connect(() => {
+        model.setMetadata('foo', 1);
+        model.metadataChanged.connect(() => {
           called = true;
         });
-        model.metadata.set('foo', 1);
+        model.setMetadata('foo', 1);
         expect(called).toBe(false);
       });
     });
@@ -135,7 +135,7 @@ describe('@jupyterlab/notebook', () => {
           model.contentChanged.connect(() => {
             called = true;
           });
-          model.metadata.set('foo', 'bar');
+          model.setMetadata('foo', 'bar');
           expect(called).toBe(true);
         });
 
@@ -182,7 +182,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#defaultKernelName()', () => {
       it('should get the default kernel name of the document', () => {
         const model = new NotebookModel();
-        model.metadata.set('kernelspec', { name: 'python3' });
+        model.setMetadata('kernelspec', { name: 'python3' });
         expect(model.defaultKernelName).toBe('python3');
       });
 
@@ -195,7 +195,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#defaultKernelLanguage', () => {
       it('should get the default kernel language of the document', () => {
         const model = new NotebookModel();
-        model.metadata.set('language_info', { name: 'python' });
+        model.setMetadata('language_info', { name: 'python' });
         expect(model.defaultKernelLanguage).toBe('python');
       });
 
@@ -308,15 +308,15 @@ describe('@jupyterlab/notebook', () => {
       it('should have default values', () => {
         const model = new NotebookModel();
         const metadata = model.metadata;
-        expect(metadata.has('kernelspec')).toBeTruthy();
-        expect(metadata.has('language_info')).toBeTruthy();
-        expect(metadata.size).toBe(2);
+        expect(metadata['kernelspec']).toBeTruthy();
+        expect(metadata['language_info']).toBeTruthy();
+        expect(Object.keys(metadata)).toHaveLength(2);
       });
 
       it('should set the dirty flag when changed', () => {
         const model = new NotebookModel();
         expect(model.dirty).toBe(false);
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(model.dirty).toBe(true);
       });
 
@@ -326,21 +326,21 @@ describe('@jupyterlab/notebook', () => {
         model.contentChanged.connect(() => {
           called = true;
         });
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(called).toBe(true);
       });
 
       it('should emit the `metadataChanged` signal', () => {
         const model = new NotebookModel();
         let called = false;
-        model.metadata.changed.connect((sender, args) => {
-          expect(sender).toBe(model.metadata);
+        model.metadataChanged.connect((sender, args) => {
+          expect(sender).toBe(model);
           expect(args.key).toBe('foo');
           expect(args.oldValue).toBeUndefined();
           expect(args.newValue).toBe('bar');
           called = true;
         });
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(called).toBe(true);
       });
     });
