@@ -489,7 +489,7 @@ function activateFileEditorCompleterService(
     translator
   );
   const sessionManager = app.serviceManager.sessions;
-
+  const sanitizer = new Sanitizer();
   const _activeSessions = new Map<string, Session.ISessionConnection>();
   const updateCompleter = async (
     _: IEditorTracker,
@@ -525,7 +525,7 @@ function activateFileEditorCompleterService(
           editor: widget.content.editor,
           widget,
           session,
-          sanitizer: new Sanitizer()
+          sanitizer
         };
         manager.updateCompleter(newCompleterContext).catch(console.error);
         _activeSessions.set(widget.id, session);

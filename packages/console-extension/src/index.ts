@@ -908,7 +908,7 @@ function activateConsoleCompleterService(
   }
 
   const trans = (translator ?? nullTranslator).load('jupyterlab');
-
+  const sanitizer = new Sanitizer();
   app.commands.addCommand(CommandIDs.invokeCompleter, {
     label: trans.__('Display the completion helper.'),
     execute: () => {
@@ -948,7 +948,7 @@ function activateConsoleCompleterService(
         editor: cell.editor,
         session: codeConsole.sessionContext.session,
         widget: consolePanel,
-        sanitzer: new Sanitizer()
+        sanitzer: sanitizer
       };
       manager.updateCompleter(newContext).catch(console.error);
     });
@@ -957,7 +957,7 @@ function activateConsoleCompleterService(
         editor: consolePanel.console.promptCell?.editor ?? null,
         session: consolePanel.console.sessionContext.session,
         widget: consolePanel,
-        sanitizer: new Sanitizer()
+        sanitizer: sanitizer
       };
       manager.updateCompleter(newContext).catch(console.error);
     });

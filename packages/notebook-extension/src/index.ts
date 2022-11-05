@@ -1744,7 +1744,7 @@ function activateNotebookCompleterService(
     return;
   }
   const trans = (translator ?? nullTranslator).load('jupyterlab');
-
+  const sanitizer = new Sanitizer();
   app.commands.addCommand(CommandIDs.invokeCompleter, {
     label: trans.__('Display the completion helper.'),
     execute: args => {
@@ -1779,7 +1779,7 @@ function activateNotebookCompleterService(
       editor: notebook.content.activeCell?.editor ?? null,
       session: notebook.sessionContext.session,
       widget: notebook,
-      sanitizer: new Sanitizer()
+      sanitizer: sanitizer
     };
     await manager.updateCompleter(completerContext);
     notebook.content.activeCellChanged.connect((_, cell) => {
@@ -1790,7 +1790,7 @@ function activateNotebookCompleterService(
             editor: cell.editor,
             session: notebook.sessionContext.session,
             widget: notebook,
-            sanitizer: new Sanitizer()
+            sanitizer: sanitizer
           };
           return manager.updateCompleter(newCompleterContext);
         })
