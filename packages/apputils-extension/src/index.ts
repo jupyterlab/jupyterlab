@@ -621,8 +621,8 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
       const schemesArray = setting.get('additionalSchemes')
         .composite as Array<string>;
 
-      if (userSanitizer.setSchemes) {
-        userSanitizer.setSchemes(schemesArray);
+      if (userSanitizer.setAdditionalSchemes) {
+        userSanitizer.setAdditionalSchemes(schemesArray);
       }
     };
 

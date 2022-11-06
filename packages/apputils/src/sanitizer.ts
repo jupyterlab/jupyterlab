@@ -447,9 +447,9 @@ export class Sanitizer {
     return sanitize(dirty, { ...this._options, ...(options || {}) });
   }
 
-  setSchemes(scheme: Array<string>): void {
+  setAdditionalSchemes(scheme: Array<string>): void {
     if (Array.isArray(this._options.allowedSchemes)) {
-      this._options.allowedSchemes = scheme;
+      this._options.allowedSchemes.concat(scheme);
     }
   }
 
