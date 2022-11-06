@@ -449,7 +449,10 @@ export class Sanitizer {
 
   setAdditionalSchemes(scheme: Array<string>): void {
     if (Array.isArray(this._options.allowedSchemes)) {
-      this._options.allowedSchemes.concat(scheme);
+      this._options.allowedSchemes = [
+        ...this._options.allowedSchemes,
+        ...scheme
+      ];
     }
   }
 
