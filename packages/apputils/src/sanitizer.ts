@@ -959,6 +959,6 @@ export class Sanitizer {
     // Since embedded data is no longer deemed to be a threat, validation can be skipped.
     // See https://github.com/jupyterlab/jupyterlab/issues/5183
     allowedSchemesAppliedToAttributes: ['href', 'cite'],
-    allowedSchemes: []
+    allowedSchemes: ['http', 'https', 'ftp', 'mailto', 'tel']
   };
 }
