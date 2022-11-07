@@ -35,7 +35,7 @@ export class EventManager implements IDisposable {
    * Whether the event manager is disposed.
    */
   get isDisposed(): boolean {
-    return this._ws === null;
+    return this._socket === null;
   }
 
   /**
@@ -53,13 +53,13 @@ export class EventManager implements IDisposable {
       return;
     }
 
-    const ws = this._ws;
-    this._ws = null;
-    ws!.onopen = () => undefined;
-    ws!.onerror = () => undefined;
-    ws!.onmessage = () => undefined;
-    ws!.onclose = () => undefined;
-    ws!.close();
+    const socket = this._socket;
+    this._socket = null;
+    socket!.onopen = () => undefined;
+    socket!.onerror = () => undefined;
+    socket!.onmessage = () => undefined;
+    socket!.onclose = () => undefined;
+    socket!.close();
 
     Signal.clearData(this);
   }
@@ -90,14 +90,15 @@ export class EventManager implements IDisposable {
     const url =
       URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
       (token ? `?token=${encodeURIComponent(token)}` : '');
+    const socket = (this._socket = new WebSocket(url));
+    const stream = this._stream;
 
-    this._ws = new WebSocket(url);
-    this._ws.onclose = () => this._connect();
-    this._ws.onmessage = event => event.data && this._stream.emit(event.data);
+    socket.onclose = () => this._connect();
+    socket.onmessage = msg => msg.data && stream.emit(JSON.parse(msg.data));
   }
 
+  private _socket: WebSocket | null = null;
   private _stream: Private.Stream;
-  private _ws: WebSocket | null = null;
 }
 
 /**
@@ -122,9 +123,7 @@ export namespace Event {
   /**
    * The event emission type.
    */
-  export type Emission = {
-    schema_name: string;
-  };
+  export type Emission = { schema_id: string };
 
   /**
    * An event stream with the characteristics of a signal and an async iterator.
@@ -162,7 +161,7 @@ namespace Private {
       pending.resolve(event);
     }
 
-    async next(): Promise<IteratorResult<Event.Emission, any>> {
+    async next(): Promise<IteratorResult<Event.Emission>> {
       return { value: await this.pending.promise };
     }
 
