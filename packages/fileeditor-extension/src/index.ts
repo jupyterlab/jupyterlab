@@ -13,6 +13,7 @@ import {
 import {
   createToolbarFactory,
   ICommandPalette,
+  ISanitizer,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -188,7 +189,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:completer',
   requires: [IEditorTracker],
-  optional: [ICompletionProviderManager],
+  optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateFileEditorCompleterService,
   autoStart: true
 };
@@ -476,7 +477,8 @@ function activateFileEditorCompleterService(
   app: JupyterFrontEnd,
   editorTracker: IEditorTracker,
   manager: ICompletionProviderManager | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  appSanitizer: ISanitizer | null
 ): void {
   if (!manager) {
     return;
@@ -489,7 +491,7 @@ function activateFileEditorCompleterService(
     translator
   );
   const sessionManager = app.serviceManager.sessions;
-  const sanitizer = new Sanitizer();
+  const sanitizer = appSanitizer ?? new Sanitizer();
   const _activeSessions = new Map<string, Session.ISessionConnection>();
   const updateCompleter = async (
     _: IEditorTracker,

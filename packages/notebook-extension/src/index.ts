@@ -792,7 +792,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:completer',
   requires: [INotebookTracker],
-  optional: [ICompletionProviderManager, ITranslator],
+  optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateNotebookCompleterService,
   autoStart: true
 };
@@ -1738,13 +1738,14 @@ function activateNotebookCompleterService(
   app: JupyterFrontEnd,
   notebooks: INotebookTracker,
   manager: ICompletionProviderManager | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  appSanitizer: ISanitizer | null
 ): void {
   if (!manager) {
     return;
   }
   const trans = (translator ?? nullTranslator).load('jupyterlab');
-  const sanitizer = new Sanitizer();
+  const sanitizer = appSanitizer ?? new Sanitizer();
   app.commands.addCommand(CommandIDs.invokeCompleter, {
     label: trans.__('Display the completion helper.'),
     execute: args => {

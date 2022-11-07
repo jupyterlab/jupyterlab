@@ -15,6 +15,7 @@ import {
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
+  ISanitizer,
   ISessionContext,
   ISessionContextDialogs,
   Sanitizer,
@@ -212,7 +213,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:completer',
   autoStart: true,
   requires: [IConsoleTracker],
-  optional: [ICompletionProviderManager],
+  optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateConsoleCompleterService
 };
 
@@ -901,14 +902,16 @@ function activateConsoleCompleterService(
   app: JupyterFrontEnd,
   consoles: IConsoleTracker,
   manager: ICompletionProviderManager | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  appSanitizer: ISanitizer | null
 ): void {
   if (!manager) {
     return;
   }
 
   const trans = (translator ?? nullTranslator).load('jupyterlab');
-  const sanitizer = new Sanitizer();
+  const sanitizer = appSanitizer ?? new Sanitizer();
+
   app.commands.addCommand(CommandIDs.invokeCompleter, {
     label: trans.__('Display the completion helper.'),
     execute: () => {
