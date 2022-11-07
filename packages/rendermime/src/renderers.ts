@@ -490,14 +490,25 @@ export namespace renderSVG {
   }
 }
 
-/**
- * Replace URLs with links.
- *
- * @param content - The text content of a node.
- *
- * @returns A list of text nodes and anchor elements.
- */
-function autolink(content: string): Array<HTMLAnchorElement | Text> {
+interface IAutoLinkOptions {
+  checkWebUrls: boolean;
+  checkPathUrls: boolean;
+}
+
+const TextAutoLinkOptions: IAutoLinkOptions = {
+  checkWebUrls: true,
+  checkPathUrls: false
+};
+
+const ErrorTextAutoLinkOptions: IAutoLinkOptions = {
+  checkWebUrls: true,
+  checkPathUrls: true
+};
+
+function autolink(
+  content: string,
+  options: IAutoLinkOptions
+): Array<HTMLAnchorElement | Text> {
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/9f709d170b06e991502153f281ec3c012add2e42/src/vs/workbench/contrib/debug/browser/linkDetector.ts#L17-L18
   const controlCodes = '\\u0000-\\u0020\\u007f-\\u009f';
@@ -510,36 +521,92 @@ function autolink(content: string): Array<HTMLAnchorElement | Text> {
     'ug'
   );
 
-  const nodes = [];
-  let lastIndex = 0;
+  // Taken from Visual Studio Code:
+  // https://github.dev/microsoft/vscode/blob/3e407526a1e2ff22cacb69c7e353e81a12f41029/extensions/notebook-renderers/src/linkify.ts#L9
+  const winAbsPathRegex = /(?:[a-zA-Z]:(?:(?:\\|\/)[\w\.-]*)+)/;
+  const winRelPathRegex = /(?:(?:\~|\.)(?:(?:\\|\/)[\w\.-]*)+)/;
+  const winPathRegex = new RegExp(
+    `(${winAbsPathRegex.source}|${winRelPathRegex.source})`
+  );
+  const posixPathRegex = /((?:\~|\.)?(?:\/[\w\.-]*)+)/;
+  const lineColumnRegex = /(?:\:([\d]+))?(?:\:([\d]+))?/;
+  const isWindows = navigator.userAgent.indexOf('Windows') >= 0;
+  const pathLinkRegex = new RegExp(
+    `${isWindows ? winPathRegex.source : posixPathRegex.source}${
+      lineColumnRegex.source
+    }`,
+    'g'
+  );
 
-  let match: RegExpExecArray | null;
-  while (null != (match = webLinkRegex.exec(content))) {
-    if (match.index !== lastIndex) {
-      nodes.push(
-        document.createTextNode(content.slice(lastIndex, match.index))
-      );
+  const { checkPathUrls, checkWebUrls } = options;
+
+  const regexes = [webLinkRegex, pathLinkRegex];
+  const enabled = [checkWebUrls, checkPathUrls];
+  const kinds = ['web', 'path'];
+
+  const nodes: Array<HTMLAnchorElement | Text> = [];
+
+  const linkify = (content: string, regexIndex: number) => {
+    if (regexIndex >= regexes.length) {
+      nodes.push(document.createTextNode(content));
+      return;
     }
-    let url = match[0];
-    // Special case when the URL ends with ">" or "<"
-    const lastChars = url.slice(-1);
-    const endsWithGtLt = ['>', '<'].indexOf(lastChars) !== -1;
-    const len = endsWithGtLt ? url.length - 1 : url.length;
-    const anchor = document.createElement('a');
-    url = url.slice(0, len);
-    anchor.href = url.startsWith('www.') ? 'https://' + url : url;
-    anchor.rel = 'noopener';
-    anchor.target = '_blank';
-    anchor.appendChild(document.createTextNode(url.slice(0, len)));
-    nodes.push(anchor);
-    lastIndex = match.index + len;
-  }
-  if (lastIndex !== content.length) {
-    nodes.push(
-      document.createTextNode(content.slice(lastIndex, content.length))
-    );
-  }
+
+    const regex = regexes[regexIndex];
+    const isEnabled = enabled[regexIndex];
+
+    if (isEnabled) {
+      let match;
+      let currentIndex = 0;
+      regex.lastIndex = 0;
+
+      while ((match = regex.exec(content)) !== null) {
+        const stringBeforeMatch = content.substring(currentIndex, match.index);
+        if (stringBeforeMatch) {
+          linkify(stringBeforeMatch, regexIndex + 1);
+        }
+
+        const value = match[0];
+        if (kinds[regexIndex] === 'web') {
+          nodes.push(convertToUrlAnchor(value));
+        } else if (kinds[regexIndex] === 'path') {
+          nodes.push(convertToPathAnchor(value));
+        }
+
+        currentIndex = match.index + value.length;
+      }
+      const stringAfterMatches = content.substring(currentIndex);
+      if (stringAfterMatches) {
+        linkify(stringAfterMatches, regexIndex + 1);
+      }
+    } else {
+      linkify(content, regexIndex + 1);
+    }
+  };
+
+  linkify(content, 0);
   return nodes;
+}
+
+function convertToUrlAnchor(url: string): HTMLAnchorElement {
+  // Special case when the URL ends with ">" or "<"
+  const lastChars = url.slice(-1);
+  const endsWithGtLt = ['>', '<'].indexOf(lastChars) !== -1;
+  const len = endsWithGtLt ? url.length - 1 : url.length;
+  const anchor = document.createElement('a');
+  url = url.slice(0, len);
+  anchor.href = url.startsWith('www.') ? 'https://' + url : url;
+  anchor.rel = 'noopener';
+  anchor.target = '_blank';
+  anchor.appendChild(document.createTextNode(url.slice(0, len)));
+  return anchor;
+}
+
+function convertToPathAnchor(path: string): HTMLAnchorElement {
+  const anchor = document.createElement('a');
+  anchor.innerText = path.slice(0, path.length);
+  anchor.href = path;
+  return anchor;
 }
 
 /**
@@ -682,8 +749,9 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
     // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
     const linkedNodes =
       sanitizer.getAutolink?.() ?? true
-        ? autolink(preTextContent)
+        ? autolink(preTextContent, TextAutoLinkOptions)
         : [document.createTextNode(content)];
+
     let inAnchorElement = false;
 
     const combinedNodes: (HTMLAnchorElement | Text | HTMLSpanElement)[] = [];
@@ -768,6 +836,94 @@ export namespace renderText {
     /**
      * The application language translator.
      */
+    translator?: ITranslator;
+  }
+}
+
+export function renderError(
+  options: renderError.IRenderOptions
+): Promise<void> {
+  // Unpack the options.
+  const { host, sanitizer, source } = options;
+
+  // Create the HTML content.
+  const content = sanitizer.sanitize(Private.ansiSpan(source), {
+    allowedTags: ['span']
+  });
+
+  // Set the sanitized content for the host node.
+  const ret = document.createElement('pre');
+  const pre = document.createElement('pre');
+  pre.innerHTML = content;
+
+  const preTextContent = pre.textContent;
+
+  if (preTextContent) {
+    // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
+    const linkedNodes = autolink(preTextContent, ErrorTextAutoLinkOptions);
+    let inAnchorElement = false;
+
+    const combinedNodes: (HTMLAnchorElement | Text | HTMLSpanElement)[] = [];
+    const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
+
+    for (let nodes of alignedNodes(preNodes, linkedNodes)) {
+      if (!nodes[0]) {
+        combinedNodes.push(nodes[1]);
+        inAnchorElement = nodes[1].nodeType !== Node.TEXT_NODE;
+        continue;
+      } else if (!nodes[1]) {
+        combinedNodes.push(nodes[0]);
+        inAnchorElement = false;
+        continue;
+      }
+      let [preNode, linkNode] = nodes;
+
+      const lastCombined = combinedNodes[combinedNodes.length - 1];
+
+      // If we are already in an anchor element and the anchor element did not change,
+      // we should insert the node from <pre> which is either Text node or coloured span Element
+      // into the anchor content as a child
+      if (
+        inAnchorElement &&
+        (linkNode as HTMLAnchorElement).href ===
+          (lastCombined as HTMLAnchorElement).href
+      ) {
+        lastCombined.appendChild(preNode);
+      } else {
+        // the `linkNode` is either Text or AnchorElement;
+        const isAnchor = linkNode.nodeType !== Node.TEXT_NODE;
+        // if we are NOT about to start an anchor element, just add the pre Node
+        if (!isAnchor) {
+          combinedNodes.push(preNode);
+          inAnchorElement = false;
+        } else {
+          // otherwise start a new anchor; the contents of the `linkNode` and `preNode` should be the same,
+          // so we just put the neatly formatted `preNode` inside the anchor node (`linkNode`)
+          // and append that to combined nodes.
+          linkNode.textContent = '';
+          linkNode.appendChild(preNode);
+          combinedNodes.push(linkNode);
+          inAnchorElement = true;
+        }
+      }
+    }
+    // Do not reuse `pre` element. Clearing out previous children is too slow...
+    for (const child of combinedNodes) {
+      ret.appendChild(child);
+    }
+  }
+
+  host.appendChild(ret);
+
+  // Return the rendered promise.
+  return Promise.resolve(undefined);
+}
+
+export namespace renderError {
+  export interface IRenderOptions {
+    host: HTMLElement;
+    sanitizer: IRenderMime.ISanitizer;
+    source: string;
     translator?: ITranslator;
   }
 }
