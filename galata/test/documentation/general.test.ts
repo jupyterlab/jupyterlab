@@ -113,10 +113,9 @@ test.describe('General', () => {
       }`
     });
 
-    await setSidebarWidth(page);
-
     await page.notebook.createNew();
     await page.click('[title="Property Inspector"]');
+    await setSidebarWidth(page, 251, 'right');
 
     expect(
       await page.screenshot({
