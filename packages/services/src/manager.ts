@@ -104,6 +104,7 @@ export class ServiceManager implements ServiceManager.IManager {
     Signal.clearData(this);
 
     this.contents.dispose();
+    this.events.dispose();
     this.sessions.dispose();
     this.terminals.dispose();
   }

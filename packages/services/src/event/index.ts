@@ -39,9 +39,9 @@ export class EventManager implements IDisposable {
   }
 
   /**
-   * A signal and async iterable iterator that emits and yields each new event.
+   * An event stream that emits and yields each new event.
    */
-  get stream(): AsyncIterableIterator<Event> & ISignal<EventManager, Event> {
+  get stream(): Event.Stream {
     return this._stream;
   }
 
@@ -120,14 +120,23 @@ export namespace EventManager {
  */
 export namespace Event {
   /**
-   * The interface for the setting system manager.
+   * The event emission type.
+   */
+  export type Emission = {
+    schema_name: string;
+  };
+
+  /**
+   * An event stream with the characteristics of a signal and an async iterator.
+   */
+  export type Stream = AsyncIterableIterator<Emission> &
+    ISignal<IManager, Emission>;
+
+  /**
+   * The interface for the event bus front-end.
    */
   export interface IManager extends EventManager {}
 }
-
-export type Event = {
-  schema_name: string;
-};
 
 /**
  * A namespace for private module data.
@@ -137,26 +146,26 @@ namespace Private {
    * A stream with the characteristics of a signal and an async iterator.
    */
   export class Stream
-    extends Signal<EventManager, Event>
-    implements AsyncIterableIterator<Event>
+    extends Signal<EventManager, Event.Emission>
+    implements AsyncIterableIterator<Event.Emission>
   {
-    async *[Symbol.asyncIterator](): AsyncIterableIterator<Event> {
+    async *[Symbol.asyncIterator](): AsyncIterableIterator<Event.Emission> {
       while (this.pending) {
         yield this.pending.promise;
       }
     }
 
-    emit(event: Event): void {
+    emit(event: Event.Emission): void {
       super.emit(event);
       const { pending } = this;
       this.pending = new PromiseDelegate();
       pending.resolve(event);
     }
 
-    async next(): Promise<IteratorResult<Event, any>> {
+    async next(): Promise<IteratorResult<Event.Emission, any>> {
       return { value: await this.pending.promise };
     }
 
-    protected pending = new PromiseDelegate<Event>();
+    protected pending = new PromiseDelegate<Event.Emission>();
   }
 }
