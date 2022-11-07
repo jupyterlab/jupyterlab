@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
-import { Poll, RateLimiter } from '@lumino/polling';
-import { ISignal, Signal, Slot } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
 
 /**
@@ -22,7 +22,7 @@ export class EventManager implements IDisposable {
   constructor(options: EventManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    this._stream = new Private.Stream((tick: MessageEvent) => tick.data, this);
+    this._stream = new Private.Stream(this);
     this._connect();
   }
 
@@ -39,9 +39,9 @@ export class EventManager implements IDisposable {
   }
 
   /**
-   * A signal and async iterable that yields each new event in the application.
+   * A signal and async iterable iterator that emits and yields each new event.
    */
-  get stream(): AsyncIterable<Event> & ISignal<EventManager, Event> {
+  get stream(): AsyncIterableIterator<Event> & ISignal<EventManager, Event> {
     return this._stream;
   }
 
@@ -61,7 +61,6 @@ export class EventManager implements IDisposable {
     ws!.onclose = () => undefined;
     ws!.close();
 
-    this._stream.dispose();
     Signal.clearData(this);
   }
 
@@ -91,13 +90,13 @@ export class EventManager implements IDisposable {
     const url =
       URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
       (token ? `?token=${encodeURIComponent(token)}` : '');
-    const ws = new WebSocket(url);
-    ws.onclose = () => this._connect();
-    ws.onmessage = event => void this._stream.invoke(event);
-    this._ws = ws;
+
+    this._ws = new WebSocket(url);
+    this._ws.onclose = () => this._connect();
+    this._ws.onmessage = event => event.data && this._stream.emit(event.data);
   }
 
-  private _stream: Private.Stream<Event, unknown, [MessageEvent]>;
+  private _stream: Private.Stream;
   private _ws: WebSocket | null = null;
 }
 
@@ -135,66 +134,29 @@ export type Event = {
  */
 namespace Private {
   /**
-   * A stream with the characteristics of a Lumino signal and an async iterator.
+   * A stream with the characteristics of a signal and an async iterator.
    */
-  export class Stream<Event, U, V extends unknown[]>
-    extends RateLimiter<Event, U, V>
-    implements ISignal<EventManager, Event>
+  export class Stream
+    extends Signal<EventManager, Event>
+    implements AsyncIterableIterator<Event>
   {
-    /**
-     * Instantiate a new stream of events.
-     */
-    constructor(fn: (...args: V) => Event, manager: EventManager) {
-      super(fn);
-      this._signal = new Signal(manager);
-    }
-
-    /**
-     * Create an async iterator over the stream of events.
-     */
-    async *[Symbol.asyncIterator]() {
-      for await (const tick of this.poll) {
-        if (tick.phase !== 'rejected' && tick.payload) {
-          this._signal.emit(tick.payload as Event);
-          yield tick.payload as Event;
-        }
+    async *[Symbol.asyncIterator](): AsyncIterableIterator<Event> {
+      while (this.pending) {
+        yield this.pending.promise;
       }
     }
 
-    /**
-     * Connect to the stream of events.
-     */
-    connect(slot: Slot<EventManager, Event>, thisArg?: any): boolean {
-      return this._signal.connect(slot, thisArg);
+    emit(event: Event): void {
+      super.emit(event);
+      const { pending } = this;
+      this.pending = new PromiseDelegate();
+      pending.resolve(event);
     }
 
-    /**
-     * Disconnect from the stream of events.
-     */
-    disconnect(slot: Slot<EventManager, Event>, thisArg?: any): boolean {
-      return this._signal.disconnect(slot, thisArg);
+    async next(): Promise<IteratorResult<Event, any>> {
+      return { value: await this.pending.promise };
     }
 
-    /**
-     * Dispose the stream.
-     */
-    dispose(): void {
-      if (this.isDisposed) {
-        return;
-      }
-      Signal.clearData(this._signal);
-      super.dispose();
-    }
-
-    /**
-     * Invoke the underlying function that generates stream events.
-     */
-    invoke(...args: V) {
-      this.args = args;
-      void this.poll.schedule({ interval: Poll.IMMEDIATE, phase: 'invoked' });
-      return this.payload!.promise;
-    }
-
-    private _signal: Signal<EventManager, Event>;
+    protected pending = new PromiseDelegate<Event>();
   }
 }
