@@ -580,6 +580,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         document will be kept in memory forever.""",
     )
 
+    collaborative_document_save_delay = Int(
+        1,
+        allow_none=True,
+        config=True,
+        help="""The delay in seconds to wait after a change is made to a document before saving it
+        (relevant only in collaborative mode). Defaults to 1s, if None then the document will never be saved.""",
+    )
+
     collaborative_ystore_class = Type(
         default_value=JupyterSQLiteYStore,
         klass=BaseYStore,
@@ -816,6 +824,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 "page_config_data": page_config,
                 "collaborative_file_poll_interval": self.collaborative_file_poll_interval,
                 "collaborative_document_cleanup_delay": self.collaborative_document_cleanup_delay,
+                "collaborative_document_save_delay": self.collaborative_document_save_delay,
                 "collaborative_ystore_class": self.collaborative_ystore_class,
             }
         )
