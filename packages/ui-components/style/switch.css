@@ -48,7 +48,7 @@
 }
 
 .jp-switch[aria-checked='true'] .jp-switch-track {
-  background-color: var(--jp-warn-color0);
+  background-color: var(--jp-switch-true-position-color);
 }
 
 .jp-switch[aria-checked='true'] .jp-switch-track::before {
