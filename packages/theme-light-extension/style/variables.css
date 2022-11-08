@@ -408,7 +408,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-reject-color-hover: var(--md-grey-700);
   --jp-reject-color-active: var(--md-grey-800);
 
-  /* File or activity icons semantic variables */
+  /* File or activity icons and switch semantic variables */
   --jp-jupyter-icon-color: var(--md-orange-900);
   --jp-notebook-icon-color: var(--md-orange-700);
   --jp-json-icon-color: var(--md-orange-700);
@@ -418,4 +418,5 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-terminal-icon-color: var(--md-grey-200);
   --jp-text-editor-icon-color: var(--md-grey-700);
   --jp-inspector-icon-color: var(--md-grey-700);
+  --jp-switch-color: var(--md-grey-400);
 }
