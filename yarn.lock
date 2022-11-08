@@ -1424,6 +1424,25 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
+"@jupyter-notebook/ydoc@~0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@jupyter-notebook/ydoc/-/ydoc-0.2.0.tgz#0febf91cd80dd2206f668c60e8ee20f4983cca99"
+  integrity sha512-R8iHKwU+8OvdYwtgNj9dh3vv0OrAyHLNDmXjaSu6CJ1w10OP7MuQasvD18DAgTjqlHEUgnPoSJA2j0UlflSC1Q==
+  dependencies:
+    "@jupyterlab/nbformat" "^3.0.0 || ^4.0.0-alpha.15"
+    "@lumino/coreutils" "^1.11.0 || ^2.0.0-alpha.6"
+    "@lumino/disposable" "^1.10.0 || ^2.0.0-alpha.6"
+    "@lumino/signaling" "^1.10.0 || ^2.0.0-alpha.6"
+    y-protocols "^1.0.5"
+    yjs "^13.5.40"
+
+"@jupyterlab/nbformat@^3.0.0 || ^4.0.0-alpha.15":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/nbformat/-/nbformat-3.5.0.tgz#ea3d926b90db9ff2da988db1ea3c8ac1dc3ba9fa"
+  integrity sha512-tQ0MCJ2NSlGTYM7auiL2vdqirIv39Pd2/gfFd4XdHClJgvT65b7XkNDOwBv6mqIuhNdHo3Mc3RXiODTo1tle7Q==
+  dependencies:
+    "@lumino/coreutils" "^1.11.0"
+
 "@lerna/add@4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@lerna/add/-/add-4.0.0.tgz#c36f57d132502a57b9e7058d1548b7a565ef183f"
@@ -2129,7 +2148,7 @@
     "@lumino/signaling" "^1.11.0"
     "@lumino/virtualdom" "^1.14.3"
 
-"@lumino/coreutils@^1.11.0", "@lumino/coreutils@^1.12.1":
+"@lumino/coreutils@^1.11.0", "@lumino/coreutils@^1.11.0 || ^2.0.0-alpha.6", "@lumino/coreutils@^1.12.1":
   version "1.12.1"
   resolved "https://registry.yarnpkg.com/@lumino/coreutils/-/coreutils-1.12.1.tgz#79860c9937483ddf6cda87f6c2b9da8eb1a5d768"
   integrity sha512-JLu3nTHzJk9N8ohZ85u75YxemMrmDzJdNgZztfP7F7T7mxND3YVNCkJG35a6aJ7edu1sIgCjBxOvV+hv27iYvQ==
@@ -2149,7 +2168,7 @@
     "@lumino/signaling" "^1.11.0"
     "@lumino/widgets" "^1.35.0"
 
-"@lumino/disposable@^1.10.0", "@lumino/disposable@^1.10.3":
+"@lumino/disposable@^1.10.0", "@lumino/disposable@^1.10.0 || ^2.0.0-alpha.6", "@lumino/disposable@^1.10.3":
   version "1.10.3"
   resolved "https://registry.yarnpkg.com/@lumino/disposable/-/disposable-1.10.3.tgz#c9778204f997605b00dab342029d488196d4baef"
   integrity sha512-a+LplaVGuubmM0KcgAK5NCcJxo0vuw020p3r5AaM/uvAtvLHM+po0wqD0Lcz633ERunf+bDdQ+8BcOhrQLPofQ==
@@ -2197,7 +2216,7 @@
   resolved "https://registry.yarnpkg.com/@lumino/properties/-/properties-1.8.2.tgz#91131f2ca91a902faa138771eb63341db78fc0fd"
   integrity sha512-EkjI9Cw8R0U+xC9HxdFSu7X1tz1H1vKu20cGvJ2gU+CXlMB1DvoYJCYxCThByHZ+kURTAap4SE5x8HvKwNPbig==
 
-"@lumino/signaling@^1.10.0", "@lumino/signaling@^1.11.0":
+"@lumino/signaling@^1.10.0", "@lumino/signaling@^1.10.0 || ^2.0.0-alpha.6", "@lumino/signaling@^1.11.0":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@lumino/signaling/-/signaling-1.11.0.tgz#b61071875a69a02e7b14b779657ebdb099aac676"
   integrity sha512-c4mfkmwr9RDh/cUF7BFoPj8KdSsmJRfGLt0e2ez4sgnbSX2afeMNQBIi/gKsD4mMmhI5bXa17tVDYQn6ICBXAw==
@@ -10192,9 +10211,9 @@ isobject@^4.0.0:
   integrity sha512-S/2fF5wH8SJA/kmwr6HYhK/RI/OkhD84k8ntalo0iJjZikgq1XFvR5M8NPT1x5F7fBwCG3qHfnzeP/Vh/ZxCUA==
 
 isomorphic.js@^0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/isomorphic.js/-/isomorphic.js-0.2.4.tgz#24ca374163ae54a7ce3b86ce63b701b91aa84969"
-  integrity sha512-Y4NjZceAwaPXctwsHgNsmfuPxR8lJ3f8X7QTAkhltrX4oGIv+eTlgHLXn4tWysC9zGTi929gapnPp+8F8cg7nA==
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/isomorphic.js/-/isomorphic.js-0.2.5.tgz#13eecf36f2dba53e85d355e11bf9d4208c6f7f88"
+  integrity sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==
 
 isstream@~0.1.2:
   version "0.1.2"
@@ -11180,10 +11199,10 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-lib0@^0.2.31, lib0@^0.2.42:
-  version "0.2.42"
-  resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.42.tgz#6d8bf1fb8205dec37a953c521c5ee403fd8769b0"
-  integrity sha512-8BNM4MiokEKzMvSxTOC3gnCBisJH+jL67CnSnqzHv3jli3pUvGC8wz+0DQ2YvGr4wVQdb2R2uNNPw9LEpVvJ4Q==
+lib0@^0.2.31, lib0@^0.2.42, lib0@^0.2.49:
+  version "0.2.53"
+  resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.53.tgz#ee674571bc0a597bc06a03767908049fedab34fc"
+  integrity sha512-IT8j61GOFP23z9QYhBCHENqp4L7kCCtFXiCAtR3Is/QGIsq4FJv+ILoNgT+88NzQYI+qeZaDGqqVmrF/G0dYRw==
   dependencies:
     isomorphic.js "^0.2.4"
 
@@ -17925,12 +17944,12 @@ yarn@1.21.1:
   resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.21.1.tgz#1d5da01a9a03492dc4a5957befc1fd12da83d89c"
   integrity sha512-dQgmJv676X/NQczpbiDtc2hsE/pppGDJAzwlRiADMTvFzYbdxPj2WO4PcNyriSt2c4jsCMpt8UFRKHUozt21GQ==
 
-yjs@^13.5.17:
-  version "13.5.17"
-  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.17.tgz#888830e015cce709f3413f78cfdcf3c2176d4b0a"
-  integrity sha512-EeroWadB+/SlGuNwXaIjo75QlTlCjst3U/dLqhTkqwIXeCGl/nRTbQev+iYgWZVskD1eTCvaDc2FdrGdpKq32A==
+yjs@^13.5.17, yjs@^13.5.40:
+  version "13.5.42"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.42.tgz#949f7d091ded6e2621a5798982a9631b79e1b62c"
+  integrity sha512-3aYBPeUSBUCs/vCOYolbyzhsQ6IDm1DeJgfhHVbW+6kq8YhWjkk2SUhYtBxd3lZPNsqmJGzYH9shKINhSVbEzw==
   dependencies:
-    lib0 "^0.2.42"
+    lib0 "^0.2.49"
 
 yocto-queue@^0.1.0:
   version "0.1.0"

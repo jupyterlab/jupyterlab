@@ -18,7 +18,7 @@ import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { JSONObject } from '@lumino/coreutils';
-import { YCodeCell } from '@jupyterlab/shared-models';
+import { YCodeCell } from '@jupyter-notebook/ydoc';
 
 class TestModel extends CellModel {
   get type(): 'raw' {

@@ -36,9 +36,6 @@
       "path": "../services"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../ui-components"
     },
     {
@@ -79,9 +76,6 @@
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../shared-models"
     },
     {
       "path": "../ui-components"

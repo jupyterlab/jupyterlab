@@ -33,9 +33,6 @@
       "path": "../settingregistry"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../statusbar"
     },
     {
@@ -79,9 +76,6 @@
     },
     {
       "path": "../settingregistry"
-    },
-    {
-      "path": "../shared-models"
     },
     {
       "path": "../statusbar"

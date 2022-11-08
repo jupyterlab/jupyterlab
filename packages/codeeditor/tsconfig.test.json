@@ -12,9 +12,6 @@
       "path": "../observables"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../translation"
     },
     {
@@ -34,9 +31,6 @@
     },
     {
       "path": "../observables"
-    },
-    {
-      "path": "../shared-models"
     },
     {
       "path": "../translation"

@@ -15,7 +15,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import * as models from '@jupyterlab/shared-models';
+import * as models from '@jupyter-notebook/ydoc';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -354,7 +354,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * @param event The event to handle.
    */
   private _changeCellMetadata(
-    metadata: Partial<models.ISharedBaseCellMetadata>,
+    metadata: Partial<nbformat.IBaseCellMetadata>,
     event: IObservableJSON.IChangedArgs
   ): void {
     switch (event.key) {
@@ -395,13 +395,13 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    */
   protected _onSharedModelChanged(
     sender: models.ISharedCodeCell,
-    change: models.CellChange<models.ISharedBaseCellMetadata>
+    change: models.CellChange<nbformat.IBaseCellMetadata>
   ): void {
     super._onSharedModelChanged(sender, change);
     globalModelDBMutex(() => {
       if (change.metadataChange) {
         const newValue = change.metadataChange
-          ?.newValue as models.ISharedBaseCellMetadata;
+          ?.newValue as nbformat.IBaseCellMetadata;
         if (newValue) {
           this._updateModelDBMetadata(newValue);
         }
@@ -410,7 +410,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   private _updateModelDBMetadata(
-    metadata: Partial<models.ISharedBaseCellMetadata>
+    metadata: Partial<nbformat.IBaseCellMetadata>
   ): void {
     Object.keys(metadata).map(key => {
       switch (key) {
@@ -870,7 +870,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   protected _onSharedModelChanged(
     sender: models.ISharedCodeCell,
-    change: models.CellChange<models.ISharedBaseCellMetadata>
+    change: models.CellChange<nbformat.IBaseCellMetadata>
   ): void {
     super._onSharedModelChanged(sender, change);
     globalModelDBMutex(() => {

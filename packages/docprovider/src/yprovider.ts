@@ -4,8 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 import { ServerConnection, UserManager } from '@jupyterlab/services';
+import { DocumentChange, YDocument } from '@jupyter-notebook/ydoc';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';

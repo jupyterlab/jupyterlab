@@ -11,7 +11,7 @@ import {
   ModelDB,
   ObservableValue
 } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import * as models from '@jupyter-notebook/ydoc';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -234,10 +234,10 @@ export namespace CodeEditor {
       } else {
         this.modelDB = new ModelDB();
       }
-      this.sharedModel = models.createStandaloneCell(
-        this.type,
-        options.id
-      ) as models.ISharedText;
+      this.sharedModel = models.createStandaloneCell({
+        cell_type: this.type,
+        id: options.id
+      }) as models.ISharedText;
       this.sharedModel.changed.connect(this._onSharedModelChanged, this);
 
       const value = this.modelDB.createString('value');

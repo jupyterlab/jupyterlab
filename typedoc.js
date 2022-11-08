@@ -74,7 +74,6 @@ const packages = [
   'settingeditor-extension',
   'settingeditor',
   'settingregistry',
-  'shared-models',
   'shortcuts-extension',
   'statedb',
   'statusbar-extension',

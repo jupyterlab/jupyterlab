@@ -9,7 +9,7 @@ import {
   IObservableUndoableList,
   ObservableMap
 } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import * as models from '@jupyter-notebook/ydoc';
 import {
   ArrayExt,
   ArrayIterator,
@@ -69,14 +69,16 @@ export class CellList implements IObservableUndoableList<ICellModel> {
           change.type === 'add' ||
           change.type === 'move'
         ) {
-          const cells = change.newValues.map(cell => {
-            return cell.sharedModel.clone() as any;
-          });
           let insertLocation = change.newIndex;
           if (change.type === 'move' && insertLocation > change.oldIndex) {
             insertLocation += change.oldValues.length;
           }
-          nbmodel.insertCells(insertLocation, cells);
+          const cells = nbmodel.insertCells(
+            insertLocation,
+            change.newValues.map(cell => {
+              return cell.sharedModel.toJSON();
+            })
+          );
           change.newValues.forEach((cell, index) => {
             cell.switchSharedModel(cells[index], false);
           });
@@ -101,7 +103,10 @@ export class CellList implements IObservableUndoableList<ICellModel> {
       change.cellsChange?.forEach(delta => {
         if (delta.insert != null) {
           const cells = delta.insert.map(nbcell => {
-            const cell = this._factory.createCell(nbcell.cell_type, {});
+            const cell = this._factory.createCell(
+              nbcell.cell_type as 'markdown' | 'raw' | 'code',
+              {}
+            );
             cell.switchSharedModel(nbcell as any, true);
             return cell;
           });
