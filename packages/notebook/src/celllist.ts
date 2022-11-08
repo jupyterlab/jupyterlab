@@ -16,7 +16,7 @@ import {
   ISharedNotebook,
   ISharedRawCell,
   NotebookChange
-} from '@jupyterlab/shared-models';
+} from '@jupyter-notebook/ydoc';
 import { ISignal, Signal } from '@lumino/signaling';
 
 /**

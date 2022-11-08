@@ -17,9 +17,6 @@
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../shared-models"
     }
   ]
 }

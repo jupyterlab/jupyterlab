@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IObservableJSON } from '@jupyterlab/observables';
-import { ISharedText, SourceChange } from '@jupyterlab/shared-models';
+import { ISharedText, SourceChange } from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,

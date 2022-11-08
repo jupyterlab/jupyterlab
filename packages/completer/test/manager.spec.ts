@@ -16,7 +16,7 @@ import {
 import { Context } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
-import { createStandaloneCell } from '@jupyterlab/shared-models';
+import { createStandaloneCell } from '@jupyter-notebook/ydoc';
 
 import { createSessionContext } from '@jupyterlab/testutils';
 import { NBTestUtils } from '@jupyterlab/testutils';

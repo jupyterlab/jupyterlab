@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISharedText, SourceChange, YFile } from '@jupyterlab/shared-models';
+import { ISharedText, SourceChange, YFile } from '@jupyter-notebook/ydoc';
 
 describe('CodeEditor.Model', () => {
   let model: CodeEditor.Model;

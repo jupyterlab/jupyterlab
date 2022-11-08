@@ -15,7 +15,7 @@ import {
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { OutputArea } from '@jupyterlab/outputarea';
-import { CellChange, ISharedBaseCell } from '@jupyterlab/shared-models';
+import { CellChange, ISharedBaseCell } from '@jupyter-notebook/ydoc';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ICellModel } from './model';
 import { Cell, CodeCell, MarkdownCell } from './widget';

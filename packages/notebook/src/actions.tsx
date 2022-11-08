@@ -20,7 +20,7 @@ import {
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
-import { ISharedAttachmentsCell } from '@jupyterlab/shared-models';
+import { ISharedAttachmentsCell } from '@jupyter-notebook/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';

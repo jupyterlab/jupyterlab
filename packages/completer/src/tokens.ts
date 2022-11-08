@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Session } from '@jupyterlab/services';
-import { SourceChange } from '@jupyterlab/shared-models';
+import { SourceChange } from '@jupyter-notebook/ydoc';
 import { Token } from '@lumino/coreutils';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
