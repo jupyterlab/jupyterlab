@@ -38,7 +38,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter-notebook/ydoc": "~0.2.0-alpha.3",
+    "@jupyter-notebook/ydoc": "~0.2.0",
     "@jupyterlab/coreutils": "^6.0.0-alpha.15",
     "@jupyterlab/services": "^7.0.0-alpha.15",
     "@lumino/coreutils": "^2.0.0-alpha.6",
