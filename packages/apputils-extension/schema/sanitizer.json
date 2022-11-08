@@ -4,13 +4,15 @@
   "jupyter.lab.setting-icon": "ui-components:html5",
   "additionalProperties": false,
   "properties": {
-    "additionalSchemes": {
-      "title": "Additional Scheme",
-      "description": "Add an additional scheme to the sanitizer.",
+    "allowedSchemes": {
+      "title": "Allowed URL Scheme",
+      "description": "Scheme allowed by the HTML sanitizer.",
       "type": "array",
+      "uniqueItems": true,
       "items": {
         "type": "string"
-      }
+      },
+      "default": ["http", "https", "ftp", "mailto", "tel"]
     }
   },
   "type": "object"

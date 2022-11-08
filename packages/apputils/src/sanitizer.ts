@@ -433,7 +433,7 @@ class CssProp {
 /**
  * A class to sanitize HTML strings.
  */
-export class Sanitizer {
+export class Sanitizer implements ISanitizer {
   /**
    * Sanitize an HTML string.
    *
@@ -447,13 +447,14 @@ export class Sanitizer {
     return sanitize(dirty, { ...this._options, ...(options || {}) });
   }
 
-  setAdditionalSchemes(scheme: Array<string>): void {
-    if (Array.isArray(this._options.allowedSchemes)) {
-      this._options.allowedSchemes = [
-        ...this._options.allowedSchemes,
-        ...scheme
-      ];
-    }
+  /**
+   * Set the allowed schemes
+   *
+   * @param scheme Allowed schemes
+   */
+  setAllowedSchemes(scheme: Array<string>): void {
+    // Force copy of `scheme`
+    this._options.allowedSchemes = [...scheme];
   }
 
   private _options: sanitize.IOptions = {
@@ -953,6 +954,7 @@ export class Sanitizer {
       // Set the "disabled" attribute for <input> tags.
       input: sanitize.simpleTransform('input', { disabled: 'disabled' })
     },
+    allowedSchemes: [...sanitize.defaults.allowedSchemes],
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
       img: sanitize.defaults.allowedSchemes.concat(['attachment'])
@@ -961,7 +963,6 @@ export class Sanitizer {
     // 'src' Attributes are validated to be URIs, which does not allow for embedded (image) data.
     // Since embedded data is no longer deemed to be a threat, validation can be skipped.
     // See https://github.com/jupyterlab/jupyterlab/issues/5183
-    allowedSchemesAppliedToAttributes: ['href', 'cite'],
-    allowedSchemes: ['http', 'https', 'ftp', 'mailto', 'tel']
+    allowedSchemesAppliedToAttributes: ['href', 'cite']
   };
 }

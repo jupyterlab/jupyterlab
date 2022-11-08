@@ -615,24 +615,22 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
   autoStart: true,
   provides: ISanitizer,
   requires: [ISettingRegistry],
-  activate: (app: JupyterFrontEnd, settings: ISettingRegistry) => {
-    const userSanitizer: Sanitizer = new Sanitizer();
+  activate: (app: JupyterFrontEnd, settings: ISettingRegistry): ISanitizer => {
+    const sanitizer = new Sanitizer();
     const loadSetting = (setting: ISettingRegistry.ISettings): void => {
-      const schemesArray = setting.get('additionalSchemes')
+      const allowedSchemes = setting.get('allowedSchemes')
         .composite as Array<string>;
 
-      if (userSanitizer.setAdditionalSchemes) {
-        userSanitizer.setAdditionalSchemes(schemesArray);
+      if (allowedSchemes) {
+        sanitizer.setAllowedSchemes(allowedSchemes);
       }
     };
 
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
-    Promise.all([
-      app.restored,
-      settings.load('@jupyterlab/apputils-extension:sanitizer')
-    ])
-      .then(([, setting]) => {
+    settings
+      .load('@jupyterlab/apputils-extension:sanitizer')
+      .then(setting => {
         // Read the settings
         loadSetting(setting);
 
@@ -642,7 +640,8 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
       .catch(reason => {
         console.error(`Failed to load sanitizer settings:`, reason);
       });
-    return userSanitizer;
+
+    return sanitizer;
   }
 };
 
