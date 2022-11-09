@@ -454,13 +454,15 @@ close the notebook without saving it.`,
     }
 
     if (changes.metadataChange) {
-      const metadata = changes.metadataChange.newValue as JSONObject;
-      this._modelDBMutex(() => {
-        this.metadata.clear();
-        Object.entries(metadata).forEach(([key, value]) => {
-          this.metadata.set(key, value);
+      const metadata = this.sharedModel.getMetadata();
+      if (metadata) {
+        this._modelDBMutex(() => {
+          this.metadata.clear();
+          Object.entries(metadata).forEach(([key, value]) => {
+            this.metadata.set(key, value);
+          });
         });
-      });
+      }
     }
   }
 

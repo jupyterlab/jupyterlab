@@ -400,8 +400,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     super._onSharedModelChanged(sender, change);
     globalModelDBMutex(() => {
       if (change.metadataChange) {
-        const newValue = change.metadataChange
-          ?.newValue as nbformat.IBaseCellMetadata;
+        const newValue = this.sharedModel.getMetadata();
         if (newValue) {
           this._updateModelDBMetadata(newValue);
         }
@@ -412,33 +411,18 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   private _updateModelDBMetadata(
     metadata: Partial<nbformat.IBaseCellMetadata>
   ): void {
-    Object.keys(metadata).map(key => {
+    this.metadata.clear();
+    Object.entries(metadata).forEach(([key, value]) => {
       switch (key) {
-        case 'collapsed':
-          this.metadata.set('collapsed', metadata.jupyter);
-          break;
-        case 'jupyter':
-          this.metadata.set('jupyter', metadata.jupyter);
-          break;
-        case 'name':
-          this.metadata.set('name', metadata.name);
-          break;
-        case 'scrolled':
-          this.metadata.set('scrolled', metadata.scrolled);
-          break;
-        case 'tags':
-          this.metadata.set('tags', metadata.tags);
-          break;
         case 'trusted':
-          const trusted = metadata.trusted as boolean;
-          this.metadata.set('trusted', trusted);
-          this.trusted = trusted;
+          this.metadata.set('trusted', value);
+          this.trusted = value as boolean;
           break;
         default:
           // The default is applied for custom metadata that are not
           // defined in the official nbformat but which are defined
           // by the user.
-          this.metadata.set(key, metadata[key]);
+          this.metadata.set(key, value);
       }
     });
   }
