@@ -81,9 +81,9 @@ export class MathJax3Typesetter implements ILatexTypesetter {
         md.outputJax.options.scale = scale;
         md.rerender();
       },
-      label: (args) => ("Mathjax Scale " + (args['scale'] ? `x${args['scale']}` : 'Reset')),
+      label: (args) => (
+        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset')),
     });
-
   }
 
   /**
