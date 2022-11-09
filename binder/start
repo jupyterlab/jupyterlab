@@ -12,6 +12,8 @@ argv = sys.argv[1:] + [
     "--extensions-in-dev-mode",
     "--collaborative",
     "--ContentsManager.allow_hidden=True",
+    # Use advance file ID service for out of band rename support
+    "--FileIdExtension.file_id_manager_class=jupyter_server_fileid.manager.LocalFileIdManager",
     "--config",
     "binder/jupyter_notebook_config.py",
 ]
