@@ -21,7 +21,7 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from notebook_shim.shim import NotebookConfigShimMixin
-from traitlets import Bool, Instance, Int, Type, Unicode, default
+from traitlets import Bool, Float, Instance, Int, Type, Unicode, default
 from ypy_websocket.ystore import BaseYStore
 
 from ._version import __version__
@@ -580,7 +580,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         document will be kept in memory forever.""",
     )
 
-    collaborative_document_save_delay = Int(
+    collaborative_document_save_delay = Float(
         1,
         allow_none=True,
         config=True,
