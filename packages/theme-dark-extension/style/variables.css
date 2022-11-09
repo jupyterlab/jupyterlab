@@ -421,4 +421,18 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-icon-contrast-color1: var(--md-green-600);
   --jp-icon-contrast-color2: var(--md-pink-600);
   --jp-icon-contrast-color3: var(--md-blue-600);
+
+  /* File or activity icons and switch semantic variables */
+  --jp-jupyter-icon-color: var(--md-orange-900);
+  --jp-notebook-icon-color: var(--md-orange-700);
+  --jp-json-icon-color: var(--md-orange-700);
+  --jp-console-icon-background-color: var(--md-blue-700);
+  --jp-console-icon-color: white;
+  --jp-terminal-icon-background-color: var(--md-grey-200);
+  --jp-terminal-icon-color: var(--md-grey-800);
+  --jp-text-editor-icon-color: var(--md-grey-200);
+  --jp-inspector-icon-color: var(--md-grey-200);
+  --jp-switch-color: var(--md-grey-400);
+  --jp-switch-true-position-color: var(--md-orange-700);
+  --jp-switch-cursor-color: rgba(0, 0, 0, 0.8);
 }

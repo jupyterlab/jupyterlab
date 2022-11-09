@@ -164,6 +164,42 @@
   stroke: var(--jp-icon-contrast-color3);
 }
 
+.jp-jupyter-icon-color[fill] {
+  fill: var(--jp-jupyter-icon-color);
+}
+
+.jp-notebook-icon-color[fill] {
+  fill: var(--jp-notebook-icon-color);
+}
+
+.jp-json-icon-color[fill] {
+  fill: var(--jp-json-icon-color);
+}
+
+.jp-console-icon-color[fill] {
+  fill: var(--jp-console-icon-color);
+}
+
+.jp-console-icon-background-color[fill] {
+  fill: var(--jp-console-icon-background-color);
+}
+
+.jp-terminal-icon-color[fill] {
+  fill: var(--jp-terminal-icon-color);
+}
+
+.jp-terminal-icon-background-color[fill] {
+  fill: var(--jp-terminal-icon-background-color);
+}
+
+.jp-text-editor-icon-color[fill] {
+  fill: var(--jp-text-editor-icon-color);
+}
+
+.jp-inspector-icon-color[fill] {
+  fill: var(--jp-inspector-icon-color);
+}
+
 /* CSS for icons in selected filebrowser listing items */
 .jp-DirListing-item.jp-mod-selected .jp-icon-selectable[fill] {
   fill: #fff;
