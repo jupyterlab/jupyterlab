@@ -68,7 +68,9 @@ class CheckForUpdate:
             if parse(__version__) < parse(last_version):
                 trans = translator.load("jupyterlab")
                 return trans.__(
-                    f"A newer version ({last_version}) of JupyterLab is available.\nSee the [changelog]({JUPYTERLAB_RELEASE_URL}{last_version}) for more information."
+                    f"A newer version ({last_version}) of JupyterLab is available.\n"
+                    f'See the <a href="{JUPYTERLAB_RELEASE_URL}{last_version}" target="_blank" rel="noreferrer">changelog</a>'
+                    " for more information."
                 )
             else:
                 return None
@@ -90,50 +92,84 @@ class NeverCheckForUpdate(CheckForUpdate):
         return None
 
 
-class AnnouncementHandler(APIHandler):
-    """Announcement API handler.
+class CheckForUpdateHandler(APIHandler):
+    """Check for Updates API handler.
 
     Args:
-        announcements_url: The Atom feed to fetch for announcements
         update_check: The class checking for a new version
     """
 
     def initialize(
         self,
-        announcements_url: Optional[str] = None,
         update_checker: Optional[CheckForUpdate] = None,
     ) -> None:
         super().initialize()
-        self.announcements_url = announcements_url
         self.update_checker = (
             NeverCheckForUpdate(__version__) if update_checker is None else update_checker
         )
 
     @web.authenticated
     async def get(self):
-        """Get the announcements and check for updates.
-
-        Query args:
-            check_update: Whether to check for update or not ["0", "1"].
+        """Check for updates.
         Response:
             {
-                "announcements": List[Notification]
+                "notification": Optional[Notification]
             }
         """
-        check_update = self.get_argument("check_update", "0") == "1"
-        announcements = []
+        notification = None
+        message = await self.update_checker()
+        if message:
+            now = time.time() * 1000.0
+            notification = Notification(
+                message=message,
+                createdAt=now,
+                modifiedAt=now,
+                type="info",
+                options={"data": {"tags": ["update"]}},
+            )
+
+        self.set_status(200)
+        self.finish(
+            json.dumps({"notification": None if notification is None else asdict(notification)})
+        )
+
+
+class NewsHandler(APIHandler):
+    """News API handler.
+
+    Args:
+        news_url: The Atom feed to fetch for news
+    """
+
+    def initialize(
+        self,
+        news_url: Optional[str] = None,
+    ) -> None:
+        super().initialize()
+        self.news_url = news_url
+
+    @web.authenticated
+    async def get(self):
+        """Get the news.
+
+        Response:
+            {
+                "news": List[Notification]
+            }
+        """
+        news = []
 
         http_client = httpclient.AsyncHTTPClient()
 
-        if self.announcements_url is not None:
-            # Those registration are global, naming them to reduce chance of clashes
+        if self.news_url is not None:
+            # Those registrations are global, naming them to reduce chance of clashes
             xml_namespaces = {"atom": "http://www.w3.org/2005/Atom"}
             for key, spec in xml_namespaces.items():
                 ET.register_namespace(key, spec)
 
             try:
                 response = await http_client.fetch(
-                    self.announcements_url,
+                    self.news_url,
                     headers={"Content-Type": "application/atom+xml"},
                 )
                 tree = ET.fromstring(response.body)
@@ -146,7 +182,9 @@ class AnnouncementHandler(APIHandler):
                         # Break line
                         + "  \n"
                         + "See {0}full post{1} for more details.".format(
-                            '<a href="{}" target="_blank">'.format(
+                            # Use HTML link syntax instead of Markdown otherwise
+                            # link will open in the same browser tab
+                            '<a href="{}" target="_blank" rel="noreferrer">'.format(
                                 node.find("atom:link", xml_namespaces).get("href")
                             ),
                             "</a>",
@@ -160,32 +198,24 @@ class AnnouncementHandler(APIHandler):
                             ISO8601_FORMAT,
                         ),
                         type="info",
-                        options={"data": {"tags": ["announcement"]}},
+                        options={
+                            "data": {
+                                "id": node.find("atom:id", xml_namespaces).text,
+                                "tags": ["news"],
+                            }
+                        },
                     )
 
-                announcements.extend(map(build_entry, tree.findall("atom:entry", xml_namespaces)))
+                news.extend(map(build_entry, tree.findall("atom:entry", xml_namespaces)))
             except Exception as e:
                 self.log.debug(
-                    f"Failed to get announcements from Atom feed: {self.announcements_url}",
+                    f"Failed to get announcements from Atom feed: {self.news_url}",
                     exc_info=e,
                 )
 
-        if check_update:
-            message = await self.update_checker()
-            if message:
-                now = time.time() * 1000.0
-                announcements.append(
-                    Notification(
-                        message,
-                        now,
-                        now,
-                        "info",
-                        {"data": {"tags": ["announcement", "update"]}},
-                    )
-                )
-
         self.set_status(200)
-        self.finish(json.dumps({"announcements": list(map(asdict, announcements))}))
+        self.finish(json.dumps({"news": list(map(asdict, news))}))
 
 
-announcement_handler_path = r"/lab/api/announcements"
+news_handler_path = r"/lab/api/news"
+check_update_handler_path = r"/lab/api/update"

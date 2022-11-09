@@ -27,7 +27,7 @@
   "properties": {
     "checkForUpdates": {
       "title": "Check for JupyterLab updates",
-      "description": "Whether to check for newer version of JupyterLab or not.",
+      "description": "Whether to check for newer version of JupyterLab or not. If `true`, it will make a request to a website.",
       "type": "boolean",
       "default": true
     },
@@ -36,6 +36,12 @@
       "description": "If `true`, no toast notifications will be automatically displayed.",
       "type": "boolean",
       "default": false
+    },
+    "fetchNews": {
+      "title": "Fetch news from JupyterLab Council",
+      "description": "Whether to fetch news from JupyterLab council news feed. If `true`, it will make a request to a website.",
+      "oneOf": [{ "title": "", "type": "boolean" }, { "type": "null" }],
+      "default": null
     }
   },
   "type": "object"

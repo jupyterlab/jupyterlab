@@ -45,9 +45,11 @@ from .debuglog import DebugLogFileMixin
 from .extensions import MANAGERS as EXT_MANAGERS
 from .extensions.readonly import ReadOnlyExtensionManager
 from .handlers.announcements import (
-    AnnouncementHandler,
     CheckForUpdate,
-    announcement_handler_path,
+    CheckForUpdateHandler,
+    NewsHandler,
+    check_update_handler_path,
+    news_handler_path,
 )
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
@@ -566,10 +568,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
-    announcements_url = Unicode(
-        "https://jupyterlab-contrib.github.io/assets/feed.xml",
+    news_url = Unicode(
+        "https://jupyterlab.github.io/assets/feed.xml",
         allow_none=True,
-        help="""URL that serves announcements as Atom feed; by default the JupyterLab organization announcements will be fetched. Set to None to turn off fetching announcements.""",
+        help="""URL that serves news Atom feed; by default the JupyterLab organization announcements will be fetched. Set to None to turn off fetching announcements.""",
         config=True,
     )
 
@@ -786,15 +788,24 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             handlers.append(ext_handler)
 
             # Add announcement handlers
-            handlers.append(
-                (
-                    announcement_handler_path,
-                    AnnouncementHandler,
-                    {
-                        "announcements_url": self.announcements_url,
-                        "update_checker": self.check_for_update,
-                    },
-                )
+            page_config["news"] = {"disabled": self.news_url is None}
+            handlers.extend(
+                [
+                    (
+                        check_update_handler_path,
+                        CheckForUpdateHandler,
+                        {
+                            "update_checker": self.check_for_update,
+                        },
+                    ),
+                    (
+                        news_handler_path,
+                        NewsHandler,
+                        {
+                            "news_url": self.news_url,
+                        },
+                    ),
+                ]
             )
 
         # If running under JupyterHub, add more metadata.

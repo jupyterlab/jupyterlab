@@ -2,18 +2,14 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { Notification } from '@jupyterlab/apputils';
+import { murmur2, Notification } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import { ServerConnection } from '@jupyterlab/services';
+import { ConfigSection, ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  PartialJSONObject,
-  ReadonlyJSONArray,
-  ReadonlyJSONObject
-} from '@lumino/coreutils';
 
-const ANNOUNCEMENTS_API_URL = '/lab/api/announcements';
+const NEWS_API_URL = '/lab/api/news';
+const UPDATE_API_URL = '/lab/api/update';
 
 /**
  * Call the announcement API
@@ -23,14 +19,12 @@ const ANNOUNCEMENTS_API_URL = '/lab/api/announcements';
  * @returns The response body interpreted as JSON
  */
 async function requestAPI<T>(
-  queryArgs: PartialJSONObject = {},
+  endpoint: string,
   init: RequestInit = {}
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
-  const requestUrl =
-    URLExt.join(settings.baseUrl, ANNOUNCEMENTS_API_URL) +
-    URLExt.objectToQueryString(queryArgs);
+  const requestUrl = URLExt.join(settings.baseUrl, endpoint);
 
   let response: Response;
   try {
@@ -57,37 +51,139 @@ export const announcements: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
+    const CONFIG_SECTION_NAME = announcements.id.replace(/[^\w]/g, '');
+
     Promise.all([
       app.restored,
-      settingRegistry?.load('@jupyterlab/apputils-extension:notification')
-    ]).then(async ([_, settings]) => {
+      settingRegistry?.load('@jupyterlab/apputils-extension:notification') ??
+        Promise.resolve(null),
+      // Use config instead of state to store independently of the workspace
+      // if a news has been displayed or not.
+      ConfigSection.create({
+        name: CONFIG_SECTION_NAME
+      })
+    ]).then(async ([_, settings, config]) => {
       const trans = (translator ?? nullTranslator).load('jupyterlab');
-      try {
-        const response = await requestAPI<{
-          announcements: Notification.INotification[];
-        }>({
-          check_update:
-            (settings?.get('checkForUpdates').composite as boolean) ?? true
-              ? '1'
-              : '0'
-        });
 
-        for (const { message, type, options } of response.announcements) {
-          const isUpdateAnnouncement = (
-            ((options.data as ReadonlyJSONObject)?.tags as ReadonlyJSONArray) ??
-            []
-          ).includes('update');
+      // Store dismiss state
+      Notification.manager.changed.connect((manager, change) => {
+        if (change.type !== 'removed') {
+          return;
+        }
+        const { id, tags }: { id?: string; tags?: Array<string> } = (change
+          .notification.options.data ?? {}) as any;
+        if ((tags ?? []).some(tag => ['news', 'update'].includes(tag)) && id) {
+          const update: { [k: string]: INewsState } = {};
+          update[id] = { seen: true, dismissed: true };
+          config.update(update as any);
+        }
+      });
 
-          if (isUpdateAnnouncement) {
-            if (settings) {
-              if (
-                !(
-                  (settings.get('checkForUpdates').composite as boolean) ?? true
-                )
-              ) {
-                continue;
+      const mustFetchNews = settings?.get('fetchNews').composite as
+        | boolean
+        | null;
+      if (mustFetchNews === null) {
+        const notificationId = Notification.emit(
+          trans.__(
+            'Do you want to receive official news from the JupyterLab team?'
+          ) +
+            '\n\n<a href="https://jupyterlab.readthedocs.io/en/latest/privacy_policies" target="_blank" rel="noreferrer">' +
+            trans.__('Please read the privacy policy.') +
+            '</a>',
+          'default',
+          {
+            autoClose: false,
+            actions: [
+              {
+                label: trans.__('Accept'),
+                callback: () => {
+                  Notification.dismiss(notificationId);
+                  config
+                    .update({})
+                    .then(() => fetchNews())
+                    .catch(reason => {
+                      console.error(`Failed to get the news:\n${reason}`);
+                    });
+                  settings?.set('fetchNews', true).catch(reason => {
+                    console.error(
+                      `Failed to save setting 'fetchNews':\n${reason}`
+                    );
+                  });
+                }
+              },
+              {
+                label: trans.__('Refuse'),
+                callback: () => {
+                  Notification.dismiss(notificationId);
+                  settings?.set('fetchNews', false).catch(reason => {
+                    console.error(
+                      `Failed to save setting 'fetchNews':\n${reason}`
+                    );
+                  });
+                }
               }
+            ]
+          }
+        );
+      } else {
+        await fetchNews();
+      }
 
+      async function fetchNews() {
+        if (settings?.get('fetchNews').composite ?? false) {
+          try {
+            const response = await requestAPI<{
+              news: Notification.INotification[];
+            }>(NEWS_API_URL);
+
+            for (const { message, type, options } of response.news) {
+              // @ts-expect-error data has no index
+              const id = options.data!['id'] as string;
+              // Filter those notifications
+              const state = (config.data[id] as INewsState) ?? {
+                seen: false,
+                dismissed: false
+              };
+              if (!state.dismissed) {
+                options.actions = [
+                  {
+                    label: trans.__("Don't show me again"),
+                    callback: () => {
+                      const update: { [k: string]: INewsState } = {};
+                      update[id] = { seen: true, dismissed: true };
+                      config.update(update as any);
+                    }
+                  }
+                ];
+                if (!state.seen) {
+                  options.autoClose = 5000;
+                  const update: { [k: string]: INewsState } = {};
+                  update[id] = { seen: true };
+                  config.update(update as any);
+                }
+
+                Notification.emit(message, type, options);
+              }
+            }
+          } catch (reason) {
+            console.log('Failed to get the announcements.', reason);
+          }
+        }
+
+        if ((settings?.get('checkForUpdates').composite as boolean) ?? true) {
+          const response = await requestAPI<{
+            notification: Notification.INotification | null;
+          }>(UPDATE_API_URL);
+
+          if (response.notification) {
+            const { message, type, options } = response.notification;
+            const id = murmur2(message, 51).toString();
+            const state = (config.data[id] as INewsState) ?? {
+              seen: false,
+              dismissed: false
+            };
+            if (!state.dismissed) {
+              let notificationId: string;
               options.actions = [
                 {
                   label: trans.__("Don't check for updates"),
@@ -95,22 +191,45 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     'If pressed, you will not be prompted if a new JupyterLab version is found.'
                   ),
                   callback: () => {
-                    settings.set('checkForUpdates', false).catch(reason => {
-                      console.error(
-                        'Failed to set the `checkForUpdates` setting.',
-                        reason
-                      );
-                    });
+                    settings
+                      ?.set('checkForUpdates', false)
+                      .then(() => {
+                        Notification.dismiss(notificationId);
+                      })
+                      .catch(reason => {
+                        console.error(
+                          'Failed to set the `checkForUpdates` setting.',
+                          reason
+                        );
+                      });
                   }
                 }
               ];
+              if (!state.seen) {
+                options.autoClose = 5000;
+                const update: { [k: string]: INewsState } = {};
+                update[id] = { seen: true };
+                config.update(update as any);
+              }
+              notificationId = Notification.emit(message, type, options);
             }
           }
-          Notification.emit(message, type, options);
         }
-      } catch (reason) {
-        console.log('Failed to get the announcements.', reason);
       }
     });
   }
 };
+
+/**
+ * News state
+ */
+interface INewsState {
+  /**
+   * Whether the news has been seen or not.
+   */
+  seen?: boolean;
+  /**
+   * Whether the user has dismissed the news or not.
+   */
+  dismissed?: boolean;
+}
