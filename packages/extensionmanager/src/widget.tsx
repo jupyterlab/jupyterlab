@@ -248,7 +248,7 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
             initialPage={(props.initialPage ?? 1) - 1}
             pageCount={props.numPages}
             marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
+            pageRangeDisplayed={3}
             onPageChange={(data: { selected: number }) =>
               props.onPage(data.selected + 1)
             }
