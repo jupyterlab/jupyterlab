@@ -33,7 +33,7 @@ mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
 
 // Override dynamically generated fonts in favor
 // of our font css that is picked up by webpack.
-class emptyFont extends TeXFont {}
+class emptyFont extends TeXFont { }
 (emptyFont as any).defaultFonts = {};
 
 /**
@@ -81,8 +81,8 @@ export class MathJax3Typesetter implements ILatexTypesetter {
         md.outputJax.options.scale = scale;
         md.rerender();
       },
-      label: (args) => (
-        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset')),
+      label: (args) => 
+        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset'),
     });
   }
 
