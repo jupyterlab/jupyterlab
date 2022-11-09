@@ -4,7 +4,11 @@
 # Distributed under the terms of the Modified BSD License.
 
 from ._version import __version__  # noqa
-from .handlers.announcements import CheckForUpdate, NeverCheckForUpdate  # noqa
+from .handlers.announcements import (  # noqa
+    CheckForUpdate,
+    CheckForUpdateABC,
+    NeverCheckForUpdate,
+)
 from .serverextension import load_jupyter_server_extension  # noqa
 
 

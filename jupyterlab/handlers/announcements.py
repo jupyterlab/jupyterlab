@@ -3,6 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import abc
 import json
 import time
 import xml.etree.ElementTree as ET
@@ -38,15 +39,40 @@ class Notification:
     options: dict = field(default_factory=dict)
 
 
-class CheckForUpdate:
+class CheckForUpdateABC(abc.ABC):
+    """Abstract class to check for update.
+
+    Args:
+        version: Current JupyterLab version
+
+    Attributes:
+        version - str: Current JupyterLab version
+        logger - logging.Logger: Server logger
+    """
+
+    def __init__(self, version: str) -> None:
+        self.version = version
+
+    @abc.abstractmethod
+    async def __call__(self) -> Awaitable[Optional[str]]:
+        """Get the notification message if a new version is available.
+
+        Returns:
+            The notification message or None if there is not update.
+        """
+        raise NotImplementedError("CheckForUpdateABC.__call__ is not implemented")
+
+
+class CheckForUpdate(CheckForUpdateABC):
     """Default class to check for update.
 
     Args:
         version: Current JupyterLab version
-    """
 
-    def __init__(self, version: str) -> None:
-        self._version = version
+    Attributes:
+        version - str: Current JupyterLab version
+        logger - logging.Logger: Server logger
+    """
 
     async def __call__(self) -> Awaitable[Optional[str]]:
         """Get the notification message if a new version is available.
@@ -63,9 +89,10 @@ class CheckForUpdate:
             data = json.loads(response.body).get("info")
             last_version = data["version"]
         except Exception as e:
-            self.log.debug("Failed to get latest version", exc_info=e)
+            self.logger.debug("Failed to get latest version", exc_info=e)
+            return None
         else:
-            if parse(__version__) < parse(last_version):
+            if parse(self.version) < parse(last_version):
                 trans = translator.load("jupyterlab")
                 return trans.__(
                     f"A newer version ({last_version}) of JupyterLab is available.\n"
@@ -76,11 +103,18 @@ class CheckForUpdate:
                 return None
 
 
-class NeverCheckForUpdate(CheckForUpdate):
+class NeverCheckForUpdate(CheckForUpdateABC):
     """Check update version that does nothing.
 
     This is provided for administrators that want to
     turn off requesting external resources.
+
+    Args:
+        version: Current JupyterLab version
+
+    Attributes:
+        version - str: Current JupyterLab version
+        logger - logging.Logger: Server logger
     """
 
     async def __call__(self) -> Awaitable[Optional[str]]:
@@ -107,6 +141,7 @@ class CheckForUpdateHandler(APIHandler):
         self.update_checker = (
             NeverCheckForUpdate(__version__) if update_checker is None else update_checker
         )
+        self.update_checker.logger = self.log
 
     @web.authenticated
     async def get(self):
@@ -189,14 +224,20 @@ class NewsHandler(APIHandler):
                             ),
                             "</a>",
                         ),
-                        createdAt=time.strptime(
-                            node.find("atom:published", xml_namespaces).text,
-                            ISO8601_FORMAT,
-                        ),
-                        modifiedAt=time.strptime(
-                            node.find("atom:updated", xml_namespaces).text,
-                            ISO8601_FORMAT,
-                        ),
+                        createdAt=time.mktime(
+                            time.strptime(
+                                node.find("atom:published", xml_namespaces).text,
+                                ISO8601_FORMAT,
+                            )
+                        )
+                        * 1000,
+                        modifiedAt=time.mktime(
+                            time.strptime(
+                                node.find("atom:updated", xml_namespaces).text,
+                                ISO8601_FORMAT,
+                            )
+                        )
+                        * 1000,
                         type="info",
                         options={
                             "data": {

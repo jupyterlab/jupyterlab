@@ -45,7 +45,7 @@ from .debuglog import DebugLogFileMixin
 from .extensions import MANAGERS as EXT_MANAGERS
 from .extensions.readonly import ReadOnlyExtensionManager
 from .handlers.announcements import (
-    CheckForUpdate,
+    CheckForUpdateABC,
     CheckForUpdateHandler,
     NewsHandler,
     check_update_handler_path,
@@ -576,7 +576,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
 
     check_for_update = Instance(
-        klass=CheckForUpdate,
+        klass=CheckForUpdateABC,
         args=(__version__,),
         config=True,
         help="""A callable class that receives the current version at instantiation and calling it must return asynchronously a string indicating which version is available and how to install or None if no update is available. The string supports Markdown format.""",
