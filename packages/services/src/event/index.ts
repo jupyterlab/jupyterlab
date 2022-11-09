@@ -62,6 +62,7 @@ export class EventManager implements IDisposable {
     socket!.close();
 
     Signal.clearData(this);
+    this._stream.stop();
   }
 
   /**
@@ -98,7 +99,7 @@ export class EventManager implements IDisposable {
   }
 
   private _socket: WebSocket | null = null;
-  private _stream: Private.Stream;
+  private _stream: Private.Stream<this, Event.Emission>;
 }
 
 /**
@@ -128,8 +129,7 @@ export namespace Event {
   /**
    * An event stream with the characteristics of a signal and an async iterator.
    */
-  export type Stream = AsyncIterableIterator<Emission> &
-    ISignal<IManager, Emission>;
+  export type Stream = AsyncIterable<Emission> & ISignal<IManager, Emission>;
 
   /**
    * The interface for the event bus front-end.
@@ -142,29 +142,54 @@ export namespace Event {
  */
 namespace Private {
   /**
-   * A stream with the characteristics of a signal and an async iterator.
+   * A pending promise in a promise chain underlying a stream.
    */
-  export class Stream
-    extends Signal<EventManager, Event.Emission>
-    implements AsyncIterableIterator<Event.Emission>
-  {
-    async *[Symbol.asyncIterator](): AsyncIterableIterator<Event.Emission> {
-      while (this.pending) {
-        yield this.pending.promise;
+  export type Pending<U> = PromiseDelegate<{ args: U; next: Pending<U> }>;
+
+  /**
+   * An object that is both a signal and an async iterable.
+   */
+  export interface IStream<T, U> extends ISignal<T, U>, AsyncIterable<U> {}
+
+  /**
+   * A stream with the characteristics of a signal and an async iterable.
+   */
+  export class Stream<T, U> extends Signal<T, U> implements IStream<T, U> {
+    /**
+     * Return an async iterator that yields every emission.
+     */
+    async *[Symbol.asyncIterator](): AsyncIterableIterator<U> {
+      let pending = this._pending;
+      while (true) {
+        try {
+          const { args, next } = await pending.promise;
+          pending = next;
+          yield args;
+        } catch (_) {
+          return; // Any promise rejection stops the iterator.
+        }
       }
     }
 
-    emit(event: Event.Emission): void {
-      super.emit(event);
-      const { pending } = this;
-      this.pending = new PromiseDelegate();
-      pending.resolve(event);
+    /**
+     * Emit the signal, invoke the connected slots, and yield the emission.
+     *
+     * @param args - The args to pass to the connected slots.
+     */
+    emit(args: U): void {
+      const pending = this._pending;
+      this._pending = new PromiseDelegate();
+      pending.resolve({ args, next: this._pending });
+      super.emit(args);
     }
 
-    async next(): Promise<IteratorResult<Event.Emission>> {
-      return { value: await this.pending.promise };
+    /**
+     * Stop the stream's async iteration.
+     */
+    stop(): void {
+      this._pending.reject('stop');
     }
 
-    protected pending = new PromiseDelegate<Event.Emission>();
+    private _pending: Private.Pending<U> = new PromiseDelegate();
   }
 }
