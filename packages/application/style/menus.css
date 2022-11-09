@@ -79,7 +79,7 @@
   z-index: 10000;
   padding: 4px 0;
   background: var(--jp-layout-color0);
-  color: var(--jp-menu-active-font-color);
+  color: var(--jp-menu-enabled-font-color);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   font-size: var(--jp-ui-font-size1);
   box-shadow: var(--jp-elevation-z6);
@@ -97,7 +97,7 @@
 }
 
 .lm-Menu-item.lm-mod-disabled {
-  color: var(--jp-menu-inactive-font-color);
+  color: var(--jp-menu-disabled-font-color);
 }
 
 .lm-Menu-itemIcon {
