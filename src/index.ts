@@ -63,8 +63,7 @@ export class MathJax3Typesetter implements ILatexTypesetter {
     });
 
     const mjclipboard = 'mathjax:clipboard';
-    const mjscale10 = 'mathjax:scale10';
-    const mjscale15 = 'mathjax:scale15';
+    const mjscale = 'mathjax:scale';
 
     app.commands.addCommand(mjclipboard, {
       execute: (args: any) => {
@@ -75,53 +74,16 @@ export class MathJax3Typesetter implements ILatexTypesetter {
       label: 'MathJax Copy Latex',
     });
 
-    app.commands.addCommand(mjscale10, {
+    app.commands.addCommand(mjscale, {
       execute: (args: any) => {
+        const scale = args['scale'] || 1.0;
         const md = this._mathDocument;
-        md.outputJax.options.scale = 1.0;
+        md.outputJax.options.scale = scale;
         md.rerender();
       },
-      label: 'MathJax Scale Reset',
+      label: (args) => ("Mathjax Scale " + (args['scale'] ? `x${args['scale']}` : 'Reset')),
     });
 
-    app.commands.addCommand(mjscale15, {
-      execute: (args: any) => {
-        const md = this._mathDocument;
-        md.outputJax.options.scale = 1.5;
-        md.rerender();
-      },
-      label: 'MathJax Scale x1.5',
-    });
-
-    app.contextMenu.addItem({
-      type: 'separator',
-      selector: '.jp-Notebook .jp-Cell',
-      rank: 12,
-    });
-
-    app.contextMenu.addItem({
-      command: mjclipboard,
-      selector: '.MathJax',
-      rank: 13,
-    });
-
-    app.contextMenu.addItem({
-      command: mjscale10,
-      selector: '.MathJax',
-      rank: 13,
-    });
-
-    app.contextMenu.addItem({
-      command: mjscale15,
-      selector: '.MathJax',
-      rank: 13,
-    });
-
-    app.contextMenu.addItem({
-      type: 'separator',
-      selector: '.jp-Notebook .jp-Cell',
-      rank: 13,
-    });
   }
 
   /**

@@ -30,7 +30,8 @@
     "lib/*.d.ts",
     "lib/*.js",
     "style/*.css",
-    "style/index.js"
+    "style/index.js",
+    "schema/**/*.json"
   ],
   "scripts": {
     "build": "jlpm run build:lib && jlpm run build:labextension:dev",
@@ -68,7 +69,8 @@
     "outputDir": "jupyterlab-mathjax3/labextension",
     "disabledExtensions": [
       "@jupyterlab/mathjax2-extension:plugin"
-    ]
+    ],
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }
