@@ -42,6 +42,19 @@
   min-height: 160px;
 }
 
+.jp-extensionmanager-disclaimer a {
+  color: var(--jp-content-link-color);
+}
+
+.jp-extensionmanager-disclaimer a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
+.jp-extensionmanager-disclaimer .jp-Button {
+  margin: 0 5px;
+}
+
 /*
   List view layout and styling
 */

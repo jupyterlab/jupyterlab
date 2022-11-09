@@ -412,14 +412,23 @@ activate this feature?`)}
             {this.trans.__('Refuse')}
           </Button>
         ) : (
-          <Button
-            className="jp-extensionmanager-disclaimer-enable"
-            onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
-              this.model.isDisclaimed = true;
-            }}
-          >
-            {this.trans.__('Agree')}
-          </Button>
+          <div>
+            <Button
+              className="jp-extensionmanager-disclaimer-enable"
+              onClick={() => {
+                this.model.isDisclaimed = true;
+              }}
+            >
+              {this.trans.__('Agree')}
+            </Button>
+            <Button
+              onClick={() => {
+                this.model.isEnabled = false;
+              }}
+            >
+              {this.trans.__('Disable')}
+            </Button>
+          </div>
         )}
       </>
     );
