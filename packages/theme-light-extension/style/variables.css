@@ -423,6 +423,6 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-switch-cursor-color: rgba(255, 255, 255, 1);
 
   /* Variables for the menu font color : to highlight the active items */
-  --jp-menu-enabled-font-color: var(--jp-ui-font-color0);
-  --jp-menu-disabled-font-color: var(--jp-ui-font-color3);
+  --jp-menu-enabled-font-color: rgba(255, 255, 255, 1);
+  --jp-menu-disabled-font-color: rgba(255, 255, 255, 0.38);
 }
