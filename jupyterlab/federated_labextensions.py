@@ -29,7 +29,11 @@ from jupyter_core.paths import ENV_JUPYTER_PATH, SYSTEM_JUPYTER_PATH, jupyter_da
 from jupyter_core.utils import ensure_dir_exists
 from jupyter_server.extension.serverextension import ArgumentConflict
 from jupyterlab_server.config import get_federated_extensions
-from tomli import load
+
+try:
+    from tomllib import load  # Python 3.11+
+except ImportError:
+    from tomli import load
 
 from .commands import _test_overlap
 
