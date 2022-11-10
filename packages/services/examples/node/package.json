@@ -1,13 +1,13 @@
 {
   "name": "node-example",
-  "version": "3.6.0-alpha.2",
+  "version": "3.6.0-alpha.3",
   "private": true,
   "scripts": {
     "clean": "rimraf node_modules",
     "update": "rimraf node_modules/@jupyterlab/services && npm install"
   },
   "dependencies": {
-    "@jupyterlab/services": "^6.6.0-alpha.2",
+    "@jupyterlab/services": "^6.6.0-alpha.3",
     "node-fetch": "^2.6.0",
     "ws": "^7.4.6"
   },
