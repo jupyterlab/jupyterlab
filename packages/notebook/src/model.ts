@@ -12,12 +12,13 @@ import {
   ISharedNotebook,
   NotebookChange,
   YNotebook
-} from '@jupyterlab/shared-models';
+} from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
@@ -100,9 +101,9 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    this.sharedModel = new YNotebook({
+    const sharedModel = (this.sharedModel = new YNotebook({
       disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
-    });
+    }));
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._deletedCells = [];
@@ -110,8 +111,8 @@ export class NotebookModel implements INotebookModel {
     // Initialize the notebook
     // In collaboration mode, this will be overridden by the initialization coming
     // from the document provider.
-    (this.sharedModel as YNotebook).nbformat_minor = nbformat.MINOR_VERSION;
-    (this.sharedModel as YNotebook).nbformat = nbformat.MAJOR_VERSION;
+    sharedModel.nbformat_minor = nbformat.MINOR_VERSION;
+    sharedModel.nbformat = nbformat.MAJOR_VERSION;
     this._ensureMetadata(options.languagePreference ?? '');
 
     this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
@@ -314,40 +315,19 @@ export class NotebookModel implements INotebookModel {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: nbformat.INotebookContent): void {
-    this.sharedModel.transact(() => {
-      const useId = value.nbformat === 4 && value.nbformat_minor >= 5;
-      const ycells = value.cells.map(cell => {
-        if (!useId) {
-          delete cell.id;
-        }
-        return cell;
-      });
-      if (!ycells.length) {
-        // Create cell when notebook is empty
-        // (non collaborative)
-        ycells.push({ cell_type: 'code' } as nbformat.ICodeCell);
-      }
-      this.sharedModel.insertCells(this.sharedModel.cells.length, ycells);
-      this.sharedModel.deleteCellRange(0, this.sharedModel.cells.length);
-    });
-
-    (this.sharedModel as YNotebook).nbformat_minor = nbformat.MINOR_VERSION;
-    (this.sharedModel as YNotebook).nbformat = nbformat.MAJOR_VERSION;
+    const copy = JSONExt.deepCopy(value);
     const origNbformat = value.metadata.orig_nbformat;
 
-    if (value.nbformat !== this.sharedModel.nbformat) {
-      (this.sharedModel as YNotebook).nbformat = value.nbformat;
-    }
-    if (
-      value.nbformat_minor >
-      ((this.sharedModel as YNotebook).nbformat_minor ?? -1)
-    ) {
-      (this.sharedModel as YNotebook).nbformat_minor = value.nbformat_minor;
-    }
-
     // Alert the user if the format changes.
-    if (origNbformat !== undefined && this.nbformat !== origNbformat) {
-      const newer = this.nbformat > origNbformat;
+    copy.nbformat = Math.max(value.nbformat, nbformat.MAJOR_VERSION);
+    if (
+      copy.nbformat !== value.nbformat ||
+      copy.nbformat_minor < nbformat.MINOR_VERSION
+    ) {
+      copy.nbformat_minor = nbformat.MINOR_VERSION;
+    }
+    if (origNbformat !== undefined && copy.nbformat !== origNbformat) {
+      const newer = copy.nbformat > origNbformat;
       let msg: string;
 
       if (newer) {
@@ -358,7 +338,7 @@ The next time you save this notebook, the current notebook format (v%2) will be 
 'Older versions of Jupyter may not be able to read the new format.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
-          this.nbformat
+          copy.nbformat
         );
       } else {
         msg = this._trans.__(
@@ -368,7 +348,7 @@ The next time you save this notebook, the current notebook format (v%2) will be 
 Some features of the original notebook may not be available.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
-          this.nbformat
+          copy.nbformat
         );
       }
       void showDialog({
@@ -378,15 +358,13 @@ close the notebook without saving it.`,
       });
     }
 
-    // Update the metadata.
-    const metadata = value.metadata;
-    for (const key in metadata) {
-      // orig_nbformat is not intended to be stored per spec.
-      if (key === 'orig_nbformat') {
-        continue;
-      }
+    // Ensure there is at least one cell
+    if ((copy.cells?.length ?? 0) === 0) {
+      copy['cells'] = [{ cell_type: 'code', source: '', metadata: {} }];
     }
-    this.sharedModel.metadata = metadata;
+
+    this.sharedModel.fromJSON(copy);
+
     this._ensureMetadata();
     this.dirty = true;
   }

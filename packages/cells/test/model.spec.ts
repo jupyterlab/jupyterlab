@@ -22,7 +22,7 @@ import {
   YCodeCell,
   YMarkdownCell,
   YRawCell
-} from '@jupyterlab/shared-models';
+} from '@jupyter-notebook/ydoc';
 
 class TestModel extends CellModel {
   get type(): 'raw' {

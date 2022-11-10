@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ISharedDocument } from '@jupyterlab/shared-models';
+import { ISharedDocument } from '@jupyter-notebook/ydoc';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 

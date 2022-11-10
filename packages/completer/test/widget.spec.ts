@@ -8,7 +8,7 @@ import {
   CompleterModel,
   CompletionHandler
 } from '@jupyterlab/completer';
-import { YFile } from '@jupyterlab/shared-models';
+import { YFile } from '@jupyter-notebook/ydoc';
 import { framePromise, sleep } from '@jupyterlab/testutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
