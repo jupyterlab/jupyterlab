@@ -92,6 +92,78 @@ export namespace galata {
   export type NotebookToolbarItemId = DefaultNotebookToolbarItemId | string;
 
   /**
+   * Options to create a new page
+   */
+  export interface INewPageOption {
+    /**
+     * Application base URL
+     */
+    baseURL: string;
+    /**
+     * Playwright browser model
+     */
+    browser: Browser;
+    /**
+     * Callback that resolved when the application page is ready
+     */
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>;
+    /**
+     * Application URL path fragment
+     *
+     * Default: /lab
+     */
+    appPath?: string;
+    /**
+     * Whether to go to JupyterLab page within the fixture or not.
+     *
+     * Default: true
+     */
+    autoGoto?: boolean;
+    /**
+     * Mock Jupyter Server configuration in-memory or not.
+     *
+     * Default true
+     */
+    mockConfig?: boolean | Record<string, unknown>,
+    /**
+     * Mock JupyterLab state in-memory or not.
+     *
+     * Default galata.DEFAULT_SETTINGS
+     */
+    mockSettings?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab settings in-memory or not.
+     *
+     * Default true
+     */
+    mockState?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab user in-memory or not.
+     *
+     * Default true
+     */
+    mockUser?: boolean | Partial<User.IUser>;
+    /**
+     * Whether to store sessions in memory or not.
+     *
+     * Default true
+     */
+    mockSessions?: boolean;
+    /**
+     * Whether to store terminals in memory or not.
+     *
+     * Default true
+     */
+    mockTerminals?: boolean;
+    /**
+     * Create and delete a temporary path during the page existence
+     *
+     * Default ''
+     */
+    tmpPath?: string;
+  }
+
+  /**
    * Add the Galata helpers to the page model
    *
    * @param page Playwright page model
@@ -225,45 +297,66 @@ export namespace galata {
   }
 
   /**
-   * Create a page with Galata helpers for the given browser
+   * Create a page with Galata helpers for the given browser in a new context.
    *
-   * @param browser Playwright browser model
-   * @param baseURL Application base URL
-   * @param waitForApplication Callback that resolved when the application page is ready
-   * @param appPath Application URL path fragment
    * @returns Playwright page model with Galata helpers
    */
-  export async function newPage(
-    appPath: string,
-    autoGoto: boolean,
-    baseURL: string,
-    browser: Browser,
-    mockConfig: boolean | Record<string, unknown>,
-    mockSettings: boolean | Record<string, unknown>,
-    mockState: boolean | Record<string, unknown>,
-    mockUser: boolean | Partial<User.IUser>,
-    sessions: Map<string, Session.IModel> | null,
-    terminals: Map<string, TerminalAPI.IModel> | null,
-    tmpPath: string,
-    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>
-  ): Promise<IJupyterLabPageFixture> {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    return initTestPage(
+  export async function newPage(options: INewPageOption): Promise<{
+    page: IJupyterLabPageFixture;
+    sessions: Map<string, Session.IModel> | null;
+    terminals: Map<string, TerminalAPI.IModel> | null;
+  }> {
+    const {
       appPath,
       autoGoto,
       baseURL,
+      browser,
+      waitForApplication,
       mockConfig,
+      mockSessions,
       mockSettings,
       mockState,
+      mockTerminals,
       mockUser,
-      page,
+      tmpPath
+    } = {
+      appPath: '/lab',
+      autoGoto: true,
+      mockConfig: true,
+      mockSessions: true,
+      mockSettings: galata.DEFAULT_SETTINGS,
+      mockState: true,
+      mockTerminals: true,
+      mockUser: true,
+      tmpPath: '',
+      ...options
+    };
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    const sessions = mockSessions ? new Map<string, Session.IModel>() : null;
+    const terminals = mockTerminals
+      ? new Map<string, TerminalAPI.IModel>()
+      : null;
+
+    return {
+      page: await initTestPage(
+        appPath,
+        autoGoto,
+        baseURL,
+        mockConfig,
+        mockSettings,
+        mockState,
+        mockUser,
+        page,
+        sessions,
+        terminals,
+        tmpPath,
+        waitForApplication
+      ),
       sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
-    );
+      terminals
+    };
   }
 
   /**
@@ -477,10 +570,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
 
@@ -609,10 +702,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
       return page.route(routeRegex, async (route, request) => {
@@ -812,10 +905,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
 
@@ -934,5 +1027,21 @@ export namespace galata {
         }
       });
     }
+  }
+
+  /**
+   * Wait for a certain amount of time.
+   *
+   * @param time Delay in milliseconds
+   */
+  export function sleep(time: number): Promise<void> {
+    let resolve: (value: void) => void;
+    const wait = new Promise<void>(r => {
+      resolve = r;
+    });
+    setTimeout(() => {
+      resolve(void 0);
+    }, time);
+    return wait;
   }
 }

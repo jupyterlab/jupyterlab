@@ -260,7 +260,7 @@ export const test: TestType<
    *
    * Possible values are:
    * - null: The Terminals API won't be mocked
-   * - Map<string, TerminalsAPI.IModel>: The Terminals created during a test.
+   * - Map<string, TerminalAPI.IModel>: The Terminals created during a test.
    *
    * By default the Terminals created during a test will be tracked and disposed at the end.
    */

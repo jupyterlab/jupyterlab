@@ -16,19 +16,7 @@ test.describe('Initialization', () => {
   let guestPage: IJupyterLabPageFixture;
 
   test.beforeEach(
-    async ({
-      request,
-      appPath,
-      autoGoto,
-      baseURL,
-      browser,
-      mockSettings,
-      mockState,
-      sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
-    }) => {
+    async ({ request, baseURL, browser, tmpPath, waitForApplication }) => {
       const contents = galata.newContentsHelper(request);
       await contents.uploadFile(
         path.resolve(
@@ -48,19 +36,14 @@ test.describe('Initialization', () => {
           color: 'var(--jp-collaborator-color2)'
         }
       };
-      guestPage = await galata.newPage(
-        appPath,
-        autoGoto,
-        baseURL!,
+      const { page } = await galata.newPage({
+        baseURL: baseURL!,
         browser,
-        mockSettings,
-        mockState,
-        user,
-        sessions,
-        terminals,
+        mockUser: user,
         tmpPath,
         waitForApplication
-      );
+      });
+      guestPage = page;
     }
   );
 
@@ -128,24 +111,14 @@ test.describe('Initialization', () => {
 });
 
 test.describe('Ten clients', () => {
+  test.setTimeout(120000);
+
   const numClients = 10;
   const pathUntitled = 'Untitled.ipynb';
   let guestPages: Array<IJupyterLabPageFixture> = [];
 
   test.beforeEach(
-    async ({
-      page,
-      appPath,
-      autoGoto,
-      baseURL,
-      browser,
-      mockSettings,
-      mockState,
-      sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
-    }) => {
+    async ({ page, baseURL, browser, tmpPath, waitForApplication }) => {
       // Renaming does not work
       await page.notebook.createNew();
 
@@ -160,48 +133,49 @@ test.describe('Ten clients', () => {
             color: 'var(--jp-collaborator-color2)'
           }
         };
-        const guestPage = await galata.newPage(
-          appPath,
-          autoGoto,
-          baseURL!,
+        const { page: guestPage } = await galata.newPage({
+          baseURL: baseURL!,
           browser,
-          mockSettings,
-          mockState,
-          user,
-          sessions,
-          terminals,
+          mockUser: user,
           tmpPath,
           waitForApplication
-        );
+        });
         guestPages.push(guestPage);
       }
     }
   );
 
-  test.afterEach(async ({ page, request, tmpPath }) => {
+  test.afterEach(async ({ request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
     await contents.deleteFile(`${tmpPath}/${pathUntitled}`);
     // Make sure to close the page to remove the client
     // from the awareness
-    for (let i = 0; i < numClients; i++) {
-      await guestPages[i].close();
-    }
+    await Promise.all(guestPages.map(guestPage => guestPage.close()));
     guestPages = [];
-    await page.close();
   });
 
   test('Adds a new cell', async ({ page }) => {
     await page.filebrowser.refresh();
     await page.notebook.open(pathUntitled);
-    await page.notebook.activate(pathUntitled);
     const numCells = await page.notebook.getCellCount();
 
-    for (let i = 0; i < numClients; i++) {
-      await guestPages[i].filebrowser.refresh();
-      await guestPages[i].notebook.open(pathUntitled);
-      await guestPages[i].notebook.activate(pathUntitled);
-      await guestPages[i].notebook.newCell();
-    }
+    await Promise.all(
+      guestPages.map(async p => {
+        await p.filebrowser.refresh();
+        await p.notebook.open(pathUntitled);
+        await Promise.race([
+          galata.sleep(500),
+          p.notebook.clickToolbarItem('insert')
+        ]);
+        if (
+          await p.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
+        ) {
+          await p
+            .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
+            .click();
+        }
+      })
+    );
 
     await page.waitForCondition(
       async () => (await page.notebook.getCellCount()) === numCells + numClients
@@ -216,20 +190,27 @@ test.describe('Ten clients', () => {
   test('Creates a cell and write on it', async ({ page }) => {
     await page.filebrowser.refresh();
     await page.notebook.open(pathUntitled);
-    await page.notebook.activate(pathUntitled);
 
-    guestPages.forEach(async (p, i) => {
-      await p.filebrowser.refresh();
-      await p.notebook.open(pathUntitled);
-      await p.notebook.activate(pathUntitled);
+    await Promise.all(
+      guestPages.map(async (p, i) => {
+        await p.filebrowser.refresh();
+        await p.notebook.open(pathUntitled);
+        await Promise.race([
+          galata.sleep(500),
+          p.notebook.clickToolbarItem('insert')
+        ]);
+        if (
+          await p.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
+        ) {
+          await p
+            .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
+            .click();
+        }
+        await p.notebook.writeCell(i, `Guest client ${i}`);
 
-      await p.notebook.clickToolbarItem('insert');
-      await p.notebook.writeCell(i, `Guest client ${i}`);
-    });
-
-    for (let i = 0; i < numClients; i++) {
-      await page.waitForSelector(`text=Guest client ${i}`);
-    }
+        await page.waitForSelector(`text=Guest client ${i}`);
+      })
+    );
 
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
@@ -240,20 +221,35 @@ test.describe('Ten clients', () => {
   test('Sets the first cell', async ({ page }) => {
     await page.filebrowser.refresh();
     await page.notebook.open(pathUntitled);
-    await page.notebook.activate(pathUntitled);
 
-    for (let i = 0; i < numClients; i++) {
-      await guestPages[i].filebrowser.refresh();
-      await guestPages[i].notebook.open(pathUntitled);
-      await guestPages[i].notebook.activate(pathUntitled);
-      await guestPages[i].notebook.setCell(0, 'raw', `Guest client ${i}`);
+    await Promise.all(
+      guestPages.map(async (p, i) => {
+        await p.filebrowser.refresh();
+        await p.notebook.open(pathUntitled);
+        await Promise.race([
+          galata.sleep(500),
+          (async () => {
+            await p.locator('.jp-Cell >> .cm-editor').first().click();
+            await p.keyboard.press('Enter');
+            await p.keyboard.type(`Guest client ${i}`);
+          })()
+        ]);
+        if (
+          await p.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
+        ) {
+          await p
+            .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
+            .click();
+        }
+      })
+    );
 
-      await page.waitForSelector(`text=Guest client ${i}`);
-    }
-
-    const nbPanel = await page.notebook.getNotebookInPanel();
-    expect(await nbPanel?.screenshot()).toMatchSnapshot(
-      'ten-clients-set-the-first-cell.png'
+    await Promise.all(
+      guestPages.map((p, i) =>
+        expect(page.locator('.jp-Cell >> nth=0 >> .cm-editor')).toHaveText(
+          new RegExp(`Guest client ${i}`)
+        )
+      )
     );
   });
 });
