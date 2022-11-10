@@ -125,6 +125,13 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-ui-font-color1: rgba(255, 255, 255, 0.87);
   --jp-ui-font-color2: rgba(255, 255, 255, 0.54);
   --jp-ui-font-color3: rgba(255, 255, 255, 0.38);
+  --jp-ui-font-color4: rgba(255, 255, 255, 0.24);
+  --jp-ui-font-color5: rgba(255, 255, 255, 0.12);
+
+  /* Font colors for disabled items like for instance in the menu */
+  --jp-ui-font-disabled-color0: var(--jp-ui-font-color3);
+  --jp-ui-font-disabled-color1: var(--jp-ui-font-color4);
+  --jp-ui-font-disabled-color2: var(--jp-ui-font-color5);
 
   /*
    * Use these against the brand/accent/warn/error colors.
@@ -436,8 +443,4 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-switch-color: var(--md-grey-400);
   --jp-switch-true-position-color: var(--md-orange-700);
   --jp-switch-cursor-color: rgba(0, 0, 0, 0.8);
-
-  /* Variables for the menu font color : to highlight the active items */
-  --jp-menu-enabled-font-color: rgba(255, 255, 255, 1);
-  --jp-menu-disabled-font-color: rgba(255, 255, 255, 0.38);
 }

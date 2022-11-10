@@ -79,7 +79,7 @@
   z-index: 10000;
   padding: 4px 0;
   background: var(--jp-layout-color0);
-  color: var(--jp-menu-enabled-font-color);
+  color: var(--jp-ui-font-color0);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   font-size: var(--jp-ui-font-size1);
   box-shadow: var(--jp-elevation-z6);
@@ -93,11 +93,11 @@
 }
 
 .lm-Menu-item.lm-mod-active {
-  background: var(--jp-layout-color2);
+  background: var(--jp-layout-color3);
 }
 
 .lm-Menu-item.lm-mod-disabled {
-  color: var(--jp-menu-disabled-font-color);
+  color: var(--jp-ui-font-disabled-color0);
 }
 
 .lm-Menu-itemIcon {
