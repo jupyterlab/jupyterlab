@@ -23,7 +23,7 @@ export class EventManager implements IDisposable {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
     this._stream = new Private.Stream(this);
-    this._subscribe();
+    void this._subscribe();
   }
 
   /**
@@ -97,6 +97,7 @@ export class EventManager implements IDisposable {
     } catch (reason) {
       if (reason.response.status === 404) {
         console.warn(`${SERVICE_EVENTS_URL} not found, expect no emissions.`);
+        this._stream.stop();
         return;
       }
     }
