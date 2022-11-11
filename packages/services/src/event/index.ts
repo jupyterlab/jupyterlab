@@ -100,11 +100,8 @@ export class EventManager implements IDisposable {
         data: { action: 'get', path: '.' },
         version: '1'
       });
-    } catch (reason) {
-      if ((reason as ServerConnection.ResponseError).response.status === 404) {
-        this._stream.stop();
-        return;
-      }
+    } catch (_) {
+      return this._stream.stop();
     }
     const { token, WebSocket, wsUrl } = this.serverSettings;
     const url =
