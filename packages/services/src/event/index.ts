@@ -35,7 +35,7 @@ export class EventManager implements IDisposable {
    * Whether the event manager is disposed.
    */
   get isDisposed(): boolean {
-    return this._socket === null;
+    return this._isDisposed;
   }
 
   /**
@@ -62,6 +62,7 @@ export class EventManager implements IDisposable {
       socket.onclose = () => undefined;
       socket.close();
     }
+    this._isDisposed = true;
   }
 
   /**
@@ -113,6 +114,7 @@ export class EventManager implements IDisposable {
     socket.onmessage = msg => msg.data && stream.emit(JSON.parse(msg.data));
   }
 
+  private _isDisposed = false;
   private _socket: WebSocket | null = null;
   private _stream: Private.Stream<this, Event.Emission>;
 }
