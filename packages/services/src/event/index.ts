@@ -66,7 +66,7 @@ export class EventManager implements IDisposable {
   }
 
   /**
-   * Emit an event to be broadcast by the application event bus.
+   * Post an event request to be emitted by the event bus.
    */
   async emit(event: Event.Request): Promise<void> {
     const { serverSettings } = this;
@@ -84,7 +84,7 @@ export class EventManager implements IDisposable {
   }
 
   /**
-   * Open the WebSocket to the server.
+   * Open a WebSocket to the server.
    */
   private _connect(): void {
     const { token, WebSocket, wsUrl } = this.serverSettings;
