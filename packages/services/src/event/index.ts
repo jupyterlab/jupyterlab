@@ -96,7 +96,7 @@ export class EventManager implements IDisposable {
       // eslint-disable-next-line camelcase
       await this.emit({ schema_id: '', data: {}, version: '' });
     } catch (reason) {
-      if (reason.response.status === 404) {
+      if (reason.response?.status === 404) {
         this._stream.stop();
         return;
       }
@@ -156,12 +156,17 @@ export namespace Event {
   /**
    * An event stream with the characteristics of a signal and an async iterator.
    */
-  export type Stream = AsyncIterable<Emission> & ISignal<IManager, Emission>;
+  export type Stream = IStream<IManager, Emission>;
 
   /**
    * The interface for the event bus front-end.
    */
   export interface IManager extends EventManager {}
+
+  /**
+   * An object that is both a signal and an async iterable.
+   */
+  export interface IStream<T, U> extends ISignal<T, U>, AsyncIterable<U> {}
 }
 
 /**
@@ -174,14 +179,9 @@ namespace Private {
   export type Pending<U> = PromiseDelegate<{ args: U; next: Pending<U> }>;
 
   /**
-   * An object that is both a signal and an async iterable.
-   */
-  export interface IStream<T, U> extends ISignal<T, U>, AsyncIterable<U> {}
-
-  /**
    * A stream with the characteristics of a signal and an async iterable.
    */
-  export class Stream<T, U> extends Signal<T, U> implements IStream<T, U> {
+  export class Stream<T, U> extends Signal<T, U> {
     /**
      * Return an async iterator that yields every emission.
      */
