@@ -22,8 +22,8 @@ export class EventManager implements IDisposable {
   constructor(options: EventManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    this._stream = new Private.Stream(this);
     void this._subscribe();
+    this._stream = new Private.Stream(this);
   }
 
   /**
@@ -52,7 +52,9 @@ export class EventManager implements IDisposable {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
 
+    // Clean up socket.
     const socket = this._socket;
     if (socket) {
       this._socket = null;
@@ -62,7 +64,10 @@ export class EventManager implements IDisposable {
       socket.onclose = () => undefined;
       socket.close();
     }
-    this._isDisposed = true;
+
+    // Clean up stream.
+    Signal.clearData(this);
+    this._stream.stop();
   }
 
   /**
@@ -101,7 +106,7 @@ export class EventManager implements IDisposable {
         version: '1'
       });
     } catch (_) {
-      return this._stream.stop();
+      return;
     }
     const { token, WebSocket, wsUrl } = this.serverSettings;
     const url =
