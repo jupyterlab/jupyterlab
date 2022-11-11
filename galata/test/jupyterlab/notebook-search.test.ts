@@ -35,6 +35,35 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
+  test('Close with Escape', async ({ page }) => {
+    // Open search box
+    await page.keyboard.press('Control+f');
+    await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
+
+    // Close search box
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.jp-DocumentSearch-overlay')).toBeHidden();
+  });
+
+  test('Close with Escape from Notebook', async ({ page }) => {
+    // Open search box
+    await page.keyboard.press('Control+f');
+    await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
+
+    // Enter first cell
+    await page.notebook.enterCellEditingMode(0);
+
+    // First escape should NOT close the search box (but leave the editing mode)
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(250);
+    expect(await page.notebook.isCellInEditingMode(0)).toBeFalsy();
+    expect(await page.isVisible('.jp-DocumentSearch-overlay')).toBeTruthy();
+
+    // Second escape should close the search box (even if it is not focused)
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.jp-DocumentSearch-overlay')).toBeHidden();
+  });
+
   test('Search within outputs', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');

@@ -33,7 +33,7 @@ import {
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { IMapChange } from '@jupyterlab/shared-models';
+import { IMapChange } from '@jupyter-notebook/ydoc';
 
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 

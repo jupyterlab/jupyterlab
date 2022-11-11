@@ -101,6 +101,9 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
+    "@lumino/coreutils": "^2.0.0-alpha.6",
+    "@lumino/disposable": "^2.0.0-alpha.6",
+    "@lumino/signaling": "^2.0.0-alpha.6",
     "@types/react": "^17.0.0",
     "react": "^17.0.1"
   },

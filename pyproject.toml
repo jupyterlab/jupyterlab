@@ -49,7 +49,7 @@ dependencies = [
     "packaging",
     "traitlets",
     "tornado>=6.1.0",
-    "tomli",
+    "tomli;python_version<\"3.11\"",
     "ypy-websocket",
 ]
 dynamic = [

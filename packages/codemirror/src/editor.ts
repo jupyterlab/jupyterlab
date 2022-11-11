@@ -6,7 +6,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import { IYText } from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,
@@ -258,7 +258,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Initialize the editor binding.
    */
   private _initializeEditorBinding(): void {
-    const sharedModel = this.model.sharedModel as models.IYText;
+    const sharedModel = this.model.sharedModel as IYText;
     this._yeditorBinding = {
       text: sharedModel.ysource,
       awareness: sharedModel.awareness,

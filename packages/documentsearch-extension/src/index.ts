@@ -40,6 +40,10 @@ namespace CommandIDs {
    * Find previous search match
    */
   export const findPrevious = 'documentsearch:highlightPrevious';
+  /**
+   * End search in a document
+   */
+  export const end = 'documentsearch:end';
 }
 
 const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
@@ -156,10 +160,12 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         const newView = new SearchDocumentView(searchModel, translator);
 
         searchViews.set(widgetId, newView);
-        // find next and previous are now enabled
-        [CommandIDs.findNext, CommandIDs.findPrevious].forEach(id => {
-          app.commands.notifyCommandChanged(id);
-        });
+        // find next, previous and end are now enabled
+        [CommandIDs.findNext, CommandIDs.findPrevious, CommandIDs.end].forEach(
+          id => {
+            app.commands.notifyCommandChanged(id);
+          }
+        );
 
         /**
          * Activate the target widget when the search panel is closing
@@ -178,8 +184,12 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
             widget.activate();
           }
           searchViews.delete(widgetId);
-          // find next and previous are now disabled
-          [CommandIDs.findNext, CommandIDs.findPrevious].forEach(id => {
+          // find next, previous and end are now disabled
+          [
+            CommandIDs.findNext,
+            CommandIDs.findPrevious,
+            CommandIDs.end
+          ].forEach(id => {
             app.commands.notifyCommandChanged(id);
           });
         });
@@ -278,16 +288,34 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       }
     });
 
+    app.commands.addCommand(CommandIDs.end, {
+      label: trans.__('End Search'),
+      isEnabled: () =>
+        !!app.shell.currentWidget &&
+        searchViews.has(app.shell.currentWidget.id),
+      execute: async () => {
+        const currentWidget = app.shell.currentWidget;
+        if (!currentWidget) {
+          return;
+        }
+
+        searchViews.get(currentWidget.id)?.close();
+      }
+    });
+
     // Add the command to the palette.
     if (palette) {
-      [CommandIDs.search, CommandIDs.findNext, CommandIDs.findPrevious].forEach(
-        command => {
-          palette.addItem({
-            command,
-            category: trans.__('Main Area')
-          });
-        }
-      );
+      [
+        CommandIDs.search,
+        CommandIDs.findNext,
+        CommandIDs.findPrevious,
+        CommandIDs.end
+      ].forEach(command => {
+        palette.addItem({
+          command,
+          category: trans.__('Main Area')
+        });
+      });
     }
 
     // Provide the registry to the system.

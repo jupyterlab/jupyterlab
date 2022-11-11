@@ -16,7 +16,7 @@ import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import type { IMapChange } from '@jupyterlab/shared-models';
+import type { IMapChange } from '@jupyter-notebook/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { WindowedList } from '@jupyterlab/ui-components';

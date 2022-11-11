@@ -5,7 +5,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { ISharedText } from '@jupyterlab/shared-models';
+import { ISharedText } from '@jupyter-notebook/ydoc';
 
 import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 

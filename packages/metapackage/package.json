@@ -108,7 +108,6 @@
     "@jupyterlab/settingeditor": "^4.0.0-alpha.15",
     "@jupyterlab/settingeditor-extension": "^4.0.0-alpha.15",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.15",
-    "@jupyterlab/shared-models": "^4.0.0-alpha.15",
     "@jupyterlab/shortcuts-extension": "^4.0.0-alpha.15",
     "@jupyterlab/statedb": "^4.0.0-alpha.15",
     "@jupyterlab/statusbar": "^4.0.0-alpha.15",

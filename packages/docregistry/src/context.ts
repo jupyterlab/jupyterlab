@@ -23,7 +23,7 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import { DocumentChange, ISharedDocument } from '@jupyterlab/shared-models';
+import { DocumentChange, ISharedDocument } from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,

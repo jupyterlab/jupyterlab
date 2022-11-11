@@ -10,7 +10,7 @@ import {
   CompletionHandler,
   ConnectorProxy
 } from '@jupyterlab/completer';
-import { ISharedText, SourceChange, YFile } from '@jupyterlab/shared-models';
+import { ISharedText, SourceChange, YFile } from '@jupyter-notebook/ydoc';
 import { createSessionContext } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {

@@ -45,7 +45,6 @@ jobs:
             js-rendermime,
             js-services,
             js-settingregistry,
-            js-shared-models,
             js-statedb,
             js-statusbar,
             js-terminal,
