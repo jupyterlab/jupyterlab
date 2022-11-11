@@ -90,13 +90,18 @@ export class EventManager implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    // TODO: (1) Make the test emission a request with a registered schema.
+    // TODO: (1) Make the test emission a request with an appropriate schema.
     // TODO: (2) Remove try block when jupyter_server 2 is a hard requirement.
     try {
-      // eslint-disable-next-line camelcase
-      await this.emit({ schema_id: '', data: {}, version: '' });
+      await this.emit({
+        // eslint-disable-next-line camelcase
+        schema_id:
+          'https://events.jupyter.org/jupyter_server/contents_service/v1',
+        data: { action: 'get', path: '.' },
+        version: '1'
+      });
     } catch (reason) {
-      if (reason.response?.status === 404) {
+      if ((reason as ServerConnection.ResponseError).response.status === 404) {
         this._stream.stop();
         return;
       }
