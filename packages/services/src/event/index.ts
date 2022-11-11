@@ -68,7 +68,7 @@ export class EventManager implements IDisposable {
   /**
    * Emit an event to be broadcast by the application event bus.
    */
-  async emit(event: Event): Promise<void> {
+  async emit(event: Event.Request): Promise<void> {
     const { serverSettings } = this;
     const { baseUrl, token } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
@@ -124,7 +124,19 @@ export namespace Event {
   /**
    * The event emission type.
    */
-  export type Emission = { schema_id: string };
+  export type Emission = {
+    [key: string]: any;
+    schema_id: string;
+  };
+
+  /**
+   * The event request type.
+   */
+  export type Request = {
+    data: { [key: string]: any };
+    schema_id: string;
+    version: string;
+  };
 
   /**
    * An event stream with the characteristics of a signal and an async iterator.
