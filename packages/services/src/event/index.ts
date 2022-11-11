@@ -23,7 +23,7 @@ export class EventManager implements IDisposable {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
     this._stream = new Private.Stream(this);
-    this._connect();
+    this._subscribe();
   }
 
   /**
@@ -54,15 +54,14 @@ export class EventManager implements IDisposable {
     }
 
     const socket = this._socket;
-    this._socket = null;
-    socket!.onopen = () => undefined;
-    socket!.onerror = () => undefined;
-    socket!.onmessage = () => undefined;
-    socket!.onclose = () => undefined;
-    socket!.close();
-
-    Signal.clearData(this);
-    this._stream.stop();
+    if (socket) {
+      this._socket = null;
+      socket.onopen = () => undefined;
+      socket.onerror = () => undefined;
+      socket.onmessage = () => undefined;
+      socket.onclose = () => undefined;
+      socket.close();
+    }
   }
 
   /**
@@ -84,9 +83,24 @@ export class EventManager implements IDisposable {
   }
 
   /**
-   * Open a WebSocket to the server.
+   * Subscribe to event bus emissions.
    */
-  private _connect(): void {
+  private async _subscribe(): Promise<void> {
+    if (this.isDisposed) {
+      return;
+    }
+    // TODO: (1) Make the test emission a request with a registered schema.
+    // TODO: (2) Remove try block when jupyter_server 2 is a hard requirement.
+    try {
+      // eslint-disable-next-line camelcase
+      await this.emit({ schema_id: '', data: {}, version: '' });
+    } catch (reason) {
+      if (reason.response.status === 404) {
+        console.warn(`${SERVICE_EVENTS_URL} not found, expect no emissions.`);
+        return;
+      }
+    }
+
     const { token, WebSocket, wsUrl } = this.serverSettings;
     const url =
       URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
@@ -94,7 +108,7 @@ export class EventManager implements IDisposable {
     const socket = (this._socket = new WebSocket(url));
     const stream = this._stream;
 
-    socket.onclose = () => this._connect();
+    socket.onclose = () => this._subscribe();
     socket.onmessage = msg => msg.data && stream.emit(JSON.parse(msg.data));
   }
 
