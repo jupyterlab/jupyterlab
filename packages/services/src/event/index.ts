@@ -97,12 +97,10 @@ export class EventManager implements IDisposable {
       await this.emit({ schema_id: '', data: {}, version: '' });
     } catch (reason) {
       if (reason.response.status === 404) {
-        console.warn(`${SERVICE_EVENTS_URL} not found, expect no emissions.`);
         this._stream.stop();
         return;
       }
     }
-
     const { token, WebSocket, wsUrl } = this.serverSettings;
     const url =
       URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
