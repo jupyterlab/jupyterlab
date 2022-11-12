@@ -221,6 +221,7 @@ namespace Private {
      * Stop the stream's async iteration.
      */
     stop(): void {
+      this._pending.promise.catch(() => undefined);
       this._pending.reject('stop');
     }
 
