@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Page } from '@playwright/test';
+import { ElementHandle, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
@@ -37,10 +37,60 @@ export function generateArrow(
  * @returns The svg to inject in the page
  */
 export function positionMouse(position: { x: number; y: number }): string {
-  return `<svg style="pointer-events: none; position: absolute;top: ${position.y}px;left: ${position.x}px;z-index: 100000" width="64" height="64" version="1.1" viewBox="0 0 16.933 16.933" xmlns="http://www.w3.org/2000/svg">
-  <path d="m3.6043 1.0103 0.28628 12.757 2.7215-3.3091 2.5607 5.7514 2.0005-0.89067-2.5607-5.7514 4.2802 0.19174z"
-      stroke="#ffffff" stroke-width=".54745" style="paint-order:markers fill stroke" />
+  // The cursor is CC-0 1.0 from https://github.com/sevmeyer/mocu-xcursor
+  return `<svg style="pointer-events: none; position: absolute;top: ${position.y}px;left: ${position.x}px;z-index: 100000" width="40" height="40" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <path id="c" class="left(-1,22)" d="m1 1v13.75l3.94-1.63 1.72 4.16 1.84-0.78-1.71-4.15 3.94-1.63z"/>
+  </defs>
+  <use xlink:href="#c" style="fill:#0a0b0c;stroke:#0a0b0c;stroke-width:2;stroke-linejoin:round;opacity:.1" x="1" y="1"/>
+  <use xlink:href="#c" style="fill:#1a1b1c;stroke:#1a1b1c;stroke-width:2;stroke-linejoin:round"/>
+  <use xlink:href="#c" style="fill:#fafbfc"/>
+  <circle id="hot" class="left(-1,22)" cx="1" cy="1" r="1" style="fill:#f00;opacity:.5"/>
 </svg>`;
+}
+
+/**
+ * Position of an injected sprint in a DOM element.
+ */
+export interface IPositionInElement {
+  /**
+   * X-coordinate multiplier for the element's width.
+   */
+  top?: number;
+  /**
+   * Y-coordinate multiplier for the element's height.
+   */
+  left?: number;
+  /**
+   * Offset added to x-coordinate after calculating position with multipliers.
+   */
+  offsetLeft?: number;
+  /**
+   * Offset added to y-coordinate after calculating position with multipliers.
+   */
+  offsetTop?: number;
+}
+
+/**
+ * Generate a SVG mouse pointer to inject in a HTML document over a DOM element.
+ *
+ * @param element A playwright handle for the target DOM element
+ * @param position A position within the target element (default: bottom right quarter).
+ * @returns The svg to inject in the page
+ */
+export async function positionMouseOver(
+  element: ElementHandle,
+  position: IPositionInElement = {}
+): Promise<string> {
+  const top = position.top ?? 0.75;
+  const left = position.left ?? 0.75;
+  const offsetTop = position.offsetTop ?? 0;
+  const offsetLeft = position.offsetLeft ?? 0;
+  const bBox = await element.boundingBox();
+  return positionMouse({
+    x: bBox.x + bBox.width * left + offsetLeft,
+    y: bBox.y + bBox.height * top + offsetTop
+  });
 }
 
 /**
