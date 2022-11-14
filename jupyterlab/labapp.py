@@ -12,7 +12,6 @@ from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_fla
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_server_ydoc.ydoc import JupyterSQLiteYStore
 from jupyterlab_server import (
     LabServerApp,
     LicensesApp,
@@ -21,7 +20,7 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from notebook_shim.shim import NotebookConfigShimMixin
-from traitlets import Bool, Float, Instance, Int, Type, Unicode, default
+from traitlets import Bool, Instance, Unicode, default
 from ypy_websocket.ystore import BaseYStore
 
 from ._version import __version__
@@ -563,40 +562,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
-    collaborative_file_poll_interval = Int(
-        1,
-        config=True,
-        help="""The period in seconds to check for file changes on disk (relevant only
-        in collaborative mode). Defaults to 1s, if 0 then file changes will only be checked when
-        saving changes from the front-end.""",
-    )
-
-    collaborative_document_cleanup_delay = Int(
-        60,
-        allow_none=True,
-        config=True,
-        help="""The delay in seconds to keep a document in memory in the back-end after all clients
-        disconnect (relevant only in collaborative mode). Defaults to 60s, if None then the
-        document will be kept in memory forever.""",
-    )
-
-    collaborative_document_save_delay = Float(
-        1,
-        allow_none=True,
-        config=True,
-        help="""The delay in seconds to wait after a change is made to a document before saving it
-        (relevant only in collaborative mode). Defaults to 1s, if None then the document will never be saved.""",
-    )
-
-    collaborative_ystore_class = Type(
-        default_value=JupyterSQLiteYStore,
-        klass=BaseYStore,
-        config=True,
-        help="""The YStore class to use for storing Y updates (relevant only in collaborative mode).
-        Defaults to JupyterSQLiteYStore, which stores Y updates in a '.jupyter_ystore.db' SQLite
-        database in the current directory.""",
-    )
-
     @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -819,15 +784,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             page_config["token"] = ""
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
-        self.serverapp.web_app.settings.update(
-            {
-                "page_config_data": page_config,
-                "collaborative_file_poll_interval": self.collaborative_file_poll_interval,
-                "collaborative_document_cleanup_delay": self.collaborative_document_cleanup_delay,
-                "collaborative_document_save_delay": self.collaborative_document_save_delay,
-                "collaborative_ystore_class": self.collaborative_ystore_class,
-            }
-        )
+        self.serverapp.web_app.settings["page_config_data"] = page_config
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
