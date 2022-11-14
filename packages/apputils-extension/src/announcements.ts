@@ -79,10 +79,8 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         }
       });
 
-      const mustFetchNews = settings?.get('fetchNews').composite as
-        | boolean
-        | null;
-      if (mustFetchNews === null) {
+      const mustFetchNews = settings?.get('fetchNews').composite as 'true' | 'false' | 'none';
+      if (mustFetchNews === 'none') {
         const notificationId = Notification.emit(
           trans.__(
             'Do you want to receive official news from the JupyterLab team?'
@@ -104,7 +102,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     .catch(reason => {
                       console.error(`Failed to get the news:\n${reason}`);
                     });
-                  settings?.set('fetchNews', true).catch(reason => {
+                  settings?.set('fetchNews', 'true').catch(reason => {
                     console.error(
                       `Failed to save setting 'fetchNews':\n${reason}`
                     );
@@ -115,7 +113,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 label: trans.__('Refuse'),
                 callback: () => {
                   Notification.dismiss(notificationId);
-                  settings?.set('fetchNews', false).catch(reason => {
+                  settings?.set('fetchNews', 'false').catch(reason => {
                     console.error(
                       `Failed to save setting 'fetchNews':\n${reason}`
                     );
@@ -130,7 +128,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
       }
 
       async function fetchNews() {
-        if (settings?.get('fetchNews').composite ?? false) {
+        if (settings?.get('fetchNews').composite ?? 'false') {
           try {
             const response = await requestAPI<{
               news: Notification.INotification[];
