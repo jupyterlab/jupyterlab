@@ -29,7 +29,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
+import { ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 

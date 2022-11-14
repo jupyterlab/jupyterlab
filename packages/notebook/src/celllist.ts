@@ -105,7 +105,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
           const cells = delta.insert.map(nbcell => {
             const cell = this._factory.createCell(
               nbcell.cell_type as 'markdown' | 'raw' | 'code',
-              {}
+              { id: nbcell.id }
             );
             cell.switchSharedModel(nbcell as any, true);
             return cell;
@@ -450,7 +450,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     const newValues = toArray(cells);
     each(newValues, cell => {
       this._cellMap.set(cell.id, cell);
-      // @todo it looks like this compound operation shoult start before the `each` loop.
+      // @todo it looks like this compound operation should start before the `each` loop.
       this._cellOrder.beginCompoundOperation();
       this._cellOrder.insert(index++, cell.id);
       this._cellOrder.endCompoundOperation();
@@ -564,13 +564,22 @@ export class CellList implements IObservableUndoableList<ICellModel> {
             let freshCell = null;
             switch (cell.cell_type) {
               case 'code':
-                freshCell = this._factory.createCodeCell({ cell });
+                freshCell = this._factory.createCodeCell({
+                  cell,
+                  id: cell.id as string
+                });
                 break;
               case 'markdown':
-                freshCell = this._factory.createMarkdownCell({ cell });
+                freshCell = this._factory.createMarkdownCell({
+                  cell,
+                  id: cell.id as string
+                });
                 break;
               default:
-                freshCell = this._factory.createRawCell({ cell });
+                freshCell = this._factory.createRawCell({
+                  cell,
+                  id: cell.id as string
+                });
                 break;
             }
             this._cellMap.set(id, freshCell);
