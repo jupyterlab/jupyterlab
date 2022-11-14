@@ -1420,13 +1420,9 @@ function activateNotebookHandler(
   const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
-  // Use the router to deal with hash navigation on windowed notebook
+  // Use the router to deal with hash navigation
   function onRouted(router: IRouter, location: IRouter.ILocation): void {
-    if (
-      factory.notebookConfig.windowingMode === 'full' &&
-      location.hash &&
-      tracker.currentWidget
-    ) {
+    if (location.hash && tracker.currentWidget) {
       tracker.currentWidget.setFragment(location.hash);
     }
   }

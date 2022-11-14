@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { positionMouse, setSidebarWidth } from './utils';
+import { positionMouseOver, setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -73,16 +73,21 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
+    const runButton = await page.waitForSelector(
+      '.jp-Toolbar-item >> [data-command="runmenu:run"]'
+    );
+    await runButton.hover();
+
     // Inject mouse pointer
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 446, y: 80 })]
+      [await positionMouseOver(runButton)]
     );
 
     expect(
-      await page.screenshot({ clip: { y: 62, x: 400, width: 190, height: 80 } })
+      await page.screenshot({ clip: { y: 62, x: 400, width: 190, height: 60 } })
     ).toMatchSnapshot('debugger_run.png');
   });
 
@@ -117,7 +122,10 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
-    await page.click('[data-id="jp-debugger-sidebar"]');
+    const sidebar = await page.waitForSelector(
+      '[data-id="jp-debugger-sidebar"]'
+    );
+    await sidebar.click();
     await setSidebarWidth(page, 251, 'right');
 
     // Inject mouse pointer
@@ -125,7 +133,7 @@ test.describe('Debugger', () => {
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 1240, y: 115 })]
+      [await positionMouseOver(sidebar, { left: 0.25 })]
     );
 
     expect(
