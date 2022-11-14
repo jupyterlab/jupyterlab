@@ -79,7 +79,10 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         }
       });
 
-      const mustFetchNews = settings?.get('fetchNews').composite as 'true' | 'false' | 'none';
+      const mustFetchNews = settings?.get('fetchNews').composite as
+        | 'true'
+        | 'false'
+        | 'none';
       if (mustFetchNews === 'none') {
         const notificationId = Notification.emit(
           trans.__(
@@ -93,7 +96,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
             autoClose: false,
             actions: [
               {
-                label: trans.__('Accept'),
+                label: trans.__('Yes'),
                 callback: () => {
                   Notification.dismiss(notificationId);
                   config
@@ -110,7 +113,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 }
               },
               {
-                label: trans.__('Refuse'),
+                label: trans.__('No'),
                 callback: () => {
                   Notification.dismiss(notificationId);
                   settings?.set('fetchNews', 'false').catch(reason => {
@@ -145,7 +148,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               if (!state.dismissed) {
                 options.actions = [
                   {
-                    label: trans.__("Don't show me again"),
+                    label: trans.__('Do not show to me again'),
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
@@ -184,7 +187,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               let notificationId: string;
               options.actions = [
                 {
-                  label: trans.__("Don't check for updates"),
+                  label: trans.__('Do not check for updates'),
                   caption: trans.__(
                     'If pressed, you will not be prompted if a new JupyterLab version is found.'
                   ),
