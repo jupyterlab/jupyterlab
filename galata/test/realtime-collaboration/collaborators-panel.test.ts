@@ -28,13 +28,14 @@ test.describe('One client', () => {
           color: 'var(--jp-collaborator-color2)'
         }
       };
-      const { page: guestPage } = await galata.newPage({
+      const { page } = await galata.newPage({
         baseURL: baseURL!,
         browser,
         mockUser: user2,
         tmpPath,
         waitForApplication
       });
+      guestPage = page;
     }
   );
 
