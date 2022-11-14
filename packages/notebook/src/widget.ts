@@ -1622,11 +1622,18 @@ export class Notebook extends StaticNotebook {
    * Scroll so that the given cell is in view. Selects and activates cell.
    *
    * @param cell - A cell in the notebook widget.
+   * @param align - Type of alignment.
    *
    */
-  async scrollToCell(cell: Cell): Promise<void> {
+  async scrollToCell(
+    cell: Cell,
+    align: WindowedList.ScrollToAlign = 'auto'
+  ): Promise<void> {
     try {
-      await this.scrollToItem(this.widgets.findIndex(c => c === cell));
+      await this.scrollToItem(
+        this.widgets.findIndex(c => c === cell),
+        align
+      );
     } catch (r) {
       //no-op
     }
@@ -1636,72 +1643,78 @@ export class Notebook extends StaticNotebook {
     cell.activate();
   }
 
-  /**
-   * Set URI fragment identifier.
-   */
-  async setFragment(fragment: string): Promise<void> {
-    // Loop on cells, get headings and search for first matching id.
-    const cleanedFragment = CSS.escape(fragment.slice(1));
+  private _parseFragment(fragment: string): Private.IFragmentData | undefined {
+    const cleanedFragment = fragment.slice(1);
 
     if (!cleanedFragment) {
       // Bail early
       return;
     }
 
-    let found = false;
-    for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
-      const cell = this.widgets[cellIdx];
-      if (
-        cell.model.type === 'raw' ||
-        (cell.model.type === 'markdown' && !(cell as MarkdownCell).rendered)
-      ) {
-        // Bail early
-        continue;
-      }
-      for (const heading of cell.headings) {
-        let id: string | undefined | null = '';
-        switch (heading.type) {
-          case Cell.HeadingType.HTML:
-            id = (heading as TableOfContentsUtils.IHTMLHeading).id;
-            break;
-          case Cell.HeadingType.Markdown:
-            {
-              const mdHeading =
-                heading as any as TableOfContentsUtils.Markdown.IMarkdownHeading;
-              id = await TableOfContentsUtils.Markdown.getHeadingId(
-                this.rendermime.markdownParser!,
-                mdHeading.raw,
-                mdHeading.level
-              );
-            }
-            break;
-        }
-        if (id === cleanedFragment) {
-          found = true;
-          if (!cell.inViewport) {
-            await this.scrollToItem(cellIdx, 'center');
-          }
+    const parts = cleanedFragment.split('=');
+    if (parts.length === 1) {
+      // Default to heading if no prefix is given.
+      return {
+        kind: 'heading',
+        value: cleanedFragment
+      };
+    }
+    return {
+      kind: parts[0] as any,
+      value: parts.slice(1).join('=')
+    };
+  }
 
-          const el = this.node.querySelector(
-            `h${heading.level}[id="${id}"]`
-          ) as HTMLElement;
-          const widgetBox = this.node.getBoundingClientRect();
-          const elementBox = el.getBoundingClientRect();
+  /**
+   * Set URI fragment identifier.
+   */
+  async setFragment(fragment: string): Promise<void> {
+    const parsedFragment = this._parseFragment(fragment);
 
-          if (
-            elementBox.top > widgetBox.bottom ||
-            elementBox.bottom < widgetBox.top
-          ) {
-            el.scrollIntoView({ block: 'center' });
-          }
+    if (!parsedFragment) {
+      // Bail early
+      return;
+    }
 
-          break;
-        }
-      }
+    let result;
 
-      if (found) {
+    switch (parsedFragment.kind) {
+      case 'heading':
+        result = await this._findHeading(parsedFragment.value);
         break;
-      }
+      case 'cell-id':
+        result = this._findCellById(parsedFragment.value);
+        break;
+      default:
+        console.warn(
+          `Unknown target type for URI fragment ${fragment}, interpreting as a heading`
+        );
+        result = await this._findHeading(
+          parsedFragment.kind + '=' + parsedFragment.value
+        );
+        break;
+    }
+
+    if (result == null) {
+      return;
+    }
+    let { cell, element } = result;
+
+    if (!cell.inViewport) {
+      await this.scrollToCell(cell, 'center');
+    }
+
+    if (element == null) {
+      element = cell.node;
+    }
+    const widgetBox = this.node.getBoundingClientRect();
+    const elementBox = element.getBoundingClientRect();
+
+    if (
+      elementBox.top > widgetBox.bottom ||
+      elementBox.bottom < widgetBox.top
+    ) {
+      element.scrollIntoView({ block: 'center' });
     }
   }
 
@@ -2063,6 +2076,68 @@ export class Notebook extends StaticNotebook {
       index = this._findCell(target);
     }
     return [target, index];
+  }
+
+  /**
+   * Find heading with given ID in any of the cells.
+   */
+  async _findHeading(queryId: string): Promise<Private.IScrollTarget | null> {
+    // Loop on cells, get headings and search for first matching id.
+    for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
+      const cell = this.widgets[cellIdx];
+      if (
+        cell.model.type === 'raw' ||
+        (cell.model.type === 'markdown' && !(cell as MarkdownCell).rendered)
+      ) {
+        // Bail early
+        continue;
+      }
+      for (const heading of cell.headings) {
+        let id: string | undefined | null = '';
+        switch (heading.type) {
+          case Cell.HeadingType.HTML:
+            id = (heading as TableOfContentsUtils.IHTMLHeading).id;
+            break;
+          case Cell.HeadingType.Markdown:
+            {
+              const mdHeading =
+                heading as any as TableOfContentsUtils.Markdown.IMarkdownHeading;
+              id = await TableOfContentsUtils.Markdown.getHeadingId(
+                this.rendermime.markdownParser!,
+                mdHeading.raw,
+                mdHeading.level
+              );
+            }
+            break;
+        }
+        if (id === queryId) {
+          const element = this.node.querySelector(
+            `h${heading.level}[id="${id}"]`
+          ) as HTMLElement;
+
+          return {
+            cell,
+            element
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Find cell by its unique ID.
+   */
+  _findCellById(queryId: string): Private.IScrollTarget | null {
+    for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
+      const cell = this.widgets[cellIdx];
+      if (cell.model.id === queryId) {
+        return {
+          cell
+        };
+      }
+    }
+    return null;
   }
 
   /**
@@ -2757,5 +2832,33 @@ namespace Private {
         mimeTypeService: options.mimeTypeService
       };
     }
+  }
+
+  /**
+   * Information about resolved scroll target defined by URL fragment.
+   */
+  export interface IScrollTarget {
+    /**
+     * Target cell.
+     */
+    cell: Cell;
+    /**
+     * Element to scroll to within the cell.
+     */
+    element?: HTMLElement;
+  }
+
+  /**
+   * Parsed fragment identifier data.
+   */
+  export interface IFragmentData {
+    /**
+     * The kind of notebook element targetted by the fragment identifier.
+     */
+    kind: 'heading' | 'cell-id';
+    /*
+     * The value of the fragment query.
+     */
+    value: string;
   }
 }
