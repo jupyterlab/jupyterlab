@@ -62,7 +62,6 @@ test.describe('Initialization', () => {
     await page.notebook.activate(pathUntitled);
     await guestPage.filebrowser.refresh();
     await guestPage.notebook.open(pathUntitled);
-    await guestPage.notebook.activate(pathUntitled);
 
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
@@ -73,7 +72,14 @@ test.describe('Initialization', () => {
       'initialization-create-notebook-guest.png'
     );
 
-    await page.notebook.close(true);
+    await Promise.race([galata.sleep(500), page.notebook.close(true)]);
+    if (
+      await page.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
+    ) {
+      await page
+        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
+        .click();
+    }
     await guestPage.notebook.close(true);
     const contents = galata.newContentsHelper(request);
     await contents.deleteFile(`${tmpPath}/${pathUntitled}`);
