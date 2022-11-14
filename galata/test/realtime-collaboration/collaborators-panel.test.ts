@@ -14,14 +14,8 @@ test.describe('One client', () => {
 
   test.beforeEach(
     async ({
-      appPath,
-      autoGoto,
       baseURL,
       browser,
-      mockSettings,
-      mockState,
-      sessions,
-      terminals,
       tmpPath,
       waitForApplication
     }) => {
@@ -34,19 +28,13 @@ test.describe('One client', () => {
           color: 'var(--jp-collaborator-color2)'
         }
       };
-      guestPage = await galata.newPage(
-        appPath,
-        autoGoto,
-        baseURL!,
+      const { page: guestPage } = await galata.newPage({
+        baseURL: baseURL!,
         browser,
-        mockSettings,
-        mockState,
-        user2,
-        sessions,
-        terminals,
+        mockUser: user2,
         tmpPath,
         waitForApplication
-      );
+      });
     }
   );
 
