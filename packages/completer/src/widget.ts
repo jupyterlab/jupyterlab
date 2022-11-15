@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { HoverBox, ISanitizer, Sanitizer } from '@jupyterlab/apputils';
+import { defaultSanitizer, HoverBox, ISanitizer, Sanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
@@ -59,7 +59,7 @@ export class Completer extends Widget {
    */
   constructor(options: Completer.IOptions) {
     super({ node: document.createElement('div') });
-    this.sanitizer = options.sanitizer ?? new Sanitizer();
+    this.sanitizer = options.sanitizer ?? defaultSanitizer;
     this._renderer =
       options.renderer ?? Completer.getDefaultRenderer(this.sanitizer);
     this.model = options.model || null;
@@ -917,7 +917,7 @@ export namespace Completer {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
-    constructor(readonly sanitizer: ISanitizer = new Sanitizer()) {}
+    constructor(readonly sanitizer: ISanitizer = defaultSanitizer) {}
 
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
