@@ -447,6 +447,16 @@ export class Sanitizer implements ISanitizer {
     return sanitize(dirty, { ...this._options, ...(options || {}) });
   }
 
+  /**
+   * Set the allowed schemes
+   *
+   * @param scheme Allowed schemes
+   */
+  setAllowedSchemes(scheme: Array<string>): void {
+    // Force copy of `scheme`
+    this._options.allowedSchemes = [...scheme];
+  }
+
   private _options: sanitize.IOptions = {
     // HTML tags that are allowed to be used. Tags were extracted from Google Caja
     allowedTags: [
@@ -944,6 +954,7 @@ export class Sanitizer implements ISanitizer {
       // Set the "disabled" attribute for <input> tags.
       input: sanitize.simpleTransform('input', { disabled: 'disabled' })
     },
+    allowedSchemes: [...sanitize.defaults.allowedSchemes],
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
       img: sanitize.defaults.allowedSchemes.concat(['attachment'])
@@ -955,8 +966,3 @@ export class Sanitizer implements ISanitizer {
     allowedSchemesAppliedToAttributes: ['href', 'cite']
   };
 }
-
-/**
- * The default instance of an `ISanitizer` meant for use by user code.
- */
-export const defaultSanitizer: ISanitizer = new Sanitizer();

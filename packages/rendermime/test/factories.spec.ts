@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { defaultSanitizer } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import * as marked from '@jupyterlab/markedparser-extension';
 import { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
@@ -32,7 +32,7 @@ function encodeChars(txt: string): string {
   return txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-const sanitizer = defaultSanitizer;
+const sanitizer = new Sanitizer();
 const defaultOptions: any = {
   sanitizer,
   linkHandler: null,
