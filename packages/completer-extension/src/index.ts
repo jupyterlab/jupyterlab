@@ -9,6 +9,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ISanitizer } from '@jupyterlab/apputils';
 import {
   Completer,
   CompleterModel,
@@ -52,7 +53,11 @@ const manager: JupyterFrontEndPlugin<ICompletionManager> = {
   id: '@jupyterlab/completer-extension:manager',
   autoStart: true,
   provides: ICompletionManager,
-  activate: (app: JupyterFrontEnd): ICompletionManager => {
+  optional: [ISanitizer],
+  activate: (
+    app: JupyterFrontEnd,
+    sanitizer: ISanitizer | null
+  ): ICompletionManager => {
     const handlers: { [id: string]: CompletionHandler } = {};
 
     app.commands.addCommand(CommandIDs.invoke, {
@@ -86,11 +91,18 @@ const manager: JupyterFrontEndPlugin<ICompletionManager> = {
     return {
       register: (
         completable: ICompletionManager.ICompletable,
-        renderer: Completer.IRenderer = Completer.defaultRenderer
+        renderer: Completer.IRenderer = Completer.getDefaultRenderer(
+          sanitizer ?? undefined
+        )
       ): ICompletionManager.ICompletableAttributes => {
         const { connector, editor, parent } = completable;
         const model = new CompleterModel();
-        const completer = new Completer({ editor, model, renderer });
+        const completer = new Completer({
+          editor,
+          model,
+          renderer,
+          sanitizer: sanitizer ?? undefined
+        });
         const handler = new CompletionHandler({
           completer,
           connector
