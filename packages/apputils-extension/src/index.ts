@@ -606,7 +606,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
  * The default HTML sanitizer.
  */
 const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
-  id: '@jupyterlab/apputils-extension:sanitizer',
+  id: '@jupyter/apputils-extension:sanitizer',
   autoStart: true,
   provides: ISanitizer,
   requires: [ISettingRegistry],
