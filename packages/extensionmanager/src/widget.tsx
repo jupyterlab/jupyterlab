@@ -409,7 +409,7 @@ activate this feature?`)}
             }}
             title={this.trans.__('This will withdraw your consent.')}
           >
-            {this.trans.__('Refuse')}
+            {this.trans.__('No')}
           </Button>
         ) : (
           <div>
@@ -419,14 +419,17 @@ activate this feature?`)}
                 this.model.isDisclaimed = true;
               }}
             >
-              {this.trans.__('Agree')}
+              {this.trans.__('Yes')}
             </Button>
             <Button
               onClick={() => {
                 this.model.isEnabled = false;
               }}
+              title={this.trans.__(
+                'This will disable the extension manager panel; including the listing of installed extension.'
+              )}
             >
-              {this.trans.__('Disable')}
+              {this.trans.__('No, disable')}
             </Button>
           </div>
         )}

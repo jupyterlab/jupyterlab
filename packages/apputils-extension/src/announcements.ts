@@ -2,7 +2,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { murmur2, Notification } from '@jupyterlab/apputils';
+import { Notification } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
 import { ConfigSection, ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -85,9 +85,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         | 'none';
       if (mustFetchNews === 'none') {
         const notificationId = Notification.emit(
-          trans.__(
-            'Do you want to receive official news from the JupyterLab team?'
-          ) +
+          trans.__('Do you want to receive official Jupyter news?') +
             '\n\n<a href="https://jupyterlab.readthedocs.io/en/latest/privacy_policies" target="_blank" rel="noreferrer">' +
             trans.__('Please read the privacy policy.') +
             '</a>',
@@ -178,7 +176,8 @@ export const announcements: JupyterFrontEndPlugin<void> = {
 
           if (response.notification) {
             const { message, type, options } = response.notification;
-            const id = murmur2(message, 51).toString();
+            // @ts-expect-error data has no index
+            const id = options.data!['id'] as string;
             const state = (config.data[id] as INewsState) ?? {
               seen: false,
               dismissed: false

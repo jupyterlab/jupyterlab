@@ -4,6 +4,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 import abc
+import hashlib
 import json
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
@@ -155,12 +156,13 @@ class CheckForUpdateHandler(APIHandler):
         message = await self.update_checker()
         if message:
             now = datetime.now().timestamp() * 1000.0
+            hash = hashlib.sha1(message)
             notification = Notification(
                 message=message,
                 createdAt=now,
                 modifiedAt=now,
                 type="info",
-                options={"data": {"tags": ["update"]}},
+                options={"data": {"id": hash, "tags": ["update"]}},
             )
 
         self.set_status(200)

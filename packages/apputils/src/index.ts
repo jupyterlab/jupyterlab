@@ -37,7 +37,6 @@ export * from './commandlinker';
 export * from './commandpalette';
 export * from './dialog';
 export * from './domutils';
-export * from './hash';
 export * from './inputdialog';
 export * from './kernelstatuses';
 export * from './mainareawidget';

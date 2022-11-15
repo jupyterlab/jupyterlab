@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { MainAreaWidget, murmur2 } from '@jupyterlab/apputils';
+import { MainAreaWidget } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry, MimeModel } from '@jupyterlab/rendermime';
 import {
   ITranslator,
@@ -12,6 +12,7 @@ import {
 } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
+import { murmur2 } from '../../hash';
 import { IDebugger } from '../../tokens';
 
 const RENDERER_PANEL_CLASS = 'jp-VariableRendererPanel';
