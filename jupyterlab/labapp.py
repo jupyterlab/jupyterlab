@@ -21,7 +21,6 @@ from jupyterlab_server import (
 )
 from notebook_shim.shim import NotebookConfigShimMixin
 from traitlets import Bool, Instance, Unicode, default
-from ypy_websocket.ystore import BaseYStore
 
 from ._version import __version__
 from .commands import (
