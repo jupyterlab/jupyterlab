@@ -65,17 +65,17 @@ There are a number of settings that you can change:
 
 .. code-block:: bash
 
-  $ # The delay of inactivity (in seconds) after which a document is saved to disk (default: 1).
-  $ # If None, the document will never be saved.
-  $ jupyter lab --collaborative --YDocExtension.document_save_delay=0.5
-  $
-  $ # The period (in seconds) to check for file changes on disk (default: 1).
-  $ # If 0, file changes will only be checked when saving.
-  $ jupyter lab --collaborative --YDocExtension.file_poll_interval=2
-  $
-  $ # The delay (in seconds) to keep a document in memory in the back-end after all clients disconnect (default: 60).
-  $ # If None, the document will be kept in memory forever.
-  $ jupyter lab --collaborative --YDocExtension.document_cleanup_delay=100
-  $
-  $ # The YStore class to use for storing Y updates (default: JupyterSQLiteYStore).
-  $ jupyter lab --collaborative --YDocExtension.ystore_class=ypy_websocket.ystore.TempFileYStore
+  # The delay of inactivity (in seconds) after which a document is saved to disk (default: 1).
+  # If None, the document will never be saved.
+  jupyter lab --collaborative --YDocExtension.document_save_delay=0.5
+  
+  # The period (in seconds) to check for file changes on disk (default: 1).
+  # If 0, file changes will only be checked when saving.
+  jupyter lab --collaborative --YDocExtension.file_poll_interval=2
+  
+  # The delay (in seconds) to keep a document in memory in the back-end after all clients disconnect (default: 60).
+  # If None, the document will be kept in memory forever.
+  jupyter lab --collaborative --YDocExtension.document_cleanup_delay=100
+  
+  # The YStore class to use for storing Y updates (default: JupyterSQLiteYStore).
+  jupyter lab --collaborative --YDocExtension.ystore_class=ypy_websocket.ystore.TempFileYStore
