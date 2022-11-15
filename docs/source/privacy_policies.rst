@@ -37,9 +37,9 @@ The announcements plugin is fetching a news feed from a GitHub page website
 package on PyPI.org (https://pypi.org/pypi/jupyterlab/json).
 
 Fetching those information will only happen if the user clicks on the *Agree*
-button of the notification asking if he wants to be notified by JupyterLab news.
+button of the notification asking if they want to be notified by JupyterLab news.
 That choice is stored as a user settings in *Notifications* ->
-*Fetch news from JupyterLab Council*. It can be reverted.
+*Fetch official Jupyter news*. It can be reverted.
 
 The plugin can also be disabled by executing:
 

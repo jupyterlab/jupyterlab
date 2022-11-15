@@ -184,7 +184,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
 namespace ListEntry {
   export interface IProperties {
     /**
-     * Whether thumbnail can be fetch from external webservice or not.
+     * Whether thumbnails can be fetched from external webservices or not.
      */
     canFetch: boolean;
 
@@ -267,7 +267,7 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
 namespace ListView {
   export interface IProperties {
     /**
-     * Whether thumbnail can be fetch from external webservice or not.
+     * Whether thumbnails can be fetched from external webservices or not.
      */
     canFetch: boolean;
 
