@@ -25,6 +25,9 @@ export namespace galata {
    * - Deactivate codemirror cursor blinking to avoid noise in screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'false'
+    },
     '@jupyterlab/fileeditor-extension:plugin': {
       editorConfig: { cursorBlinkRate: 0 }
     },
@@ -538,14 +541,14 @@ export namespace galata {
           case 'GET':
             return route.fulfill({
               status: 200,
-              body: JSON.stringify(config[section])
+              body: JSON.stringify(config[section] ?? {})
             });
           case 'PATCH': {
             const data = request.postDataJSON();
             // FIXME jupyter-server does a recursive update
             // We are not doing it here as @jupyterlab/services is actually not recursively
             // updating the object.
-            config[section] = { ...config[section], ...data };
+            config[section] = { ...(config[section] ?? {}), ...data };
             return route.fulfill({
               status: 200,
               body: JSON.stringify(config[section])

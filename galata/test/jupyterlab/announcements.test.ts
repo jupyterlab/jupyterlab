@@ -3,6 +3,15 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 
+test.use({
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'none'
+    }
+  }
+});
+
 test('Announcements requires user agreement', async ({ page }) => {
   const notifications = await page.evaluate(() => {
     return (window.jupyterapp as any).notificationManager.notifications;
@@ -14,7 +23,7 @@ test('Announcements requires user agreement', async ({ page }) => {
   );
 });
 
-test.describe('Update news', () => {
+test.describe('Update available', () => {
   const id = 'update-id';
   const message =
     'A newer version (1000.0) of JupyterLab is available.\nSee the <a href="JUPYTERLAB_RELEASE_URL1000.0" target="_blank" rel="noreferrer">changelog</a> for more information.';
@@ -32,10 +41,12 @@ test.describe('Update news', () => {
           return route.fulfill({
             status: 200,
             body: JSON.stringify({
-              createdAt: Date.now(),
-              modifiedAt: Date.now(),
-              message,
-              options: { data: { id, tags: ['update'] } }
+              notification: {
+                createdAt: Date.now(),
+                modifiedAt: Date.now(),
+                message,
+                options: { data: { id, tags: ['update'] } }
+              }
             })
           });
         default:
@@ -93,9 +104,12 @@ test.describe('Update news', () => {
 
   test('Should not display notice', async ({ page }) => {
     const config = {
-      jupyterlabapputilsextension: {}
+      jupyterlabapputilsextensionannouncements: {}
     };
-    config['jupyterlabapputilsextension'][id] = { seen: true, dismissed: true };
+    config['jupyterlabapputilsextensionannouncements'][id] = {
+      seen: true,
+      dismissed: true
+    };
     await galata.Mock.mockConfig(page, config);
     const settings = [];
     await galata.Mock.mockSettings(page, settings, {
@@ -176,7 +190,9 @@ test.describe('Fetch news', () => {
       n.options?.data?.tags?.includes('news')
     );
     expect(news).toHaveLength(2);
-    expect(news[0].message).toEqual(message);
+    expect(news.filter(n => n.options.data.id === id)[0].message).toEqual(
+      message
+    );
   });
 
   test('Should not fetch', async ({ page }) => {
@@ -204,9 +220,12 @@ test.describe('Fetch news', () => {
 
   test('Should not display some news', async ({ page }) => {
     const config = {
-      jupyterlabapputilsextension: {}
+      jupyterlabapputilsextensionannouncements: {}
     };
-    config['jupyterlabapputilsextension'][id] = { seen: true, dismissed: true };
+    config['jupyterlabapputilsextensionannouncements'][id] = {
+      seen: true,
+      dismissed: true
+    };
     await galata.Mock.mockConfig(page, config);
     const settings = [];
     await galata.Mock.mockSettings(page, settings, {

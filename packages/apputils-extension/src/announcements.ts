@@ -133,7 +133,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
       }
 
       async function fetchNews() {
-        if (settings?.get('fetchNews').composite ?? 'false') {
+        if ((settings?.get('fetchNews').composite ?? 'false') === 'true') {
           try {
             const response = await requestAPI<{
               news: Notification.INotification[];
