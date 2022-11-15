@@ -1,6 +1,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import hashlib
 import json
 from unittest.mock import MagicMock, patch
 
@@ -69,13 +70,13 @@ async def test_CheckForUpdateHandler_get_pypi_success(mock_client, labserverapp,
 
     response = await jp_fetch("lab", "api", "update", method="GET")
 
+    message = 'A newer version (1000.0.0) of JupyterLab is available.\nSee the <a href="https://github.com/jupyterlab/jupyterlab/releases/tag/v1000.0.0" target="_blank" rel="noreferrer">changelog</a> for more information.'
     assert response.code == 200
     payload = json.loads(response.body)
-    assert (
-        payload["notification"]["message"]
-        == 'A newer version (1000.0.0) of JupyterLab is available.\nSee the <a href="https://github.com/jupyterlab/jupyterlab/releases/tag/v1000.0.0" target="_blank" rel="noreferrer">changelog</a> for more information.'
-    )
-    assert payload["notification"]["options"] == {"data": {"tags": ["update"]}}
+    assert payload["notification"]["message"] == message
+    assert payload["notification"]["options"] == {
+        "data": {"id": hashlib.sha1(message.encode()).hexdigest(), "tags": ["update"]}
+    }
 
 
 @patch("tornado.httpclient.AsyncHTTPClient")
