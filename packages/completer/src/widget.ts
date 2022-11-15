@@ -1096,7 +1096,7 @@ export namespace Completer {
   /**
    * The default `IRenderer` instance.
    */
-  export function getDefaultRenderer(sanitizer?: ISanitizer): IRenderer {
+  export function getDefaultRenderer(sanitizer?: ISanitizer): Renderer {
     if (
       !_defaultRenderer ||
       (sanitizer && _defaultRenderer.sanitizer !== sanitizer)
