@@ -103,7 +103,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     .catch(reason => {
                       console.error(`Failed to get the news:\n${reason}`);
                     });
-                  settings?.set('fetchNews', 'true').catch(reason => {
+                  settings?.set('fetchNews', 'true').catch((reason: any) => {
                     console.error(
                       `Failed to save setting 'fetchNews':\n${reason}`
                     );
@@ -114,7 +114,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 label: trans.__('No'),
                 callback: () => {
                   Notification.dismiss(notificationId);
-                  settings?.set('fetchNews', 'false').catch(reason => {
+                  settings?.set('fetchNews', 'false').catch((reason: any) => {
                     console.error(
                       `Failed to save setting 'fetchNews':\n${reason}`
                     );
@@ -196,7 +196,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                       .then(() => {
                         Notification.dismiss(notificationId);
                       })
-                      .catch(reason => {
+                      .catch((reason: any) => {
                         console.error(
                           'Failed to set the `checkForUpdates` setting.',
                           reason
