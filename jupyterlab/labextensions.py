@@ -99,6 +99,8 @@ disable_aliases["level"] = "DisableLabExtensionsApp.level"
 
 VERSION = get_app_version()
 
+LABEXTENSION_COMMAND_WARNING = "Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to distribute their extensions as prebuilt packages"
+
 
 class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     version = VERSION
@@ -174,7 +176,9 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         pass
 
     def deprecation_warning(self, msg):
-        return self.log.warning("\033[33m(Deprecated) %s \033[0m", msg)
+        return self.log.warning(
+            "\033[33m(Deprecated) %s\n\n%s \033[0m", msg, LABEXTENSION_COMMAND_WARNING
+        )
 
     def _log_format_default(self):
         """A default format for messages"""
@@ -202,10 +206,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.deprecation_warning(
-            """Installing extensions with the jupyter labextension install command is now deprecated and will be removed in a future major version of JupyterLab.
-
-Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to distribute their extensions as prebuilt packages.
-"""
+            "Installing extensions with the jupyter labextension install command is now deprecated and will be removed in a future major version of JupyterLab."
         )
         pinned_versions = self.pin.split(",")
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -331,10 +332,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.deprecation_warning(
-            """Updating extensions with the jupyter labextension update command is now deprecated and will be removed in a future major version of JupyterLab.
-
-Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to distribute their extensions as prebuilt packages.
-"""
+            "Updating extensions with the jupyter labextension update command is now deprecated and will be removed in a future major version of JupyterLab."
         )
         if not self.all and not self.extra_args:
             self.log.warning(
@@ -395,10 +393,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.deprecation_warning(
-            """Uninstalling extensions with the jupyter labextension uninstall command is now deprecated and will be removed in a future major version of JupyterLab.
-
-Users should manage prebuilt extensions with package managers like pip and conda, and extension authors are encouraged to distribute their extensions as prebuilt packages.
-"""
+            "Uninstalling extensions with the jupyter labextension uninstall command is now deprecated and will be removed in a future major version of JupyterLab."
         )
         self.extra_args = self.extra_args or [os.getcwd()]
 
