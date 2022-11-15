@@ -156,7 +156,7 @@ class CheckForUpdateHandler(APIHandler):
         message = await self.update_checker()
         if message:
             now = datetime.now().timestamp() * 1000.0
-            hash = hashlib.sha1(message)
+            hash = hashlib.sha1(message.encode()).hexdigest()
             notification = Notification(
                 message=message,
                 createdAt=now,

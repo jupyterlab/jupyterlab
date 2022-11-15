@@ -1,7 +1,7 @@
 Privacy policies
 ================
 
-Last modified: November 9th, 2022
+Last modified: November 15th, 2022
 
 Introduction
 ------------
@@ -89,4 +89,4 @@ Changes to policy
 Our Privacy Policy may change from time to time, and the new policy will be posted
 on this page. We will never materially change our policies and practices to make
 them less protective of personal information collected in the past without your
-prior consent. This Privacy Policy was last updated on November 9, 2022.
+prior consent.
