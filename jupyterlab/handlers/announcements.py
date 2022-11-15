@@ -5,9 +5,9 @@
 
 import abc
 import json
-import time
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
+from datetime import datetime
 from typing import Awaitable, Optional
 
 from jupyter_server.base.handlers import APIHandler
@@ -154,7 +154,7 @@ class CheckForUpdateHandler(APIHandler):
         notification = None
         message = await self.update_checker()
         if message:
-            now = time.time() * 1000.0
+            now = datetime.now().timestamp() * 1000.0
             notification = Notification(
                 message=message,
                 createdAt=now,
@@ -224,19 +224,13 @@ class NewsHandler(APIHandler):
                             ),
                             "</a>",
                         ),
-                        createdAt=time.mktime(
-                            time.strptime(
-                                node.find("atom:published", xml_namespaces).text,
-                                ISO8601_FORMAT,
-                            )
-                        )
+                        createdAt=datetime.fromisoformat(
+                            node.find("atom:published", xml_namespaces).text
+                        ).timestamp()
                         * 1000,
-                        modifiedAt=time.mktime(
-                            time.strptime(
-                                node.find("atom:updated", xml_namespaces).text,
-                                ISO8601_FORMAT,
-                            )
-                        )
+                        modifiedAt=datetime.fromisoformat(
+                            node.find("atom:updated", xml_namespaces).text
+                        ).timestamp()
                         * 1000,
                         type="info",
                         options={

@@ -29,9 +29,9 @@ async def test_NewsHandler_get_success(mock_client, labserverapp, jp_fetch):
     payload = json.loads(response.body)
     assert payload["news"] == [
         {
-            "createdAt": 1667394000000.0,
+            "createdAt": 1667397600000.0,
             "message": 'Thanks for using JupyterLab\n\nBig thanks to you, beloved JupyterLab user.  \nSee <a href="https://jupyterlab-contrib.github.io/assets/posts/2022/11/02/demo.html" target="_blank" rel="noreferrer">full post</a> for more details.',
-            "modifiedAt": 1667394000000.0,
+            "modifiedAt": 1667397600000.0,
             "type": "info",
             "options": {
                 "data": {
