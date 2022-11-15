@@ -46,6 +46,7 @@ from .extensions import MANAGERS as EXT_MANAGERS
 from .extensions.readonly import ReadOnlyExtensionManager
 from .handlers.announcements import (
     CheckForUpdate,
+    CheckForUpdateABC,
     CheckForUpdateHandler,
     NewsHandler,
     check_update_handler_path,
@@ -575,9 +576,9 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         config=True,
     )
 
-    check_for_update = Instance(
-        klass=CheckForUpdate,
-        args=(__version__,),
+    check_for_updates_class = Type(
+        default_value=CheckForUpdate,
+        klass=CheckForUpdateABC,
         config=True,
         help="""A callable class that receives the current version at instantiation and calling it must return asynchronously a string indicating which version is available and how to install or None if no update is available. The string supports Markdown format.""",
     )
@@ -795,7 +796,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                         check_update_handler_path,
                         CheckForUpdateHandler,
                         {
-                            "update_checker": self.check_for_update,
+                            "update_checker": self.check_for_updates_class(__version__),
                         },
                     ),
                     (
