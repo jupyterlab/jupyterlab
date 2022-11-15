@@ -64,15 +64,6 @@ test.describe('Initialization', () => {
     await guestPage.notebook.open(pathUntitled);
 
     const nbPanel = await page.notebook.getNotebookInPanel();
-    expect(await nbPanel?.screenshot()).toMatchSnapshot(
-      'initialization-create-notebook-host.png'
-    );
-    const nbPanelGuest = await guestPage.notebook.getNotebookInPanel();
-    expect(await nbPanelGuest?.screenshot()).toMatchSnapshot(
-      'initialization-create-notebook-guest.png'
-    );
-
-    await Promise.race([galata.sleep(500), page.notebook.close(true)]);
     if (
       await page.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
     ) {
@@ -80,6 +71,25 @@ test.describe('Initialization', () => {
         .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
         .click();
     }
+    expect(await nbPanel?.screenshot()).toMatchSnapshot(
+      'initialization-create-notebook-host.png'
+    );
+
+    const nbPanelGuest = await guestPage.notebook.getNotebookInPanel();
+    if (
+      await guestPage
+        .locator('.jp-Dialog-header:text("Select Kernel")')
+        .isVisible()
+    ) {
+      await guestPage
+        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
+        .click();
+    }
+    expect(await nbPanelGuest?.screenshot()).toMatchSnapshot(
+      'initialization-create-notebook-guest.png'
+    );
+
+    await page.notebook.close(true);
     await guestPage.notebook.close(true);
     const contents = galata.newContentsHelper(request);
     await contents.deleteFile(`${tmpPath}/${pathUntitled}`);
@@ -99,14 +109,29 @@ test.describe('Initialization', () => {
 
     await guestPage.filebrowser.refresh();
     await guestPage.notebook.open(exampleNotebook);
-    await guestPage.notebook.activate(exampleNotebook);
 
     const nbPanel = await page.notebook.getNotebookInPanel();
+    if (
+      await page.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
+    ) {
+      await page
+        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
+        .click();
+    }
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
       'initialization-open-notebook-host.png'
     );
 
     const nbPanelGuest = await guestPage.notebook.getNotebookInPanel();
+    if (
+      await guestPage
+        .locator('.jp-Dialog-header:text("Select Kernel")')
+        .isVisible()
+    ) {
+      await guestPage
+        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
+        .click();
+    }
     expect(await nbPanelGuest?.screenshot()).toMatchSnapshot(
       'initialization-open-notebook-guest.png'
     );
