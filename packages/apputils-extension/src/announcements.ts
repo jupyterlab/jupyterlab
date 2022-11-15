@@ -53,7 +53,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
   ): void => {
     const CONFIG_SECTION_NAME = announcements.id.replace(/[^\w]/g, '');
 
-    Promise.all([
+    void Promise.all([
       app.restored,
       settingRegistry?.load('@jupyterlab/apputils-extension:notification') ??
         Promise.resolve(null),
@@ -75,7 +75,11 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if ((tags ?? []).some(tag => ['news', 'update'].includes(tag)) && id) {
           const update: { [k: string]: INewsState } = {};
           update[id] = { seen: true, dismissed: true };
-          config.update(update as any);
+          config.update(update as any).catch(reason => {
+            console.error(
+              `Failed to update the announcements config:\n${reason}`
+            );
+          });
         }
       });
 
@@ -150,7 +154,11 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
-                      config.update(update as any);
+                      config.update(update as any).catch(reason => {
+                        console.error(
+                          `Failed to update the announcements config:\n${reason}`
+                        );
+                      });
                     }
                   }
                 ];
@@ -158,7 +166,11 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   options.autoClose = 5000;
                   const update: { [k: string]: INewsState } = {};
                   update[id] = { seen: true };
-                  config.update(update as any);
+                  config.update(update as any).catch(reason => {
+                    console.error(
+                      `Failed to update the announcements config:\n${reason}`
+                    );
+                  });
                 }
 
                 Notification.emit(message, type, options);
@@ -209,7 +221,11 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 options.autoClose = 5000;
                 const update: { [k: string]: INewsState } = {};
                 update[id] = { seen: true };
-                config.update(update as any);
+                config.update(update as any).catch(reason => {
+                  console.error(
+                    `Failed to update the announcements config:\n${reason}`
+                  );
+                });
               }
               notificationId = Notification.emit(message, type, options);
             }
