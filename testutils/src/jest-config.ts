@@ -1,6 +1,12 @@
 import path from 'path';
 
-const esModules = ['lib0', 'y-protocols', 'y-websocket', 'yjs'].join('|');
+const esModules = [
+  '@jupyter-notebook/ydoc',
+  'lib0',
+  'y-protocols',
+  'y-websocket',
+  'yjs'
+].join('|');
 
 module.exports = function (baseDir: string) {
   return {

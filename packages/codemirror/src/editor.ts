@@ -10,7 +10,7 @@ import {
   IObservableMap,
   IObservableString
 } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import * as models from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,

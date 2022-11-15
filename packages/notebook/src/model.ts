@@ -23,13 +23,13 @@ import {
   IObservableUndoableList,
   ModelDB
 } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import * as models from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
+import { ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
@@ -87,9 +87,9 @@ export class NotebookModel implements INotebookModel {
     } else {
       this.modelDB = new ModelDB();
     }
-    this.sharedModel = models.YNotebook.create(
-      options.disableDocumentWideUndoRedo ?? false
-    ) as models.ISharedNotebook;
+    this.sharedModel = new models.YNotebook({
+      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
+    }) as models.ISharedNotebook;
     this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
       options.contentFactory || NotebookModel.defaultContentFactory;
@@ -434,7 +434,11 @@ close the notebook without saving it.`,
           // and the local attribute are synchronized one way shared model -> _dirty
           this.dirty = value.newValue;
         } else if (value.oldValue !== value.newValue) {
-          this.triggerStateChange(value);
+          this.triggerStateChange({
+            newValue: undefined,
+            oldValue: undefined,
+            ...value
+          });
         }
       });
     }
@@ -450,13 +454,15 @@ close the notebook without saving it.`,
     }
 
     if (changes.metadataChange) {
-      const metadata = changes.metadataChange.newValue as JSONObject;
-      this._modelDBMutex(() => {
-        this.metadata.clear();
-        Object.entries(metadata).forEach(([key, value]) => {
-          this.metadata.set(key, value);
+      const metadata = this.sharedModel.getMetadata();
+      if (metadata) {
+        this._modelDBMutex(() => {
+          this.metadata.clear();
+          Object.entries(metadata).forEach(([key, value]) => {
+            this.metadata.set(key, value);
+          });
         });
-      });
+      }
     }
   }
 

@@ -17,7 +17,7 @@ import {
   WebSocketProvider
 } from '@jupyterlab/docprovider';
 import { ServerConnection } from '@jupyterlab/services';
-import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
+import { DocumentChange, YDocument } from '@jupyter-notebook/ydoc';
 
 /**
  * The default document provider plugin

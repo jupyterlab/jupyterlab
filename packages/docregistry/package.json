@@ -41,6 +41,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyter-notebook/ydoc": "~0.2.0",
     "@jupyterlab/apputils": "^3.6.0-alpha.3",
     "@jupyterlab/codeeditor": "^3.6.0-alpha.3",
     "@jupyterlab/codemirror": "^3.6.0-alpha.3",
@@ -50,7 +51,6 @@
     "@jupyterlab/rendermime": "^3.6.0-alpha.3",
     "@jupyterlab/rendermime-interfaces": "^3.6.0-alpha.3",
     "@jupyterlab/services": "^6.6.0-alpha.3",
-    "@jupyterlab/shared-models": "^3.6.0-alpha.3",
     "@jupyterlab/translation": "^3.6.0-alpha.3",
     "@jupyterlab/ui-components": "^3.6.0-alpha.3",
     "@lumino/algorithm": "^1.9.0",

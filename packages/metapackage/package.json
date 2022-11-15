@@ -105,7 +105,6 @@
     "@jupyterlab/settingeditor": "^3.6.0-alpha.3",
     "@jupyterlab/settingeditor-extension": "^3.6.0-alpha.3",
     "@jupyterlab/settingregistry": "^3.6.0-alpha.3",
-    "@jupyterlab/shared-models": "^3.6.0-alpha.3",
     "@jupyterlab/shortcuts-extension": "^3.6.0-alpha.3",
     "@jupyterlab/statedb": "^3.6.0-alpha.3",
     "@jupyterlab/statusbar": "^3.6.0-alpha.3",

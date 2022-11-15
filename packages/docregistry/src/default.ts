@@ -7,7 +7,7 @@ import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IModelDB, IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import * as models from '@jupyterlab/shared-models';
+import * as models from '@jupyter-notebook/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -172,7 +172,11 @@ export class DocumentModel
           // and the local attribute are synchronized one way shared model -> _dirty
           this.dirty = value.newValue;
         } else if (value.oldValue !== value.newValue) {
-          this.triggerStateChange(value);
+          this.triggerStateChange({
+            newValue: undefined,
+            oldValue: undefined,
+            ...value
+          });
         }
       });
     }
