@@ -206,10 +206,9 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const firstProvider = [...this._activeProviders][0];
     const provider = this._providers.get(firstProvider);
 
-    let renderer = provider?.renderer;
-    if (!renderer) {
-      renderer = Completer.defaultRenderer;
-    }
+    let renderer =
+      provider?.renderer ??
+      Completer.getDefaultRenderer(completerContext.sanitizer);
     const modelFactory = provider?.modelFactory;
     let model: Completer.IModel;
     if (modelFactory) {

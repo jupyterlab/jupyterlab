@@ -60,12 +60,11 @@ export class Completer extends Widget {
    */
   constructor(options: Completer.IOptions) {
     super({ node: document.createElement('div') });
-    this._renderer = options.renderer || Completer.defaultRenderer;
-
-    this.model = options.model || null;
-    this.editor = options.editor || null;
-    this.addClass('jp-Completer');
     this.sanitizer = options.sanitizer ?? new Sanitizer();
+    this._renderer = options.renderer ?? Completer.getDefaultRenderer(this.sanitizer);
+    this.model = options.model ?? null;
+    this.editor = options.editor ?? null;
+    this.addClass('jp-Completer');
   }
 
   /**
@@ -674,7 +673,7 @@ export class Completer extends Widget {
           let node: HTMLElement;
           const nodeRenderer =
             this._renderer.createDocumentationNode ??
-            Completer.defaultRenderer.createDocumentationNode;
+            Completer.getDefaultRenderer(this.sanitizer).createDocumentationNode;
           node = nodeRenderer(activeItem);
           docPanel!.textContent = '';
           docPanel!.appendChild(node);
@@ -731,7 +730,7 @@ export namespace Completer {
     /**
      * Sanitizer used to sanitize html strings
      */
-    sanitizer?: Sanitizer;
+    sanitizer?: ISanitizer;
   }
 
   /**
@@ -948,14 +947,15 @@ export namespace Completer {
     /**
      * The sanitizer used to sanitize untrusted html inputs.
      */
-    sanitizer: Sanitizer;
+    readonly sanitizer: ISanitizer;
   }
 
   /**
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
-    sanitizer: Sanitizer = new Sanitizer();
+    constructor(readonly sanitizer: ISanitizer = new Sanitizer()) {};
+
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
      */
@@ -1089,9 +1089,22 @@ export namespace Completer {
   }
 
   /**
+   * Default renderer
+   */
+  let _defaultRenderer: IRenderer;
+
+  /**
    * The default `IRenderer` instance.
    */
-  export const defaultRenderer = new Renderer();
+  export function getDefaultRenderer(sanitizer?: ISanitizer): IRenderer {
+    if (
+      !_defaultRenderer ||
+      (sanitizer && _defaultRenderer.sanitizer !== sanitizer)
+    ) {
+      _defaultRenderer = new Renderer(sanitizer)
+    }
+    return this._defaultRenderer;
+  };
 }
 
 /**
