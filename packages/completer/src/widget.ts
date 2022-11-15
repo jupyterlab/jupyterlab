@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { defaultSanitizer, HoverBox, ISanitizer, Sanitizer } from '@jupyterlab/apputils';
+import { defaultSanitizer, HoverBox, ISanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
@@ -1062,7 +1062,7 @@ export namespace Completer {
   /**
    * The default `IRenderer` instance.
    */
-  export function getDefaultRenderer(sanitizer?: ISanitizer): IRenderer {
+  export function getDefaultRenderer(sanitizer?: ISanitizer): Renderer {
     if (
       !_defaultRenderer ||
       (sanitizer && _defaultRenderer.sanitizer !== sanitizer)
