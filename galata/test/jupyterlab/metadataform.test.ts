@@ -109,7 +109,7 @@ async function getCellMetadata(
 ): Promise<ObservableJSON> {
   return await page.evaluate(cellNum => {
     let nb = window.jupyterapp.shell.currentWidget;
-    return nb.model.cells.get(cellNum).metadata.toJSON();
+    return nb.model.cells.get(cellNum).metadata;
   }, cellNumber);
 }
 
@@ -121,7 +121,7 @@ async function getNotebookMetadata(
 ): Promise<ObservableJSON> {
   return await page.evaluate(() => {
     let nb = window.jupyterapp.shell.currentWidget;
-    return nb.model.metadata.toJSON();
+    return nb.model.metadata;
   });
 }
 
