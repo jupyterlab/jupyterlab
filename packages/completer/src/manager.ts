@@ -217,7 +217,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       model = new CompleterModel();
     }
 
-    const completer = new Completer({ model, renderer });
+    const { sanitizer } = completerContext;
+    const completer = new Completer({ model, renderer, sanitizer });
     completer.showDocsPanel = this._showDoc;
     completer.hide();
     Widget.attach(completer, document.body);
