@@ -315,7 +315,11 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
             ].includes(change.name) &&
             settings.get(change.name).composite !== change.newValue
           ) {
-            settings.set(change.name, change.newValue);
+            settings.set(change.name, change.newValue).catch(reason => {
+              console.error(
+                `Failed to set the setting '${change.name}':\n${reason}`
+              );
+            });
           }
         };
         docManager.stateChanged.connect(onStateChanged);
