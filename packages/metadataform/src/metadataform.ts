@@ -6,7 +6,6 @@
  */
 
 import { NotebookTools } from '@jupyterlab/notebook';
-import { IObservableJSON } from '@jupyterlab/observables';
 import {
   ITranslator,
   nullTranslator,
@@ -178,7 +177,7 @@ export class MetadataFormWidget
       ) {
         continue;
       }
-      let currentMetadata: IObservableJSON;
+      let currentMetadata: PartialJSONObject;
       let metadataObject: Private.IMetadataRepresentation;
 
       // Linking the working variable to the corresponding metadata and representation.
@@ -219,9 +218,7 @@ export class MetadataFormWidget
 
       // Deep copy of the metadata if not already done.
       if (!(baseMetadataKey in metadataObject)) {
-        metadataObject[baseMetadataKey] = currentMetadata.toJSON()[
-          baseMetadataKey
-        ] as PartialJSONObject;
+        metadataObject[baseMetadataKey] = currentMetadata[baseMetadataKey];
       }
       if (metadataObject[baseMetadataKey] === undefined)
         metadataObject[baseMetadataKey] = {};
@@ -269,16 +266,16 @@ export class MetadataFormWidget
 
     // Set the cell metadata or delete it if value is undefined or empty object.
     for (let [key, value] of Object.entries(cellMetadataObject)) {
-      if (value === undefined) cell.model.metadata.delete(key);
-      else cell.model.metadata.set(key, value as ReadonlyPartialJSONValue);
+      if (value === undefined) cell.model.deleteMetadata(key);
+      else cell.model.setMetadata(key, value as ReadonlyPartialJSONValue);
     }
 
     // Set the notebook metadata or delete it if value is undefined or empty object.
     if (!this._notebookModelNull) {
       for (let [key, value] of Object.entries(notebookMetadataObject)) {
-        if (value === undefined) notebook!.model!.metadata.delete(key);
+        if (value === undefined) notebook!.model!.deleteMetadata(key);
         else
-          notebook!.model!.metadata.set(key, value as ReadonlyPartialJSONValue);
+          notebook!.model!.setMetadata(key, value as ReadonlyPartialJSONValue);
       }
     }
 
@@ -400,9 +397,9 @@ export class MetadataFormWidget
 
       // Associates the correct metadata object to the working object.
       if (this._metaInformation[metadataKey]?.level === 'notebook') {
-        workingObject = notebook!.model!.metadata.toJSON();
+        workingObject = notebook!.model!.metadata;
       } else {
-        workingObject = cell.model.metadata.toJSON();
+        workingObject = cell.model.metadata;
       }
 
       let hasValue = true;
