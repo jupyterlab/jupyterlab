@@ -31,7 +31,7 @@ for what is essential, the document's content.
 
 A nice improvement from Real Time Collaboration (RTC) is that you don't need to worry
 about saving a document anymore. It is automatically taken care of: each change made by
-any user to a document is saved after one second. You can see it with the dirty indicator
+any user to a document is saved after one second by default. You can see it with the dirty indicator
 being set after a change, and cleared after saving. This even works if the file is modified
 outside of JupyterLab's editor, for instance in the back-end with a third-party editor or
 after changing branch in a version control system such as ``git``. In this case, the file is
@@ -60,3 +60,22 @@ on the same document.
     looses connection and goes offline for a while. You should never have to touch it, and it is
     fine to just ignore it, including in your version control system (don't commit this file). If
     you happen to delete it, there shouldn't be any serious consequence either.
+
+There are a number of settings that you can change:
+
+.. code-block:: bash
+
+  # The delay of inactivity (in seconds) after which a document is saved to disk (default: 1).
+  # If None, the document will never be saved.
+  jupyter lab --collaborative --YDocExtension.document_save_delay=0.5
+
+  # The period (in seconds) to check for file changes on disk (default: 1).
+  # If 0, file changes will only be checked when saving.
+  jupyter lab --collaborative --YDocExtension.file_poll_interval=2
+
+  # The delay (in seconds) to keep a document in memory in the back-end after all clients disconnect (default: 60).
+  # If None, the document will be kept in memory forever.
+  jupyter lab --collaborative --YDocExtension.document_cleanup_delay=100
+
+  # The YStore class to use for storing Y updates (default: JupyterSQLiteYStore).
+  jupyter lab --collaborative --YDocExtension.ystore_class=ypy_websocket.ystore.TempFileYStore
