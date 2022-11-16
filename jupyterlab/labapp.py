@@ -20,7 +20,7 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from notebook_shim.shim import NotebookConfigShimMixin
-from traitlets import Bool, Instance, Unicode, default
+from traitlets import Bool, Instance, Type, Unicode, default
 
 from ._version import __version__
 from .commands import (
