@@ -168,10 +168,10 @@ describe('metadataform/form simple', () => {
   it('should update cell metadata', async () => {
     const metadataForm = await buildForm();
     expect(
-      tracker.activeCell?.model.metadata.get('cell-metadata')
+      tracker.activeCell?.model.getMetadata('cell-metadata')
     ).toBeUndefined();
     metadataForm.updateMetadata({ '/cell-metadata': 'test value' });
-    expect(tracker.activeCell?.model.metadata.get('cell-metadata')).toBe(
+    expect(tracker.activeCell?.model.getMetadata('cell-metadata')).toBe(
       'test value'
     );
   });
@@ -179,22 +179,22 @@ describe('metadataform/form simple', () => {
   it('should update notebook metadata', async () => {
     const metadataForm = await buildForm();
     expect(
-      tracker.currentWidget?.model?.metadata.get('notebook-metadata')
+      tracker.currentWidget?.model?.getMetadata('notebook-metadata')
     ).toBeUndefined();
     metadataForm.updateMetadata({ '/notebook-metadata': 'test value' });
-    expect(
-      tracker.currentWidget?.model?.metadata.get('notebook-metadata')
-    ).toBe('test value');
+    expect(tracker.currentWidget?.model?.getMetadata('notebook-metadata')).toBe(
+      'test value'
+    );
   });
 
   it('should not update cell metadata if metadataKey is not in schema', async () => {
     const metadataForm = await buildForm();
     expect(
-      tracker.activeCell?.model.metadata.get('fake-metadata')
+      tracker.activeCell?.model.getMetadata('fake-metadata')
     ).toBeUndefined();
     metadataForm.updateMetadata({ '/fake-metadata': 'test value' });
     expect(
-      tracker.activeCell?.model.metadata.get('fake-metadata')
+      tracker.activeCell?.model.getMetadata('fake-metadata')
     ).toBeUndefined();
   });
 
@@ -205,11 +205,11 @@ describe('metadataform/form simple', () => {
     tracker.currentWidget!.content.activeCellIndex++;
 
     expect(
-      tracker.activeCell?.model.metadata.get('cell-metadata')
+      tracker.activeCell?.model.getMetadata('cell-metadata')
     ).toBeUndefined();
     metadataForm.updateMetadata({ '/cell-metadata': 'test value' });
     expect(
-      tracker.activeCell?.model.metadata.get('cell-metadata')
+      tracker.activeCell?.model.getMetadata('cell-metadata')
     ).toBeUndefined();
   });
 
