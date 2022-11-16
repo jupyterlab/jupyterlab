@@ -425,7 +425,7 @@ export class DocumentWidgetManager implements IDisposable {
 
       return Promise.resolve([
         confirm.button.accept,
-        confirm.button.displayType === 'warn'
+        isDirty ? confirm.button.displayType === 'warn' : true
       ]);
     } else {
       if (!isDirty) {
