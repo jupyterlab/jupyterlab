@@ -22,8 +22,8 @@ export class EventManager implements IDisposable {
   constructor(options: EventManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    void this._subscribe();
     this._stream = new Private.Stream(this);
+    void this._subscribe();
   }
 
   /**
