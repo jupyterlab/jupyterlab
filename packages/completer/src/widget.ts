@@ -61,7 +61,8 @@ export class Completer extends Widget {
   constructor(options: Completer.IOptions) {
     super({ node: document.createElement('div') });
     this.sanitizer = options.sanitizer ?? new Sanitizer();
-    this._renderer = options.renderer ?? Completer.getDefaultRenderer(this.sanitizer);
+    this._renderer =
+      options.renderer ?? Completer.getDefaultRenderer(this.sanitizer);
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass('jp-Completer');
@@ -673,7 +674,8 @@ export class Completer extends Widget {
           let node: HTMLElement;
           const nodeRenderer =
             this._renderer.createDocumentationNode ??
-            Completer.getDefaultRenderer(this.sanitizer).createDocumentationNode;
+            Completer.getDefaultRenderer(this.sanitizer)
+              .createDocumentationNode;
           node = nodeRenderer(activeItem);
           docPanel!.textContent = '';
           docPanel!.appendChild(node);
@@ -954,7 +956,7 @@ export namespace Completer {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
-    constructor(readonly sanitizer: ISanitizer = new Sanitizer()) {};
+    constructor(readonly sanitizer: ISanitizer = new Sanitizer()) {}
 
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
@@ -1101,10 +1103,10 @@ export namespace Completer {
       !_defaultRenderer ||
       (sanitizer && _defaultRenderer.sanitizer !== sanitizer)
     ) {
-      _defaultRenderer = new Renderer(sanitizer)
+      _defaultRenderer = new Renderer(sanitizer);
     }
     return this._defaultRenderer;
-  };
+  }
 }
 
 /**
