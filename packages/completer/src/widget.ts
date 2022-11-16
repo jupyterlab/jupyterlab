@@ -1057,7 +1057,7 @@ export namespace Completer {
   /**
    * Default renderer with custom sanitizer.
    */
-  let _defaultRenderer: IRenderer;
+  let _defaultRenderer: Renderer;
 
   /**
    * The default `IRenderer` instance.
@@ -1069,7 +1069,7 @@ export namespace Completer {
     ) {
       _defaultRenderer = new Renderer(sanitizer);
     }
-    return this._defaultRenderer;
+    return _defaultRenderer;
   }
 }
 
