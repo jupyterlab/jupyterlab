@@ -245,6 +245,10 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
         autosave === true || autosave === false ? autosave : true;
       app.commands.notifyCommandChanged(CommandIDs.toggleAutosave);
 
+      const confirmClosingDocument = settings.get('confirmClosingDocument')
+        .composite as boolean;
+      docManager.confirmClosingDocument = confirmClosingDocument ?? true;
+
       // Handle autosave interval
       const autosaveInterval = settings.get('autosaveInterval').composite as
         | number
@@ -296,6 +300,25 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       .then(([settings]) => {
         settings.changed.connect(onSettingsUpdated);
         onSettingsUpdated(settings);
+
+        const onStateChanged = (
+          sender: IDocumentManager,
+          change: IChangedArgs<any>
+        ): void => {
+          if (
+            [
+              'autosave',
+              'autosaveInterval',
+              'confirmClosingDocument',
+              'lastModifiedCheckMargin',
+              'renameUntitledFileOnSave'
+            ].includes(change.name) &&
+            settings.get(change.name).composite !== change.newValue
+          ) {
+            settings.set(change.name, change.newValue);
+          }
+        };
+        docManager.stateChanged.connect(onStateChanged);
       })
       .catch((reason: Error) => {
         console.error(reason.message);

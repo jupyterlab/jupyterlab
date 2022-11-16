@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, Time } from '@jupyterlab/coreutils';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -35,6 +35,31 @@ export class DocumentWidgetManager implements IDisposable {
    */
   get activateRequested(): ISignal<this, string> {
     return this._activateRequested;
+  }
+
+  /**
+   * Whether to ask confirmation to close a tab or not.
+   */
+  get confirmClosingDocument(): boolean {
+    return this._confirmClosingTab;
+  }
+  set confirmClosingDocument(v: boolean) {
+    if (this._confirmClosingTab !== v) {
+      const oldValue = this._confirmClosingTab;
+      this._confirmClosingTab = v;
+      this._stateChanged.emit({
+        name: 'confirmClosingDocument',
+        oldValue,
+        newValue: v
+      });
+    }
+  }
+
+  /**
+   * Signal triggered when an attribute changes.
+   */
+  get stateChanged(): ISignal<DocumentWidgetManager, IChangedArgs<any>> {
+    return this._stateChanged;
   }
 
   /**
@@ -333,7 +358,7 @@ export class DocumentWidgetManager implements IDisposable {
   /**
    * Ask the user whether to close an unsaved file.
    */
-  private _maybeClose(
+  private async _maybeClose(
     widget: Widget,
     translator?: ITranslator
   ): Promise<[boolean, boolean]> {
@@ -356,29 +381,71 @@ export class DocumentWidgetManager implements IDisposable {
       }
       return factory.readOnly === false;
     });
-    const factory = Private.factoryProperty.get(widget);
-    if (!factory) {
-      return Promise.resolve([true, true]);
-    }
-    const model = context.model;
-    if (!model.dirty || widgets.length > 1 || factory.readOnly) {
-      return Promise.resolve([true, true]);
-    }
     const fileName = widget.title.label;
-    const saveLabel = context.contentsModel?.writable
-      ? trans.__('Save')
-      : trans.__('Save as');
-    return showDialog({
-      title: trans.__('Save your work'),
-      body: trans.__('Save changes in "%1" before closing?', fileName),
-      buttons: [
+
+    const factory = Private.factoryProperty.get(widget);
+    const isDirty =
+      context.model.dirty &&
+      widgets.length <= 1 &&
+      !(factory?.readOnly ?? true);
+
+    // Ask confirmation
+    if (this.confirmClosingDocument) {
+      const buttons = [
         Dialog.cancelButton(),
-        Dialog.warnButton({ label: trans.__('Discard') }),
-        Dialog.okButton({ label: saveLabel })
-      ]
-    }).then(result => {
+        Dialog.okButton({
+          label: isDirty ? trans.__('Close and save') : trans.__('Close')
+        })
+      ];
+      if (isDirty) {
+        buttons.splice(
+          1,
+          0,
+          Dialog.warnButton({ label: trans.__('Close without saving') })
+        );
+      }
+
+      const confirm = await showDialog({
+        title: trans.__('Confirmation'),
+        body: trans.__('Please confirm you want to close "%1".', fileName),
+        checkbox: isDirty
+          ? null
+          : {
+              label: trans.__('Do not ask me again.'),
+              caption: trans.__(
+                'If checked, no confirmation to close a document will be asked in the future.'
+              )
+            },
+        buttons
+      });
+
+      if (confirm.isChecked) {
+        this.confirmClosingDocument = false;
+      }
+
+      return Promise.resolve([
+        confirm.button.accept,
+        confirm.button.displayType === 'warn'
+      ]);
+    } else {
+      if (!isDirty) {
+        return Promise.resolve([true, true]);
+      }
+
+      const saveLabel = context.contentsModel?.writable
+        ? trans.__('Save')
+        : trans.__('Save as');
+      const result = await showDialog({
+        title: trans.__('Save your work'),
+        body: trans.__('Save changes in "%1" before closing?', fileName),
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: trans.__('Discard') }),
+          Dialog.okButton({ label: saveLabel })
+        ]
+      });
       return [result.button.accept, result.button.displayType === 'warn'];
-    });
+    }
   }
 
   /**
@@ -432,7 +499,11 @@ export class DocumentWidgetManager implements IDisposable {
   protected translator: ITranslator;
   private _registry: DocumentRegistry;
   private _activateRequested = new Signal<this, string>(this);
+  private _confirmClosingTab = false;
   private _isDisposed = false;
+  private _stateChanged = new Signal<DocumentWidgetManager, IChangedArgs<any>>(
+    this
+  );
 }
 
 /**

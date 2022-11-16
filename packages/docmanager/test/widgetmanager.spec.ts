@@ -264,6 +264,22 @@ describe('@jupyterlab/docmanager', () => {
         await delegate.promise;
       });
 
+      it('should ask confirmation when a widget is closed', async () => {
+        manager.confirmClosingDocument = true;
+        const widget = manager.createWidget(widgetFactory, context);
+        const delegate = new PromiseDelegate();
+
+        widget.disposed.connect(async () => {
+          expect(manager.methods).toEqual(expect.arrayContaining(['onClose']));
+          await dismissDialog();
+          delegate.resolve(undefined);
+        });
+        widget.close();
+        await delegate.promise;
+        expect(widget.isAttached).toEqual(true);
+        widget.dispose();
+      });
+
       it('should prompt the user before closing', async () => {
         // Populate the model with content.
         context.model.fromString('foo');
