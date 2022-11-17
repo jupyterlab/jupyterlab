@@ -506,6 +506,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       continue: CommandIDs.debugContinue,
       terminate: CommandIDs.terminate,
       next: CommandIDs.next,
+      pause: CommandIDs.pause,
       stepIn: CommandIDs.stepIn,
       stepOut: CommandIDs.stepOut,
       evaluate: CommandIDs.evaluate
@@ -513,7 +514,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 
     const breakpointsCommands = {
       registry: commands,
-      pause: CommandIDs.pause
+      pause: CommandIDs.pauseOnExceptions
     };
 
     const sidebar = new Debugger.Sidebar({
@@ -682,6 +683,17 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.pause, {
+      label: trans.__('Pause'),
+      caption: trans.__('Pause'),
+      icon: Debugger.Icons.pauseIcon,
+      isEnabled: () =>
+        (service.session?.isStarted ?? false) && !service.hasStoppedThreads(),
+      execute: async () => {
+        await service.pause();
+      }
+    });
+
     commands.addCommand(CommandIDs.stepIn, {
       label: trans.__('Step In'),
       caption: trans.__('Step In'),
@@ -702,7 +714,7 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    commands.addCommand(CommandIDs.pause, {
+    commands.addCommand(CommandIDs.pauseOnExceptions, {
       label: trans.__('Enable / Disable pausing on exceptions'),
       caption: () =>
         service.isStarted
@@ -778,10 +790,11 @@ const main: JupyterFrontEndPlugin<void> = {
         CommandIDs.debugContinue,
         CommandIDs.terminate,
         CommandIDs.next,
+        CommandIDs.pause,
         CommandIDs.stepIn,
         CommandIDs.stepOut,
         CommandIDs.evaluate,
-        CommandIDs.pause
+        CommandIDs.pauseOnExceptions
       ].forEach(command => {
         palette.addItem({ command, category });
       });

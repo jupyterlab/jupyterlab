@@ -8,6 +8,7 @@ import stepIntoSvgStr from '../style/icons/step-into.svg';
 import stepOutSvgStr from '../style/icons/step-out.svg';
 import stepOverSvgStr from '../style/icons/step-over.svg';
 import variableSvgStr from '../style/icons/variable.svg';
+import pauseOnExceptionsSvgStr from '../style/icons/pause-on-exceptions.svg';
 import pauseSvgStr from '../style/icons/pause.svg';
 import viewBreakpointSvgStr from '../style/icons/view-breakpoint.svg';
 import openKernelSourceSvgStr from '../style/icons/open-kernel-source.svg';
@@ -23,6 +24,11 @@ export const closeAllIcon = new LabIcon({
 });
 
 export const pauseOnExceptionsIcon = new LabIcon({
+  name: 'debugger:pause-on-exceptions',
+  svgstr: pauseOnExceptionsSvgStr
+});
+
+export const pauseIcon = new LabIcon({
   name: 'debugger:pause',
   svgstr: pauseSvgStr
 });

@@ -92,6 +92,7 @@ describe('Debugger', () => {
         continue: '',
         terminate: '',
         next: '',
+        pause: '',
         stepIn: '',
         stepOut: '',
         evaluate: ''

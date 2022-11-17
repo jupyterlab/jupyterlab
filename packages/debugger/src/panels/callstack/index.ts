@@ -55,6 +55,15 @@ export class Callstack extends PanelWithToolbar {
     );
 
     this.toolbar.addItem(
+      'pause',
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.pause,
+        label: ''
+      })
+    );
+
+    this.toolbar.addItem(
       'step-in',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -113,6 +122,11 @@ export namespace Callstack {
      * The next / stepOver command ID.
      */
     next: string;
+
+    /**
+     * The pause command ID.
+     */
+    pause: string;
 
     /**
      * The stepIn command ID.

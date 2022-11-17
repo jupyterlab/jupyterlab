@@ -162,6 +162,11 @@ export interface IDebugger {
   start(): Promise<void>;
 
   /**
+   * Makes the current thread pause if possible.
+   */
+  pause(): Promise<void>;
+
+  /**
    * Makes the current thread step in a function / method if possible.
    */
   stepIn(): Promise<void>;
