@@ -159,6 +159,13 @@ describe('fileeditorcodewrapper', () => {
         expect(widget.editor.hasFocus()).toBe(true);
       });
     });
+
+    describe('#ready', () => {
+      it('should resolve after initialization', async () => {
+        await context.initialize(true);
+        return expect(widget.ready).resolves.toBe(undefined);
+      });
+    });
   });
 
   describe('FileEditorFactory', () => {
