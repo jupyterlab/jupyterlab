@@ -6415,10 +6415,10 @@ contains many enhancements, bugfixes, and refinements, including:
 - Handle asynchronous comm messages in the services library more
   correctly (Note: this means `@jupyterlab/services` is now at version
   2.0!)
-  ([\[#4115\](https://github.com/jupyterlab/jupyterlab/issues/4115)](https://github.com/jupyterlab/jupyterlab/pull/4115)).
+  (\[[#4115](https://github.com/jupyterlab/jupyterlab/issues/4115)\](https://github.com/jupyterlab/jupyterlab/pull/4115)).
 - Display the kernel banner in the console when a kernel is restarted
   to mark the restart
-  ([\[#3663\](https://github.com/jupyterlab/jupyterlab/issues/3663)](https://github.com/jupyterlab/jupyterlab/pull/3663)).
+  (\[[#3663](https://github.com/jupyterlab/jupyterlab/issues/3663)\](https://github.com/jupyterlab/jupyterlab/pull/3663)).
 - Many tweaks to the UI, as well as better error handling.
 
 ## [Beta 1 (v0.31.0)](https://github.com/jupyterlab/jupyterlab/releases/tag/v0.31.0)
