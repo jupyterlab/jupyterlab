@@ -4,8 +4,8 @@
 Announcements
 =============
 
-To get notify for Jupyter news, your consent is required (this is an opt-in feature).
-Once you have answer the request, you can change your decision in the *Notification*
+Your consent is required to get Jupyter news (this is an opt-in feature).
+Once you have answered the request, you can change your decision in the *Notification*
 settings.
 
 Configuration
@@ -21,7 +21,7 @@ It can be disabled as any plugin by executing in a terminal prior to start Jupyt
 Check for updates
 ^^^^^^^^^^^^^^^^^
 
-You can also control whether to check for update or not at two levels:
+You can also control whether to check for updates or not at two levels:
 
 - on the server side through a command-line option ``--LabApp.check_for_updates_class="jupyterlab.NeverCheckForUpdate"``
 - on the frontend through the setting *checkForUpdates* in the *Notification* section.

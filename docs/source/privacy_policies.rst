@@ -1,12 +1,12 @@
 Privacy policies
 ================
 
-Last modified: November 15th, 2022
+Last modified: November 17th, 2022
 
 Introduction
 ------------
 
-JupyterLab development team avoids as much as possible to use external
+JupyterLab development team avoids as much as possible the use of external
 web services. However to provide some features requests to those kind of
 services are required (see below for a full list). But those features are
 opt-in by default (aka you need to explicitly consent to activate them).
@@ -16,7 +16,7 @@ ensures the necessary steps are taken to protect the privacy of its users
 throughout their experience.
 
 This policy sets out the different areas where user privacy is concerned
-and outlines the obligations and requirements of the users, JupyterLab
+and outlines the obligations and requirements of the JupyterLab
 development team.
 
 What information do we collect?

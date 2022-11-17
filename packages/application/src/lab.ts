@@ -132,7 +132,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * Get a handle on the notification manager.
    *
    * ### Notes
-   * You should use stable API `Notification.manager` form `@jupyterlab/apputils`.
+   * You should use stable API `Notification.manager` from `@jupyterlab/apputils`.
    *
    * @deprecated This is an experimental feature used for integration testing.
    * @private

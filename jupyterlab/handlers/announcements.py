@@ -79,7 +79,7 @@ class CheckForUpdate(CheckForUpdateABC):
         """Get the notification message if a new version is available.
 
         Returns:
-            The notification message or None if there is not update.
+            The notification message or None if there is no update.
         """
         http_client = httpclient.AsyncHTTPClient()
         try:
