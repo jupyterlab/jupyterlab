@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.6.0-alpha.3",
+    "@jupyterlab/apputils": "^3.6.0-alpha.3",
     "@jupyterlab/completer": "^3.6.0-alpha.3",
     "@jupyterlab/console": "^3.6.0-alpha.3",
     "@jupyterlab/fileeditor": "^3.6.0-alpha.3",

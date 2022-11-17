@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { defaultSanitizer, HoverBox } from '@jupyterlab/apputils';
+import { defaultSanitizer, HoverBox, ISanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
@@ -59,11 +59,18 @@ export class Completer extends Widget {
    */
   constructor(options: Completer.IOptions) {
     super({ node: document.createElement('div') });
-    this._renderer = options.renderer || Completer.defaultRenderer;
+    this.sanitizer = options.sanitizer ?? defaultSanitizer;
+    this._renderer =
+      options.renderer ?? Completer.getDefaultRenderer(this.sanitizer);
     this.model = options.model || null;
     this.editor = options.editor || null;
     this.addClass('jp-Completer');
   }
+
+  /**
+   * The sanitizer used to sanitize untrusted html inputs.
+   */
+  readonly sanitizer: ISanitizer;
 
   /**
    * The active index.
@@ -639,7 +646,9 @@ export class Completer extends Widget {
     if (activeItem.documentation) {
       let node: HTMLElement;
       if (!this._renderer.createDocumentationNode) {
-        node = Completer.defaultRenderer.createDocumentationNode(activeItem);
+        node = Completer.getDefaultRenderer(
+          this.sanitizer
+        ).createDocumentationNode(activeItem);
       } else {
         node = this._renderer.createDocumentationNode(activeItem);
       }
@@ -685,6 +694,11 @@ export namespace Completer {
      * The renderer for the completer widget nodes.
      */
     renderer?: IRenderer;
+
+    /**
+     * Sanitizer used to sanitize html strings
+     */
+    sanitizer?: ISanitizer;
   }
 
   /**
@@ -892,12 +906,19 @@ export namespace Completer {
     createDocumentationNode?(
       activeItem: CompletionHandler.ICompletionItem
     ): HTMLElement;
+
+    /**
+     * The sanitizer used to sanitize untrusted html inputs.
+     */
+    readonly sanitizer: ISanitizer;
   }
 
   /**
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
+    constructor(readonly sanitizer: ISanitizer = defaultSanitizer) {}
+
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
      */
@@ -965,7 +986,7 @@ export namespace Completer {
       const matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(result, {
+      matchNode.innerHTML = this.sanitizer.sanitize(result, {
         allowedTags: ['mark']
       });
       return matchNode;
@@ -1028,8 +1049,28 @@ export namespace Completer {
 
   /**
    * The default `IRenderer` instance.
+   *
+   * @deprecated Will be removed in v4 - you should use `getDefaultRenderer` instead.
    */
   export const defaultRenderer = new Renderer();
+
+  /**
+   * Default renderer with custom sanitizer.
+   */
+  let _defaultRenderer: Renderer;
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export function getDefaultRenderer(sanitizer?: ISanitizer): Renderer {
+    if (
+      !_defaultRenderer ||
+      (sanitizer && _defaultRenderer.sanitizer !== sanitizer)
+    ) {
+      _defaultRenderer = new Renderer(sanitizer);
+    }
+    return _defaultRenderer;
+  }
 }
 
 /**

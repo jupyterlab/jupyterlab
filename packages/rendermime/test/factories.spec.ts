@@ -63,7 +63,7 @@ The outer pipes (|) are optional, and you don't need to make the
 raw Markdown line up prettily. You can also use inline Markdown.
 `;
 
-import { defaultSanitizer } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import {
@@ -91,7 +91,7 @@ function encodeChars(txt: string): string {
   return txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-const sanitizer = defaultSanitizer;
+const sanitizer = new Sanitizer();
 const defaultOptions: any = {
   sanitizer,
   linkHandler: null,
