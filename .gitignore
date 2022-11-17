@@ -122,5 +122,7 @@ junit.xml
 .history
 .vscode
 .vs
+.vscode/*
+!.vscode/extension.json
 
 .jupyter_releaser_checkout

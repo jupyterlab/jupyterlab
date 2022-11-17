@@ -215,8 +215,16 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   flex: 0 0 70%;
 }
 
+.jp-Stdin-input::placeholder {
+  opacity: 0;
+}
+
 .jp-Stdin-input:focus {
   box-shadow: none;
+}
+
+.jp-Stdin-input:focus::placeholder {
+  opacity: 1;
 }
 
 /*-----------------------------------------------------------------------------
