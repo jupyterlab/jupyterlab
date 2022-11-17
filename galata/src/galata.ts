@@ -24,6 +24,9 @@ export namespace galata {
    * - Deactivate codemirror cursor blinking to avoid noise in screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
+    '@jupyterlab/docmanager-extension:plugin': {
+      confirmClosingDocument: false
+    },
     '@jupyterlab/fileeditor-extension:plugin': {
       editorConfig: { cursorBlinkRate: 0 }
     },
