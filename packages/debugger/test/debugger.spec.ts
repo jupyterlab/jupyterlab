@@ -208,9 +208,9 @@ describe('Debugger', () => {
         expect(title.length).toBe(1);
         expect(title[0].innerHTML).toContain('Callstack');
       });
-      it('should have six buttons', () => {
+      it('should have seven buttons', () => {
         const buttons = toolbar.querySelectorAll('button');
-        expect(buttons.length).toBe(6);
+        expect(buttons.length).toBe(7);
       });
     });
     describe('Breakpoints toolbar', () => {
