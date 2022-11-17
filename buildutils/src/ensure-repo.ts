@@ -71,13 +71,11 @@ const UNUSED: Dict<string[]> = {
     // The libraries needed for building other extensions.
     '@babel/core',
     '@babel/preset-env',
-    'babel-loader',
     'css-loader',
     'path-browserify',
     'process',
     'style-loader',
     'terser-webpack-plugin',
-    'to-string-loader',
     'webpack-cli',
     'worker-loader'
   ],

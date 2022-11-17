@@ -91,7 +91,6 @@
     "jest-raw-loader": "^1.0.1",
     "jest-summary-reporter": "^0.0.2",
     "rimraf": "~3.0.0",
-    "shell-quote": "^1.7.2",
     "text-encoding": "^0.7.0",
     "ts-jest": "^26.3.0",
     "typedoc": "~0.22.10",

@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////
 
 import * as path from 'path';
-import commander from 'commander';
+import { program as commander } from 'commander';
 import webpack from 'webpack';
 import generateConfig from './extensionConfig';
 import { stdout as colors } from 'supports-color';
