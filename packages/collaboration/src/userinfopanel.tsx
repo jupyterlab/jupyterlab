@@ -3,7 +3,7 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { User, UserManager } from '@jupyterlab/services';
+import { User } from '@jupyterlab/services';
 
 import { Panel } from '@lumino/widgets';
 
@@ -12,10 +12,10 @@ import * as React from 'react';
 import { UserIconComponent } from './components';
 
 export class UserInfoPanel extends Panel {
-  private _profile: UserManager.IManager;
+  private _profile: User.IManager;
   private _body: UserInfoBody;
 
-  constructor(user: UserManager.IManager) {
+  constructor(user: User.IManager) {
     super({});
     this.addClass('jp-UserInfoPanel');
 

@@ -4,6 +4,7 @@
 import { CommandLinker } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
+import { UserManager } from '@jupyterlab/services/src/user';
 import { ContextMenuSvg } from '@jupyterlab/ui-components';
 import { IIterator } from '@lumino/algorithm';
 import { Application, IPlugin } from '@lumino/application';
