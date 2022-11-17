@@ -169,7 +169,7 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
         `${galata.Routes.extensions}?query&page=1&per_page=30&refresh=0`
       )
     ),
-    page.click('button:has-text("Enable")')
+    page.click('button:has-text("Yes")')
   ]);
   await page.waitForSelector(
     '.jp-extensionmanager-view >> .jp-AccordionPanel-title[aria-expanded="false"] >> text=Warning'
