@@ -250,8 +250,11 @@ export namespace ServiceManager {
 
     /**
      * The events service manager.
+     *
+     * #### Notes
+     * The events manager is optional until JupyterLab 4.
      */
-    readonly events: Event.IManager;
+    readonly events?: Event.IManager;
 
     /**
      * A promise that fulfills when the manager is initially ready.
