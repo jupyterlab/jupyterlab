@@ -75,7 +75,7 @@ test.describe('Benchmark', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    galata.Mock.mockSettings(page, [], galata.DEFAULT_SETTINGS);
+    await galata.Mock.mockSettings(page, [], galata.DEFAULT_SETTINGS);
   });
 
   // Remove benchmark files
