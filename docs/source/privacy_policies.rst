@@ -100,8 +100,8 @@ The service providing NPM packages (https://unpkg.com/) is not providing informa
 collection.
 If data are collected, they are not accessible to and not readable for the JupyterLab development team.
 
-The project is open source and the origin server is deployed on `Fly.io <https://fly.io/>`_ (see their `privacy policy <https://fly.io/legal/privacy-policy/>`_)
-and the content delivery network is powered by `Cloudflare <https://www.cloudflare.com/>`_ (see their `privacy policy <https://www.cloudflare.com/privacypolicy/>`_).
+The project is open source and the origin server is deployed on `Fly.io <https://fly.io/>`_ (see `Fly.io privacy policy <https://fly.io/legal/privacy-policy/>`_)
+and the content delivery network is powered by `Cloudflare <https://www.cloudflare.com/>`_ (see `Cloudflare privacy policy <https://www.cloudflare.com/privacypolicy/>`_).
 
 
 Changes to policy
