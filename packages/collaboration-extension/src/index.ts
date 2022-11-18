@@ -59,7 +59,7 @@ const menuBarPlugin: JupyterFrontEndPlugin<void> = {
     const { shell } = app;
     const { user } = app.serviceManager;
 
-    if (PageConfig.getOption('collaborative') !== 'true') {
+    if (PageConfig.getOption('collaborative') !== 'true' || !user) {
       return;
     }
 

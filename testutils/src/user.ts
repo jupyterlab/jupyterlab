@@ -12,9 +12,7 @@ import {
 /**
  * The user API service manager.
  */
-export class FakeUserManager
-  extends BaseManager
-  implements UserManager.IManager {
+export class FakeUserManager extends BaseManager implements User.IManager {
   private _isReady = false;
   private _ready: Promise<void>;
 

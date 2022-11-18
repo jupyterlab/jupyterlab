@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { ServerConnection, UserManager } from '@jupyterlab/services';
+import { ServerConnection, User } from '@jupyterlab/services';
 import { DocumentChange, YDocument } from '@jupyter-notebook/ydoc';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
@@ -42,12 +42,12 @@ export class WebSocketProvider implements IDocumentProvider {
 
     const user = options.user;
 
-    user.ready
+    user?.ready
       .then(() => {
         this._onUserChanged(user);
       })
       .catch(e => console.error(e));
-    user.userChanged.connect(this._onUserChanged, this);
+    user?.userChanged.connect(this._onUserChanged, this);
 
     const serverSettings = ServerConnection.makeSettings();
     const url = URLExt.join(
@@ -106,7 +106,7 @@ export class WebSocketProvider implements IDocumentProvider {
     Signal.clearData(this);
   }
 
-  private _onUserChanged(user: UserManager.IManager): void {
+  private _onUserChanged(user: User.IManager): void {
     this._awareness.setLocalStateField('user', user.identity);
   }
 
@@ -138,6 +138,6 @@ export namespace WebSocketProvider {
     /**
      * The user data
      */
-    user: UserManager.IManager;
+    user?: User.IManager;
   }
 }
