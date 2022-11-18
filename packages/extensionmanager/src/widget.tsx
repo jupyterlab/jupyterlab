@@ -789,7 +789,7 @@ to work, this panel needs to fetch data from web services.`)}
               target="_blank"
               rel="noreferrer"
             >
-              {this.trans.__('Please read the privacy policy.')}
+              {this._trans.__('Please read the privacy policy.')}
             </a>
           </p>
           <div style={{ paddingTop: 8 }}>
