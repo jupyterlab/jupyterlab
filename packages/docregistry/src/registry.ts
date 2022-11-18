@@ -1310,7 +1310,8 @@ export namespace DocumentRegistry {
       extensions: ['.ipynb'],
       contentType: 'notebook',
       fileFormat: 'json',
-      icon: notebookIcon
+      icon: notebookIcon,
+      collaborative: true
     };
   }
 
