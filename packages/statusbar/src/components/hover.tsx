@@ -20,7 +20,9 @@ const hoverItem = style({
  */
 export function showPopup(options: Popup.IOptions): Popup {
   const dialog = new Popup(options);
-  dialog.launch();
+  if (!options.startHidden) {
+    dialog.launch();
+  }
   return dialog;
 }
 
@@ -31,7 +33,7 @@ export class Popup extends Widget {
   /**
    * Construct a new Popup.
    */
-  constructor(options: Popup.IOptions) {
+  constructor(options: Omit<Popup.IOptions, 'startHidden'>) {
     super();
     this._body = options.body;
     this._body.addClass(hoverItem);
@@ -41,7 +43,6 @@ export class Popup extends Widget {
       this._observer = new ResizeObserver(() => {
         this.update();
       });
-      this._observer.observe(this._body.node);
     }
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(options.body);
@@ -76,12 +77,14 @@ export class Popup extends Widget {
     document.addEventListener('click', this, false);
     this.node.addEventListener('keydown', this, false);
     window.addEventListener('resize', this, false);
+    this._observer?.observe(this._body.node);
   }
 
   /**
-   * Handle `'after-detach'` messages for the widget.
+   * Handle `'before-detach'` messages for the widget.
    */
-  protected onAfterDetach(msg: Message): void {
+  protected onBeforeDetach(msg: Message): void {
+    this._observer?.disconnect();
     document.removeEventListener('click', this, false);
     this.node.removeEventListener('keydown', this, false);
     window.removeEventListener('resize', this, false);
@@ -204,5 +207,14 @@ export namespace Popup {
      * By default, this is `false`.
      */
     hasDynamicSize?: boolean;
+
+    /**
+     * Whether to start the popup in hidden mode or not.
+     * By default, this is `false`.
+     *
+     * ### Note
+     * The popup can be displayed using `launch` method.
+     */
+    startHidden?: boolean;
   }
 }

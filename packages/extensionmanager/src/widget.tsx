@@ -776,13 +776,22 @@ administrator to verify the listings configuration.`)}
         header={this._trans.__('Warning')}
       >
         <div className="jp-extensionmanager-disclaimer">
-          <div>
+          <p>
             {this._trans
               .__(`The JupyterLab development team is excited to have a robust
 third-party extension community. However, we do not review
 third-party extensions, and some extensions may introduce security
-risks or contain malicious code that runs on your machine.`)}
-          </div>
+risks or contain malicious code that runs on your machine. Moreover in order
+to work, this panel needs to fetch data from web services.`)}
+            <br />
+            <a
+              href="https://jupyterlab.readthedocs.io/en/3.6.x/privacy_policies"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {this.trans.__('Please read the privacy policy.')}
+            </a>
+          </p>
           <div style={{ paddingTop: 8 }}>
             {ListModel.isDisclaimed() && (
               <Button

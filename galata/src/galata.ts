@@ -2,10 +2,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as nbformat from '@jupyterlab/nbformat';
-import { Session, TerminalAPI, Workspace } from '@jupyterlab/services';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { APIRequestContext, Browser, Page } from '@playwright/test';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { Session, TerminalAPI, Workspace } from '@jupyterlab/services';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { JSONObject } from '@lumino/coreutils';
+import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import fetch from 'node-fetch';
 import { ContentsHelper } from './contents';
@@ -25,6 +26,9 @@ export namespace galata {
    * - Deactivate codemirror cursor blinking to avoid noise in screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'false'
+    },
     '@jupyterlab/fileeditor-extension:plugin': {
       editorConfig: { cursorBlinkRate: 0 }
     },
@@ -117,6 +121,7 @@ export namespace galata {
     appPath: string,
     autoGoto: boolean,
     baseURL: string,
+    mockConfig: boolean | Record<string, unknown>,
     mockSettings: boolean | Record<string, unknown>,
     mockState: boolean | Record<string, unknown>,
     page: Page,
@@ -134,6 +139,12 @@ export namespace galata {
     );
 
     // Add server mocks
+    if (mockConfig) {
+      const config: Record<string, JSONObject> =
+        typeof mockConfig !== 'boolean' ? ({ ...mockConfig } as any) : {};
+      await Mock.mockConfig(page, config);
+    }
+
     const settings: ISettingRegistry.IPlugin[] = [];
     if (mockSettings) {
       // Settings will be stored in-memory (after loading the initial version from disk)
@@ -202,6 +213,7 @@ export namespace galata {
     autoGoto: boolean,
     baseURL: string,
     browser: Browser,
+    mockConfig: boolean | Record<string, unknown>,
     mockSettings: boolean | Record<string, unknown>,
     mockState: boolean | Record<string, unknown>,
     sessions: Map<string, Session.IModel> | null,
@@ -216,6 +228,7 @@ export namespace galata {
       appPath,
       autoGoto,
       baseURL,
+      mockConfig,
       mockSettings,
       mockState,
       page,
@@ -240,6 +253,28 @@ export namespace galata {
    * Regex to capture JupyterLab API call
    */
   export namespace Routes {
+    /**
+     * Config API
+     *
+     * The config section can be found in the named group `section`.
+     */
+    export const config = /.*\/api\/config\/(?<section>\w+)/;
+
+    /**
+     * Contents API
+     *
+     * The content path can be found in the named group `path`.
+     *
+     * The path will be prefixed by '/'.
+     * The path will be undefined for the root folder.
+     */
+    export const contents = /.*\/api\/contents(?<path>\/.+)?\?/;
+
+    /**
+     * Extensions API
+     */
+    export const extensions = /.*\/lab\/api\/extensions.*/;
+
     /**
      * Sessions API
      *
@@ -426,6 +461,47 @@ export namespace galata {
       return responses.every(response =>
         typeof response.ok === 'function' ? response.ok() : response.ok
       );
+    }
+
+    /**
+     * Mock config route.
+     *
+     * @param page Page model object
+     * @param config In-memory config
+     */
+    export function mockConfig(
+      page: Page,
+      config: Record<string, JSONObject>
+    ): Promise<void> {
+      return page.route(Routes.config, (route, request) => {
+        const section = Routes.config.exec(request.url())?.groups
+          ?.section as string;
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(config[section] ?? {})
+            });
+          case 'PATCH': {
+            const data = request.postDataJSON();
+            // FIXME jupyter-server does a recursive update
+            // We are not doing it here as @jupyterlab/services is actually not recursively
+            // updating the object.
+            config[section] = { ...(config[section] ?? {}), ...data };
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(config[section])
+            });
+          }
+          case 'PUT': {
+            const data = request.postDataJSON();
+            config[section] = data;
+            return route.fulfill({ status: 204 });
+          }
+          default:
+            return route.continue();
+        }
+      });
     }
 
     /**

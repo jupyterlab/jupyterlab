@@ -1626,7 +1626,7 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.run, {
-    label: trans.__("Run Selected Cells and Don't Advance"),
+    label: trans.__('Run Selected Cells and Do not Advance'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 

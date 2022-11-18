@@ -21,6 +21,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   GroupItem,
   IStatusBar,
+  Popup,
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
@@ -36,7 +37,6 @@ import {
   deleteIcon
 } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
 import memoize from 'lodash.memoize';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -475,7 +475,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    let popup: Widget | null = null;
+    let popup: Popup | null = null;
     model.listOpened = false;
 
     const notificationList = ReactWidget.create(
@@ -558,19 +558,22 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         popup.dispose();
         popup = null;
       } else {
+        popup = showPopup({
+          body: notificationList,
+          anchor: notificationStatus,
+          align: 'right',
+          hasDynamicSize: true,
+          startHidden: true
+        });
+
         // Dismiss all toasts when opening the notification center
         const finalize = () => {
-          popup = showPopup({
-            body: notificationList,
-            anchor: notificationStatus,
-            align: 'right',
-            hasDynamicSize: true
-          });
+          popup?.launch();
 
           // Focus on the pop-up
           notificationList.node.focus();
 
-          popup.disposed.connect(() => {
+          popup?.disposed.connect(() => {
             model.listOpened = false;
             popup = null;
           });
