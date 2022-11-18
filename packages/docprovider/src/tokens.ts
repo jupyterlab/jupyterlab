@@ -58,5 +58,11 @@ export namespace IDocumentProviderFactory {
      * The document model
      */
     model: T;
+
+    /**
+     * Whether collaboration is enabled globally and the current document file
+     * type supports collaboration.
+     */
+    collaborative: boolean;
   }
 }

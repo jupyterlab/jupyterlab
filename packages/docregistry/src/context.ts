@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -51,6 +50,8 @@ export class Context<
     const manager = (this._manager = options.manager);
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
+    // if collaborative is `undefined`, default to `false`.
+    this._collaborative = !!options.collaborative;
     this._factory = options.factory;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._opener = options.opener || Private.noOp;
@@ -65,7 +66,8 @@ export class Context<
           path: this._path,
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
-          model: this._model.sharedModel
+          model: this._model.sharedModel,
+          collaborative: this._collaborative
         })
       : new ProviderMock();
 
@@ -220,6 +222,14 @@ export class Context<
   }
 
   /**
+   * Returns whether this document context is writable. True only if the
+   * contents model is writable and collaboration is disabled.
+   */
+  get writable(): boolean {
+    return !!(this._contentsModel?.writable && !this._collaborative);
+  }
+
+  /**
    * The url resolver for the context.
    */
   readonly urlResolver: IRenderMime.IResolver;
@@ -232,7 +242,7 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean) {
-    if (PageConfig.getOption('collaborative') == 'true') {
+    if (this._collaborative) {
       await this._loadContext();
     } else {
       if (isNew) {
@@ -473,8 +483,7 @@ export class Context<
    * Update our contents model, without the content.
    */
   private _updateContentsModel(model: Contents.IModel): void {
-    const writable =
-      model.writable && PageConfig.getOption('collaborative') != 'true';
+    const writable = model.writable && !this._collaborative;
     const newModel: Contents.IModel = {
       path: model.path,
       name: model.name,
@@ -556,7 +565,7 @@ export class Context<
   private async _save(): Promise<void> {
     // if collaborative mode is enabled, saving happens in the back-end
     // after each change to the document
-    if (PageConfig.getOption('collaborative') === 'true') {
+    if (this._collaborative) {
       return;
     }
     this._saveState.emit('started');
@@ -771,17 +780,15 @@ export class Context<
    * Add a checkpoint the file is writable.
    */
   private _maybeCheckpoint(force: boolean): Promise<void> {
-    let writable = this._contentsModel && this._contentsModel.writable;
     let promise = Promise.resolve(void 0);
-    if (!writable) {
+    if (!this.writable) {
       return promise;
     }
     if (force) {
       promise = this.createCheckpoint().then(/* no-op */);
     } else {
       promise = this.listCheckpoints().then(checkpoints => {
-        writable = this._contentsModel && this._contentsModel.writable;
-        if (!this.isDisposed && !checkpoints.length && writable) {
+        if (!this.isDisposed && !checkpoints.length && this.writable) {
           return this.createCheckpoint().then(/* no-op */);
         }
       });
@@ -918,6 +925,7 @@ or load the version on disk (revert)?`,
   private _provider: IDocumentProvider;
   private _lastModifiedCheckMargin = 500;
   private _timeConflictModalIsOpen = false;
+  private _collaborative: boolean;
 }
 
 /**

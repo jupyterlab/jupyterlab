@@ -79,7 +79,8 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
       name: 'vdom',
       mimeTypes: [MIME_TYPE],
       extensions: ['.vdom', '.vdom.json'],
-      icon: reactIcon
+      icon: reactIcon,
+      collaborative: true
     });
 
     const trans = (translator || nullTranslator).load('jupyterlab');

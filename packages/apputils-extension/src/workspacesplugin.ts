@@ -71,7 +71,8 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
       displayName: trans.__('JupyterLab workspace File'),
       extensions: [WORKSPACE_EXT],
       mimeTypes: ['text/json'],
-      iconClass: ICON_NAME
+      iconClass: ICON_NAME,
+      collaborative: true
     });
     app.docRegistry.addWidgetFactory(factory);
     app.commands.addCommand(CommandIDs.saveWorkspaceAs, {

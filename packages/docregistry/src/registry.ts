@@ -933,6 +933,12 @@ export namespace DocumentRegistry {
     readonly ready: Promise<void>;
 
     /**
+     * Returns whether this document context is writable. True only if the
+     * contents model is writable and collaboration is disabled.
+     */
+    readonly writable: boolean;
+
+    /**
      * Rename the document.
      */
     rename(newName: string): Promise<void>;
@@ -1207,6 +1213,12 @@ export namespace DocumentRegistry {
      * The format of the new file.
      */
     readonly fileFormat: Contents.FileFormat;
+
+    /**
+     * Whether this file type supports collaboration. `DocumentContext`
+     * defines the default if this value is `undefined`.
+     */
+    readonly collaborative?: boolean;
   }
 
   /**
@@ -1272,7 +1284,8 @@ export namespace DocumentRegistry {
       displayName: trans.__('Text'),
       mimeTypes: ['text/plain'],
       extensions: ['.txt'],
-      icon: fileIcon
+      icon: fileIcon,
+      collaborative: true
     };
   }
 
@@ -1347,63 +1360,72 @@ export namespace DocumentRegistry {
         displayName: trans.__('Markdown File'),
         extensions: ['.md'],
         mimeTypes: ['text/markdown'],
-        icon: markdownIcon
+        icon: markdownIcon,
+        collaborative: true
       },
       {
         name: 'PDF',
         displayName: trans.__('PDF File'),
         extensions: ['.pdf'],
         mimeTypes: ['application/pdf'],
-        icon: pdfIcon
+        icon: pdfIcon,
+        collaborative: true
       },
       {
         name: 'python',
         displayName: trans.__('Python File'),
         extensions: ['.py'],
         mimeTypes: ['text/x-python'],
-        icon: pythonIcon
+        icon: pythonIcon,
+        collaborative: true
       },
       {
         name: 'json',
         displayName: trans.__('JSON File'),
         extensions: ['.json'],
         mimeTypes: ['application/json'],
-        icon: jsonIcon
+        icon: jsonIcon,
+        collaborative: true
       },
       {
         name: 'julia',
         displayName: trans.__('Julia File'),
         extensions: ['.jl'],
         mimeTypes: ['text/x-julia'],
-        icon: juliaIcon
+        icon: juliaIcon,
+        collaborative: true
       },
       {
         name: 'csv',
         displayName: trans.__('CSV File'),
         extensions: ['.csv'],
         mimeTypes: ['text/csv'],
-        icon: spreadsheetIcon
+        icon: spreadsheetIcon,
+        collaborative: true
       },
       {
         name: 'tsv',
         displayName: trans.__('TSV File'),
         extensions: ['.tsv'],
         mimeTypes: ['text/csv'],
-        icon: spreadsheetIcon
+        icon: spreadsheetIcon,
+        collaborative: true
       },
       {
         name: 'r',
         displayName: trans.__('R File'),
         mimeTypes: ['text/x-rsrc'],
         extensions: ['.R'],
-        icon: rKernelIcon
+        icon: rKernelIcon,
+        collaborative: true
       },
       {
         name: 'yaml',
         displayName: trans.__('YAML File'),
         mimeTypes: ['text/x-yaml', 'text/yaml'],
         extensions: ['.yaml', '.yml'],
-        icon: yamlIcon
+        icon: yamlIcon,
+        collaborative: true
       },
       {
         name: 'svg',
@@ -1411,7 +1433,8 @@ export namespace DocumentRegistry {
         mimeTypes: ['image/svg+xml'],
         extensions: ['.svg'],
         icon: imageIcon,
-        fileFormat: 'base64'
+        fileFormat: 'base64',
+        collaborative: true
       },
       {
         name: 'tiff',

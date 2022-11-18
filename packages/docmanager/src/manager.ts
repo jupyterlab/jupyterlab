@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 import {
   Context,
@@ -39,7 +39,6 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
-    this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._docProviderFactory = options.docProviderFactory;
     this._isConnectedCallback = options.isConnectedCallback || (() => true);
@@ -487,7 +486,8 @@ export class DocumentManager implements IDocumentManager {
   private _createContext(
     path: string,
     factory: DocumentRegistry.ModelFactory,
-    kernelPreference?: ISessionContext.IKernelPreference
+    kernelPreference: ISessionContext.IKernelPreference | undefined,
+    collaborative: boolean | undefined
   ): Private.IContext {
     // TODO: Make it impossible to open two different contexts for the same
     // path. Or at least prompt the closing of all widgets associated with the
@@ -513,7 +513,7 @@ export class DocumentManager implements IDocumentManager {
       kernelPreference,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      collaborative: this._collaborative,
+      collaborative,
       docProviderFactory: this._docProviderFactory,
       lastModifiedCheckMargin: this._lastModifiedCheckMargin,
       translator: this.translator
@@ -584,6 +584,21 @@ export class DocumentManager implements IDocumentManager {
       return undefined;
     }
 
+    let fileType: DocumentRegistry.IFileType | undefined = undefined;
+    for (const ft of this.registry.fileTypes()) {
+      if (ft.name === modelName) {
+        fileType = ft;
+        break;
+      }
+    }
+
+    // determine whether this collaborative mode should be enabled for this
+    // DocumentContext. collaborative mode must be enabled globally and the file
+    // type must support collaboration.
+    const globalCollab = PageConfig.getOption('collaborative') === 'true';
+    const fileTypeSupportsCollab = fileType?.collaborative;
+    const collaborative = globalCollab && fileTypeSupportsCollab;
+
     // Handle the kernel preference.
     const preference = this.registry.getKernelPreference(
       path,
@@ -599,13 +614,13 @@ export class DocumentManager implements IDocumentManager {
       // Use an existing context if available.
       context = this._findContext(path, factory.name) || null;
       if (!context) {
-        context = this._createContext(path, factory, preference);
+        context = this._createContext(path, factory, preference, collaborative);
         // Populate the model, either from disk or a
         // model backend.
         ready = this._when.then(() => context!.initialize(false));
       }
     } else if (which === 'create') {
-      context = this._createContext(path, factory, preference);
+      context = this._createContext(path, factory, preference, collaborative);
       // Immediately save the contents to disk.
       ready = this._when.then(() => context!.initialize(true));
     } else {
@@ -651,7 +666,6 @@ export class DocumentManager implements IDocumentManager {
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
   private _docProviderFactory: IDocumentProviderFactory | undefined;
-  private _collaborative: boolean;
   private _isConnectedCallback: () => boolean;
 }
 
@@ -702,12 +716,6 @@ export namespace DocumentManager {
      * A factory method for the document provider.
      */
     docProviderFactory?: IDocumentProviderFactory;
-
-    /**
-     * Whether the context should be collaborative.
-     * If true, the context will connect through yjs_ws_server to share information if possible.
-     */
-    collaborative?: boolean;
 
     /**
      * Autosaving should be paused while this callback function returns `false`.
