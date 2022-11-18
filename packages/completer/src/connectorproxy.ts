@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SourceChange } from '@jupyterlab/shared-models';
+import { SourceChange } from '@jupyter-notebook/ydoc';
 import { CompletionHandler } from './handler';
 import {
   ICompletionContext,

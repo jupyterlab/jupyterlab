@@ -7,7 +7,11 @@ import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import * as models from '@jupyterlab/shared-models';
+import {
+  DocumentChange,
+  FileChange,
+  ISharedFile
+} from '@jupyter-notebook/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -25,7 +29,7 @@ export class DocumentModel
    * Construct a new document model.
    */
   constructor(languagePreference?: string) {
-    super({ sharedModel: new models.YFile() as models.ISharedText });
+    super();
     this._defaultLang = languagePreference || '';
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
@@ -154,17 +158,18 @@ export class DocumentModel
     this.dirty = true;
   }
 
-  private _onStateChanged(
-    sender: models.ISharedFile,
-    changes: models.NotebookChange | models.FileChange
-  ): void {
-    if (changes.contextChange || (changes as models.FileChange).sourceChange) {
+  private _onStateChanged(sender: ISharedFile, changes: DocumentChange): void {
+    if ((changes as FileChange).sourceChange) {
       this.triggerContentChange();
     }
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
-          this._dirty = value.newValue;
+        if (value.name === 'dirty') {
+          // Setting `dirty` will trigger the state change.
+          // We always set `dirty` because the shared model state
+          // and the local attribute are synchronized one way shared model -> _dirty
+          this.dirty = value.newValue;
+        } else if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
             oldValue: undefined,
@@ -178,7 +183,7 @@ export class DocumentModel
   /**
    * The shared notebook model.
    */
-  readonly sharedModel: models.ISharedFile;
+  readonly sharedModel: ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
@@ -562,6 +567,8 @@ export class DocumentWidget<
     path: string
   ): void {
     this.title.label = PathExt.basename(sender.localPath);
+    // The document is not untitled any more.
+    this.isUntitled = false;
   }
 
   /**
@@ -591,6 +598,15 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
+
+  /**
+   * Whether the document has an auto-generated name or not.
+   *
+   * #### Notes
+   * A document has auto-generated name if its name is untitled and up
+   * to the instant the user saves it manually for the first time.
+   */
+  isUntitled?: boolean;
 }
 
 export namespace DocumentWidget {

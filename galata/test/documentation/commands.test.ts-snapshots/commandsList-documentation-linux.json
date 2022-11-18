@@ -592,6 +592,14 @@
     "shortcuts": []
   },
   {
+    "id": "documentsearch:end",
+    "label": "End Search",
+    "caption": "",
+    "shortcuts": [
+      "Escape"
+    ]
+  },
+  {
     "id": "documentsearch:highlightNext",
     "label": "Find Next",
     "caption": "",

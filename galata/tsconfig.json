@@ -5,7 +5,8 @@
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",
-    "types": ["node"]
+    "types": ["node"],
+    "lib": ["DOM", "DOM.iterable", "es2019.array"]
   },
   "include": ["src/**/*"],
   "references": [

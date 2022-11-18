@@ -126,7 +126,6 @@ function activate(
           void commands.execute(CommandIDs.create);
         }
       }
-      maybeCreate();
       // When layout is modified, create a launcher if there are no open items.
       labShell.layoutModified.connect(() => {
         maybeCreate();

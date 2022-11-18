@@ -1,6 +1,8 @@
 {
   "title": "Document Search",
   "description": "Document search plugin.",
+  "jupyter.lab.setting-icon": "ui-components:search",
+  "jupyter.lab.setting-icon-label": "Document Search",
   "jupyter.lab.menus": {
     "main": [
       {
@@ -44,6 +46,11 @@
     {
       "command": "documentsearch:highlightPrevious",
       "keys": ["Accel Shift G"],
+      "selector": ".jp-mod-searchable"
+    },
+    {
+      "command": "documentsearch:end",
+      "keys": ["Escape"],
       "selector": ".jp-mod-searchable"
     }
   ],

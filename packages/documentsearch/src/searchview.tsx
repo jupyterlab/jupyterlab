@@ -19,7 +19,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import { Message } from '@lumino/messaging';
 import * as React from 'react';
 import { SearchDocumentModel } from './searchmodel';
 import { IFilter, IFilters } from './tokens';
@@ -408,11 +408,6 @@ class SearchOverlay extends React.Component<
       event.shiftKey
         ? this.props.onHighlightPrevious()
         : this.props.onHighlightNext();
-    } else if (event.keyCode === 27) {
-      // Escape pressed
-      event.preventDefault();
-      event.stopPropagation();
-      this._onClose();
     }
   }
 
@@ -646,6 +641,18 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
     this.setReplaceInputVisibility(true);
   }
 
+  /**
+   * A message handler invoked on a `'close-request'` message.
+   *
+   * #### Notes
+   * On top of the default implementation emit closed signal and end model query.
+   */
+  protected onCloseRequest(msg: Message): void {
+    super.onCloseRequest(msg);
+    this._closed.emit();
+    void this.model.endQuery();
+  }
+
   protected setReplaceInputVisibility(v: boolean): void {
     if (this._showReplace !== v) {
       this._showReplace = v;
@@ -687,10 +694,8 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         onSearchChanged={(q: string) => {
           this.model.searchExpression = q;
         }}
-        onClose={async () => {
-          Widget.detach(this);
-          this._closed.emit();
-          await this.model.endQuery();
+        onClose={() => {
+          this.close();
         }}
         onReplaceEntryShown={(v: boolean) => {
           this.setReplaceInputVisibility(v);

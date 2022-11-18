@@ -14,7 +14,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  defaultSanitizer,
   Dialog,
   ICommandPalette,
   ISanitizer,
@@ -23,6 +22,7 @@ import {
   IWindowResolver,
   MainAreaWidget,
   Printing,
+  Sanitizer,
   sessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
@@ -34,6 +34,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
+import { announcements } from './announcements';
 import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
 import { settingsPlugin } from './settingsplugin';
@@ -611,11 +612,37 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
  * The default HTML sanitizer.
  */
 const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
-  id: '@jupyter/apputils-extension:sanitizer',
+  id: '@jupyterlab/apputils-extension:sanitizer',
   autoStart: true,
   provides: ISanitizer,
-  activate: () => {
-    return defaultSanitizer;
+  requires: [ISettingRegistry],
+  activate: (app: JupyterFrontEnd, settings: ISettingRegistry): ISanitizer => {
+    const sanitizer = new Sanitizer();
+    const loadSetting = (setting: ISettingRegistry.ISettings): void => {
+      const allowedSchemes = setting.get('allowedSchemes')
+        .composite as Array<string>;
+
+      if (allowedSchemes) {
+        sanitizer.setAllowedSchemes(allowedSchemes);
+      }
+    };
+
+    // Wait for the application to be restored and
+    // for the settings for this plugin to be loaded
+    settings
+      .load('@jupyterlab/apputils-extension:sanitizer')
+      .then(setting => {
+        // Read the settings
+        loadSetting(setting);
+
+        // Listen for your plugin setting changes using Signal
+        setting.changed.connect(loadSetting);
+      })
+      .catch(reason => {
+        console.error(`Failed to load sanitizer settings:`, reason);
+      });
+
+    return sanitizer;
   }
 };
 
@@ -623,6 +650,7 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  announcements,
   kernelStatus,
   notificationPlugin,
   palette,

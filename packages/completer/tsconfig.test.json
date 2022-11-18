@@ -18,9 +18,6 @@
       "path": "../services"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../statedb"
     },
     {

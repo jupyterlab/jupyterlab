@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import {
-  IModelDB,
-  IObservableMap,
-  IObservableValue,
-  ModelDB,
-  ObservableValue
-} from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
-import { ISharedText, YFile } from '@jupyterlab/shared-models';
+import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
+import { ISharedText, YFile } from '@jupyter-notebook/ydoc';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -175,11 +167,6 @@ export namespace CodeEditor {
     mimeTypeChanged: ISignal<IModel, IChangedArgs<string>>;
 
     /**
-     * A signal emitted when the shared model was switched.
-     */
-    sharedModelSwitched: ISignal<IModel, boolean>;
-
-    /**
      * A mime type of the model.
      *
      * #### Notes
@@ -195,7 +182,7 @@ export namespace CodeEditor {
     /**
      * The shared model for the cell editor.
      */
-    readonly sharedModel: models.ISharedText;
+    readonly sharedModel: ISharedText;
   }
 
   /**
@@ -206,29 +193,16 @@ export namespace CodeEditor {
      * Construct a new Model.
      */
     constructor(options: Model.IOptions = {}) {
-      this.modelDB = new ModelDB();
-      this.sharedModel = options?.sharedModel || YFile.create();
-      const mimeType = this.modelDB.createValue('mimeType');
-      mimeType.changed.connect(this._onModelDBMimeTypeChanged, this);
-      mimeType.set(options?.mimeType || 'text/plain');
-
-      this.modelDB.createMap('selections');
-    }
-
-    get type(): nbformat.CellType {
-      return 'code';
+      // Track if we need to dispose the model or not.
+      this.standaloneModel = typeof options.sharedModel === 'undefined';
+      this.sharedModel = options.sharedModel ?? new YFile();
+      this._mimeType = options.mimeType ?? 'text/plain';
     }
 
     /**
      * The shared model for the cell editor.
      */
-    readonly sharedModel: models.ISharedText;
-
-    /**
-     * The underlying `IModelDB` instance in which state is
-     * stored in an observable manner.
-     */
-    protected readonly modelDB: IModelDB;
+    readonly sharedModel: ISharedText;
 
     /**
      * A signal emitted when a mimetype changes.
@@ -238,31 +212,29 @@ export namespace CodeEditor {
     }
 
     /**
-     * A signal emitted when the shared model was switched.
-     */
-    get sharedModelSwitched(): ISignal<this, boolean> {
-      return this._sharedModelSwitched;
-    }
-
-    /**
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this.modelDB.get('selections') as IObservableMap<ITextSelection[]>;
+      return this._selections;
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this.modelDB.getValue('mimeType') as string;
+      return this._mimeType;
     }
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      this.modelDB.setValue('mimeType', newValue);
+      this._mimeType = newValue;
+      this._mimeTypeChanged.emit({
+        name: 'mimeType',
+        oldValue: oldValue,
+        newValue: newValue
+      });
     }
 
     /**
@@ -280,24 +252,21 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
-      this.modelDB.dispose();
+      if (this.standaloneModel) {
+        this.sharedModel.dispose();
+      }
       Signal.clearData(this);
     }
 
-    private _onModelDBMimeTypeChanged(
-      mimeType: IObservableValue,
-      args: ObservableValue.IChangedArgs
-    ): void {
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue: args.oldValue as string,
-        newValue: args.newValue as string
-      });
-    }
+    /**
+     * Whether the model should disposed the shared model on disposal or not.
+     */
+    protected standaloneModel = false;
 
     private _isDisposed = false;
+    private _selections = new ObservableMap<ITextSelection[]>();
+    private _mimeType = 'text/plain';
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
-    private _sharedModelSwitched = new Signal<this, boolean>(this);
   }
 
   /**

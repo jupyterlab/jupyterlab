@@ -3,8 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ISharedDocument } from '@jupyterlab/shared-models';
+import { ISharedDocument } from '@jupyter-notebook/ydoc';
 import { Token } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 
 /**
  * The default document provider token.
@@ -16,23 +17,11 @@ export const IDocumentProviderFactory = new Token<IDocumentProviderFactory>(
 /**
  * An interface for a document provider.
  */
-export interface IDocumentProvider {
+export interface IDocumentProvider extends IDisposable {
   /**
-   * Returns a Promise that resolves when renaming is ackownledged.
-   * This is a necessary synchronization mechanism in collaborative mode,
-   * since renaming is done through an HTTP request, not the Y WebSocket.
+   * Returns a Promise that resolves when the document provider is ready.
    */
-  readonly renameAck: Promise<boolean>;
-
-  /**
-   * This should be called by the docregistry when the file has been renamed to update the websocket connection url
-   */
-  setPath(newPath: string): void;
-
-  /**
-   * Destroy the provider.
-   */
-  destroy(): void;
+  readonly ready: Promise<void>;
 }
 
 /**
@@ -51,7 +40,7 @@ export namespace IDocumentProviderFactory {
    */
   export interface IOptions<T extends ISharedDocument> {
     /**
-     * The name (id) of the room
+     * The document file path
      */
     path: string;
 

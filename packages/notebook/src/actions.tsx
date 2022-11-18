@@ -20,7 +20,7 @@ import {
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
-import { ISharedAttachmentsCell } from '@jupyterlab/shared-models';
+import { ISharedAttachmentsCell } from '@jupyter-notebook/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
@@ -411,34 +411,42 @@ export namespace NotebookActions {
     Private.handleState(notebook, state, true);
   }
 
+  function move(notebook: Notebook, shift: number): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    const state = Private.getState(notebook);
+
+    const firstIndex = notebook.widgets.findIndex(w =>
+      notebook.isSelectedOrActive(w)
+    );
+    let lastIndex = notebook.widgets
+      .slice(firstIndex + 1)
+      .findIndex(w => !notebook.isSelectedOrActive(w));
+
+    if (lastIndex >= 0) {
+      lastIndex += firstIndex + 1;
+    } else {
+      lastIndex = notebook.model.cells.length;
+    }
+
+    if (shift > 0) {
+      notebook.moveCell(firstIndex, lastIndex, lastIndex - firstIndex);
+    } else {
+      notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
+    }
+
+    Private.handleState(notebook, state, true);
+  }
+
   /**
    * Move the selected cell(s) down.
    *
    * @param notebook = The target notebook widget.
    */
   export function moveDown(notebook: Notebook): void {
-    if (!notebook.model || !notebook.activeCell) {
-      return;
-    }
-
-    const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
-    const widgets = notebook.widgets;
-
-    for (let i = cells.length - 2; i > -1; i--) {
-      if (notebook.isSelectedOrActive(widgets[i])) {
-        if (!notebook.isSelectedOrActive(widgets[i + 1])) {
-          const activeCellIndex = notebook.activeCellIndex;
-          notebook.moveCell(i, i + 1);
-          if (activeCellIndex === i) {
-            notebook.activeCellIndex = activeCellIndex + 1;
-          }
-          notebook.select(widgets[i + 1]);
-          notebook.deselect(widgets[i]);
-        }
-      }
-    }
-    Private.handleState(notebook, state, true);
+    move(notebook, 1);
   }
 
   /**
@@ -447,26 +455,7 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    */
   export function moveUp(notebook: Notebook): void {
-    if (!notebook.model || !notebook.activeCell) {
-      return;
-    }
-
-    const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
-    const widgets = notebook.widgets;
-    for (let i = 1; i < cells.length; i++) {
-      if (notebook.isSelectedOrActive(widgets[i])) {
-        if (!notebook.isSelectedOrActive(widgets[i - 1])) {
-          notebook.moveCell(i, i - 1);
-          if (notebook.activeCellIndex === i) {
-            notebook.activeCellIndex--;
-          }
-          notebook.select(widgets[i - 1]);
-          notebook.deselect(widgets[i]);
-        }
-      }
-    }
-    Private.handleState(notebook, state, true);
+    move(notebook, -1);
   }
 
   /**
@@ -1203,7 +1192,9 @@ export namespace NotebookActions {
 
           notebook.widgets.forEach((child, index) => {
             const deletable =
-              child.model.sharedModel.getMetadata().deletable !== false;
+              (child.model.sharedModel.getMetadata(
+                'deletable'
+              ) as unknown as boolean) !== false;
 
             if (notebook.isSelectedOrActive(child) && deletable) {
               toDelete.push(index);
@@ -1606,7 +1597,7 @@ export namespace NotebookActions {
     let latestCellIdx: number | null = null;
     notebook.widgets.forEach((cell, cellIndx) => {
       if (cell.model.type === 'code') {
-        const execution = (cell as CodeCell).model.metadata.get('execution');
+        const execution = cell.model.getMetadata('execution');
         if (
           execution &&
           JSONExt.isObject(execution) &&
@@ -2040,9 +2031,12 @@ namespace Private {
     wasFocused: boolean;
 
     /**
-     * The active cell before the action.
+     * The active cell id before the action.
+     *
+     * We cannot rely on the Cell widget or model as it may be
+     * discarded by action such as move.
      */
-    activeCell: Cell | null;
+    activeCellId: string | null;
   }
 
   /**
@@ -2051,7 +2045,7 @@ namespace Private {
   export function getState(notebook: Notebook): IState {
     return {
       wasFocused: notebook.node.contains(document.activeElement),
-      activeCell: notebook.activeCell
+      activeCellId: notebook.activeCell?.model.id ?? null
     };
   }
 
@@ -2087,12 +2081,15 @@ namespace Private {
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-    if (scroll && state.activeCell?.inputArea) {
-      notebook
-        .scrollToItem(notebook.widgets.findIndex(w => w === state.activeCell))
-        .catch(reason => {
+    if (scroll && state.activeCellId) {
+      const index = notebook.widgets.findIndex(
+        w => w.model.id === state.activeCellId
+      );
+      if (notebook.widgets[index]?.inputArea) {
+        notebook.scrollToItem(index).catch(reason => {
           // no-op
         });
+      }
     }
   }
 
@@ -2421,7 +2418,7 @@ namespace Private {
 
     // Find the cells to delete.
     notebook.widgets.forEach((child, index) => {
-      const deletable = child.model.metadata.get('deletable') !== false;
+      const deletable = child.model.getMetadata('deletable') !== false;
 
       if (notebook.isSelectedOrActive(child) && deletable) {
         toDelete.push(index);
@@ -2652,11 +2649,14 @@ namespace Private {
       headingLevel: number,
       notebook: Notebook
     ): Promise<void> {
+      headingLevel = Math.min(Math.max(headingLevel, 1), 6);
       const state = Private.getState(notebook);
       const model = notebook.model!;
       const sharedModel = model!.sharedModel;
-      sharedModel.insertCell(cellIndex, { cell_type: 'markdown' });
-      Private.setMarkdownHeader(model.cells.get(cellIndex), headingLevel);
+      sharedModel.insertCell(cellIndex, {
+        cell_type: 'markdown',
+        source: '#'.repeat(headingLevel) + ' '
+      });
       notebook.activeCellIndex = cellIndex;
       if (notebook.activeCell?.inViewport === false) {
         await signalToPromise(notebook.activeCell.inViewportChanged, 200).catch(

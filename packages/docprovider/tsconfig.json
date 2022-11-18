@@ -7,10 +7,10 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../collaboration"
+      "path": "../coreutils"
     },
     {
-      "path": "../shared-models"
+      "path": "../services"
     }
   ]
 }

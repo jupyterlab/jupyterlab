@@ -6,19 +6,19 @@ import { ICellModel } from '@jupyterlab/cells';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
+import { IObservableList } from '@jupyterlab/observables';
 import {
-  IObservableJSON,
-  IObservableList,
-  IObservableMap,
-  ObservableJSON
-} from '@jupyterlab/observables';
-import * as sharedModels from '@jupyterlab/shared-models';
+  IMapChange,
+  ISharedNotebook,
+  NotebookChange,
+  YNotebook
+} from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { JSONObject, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
@@ -43,17 +43,54 @@ export interface INotebookModel extends DocumentRegistry.IModel {
 
   /**
    * The metadata associated with the notebook.
+   *
+   * ### Notes
+   * This is a copy of the metadata. Changing a part of it
+   * won't affect the model.
+   * As this returns a copy of all metadata, it is advised to
+   * use `getMetadata` to speed up the process of getting a single key.
    */
-  readonly metadata: IObservableJSON;
+  readonly metadata: nbformat.INotebookMetadata;
+
+  /**
+   * Signal emitted when notebook metadata changes.
+   */
+  readonly metadataChanged: ISignal<INotebookModel, IMapChange>;
 
   /**
    * The array of deleted cells since the notebook was last run.
    */
   readonly deletedCells: string[];
+
   /**
    * Shared model
    */
-  readonly sharedModel: sharedModels.ISharedNotebook;
+  readonly sharedModel: ISharedNotebook;
+
+  /**
+   * Delete a metadata
+   *
+   * @param key Metadata key
+   */
+  deleteMetadata(key: string): void;
+
+  /**
+   * Get a metadata
+   *
+   * ### Notes
+   * This returns a copy of the key value.
+   *
+   * @param key Metadata key
+   */
+  getMetadata(key: string): any;
+
+  /**
+   * Set a metadata
+   *
+   * @param key Metadata key
+   * @param value Metadata value
+   */
+  setMetadata(key: string, value: any): void;
 }
 
 /**
@@ -64,23 +101,22 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    this.sharedModel = sharedModels.YNotebook.create({
+    const sharedModel = (this.sharedModel = new YNotebook({
       disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
-    }) as sharedModels.ISharedNotebook;
+    }));
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
-    this._cells.changed.connect(this._onCellsChanged, this);
-
-    // Handle initial metadata.
-    this._metadata = new ObservableJSON();
-    if (!this._metadata.has('language_info')) {
-      const name = options.languagePreference || '';
-      this._metadata.set('language_info', { name });
-    }
-    this._ensureMetadata();
-    this._metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
 
+    // Initialize the notebook
+    // In collaboration mode, this will be overridden by the initialization coming
+    // from the document provider.
+    sharedModel.nbformat_minor = nbformat.MINOR_VERSION;
+    sharedModel.nbformat = nbformat.MAJOR_VERSION;
+    this._ensureMetadata(options.languagePreference ?? '');
+
+    this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
+    this._cells.changed.connect(this._onCellsChanged, this);
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
   /**
@@ -91,10 +127,24 @@ export class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Signal emitted when notebook metadata changes.
+   */
+  get metadataChanged(): ISignal<INotebookModel, IMapChange<any>> {
+    return this._metadataChanged;
+  }
+
+  /**
    * A signal emitted when the document state changes.
    */
   get stateChanged(): ISignal<this, IChangedArgs<any>> {
     return this._stateChanged;
+  }
+
+  /**
+   * Get the observable list of notebook cells.
+   */
+  get cells(): CellList {
+    return this._cells;
   }
 
   /**
@@ -133,40 +183,37 @@ export class NotebookModel implements INotebookModel {
 
   /**
    * The metadata associated with the notebook.
+   *
+   * ### Notes
+   * This is a copy of the metadata. Changing a part of it
+   * won't affect the model.
+   * As this returns a copy of all metadata, it is advised to
+   * use `getMetadata` to speed up the process of getting a single key.
    */
-  get metadata(): IObservableJSON {
-    return this._metadata;
-  }
-
-  /**
-   * Get the observable list of notebook cells.
-   */
-  get cells(): CellList {
-    return this._cells;
+  get metadata(): nbformat.INotebookMetadata {
+    return this.sharedModel.metadata;
   }
 
   /**
    * The major version number of the nbformat.
    */
   get nbformat(): number {
-    return this._nbformat;
+    return this.sharedModel.nbformat;
   }
 
   /**
    * The minor version number of the nbformat.
    */
   get nbformatMinor(): number {
-    return this._nbformatMinor;
+    return this.sharedModel.nbformat_minor;
   }
 
   /**
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    const spec = this.metadata.get(
-      'kernelspec'
-    ) as nbformat.IKernelspecMetadata;
-    return spec ? spec.name : '';
+    const spec = this.getMetadata('kernelspec');
+    return spec?.name ?? '';
   }
 
   /**
@@ -180,10 +227,8 @@ export class NotebookModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    const info = this.metadata.get(
-      'language_info'
-    ) as nbformat.ILanguageInfoMetadata;
-    return info ? info.name : '';
+    const info = this.getMetadata('language_info');
+    return info?.name ?? '';
   }
 
   /**
@@ -194,12 +239,48 @@ export class NotebookModel implements INotebookModel {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
+
     const cells = this.cells;
     this._cells = null!;
     cells.dispose();
     this.sharedModel.dispose();
-    this._isDisposed = true;
     Signal.clearData(this);
+  }
+
+  /**
+   * Delete a metadata
+   *
+   * @param key Metadata key
+   */
+  deleteMetadata(key: string): void {
+    return this.sharedModel.deleteMetadata(key);
+  }
+
+  /**
+   * Get a metadata
+   *
+   * ### Notes
+   * This returns a copy of the key value.
+   *
+   * @param key Metadata key
+   */
+  getMetadata(key: string): any {
+    return this.sharedModel.getMetadata(key);
+  }
+
+  /**
+   * Set a metadata
+   *
+   * @param key Metadata key
+   * @param value Metadata value
+   */
+  setMetadata(key: string, value: any): void {
+    if (typeof value === 'undefined') {
+      this.sharedModel.deleteMetadata(key);
+    } else {
+      this.sharedModel.setMetadata(key, value);
+    }
   }
 
   /**
@@ -223,26 +304,8 @@ export class NotebookModel implements INotebookModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.INotebookContent {
-    const cells: nbformat.ICell[] = [];
-    for (let i = 0; i < (this.cells?.length ?? 0); i++) {
-      const cell = this.cells.get(i).toJSON();
-      if (this._nbformat === 4 && this._nbformatMinor <= 4) {
-        // strip cell ids if we have notebook format 4.0-4.4
-        delete cell.id;
-      }
-      cells.push(cell);
-    }
     this._ensureMetadata();
-    const metadata = this.sharedModel.getMetadata();
-    for (const key of this.metadata.keys()) {
-      metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
-    }
-    return {
-      metadata,
-      nbformat_minor: this._nbformatMinor,
-      nbformat: this._nbformat,
-      cells
-    };
+    return this.sharedModel.toJSON();
   }
 
   /**
@@ -252,40 +315,19 @@ export class NotebookModel implements INotebookModel {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: nbformat.INotebookContent): void {
-    this.sharedModel.transact(() => {
-      const useId = value.nbformat === 4 && value.nbformat_minor >= 5;
-      const ycells = value.cells.map(cell => {
-        if (!useId) {
-          delete cell.id;
-        }
-        return cell;
-      });
-      if (!ycells.length) {
-        // Create cell when notebook is empty
-        // (non collaborative)
-        ycells.push({ cell_type: 'code' } as nbformat.ICodeCell);
-      }
-      this.sharedModel.insertCells(this.sharedModel.cells.length, ycells);
-      this.sharedModel.deleteCellRange(0, this.sharedModel.cells.length);
-    });
-
-    (this.sharedModel as sharedModels.YNotebook).nbformat_minor =
-      nbformat.MINOR_VERSION;
-    (this.sharedModel as sharedModels.YNotebook).nbformat =
-      nbformat.MAJOR_VERSION;
+    const copy = JSONExt.deepCopy(value);
     const origNbformat = value.metadata.orig_nbformat;
 
-    if (value.nbformat !== this._nbformat) {
-      (this.sharedModel as sharedModels.YNotebook).nbformat = value.nbformat;
-    }
-    if (value.nbformat_minor > this._nbformatMinor) {
-      (this.sharedModel as sharedModels.YNotebook).nbformat_minor =
-        value.nbformat_minor;
-    }
-
     // Alert the user if the format changes.
-    if (origNbformat !== undefined && this._nbformat !== origNbformat) {
-      const newer = this._nbformat > origNbformat;
+    copy.nbformat = Math.max(value.nbformat, nbformat.MAJOR_VERSION);
+    if (
+      copy.nbformat !== value.nbformat ||
+      copy.nbformat_minor < nbformat.MINOR_VERSION
+    ) {
+      copy.nbformat_minor = nbformat.MINOR_VERSION;
+    }
+    if (origNbformat !== undefined && copy.nbformat !== origNbformat) {
+      const newer = copy.nbformat > origNbformat;
       let msg: string;
 
       if (newer) {
@@ -296,7 +338,7 @@ The next time you save this notebook, the current notebook format (v%2) will be 
 'Older versions of Jupyter may not be able to read the new format.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
-          this._nbformat
+          copy.nbformat
         );
       } else {
         msg = this._trans.__(
@@ -306,7 +348,7 @@ The next time you save this notebook, the current notebook format (v%2) will be 
 Some features of the original notebook may not be available.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
-          this._nbformat
+          copy.nbformat
         );
       }
       void showDialog({
@@ -316,16 +358,13 @@ close the notebook without saving it.`,
       });
     }
 
-    // Update the metadata.
-    this.metadata.clear();
-    const metadata = value.metadata;
-    for (const key in metadata) {
-      // orig_nbformat is not intended to be stored per spec.
-      if (key === 'orig_nbformat') {
-        continue;
-      }
-      this.metadata.set(key, metadata[key]);
+    // Ensure there is at least one cell
+    if ((copy.cells?.length ?? 0) === 0) {
+      copy['cells'] = [{ cell_type: 'code', source: '', metadata: {} }];
     }
+
+    this.sharedModel.fromJSON(copy);
+
     this._ensureMetadata();
     this.dirty = true;
   }
@@ -356,14 +395,26 @@ close the notebook without saving it.`,
     this.triggerContentChange();
   }
 
+  private _onMetadataChanged(
+    sender: ISharedNotebook,
+    changes: IMapChange
+  ): void {
+    this._metadataChanged.emit(changes);
+    this.triggerContentChange();
+  }
+
   private _onStateChanged(
-    sender: sharedModels.ISharedNotebook,
-    changes: sharedModels.NotebookChange
+    sender: ISharedNotebook,
+    changes: NotebookChange
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
-          this._dirty = value.newValue;
+        if (value.name === 'dirty') {
+          // Setting `dirty` will trigger the state change.
+          // We always set `dirty` because the shared model state
+          // and the local attribute are synchronized one way shared model -> _dirty
+          this.dirty = value.newValue;
+        } else if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
             oldValue: undefined,
@@ -372,47 +423,20 @@ close the notebook without saving it.`,
         }
       });
     }
-
-    if (changes.nbformatChanged) {
-      const change = changes.nbformatChanged;
-      if (change.key === 'nbformat' && change.newValue !== undefined) {
-        this._nbformat = change.newValue;
-      }
-      if (change.key === 'nbformat_minor' && change.newValue !== undefined) {
-        this._nbformatMinor = change.newValue;
-      }
-    }
-
-    if (changes.metadataChange) {
-      const metadata = changes.metadataChange.newValue as JSONObject;
-      this._modelDBMutex(() => {
-        Object.entries(metadata).forEach(([key, value]) => {
-          this.metadata.set(key, value);
-        });
-      });
-    }
-  }
-
-  private _onMetadataChanged(
-    metadata: IObservableJSON,
-    change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
-  ): void {
-    this._modelDBMutex(() => {
-      this.sharedModel.updateMetadata(metadata.toJSON());
-    });
-    this.triggerContentChange();
   }
 
   /**
    * Make sure we have the required metadata fields.
    */
-  private _ensureMetadata(): void {
-    const metadata = this.metadata;
-    if (!metadata.has('language_info')) {
-      metadata.set('language_info', { name: '' });
+  private _ensureMetadata(languageName: string = ''): void {
+    if (!this.getMetadata('language_info')) {
+      this.sharedModel.setMetadata('language_info', { name: languageName });
     }
-    if (!metadata.has('kernelspec')) {
-      metadata.set('kernelspec', { name: '', display_name: '' });
+    if (!this.getMetadata('kernelspec')) {
+      this.sharedModel.setMetadata('kernelspec', {
+        name: '',
+        display_name: ''
+      });
     }
   }
 
@@ -441,12 +465,7 @@ close the notebook without saving it.`,
   /**
    * The shared notebook model.
    */
-  readonly sharedModel: sharedModels.ISharedNotebook;
-
-  /**
-   * A mutex to update the shared model.
-   */
-  protected readonly _modelDBMutex = sharedModels.createMutex();
+  readonly sharedModel: ISharedNotebook;
 
   private _dirty = false;
   private _readOnly = false;
@@ -455,11 +474,9 @@ close the notebook without saving it.`,
 
   private _trans: TranslationBundle;
   private _cells: CellList;
-  private _metadata: IObservableJSON;
-  private _nbformat = nbformat.MAJOR_VERSION;
-  private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
   private _isDisposed = false;
+  private _metadataChanged = new Signal<NotebookModel, IMapChange>(this);
 }
 
 /**

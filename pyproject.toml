@@ -35,21 +35,20 @@ classifiers = [
 ]
 dependencies = [
     "async_lru>=1.0.0",
-    "importlib-metadata>=3.6;python_version<\"3.10\"",
+    "importlib-metadata>=4.8.3;python_version<\"3.10\"",
     "importlib-resources>=1.4;python_version<\"3.9\"",
     "ipykernel",
     "jinja2>=3.0.3",
     "jupyter_core",
     "jupyter-lsp>=1.5.1",
-    "jupyter_server>=1.16.0,<3",
-    "jupyter_ydoc>=0.2.0,<0.3.0",
-    "jupyter_server_ydoc>=0.1.12,<0.2.0",
-    "jupyterlab_server>=2.11.1,<3",
-    "notebook_shim>=0.1",
+    "jupyter_server>=2.0.0rc3,<3",
+    "jupyter_server_ydoc>=0.4.0,<0.5.0",
+    "jupyterlab_server>=2.16.0,<3",
+    "notebook_shim>=0.2",
     "packaging",
     "traitlets",
     "tornado>=6.1.0",
-    "tomli",
+    "tomli;python_version<\"3.11\"",
     "ypy-websocket",
 ]
 dynamic = [
@@ -90,7 +89,7 @@ docs-screenshots = [
     "altair==4.2.0",
     "ipython==8.0.0",
     "ipywidgets==7.6.6",
-    "jupyterlab-geojson==3.2.0",
+    "jupyterlab-geojson==3.3.1",
     "jupyterlab-language-pack-zh-CN==3.2.post7",
     "matplotlib==3.5.1",
     "nbconvert>=7.0.0",
@@ -100,15 +99,18 @@ docs-screenshots = [
     "vega_datasets==0.9.0",
 ]
 test = [
-    "jupyterlab_server[test]>=2.11.1,<3",
+    "coverage",
     "pytest>=7.0",
     "pytest-check-links>=0.7",
     "pytest-console-scripts",
+    "pytest-cov",
+    "pytest-timeout",
+    "pytest-tornasync",
     "requests",
     "requests_cache",
     "virtualenv",
 ]
-dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatchling"]
+dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
 ui-tests = ["build"]
 
 [tool.hatch.version]
@@ -199,19 +201,7 @@ norecursedirs = "node_modules .git _build"
 addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
 ignore = "tests examples"
 
-[tool.jupyter-releaser]
-skip = ["check-links", "check-manifest"]
-
 [tool.jupyter-releaser.options]
-ignore-glob = [
-    "packages/ui-components/docs/source/ui_components.rst",
-    "images",
-]
-ignore-links = [
-    "../api/*.*",
-    ".*/images/[\\w-]+.png",
-    "https://docs.github.com/en/.*",
-]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 npm-cmd = "npm publish --tag next"
@@ -220,11 +210,10 @@ tag-message = "[ci skip] Release {tag_name}"
 
 [tool.jupyter-releaser.hooks]
 before-bump-version = [
+    "pip install -e .[dev]",
     "git checkout .",
-    "pip install bump2version",
 ]
 before-build-npm = [
-    "git commit -am '[ci skip] Bump version'",
     "jlpm",
     "jlpm run build:all",
 ]

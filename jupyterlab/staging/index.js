@@ -81,7 +81,8 @@ export async function main() {
       queuedFederated.push(data.name);
       federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
-    if (data.style) {
+
+    if (data.style && !PageConfig.Extension.isDisabled(data.name)) {
       federatedStylePromises.push(createModule(data.name, data.style));
     }
   });

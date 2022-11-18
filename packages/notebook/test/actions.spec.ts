@@ -6,7 +6,7 @@ import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISharedCodeCell } from '@jupyterlab/shared-models';
+import { ISharedCodeCell } from '@jupyter-notebook/ydoc';
 import {
   acceptDialog,
   createSessionContext,
@@ -1237,6 +1237,13 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(0);
       });
 
+      it('should move the last cell up', () => {
+        const lastIndex = widget.model!.cells.length - 1;
+        widget.activeCellIndex = lastIndex;
+        NotebookActions.moveUp(widget);
+        expect(widget.activeCellIndex).toBe(lastIndex - 1);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.moveUp(widget);
@@ -1315,7 +1322,7 @@ describe('@jupyterlab/notebook', () => {
       it('should delete metadata.deletable', () => {
         const next = widget.widgets[1];
         widget.select(next);
-        next.model.metadata.set('deletable', false);
+        next.model.setMetadata('deletable', false);
         NotebookActions.copy(widget);
         const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
         data.map(cell => {

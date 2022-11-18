@@ -617,17 +617,19 @@ export class CodeMirrorSearchHighlighter {
     this._currentIndex = null;
     this._matches = [];
 
-    this._cm!.editor.dispatch({
-      effects: this._highlightEffect.of({ matches: [] })
-    });
+    if (this._cm) {
+      this._cm.editor.dispatch({
+        effects: this._highlightEffect.of({ matches: [] })
+      });
 
-    const selection = this._cm!.state.selection.main;
-    const from = selection.from;
-    const to = selection.to;
-    // Setting a reverse selection to allow search-as-you-type to maintain the
-    // current selected match. See comment in _findNext for more details.
-    if (from !== to) {
-      this._cm!.editor.dispatch({ selection: { anchor: to, head: from } });
+      const selection = this._cm.state.selection.main;
+      const from = selection.from;
+      const to = selection.to;
+      // Setting a reverse selection to allow search-as-you-type to maintain the
+      // current selected match. See comment in _findNext for more details.
+      if (from !== to) {
+        this._cm.editor.dispatch({ selection: { anchor: to, head: from } });
+      }
     }
 
     return Promise.resolve();

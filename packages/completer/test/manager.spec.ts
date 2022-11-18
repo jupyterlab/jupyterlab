@@ -16,7 +16,7 @@ import {
 import { Context } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
-import { createStandaloneCell } from '@jupyterlab/shared-models';
+import { createStandaloneCell } from '@jupyter-notebook/ydoc';
 
 import { createSessionContext } from '@jupyterlab/testutils';
 import { NBTestUtils } from '@jupyterlab/testutils';
@@ -41,6 +41,12 @@ function contextFactory(): Context<INotebookModel> {
     }
   });
   return context;
+}
+
+class TestCellModel extends CellModel {
+  get type(): string {
+    return 'code';
+  }
 }
 
 class CustomCompleterModel extends CompleterModel {}
@@ -182,7 +188,7 @@ describe('completer/manager', () => {
 
         await manager.updateCompleter(completerContext);
         const cell = new Cell({
-          model: new CellModel({
+          model: new TestCellModel({
             sharedModel: createStandaloneCell({ cell_type: 'code' })
           }),
           placeholder: false

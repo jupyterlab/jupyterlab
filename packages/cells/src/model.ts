@@ -13,27 +13,23 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import * as models from '@jupyterlab/shared-models';
-
-import { JSONExt } from '@lumino/coreutils';
-
-import {
-  IObservableJSON,
-  IObservableValue,
-  ObservableValue
-} from '@jupyterlab/observables';
+import { ObservableValue } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
 import {
+  CellChange,
+  createMutex,
   createStandaloneCell,
+  IMapChange,
   ISharedCell,
   ISharedCodeCell,
   ISharedMarkdownCell,
-  ISharedRawCell
-} from '@jupyterlab/shared-models';
+  ISharedRawCell,
+  YCodeCell
+} from '@jupyter-notebook/ydoc';
 
-const globalModelDBMutex = models.createMutex();
+const globalModelDBMutex = createMutex();
 
 /**
  * The definition of a model object for a cell.
@@ -69,13 +65,49 @@ export interface ICellModel extends CodeEditor.IModel {
 
   /**
    * The metadata associated with the cell.
+   *
+   * ### Notes
+   * This is a copy of the metadata. Changing a part of it
+   * won't affect the model.
+   * As this returns a copy of all metadata, it is advised to
+   * use `getMetadata` to speed up the process of getting a single key.
    */
-  readonly metadata: IObservableJSON;
+  readonly metadata: Omit<nbformat.IBaseCellMetadata, 'trusted'>;
+
+  /**
+   * Signal emitted when cell metadata changes.
+   */
+  readonly metadataChanged: ISignal<ICellModel, IMapChange>;
 
   /**
    * The cell shared model.
    */
-  readonly sharedModel: models.ISharedCell;
+  readonly sharedModel: ISharedCell;
+
+  /**
+   * Delete a metadata.
+   *
+   * @param key Metadata key
+   */
+  deleteMetadata(key: string): void;
+
+  /**
+   * Get a metadata
+   *
+   * ### Notes
+   * This returns a copy of the key value.
+   *
+   * @param key Metadata key
+   */
+  getMetadata(key: string): any;
+
+  /**
+   * Set a metadata
+   *
+   * @param key Metadata key
+   * @param value Metadata value
+   */
+  setMetadata(key: string, value: any): void;
 
   /**
    * Serialize the model to JSON.
@@ -133,7 +165,7 @@ export interface ICodeCellModel extends ICellModel {
   /**
    * The code cell shared model
    */
-  readonly sharedModel: models.ISharedCodeCell;
+  readonly sharedModel: ISharedCodeCell;
 }
 
 /**
@@ -183,45 +215,43 @@ export function isRawCellModel(model: ICellModel): model is IRawCellModel {
 /**
  * An implementation of the cell model.
  */
-export class CellModel extends CodeEditor.Model implements ICellModel {
+export abstract class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions<ISharedCell> = {}) {
+    const { cell_type, sharedModel, ...others } = options;
     super({
-      sharedModel: createStandaloneCell({ cell_type: 'raw', id: options.id }),
-      ...options
+      sharedModel:
+        sharedModel ??
+        createStandaloneCell({
+          cell_type: cell_type ?? 'raw',
+          id: options.id
+        }),
+      ...others
     });
-    this._standaloneModel = typeof options.sharedModel === 'undefined';
+    this.standaloneModel = typeof options.sharedModel === 'undefined';
+    this.trusted = !!this.getMetadata('trusted') || !!options.trusted;
 
     this.sharedModel.changed.connect(this.onGenericChange, this);
-    this.sharedModel.changed.connect(this.onSharedModelChanged, this);
-
-    const observableMetadata = this.modelDB.createMap('metadata');
-    const metadata = JSONExt.deepCopy(this.sharedModel.getMetadata());
-    const trusted = this.modelDB.createValue('trusted');
-    const cellType = this.modelDB.createValue('type');
-    cellType.set(this.type);
-    for (const key in metadata) {
-      observableMetadata.set(key, metadata[key]);
-    }
-    observableMetadata.changed.connect(this.onModelDBMetadataChange, this);
-    trusted.changed.connect(this.onTrustedChanged, this);
-    trusted.set(!!metadata.trusted || !!options.trusted);
+    this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
   }
 
-  readonly sharedModel: models.ISharedCell;
+  readonly sharedModel: ISharedCell;
 
   /**
    * The type of cell.
    */
-  get type(): nbformat.CellType {
-    // This getter really should be abstract, but our current constructor
-    // depends on .type working
-    return 'raw';
-  }
+  abstract get type(): nbformat.CellType;
 
   /**
    * A signal emitted when the state of the model changes.
    */
   readonly contentChanged = new Signal<this, void>(this);
+
+  /**
+   * Signal emitted when cell metadata changes.
+   */
+  get metadataChanged(): ISignal<ICellModel, IMapChange> {
+    return this._metadataChanged;
+  }
 
   /**
    * A signal emitted when a model state changes.
@@ -241,36 +271,22 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * The metadata associated with the cell.
    */
-  get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
+  get metadata(): Omit<nbformat.IBaseCellMetadata, 'trusted'> {
+    return this.sharedModel.metadata;
   }
 
   /**
-   * Get the trusted state of the model.
+   * The trusted state of the model.
    */
   get trusted(): boolean {
-    return this.modelDB.getValue('trusted') as boolean;
+    return this._trusted;
   }
-
-  /**
-   * Set the trusted state of the model.
-   */
   set trusted(newValue: boolean) {
     const oldValue = this.trusted;
-    if (oldValue === newValue) {
-      return;
+    if (oldValue !== newValue) {
+      this._trusted = newValue;
+      this.onTrustedChanged(this, { newValue, oldValue });
     }
-    this.modelDB.setValue('trusted', newValue);
-  }
-
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    if (this._standaloneModel) {
-      this.sharedModel.dispose();
-    }
-    super.dispose();
   }
 
   /**
@@ -279,10 +295,45 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * The default implementation is a no-op.
    */
   onTrustedChanged(
-    trusted: IObservableValue,
+    trusted: CellModel,
     args: ObservableValue.IChangedArgs
   ): void {
     /* no-op */
+  }
+
+  /**
+   * Delete a metadata
+   *
+   * @param key Metadata key
+   */
+  deleteMetadata(key: string): any {
+    return this.sharedModel.deleteMetadata(key);
+  }
+
+  /**
+   * Get a metadata
+   *
+   * ### Notes
+   * This returns a copy of the key value.
+   *
+   * @param key Metadata key
+   */
+  getMetadata(key: string): any {
+    return this.sharedModel.getMetadata(key);
+  }
+
+  /**
+   * Set a metadata
+   *
+   * @param key Metadata key
+   * @param value Metadata value
+   */
+  setMetadata(key: string, value: any): void {
+    if (typeof value === 'undefined') {
+      this.sharedModel.deleteMetadata(key);
+    } else {
+      this.sharedModel.setMetadata(key, value);
+    }
   }
 
   /**
@@ -299,105 +350,12 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     this.contentChanged.emit(void 0);
   }
 
-  /**
-   * Handle a change to the cell metadata modelDB and reflect it in the shared model.
-   */
-  protected onModelDBMetadataChange(
-    sender: IObservableJSON,
-    event: IObservableJSON.IChangedArgs
-  ): void {
-    const metadata = this.sharedModel.getMetadata();
-    switch (event.type) {
-      case 'add':
-        this._changeCellMetadata(metadata, event);
-        break;
-      case 'change':
-        this._changeCellMetadata(metadata, event);
-        break;
-      case 'remove':
-        delete metadata[event.key];
-        if (event.key === 'collapsed' && metadata.jupyter) {
-          delete metadata.jupyter.outputs_hidden;
-          if (Object.keys(metadata.jupyter).length === 0) {
-            delete metadata.jupyter;
-          }
-        }
-        if (event.key === 'jupyter') {
-          delete metadata.collapsed;
-        }
-        break;
-      default:
-        throw new Error(`Invalid event type: ${event.type}`);
-    }
-    this.sharedModel.setMetadata(metadata);
+  private _onMetadataChanged(sender: ISharedCell, change: IMapChange) {
+    this._metadataChanged.emit(change);
   }
 
-  protected onSharedModelChanged(
-    sender: models.ISharedCell,
-    change: models.CellChange<nbformat.IBaseCellMetadata>
-  ) {
-    if (change.metadataChange) {
-      const newValue = change.metadataChange.newValue ?? {};
-      const oldValue = change.metadataChange.oldValue ?? {};
-      for (const key in newValue) {
-        if (
-          oldValue[key] === undefined ||
-          !JSONExt.deepEqual(newValue[key]!, oldValue[key]!)
-        ) {
-          this.metadata.set(key, newValue[key]);
-        }
-      }
-      this.metadata.keys().forEach(key => {
-        if (newValue[key] === undefined) {
-          this.metadata.delete(key);
-        }
-      });
-    }
-  }
-
-  /**
-   * Change the cell metadata for a given event.
-   *
-   * @param metadata The cell metadata.
-   * @param event The event to handle.
-   */
-  private _changeCellMetadata(
-    metadata: Partial<nbformat.IBaseCellMetadata>,
-    event: IObservableJSON.IChangedArgs
-  ): void {
-    switch (event.key) {
-      case 'jupyter':
-        metadata.jupyter = event.newValue as any;
-        if (metadata.jupyter?.outputs_hidden != null) {
-          metadata.collapsed = metadata.jupyter.outputs_hidden;
-        } else {
-          delete metadata.collapsed;
-        }
-        break;
-      case 'collapsed':
-        metadata.collapsed = event.newValue as any;
-        break;
-      case 'name':
-        metadata.name = event.newValue as any;
-        break;
-      case 'scrolled':
-        metadata.scrolled = event.newValue as any;
-        break;
-      case 'tags':
-        metadata.tags = event.newValue as any;
-        break;
-      case 'trusted':
-        metadata.trusted = event.newValue as any;
-        break;
-      default:
-        // The default is applied for custom metadata that are not
-        // defined in the official nbformat but which are defined
-        // by the user.
-        metadata[event.key] = event.newValue as any;
-    }
-  }
-
-  private readonly _standaloneModel: boolean;
+  private _metadataChanged = new Signal<this, IMapChange>(this);
+  private _trusted = false;
 }
 
 /**
@@ -417,6 +375,12 @@ export namespace CellModel {
      * The cell shared model.
      */
     sharedModel?: T;
+
+    /**
+     * The cell type
+     */
+    cell_type?: string;
+
     /**
      * Whether the cell is trusted or not.
      */
@@ -427,7 +391,7 @@ export namespace CellModel {
 /**
  * A base implementation for cell models with attachments.
  */
-export class AttachmentsCellModel extends CellModel {
+export abstract class AttachmentsCellModel extends CellModel {
   /**
    * Construct a new cell with optional attachments.
    */
@@ -512,15 +476,15 @@ export class RawCellModel extends AttachmentsCellModel {
   /**
    * Construct a raw cell model from optional shared model.
    */
-  constructor(options: AttachmentsCellModel.IOptions<ISharedRawCell> = {}) {
+  constructor(
+    options: Omit<
+      AttachmentsCellModel.IOptions<ISharedRawCell>,
+      'cell_type'
+    > = {}
+  ) {
     super({
-      ...options,
-      sharedModel:
-        options?.sharedModel ||
-        (createStandaloneCell({
-          cell_type: 'raw',
-          id: options.id
-        }) as ISharedRawCell)
+      cell_type: 'raw',
+      ...options
     });
   }
 
@@ -547,16 +511,14 @@ export class MarkdownCellModel extends AttachmentsCellModel {
    * Construct a markdown cell model from optional shared model.
    */
   constructor(
-    options: AttachmentsCellModel.IOptions<ISharedMarkdownCell> = {}
+    options: Omit<
+      AttachmentsCellModel.IOptions<ISharedMarkdownCell>,
+      'cell_type'
+    > = {}
   ) {
     super({
-      ...options,
-      sharedModel:
-        options?.sharedModel ||
-        (createStandaloneCell({
-          cell_type: 'markdown',
-          id: options.id
-        }) as ISharedMarkdownCell)
+      cell_type: 'markdown',
+      ...options
     });
     // Use the Github-flavored markdown mode.
     this.mimeType = 'text/x-ipythongfm';
@@ -586,20 +548,19 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   constructor(options: CodeCellModel.IOptions = {}) {
     super({
-      ...options,
-      sharedModel:
-        options?.sharedModel ||
-        createStandaloneCell({ cell_type: 'code', id: options.id })
+      cell_type: 'code',
+      ...options
     });
-    const factory =
-      options?.contentFactory || CodeCellModel.defaultContentFactory;
-    const trusted = this.trusted;
-    let outputs: nbformat.IOutput[] = this.sharedModel.getOutputs();
-    this.sharedModel.changed.connect(this._onValueChanged, this);
 
+    const factory =
+      options?.contentFactory ?? CodeCellModel.defaultContentFactory;
+    const trusted = this.trusted;
+    const outputs = this.sharedModel.getOutputs();
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
+
+    this.sharedModel.changed.connect(this._onSharedModelChanged, this);
     this._outputs.changed.connect(this.onGenericChange, this);
-    this._outputs.changed.connect(this.onModelDBOutputsChange, this);
+    this._outputs.changed.connect(this.onOutputsChange, this);
   }
 
   /**
@@ -638,7 +599,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     return this._outputs;
   }
 
-  readonly sharedModel: models.ISharedCodeCell;
+  readonly sharedModel: ISharedCodeCell;
 
   clearExecution(): void {
     this.outputs.clear();
@@ -663,16 +624,23 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * Handle a change to the trusted state.
    */
   onTrustedChanged(
-    trusted: IObservableValue,
+    trusted: CellModel,
     args: ObservableValue.IChangedArgs
   ): void {
+    const newTrusted = args.newValue as boolean;
     if (this._outputs) {
-      this._outputs.trusted = args.newValue as boolean;
+      this._outputs.trusted = newTrusted;
+    }
+    if (newTrusted) {
+      const codeCell = this.sharedModel as YCodeCell;
+      const metadata = codeCell.getMetadata();
+      metadata.trusted = true;
+      codeCell.setMetadata(metadata);
     }
     this.stateChanged.emit({
       name: 'trusted',
       oldValue: args.oldValue as boolean,
-      newValue: args.newValue as boolean
+      newValue: newTrusted
     });
   }
 
@@ -686,11 +654,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Handle a change to the cell outputs modelDB and reflect it in the shared model.
    */
-  protected onModelDBOutputsChange(
+  protected onOutputsChange(
     sender: IOutputAreaModel,
     event: IOutputAreaModel.ChangedArgs
   ): void {
-    const codeCell = this.sharedModel as models.YCodeCell;
+    const codeCell = this.sharedModel as YCodeCell;
     globalModelDBMutex(() => {
       switch (event.type) {
         case 'add': {
@@ -717,34 +685,19 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Handle a change to the output shared model and reflect it in modelDB.
-   * We update the modeldb metadata when the nbcell changes.
-   *
-   * This method overrides the CellModel protected _onSharedModelChanged
-   * so we first call super._onSharedModelChanged
-   *
-   * @override CellModel._onSharedModelChanged
-   */
-  protected onSharedModelChanged(
-    sender: models.ISharedCodeCell,
-    change: models.CellChange<nbformat.ICodeCellMetadata>
-  ): void {
-    super.onSharedModelChanged(sender, change);
-    globalModelDBMutex(() => {
-      if (change.outputsChange) {
-        this.outputs.clear();
-        sender.getOutputs().forEach(output => this._outputs.add(output));
-      }
-    });
-  }
-
-  /**
    * Handle a change to the code cell value.
    */
-  private _onValueChanged(
-    slot: models.ISharedCodeCell,
-    change: models.CellChange<nbformat.ICodeCellMetadata>
+  private _onSharedModelChanged(
+    slot: ISharedCodeCell,
+    change: CellChange<nbformat.ICodeCellMetadata>
   ): void {
+    if (change.outputsChange) {
+      globalModelDBMutex(() => {
+        this.outputs.clear();
+        slot.getOutputs().forEach(output => this._outputs.add(output));
+      });
+    }
+
     if (change.executionCountChange) {
       if (
         change.executionCountChange.newValue &&
@@ -783,7 +736,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
   }
 
-  private _executedCode: string = '';
+  private _executedCode = '';
   private _isDirty = false;
   private _outputs: IOutputAreaModel;
 }
@@ -795,7 +748,8 @@ export namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions extends CellModel.IOptions<ISharedCodeCell> {
+  export interface IOptions
+    extends Omit<CellModel.IOptions<ISharedCodeCell>, 'cell_type'> {
     /**
      * The factory for output area model creation.
      */

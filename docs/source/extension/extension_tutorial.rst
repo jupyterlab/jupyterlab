@@ -112,17 +112,22 @@ are using to fetch pictures).
     2 - server
     3 - theme
     Choose from 1, 2, 3 [1]: 1
-    author_name []: Your Name
-    author_email []: your@name.org
+    author_name [My Name]: You Name
+    author_email [me@test.com]: your@name.org
     labextension_name [myextension]: jupyterlab_apod
-    python_name [myextension]: jupyterlab_apod
+    python_name [jupyterlab_apod]: jupyterlab_apod
     project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
     has_settings [n]: n
     has_binder [n]: y
-    repository [https://github.com/github_username/myextension]: https://github.com/github_username/jupyterlab_apod
+    test [y]: y
+    repository [https://github.com/github_username/jupyterlab_apod]: https://github.com/github_username/jupyterlab_apod
 
-Note: if not using a repository, leave the repository field blank. You can come
-back and edit the repository field in the ``package.json`` file later.
+Notes:
+
+- If you are not using a repository, leave the repository field blank. You can come back and edit the repository field in the ``package.json`` file later.
+
+- If you are using the latest version of ``cookiecutter`` you will notice that tests are included in the template. If you don't want to include them just insert ``n`` .
+
 
 Change to the directory the cookiecutter created and list the files.
 
@@ -135,8 +140,8 @@ You should see a list like the following.
 
 ::
 
-    binder          CHANGELOG.md  install.json  jupyterlab_apod  LICENSE   MANIFEST.in   package.json
-    pyproject.toml  README.md     RELEASE.md    setup.py         src       style         tsconfig.json
+    CHANGELOG.md    README.md       babel.config.js install.json    jupyterlab_apod pyproject.toml  src       tsconfig.json
+    LICENSE         RELEASE.md      binder          jest.config.js  package.json    setup.py        style     ui-tests
 
 Commit what you have to git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -241,7 +246,7 @@ to the command palette interface and the `JupyterFrontEnd` instance.
 
     import { ICommandPalette } from '@jupyterlab/apputils';
 
-Locate the ``extension`` object of type ``JupyterFrontEndPlugin``. Change the
+Locate the ``plugin`` object of type ``JupyterFrontEndPlugin``. Change the
 definition so that it reads like so:
 
 .. code:: typescript
@@ -249,7 +254,7 @@ definition so that it reads like so:
     /**
      * Initialization data for the jupyterlab_apod extension.
      */
-    const extension: JupyterFrontEndPlugin<void> = {
+    const plugin: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab-apod',
       autoStart: true,
       requires: [ICommandPalette],
@@ -753,14 +758,14 @@ like this:
 
 .. code-block:: typescript
 
-    const extension: JupyterFrontEndPlugin<void> = {
+    const plugin: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_apod',
       autoStart: true,
       requires: [ICommandPalette],
       activate: activate
     };
 
-Make sure you retain the ``export default extension;`` line in the file.
+Make sure you retain the ``export default plugin;`` line in the file.
 Now build the extension again and refresh the JupyterLab browser tab.
 Run the *Random Astronomy Picture* command more than once without closing the
 panel. The picture should update each time you execute the command. Close

@@ -7,6 +7,7 @@ import path from 'path';
 
 const esModules = [
   '@codemirror',
+  '@jupyter-notebook/ydoc',
   'lib0',
   'vscode-ws-jsonrpc',
   'y-protocols',

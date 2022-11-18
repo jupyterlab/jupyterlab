@@ -91,8 +91,8 @@ We can use `next` when making a `patch` release or a `build` pre-release.
 Click on "Run workflow", then wait for:
 
 1. the PR to be created on the repo. Example: https://github.com/jupyterlab/jupyterlab/pull/11422
-2. Tests to pass
-3. Merge the changelog PR
+1. Tests to pass
+1. Merge the changelog PR
 
 ### Full Release
 
@@ -280,7 +280,7 @@ Now do the actual final release:
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Update the API [docs](#updating-api-docs)
 - [ ] Merge the PRs on the other repos and set the default branch of the
-      xckd repo
+  xckd repo
 - [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
@@ -341,7 +341,7 @@ rm -rf initial
 
 #### Publishing extension tutorial changes
 
-- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, replacing `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`) ```bash
+- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, replacing `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`) \`\`\`bash
   git tag BRANCH-01-show-a-panel HEAD~4
   git tag BRANCH-02-show-an-image HEAD~3
   git tag BRANCH-03-style-and-attribute HEAD~2
@@ -353,13 +353,18 @@ rm -rf initial
   ```
 
 - Push the branch with the new tags
+
   ```bash
   git push origin BRANCH --tags
   ```
+
   Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_apod/settings/branches`).
+
 - If there were changes to the example in the documentation, submit a PR to JupyterLab
+
 - Publish the new `jupyterlab_apod` python package. Make sure to update the version
   number in the last commit of the branch.
+
   ```bash
   twine upload dist/*
   ```

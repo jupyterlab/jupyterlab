@@ -22,7 +22,7 @@ import {
   YCodeCell,
   YMarkdownCell,
   YRawCell
-} from '@jupyterlab/shared-models';
+} from '@jupyter-notebook/ydoc';
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -34,8 +34,8 @@ describe('cells/model', () => {
   describe('CellModel', () => {
     describe('#constructor()', () => {
       it('should create a cell model', () => {
-        const model = new CellModel({
-          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         expect(model).toBeInstanceOf(CellModel);
       });
@@ -45,8 +45,8 @@ describe('cells/model', () => {
           cell_type: 'raw',
           source: 'foo',
           metadata: { trusted: false }
-        });
-        const model = new CellModel({ sharedModel });
+        }) as YRawCell;
+        const model = new TestModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.sharedModel.getSource()).toBe('foo');
       });
@@ -57,8 +57,8 @@ describe('cells/model', () => {
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false },
           id: 'cell_id'
-        });
-        const model = new CellModel({ sharedModel });
+        }) as YRawCell;
+        const model = new TestModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.sharedModel.getSource()).toBe('foo\n\nbar\n\nbaz');
       });
@@ -69,14 +69,14 @@ describe('cells/model', () => {
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false },
           id: 'cell_id'
-        });
-        const model = new CellModel({ sharedModel, id: 'my_id' });
+        }) as YRawCell;
+        const model = new TestModel({ sharedModel, id: 'my_id' });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id).toBe('cell_id');
       });
 
       it('should use the id if an cell is not supplied', () => {
-        const model = new CellModel({ id: 'cell_id' });
+        const model = new TestModel({ id: 'cell_id' });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id).toBe('cell_id');
       });
@@ -86,8 +86,8 @@ describe('cells/model', () => {
           cell_type: 'raw',
           source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false }
-        });
-        const model = new CellModel({ sharedModel });
+        }) as YRawCell;
+        const model = new TestModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
         expect(model.id.length).toBeGreaterThan(0);
       });
@@ -95,8 +95,8 @@ describe('cells/model', () => {
 
     describe('#contentChanged', () => {
       it('should signal when model content has changed', () => {
-        const model = new CellModel({
-          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         let called = false;
         model.contentChanged.connect(() => {
@@ -168,9 +168,9 @@ describe('cells/model', () => {
           value = args.newValue;
         };
         let value = '';
-        model.metadata.changed.connect(listener);
+        model.metadataChanged.connect(listener);
         expect(Object.keys(value)).toHaveLength(0);
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(value).toBe('bar');
       });
 
@@ -179,13 +179,13 @@ describe('cells/model', () => {
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
         let called = 0;
-        model.metadata.changed.connect(() => {
+        model.metadataChanged.connect(() => {
           called++;
         });
         expect(called).toBe(0);
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(called).toBe(1);
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(called).toBe(1);
       });
     });
@@ -206,15 +206,15 @@ describe('cells/model', () => {
 
     describe('#isDisposed', () => {
       it('should be false by default', () => {
-        const model = new CellModel({
-          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         expect(model.isDisposed).toBe(false);
       });
 
       it('should be true after model is disposed', () => {
-        const model = new CellModel({
-          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         model.dispose();
         expect(model.isDisposed).toBe(true);
@@ -231,8 +231,8 @@ describe('cells/model', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        const model = new CellModel({
-          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         model.dispose();
         model.dispose();
@@ -273,32 +273,32 @@ describe('cells/model', () => {
 
     describe('#metadata', () => {
       it('should handle a metadata for the cell', () => {
-        const model = new CellModel({
-          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
-        expect(model.metadata.get('foo')).toBeUndefined();
-        model.metadata.set('foo', 1);
-        expect(model.metadata.get('foo')).toBe(1);
+        expect(model.getMetadata('foo')).toBeUndefined();
+        model.setMetadata('foo', 1);
+        expect(model.getMetadata('foo')).toBe(1);
       });
 
       it('should get a list of user metadata keys', () => {
-        const model = new CellModel({
-          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
-        expect(Array.from(model.metadata.keys())).toHaveLength(0);
-        model.metadata.set('foo', 1);
-        expect(model.metadata.keys()).toEqual(['foo']);
+        expect(Array.from(Object.keys(model.metadata))).toHaveLength(0);
+        model.setMetadata('foo', 1);
+        expect(Object.keys(model.metadata)).toEqual(['foo']);
       });
 
       it('should trigger changed signal', () => {
-        const model = new CellModel({
-          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
         });
         let called = false;
-        model.metadata.changed.connect(() => {
+        model.metadataChanged.connect(() => {
           called = true;
         });
-        model.metadata.set('foo', 1);
+        model.setMetadata('foo', 1);
         expect(called).toBe(true);
       });
     });
@@ -408,8 +408,8 @@ describe('cells/model', () => {
             metadata: { collapsed: true }
           }) as YCodeCell
         });
-        expect(model.metadata.get('collapsed')).toBe(true);
-        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(model.getMetadata('collapsed')).toBe(true);
+        jupyter = model.getMetadata('jupyter') as JSONObject;
         expect(jupyter.outputs_hidden).toBe(true);
 
         // Setting `jupyter.outputs_hidden` works
@@ -420,8 +420,8 @@ describe('cells/model', () => {
             metadata: { jupyter: { outputs_hidden: true } }
           }) as YCodeCell
         });
-        expect(model.metadata.get('collapsed')).toBe(true);
-        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(model.getMetadata('collapsed')).toBe(true);
+        jupyter = model.getMetadata('jupyter') as JSONObject;
         expect(jupyter.outputs_hidden).toBe(true);
 
         // `collapsed` takes precedence
@@ -432,8 +432,8 @@ describe('cells/model', () => {
             metadata: { collapsed: false, jupyter: { outputs_hidden: true } }
           }) as YCodeCell
         });
-        expect(model.metadata.get('collapsed')).toBe(false);
-        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(model.getMetadata('collapsed')).toBe(false);
+        jupyter = model.getMetadata('jupyter') as JSONObject;
         expect(jupyter.outputs_hidden).toBe(false);
       });
     });
@@ -571,7 +571,7 @@ describe('cells/model', () => {
       });
     });
 
-    describe('#onModelDBOutputsChange()', () => {
+    describe('#onOutputsChange()', () => {
       const output0 = {
         output_type: 'display_data',
         data: {
@@ -616,7 +616,7 @@ describe('cells/model', () => {
           oldIndex: -1,
           newIndex: 0
         } as any;
-        model['onModelDBOutputsChange'](null as any, newEvent0);
+        model['onOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(1);
         expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output0);
 
@@ -627,7 +627,7 @@ describe('cells/model', () => {
           oldIndex: -1,
           newIndex: 1
         } as any;
-        model['onModelDBOutputsChange'](null as any, newEvent1);
+        model['onOutputsChange'](null as any, newEvent1);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
         expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output1);
       });
@@ -646,7 +646,7 @@ describe('cells/model', () => {
           oldIndex: 0,
           newIndex: 0
         } as any;
-        model['onModelDBOutputsChange'](null as any, newEvent0);
+        model['onOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
         expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output2);
         const newEvent1 = {
@@ -656,7 +656,7 @@ describe('cells/model', () => {
           oldIndex: 1,
           newIndex: 1
         } as any;
-        model['onModelDBOutputsChange'](null as any, newEvent1);
+        model['onOutputsChange'](null as any, newEvent1);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
         expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output2);
       });
@@ -674,75 +674,75 @@ describe('cells/model', () => {
           oldIndex: 0,
           newIndex: 0
         } as any;
-        model['onModelDBOutputsChange'](null as any, newEvent0);
+        model['onOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(0);
       });
     });
 
     describe('.metadata', () => {
       it('should sync collapsed and jupyter.outputs_hidden metadata when changed', () => {
-        const metadata = new CodeCellModel().metadata;
+        const cell = new CodeCellModel();
 
-        expect(metadata.get('collapsed')).toBeUndefined();
-        expect(metadata.get('jupyter')).toBeUndefined();
+        expect(cell.getMetadata('collapsed')).toBeUndefined();
+        expect(cell.getMetadata('jupyter')).toBeUndefined();
 
         // Setting collapsed sets jupyter.outputs_hidden
-        metadata.set('collapsed', true);
-        expect(metadata.get('collapsed')).toBe(true);
-        expect(metadata.get('jupyter')).toEqual({
+        cell.setMetadata('collapsed', true);
+        expect(cell.getMetadata('collapsed')).toBe(true);
+        expect(cell.getMetadata('jupyter')).toEqual({
           outputs_hidden: true
         });
 
-        metadata.set('collapsed', false);
-        expect(metadata.get('collapsed')).toBe(false);
-        expect(metadata.get('jupyter')).toEqual({
+        cell.setMetadata('collapsed', false);
+        expect(cell.getMetadata('collapsed')).toBe(false);
+        expect(cell.getMetadata('jupyter')).toEqual({
           outputs_hidden: false
         });
 
-        metadata.delete('collapsed');
-        expect(metadata.get('collapsed')).toBeUndefined();
-        expect(metadata.get('jupyter')).toBeUndefined();
+        cell.deleteMetadata('collapsed');
+        expect(cell.getMetadata('collapsed')).toBeUndefined();
+        expect(cell.getMetadata('jupyter')).toBeUndefined();
 
         // Setting jupyter.outputs_hidden sets collapsed
-        metadata.set('jupyter', { outputs_hidden: true });
-        expect(metadata.get('collapsed')).toBe(true);
-        expect(metadata.get('jupyter')).toEqual({
+        cell.setMetadata('jupyter', { outputs_hidden: true });
+        expect(cell.getMetadata('collapsed')).toBe(true);
+        expect(cell.getMetadata('jupyter')).toEqual({
           outputs_hidden: true
         });
 
-        metadata.set('jupyter', { outputs_hidden: false });
-        expect(metadata.get('collapsed')).toBe(false);
-        expect(metadata.get('jupyter')).toEqual({
+        cell.setMetadata('jupyter', { outputs_hidden: false });
+        expect(cell.getMetadata('collapsed')).toBe(false);
+        expect(cell.getMetadata('jupyter')).toEqual({
           outputs_hidden: false
         });
 
-        metadata.delete('jupyter');
-        expect(metadata.get('collapsed')).toBeUndefined();
-        expect(metadata.get('jupyter')).toBeUndefined();
+        cell.deleteMetadata('jupyter');
+        expect(cell.getMetadata('collapsed')).toBeUndefined();
+        expect(cell.getMetadata('jupyter')).toBeUndefined();
 
         // Deleting jupyter.outputs_hidden preserves other jupyter fields
-        metadata.set('jupyter', { outputs_hidden: true, other: true });
-        expect(metadata.get('collapsed')).toBe(true);
-        expect(metadata.get('jupyter')).toEqual({
+        cell.setMetadata('jupyter', { outputs_hidden: true, other: true });
+        expect(cell.getMetadata('collapsed')).toBe(true);
+        expect(cell.getMetadata('jupyter')).toEqual({
           outputs_hidden: true,
           other: true
         });
-        metadata.set('jupyter', { other: true });
-        expect(metadata.get('collapsed')).toBeUndefined();
-        expect(metadata.get('jupyter')).toEqual({
+        cell.setMetadata('jupyter', { other: true });
+        expect(cell.getMetadata('collapsed')).toBeUndefined();
+        expect(cell.getMetadata('jupyter')).toEqual({
           other: true
         });
 
         // Deleting collapsed preserves other jupyter fields
-        metadata.set('jupyter', { outputs_hidden: true, other: true });
-        expect(metadata.get('collapsed')).toBe(true);
-        expect(metadata.get('jupyter')).toEqual({
+        cell.setMetadata('jupyter', { outputs_hidden: true, other: true });
+        expect(cell.getMetadata('collapsed')).toBe(true);
+        expect(cell.getMetadata('jupyter')).toEqual({
           outputs_hidden: true,
           other: true
         });
-        metadata.delete('collapsed');
-        expect(metadata.get('collapsed')).toBeUndefined();
-        expect(metadata.get('jupyter')).toEqual({
+        cell.deleteMetadata('collapsed');
+        expect(cell.getMetadata('collapsed')).toBeUndefined();
+        expect(cell.getMetadata('jupyter')).toEqual({
           other: true
         });
       });

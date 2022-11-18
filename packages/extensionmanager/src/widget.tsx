@@ -42,13 +42,13 @@ function getExtensionGitHubUser(entry: IEntry) {
  * VDOM for visualizing an extension entry.
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
-  const { entry, supportInstallation, trans } = props;
+  const { canFetch, entry, supportInstallation, trans } = props;
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
   const title = entry.name;
-  const githubUser = getExtensionGitHubUser(entry);
+  const githubUser = canFetch ? getExtensionGitHubUser(entry) : null;
 
   if (!entry.allowed) {
     flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
@@ -184,6 +184,11 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
 namespace ListEntry {
   export interface IProperties {
     /**
+     * Whether thumbnails can be fetched from external webservices or not.
+     */
+    canFetch: boolean;
+
+    /**
      * The entry to visualize.
      */
     entry: IEntry;
@@ -211,7 +216,7 @@ namespace ListEntry {
  * List view widget for extensions
  */
 function ListView(props: ListView.IProperties): React.ReactElement<any> {
-  const { trans } = props;
+  const { canFetch, performAction, supportInstallation, trans } = props;
 
   return (
     <div className="jp-extensionmanager-listview-wrapper">
@@ -220,9 +225,10 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
           {props.entries.map(entry => (
             <ListEntry
               key={entry.name}
+              canFetch={canFetch}
               entry={entry}
-              performAction={props.performAction}
-              supportInstallation={props.supportInstallation}
+              performAction={performAction}
+              supportInstallation={supportInstallation}
               trans={trans}
             />
           ))}
@@ -242,7 +248,7 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
             initialPage={(props.initialPage ?? 1) - 1}
             pageCount={props.numPages}
             marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
+            pageRangeDisplayed={3}
             onPageChange={(data: { selected: number }) =>
               props.onPage(data.selected + 1)
             }
@@ -260,6 +266,11 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
  */
 namespace ListView {
   export interface IProperties {
+    /**
+     * Whether thumbnails can be fetched from external webservices or not.
+     */
+    canFetch: boolean;
+
     /**
      * The extension entries to display.
      */
@@ -378,7 +389,17 @@ class Warning extends ReactWidget {
             .__(`The JupyterLab development team is excited to have a robust
 third-party extension community. However, we do not review
 third-party extensions, and some extensions may introduce security
-risks or contain malicious code that runs on your machine.`)}
+risks or contain malicious code that runs on your machine. Moreover in order
+to work, this panel needs to fetch data from web services. Do you agree to
+activate this feature?`)}
+          <br />
+          <a
+            href="https://jupyterlab.readthedocs.io/en/latest/privacy_policies"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {this.trans.__('Please read the privacy policy.')}
+          </a>
         </p>
         {this.model.isDisclaimed ? (
           <Button
@@ -386,18 +407,31 @@ risks or contain malicious code that runs on your machine.`)}
             onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
               this.model.isDisclaimed = false;
             }}
+            title={this.trans.__('This will withdraw your consent.')}
           >
-            {this.trans.__('Disable')}
+            {this.trans.__('No')}
           </Button>
         ) : (
-          <Button
-            className="jp-extensionmanager-disclaimer-enable"
-            onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
-              this.model.isDisclaimed = true;
-            }}
-          >
-            {this.trans.__('Enable')}
-          </Button>
+          <div>
+            <Button
+              className="jp-extensionmanager-disclaimer-enable"
+              onClick={() => {
+                this.model.isDisclaimed = true;
+              }}
+            >
+              {this.trans.__('Yes')}
+            </Button>
+            <Button
+              onClick={() => {
+                this.model.isEnabled = false;
+              }}
+              title={this.trans.__(
+                'This will disable the extension manager panel; including the listing of installed extension.'
+              )}
+            >
+              {this.trans.__('No, disable')}
+            </Button>
+          </div>
         )}
       </>
     );
@@ -425,6 +459,7 @@ class InstalledList extends ReactWidget {
           </div>
         ) : (
           <ListView
+            canFetch={this.model.isDisclaimed}
             entries={this.model.installed.filter(pkg =>
               new RegExp(this.model.query.toLowerCase()).test(pkg.name)
             )}
@@ -518,6 +553,7 @@ class SearchResult extends ReactWidget {
           </div>
         ) : (
           <ListView
+            canFetch={this.model.isDisclaimed}
             entries={this.model.searchResult}
             initialPage={this.model.page}
             numPages={this.model.lastPage}

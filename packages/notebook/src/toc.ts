@@ -88,7 +88,7 @@ export class NotebookToCModel extends TableOfContentsModel<
       this.setConfiguration({});
     });
 
-    this.widget.context.model.metadata.changed.connect(
+    this.widget.context.model.metadataChanged.connect(
       this.onMetadataChanged,
       this
     );
@@ -168,7 +168,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     }
 
     this.headingsChanged.disconnect(this.onHeadingsChanged, this);
-    this.widget.context?.model?.metadata?.changed.disconnect(
+    this.widget.context?.model?.metadataChanged.disconnect(
       this.onMetadataChanged,
       this
     );
@@ -308,7 +308,7 @@ export class NotebookToCModel extends TableOfContentsModel<
           }
 
           const keyPath = key.split('/');
-          let value = nbModel.metadata.get(keyPath[0]) as any;
+          let value = nbModel.getMetadata(keyPath[0]);
           for (let p = 1; p < keyPath.length; p++) {
             value = (value ?? {})[keyPath[p]];
           }

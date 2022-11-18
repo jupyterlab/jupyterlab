@@ -23,7 +23,7 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import * as ymodels from '@jupyterlab/shared-models';
+import { DocumentChange, ISharedDocument } from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,
@@ -33,9 +33,7 @@ import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import * as Y from 'yjs';
 import { DocumentRegistry } from './registry';
-import { DocumentChange, ISharedDocument } from '@jupyterlab/shared-models';
 
 /**
  * An implementation of a document context.
@@ -61,10 +59,6 @@ export class Context<
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
     this._model = this._factory.createNew(lang);
-    const ymodel = this._model.sharedModel as ymodels.YDocument<DocumentChange>; // translate to the concrete Yjs implementation
-    const ydoc = ymodel.ydoc;
-    this._ydoc = ydoc;
-    this._ycontext = ydoc.getMap('context');
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
       ? docProviderFactory({
@@ -92,24 +86,12 @@ export class Context<
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    const urlResolver = (this.urlResolver = new RenderMimeRegistry.UrlResolver({
+    this.urlResolver = new RenderMimeRegistry.UrlResolver({
       path: this._path,
       contents: manager.contents
-    }));
-    this._ycontext.set('path', this._path);
-    this._ycontext.observe(event => {
-      const pathChanged = event.changes.keys.get('path');
-      if (pathChanged) {
-        const newPath = this._ycontext.get('path')!;
-        if (newPath && newPath !== pathChanged.oldValue) {
-          urlResolver.path = newPath;
-          this._path = newPath;
-          this._provider.setPath(newPath);
-          this._pathChanged.emit(this.path);
-          this.sessionContext.session?.setPath(newPath) as any;
-        }
-      }
     });
+    this.model.sharedModel.setState('path', this._path);
+    this.model.sharedModel.changed.connect(this.onStateChanged, this);
   }
 
   /**
@@ -217,9 +199,8 @@ export class Context<
     this._isDisposed = true;
     this.sessionContext.dispose();
     this._model.dispose();
-    this._provider.destroy();
+    this._provider.dispose();
     this._model.sharedModel.dispose();
-    this._ydoc.destroy();
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -419,6 +400,20 @@ export class Context<
     });
   }
 
+  protected onStateChanged(sender: ISharedDocument, changes: DocumentChange) {
+    if (changes.stateChange) {
+      changes.stateChange.forEach(change => {
+        if (change.name === 'path' && change.newValue !== change.oldValue) {
+          (this.urlResolver as RenderMimeRegistry.UrlResolver).path =
+            change.newValue;
+          this._path = change.newValue;
+          this.sessionContext.session?.setPath(change.newValue) as any;
+          this._pathChanged.emit(this.path);
+        }
+      });
+    }
+  }
+
   /**
    * Handle a change on the contents manager.
    */
@@ -456,7 +451,7 @@ export class Context<
       const localPath = this._manager.contents.localPath(newPath);
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
-      this._ycontext.set('path', this._path);
+      this._model.sharedModel.setState('path', this._path);
     }
   }
 
@@ -470,7 +465,7 @@ export class Context<
     const path = this.sessionContext.session!.path;
     if (path !== this._path) {
       this._path = path;
-      this._ycontext.set('path', this._path);
+      this._model.sharedModel.setState('path', this._path);
     }
   }
 
@@ -493,7 +488,7 @@ export class Context<
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
-    this._ycontext.set('last_modified', newModel.last_modified);
+    this._model.sharedModel.setState('last_modified', newModel.last_modified);
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -502,33 +497,34 @@ export class Context<
   /**
    * Handle an initial population.
    */
-  private _populate(): Promise<void> {
+  private async _populate(): Promise<void> {
+    await this._provider.ready;
+
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
 
     // Add a checkpoint if none exists and the file is writable.
-    return this._maybeCheckpoint(false).then(() => {
-      if (this.isDisposed) {
-        return;
+    await this._maybeCheckpoint(false);
+    if (this.isDisposed) {
+      return;
+    }
+    // Update the kernel preference.
+    const name =
+      this._model.defaultKernelName ||
+      this.sessionContext.kernelPreference.name;
+    this.sessionContext.kernelPreference = {
+      ...this.sessionContext.kernelPreference,
+      name,
+      language: this._model.defaultKernelLanguage
+    };
+    // Note: we don't wait on the session to initialize
+    // so that the user can be shown the content before
+    // any kernel has started.
+    void this.sessionContext.initialize().then(shouldSelect => {
+      if (shouldSelect) {
+        void this._dialogs.selectKernel(this.sessionContext, this.translator);
       }
-      // Update the kernel preference.
-      const name =
-        this._model.defaultKernelName ||
-        this.sessionContext.kernelPreference.name;
-      this.sessionContext.kernelPreference = {
-        ...this.sessionContext.kernelPreference,
-        name,
-        language: this._model.defaultKernelLanguage
-      };
-      // Note: we don't wait on the session to initialize
-      // so that the user can be shown the content before
-      // any kernel has started.
-      void this.sessionContext.initialize().then(shouldSelect => {
-        if (shouldSelect) {
-          void this._dialogs.selectKernel(this.sessionContext, this.translator);
-        }
-      });
     });
   }
 
@@ -551,7 +547,7 @@ export class Context<
     await this.sessionContext.session?.setName(newName);
 
     this._path = newPath;
-    this._ycontext.set('path', this._path);
+    this._model.sharedModel.setState('path', this._path);
   }
 
   /**
@@ -736,8 +732,10 @@ export class Context<
         // (our last save)
         // In some cases the filesystem reports an inconsistent time, so we allow buffer when comparing.
         const lastModifiedCheckMargin = this._lastModifiedCheckMargin;
-        const ycontextModified = this._ycontext.get('last_modified');
-        // prefer using the timestamp from ycontext because it is more up to date
+        const ycontextModified = this._model.sharedModel.getState(
+          'last_modified'
+        ) as string;
+        // prefer using the timestamp from the state because it is more up to date
         const modified = ycontextModified || this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
@@ -890,8 +888,7 @@ or load the version on disk (revert)?`,
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
     // we must rename the document before saving with the new path
-    this._ycontext.set('path', this._path);
-    await this._provider.renameAck;
+    this._model.sharedModel.setState('path', this._path);
     await this.save();
     await this._maybeCheckpoint(true);
   }
@@ -919,8 +916,6 @@ or load the version on disk (revert)?`,
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _provider: IDocumentProvider;
-  private _ydoc: Y.Doc;
-  private _ycontext: Y.Map<string>;
   private _lastModifiedCheckMargin = 500;
   private _timeConflictModalIsOpen = false;
 }

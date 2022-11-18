@@ -12,7 +12,6 @@ from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_fla
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_server_ydoc.ydoc import JupyterSQLiteYStore
 from jupyterlab_server import (
     LabServerApp,
     LicensesApp,
@@ -21,8 +20,7 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from notebook_shim.shim import NotebookConfigShimMixin
-from traitlets import Bool, Instance, Int, Type, Unicode, default
-from ypy_websocket.ystore import BaseYStore
+from traitlets import Bool, Instance, Type, Unicode, default
 
 from ._version import __version__
 from .commands import (
@@ -46,6 +44,14 @@ from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
 from .extensions import MANAGERS as EXT_MANAGERS
 from .extensions.readonly import ReadOnlyExtensionManager
+from .handlers.announcements import (
+    CheckForUpdate,
+    CheckForUpdateABC,
+    CheckForUpdateHandler,
+    NewsHandler,
+    check_update_handler_path,
+    news_handler_path,
+)
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import (
@@ -563,30 +569,18 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
-    collaborative_file_poll_interval = Int(
-        1,
-        config=True,
-        help="""The period in seconds to check for file changes on disk (relevant only
-        in collaborative mode). Defaults to 1s, if 0 then file changes will only be checked when
-        saving changes from the front-end.""",
-    )
-
-    collaborative_document_cleanup_delay = Int(
-        60,
+    news_url = Unicode(
+        "https://jupyterlab.github.io/assets/feed.xml",
         allow_none=True,
+        help="""URL that serves news Atom feed; by default the JupyterLab organization announcements will be fetched. Set to None to turn off fetching announcements.""",
         config=True,
-        help="""The delay in seconds to keep a document in memory in the back-end after all clients
-        disconnect (relevant only in collaborative mode). Defaults to 60s, if None then the
-        document will be kept in memory forever.""",
     )
 
-    collaborative_ystore_class = Type(
-        default_value=JupyterSQLiteYStore,
-        klass=BaseYStore,
+    check_for_updates_class = Type(
+        default_value=CheckForUpdate,
+        klass=CheckForUpdateABC,
         config=True,
-        help="""The YStore class to use for storing Y updates (relevant only in collaborative mode).
-        Defaults to JupyterSQLiteYStore, which stores Y updates in a '.jupyter_ystore.db' SQLite
-        database in the current directory.""",
+        help="""A callable class that receives the current version at instantiation and calling it must return asynchronously a string indicating which version is available and how to install or None if no update is available. The string supports Markdown format.""",
     )
 
     @default("app_dir")
@@ -738,6 +732,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.cache_files = False
 
         if not self.core_mode and not errored:
+            # Add extension management handlers
             provider = self.extension_manager
             entry_point = EXT_MANAGERS.get(provider)
             if entry_point is None:
@@ -793,6 +788,27 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             )
             handlers.append(ext_handler)
 
+            # Add announcement handlers
+            page_config["news"] = {"disabled": self.news_url is None}
+            handlers.extend(
+                [
+                    (
+                        check_update_handler_path,
+                        CheckForUpdateHandler,
+                        {
+                            "update_checker": self.check_for_updates_class(__version__),
+                        },
+                    ),
+                    (
+                        news_handler_path,
+                        NewsHandler,
+                        {
+                            "news_url": self.news_url,
+                        },
+                    ),
+                ]
+            )
+
         # If running under JupyterHub, add more metadata.
         if "hub_prefix" in self.serverapp.tornado_settings:
             tornado_settings = self.serverapp.tornado_settings
@@ -811,14 +827,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             page_config["token"] = ""
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
-        self.serverapp.web_app.settings.update(
-            {
-                "page_config_data": page_config,
-                "collaborative_file_poll_interval": self.collaborative_file_poll_interval,
-                "collaborative_document_cleanup_delay": self.collaborative_document_cleanup_delay,
-                "collaborative_ystore_class": self.collaborative_ystore_class,
-            }
-        )
+        self.serverapp.web_app.settings["page_config_data"] = page_config
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)

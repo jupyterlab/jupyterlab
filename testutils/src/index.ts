@@ -5,6 +5,8 @@ export { NBTestUtils } from './notebook-utils';
 
 export { defaultRenderMime } from './rendermime';
 
+export { FakeUserManager } from './user';
+
 export { JupyterServer } from './start_jupyter_server';
 
 export {

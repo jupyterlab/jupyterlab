@@ -1,7 +1,7 @@
 {
   "title": "Extension Manager",
   "description": "Extension manager settings.",
-  "jupyter.lab.setting-icon": "ui-components:settings",
+  "jupyter.lab.setting-icon": "ui-components:extension",
   "jupyter.lab.setting-icon-label": "Extension Manager",
   "jupyter.lab.menus": {
     "main": [
@@ -43,13 +43,13 @@
   "properties": {
     "enabled": {
       "title": "Enabled Status",
-      "description": "Enables extension manager (requires Node.js/npm).\nWARNING: installing untrusted extensions may be unsafe.",
+      "description": "Enables extension manager.\nWARNING: installing untrusted extensions may be unsafe.",
       "default": true,
       "type": "boolean"
     },
     "disclaimed": {
       "title": "Disclaimed Status",
-      "description": "Whether the user understand that extensions managed through this interface run arbitrary code that may be dangerous",
+      "description": "Whether the user agrees the access to external web services and understands extensions may introduce security risks or contain malicious code that runs on his machine.",
       "default": false,
       "type": "boolean"
     }

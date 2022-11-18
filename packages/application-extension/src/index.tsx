@@ -733,30 +733,33 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
     const first = app.started;
     const registry = app.commands;
 
-    const restorer = new LayoutRestorer({ connector: state, first, registry });
-
+    const mode = PageConfig.getOption('mode') as DockPanel.Mode;
+    const restorer = new LayoutRestorer({
+      connector: state,
+      first,
+      registry,
+      mode
+    });
     settingRegistry
       .load(shell.id)
       .then(settings => {
         // Add a layer of customization to support app shell mode
         const customizedLayout = settings.composite['layout'] as any;
 
-        void restorer.fetch().then(saved => {
-          labShell.restoreLayout(
-            PageConfig.getOption('mode') as DockPanel.Mode,
-            saved,
-            {
-              'multiple-document': customizedLayout.multiple ?? {},
-              'single-document': customizedLayout.single ?? {}
-            }
-          );
-          labShell.layoutModified.connect(() => {
-            void restorer.save(labShell.saveLayout());
-          });
+        // Restore the layout.
+        void labShell
+          .restoreLayout(mode, restorer, {
+            'multiple-document': customizedLayout.multiple ?? {},
+            'single-document': customizedLayout.single ?? {}
+          })
+          .then(() => {
+            labShell.layoutModified.connect(() => {
+              void restorer.save(labShell.saveLayout());
+            });
 
-          settings.changed.connect(onSettingsChanged);
-          Private.activateSidebarSwitcher(app, labShell, settings, trans);
-        });
+            settings.changed.connect(onSettingsChanged);
+            Private.activateSidebarSwitcher(app, labShell, settings, trans);
+          });
       })
       .catch(reason => {
         console.error('Fail to load settings for the layout restorer.');
@@ -1139,8 +1142,6 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
           console.error(reason.message);
         });
     }
-
-    modeSwitch.value = labShell.mode === 'single-document';
 
     // Show the current file browser shortcut in its title.
     const updateModeSwitchTitle = () => {

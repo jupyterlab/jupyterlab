@@ -10,8 +10,7 @@ import {
 import { IObservableList } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Kernel } from '@jupyterlab/services';
-import * as models from '@jupyterlab/shared-models';
-import { ISharedDocument } from '@jupyterlab/shared-models';
+import { ISharedDocument, ISharedFile } from '@jupyter-notebook/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   fileIcon,
@@ -855,7 +854,7 @@ export namespace DocumentRegistry {
    * The interface for a document model that represents code.
    */
   export interface ICodeModel extends IModel, CodeEditor.IModel {
-    sharedModel: models.ISharedFile;
+    sharedModel: ISharedFile;
   }
 
   /**

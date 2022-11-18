@@ -19,10 +19,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { KernelMessage } from '@jupyterlab/services';
-import {
-  createStandaloneCell,
-  ISharedRawCell
-} from '@jupyterlab/shared-models';
+import { createStandaloneCell, ISharedRawCell } from '@jupyter-notebook/ydoc';
 import { JSONObject, MimeData } from '@lumino/coreutils';
 import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
@@ -343,7 +340,7 @@ export class CodeConsole extends Widget {
     const cell = this.createCodeCell();
     cell.model.sharedModel.setSource(code);
     for (const key of Object.keys(metadata)) {
-      cell.model.metadata.set(key, metadata[key]);
+      cell.model.setMetadata(key, metadata[key]);
     }
     this.addCell(cell);
     return this._execute(cell);

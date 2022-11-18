@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docmanager",
-  "version": "4.0.0-alpha.15",
+  "version": "4.0.0-alpha.16",
   "description": "JupyterLab - Document Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,14 +41,14 @@
     "watch": "npm run test -- --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.15",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.15",
-    "@jupyterlab/docprovider": "^4.0.0-alpha.15",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.15",
-    "@jupyterlab/services": "^7.0.0-alpha.15",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.15",
-    "@jupyterlab/translation": "^4.0.0-alpha.15",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.30",
+    "@jupyterlab/apputils": "^4.0.0-alpha.16",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.16",
+    "@jupyterlab/docprovider": "^4.0.0-alpha.16",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.16",
+    "@jupyterlab/services": "^7.0.0-alpha.16",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.16",
+    "@jupyterlab/translation": "^4.0.0-alpha.16",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.31",
     "@lumino/algorithm": "^2.0.0-alpha.6",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/disposable": "^2.0.0-alpha.6",
@@ -59,7 +59,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.15",
+    "@jupyterlab/testutils": "^4.0.0-alpha.16",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

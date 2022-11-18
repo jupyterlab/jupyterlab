@@ -3,32 +3,36 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import * as React from 'react';
+import { User } from '@jupyterlab/services';
 
-import { ICurrentUser, IUser } from './tokens';
-import { UserIconComponent } from './components';
 import { Panel } from '@lumino/widgets';
 
+import * as React from 'react';
+
+import { UserIconComponent } from './components';
+
 export class UserInfoPanel extends Panel {
-  private _profile: ICurrentUser;
+  private _profile: User.IManager;
   private _body: UserInfoBody;
 
-  constructor(user: ICurrentUser) {
+  constructor(user: User.IManager) {
     super({});
     this.addClass('jp-UserInfoPanel');
 
     this._profile = user;
 
     if (this._profile.isReady) {
-      this._body = new UserInfoBody(user.toJSON());
+      this._body = new UserInfoBody(this._profile.identity!);
       this.addWidget(this._body);
       this.update();
     } else {
-      this._profile.ready.connect(user => {
-        this._body = new UserInfoBody(user.toJSON());
-        this.addWidget(this._body);
-        this.update();
-      });
+      this._profile.ready
+        .then(() => {
+          this._body = new UserInfoBody(this._profile.identity!);
+          this.addWidget(this._body);
+          this.update();
+        })
+        .catch(e => console.error(e));
     }
   }
 }
@@ -37,21 +41,21 @@ export class UserInfoPanel extends Panel {
  * A SettingsWidget for the user.
  */
 export class UserInfoBody extends ReactWidget {
-  private _user: IUser.User;
+  private _user: User.IIdentity;
 
   /**
    * Constructs a new settings widget.
    */
-  constructor(user: IUser.User) {
+  constructor(user: User.IIdentity) {
     super();
     this._user = user;
   }
 
-  get user(): IUser.User {
+  get user(): User.IIdentity {
     return this._user;
   }
 
-  set user(user: IUser.User) {
+  set user(user: User.IIdentity) {
     this._user = user;
     this.update();
   }

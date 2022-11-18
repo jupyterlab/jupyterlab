@@ -6,7 +6,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import { IYText } from '@jupyter-notebook/ydoc';
 import {
   ITranslator,
   nullTranslator,
@@ -247,9 +247,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ]
     );
 
-    // every time the model is switched, we need to re-initialize the editor binding
-    this.model.sharedModelSwitched.connect(this._initializeEditorBinding, this);
-
     this._onMimeTypeChanged();
     this._onCursorActivity();
 
@@ -261,7 +258,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Initialize the editor binding.
    */
   private _initializeEditorBinding(): void {
-    const sharedModel = this.model.sharedModel as models.IYText;
+    const sharedModel = this.model.sharedModel as IYText;
     this._yeditorBinding = {
       text: sharedModel.ysource,
       awareness: sharedModel.awareness,
