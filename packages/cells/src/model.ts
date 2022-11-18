@@ -484,6 +484,7 @@ export class AttachmentsCellModel extends CellModel {
       modelDB: this.modelDB
     });
     this._attachments.stateChanged.connect(this.onGenericChange, this);
+    this._attachments.changed.connect(this.onModelDBAttachmentsChange, this);
   }
 
   /**
@@ -502,6 +503,61 @@ export class AttachmentsCellModel extends CellModel {
       cell.attachments = this.attachments.toJSON();
     }
     return cell;
+  }
+
+  public switchSharedModel(
+    sharedModel: models.ISharedCodeCell,
+    reinitialize?: boolean
+  ): void {
+    if (reinitialize) {
+      const attachments = ((sharedModel as unknown) as models.YRawCell).getAttachments();
+      this._attachments.fromJSON(attachments ?? {});
+    }
+    super.switchSharedModel(sharedModel, reinitialize);
+  }
+
+  /**
+   * Handle a change to the cell outputs modelDB and reflect it in the shared model.
+   */
+  protected onModelDBAttachmentsChange(
+    sender: IAttachmentsModel,
+    event: IAttachmentsModel.ChangedArgs
+  ): void {
+    const sharedModel = this.sharedModel as models.YRawCell;
+    globalModelDBMutex(() => {
+      switch (event.type) {
+        case 'add':
+        case 'change':
+        case 'remove':
+          sharedModel.setAttachments(sender.toJSON());
+          break;
+        default:
+          throw new Error(`Invalid event type: ${event.type}`);
+      }
+    });
+  }
+
+  /**
+   * Handle a change to the output shared model and reflect it in modelDB.
+   * We update the modeldb metadata when the nbcell changes.
+   *
+   * This method overrides the CellModel protected _onSharedModelChanged
+   * so we first call super._onSharedModelChanged
+   *
+   * @override CellModel._onSharedModelChanged
+   */
+  protected _onSharedModelChanged(
+    sender: models.ISharedCodeCell,
+    change: models.CellChange<nbformat.IBaseCellMetadata>
+  ): void {
+    super._onSharedModelChanged(sender, change);
+    const sharedModel = this.sharedModel as models.YRawCell;
+    globalModelDBMutex(() => {
+      if (change.attachmentsChange) {
+        const attachments = sharedModel.getAttachments();
+        this._attachments.fromJSON(attachments ?? {});
+      }
+    });
   }
 
   private _attachments: IAttachmentsModel;
