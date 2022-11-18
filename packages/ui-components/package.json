@@ -65,10 +65,9 @@
     "@jupyterlab/testutils": "^4.0.0-alpha.16",
     "@types/jest": "^26.0.10",
     "@types/react": "^17.0.0",
-    "babel-loader": "^8.0.6",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
-    "svgo": "^2.8.0",
+    "svgo": "^3.0.1",
     "ts-jest": "^26.3.0",
     "typedoc": "~0.22.10",
     "typescript": "~4.7.3"

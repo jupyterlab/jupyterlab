@@ -60,7 +60,7 @@
     "@jupyterlab/testutils": "^4.0.0-alpha.16",
     "@types/jest": "^26.0.10",
     "@types/lodash.escape": "^4.0.6",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^10.1.0",
     "jest": "^26.4.2",
     "json2html": "^0.0.8",
     "rimraf": "~3.0.0",
