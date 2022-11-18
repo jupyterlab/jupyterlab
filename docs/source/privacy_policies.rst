@@ -1,7 +1,7 @@
 Privacy policies
 ================
 
-Last modified: November 17th, 2022
+Last modified: November 19th, 2022
 
 Introduction
 ------------
