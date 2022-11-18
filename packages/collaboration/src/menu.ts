@@ -102,7 +102,7 @@ export class RendererUserMenu extends MenuBar.Renderer {
  * Custom lumino Menu for the user menu.
  */
 export class UserMenu extends Menu {
-  private _user: User.IManager;
+  private _user?: User.IManager;
 
   constructor(options: UserMenu.IOptions) {
     super(options);
@@ -114,7 +114,7 @@ export class UserMenu extends Menu {
 
     this._user?.ready
       .then(() => {
-        this.title.label = this._user.identity!.display_name;
+        this.title.label = this._user!.identity!.display_name;
       })
       .catch(e => console.error(e));
 
