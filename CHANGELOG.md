@@ -14,22 +14,22 @@
 
 ### Enhancements made
 
-- Backport #12502 on branch 3.6.x (Add line history to Stdin cell outputs) [#13431](https://github.com/jupyterlab/jupyterlab/pull/13431) ([@fcollonval](https://github.com/fcollonval))
-- Backport #13413 on branch 3.6.x (Move configuration to jupyter-server-ydoc) [#13425](https://github.com/jupyterlab/jupyterlab/pull/13425) ([@fcollonval](https://github.com/fcollonval))
-- Backport #13341 on branch 3.6.x (Add user configuration for additional schemes for the sanitizer plugin) [#13419](https://github.com/jupyterlab/jupyterlab/pull/13419) ([@fcollonval](https://github.com/fcollonval))
-- Backport #13279 on branch 3.6.x (Define file or activity icons color as static) [#13408](https://github.com/jupyterlab/jupyterlab/pull/13408) ([@fcollonval](https://github.com/fcollonval))
+- Add line history to Stdin cell outputs [#13431](https://github.com/jupyterlab/jupyterlab/pull/13431) ([@fcollonval](https://github.com/fcollonval))
+- Move configuration to jupyter-server-ydoc [#13425](https://github.com/jupyterlab/jupyterlab/pull/13425) ([@fcollonval](https://github.com/fcollonval))
+- Add user configuration for additional schemes for the sanitizer plugin [#13419](https://github.com/jupyterlab/jupyterlab/pull/13419) ([@fcollonval](https://github.com/fcollonval))
+- Define file or activity icons color as static [#13408](https://github.com/jupyterlab/jupyterlab/pull/13408) ([@fcollonval](https://github.com/fcollonval))
 
 ### Maintenance and upkeep improvements
 
-- Backport #13434 on branch 3.6.x (Require jupyter_server_ydoc >=0.4.0) [#13437](https://github.com/jupyterlab/jupyterlab/pull/13437) ([@hbcarlos](https://github.com/hbcarlos))
-- Backport #13428 on branch 3.6.x (Use more consistent naming for user service) [#13435](https://github.com/jupyterlab/jupyterlab/pull/13435) ([@fcollonval](https://github.com/fcollonval))
-- Backport: Deprecate managing source extensions with `jupyter labextension` [#13424](https://github.com/jupyterlab/jupyterlab/pull/13424) ([@jtpio](https://github.com/jtpio))
-- Backport #13389 on branch 3.6.x (Extract @jupyterlab/shared-models to @jupyter-notebook/ydoc) [#13398](https://github.com/jupyterlab/jupyterlab/pull/13398) ([@fcollonval](https://github.com/fcollonval))
+- Require jupyter_server_ydoc >=0.4.0 [#13437](https://github.com/jupyterlab/jupyterlab/pull/13437) ([@hbcarlos](https://github.com/hbcarlos))
+- Use more consistent naming for user service [#13435](https://github.com/jupyterlab/jupyterlab/pull/13435) ([@fcollonval](https://github.com/fcollonval))
+- Deprecate managing source extensions with `jupyter labextension` [#13424](https://github.com/jupyterlab/jupyterlab/pull/13424) ([@jtpio](https://github.com/jtpio))
+- Extract @jupyterlab/shared-models to @jupyter-notebook/ydoc [#13398](https://github.com/jupyterlab/jupyterlab/pull/13398) ([@fcollonval](https://github.com/fcollonval))
 
 ### Documentation improvements
 
 - Remove broken URL [#13445](https://github.com/jupyterlab/jupyterlab/pull/13445) ([@fcollonval](https://github.com/fcollonval))
-- Backport #13413 on branch 3.6.x (Move configuration to jupyter-server-ydoc) [#13425](https://github.com/jupyterlab/jupyterlab/pull/13425) ([@fcollonval](https://github.com/fcollonval))
+- Move configuration to jupyter-server-ydoc [#13425](https://github.com/jupyterlab/jupyterlab/pull/13425) ([@fcollonval](https://github.com/fcollonval))
 - Update the tutorial to reflect the changes in the latest cookiecutter… [#13417](https://github.com/jupyterlab/jupyterlab/pull/13417) ([@frivas-at-navteca](https://github.com/frivas-at-navteca))
 
 ### Contributors to this release
