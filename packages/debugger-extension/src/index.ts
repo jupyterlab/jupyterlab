@@ -685,7 +685,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.pause, {
       label: trans.__('Pause'),
-      caption: trans.__('Pause'),
+      caption: trans.__('Pause the current thread if possible.'),
       icon: Debugger.Icons.pauseIcon,
       isEnabled: () =>
         (service.session?.isStarted ?? false) && !service.hasStoppedThreads(),
