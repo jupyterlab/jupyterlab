@@ -2,35 +2,16 @@
 # Distributed under the terms of the Modified BSD License.
 
 import json
-from typing import NamedTuple
 from unittest.mock import MagicMock, Mock, patch
-
-try:
-    from unittest.mock import AsyncMock
-except ImportError:
-    AsyncMock = None
 
 import pytest
 import tornado
-from jupyter_server.utils import ensure_async
 from traitlets.config import Config, Configurable
 
 from jupyterlab.extensions import PyPIExtensionManager, ReadOnlyExtensionManager
 from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage
 
-
-class Response(NamedTuple):
-    """Fake tornado response."""
-
-    body: bytes
-
-
-def to_async_mock(args):
-    """Convert arguments to awaitable arguments or asynchronous mock."""
-    if AsyncMock is None:
-        return ensure_async(args)
-    else:
-        return AsyncMock(return_value=args)
+from . import Response, to_async_mock
 
 
 @pytest.mark.parametrize(

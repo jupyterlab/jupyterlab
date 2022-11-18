@@ -42,6 +42,19 @@
   min-height: 160px;
 }
 
+.jp-extensionmanager-disclaimer a {
+  color: var(--jp-content-link-color);
+}
+
+.jp-extensionmanager-disclaimer a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
+.jp-extensionmanager-disclaimer .jp-Button {
+  margin: 0 5px;
+}
+
 /*
   List view layout and styling
 */
@@ -85,14 +98,9 @@
   List view pagination styling
 */
 
-.jp-extensionmanager-pagination {
+.jp-extensionmanager-view ul.pagination {
   display: flex;
   justify-content: center;
-  flex: 0 0 auto;
-}
-
-.jp-extensionmanager-view ul.pagination {
-  display: inline-block;
   padding-left: 0;
   padding-right: 0;
 }
@@ -103,7 +111,6 @@
 
 .jp-extensionmanager-view .pagination li a {
   padding: 0 5px;
-  margin: 0 5px;
 }
 
 .jp-extensionmanager-view .pagination li.active a {
