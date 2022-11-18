@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -95,17 +95,9 @@ export class EventManager implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    // TODO: (1) Make the test emission a request with an appropriate schema.
-    // TODO: (2) Remove try block when jupyter_server 2 is a hard requirement.
-    try {
-      await this.emit({
-        // eslint-disable-next-line camelcase
-        schema_id:
-          'https://events.jupyter.org/jupyter_server/contents_service/v1',
-        data: { action: 'get', path: '.' },
-        version: '1'
-      });
-    } catch (_) {
+    // TODO: Remove this check for the `jupyter_server` version.
+    // It is only necessary in JupyterLab < 4.
+    if (2 > PageConfig.getNotebookVersion()[0]) {
       return;
     }
     const { token, WebSocket, wsUrl } = this.serverSettings;
