@@ -45,6 +45,15 @@
   min-height: 0;
 }
 
+.jp-extensionmanager-disclaimer a {
+  color: var(--jp-content-link-color);
+}
+
+.jp-extensionmanager-disclaimer a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
 /*
   Section headers
 */
