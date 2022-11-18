@@ -247,50 +247,50 @@ These lines:
 
 ## Post release candidate checklist
 
-- \[ \] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
-- \[ \] Write [release highlights](CHANGELOG.md), starting with:
+- [ ] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
+- [ ] Write [release highlights](CHANGELOG.md), starting with:
   ```bash
   loghub jupyterlab/jupyterlab -m XXX -t $GITHUB_TOKEN --template scripts/release_template.txt
   ```
-- \[ \] Test the release candidate in a clean environment
-- \[ \] Make sure the CI builds pass
+- [ ] Test the release candidate in a clean environment
+- [ ] Make sure the CI builds pass
   - The build will fail if we publish a new package because by default it is
     private. Use `npm access public @jupyterlab/<name>` to make it public.
   - The build will fail if we forget to include `style/` in the `files:`
     of a package (it will fail on the `jupyter lab build` command because
     webpack cannot find the referenced styles to import.
-- \[ \] Update the other repos:
-  - \[ \] https://github.com/jupyterlab/extension-cookiecutter-js
-  - \[ \] https://github.com/jupyterlab/extension-cookiecutter-ts
-  - \[ \] https://github.com/jupyterlab/mimerender-cookiecutter
-  - \[ \] https://github.com/jupyterlab/mimerender-cookiecutter-ts
-  - \[ \] https://github.com/jupyterlab/theme-cookiecutter
-  - \[ \] https://github.com/jupyterlab/jupyter-renderers
-- \[ \] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
-- \[ \] Update the extension examples:
-  - \[ \] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
-- \[ \] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
-- \[ \] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
+- [ ] Update the other repos:
+  - [ ] https://github.com/jupyterlab/extension-cookiecutter-js
+  - [ ] https://github.com/jupyterlab/extension-cookiecutter-ts
+  - [ ] https://github.com/jupyterlab/mimerender-cookiecutter
+  - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
+  - [ ] https://github.com/jupyterlab/theme-cookiecutter
+  - [ ] https://github.com/jupyterlab/jupyter-renderers
+- [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
+- [ ] Update the extension examples:
+  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
+- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
+- [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
 Now do the actual final release:
 
-- \[ \] Run `jlpm run bumpversion release` to switch to final release
-- \[ \] Push the commit and tags to master
-- \[ \] Run `npm run publish:all` to publish the packages
-- \[ \] Create a branch for the release and push to GitHub
-- \[ \] Update the API [docs](#updating-api-docs)
-- \[ \] Merge the PRs on the other repos and set the default branch of the
+- [ ] Run `jlpm run bumpversion release` to switch to final release
+- [ ] Push the commit and tags to master
+- [ ] Run `npm run publish:all` to publish the packages
+- [ ] Create a branch for the release and push to GitHub
+- [ ] Update the API [docs](#updating-api-docs)
+- [ ] Merge the PRs on the other repos and set the default branch of the
   xckd repo
-- \[ \] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
+- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
 the next release:
 
-- \[ \] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
-- \[ \] Put the commit and tags to master
-- \[ \] Run `npm run publish:all` to publish the packages
-- \[ \] Release the other repos as appropriate
-- \[ \] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
+- [ ] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
+- [ ] Put the commit and tags to master
+- [ ] Run `npm run publish:all` to publish the packages
+- [ ] Release the other repos as appropriate
+- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
 
 ### Updating the extension tutorial
 

@@ -9,7 +9,7 @@ import { Panel } from '@lumino/widgets';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { UserManager } from '@jupyterlab/services';
+import { User } from '@jupyterlab/services';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
@@ -36,12 +36,12 @@ const CLICKABLE_COLLABORATOR_CLASS = 'jp-ClickableCollaborator';
 const COLLABORATOR_ICON_CLASS = 'jp-CollaboratorIcon';
 
 export class CollaboratorsPanel extends Panel {
-  private _currentUser: UserManager.IManager;
+  private _currentUser: User.IManager;
   private _awareness: Awareness;
   private _body: CollaboratorsBody;
 
   constructor(
-    currentUser: UserManager.IManager,
+    currentUser: User.IManager,
     awareness: Awareness,
     fileopener: (path: string) => void
   ) {

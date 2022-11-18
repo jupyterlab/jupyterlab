@@ -51,6 +51,8 @@ repos:
     rev: 0.7.16
     hooks:
       - id: mdformat
+        additional_dependencies:
+          [mdformat-gfm, mdformat-frontmatter, mdformat-footnote]
 
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.19.1

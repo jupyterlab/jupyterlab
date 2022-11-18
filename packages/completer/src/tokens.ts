@@ -32,6 +32,9 @@ export interface ICompletionContext {
    */
   session?: Session.ISessionConnection | null;
 
+  /**
+   * The sanitizer used to sanitize untrusted html inputs.
+   */
   sanitizer?: ISanitizer;
 }
 
