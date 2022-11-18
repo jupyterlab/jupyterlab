@@ -199,6 +199,8 @@ test.describe('Customized', () => {
 
     await page.waitForSelector('.jp-Terminal');
 
+    await setSidebarWidth(page, 251, 'right');
+
     expect(await page.screenshot()).toMatchSnapshot(
       'customized-terminal-position-single.png'
     );
