@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { defaultSanitizer } from '@jupyterlab/apputils';
+import { ISanitizer, Sanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { renderText } from '@jupyterlab/rendermime';
 import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
@@ -60,12 +60,18 @@ export class Completer extends Widget {
    */
   constructor(options: Completer.IOptions) {
     super({ node: document.createElement('div') });
-    this._renderer = options.renderer || Completer.defaultRenderer;
-
-    this.model = options.model || null;
-    this.editor = options.editor || null;
+    this.sanitizer = options.sanitizer ?? new Sanitizer();
+    this._renderer =
+      options.renderer ?? Completer.getDefaultRenderer(this.sanitizer);
+    this.model = options.model ?? null;
+    this.editor = options.editor ?? null;
     this.addClass('jp-Completer');
   }
+
+  /**
+   * The sanitizer used to sanitize untrusted html inputs.
+   */
+  readonly sanitizer: ISanitizer;
 
   /**
    * The active index.
@@ -668,7 +674,8 @@ export class Completer extends Widget {
           let node: HTMLElement;
           const nodeRenderer =
             this._renderer.createDocumentationNode ??
-            Completer.defaultRenderer.createDocumentationNode;
+            Completer.getDefaultRenderer(this.sanitizer)
+              .createDocumentationNode;
           node = nodeRenderer(activeItem);
           docPanel!.textContent = '';
           docPanel!.appendChild(node);
@@ -721,6 +728,11 @@ export namespace Completer {
      * Flag to show or hide the document panel.
      */
     showDoc?: boolean;
+
+    /**
+     * Sanitizer used to sanitize html strings
+     */
+    sanitizer?: ISanitizer;
   }
 
   /**
@@ -933,12 +945,19 @@ export namespace Completer {
      * documentation panel.
      */
     createDocumentationNode?(activeItem: T): HTMLElement;
+
+    /**
+     * The sanitizer used to sanitize untrusted html inputs.
+     */
+    readonly sanitizer: ISanitizer;
   }
 
   /**
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
+    constructor(readonly sanitizer: ISanitizer = new Sanitizer()) {}
+
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
      */
@@ -1010,7 +1029,7 @@ export namespace Completer {
       const matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(result, {
+      matchNode.innerHTML = this.sanitizer.sanitize(result, {
         allowedTags: ['mark']
       });
       return matchNode;
@@ -1072,9 +1091,22 @@ export namespace Completer {
   }
 
   /**
+   * Default renderer
+   */
+  let _defaultRenderer: Renderer;
+
+  /**
    * The default `IRenderer` instance.
    */
-  export const defaultRenderer = new Renderer();
+  export function getDefaultRenderer(sanitizer?: ISanitizer): Renderer {
+    if (
+      !_defaultRenderer ||
+      (sanitizer && _defaultRenderer.sanitizer !== sanitizer)
+    ) {
+      _defaultRenderer = new Renderer(sanitizer);
+    }
+    return _defaultRenderer;
+  }
 }
 
 /**

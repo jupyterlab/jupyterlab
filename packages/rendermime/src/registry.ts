@@ -2,11 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
-  defaultSanitizer,
-  ISanitizer,
-  ISessionContext
-} from '@jupyterlab/apputils';
+import { ISanitizer, ISessionContext, Sanitizer } from '@jupyterlab/apputils';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Session } from '@jupyterlab/services';
@@ -38,7 +34,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
     this.linkHandler = options.linkHandler ?? null;
     this.latexTypesetter = options.latexTypesetter ?? null;
     this.markdownParser = options.markdownParser ?? null;
-    this.sanitizer = options.sanitizer ?? defaultSanitizer;
+    this.sanitizer = options.sanitizer ?? new Sanitizer();
 
     // Add the initial factories.
     if (options.initialFactories) {

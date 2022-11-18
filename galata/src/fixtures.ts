@@ -2,7 +2,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Session, TerminalAPI } from '@jupyterlab/services';
+import type { Session, TerminalAPI } from '@jupyterlab/services';
 import {
   test as base,
   Page,
@@ -56,6 +56,17 @@ export type GalataOptions = {
    * Default: true
    */
   autoGoto: boolean;
+  /**
+   * Mock JupyterLab config in-memory or not.
+   *
+   * Possible values are:
+   * - true (default): JupyterLab config will be mocked on a per test basis
+   * - false: JupyterLab config won't be mocked (Be careful it will write config in local files)
+   * - Record<string, JSONObject>: Initial JupyterLab data config - Mapping (config section, value).
+   *
+   * By default the config is stored in-memory.
+   */
+  mockConfig: boolean | Record<string, unknown>;
   /**
    * Mock JupyterLab state in-memory or not.
    *
@@ -158,6 +169,17 @@ export const test: TestType<
    * Note: Setting it to false allows to register new route mock-ups for example.
    */
   autoGoto: [true, { option: true }],
+  /**
+   * Mock JupyterLab config in-memory or not.
+   *
+   * Possible values are:
+   * - true (default): JupyterLab config will be mocked on a per test basis
+   * - false: JupyterLab config won't be mocked (Be careful it will write config in local files)
+   * - Record<string, JSONObject>: Initial JupyterLab data config - Mapping (config section, value).
+   *
+   * By default the config is stored in-memory.
+   */
+  mockConfig: [true, { option: true }],
   /**
    * Mock JupyterLab state in-memory or not.
    *
@@ -312,6 +334,7 @@ export const test: TestType<
       appPath,
       autoGoto,
       baseURL,
+      mockConfig,
       mockSettings,
       mockState,
       page,
@@ -327,6 +350,7 @@ export const test: TestType<
         appPath,
         autoGoto,
         baseURL!,
+        mockConfig,
         mockSettings,
         mockState,
         page,

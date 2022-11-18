@@ -15,8 +15,10 @@ import {
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
+  ISanitizer,
   ISessionContext,
   ISessionContextDialogs,
+  Sanitizer,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
@@ -211,7 +213,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:completer',
   autoStart: true,
   requires: [IConsoleTracker],
-  optional: [ICompletionProviderManager],
+  optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateConsoleCompleterService
 };
 
@@ -900,13 +902,15 @@ function activateConsoleCompleterService(
   app: JupyterFrontEnd,
   consoles: IConsoleTracker,
   manager: ICompletionProviderManager | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  appSanitizer: ISanitizer | null
 ): void {
   if (!manager) {
     return;
   }
 
   const trans = (translator ?? nullTranslator).load('jupyterlab');
+  const sanitizer = appSanitizer ?? new Sanitizer();
 
   app.commands.addCommand(CommandIDs.invokeCompleter, {
     label: trans.__('Display the completion helper.'),
@@ -946,7 +950,8 @@ function activateConsoleCompleterService(
       const newContext = {
         editor: cell.editor,
         session: codeConsole.sessionContext.session,
-        widget: consolePanel
+        widget: consolePanel,
+        sanitzer: sanitizer
       };
       manager.updateCompleter(newContext).catch(console.error);
     });
@@ -954,7 +959,8 @@ function activateConsoleCompleterService(
       const newContext = {
         editor: consolePanel.console.promptCell?.editor ?? null,
         session: consolePanel.console.sessionContext.session,
-        widget: consolePanel
+        widget: consolePanel,
+        sanitizer: sanitizer
       };
       manager.updateCompleter(newContext).catch(console.error);
     });

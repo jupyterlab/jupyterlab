@@ -48,7 +48,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const { commands, shell, serviceManager } = app;
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
-    let enabled = false;
 
     const model = new ListModel(serviceManager, translator);
 
@@ -75,21 +74,26 @@ const plugin: JupyterFrontEndPlugin<void> = {
     Promise.all([app.restored, registry.load(PLUGIN_ID)])
       .then(([, settings]) => {
         model.isDisclaimed = settings.get('disclaimed').composite as boolean;
+        model.isEnabled = settings.get('enabled').composite as boolean;
         model.stateChanged.connect(() => {
           if (
             model.isDisclaimed !==
             (settings.get('disclaimed').composite as boolean)
           ) {
             settings.set('disclaimed', model.isDisclaimed).catch(reason => {
-              console.error(
-                `Something went wrong when setting disclaimed.\n${reason}`
-              );
+              console.error(`Failed to set setting 'disclaimed'.\n${reason}`);
+            });
+          }
+          if (
+            model.isEnabled !== (settings.get('enabled').composite as boolean)
+          ) {
+            settings.set('enabled', model.isEnabled).catch(reason => {
+              console.error(`Failed to set setting 'enabled'.\n${reason}`);
             });
           }
         });
-        enabled = settings.get('enabled').composite as boolean;
 
-        if (enabled) {
+        if (model.isEnabled) {
           view = view ?? createView();
         } else {
           view?.dispose();
@@ -98,10 +102,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
         settings.changed.connect(async () => {
           model.isDisclaimed = settings.get('disclaimed').composite as boolean;
-          enabled = settings.get('enabled').composite as boolean;
+          model.isEnabled = settings.get('enabled').composite as boolean;
           app.commands.notifyCommandChanged(CommandIDs.toggle);
 
-          if (enabled) {
+          if (model.isEnabled) {
             if (view === null || !view.isAttached) {
               const accepted = await Private.showWarning(trans);
               if (!accepted) {
@@ -129,17 +133,17 @@ const plugin: JupyterFrontEndPlugin<void> = {
           shell.activateById(view.id);
         }
       },
-      isVisible: () => enabled
+      isVisible: () => model.isEnabled
     });
 
     commands.addCommand(CommandIDs.toggle, {
       label: trans.__('Enable Extension Manager'),
       execute: () => {
         if (registry) {
-          void registry.set(plugin.id, 'enabled', !enabled);
+          void registry.set(plugin.id, 'enabled', !model.isEnabled);
         }
       },
-      isToggled: () => enabled
+      isToggled: () => model.isEnabled
     });
 
     if (palette) {

@@ -23,6 +23,7 @@ import {
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
+  Sanitizer,
   sessionContextDialogs,
   showDialog,
   Toolbar,
@@ -791,7 +792,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:completer',
   requires: [INotebookTracker],
-  optional: [ICompletionProviderManager, ITranslator],
+  optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateNotebookCompleterService,
   autoStart: true
 };
@@ -1733,13 +1734,14 @@ function activateNotebookCompleterService(
   app: JupyterFrontEnd,
   notebooks: INotebookTracker,
   manager: ICompletionProviderManager | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  appSanitizer: ISanitizer | null
 ): void {
   if (!manager) {
     return;
   }
   const trans = (translator ?? nullTranslator).load('jupyterlab');
-
+  const sanitizer = appSanitizer ?? new Sanitizer();
   app.commands.addCommand(CommandIDs.invokeCompleter, {
     label: trans.__('Display the completion helper.'),
     execute: args => {
@@ -1773,7 +1775,8 @@ function activateNotebookCompleterService(
     const completerContext = {
       editor: notebook.content.activeCell?.editor ?? null,
       session: notebook.sessionContext.session,
-      widget: notebook
+      widget: notebook,
+      sanitizer: sanitizer
     };
     await manager.updateCompleter(completerContext);
     notebook.content.activeCellChanged.connect((_, cell) => {
@@ -1783,7 +1786,8 @@ function activateNotebookCompleterService(
           const newCompleterContext = {
             editor: cell.editor,
             session: notebook.sessionContext.session,
-            widget: notebook
+            widget: notebook,
+            sanitizer: sanitizer
           };
           return manager.updateCompleter(newCompleterContext);
         })
@@ -1916,7 +1920,7 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.run, {
-    label: trans.__("Run Selected Cells and Don't Advance"),
+    label: trans.__('Run Selected Cells and Do not Advance'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 

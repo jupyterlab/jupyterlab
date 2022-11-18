@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import commander from 'commander';
+import { program as commander } from 'commander';
 import * as crypto from 'crypto';
 import * as fs from 'fs-extra';
 import * as path from 'path';

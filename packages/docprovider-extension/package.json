@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docprovider-extension",
-  "version": "4.0.0-alpha.15",
+  "version": "4.0.0-alpha.16",
   "description": "JupyterLab - Document Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "@jupyter-notebook/ydoc": "~0.2.0",
-    "@jupyterlab/application": "^4.0.0-alpha.15",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.15",
-    "@jupyterlab/docprovider": "^4.0.0-alpha.15",
-    "@jupyterlab/services": "^7.0.0-alpha.15"
+    "@jupyterlab/application": "^4.0.0-alpha.16",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.16",
+    "@jupyterlab/docprovider": "^4.0.0-alpha.16",
+    "@jupyterlab/services": "^7.0.0-alpha.16"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

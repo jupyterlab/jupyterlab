@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////
 
 import * as path from 'path';
-import commander from 'commander';
+import { program as commander } from 'commander';
 import webpack from 'webpack';
 import generateConfig from './extensionConfig';
 import { stdout as colors } from 'supports-color';
@@ -57,26 +57,26 @@ commander
     'url for build assets, if hosted outside the built extension'
   )
   .option('--watch')
-  .action(async cmd => {
-    const mode = cmd.development ? 'development' : 'production';
-    const corePath = path.resolve(cmd.corePath || process.cwd());
-    const packagePath = path.resolve(cmd.args[0]);
-    const devtool = cmd.sourceMap ? 'source-map' : undefined;
+  .action(async (options, command) => {
+    const mode = options.development ? 'development' : 'production';
+    const corePath = path.resolve(options.corePath || process.cwd());
+    const packagePath = path.resolve(command.args[0]);
+    const devtool = options.sourceMap ? 'source-map' : undefined;
 
     const config = generateConfig({
       packagePath,
       mode,
       corePath,
-      staticUrl: cmd.staticUrl,
+      staticUrl: options.staticUrl,
       devtool,
-      watchMode: cmd.watch
+      watchMode: options.watch
     });
     const compiler = webpack(config);
 
     let lastHash: string | null = null;
 
     function compilerCallback(err: any, stats: any) {
-      if (!cmd.watch || err) {
+      if (!options.watch || err) {
         // Do not keep cache anymore
         compiler.purgeInputFileSystem();
       }
@@ -93,7 +93,7 @@ commander
 
       if (stats.hasErrors()) {
         console.error(info.errors);
-        if (!cmd.watch) {
+        if (!options.watch) {
           process.exit(2);
         }
       }
@@ -108,7 +108,7 @@ commander
       }
     }
 
-    if (cmd.watch) {
+    if (options.watch) {
       compiler.hooks.watchRun.tap('WebpackInfo', () => {
         console.error('\nWatch Compilation starting…\n');
       });
@@ -124,7 +124,7 @@ commander
       });
     }
 
-    if (cmd.watch) {
+    if (options.watch) {
       compiler.watch(config[0].watchOptions || {}, compilerCallback);
       console.error('\nwebpack is watching the files…\n');
     } else {

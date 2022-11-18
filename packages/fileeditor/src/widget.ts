@@ -76,7 +76,7 @@ export class FileEditor extends Widget {
    * A promise that resolves when the file editor is ready.
    */
   get ready(): Promise<void> {
-    return this.ready;
+    return this._ready.promise;
   }
 
   /**

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "4.0.0-alpha.15",
+  "version": "4.0.0-alpha.16",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,10 +42,10 @@
   "dependencies": {
     "@yarnpkg/lockfile": "^1.1.0",
     "child_process": "~1.0.2",
-    "commander": "~6.0.0",
+    "commander": "^9.4.1",
     "crypto": "~1.0.1",
-    "dependency-graph": "^0.9.0",
-    "fs-extra": "^9.0.1",
+    "dependency-graph": "^0.11.0",
+    "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
     "inquirer": "^7.1.0",
     "minimatch": "~3.0.4",

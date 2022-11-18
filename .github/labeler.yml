@@ -266,10 +266,6 @@ pkg:settingregistry:
   - packages/settingregistry/**/*
   - packages/settingregistry/*
 
-pkg:shared-models:
-  - packages/shared-models/**/*
-  - packages/shared-models/*
-
 pkg:shortcuts:
   - packages/shortcuts-extension/**/*
   - packages/shortcuts-extension/*

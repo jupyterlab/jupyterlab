@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { caretDownIcon, userIcon } from '@jupyterlab/ui-components';
-import { User, UserManager } from '@jupyterlab/services';
+import { User } from '@jupyterlab/services';
 import { Menu, MenuBar } from '@lumino/widgets';
 import { h, VirtualElement } from '@lumino/virtualdom';
 
@@ -10,14 +10,14 @@ import { h, VirtualElement } from '@lumino/virtualdom';
  * Custom renderer for the user menu.
  */
 export class RendererUserMenu extends MenuBar.Renderer {
-  private _user: UserManager.IManager;
+  private _user: User.IManager;
 
   /**
    * Constructor of the class RendererUserMenu.
    *
    * @argument user Current user object.
    */
-  constructor(user: UserManager.IManager) {
+  constructor(user: User.IManager) {
     super();
     this._user = user;
   }
@@ -92,7 +92,7 @@ export class RendererUserMenu extends MenuBar.Renderer {
  * Custom lumino Menu for the user menu.
  */
 export class UserMenu extends Menu {
-  private _user: UserManager.IManager;
+  private _user: User.IManager;
 
   constructor(options: UserMenu.IOptions) {
     super(options);
@@ -115,7 +115,7 @@ export class UserMenu extends Menu {
     this._user.userChanged.disconnect(this._updateLabel, this);
   }
 
-  private _updateLabel(sender: UserManager.IManager, user: User.IUser): void {
+  private _updateLabel(sender: User.IManager, user: User.IUser): void {
     this.title.label = user.identity.display_name;
     this.update();
   }
@@ -132,6 +132,6 @@ export namespace UserMenu {
     /**
      * Current user manager.
      */
-    user: UserManager.IManager;
+    user: User.IManager;
   }
 }

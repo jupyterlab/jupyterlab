@@ -86,6 +86,7 @@ module.exports = {
           'blocked_extensions_uris',
           'bundles_extension',
           'cell_type',
+          'check_update',
           'clear_output',
           'codemirror_mode',
           'comm_close',

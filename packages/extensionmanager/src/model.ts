@@ -237,6 +237,19 @@ export class ListModel extends VDomModel {
     }
   }
 
+  /**
+   * Whether the extension manager is enabled or not.
+   */
+  get isEnabled(): boolean {
+    return this._isEnabled;
+  }
+  set isEnabled(v: boolean) {
+    if (v !== this._isEnabled) {
+      this._isEnabled = v;
+      this.stateChanged.emit();
+    }
+  }
+
   get isLoadingInstalledExtensions(): boolean {
     return this._isLoadingInstalledExtensions;
   }
@@ -574,6 +587,7 @@ export class ListModel extends VDomModel {
   protected translator: ITranslator;
 
   private _isDisclaimed = false;
+  private _isEnabled = false;
   private _isLoadingInstalledExtensions = false;
   private _isSearching = false;
 
