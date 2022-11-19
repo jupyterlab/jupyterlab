@@ -23,7 +23,12 @@ export class EventManager implements IDisposable {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
     this._stream = new Private.Stream(this);
-    void this._subscribe();
+    // TODO: Remove this logic in JupyterLab 4
+    if (this._isDisabled) {
+      this._stream.stop();
+    } else {
+      void this._subscribe();
+    }
   }
 
   /**
@@ -92,12 +97,7 @@ export class EventManager implements IDisposable {
    * Subscribe to event bus emissions.
    */
   private async _subscribe(): Promise<void> {
-    if (this.isDisposed) {
-      return;
-    }
-    // TODO: Remove this check for the `jupyter_server` version.
-    // It is only necessary in JupyterLab < 4.
-    if (2 > PageConfig.getNotebookVersion()[0]) {
+    if (this.isDisposed || this._isDisabled) {
       return;
     }
     const { token, WebSocket, wsUrl } = this.serverSettings;
@@ -111,6 +111,9 @@ export class EventManager implements IDisposable {
     socket.onmessage = msg => msg.data && stream.emit(JSON.parse(msg.data));
   }
 
+  // TODO: Remove this check for the `jupyter_server` version.
+  // It is only necessary in JupyterLab < 4.
+  private _isDisabled = 2 > PageConfig.getNotebookVersion()[0];
   private _isDisposed = false;
   private _socket: WebSocket | null = null;
   private _stream: Private.Stream<this, Event.Emission>;
