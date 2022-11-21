@@ -307,15 +307,20 @@ test.describe('Workspace in doc mode', () => {
     await Promise.all([
       // Wait for the workspace to be saved.
       page.waitForRequest(request => {
-        let restorerData = {};
+        if (
+          request.method() !== 'PUT' ||
+          !/api\/workspaces/.test(request.url())
+        ) {
+          return false;
+        }
+        let restorerData: any = {};
         let mainRestorerWidgets = [];
         if (request.postDataJSON() && request.postDataJSON().data) {
-          restorerData = request.postDataJSON().data['layout-restorer:data'];
-          mainRestorerWidgets = restorerData['main']['dock']['widgets'];
+          restorerData =
+            request.postDataJSON().data['layout-restorer:data'] ?? {};
+          mainRestorerWidgets = restorerData.main?.dock?.widgets;
         }
         return (
-          request.method() === 'PUT' &&
-          /api\/workspaces/.test(request.url()) &&
           mainRestorerWidgets.length === 1 &&
           mainRestorerWidgets[0] ===
             'notebook:workspace-test/simple_notebook.ipynb'
