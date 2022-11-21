@@ -85,7 +85,7 @@ export interface ICompletionProvider<
    * Given an incomplete (unresolved) completion item, resolve it by adding
    * all missing details, such as lazy-fetched documentation.
    *
-   * @param completion - the completion item to resolve
+   * @param completionItem - the completion item to resolve
    * @param context - The context of the completer
    * @param patch - The text which will be injected if the completion item is
    * selected.

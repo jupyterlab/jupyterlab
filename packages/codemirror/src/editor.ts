@@ -675,6 +675,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (tree) {
       tree.iterate({
         enter: (node: SyntaxNodeRef) => {
+          // If it has a child, it is not a leaf, but we still want to enter
+          if (node.node.firstChild !== null) {
+            return true;
+          }
           tokens.push({
             value: this.state.sliceDoc(node.from, node.to),
             offset: node.from,
@@ -692,13 +696,27 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   getTokenAt(offset: number): CodeEditor.IToken {
     const tree = ensureSyntaxTree(this.state, offset);
+    let token: CodeEditor.IToken | null = null;
     if (tree) {
-      const node = tree.resolveInner(offset);
-      return {
-        value: this.state.sliceDoc(node.from, node.to),
-        offset: node.from,
-        type: node.name
-      };
+      tree.iterate({
+        enter: (node: SyntaxNodeRef) => {
+          // If it has a child, it is not a leaf, but we still want to enter
+          if (node.node.firstChild !== null) {
+            return true;
+          }
+          if (offset >= node.from && offset <= node.to) {
+            token = {
+              value: this.state.sliceDoc(node.from, node.to),
+              offset: node.from,
+              type: node.name
+            };
+          }
+          return true;
+        }
+      });
+    }
+    if (token !== null) {
+      return token;
     } else {
       return {
         value: '',
