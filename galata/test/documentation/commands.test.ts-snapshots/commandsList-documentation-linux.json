@@ -1780,7 +1780,7 @@
   },
   {
     "id": "notebook:run-cell",
-    "label": "Run Selected Cells and Don't Advance",
+    "label": "Run Selected Cells and Do not Advance",
     "caption": "",
     "shortcuts": [
       "Ctrl Enter"
