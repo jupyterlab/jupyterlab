@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, JupyterLabPage, test } from '@jupyterlab/galata';
+import { expect, galata, JupyterLabPage, test } from '@jupyterlab/galata';
 
 test.describe('page', () => {
   test('should return a JupyterLabPage', ({ page }) => {
@@ -24,6 +24,7 @@ test.describe('page', () => {
 test.describe('mockSettings', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/apputils-extension:themes': {
         theme: 'JupyterLab Dark'
       }

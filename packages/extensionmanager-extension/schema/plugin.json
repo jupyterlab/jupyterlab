@@ -33,7 +33,7 @@
     },
     "disclaimed": {
       "title": "Disclaimed Status",
-      "description": "Whether the user understand that extensions managed through this interface run arbitrary code that may be dangerous",
+      "description": "Whether the user agrees the access to external web services and understands extensions may introduce security risks or contain malicious code that runs on his machine.",
       "default": false,
       "type": "boolean"
     },
@@ -44,14 +44,14 @@
       "type": "string"
     },
     "npmCdn": {
-      "title": "NPM CDN",
-      "description": "The URI of the CDN to use for fetching full package data",
+      "title": "NPM Content Delivery Network (CDN)",
+      "description": "The URI of the Content Delivery Network (CDN) to use for fetching full package data",
       "default": "https://unpkg.com",
       "type": "string"
     },
     "enableCdn": {
-      "title": "Enable CDN",
-      "description": "Enables using the CDN to fetch full package data.  Otherwise, the configured NPM registry will be used. Due to a lack of CORS support by NPM registry, only disable if supplying a custom registry",
+      "title": "Enable Content Delivery Network (CDN)",
+      "description": "Enables using the Content Delivery Network (CDN) to fetch full package data.  Otherwise, the configured NPM registry will be used. Due to a lack of CORS support by NPM registry, only disable if supplying a custom registry",
       "default": true,
       "type": "boolean"
     }

@@ -34,6 +34,7 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    :maxdepth: 1
    :caption: User Guide
 
+   user/announcements
    user/interface
    user/urls
    user/files
@@ -82,3 +83,9 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    developer/css
    developer/api
 
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Privacy Policies
+
+   privacy_policies

@@ -20,7 +20,7 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from nbclassic.shim import NBClassicConfigShimMixin
-from traitlets import Bool, Instance, Unicode, default
+from traitlets import Bool, Instance, Type, Unicode, default
 
 from ._version import __version__
 from .commands import (
@@ -42,6 +42,14 @@ from .commands import (
 )
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
+from .handlers.announcements import (
+    CheckForUpdate,
+    CheckForUpdateABC,
+    CheckForUpdateHandler,
+    NewsHandler,
+    check_update_handler_path,
+    news_handler_path,
+)
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import (
@@ -537,6 +545,20 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
+    news_url = Unicode(
+        "https://jupyterlab.github.io/assets/feed.xml",
+        allow_none=True,
+        help="""URL that serves news Atom feed; by default the JupyterLab organization announcements will be fetched. Set to None to turn off fetching announcements.""",
+        config=True,
+    )
+
+    check_for_updates_class = Type(
+        default_value=CheckForUpdate,
+        klass=CheckForUpdateABC,
+        config=True,
+        help="""A callable class that receives the current version at instantiation and calling it must return asynchronously a string indicating which version is available and how to install or None if no update is available. The string supports Markdown format.""",
+    )
+
     @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -692,6 +714,27 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             ext_manager = ExtensionManager(app_options=build_handler_options)
             ext_handler = (extensions_handler_path, ExtensionHandler, {"manager": ext_manager})
             handlers.append(ext_handler)
+
+            # Add announcement handlers
+            page_config["news"] = {"disabled": self.news_url is None}
+            handlers.extend(
+                [
+                    (
+                        check_update_handler_path,
+                        CheckForUpdateHandler,
+                        {
+                            "update_checker": self.check_for_updates_class(__version__),
+                        },
+                    ),
+                    (
+                        news_handler_path,
+                        NewsHandler,
+                        {
+                            "news_url": self.news_url,
+                        },
+                    ),
+                ]
+            )
 
         # If running under JupyterHub, add more metadata.
         if "hub_prefix" in self.serverapp.tornado_settings:
