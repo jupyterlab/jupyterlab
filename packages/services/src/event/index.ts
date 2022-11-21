@@ -4,6 +4,7 @@
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
+import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
 
@@ -22,12 +23,15 @@ export class EventManager implements IDisposable {
   constructor(options: EventManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+
+    this._poll = new Poll({ factory: () => this._subscribe() });
     this._stream = new Private.Stream(this);
+
     // TODO: Remove this logic in JupyterLab 4
     if (this._isDisabled) {
       this._stream.stop();
     } else {
-      void this._subscribe();
+      void this._poll.start();
     }
   }
 
@@ -58,6 +62,9 @@ export class EventManager implements IDisposable {
       return;
     }
     this._isDisposed = true;
+
+    // Clean up poll.
+    this._poll.dispose();
 
     // Clean up socket.
     const socket = this._socket;
@@ -96,25 +103,30 @@ export class EventManager implements IDisposable {
   /**
    * Subscribe to event bus emissions.
    */
-  private async _subscribe(): Promise<void> {
-    if (this.isDisposed || this._isDisabled) {
-      return;
-    }
-    const { token, WebSocket, wsUrl } = this.serverSettings;
-    const url =
-      URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
-      (token ? `?token=${encodeURIComponent(token)}` : '');
-    const socket = (this._socket = new WebSocket(url));
-    const stream = this._stream;
+  private _subscribe(): Promise<void> {
+    return new Promise<void>((_, reject) => {
+      if (this.isDisposed || this._isDisabled) {
+        return;
+      }
 
-    socket.onclose = () => this._subscribe();
-    socket.onmessage = msg => msg.data && stream.emit(JSON.parse(msg.data));
+      const { token, WebSocket, wsUrl } = this.serverSettings;
+      const url =
+        URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
+        (token ? `?token=${encodeURIComponent(token)}` : '');
+      const socket = (this._socket = new WebSocket(url));
+      const stream = this._stream;
+
+      // Cause the poll to tick a rejection and back off if the socket closes.
+      socket.onclose = () => reject(new Error('EventManager socket closed'));
+      socket.onmessage = msg => msg.data && stream.emit(JSON.parse(msg.data));
+    });
   }
 
   // TODO: Remove this check for the `jupyter_server` version.
   // It is only necessary in JupyterLab < 4.
   private _isDisabled = 2 > PageConfig.getNotebookVersion()[0];
   private _isDisposed = false;
+  private _poll: Poll;
   private _socket: WebSocket | null = null;
   private _stream: Private.Stream<this, Event.Emission>;
 }
