@@ -124,8 +124,8 @@
     },
     "confirmClosingDocument": {
       "type": "boolean",
-      "title": "Ask confirmation to close a document",
-      "description": "Whether to ask confirmation to close a document or not.",
+      "title": "Ask for confirmation to close a document",
+      "description": "Whether to ask for confirmation to close a document or not.",
       "default": true
     },
     "lastModifiedCheckMargin": {
