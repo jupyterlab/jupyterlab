@@ -824,6 +824,12 @@ export namespace DocumentRegistry {
     readonly sharedModel: ISharedDocument;
 
     /**
+     * Whether this document model supports collaboration when the collaborative
+     * flag is enabled globally. Defaults to `false`.
+     */
+    readonly collaborative?: boolean;
+
+    /**
      * Serialize the model to a string.
      */
     toString(): string;
@@ -931,6 +937,12 @@ export namespace DocumentRegistry {
      * A promise that is fulfilled when the context is ready.
      */
     readonly ready: Promise<void>;
+
+    /**
+     * Returns whether this document context is writable. True only if the
+     * contents model is writable and collaboration is disabled.
+     */
+    readonly writable: boolean;
 
     /**
      * Rename the document.

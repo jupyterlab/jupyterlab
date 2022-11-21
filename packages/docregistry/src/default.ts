@@ -102,6 +102,10 @@ export class DocumentModel
     return this._defaultLang;
   }
 
+  get collaborative(): boolean {
+    return true;
+  }
+
   /**
    * Serialize the model to a string.
    */

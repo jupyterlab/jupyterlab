@@ -55,8 +55,13 @@ export namespace IDocumentProviderFactory {
     format: string;
 
     /**
-     * The document model
+     * The shared model
      */
     model: T;
+
+    /**
+     * Whether the document provider should be collaborative.
+     */
+    collaborative: boolean;
   }
 }

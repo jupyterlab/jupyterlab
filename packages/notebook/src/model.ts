@@ -231,6 +231,10 @@ export class NotebookModel implements INotebookModel {
     return info?.name ?? '';
   }
 
+  get collaborative(): boolean {
+    return true;
+  }
+
   /**
    * Dispose of the resources held by the model.
    */
