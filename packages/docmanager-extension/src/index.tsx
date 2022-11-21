@@ -611,12 +611,6 @@ function addCommands(
       return false;
     }
     const context = docManager.contextForWidget(currentWidget);
-    console.log({
-      context,
-      writable: !!context?.writable,
-      // @ts-ignore
-      collaborative: context?._collaborative
-    });
     return !!context?.writable;
   };
 
