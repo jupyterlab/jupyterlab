@@ -16,7 +16,6 @@ import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
 import {
   closeAllIcon as closeAll,
   pauseIcon as pause,
-  pauseOnExceptionsIcon as pauseOnExceptions,
   stepIntoIcon as stepInto,
   stepOutIcon as stepOut,
   stepOverIcon as stepOver,
@@ -101,7 +100,7 @@ export namespace Debugger {
    * The command IDs used by the debugger plugin.
    */
   export namespace CommandIDs {
-    export const debugContinue = 'debugger:continue';
+    export const pauseOrContinue = 'debugger:pause-continue';
 
     export const terminate = 'debugger:terminate';
 
@@ -140,7 +139,7 @@ export namespace Debugger {
     export const terminateIcon = stopIcon;
     export const variableIcon = variable;
     export const viewBreakpointIcon = viewBreakpoint;
-    export const pauseOnExceptionsIcon = pauseOnExceptions;
+    export const pauseOnExceptionsIcon = pause;
   }
 
   /**

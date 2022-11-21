@@ -40,7 +40,7 @@
       "selector": "body"
     },
     {
-      "command": "debugger:continue",
+      "command": "debugger:pause-continue",
       "keys": ["F9"],
       "selector": "body"
     },

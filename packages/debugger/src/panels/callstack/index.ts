@@ -31,7 +31,7 @@ export class Callstack extends PanelWithToolbar {
       'continue',
       new CommandToolbarButton({
         commands: commands.registry,
-        id: commands.continue,
+        id: commands.pauseOrContinue,
         label: ''
       })
     );
@@ -50,15 +50,6 @@ export class Callstack extends PanelWithToolbar {
       new CommandToolbarButton({
         commands: commands.registry,
         id: commands.next,
-        label: ''
-      })
-    );
-
-    this.toolbar.addItem(
-      'pause',
-      new CommandToolbarButton({
-        commands: commands.registry,
-        id: commands.pause,
         label: ''
       })
     );
@@ -109,9 +100,9 @@ export namespace Callstack {
     registry: CommandRegistry;
 
     /**
-     * The continue command ID.
+     * The pause/continue command ID.
      */
-    continue: string;
+    pauseOrContinue: string;
 
     /**
      * The terminate command ID.
@@ -122,11 +113,6 @@ export namespace Callstack {
      * The next / stepOver command ID.
      */
     next: string;
-
-    /**
-     * The pause command ID.
-     */
-    pause: string;
 
     /**
      * The stepIn command ID.

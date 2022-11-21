@@ -503,10 +503,9 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 
     const callstackCommands = {
       registry: commands,
-      continue: CommandIDs.debugContinue,
+      pauseOrContinue: CommandIDs.pauseOrContinue,
       terminate: CommandIDs.terminate,
       next: CommandIDs.next,
-      pause: CommandIDs.pause,
       stepIn: CommandIDs.stepIn,
       stepOut: CommandIDs.stepOut,
       evaluate: CommandIDs.evaluate
@@ -651,13 +650,29 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    commands.addCommand(CommandIDs.debugContinue, {
-      label: trans.__('Continue'),
-      caption: trans.__('Continue'),
-      icon: Debugger.Icons.continueIcon,
-      isEnabled: () => service.hasStoppedThreads(),
+    commands.addCommand(CommandIDs.pauseOrContinue, {
+      label: () => {
+        return service.hasStoppedThreads()
+          ? trans.__('Continue')
+          : trans.__('Pause');
+      },
+      caption: () => {
+        return service.hasStoppedThreads()
+          ? trans.__('Continue')
+          : trans.__('Pause');
+      },
+      icon: () => {
+        return service.hasStoppedThreads()
+          ? Debugger.Icons.continueIcon
+          : Debugger.Icons.pauseIcon;
+      },
+      isEnabled: () => service.session?.isStarted ?? false,
       execute: async () => {
-        await service.continue();
+        if (service.hasStoppedThreads()) {
+          await service.continue();
+        } else {
+          await service.pause();
+        }
         commands.notifyCommandChanged();
       }
     });
@@ -680,17 +695,6 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.next();
-      }
-    });
-
-    commands.addCommand(CommandIDs.pause, {
-      label: trans.__('Pause'),
-      caption: trans.__('Pause the current thread if possible.'),
-      icon: Debugger.Icons.pauseIcon,
-      isEnabled: () =>
-        (service.session?.isStarted ?? false) && !service.hasStoppedThreads(),
-      execute: async () => {
-        await service.pause();
       }
     });
 
@@ -787,10 +791,9 @@ const main: JupyterFrontEndPlugin<void> = {
     if (palette) {
       const category = trans.__('Debugger');
       [
-        CommandIDs.debugContinue,
+        CommandIDs.pauseOrContinue,
         CommandIDs.terminate,
         CommandIDs.next,
-        CommandIDs.pause,
         CommandIDs.stepIn,
         CommandIDs.stepOut,
         CommandIDs.evaluate,
