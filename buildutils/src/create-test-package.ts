@@ -29,6 +29,7 @@ if (require.main === module) {
   const jsonPath = path.join(dest, 'package.json');
   const data = utils.readJSONFile(jsonPath);
   if (name.indexOf('@jupyterlab/') === -1) {
+    // eslint-disable-next-line no-global-assign
     name = '@jupyterlab/test-' + name;
   }
   data.name = name;

@@ -3,6 +3,7 @@ const inspect = require('util').inspect;
 const path = require('path');
 const fs = require('fs');
 
+// eslint-disable-next-line no-redeclare
 const URL = process.argv[2];
 const BROWSER_VAR = 'JLAB_BROWSER_TYPE';
 const BROWSER = process.env[BROWSER_VAR] || 'chromium';
