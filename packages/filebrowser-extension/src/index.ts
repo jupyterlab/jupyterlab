@@ -162,7 +162,6 @@ const browser: JupyterFrontEndPlugin<void> = {
     treePathUpdater: ITreePathUpdater | null,
     commandPalette: ICommandPalette | null
   ): Promise<void> => {
-    const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
 
     // Let the application restorer track the primary file browser (that is
@@ -182,24 +181,6 @@ const browser: JupyterFrontEndPlugin<void> = {
     }
 
     addCommands(app, factory, translator, settingRegistry, commandPalette);
-
-    // Show the current file browser shortcut in its title.
-    const updateBrowserTitle = () => {
-      const binding = find(
-        app.commands.keyBindings,
-        b => b.command === CommandIDs.toggleBrowser
-      );
-      if (binding) {
-        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
-        browser.title.caption = trans.__('File Browser (%1)', ks);
-      } else {
-        browser.title.caption = trans.__('File Browser');
-      }
-    };
-    updateBrowserTitle();
-    app.commands.keyBindingChanged.connect(() => {
-      updateBrowserTitle();
-    });
 
     return void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
@@ -405,6 +386,24 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
     browser.title.icon = folderIcon;
 
+    // Show the current file browser shortcut in its title.
+    const updateBrowserTitle = () => {
+      const binding = find(
+        app.commands.keyBindings,
+        b => b.command === CommandIDs.toggleBrowser
+      );
+      if (binding) {
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
+        browser.title.caption = trans.__('File Browser (%1)', ks);
+      } else {
+        browser.title.caption = trans.__('File Browser');
+      }
+    };
+    updateBrowserTitle();
+    app.commands.keyBindingChanged.connect(() => {
+      updateBrowserTitle();
+    });
+
     // Toolbar
     toolbarRegistry.addFactory(
       FILE_BROWSER_FACTORY,
@@ -425,6 +424,17 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     );
 
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
+
+    commands.addCommand(CommandIDs.toggleBrowser, {
+      label: trans.__('File Browser'),
+      execute: () => {
+        if (browser.isHidden) {
+          return commands.execute(CommandIDs.showBrowser, void 0);
+        }
+
+        return commands.execute(CommandIDs.hideBrowser, void 0);
+      }
+    });
 
     commands.addCommand(CommandIDs.showBrowser, {
       label: trans.__('Open the file browser for the provided `path`.'),
@@ -1111,17 +1121,6 @@ function addCommands(
     },
     icon: stopIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Shut Down Kernel')
-  });
-
-  commands.addCommand(CommandIDs.toggleBrowser, {
-    label: trans.__('File Browser'),
-    execute: () => {
-      if (browser.isHidden) {
-        return commands.execute(CommandIDs.showBrowser, void 0);
-      }
-
-      return commands.execute(CommandIDs.hideBrowser, void 0);
-    }
   });
 
   if (settingRegistry) {
