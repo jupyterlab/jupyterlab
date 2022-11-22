@@ -62,6 +62,6 @@ export namespace IDocumentProviderFactory {
     /**
      * Whether the document provider should be collaborative.
      */
-    collaborative: boolean;
+    collaborative?: boolean;
   }
 }
