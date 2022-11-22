@@ -1,10 +1,39 @@
+// Copyright (c) Jupyter Development Team.
 // Copyright (c) Bloomberg Finance LP.
 // Distributed under the terms of the Modified BSD License.
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { IRouter } from '@jupyterlab/application';
+import type {
+  Dialog,
+  Notification,
+  NotificationManager,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { Token } from '@lumino/coreutils';
+
+/**
+ * Static objects exposed.
+ */
+export interface IGalataHelpers {
+  /**
+   * JupyterLab dialogs tracker.
+   */
+  readonly dialogs: WidgetTracker<Dialog<any>>;
+  /**
+   * JupyterLab notifications manager.
+   */
+  readonly notifications: NotificationManager;
+}
+
+/**
+ * Test token exposing some static JupyterLab objects.
+ */
+export const IGalataHelpers = new Token<IGalataHelpers>(
+  '@jupyterlab/galata:IGalataHelpers'
+);
 
 /**
  * Cell execution callbacks interface
@@ -34,11 +63,13 @@ export interface IWaitForSelectorOptions {
   hidden?: boolean;
 }
 
+export const PLUGIN_ID_GALATA_HELPERS = '@jupyterlab/galata:helpers';
 export const PLUGIN_ID_ROUTER = '@jupyterlab/application-extension:router';
 export const PLUGIN_ID_DOC_MANAGER = '@jupyterlab/docmanager-extension:manager';
 export const PLUGIN_ID_SETTINGS = '@jupyterlab/apputils-extension:settings';
 
 export interface IPluginNameToInterfaceMap {
+  [PLUGIN_ID_GALATA_HELPERS]: IGalataHelpers;
   [PLUGIN_ID_ROUTER]: IRouter;
   [PLUGIN_ID_DOC_MANAGER]: IDocumentManager;
   [PLUGIN_ID_SETTINGS]: ISettingRegistry;
@@ -97,6 +128,24 @@ export interface IGalataInpage {
    * @returns Test result
    */
   isElementVisible(el: HTMLElement): boolean;
+
+  off(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  off(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+
+  on(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  on(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+
+  once(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  once(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
 
   /**
    * Save the active notebook

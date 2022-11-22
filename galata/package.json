@@ -12,21 +12,14 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "sideEffects": [
-    "style/*.css",
-    "style/index.js"
-  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
   "files": [
     "lib/**/*.{js,ts,map}",
-    "!lib/inpage/index.*",
-    "style/index.css",
-    "style/index.js"
+    "!lib/inpage/index.*"
   ],
   "scripts": {
     "build": "npm run clean && npm run build:galata && npm run build:inpage",
@@ -54,6 +47,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.17",
+    "@jupyterlab/apputils": "^4.0.0-alpha.17",
     "@jupyterlab/cells": "^4.0.0-alpha.17",
     "@jupyterlab/coreutils": "^6.0.0-alpha.17",
     "@jupyterlab/docmanager": "^4.0.0-alpha.17",
@@ -88,6 +82,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "styleModule": "style/index.js"
+  }
 }

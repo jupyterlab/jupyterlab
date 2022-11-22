@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { Dialog, Notification } from '@jupyterlab/apputils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ElementHandle, Page, Response } from '@playwright/test';
 import * as path from 'path';
@@ -175,8 +176,9 @@ export interface IJupyterLabPage {
        * - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
        * - `'load'` - consider operation to be finished when the `load` event is fired.
        * - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+       * - `'commit'` - consider operation to be finished when network response is received and the document started loading.
        */
-      waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+      waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' | 'commit';
     }
   ): Promise<Response | null>;
 
@@ -184,6 +186,33 @@ export interface IJupyterLabPage {
    * Whether JupyterLab is in simple mode or not
    */
   isInSimpleMode(): Promise<boolean>;
+
+  offJpEvent(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+
+  offJpEvent(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+
+  onJpEvent(
+    event: 'dialog',
+    listener: (dialog: Dialog<any>) => void
+  ): Promise<void>;
+
+  onJpEvent(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): Promise<void>;
+
+  onceJpEvent(
+    event: 'dialog',
+    listener: (dialog: Dialog<any>) => void
+  ): Promise<void>;
+
+  onceJpEvent(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): Promise<void>;
 
   /**
    * Reset the User Interface
@@ -476,6 +505,69 @@ export class JupyterLabPage implements IJupyterLabPage {
     return checked;
   };
 
+  offJpEvent(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  offJpEvent(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+  offJpEvent(
+    event: 'dialog' | 'notification',
+    listener: (arg: any) => void
+  ): void {
+    const id = this._listenersId.get(listener);
+    if (id) {
+      this._listenersId.delete(listener);
+    }
+  }
+
+  onceJpEvent(
+    event: 'dialog',
+    listener: (dialog: Dialog<any>) => void
+  ): Promise<void>;
+  onceJpEvent(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): Promise<void>;
+  async onceJpEvent(
+    event: 'dialog' | 'notification',
+    listener: (arg: any) => void
+  ): Promise<void> {
+    const wrappedListener = (arg: any) => {
+      listener(arg);
+      this.offJpEvent(event as any, listener);
+    };
+    this.onJpEvent(event as any, wrappedListener);
+  }
+
+  onJpEvent(
+    event: 'dialog',
+    listener: (dialog: Dialog<any>) => void
+  ): Promise<void>;
+  onJpEvent(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): Promise<void>;
+  async onJpEvent(
+    event: 'dialog' | 'notification',
+    listener: (arg: any) => void
+  ): Promise<void> {
+    let id = this._listenersId.get(listener);
+    if (id && id.slice(0, event.length) === event) {
+      throw new Error(`Listener is already attached for event "${event}".`);
+    }
+    id = Private.createListenerId(event);
+    this.page.exposeFunction(id, listener);
+
+    this._listenersId.set(listener, id);
+    await this.page.evaluate(
+      ([event, id]) => {
+        // @ts-expect-error unmatched signature
+        window.galataip.on(event, (window as any)[id]);
+      },
+      [event, id]
+    );
+  }
+
   /**
    * Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
    * last redirect.
@@ -693,4 +785,19 @@ export class JupyterLabPage implements IJupyterLabPage {
     page: Page,
     helpers: IJupyterLabPage
   ) => Promise<void>;
+
+  private _listenersId = new WeakMap<(arg: any) => void, string>();
+}
+
+namespace Private {
+  let counter = 0;
+
+  /**
+   * Create an unique listener ID
+   * @param event Event type
+   * @returns Listener ID
+   */
+  export function createListenerId(event: string): string {
+    return `${event}${counter++}`;
+  }
 }

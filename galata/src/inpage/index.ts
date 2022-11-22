@@ -1,19 +1,28 @@
 /* eslint-disable @typescript-eslint/ban-types */
+// Copyright (c) Jupyter Development Team.
 // Copyright (c) Bloomberg Finance LP.
 // Distributed under the terms of the Modified BSD License.
 
 import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
+import {
+  Dialog,
+  IWidgetTracker,
+  Notification,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 import type { Cell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
 import { findIndex } from '@lumino/algorithm';
 import { Signal } from '@lumino/signaling';
+import { galataPlugin } from './plugin';
 import {
   IGalataInpage,
   INotebookRunCallback,
   IPluginNameToInterfaceMap,
   IWaitForSelectorOptions,
   PLUGIN_ID_DOC_MANAGER,
+  PLUGIN_ID_GALATA_HELPERS,
   PLUGIN_ID_ROUTER
 } from './tokens';
 
@@ -23,6 +32,8 @@ import {
 export class GalataInpage implements IGalataInpage {
   constructor() {
     this._app = window.jupyterlab ?? window.jupyterapp;
+    // Register helpers plugin
+    this._app.registerPlugin(galataPlugin);
   }
 
   /**
@@ -56,6 +67,91 @@ export class GalataInpage implements IGalataInpage {
         }
       }
     });
+  }
+
+  off(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  off(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+  off(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
+    const callback = this.listeners.get(listener);
+    if (callback) {
+      this.getPlugin(PLUGIN_ID_GALATA_HELPERS).then(plugin => {
+        if (!plugin) {
+          return;
+        }
+        switch (event) {
+          case 'dialog':
+            plugin.dialogs.currentChanged.disconnect(callback);
+            break;
+          case 'notification':
+            plugin.notifications.changed.disconnect(callback);
+            break;
+        }
+        this.listeners.delete(listener);
+      });
+    }
+  }
+
+  on(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  on(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+  on(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
+    this.getPlugin(PLUGIN_ID_GALATA_HELPERS)
+      .then(plugin => {
+        switch (event) {
+          case 'dialog':
+            {
+              const callback = (
+                tracker: IWidgetTracker<Dialog<any>>,
+                dialog: Dialog<any>
+              ) => {
+                listener(dialog);
+              };
+              this.listeners.set(listener, callback);
+              plugin?.dialogs.currentChanged.connect(callback);
+            }
+            break;
+          case 'notification':
+            {
+              const callback = (
+                tracker: WidgetTracker<Dialog<any>>,
+                dialog: Dialog<any> | null
+              ) => {
+                if (dialog) {
+                  listener(dialog);
+                }
+              };
+              this.listeners.set(listener, callback);
+              plugin?.dialogs.currentChanged.connect(callback);
+            }
+            break;
+        }
+      })
+      .catch(reason => {
+        console.error(
+          `Failed to add listener to JupyterLab dialog event:\n${reason}`
+        );
+      });
+  }
+
+  once(even: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  once(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+  once(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
+    const onceListener = (arg: any) => {
+      try {
+        listener(arg);
+      } finally {
+        this.off(event as any, onceListener);
+      }
+    };
+    this.on(event as any, onceListener);
   }
 
   /**
@@ -601,6 +697,10 @@ export class GalataInpage implements IGalataInpage {
   }
 
   private _app: JupyterFrontEnd;
+  protected listeners = new WeakMap<
+    (arg: unknown) => void,
+    (sender: unknown, args: unknown) => void
+  >();
 }
 
 window.galataip = new GalataInpage();

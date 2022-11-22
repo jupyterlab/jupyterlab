@@ -14,7 +14,9 @@ test.use({
 
 test('Announcements requires user agreement', async ({ page }) => {
   const notifications = await page.evaluate(() => {
-    return (window.jupyterapp as any).notificationManager.notifications;
+    return window.galataip.getPlugin<PLUGIN_ID_GALATA_HELPERS>(
+      PLUGIN_ID_GALATA_HELPERS
+    ).notifications.notifications;
   });
 
   expect(notifications).toHaveLength(1);
@@ -75,7 +77,9 @@ test.describe('Update available', () => {
     await page.goto();
 
     const notifications = await page.evaluate(() => {
-      return (window.jupyterapp as any).notificationManager.notifications;
+      return window.galataip.getPlugin<PLUGIN_ID_GALATA_HELPERS>(
+        PLUGIN_ID_GALATA_HELPERS
+      ).notifications.notifications;
     });
 
     const updates = notifications.filter(n =>
@@ -101,7 +105,9 @@ test.describe('Update available', () => {
     await page.goto();
 
     const notifications = await page.evaluate(() => {
-      return (window.jupyterapp as any).notificationManager.notifications;
+      return window.galataip.getPlugin<PLUGIN_ID_GALATA_HELPERS>(
+        PLUGIN_ID_GALATA_HELPERS
+      ).notifications.notifications;
     });
 
     expect(
@@ -129,7 +135,9 @@ test.describe('Update available', () => {
     await page.goto();
 
     const notifications = await page.evaluate(() => {
-      return (window.jupyterapp as any).notificationManager.notifications;
+      return window.galataip.getPlugin<PLUGIN_ID_GALATA_HELPERS>(
+        PLUGIN_ID_GALATA_HELPERS
+      ).notifications.notifications;
     });
     expect(
       notifications.filter(n => n.options?.data?.tags?.includes('update'))
@@ -193,7 +201,9 @@ test.describe('Fetch news', () => {
     await page.goto();
 
     const notifications = await page.evaluate(() => {
-      return (window.jupyterapp as any).notificationManager.notifications;
+      return window.galataip.getPlugin<PLUGIN_ID_GALATA_HELPERS>(
+        PLUGIN_ID_GALATA_HELPERS
+      ).notifications.notifications;
     });
 
     const news = notifications.filter(n =>
@@ -222,7 +232,9 @@ test.describe('Fetch news', () => {
     await page.goto();
 
     const notifications = await page.evaluate(() => {
-      return (window.jupyterapp as any).notificationManager.notifications;
+      return window.galataip.getPlugin<PLUGIN_ID_GALATA_HELPERS>(
+        PLUGIN_ID_GALATA_HELPERS
+      ).notifications.notifications;
     });
 
     const news = notifications.filter(n =>
@@ -251,7 +263,9 @@ test.describe('Fetch news', () => {
     await page.goto();
 
     const notifications = await page.evaluate(() => {
-      return (window.jupyterapp as any).notificationManager.notifications;
+      return window.galataip.getPlugin<PLUGIN_ID_GALATA_HELPERS>(
+        PLUGIN_ID_GALATA_HELPERS
+      ).notifications.notifications;
     });
 
     const news = notifications.filter(n =>
