@@ -9,7 +9,7 @@ import { JSONArray, JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import * as React from 'react';
 import Highlight from 'react-highlighter';
 import { JSONTree } from 'react-json-tree';
-
+import { StyleModule } from 'style-mod';
 /**
  * The properties for the JSON tree component.
  */
@@ -37,6 +37,8 @@ export interface IState {
 function getStyle(tag: Tag): string {
   return jupyterHighlightStyle.style([tag]) ?? '';
 }
+
+StyleModule.mount(document, jupyterHighlightStyle.module as StyleModule);
 
 /**
  * A component that renders JSON data as a collapsible tree.
