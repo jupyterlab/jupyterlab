@@ -25,7 +25,7 @@ export namespace Time {
    * @returns A formatted date.
    */
   export function formatHuman(value: string | Date): string {
-    const lang = document.documentElement.lang;
+    const lang = document.documentElement.lang || 'en';
     const formatter = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
     const delta = new Date(value).getTime() - Date.now();
     for (let unit of UNITS) {
@@ -46,7 +46,8 @@ export namespace Time {
    * @returns A formatted date.
    */
   export function format(value: string | Date): string {
-    const lang = document.documentElement.lang;
+    const lang = document.documentElement.lang || 'en';
+    console.log('lang:', lang);
     const formatter = new Intl.DateTimeFormat(lang, {
       dateStyle: 'short',
       timeStyle: 'short'
