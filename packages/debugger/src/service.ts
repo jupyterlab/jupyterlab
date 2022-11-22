@@ -328,6 +328,33 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Request to set a variable in the global scope.
+   *
+   * @param name The name of the variable.
+   * @param value The value of the variable.
+   */
+  async setVariableInGlobal(name: string, value: string): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+    const frames = this.model.callstack.frames;
+    this.session
+      .sendRequest('setExpression', {
+        expression: name,
+        value: value,
+        frameId: frames[frames.length - 1].id
+      })
+      .then(async () => {
+        const scopes = await this._getScopes(frames[0]);
+        const variables = await Promise.all(
+          scopes.map(scope => this._getVariables(scope))
+        );
+        const variableScopes = this._convertScopes(scopes, variables);
+        this._model.variables.scopes = variableScopes;
+      });
+  }
+
+  /**
    * Requests all the defined variables and display them in the
    * table view.
    */

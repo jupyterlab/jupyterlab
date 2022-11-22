@@ -119,6 +119,14 @@ export interface IDebugger {
   ): Promise<DebugProtocol.Variable[]>;
 
   /**
+   * Request to set a variable in the global scope.
+   *
+   * @param name The name of the variable.
+   * @param value The value of the variable.
+   */
+  setVariableInGlobal(name: string, value: string): Promise<void>;
+
+  /**
    * Request rich representation of a variable.
    *
    * @param variableName The variable name to request

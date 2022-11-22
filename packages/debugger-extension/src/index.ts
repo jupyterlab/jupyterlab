@@ -519,6 +519,20 @@ const variables: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    commands.addCommand(CommandIDs.copyToGlobals, {
+      label: 'Copy variable to globals',
+      caption: trans.__('Copy variable to globals scope'),
+      isEnabled: () => !!service.session?.isStarted,
+      isVisible: () =>
+        service.model.hasRichVariableRendering &&
+        (rendermime !== null || handler.activeWidget instanceof NotebookPanel),
+      execute: args => {
+        const name = service.model.variables.selectedVariable!.name;
+        const value = service.model.variables.selectedVariable!.value;
+        service.setVariableInGlobal(name, value);
+      }
+    });
   }
 };
 
