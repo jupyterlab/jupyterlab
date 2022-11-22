@@ -6,15 +6,9 @@
     "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es2015",
+    "target": "es2018",
     "outDir": "lib",
-    "lib": [
-      "es2015",
-      "es2015.collection",
-      "dom",
-      "es2015.iterable",
-      "es2017.object"
-    ],
+    "lib": ["DOM", "ES2018"],
     "types": ["jest", "node"],
     "jsx": "react",
     "resolveJsonModule": true,
