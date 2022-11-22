@@ -39,20 +39,18 @@ export namespace Time {
   }
 
   /**
-   * Convert a timestring to a date format.
+   * Convenient helper to convert a timestring to a date format.
    *
    * @param value - The date timestring or date object.
    *
-   * @param timeFormat - The format string.
-   *
    * @returns A formatted date.
    */
-  export function format(
-    value: string | Date,
-    timeFormat = 'YYYY-MM-DD HH:mm'
-  ): string {
+  export function format(value: string | Date): string {
     const lang = document.documentElement.lang;
-    // TODO: support previous timeFormat parameter?
-    return new Intl.DateTimeFormat(lang).format(new Date(value));
+    const formatter = new Intl.DateTimeFormat(lang, {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    });
+    return formatter.format(new Date(value));
   }
 }
