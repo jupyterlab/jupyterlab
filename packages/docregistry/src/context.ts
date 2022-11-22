@@ -58,10 +58,9 @@ export class Context<
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
-    this._model = this._factory.createNew(lang);
-    this._collaborative = !!(
-      PageConfig.getOption('collaborative') === 'true' &&
-      this._model.collaborative
+    this._model = this._factory.createNew(
+      lang,
+      PageConfig.getOption('collaborative') === 'true'
     );
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
@@ -70,7 +69,7 @@ export class Context<
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
           model: this._model.sharedModel,
-          collaborative: this._collaborative
+          collaborative: this._model.collaborative
         })
       : new ProviderMock();
 
@@ -229,7 +228,7 @@ export class Context<
    * contents model is writable and collaboration is disabled.
    */
   get writable(): boolean {
-    return !!(this._contentsModel?.writable && !this._collaborative);
+    return !!(this._contentsModel?.writable && !this._model.collaborative);
   }
 
   /**

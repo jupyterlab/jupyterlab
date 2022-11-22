@@ -68,9 +68,13 @@ export class NotebookModelFactory
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): INotebookModel {
+  createNew(
+    languagePreference?: string,
+    collaborationEnabled?: boolean
+  ): INotebookModel {
     return new NotebookModel({
       languagePreference,
+      collaborationEnabled,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
     });
   }

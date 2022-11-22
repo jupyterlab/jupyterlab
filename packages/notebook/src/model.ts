@@ -107,6 +107,7 @@ export class NotebookModel implements INotebookModel {
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._deletedCells = [];
+    this._collaborationEnabled = !!options?.collaborationEnabled;
 
     // Initialize the notebook
     // In collaboration mode, this will be overridden by the initialization coming
@@ -231,8 +232,11 @@ export class NotebookModel implements INotebookModel {
     return info?.name ?? '';
   }
 
+  /**
+   * Whether the model is collaborative or not.
+   */
   get collaborative(): boolean {
-    return true;
+    return this._collaborationEnabled;
   }
 
   /**
@@ -481,6 +485,7 @@ close the notebook without saving it.`,
   private _deletedCells: string[];
   private _isDisposed = false;
   private _metadataChanged = new Signal<NotebookModel, IMapChange>(this);
+  private _collaborationEnabled: boolean;
 }
 
 /**
@@ -510,5 +515,10 @@ export namespace NotebookModel {
      * Defines if the document can be undo/redo.
      */
     disableDocumentWideUndoRedo?: boolean;
+
+    /**
+     * Whether collaboration should be enabled for this document model.
+     */
+    collaborationEnabled?: boolean;
   }
 }
