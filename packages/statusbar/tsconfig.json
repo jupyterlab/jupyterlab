@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "lib": ["DOM", "ES2017"],
+    "lib": ["DOM", "ES2018"],
     "types": ["resize-observer-browser"]
   },
   "include": ["src/**/*"],

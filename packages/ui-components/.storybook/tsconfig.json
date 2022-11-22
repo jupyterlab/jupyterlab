@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfigbase.json",
   "compilerOptions": {
-    "lib": ["es6", "dom", "ES2017"],
+    "lib": ["es6", "dom", "ES2018"],
     "allowJs": false,
     "rootDir": "../",
     "outDir": "dist",
