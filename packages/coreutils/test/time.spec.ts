@@ -15,14 +15,5 @@ describe('@jupyterlab/coreutils', () => {
         expect(Time.formatHuman(date.toISOString())).toBe('3 minutes ago');
       });
     });
-
-    describe('.format()', () => {
-      it('should convert a timestring to a date format', () => {
-        expect(Time.format(new Date()).length).toBe(16);
-        const date = new Date();
-        const value = Time.format(date.toISOString(), 'MM-DD');
-        expect(value.length).toBe(5);
-      });
-    });
   });
 });
