@@ -6,6 +6,7 @@
 
 import json
 import os
+import sys
 from os.path import join as pjoin
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
@@ -763,6 +764,16 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     def initialize(self, argv=None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
+
+        if self.collaborative and jpserver_version_info < (2, 0, 0):
+            jpserver_version = ".".join(filter(lambda p: p, map(lambda p: str(p), jpserver_version_info)))
+            self.log.critical(f"""To enable real-time collaboration, you must install Jupyter Server v2 (current version is {jpserver_version}).
+
+You can install it using pip for example:
+
+  python -m pip install "jupyter_server>=2.0.0"
+""")
+            sys.exit(1)
 
 
 # -----------------------------------------------------------------------------
