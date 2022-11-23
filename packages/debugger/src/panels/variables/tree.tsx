@@ -65,7 +65,7 @@ export class VariablesBodyTree extends ReactWidget {
       <caretDownEmptyIcon.react stylesheet="menuItem" tag="span" />
     );
 
-    if (scope.name !== 'Globals') {
+    if (scope?.name !== 'Globals') {
       this.addClass('jp-debuggerVariables-local');
     } else {
       this.removeClass('jp-debuggerVariables-local');
