@@ -224,10 +224,9 @@ export class Context<
   }
 
   /**
-   * Returns whether this document context is writable. True only if the
-   * contents model is writable and collaboration is disabled.
+   * Whether the document can be saved via the Contents API.
    */
-  get writable(): boolean {
+  protected get canSave(): boolean {
     return !!(this._contentsModel?.writable && !this._model.collaborative);
   }
 
@@ -244,7 +243,7 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean) {
-    if (this._collaborative) {
+    if (this._model.collaborative) {
       await this._loadContext();
     } else {
       if (isNew) {
@@ -485,7 +484,7 @@ export class Context<
    * Update our contents model, without the content.
    */
   private _updateContentsModel(model: Contents.IModel): void {
-    const writable = model.writable && !this._collaborative;
+    const writable = model.writable && !this._model.collaborative;
     const newModel: Contents.IModel = {
       path: model.path,
       name: model.name,
@@ -567,7 +566,7 @@ export class Context<
   private async _save(): Promise<void> {
     // if collaborative mode is enabled, saving happens in the back-end
     // after each change to the document
-    if (this._collaborative) {
+    if (this._model.collaborative) {
       return;
     }
     this._saveState.emit('started');
@@ -783,14 +782,14 @@ export class Context<
    */
   private _maybeCheckpoint(force: boolean): Promise<void> {
     let promise = Promise.resolve(void 0);
-    if (!this.writable) {
+    if (!this.canSave) {
       return promise;
     }
     if (force) {
       promise = this.createCheckpoint().then(/* no-op */);
     } else {
       promise = this.listCheckpoints().then(checkpoints => {
-        if (!this.isDisposed && !checkpoints.length && this.writable) {
+        if (!this.isDisposed && !checkpoints.length && this.canSave) {
           return this.createCheckpoint().then(/* no-op */);
         }
       });
@@ -927,11 +926,6 @@ or load the version on disk (revert)?`,
   private _provider: IDocumentProvider;
   private _lastModifiedCheckMargin = 500;
   private _timeConflictModalIsOpen = false;
-  /**
-   * Whether both the global collaborative flag was passed and the current
-   * document model supports collaboration.
-   */
-  private _collaborative: boolean;
 }
 
 /**

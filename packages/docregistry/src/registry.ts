@@ -939,12 +939,6 @@ export namespace DocumentRegistry {
     readonly ready: Promise<void>;
 
     /**
-     * Returns whether this document context is writable. True only if the
-     * contents model is writable and collaboration is disabled.
-     */
-    readonly writable: boolean;
-
-    /**
      * Rename the document.
      */
     rename(newName: string): Promise<void>;

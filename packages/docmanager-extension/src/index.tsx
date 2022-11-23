@@ -611,7 +611,7 @@ function addCommands(
       return false;
     }
     const context = docManager.contextForWidget(currentWidget);
-    return !!context?.writable;
+    return !!context?.contentsModel?.writable;
   };
 
   // If inside a rich application like JupyterLab, add additional functionality.
