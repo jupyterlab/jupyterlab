@@ -10,7 +10,7 @@ describe('@jupyterlab/coreutils', () => {
         const date = new Date();
         date.setSeconds(date.getSeconds() - 10);
         const value = Time.formatHuman(date);
-        expect(value).toBe('seconds ago');
+        expect(value).toContain('seconds ago');
         date.setMinutes(date.getMinutes() - 3);
         expect(Time.formatHuman(date.toISOString())).toBe('3 minutes ago');
       });
