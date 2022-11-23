@@ -424,6 +424,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this._svgReactAttrs = undefined;
 
     // update icon elements created using .element method
+    if (typeof document === 'undefined') return;
     document
       .querySelectorAll(`[data-icon-id="${uuidOld}"]`)
       .forEach(oldSvgElement => {

@@ -154,8 +154,10 @@ const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
-
-if ((window as any).requestIdleCallback === undefined) {
+if (
+  typeof window !== 'undefined' &&
+  (window as any).requestIdleCallback === undefined
+) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
   // eslint-disable-next-line @typescript-eslint/ban-types

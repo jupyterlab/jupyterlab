@@ -110,6 +110,7 @@ namespace Private {
    * Start the storage event handler.
    */
   function initialize(): void {
+    if (typeof window === 'undefined') return;
     // Listen to all storage events for beacons and window names.
     window.addEventListener('storage', (event: StorageEvent) => {
       const { key, newValue } = event;
