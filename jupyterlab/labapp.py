@@ -766,7 +766,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         super().initialize()
 
         if self.collaborative and jpserver_version_info < (2, 0, 0):
-            jpserver_version = ".".join(filter(lambda p: p, map(lambda p: str(p), jpserver_version_info)))
+            jpserver_version = ".".join(filter(lambda p: len(p) > 0, map(lambda p: str(p), jpserver_version_info)))
             self.log.critical(f"""To enable real-time collaboration, you must install Jupyter Server v2 (current version is {jpserver_version}).
 
 You can install it using pip for example:
