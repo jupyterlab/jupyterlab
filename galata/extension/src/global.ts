@@ -4,38 +4,32 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
-import {
+import type {
   Dialog,
   IWidgetTracker,
   Notification,
-  WidgetTracker
+  NotificationManager
 } from '@jupyterlab/apputils';
 import type { Cell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
 import { findIndex } from '@lumino/algorithm';
 import { Signal } from '@lumino/signaling';
-import { galataPlugin } from './plugin';
 import {
   IGalataInpage,
   INotebookRunCallback,
   IPluginNameToInterfaceMap,
   IWaitForSelectorOptions,
-  PLUGIN_ID_DOC_MANAGER,
-  PLUGIN_ID_GALATA_HELPERS,
-  PLUGIN_ID_ROUTER
+  PLUGIN_ID_GALATA_HELPERS
 } from './tokens';
+
+const PLUGIN_ID_DOC_MANAGER = '@jupyterlab/docmanager-extension:manager';
+const PLUGIN_ID_ROUTER = '@jupyterlab/application-extension:router';
 
 /**
  * In-Page Galata helpers
  */
 export class GalataInpage implements IGalataInpage {
-  constructor() {
-    this._app = window.jupyterlab ?? window.jupyterapp;
-    // Register helpers plugin
-    this._app.registerPlugin(galataPlugin);
-  }
-
   /**
    * Get an application plugin
    *
@@ -69,7 +63,7 @@ export class GalataInpage implements IGalataInpage {
     });
   }
 
-  off(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   off(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
@@ -94,7 +88,7 @@ export class GalataInpage implements IGalataInpage {
     }
   }
 
-  on(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   on(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
@@ -107,7 +101,7 @@ export class GalataInpage implements IGalataInpage {
             {
               const callback = (
                 tracker: IWidgetTracker<Dialog<any>>,
-                dialog: Dialog<any>
+                dialog: Dialog<any> | null
               ) => {
                 listener(dialog);
               };
@@ -118,15 +112,15 @@ export class GalataInpage implements IGalataInpage {
           case 'notification':
             {
               const callback = (
-                tracker: WidgetTracker<Dialog<any>>,
-                dialog: Dialog<any> | null
+                manager: NotificationManager,
+                notification: Notification.IChange
               ) => {
-                if (dialog) {
-                  listener(dialog);
+                if (notification.notification) {
+                  listener(notification.notification);
                 }
               };
               this.listeners.set(listener, callback);
-              plugin?.dialogs.currentChanged.connect(callback);
+              plugin?.notifications.changed.connect(callback);
             }
             break;
         }
@@ -138,7 +132,7 @@ export class GalataInpage implements IGalataInpage {
       });
   }
 
-  once(even: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  once(even: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   once(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
@@ -693,6 +687,9 @@ export class GalataInpage implements IGalataInpage {
    * Application object
    */
   get app(): JupyterFrontEnd {
+    if (!this._app) {
+      this._app = window.jupyterlab ?? window.jupyterapp;
+    }
     return this._app;
   }
 
@@ -702,5 +699,3 @@ export class GalataInpage implements IGalataInpage {
     (sender: unknown, args: unknown) => void
   >();
 }
-
-window.galataip = new GalataInpage();

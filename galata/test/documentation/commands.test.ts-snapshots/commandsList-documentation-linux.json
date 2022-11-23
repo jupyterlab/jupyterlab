@@ -579,7 +579,7 @@
   },
   {
     "id": "docmanager:save-as",
-    "label": "Save  As…",
+    "label": "Save As…",
     "caption": "Save with new path",
     "shortcuts": [
       "Ctrl Shift S"

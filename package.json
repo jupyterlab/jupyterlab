@@ -18,6 +18,7 @@
       "buildutils/template",
       "buildutils/test-template",
       "galata",
+      "galata/extension",
       "tests",
       "tests/test-*",
       "testutils",

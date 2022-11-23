@@ -50,3 +50,88 @@ playwrightTest('should not be loading galata helper', async ({ page }) => {
   expect(page['notebook']).toBeUndefined(); // no helper
   expect(page.url()).toEqual('about:blank');
 });
+
+test.describe('listeners', () => {
+  const DEFAULT_NAME = 'untitled.txt';
+
+  test('should listen to JupyterLab dialog', async ({ page }) => {
+    await page.evaluate(() => {
+      window.galataip.on('dialog', d => {
+        d.reject();
+      });
+    });
+
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.menu.clickMenuItem('File>Save Text As…');
+
+    await expect(page.locator('.jp-Dialog')).toHaveCount(0);
+  });
+
+  test('should stop listening to JupyterLab dialog', async ({ page }) => {
+    await page.evaluate(() => {
+      const callback = d => {
+        // We need to slightly wait before rejecting otherwise
+        // the `locator('.jp-Dialog').waitFor()` is not resolved.
+        setTimeout(() => d.reject(), 100);
+        window.galataip.off('dialog', callback);
+      };
+      window.galataip.on('dialog', callback);
+    });
+
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+
+    await Promise.all([
+      page.locator('.jp-Dialog').waitFor(),
+      page.menu.clickMenuItem('File>Save Text As…')
+    ]);
+
+    await expect(page.locator('.jp-Dialog')).toHaveCount(0);
+
+    await Promise.all([
+      page.locator('.jp-Dialog').waitFor(),
+      page.menu.clickMenuItem('File>Save Text As…')
+    ]);
+
+    await expect(page.locator('.jp-Dialog')).toHaveCount(1);
+  });
+
+  test('should listen only once to JupyterLab dialog', async ({ page }) => {
+    await page.evaluate(() => {
+      const callback = d => {
+        // We need to slightly wait before rejecting otherwise
+        // the `locator('.jp-Dialog').waitFor()` is not resolved.
+        setTimeout(() => d.reject(), 100);
+      };
+      window.galataip.once('dialog', callback);
+    });
+
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+
+    await Promise.all([
+      page.locator('.jp-Dialog').waitFor(),
+      page.menu.clickMenuItem('File>Save Text As…')
+    ]);
+
+    await expect(page.locator('.jp-Dialog')).toHaveCount(0);
+
+    await Promise.all([
+      page.locator('.jp-Dialog').waitFor(),
+      page.menu.clickMenuItem('File>Save Text As…')
+    ]);
+
+    await expect(page.locator('.jp-Dialog')).toHaveCount(1);
+  });
+
+  // test('should listen to JupyterLab notification', async ({ page }) => {});
+
+  // test('should stop listening to JupyterLab notification', async ({
+  //   page
+  // }) => {});
+
+  // test('should listen only once to JupyterLab notification', async ({
+  //   page
+  // }) => {});
+});

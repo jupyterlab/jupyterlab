@@ -1,0 +1,49 @@
+{
+  "name": "@jupyterlab/galata-extension",
+  "version": "5.0.0-alpha.16",
+  "description": "JupyterLab UI Testing Framework Extension.",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "jlpm build:lib && jlpm build:labextension:dev",
+    "build:prod": "jlpm clean && jlpm build:lib && jlpm build:labextension",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build:lib": "tsc",
+    "clean": "jlpm clean:lib",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean:labextension": "rimraf ../../jupyterlab/galata/@jupyterlab",
+    "clean:all": "jlpm clean:lib && jlpm clean:labextension"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^4.0.0-alpha.16",
+    "@jupyterlab/apputils": "^4.0.0-alpha.16"
+  },
+  "devDependencies": {
+    "@jupyterlab/builder": "^4.0.0-alpha.16",
+    "rimraf": "~3.0.0",
+    "typescript": "~4.7.3"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "outputDir": "../../jupyterlab/galata/@jupyterlab/galata-extension"
+  }
+}

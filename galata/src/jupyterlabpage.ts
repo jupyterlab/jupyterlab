@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { Dialog, Notification } from '@jupyterlab/apputils';
+import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata-extension';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ElementHandle, Page, Response } from '@playwright/test';
-import * as path from 'path';
 import { ContentsHelper } from './contents';
 import {
   ActivityHelper,
@@ -20,7 +20,6 @@ import {
   StyleHelper,
   ThemeHelper
 } from './helpers';
-import { IPluginNameToInterfaceMap, PLUGIN_ID_SETTINGS } from './inpage/tokens';
 import * as Utils from './utils';
 
 /**
@@ -640,7 +639,10 @@ export class JupyterLabPage implements IJupyterLabPage {
         const SHELL_ID = '@jupyterlab/application-extension:shell';
         await settingRegistry.remove(SHELL_ID, 'layout');
       },
-      { pluginId: PLUGIN_ID_SETTINGS as keyof IPluginNameToInterfaceMap }
+      {
+        pluginId:
+          '@jupyterlab/apputils-extension:settings' as keyof IPluginNameToInterfaceMap
+      }
     );
     // show Files tab on sidebar
     await this.sidebar.openTab('filebrowser');
@@ -737,9 +739,9 @@ export class JupyterLabPage implements IJupyterLabPage {
    */
   protected async hookHelpersUp(): Promise<void> {
     // Insert Galata in page helpers
-    await this.page.addScriptTag({
-      path: path.resolve(__dirname, './lib-inpage/inpage.js')
-    });
+    // await this.page.addScriptTag({
+    //   path: path.resolve(__dirname, './lib-inpage/inpage.js')
+    // });
 
     const galataipDefined = await this.page.evaluate(() => {
       return Promise.resolve(typeof window.galataip === 'object');
@@ -798,6 +800,6 @@ namespace Private {
    * @returns Listener ID
    */
   export function createListenerId(event: string): string {
-    return `${event}${counter++}`;
+    return `_galata_${event}${counter++}`;
   }
 }

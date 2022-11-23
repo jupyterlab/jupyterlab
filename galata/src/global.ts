@@ -4,8 +4,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
-import { IGalataInpage } from './inpage/tokens';
+import type { IGalataInpage } from '@jupyterlab/galata-extension';
 
 declare global {
   interface Window {

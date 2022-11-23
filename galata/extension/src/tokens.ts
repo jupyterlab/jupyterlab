@@ -14,6 +14,34 @@ import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Token } from '@lumino/coreutils';
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  interface Window {
+    /**
+     * Access JupyterLab Application object
+     *
+     * @deprecated since v4
+     * Please use window.jupyterapp to access the Jupyter Application
+     */
+    jupyterlab?: JupyterFrontEnd;
+    /**
+     * Access Jupyter Application object
+     */
+    jupyterapp: JupyterFrontEnd;
+    /**
+     * Access to Galata In-Page helpers
+     *
+     * Those helpers are injected when navigating to JupyterLab page
+     */
+    galataip: IGalataInpage;
+  }
+}
+
+/**
+ * Galata in-page extension helpers.
+ */
+export const PLUGIN_ID_GALATA_HELPERS = '@jupyterlab/galata-extension:helpers';
+
 /**
  * Static objects exposed.
  */
@@ -32,7 +60,7 @@ export interface IGalataHelpers {
  * Test token exposing some static JupyterLab objects.
  */
 export const IGalataHelpers = new Token<IGalataHelpers>(
-  '@jupyterlab/galata:IGalataHelpers'
+  '@jupyterlab/galata-extension:IGalataHelpers'
 );
 
 /**
@@ -63,16 +91,11 @@ export interface IWaitForSelectorOptions {
   hidden?: boolean;
 }
 
-export const PLUGIN_ID_GALATA_HELPERS = '@jupyterlab/galata:helpers';
-export const PLUGIN_ID_ROUTER = '@jupyterlab/application-extension:router';
-export const PLUGIN_ID_DOC_MANAGER = '@jupyterlab/docmanager-extension:manager';
-export const PLUGIN_ID_SETTINGS = '@jupyterlab/apputils-extension:settings';
-
 export interface IPluginNameToInterfaceMap {
   [PLUGIN_ID_GALATA_HELPERS]: IGalataHelpers;
-  [PLUGIN_ID_ROUTER]: IRouter;
-  [PLUGIN_ID_DOC_MANAGER]: IDocumentManager;
-  [PLUGIN_ID_SETTINGS]: ISettingRegistry;
+  '@jupyterlab/application-extension:router': IRouter;
+  '@jupyterlab/docmanager-extension:manager': IDocumentManager;
+  '@jupyterlab/apputils-extension:settings': ISettingRegistry;
 }
 
 /**
@@ -129,19 +152,19 @@ export interface IGalataInpage {
    */
   isElementVisible(el: HTMLElement): boolean;
 
-  off(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   off(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
   ): void;
 
-  on(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   on(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
   ): void;
 
-  once(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
+  once(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   once(
     event: 'notification',
     listener: (notification: Notification.INotification) => void

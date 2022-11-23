@@ -1,15 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata-extension';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ElementHandle, Page } from '@playwright/test';
-import {
-  IPluginNameToInterfaceMap,
-  PLUGIN_ID_SETTINGS
-} from '../inpage/tokens';
-import { MenuHelper } from './menu';
-import * as Utils from '../utils';
 import { galata } from '../galata';
+import * as Utils from '../utils';
+import { MenuHelper } from './menu';
 
 /**
  * Sidebar helpers
@@ -158,7 +155,10 @@ export class SidebarHelper {
           multiple: { ...currentLayout.multiple, ...sidebars }
         });
       },
-      { pluginId: PLUGIN_ID_SETTINGS as keyof IPluginNameToInterfaceMap }
+      {
+        pluginId:
+          '@jupyterlab/apputils-extension:settings' as keyof IPluginNameToInterfaceMap
+      }
     );
 
     await this.page.waitForFunction(() => {
