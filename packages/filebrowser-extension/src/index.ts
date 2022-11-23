@@ -367,6 +367,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     ILabShell,
     IFileBrowserCommands
   ],
+  optional: [ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
@@ -375,7 +376,9 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     settings: ISettingRegistry,
     toolbarRegistry: IToolbarWidgetRegistry,
     translator: ITranslator,
-    labShell: ILabShell
+    labShell: ILabShell,
+    fileBrowserCommands: null,
+    commandPalette: ICommandPalette | null
   ): void => {
     const { commands } = app;
     const { defaultBrowser: browser, tracker } = factory;
@@ -473,6 +476,27 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    commands.addCommand(CommandIDs.toggleNavigateToCurrentDirectory, {
+      label: trans.__('Show Active File in File Browser'),
+      isToggled: () => browser.navigateToCurrentDirectory,
+      execute: () => {
+        const value = !browser.navigateToCurrentDirectory;
+        const key = 'navigateToCurrentDirectory';
+        return settings
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set navigateToCurrentDirectory setting`);
+          });
+      }
+    });
+
+    if (commandPalette) {
+      commandPalette.addItem({
+        command: CommandIDs.toggleNavigateToCurrentDirectory,
+        category: trans.__('File Operations')
+      });
+    }
 
     // If the layout is a fresh session without saved data and not in single document
     // mode, open file browser.
@@ -1123,22 +1147,6 @@ function addCommands(
     label: trans.__('Shut Down Kernel')
   });
 
-  if (settingRegistry) {
-    commands.addCommand(CommandIDs.toggleNavigateToCurrentDirectory, {
-      label: trans.__('Show Active File in File Browser'),
-      isToggled: () => browser.navigateToCurrentDirectory,
-      execute: () => {
-        const value = !browser.navigateToCurrentDirectory;
-        const key = 'navigateToCurrentDirectory';
-        return settingRegistry
-          .set(FILE_BROWSER_PLUGIN_ID, key, value)
-          .catch((reason: Error) => {
-            console.error(`Failed to set navigateToCurrentDirectory setting`);
-          });
-      }
-    });
-  }
-
   commands.addCommand(CommandIDs.toggleLastModified, {
     label: trans.__('Show Last Modified Column'),
     isToggled: () => browser.showLastModifiedColumn,
@@ -1192,13 +1200,6 @@ function addCommands(
     label: trans.__('Search on File Names'),
     execute: () => alert('search')
   });
-
-  if (commandPalette) {
-    commandPalette.addItem({
-      command: CommandIDs.toggleNavigateToCurrentDirectory,
-      category: trans.__('File Operations')
-    });
-  }
 }
 
 /**

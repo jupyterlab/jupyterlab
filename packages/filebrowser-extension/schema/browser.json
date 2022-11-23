@@ -28,23 +28,6 @@
             "rank": 9.95
           }
         ]
-      },
-      {
-        "id": "jp-mainmenu-settings",
-        "items": [
-          {
-            "type": "separator",
-            "rank": 5
-          },
-          {
-            "command": "filebrowser:toggle-navigate-to-current-directory",
-            "rank": 5
-          },
-          {
-            "type": "separator",
-            "rank": 5
-          }
-        ]
       }
     ],
     "context": [
