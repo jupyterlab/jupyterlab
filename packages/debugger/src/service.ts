@@ -351,6 +351,9 @@ export class DebuggerService implements IDebugger, IDisposable {
         );
         const variableScopes = this._convertScopes(scopes, variables);
         this._model.variables.scopes = variableScopes;
+      })
+      .catch(reason => {
+        console.error(reason);
       });
   }
 
