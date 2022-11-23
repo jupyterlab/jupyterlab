@@ -113,11 +113,6 @@
   outline: 0;
 }
 
-.jp-DirListing:focus-visible {
-  outline: 1px solid var(--jp-brand-color1);
-  outline-offset: -2px;
-}
-
 .jp-DirListing-header {
   flex: 0 0 auto;
   display: flex;
@@ -271,6 +266,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   user-select: none;
+}
+
+/* https://css-tricks.com/copy-the-browsers-native-focus-styles/ */
+.jp-DirListing-itemText:focus {
+  outline: 5px auto Highlight;
+  outline: 5px auto -webkit-focus-ring-color;
 }
 
 .jp-DirListing-itemModified {

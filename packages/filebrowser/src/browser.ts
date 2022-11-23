@@ -79,8 +79,6 @@ export class FileBrowser extends SidePanel {
       this._trans.__('file browser')
     );
 
-    this._directoryPending = false;
-
     // File browser widgets container
     this.mainPanel = new Panel();
     this.mainPanel.addClass(FILE_BROWSER_PANEL_CLASS);
@@ -263,63 +261,52 @@ export class FileBrowser extends SidePanel {
     return this.listing.paste();
   }
 
+  private _createNew(
+    future: Private.FutureNewDirectoryItem,
+    createOptions: Contents.ICreateOptions
+  ): Promise<Contents.IModel> {
+    if (future.pending === true) {
+      return future.promise;
+    }
+    const newItem = {
+      pending: true,
+      promise: this._manager.newUntitled(createOptions).then(async model => {
+        await this.listing.selectItemByName(model.name, true);
+        await this.rename();
+        return model;
+      })
+    };
+    Object.assign(future, newItem);
+    const { promise } = newItem;
+    promise
+      .catch(err => {
+        void showErrorMessage(this._trans.__('Error'), err);
+      })
+      .finally(() => {
+        future.pending = false;
+      });
+    return promise;
+  }
+
   /**
    * Create a new directory
    */
-  createNewDirectory(): void {
-    if (this._directoryPending === true) {
-      return;
-    }
-    this._directoryPending = true;
-    // TODO: We should provide a hook into when the
-    // directory is done being created. This probably
-    // means storing a pendingDirectory promise and
-    // returning that if there is already a directory
-    // request.
-    void this._manager
-      .newUntitled({
-        path: this.model.path,
-        type: 'directory'
-      })
-      .then(async model => {
-        await this.listing.selectItemByName(model.name);
-        await this.rename();
-        this._directoryPending = false;
-      })
-      .catch(err => {
-        void showErrorMessage(this._trans.__('Error'), err);
-        this._directoryPending = false;
-      });
+  createNewDirectory(): Promise<Contents.IModel> {
+    return this._createNew(this._futureNewDirectory, {
+      path: this.model.path,
+      type: 'directory'
+    });
   }
 
   /**
    * Create a new file
    */
-  createNewFile(options: FileBrowser.IFileOptions): void {
-    if (this._filePending === true) {
-      return;
-    }
-    this._filePending = true;
-    // TODO: We should provide a hook into when the
-    // file is done being created. This probably
-    // means storing a pendingFile promise and
-    // returning that if there is already a file
-    // request.
-    void this._manager
-      .newUntitled({
-        path: this.model.path,
-        type: 'file',
-        ext: options.ext
-      })
-      .then(async model => {
-        await this.listing.selectItemByName(model.name);
-        await this.rename();
-        this._filePending = false;
-      })
-      .catch(err => {
-        void showErrorMessage(this._trans.__('Error'), err);
-        this._filePending = false;
-      });
+  createNewFile(options: FileBrowser.IFileOptions): Promise<Contents.IModel> {
+    return this._createNew(this._futureNewFile, {
+      path: this.model.path,
+      type: 'file',
+      ext: options.ext
+    });
   }
 
   /**
@@ -345,6 +332,15 @@ export class FileBrowser extends SidePanel {
    */
   download(): Promise<void> {
     return this.listing.download();
+  }
+
+  /**
+   * cd ..
+   *
+   * Go up one level in the directory tree.
+   */
+  async goUp() {
+    return this.listing.goUp();
   }
 
   /**
@@ -420,8 +416,14 @@ export class FileBrowser extends SidePanel {
 
   private _filenameSearcher: ReactWidget;
   private _manager: IDocumentManager;
-  private _directoryPending: boolean;
-  private _filePending: boolean;
+  private _futureNewDirectory: Private.FutureNewDirectoryItem = {
+    pending: false,
+    promise: null
+  };
+  private _futureNewFile: Private.FutureNewDirectoryItem = {
+    pending: false,
+    promise: null
+  };
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
@@ -479,4 +481,22 @@ export namespace FileBrowser {
      */
     ext: string;
   }
+}
+
+namespace Private {
+  /**
+   * A special type with the following properties:
+   * - When `pending` is `true`, the `promise` field points to a promise for a
+   *   new directory or file.
+   * - When `pending` is `false`, the `promise` field has no guarantee.
+   */
+  export type FutureNewDirectoryItem =
+    | {
+        pending: true;
+        promise: Promise<Contents.IModel>;
+      }
+    | {
+        pending: false;
+        promise: any;
+      };
 }

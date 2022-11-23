@@ -346,6 +346,11 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
             Clipboard.copyToSystem(url);
           });
       },
+      isVisible: () =>
+        // So long as this command only handles one file at time, don't show it
+        // if multiple files are selected.
+        !!tracker.currentWidget &&
+        Array.from(tracker.currentWidget.selectedItems()).length === 1,
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Download Link'),
       mnemonic: 0
@@ -925,14 +930,8 @@ function addCommands(
       if (model.path === model.rootPath) {
         return;
       }
-      try {
-        await model.cd('..');
-      } catch (reason) {
-        console.warn(
-          `${CommandIDs.goUp} failed to go to parent directory of ${model.path}`,
-          reason
-        );
-      }
+
+      browserForPath.goUp();
     }
   });
 
@@ -1111,6 +1110,11 @@ function addCommands(
         return widget.rename();
       }
     },
+    isVisible: () =>
+      // So long as this command only handles one file at time, don't show it
+      // if multiple files are selected.
+      !!tracker.currentWidget &&
+      Array.from(tracker.currentWidget.selectedItems()).length === 1,
     icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Rename'),
     mnemonic: 0
@@ -1130,8 +1134,10 @@ function addCommands(
       Clipboard.copyToSystem(item.value.path);
     },
     isVisible: () =>
+      // So long as this command only handles one file at time, don't show it
+      // if multiple files are selected.
       !!tracker.currentWidget &&
-      !tracker.currentWidget.selectedItems().next().done,
+      Array.from(tracker.currentWidget.selectedItems()).length === 1,
     icon: fileIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Copy Path')
   });
