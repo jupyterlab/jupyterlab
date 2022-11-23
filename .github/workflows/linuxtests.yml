@@ -15,7 +15,7 @@ jobs:
       matrix:
         group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
         # This will be used by the base setup action
-        python-version: ["3.7", "3.10"]
+        python-version: ["3.7", "3.11"]
         include:
           - group: release_test
             upload-output: true
