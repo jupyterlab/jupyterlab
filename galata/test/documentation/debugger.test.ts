@@ -229,8 +229,11 @@ test.describe('Debugger', () => {
     // Don't wait as it will be blocked
     void page.notebook.runCell(1);
 
-    // Wait to be stopped on the breakpoint
+    // Wait to be stopped on the breakpoint and the local variables to be displayed
     await page.debugger.waitForCallStack();
+    await expect(page.locator('select[aria-label="Scope"]')).toHaveValue(
+      'Locals'
+    );
 
     // Wait for the locals variables to be displayed
     await expect(
@@ -260,6 +263,37 @@ test.describe('Debugger', () => {
     await expect(
       page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
     ).toHaveAttribute('aria-disabled', 'true');
+
+    // Expect the context menu for local variables to match snapshot
+    const variable = await page
+      .locator('.jp-DebuggerVariables-body li:first-child')
+      .textContent();
+    await page.click('.jp-DebuggerVariables-body li:first-child', {
+      button: 'right'
+    });
+    expect(await page.locator('.lm-Menu-content').screenshot()).toMatchSnapshot(
+      'debugger_variables_context-locals.png'
+    );
+
+    // Copy the local variable to globals scope
+    await page.click(
+      '.lm-Menu-content li[data-command="debugger:copy-variable"]'
+    );
+
+    // Expect the local variable to have been copied to global scope
+    await page.locator('select[aria-label="Scope"]').selectOption('Globals');
+    await expect(
+      page.locator(`.jp-DebuggerVariables-body li:text("${variable}")`)
+    ).toHaveCount(1);
+
+    // Expect the context menu for global variables to match snapshot
+    await page.click(`.jp-DebuggerVariables-body li:text("${variable}")`, {
+      button: 'right'
+    });
+    expect(await page.locator('.lm-Menu-content').screenshot()).toMatchSnapshot(
+      'debugger_variables_context-globals.png'
+    );
+
     await page.click('button[title^=Continue]');
   });
 
