@@ -100,13 +100,11 @@ export namespace Debugger {
    * The command IDs used by the debugger plugin.
    */
   export namespace CommandIDs {
-    export const pauseOrContinue = 'debugger:pause-continue';
+    export const debugContinue = 'debugger:continue';
 
     export const terminate = 'debugger:terminate';
 
     export const next = 'debugger:next';
-
-    export const pause = 'debugger:pause';
 
     export const showPanel = 'debugger:show-panel';
 

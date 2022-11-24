@@ -503,7 +503,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 
     const callstackCommands = {
       registry: commands,
-      pauseOrContinue: CommandIDs.pauseOrContinue,
+      continue: CommandIDs.debugContinue,
       terminate: CommandIDs.terminate,
       next: CommandIDs.next,
       stepIn: CommandIDs.stepIn,
@@ -650,7 +650,7 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    commands.addCommand(CommandIDs.pauseOrContinue, {
+    commands.addCommand(CommandIDs.debugContinue, {
       label: () => {
         return service.hasStoppedThreads()
           ? trans.__('Continue')
@@ -791,7 +791,7 @@ const main: JupyterFrontEndPlugin<void> = {
     if (palette) {
       const category = trans.__('Debugger');
       [
-        CommandIDs.pauseOrContinue,
+        CommandIDs.debugContinue,
         CommandIDs.terminate,
         CommandIDs.next,
         CommandIDs.stepIn,
