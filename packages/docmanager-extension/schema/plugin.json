@@ -126,7 +126,7 @@
       "type": "boolean",
       "title": "Ask for confirmation to close a document",
       "description": "Whether to ask for confirmation to close a document or not.",
-      "default": true
+      "default": false
     },
     "lastModifiedCheckMargin": {
       "type": "number",

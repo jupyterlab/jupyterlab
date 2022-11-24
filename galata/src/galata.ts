@@ -28,9 +28,6 @@ export namespace galata {
     '@jupyterlab/apputils-extension:notification': {
       fetchNews: 'false'
     },
-    '@jupyterlab/docmanager-extension:plugin': {
-      confirmClosingDocument: false
-    },
     '@jupyterlab/fileeditor-extension:plugin': {
       editorConfig: { cursorBlinkRate: 0 }
     },
