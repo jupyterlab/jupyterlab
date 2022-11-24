@@ -634,7 +634,6 @@ export class DocumentManager implements IDocumentManager {
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
   private _docProviderFactory: IDocumentProviderFactory | undefined;
-  private _collaborative: boolean;
 }
 
 /**
