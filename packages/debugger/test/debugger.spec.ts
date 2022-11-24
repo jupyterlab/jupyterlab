@@ -89,7 +89,7 @@ describe('Debugger', () => {
       service,
       callstackCommands: {
         registry,
-        pauseOrContinue: '',
+        continue: '',
         terminate: '',
         next: '',
         stepIn: '',
