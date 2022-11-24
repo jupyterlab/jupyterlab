@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
@@ -24,15 +24,13 @@ export class EventManager implements IDisposable {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
 
+    // If subscription fails, the poll attempts to reconnect and backs off.
     this._poll = new Poll({ factory: () => this._subscribe() });
+    // TODO: Switch to Lumino 2 `Stream`.
     this._stream = new Private.Stream(this);
 
-    // TODO: Remove this logic in JupyterLab 4
-    if (this._isDisabled) {
-      this._stream.stop();
-    } else {
-      void this._poll.start();
-    }
+    // Subscribe to the events socket.
+    void this._poll.start();
   }
 
   /**
@@ -44,7 +42,7 @@ export class EventManager implements IDisposable {
    * Whether the event manager is disposed.
    */
   get isDisposed(): boolean {
-    return this._isDisposed;
+    return this._poll.isDisposed;
   }
 
   /**
@@ -58,10 +56,9 @@ export class EventManager implements IDisposable {
    * Dispose the event manager.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._poll.isDisposed) {
       return;
     }
-    this._isDisposed = true;
 
     // Clean up poll.
     this._poll.dispose();
@@ -105,7 +102,7 @@ export class EventManager implements IDisposable {
    */
   private _subscribe(): Promise<void> {
     return new Promise<void>((_, reject) => {
-      if (this.isDisposed || this._isDisabled) {
+      if (this.isDisposed) {
         return;
       }
 
@@ -116,16 +113,11 @@ export class EventManager implements IDisposable {
       const socket = (this._socket = new WebSocket(url));
       const stream = this._stream;
 
-      // Cause the poll to tick a rejection and back off if the socket closes.
       socket.onclose = () => reject(new Error('EventManager socket closed'));
       socket.onmessage = msg => msg.data && stream.emit(JSON.parse(msg.data));
     });
   }
 
-  // TODO: Remove this check for the `jupyter_server` version.
-  // It is only necessary in JupyterLab < 4.
-  private _isDisabled = 2 > PageConfig.getNotebookVersion()[0];
-  private _isDisposed = false;
   private _poll: Poll;
   private _socket: WebSocket | null = null;
   private _stream: Private.Stream<this, Event.Emission>;

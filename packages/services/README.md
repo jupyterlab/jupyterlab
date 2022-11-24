@@ -101,7 +101,7 @@ See `examples/node` for an example of using an ES5 node script.
 
 ## Usage Examples
 
-**Note:** This package is compiled to ES2017 JavaScript syntax from
+**Note:** This package is compiled to ES2018 JavaScript syntax from
 TypeScript. Here are some examples of using parts of this package. See the
 other `examples` subdirectories for more examples.
 
