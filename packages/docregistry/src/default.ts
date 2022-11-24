@@ -28,10 +28,11 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string) {
+  constructor(languagePreference?: string, collaborationEnabled?: boolean) {
     super();
     this._defaultLang = languagePreference || '';
     this.sharedModel.changed.connect(this._onStateChanged, this);
+    this._collaborationEnabled = !!collaborationEnabled;
   }
 
   /**
@@ -100,6 +101,13 @@ export class DocumentModel
    */
   get defaultKernelLanguage(): string {
     return this._defaultLang;
+  }
+
+  /**
+   * Whether the model is collaborative or not.
+   */
+  get collaborative(): boolean {
+    return this._collaborationEnabled;
   }
 
   /**
@@ -189,6 +197,7 @@ export class DocumentModel
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _collaborationEnabled: boolean;
 }
 
 /**
@@ -247,8 +256,11 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference);
+  createNew(
+    languagePreference?: string,
+    collaborationEnabled?: boolean
+  ): DocumentRegistry.ICodeModel {
+    return new DocumentModel(languagePreference, collaborationEnabled);
   }
 
   /**

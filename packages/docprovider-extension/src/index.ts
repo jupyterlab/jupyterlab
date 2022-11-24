@@ -9,7 +9,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 import {
   IDocumentProvider,
   IDocumentProviderFactory,
@@ -28,12 +28,10 @@ const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
-    const collaborative =
-      PageConfig.getOption('collaborative') == 'true' ? true : false;
     const factory = (
       options: IDocumentProviderFactory.IOptions<YDocument<DocumentChange>>
     ): IDocumentProvider => {
-      return collaborative
+      return options.collaborative
         ? new WebSocketProvider({
             ...options,
             url,

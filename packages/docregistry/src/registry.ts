@@ -824,6 +824,12 @@ export namespace DocumentRegistry {
     readonly sharedModel: ISharedDocument;
 
     /**
+     * Whether this document model supports collaboration when the collaborative
+     * flag is enabled globally. Defaults to `false`.
+     */
+    readonly collaborative?: boolean;
+
+    /**
      * Serialize the model to a string.
      */
     toString(): string;
@@ -1171,7 +1177,7 @@ export namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string): T;
+    createNew(languagePreference?: string, collaborationEnabled?: boolean): T;
 
     /**
      * Get the preferred kernel language given a file path.

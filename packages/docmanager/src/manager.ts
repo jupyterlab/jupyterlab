@@ -39,7 +39,6 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
-    this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._docProviderFactory = options.docProviderFactory;
     this._isConnectedCallback = options.isConnectedCallback || (() => true);
@@ -513,7 +512,6 @@ export class DocumentManager implements IDocumentManager {
       kernelPreference,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      collaborative: this._collaborative,
       docProviderFactory: this._docProviderFactory,
       lastModifiedCheckMargin: this._lastModifiedCheckMargin,
       translator: this.translator
@@ -651,7 +649,6 @@ export class DocumentManager implements IDocumentManager {
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
   private _docProviderFactory: IDocumentProviderFactory | undefined;
-  private _collaborative: boolean;
   private _isConnectedCallback: () => boolean;
 }
 
@@ -702,12 +699,6 @@ export namespace DocumentManager {
      * A factory method for the document provider.
      */
     docProviderFactory?: IDocumentProviderFactory;
-
-    /**
-     * Whether the context should be collaborative.
-     * If true, the context will connect through yjs_ws_server to share information if possible.
-     */
-    collaborative?: boolean;
 
     /**
      * Autosaving should be paused while this callback function returns `false`.
