@@ -111,6 +111,7 @@ export class NotebookModel implements INotebookModel {
     this._ensureMetadata();
     metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
+    this._collaborationEnabled = !!options?.collaborationEnabled;
 
     this.sharedModel.changed.connect(this._onStateChanged, this);
   }
@@ -222,6 +223,13 @@ export class NotebookModel implements INotebookModel {
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
+  }
+
+  /**
+   * Whether the model is collaborative or not.
+   */
+  get collaborative(): boolean {
+    return this._collaborationEnabled;
   }
 
   /**
@@ -544,6 +552,7 @@ close the notebook without saving it.`,
   private _deletedCells: string[];
   private _isInitialized: boolean;
   private _isDisposed = false;
+  private _collaborationEnabled: boolean;
 }
 
 /**
@@ -585,6 +594,11 @@ export namespace NotebookModel {
      * Defines if the document can be undo/redo.
      */
     disableDocumentWideUndoRedo?: boolean;
+
+    /**
+     * Whether collaboration should be enabled for this document model.
+     */
+    collaborationEnabled?: boolean;
   }
 
   /**

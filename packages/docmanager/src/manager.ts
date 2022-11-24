@@ -39,7 +39,6 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
-    this._collaborative = !!options.collaborative;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._docProviderFactory = options.docProviderFactory;
 
@@ -499,7 +498,6 @@ export class DocumentManager implements IDocumentManager {
       modelDBFactory,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      collaborative: this._collaborative,
       docProviderFactory: this._docProviderFactory,
       lastModifiedCheckMargin: this._lastModifiedCheckMargin,
       translator: this.translator
@@ -689,7 +687,10 @@ export namespace DocumentManager {
 
     /**
      * Whether the context should be collaborative.
-     * If true, the context will connect through yjs_ws_server to share information if possible.
+     * 
+     * @deprecated It will be removed in 4.0.0. The collaborative feature
+     * is provided by the `DocumentRegistry.IModel` (can be customized by the
+     * `DocumentRegistry.IModelFactory`)
      */
     collaborative?: boolean;
   }
