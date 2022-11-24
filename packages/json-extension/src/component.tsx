@@ -38,8 +38,6 @@ function getStyle(tag: Tag): string {
   return jupyterHighlightStyle.style([tag]) ?? '';
 }
 
-StyleModule.mount(document, jupyterHighlightStyle.module as StyleModule);
-
 /**
  * A component that renders JSON data as a collapsible tree.
  */
@@ -47,6 +45,10 @@ export class Component extends React.Component<IProps, IState> {
   state = { filter: '', value: '' };
 
   timer: number = 0;
+
+  componentDidMount(): void {
+    StyleModule.mount(document, jupyterHighlightStyle.module as StyleModule);
+  }
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = event.target;
