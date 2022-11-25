@@ -17,7 +17,7 @@ export type {
   INotebookRunCallback,
   IPluginNameToInterfaceMap,
   IWaitForSelectorOptions
-} from '@jupyterlab/galata-extension';
+} from '@jupyterlab/galata/lib/extension';
 
 export * from './benchmarkReporter';
 export * from './galata';

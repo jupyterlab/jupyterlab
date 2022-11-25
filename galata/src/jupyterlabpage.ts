@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { Dialog, Notification } from '@jupyterlab/apputils';
-import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata-extension';
+import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata/lib/extension';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ElementHandle, Page, Response } from '@playwright/test';
 import { ContentsHelper } from './contents';
@@ -697,19 +696,4 @@ export class JupyterLabPage implements IJupyterLabPage {
     page: Page,
     helpers: IJupyterLabPage
   ) => Promise<void>;
-
-  private _listenersId = new WeakMap<(arg: any) => void, string>();
-}
-
-namespace Private {
-  let counter = 0;
-
-  /**
-   * Create an unique listener ID
-   * @param event Event type
-   * @returns Listener ID
-   */
-  export function createListenerId(event: string): string {
-    return `_galata_${event}${counter++}`;
-  }
 }

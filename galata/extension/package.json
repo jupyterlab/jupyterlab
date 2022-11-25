@@ -2,6 +2,7 @@
   "name": "@jupyterlab/galata-extension",
   "version": "5.0.0-alpha.16",
   "description": "JupyterLab UI Testing Framework Extension.",
+  "private": true,
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -11,31 +12,37 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
-  "license": "BSD-3-Clause",
-  "author": "Project Jupyter",
-  "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
-  ],
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "main": "../lib/extension/index.js",
+  "types": "../lib/extension/index.d.ts",
+  "files": [
+    "../lib/extension/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
+  ],
   "scripts": {
-    "build": "jlpm build:lib && jlpm build:labextension:dev",
-    "build:prod": "jlpm clean && jlpm build:lib && jlpm build:labextension",
-    "build:labextension": "jupyter labextension build .",
-    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build": "jlpm build:lib && jlpm build:labextension",
+    "build:all": "npm run build",
+    "build:labextension": "jupyter labextension build --development True .",
     "build:lib": "tsc",
-    "clean": "jlpm clean:lib",
-    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean": "jlpm clean:lib && jlpm clean:labextension",
     "clean:labextension": "rimraf ../../jupyterlab/galata/@jupyterlab",
-    "clean:all": "jlpm clean:lib && jlpm clean:labextension"
+    "clean:lib": "rimraf ../lib/extension tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.16",
-    "@jupyterlab/apputils": "^4.0.0-alpha.16"
+    "@jupyterlab/apputils": "^4.0.0-alpha.16",
+    "@jupyterlab/cells": "^4.0.0-alpha.16",
+    "@jupyterlab/docmanager": "^4.0.0-alpha.16",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.16",
+    "@jupyterlab/notebook": "^4.0.0-alpha.16",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.16",
+    "@lumino/algorithm": "^2.0.0-alpha.6",
+    "@lumino/coreutils": "^2.0.0-alpha.6",
+    "@lumino/signaling": "^2.0.0-alpha.6"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.16",

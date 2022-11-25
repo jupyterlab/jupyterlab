@@ -21,11 +21,12 @@
     "lib/**/*.{js,ts,map}"
   ],
   "scripts": {
-    "build": "npm run clean && npm run build:galata",
+    "build": "npm run clean && npm run build:extension && npm run build:galata",
     "build:all": "npm run build",
     "build:galata": "tsc -b",
-    "build:inpage": "webpack --mode=production",
-    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "build:extension": "cd extension && npm run build && cd ..",
+    "clean": "npm run clean:extension && rimraf lib tsconfig.tsbuildinfo",
+    "clean:extension": "cd extension && npm run clean && cd ..",
     "start": "jupyter lab --config ./jupyter_server_test_config.py",
     "start:detached": "(npm run start&)",
     "start:doc": "jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
@@ -49,7 +50,6 @@
     "@jupyterlab/apputils": "^4.0.0-alpha.17",
     "@jupyterlab/cells": "^4.0.0-alpha.17",
     "@jupyterlab/coreutils": "^6.0.0-alpha.17",
-    "@jupyterlab/galata-extension": "./extension",
     "@jupyterlab/docmanager": "^4.0.0-alpha.17",
     "@jupyterlab/nbformat": "^4.0.0-alpha.17",
     "@jupyterlab/notebook": "^4.0.0-alpha.17",

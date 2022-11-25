@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { INotebookRunCallback } from '@jupyterlab/galata-extension';
+import type { INotebookRunCallback } from '@jupyterlab/galata/lib/extension';
 import * as nbformat from '@jupyterlab/nbformat';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ElementHandle, Page } from '@playwright/test';

@@ -3,7 +3,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
-import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata-extension';
+import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata/lib/extension';
 import type { Contents } from '@jupyterlab/services';
 import type { APIRequestContext, APIResponse, Page } from '@playwright/test';
 import type { ReadStream } from 'fs-extra';
