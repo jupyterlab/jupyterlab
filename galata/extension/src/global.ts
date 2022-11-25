@@ -63,7 +63,29 @@ export class GalataInpage implements IGalataInpage {
     });
   }
 
+  /**
+   * Get the Jupyter notifications
+   *
+   * @returns Jupyter Notifications
+   */
+  async getNotifications(): Promise<Notification.INotification[]> {
+    const plugin = await this.getPlugin(PLUGIN_ID_GALATA_HELPERS);
+    return plugin?.notifications.notifications ?? [];
+  }
+
+  /**
+   * Disconnect a listener to new Jupyter dialog events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  /**
+   * Disconnect a listener to new or updated Jupyter notification events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   off(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
@@ -88,11 +110,22 @@ export class GalataInpage implements IGalataInpage {
     }
   }
 
-  on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  /**
+   * Connect a listener to new Jupyter dialog events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */ on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   on(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
   ): void;
+  /**
+   * Connect a listener to new or updated Jupyter notification events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   on(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
     this.getPlugin(PLUGIN_ID_GALATA_HELPERS)
       .then(plugin => {
@@ -115,7 +148,7 @@ export class GalataInpage implements IGalataInpage {
                 manager: NotificationManager,
                 notification: Notification.IChange
               ) => {
-                if (notification.notification) {
+                if (notification.type !== 'removed') {
                   listener(notification.notification);
                 }
               };
@@ -132,7 +165,19 @@ export class GalataInpage implements IGalataInpage {
       });
   }
 
+  /**
+   * Connect a listener to the next new Jupyter dialog event.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   once(even: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  /**
+   * Connect a listener to the next new or updated Jupyter notification event.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   once(
     event: 'notification',
     listener: (notification: Notification.INotification) => void

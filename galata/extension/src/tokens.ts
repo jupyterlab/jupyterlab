@@ -126,6 +126,13 @@ export interface IGalataInpage {
   ): Promise<IPluginNameToInterfaceMap[K] | undefined>;
 
   /**
+   * Get the Jupyter notifications.
+   *
+   * @returns Jupyter Notifications
+   */
+  getNotifications(): Promise<Notification.INotification[]>;
+
+  /**
    * Test if one or all cells have an execution number.
    *
    * @param cellIndex Cell index
@@ -152,19 +159,57 @@ export interface IGalataInpage {
    */
   isElementVisible(el: HTMLElement): boolean;
 
+  /**
+   * Disconnect a listener to new Jupyter dialog events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  /**
+   * Disconnect a listener to new or updated Jupyter notification events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   off(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
   ): void;
 
+  /**
+   * Connect a listener to new Jupyter dialog events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+
+  /**
+   * Connect a listener to new or updated Jupyter notification events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   on(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
   ): void;
 
+  /**
+   * Connect a listener to the next new Jupyter dialog event.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   once(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+
+  /**
+   * Connect a listener to the next new or updated Jupyter notification event.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
   once(
     event: 'notification',
     listener: (notification: Notification.INotification) => void

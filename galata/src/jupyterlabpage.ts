@@ -186,33 +186,6 @@ export interface IJupyterLabPage {
    */
   isInSimpleMode(): Promise<boolean>;
 
-  offJpEvent(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
-
-  offJpEvent(
-    event: 'notification',
-    listener: (notification: Notification.INotification) => void
-  ): void;
-
-  onJpEvent(
-    event: 'dialog',
-    listener: (dialog: Dialog<any>) => void
-  ): Promise<void>;
-
-  onJpEvent(
-    event: 'notification',
-    listener: (notification: Notification.INotification) => void
-  ): Promise<void>;
-
-  onceJpEvent(
-    event: 'dialog',
-    listener: (dialog: Dialog<any>) => void
-  ): Promise<void>;
-
-  onceJpEvent(
-    event: 'notification',
-    listener: (notification: Notification.INotification) => void
-  ): Promise<void>;
-
   /**
    * Reset the User Interface
    */
@@ -503,69 +476,6 @@ export class JupyterLabPage implements IJupyterLabPage {
 
     return checked;
   };
-
-  offJpEvent(event: 'dialog', listener: (dialog: Dialog<any>) => void): void;
-  offJpEvent(
-    event: 'notification',
-    listener: (notification: Notification.INotification) => void
-  ): void;
-  offJpEvent(
-    event: 'dialog' | 'notification',
-    listener: (arg: any) => void
-  ): void {
-    const id = this._listenersId.get(listener);
-    if (id) {
-      this._listenersId.delete(listener);
-    }
-  }
-
-  onceJpEvent(
-    event: 'dialog',
-    listener: (dialog: Dialog<any>) => void
-  ): Promise<void>;
-  onceJpEvent(
-    event: 'notification',
-    listener: (notification: Notification.INotification) => void
-  ): Promise<void>;
-  async onceJpEvent(
-    event: 'dialog' | 'notification',
-    listener: (arg: any) => void
-  ): Promise<void> {
-    const wrappedListener = (arg: any) => {
-      listener(arg);
-      this.offJpEvent(event as any, listener);
-    };
-    this.onJpEvent(event as any, wrappedListener);
-  }
-
-  onJpEvent(
-    event: 'dialog',
-    listener: (dialog: Dialog<any>) => void
-  ): Promise<void>;
-  onJpEvent(
-    event: 'notification',
-    listener: (notification: Notification.INotification) => void
-  ): Promise<void>;
-  async onJpEvent(
-    event: 'dialog' | 'notification',
-    listener: (arg: any) => void
-  ): Promise<void> {
-    let id = this._listenersId.get(listener);
-    if (id && id.slice(0, event.length) === event) {
-      throw new Error(`Listener is already attached for event "${event}".`);
-    }
-    id = Private.createListenerId(event);
-    this.page.exposeFunction(id, listener);
-
-    this._listenersId.set(listener, id);
-    await this.page.evaluate(
-      ([event, id]) => {
-        // @ts-expect-error unmatched signature
-        window.galataip.on(event, (window as any)[id]);
-      },
-      [event, id]
-    );
-  }
 
   /**
    * Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
