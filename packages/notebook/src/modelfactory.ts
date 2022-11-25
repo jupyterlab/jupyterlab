@@ -75,18 +75,23 @@ export class NotebookModelFactory
    * Create a new model for a given path.
    *
    * @param languagePreference - An optional kernel language preference.
+   * @param modelDB - An optional model storage.
+   * @param isInitialized - Whether the model is initialized or not.
+   * @param collaborationEnabled - Whether collaboration is enabled at the application level or not (default `false`).
    *
    * @returns A new document model.
    */
   createNew(
     languagePreference?: string,
     modelDB?: IModelDB,
-    isInitialized?: boolean
+    isInitialized?: boolean,
+    collaborationEnabled?: boolean
   ): INotebookModel {
     const contentFactory = this.contentFactory;
     return new NotebookModel({
       languagePreference,
       contentFactory,
+      collaborationEnabled,
       modelDB,
       isInitialized,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo

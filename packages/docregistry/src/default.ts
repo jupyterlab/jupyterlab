@@ -23,7 +23,11 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
+  constructor(
+    languagePreference?: string,
+    modelDB?: IModelDB,
+    collaborationEnabled?: boolean
+  ) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
     const filemodel = new models.YFile() as models.ISharedFile;
@@ -31,6 +35,7 @@ export class DocumentModel
     this.value.changed.connect(this.triggerContentChange, this);
 
     this.sharedModel.changed.connect(this._onStateChanged, this);
+    this._collaborationEnabled = !!collaborationEnabled;
   }
 
   /**
@@ -99,6 +104,13 @@ export class DocumentModel
    */
   get defaultKernelLanguage(): string {
     return this._defaultLang;
+  }
+
+  /**
+   * Whether the model is collaborative or not.
+   */
+  get collaborative(): boolean {
+    return this._collaborationEnabled;
   }
 
   /**
@@ -191,6 +203,7 @@ export class DocumentModel
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _collaborationEnabled: boolean;
 }
 
 /**
@@ -244,17 +257,19 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Create a new model.
    *
    * @param languagePreference - An optional kernel language preference.
-   * @param modelDB - An optional modelDB.
-   * @param isInitialized - An optional flag to check if the model is initialized.
+   * @param modelDB - An optional model storage.
+   * @param isInitialized - Whether the model is initialized or not.
+   * @param collaborationEnabled - Whether collaboration is enabled at the application level or not (default `false`).
    *
    * @returns A new document model.
    */
   createNew(
     languagePreference?: string,
     modelDB?: IModelDB,
-    isInitialized?: boolean
+    isInitialized?: boolean,
+    collaborationEnabled?: boolean
   ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB);
+    return new DocumentModel(languagePreference, modelDB, collaborationEnabled);
   }
 
   /**
