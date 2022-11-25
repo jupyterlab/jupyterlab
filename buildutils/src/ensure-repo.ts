@@ -45,7 +45,7 @@ const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
   '@jupyterlab/builder': ['path'],
-  '@jupyterlab/galata': ['fs', 'path'],
+  '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/testing': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -156,6 +156,11 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
   '@jupyterlab/galata': [
+    '@jupyterlab/application',
+    '@jupyterlab/docmanager',
+    '@jupyterlab/notebook'
+  ],
+  '@jupyterlab/galata-extension': [
     '@jupyterlab/application',
     '@jupyterlab/apputils',
     '@jupyterlab/cells',

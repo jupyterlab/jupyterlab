@@ -1,8 +1,8 @@
 {
   "name": "@jupyterlab/galata-extension",
   "version": "5.0.0-alpha.16",
-  "description": "JupyterLab UI Testing Framework Extension.",
   "private": true,
+  "description": "JupyterLab UI Testing Framework Extension.",
   "keywords": [
     "jupyter",
     "jupyterlab",
