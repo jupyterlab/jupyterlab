@@ -16,7 +16,14 @@ test.describe('Initialization', () => {
   let guestPage: IJupyterLabPageFixture;
 
   test.beforeEach(
-    async ({ request, baseURL, browser, tmpPath, waitForApplication }) => {
+    async ({
+      page,
+      request,
+      baseURL,
+      browser,
+      tmpPath,
+      waitForApplication
+    }) => {
       const contents = galata.newContentsHelper(request);
       await contents.uploadFile(
         path.resolve(
@@ -25,6 +32,12 @@ test.describe('Initialization', () => {
         ),
         `${tmpPath}/${exampleNotebook}`
       );
+
+      await page.evaluate(() => {
+        window.galataip.on('dialog', d => {
+          d?.resolve();
+        });
+      });
 
       // Create a new client
       const user: Partial<User.IUser> = {
@@ -36,14 +49,21 @@ test.describe('Initialization', () => {
           color: 'var(--jp-collaborator-color2)'
         }
       };
-      const { page } = await galata.newPage({
+      const { page: newPage } = await galata.newPage({
         baseURL: baseURL!,
         browser,
         mockUser: user,
         tmpPath,
         waitForApplication
       });
-      guestPage = page;
+      guestPage = newPage;
+
+      await guestPage.evaluate(() => {
+        // Acknowledge any dialog
+        window.galataip.on('dialog', d => {
+          d?.resolve();
+        });
+      });
     }
   );
 
@@ -64,27 +84,11 @@ test.describe('Initialization', () => {
     await guestPage.notebook.open(pathUntitled);
 
     const nbPanel = await page.notebook.getNotebookInPanel();
-    if (
-      await page.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
-    ) {
-      await page
-        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-        .click();
-    }
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
       'initialization-create-notebook-host.png'
     );
 
     const nbPanelGuest = await guestPage.notebook.getNotebookInPanel();
-    if (
-      await guestPage
-        .locator('.jp-Dialog-header:text("Select Kernel")')
-        .isVisible()
-    ) {
-      await guestPage
-        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-        .click();
-    }
     expect(await nbPanelGuest?.screenshot()).toMatchSnapshot(
       'initialization-create-notebook-guest.png'
     );
@@ -111,27 +115,11 @@ test.describe('Initialization', () => {
     await guestPage.notebook.open(exampleNotebook);
 
     const nbPanel = await page.notebook.getNotebookInPanel();
-    if (
-      await page.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
-    ) {
-      await page
-        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-        .click();
-    }
     expect(await nbPanel?.screenshot()).toMatchSnapshot(
       'initialization-open-notebook-host.png'
     );
 
     const nbPanelGuest = await guestPage.notebook.getNotebookInPanel();
-    if (
-      await guestPage
-        .locator('.jp-Dialog-header:text("Select Kernel")')
-        .isVisible()
-    ) {
-      await guestPage
-        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-        .click();
-    }
     expect(await nbPanelGuest?.screenshot()).toMatchSnapshot(
       'initialization-open-notebook-guest.png'
     );
@@ -150,6 +138,13 @@ test.describe('Ten clients', () => {
 
   test.beforeEach(
     async ({ page, baseURL, browser, tmpPath, waitForApplication }) => {
+      await page.evaluate(() => {
+        // Acknowledge any dialog
+        window.galataip.on('dialog', d => {
+          d?.resolve();
+        });
+      });
+
       // Renaming does not work
       await page.notebook.createNew();
 
@@ -170,6 +165,13 @@ test.describe('Ten clients', () => {
           mockUser: user,
           tmpPath,
           waitForApplication
+        });
+
+        await guestPage.evaluate(() => {
+          // Acknowledge any dialog
+          window.galataip.on('dialog', d => {
+            d?.resolve();
+          });
         });
         guestPages.push(guestPage);
       }
@@ -222,17 +224,7 @@ test.describe('Ten clients', () => {
       guestPages.map(async p => {
         await p.filebrowser.refresh();
         await p.notebook.open(pathUntitled);
-        await Promise.race([
-          galata.sleep(500),
-          p.notebook.clickToolbarItem('insert')
-        ]);
-        if (
-          await p.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
-        ) {
-          await p
-            .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-            .click();
-        }
+        await p.notebook.clickToolbarItem('insert');
       })
     );
 
@@ -254,17 +246,7 @@ test.describe('Ten clients', () => {
       guestPages.map(async (p, i) => {
         await p.filebrowser.refresh();
         await p.notebook.open(pathUntitled);
-        await Promise.race([
-          galata.sleep(500),
-          p.notebook.clickToolbarItem('insert')
-        ]);
-        if (
-          await p.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
-        ) {
-          await p
-            .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-            .click();
-        }
+        await p.notebook.clickToolbarItem('insert');
         await p.notebook.writeCell(i, `Guest client ${i}`);
 
         await page.waitForSelector(`text=Guest client ${i}`);
@@ -286,21 +268,9 @@ test.describe('Ten clients', () => {
       guestPages.map(async (p, i) => {
         await p.filebrowser.refresh();
         await p.notebook.open(pathUntitled);
-        await Promise.race([
-          galata.sleep(500),
-          (async () => {
-            await p.locator('.jp-Cell >> .cm-editor').first().click();
-            await p.keyboard.press('Enter');
-            await p.keyboard.type(`Guest client ${i}`);
-          })()
-        ]);
-        if (
-          await p.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
-        ) {
-          await p
-            .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-            .click();
-        }
+        await p.locator('.jp-Cell >> .cm-editor').first().click();
+        await p.keyboard.press('Enter');
+        await p.keyboard.type(`Guest client ${i}`);
 
         await p.locator(`text=Guest client ${i}`).waitFor();
       })

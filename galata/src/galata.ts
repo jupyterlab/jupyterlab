@@ -3,7 +3,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { Session, TerminalAPI, User, Workspace } from '@jupyterlab/services';
+import type {
+  Session,
+  TerminalAPI,
+  User,
+  Workspace
+} from '@jupyterlab/services';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { JSONObject } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
@@ -124,7 +129,7 @@ export namespace galata {
      *
      * Default true
      */
-    mockConfig?: boolean | Record<string, unknown>,
+    mockConfig?: boolean | Record<string, unknown>;
     /**
      * Mock JupyterLab state in-memory or not.
      *
@@ -1027,21 +1032,5 @@ export namespace galata {
         }
       });
     }
-  }
-
-  /**
-   * Wait for a certain amount of time.
-   *
-   * @param time Delay in milliseconds
-   */
-  export function sleep(time: number): Promise<void> {
-    let resolve: (value: void) => void;
-    const wait = new Promise<void>(r => {
-      resolve = r;
-    });
-    setTimeout(() => {
-      resolve(void 0);
-    }, time);
-    return wait;
   }
 }

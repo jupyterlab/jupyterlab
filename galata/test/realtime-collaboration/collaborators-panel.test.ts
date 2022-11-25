@@ -12,25 +12,39 @@ import { User } from '@jupyterlab/services';
 test.describe('One client', () => {
   let guestPage: IJupyterLabPageFixture;
 
-  test.beforeEach(async ({ baseURL, browser, tmpPath, waitForApplication }) => {
-    const user2: Partial<User.IUser> = {
-      identity: {
-        username: 'jovyan_2',
-        name: 'jovyan_2',
-        display_name: 'jovyan_2',
-        initials: 'JP',
-        color: 'var(--jp-collaborator-color2)'
-      }
-    };
-    const { page } = await galata.newPage({
-      baseURL: baseURL!,
-      browser,
-      mockUser: user2,
-      tmpPath,
-      waitForApplication
-    });
-    guestPage = page;
-  });
+  test.beforeEach(
+    async ({ baseURL, browser, page, tmpPath, waitForApplication }) => {
+      await page.evaluate(() => {
+        // Acknowledge any dialog
+        window.galataip.on('dialog', d => {
+          d?.resolve();
+        });
+      });
+      const user2: Partial<User.IUser> = {
+        identity: {
+          username: 'jovyan_2',
+          name: 'jovyan_2',
+          display_name: 'jovyan_2',
+          initials: 'JP',
+          color: 'var(--jp-collaborator-color2)'
+        }
+      };
+      const { page: newPage } = await galata.newPage({
+        baseURL: baseURL!,
+        browser,
+        mockUser: user2,
+        tmpPath,
+        waitForApplication
+      });
+      await newPage.evaluate(() => {
+        // Acknowledge any dialog
+        window.galataip.on('dialog', d => {
+          d?.resolve();
+        });
+      });
+      guestPage = newPage;
+    }
+  );
 
   test.afterEach(async ({ page }) => {
     // Make sure to close the page to remove the client
@@ -57,17 +71,7 @@ test.describe('One client', () => {
     await guestPage.filebrowser.refresh();
     await guestPage.notebook.open('Untitled.ipynb');
 
-    await Promise.race([
-      galata.sleep(500),
-      page.sidebar.openTab('jp-collaboration-panel')
-    ]);
-    if (
-      await page.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
-    ) {
-      await page
-        .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-        .click();
-    }
+    await page.sidebar.openTab('jp-collaboration-panel');
 
     await page.notebook.activate('Untitled.ipynb');
     await guestPage.notebook.activate('Untitled.ipynb');
@@ -92,28 +96,43 @@ test.describe('Three clients', () => {
   let numClients = 3;
   let guestPages: Array<IJupyterLabPageFixture> = [];
 
-  test.beforeEach(async ({ baseURL, browser, tmpPath, waitForApplication }) => {
-    for (let i = 0; i < numClients; i++) {
-      // Create a new client
-      const user: Partial<User.IUser> = {
-        identity: {
-          username: 'jovyan_' + i,
-          name: 'jovyan_' + i,
-          display_name: 'jovyan_' + i,
-          initials: 'JP',
-          color: 'var(--jp-collaborator-color2)'
-        }
-      };
-      const { page } = await galata.newPage({
-        baseURL: baseURL!,
-        browser,
-        mockUser: user,
-        tmpPath,
-        waitForApplication
+  test.beforeEach(
+    async ({ baseURL, browser, page, tmpPath, waitForApplication }) => {
+      await page.evaluate(() => {
+        // Acknowledge any dialog
+        window.galataip.on('dialog', d => {
+          d?.resolve();
+        });
       });
-      guestPages.push(page);
+      for (let i = 0; i < numClients; i++) {
+        // Create a new client
+        const user: Partial<User.IUser> = {
+          identity: {
+            username: 'jovyan_' + i,
+            name: 'jovyan_' + i,
+            display_name: 'jovyan_' + i,
+            initials: 'JP',
+            color: 'var(--jp-collaborator-color2)'
+          }
+        };
+        const { page: newPage } = await galata.newPage({
+          baseURL: baseURL!,
+          browser,
+          mockUser: user,
+          tmpPath,
+          waitForApplication
+        });
+
+        await newPage.evaluate(() => {
+          // Acknowledge any dialog
+          window.galataip.on('dialog', d => {
+            d?.resolve();
+          });
+        });
+        guestPages.push(newPage);
+      }
     }
-  });
+  );
 
   test.afterEach(async ({ page }) => {
     // Make sure to close the page to remove the client
@@ -147,17 +166,7 @@ test.describe('Three clients', () => {
     await Promise.all(
       guestPages.map(async p => {
         await p.filebrowser.refresh();
-        await Promise.race([
-          galata.sleep(500),
-          p.notebook.open('Untitled.ipynb')
-        ]);
-        if (
-          await p.locator('.jp-Dialog-header:text("Select Kernel")').isVisible()
-        ) {
-          await p
-            .locator('.jp-Dialog >> .jp-Dialog-button >> text=Select')
-            .click();
-        }
+        await p.notebook.open('Untitled.ipynb');
       })
     );
 
