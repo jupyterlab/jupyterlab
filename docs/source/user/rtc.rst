@@ -9,7 +9,12 @@ Real Time Collaboration
 From JupyterLab 3.1, file documents and notebooks have collaborative
 editing using the `Yjs shared editing framework <https://github.com/yjs/yjs>`_.
 Editors are not collaborative by default; to activate it, start JupyterLab
-with the ``--collaborative`` flag.
+with the ``--collaborative`` flag and you need to upgrade Jupyter Server to 
+version 2.0.0 or later. To install it with pip for example:
+
+.. code-block:: bash
+
+    python -m pip install "jupyter_server>=2.0.0"
 
 To share a document with other users, you can copy the URL and send it, or you
 can install a helpful extension called
