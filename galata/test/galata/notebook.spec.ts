@@ -140,9 +140,7 @@ test.describe('Access cells in windowed notebook', () => {
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/notebook-extension:tracker': {
-        ...galata.DEFAULT_DOCUMENTATION_STATE[
-          '@jupyterlab/notebook-extension:tracker'
-        ],
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
         windowingMode: 'full'
       }
     }

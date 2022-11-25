@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 import {
   Context,
@@ -51,6 +51,7 @@ export class DocumentManager implements IDocumentManager {
       translator: this.translator
     });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
+    widgetManager.stateChanged.connect(this._onWidgetStateChanged, this);
     this._widgetManager = widgetManager;
     this._setBusy = options.setBusy;
   }
@@ -80,20 +81,28 @@ export class DocumentManager implements IDocumentManager {
   }
 
   set autosave(value: boolean) {
-    this._autosave = value;
+    if (this._autosave !== value) {
+      const oldValue = this._autosave;
+      this._autosave = value;
 
-    // For each existing context, start/stop the autosave handler as needed.
-    this._contexts.forEach(context => {
-      const handler = Private.saveHandlerProperty.get(context);
-      if (!handler) {
-        return;
-      }
-      if (value === true && !handler.isActive) {
-        handler.start();
-      } else if (value === false && handler.isActive) {
-        handler.stop();
-      }
-    });
+      // For each existing context, start/stop the autosave handler as needed.
+      this._contexts.forEach(context => {
+        const handler = Private.saveHandlerProperty.get(context);
+        if (!handler) {
+          return;
+        }
+        if (value === true && !handler.isActive) {
+          handler.start();
+        } else if (value === false && handler.isActive) {
+          handler.stop();
+        }
+      });
+      this._stateChanged.emit({
+        name: 'autosave',
+        oldValue,
+        newValue: value
+      });
+    }
   }
 
   /**
@@ -104,16 +113,42 @@ export class DocumentManager implements IDocumentManager {
   }
 
   set autosaveInterval(value: number) {
-    this._autosaveInterval = value;
+    if (this._autosaveInterval !== value) {
+      const oldValue = this._autosaveInterval;
+      this._autosaveInterval = value;
 
-    // For each existing context, set the save interval as needed.
-    this._contexts.forEach(context => {
-      const handler = Private.saveHandlerProperty.get(context);
-      if (!handler) {
-        return;
-      }
-      handler.saveInterval = value || 120;
-    });
+      // For each existing context, set the save interval as needed.
+      this._contexts.forEach(context => {
+        const handler = Private.saveHandlerProperty.get(context);
+        if (!handler) {
+          return;
+        }
+        handler.saveInterval = value || 120;
+      });
+      this._stateChanged.emit({
+        name: 'autosaveInterval',
+        oldValue,
+        newValue: value
+      });
+    }
+  }
+
+  /**
+   * Whether to ask confirmation to close a tab or not.
+   */
+  get confirmClosingDocument(): boolean {
+    return this._widgetManager.confirmClosingDocument;
+  }
+  set confirmClosingDocument(value: boolean) {
+    if (this._widgetManager.confirmClosingDocument !== value) {
+      const oldValue = this._widgetManager.confirmClosingDocument;
+      this._widgetManager.confirmClosingDocument = value;
+      this._stateChanged.emit({
+        name: 'confirmClosingDocument',
+        oldValue,
+        newValue: value
+      });
+    }
   }
 
   /**
@@ -124,12 +159,20 @@ export class DocumentManager implements IDocumentManager {
   }
 
   set lastModifiedCheckMargin(value: number) {
-    this._lastModifiedCheckMargin = value;
+    if (this._lastModifiedCheckMargin !== value) {
+      const oldValue = this._lastModifiedCheckMargin;
+      this._lastModifiedCheckMargin = value;
 
-    // For each existing context, update the margin value.
-    this._contexts.forEach(context => {
-      context.lastModifiedCheckMargin = value;
-    });
+      // For each existing context, update the margin value.
+      this._contexts.forEach(context => {
+        context.lastModifiedCheckMargin = value;
+      });
+      this._stateChanged.emit({
+        name: 'lastModifiedCheckMargin',
+        oldValue,
+        newValue: value
+      });
+    }
   }
 
   /**
@@ -140,7 +183,22 @@ export class DocumentManager implements IDocumentManager {
   }
 
   set renameUntitledFileOnSave(value: boolean) {
-    this._renameUntitledFileOnSave = value;
+    if (this._renameUntitledFileOnSave !== value) {
+      const oldValue = this._renameUntitledFileOnSave;
+      this._renameUntitledFileOnSave = value;
+      this._stateChanged.emit({
+        name: 'renameUntitledFileOnSave',
+        oldValue,
+        newValue: value
+      });
+    }
+  }
+
+  /**
+   * Signal triggered when an attribute changes.
+   */
+  get stateChanged(): ISignal<IDocumentManager, IChangedArgs<any>> {
+    return this._stateChanged;
   }
 
   /**
@@ -635,6 +693,15 @@ export class DocumentManager implements IDocumentManager {
     this._activateRequested.emit(args);
   }
 
+  protected _onWidgetStateChanged(
+    sender: DocumentWidgetManager,
+    args: IChangedArgs<any>
+  ): void {
+    if (args.name === 'confirmClosingDocument') {
+      this._stateChanged.emit(args);
+    }
+  }
+
   protected translator: ITranslator;
   private _activateRequested = new Signal<this, string>(this);
   private _contexts: Private.IContext[] = [];
@@ -650,6 +717,7 @@ export class DocumentManager implements IDocumentManager {
   private _dialogs: ISessionContext.IDialogs;
   private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _isConnectedCallback: () => boolean;
+  private _stateChanged = new Signal<DocumentManager, IChangedArgs<any>>(this);
 }
 
 /**

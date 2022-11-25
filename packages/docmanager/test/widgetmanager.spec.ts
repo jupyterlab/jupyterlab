@@ -10,7 +10,11 @@ import {
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
-import { dangerDialog, dismissDialog } from '@jupyterlab/testutils';
+import {
+  acceptDialog,
+  dangerDialog,
+  dismissDialog
+} from '@jupyterlab/testutils';
 import * as Mock from '@jupyterlab/testutils/lib/mock';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
@@ -264,8 +268,46 @@ describe('@jupyterlab/docmanager', () => {
         await delegate.promise;
       });
 
+      it('should ask confirmation when a widget is closing', async () => {
+        manager.confirmClosingDocument = true;
+        const widget = manager.createWidget(widgetFactory, context);
+
+        widget.close();
+        await dismissDialog();
+
+        expect(widget.isDisposed).toEqual(false);
+        widget.dispose();
+      });
+
+      it('should confirm widget close action', async () => {
+        manager.confirmClosingDocument = true;
+        const widget = manager.createWidget(widgetFactory, context);
+        const delegate = new PromiseDelegate();
+
+        widget.close();
+        await acceptDialog();
+
+        widget.disposed.connect(async () => {
+          expect(manager.methods).toEqual(expect.arrayContaining(['onClose']));
+          delegate.resolve(undefined);
+        });
+        await delegate.promise;
+      });
+
       it('should prompt the user before closing', async () => {
         // Populate the model with content.
+        context.model.fromString('foo');
+
+        const widget = manager.createWidget(widgetFactory, context);
+        const closed = manager.onClose(widget);
+
+        await Promise.all([dangerDialog(), closed]);
+
+        expect(widget.isDisposed).toBe(true);
+      });
+
+      it('should ask confirmation when a dirty widget is closing', async () => {
+        manager.confirmClosingDocument = true;
         context.model.fromString('foo');
 
         const widget = manager.createWidget(widgetFactory, context);
