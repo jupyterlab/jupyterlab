@@ -24,11 +24,11 @@
     "../lib/extension/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
   ],
   "scripts": {
-    "build": "jlpm build:lib && jlpm build:labextension",
+    "build": "npm run build:lib && npm run build:labextension",
     "build:all": "npm run build",
     "build:labextension": "jupyter labextension build --development True .",
     "build:lib": "tsc",
-    "clean": "jlpm clean:lib && jlpm clean:labextension",
+    "clean": "npm run clean:lib && npm run clean:labextension",
     "clean:labextension": "rimraf ../../jupyterlab/galata/@jupyterlab",
     "clean:lib": "rimraf ../lib/extension tsconfig.tsbuildinfo"
   },
