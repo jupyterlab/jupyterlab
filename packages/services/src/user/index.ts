@@ -23,6 +23,13 @@ import { BaseManager, IManager as IBaseManager } from '../basemanager';
 const SERVICE_USER_URL = 'api/me';
 
 /**
+ * The service's ID.
+ * Used to uniquely identify the poll, and
+ * the item in local storage.
+ */
+const SERVICE_ID = '@jupyterlab/services:UserManager#user';
+
+/**
  * The user API service manager.
  */
 export class UserManager extends BaseManager implements User.IManager {
@@ -67,7 +74,7 @@ export class UserManager extends BaseManager implements User.IManager {
         backoff: true,
         max: 300 * 1000
       },
-      name: `@jupyterlab/services:UserManager#user`,
+      name: SERVICE_ID,
       standby: options.standby ?? 'when-hidden'
     });
 
@@ -173,11 +180,10 @@ export class UserManager extends BaseManager implements User.IManager {
     // store the color and initials for the user
     // this info is not provided by the server
     const { localStorage } = window;
-    const data = localStorage.getItem(identity.username);
+    const data = localStorage.getItem(SERVICE_ID);
 
     if (data && (!identity.initials || !identity.color)) {
       const localUser = JSON.parse(data);
-      const identity = newUser.identity;
       identity.initials =
         identity.initials ||
         localUser.initials ||
@@ -189,7 +195,7 @@ export class UserManager extends BaseManager implements User.IManager {
     if (!JSONExt.deepEqual(newUser, oldUser)) {
       this._identity = identity;
       this._permissions = newUser.permissions;
-      localStorage.setItem(identity.username, JSON.stringify(identity));
+      localStorage.setItem(SERVICE_ID, JSON.stringify(identity));
       this._userChanged.emit(newUser);
     }
   }
