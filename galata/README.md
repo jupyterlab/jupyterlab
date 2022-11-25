@@ -62,17 +62,12 @@ specific options.
 Create `jupyter_server_test_config.py` with the following content.
 
 ```py
-from tempfile import mkdtemp
+from jupyterlab.galata import configureJupyterServerForGalata
 
-c.ServerApp.port = 8888
-c.ServerApp.port_retries = 0
-c.ServerApp.open_browser = False
+configureJupyterServerForGalata(c)
 
-c.ServerApp.root_dir = mkdtemp(prefix='galata-test-')
-c.ServerApp.token = ""
-c.ServerApp.password = ""
-c.ServerApp.disable_check_xsrf = True
-c.LabApp.expose_app_in_browser = True
+# Uncomment to set server log level to debug level
+# c.ServerApp.log_level = "DEBUG"
 ```
 
 Then start the server with:
@@ -80,6 +75,8 @@ Then start the server with:
 ```bash
 jupyter lab --config jupyter_server_test_config.py
 ```
+
+> If you need to customize the set up for galata, you can look at the `configureJupyterServerForGalata <https://github.com/jupyterlab/jupyterlab/tree/master/jupyterlab/galata/__init__.py>`\_ definition.
 
 ### Run test project
 
