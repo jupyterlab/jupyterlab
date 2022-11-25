@@ -148,7 +148,7 @@ Available icon classes
 
 .. raw:: html
 
-   <em>Icon-related CSS classes are defined in <a href="https://github.com/jupyterlab/jupyterlab/blob/f0153e0258b32674c9aec106383ddf7b618cebab/packages/ui-components/style/icons.css">ui-components/style/icons.css</a></em>
+   <em>Icon-related CSS classes are defined in <a href="https://github.com/jupyterlab/jupyterlab/blob/master/packages/ui-components/style/icons.css">ui-components/style/icons.css</a></em>
 
 |
 | All colors shown are for the standard light/dark theme, mouse over for hex values.
@@ -189,6 +189,24 @@ forth.
 For light/dark themes, ``jp-icon-accent0`` corresponds to the
 lightest/darkest background color, while ``jp-icon-accent1`` is somewhat
 darker/lighter, and so forth.
+
+Activity icons
+""""""""""""""
+
+Activity icons have their own set of CSS properties as it may not make sense to link them
+to a theme color. Here is a list of icons and the related properties:
+
+=========== ============================= =====================================
+   Icon             Primary color                    Secondary color
+=========== ============================= =====================================
+jupyter     ``jp-jupyter-icon-color``     None
+notebook    ``jp-notebook-icon-color``    None
+json        ``jp-json-icon-color``        None
+console     ``jp-console-icon-color``     ``jp-console-icon-background-color``
+terminal    ``jp-terminal-icon-color``    ``jp-terminal-icon-background-color``
+text editor ``jp-text-editor-icon-color`` None
+inspector   ``jp-inspector-icon-color``   None
+=========== ============================= =====================================
 
 Adding classes to a one-color icon
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
