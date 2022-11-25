@@ -23,7 +23,11 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB, collaborationEnabled?: boolean) {
+  constructor(
+    languagePreference?: string,
+    modelDB?: IModelDB,
+    collaborationEnabled?: boolean
+  ) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
     const filemodel = new models.YFile() as models.ISharedFile;

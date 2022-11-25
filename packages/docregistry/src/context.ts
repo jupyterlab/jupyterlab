@@ -969,7 +969,7 @@ export namespace Context {
 
     /**
      * Whether the model is collaborative.
-     * 
+     *
      * @deprecated It will be removed in 4.0.0. The collaborative feature
      * is provided by the `DocumentRegistry.IModel` (can be customized by the
      * `DocumentRegistry.IModelFactory`)
