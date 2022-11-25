@@ -437,6 +437,7 @@ close the notebook without saving it.`,
     if (changes.metadataChange) {
       const metadata = changes.metadataChange.newValue as JSONObject;
       this._modelDBMutex(() => {
+        this.metadata.clear();
         Object.entries(metadata).forEach(([key, value]) => {
           this.metadata.set(key, value);
         });
@@ -450,7 +451,7 @@ close the notebook without saving it.`,
   ): void {
     if (!UNSHARED_KEYS.includes(change.key)) {
       this._modelDBMutex(() => {
-        this.sharedModel.updateMetadata(metadata.toJSON());
+        this.sharedModel.setMetadata(metadata.toJSON());
       });
     }
     this.triggerContentChange();
