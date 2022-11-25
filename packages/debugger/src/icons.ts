@@ -22,7 +22,7 @@ export const closeAllIcon = new LabIcon({
   svgstr: closeAllSvgStr
 });
 
-export const pauseOnExceptionsIcon = new LabIcon({
+export const pauseIcon = new LabIcon({
   name: 'debugger:pause',
   svgstr: pauseSvgStr
 });
