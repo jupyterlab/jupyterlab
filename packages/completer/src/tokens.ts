@@ -153,7 +153,7 @@ export interface ICompletionProviderManager {
   activeProvidersChanged: ISignal<ICompletionProviderManager, void>;
 }
 
-export interface IConnectorProxy {
+export interface IProviderReconciliator {
   /**
    * Fetch response from multiple providers, If a provider can not return
    * the response for a completer request before timeout,
@@ -163,7 +163,7 @@ export interface IConnectorProxy {
    */
   fetch(
     request: CompletionHandler.IRequest
-  ): Promise<Array<CompletionHandler.ICompletionItemsReply | null>>;
+  ): Promise<CompletionHandler.ICompletionItemsReply | null>;
 
   /**
    * Check if completer should make request to fetch completion responses

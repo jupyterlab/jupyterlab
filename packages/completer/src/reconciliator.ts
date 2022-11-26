@@ -6,38 +6,33 @@ import { CompletionHandler } from './handler';
 import {
   ICompletionContext,
   ICompletionProvider,
-  IConnectorProxy
+  IProviderReconciliator
 } from './tokens';
 import { Completer } from './widget';
 
 /**
  * The connector which is used to fetch responses from multiple providers.
  */
-export class ConnectorProxy implements IConnectorProxy {
+export class ProviderReconciliator implements IProviderReconciliator {
   /**
-   * Creates an instance of ConnectorProxy. The `context` and `timeout` parameter
-   * is stored and will be used in the `fetch` method of provider.
+   * Creates an instance of ProviderReconciliator.
    */
-  constructor(
-    completerContext: ICompletionContext,
-    providers: Array<ICompletionProvider>,
-    timeout: number
-  ) {
-    this._providers = providers;
-    this._context = completerContext;
-    this._timeout = timeout;
+  constructor(options: ProviderReconciliator.IOptions) {
+    this._providers = options.providers;
+    this._context = options.completerContext;
+    this._timeout = options.timeout;
   }
 
   /**
    * Fetch response from multiple providers, If a provider can not return
    * the response for a completer request before timeout,
-   * the result of this provider will be ignore.
+   * the result of this provider will be ignored.
    *
    * @param {CompletionHandler.IRequest} request - The completion request.
    */
   public async fetch(
     request: CompletionHandler.IRequest
-  ): Promise<Array<CompletionHandler.ICompletionItemsReply | null>> {
+  ): Promise<CompletionHandler.ICompletionItemsReply | null> {
     const current = ++this._fetching;
     let promises: Promise<CompletionHandler.ICompletionItemsReply | null>[] =
       [];
@@ -62,7 +57,34 @@ export class ConnectorProxy implements IConnectorProxy {
       promises.push(promise);
     }
     const combinedPromise = Promise.all(promises);
-    return combinedPromise;
+    return this._mergeCompletions(combinedPromise);
+  }
+
+  private async _mergeCompletions(
+    promises: Promise<(CompletionHandler.ICompletionItemsReply | null)[]>
+  ): Promise<CompletionHandler.ICompletionItemsReply | null> {
+    const replies = await promises;
+    let items: CompletionHandler.ICompletionItem[] = [];
+    let start = 0;
+    let end = 0;
+    let skip = false;
+
+    // TODO implement reconciliation
+    for (const data of replies) {
+      if (data) {
+        items = items.concat(data.items);
+        if (!skip) {
+          start = data.start;
+          end = data.end;
+          skip = true;
+        }
+      }
+    }
+    return {
+      start,
+      end,
+      items
+    };
   }
 
   /**
@@ -129,9 +151,19 @@ export class ConnectorProxy implements IConnectorProxy {
   private _fetching = 0;
 }
 
-export namespace ConnectorProxy {
-  export type IConnectorMap = Map<
-    string,
-    CompletionHandler.ICompletionItemsConnector
-  >;
+export namespace ProviderReconciliator {
+  export interface IOptions {
+    /**
+     * Completion context that will be used in the `fetch` method of provider.
+     */
+    completerContext: ICompletionContext;
+    /**
+     * List of completion providers, assumed to contain at least one provider.
+     */
+    providers: ICompletionProvider[];
+    /**
+     * How long should we wait for each of the providers to resolve `fetch` promise
+     */
+    timeout: number;
+  }
 }

@@ -61,7 +61,7 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
       const showDoc = settingValues.get(SHOW_DOCUMENT_PANEL);
       const continuousHinting = settingValues.get(CONTINUOUS_HINTING);
       manager.setTimeout(timeout.composite as number);
-      manager.setShowDocumentFlag(showDoc.composite as boolean);
+      manager.setShowDocumentationPanel(showDoc.composite as boolean);
       manager.setContinuousHinting(continuousHinting.composite as boolean);
       const selectedProviders = providersData.user ?? providersData.composite;
       const sortedProviders = Object.entries(selectedProviders ?? {})

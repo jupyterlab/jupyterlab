@@ -3,7 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { ConnectorProxy } from './connectorproxy';
+import { ProviderReconciliator } from './reconciliator';
 import { CONTEXT_PROVIDER_ID } from './default/contextprovider';
 import { KERNEL_PROVIDER_ID } from './default/kernelprovider';
 import { CompletionHandler } from './handler';
@@ -49,7 +49,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Enable/disable the document panel.
    */
-  setShowDocumentFlag(showDoc: boolean): void {
+  setShowDocumentationPanel(showDoc: boolean): void {
     this._panelHandlers.forEach(
       handler => (handler.completer.showDocsPanel = showDoc)
     );
@@ -132,7 +132,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       handler.autoCompletion = this._autoCompletion;
       if (editor) {
         handler.editor = editor;
-        handler.connector = await this.generateConnectorProxy(
+        handler.reconciliator = await this.generateReconciliator(
           newCompleterContext
         );
       }
@@ -164,15 +164,15 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Helper function to generate a `ConnectorProxy` with provided context.
+   * Helper function to generate a `ProviderReconciliator` with provided context.
    * The `isApplicable` method of provider is used to filter out the providers
    * which can not be used with provided context.
    *
    * @param {ICompletionContext} completerContext - the current completer context
    */
-  private async generateConnectorProxy(
+  private async generateReconciliator(
     completerContext: ICompletionContext
-  ): Promise<ConnectorProxy> {
+  ): Promise<ProviderReconciliator> {
     let providers: Array<ICompletionProvider> = [];
     //TODO Update list with rank
     for (const id of this._activeProviders) {
@@ -181,7 +181,11 @@ export class CompletionProviderManager implements ICompletionProviderManager {
         providers.push(provider);
       }
     }
-    return new ConnectorProxy(completerContext, providers, this._timeout);
+    return new ProviderReconciliator({
+      completerContext,
+      providers,
+      timeout: this._timeout
+    });
   }
 
   /**
@@ -222,10 +226,10 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     completer.showDocsPanel = this._showDoc;
     completer.hide();
     Widget.attach(completer, document.body);
-    const connectorProxy = await this.generateConnectorProxy(completerContext);
+    const reconciliator = await this.generateReconciliator(completerContext);
     const handler = new CompletionHandler({
       completer,
-      connector: connectorProxy
+      reconciliator: reconciliator
     });
     handler.editor = completerContext.editor;
 
