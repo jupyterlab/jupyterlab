@@ -143,12 +143,13 @@ describe('completer/reconciliator', () => {
           providers: [provider1, provider2]
         });
         const request = { offset: 0, text: '' };
-        const result = await reconciliator.fetch(request);
+        let result = await reconciliator.fetch(request);
         expect(result).toEqual(reply1);
         reconciliator = new ProviderReconciliator({
           ...defaultOptions,
           providers: [provider2, provider1]
         });
+        result = await reconciliator.fetch(request);
         expect(result).toEqual(reply2);
       });
       it('should ignore flanking whitespaces for de-duplication', async () => {
