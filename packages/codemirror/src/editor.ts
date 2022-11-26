@@ -710,6 +710,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
               offset: node.from,
               type: node.name
             };
+            // We have just found the relevant leaf token, no need to iterate further
+            return false;
           }
           return true;
         }
