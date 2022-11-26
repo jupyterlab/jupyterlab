@@ -60,30 +60,95 @@ export class ProviderReconciliator implements IProviderReconciliator {
     return this._mergeCompletions(combinedPromise);
   }
 
+  private _alignPrefixes(
+    replies: CompletionHandler.ICompletionItemsReply[],
+    minStart: number,
+    maxStart: number
+  ): CompletionHandler.ICompletionItemsReply[] {
+    if (minStart != maxStart) {
+      const editor = this._context.editor;
+      if (!editor) {
+        return replies;
+      }
+      const cursor = editor.getCursorPosition();
+      const line = editor.getLine(cursor.line);
+      if (!line) {
+        return replies;
+      }
+
+      return replies.map(reply => {
+        // No prefix to strip, return as-is.
+        if (reply.start == maxStart) {
+          return reply;
+        }
+        let prefix = line.substring(reply.start, maxStart);
+        return {
+          ...reply,
+          items: reply.items.map(item => {
+            let insertText = item.insertText || item.label;
+            item.insertText = insertText.startsWith(prefix)
+              ? insertText.slice(prefix.length)
+              : insertText;
+            return item;
+          })
+        };
+      });
+    }
+    return replies;
+  }
+
   private async _mergeCompletions(
     promises: Promise<(CompletionHandler.ICompletionItemsReply | null)[]>
   ): Promise<CompletionHandler.ICompletionItemsReply | null> {
-    const replies = await promises;
-    let items: CompletionHandler.ICompletionItem[] = [];
-    let start = 0;
-    let end = 0;
-    let skip = false;
-
-    // TODO implement reconciliation
-    for (const data of replies) {
-      if (data) {
-        items = items.concat(data.items);
-        if (!skip) {
-          start = data.start;
-          end = data.end;
-          skip = true;
-        }
+    let replies = (await promises).filter(reply => {
+      if (!reply) {
+        return false;
       }
+      // Ignore if no matches.
+      if (!reply.items.length) {
+        return false;
+      }
+      // Otherwise keep.
+      return true;
+    }) as CompletionHandler.ICompletionItemsReply[];
+
+    // Fast path for a single reply or no replies.
+    if (replies.length == 0) {
+      return null;
+    } else if (replies.length == 1) {
+      return replies[0];
+    }
+
+    const minEnd = Math.min(...replies.map(reply => reply.end));
+
+    // If any of the replies uses a wider range, we need to align them
+    // so that all responses use the same range.
+    const starts = replies.map(reply => reply.start);
+    const minStart = Math.min(...starts);
+    const maxStart = Math.max(...starts);
+
+    replies = this._alignPrefixes(replies, minStart, maxStart);
+
+    const insertTextSet = new Set<string>();
+    const mergedItems = new Array<CompletionHandler.ICompletionItem>();
+
+    for (const reply of replies) {
+      reply.items.forEach(item => {
+        // IPython returns 'import' and 'import '; while the latter is more useful,
+        // user should not see two suggestions with identical labels and nearly-identical
+        // behaviour as they could not distinguish the two either way.
+        let text = (item.insertText || item.label).trim();
+        if (insertTextSet.has(text)) {
+          return;
+        }
+        insertTextSet.add(text);
+        mergedItems.push(item);
+      });
     }
     return {
-      start,
-      end,
-      items
+      start: maxStart,
+      end: minEnd,
+      items: mergedItems
     };
   }
 
@@ -152,6 +217,9 @@ export class ProviderReconciliator implements IProviderReconciliator {
 }
 
 export namespace ProviderReconciliator {
+  /**
+   * The instantiation options for provider reconciliator.
+   */
   export interface IOptions {
     /**
      * Completion context that will be used in the `fetch` method of provider.
