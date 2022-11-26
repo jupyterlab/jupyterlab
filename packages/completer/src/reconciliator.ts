@@ -54,8 +54,10 @@ export class ProviderReconciliator implements IProviderReconciliator {
           return setTimeout(() => resolve(null), this._timeout);
         });
       promise = Promise.race([promise, timeoutPromise]);
-      promises.push(promise);
+      // Wrap promise and return error in case of failure.
+      promises.push(promise.catch(p => p));
     }
+    // TODO: maybe use `Promise.allSettled` once library is at es2020 instead of adding a catch.
     const combinedPromise = Promise.all(promises);
     return this._mergeCompletions(combinedPromise);
   }
@@ -101,7 +103,8 @@ export class ProviderReconciliator implements IProviderReconciliator {
     promises: Promise<(CompletionHandler.ICompletionItemsReply | null)[]>
   ): Promise<CompletionHandler.ICompletionItemsReply | null> {
     let replies = (await promises).filter(reply => {
-      if (!reply) {
+      // Ignore it errors out.
+      if (!reply || reply instanceof Error) {
         return false;
       }
       // Ignore if no matches.
@@ -141,6 +144,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
         if (insertTextSet.has(text)) {
           return;
         }
+        item.type;
         insertTextSet.add(text);
         mergedItems.push(item);
       });
