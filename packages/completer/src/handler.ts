@@ -6,7 +6,6 @@ import { Text } from '@jupyterlab/coreutils';
 import { ISharedText, SourceChange } from '@jupyter-notebook/ydoc';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';

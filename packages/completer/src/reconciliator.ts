@@ -19,7 +19,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
    */
   constructor(options: ProviderReconciliator.IOptions) {
     this._providers = options.providers;
-    this._context = options.completerContext;
+    this._context = options.context;
     this._timeout = options.timeout;
   }
 
@@ -224,7 +224,7 @@ export namespace ProviderReconciliator {
     /**
      * Completion context that will be used in the `fetch` method of provider.
      */
-    completerContext: ICompletionContext;
+    context: ICompletionContext;
     /**
      * List of completion providers, assumed to contain at least one provider.
      */

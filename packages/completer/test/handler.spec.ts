@@ -8,7 +8,7 @@ import {
   Completer,
   CompleterModel,
   CompletionHandler,
-  ConnectorProxy
+  ProviderReconciliator
 } from '@jupyterlab/completer';
 import { ISharedText, SourceChange, YFile } from '@jupyter-notebook/ydoc';
 import { createSessionContext } from '@jupyterlab/testutils';
@@ -50,13 +50,17 @@ class TestCompletionHandler extends CompletionHandler {
 }
 
 describe('@jupyterlab/completer', () => {
-  let connector: ConnectorProxy;
+  let reconciliator: ProviderReconciliator;
   let sessionContext: ISessionContext;
 
   beforeAll(async () => {
     sessionContext = await createSessionContext();
     await (sessionContext as SessionContext).initialize();
-    connector = new ConnectorProxy(null as any, null as any, 0);
+    reconciliator = new ProviderReconciliator({
+      context: null as any,
+      providers: null as any,
+      timeout: 0
+    });
   });
 
   afterAll(() => sessionContext.shutdown());
@@ -65,7 +69,7 @@ describe('@jupyterlab/completer', () => {
     describe('#constructor()', () => {
       it('should create a completer handler', () => {
         const handler = new CompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         expect(handler).toBeInstanceOf(CompletionHandler);
@@ -75,7 +79,7 @@ describe('@jupyterlab/completer', () => {
     describe('#editor', () => {
       it('should default to null', () => {
         const handler = new CompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         expect(handler.editor).toBeNull();
@@ -83,7 +87,7 @@ describe('@jupyterlab/completer', () => {
 
       it('should be settable', () => {
         const handler = new CompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         const widget = createEditorWidget();
@@ -94,7 +98,7 @@ describe('@jupyterlab/completer', () => {
 
       it('should be resettable', () => {
         const handler = new CompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         const one = createEditorWidget();
@@ -108,7 +112,7 @@ describe('@jupyterlab/completer', () => {
 
       it('should remove the completer active and enabled classes of the old editor', () => {
         const handler = new CompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         const widget = createEditorWidget();
@@ -124,7 +128,7 @@ describe('@jupyterlab/completer', () => {
     describe('#isDisposed', () => {
       it('should be true if handler has been disposed', () => {
         const handler = new CompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         expect(handler.isDisposed).toBe(false);
@@ -136,7 +140,7 @@ describe('@jupyterlab/completer', () => {
     describe('#dispose()', () => {
       it('should dispose of the handler resources', () => {
         const handler = new CompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         expect(handler.isDisposed).toBe(false);
@@ -146,7 +150,7 @@ describe('@jupyterlab/completer', () => {
 
       it('should be safe to call multiple times', () => {
         const handler = new CompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         expect(handler.isDisposed).toBe(false);
@@ -159,7 +163,7 @@ describe('@jupyterlab/completer', () => {
     describe('#onTextChanged()', () => {
       it('should fire when the active editor emits a text change', () => {
         const handler = new TestCompletionHandler({
-          connector,
+          reconciliator,
           completer: new Completer({ editor: null })
         });
         handler.editor = createEditorWidget().editor;
@@ -177,7 +181,7 @@ describe('@jupyterlab/completer', () => {
           editor: null,
           model: new TestCompleterModel()
         });
-        const handler = new TestCompletionHandler({ completer, connector });
+        const handler = new TestCompletionHandler({ completer, reconciliator });
         const editor = createEditorWidget().editor;
         const model = completer.model as TestCompleterModel;
 
@@ -200,7 +204,7 @@ describe('@jupyterlab/completer', () => {
     describe('#onCompletionSelected()', () => {
       it('should fire when the completer widget emits a signal', () => {
         const completer = new Completer({ editor: null });
-        const handler = new TestCompletionHandler({ completer, connector });
+        const handler = new TestCompletionHandler({ completer, reconciliator });
 
         expect(handler.methods).toEqual(
           expect.not.arrayContaining(['onCompletionSelected'])
@@ -216,7 +220,7 @@ describe('@jupyterlab/completer', () => {
           editor: null,
           model: new TestCompleterModel()
         });
-        const handler = new TestCompletionHandler({ completer, connector });
+        const handler = new TestCompletionHandler({ completer, reconciliator });
         const model = completer.model as TestCompleterModel;
 
         handler.editor = createEditorWidget().editor;
@@ -231,7 +235,7 @@ describe('@jupyterlab/completer', () => {
         const model = new CompleterModel();
         const patch = 'foobar';
         const completer = new Completer({ editor: null, model });
-        const handler = new TestCompletionHandler({ completer, connector });
+        const handler = new TestCompletionHandler({ completer, reconciliator });
         const editor = createEditorWidget().editor;
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
@@ -263,7 +267,7 @@ describe('@jupyterlab/completer', () => {
         const model = new CompleterModel();
         const patch = 'foobar';
         const completer = new Completer({ editor: null, model });
-        const handler = new TestCompletionHandler({ completer, connector });
+        const handler = new TestCompletionHandler({ completer, reconciliator });
         const editor = createEditorWidget().editor;
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
@@ -312,7 +316,7 @@ describe('@jupyterlab/completer', () => {
       const model = new CompleterModel();
       const patch = 'foobar';
       const completer = new Completer({ editor: null, model });
-      const handler = new TestCompletionHandler({ completer, connector });
+      const handler = new TestCompletionHandler({ completer, reconciliator });
       const editor = createEditorWidget().editor;
       const text = 'eggs\n  # comment\nbaz';
       const want = 'eggs\n foobar # comment\nbaz';

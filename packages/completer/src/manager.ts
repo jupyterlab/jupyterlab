@@ -182,7 +182,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       }
     }
     return new ProviderReconciliator({
-      completerContext,
+      context: completerContext,
       providers,
       timeout: this._timeout
     });
