@@ -311,6 +311,7 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
       label: trans.__('Show Header Above Content'),
       isEnabled: () =>
         app.shell.currentWidget instanceof MainAreaWidget &&
+        !app.shell.currentWidget.contentHeader.isDisposed &&
         app.shell.currentWidget.contentHeader.widgets.length > 0,
       isToggled: () => {
         const widget = app.shell.currentWidget;

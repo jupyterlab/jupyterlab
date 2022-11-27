@@ -441,6 +441,22 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Makes the current thread pause if possible.
+   */
+  async pause(): Promise<void> {
+    try {
+      if (!this.session) {
+        throw new Error('No active debugger session');
+      }
+      await this.session.sendRequest('pause', {
+        threadId: this._currentThread()
+      });
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  }
+
+  /**
    * Makes the current thread step in a function / method if possible.
    */
   async stepIn(): Promise<void> {

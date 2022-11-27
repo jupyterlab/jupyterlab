@@ -52,6 +52,9 @@ bumped their major version (following semver convention). We want to point out p
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
    in particular those with the strict null checks enabled.
+- ``@jupyterlab/debugger`` from 3.x to 4.x
+   * The command ``debugger:pause`` command ID has been renamed ``debugger:pause-on-exceptions`` to avoid ambiguity with
+     pausing the current running thread.
 - ``@jupyterlab/docmanager`` from 3.x to 4.x
    * The ``renameDialog`` now receives the ``DocumentRegistry.Context`` instead of a path.
    * The interface ``DocumentManager.IWidgetOpener`` is now ``IDocumentWidgetOpener`` and is provided

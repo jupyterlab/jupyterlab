@@ -58,14 +58,18 @@ export class Context<
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
-    this._model = this._factory.createNew(lang);
+    this._model = this._factory.createNew(
+      lang,
+      PageConfig.getOption('collaborative') === 'true'
+    );
     const docProviderFactory = options.docProviderFactory;
     this._provider = docProviderFactory
       ? docProviderFactory({
           path: this._path,
           contentType: this._factory.contentType,
           format: this._factory.fileFormat!,
-          model: this._model.sharedModel
+          model: this._model.sharedModel,
+          collaborative: this._model.collaborative
         })
       : new ProviderMock();
 
@@ -220,6 +224,13 @@ export class Context<
   }
 
   /**
+   * Whether the document can be saved via the Contents API.
+   */
+  protected get canSave(): boolean {
+    return !!(this._contentsModel?.writable && !this._model.collaborative);
+  }
+
+  /**
    * The url resolver for the context.
    */
   readonly urlResolver: IRenderMime.IResolver;
@@ -232,7 +243,7 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean) {
-    if (PageConfig.getOption('collaborative') == 'true') {
+    if (this._model.collaborative) {
       await this._loadContext();
     } else {
       if (isNew) {
@@ -473,8 +484,7 @@ export class Context<
    * Update our contents model, without the content.
    */
   private _updateContentsModel(model: Contents.IModel): void {
-    const writable =
-      model.writable && PageConfig.getOption('collaborative') != 'true';
+    const writable = model.writable && !this._model.collaborative;
     const newModel: Contents.IModel = {
       path: model.path,
       name: model.name,
@@ -556,7 +566,7 @@ export class Context<
   private async _save(): Promise<void> {
     // if collaborative mode is enabled, saving happens in the back-end
     // after each change to the document
-    if (PageConfig.getOption('collaborative') === 'true') {
+    if (this._model.collaborative) {
       return;
     }
     this._saveState.emit('started');
@@ -771,17 +781,15 @@ export class Context<
    * Add a checkpoint the file is writable.
    */
   private _maybeCheckpoint(force: boolean): Promise<void> {
-    let writable = this._contentsModel && this._contentsModel.writable;
     let promise = Promise.resolve(void 0);
-    if (!writable) {
+    if (!this.canSave) {
       return promise;
     }
     if (force) {
       promise = this.createCheckpoint().then(/* no-op */);
     } else {
       promise = this.listCheckpoints().then(checkpoints => {
-        writable = this._contentsModel && this._contentsModel.writable;
-        if (!this.isDisposed && !checkpoints.length && writable) {
+        if (!this.isDisposed && !checkpoints.length && this.canSave) {
           return this.createCheckpoint().then(/* no-op */);
         }
       });
@@ -942,11 +950,6 @@ export namespace Context {
      * The initial path of the file.
      */
     path: string;
-
-    /**
-     * Whether the model is collaborative.
-     */
-    collaborative?: boolean;
 
     /**
      * The kernel preference associated with the context.

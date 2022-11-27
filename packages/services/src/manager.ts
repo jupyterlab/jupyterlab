@@ -9,13 +9,15 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Builder, BuildManager } from './builder';
 
-import { NbConvert, NbConvertManager } from './nbconvert';
-
 import { Contents, ContentsManager } from './contents';
+
+import { Event, EventManager } from './event';
 
 import { Kernel, KernelManager } from './kernel';
 
 import { KernelSpec, KernelSpecManager } from './kernelspec';
+
+import { NbConvert, NbConvertManager } from './nbconvert';
 
 import { ServerConnection } from './serverconnection';
 
@@ -46,6 +48,7 @@ export class ServiceManager implements ServiceManager.IManager {
     const kernelManager = options.kernels || new KernelManager(normalized);
     this.serverSettings = serverSettings;
     this.contents = options.contents || new ContentsManager(normalized);
+    this.events = options.events || new EventManager(normalized);
     this.sessions =
       options.sessions ||
       new SessionManager({
@@ -60,12 +63,12 @@ export class ServiceManager implements ServiceManager.IManager {
     this.kernelspecs = options.kernelspecs || new KernelSpecManager(normalized);
     this.user = options.user || new UserManager(normalized);
 
-    // Relay connection failures from the service managers that poll
-    // the server for current information.
+    // Proxy all connection failures from the individual service managers.
     this.kernelspecs.connectionFailure.connect(this._onConnectionFailure, this);
     this.sessions.connectionFailure.connect(this._onConnectionFailure, this);
     this.terminals.connectionFailure.connect(this._onConnectionFailure, this);
 
+    // Define promises that need to be resolved before service manager is ready.
     const readyList = [this.sessions.ready, this.kernelspecs.ready];
     if (this.terminals.isAvailable()) {
       readyList.push(this.terminals.ready);
@@ -101,6 +104,7 @@ export class ServiceManager implements ServiceManager.IManager {
     Signal.clearData(this);
 
     this.contents.dispose();
+    this.events.dispose();
     this.sessions.dispose();
     this.terminals.dispose();
   }
@@ -134,6 +138,11 @@ export class ServiceManager implements ServiceManager.IManager {
    * Get the contents manager instance.
    */
   readonly contents: Contents.IManager;
+
+  /**
+   * The event manager instance.
+   */
+  readonly events: Event.IManager;
 
   /**
    * Get the terminal manager instance.
@@ -238,6 +247,14 @@ export namespace ServiceManager {
      * The contents manager for the manager.
      */
     readonly contents: Contents.IManager;
+
+    /**
+     * The events service manager.
+     *
+     * #### Notes
+     * The events manager is optional until JupyterLab 4.
+     */
+    readonly events?: Event.IManager;
 
     /**
      * A promise that fulfills when the manager is initially ready.
