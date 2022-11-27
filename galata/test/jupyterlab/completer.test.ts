@@ -50,6 +50,9 @@ test.describe('Completer', () => {
           'option'
       );
       await page.notebook.enterCellEditingMode(0);
+      // move to the end of cell
+      await page.keyboard.press('PageDown');
+      await page.keyboard.press('End');
 
       // we need to wait until the completer gets bound to the cell after entering it
       await page.waitForTimeout(50);
