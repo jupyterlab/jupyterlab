@@ -25,8 +25,7 @@
   ],
   "scripts": {
     "build": "npm run build:lib && npm run build:labextension",
-    "build:all": "npm run build",
-    "build:labextension": "jupyter labextension build --development True .",
+    "build:labextension": "node ../../node_modules/@jupyterlab/builder/lib/build-labextension.js --core-path ../../dev_mode --development .",
     "build:lib": "tsc",
     "clean": "npm run clean:lib && npm run clean:labextension",
     "clean:labextension": "rimraf ../../jupyterlab/galata/@jupyterlab",
