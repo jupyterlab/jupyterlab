@@ -56,7 +56,7 @@ export class EventManager implements IDisposable {
    * Dispose the event manager.
    */
   dispose(): void {
-    if (this._poll.isDisposed) {
+    if (this.isDisposed) {
       return;
     }
 
