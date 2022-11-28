@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/metadataform",
-  "version": "4.0.0-alpha.15",
+  "version": "4.0.0-alpha.16",
   "description": "A helper to build form for metadata",
   "keywords": [
     "jupyter",
@@ -58,7 +58,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.15",
+    "@jupyterlab/testutils": "^4.0.0-alpha.16",
     "@types/jest": "^26.0.10",
     "@types/react": "^17.0.0",
     "jest": "^26.4.2",
