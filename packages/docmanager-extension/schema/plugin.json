@@ -117,6 +117,12 @@
       "description": "Length of save interval in seconds",
       "default": 120
     },
+    "confirmClosingDocument": {
+      "type": "boolean",
+      "title": "Ask for confirmation to close a document",
+      "description": "Whether to ask for confirmation to close a document or not.",
+      "default": false
+    },
     "lastModifiedCheckMargin": {
       "type": "number",
       "title": "Margin for last modified timestamp check",

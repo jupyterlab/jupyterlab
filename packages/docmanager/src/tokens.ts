@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
@@ -42,6 +43,11 @@ export interface IDocumentManager extends IDisposable {
   autosave: boolean;
 
   /**
+   * Whether to ask confirmation to close a tab or not.
+   */
+  confirmClosingDocument: boolean;
+
+  /**
    * Determines the time interval for autosave in seconds.
    */
   autosaveInterval: number;
@@ -50,6 +56,11 @@ export interface IDocumentManager extends IDisposable {
    * Whether to ask the user to rename untitled file on first manual save.
    */
   renameUntitledFileOnSave: boolean;
+
+  /**
+   * Signal triggered when an attribute changes.
+   */
+  readonly stateChanged: ISignal<IDocumentManager, IChangedArgs<any>>;
 
   /**
    * Clone a widget.
