@@ -409,8 +409,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-reject-color-active: var(--md-grey-800);
 
   /* File or activity icons and switch semantic variables */
-  --jp-jupyter-icon-color: var(--md-orange-900);
-  --jp-notebook-icon-color: var(--md-orange-900);
+  --jp-jupyter-icon-color: #f37626;
+  --jp-notebook-icon-color: #f37626;
   --jp-json-icon-color: var(--md-orange-700);
   --jp-console-icon-background-color: var(--md-blue-700);
   --jp-console-icon-color: white;
