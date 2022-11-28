@@ -25,7 +25,7 @@
 
 .jp-switch-track {
   cursor: pointer;
-  background-color: var(--jp-switch-color);
+  background-color: var(--jp-switch-color, var(--jp-border-color1));
   -webkit-transition: 0.4s;
   transition: 0.4s;
   border-radius: 34px;
@@ -48,7 +48,7 @@
 }
 
 .jp-switch[aria-checked='true'] .jp-switch-track {
-  background-color: var(--jp-switch-true-position-color);
+  background-color: var(--jp-switch-true-position-color, var(--jp-warn-color0));
 }
 
 .jp-switch[aria-checked='true'] .jp-switch-track::before {
