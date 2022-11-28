@@ -118,7 +118,7 @@ export namespace Debugger {
 
     export const restartDebug = 'debugger:restart-debug';
 
-    export const pause = 'debugger:pause-on-exceptions';
+    export const pause = 'debugger:pause';
   }
 
   /**
