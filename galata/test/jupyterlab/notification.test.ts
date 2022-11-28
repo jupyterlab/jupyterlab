@@ -107,6 +107,24 @@ test.describe('Toast', () => {
     });
   });
 
+  test('should sanitize the notification', async ({ page }) => {
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute('apputils:notify', {
+        message:
+          '## Title\n\nThis _is_ a **Markdown** message.\n\n![logo](https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg)\n\n<p style="color:pink;">Pink text</p>\n\n- Item 1\n- Item 2\n\n<style>.jp-dummy {\n  color: pink;\n}\n</style>\n<script>alert("I\'m in");</script>',
+        options: { autoClose: false }
+      });
+    });
+
+    await page.waitForSelector('.Toastify__toast');
+
+    expect(
+      await page.locator('.Toastify__toast-body').innerHTML()
+    ).toMatchSnapshot({
+      name: 'sanitized-notification.txt'
+    });
+  });
+
   test('should update a notification', async ({ page }) => {
     const id = await page.evaluate(() => {
       return window.jupyterapp.commands.execute('apputils:notify', {
@@ -192,7 +210,7 @@ test.describe('Notification center', () => {
     );
   });
 
-  test('should be stop highlight once the center is closed', async ({
+  test('should stop the highlight once the center is closed', async ({
     page
   }) => {
     await page.evaluate(() => {

@@ -52,7 +52,66 @@ import type {
   UpdateOptions
 } from 'react-toastify';
 
+/**
+ * Toast close button class
+ */
 const TOAST_CLOSE_BUTTON_CLASS = 'jp-Notification-Toast-Close';
+
+/**
+ * Sanitizer options used on notification message.
+ */
+const NOTIFICATION_SANITIZER_OPTIONS: ISanitizer.IOptions = {
+  allowedTags: [
+    'a',
+    'abbr',
+    'article',
+    'b',
+    'bdi',
+    'bdo',
+    'blockquote',
+    'br',
+    'cite',
+    'code',
+    'dd',
+    'del',
+    'dfn',
+    'div',
+    'dl',
+    'dt',
+    'em',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'hr',
+    'i',
+    'ins',
+    'kdb',
+    'li',
+    'mark',
+    'ol',
+    'p',
+    'pre',
+    'q',
+    's',
+    'samp',
+    'small',
+    'span',
+    'strong',
+    'sub',
+    'sup',
+    'time',
+    'u',
+    'ul',
+    'var',
+    'wbr'
+  ],
+  allowedStyles: {
+    '*': {}
+  }
+};
 
 namespace CommandIDs {
   /**
@@ -387,7 +446,10 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     const parse =
       sanitizer && parser
         ? async (message: string) =>
-            sanitizer.sanitize(await parser.render(message))
+            sanitizer.sanitize(
+              await parser.render(message),
+              NOTIFICATION_SANITIZER_OPTIONS
+            )
         : (message: string) => Promise.resolve(message);
 
     app.commands.addCommand(CommandIDs.notify, {
