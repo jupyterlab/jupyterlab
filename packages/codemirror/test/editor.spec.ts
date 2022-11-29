@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { YFile } from '@jupyter-notebook/ydoc';
+import { YFile } from '@jupyter/ydoc';
 import { generate, simulate } from 'simulate-event';
 
 const UP_ARROW = 38;

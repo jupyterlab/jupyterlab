@@ -19,7 +19,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { KernelMessage } from '@jupyterlab/services';
-import { createStandaloneCell, ISharedRawCell } from '@jupyter-notebook/ydoc';
+import { createStandaloneCell, ISharedRawCell } from '@jupyter/ydoc';
 import { JSONObject, MimeData } from '@lumino/coreutils';
 import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';

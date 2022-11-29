@@ -8,7 +8,7 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import { createStandaloneCell, YCodeCell } from '@jupyter-notebook/ydoc';
+import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
 import { createSessionContext, NBTestUtils } from '@jupyterlab/testutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';

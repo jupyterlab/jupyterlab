@@ -11,7 +11,7 @@ import {
   DocumentChange,
   FileChange,
   ISharedFile
-} from '@jupyter-notebook/ydoc';
+} from '@jupyter/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
