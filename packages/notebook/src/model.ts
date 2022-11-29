@@ -437,6 +437,13 @@ close the notebook without saving it.`,
     if (changes.metadataChange) {
       const metadata = changes.metadataChange.newValue as JSONObject;
       this._modelDBMutex(() => {
+        UNSHARED_KEYS.forEach(key => {
+          const value = this.metadata.get(key) as JSONObject | undefined;
+          if (value) {
+            metadata[key] = value;
+          }
+        });
+        this.metadata.clear();
         Object.entries(metadata).forEach(([key, value]) => {
           this.metadata.set(key, value);
         });
@@ -448,11 +455,11 @@ close the notebook without saving it.`,
     metadata: IObservableJSON,
     change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
   ): void {
-    if (!UNSHARED_KEYS.includes(change.key)) {
-      this._modelDBMutex(() => {
-        this.sharedModel.updateMetadata(metadata.toJSON());
-      });
-    }
+    this._modelDBMutex(() => {
+      const meta = metadata.toJSON();
+      UNSHARED_KEYS.forEach(key => delete meta[key]);
+      this.sharedModel.setMetadata(meta);
+    });
     this.triggerContentChange();
   }
 
