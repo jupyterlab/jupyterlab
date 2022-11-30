@@ -21,7 +21,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-}, 20000);
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -125,7 +125,7 @@ describe('@jupyterlab/ui-components', () => {
 
     beforeEach(async () => {
       widget = new Toolbar();
-    }, 20000);
+    }, 30000);
 
     afterEach(async () => {
       widget.dispose();

@@ -15,7 +15,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-}, 20000);
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -70,7 +70,7 @@ describe('terminal/index', () => {
       widget = new LogTerminal(session, { autoFit: false });
       Widget.attach(widget, document.body);
       return framePromise();
-    });
+    }, 30000);
 
     afterEach(() => {
       widget.dispose();

@@ -31,7 +31,7 @@ jest.retryTimes(3);
 
 beforeAll(async () => {
   await server.start();
-}, 20000);
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

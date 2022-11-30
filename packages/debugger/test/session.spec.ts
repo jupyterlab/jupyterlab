@@ -27,7 +27,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-}, 20000);
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -182,14 +182,14 @@ describe('protocol', () => {
 
     // wait for the first stopped event
     await stoppedFuture.promise;
-  }, 20000);
+  }, 30000);
 
   afterEach(async () => {
     await debugSession.stop();
     debugSession.dispose();
     await connection.shutdown();
     connection.dispose();
-  }, 20000);
+  }, 30000);
 
   describe('#debugInfo', () => {
     it('should return the state of the current debug session', async () => {

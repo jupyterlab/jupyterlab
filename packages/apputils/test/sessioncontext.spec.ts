@@ -25,7 +25,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-}, 20000);
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -50,7 +50,7 @@ describe('@jupyterlab/apputils', () => {
         kernelManager.ready,
         specsManager.ready
       ]);
-    }, 20000);
+    }, 30000);
 
     beforeEach(async () => {
       Dialog.flush();

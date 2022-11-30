@@ -39,7 +39,7 @@ beforeAll(async () => {
   await server.start();
   kernelManager = new KernelManager();
   sessionManager = new SessionManager({ kernelManager });
-}, 20000);
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -51,7 +51,7 @@ describe('session', () => {
 
   beforeAll(async () => {
     defaultSession = await startNew();
-  }, 20000);
+  }, 30000);
 
   afterEach(async () => {
     if (session && !session.isDisposed) {

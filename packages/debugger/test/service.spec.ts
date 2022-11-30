@@ -42,7 +42,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-}, 20000);
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

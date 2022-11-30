@@ -35,7 +35,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-}, 20000);
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -62,7 +62,7 @@ describe('@jupyterlab/notebook', () => {
         createContext(),
         createContext({ kernelPreference: { name: 'ipython' } })
       ]);
-    }, 20000);
+    }, 30000);
 
     beforeEach(async () => {
       widget = new Notebook({
