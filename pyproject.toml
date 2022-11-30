@@ -104,7 +104,7 @@ test = [
     "pytest-check-links>=0.7",
     "pytest-console-scripts",
     "pytest-cov",
-    "pytest-jupyter[server]",
+    "pytest-jupyter",
     "pytest-timeout",
     "pytest-tornasync",
     "requests",
