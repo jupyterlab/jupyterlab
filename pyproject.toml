@@ -42,7 +42,7 @@ dependencies = [
     "jupyter_core",
     "jupyter-lsp>=1.5.1",
     "jupyter_server>=2.0.0rc3,<3",
-    "jupyter_server_ydoc>=0.5.1,<0.6.0",
+    "jupyter_server_ydoc>=0.6.0,<0.7.0",
     "jupyterlab_server>=2.16.0,<3",
     "notebook_shim>=0.2",
     "packaging",
@@ -104,6 +104,7 @@ test = [
     "pytest-check-links>=0.7",
     "pytest-console-scripts",
     "pytest-cov",
+    "pytest-jupyter",
     "pytest-timeout",
     "pytest-tornasync",
     "requests",
@@ -111,7 +112,6 @@ test = [
     "virtualenv",
 ]
 dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
-ui-tests = ["build"]
 
 [tool.hatch.version]
 path = "jupyterlab/_version.py"

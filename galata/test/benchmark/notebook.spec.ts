@@ -74,6 +74,10 @@ test.describe('Benchmark', () => {
     await content.uploadContent(loremIpsum, 'text', `${tmpPath}/${textFile}`);
   });
 
+  test.beforeEach(async ({ page }) => {
+    await galata.Mock.mockSettings(page, [], galata.DEFAULT_SETTINGS);
+  });
+
   // Remove benchmark files
   test.afterAll(async ({ request }) => {
     const content = galata.newContentsHelper(request);
