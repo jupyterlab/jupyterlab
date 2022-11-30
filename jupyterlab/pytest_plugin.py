@@ -96,7 +96,7 @@ def labapp(jp_serverapp, make_lab_app):
 
 
 @pytest.fixture
-def fetch_long(http_server_client, jp_auth_header, jp_base_url):
+def fetch_long(jp_http_server_client, jp_auth_header, jp_base_url):
     """fetch fixture that handles auth, base_url, and path"""
 
     def client_fetch(*parts, headers=None, params=None, **kwargs):
@@ -109,6 +109,6 @@ def fetch_long(http_server_client, jp_auth_header, jp_base_url):
         headers = headers or {}
         headers.update(jp_auth_header)
         # Make request.
-        return http_server_client.fetch(url, headers=headers, request_timeout=250, **kwargs)
+        return jp_http_server_client.fetch(url, headers=headers, request_timeout=250, **kwargs)
 
     return client_fetch
