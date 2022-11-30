@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import {
-  flakyIt as it,
-  JupyterServer,
-  testEmission
-} from '@jupyterlab/testutils';
+import { JupyterServer, testEmission } from '@jupyterlab/testutils';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import {
   Kernel,
@@ -18,6 +14,8 @@ import {
 import { FakeKernelManager, handleRequest, KernelTester } from '../utils';
 
 const server = new JupyterServer();
+
+jest.retryTimes(3);
 
 beforeAll(async () => {
   await server.start();

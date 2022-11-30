@@ -101,12 +101,13 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
+    '@babel/core',
+    '@babel/preset-env',
     'fs-extra',
     'node-fetch',
     'identity-obj-proxy',
-    'jest-raw-loader',
-    'jest-junit',
-    'jest-summary-reporter'
+    'jest-environment-jsdom',
+    'jest-junit'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite']

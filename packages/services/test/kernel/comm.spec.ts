@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  isFulfilled,
-  flakyIt as it,
-  JupyterServer
-} from '@jupyterlab/testutils';
+import { isFulfilled, JupyterServer } from '@jupyterlab/testutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Kernel, KernelManager, KernelMessage } from '../../src';
 import { init } from '../utils';
@@ -47,6 +43,8 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
 const server = new JupyterServer();
+
+jest.retryTimes(3);
 
 beforeAll(async () => {
   await server.start();

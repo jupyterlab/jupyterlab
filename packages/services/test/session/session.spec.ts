@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { flakyIt as it, JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testutils';
 import { UUID } from '@lumino/coreutils';
 import { Session, SessionAPI } from '../../src';
 import {
@@ -14,6 +14,8 @@ import {
 init();
 
 const server = new JupyterServer();
+
+jest.retryTimes(3);
 
 beforeAll(async () => {
   await server.start();

@@ -16,7 +16,6 @@ import {
 import {
   acceptDialog,
   dismissDialog,
-  flakyIt as it,
   JupyterServer,
   testEmission
 } from '@jupyterlab/testutils';
@@ -31,6 +30,8 @@ beforeAll(async () => {
 afterAll(async () => {
   await server.shutdown();
 });
+
+jest.retryTimes(3);
 
 describe('@jupyterlab/apputils', () => {
   describe('SessionContext', () => {

@@ -1,16 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  flakyIt as it,
-  JupyterServer,
-  sleep,
-  testEmission
-} from '@jupyterlab/testutils';
+import { JupyterServer, sleep, testEmission } from '@jupyterlab/testutils';
 import { Kernel, KernelAPI, KernelManager } from '../../src';
 import { makeSettings } from '../utils';
 
 const server = new JupyterServer();
+
+jest.retryTimes(3);
 
 beforeAll(async () => {
   await server.start();
