@@ -8,15 +8,13 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 describe('JupyterServer', () => {
   it('should start the server', async () => {
-    jest.setTimeout(20000);
     const server = new JupyterServer();
     const url = await server.start();
     await fetch(URLExt.join(url, 'api'));
     await expect(server.shutdown()).resolves.not.toThrow();
-  });
+  }, 30000);
 
   it('should accept options', async () => {
-    jest.setTimeout(20000);
     const pageConfig = { foo: 'bar', fizz: 'buzz' };
     const configData = {
       // eslint-disable-next-line camelcase
@@ -49,5 +47,5 @@ describe('JupyterServer', () => {
     expect(PageConfig.getOption('__configData')).toContain('1.11');
     expect(PageConfig.getOption('__kernelSpec_foo')).toContain('Test Python');
     await expect(server.shutdown()).resolves.not.toThrow();
-  });
+  }, 30000);
 });
