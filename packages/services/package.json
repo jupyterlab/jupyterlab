@@ -40,7 +40,7 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "test": "jest",
-    "test:cov": "jest --collect-coverage",
+    "test:cov": "jest --collect-coverage --detectOpenHandles",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
