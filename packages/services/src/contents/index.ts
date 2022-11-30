@@ -9,6 +9,8 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { ISharedDocument } from '@jupyter-notebook/ydoc';
+
 import { ServerConnection } from '..';
 
 import * as validate from './validate';
@@ -150,7 +152,7 @@ export namespace Contents {
    * The options used to open a file.
    */
   export interface IOpenOptions extends ICloseOptions {
-    model: any;
+    model?: ISharedDocument;
   }
 
   /**
@@ -313,7 +315,7 @@ export namespace Contents {
      *
      * @returns A promise which resolves with the file content.
      */
-    open(path: string, options: IOpenOptions): Promise<void>;
+    open(path: string, options: IOpenOptions): ISharedDocument | void;
 
     /**
      * Close a file.
@@ -474,7 +476,7 @@ export namespace Contents {
      *
      * @returns A promise which resolves with the file content.
      */
-    open(path: string, options: IOpenOptions): Promise<void>;
+    open(path: string, options: IOpenOptions): ISharedDocument | void;
 
     /**
      * Close a file.
@@ -747,7 +749,7 @@ export class ContentsManager implements Contents.IManager {
    *
    * @returns A promise which resolves with the file content.
    */
-  open(path: string, options: Contents.IOpenOptions): Promise<void> {
+  open(path: string, options: Contents.IOpenOptions): ISharedDocument | void {
     const [drive, localPath] = this._driveForPath(path);
     return drive.open(localPath, options);
   }
@@ -1129,9 +1131,9 @@ export class Drive implements Contents.IDrive {
    *
    * @returns A promise which resolves with the file content.
    */
-  open(path: string, options: Contents.IOpenOptions): Promise<void> {
+  open(path: string, options: Contents.IOpenOptions): ISharedDocument | void {
     // NO-OP
-    return Promise.resolve();
+    return;
   }
 
   /**

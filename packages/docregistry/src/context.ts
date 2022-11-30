@@ -53,16 +53,17 @@ export class Context<
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
+
+    const sharedModel = this._manager.contents.open(this._path, {
+      type: this._factory.contentType,
+      format: this._factory.fileFormat
+    });
+
     this._model = this._factory.createNew(
       lang,
-      PageConfig.getOption('collaborative') === 'true'
+      PageConfig.getOption('collaborative') === 'true',
+      sharedModel ?? undefined
     );
-
-    this._contentsReady = this._manager.contents.open(this._path, {
-      type: this._factory.contentType,
-      format: this._factory.fileFormat,
-      model: this._model.sharedModel
-    });
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;

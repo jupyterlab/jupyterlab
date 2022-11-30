@@ -5,6 +5,14 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { Contents, Drive, User } from '@jupyterlab/services';
 
+import {
+  DocumentChange,
+  ISharedDocument,
+  YDocument,
+  YFile,
+  YNotebook
+} from '@jupyter-notebook/ydoc';
+
 import { WebSocketProvider } from './yprovider';
 
 /**
@@ -39,20 +47,39 @@ export class YDrive extends Drive {
     super.dispose();
   }
 
-  async open(localPath: string, options: Contents.IOpenOptions): Promise<void> {
+  async open(
+    localPath: string,
+    options: Contents.IOpenOptions
+  ): Promise<ISharedDocument> {
+    let sharedModel: YDocument<DocumentChange>;
+    switch (options.type) {
+      case 'file':
+        sharedModel = new YFile();
+        break;
+      case 'notebook':
+        sharedModel = new YNotebook();
+        break;
+      case 'directory':
+        sharedModel = new YDocument();
+        break;
+      default:
+        sharedModel = new YFile();
+        break;
+    }
+
     const provider = new WebSocketProvider({
       url: URLExt.join(this.serverSettings.wsUrl, Y_DOCUMENT_PROVIDER_URL),
       path: localPath,
       format: options.format as string,
       contentType: options.type,
       collaborative: true,
-      model: options.model,
+      model: sharedModel,
       user: this._user
     });
 
     const key = `${options.type}:${options.format}:${localPath}`;
     this._providers.set(key, provider);
-    return provider.ready;
+    return sharedModel;
   }
 
   async close(

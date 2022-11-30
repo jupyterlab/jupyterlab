@@ -520,5 +520,7 @@ export namespace NotebookModel {
      * Whether collaboration should be enabled for this document model.
      */
     collaborationEnabled?: boolean;
+
+    sharedModel?: ISharedNotebook;
   }
 }

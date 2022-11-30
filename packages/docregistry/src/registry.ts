@@ -1182,7 +1182,11 @@ export namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string, collaborationEnabled?: boolean): T;
+    createNew(
+      languagePreference?: string,
+      collaborationEnabled?: boolean,
+      sharedModel?: ISharedDocument
+    ): T;
 
     /**
      * Get the preferred kernel language given a file path.
