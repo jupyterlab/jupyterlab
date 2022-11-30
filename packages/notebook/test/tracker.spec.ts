@@ -13,9 +13,8 @@ const namespace = 'notebook-tracker-test';
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 20000);
 
 afterAll(async () => {
   await server.shutdown();

@@ -32,7 +32,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-}, 30000);
+}, 20000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -47,7 +47,6 @@ describe('@jupyterlab/notebook', () => {
     let ipySessionContext: ISessionContext;
 
     beforeAll(async function () {
-      jest.setTimeout(20000);
       rendermime = utils.defaultRenderMime();
 
       async function createContext(options?: Partial<SessionContext.IOptions>) {
@@ -60,7 +59,7 @@ describe('@jupyterlab/notebook', () => {
         createContext(),
         createContext({ kernelPreference: { name: 'ipython' } })
       ]);
-    });
+    }, 20000);
 
     beforeEach(() => {
       widget = new Notebook({

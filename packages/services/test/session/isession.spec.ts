@@ -39,7 +39,7 @@ beforeAll(async () => {
   await server.start();
   kernelManager = new KernelManager();
   sessionManager = new SessionManager({ kernelManager });
-});
+}, 20000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -50,9 +50,8 @@ describe('session', () => {
   let defaultSession: Session.ISessionConnection;
 
   beforeAll(async () => {
-    jest.setTimeout(20000);
     defaultSession = await startNew();
-  });
+  }, 20000);
 
   afterEach(async () => {
     if (session && !session.isDisposed) {

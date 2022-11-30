@@ -25,7 +25,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 20000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -42,7 +42,6 @@ describe('@jupyterlab/apputils', () => {
     let sessionContext: SessionContext;
 
     beforeAll(async () => {
-      jest.setTimeout(20000);
       kernelManager = new KernelManager();
       sessionManager = new SessionManager({ kernelManager });
       specsManager = new KernelSpecManager();
@@ -51,7 +50,7 @@ describe('@jupyterlab/apputils', () => {
         kernelManager.ready,
         specsManager.ready
       ]);
-    });
+    }, 20000);
 
     beforeEach(async () => {
       Dialog.flush();

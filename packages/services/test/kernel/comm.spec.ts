@@ -48,7 +48,7 @@ jest.retryTimes(3);
 
 beforeAll(async () => {
   await server.start();
-});
+}, 20000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -59,10 +59,9 @@ describe('jupyter.services - Comm', () => {
   let kernel: Kernel.IKernelConnection;
 
   beforeAll(async () => {
-    jest.setTimeout(20000);
     kernelManager = new KernelManager();
     kernel = await kernelManager.startNew({ name: 'ipython' });
-  });
+  }, 20000);
 
   afterEach(() => {
     // A no-op comm target.

@@ -11,7 +11,7 @@ jest.retryTimes(3);
 
 beforeAll(async () => {
   await server.start();
-});
+}, 20000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -21,9 +21,8 @@ describe('kernel/manager', () => {
   let kernel: Kernel.IModel;
 
   beforeAll(async () => {
-    jest.setTimeout(20000);
     kernel = await KernelAPI.startNew();
-  });
+  }, 20000);
 
   describe('KernelManager', () => {
     let manager: KernelManager;
