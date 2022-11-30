@@ -132,6 +132,28 @@ export namespace Contents {
   export type FileFormat = 'json' | 'text' | 'base64' | null;
 
   /**
+   * The options used to close a file.
+   */
+  export interface ICloseOptions {
+    /**
+     * The override file type for the request.
+     */
+    type: ContentType;
+
+    /**
+     * The override file format for the request.
+     */
+    format: FileFormat;
+  }
+
+  /**
+   * The options used to open a file.
+   */
+  export interface IOpenOptions extends ICloseOptions {
+    model: any;
+  }
+
+  /**
    * The options used to fetch a file.
    */
   export interface IFetchOptions {
@@ -283,6 +305,26 @@ export namespace Contents {
     driveName(path: string): string;
 
     /**
+     * Open a file.
+     *
+     * @param path: The path to the file.
+     *
+     * @param options: The options used to open the file.
+     *
+     * @returns A promise which resolves with the file content.
+     */
+    open(path: string, options: IOpenOptions): Promise<void>;
+
+    /**
+     * Close a file.
+     *
+     * @param path: The path to the file.
+     *
+     * @returns A promise which resolves with the file content.
+     */
+    close(path: string, options: Contents.ICloseOptions): Promise<void>;
+
+    /**
      * Get a file or directory.
      *
      * @param path: The path to the file.
@@ -422,6 +464,26 @@ export namespace Contents {
      * A signal emitted when a file operation takes place.
      */
     fileChanged: ISignal<IDrive, IChangedArgs>;
+
+    /**
+     * Open a file.
+     *
+     * @param path: The path to the file.
+     *
+     * @param options: The options used to open the file.
+     *
+     * @returns A promise which resolves with the file content.
+     */
+    open(path: string, options: IOpenOptions): Promise<void>;
+
+    /**
+     * Close a file.
+     *
+     * @param path: The path to the file.
+     *
+     * @returns A promise which resolves with the file content.
+     */
+    close(path: string, options: Contents.ICloseOptions): Promise<void>;
 
     /**
      * Get a file or directory.
@@ -674,6 +736,32 @@ export class ContentsManager implements Contents.IManager {
       return firstParts[0];
     }
     return '';
+  }
+
+  /**
+   * Open a file.
+   *
+   * @param path: The path to the file.
+   *
+   * @param options: The options used to open the file.
+   *
+   * @returns A promise which resolves with the file content.
+   */
+  open(path: string, options: Contents.IOpenOptions): Promise<void> {
+    const [drive, localPath] = this._driveForPath(path);
+    return drive.open(localPath, options);
+  }
+
+  /**
+   * Close a file.
+   *
+   * @param path: The path to the file.
+   *
+   * @returns A promise which resolves with the file content.
+   */
+  close(path: string, options: Contents.ICloseOptions): Promise<void> {
+    const [drive, localPath] = this._driveForPath(path);
+    return drive.close(localPath, options);
   }
 
   /**
@@ -1030,6 +1118,32 @@ export class Drive implements Contents.IDrive {
     }
     this._isDisposed = true;
     Signal.clearData(this);
+  }
+
+  /**
+   * Open a file.
+   *
+   * @param path: The path to the file.
+   *
+   * @param options: The options used to open the file.
+   *
+   * @returns A promise which resolves with the file content.
+   */
+  open(path: string, options: Contents.IOpenOptions): Promise<void> {
+    // NO-OP
+    return Promise.resolve();
+  }
+
+  /**
+   * Close a file.
+   *
+   * @param path: The path to the file.
+   *
+   * @returns A promise which resolves with the file content.
+   */
+  close(path: string, options: Contents.ICloseOptions): Promise<void> {
+    // NO-OP
+    return Promise.resolve();
   }
 
   /**

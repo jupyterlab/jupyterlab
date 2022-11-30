@@ -43,7 +43,6 @@
   "dependencies": {
     "@jupyterlab/apputils": "^4.0.0-alpha.17",
     "@jupyterlab/coreutils": "^6.0.0-alpha.17",
-    "@jupyterlab/docprovider": "^4.0.0-alpha.17",
     "@jupyterlab/docregistry": "^4.0.0-alpha.17",
     "@jupyterlab/services": "^7.0.0-alpha.17",
     "@jupyterlab/statusbar": "^4.0.0-alpha.17",

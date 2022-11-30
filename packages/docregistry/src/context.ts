@@ -11,11 +11,6 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import {
-  IDocumentProvider,
-  IDocumentProviderFactory,
-  ProviderMock
-} from '@jupyterlab/docprovider';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
@@ -62,16 +57,12 @@ export class Context<
       lang,
       PageConfig.getOption('collaborative') === 'true'
     );
-    const docProviderFactory = options.docProviderFactory;
-    this._provider = docProviderFactory
-      ? docProviderFactory({
-          path: this._path,
-          contentType: this._factory.contentType,
-          format: this._factory.fileFormat!,
-          model: this._model.sharedModel,
-          collaborative: this._model.collaborative
-        })
-      : new ProviderMock();
+
+    this._contentsReady = this._manager.contents.open(this._path, {
+      type: this._factory.contentType,
+      format: this._factory.fileFormat,
+      model: this._model.sharedModel
+    });
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -203,7 +194,10 @@ export class Context<
     this._isDisposed = true;
     this.sessionContext.dispose();
     this._model.dispose();
-    this._provider.dispose();
+    this._manager.contents.close(this._path, {
+      type: this._factory.contentType,
+      format: this._factory.fileFormat
+    });
     this._model.sharedModel.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -243,14 +237,10 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean) {
-    if (this._model.collaborative) {
-      await this._loadContext();
+    if (isNew) {
+      await this._save();
     } else {
-      if (isNew) {
-        await this._save();
-      } else {
-        await this._revert();
-      }
+      await this._revert();
     }
     this.model.sharedModel.clearUndoHistory();
   }
@@ -294,7 +284,9 @@ export class Context<
         // Make sure the path does not exist.
         return this._manager.ready
           .then(() => {
-            return this._manager.contents.get(newPath);
+            // We are not using the content of the document, we are just
+            // checking whether the new path already exists or not.
+            return this._manager.contents.get(newPath, { content: false });
           })
           .then(() => {
             return this._maybeOverWrite(newPath);
@@ -414,11 +406,18 @@ export class Context<
   protected onStateChanged(sender: ISharedDocument, changes: DocumentChange) {
     if (changes.stateChange) {
       changes.stateChange.forEach(change => {
-        if (change.name === 'path' && change.newValue !== change.oldValue) {
-          (this.urlResolver as RenderMimeRegistry.UrlResolver).path =
-            change.newValue;
-          this._path = change.newValue;
-          this.sessionContext.session?.setPath(change.newValue) as any;
+        if (change.name === 'path' && change.newValue !== this._path) {
+          // Jupyter_ydoc re-initializes the path but it doen't have drive
+          const oldDrive = this._manager.contents.driveName(this._path);
+          const newDrive = this._manager.contents.driveName(change.newValue);
+          const newPath =
+            oldDrive != newDrive
+              ? `${oldDrive}:${change.newValue}`
+              : change.newValue;
+
+          (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+          this._path = newPath;
+          this.sessionContext.session?.setPath(newPath) as any;
           this._pathChanged.emit(this.path);
         }
       });
@@ -508,7 +507,7 @@ export class Context<
    * Handle an initial population.
    */
   private async _populate(): Promise<void> {
-    await this._provider.ready;
+    await this._contentsReady;
 
     this._isPopulated = true;
     this._isReady = true;
@@ -626,47 +625,6 @@ export class Context<
   }
 
   /**
-   * Load the metadata of the document without the content.
-   */
-  private _loadContext(): Promise<void> {
-    const opts: Contents.IFetchOptions = {
-      type: this._factory.contentType,
-      content: false,
-      ...(this._factory.fileFormat !== null
-        ? { format: this._factory.fileFormat }
-        : {})
-    };
-    const path = this._path;
-    return this._manager.ready
-      .then(() => {
-        return this._manager.contents.get(path, opts);
-      })
-      .then(contents => {
-        if (this.isDisposed) {
-          return;
-        }
-        const model = {
-          ...contents,
-          format: this._factory.fileFormat
-        };
-        this._updateContentsModel(model);
-        this._model.dirty = false;
-        if (!this._isPopulated) {
-          return this._populate();
-        }
-      })
-      .catch(async err => {
-        const localPath = this._manager.contents.localPath(this._path);
-        const name = PathExt.basename(localPath);
-        void this._handleError(
-          err,
-          this._trans.__('File Load Error for %1', name)
-        );
-        throw err;
-      });
-  }
-
-  /**
    * Revert the document contents to disk contents.
    *
    * @param initializeModel - call the model's initialization function after
@@ -690,22 +648,24 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
-        if (contents.format === 'json') {
-          model.fromJSON(contents.content);
-        } else {
-          let content = contents.content;
-          // Convert line endings if necessary, marking the file
-          // as dirty.
-          if (content.indexOf('\r\n') !== -1) {
-            this._lineEnding = '\r\n';
-            content = content.replace(/\r\n/g, '\n');
-          } else if (content.indexOf('\r') !== -1) {
-            this._lineEnding = '\r';
-            content = content.replace(/\r/g, '\n');
+        if (contents.content) {
+          if (contents.format === 'json') {
+            model.fromJSON(contents.content);
           } else {
-            this._lineEnding = null;
+            let content = contents.content;
+            // Convert line endings if necessary, marking the file
+            // as dirty.
+            if (content.indexOf('\r\n') !== -1) {
+              this._lineEnding = '\r\n';
+              content = content.replace(/\r\n/g, '\n');
+            } else if (content.indexOf('\r') !== -1) {
+              this._lineEnding = '\r';
+              content = content.replace(/\r/g, '\n');
+            } else {
+              this._lineEnding = null;
+            }
+            model.fromString(content);
           }
-          model.fromString(content);
         }
         this._updateContentsModel(contents);
         model.dirty = false;
@@ -914,6 +874,7 @@ or load the version on disk (revert)?`,
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
   private _readyPromise: Promise<void>;
+  private _contentsReady: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
   private _isPopulated = false;
   private _isReady = false;
@@ -923,7 +884,6 @@ or load the version on disk (revert)?`,
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
-  private _provider: IDocumentProvider;
   private _lastModifiedCheckMargin = 500;
   private _timeConflictModalIsOpen = false;
 }
@@ -955,11 +915,6 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
-
-    /**
-     * An factory method for the document provider.
-     */
-    docProviderFactory?: IDocumentProviderFactory<ISharedDocument>;
 
     /**
      * An optional callback for opening sibling widgets.

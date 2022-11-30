@@ -41,7 +41,6 @@
     "@jupyterlab/apputils": "^4.0.0-alpha.17",
     "@jupyterlab/coreutils": "^6.0.0-alpha.17",
     "@jupyterlab/docmanager": "^4.0.0-alpha.17",
-    "@jupyterlab/docprovider": "^4.0.0-alpha.17",
     "@jupyterlab/docregistry": "^4.0.0-alpha.17",
     "@jupyterlab/services": "^7.0.0-alpha.17",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.17",

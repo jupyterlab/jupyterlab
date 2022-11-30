@@ -63,7 +63,6 @@
     "@jupyterlab/docmanager": "^4.0.0-alpha.17",
     "@jupyterlab/docmanager-extension": "^4.0.0-alpha.17",
     "@jupyterlab/docprovider": "^4.0.0-alpha.17",
-    "@jupyterlab/docprovider-extension": "^4.0.0-alpha.17",
     "@jupyterlab/docregistry": "^4.0.0-alpha.17",
     "@jupyterlab/documentsearch": "^4.0.0-alpha.17",
     "@jupyterlab/documentsearch-extension": "^4.0.0-alpha.17",
