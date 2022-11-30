@@ -420,5 +420,4 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inspector-icon-color: var(--md-grey-700);
   --jp-switch-color: var(--md-grey-400);
   --jp-switch-true-position-color: var(--md-orange-900);
-  --jp-switch-cursor-color: rgba(255, 255, 255, 1);
 }
