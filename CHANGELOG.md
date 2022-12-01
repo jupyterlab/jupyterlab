@@ -19,7 +19,7 @@
 ### Maintenance and upkeep improvements
 
 - Bump sanitize-html to 2.7.3 [#13509](https://github.com/jupyterlab/jupyterlab/pull/13509) ([@fcollonval](https://github.com/fcollonval))
-- Backport PR #13322 on branch 3.6.x (Switch to releaser v2) [#13327](https://github.com/jupyterlab/jupyterlab/pull/13327) ([@blink1073](https://github.com/blink1073))
+- Switch to releaser v2 [#13327](https://github.com/jupyterlab/jupyterlab/pull/13327) ([@blink1073](https://github.com/blink1073))
 
 ### Documentation improvements
 
