@@ -3,7 +3,7 @@
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
-import { ISharedText, YFile } from '@jupyter-notebook/ydoc';
+import { ISharedText, YFile } from '@jupyter/ydoc';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';

@@ -7,11 +7,7 @@ import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import {
-  DocumentChange,
-  FileChange,
-  ISharedFile
-} from '@jupyter-notebook/ydoc';
+import { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';

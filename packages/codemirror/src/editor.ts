@@ -6,7 +6,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
-import { IYText } from '@jupyter-notebook/ydoc';
+import { IYText } from '@jupyter/ydoc';
 import {
   ITranslator,
   nullTranslator,

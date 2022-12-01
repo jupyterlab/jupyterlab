@@ -11,7 +11,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { ISharedText, SourceChange } from '@jupyter-notebook/ydoc';
+import { ISharedText, SourceChange } from '@jupyter/ydoc';
 
 import {
   Compartment,

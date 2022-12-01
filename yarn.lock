@@ -1424,10 +1424,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@jupyter-notebook/ydoc@~0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@jupyter-notebook/ydoc/-/ydoc-0.2.0.tgz#0febf91cd80dd2206f668c60e8ee20f4983cca99"
-  integrity sha512-R8iHKwU+8OvdYwtgNj9dh3vv0OrAyHLNDmXjaSu6CJ1w10OP7MuQasvD18DAgTjqlHEUgnPoSJA2j0UlflSC1Q==
+"@jupyter/ydoc@~0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@jupyter/ydoc/-/ydoc-0.2.2.tgz#a2be83d2a0e076cef7ed77302e69153a0a4d6c16"
+  integrity sha512-UtU7ZxpL0k+QF9So4wtGxaS2C+nno58dig7sQUaBn48wlQDiuypzKgUmF7I37srpu6f/ywon3JBuEjxuL1CIBQ==
   dependencies:
     "@jupyterlab/nbformat" "^3.0.0 || ^4.0.0-alpha.15"
     "@lumino/coreutils" "^1.11.0 || ^2.0.0-alpha.6"
