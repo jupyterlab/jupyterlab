@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { JupyterServer, testEmission } from '@jupyterlab/testutils';
+import { JupyterServer, sleep, testEmission } from '@jupyterlab/testutils';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import {
@@ -79,7 +79,10 @@ describe('session', () => {
       it('should emit when the kernel changes', async () => {
         let called: Session.ISessionConnection.IKernelChangedArgs | null = null;
         const object = {};
-        await defaultSession.kernel?.requestKernelInfo();
+        while (defaultSession.kernel!.connectionStatus !== 'connected') {
+          await sleep(100);
+        }
+        await defaultSession.kernel!.requestKernelInfo();
         defaultSession.kernelChanged.connect((s, args) => {
           called = args;
           Signal.disconnectReceiver(object);
@@ -105,6 +108,9 @@ describe('session', () => {
             called = true;
           }
         });
+        while (defaultSession.kernel!.connectionStatus !== 'connected') {
+          await sleep(100);
+        }
         await defaultSession.kernel!.requestKernelInfo();
         expect(called).toBe(true);
       });
