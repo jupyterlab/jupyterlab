@@ -140,7 +140,7 @@
 
 .jp-LauncherCard[data-category='Notebook'] .jp-LauncherCard-noKernelIcon {
   /* This color is copied from the notebook icon. */
-  color: #ef6c00;
+  color: var(--jp-jupyter-icon-color);
 }
 
 .jp-LauncherCard[data-category='Console'] .jp-LauncherCard-noKernelIcon {
