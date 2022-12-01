@@ -404,8 +404,8 @@ class PyPIExtensionManager(ExtensionManager):
                 None, partial(run, tmp_cmd, capture_output=True)
             )
             lines = filter(
-                lambda l: l.endswith("package.json"),
-                map(lambda l: l.strip(), result.stdout.decode("utf-8").splitlines()),
+                lambda line: line.endswith("package.json"),
+                map(lambda line: line.strip(), result.stdout.decode("utf-8").splitlines()),
             )
             for filepath in filter(
                 lambda f: f.name == "package.json",
