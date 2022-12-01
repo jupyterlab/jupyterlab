@@ -24,8 +24,12 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, collaborationEnabled?: boolean) {
-    super();
+  constructor(
+    languagePreference?: string,
+    collaborationEnabled?: boolean,
+    sharedModel?: ISharedFile
+  ) {
+    super({ sharedModel });
     this._defaultLang = languagePreference || '';
     this.sharedModel.changed.connect(this._onStateChanged, this);
     this._collaborationEnabled = !!collaborationEnabled;
@@ -254,9 +258,14 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    */
   createNew(
     languagePreference?: string,
-    collaborationEnabled?: boolean
+    collaborationEnabled?: boolean,
+    sharedModel?: ISharedFile
   ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, collaborationEnabled);
+    return new DocumentModel(
+      languagePreference,
+      collaborationEnabled,
+      sharedModel
+    );
   }
 
   /**

@@ -58,20 +58,32 @@ export class Context<
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
+
+    const sharedModel = this._manager.contents.open
+      ? this._manager.contents.open(this._path, {
+          type: this._factory.contentType,
+          format: this._factory.fileFormat
+        })
+      : undefined;
+
     this._model = this._factory.createNew(
       lang,
       PageConfig.getOption('collaborative') === 'true'
+      //sharedModel ?? undefined
     );
-    const docProviderFactory = options.docProviderFactory;
-    this._provider = docProviderFactory
-      ? docProviderFactory({
-          path: this._path,
-          contentType: this._factory.contentType,
-          format: this._factory.fileFormat!,
-          model: this._model.sharedModel,
-          collaborative: this._model.collaborative
-        })
-      : new ProviderMock();
+
+    // TODO: remove for v4.0
+    if (!sharedModel && options.docProviderFactory) {
+      this._provider = options.docProviderFactory({
+        path: this._path,
+        contentType: this._factory.contentType,
+        format: this._factory.fileFormat!,
+        model: this._model.sharedModel,
+        collaborative: this._model.collaborative
+      });
+    } else {
+      this._provider = new ProviderMock();
+    }
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -205,6 +217,12 @@ export class Context<
     this._model.dispose();
     this._provider.dispose();
     this._model.sharedModel.dispose();
+    if (this._manager.contents.close) {
+      this._manager.contents.close(this._path, {
+        type: this._factory.contentType,
+        format: this._factory.fileFormat
+      });
+    }
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -243,14 +261,10 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean) {
-    if (this._model.collaborative) {
-      await this._loadContext();
+    if (isNew) {
+      await this._save();
     } else {
-      if (isNew) {
-        await this._save();
-      } else {
-        await this._revert();
-      }
+      await this._revert();
     }
     this.model.sharedModel.clearUndoHistory();
   }
@@ -294,7 +308,9 @@ export class Context<
         // Make sure the path does not exist.
         return this._manager.ready
           .then(() => {
-            return this._manager.contents.get(newPath);
+            // We are not using the content of the document, we are just
+            // checking whether the new path already exists or not.
+            return this._manager.contents.get(newPath, { content: false });
           })
           .then(() => {
             return this._maybeOverWrite(newPath);
@@ -414,11 +430,24 @@ export class Context<
   protected onStateChanged(sender: ISharedDocument, changes: DocumentChange) {
     if (changes.stateChange) {
       changes.stateChange.forEach(change => {
-        if (change.name === 'path' && change.newValue !== change.oldValue) {
-          (this.urlResolver as RenderMimeRegistry.UrlResolver).path =
-            change.newValue;
-          this._path = change.newValue;
-          this.sessionContext.session?.setPath(change.newValue) as any;
+        if (
+          change.name === 'path' &&
+          change.newValue &&
+          change.newValue !== this._path
+        ) {
+          // Jupyter_ydoc re-initializes the path but it doesn't have drive
+          const oldDrive = this._manager.contents.driveName(this._path);
+          const newDrive = this._manager.contents.driveName(
+            change.newValue ?? ''
+          );
+          const newPath =
+            oldDrive != newDrive
+              ? `${oldDrive}:${change.newValue}`
+              : change.newValue;
+
+          (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+          this._path = newPath;
+          this.sessionContext.session?.setPath(newPath) as any;
           this._pathChanged.emit(this.path);
         }
       });
@@ -626,47 +655,6 @@ export class Context<
   }
 
   /**
-   * Load the metadata of the document without the content.
-   */
-  private _loadContext(): Promise<void> {
-    const opts: Contents.IFetchOptions = {
-      type: this._factory.contentType,
-      content: false,
-      ...(this._factory.fileFormat !== null
-        ? { format: this._factory.fileFormat }
-        : {})
-    };
-    const path = this._path;
-    return this._manager.ready
-      .then(() => {
-        return this._manager.contents.get(path, opts);
-      })
-      .then(contents => {
-        if (this.isDisposed) {
-          return;
-        }
-        const model = {
-          ...contents,
-          format: this._factory.fileFormat
-        };
-        this._updateContentsModel(model);
-        this._model.dirty = false;
-        if (!this._isPopulated) {
-          return this._populate();
-        }
-      })
-      .catch(async err => {
-        const localPath = this._manager.contents.localPath(this._path);
-        const name = PathExt.basename(localPath);
-        void this._handleError(
-          err,
-          this._trans.__('File Load Error for %1', name)
-        );
-        throw err;
-      });
-  }
-
-  /**
    * Revert the document contents to disk contents.
    *
    * @param initializeModel - call the model's initialization function after
@@ -690,6 +678,15 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
+        this._updateContentsModel(contents);
+
+        if (this._model.collaborative || !contents.content) {
+          if (!this._isPopulated) {
+            return this._populate();
+          }
+          return;
+        }
+
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
         } else {
@@ -707,7 +704,6 @@ export class Context<
           }
           model.fromString(content);
         }
-        this._updateContentsModel(contents);
         model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();

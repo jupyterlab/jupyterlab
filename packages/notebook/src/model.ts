@@ -101,9 +101,12 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    const sharedModel = (this.sharedModel = new YNotebook({
-      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
-    }));
+    this.sharedModel =
+      options.sharedModel ??
+      new YNotebook({
+        disableDocumentWideUndoRedo:
+          options.disableDocumentWideUndoRedo ?? false
+      });
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._deletedCells = [];
@@ -112,6 +115,7 @@ export class NotebookModel implements INotebookModel {
     // Initialize the notebook
     // In collaboration mode, this will be overridden by the initialization coming
     // from the document provider.
+    const sharedModel = this.sharedModel as YNotebook;
     sharedModel.nbformat_minor = nbformat.MINOR_VERSION;
     sharedModel.nbformat = nbformat.MAJOR_VERSION;
     this._ensureMetadata(options.languagePreference ?? '');
@@ -520,5 +524,10 @@ export namespace NotebookModel {
      * Whether collaboration should be enabled for this document model.
      */
     collaborationEnabled?: boolean;
+
+    /**
+     * The shared document model.
+     */
+    sharedModel?: ISharedNotebook;
   }
 }

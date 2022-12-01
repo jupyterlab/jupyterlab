@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISharedNotebook } from '@jupyter/ydoc';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents } from '@jupyterlab/services';
 import { INotebookModel, NotebookModel } from './model';
@@ -70,11 +71,13 @@ export class NotebookModelFactory
    */
   createNew(
     languagePreference?: string,
-    collaborationEnabled?: boolean
+    collaborationEnabled?: boolean,
+    sharedModel?: ISharedNotebook
   ): INotebookModel {
     return new NotebookModel({
       languagePreference,
       collaborationEnabled,
+      sharedModel,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
     });
   }
