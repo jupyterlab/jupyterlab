@@ -111,8 +111,8 @@ const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +
   [
     'packages/application-extension/src/index.tsx',
-    'examples/example.spec.ts'
-    //'packages/*/test/*.spec.ts',
+    'examples/example.spec.ts',
+    'packages/*/src/svg.d.ts'
   ];
 
 module.exports = {
@@ -120,18 +120,7 @@ module.exports = {
   exclude,
   name: '@jupyterlab',
   out: 'docs/api',
-  // json: 'docs/api.json',
   readme: 'README.md',
   theme: 'default',
   tsconfig: 'tsconfigdoc.json'
-  //plugin: "./typedoc-theme/lib/index.js"
-
-  // theme: minimal,
-  // excludePrivate: true,
-  // excludeProtected: true,
-  // excludeExternals: true,
-  // hideGenerator: true
-
-  // gitRevision: 'master',
-  // 'sourcefile-url-prefix': `https://github.com/sinnerschrader/feature-hub/tree/${git.short()}/packages/`,
 };
