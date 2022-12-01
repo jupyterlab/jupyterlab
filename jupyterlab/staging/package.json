@@ -16,7 +16,7 @@
     "watch": "webpack --watch"
   },
   "resolutions": {
-    "@jupyter-notebook/ydoc": "~0.2.0",
+    "@jupyter/ydoc": "~0.2.0",
     "@jupyterlab/application": "~3.6.0-alpha.4",
     "@jupyterlab/application-extension": "~3.6.0-alpha.4",
     "@jupyterlab/apputils": "~3.6.0-alpha.4",
@@ -263,7 +263,7 @@
     "buildDir": "./build",
     "outputDir": "..",
     "singletonPackages": [
-      "@jupyter-notebook/ydoc",
+      "@jupyter/ydoc",
       "@jupyterlab/application",
       "@jupyterlab/apputils",
       "@jupyterlab/cell-toolbar",
