@@ -3,10 +3,6 @@
 
 import { JupyterServer } from '@jupyterlab/testutils';
 import { ServerConnection, WorkspaceManager } from '../../src';
-import { init } from '../utils';
-
-// Initialize the fetch overrides.
-init();
 
 const server = new JupyterServer();
 

@@ -9,7 +9,7 @@
   "dependencies": {
     "@jupyterlab/services": "^7.0.0-alpha.16",
     "node-fetch": "^2.6.0",
-    "ws": "^7.4.6"
+    "ws": "^8.11.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0"
