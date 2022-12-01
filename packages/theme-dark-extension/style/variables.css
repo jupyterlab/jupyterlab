@@ -423,10 +423,10 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-icon-contrast-color3: var(--md-blue-600);
 
   /* File or activity icons and switch semantic variables */
-  --jp-jupyter-icon-color: var(--md-orange-900);
-  --jp-notebook-icon-color: var(--md-orange-700);
-  --jp-json-icon-color: var(--md-orange-700);
-  --jp-console-icon-background-color: var(--md-blue-700);
+  --jp-jupyter-icon-color: #f37626;
+  --jp-notebook-icon-color: #f37626;
+  --jp-json-icon-color: var(--md-orange-500);
+  --jp-console-icon-background-color: var(--md-blue-500);
   --jp-console-icon-color: white;
   --jp-terminal-icon-background-color: var(--md-grey-200);
   --jp-terminal-icon-color: var(--md-grey-800);
@@ -434,5 +434,4 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inspector-icon-color: var(--md-grey-200);
   --jp-switch-color: var(--md-grey-400);
   --jp-switch-true-position-color: var(--md-orange-700);
-  --jp-switch-cursor-color: rgba(0, 0, 0, 0.8);
 }
