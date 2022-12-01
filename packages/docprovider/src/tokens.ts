@@ -38,7 +38,7 @@ export namespace IDocumentProviderFactory {
   /**
    * The instantiation options for a IDocumentProviderFactory.
    */
-  export interface IOptions<T extends ISharedDocument> {
+  export interface IOptions<T extends ISharedDocument = ISharedDocument> {
     /**
      * The document file path
      */
