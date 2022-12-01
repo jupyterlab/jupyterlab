@@ -410,7 +410,9 @@ export class Context<
         if (change.name === 'path' && change.newValue !== this._path) {
           // Jupyter_ydoc re-initializes the path but it doen't have drive
           const oldDrive = this._manager.contents.driveName(this._path);
-          const newDrive = this._manager.contents.driveName(change.newValue);
+          const newDrive = this._manager.contents.driveName(
+            change.newValue ?? ''
+          );
           const newPath =
             oldDrive != newDrive
               ? `${oldDrive}:${change.newValue}`

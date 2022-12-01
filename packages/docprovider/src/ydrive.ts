@@ -47,10 +47,10 @@ export class YDrive extends Drive {
     super.dispose();
   }
 
-  async open(
+  open(
     localPath: string,
     options: Contents.IOpenOptions
-  ): Promise<ISharedDocument> {
+  ): ISharedDocument | void {
     let sharedModel: YDocument<DocumentChange>;
     switch (options.type) {
       case 'file':
