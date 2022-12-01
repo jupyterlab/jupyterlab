@@ -44,6 +44,12 @@ jobs:
           server_url: http-get://localhost:8888/lab
           test_folder: galata
 
+      - name: Comment back on the PR
+        run: |
+          hub api repos/${{ github.event.organization }}/${{ github.event.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   update-documentation-snapshots:
     name: Update Documentation Snapshots
     if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update documentation snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
@@ -113,3 +119,9 @@ jobs:
           test_folder: core/galata
           start_server_script: start:doc
           update_script: test:doc:update
+
+      - name: Comment back on the PR
+        run: |
+          hub api repos/${{ github.event.organization }}/${{ github.event.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

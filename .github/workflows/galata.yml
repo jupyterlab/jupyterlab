@@ -1,6 +1,8 @@
 name: UI Tests
 
 on:
+  issue_comment:
+    types: [created]
   push:
     branches:
       - master
@@ -9,6 +11,7 @@ on:
 jobs:
   test:
     name: Visual Regression Tests
+    if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
     timeout-minutes: 80
     runs-on: ubuntu-20.04
     steps:
@@ -74,6 +77,7 @@ jobs:
 
   test-documentation:
     name: Visual Regression Documentation
+    if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Documentation snapshots updated.'))) }}
     # Python version is frozen through strategy.matrix.python-version
     # Python dependencies are frozen in the installation step
     # Note: IPython is among the frozen package
