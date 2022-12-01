@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { caretDownIcon, userIcon } from '@jupyterlab/ui-components';
+import { userIcon } from '@jupyterlab/ui-components';
 import { User } from '@jupyterlab/services';
 import { Menu, MenuBar } from '@lumino/widgets';
 import { h, VirtualElement } from '@lumino/virtualdom';
@@ -99,14 +99,6 @@ export class UserMenu extends Menu {
     this._user = options.user;
 
     this.title.label = '';
-    this.title.icon = caretDownIcon;
-    this.title.iconClass = 'jp-UserMenu-caretDownIcon';
-
-    this._user.ready
-      .then(() => {
-        this.title.label = this._user.identity!.display_name;
-      })
-      .catch(e => console.error(e));
 
     this._user.userChanged.connect(this._updateLabel, this);
   }
@@ -116,7 +108,6 @@ export class UserMenu extends Menu {
   }
 
   private _updateLabel(sender: User.IManager, user: User.IUser): void {
-    this.title.label = user.identity.display_name;
     this.update();
   }
 }
