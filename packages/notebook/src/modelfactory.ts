@@ -17,6 +17,7 @@ export class NotebookModelFactory
   constructor(options: NotebookModelFactory.IOptions) {
     this._disableDocumentWideUndoRedo =
       options.disableDocumentWideUndoRedo || false;
+    this._collaborative = options.collaborative ?? true;
   }
 
   /**
@@ -48,6 +49,13 @@ export class NotebookModelFactory
   }
 
   /**
+   * Whether the model is collaborative or not.
+   */
+  get collaborative(): boolean {
+    return this._collaborative;
+  }
+
+  /**
    * Get whether the model factory has been disposed.
    */
   get isDisposed(): boolean {
@@ -74,7 +82,7 @@ export class NotebookModelFactory
   ): INotebookModel {
     return new NotebookModel({
       languagePreference,
-      collaborationEnabled,
+      collaborationEnabled: collaborationEnabled && this.collaborative,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
     });
   }
@@ -91,6 +99,7 @@ export class NotebookModelFactory
    */
   private _disableDocumentWideUndoRedo: boolean;
   private _disposed = false;
+  private _collaborative: boolean;
 }
 
 /**
@@ -101,6 +110,11 @@ export namespace NotebookModelFactory {
    * The options used to initialize a NotebookModelFactory.
    */
   export interface IOptions {
+    /**
+     * Whether the model is collaborative or not.
+     */
+    collaborative?: boolean;
+
     /**
      * Defines if the document can be undo/redo.
      */
