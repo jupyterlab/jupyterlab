@@ -46,7 +46,7 @@ jobs:
 
       - name: Comment back on the PR
         run: |
-          hub api repos/${{ github.event.organization }}/${{ github.event.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
+          hub api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -122,6 +122,6 @@ jobs:
 
       - name: Comment back on the PR
         run: |
-          hub api repos/${{ github.event.organization }}/${{ github.event.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
+          hub api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
