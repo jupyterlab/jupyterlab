@@ -24,7 +24,7 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import { DocumentChange, ISharedDocument } from '@jupyter-notebook/ydoc';
+import { DocumentChange, ISharedDocument } from '@jupyter/ydoc';
 import {
   ITranslator,
   nullTranslator,

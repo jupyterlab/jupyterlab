@@ -1,7 +1,7 @@
 import path from 'path';
 
 const esModules = [
-  '@jupyter-notebook/ydoc',
+  '@jupyter/ydoc',
   'lib0',
   'y-protocols',
   'y-websocket',
