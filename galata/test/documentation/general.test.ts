@@ -509,7 +509,7 @@ test.describe('General', () => {
 
     await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
-      "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
+      "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello JupyterLab User</h1>'))"
     );
     await page.keyboard.press('Shift+Enter');
 

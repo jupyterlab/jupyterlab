@@ -22,7 +22,7 @@ test.describe('Notebook Tests', () => {
   test('Create Markdown cell', async ({ page }) => {
     await page.notebook.createNew();
 
-    await page.notebook.setCell(0, 'markdown', '## This is a markdown cell');
+    await page.notebook.setCell(0, 'markdown', '## This is one markdown cell');
     expect(await page.notebook.getCellCount()).toBe(1);
     expect(await page.notebook.getCellType(0)).toBe('markdown');
 
