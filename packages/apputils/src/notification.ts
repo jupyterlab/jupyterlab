@@ -233,12 +233,8 @@ export namespace Notification {
     /**
      * Notification message
      *
-     * It supports Markdown syntax.
-     *
-     * The message will be sanitized before displayed with the following rules:
-     * - Only text, list and hyperlinks HTML tags are allowed
-     *   - `img` tags are not allowed (and by extension image from Markdown syntax)
-     * - No inline styles (you can use tag such as `strong`, `em`,...)
+     * #### Notes
+     * The message will be truncated if longer than 140 characters.
      */
     message: string;
     /**
@@ -315,6 +311,9 @@ export namespace Notification {
   > {
     /**
      * Promise pending message and options
+     *
+     * #### Notes
+     * The message will be truncated if longer than 140 characters.
      */
     pending: { message: string; options?: IOptions<Pending> };
     /**
@@ -322,6 +321,9 @@ export namespace Notification {
      *
      * The message factory receives as first argument the result
      * of the promise and as second the success `options.data`.
+     *
+     * #### Notes
+     * The message will be truncated if longer than 140 characters.
      */
     success: {
       message: (result: unknown, data?: Success) => string;
@@ -332,6 +334,9 @@ export namespace Notification {
      *
      * The message factory receives as first argument the error
      * of the promise and as second the error `options.data`.
+     *
+     * #### Notes
+     * The message will be truncated if longer than 140 characters.
      */
     error: {
       message: (reason: unknown, data?: Error) => string;
@@ -385,6 +390,9 @@ export namespace Notification {
   /**
    * Helper function to emit a notification.
    *
+   * #### Notes
+   * The message will be truncated if longer than 140 characters.
+   *
    * @param message Notification message
    * @param type Notification type
    * @param options Options for the error notification
@@ -401,6 +409,9 @@ export namespace Notification {
   /**
    * Helper function to emit an error notification.
    *
+   * #### Notes
+   * The message will be truncated if longer than 140 characters.
+   *
    * @param message Notification message
    * @param options Options for the error notification
    * @returns Notification unique id
@@ -415,6 +426,9 @@ export namespace Notification {
   /**
    * Helper function to emit an info notification.
    *
+   * #### Notes
+   * The message will be truncated if longer than 140 characters.
+   *
    * @param message Notification message
    * @param options Options for the info notification
    * @returns Notification unique id
@@ -428,6 +442,9 @@ export namespace Notification {
 
   /**
    * Helper function to show an in-progress notification.
+   *
+   * #### Notes
+   * The message will be truncated if longer than 140 characters.
    *
    * @param promise Promise to wait for
    * @param options Options for the in-progress notification
@@ -472,6 +489,9 @@ export namespace Notification {
   /**
    * Helper function to emit a success notification.
    *
+   * #### Notes
+   * The message will be truncated if longer than 140 characters.
+   *
    * @param message Notification message
    * @param options Options for the success notification
    * @returns Notification unique id
@@ -491,6 +511,9 @@ export namespace Notification {
    * Once updated the notification will be moved at the begin
    * of the notification stack.
    *
+   * #### Notes
+   * The message will be truncated if longer than 140 characters.
+   *
    * @param args Update options
    * @returns Whether the update was successful or not.
    */
@@ -502,6 +525,9 @@ export namespace Notification {
 
   /**
    * Helper function to emit a warning notification.
+   *
+   * #### Notes
+   * The message will be truncated if longer than 140 characters.
    *
    * @param message Notification message
    * @param options Options for the warning notification

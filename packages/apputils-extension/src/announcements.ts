@@ -14,7 +14,7 @@ const UPDATE_API_URL = '/lab/api/update';
 /**
  * Call the announcement API
  *
- * @param queryArgs Query arguments
+ * @param endpoint Endpoint to request
  * @param init Initial values for the request
  * @returns The response body interpreted as JSON
  */
@@ -89,14 +89,23 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         | 'none';
       if (mustFetchNews === 'none') {
         const notificationId = Notification.emit(
-          trans.__('Do you want to receive official Jupyter news?') +
-            '\n\n<a href="https://jupyterlab.readthedocs.io/en/latest/privacy_policies" target="_blank" rel="noreferrer">' +
-            trans.__('Please read the privacy policy.') +
-            '</a>',
+          trans.__(
+            'Do you want to receive official Jupyter news?\nPlease read the privacy policy.'
+          ),
           'default',
           {
             autoClose: false,
             actions: [
+              {
+                label: trans.__('Open privacy policy'),
+                callback: () => {
+                  window.open(
+                    'https://jupyterlab.readthedocs.io/en/latest/privacy_policies',
+                    '_blank',
+                    'noreferrer'
+                  );
+                }
+              },
               {
                 label: trans.__('Yes'),
                 callback: () => {
@@ -136,10 +145,10 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if ((settings?.get('fetchNews').composite ?? 'false') === 'true') {
           try {
             const response = await requestAPI<{
-              news: Notification.INotification[];
+              news: (Notification.INotification & { link: [string, string] })[];
             }>(NEWS_API_URL);
 
-            for (const { message, type, options } of response.news) {
+            for (const { link, message, type, options } of response.news) {
               // @ts-expect-error data has no index
               const id = options.data!['id'] as string;
               // Filter those notifications
@@ -150,7 +159,10 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               if (!state.dismissed) {
                 options.actions = [
                   {
-                    label: trans.__('Do not show to me again'),
+                    label: trans.__('Hide'),
+                    caption: trans.__(
+                      'If pressed, this notification will never be showed again.'
+                    ),
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
@@ -162,6 +174,14 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     }
                   }
                 ];
+                if (link?.length === 2) {
+                  options.actions.push({
+                    label: link[0],
+                    callback: () => {
+                      window.open(link[1], '_blank', 'noreferrer');
+                    }
+                  });
+                }
                 if (!state.seen) {
                   options.autoClose = 5000;
                   const update: { [k: string]: INewsState } = {};
@@ -183,11 +203,13 @@ export const announcements: JupyterFrontEndPlugin<void> = {
 
         if ((settings?.get('checkForUpdates').composite as boolean) ?? true) {
           const response = await requestAPI<{
-            notification: Notification.INotification | null;
+            notification:
+              | (Notification.INotification & { link: [string, string] })
+              | null;
           }>(UPDATE_API_URL);
 
           if (response.notification) {
-            const { message, type, options } = response.notification;
+            const { link, message, type, options } = response.notification;
             // @ts-expect-error data has no index
             const id = options.data!['id'] as string;
             const state = (config.data[id] as INewsState) ?? {
@@ -217,6 +239,14 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   }
                 }
               ];
+              if (link?.length === 2) {
+                options.actions.push({
+                  label: link[0],
+                  callback: () => {
+                    window.open(link[1], '_blank', 'noreferrer');
+                  }
+                });
+              }
               if (!state.seen) {
                 options.autoClose = 5000;
                 const update: { [k: string]: INewsState } = {};

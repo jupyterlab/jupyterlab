@@ -86,32 +86,13 @@ test.describe('Toast', () => {
     );
   });
 
-  test('should display a markdown notification', async ({ page }) => {
+  test('should display as truncated text content the notification', async ({
+    page
+  }) => {
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute('apputils:notify', {
         message:
-          'This _is_ a **Markdown** [message](https://jupyter.org).\n\n- Item 1\n- Item 2',
-        options: { autoClose: false }
-      });
-    });
-
-    await page.waitForSelector('.Toastify__toast');
-
-    expect(
-      await page.locator('.Toastify__toast').screenshot({
-        // Ensure consistency
-        animations: 'disabled'
-      })
-    ).toMatchSnapshot({
-      name: `notification-markdown.png`
-    });
-  });
-
-  test('should sanitize the notification', async ({ page }) => {
-    await page.evaluate(() => {
-      return window.jupyterapp.commands.execute('apputils:notify', {
-        message:
-          '## Title\n\nThis _is_ a **Markdown** message.\n\n![logo](https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg)\n\n<p style="color:pink;">Pink text</p>\n\n- Item 1\n- Item 2\n\n<style>.jp-dummy {\n  color: pink;\n}\n</style>\n<script>alert("I\'m in");</script>',
+          '<style>.jp-dummy {\n  color: pink;\n}\n</style>\n<script>alert("I\'m in");</script>\n\n## Title\n\nThis _is_ a **Markdown** message.\n\n![logo](https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg)\n\n<p style="color:pink;">Pink text</p>\n\n- Item 1\n- Item 2',
         options: { autoClose: false }
       });
     });
@@ -121,7 +102,7 @@ test.describe('Toast', () => {
     expect(
       await page.locator('.Toastify__toast-body').innerHTML()
     ).toMatchSnapshot({
-      name: 'sanitized-notification.txt'
+      name: 'text-content-notification.txt'
     });
   });
 

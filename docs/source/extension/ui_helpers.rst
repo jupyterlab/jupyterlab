@@ -177,12 +177,8 @@ A notification is described by the following element:
      /**
       * Notification message
       *
-      * It supports Markdown syntax.
-      *
-      * The message will be sanitized before displayed with the following rules:
-      * - Only text, list and hyperlinks HTML tags are allowed
-      *   - `img` tags are not allowed (and by extension image from Markdown syntax)
-      * - No inline styles (you can use tag such as `strong`, `em`,...)
+      * ### Notes
+      * Message can only be plain text with a maximum length of 140 characters.
       */
      message: string;
      /**
