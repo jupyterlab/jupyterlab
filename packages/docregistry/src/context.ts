@@ -68,11 +68,11 @@ export class Context<
 
     this._model = this._factory.createNew(
       lang,
-      PageConfig.getOption('collaborative') === 'true'
-      //sharedModel ?? undefined
+      PageConfig.getOption('collaborative') === 'true',
+      sharedModel
     );
 
-    // TODO: remove for v4.0
+    // TODO: remove for v4.0?
     if (!sharedModel && options.docProviderFactory) {
       this._provider = options.docProviderFactory({
         path: this._path,
@@ -106,6 +106,7 @@ export class Context<
       path: this._path,
       contents: manager.contents
     });
+
     this.model.sharedModel.setState('path', this._path);
     this.model.sharedModel.changed.connect(this.onStateChanged, this);
   }
@@ -217,12 +218,6 @@ export class Context<
     this._model.dispose();
     this._provider.dispose();
     this._model.sharedModel.dispose();
-    if (this._manager.contents.close) {
-      this._manager.contents.close(this._path, {
-        type: this._factory.contentType,
-        format: this._factory.fileFormat
-      });
-    }
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -595,7 +590,8 @@ export class Context<
   private async _save(): Promise<void> {
     // if collaborative mode is enabled, saving happens in the back-end
     // after each change to the document
-    if (this._model.collaborative) {
+    const drive = this._manager.contents.driveName(this._path);
+    if (drive == '' && this._model.collaborative) {
       return;
     }
     this._saveState.emit('started');

@@ -3,8 +3,6 @@
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
-import { ISharedDocument } from '@jupyter/ydoc';
-
 import { PartialJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
@@ -137,21 +135,6 @@ export namespace Contents {
    * The options used to open a file.
    */
   export interface IOpenOptions {
-    /**
-     * The override file type for the request.
-     */
-    type: ContentType;
-
-    /**
-     * The override file format for the request.
-     */
-    format: FileFormat;
-  }
-
-  /**
-   * The options used to close a file.
-   */
-  export interface ICloseOptions {
     /**
      * The override file type for the request.
      */
@@ -322,17 +305,12 @@ export namespace Contents {
      * @param options: The options used to open the file.
      *
      * @returns A promise which resolves with the file content.
-     */
-    open?(path: string, options: Contents.IOpenOptions): ISharedDocument | void;
-
-    /**
-     * Close a file.
      *
-     * @param path: The path to the file.
-     *
-     * @returns A promise which resolves with the file content.
+     * Note: This is useful in real-time collaboration when the retrieval
+     * of the information goes through web sockets.
+     * This method can be use to stablish the connection.
      */
-    close?(path: string, options: Contents.ICloseOptions): Promise<void>;
+    open?(path: string, options: IOpenOptions): any;
 
     /**
      * Get a file or directory.
@@ -483,17 +461,12 @@ export namespace Contents {
      * @param options: The options used to open the file.
      *
      * @returns A promise which resolves with the file content.
-     */
-    open?(path: string, options: Contents.IOpenOptions): ISharedDocument | void;
-
-    /**
-     * Close a file.
      *
-     * @param path: The path to the file.
-     *
-     * @returns A promise which resolves with the file content.
+     * Note: This is useful in real-time collaboration when the retrieval
+     * of the information goes through web sockets.
+     * This method can be use to stablish the connection.
      */
-    close?(path: string, options: Contents.ICloseOptions): Promise<void>;
+    open?(path: string, options: IOpenOptions): any;
 
     /**
      * Get a file or directory.
@@ -756,30 +729,17 @@ export class ContentsManager implements Contents.IManager {
    * @param options: The options used to open the file.
    *
    * @returns A promise which resolves with the file content.
+   *
+   * Note: This is useful in real-time collaboration when the retrieval
+   * of the information goes through web sockets.
+   * This method can be use to stablish the connection.
    */
-  open(path: string, options: Contents.IOpenOptions): ISharedDocument | void {
+  open?(path: string, options: Contents.IOpenOptions): any {
     const [drive, localPath] = this._driveForPath(path);
     if (drive.open) {
       return drive.open(localPath, options);
     }
     return;
-  }
-
-  /**
-   * Close a file.
-   *
-   * @param path: The path to the file.
-   *
-   * @returns A promise which resolves with the file content.
-   */
-  close(path: string, options: Contents.ICloseOptions): Promise<void> {
-    const [drive, localPath] = this._driveForPath(path);
-    if (drive.close) {
-      return drive.close(localPath, options);
-    }
-    return Promise.reject(
-      `The current drive ${drive.name} doesn't support close.`
-    );
   }
 
   /**
@@ -1146,22 +1106,14 @@ export class Drive implements Contents.IDrive {
    * @param options: The options used to open the file.
    *
    * @returns A promise which resolves with the file content.
+   *
+   * Note: This is useful in real-time collaboration when the retrieval
+   * of the information goes through web sockets.
+   * This method can be use to stablish the connection.
    */
-  open(path: string, options: Contents.IOpenOptions): ISharedDocument | void {
-    // NO-OP
+  open?(path: string, options: Contents.IOpenOptions): any {
+    // NO OP
     return;
-  }
-
-  /**
-   * Close a file.
-   *
-   * @param path: The path to the file.
-   *
-   * @returns A promise which resolves with the file content.
-   */
-  close(path: string, options: Contents.ICloseOptions): Promise<void> {
-    // NO-OP
-    return Promise.resolve();
   }
 
   /**
