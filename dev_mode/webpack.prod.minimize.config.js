@@ -21,7 +21,6 @@ config[0] = merge(config[0], {
     minimizer: [
       new TerserPlugin({
         parallel: true,
-        sourceMap: true,
         terserOptions: {
           compress: false,
           ecma: 6,
@@ -31,8 +30,7 @@ config[0] = merge(config[0], {
             comments: false
           },
           safari10: true
-        },
-        cache: process.platform !== 'win32'
+        }
       })
     ]
   },
