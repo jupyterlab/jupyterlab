@@ -54,5 +54,28 @@ describe('setting', () => {
         expect(manager.serverSettings.baseUrl).toBe(baseUrl);
       });
     });
+
+    describe('#emit()', () => {
+        it('should emit an event', async () => {
+          const expected = `#emit() test`;
+          let received = '';
+          void (async () => {
+            for await (const emission of manager.stream) {
+              if (emission['path'] === expected) {
+                received = expected;
+                break;
+              }
+            }
+            expect(received).toEqual(expected);
+          })();
+          expect(await manager.emit({
+            // eslint-disable-next-line camelcase
+            schema_id:
+              'https://events.jupyter.org/jupyter_server/contents_service/v1',
+            data: { action: 'get', path: expected },
+            version: '1'
+          })).not.toThrow();
+        });
+    });
   });
 });
