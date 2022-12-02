@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SourceChange } from '@jupyter-notebook/ydoc';
+import { SourceChange } from '@jupyter/ydoc';
 import { CompletionHandler } from './handler';
 import {
   ICompletionContext,
@@ -144,7 +144,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
         if (insertTextSet.has(text)) {
           return;
         }
-        
+
         insertTextSet.add(text);
         mergedItems.push(item);
       });

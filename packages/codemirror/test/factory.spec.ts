@@ -6,7 +6,7 @@ import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
-import { YFile } from '@jupyter-notebook/ydoc';
+import { YFile } from '@jupyter/ydoc';
 
 import { indentSelection } from '@codemirror/commands';
 

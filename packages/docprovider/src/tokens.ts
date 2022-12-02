@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ISharedDocument } from '@jupyter-notebook/ydoc';
+import { ISharedDocument } from '@jupyter/ydoc';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 
@@ -38,7 +38,7 @@ export namespace IDocumentProviderFactory {
   /**
    * The instantiation options for a IDocumentProviderFactory.
    */
-  export interface IOptions<T extends ISharedDocument> {
+  export interface IOptions<T extends ISharedDocument = ISharedDocument> {
     /**
      * The document file path
      */

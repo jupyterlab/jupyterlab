@@ -11,7 +11,7 @@ import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { IMapChange, ISharedText } from '@jupyter-notebook/ydoc';
+import { IMapChange, ISharedText } from '@jupyter/ydoc';
 import {
   ITranslator,
   nullTranslator,
