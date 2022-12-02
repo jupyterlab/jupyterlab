@@ -55,6 +55,29 @@ describe('setting', () => {
       });
     });
 
+    describe('#stream[Symbol.asyncIterator]()', () => {
+      it('should yield an event', async () => {
+        const expected = `#stream[Symbol.asyncIterator]() test`;
+        let received = '';
+        void (async () => {
+          for await (const emission of manager.stream) {
+            if (emission['path'] === expected) {
+              received = expected;
+              break;
+            }
+          }
+          expect(received).toEqual(expected);
+        })();
+        void (await manager.emit({
+          // eslint-disable-next-line camelcase
+          schema_id:
+            'https://events.jupyter.org/jupyter_server/contents_service/v1',
+          data: { action: 'get', path: expected },
+          version: '1'
+        }));
+      });
+    });
+
     describe('#emit()', () => {
       it('should emit an event', async () => {
         const expected = `#emit() test`;
