@@ -21,7 +21,6 @@ jobs:
             js-cells,
             js-codeeditor,
             js-codemirror,
-            js-collaboration,
             js-completer,
             js-console,
             js-coreutils,
