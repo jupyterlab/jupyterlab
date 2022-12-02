@@ -3,7 +3,7 @@
 
 import { Text } from '@jupyterlab/coreutils';
 import { KernelMessage } from '@jupyterlab/services';
-import { SourceChange } from '@jupyter-notebook/ydoc';
+import { SourceChange } from '@jupyter/ydoc';
 import { JSONObject } from '@lumino/coreutils';
 import { CompletionHandler } from '../handler';
 import { ICompletionContext, ICompletionProvider } from '../tokens';

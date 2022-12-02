@@ -12,7 +12,7 @@ import {
   ISharedNotebook,
   NotebookChange,
   YNotebook
-} from '@jupyter-notebook/ydoc';
+} from '@jupyter/ydoc';
 import {
   ITranslator,
   nullTranslator,

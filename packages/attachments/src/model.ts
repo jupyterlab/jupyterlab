@@ -15,7 +15,7 @@ import {
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import { ISharedMarkdownCell, ISharedRawCell } from '@jupyter-notebook/ydoc';
+import { ISharedMarkdownCell, ISharedRawCell } from '@jupyter/ydoc';
 
 /**
  * The model for attachments.

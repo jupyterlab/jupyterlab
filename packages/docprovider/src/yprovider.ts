@@ -5,7 +5,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection, User } from '@jupyterlab/services';
-import { DocumentChange, YDocument } from '@jupyter-notebook/ydoc';
+import { DocumentChange, YDocument } from '@jupyter/ydoc';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
