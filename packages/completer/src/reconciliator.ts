@@ -62,6 +62,27 @@ export class ProviderReconciliator implements IProviderReconciliator {
     return this._mergeCompletions(combinedPromise);
   }
 
+  /**
+   * Check if completer should make request to fetch completion responses
+   * on user typing. If the provider with highest rank does not have
+   * `shouldShowContinuousHint` method, a default one will be used.
+   *
+   * @param completerIsVisible - The visible status of completer widget.
+   * @param changed - CodeMirror changed argument.
+   */
+  public shouldShowContinuousHint(
+    completerIsVisible: boolean,
+    changed: SourceChange
+  ): boolean {
+    if (this._providers[0].shouldShowContinuousHint) {
+      return this._providers[0].shouldShowContinuousHint(
+        completerIsVisible,
+        changed
+      );
+    }
+    return this._defaultShouldShowContinuousHint(completerIsVisible, changed);
+  }
+
   private _alignPrefixes(
     replies: CompletionHandler.ICompletionItemsReply[],
     minStart: number,
@@ -154,27 +175,6 @@ export class ProviderReconciliator implements IProviderReconciliator {
       end: minEnd,
       items: mergedItems
     };
-  }
-
-  /**
-   * Check if completer should make request to fetch completion responses
-   * on user typing. If the provider with highest rank does not have
-   * `shouldShowContinuousHint` method, a default one will be used.
-   *
-   * @param completerIsVisible - The visible status of completer widget.
-   * @param changed - CodeMirror changed argument.
-   */
-  public shouldShowContinuousHint(
-    completerIsVisible: boolean,
-    changed: SourceChange
-  ): boolean {
-    if (this._providers[0].shouldShowContinuousHint) {
-      return this._providers[0].shouldShowContinuousHint(
-        completerIsVisible,
-        changed
-      );
-    }
-    return this._defaultShouldShowContinuousHint(completerIsVisible, changed);
   }
 
   private _defaultShouldShowContinuousHint(
