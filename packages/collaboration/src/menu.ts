@@ -89,26 +89,12 @@ export class RendererUserMenu extends MenuBar.Renderer {
 }
 
 /**
+ * This menu does not contain anything but we keep it around in case someone uses it.
  * Custom lumino Menu for the user menu.
  */
 export class UserMenu extends Menu {
-  private _user: User.IManager;
-
   constructor(options: UserMenu.IOptions) {
     super(options);
-    this._user = options.user;
-
-    this.title.label = '';
-
-    this._user.userChanged.connect(this._updateLabel, this);
-  }
-
-  dispose() {
-    this._user.userChanged.disconnect(this._updateLabel, this);
-  }
-
-  private _updateLabel(sender: User.IManager, user: User.IUser): void {
-    this.update();
   }
 }
 
