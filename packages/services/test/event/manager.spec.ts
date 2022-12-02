@@ -58,24 +58,29 @@ describe('setting', () => {
 
     describe('#stream[Symbol.asyncIterator]()', () => {
       it('should yield an event', async () => {
+        const delegate = new PromiseDelegate<void>();
         const expected = `#stream[Symbol.asyncIterator]() test`;
         let received = '';
-        void (async () => {
+        setTimeout(async () => {
           for await (const emission of manager.stream) {
-            if (emission['path'] === expected) {
-              received = expected;
+            received = (emission.path as string) || '';
+            if (received === expected) {
               break;
             }
           }
           expect(received).toEqual(expected);
-        })();
-        void manager.emit({
-          // eslint-disable-next-line camelcase
-          schema_id:
-            'https://events.jupyter.org/jupyter_server/contents_service/v1',
-          data: { action: 'get', path: expected },
-          version: '1'
+          delegate.resolve();
         });
+        setTimeout(() => {
+          void manager.emit({
+            // eslint-disable-next-line camelcase
+            schema_id:
+              'https://events.jupyter.org/jupyter_server/contents_service/v1',
+            data: { action: 'get', path: expected },
+            version: '1'
+          });
+        }, 500);
+        return delegate.promise;
       });
     });
 
@@ -85,7 +90,8 @@ describe('setting', () => {
         const expected = `#stream.connect() test`;
         let received = '';
         manager.stream.connect((_, emission) => {
-          if ((received = emission['path']) !== expected) {
+          received = (emission.path as string) || '';
+          if (received !== expected) {
             return;
           }
           expect(received).toEqual(expected);
@@ -104,24 +110,29 @@ describe('setting', () => {
 
     describe('#emit()', () => {
       it('should emit an event', async () => {
+        const delegate = new PromiseDelegate<void>();
         const expected = `#emit() test`;
         let received = '';
-        void (async () => {
+        setTimeout(async () => {
           for await (const emission of manager.stream) {
-            if (emission['path'] === expected) {
-              received = expected;
+            received = (emission.path as string) || '';
+            if (received === expected) {
               break;
             }
           }
           expect(received).toEqual(expected);
-        })();
-        void manager.emit({
-          // eslint-disable-next-line camelcase
-          schema_id:
-            'https://events.jupyter.org/jupyter_server/contents_service/v1',
-          data: { action: 'get', path: expected },
-          version: '1'
+          delegate.resolve();
         });
+        setTimeout(() => {
+          void manager.emit({
+            // eslint-disable-next-line camelcase
+            schema_id:
+              'https://events.jupyter.org/jupyter_server/contents_service/v1',
+            data: { action: 'get', path: expected },
+            version: '1'
+          });
+        }, 500);
+        return delegate.promise;
       });
     });
   });
