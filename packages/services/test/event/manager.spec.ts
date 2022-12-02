@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterServer } from '@jupyterlab/testutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { EventManager, ServerConnection } from '../../src';
 import { init } from '../utils';
 
@@ -22,13 +23,13 @@ describe('setting', () => {
   describe('EventManager', () => {
     let manager: EventManager;
 
-    beforeAll(() => {
+    beforeEach(() => {
       manager = new EventManager({
         serverSettings: ServerConnection.makeSettings({ appUrl: 'lab' })
       });
     });
 
-    afterAll(() => {
+    afterEach(() => {
       manager.dispose();
     });
 
@@ -68,13 +69,36 @@ describe('setting', () => {
           }
           expect(received).toEqual(expected);
         })();
-        void (await manager.emit({
+        void manager.emit({
           // eslint-disable-next-line camelcase
           schema_id:
             'https://events.jupyter.org/jupyter_server/contents_service/v1',
           data: { action: 'get', path: expected },
           version: '1'
-        }));
+        });
+      });
+    });
+
+    describe('#stream.connect()', () => {
+      it('should yield an event', async () => {
+        const delegate = new PromiseDelegate<void>();
+        const expected = `#stream.connect() test`;
+        let received = '';
+        manager.stream.connect((_, emission) => {
+          if ((received = emission['path']) !== expected) {
+            return;
+          }
+          expect(received).toEqual(expected);
+          delegate.resolve();
+        });
+        void manager.emit({
+          // eslint-disable-next-line camelcase
+          schema_id:
+            'https://events.jupyter.org/jupyter_server/contents_service/v1',
+          data: { action: 'get', path: expected },
+          version: '1'
+        });
+        return delegate.promise;
       });
     });
 
@@ -91,13 +115,13 @@ describe('setting', () => {
           }
           expect(received).toEqual(expected);
         })();
-        void (await manager.emit({
+        void manager.emit({
           // eslint-disable-next-line camelcase
           schema_id:
             'https://events.jupyter.org/jupyter_server/contents_service/v1',
           data: { action: 'get', path: expected },
           version: '1'
-        }));
+        });
       });
     });
   });
