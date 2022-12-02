@@ -73,7 +73,8 @@ export class Context<
     );
 
     // TODO: remove for v4.0?
-    if (!sharedModel && options.docProviderFactory) {
+    const drive = this._manager.contents.driveName(this._path);
+    if (!sharedModel && !drive && options.docProviderFactory) {
       this._provider = options.docProviderFactory({
         path: this._path,
         contentType: this._factory.contentType,
@@ -107,7 +108,7 @@ export class Context<
       contents: manager.contents
     });
 
-    this.model.sharedModel.setState('path', this._path);
+    //this.model.sharedModel.setState('path', this._path);
     this.model.sharedModel.changed.connect(this.onStateChanged, this);
   }
 
@@ -371,17 +372,16 @@ export class Context<
    */
   restoreCheckpoint(checkpointId?: string): Promise<void> {
     const contents = this._manager.contents;
-    const path = this._path;
     return this._manager.ready.then(() => {
       if (checkpointId) {
-        return contents.restoreCheckpoint(path, checkpointId);
+        return contents.restoreCheckpoint(this._path, checkpointId);
       }
       return this.listCheckpoints().then(checkpoints => {
         if (this.isDisposed || !checkpoints.length) {
           return;
         }
         checkpointId = checkpoints[checkpoints.length - 1].id;
-        return contents.restoreCheckpoint(path, checkpointId);
+        return contents.restoreCheckpoint(this._path, checkpointId);
       });
     });
   }
@@ -428,22 +428,31 @@ export class Context<
         if (
           change.name === 'path' &&
           change.newValue &&
-          change.newValue !== this._path
+          change.newValue !== this._path &&
+          change.newValue !== change.oldValue
         ) {
           // Jupyter_ydoc re-initializes the path but it doesn't have drive
           const oldDrive = this._manager.contents.driveName(this._path);
           const newDrive = this._manager.contents.driveName(
             change.newValue ?? ''
           );
+
           const newPath =
-            oldDrive != newDrive
+            oldDrive && !newDrive
               ? `${oldDrive}:${change.newValue}`
               : change.newValue;
 
-          (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
-          this._path = newPath;
-          this.sessionContext.session?.setPath(newPath) as any;
-          this._pathChanged.emit(this.path);
+          this._path = this._manager.contents.normalize(newPath);
+          (this.urlResolver as RenderMimeRegistry.UrlResolver).path =
+            this._path;
+
+          void this.sessionContext.session?.setPath(this._path);
+          const localPath = this._manager.contents.localPath(this._path);
+          void this.sessionContext.session?.setName(
+            PathExt.basename(localPath)
+          );
+
+          this._pathChanged.emit(this._path);
         }
       });
     }
@@ -469,7 +478,6 @@ export class Context<
 
       if (oldPath !== this._path) {
         newPath = this._path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = this._path;
 
         // Update client file model from folder change
         changeModel = {
@@ -477,16 +485,12 @@ export class Context<
           path: newPath
         };
       }
-      this._path = newPath;
-      void this.sessionContext.session?.setPath(newPath);
+
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
       };
-      const localPath = this._manager.contents.localPath(newPath);
-      void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
-      this._model.sharedModel.setState('path', this._path);
     }
   }
 
@@ -498,10 +502,8 @@ export class Context<
       return;
     }
     const path = this.sessionContext.session!.path;
-    if (path !== this._path) {
-      this._path = path;
-      this._model.sharedModel.setState('path', this._path);
-    }
+    const localPath = this._manager.contents.localPath(path);
+    this._model.sharedModel.setState('path', localPath);
   }
 
   /**
@@ -522,7 +524,11 @@ export class Context<
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
-    this._model.sharedModel.setState('last_modified', newModel.last_modified);
+    this._model.sharedModel.transact(() => {
+      const localPath = this._manager.contents.localPath(newModel.path);
+      this._model.sharedModel.setState('path', localPath);
+      this._model.sharedModel.setState('last_modified', newModel.last_modified);
+    });
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -571,17 +577,13 @@ export class Context<
     const splitPath = this.localPath.split('/');
     splitPath[splitPath.length - 1] = newName;
     let newPath = PathExt.join(...splitPath);
-    const driveName = this._manager.contents.driveName(this.path);
+    const driveName = this._manager.contents.driveName(this._path);
     if (driveName) {
       newPath = `${driveName}:${newPath}`;
     }
 
-    await this._manager.contents.rename(this.path, newPath);
-    await this.sessionContext.session?.setPath(newPath);
-    await this.sessionContext.session?.setName(newName);
-
-    this._path = newPath;
-    this._model.sharedModel.setState('path', this._path);
+    await this._manager.contents.rename(this._path, newPath);
+    this._model.sharedModel.setState('path', newPath);
   }
 
   /**
@@ -591,7 +593,7 @@ export class Context<
     // if collaborative mode is enabled, saving happens in the back-end
     // after each change to the document
     const drive = this._manager.contents.driveName(this._path);
-    if (drive == '' && this._model.collaborative) {
+    if (!drive && this._model.collaborative) {
       return;
     }
     this._saveState.emit('started');
@@ -664,11 +666,10 @@ export class Context<
         ? { format: this._factory.fileFormat }
         : {})
     };
-    const path = this._path;
-    const model = this._model;
+
     return this._manager.ready
       .then(() => {
-        return this._manager.contents.get(path, opts);
+        return this._manager.contents.get(this._path, opts);
       })
       .then(contents => {
         if (this.isDisposed) {
@@ -684,7 +685,7 @@ export class Context<
         }
 
         if (contents.format === 'json') {
-          model.fromJSON(contents.content);
+          this._model.fromJSON(contents.content);
         } else {
           let content = contents.content;
           // Convert line endings if necessary, marking the file
@@ -698,9 +699,9 @@ export class Context<
           } else {
             this._lineEnding = null;
           }
-          model.fromString(content);
+          this._model.fromString(content);
         }
-        model.dirty = false;
+        this._model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();
         }
@@ -722,9 +723,8 @@ export class Context<
   private _maybeSave(
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
-    const path = this._path;
     // Make sure the file has not changed on disk.
-    const promise = this._manager.contents.get(path, { content: false });
+    const promise = this._manager.contents.get(this._path, { content: false });
     return promise.then(
       model => {
         if (this.isDisposed) {
@@ -747,11 +747,11 @@ export class Context<
         ) {
           return this._timeConflict(tClient, model, options);
         }
-        return this._manager.contents.save(path, options);
+        return this._manager.contents.save(this._path, options);
       },
       err => {
         if (err.response && err.response.status === 404) {
-          return this._manager.contents.save(path, options);
+          return this._manager.contents.save(this._path, options);
         }
         throw err;
       }
@@ -884,11 +884,8 @@ or load the version on disk (revert)?`,
    * Finish a saveAs operation given a new path.
    */
   private async _finishSaveAs(newPath: string): Promise<void> {
-    this._path = newPath;
-    await this.sessionContext.session?.setPath(newPath);
-    await this.sessionContext.session?.setName(newPath.split('/').pop()!);
     // we must rename the document before saving with the new path
-    this._model.sharedModel.setState('path', this._path);
+    this._model.sharedModel.setState('path', newPath);
     await this.save();
     await this._maybeCheckpoint(true);
   }
