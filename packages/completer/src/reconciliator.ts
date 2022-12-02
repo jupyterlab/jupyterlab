@@ -11,7 +11,7 @@ import {
 import { Completer } from './widget';
 
 /**
- * The connector which is used to fetch responses from multiple providers.
+ * The reconciliator which is used to fetch and merge responses from multiple completion providers.
  */
 export class ProviderReconciliator implements IProviderReconciliator {
   /**
@@ -144,7 +144,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
         if (insertTextSet.has(text)) {
           return;
         }
-        item.type;
+        
         insertTextSet.add(text);
         mergedItems.push(item);
       });

@@ -508,8 +508,8 @@ export namespace CompletionHandler {
   /**
    * Connector for completion items.
    *
-   * @deprecated to add new source of completions register a completion provider;
-   *   to customise how completions get merged provide a custom reconciliator.
+   * @deprecated to add a new source of completions, register a completion provider;
+   *   to customise how completions get merged, provide a custom reconciliator.
    */
   export type ICompletionItemsConnector = IDataConnector<
     CompletionHandler.ICompletionItemsReply,
