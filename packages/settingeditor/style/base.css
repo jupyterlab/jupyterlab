@@ -18,9 +18,9 @@
   min-width: 360px;
   min-height: 240px;
   background-color: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color0);
   margin-top: -1px;
   outline: none;
-  color: var(--jp-content-font-color1) !important;
 
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
@@ -93,6 +93,7 @@
 .jp-PluginList .jp-PluginList-header {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-PluginList .jp-PluginList-noResults,
@@ -106,7 +107,7 @@
   margin: 10px;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
-  color: var(--jp-content-font-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-PluginList .jp-SelectedIndicator {
@@ -215,7 +216,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   border-width: 1px;
   padding: 6px 8px;
   background: none;
-  color: var(--jp-content-font-color0);
+  color: var(--jp-ui-font-color0);
   height: inherit;
 }
 
@@ -280,6 +281,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 
 .jp-SettingsPanel .jp-FormGroup-contentItem {
   margin-left: 7px;
+  color: var(--jp-ui-font-color0);
 }
 
 .jp-SettingsPanel .jp-FormGroup-description {
@@ -458,7 +460,7 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   text-overflow: ellipsis;
   overflow-x: hidden;
   white-space: nowrap;
-  color: var(--jp-content-font-color1);
+  color: var(--jp-ui-font-color2);
   line-height: var(--jp-cell-collapser-min-height);
 }
 

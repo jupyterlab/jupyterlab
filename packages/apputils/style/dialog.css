@@ -94,7 +94,7 @@ button.jp-Dialog-close-button {
   padding-bottom: 12px;
   font-size: var(--jp-ui-font-size3);
   font-weight: 400;
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-Dialog-body {
@@ -103,6 +103,7 @@ button.jp-Dialog-close-button {
   flex: 1 1 auto;
   font-size: var(--jp-ui-font-size1);
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
   overflow: auto;
 }
 
