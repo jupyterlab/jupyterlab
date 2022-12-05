@@ -249,7 +249,7 @@ test.describe('Notification center', () => {
     for (const type of NOTIFICATION_TYPE) {
       await page.evaluate(kind => {
         return window.jupyterapp.commands.execute('apputils:notify', {
-          message: 'This is a _test_ [message](http://jupyter.org)',
+          message: 'This is a test message',
           type: kind
         });
       }, type);
