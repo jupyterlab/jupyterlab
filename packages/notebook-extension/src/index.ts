@@ -1519,7 +1519,8 @@ function activateNotebookHandler(
   const registry = app.docRegistry;
   const modelFactory = new NotebookModelFactory({
     disableDocumentWideUndoRedo:
-      factory.notebookConfig.disableDocumentWideUndoRedo
+      factory.notebookConfig.disableDocumentWideUndoRedo,
+    collaborative: true
   });
   registry.addModelFactory(modelFactory);
 
