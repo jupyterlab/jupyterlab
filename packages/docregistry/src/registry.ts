@@ -60,7 +60,7 @@ export class DocumentRegistry implements IDisposable {
     if (factory && factory.name !== 'text') {
       throw new Error('Text model factory must have the name `text`');
     }
-    this._modelFactories['text'] = factory || new TextModelFactory();
+    this._modelFactories['text'] = factory || new TextModelFactory(true);
 
     const fts =
       options.initialFileTypes ||
@@ -1206,6 +1206,11 @@ export namespace DocumentRegistry {
      * The format of the file (defaults to `"text"`).
      */
     readonly fileFormat: Contents.FileFormat;
+
+    /**
+     * Whether the model is collaborative or not.
+     */
+    readonly collaborative?: boolean;
 
     /**
      * Create a new model for a given path.
