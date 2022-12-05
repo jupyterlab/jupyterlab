@@ -211,6 +211,13 @@ export class DocumentModel
  */
 export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   /**
+   * Instantiates a TextModelFactory.
+   */
+  constructor(collaborative?: boolean) {
+    this._collaborative = collaborative ?? true;
+  }
+
+  /**
    * The name of the model type.
    *
    * #### Notes
@@ -237,6 +244,13 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    */
   get fileFormat(): Contents.FileFormat {
     return 'text';
+  }
+
+  /**
+   * Whether the model is collaborative or not.
+   */
+  get collaborative(): boolean {
+    return this._collaborative;
   }
 
   /**
@@ -269,7 +283,8 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
     isInitialized?: boolean,
     collaborationEnabled?: boolean
   ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB, collaborationEnabled);
+    const collaborative = collaborationEnabled && this.collaborative;
+    return new DocumentModel(languagePreference, modelDB, collaborative);
   }
 
   /**
@@ -281,6 +296,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   }
 
   private _isDisposed = false;
+  private _collaborative: boolean;
 }
 
 /**
