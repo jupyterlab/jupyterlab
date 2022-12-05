@@ -48,10 +48,7 @@
     "yjs": "^13.5.17"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.10",
-    "jest": "^26.4.2",
     "rimraf": "~3.0.0",
-    "ts-jest": "^26.3.0",
     "typedoc": "~0.21.2",
     "typescript": "~4.1.3"
   },
