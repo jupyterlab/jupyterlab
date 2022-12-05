@@ -109,10 +109,7 @@ const entryPoints = packages
 
 const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +
-  [
-    'packages/application-extension/src/index.tsx',
-    'examples/example.spec.ts'
-  ];
+  ['packages/application-extension/src/index.tsx', 'examples/example.spec.ts'];
 
 module.exports = {
   entryPoints,

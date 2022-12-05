@@ -9,7 +9,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -101,7 +101,7 @@ describe('setting', () => {
           version: '1'
         });
         return delegate.promise;
-      });
+      }, 20000);
     });
 
     describe('#emit()', () => {
