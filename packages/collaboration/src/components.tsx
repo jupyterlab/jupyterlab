@@ -26,7 +26,7 @@ export const UserIconComponent: React.FC<Props> = props => {
       >
         <span>{user.initials}</span>
       </div>
-      <h3>{user.displayName}</h3>
+      <h3>{user.display_name}</h3>
     </div>
   );
 };
