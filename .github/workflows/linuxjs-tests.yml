@@ -20,7 +20,6 @@ jobs:
             js-cell-toolbar,
             js-codeeditor,
             js-codemirror,
-            js-collaboration,
             js-completer,
             js-console,
             js-coreutils,

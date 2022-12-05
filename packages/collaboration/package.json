@@ -31,13 +31,8 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "test": "jest",
-    "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -53,11 +48,7 @@
     "yjs": "^13.5.17"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.6.0-alpha.4",
-    "@types/jest": "^26.0.10",
-    "jest": "^26.4.2",
     "rimraf": "~3.0.0",
-    "ts-jest": "^26.3.0",
     "typedoc": "~0.21.2",
     "typescript": "~4.1.3"
   },
