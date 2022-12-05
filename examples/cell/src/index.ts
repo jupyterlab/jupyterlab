@@ -24,8 +24,8 @@ import {
   Completer,
   CompleterModel,
   CompletionHandler,
-  ConnectorProxy,
-  KernelCompleterProvider
+  KernelCompleterProvider,
+  ProviderReconciliator
 } from '@jupyterlab/completer';
 
 import {
@@ -93,21 +93,21 @@ function main(): void {
   const completer = new Completer({ editor, model });
   const timeout = 1000;
   const provider = new KernelCompleterProvider();
-  const connector = new ConnectorProxy(
-    { widget: cellWidget, editor, session: sessionContext.session },
-    [provider],
-    timeout
-  );
-  const handler = new CompletionHandler({ completer, connector });
+  const reconciliator = new ProviderReconciliator({
+    context: { widget: cellWidget, editor, session: sessionContext.session },
+    providers: [provider],
+    timeout: timeout
+  });
+  const handler = new CompletionHandler({ completer, reconciliator });
 
   //sessionContext.session?.kernel.
   void sessionContext.ready.then(() => {
     const provider = new KernelCompleterProvider();
-    handler.connector = new ConnectorProxy(
-      { widget: cellWidget, editor, session: sessionContext.session },
-      [provider],
-      timeout
-    );
+    handler.reconciliator = new ProviderReconciliator({
+      context: { widget: cellWidget, editor, session: sessionContext.session },
+      providers: [provider],
+      timeout: timeout
+    });
   });
 
   // Set the handler's editor.

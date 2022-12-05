@@ -436,4 +436,61 @@ describe('CodeMirrorEditor', () => {
       expect(editor.methods).toEqual(expect.arrayContaining(['onKeydown']));
     });
   });
+
+  describe('#getTokenAt()', () => {
+    it('should return innermost token', () => {
+      editor.setOption('mode', 'text/x-python');
+      model.sharedModel.setSource('foo = "a"\nbar = 1');
+      expect(editor.getTokenAt(1)).toStrictEqual({
+        offset: 0,
+        type: 'VariableName',
+        value: 'foo'
+      });
+
+      expect(editor.getTokenAt(11)).toStrictEqual({
+        offset: 10,
+        type: 'VariableName',
+        value: 'bar'
+      });
+    });
+  });
+
+  describe('#getTokens()', () => {
+    it('should get a list of tokens', () => {
+      editor.setOption('mode', 'text/x-python');
+      model.sharedModel.setSource('foo = "a"\nbar = 1');
+      expect(editor.getTokens()).toStrictEqual([
+        {
+          offset: 0,
+          type: 'VariableName',
+          value: 'foo'
+        },
+        {
+          offset: 4,
+          type: 'AssignOp',
+          value: '='
+        },
+        {
+          offset: 6,
+          type: 'String',
+          value: '"a"'
+        },
+        {
+          offset: 10,
+          type: 'VariableName',
+          value: 'bar'
+        },
+        {
+          offset: 14,
+          type: 'AssignOp',
+          value: '='
+        },
+        {
+          offset: 16,
+          type: 'Number',
+          value: '1'
+        }
+      ]);
+    });
+  });
 });

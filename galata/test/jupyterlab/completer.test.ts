@@ -38,6 +38,37 @@ test.describe('Completer', () => {
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });
 
+    test('Token completions show up without running the cell when in the same cell', async ({
+      page
+    }) => {
+      await page.notebook.setCell(
+        0,
+        'code',
+        'option_1 = 1\n' +
+          'option_2 = lambda x: x\n' +
+          'option_3 = int\n' +
+          'option'
+      );
+      await page.notebook.enterCellEditingMode(0);
+      // move to the end of cell
+      await page.keyboard.press('PageDown');
+      await page.keyboard.press('End');
+
+      // we need to wait until the completer gets bound to the cell after entering it
+      await page.waitForTimeout(50);
+      await page.keyboard.press('Tab');
+      let completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(50);
+      await expect(completer).toBeHidden();
+      await page.keyboard.press('Tab');
+      completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+      const imageName = 'token-completer.png';
+      expect(await completer.screenshot()).toMatchSnapshot(imageName);
+    });
+
     test('Filter notebook completer suggestions by typing', async ({
       page
     }) => {

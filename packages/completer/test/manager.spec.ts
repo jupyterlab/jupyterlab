@@ -8,10 +8,10 @@ import {
   CompleterModel,
   CompletionHandler,
   CompletionProviderManager,
-  ConnectorProxy,
   ContextCompleterProvider,
   ICompletionContext,
-  ICompletionProvider
+  ICompletionProvider,
+  ProviderReconciliator
 } from '@jupyterlab/completer';
 import { Context } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
@@ -100,14 +100,14 @@ describe('completer/manager', () => {
       });
     });
 
-    describe('#generateConnectorProxy()', () => {
-      it('should create a ConnectorProxy', async () => {
-        const connectorProxy = await manager['generateConnectorProxy']({
+    describe('#generateReconciliator()', () => {
+      it('should create a ProviderReconciliator', async () => {
+        const reconciliator = await manager['generateReconciliator']({
           session: sessionContext.session,
           editor: null
         });
-        expect(connectorProxy).toBeInstanceOf(ConnectorProxy);
-        expect(connectorProxy['_providers'].length).toBe(1);
+        expect(reconciliator).toBeInstanceOf(ProviderReconciliator);
+        expect(reconciliator['_providers'].length).toBe(1);
       });
     });
 
