@@ -111,8 +111,7 @@ const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +
   [
     'packages/application-extension/src/index.tsx',
-    'examples/example.spec.ts',
-    'packages/*/src/svg.d.ts'
+    'examples/example.spec.ts'
   ];
 
 module.exports = {

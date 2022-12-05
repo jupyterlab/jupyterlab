@@ -4,10 +4,6 @@
 import { JupyterServer } from '@jupyterlab/testutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { EventManager, ServerConnection } from '../../src';
-import { init } from '../utils';
-
-// Initialize the fetch overrides.
-init();
 
 const server = new JupyterServer();
 
