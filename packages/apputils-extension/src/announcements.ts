@@ -100,7 +100,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 label: trans.__('Open privacy policy'),
                 callback: () => {
                   window.open(
-                    'https://jupyterlab.readthedocs.io/en/latest/privacy_policies',
+                    'https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html',
                     '_blank',
                     'noreferrer'
                   );

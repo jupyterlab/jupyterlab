@@ -805,10 +805,10 @@ namespace Private {
       <>
         <div>
           {shortenMessage.split('\n').map((part, index) => (
-            <>
+            <React.Fragment key={`part-${index}`}>
               {index > 0 ? <br /> : null}
               {part}
-            </>
+            </React.Fragment>
           ))}
         </div>
         {(actions?.length ?? 0) > 0 && (
