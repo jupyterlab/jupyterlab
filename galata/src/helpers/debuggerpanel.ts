@@ -87,6 +87,19 @@ export class DebuggerHelper {
   }
 
   /**
+   * render variable
+   */
+  async renderVariable(name: string): Promise<void> {
+    await this.page
+      .locator(`.jp-DebuggerVariables :text("${name}")`)
+      .click({ button: 'right' });
+    await this.page
+      .locator('.lm-Menu-itemLabel:text("Render Variable")')
+      .click();
+    await this.page.waitForSelector('.jp-VariableRendererPanel-renderer');
+  }
+
+  /**
    * Returns handle to callstack panel content
    */
   async getCallStackPanel(): Promise<ElementHandle<Element> | null> {
