@@ -9,7 +9,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ISharedDocument } from '@jupyter-notebook/ydoc';
+import { ISharedDocument } from '@jupyter/ydoc';
 
 import { ServerConnection } from '..';
 
@@ -131,29 +131,7 @@ export namespace Contents {
   /**
    * A contents file format.
    */
-  export type FileFormat = 'json' | 'text' | 'base64' | null;
-
-  /**
-   * The options used to close a file.
-   */
-  export interface ICloseOptions {
-    /**
-     * The override file type for the request.
-     */
-    type: ContentType;
-
-    /**
-     * The override file format for the request.
-     */
-    format: FileFormat;
-  }
-
-  /**
-   * The options used to open a file.
-   */
-  export interface IOpenOptions extends ICloseOptions {
-    model?: ISharedDocument;
-  }
+  export type FileFormat = 'json' | 'text' | 'base64' | null | string;
 
   /**
    * The options used to fetch a file.
@@ -175,6 +153,8 @@ export namespace Contents {
      * The default is `true`.
      */
     content?: boolean;
+
+    sharedDocument?: ISharedDocument;
   }
 
   /**
@@ -305,26 +285,6 @@ export namespace Contents {
      * @returns The drive name for the path, or the empty string.
      */
     driveName(path: string): string;
-
-    /**
-     * Open a file.
-     *
-     * @param path: The path to the file.
-     *
-     * @param options: The options used to open the file.
-     *
-     * @returns A promise which resolves with the file content.
-     */
-    open(path: string, options: IOpenOptions): ISharedDocument | void;
-
-    /**
-     * Close a file.
-     *
-     * @param path: The path to the file.
-     *
-     * @returns A promise which resolves with the file content.
-     */
-    close(path: string, options: Contents.ICloseOptions): Promise<void>;
 
     /**
      * Get a file or directory.
@@ -466,26 +426,6 @@ export namespace Contents {
      * A signal emitted when a file operation takes place.
      */
     fileChanged: ISignal<IDrive, IChangedArgs>;
-
-    /**
-     * Open a file.
-     *
-     * @param path: The path to the file.
-     *
-     * @param options: The options used to open the file.
-     *
-     * @returns A promise which resolves with the file content.
-     */
-    open(path: string, options: IOpenOptions): ISharedDocument | void;
-
-    /**
-     * Close a file.
-     *
-     * @param path: The path to the file.
-     *
-     * @returns A promise which resolves with the file content.
-     */
-    close(path: string, options: Contents.ICloseOptions): Promise<void>;
 
     /**
      * Get a file or directory.
@@ -738,32 +678,6 @@ export class ContentsManager implements Contents.IManager {
       return firstParts[0];
     }
     return '';
-  }
-
-  /**
-   * Open a file.
-   *
-   * @param path: The path to the file.
-   *
-   * @param options: The options used to open the file.
-   *
-   * @returns A promise which resolves with the file content.
-   */
-  open(path: string, options: Contents.IOpenOptions): ISharedDocument | void {
-    const [drive, localPath] = this._driveForPath(path);
-    return drive.open(localPath, options);
-  }
-
-  /**
-   * Close a file.
-   *
-   * @param path: The path to the file.
-   *
-   * @returns A promise which resolves with the file content.
-   */
-  close(path: string, options: Contents.ICloseOptions): Promise<void> {
-    const [drive, localPath] = this._driveForPath(path);
-    return drive.close(localPath, options);
   }
 
   /**
@@ -1123,32 +1037,6 @@ export class Drive implements Contents.IDrive {
   }
 
   /**
-   * Open a file.
-   *
-   * @param path: The path to the file.
-   *
-   * @param options: The options used to open the file.
-   *
-   * @returns A promise which resolves with the file content.
-   */
-  open(path: string, options: Contents.IOpenOptions): ISharedDocument | void {
-    // NO-OP
-    return;
-  }
-
-  /**
-   * Close a file.
-   *
-   * @param path: The path to the file.
-   *
-   * @returns A promise which resolves with the file content.
-   */
-  close(path: string, options: Contents.ICloseOptions): Promise<void> {
-    // NO-OP
-    return Promise.resolve();
-  }
-
-  /**
    * Get a file or directory.
    *
    * @param localPath: The path to the file.
@@ -1169,8 +1057,10 @@ export class Drive implements Contents.IDrive {
       if (options.type === 'notebook') {
         delete options['format'];
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { sharedDocument, ...rest } = options;
       const content = options.content ? '1' : '0';
-      const params: PartialJSONObject = { ...options, content };
+      const params: PartialJSONObject = { ...rest, content };
       url += URLExt.objectToQueryString(params);
     }
 

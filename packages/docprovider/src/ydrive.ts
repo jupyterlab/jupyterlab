@@ -1,18 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DocumentChange, ISharedDocument, YDocument } from '@jupyter/ydoc';
 import { URLExt } from '@jupyterlab/coreutils';
-
 import { Contents, Drive, User } from '@jupyterlab/services';
-
-import {
-  DocumentChange,
-  ISharedDocument,
-  YDocument,
-  YFile,
-  YNotebook
-} from '@jupyter-notebook/ydoc';
-
 import { WebSocketProvider } from './yprovider';
 
 /**
@@ -33,7 +24,24 @@ export class YDrive extends Drive {
   constructor(user: User.IManager) {
     super({ name: 'YDrive' });
     this._user = user;
-    this._providers = new Map();
+    this._providers = new Map<ISharedDocument, WebSocketProvider>();
+    this._sharedPaths = new Set<string>();
+  }
+
+  /**
+   * Delete a file.
+   *
+   * @param localPath - The path to the file.
+   *
+   * @returns A promise which resolves when the file is deleted.
+   *
+   * #### Notes
+   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
+   */
+  async delete(localPath: string): Promise<void> {
+    await super.delete(localPath);
+    // TODO should we remove the path from the sharedPath?
+    this._sharedPaths.delete(localPath);
   }
 
   /**
@@ -43,53 +51,10 @@ export class YDrive extends Drive {
     if (this.isDisposed) {
       return;
     }
+    this._sharedPaths.clear();
     this._providers.forEach(p => p.dispose());
+    this._providers.clear();
     super.dispose();
-  }
-
-  open(
-    localPath: string,
-    options: Contents.IOpenOptions
-  ): ISharedDocument | void {
-    let sharedModel: YDocument<DocumentChange>;
-    switch (options.type) {
-      case 'file':
-        sharedModel = new YFile();
-        break;
-      case 'notebook':
-        sharedModel = new YNotebook();
-        break;
-      case 'directory':
-        sharedModel = new YDocument();
-        break;
-      default:
-        sharedModel = new YFile();
-        break;
-    }
-
-    const provider = new WebSocketProvider({
-      url: URLExt.join(this.serverSettings.wsUrl, Y_DOCUMENT_PROVIDER_URL),
-      path: localPath,
-      format: options.format as string,
-      contentType: options.type,
-      collaborative: true,
-      model: sharedModel,
-      user: this._user
-    });
-
-    const key = `${options.type}:${options.format}:${localPath}`;
-    this._providers.set(key, provider);
-    return sharedModel;
-  }
-
-  async close(
-    localPath: string,
-    options: Contents.ICloseOptions
-  ): Promise<void> {
-    const key = `${options.type}:${options.format}:${localPath}`;
-    const provider = this._providers.get(key);
-    provider?.dispose();
-    this._providers.delete(key);
   }
 
   /**
@@ -107,9 +72,53 @@ export class YDrive extends Drive {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    if (options?.type == 'file' || options?.type == 'notebook') {
-      return super.get(localPath, { ...options, content: false });
+    if (options?.sharedDocument) {
+      if (
+        typeof options?.format !== 'string' ||
+        typeof options?.type !== 'string'
+      ) {
+        throw new Error(
+          'Format and content type must be provided with a shared document.'
+        );
+      }
+
+      if (!this._providers.has(options.sharedDocument)) {
+        try {
+          const provider = new WebSocketProvider({
+            url: URLExt.join(
+              this.serverSettings.wsUrl,
+              Y_DOCUMENT_PROVIDER_URL
+            ),
+            path: localPath,
+            format: options.format as string,
+            contentType: options.type,
+            collaborative: true,
+            model: options.sharedDocument as YDocument<DocumentChange>,
+            user: this._user
+          });
+
+          this._providers.set(options.sharedDocument, provider);
+          // FIXME
+          // options.sharedDocument.disposed.connect(() => {
+          //   const provider = this._providers.get(options.sharedDocument!);
+          //   if(provider){
+          //     provider.dispose();
+          //     this._providers.delete(options.sharedDocument!)
+          //   }
+          // });
+
+          options.content = false;
+          this._sharedPaths.add(localPath);
+        } catch (error) {
+          // Falling back to the contents API if opening the websocket failed
+          //  This may happen if the shared document is not a YDocument.
+          console.error(
+            `Failed to open websocket connection for ${localPath}.\n:${error}`
+          );
+        }
+      }
     }
+
     return super.get(localPath, options);
   }
 
@@ -130,7 +139,12 @@ export class YDrive extends Drive {
     oldLocalPath: string,
     newLocalPath: string
   ): Promise<Contents.IModel> {
-    return super.rename(oldLocalPath, newLocalPath);
+    const model = await super.rename(oldLocalPath, newLocalPath);
+    if (this._sharedPaths.has(oldLocalPath)) {
+      this._sharedPaths.delete(oldLocalPath);
+      this._sharedPaths.add(model.path);
+    }
+    return model;
   }
 
   /**
@@ -152,10 +166,15 @@ export class YDrive extends Drive {
     localPath: string,
     options: Partial<Contents.IModel> = {}
   ): Promise<Contents.IModel> {
-    // Save is done from the backend
-    return options as Contents.IModel;
+    if (this._sharedPaths.has(localPath)) {
+      // Save is done from the backend
+      return this.get(localPath, { ...options, content: false });
+    } else {
+      return super.save(localPath, options);
+    }
   }
 
   private _user: User.IManager;
-  private _providers: Map<string, WebSocketProvider>;
+  private _sharedPaths: Set<string>;
+  private _providers: Map<ISharedDocument, WebSocketProvider>;
 }

@@ -54,15 +54,9 @@ export class Context<
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    const sharedModel = this._manager.contents.open(this._path, {
-      type: this._factory.contentType,
-      format: this._factory.fileFormat
-    });
-
     this._model = this._factory.createNew(
       lang,
-      PageConfig.getOption('collaborative') === 'true',
-      sharedModel ?? undefined
+      PageConfig.getOption('collaborative') === 'true'
     );
 
     this._readyPromise = manager.ready.then(() => {
@@ -195,10 +189,6 @@ export class Context<
     this._isDisposed = true;
     this.sessionContext.dispose();
     this._model.dispose();
-    this._manager.contents.close(this._path, {
-      type: this._factory.contentType,
-      format: this._factory.fileFormat
-    });
     this._model.sharedModel.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -643,6 +633,11 @@ export class Context<
     };
     const path = this._path;
     const model = this._model;
+
+    if (model.collaborative) {
+      opts.sharedDocument = model.sharedModel;
+    }
+
     return this._manager.ready
       .then(() => {
         return this._manager.contents.get(path, opts);
