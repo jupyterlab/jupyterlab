@@ -13,7 +13,7 @@ export {
   NBTestUtils
 } from '@jupyterlab/notebook/lib/testutils';
 export { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
-export * as Mock from '@jupyterlab/services/lib/testutils';
+export * as Mock from './mock';
 export { FakeUserManager } from '@jupyterlab/services/lib/testutils';
 export {
   acceptDialog,
