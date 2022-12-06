@@ -113,6 +113,8 @@
 .jp-LauncherCard:focus:not(:active) {
   border: 1px solid var(--jp-brand-color1);
   box-shadow: var(--jp-elevation-z6);
+  outline: unset; /* if outline is not unset, then depending on which browser you use, the
+    border change is either hidden behind the outline or visually combined with it */
 }
 
 .jp-LauncherCard:hover {
