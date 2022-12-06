@@ -1,17 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  isFulfilled,
-  flakyIt as it,
-  JupyterServer
-} from '@jupyterlab/testutils';
+import { isFulfilled, JupyterServer } from '@jupyterlab/testutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Kernel, KernelManager, KernelMessage } from '../../src';
-import { init } from '../utils';
-
-// Initialize fetch override.
-init();
 
 const BLIP = `
 from ipykernel.comm import Comm
@@ -48,9 +40,11 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 
 const server = new JupyterServer();
 
+jest.retryTimes(3);
+
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -61,10 +55,9 @@ describe('jupyter.services - Comm', () => {
   let kernel: Kernel.IKernelConnection;
 
   beforeAll(async () => {
-    jest.setTimeout(20000);
     kernelManager = new KernelManager();
     kernel = await kernelManager.startNew({ name: 'ipython' });
-  });
+  }, 30000);
 
   afterEach(() => {
     // A no-op comm target.

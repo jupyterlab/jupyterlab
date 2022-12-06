@@ -4,16 +4,12 @@
 import { JupyterServer } from '@jupyterlab/testutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { EventManager, ServerConnection } from '../../src';
-import { init } from '../utils';
-
-// Initialize the fetch overrides.
-init();
 
 const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -105,7 +101,7 @@ describe('setting', () => {
           version: '1'
         });
         return delegate.promise;
-      });
+      }, 20000);
     });
 
     describe('#emit()', () => {

@@ -91,9 +91,8 @@ class LogKeySelector extends NotebookTools.KeySelector {
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

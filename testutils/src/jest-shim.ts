@@ -5,20 +5,28 @@
 
 // Shims originally adapted from https://github.com/nteract/nteract/blob/47f8b038ff129543e42c39395129efc433eb4e90/scripts/test-shim.js
 
-const util = require('util');
-(global as any).DragEvent = class DragEvent {};
-(global as any).TextDecoder = util.TextDecoder;
-(global as any).TextEncoder = util.TextEncoder;
+/* global globalThis */
+
+globalThis.DragEvent = class DragEvent {} as any;
+
+if (
+  typeof globalThis.TextDecoder === 'undefined' ||
+  typeof globalThis.TextDecoder === 'undefined'
+) {
+  const util = require('util');
+  globalThis.TextDecoder = util.TextDecoder;
+  globalThis.TextEncoder = util.TextEncoder;
+}
 
 const fetchMod = ((window as any).fetch = require('node-fetch')); // tslint:disable-line
 (window as any).Request = fetchMod.Request;
 (window as any).Headers = fetchMod.Headers;
 (window as any).Response = fetchMod.Response;
 
-(global as any).Image = (window as any).Image;
-(global as any).Range = function Range() {
+globalThis.Image = (window as any).Image;
+globalThis.Range = function Range() {
   /* no-op */
-};
+} as any;
 
 // HACK: Polyfill that allows CodeMirror to render in a JSDOM env.
 const createContextualFragment = (html: string) => {
@@ -27,8 +35,8 @@ const createContextualFragment = (html: string) => {
   return div.children[0]; // so hokey it's not even funny
 };
 
-(global as any).Range.prototype.createContextualFragment = (html: string) =>
-  createContextualFragment(html);
+globalThis.Range.prototype.createContextualFragment = (html: string) =>
+  createContextualFragment(html) as any;
 
 (window as any).document.createRange = function createRange() {
   return {

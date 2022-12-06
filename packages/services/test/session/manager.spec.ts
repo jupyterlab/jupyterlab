@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  flakyIt as it,
-  JupyterServer,
-  testEmission
-} from '@jupyterlab/testutils';
+import { JupyterServer, testEmission } from '@jupyterlab/testutils';
 import { UUID } from '@lumino/coreutils';
 import {
   KernelManager,
@@ -31,9 +27,11 @@ async function startNew(
 
 const server = new JupyterServer();
 
+jest.retryTimes(3);
+
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

@@ -11,7 +11,6 @@ import { KernelManager } from '@jupyterlab/services';
 import {
   createSessionContext,
   defaultRenderMime,
-  flakyIt as it,
   JupyterServer,
   NBTestUtils
 } from '@jupyterlab/testutils';
@@ -45,10 +44,11 @@ class LogOutputArea extends OutputArea {
 
 const server = new JupyterServer();
 
+jest.retryTimes(3);
+
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

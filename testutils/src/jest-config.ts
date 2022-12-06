@@ -17,13 +17,21 @@ const esModules = [
 
 module.exports = function (baseDir: string) {
   return {
-    preset: 'ts-jest/presets/js-with-babel',
+    testEnvironment: 'jsdom',
     moduleNameMapper: {
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
       '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
     },
     transform: {
-      '\\.svg$': 'jest-raw-loader'
+      '\\.svg$': '@jupyterlab/testutils/lib/jest-raw-loader.js',
+      // Extracted from https://github.com/kulshekhar/ts-jest/blob/v29.0.3/presets/index.js
+      '^.+\\.tsx?$': [
+        'ts-jest/legacy',
+        {
+          tsconfig: `./tsconfig.test.json`
+        }
+      ],
+      '^.+\\.jsx?$': 'babel-jest'
     },
     testTimeout: 10000,
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
@@ -39,14 +47,9 @@ module.exports = function (baseDir: string) {
       'cjs'
     ],
     transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
-    reporters: ['default', 'jest-junit', 'jest-summary-reporter'],
+    reporters: ['default', 'jest-junit', 'github-actions'],
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),
-    testRegex: '/test/.*.spec.ts[x]?$',
-    globals: {
-      'ts-jest': {
-        tsconfig: `./tsconfig.test.json`
-      }
-    }
+    testRegex: '/test/.*.spec.ts[x]?$'
   };
 };
