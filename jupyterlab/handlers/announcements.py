@@ -105,7 +105,7 @@ class CheckForUpdate(CheckForUpdateABC):
                 trans = translator.load("jupyterlab")
                 return (
                     trans.__(f"A newer version ({last_version}) of JupyterLab is available."),
-                    (trans.__("See changelog"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
+                    (trans.__("Open changelog"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
                 )
             else:
                 return None
@@ -239,7 +239,7 @@ class NewsHandler(APIHandler):
                         * 1000,
                         type="info",
                         link=(
-                            trans.__("See full post"),
+                            trans.__("Open full post"),
                             node.find("atom:link", xml_namespaces).get("href"),
                         ),
                         options={

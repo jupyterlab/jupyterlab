@@ -29,7 +29,7 @@ async def test_NewsHandler_get_success(mock_client, labserverapp, jp_fetch):
             "modifiedAt": 1667397600000.0,
             "type": "info",
             "link": [
-                "See full post",
+                "Open full post",
                 "https://jupyterlab.github.io/assets/posts/2022/11/02/demo.html",
             ],
             "options": {
@@ -62,7 +62,7 @@ async def test_CheckForUpdateHandler_get_pypi_success(mock_client, labserverapp,
     payload = json.loads(response.body)
     assert payload["notification"]["message"] == message
     assert payload["notification"]["link"] == [
-        "See changelog",
+        "Open changelog",
         "https://github.com/jupyterlab/jupyterlab/releases/tag/v1000.0.0",
     ]
     assert payload["notification"]["options"] == {
