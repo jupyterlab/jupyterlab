@@ -162,7 +162,6 @@ const browser: JupyterFrontEndPlugin<void> = {
     treePathUpdater: ITreePathUpdater | null,
     commandPalette: ICommandPalette | null
   ): Promise<void> => {
-    const trans = translator.load('jupyterlab');
     const browser = factory.defaultBrowser;
 
     // Let the application restorer track the primary file browser (that is
@@ -182,24 +181,6 @@ const browser: JupyterFrontEndPlugin<void> = {
     }
 
     addCommands(app, factory, translator, settingRegistry, commandPalette);
-
-    // Show the current file browser shortcut in its title.
-    const updateBrowserTitle = () => {
-      const binding = find(
-        app.commands.keyBindings,
-        b => b.command === CommandIDs.toggleBrowser
-      );
-      if (binding) {
-        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
-        browser.title.caption = trans.__('File Browser (%1)', ks);
-      } else {
-        browser.title.caption = trans.__('File Browser');
-      }
-    };
-    updateBrowserTitle();
-    app.commands.keyBindingChanged.connect(() => {
-      updateBrowserTitle();
-    });
 
     return void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
@@ -386,6 +367,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     ILabShell,
     IFileBrowserCommands
   ],
+  optional: [ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
@@ -394,7 +376,10 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     settings: ISettingRegistry,
     toolbarRegistry: IToolbarWidgetRegistry,
     translator: ITranslator,
-    labShell: ILabShell
+    labShell: ILabShell,
+    // Wait until file browser commands are ready before activating file browser widget
+    fileBrowserCommands: null,
+    commandPalette: ICommandPalette | null
   ): void => {
     const { commands } = app;
     const { defaultBrowser: browser, tracker } = factory;
@@ -404,6 +389,24 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     browser.node.setAttribute('role', 'region');
     browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
     browser.title.icon = folderIcon;
+
+    // Show the current file browser shortcut in its title.
+    const updateBrowserTitle = () => {
+      const binding = find(
+        app.commands.keyBindings,
+        b => b.command === CommandIDs.toggleBrowser
+      );
+      if (binding) {
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
+        browser.title.caption = trans.__('File Browser (%1)', ks);
+      } else {
+        browser.title.caption = trans.__('File Browser');
+      }
+    };
+    updateBrowserTitle();
+    app.commands.keyBindingChanged.connect(() => {
+      updateBrowserTitle();
+    });
 
     // Toolbar
     toolbarRegistry.addFactory(
@@ -425,6 +428,17 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     );
 
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
+
+    commands.addCommand(CommandIDs.toggleBrowser, {
+      label: trans.__('File Browser'),
+      execute: () => {
+        if (browser.isHidden) {
+          return commands.execute(CommandIDs.showBrowser, void 0);
+        }
+
+        return commands.execute(CommandIDs.hideBrowser, void 0);
+      }
+    });
 
     commands.addCommand(CommandIDs.showBrowser, {
       label: trans.__('Open the file browser for the provided `path`.'),
@@ -463,6 +477,27 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    commands.addCommand(CommandIDs.toggleNavigateToCurrentDirectory, {
+      label: trans.__('Show Active File in File Browser'),
+      isToggled: () => browser.navigateToCurrentDirectory,
+      execute: () => {
+        const value = !browser.navigateToCurrentDirectory;
+        const key = 'navigateToCurrentDirectory';
+        return settings
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set navigateToCurrentDirectory setting`);
+          });
+      }
+    });
+
+    if (commandPalette) {
+      commandPalette.addItem({
+        command: CommandIDs.toggleNavigateToCurrentDirectory,
+        category: trans.__('File Operations')
+      });
+    }
 
     // If the layout is a fresh session without saved data and not in single document
     // mode, open file browser.
@@ -1113,33 +1148,6 @@ function addCommands(
     label: trans.__('Shut Down Kernel')
   });
 
-  commands.addCommand(CommandIDs.toggleBrowser, {
-    label: trans.__('File Browser'),
-    execute: () => {
-      if (browser.isHidden) {
-        return commands.execute(CommandIDs.showBrowser, void 0);
-      }
-
-      return commands.execute(CommandIDs.hideBrowser, void 0);
-    }
-  });
-
-  if (settingRegistry) {
-    commands.addCommand(CommandIDs.toggleNavigateToCurrentDirectory, {
-      label: trans.__('Show Active File in File Browser'),
-      isToggled: () => browser.navigateToCurrentDirectory,
-      execute: () => {
-        const value = !browser.navigateToCurrentDirectory;
-        const key = 'navigateToCurrentDirectory';
-        return settingRegistry
-          .set(FILE_BROWSER_PLUGIN_ID, key, value)
-          .catch((reason: Error) => {
-            console.error(`Failed to set navigateToCurrentDirectory setting`);
-          });
-      }
-    });
-  }
-
   commands.addCommand(CommandIDs.toggleLastModified, {
     label: trans.__('Show Last Modified Column'),
     isToggled: () => browser.showLastModifiedColumn,
@@ -1193,13 +1201,6 @@ function addCommands(
     label: trans.__('Search on File Names'),
     execute: () => alert('search')
   });
-
-  if (commandPalette) {
-    commandPalette.addItem({
-      command: CommandIDs.toggleNavigateToCurrentDirectory,
-      category: trans.__('File Operations')
-    });
-  }
 }
 
 /**
