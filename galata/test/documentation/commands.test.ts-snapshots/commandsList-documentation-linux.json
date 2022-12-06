@@ -415,8 +415,8 @@
   },
   {
     "id": "debugger:continue",
-    "label": "Continue",
-    "caption": "Continue",
+    "label": "Pause",
+    "caption": "Pause",
     "shortcuts": [
       "F9"
     ]
@@ -442,7 +442,7 @@
     ]
   },
   {
-    "id": "debugger:pause",
+    "id": "debugger:pause-on-exceptions",
     "label": "Enable / Disable pausing on exceptions",
     "caption": "Enable / Disable pausing on exceptions",
     "shortcuts": []
