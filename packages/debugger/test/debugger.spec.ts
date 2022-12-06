@@ -16,7 +16,7 @@ import {
   createSession,
   JupyterServer,
   signalToPromise
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 
 import { CommandRegistry } from '@lumino/commands';
 

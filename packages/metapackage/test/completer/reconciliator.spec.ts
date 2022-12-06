@@ -12,7 +12,7 @@ import {
 import { Context } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
-import { NBTestUtils } from '@jupyterlab/testutils';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 
 function contextFactory(): Context<INotebookModel> {
   const serviceManager = new ServiceManager({ standby: 'never' });

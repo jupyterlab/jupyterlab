@@ -79,7 +79,8 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.16",
+    "@jupyterlab/testing": "^4.0.0-alpha.16",
+    "@types/jest": "^29.2.0",
     "canvas": "^2.9.1",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",

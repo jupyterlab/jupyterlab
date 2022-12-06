@@ -7,7 +7,7 @@ import {
   createSession,
   JupyterServer,
   signalToPromise
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 
 import { JSONExt, UUID } from '@lumino/coreutils';
 
