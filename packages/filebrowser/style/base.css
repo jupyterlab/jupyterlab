@@ -128,7 +128,8 @@
 }
 
 .jp-DirListing:focus-visible {
-  border: 1px solid var(--jp-brand-color1);
+  outline: 1px solid var(--jp-brand-color1);
+  outline-offset: -2px;
 }
 
 .jp-DirListing-header {

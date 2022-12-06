@@ -17,7 +17,8 @@ button {
 }
 
 button:focus-visible {
-  border: 1px solid var(--md-blue-900);
+  outline: 1px solid var(--md-blue-900);
+  outline-offset: -1px;
 }
 
 button.jp-mod-styled.jp-mod-accept {
@@ -35,7 +36,7 @@ button.jp-mod-styled.jp-mod-accept:active {
 }
 
 button.jp-mod-styled.jp-mod-accept:focus-visible {
-  border: 1px solid var(--md-blue-900);
+  outline: 1px solid var(--md-blue-900);
 }
 
 button.jp-mod-styled.jp-mod-reject {
@@ -53,7 +54,7 @@ button.jp-mod-styled.jp-mod-reject:active {
 }
 
 button.jp-mod-styled.jp-mod-reject:focus-visible {
-  border: 1px solid var(--md-grey-800);
+  outline: 1px solid var(--md-grey-800);
 }
 
 button.jp-mod-styled.jp-mod-warn {
@@ -71,7 +72,7 @@ button.jp-mod-styled.jp-mod-warn:active {
 }
 
 button.jp-mod-styled.jp-mod-warn:focus-visible {
-  border: 1px solid var(--md-red-900);
+  outline: 1px solid var(--md-red-900);
 }
 
 .jp-Button-flat {
