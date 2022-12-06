@@ -100,6 +100,10 @@ test.describe('General', () => {
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
+    await page.evaluate(() => {
+      (document.activeElement as HTMLElement).blur();
+    });
+
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('interface_left.png');
