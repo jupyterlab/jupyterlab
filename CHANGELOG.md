@@ -17,11 +17,11 @@
 - Add lumino with support for plugin deactivation [#13541](https://github.com/jupyterlab/jupyterlab/pull/13541) ([@fcollonval](https://github.com/fcollonval))
 - Sets whether the model is collaborative or not when registering its factory [#13526](https://github.com/jupyterlab/jupyterlab/pull/13526) ([@hbcarlos](https://github.com/hbcarlos))
 - RTC: Move user name to user panel [#13517](https://github.com/jupyterlab/jupyterlab/pull/13517) ([@martinRenou](https://github.com/martinRenou))
-- Backport #13492 on branch 3.6.x (jupyter_server_ydoc>=0.6.0,\<0.7.0) [#13499](https://github.com/jupyterlab/jupyterlab/pull/13499) ([@fcollonval](https://github.com/fcollonval))
-- Backport #13433 (Allows to pause the execution during debug) [#13494](https://github.com/jupyterlab/jupyterlab/pull/13494) ([@brichet](https://github.com/brichet))
-- Backport #13267 on branch 3.6.x (Ask confirmation when closing a document) [#13489](https://github.com/jupyterlab/jupyterlab/pull/13489) ([@fcollonval](https://github.com/fcollonval))
-- Backport #12667 on branch 3.6.x (Add events service) [#13465](https://github.com/jupyterlab/jupyterlab/pull/13465) ([@fcollonval](https://github.com/fcollonval))
-- Backport #13365 on branch 3.6.x (Add announcements) [#13444](https://github.com/jupyterlab/jupyterlab/pull/13444) ([@fcollonval](https://github.com/fcollonval))
+- jupyter_server_ydoc>=0.6.0,\<0.7.0 [#13499](https://github.com/jupyterlab/jupyterlab/pull/13499) ([@fcollonval](https://github.com/fcollonval))
+- Allows to pause the execution during debug [#13494](https://github.com/jupyterlab/jupyterlab/pull/13494) ([@brichet](https://github.com/brichet))
+- Ask confirmation when closing a document [#13489](https://github.com/jupyterlab/jupyterlab/pull/13489) ([@fcollonval](https://github.com/fcollonval))
+- Add events service [#13465](https://github.com/jupyterlab/jupyterlab/pull/13465) ([@fcollonval](https://github.com/fcollonval))
+- Add announcements [#13444](https://github.com/jupyterlab/jupyterlab/pull/13444) ([@fcollonval](https://github.com/fcollonval))
 
 ### Bugs fixed
 
@@ -29,7 +29,7 @@
 - Default `IDocumentProviderFactory.IOptions` generic to ISharedDocument [#13490](https://github.com/jupyterlab/jupyterlab/pull/13490) ([@jtpio](https://github.com/jtpio))
 - Use same key for saving user info in local store [#13482](https://github.com/jupyterlab/jupyterlab/pull/13482) ([@hbcarlos](https://github.com/hbcarlos))
 - Set fallback values for icons colors. [#13468](https://github.com/jupyterlab/jupyterlab/pull/13468) ([@HaudinFlorence](https://github.com/HaudinFlorence))
-- Backport #13458 on branch 3.6.x (Enable document model specific collaboration) [#13480](https://github.com/jupyterlab/jupyterlab/pull/13480) ([@fcollonval](https://github.com/fcollonval))
+- Enable document model specific collaboration [#13480](https://github.com/jupyterlab/jupyterlab/pull/13480) ([@fcollonval](https://github.com/fcollonval))
 - Share attachments [#13450](https://github.com/jupyterlab/jupyterlab/pull/13450) ([@hbcarlos](https://github.com/hbcarlos))
 
 ### Maintenance and upkeep improvements
@@ -37,16 +37,16 @@
 - Bump sanitize-html to 2.7.3 [#13509](https://github.com/jupyterlab/jupyterlab/pull/13509) ([@fcollonval](https://github.com/fcollonval))
 - Depend on `@jupyter/ydoc` instead of `@jupyter-notebook/ydoc` [#13506](https://github.com/jupyterlab/jupyterlab/pull/13506) ([@jtpio](https://github.com/jtpio))
 - Fix Python test dependencies [#13508](https://github.com/jupyterlab/jupyterlab/pull/13508) ([@fcollonval](https://github.com/fcollonval))
-- Backport #13478 on branch 3.6.x (Require jupyter-server-ydoc >=0.5.1) [#13479](https://github.com/jupyterlab/jupyterlab/pull/13479) ([@fcollonval](https://github.com/fcollonval))
+- Require jupyter-server-ydoc >=0.5.1 [#13479](https://github.com/jupyterlab/jupyterlab/pull/13479) ([@fcollonval](https://github.com/fcollonval))
 
 ### Documentation improvements
 
 - Forbid using RTC mode without Jupyter Server v2. [#13472](https://github.com/jupyterlab/jupyterlab/pull/13472) ([@fcollonval](https://github.com/fcollonval))
-- Backport #13365 on branch 3.6.x (Add announcements) [#13444](https://github.com/jupyterlab/jupyterlab/pull/13444) ([@fcollonval](https://github.com/fcollonval))
+- Add announcements [#13444](https://github.com/jupyterlab/jupyterlab/pull/13444) ([@fcollonval](https://github.com/fcollonval))
 
 ### API and Breaking Changes
 
-- Backport #13458 on branch 3.6.x (Enable document model specific collaboration) [#13480](https://github.com/jupyterlab/jupyterlab/pull/13480) ([@fcollonval](https://github.com/fcollonval))
+- Enable document model specific collaboration [#13480](https://github.com/jupyterlab/jupyterlab/pull/13480) ([@fcollonval](https://github.com/fcollonval))
 
 ### Contributors to this release
 
