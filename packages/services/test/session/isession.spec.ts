@@ -29,25 +29,18 @@ async function startNew(): Promise<Session.ISessionConnection> {
   return session;
 }
 
-const server = new JupyterServer();
-
-jest.retryTimes(3);
-
-beforeAll(async () => {
-  await server.start();
-  kernelManager = new KernelManager();
-  sessionManager = new SessionManager({ kernelManager });
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('session', () => {
   let session: Session.ISessionConnection;
   let defaultSession: Session.ISessionConnection;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
 
   beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+    kernelManager = new KernelManager();
+    sessionManager = new SessionManager({ kernelManager });
     defaultSession = await startNew();
   }, 30000);
 
@@ -59,6 +52,7 @@ describe('session', () => {
 
   afterAll(async () => {
     await defaultSession.shutdown();
+    await server.shutdown();
   });
 
   describe('Session.DefaultSession', () => {

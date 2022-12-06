@@ -5,17 +5,18 @@ import { JupyterServer } from '@jupyterlab/testutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { EventManager, ServerConnection } from '../../src';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('setting', () => {
+  let server: JupyterServer;
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
+  });
+
   describe('EventManager', () => {
     let manager: EventManager;
 
@@ -101,7 +102,7 @@ describe('setting', () => {
           version: '1'
         });
         return delegate.promise;
-      }, 20000);
+      }, 30000);
     });
 
     describe('#emit()', () => {

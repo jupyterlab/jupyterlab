@@ -6,24 +6,21 @@ import { UUID } from '@lumino/coreutils';
 import { Session, SessionAPI } from '../../src';
 import { createSessionModel, getRequestHandler, makeSettings } from '../utils';
 
-const server = new JupyterServer();
-
-jest.retryTimes(3);
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('session', () => {
   let session: Session.IModel;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
 
   beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
     const sessions = await SessionAPI.listRunning();
     await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
   });
 
   afterEach(async () => {

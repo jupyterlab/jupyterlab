@@ -11,24 +11,24 @@ import {
   PYTHON_SPEC
 } from '../utils';
 
-jest.retryTimes(3);
-
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('kernel', () => {
   let tester: KernelTester;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
+  });
 
   afterEach(async () => {
     if (tester) {

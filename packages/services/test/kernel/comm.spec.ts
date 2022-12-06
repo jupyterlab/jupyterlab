@@ -38,19 +38,20 @@ def target_func(comm, msg):
 get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
-const server = new JupyterServer();
-
-jest.retryTimes(3);
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('jupyter.services - Comm', () => {
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
+  });
+
   let kernelManager: KernelManager;
   let kernel: Kernel.IKernelConnection;
 

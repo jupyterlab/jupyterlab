@@ -42,19 +42,20 @@ class LogOutputArea extends OutputArea {
   }
 }
 
-const server = new JupyterServer();
-
-jest.retryTimes(3);
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('outputarea/widget', () => {
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
+  });
+
   let widget: LogOutputArea;
   let model: OutputAreaModel;
 
