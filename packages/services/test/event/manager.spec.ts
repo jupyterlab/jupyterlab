@@ -82,6 +82,8 @@ describe('setting', () => {
     });
 
     describe('#stream.connect()', () => {
+      jest.setTimeout(30000);
+
       it('should yield an event', async () => {
         const delegate = new PromiseDelegate<void>();
         const expected = `#stream.connect() test`;
@@ -102,7 +104,7 @@ describe('setting', () => {
           version: '1'
         });
         return delegate.promise;
-      }, 30000);
+      });
     });
 
     describe('#emit()', () => {
