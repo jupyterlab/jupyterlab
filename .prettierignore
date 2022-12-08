@@ -6,6 +6,7 @@
 **/static
 **/.ipynb_checkpoints
 tests/**/coverage
+CHANGELOG.md
 
 .eggs
 dev_mode/index.js
