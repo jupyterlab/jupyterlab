@@ -201,6 +201,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                     minimize=self.minimize,
                 )
             except Exception as e:
+                self.log.error(build_failure_msg)
                 raise e
 
 
@@ -296,7 +297,9 @@ class LabPathApp(JupyterApp):
     """
 
     def start(self):
-        pass
+        self.log.info("Application directory:   %s" % get_app_dir())
+        self.log.info("User Settings directory: %s" % get_user_settings_dir())
+        self.log.info("Workspaces directory: %s" % get_workspaces_dir())
 
 
 class LabWorkspaceExportApp(WorkspaceExportApp):
@@ -348,6 +351,7 @@ class LabWorkspaceApp(JupyterApp):
     def start(self):
         try:
             super().start()
+            self.log.error("One of `export`, `import` or `list` must be specified.")
             self.exit(1)
         except NoStart:
             pass
