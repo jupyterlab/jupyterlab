@@ -176,13 +176,23 @@ export async function main() {
   });
 
   let serviceManagerPlugin;
+  let serviceManagerIDs = [];
   register = register.filter(plugin => {
     if (plugin.provides === ServiceManager.IManager) {
-      serviceManagerPlugin = plugin;
+      if (!serviceManagerPlugin) { // Use first match.
+        serviceManagerPlugin = plugin;
+      }
+      serviceManagerIDs.push(plugin.id);
       return false;
     }
     return true;
   });
+  if (serviceManagerIDs.length > 1) {
+    let warning = 'Multiple service manager plugins were provided, ignoring:';
+    serviceManagerIDs.shift();
+    console.warn(`${warning} ${serviceManagerIDs.join(', ')}`);
+  }
+
   const lab = new JupyterLab({
     mimeExtensions,
     disabled: {
