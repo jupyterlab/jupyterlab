@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
@@ -21,11 +20,7 @@ here = osp.abspath(osp.dirname(__file__))
 
 
 def header(path):
-    test_name = osp.basename(path)
-    print(
-        "\n".join(("\n", "*" * 40, "Starting %s test in %s" % (test_name, path), "*" * 40)),
-        flush=True,
-    )
+    _ = osp.basename(path)
 
 
 def main():
@@ -39,8 +34,6 @@ def main():
     paths += [i for i in glob.glob("%s/*" % services_dir)]
     if args.testPath:
         paths = [p for p in paths if args.testPath in p]
-
-    print("Testing %s" % paths)
 
     count = 0
     for path in sorted(paths):
@@ -56,8 +49,6 @@ def main():
                 runner = osp.join(here, "example_check.py")
                 subprocess.check_call([sys.executable, runner, path], cwd=cwd)
                 count += 1
-
-    print("\n\n%s tests complete!" % count)
 
 
 if __name__ == "__main__":

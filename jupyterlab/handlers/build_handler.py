@@ -11,10 +11,10 @@ from jupyter_server.extension.handler import ExtensionHandlerMixin
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
-from ..commands import AppOptions, _ensure_options, build, build_check, clean
+from jupyterlab.commands import AppOptions, _ensure_options, build, build_check, clean
 
 
-class Builder(object):
+class Builder:
     building = False
     executor = ThreadPoolExecutor(max_workers=5)
     canceled = False
@@ -121,7 +121,7 @@ class Builder(object):
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
     def initialize(self, builder=None, name=None):
-        super(BuildHandler, self).initialize(name=name)
+        super().initialize(name=name)
         self.builder = builder
 
     @web.authenticated
@@ -137,7 +137,7 @@ class BuildHandler(ExtensionHandlerMixin, APIHandler):
         try:
             yield self.builder.cancel()
         except Exception as e:
-            raise web.HTTPError(500, str(e))
+            raise web.HTTPError(500, str(e)) from None
         self.set_status(204)
 
     @web.authenticated
@@ -147,7 +147,7 @@ class BuildHandler(ExtensionHandlerMixin, APIHandler):
         try:
             yield self.builder.build()
         except Exception as e:
-            raise web.HTTPError(500, str(e))
+            raise web.HTTPError(500, str(e)) from None
 
         if self.builder.canceled:
             raise web.HTTPError(400, "Build canceled")

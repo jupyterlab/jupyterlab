@@ -1,4 +1,3 @@
-# coding: utf-8
 """Test installation of JupyterLab extensions"""
 
 # Copyright (c) Jupyter Development Team.
@@ -261,7 +260,7 @@ class TestExtension(AppHandlerTest):
         You should be able to install different versions of the same extension with different
         pinned names and uninstall them with those names.
         """
-        NAMES = ["test-1", "test-2"]
+        NAMES = ["test-1", "test-2"]  # noqa
         assert install_extension(self.pinned_packages[0], pin=NAMES[0])
         assert install_extension(self.pinned_packages[1], pin=NAMES[1])
 
@@ -698,7 +697,7 @@ class TestExtension(AppHandlerTest):
             )
             return info
 
-        class Success(Exception):
+        class Success(Exception):  # noqa
             pass
 
         def _mock_install(self, name, *args, **kwargs):

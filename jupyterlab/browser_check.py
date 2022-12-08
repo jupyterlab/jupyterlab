@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
@@ -44,7 +43,7 @@ class LogErrorHandler(logging.Handler):
         super().__init__(level=logging.ERROR)
         self.errored = False
 
-    def filter(self, record):
+    def filter(self, record):  # noqa
         # Handle known StreamClosedError from Tornado
         # These occur when we forcibly close Websockets or
         # browser connections during the test.
@@ -58,7 +57,6 @@ class LogErrorHandler(logging.Handler):
         return super().filter(record)
 
     def emit(self, record):
-        print(record.msg, file=sys.stderr)
         self.errored = True
 
 

@@ -6,10 +6,7 @@ import os
 import os.path as osp
 
 from jupyter_server.base.handlers import JupyterHandler
-from jupyter_server.extension.handler import (
-    ExtensionHandlerJinjaMixin,
-    ExtensionHandlerMixin,
-)
+from jupyter_server.extension.handler import ExtensionHandlerJinjaMixin, ExtensionHandlerMixin
 from jupyter_server.utils import url_path_join as ujoin
 from jupyterlab_server import LabServerApp
 

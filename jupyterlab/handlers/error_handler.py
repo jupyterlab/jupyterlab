@@ -1,4 +1,3 @@
-# coding: utf-8
 """An error handler for JupyterLab."""
 
 # Copyright (c) Jupyter Development Team.
@@ -24,7 +23,7 @@ TEMPLATE = """
 
 class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
     def initialize(self, messages=None, name=None):
-        super(ErrorHandler, self).initialize(name=name)
+        super().initialize(name=name)
         self.messages = messages
 
     @web.authenticated

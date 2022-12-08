@@ -1,4 +1,3 @@
-# coding: utf-8
 """Jupyter LabExtension Entry Points."""
 
 # Copyright (c) Jupyter Development Team.
@@ -29,11 +28,7 @@ from .commands import (
     unlink_package,
     update_extension,
 )
-from .federated_labextensions import (
-    build_labextension,
-    develop_labextension_py,
-    watch_labextension,
-)
+from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
 from .labapp import LabApp
 
 flags = dict(base_flags)
@@ -244,7 +239,7 @@ class DevelopLabExtensionApp(BaseExtensionApp):
     )
 
     def run_task(self):
-        "Add config for this labextension"
+        """Add config for this labextension"""
         self.extra_args = self.extra_args or [os.getcwd()]
         for arg in self.extra_args:
             develop_labextension_py(
@@ -328,7 +323,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
     description = "Update labextension(s)"
     flags = update_flags
 
-    all = Bool(False, config=True, help="Whether to update all extensions")
+    all = Bool(False, config=True, help="Whether to update all extensions")  # noqa
 
     def run_task(self):
         self.deprecation_warning(
@@ -389,7 +384,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
     flags = uninstall_flags
 
-    all = Bool(False, config=True, help="Whether to uninstall all extensions")
+    all = Bool(False, config=True, help="Whether to uninstall all extensions")  # noqa
 
     def run_task(self):
         self.deprecation_warning(
@@ -529,7 +524,7 @@ class LabExtensionApp(JupyterApp):
 
     def start(self):
         """Perform the App's functions as configured"""
-        super(LabExtensionApp, self).start()
+        super().start()
 
         # The above should have called a subcommand and raised NoStart; if we
         # get here, it didn't, so we should self.log.info a message.

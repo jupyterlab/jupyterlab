@@ -1,4 +1,3 @@
-# coding: utf-8
 """A Jupyter-aware wrapper for the yarn package manager"""
 
 import os

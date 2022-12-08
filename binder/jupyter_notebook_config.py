@@ -1,5 +1,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+import logging
+from typing import Any
+
+c: Any
 
 common = [
     "--no-browser",
@@ -40,7 +44,5 @@ c.ServerProxy.servers = {
         "absolute_url": True,
     },
 }
-
-import logging
 
 c.ServerApp.log_level = logging.DEBUG
