@@ -25,6 +25,27 @@ export type JupyterFrontEndPlugin<
   V extends string = 'desktop' | 'mobile'
 > = IPlugin<JupyterFrontEnd<U, V>, T>;
 
+export type ServiceManagerPlugin = {
+  /**
+   * The ID of the service manager plugin.
+   */
+  id: string;
+
+  /**
+   * The service manager provided by the plugin.
+   */
+  provides: Token<ServiceManager.IManager>;
+
+  /**
+   * A function invoked to activate the service manager plugin.
+   *
+   * @param app - The application which owns the plugin.
+   *
+   * @returns The provided service, or a promise to the service.
+   */
+  activate: (app: Application) => ServiceManager.IManager;
+};
+
 /**
  * The base Jupyter front-end application class.
  *
@@ -67,7 +88,12 @@ export abstract class JupyterFrontEnd<
     this.restored =
       options.restored ||
       this.started.then(() => restored).catch(() => restored);
-    this.serviceManager = options.serviceManager || new ServiceManager();
+    if (options.serviceManager) {
+      this.serviceManager = options.serviceManager;
+    } else if (options.serviceManagerPlugin) {
+      options.serviceManagerPlugin.id;
+      this.serviceManager = options.serviceManagerPlugin.activate(this);
+    }
   }
 
   /**
@@ -231,6 +257,8 @@ export namespace JupyterFrontEnd {
      * The service manager used by the application.
      */
     serviceManager?: ServiceManager.IManager;
+
+    serviceManagerPlugin?: ServiceManagerPlugin;
 
     /**
      * Promise that resolves when state is first restored, returning layout

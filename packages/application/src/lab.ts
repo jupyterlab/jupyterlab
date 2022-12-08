@@ -25,11 +25,14 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       shell: options.shell || new LabShell(),
       serviceManager:
         options.serviceManager ||
-        new ServiceManager({
-          standby: () => {
-            return !this._info.isConnected || 'when-hidden';
-          }
-        })
+        (options.serviceManagerPlugin
+          ? undefined
+          : new ServiceManager({
+              standby: () => {
+                return !this._info.isConnected || 'when-hidden';
+              }
+            })),
+      serviceManagerPlugin: options.serviceManagerPlugin
     });
     this.restored = this.shell.restored
       .then(() => undefined)

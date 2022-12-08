@@ -9,7 +9,8 @@ export { ConnectionLost } from './connectionlost';
 export {
   JupyterFrontEnd,
   JupyterFrontEndContextMenu,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ServiceManagerPlugin
 } from './frontend';
 export { JupyterLab } from './lab';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
