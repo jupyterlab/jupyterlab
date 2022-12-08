@@ -20,7 +20,11 @@ here = osp.abspath(osp.dirname(__file__))
 
 
 def header(path):
-    _ = osp.basename(path)
+    test_name = osp.basename(path)
+    print(  # noqa
+        "\n".join(("\n", "*" * 40, "Starting %s test in %s" % (test_name, path), "*" * 40)),
+        flush=True,
+    )
 
 
 def main():
@@ -35,6 +39,7 @@ def main():
     if args.testPath:
         paths = [p for p in paths if args.testPath in p]
 
+    print("Testing %s" % paths)  # noqa
     count = 0
     for path in sorted(paths):
         if osp.basename(path) == "node":
@@ -49,6 +54,8 @@ def main():
                 runner = osp.join(here, "example_check.py")
                 subprocess.check_call([sys.executable, runner, path], cwd=cwd)
                 count += 1
+
+    print("\n\n%s tests complete!" % count)  # noqa
 
 
 if __name__ == "__main__":
