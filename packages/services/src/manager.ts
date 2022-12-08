@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Token } from '@lumino/coreutils';
+
 import { IDisposable } from '@lumino/disposable';
 
 import { Poll } from '@lumino/polling';
@@ -211,6 +213,11 @@ export namespace ServiceManager {
      */
     readonly connectionFailure: ISignal<IManager, Error>;
   }
+
+  /**
+   * The service manager token used if a plugin replaces the default manager.
+   */
+  export const IManager = new Token<IManager>('@jupyterlab/services:manager');
 
   /**
    * The options used to create a service manager.
