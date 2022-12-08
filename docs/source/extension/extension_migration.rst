@@ -3,6 +3,43 @@
 Extension Migration Guide
 ================================================
 
+JupyterLab 3.5 to 3.6
+---------------------
+
+Real-Time Collaboration
+^^^^^^^^^^^^^^^^^^^^^^^
+In JupyterLab v3.6, it is necessary to install Jupyter Server v2.0 to use real-time collaboration. 
+This requirement was introduced to take advantage of the new identity API in Jupyter Server v2.0.
+
+On the other side, we also changed how JupyterLab loads documents. Instead of using the content
+API, now the provider opens a WebSocket connection to the YDocWebSocketHandler, which is implemented
+in an external `jupyter server extension <https://github.com/jupyter-server/jupyter_server_ydoc>`__.
+
+In addition, the shared models' package was moved to an external package called `@jupyter/ydoc
+<https://github.com/jupyter-server/jupyter_ydoc>`__. All the extensions that depend on 
+``@jupyterlab/shared-models`` will need to update to depend in ``@jupyter/ydoc``; the API should
+be the same.
+
+**API Changes:**
+To be able to fix RTC and make it stable. It was necessary to change the API and make a few breaking changes.
+These changes should not affect the vast majority of extensions. They will only affect a couple
+of extensions focused on RTC.
+
+It was necessary to change the paradigm of how JupyterLab loads documents and replace the locking mechanism
+in the back-end. Instead of identifying the first client to open the document, it now centralizes
+the process by instantiating a YDoc client in the back-end. This client is the only one that loads
+the content of the document into memory and shares it with every other client connected.
+
+The involved packages are:
+
+- ``@jupyterlab/docprovider`` Interface ``IDocumentProvider``:
+    We removed every method and added two properties:
+    - ``ready``, a promise resolved once the client is synced for the first time.
+    - ``isDisposed``, to know whether the provider is disposed or not.
+
+
+.. _extension_migration_3.0_3.1:
+
 JupyterLab 3.0 to 3.1
 ---------------------
 
