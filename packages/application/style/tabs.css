@@ -64,6 +64,7 @@
 .lm-DockPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current),
 .lm-TabPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current) {
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .lm-DockPanel-tabBar .lm-TabBar-tab:first-child,
@@ -74,7 +75,7 @@
 /* This is a current tab of a tab bar in the dock panel: each tab bar has 1. */
 .lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current {
   background: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-ui-font-color1);
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
   );
@@ -83,7 +84,7 @@
 
 .lm-TabPanel-tabBar .lm-TabBar-tab.lm-mod-current {
   background: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-ui-font-color1);
 }
 
 /* This is the main application level current tab: only 1 exists. */
@@ -99,12 +100,13 @@
 
 /* This is the left tab bar current tab: only 1 exists. */
 .lm-TabBar-tab.lm-mod-current {
-  color: var(--jp-ui-font-color0);
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .lm-TabBar-tab.lm-mod-current:hover {
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab,
@@ -154,10 +156,10 @@
 
 .lm-TabBar-tab.lm-mod-drag-image {
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-top: var(--jp-border-width) solid var(--jp-brand-color1);
   box-shadow: var(--jp-elevation-z4);
-  color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   line-height: var(--jp-private-horizontal-tab-height);
   min-height: var(--jp-private-horizontal-tab-height);

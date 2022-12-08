@@ -28,8 +28,6 @@ export {
   dismissDialog
 } from './common';
 
-export { flakyIt } from './flakyIt';
-
 import * as Mock from './mock';
 
 export { Mock };

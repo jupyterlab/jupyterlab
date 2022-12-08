@@ -1,10 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { init } from './utils';
-
-init();
-
 import { act } from 'react-dom/test-utils';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
@@ -43,9 +39,8 @@ import { IDebugger } from '../src/tokens';
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

@@ -38,13 +38,33 @@
   line-height: calc(var(--jp-private-menubar-height) - var(--jp-border-width));
 }
 
+.lm-MenuBar-content:focus-visible {
+  outline-offset: -3px; /* this value is a compromise between Firefox, Chrome,
+    and Safari over this outline's visibility and discretion */
+}
+
+.lm-MenuBar:focus-visible {
+  outline: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
+  outline-offset: -1px;
+}
+
+.lm-MenuBar-menu:focus-visible,
+.lm-MenuBar-item:focus-visible,
+.lm-Menu-item:focus-visible {
+  outline: unset;
+  outline-offset: unset;
+  -moz-outline-radius: unset;
+}
+
 .lm-MenuBar-item.lm-mod-active {
   background: var(--jp-layout-color2);
+  color: var(--jp-layout-color2);
 }
 
 .lm-MenuBar.lm-mod-active .lm-MenuBar-item.lm-mod-active {
   z-index: 10001;
   background: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color0);
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: var(--jp-elevation-z6);
@@ -57,6 +77,7 @@
 }
 
 .lm-MenuBar-item.lm-mod-disabled {
+  /*background: var(--jp-layout-color3);*/
   color: var(--jp-ui-font-color3);
 }
 
@@ -79,7 +100,7 @@
   z-index: 10000;
   padding: 4px 0;
   background: var(--jp-layout-color0);
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color0);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   font-size: var(--jp-ui-font-size1);
   box-shadow: var(--jp-elevation-z6);

@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  flakyIt as it,
-  JupyterServer,
-  testEmission
-} from '@jupyterlab/testutils';
+import { JupyterServer, testEmission } from '@jupyterlab/testutils';
 import { UUID } from '@lumino/coreutils';
 import { KernelAPI } from '../../src';
 import {
@@ -15,6 +11,8 @@ import {
   PYTHON_SPEC
 } from '../utils';
 
+jest.retryTimes(3);
+
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
@@ -23,7 +21,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

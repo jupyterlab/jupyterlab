@@ -23,7 +23,7 @@
 
 .jp-SideBar.lm-TabBar,
 #jp-down-stack .lm-TabBar {
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color2);
   background: var(--jp-layout-color2);
   font-size: var(--jp-ui-font-size1);
   overflow: visible;

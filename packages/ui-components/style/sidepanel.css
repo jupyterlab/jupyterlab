@@ -48,7 +48,8 @@
   margin: 0;
   display: flex;
   align-items: center;
-  background: var(--jp-toolbar-background);
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   box-shadow: var(--jp-toolbar-box-shadow);
   font-size: var(--jp-ui-font-size0);

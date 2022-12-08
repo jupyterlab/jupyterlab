@@ -3,16 +3,12 @@
 
 import { JupyterServer } from '@jupyterlab/testutils';
 import { ServerConnection, SettingManager } from '../../src';
-import { init } from '../utils';
-
-// Initialize the fetch overrides.
-init();
 
 const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

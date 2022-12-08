@@ -1,10 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { init } from './utils';
-
-init();
-
 import { KernelSpec, KernelSpecManager, Session } from '@jupyterlab/services';
 
 import {
@@ -41,9 +37,8 @@ class TestKernelSpecManager extends KernelSpecManager {
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
