@@ -41,7 +41,7 @@ export type ServiceManagerPlugin = {
    *
    * @param app - The application which owns the plugin.
    *
-   * @returns The provided service, or a promise to the service.
+   * @returns The provided service manager instance.
    */
   activate: (app: Application) => ServiceManager.IManager;
 };
@@ -91,7 +91,6 @@ export abstract class JupyterFrontEnd<
     if (options.serviceManager) {
       this.serviceManager = options.serviceManager;
     } else if (options.serviceManagerPlugin) {
-      options.serviceManagerPlugin.id;
       this.serviceManager = options.serviceManagerPlugin.activate(this);
     }
   }
@@ -255,9 +254,20 @@ export namespace JupyterFrontEnd {
 
     /**
      * The service manager used by the application.
+     *
+     * #### Notes
+     * If `serviceManagerPlugin` is also defined, it is ignored in favor of
+     * `serviceManager`.
      */
     serviceManager?: ServiceManager.IManager;
 
+    /**
+     * A plugin that provides a service manager used by the application.
+     *
+     * #### Notes
+     * If `serviceManager` is also defined, it takes precedence over
+     * `serviceManagerPlugin`.
+     */
     serviceManagerPlugin?: ServiceManagerPlugin;
 
     /**
