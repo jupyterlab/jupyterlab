@@ -199,6 +199,35 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   /**
+   * Check if terminal has any text selected.
+   */
+  hasSelection(): boolean {
+    if (!this.isDisposed) {
+      return this._term.hasSelection();
+    }
+    return false;
+  }
+
+  /**
+   * Paste text into terminal.
+   */
+  paste(data: string): void {
+    if (!this.isDisposed) {
+      return this._term.paste(data);
+    }
+  }
+
+  /**
+   * Get selected text from terminal.
+   */
+  getSelection(): string | null {
+    if (!this.isDisposed) {
+      return this._term.getSelection();
+    }
+    return null;
+  }
+
+  /**
    * Process a message sent to the widget.
    *
    * @param msg - The message sent to the widget.
