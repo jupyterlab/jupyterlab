@@ -4,6 +4,7 @@
  */
 
 import { PageConfig } from '@jupyterlab/coreutils';
+import { ServiceManager } from '@jupyterlab/services';
 
 import './style.js';
 
@@ -174,6 +175,14 @@ export async function main() {
     console.error(reason);
   });
 
+  let serviceManagerPlugin;
+  register = register.filter(plugin => {
+    if (plugin.provides === ServiceManager.IManager) {
+      serviceManagerPlugin = plugin;
+      return false;
+    }
+    return true;
+  });
   const lab = new JupyterLab({
     mimeExtensions,
     disabled: {
@@ -186,6 +195,7 @@ export async function main() {
       patterns: PageConfig.Extension.deferred
         .map(function (val) { return val.raw; })
     },
+    serviceManagerPlugin
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
   lab.start({ ignorePlugins });
