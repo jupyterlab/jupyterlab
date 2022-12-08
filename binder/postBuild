@@ -3,12 +3,4 @@
 # Distributed under the terms of the Modified BSD License.
 set -euo pipefail
 
-<<<<<<< HEAD
-pip install -e .
-
-jlpm
-
-jlpm build
-=======
 pip install -e .[dev]
->>>>>>> 7782a67a7c (Fix Binder for jupyter-server v2 (#13344))

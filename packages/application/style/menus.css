@@ -38,6 +38,24 @@
   line-height: calc(var(--jp-private-menubar-height) - var(--jp-border-width));
 }
 
+.lm-MenuBar-content:focus-visible {
+  outline-offset: -3px; /* this value is a compromise between Firefox, Chrome,
+    and Safari over this outline's visibility and discretion */
+}
+
+.lm-MenuBar:focus-visible {
+  outline: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
+  outline-offset: -1px;
+}
+
+.lm-MenuBar-menu:focus-visible,
+.lm-MenuBar-item:focus-visible,
+.lm-Menu-item:focus-visible {
+  outline: unset;
+  outline-offset: unset;
+  -moz-outline-radius: unset;
+}
+
 .lm-MenuBar-item.lm-mod-active {
   background: var(--jp-layout-color2);
 }
