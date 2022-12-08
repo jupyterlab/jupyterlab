@@ -161,7 +161,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   {
                     label: trans.__('Hide'),
                     caption: trans.__(
-                      'If pressed, this notification will never be showed again.'
+                      'Never show this notification again.'
                     ),
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
