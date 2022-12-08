@@ -11,6 +11,7 @@ import os
 import sys
 import tempfile
 import traceback
+import warnings
 
 from traitlets import Unicode
 from traitlets.config import Configurable
@@ -50,7 +51,11 @@ class DebugLogFileMixin(Configurable):
             for line in msg:
                 self.log.debug(line)
             if isinstance(ex, SystemExit):
+                warnings.warn("An error occurred. See the log file for details: ", log_path)
                 raise
+            warnings.warn("An error occurred.")
+            warnings.warn(msg[-1].strip())
+            warnings.warn("See the log file for details: ", log_path)
             self.exit(1)
         else:
             log.removeHandler(_debug_handler)
