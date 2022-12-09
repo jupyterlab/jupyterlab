@@ -254,9 +254,7 @@ test.describe('Debugger', () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('2');
 
     // Copy value entry is disabled for variables with empty value
-    await page
-      .locator('.jp-DebuggerVariables-toolbar select')
-      .selectOption('Globals');
+    await page.locator('select[aria-label="Scope"]').selectOption('Globals');
     await page
       .locator('.jp-DebuggerVariables-body :text("special variables")')
       .click({ button: 'right' });
@@ -264,16 +262,17 @@ test.describe('Debugger', () => {
       page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
     ).toHaveAttribute('aria-disabled', 'true');
 
-    // Expect the context menu for local variables to match snapshot
+    // Expect the context menu for local variables to have the 'copy' entry
+    await page.locator('select[aria-label="Scope"]').selectOption('Locals');
     const variable = await page
       .locator('.jp-DebuggerVariables-body li:first-child')
       .textContent();
     await page.click('.jp-DebuggerVariables-body li:first-child', {
       button: 'right'
     });
-    expect(await page.locator('.lm-Menu-content').screenshot()).toMatchSnapshot(
-      'debugger_variables_context-locals.png'
-    );
+    await expect(
+      page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
+    ).toHaveCount(1);
 
     // Copy the local variable to globals scope
     await page.click(
@@ -286,13 +285,14 @@ test.describe('Debugger', () => {
       page.locator(`.jp-DebuggerVariables-body li:text("${variable}")`)
     ).toHaveCount(1);
 
-    // Expect the context menu for global variables to match snapshot
+    // Expect the context menu for global variables to not have the 'copy' entry
     await page.click(`.jp-DebuggerVariables-body li:text("${variable}")`, {
       button: 'right'
     });
-    expect(await page.locator('.lm-Menu-content').screenshot()).toMatchSnapshot(
-      'debugger_variables_context-globals.png'
-    );
+    await expect(page.locator('.lm-Menu-content')).toBeVisible();
+    expect(
+      page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
+    ).toHaveCount(0);
 
     await page.click('button[title^=Continue]');
   });

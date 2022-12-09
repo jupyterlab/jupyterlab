@@ -124,7 +124,7 @@ export interface IDebugger {
    * @param name The name of the variable.
    * @param value The value of the variable.
    */
-  setVariableInGlobal(name: string, value: string): Promise<void>;
+  copyToGlobals(name: string): Promise<void>;
 
   /**
    * Request rich representation of a variable.
@@ -529,6 +529,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsArguments;
       configurationDone: DebugProtocol.ConfigurationDoneArguments;
       continue: DebugProtocol.ContinueArguments;
+      copyToGlobals: ICopyToGlobalsArguments;
       debugInfo: Record<string, never>;
       disconnect: DebugProtocol.DisconnectArguments;
       dumpCell: IDumpCellArguments;
@@ -573,6 +574,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsResponse;
       configurationDone: DebugProtocol.ConfigurationDoneResponse;
       continue: DebugProtocol.ContinueResponse;
+      copyToGlobals: DebugProtocol.SetExpressionResponse;
       debugInfo: IDebugInfoResponse;
       disconnect: DebugProtocol.DisconnectResponse;
       dumpCell: IDumpCellResponse;
@@ -608,6 +610,12 @@ export namespace IDebugger {
       threads: DebugProtocol.ThreadsResponse;
       variables: DebugProtocol.VariablesResponse;
     };
+
+    export interface ICopyToGlobalsArguments {
+      srcVariableName: string;
+      dstVariableName: string;
+      srcFrameId: number;
+    }
 
     /**
      * List of breakpoints in a source file.

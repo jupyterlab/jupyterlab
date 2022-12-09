@@ -521,14 +521,13 @@ const variables: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.copyToGlobals, {
-      label: 'Copy variable to globals',
+      label: 'Copy Variable to Globals',
       caption: trans.__('Copy variable to globals scope'),
       isEnabled: () => !!service.session?.isStarted,
       isVisible: () => handler.activeWidget instanceof NotebookPanel,
       execute: async args => {
         const name = service.model.variables.selectedVariable!.name;
-        const value = service.model.variables.selectedVariable!.value;
-        await service.setVariableInGlobal(name, value);
+        await service.copyToGlobals(name);
       }
     });
   }
