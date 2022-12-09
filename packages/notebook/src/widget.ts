@@ -545,8 +545,7 @@ export class StaticNotebook extends WindowedList {
     }
     this._updateMimetype();
     const cells = newValue.cells;
-    const collab =
-      (PageConfig.getOption('collaborative') ?? '').toLowerCase() === 'true';
+    const collab = newValue.collaborative ?? false;
     if (!collab && !cells.length) {
       newValue.sharedModel.insertCell(0, {
         cell_type: this.notebookConfig.defaultCell

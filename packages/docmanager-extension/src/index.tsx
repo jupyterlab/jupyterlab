@@ -809,7 +809,8 @@ function addCommands(
   });
 
   const caption = () => {
-    if (PageConfig.getOption('collaborative') == 'true') {
+    const context = docManager.contextForWidget(shell.currentWidget!);
+    if (context?.model.collaborative) {
       return trans.__(
         'In collaborative mode, the document is saved automatically after every change'
       );
