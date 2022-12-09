@@ -290,7 +290,7 @@ test.describe('Debugger', () => {
       button: 'right'
     });
     await expect(page.locator('.lm-Menu-content')).toBeVisible();
-    expect(
+    await expect(
       page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
     ).toHaveCount(0);
 
