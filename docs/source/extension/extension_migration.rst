@@ -43,7 +43,7 @@ bumped their major version (following semver convention). We want to point out p
    and a signal ``inViewportChanged`` are available to test if the cell is attached to the DOM.
    If you instantiate standalone cells outside of a notebook, you will probably need to set the constructor option
    ``placeholder`` to ``false`` to ensure direct rendering of the cell.
-   * ``MarkdownCell.renderInput`` does not take any more arguments.
+   * ``MarkdownCell.renderInput`` does not take arguments anymore.
 - ``@jupyterlab/completer`` from 3.x to 4.x
    Major version bumped following the removal of ``ICompletionManager`` token and the replacement
    of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
