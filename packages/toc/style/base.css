@@ -406,6 +406,7 @@
   margin: 2px;
   background: none;
   border: none;
+  flex: auto 0 0;
 }
 
 .toc-entry-holder[data-running='0']::after {
