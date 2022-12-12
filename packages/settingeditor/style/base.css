@@ -227,8 +227,12 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 }
 
 /** copy of `input.jp-mod-styled:focus` style */
-.jp-SettingsPanel fieldset input:focus {
-  border: var(--jp-border-width) solid var(--md-blue-500);
+.jp-SettingsPanel fieldset input:focus,
+.jp-SettingsPanel fieldset select:focus,
+.jp-SettingsPanel fieldset textarea:focus {
+  -moz-outline-radius: unset;
+  outline: var(--jp-border-width) solid var(--md-blue-500);
+  outline-offset: -1px;
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
