@@ -8,9 +8,11 @@ import { ConfigSection, ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
+const COMMAND_HELP_OPEN = 'help:open';
 const NEWS_API_URL = '/lab/api/news';
 const UPDATE_API_URL = '/lab/api/update';
-const PRIVACY_URL = 'https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html';
+const PRIVACY_URL =
+  'https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html';
 
 /**
  * Call the announcement API
@@ -102,11 +104,14 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 caption: PRIVACY_URL,
                 callback: event => {
                   event.preventDefault();
-                  window.open(
-                    PRIVACY_URL,
-                    '_blank',
-                    'noreferrer'
-                  );
+                  if (app.commands.hasCommand(COMMAND_HELP_OPEN)) {
+                    void app.commands.execute(COMMAND_HELP_OPEN, {
+                      text: trans.__('Privacy policies'),
+                      url: PRIVACY_URL
+                    });
+                  } else {
+                    window.open(PRIVACY_URL, '_blank', 'noreferrer');
+                  }
                 },
                 displayType: 'link'
               },
