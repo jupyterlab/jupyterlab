@@ -80,6 +80,21 @@ export class ActivityHelper {
   }
 
   /**
+   * Close a panel from its tab name
+   *
+   * @param name Activity name
+   */
+  async closePanel(name: string): Promise<void> {
+    await this.activateTab(name);
+    await this.page.evaluate(async (launcherSelector: string) => {
+      const app = window.jupyterlab ?? window.jupyterapp;
+
+      await app.commands.execute('application:close');
+      await window.galataip.waitForXPath(launcherSelector);
+    }, this.launcherSelector);
+  }
+
+  /**
    * Activate a tab is active
    *
    * @param name Activity name
