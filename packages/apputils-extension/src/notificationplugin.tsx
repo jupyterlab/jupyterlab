@@ -638,7 +638,7 @@ namespace Private {
     return (
       <button
         className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
-        title={trans.__('Close notification')}
+        title={trans.__('Hide notification')}
         onClick={props.closeToast}
       >
         <closeIcon.react className="jp-icon-hover" tag="span"></closeIcon.react>
