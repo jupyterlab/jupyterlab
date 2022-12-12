@@ -768,6 +768,13 @@ namespace Private {
     closeToast: () => void;
   }
 
+  const displayType2Class: Record<Notification.ActionDisplayType, string> = {
+    accent: 'jp-mod-accept',
+    link: 'jp-mod-link',
+    warn: 'jp-mod-warn',
+    default: ''
+  };
+
   /**
    * Create a button with customized callback in a toast
    */
@@ -778,10 +785,14 @@ namespace Private {
         closeToast();
       }
     };
+    const classes = [
+      'jp-toast-button',
+      displayType2Class[action.displayType ?? 'default']
+    ].join(' ');
     return (
       <Button
         title={action.caption ?? action.label}
-        className={'jp-toast-button'}
+        className={classes}
         onClick={clickHandler}
         small={true}
       >

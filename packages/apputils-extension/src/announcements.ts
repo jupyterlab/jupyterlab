@@ -10,6 +10,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 const NEWS_API_URL = '/lab/api/news';
 const UPDATE_API_URL = '/lab/api/update';
+const PRIVACY_URL = 'https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html';
 
 /**
  * Call the announcement API
@@ -98,14 +99,16 @@ export const announcements: JupyterFrontEndPlugin<void> = {
             actions: [
               {
                 label: trans.__('Open privacy policy'),
+                caption: PRIVACY_URL,
                 callback: event => {
                   event.preventDefault();
                   window.open(
-                    'https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html',
+                    PRIVACY_URL,
                     '_blank',
                     'noreferrer'
                   );
-                }
+                },
+                displayType: 'link'
               },
               {
                 label: trans.__('Yes'),
@@ -176,9 +179,11 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 if (link?.length === 2) {
                   options.actions.push({
                     label: link[0],
+                    caption: link[1],
                     callback: () => {
                       window.open(link[1], '_blank', 'noreferrer');
-                    }
+                    },
+                    displayType: 'link'
                   });
                 }
                 if (!state.seen) {
@@ -241,9 +246,11 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               if (link?.length === 2) {
                 options.actions.push({
                   label: link[0],
+                  caption: link[1],
                   callback: () => {
                     window.open(link[1], '_blank', 'noreferrer');
-                  }
+                  },
+                  displayType: 'link'
                 });
               }
               if (!state.seen) {

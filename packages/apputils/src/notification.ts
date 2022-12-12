@@ -197,6 +197,11 @@ export class NotificationManager implements IDisposable {
  */
 export namespace Notification {
   /**
+   * Enumeration of available action display type.
+   */
+  export type ActionDisplayType = 'default' | 'accent' | 'warn' | 'link';
+
+  /**
    * Interface describing an action linked to a notification.
    */
   export interface IAction {
@@ -223,6 +228,13 @@ export namespace Notification {
      * This can be a longer description of the action.
      */
     caption?: string;
+
+    /**
+     * The action display type.
+     * 
+     * This will be used to modify the action button style.
+     */
+    displayType?: ActionDisplayType;
   }
 
   /**

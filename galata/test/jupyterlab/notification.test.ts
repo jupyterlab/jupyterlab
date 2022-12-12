@@ -14,6 +14,8 @@ const NOTIFICATION_TYPE = [
   'in-progress'
 ];
 
+const ACTION_DISPLAY_TYPE = ['default', 'accent', 'warn', 'link'];
+
 test.describe('Toast', () => {
   for (const type of NOTIFICATION_TYPE) {
     test(`should display a ${type} notification`, async ({ page }) => {
@@ -85,6 +87,39 @@ test.describe('Toast', () => {
       'Button 2 was clicked'
     );
   });
+
+  for (const displayType of ACTION_DISPLAY_TYPE) {
+    test(`should display a notification with action ${displayType}`, async ({ page }) => {
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute('apputils:notify', {
+          message: 'This is a test message',
+          options: {
+            autoClose: false,
+            actions: [
+              {
+                label: 'Button 1',
+                commandId: 'apputils:notify',
+                args: {
+                  message: 'Button 1 was clicked',
+                  type: 'success',
+                  options: { autoClose: false }
+                },
+                displayType
+              }
+            ]
+          }
+        });
+      });
+
+      const handle = await page.waitForSelector('.Toastify__toast');
+
+      expect(
+        await handle.screenshot({ animations: 'disabled' })
+      ).toMatchSnapshot({
+        name: `notification-${displayType}-action.png`
+      });
+    });
+  }
 
   test('should display as truncated text content the notification', async ({
     page
