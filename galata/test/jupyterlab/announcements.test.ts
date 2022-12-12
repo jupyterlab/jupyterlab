@@ -19,7 +19,7 @@ test('Announcements requires user agreement', async ({ page }) => {
 
   expect(notifications).toHaveLength(1);
   expect(notifications[0].message).toEqual(
-    'Do you want to receive official Jupyter news?\nPlease read the privacy policy.'
+    'Would you like to receive official Jupyter news?\nPlease read the privacy policy.'
   );
   console.log(notifications[0]);
   expect(notifications[0].options.actions).toHaveLength(3);

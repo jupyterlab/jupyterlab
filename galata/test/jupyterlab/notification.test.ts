@@ -92,7 +92,7 @@ test.describe('Toast', () => {
     test(`should display a notification with action ${displayType}`, async ({
       page
     }) => {
-      await page.evaluate(() => {
+      await page.evaluate(displayType => {
         return window.jupyterapp.commands.execute('apputils:notify', {
           message: 'This is a test message',
           options: {
@@ -111,7 +111,7 @@ test.describe('Toast', () => {
             ]
           }
         });
-      });
+      }, displayType);
 
       const handle = await page.waitForSelector('.Toastify__toast');
 
