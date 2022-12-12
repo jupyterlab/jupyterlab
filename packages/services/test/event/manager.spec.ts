@@ -82,8 +82,6 @@ describe('setting', () => {
     });
 
     describe('#stream.connect()', () => {
-      jest.setTimeout(30000);
-
       it('should yield an event', async () => {
         const delegate = new PromiseDelegate<void>();
         const expected = `#stream.connect() test`;
@@ -96,13 +94,15 @@ describe('setting', () => {
           expect(received).toEqual(expected);
           delegate.resolve();
         });
-        void manager.emit({
-          // eslint-disable-next-line camelcase
-          schema_id:
-            'https://events.jupyter.org/jupyter_server/contents_service/v1',
-          data: { action: 'get', path: expected },
-          version: '1'
-        });
+        setTimeout(() => {
+          void manager.emit({
+            // eslint-disable-next-line camelcase
+            schema_id:
+              'https://events.jupyter.org/jupyter_server/contents_service/v1',
+            data: { action: 'get', path: expected },
+            version: '1'
+          });
+        }, 500);
         return delegate.promise;
       });
     });
