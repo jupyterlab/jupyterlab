@@ -1,4 +1,8 @@
-// From https://en.wikipedia.org/wiki/Moons_of_Jupiter
+/**
+ * From https://en.wikipedia.org/wiki/Moons_of_Jupiter
+ *
+ * @deprecated in favor of user service. Will be removed in v4.0
+ */
 export const moonsOfJupyter = [
   'Metis',
   'Adrastea',
@@ -84,11 +88,16 @@ export const moonsOfJupyter = [
 /**
  * Get a random user-name based on the moons of Jupyter.
  * This function returns names like "Anonymous Io" or "Anonymous Metis".
+ *
+ * @deprecated in favor of user service. Will be removed in v4.0
  */
 export const getAnonymousUserName = (): string =>
   'Anonymous ' +
   moonsOfJupyter[Math.floor(Math.random() * moonsOfJupyter.length)];
 
+/**
+ * @deprecated in favor of user service. Will be removed in v4.0
+ */
 export const userColors = [
   '#12A0D3',
   '#17AB30',
@@ -100,5 +109,8 @@ export const userColors = [
   '#00A1B3'
 ];
 
+/**
+ * @deprecated in favor of user service. Will be removed in v4.0
+ */
 export const getRandomColor = (): string =>
   userColors[Math.floor(Math.random() * userColors.length)];
