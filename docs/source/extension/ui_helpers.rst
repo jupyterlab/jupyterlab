@@ -300,6 +300,12 @@ When using the API, an action is defined by:
      * This can be a longer description of the action.
      */
     caption?: string;
+    /**
+     * The action display type.
+     *
+     * This will be used to modify the action button style.
+     */
+    displayType?: 'default' | 'accent' | 'warn' | 'link';
   }
 
 You can update a notification using:
@@ -378,6 +384,12 @@ An action is defined by:
      * This can be a longer description of the action.
      */
     caption?: string;
+    /**
+     * The action display type.
+     *
+     * This will be used to modify the action button style.
+     */
+    displayType?: 'default' | 'accent' | 'warn' | 'link';
   }
 
 ``'apputils:update-notification'`` to update a notification:

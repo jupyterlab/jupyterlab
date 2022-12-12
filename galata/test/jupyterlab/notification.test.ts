@@ -89,7 +89,9 @@ test.describe('Toast', () => {
   });
 
   for (const displayType of ACTION_DISPLAY_TYPE) {
-    test(`should display a notification with action ${displayType}`, async ({ page }) => {
+    test(`should display a notification with action ${displayType}`, async ({
+      page
+    }) => {
       await page.evaluate(() => {
         return window.jupyterapp.commands.execute('apputils:notify', {
           message: 'This is a test message',

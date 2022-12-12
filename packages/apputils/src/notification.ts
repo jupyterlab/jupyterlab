@@ -231,7 +231,7 @@ export namespace Notification {
 
     /**
      * The action display type.
-     * 
+     *
      * This will be used to modify the action button style.
      */
     displayType?: ActionDisplayType;
