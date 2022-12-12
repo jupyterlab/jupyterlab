@@ -12,7 +12,8 @@ const esModules = [
   'vscode-ws-jsonrpc',
   'y-protocols',
   'y-websocket',
-  'yjs'
+  'yjs',
+  'nanoid'
 ].join('|');
 
 module.exports = function (baseDir: string) {
