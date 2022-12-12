@@ -24,7 +24,7 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   IDocumentManager,

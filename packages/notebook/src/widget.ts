@@ -12,7 +12,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
