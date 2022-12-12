@@ -261,7 +261,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
             disabled={
               !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
                 name: variable.name,
-                variablesReference: variable.variablesReference
+                frameID: service.model.callstack.frame?.id
               } as any)
             }
             onClick={e => {
@@ -270,7 +270,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
               commands
                 .execute(Debugger.CommandIDs.renderMimeVariable, {
                   name: variable.name,
-                  variablesReference: variable.variablesReference
+                  frameID: service.model.callstack.frame?.id
                 } as any)
                 .catch(reason => {
                   console.error(
