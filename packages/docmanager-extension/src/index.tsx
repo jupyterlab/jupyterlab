@@ -809,14 +809,16 @@ function addCommands(
   });
 
   const caption = () => {
-    const context = docManager.contextForWidget(shell.currentWidget!);
-    if (context?.model.collaborative) {
-      return trans.__(
-        'In collaborative mode, the document is saved automatically after every change'
-      );
-    } else {
-      return trans.__('Save and create checkpoint');
+    if (shell.currentWidget) {
+      const context = docManager.contextForWidget(shell.currentWidget);
+      if (context?.model.collaborative) {
+        return trans.__(
+          'In collaborative mode, the document is saved automatically after every change'
+        );
+      }
     }
+
+    return trans.__('Save and create checkpoint');
   };
 
   const saveInProgress = new WeakSet<DocumentRegistry.Context>();
