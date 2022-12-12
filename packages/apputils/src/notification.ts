@@ -209,8 +209,13 @@ export namespace Notification {
 
     /**
      * Callback function to trigger
+     *
+     * ### Notes
+     * By default execution of the callback will close the toast
+     * and dismiss the notification. You can prevent this by calling
+     * `event.preventDefault()` in the callback.
      */
-    callback: () => void;
+    callback: (event: MouseEvent) => void;
 
     /**
      * The action caption.

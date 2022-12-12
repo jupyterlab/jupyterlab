@@ -523,7 +523,10 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
             if (toast.isActive(id)) {
               // Update existing toast
               const closeToast = (): void => {
+                // Dismiss the displayed toast
                 toast.dismiss(id);
+                // Dismiss the notification from the queue
+                manager.dismiss(id);
               };
               toast.update(id, {
                 type: type === 'in-progress' ? null : type,
@@ -769,9 +772,11 @@ namespace Private {
    * Create a button with customized callback in a toast
    */
   function ToastButton({ action, closeToast }: IToastButtonProps): JSX.Element {
-    const clickHandler = (): void => {
-      closeToast();
-      action.callback();
+    const clickHandler = (event: React.MouseEvent): void => {
+      action.callback(event as any);
+      if (!event.defaultPrevented) {
+        closeToast();
+      }
     };
     return (
       <Button
@@ -858,7 +863,14 @@ namespace Private {
 
     return t(
       ({ closeToast }: { closeToast: () => void }) =>
-        createContent(message, closeToast, actions),
+        createContent(
+          message,
+          () => {
+            closeToast();
+            Notification.manager.dismiss(toastId);
+          },
+          actions
+        ),
       toastOptions
     );
   }

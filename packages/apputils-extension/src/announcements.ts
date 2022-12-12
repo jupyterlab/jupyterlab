@@ -98,7 +98,8 @@ export const announcements: JupyterFrontEndPlugin<void> = {
             actions: [
               {
                 label: trans.__('Open privacy policy'),
-                callback: () => {
+                callback: event => {
+                  event.preventDefault();
                   window.open(
                     'https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html',
                     '_blank',
@@ -160,9 +161,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 options.actions = [
                   {
                     label: trans.__('Hide'),
-                    caption: trans.__(
-                      'Never show this notification again.'
-                    ),
+                    caption: trans.__('Never show this notification again.'),
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
