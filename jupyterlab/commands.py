@@ -136,17 +136,53 @@ def pjoin(*args):
     return osp.abspath(osp.join(*args))
 
 
+def _writable_dir_or_parent(path):
+    """Return whether a path represents a writable directory
+
+    Returns true a non-existent path if it can be created
+    because the nearest parent is writable.
+    """
+
+    # walk up to the first parent that exists
+    prev_path = "/"
+    while not osp.exists(path) and prev_path != path:
+        prev_path = path
+        path = osp.dirname(path)
+
+    return osp.isdir(path) and os.access(path, os.W_OK)
+
+
+def _first_writable_subdir(paths, *subpath):
+    """Return the first writable path
+
+    Given a path list (e.g. jupyter_config_path()),
+    and a subdirectory path (e.g. 'lab', 'user-settings'),
+    return the first match in the path which will be writable.
+    """
+    for parent in paths:
+        path = pjoin(parent, *subpath)
+        if _writable_dir_or_parent(path):
+            return path
+
+    # no writable path. Error?
+
+
 def get_user_settings_dir():
     """Get the configured JupyterLab user settings directory."""
     settings_dir = os.environ.get("JUPYTERLAB_SETTINGS_DIR")
-    settings_dir = settings_dir or pjoin(jupyter_config_path()[0], "lab", "user-settings")
+    settings_dir = settings_dir or _first_writable_subdir(
+        jupyter_config_path(), "lab", "user-settings"
+    )
+
     return osp.abspath(settings_dir)
 
 
 def get_workspaces_dir():
     """Get the configured JupyterLab workspaces directory."""
     workspaces_dir = os.environ.get("JUPYTERLAB_WORKSPACES_DIR")
-    workspaces_dir = workspaces_dir or pjoin(jupyter_config_path()[0], "lab", "workspaces")
+    workspaces_dir = workspaces_dir or _first_writable_subdir(
+        jupyter_config_path(), "lab", "workspaces"
+    )
     return osp.abspath(workspaces_dir)
 
 
