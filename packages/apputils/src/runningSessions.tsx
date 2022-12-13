@@ -20,7 +20,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import { GroupItem, interactiveItem, TextItem } from '@jupyterlab/statusbar';
+import { GroupItem, TextItem } from '@jupyterlab/statusbar';
 
 /**
  * Half spacing between subitems in a status item.
@@ -100,7 +100,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
       this
     );
 
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
   }
 
   /**

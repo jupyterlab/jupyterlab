@@ -5,7 +5,7 @@ import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
-import { interactiveItem, ProgressCircle } from '@jupyterlab/statusbar';
+import { ProgressCircle } from '@jupyterlab/statusbar';
 
 import {
   circleIcon,
@@ -186,7 +186,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
   constructor(translator?: ITranslator, showProgress: boolean = true) {
     super(new ExecutionIndicator.Model());
     this.translator = translator || nullTranslator;
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
   }
 
   /**

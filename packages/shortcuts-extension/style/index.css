@@ -7,4 +7,4 @@
 @import url('~@lumino/widgets/style/index.css');
 @import url('~@jupyterlab/ui-components/style/index.css');
 
-@import url('base.css');
+@import url('./base.css');

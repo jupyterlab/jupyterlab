@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Session } from '@jupyterlab/services';
-import { interactiveItem, TextItem } from '@jupyterlab/statusbar';
+import { TextItem } from '@jupyterlab/statusbar';
 import {
   ITranslator,
   nullTranslator,
@@ -111,7 +111,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
     super(new KernelStatus.Model(translator));
     this.translator = translator || nullTranslator;
     this._handleClick = opts.onClick;
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
   }
 
   /**
