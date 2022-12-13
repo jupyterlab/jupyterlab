@@ -1945,9 +1945,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
-   * Renderer
+   * Markdown rendered container
    */
-  get renderer(): IRenderMime.IRenderer {
+  get renderer(): Widget {
     return this._renderer;
   }
 
@@ -2212,6 +2212,8 @@ export namespace MarkdownCell {
      * Show editor for read-only Markdown cells.
      */
     showEditorForReadOnlyMarkdown?: boolean;
+
+    /** */
   }
 
   /**
