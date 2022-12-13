@@ -9,4 +9,5 @@
 
 export * from './mock';
 export * from './tokens';
+export * from './awareness';
 export * from './yprovider';
