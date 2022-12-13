@@ -6,9 +6,9 @@
 Identity
 ========
 
-JupyterLab v3.6 includes user identity build on top of the ``IdentityProvider`` and the endpoint ``/api/me``
+Starting with JupyterLab v3.6, user identity builds on top of the ``IdentityProvider`` and the endpoint ``/api/me``
 introduced in Jupyter Server v2 as part of the authentication. The ``/api/me`` endpoint returns a dictionary
-with the user's identity their permissions. Please check out its
+with the user's identity and their permissions. Please check out its
 `documentation <https://jupyter-server.readthedocs.io/en/latest/operators/security.html#identity-model>`_
 to know more about the identity model implemented in Jupyter Server.
 

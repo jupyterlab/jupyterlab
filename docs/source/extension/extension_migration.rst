@@ -169,13 +169,14 @@ Real-Time Collaboration
 In JupyterLab v3.6, it is necessary to install Jupyter Server v2.0 to use real-time collaboration.
 This requirement was introduced to take advantage of the new identity API in Jupyter Server v2.0.
 
-On the other side, we also changed how JupyterLab loads documents. Instead of using the content
-API, now the provider opens a WebSocket connection to the YDocWebSocketHandler, which is implemented
-in an external `jupyter server extension <https://github.com/jupyter-server/jupyter_server_ydoc>`__.
+On the other side, we also changed how JupyterLab loads documents (only in collaborative mode).
+Instead of using the content API, now the provider opens a WebSocket connection to the
+`YDocWebSocketHandler`, which is implemented in an external
+`jupyter server extension <https://github.com/jupyter-server/jupyter_server_ydoc>`__.
 
 In addition, the shared models' package was moved to an external package called `@jupyter/ydoc
 <https://github.com/jupyter-server/jupyter_ydoc>`__. All the extensions that depend on
-``@jupyterlab/shared-models`` will need to update to depend in ``@jupyter/ydoc``; the API should
+``@jupyterlab/shared-models`` will need to update to depend in ``@jupyter/ydoc@~0.2.2``; the API should
 be the same.
 
 **API Changes:**
@@ -195,7 +196,7 @@ The involved packages are:
      Removed: ``acquireLock``, ``releaseLock``, ``setPath``, ``destroy``, ``requestInitialContent`` and ``putInitializedState``.
      Added: ``ready`` and ``isDisposed``.
 
-   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument``.
+   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument = ISharedDocument``.
      And the ``ymodel`` attribute has been renamed ``model`` typed ``T`` (relaxing typing from ``YDocument`` to ``ISharedDocument``).
 
    * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
@@ -204,7 +205,7 @@ The involved packages are:
    * ``WebSocketProvider.IOptions`` has a new optional attribute, ``user``.
 
 - ``@jupyterlab/services``:
-   * The interface ``IManager`` has a new optional property, ``user``.
+   * The interface ``IManager`` has a new optional property, ``user`` that implement `User.IManager <../api/interfaces/services.User.IManager.html>`_.
 
    * The ``ServiceManager`` class implements the optional property ``user`` from the ``IManager``.
 
