@@ -718,11 +718,24 @@ function addCommands(
     }
   });
 
+  const caption = () => {
+    if (shell.currentWidget) {
+      const context = docManager.contextForWidget(shell.currentWidget);
+      if (context?.model.collaborative) {
+        return trans.__(
+          'In collaborative mode, the document is saved automatically after every change'
+        );
+      }
+    }
+
+    return trans.__('Save and create checkpoint');
+  };
+
   const saveInProgress = new WeakSet<DocumentRegistry.Context>();
 
   commands.addCommand(CommandIDs.save, {
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
-    caption: trans.__('Save and create checkpoint'),
+    caption,
     icon: args => (args.toolbar ? saveIcon : ''),
     isEnabled: isWritable,
     execute: async () => {
