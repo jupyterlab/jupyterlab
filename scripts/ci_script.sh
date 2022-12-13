@@ -63,8 +63,8 @@ if [[ $GROUP == lint ]]; then
     jlpm run stylelint:check || (echo 'Please run `jlpm run stylelint` locally and push changes' && exit 1)
 
     # Python checks
-    pipx run black --check --diff --color .
-    pipx run ruff .
+    black --check --diff --color .
+    ruff .
     pipx run 'validate-pyproject[all]' pyproject.toml
 fi
 
