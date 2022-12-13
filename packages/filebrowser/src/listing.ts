@@ -1385,7 +1385,16 @@ export class DirListing extends Widget {
     // Detects printable characters typed by the user.
     // Not all browsers support .key, but it discharges us from reconstructing
     // characters from key codes.
-    if (event.key !== undefined && event.key.length === 1) {
+    if (
+      event.key !== undefined &&
+      event.key.length === 1 &&
+      // Don't gobble up the space key on the check-all checkbox (which the
+      // browser treats as a click event).
+      !(
+        (event.key === ' ' || event.keyCode === 32) &&
+        (event.target as HTMLInputElement).type === 'checkbox'
+      )
+    ) {
       if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
         return;
       }
