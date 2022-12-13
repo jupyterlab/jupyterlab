@@ -54,7 +54,11 @@
   background-color: var(--jp-brand-color1);
 }
 
-.jp-mod-clicked > .jp-StatusBar-Item {
+.jp-mod-clicked:hover {
+  background-color: var(--jp-brand-color0);
+}
+
+.jp-mod-clicked .jp-StatusBar-TextItem {
   color: var(--jp-ui-inverse-font-color1);
 }
 
