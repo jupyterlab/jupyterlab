@@ -251,9 +251,15 @@ ignore = [
 ]
 
 [tool.ruff.per-file-ignores]
+# F821 Undefined name `c`
+"binder/jupyter_notebook_config.py" = ["F821"]
+# F821 Undefined name `c`
+# S104 Possible binding to all interfaces
+# S105 Possible hardcoded password: `""`
+"galata/jupyter_server_test_config.py" = ["F821", "S104", "S105"]
 # S101 Use of `assert` detected
 # N802 Function name `foo` should be lowercase
-"jupyterlab/tests/*" = ["S101", "N802"]
+"jupyterlab/tests/*" = ["S101", "N802", "E501"]
 # T201 `print` found
 "scripts/milestone_check.py" = ["T201"]
 # N806 Variable `tM` in function should be lowercase
