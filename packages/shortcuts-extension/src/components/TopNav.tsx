@@ -9,26 +9,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Menu } from '@lumino/widgets';
 import * as React from 'react';
-import { classes } from 'typestyle';
-import { CellStyle } from '../componentStyle/ShortcutItemStyle';
-import {
-  AdvancedOptionsContainerStyle,
-  AdvancedOptionsLinkStyle,
-  AdvancedOptionsSmallStyle,
-  AdvancedOptionsStyle,
-  altIconStyle,
-  commandIconStyle,
-  controlIconStyle,
-  HeaderRowContainerStyle,
-  HeaderRowStyle,
-  SearchContainerStyle,
-  SearchStyle,
-  SymbolsRowStyle,
-  SymbolsSmallStyle,
-  SymbolsStyle,
-  TopNavStyle,
-  TopStyle
-} from '../componentStyle/TopNavStyle';
+
 import { ShortcutTitleItem } from './ShortcutTitleItem';
 import { UISize } from './ShortcutUI';
 
@@ -67,8 +48,8 @@ export namespace CommandIDs {
 class Symbols extends React.Component<ISymbolsProps> {
   getRegularSymbols() {
     return (
-      <div className={SymbolsStyle}>
-        <div className={SymbolsRowStyle}>
+      <div className="jp-Shortcuts-Symbols">
+        <div className="jp-Shortcuts-SymbolsRow">
           <div>Cmd ⌘</div>
           <div>Alt ⌥</div>
           <div>Ctrl ⌃</div>
@@ -80,16 +61,16 @@ class Symbols extends React.Component<ISymbolsProps> {
 
   getSmallSymbols() {
     return (
-      <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-        <div className={SymbolsRowStyle}>
+      <div className="jp-Shortcuts-Symbols jp-Shortcuts-SymbolsSmall">
+        <div className="jp-Shortcuts-SymbolsRow">
           <span>Cmd </span>
-          <span className={commandIconStyle}>⌘</span>
+          <span className="jp-Shortcuts-commandIcon">⌘</span>
           <span>Alt </span>
-          <span className={altIconStyle}>⌥</span>
+          <span className="jp-Shortcuts-altIcon">⌥</span>
         </div>
-        <div className={SymbolsRowStyle}>
+        <div className="jp-Shortcuts-SymbolsRow">
           <span>Ctrl </span>
-          <span className={controlIconStyle}>⌃</span>
+          <span className="jp-Shortcuts-controlIcon">⌃</span>
           <span>Shift </span>
           <span>⇧</span>
         </div>
@@ -99,20 +80,20 @@ class Symbols extends React.Component<ISymbolsProps> {
 
   getTinySymbols() {
     return (
-      <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-        <div className={SymbolsRowStyle}>
+      <div className="jp-Shortcuts-Symbols jp-Shortcuts-SymbolsSmall">
+        <div className="jp-Shortcuts-SymbolsRow">
           <span>Cmd</span>
           <span>⌘</span>
         </div>
-        <div className={SymbolsRowStyle}>
+        <div className="jp-Shortcuts-SymbolsRow">
           <span>Alt</span>
           <span>⌥</span>
         </div>
-        <div className={SymbolsRowStyle}>
+        <div className="jp-Shortcuts-SymbolsRow">
           <span>Ctrl</span>
           <span>⌃</span>
         </div>
-        <div className={SymbolsRowStyle}>
+        <div className="jp-Shortcuts-SymbolsRow">
           <span>Shift</span>
           <span>⇧</span>
         </div>
@@ -137,10 +118,10 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps> {
     const trans = this.props.translator.load('jupyterlab');
     if (this.props.size === UISize.Regular) {
       return (
-        <div className={AdvancedOptionsContainerStyle}>
-          <div className={AdvancedOptionsStyle}>
+        <div className="jp-Shortcuts-AdvancedOptionsContainer">
+          <div className="jp-Shortcuts-AdvancedOptions">
             <a
-              className={AdvancedOptionsLinkStyle(this.props.size)}
+              className="jp-Shortcuts-AdvancedOptionsLink-Regular"
               onClick={() => this.props.toggleSelectors()}
             >
               {this.props.showSelectors
@@ -148,7 +129,7 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps> {
                 : trans.__('Show Selectors')}
             </a>
             <a
-              className={classes(AdvancedOptionsLinkStyle(this.props.size))}
+              className="jp-Shortcuts-AdvancedOptionsLink-Regular"
               onClick={() => this.props.resetShortcuts()}
             >
               {trans.__('Reset All')}
@@ -158,11 +139,9 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps> {
       );
     } else {
       return (
-        <div
-          className={classes(AdvancedOptionsStyle, AdvancedOptionsSmallStyle)}
-        >
+        <div className="jp-Shortcuts-AdvancedOptions jp-Shortcuts-AdvancedOptionsSmall">
           <a
-            className={AdvancedOptionsLinkStyle(this.props.size)}
+            className="jp-Shortcuts-AdvancedOptionsLink-Small"
             onClick={() => this.props.toggleSelectors()}
           >
             {this.props.showSelectors
@@ -170,7 +149,7 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps> {
               : trans.__('Show Selectors')}
           </a>
           <a
-            className={classes(AdvancedOptionsLinkStyle(this.props.size))}
+            className="jp-Shortcuts-AdvancedOptionsLink-Small"
             onClick={() => this.props.resetShortcuts()}
           >
             {trans.__('Reset All')}
@@ -240,7 +219,7 @@ export class TopNav extends React.Component<ITopNavProps> {
 
   getShortCutTitleItem(title: string) {
     return (
-      <div className={CellStyle}>
+      <div className="jp-Shortcuts-Cell">
         <ShortcutTitleItem
           title={title}
           updateSort={this.props.updateSort}
@@ -253,13 +232,13 @@ export class TopNav extends React.Component<ITopNavProps> {
   render() {
     const trans = this.props.external.translator.load('jupyterlab');
     return (
-      <div className={TopStyle}>
-        <div className={TopNavStyle}>
+      <div className="jp-Shortcuts-Top">
+        <div className="jp-Shortcuts-TopNav">
           <Symbols size={this.getSize(this.props.width)} />
-          <div className={SearchContainerStyle}>
+          <div className="jp-Shortcuts-SearchContainer">
             <input
               onChange={event => this.props.updateSearchQuery(event)}
-              className={SearchStyle}
+              className="jp-Shortcuts-Search"
               placeholder={trans.__('Search')}
             />
           </div>
@@ -272,11 +251,11 @@ export class TopNav extends React.Component<ITopNavProps> {
             translator={this.props.external.translator}
           />
         </div>
-        <div className={HeaderRowContainerStyle}>
-          <div className={HeaderRowStyle}>
+        <div className="jp-Shortcuts-HeaderRowContainer">
+          <div className="jp-Shortcuts-HeaderRow">
             {this.getShortCutTitleItem(trans.__('Category'))}
             {this.getShortCutTitleItem(trans.__('Command'))}
-            <div className={CellStyle}>
+            <div className="jp-Shortcuts-Cell">
               <div className="title-div">{trans.__('Shortcut')}</div>
             </div>
             {this.getShortCutTitleItem(trans.__('Source'))}

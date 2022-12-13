@@ -9,11 +9,6 @@ import { ArrayExt, StringExt } from '@lumino/algorithm';
 
 import { ReadonlyJSONArray } from '@lumino/coreutils';
 
-import {
-  ShortcutUIStyle,
-  TopWhitespaceStyle
-} from '../componentStyle/ShortcutUIStyle';
-
 import { ShortcutList } from './ShortcutList';
 
 import { IShortcutUIexternal, TopNav } from './TopNav';
@@ -493,8 +488,8 @@ export class ShortcutUI extends React.Component<
       return null;
     }
     return (
-      <div className={ShortcutUIStyle} id="jp-shortcutui">
-        <div className={TopWhitespaceStyle} />
+      <div className="jp-Shortcuts-ShortcutUI" id="jp-shortcutui">
+        <div className="jp-Shortcuts-TopWhitespace" />
         <TopNav
           updateSearchQuery={this.updateSearchQuery}
           resetShortcuts={this.resetShortcuts}

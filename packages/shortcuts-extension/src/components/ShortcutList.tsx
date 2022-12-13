@@ -36,10 +36,13 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
   render(): JSX.Element {
     return (
       <div
-        className={ShortcutListContainerStyle(TOPNAV_HEIGHT, this.props.height)}
+        className="jp-Shortcuts-ShortcutListContainer"
+        style={{
+          height: `${this.props.height - TOPNAV_HEIGHT}px`
+        }}
         id="shortcutListContainer"
       >
-        <div className={ShortcutListStyle}>
+        <div className="jp-Shortcuts-ShortcutList">
           {this.props.shortcuts.map((shortcut: ShortcutObject) => {
             return (
               <ShortcutItem
