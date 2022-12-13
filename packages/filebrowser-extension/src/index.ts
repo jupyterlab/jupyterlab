@@ -931,7 +931,7 @@ function addCommands(
         return;
       }
 
-      browserForPath.goUp();
+      void browserForPath.goUp();
     }
   });
 

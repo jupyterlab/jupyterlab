@@ -1378,7 +1378,7 @@ export class DirListing extends Widget {
         }
         event.stopPropagation();
         event.preventDefault();
-        this.goUp();
+        void this.goUp();
         break;
     }
 
