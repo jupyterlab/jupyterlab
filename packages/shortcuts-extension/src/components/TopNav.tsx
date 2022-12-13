@@ -45,26 +45,28 @@ function Symbols(props: ISymbolsProps): JSX.Element {
   return (
     <div className="jp-Shortcuts-Symbols">
       <table>
-        <tr>
-          <td>
-            <kbd>Cmd</kbd>
-          </td>
-          <td>⌘</td>
-          <td>
-            <kbd>Ctrl</kbd>
-          </td>
-          <td>⌃</td>
-        </tr>
-        <tr>
-          <td>
-            <kbd>Alt</kbd>
-          </td>
-          <td>⌥</td>
-          <td>
-            <kbd>Shift</kbd>
-          </td>
-          <td>⇧</td>
-        </tr>
+        <tbody>
+          <tr>
+            <td>
+              <kbd>Cmd</kbd>
+            </td>
+            <td>⌘</td>
+            <td>
+              <kbd>Ctrl</kbd>
+            </td>
+            <td>⌃</td>
+          </tr>
+          <tr>
+            <td>
+              <kbd>Alt</kbd>
+            </td>
+            <td>⌥</td>
+            <td>
+              <kbd>Shift</kbd>
+            </td>
+            <td>⇧</td>
+          </tr>
+        </tbody>
       </table>
     </div>
   );
