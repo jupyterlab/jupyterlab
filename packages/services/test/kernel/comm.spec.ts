@@ -273,7 +273,7 @@ describe('jupyter.services - Comm', () => {
         });
         await kernel.requestExecute({ code: SEND }, true).done;
         await expect(promise.promise).resolves.not.toThrow();
-      });
+      }, 30000);
     });
 
     describe('#onMsg', () => {
