@@ -21,6 +21,7 @@
 
 .jp-switch-label {
   margin-right: 5px;
+  font-family: var(--jp-ui-font-family);
 }
 
 .jp-switch-track {
