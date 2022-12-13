@@ -48,6 +48,9 @@ bumped their major version (following semver convention). We want to point out p
    of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
    for JupyterLab, users need to implement the interface ``ICompletionProvider`` and then register
    this provider with ``ICompletionProviderManager`` token.
+- ``@jupyterlab/codeeditor`` from 3.x to 4.x
+   * Remove ``ISelectionStyle`` (and therefore ``defaultSelectionStyle`` and ``IEditor.selectionStyle``). This was envisaged
+     for real-time collaboration. But this is not used in the final implementation.
 - ``@jupyterlab/console`` from 3.x to 4.x
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,

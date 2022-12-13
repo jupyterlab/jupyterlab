@@ -81,22 +81,6 @@ describe('CodeMirrorEditor', () => {
     });
   });
 
-  describe('#selectionStyle', () => {
-    it('should be the selection style of the editor', () => {
-      expect(editor.selectionStyle).toEqual(CodeEditor.defaultSelectionStyle);
-    });
-
-    it('should be settable', () => {
-      const style = {
-        className: 'foo',
-        displayName: 'bar',
-        color: 'black'
-      };
-      editor.selectionStyle = style;
-      expect(editor.selectionStyle).toEqual(style);
-    });
-  });
-
   describe('#editor', () => {
     it('should be the codemirror editor wrapped by the editor', () => {
       const cm = editor.editor;
