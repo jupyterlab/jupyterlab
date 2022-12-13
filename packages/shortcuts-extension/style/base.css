@@ -202,15 +202,7 @@
   display: flex;
   flex-wrap: wrap;
   padding: 6px 12px;
-  margin-left: 25%;
-}
-
-.jp-Shortcuts-ConflictContainer .jp-mod-selectors {
   margin-left: 20%;
-}
-
-.jp-Shortcuts-ConflictContainer.jp-mod-small {
-  margin-left: 0;
 }
 
 .jp-Shortcuts-ShortcutKeys {
@@ -320,16 +312,6 @@
 }
 
 /* Shortcut UI Style */
-.jp-Shortcuts-TopWhitespace {
-  content: ' ';
-  height: var(--jp-toolbar-micro-height);
-  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  z-index: 2;
-  width: 100%;
-  background: var(--jp-toolbar-background);
-  position: relative;
-}
 
 .jp-Shortcuts-ShortcutUI {
   display: flex;
@@ -349,60 +331,31 @@
 .jp-Shortcuts-TopNav {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   box-sizing: border-box;
   font-size: var(--jp-ui-font-size1);
   background-color: var(--jp-layout-color0);
-  z-index: 1;
-  height: 56px;
 }
 
 .jp-Shortcuts-Symbols {
-  width: 15%;
-  display: table;
-  padding-left: 12px;
-  padding-top: 5px;
-  line-height: 24px;
+  padding: 0 12px;
 }
 
-.jp-Shortcuts-SymbolsSmall {
-  line-height: 14px;
-}
-
-.jp-Shortcuts-SymbolsRow {
-  justify-content: center;
-  margin-bottom: 8px;
-  display: table-row;
-}
-
-.jp-Shortcuts-SymbolsSmall div {
-  margin: 0 10px;
-  font-size: var(--jp-ui-font-size1);
-  display: table-cell;
-}
-
-.jp-Shortcuts-SymbolsSmall span {
-  font-size: var(--jp-ui-font-size1);
-}
-
-.jp-Shortcuts-SearchContainer {
-  width: 60%;
-  text-align: center;
+.jp-Shortcuts-Symbols td:nth-child(2) {
+  padding-right: 10px;
 }
 
 .jp-Shortcuts-Search {
   border: var(--jp-border-width) solid var(--jp-layout-color3);
   height: 30px;
-  width: 65%;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color0);
-  padding-left: 6px;
   background-color: var(--jp-layout-color1);
   background-image: var(--jp-icon-search);
   background-size: 18px;
   background-position-x: 98%;
   background-position-y: 6px;
   background-repeat: no-repeat;
-  margin-top: 8px;
   outline: none;
 }
 
@@ -415,15 +368,6 @@
   color: var(--jp-ui-font-color2);
 }
 
-.jp-Shortcuts-AdvancedOptionsContainer {
-  display: contents;
-}
-
-.jp-Shortcuts-AdvancedOptions {
-  display: block;
-  padding-top: 15px;
-}
-
 .jp-Shortcuts-AdvancedOptionsSmall {
   width: 30%;
 }
@@ -432,32 +376,17 @@
   margin-top: 8px;
 }
 
-.jp-Shortcuts-AdvancedOptionsLink-Regular {
-  color: var(--jp-brand-color2);
+.jp-Shortcuts-AdvancedOptionsLink {
+  color: var(--jp-content-link-color);
   text-decoration: none;
   margin-right: 15px;
 }
 
-.jp-Shortcuts-AdvancedOptionsLink-Regular:hover {
-  color: var(--jp-brand-color1);
-}
-
-.jp-Shortcuts-AdvancedOptionsLink-Regular:active {
+.jp-Shortcuts-AdvancedOptionsLink:hover {
   color: var(--jp-brand-color0);
 }
 
-.jp-Shortcuts-AdvancedOptionsLink-Small {
-  color: var(--jp-brand-color2);
-  text-decoration: none;
-  text-align: center;
-  display: block;
-}
-
-.jp-Shortcuts-AdvancedOptionsLink-Small:hover {
-  color: var(--jp-brand-color1);
-}
-
-.jp-Shortcuts-AdvancedOptionsLink-Small:active {
+.jp-Shortcuts-AdvancedOptionsLink:active {
   color: var(--jp-brand-color0);
 }
 

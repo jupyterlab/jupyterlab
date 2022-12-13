@@ -448,10 +448,10 @@ export class ShortcutInput extends React.Component<
         <button
           className={
             !this.state.isFunctional
-              ? 'jp-Shortcuts-Submit jp-mod-defunc-Submit' // classes(SubmitStyle, SubmitNonFunctionalStyle)
+              ? 'jp-Shortcuts-Submit jp-mod-defunc-Submit'
               : !this.state.isAvailable
-              ? 'jp-Shortcuts-Submit jp-mod-conflict-Submit' // classes(SubmitStyle, SubmitConflictStyle)
-              : 'jp-Shortcuts-Submit' // classes(SubmitStyle)
+              ? 'jp-Shortcuts-Submit jp-mod-conflict-Submit'
+              : 'jp-Shortcuts-Submit'
           }
           id={'no-blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}

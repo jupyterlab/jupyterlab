@@ -4,13 +4,8 @@
  */
 
 import * as React from 'react';
-import {
-  ShortcutListContainerStyle,
-  ShortcutListStyle
-} from '../componentStyle/ShortcutListStyle';
 import { ShortcutObject, TakenByObject } from './ShortcutInput';
 import { ShortcutItem } from './ShortcutItem';
-import { UISize } from './ShortcutUI';
 import { IShortcutUIexternal } from './TopNav';
 
 const TOPNAV_HEIGHT: number = 115;
@@ -26,7 +21,6 @@ export interface IShortcutListProps {
   sortConflict: Function;
   clearConflicts: Function;
   height: number;
-  errorSize: UISize;
   contextMenu: Function;
   external: IShortcutUIexternal;
 }
@@ -55,7 +49,6 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
                 keyBindingsUsed={this.props.keyBindingsUsed}
                 sortConflict={this.props.sortConflict}
                 clearConflicts={this.props.clearConflicts}
-                errorSize={this.props.errorSize}
                 contextMenu={this.props.contextMenu}
                 external={this.props.external}
               />

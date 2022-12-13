@@ -12,7 +12,6 @@ import {
   ShortcutObject,
   TakenByObject
 } from './ShortcutInput';
-import { UISize } from './ShortcutUI';
 import { IShortcutUIexternal } from './TopNav';
 
 /** Props for ShortcutItem component */
@@ -25,7 +24,6 @@ export interface IShortcutItemProps {
   keyBindingsUsed: { [index: string]: TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
-  errorSize: UISize;
   contextMenu: Function;
   external: IShortcutUIexternal;
 }
@@ -212,16 +210,10 @@ export class ShortcutItem extends React.Component<
 
   getErrorRow(): JSX.Element {
     const trans = this.props.external.translator.load('jupyterlab');
-    const classes = ['jp-Shortcuts-ConflictContainer'];
-    if (this.props.errorSize === UISize.Regular) {
-      if (this.props.showSelectors) classes.push('jp-mod-selectors');
-    } else {
-      classes.push('jp-mod-small');
-    }
 
     return (
       <div className="jp-Shortcuts-Row">
-        <div className={classes.join(' ')}>
+        <div className="jp-Shortcuts-ConflictContainer">
           <div className="jp-Shortcuts-ErrorMessage">
             {trans.__(
               'Shortcut already in use by %1. Overwrite it?',
@@ -281,14 +273,12 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  getOptionalSelectorCell(): JSX.Element {
+  getOptionalSelectorCell(): JSX.Element | null {
     return this.props.showSelectors ? (
       <div className="jp-Shortcuts-Cell">
         <div className="jp-selector">{this.props.shortcut.selector}</div>
       </div>
-    ) : (
-      <div />
-    );
+    ) : null;
   }
 
   getClassNameForShortCuts(nonEmptyKeys: string[]): string {

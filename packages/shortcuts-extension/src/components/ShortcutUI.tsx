@@ -23,12 +23,6 @@ const enum MatchType {
   Default
 }
 
-export const enum UISize {
-  Regular,
-  Small,
-  Tiny
-}
-
 /** Props for ShortcutUI component */
 export interface IShortcutUIProps {
   external: IShortcutUIexternal;
@@ -489,7 +483,6 @@ export class ShortcutUI extends React.Component<
     }
     return (
       <div className="jp-Shortcuts-ShortcutUI" id="jp-shortcutui">
-        <div className="jp-Shortcuts-TopWhitespace" />
         <TopNav
           updateSearchQuery={this.updateSearchQuery}
           resetShortcuts={this.resetShortcuts}
@@ -510,7 +503,6 @@ export class ShortcutUI extends React.Component<
           sortConflict={this.sortConflict}
           clearConflicts={this.clearConflicts}
           height={this.props.height}
-          errorSize={this.props.width < 775 ? UISize.Small : UISize.Regular}
           contextMenu={this.contextMenu}
           external={this.props.external}
         />
