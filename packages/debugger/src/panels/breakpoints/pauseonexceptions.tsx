@@ -12,6 +12,7 @@ import { Breakpoints } from './index';
 
 const PAUSE_ON_EXCEPTION_CLASS = 'jp-debugger-pauseOnExceptions';
 const PAUSE_ON_EXCEPTION_BUTTON_CLASS = 'jp-PauseOnExceptions';
+const PAUSE_ON_EXCEPTION_MENU_CLASS = 'jp-PauseOnExceptions-menu';
 
 export class PauseOnExceptionsWidget extends ToolbarButton {
   constructor(props: PauseOnExceptions.IProps) {
@@ -88,6 +89,7 @@ export class PauseOnExceptionsMenu extends MenuSvg {
     }, this);
 
     this._build();
+    this.addClass(PAUSE_ON_EXCEPTION_MENU_CLASS);
   }
 
   private _build(): void {
