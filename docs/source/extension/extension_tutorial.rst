@@ -337,18 +337,28 @@ code:
       activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_apod is activated!');
 
-        // Create a blank content widget inside of a MainAreaWidget
-        const content = new Widget();
-        const widget = new MainAreaWidget({ content });
-        widget.id = 'apod-jupyterlab';
-        widget.title.label = 'Astronomy Picture';
-        widget.title.closable = true;
+        // Define a widget creator function,
+        // then call it to make a new widget
+        const newWidget = () => {
+          // Create a blank content widget inside of a MainAreaWidget
+          const content = new Widget();
+          const widget = new MainAreaWidget({ content });
+          widget.id = 'apod-jupyterlab';
+          widget.title.label = 'Astronomy Picture';
+          widget.title.closable = true;
+          return widget;
+        }
+        let widget = newWidget();
 
         // Add an application command
         const command: string = 'apod:open';
         app.commands.addCommand(command, {
           label: 'Random Astronomy Picture',
           execute: () => {
+            // Regenerate the widget if disposed
+            if (widget.isDisposed) {
+              widget = newWidget();
+            }
             if (!widget.isAttached) {
               // Attach the widget to the main work area if it's not there
               app.shell.add(widget, 'main');
@@ -406,8 +416,9 @@ Show a picture in the panel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You now have an empty panel. It's time to add a picture to it. Go back to
-your code editor. Add the following code below the lines that create a
-``MainAreaWidget`` instance and above the lines that define the command.
+your code editor. Add the following code in the widget creator function below
+the lines that create a ``MainAreaWidget`` instance and above the line that
+returns the new widget.
 
 .. code-block:: typescript
 
@@ -455,12 +466,45 @@ this definition just under the imports at the top of the file.
           url: string;
         };
 
-And update the ``activate`` method to be ``async`` since we are now using
-``await`` in the method body.
+Then we need to add ``async`` and ``await`` to a few places in our code since
+we're using ``await`` in our widget creator function.
+
+Update the ``activate`` method to be ``async``:
 
 .. code-block:: typescript
 
         activate: async (app: JupyterFrontEnd, palette: ICommandPalette) =>
+
+Next, update the ``newWidget`` function to be ``async``:
+
+.. code-block:: typescript
+
+        const newWidget = async () => {
+
+Finally, add ``await`` to both of the ``newWidget`` function calls:
+
+.. code-block:: typescript
+      :emphasize-lines: 1,10
+
+        let widget = await newWidget();
+
+        // Add an application command
+        const command: string = 'apod:open';
+        app.commands.addCommand(command, {
+          label: 'Random Astronomy Picture',
+          execute: async () => {
+            // Regenerate the widget if disposed
+            if (widget.isDisposed) {
+              widget = await newWidget();
+            }
+            if (!widget.isAttached) {
+              // Attach the widget to the main work area if it's not there
+              app.shell.add(widget, 'main');
+            }
+            // Activate the widget
+            app.shell.activateById(widget.id);
+          }
+        });
 
 .. note::
 
@@ -533,56 +577,60 @@ The beginning of the function should read like the following:
       activate: async (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_apod is activated!');
 
-        // Create a blank content widget inside of a MainAreaWidget
-        const content = new Widget();
-        content.addClass('my-apodWidget'); // new line
-        const widget = new MainAreaWidget({content});
-        widget.id = 'apod-jupyterlab';
-        widget.title.label = 'Astronomy Picture';
-        widget.title.closable = true;
+        const newWidget = async () => {
+          // Create a blank content widget inside of a MainAreaWidget
+          const content = new Widget();
+          content.addClass('my-apodWidget'); // new line
+          const widget = new MainAreaWidget({ content });
+          widget.id = 'apod-jupyterlab';
+          widget.title.label = 'Astronomy Picture';
+          widget.title.closable = true;
 
-        // Add an image element to the content
-        let img = document.createElement('img');
-        content.node.appendChild(img);
+          // Add an image element to the content
+          let img = document.createElement('img');
+          content.node.appendChild(img);
 
-        let summary = document.createElement('p');
-        content.node.appendChild(summary);
+          let summary = document.createElement('p');
+          content.node.appendChild(summary);
 
-        // Get a random date string in YYYY-MM-DD format
-        function randomDate() {
-          const start = new Date(2010, 1, 1);
-          const end = new Date();
-          const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
-          return randomDate.toISOString().slice(0, 10);
-        }
-
-        // Fetch info about a random picture
-        const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${randomDate()}`);
-        if (!response.ok) {
-          const data = await response.json();
-          if (data.error) {
-            summary.innerText = data.error.message;
-          } else {
-            summary.innerText = response.statusText;
+          // Get a random date string in YYYY-MM-DD format
+          function randomDate() {
+            const start = new Date(2010, 1, 1);
+            const end = new Date();
+            const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
+            return randomDate.toISOString().slice(0, 10);
           }
-        } else {
-          const data = await response.json() as APODResponse;
 
-          if (data.media_type === 'image') {
-            // Populate the image
-            img.src = data.url;
-            img.title = data.title;
-            summary.innerText = data.title;
-            if (data.copyright) {
-              summary.innerText += ` (Copyright ${data.copyright})`;
+          // Fetch info about a random picture
+          const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${randomDate()}`);
+          if (!response.ok) {
+            const data = await response.json();
+            if (data.error) {
+              summary.innerText = data.error.message;
+            } else {
+              summary.innerText = response.statusText;
             }
           } else {
-            summary.innerText = 'Random APOD fetched was not an image.';
+            const data = await response.json() as APODResponse;
+
+            if (data.media_type === 'image') {
+              // Populate the image
+              img.src = data.url;
+              img.title = data.title;
+              summary.innerText = data.title;
+              if (data.copyright) {
+                summary.innerText += ` (Copyright ${data.copyright})`;
+              }
+            } else {
+              summary.innerText = 'Random APOD fetched was not an image.';
+            }
           }
+
+          return widget;
         }
 
-      // Keep all the remaining command lines the same
-      // as before from here down ...
+        // Keep all the remaining command lines the same
+        // as before from here down ...
 
 Build your extension if necessary (``jlpm run build``) and refresh your
 JupyterLab browser tab. Invoke the *Random Astronomy Picture* command and
@@ -722,18 +770,32 @@ these changes:
     function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
       console.log('JupyterLab extension jupyterlab_apod is activated!');
 
+      // Define a widget creator function
+      const newWidget = () => {
+        const content = new APODWidget();
+        const widget = new MainAreaWidget({content});
+        widget.id = 'apod-jupyterlab';
+        widget.title.label = 'Astronomy Picture';
+        widget.title.closable = true;
+        return {w: widget, c:content};
+      }
+
       // Create a single widget
-      const content = new APODWidget();
-      const widget = new MainAreaWidget({content});
-      widget.id = 'apod-jupyterlab';
-      widget.title.label = 'Astronomy Picture';
-      widget.title.closable = true;
+      let result = newWidget();
+      let widget = result.w;
+      let content = result.c;
 
       // Add an application command
       const command: string = 'apod:open';
       app.commands.addCommand(command, {
         label: 'Random Astronomy Picture',
         execute: () => {
+          // Regenerate the widget if disposed
+          if (widget.isDisposed) {
+            result = newWidget();
+            widget = result.w;
+            content = result.c;
+          }
           if (!widget.isAttached) {
             // Attach the widget to the main work area if it's not there
             app.shell.add(widget, 'main');
