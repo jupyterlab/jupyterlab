@@ -566,13 +566,12 @@ field pointing to it. In general, you should import all of your styles into a
 single CSS file, such as this ``index.css`` file, and put the path to that CSS
 file in the ``package.json`` file ``style`` field.
 
-Return to the ``index.ts`` file. Modify the ``activate``
-function to apply the CSS classes, the copyright information, and error handling
-for the API response.
+Return to the ``index.ts`` file. Modify the ``activate`` function to apply the
+CSS classes, the copyright information, and error handling for the API response.
 The beginning of the function should read like the following:
 
 .. code-block:: typescript
-      :emphasize-lines: 6,16-17,28-50
+      :emphasize-lines: 7,17-18,28-51
 
       activate: async (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_apod is activated!');
