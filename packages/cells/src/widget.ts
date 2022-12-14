@@ -2094,7 +2094,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       if (numHashAtStart > 0) {
         this.inputArea!.editor.setCursorPosition({
           column: numHashAtStart + 1,
-          line: 0
+          line: 1
         });
       }
     }

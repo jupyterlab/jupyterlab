@@ -1985,8 +1985,8 @@ export class Notebook extends StaticNotebook {
       if (this.activeCellIndex < prev) {
         const editor = this.activeCell!.editor;
         if (editor) {
-          const lastLine = editor.lineCount - 1;
-          editor.setCursorPosition({ line: lastLine, column: 0 });
+          const lastLine = editor.lineCount;
+          editor.setCursorPosition({ line: lastLine, column: 1 });
         }
       }
     } else if (location === 'bottom') {
@@ -1995,7 +1995,7 @@ export class Notebook extends StaticNotebook {
       if (this.activeCellIndex > prev) {
         const editor = this.activeCell!.editor;
         if (editor) {
-          editor.setCursorPosition({ line: 0, column: 0 });
+          editor.setCursorPosition({ line: 1, column: 1 });
         }
       }
     }

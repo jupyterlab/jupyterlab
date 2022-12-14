@@ -19,7 +19,7 @@ import { ISignal, Signal } from '@lumino/signaling';
  */
 export namespace CodeEditor {
   /**
-   * A zero-based position in the editor.
+   * A one-based position in the editor.
    */
   export interface IPosition extends JSONObject {
     /**
@@ -484,7 +484,7 @@ export namespace CodeEditor {
     /**
      * Reveals the given selection in the editor.
      *
-     * @param position - The desired selection to reveal.
+     * @param selection - The desired selection to reveal.
      */
     revealSelection(selection: IRange): void;
 

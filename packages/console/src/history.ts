@@ -266,12 +266,12 @@ export class ConsoleHistory implements IConsoleHistory {
         }
         this._setByHistory = true;
         sharedModel.setSource(value);
-        let columnPos = 0;
-        columnPos = value.indexOf('\n');
-        if (columnPos < 0) {
+        let columnPos = 1;
+        columnPos = value.indexOf('\n') + 1;
+        if (columnPos < 1) {
           columnPos = value.length;
         }
-        editor.setCursorPosition({ line: 0, column: columnPos });
+        editor.setCursorPosition({ line: 1, column: columnPos });
       });
     } else {
       void this.forward(source).then(value => {

@@ -182,9 +182,9 @@ describe('CodeMirrorEditor', () => {
   describe('#getLine()', () => {
     it('should get a line of text', () => {
       model.sharedModel.setSource('foo\nbar');
-      expect(editor.getLine(0)).toBe('foo');
-      expect(editor.getLine(1)).toBe('bar');
-      expect(editor.getLine(2)).toBeUndefined();
+      expect(editor.getLine(1)).toBe('foo');
+      expect(editor.getLine(2)).toBe('bar');
+      expect(editor.getLine(3)).toBeUndefined();
     });
   });
 
@@ -192,13 +192,13 @@ describe('CodeMirrorEditor', () => {
     it('should get the offset for a given position', () => {
       model.sharedModel.setSource('foo\nbar');
       let pos = {
-        column: 2,
-        line: 1
+        column: 3,
+        line: 2
       };
       expect(editor.getOffsetAt(pos)).toBe(6);
       pos = {
-        column: 2,
-        line: 5
+        column: 3,
+        line: 6
       };
       expect(() => {
         editor.getOffsetAt(pos);
@@ -210,8 +210,8 @@ describe('CodeMirrorEditor', () => {
     it('should get the position for a given offset', () => {
       model.sharedModel.setSource('foo\nbar');
       let pos = editor.getPositionAt(6);
-      expect(pos.column).toBe(2);
-      expect(pos.line).toBe(1);
+      expect(pos.column).toBe(3);
+      expect(pos.line).toBe(2);
       expect(() => {
         pos = editor.getPositionAt(101);
       }).toThrow(RangeError);
@@ -310,7 +310,7 @@ describe('CodeMirrorEditor', () => {
   describe('#revealPosition()', () => {
     it('should reveal the given position in the editor', () => {
       model.sharedModel.setSource(TEXT);
-      editor.revealPosition({ line: 50, column: 0 });
+      editor.revealPosition({ line: 50, column: 1 });
       expect(editor).toBeTruthy();
     });
   });
@@ -318,8 +318,8 @@ describe('CodeMirrorEditor', () => {
   describe('#revealSelection()', () => {
     it('should reveal the given selection in the editor', () => {
       model.sharedModel.setSource(TEXT);
-      const start = { line: 50, column: 0 };
-      const end = { line: 52, column: 0 };
+      const start = { line: 50, column: 1 };
+      const end = { line: 52, column: 1 };
       editor.setSelection({ start, end });
       editor.revealSelection(editor.getSelection());
       expect(editor).toBeTruthy();
@@ -330,8 +330,8 @@ describe('CodeMirrorEditor', () => {
     it('should get the primary position of the cursor', () => {
       model.sharedModel.setSource(TEXT);
       let pos = editor.getCursorPosition();
-      expect(pos.line).toBe(0);
-      expect(pos.column).toBe(0);
+      expect(pos.line).toBe(1);
+      expect(pos.column).toBe(1);
 
       editor.setCursorPosition({ line: 12, column: 3 });
       pos = editor.getCursorPosition();
@@ -353,16 +353,16 @@ describe('CodeMirrorEditor', () => {
   describe('#getSelection()', () => {
     it('should get the primary selection of the editor', () => {
       const selection = editor.getSelection();
-      expect(selection.start.line).toBe(0);
-      expect(selection.end.line).toBe(0);
+      expect(selection.start.line).toBe(1);
+      expect(selection.end.line).toBe(1);
     });
   });
 
   describe('#setSelection()', () => {
     it('should set the primary selection of the editor', () => {
       model.sharedModel.setSource(TEXT);
-      const start = { line: 50, column: 0 };
-      const end = { line: 52, column: 0 };
+      const start = { line: 50, column: 1 };
+      const end = { line: 52, column: 1 };
       editor.setSelection({ start, end });
       expect(editor.getSelection().start).toEqual(start);
       expect(editor.getSelection().end).toEqual(end);
@@ -371,12 +371,12 @@ describe('CodeMirrorEditor', () => {
     it('should remove any secondary cursors', () => {
       model.sharedModel.setSource(TEXT);
       const range0 = {
-        start: { line: 50, column: 0 },
-        end: { line: 52, column: 0 }
+        start: { line: 50, column: 1 },
+        end: { line: 52, column: 1 }
       };
       const range1 = {
-        start: { line: 53, column: 0 },
-        end: { line: 54, column: 0 }
+        start: { line: 53, column: 1 },
+        end: { line: 54, column: 1 }
       };
       editor.setSelections([range0, range1]);
       editor.setSelection(range1);
@@ -388,12 +388,12 @@ describe('CodeMirrorEditor', () => {
     it('should get the selections for all the cursors', () => {
       model.sharedModel.setSource(TEXT);
       const range0 = {
-        start: { line: 50, column: 0 },
-        end: { line: 52, column: 0 }
+        start: { line: 50, column: 1 },
+        end: { line: 52, column: 1 }
       };
       const range1 = {
-        start: { line: 53, column: 0 },
-        end: { line: 54, column: 0 }
+        start: { line: 53, column: 1 },
+        end: { line: 54, column: 1 }
       };
       editor.setSelections([range0, range1]);
       const selections = editor.getSelections();
@@ -406,12 +406,12 @@ describe('CodeMirrorEditor', () => {
     it('should set the selections for all the cursors', () => {
       model.sharedModel.setSource(TEXT);
       const range0 = {
-        start: { line: 50, column: 0 },
-        end: { line: 52, column: 0 }
+        start: { line: 50, column: 1 },
+        end: { line: 52, column: 1 }
       };
       const range1 = {
-        start: { line: 53, column: 0 },
-        end: { line: 54, column: 0 }
+        start: { line: 53, column: 1 },
+        end: { line: 54, column: 1 }
       };
       editor.setSelections([range0, range1]);
       const selections = editor.getSelections();
@@ -423,8 +423,8 @@ describe('CodeMirrorEditor', () => {
       model.sharedModel.setSource(TEXT);
       editor.setSelections([]);
       const selection = editor.getSelection();
-      expect(selection.start.line).toBe(0);
-      expect(selection.end.line).toBe(0);
+      expect(selection.start.line).toBe(1);
+      expect(selection.end.line).toBe(1);
     });
   });
 

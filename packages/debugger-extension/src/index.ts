@@ -852,8 +852,8 @@ const main: JupyterFrontEndPlugin<void> = {
             results.forEach(editor => {
               void editor.reveal().then(() => {
                 editor.get()?.revealPosition({
-                  line: (breakpoint.line as number) - 1,
-                  column: breakpoint.column || 0
+                  line: breakpoint.line ?? 1,
+                  column: breakpoint.column ?? 1
                 });
               });
             });

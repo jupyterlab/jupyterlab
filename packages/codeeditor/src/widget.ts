@@ -155,7 +155,7 @@ export class CodeEditorWrapper extends Widget {
       if (
         this.editor
           .getLine(end.line)!
-          .slice(0, end.column)
+          .slice(0, end.column - 1)
           .match(leadingWhitespaceRe)
       ) {
         this.addClass(HAS_IN_LEADING_WHITESPACE_CLASS);

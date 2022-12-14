@@ -407,8 +407,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Returns the content for the given line number.
    */
   getLine(line: number): string | undefined {
-    // TODO: CM6 remove +1 when CM6 first line number has propagated
-    line = line + 1;
     return line <= this.doc.lines ? this.doc.line(line).text : undefined;
   }
 
@@ -416,17 +414,15 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Find an offset for the given position.
    */
   getOffsetAt(position: CodeEditor.IPosition): number {
-    // TODO: CM6 remove +1 when CM6 first line number has propagated
-    return this.doc.line(position.line + 1).from + position.column;
+    return this.doc.line(position.line).from + position.column - 1;
   }
 
   /**
    * Find a position for the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
-    // TODO: CM6 remove -1 when CM6 first line number has propagated
     const line = this.doc.lineAt(offset);
-    return { line: line.number - 1, column: offset - line.from };
+    return { line: line.number, column: offset - line.from + 1 };
   }
 
   /**
@@ -484,12 +480,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   firstLine(): number {
-    // TODO: return 1 when CM6 first line number has propagated
-    return 0;
+    return 1;
   }
 
   lastLine(): number {
-    return this.doc.lines - 1;
+    return this.doc.lines;
   }
 
   cursorCoords(

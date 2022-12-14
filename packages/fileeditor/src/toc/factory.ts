@@ -57,7 +57,7 @@ export abstract class EditorTableOfContentsFactory extends TableOfContentsFactor
       if (heading) {
         widget.content.editor.setCursorPosition({
           line: heading.line,
-          column: 0
+          column: 1
         });
       }
     };

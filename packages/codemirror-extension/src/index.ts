@@ -378,8 +378,8 @@ function activateEditorCommands(
       const column = args['column'] as number | undefined;
       if (line !== undefined || column !== undefined) {
         editor.setCursorPosition({
-          line: (line ?? 1) - 1,
-          column: (column ?? 1) - 1
+          line: line ?? 1,
+          column: column ?? 1
         });
       } else {
         editor.execCommand(gotoLine);

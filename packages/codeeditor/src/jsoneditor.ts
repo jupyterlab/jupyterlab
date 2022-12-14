@@ -316,7 +316,7 @@ export class JSONEditor extends Widget {
       this._originalValue = content;
       // Move the cursor to within the brace.
       if (value.length > 1 && value[0] === '{') {
-        this.editor.setCursorPosition({ line: 0, column: 1 });
+        this.editor.setCursorPosition({ line: 1, column: 2 });
       }
     }
     this._changeGuard = false;

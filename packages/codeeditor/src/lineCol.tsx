@@ -295,7 +295,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
    * Handle submission for the widget.
    */
   private _handleSubmit(value: number): void {
-    this.model!.editor!.setCursorPosition({ line: value - 1, column: 0 });
+    this.model!.editor!.setCursorPosition({ line: value, column: 1 });
     this._popup!.dispose();
     this.model!.editor!.focus();
   }
@@ -333,8 +333,8 @@ export namespace LineCol {
         this._editor.model.selections.changed.connect(this._onSelectionChanged);
 
         const pos = this._editor.getCursorPosition();
-        this._column = pos.column + 1;
-        this._line = pos.line + 1;
+        this._column = pos.column;
+        this._line = pos.line;
       }
 
       this._triggerChange(oldState, this._getAllState());
@@ -360,8 +360,8 @@ export namespace LineCol {
     private _onSelectionChanged = () => {
       const oldState = this._getAllState();
       const pos = this.editor!.getCursorPosition();
-      this._line = pos.line + 1;
-      this._column = pos.column + 1;
+      this._line = pos.line;
+      this._column = pos.column;
 
       this._triggerChange(oldState, this._getAllState());
     };

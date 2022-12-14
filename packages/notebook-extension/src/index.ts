@@ -1266,7 +1266,7 @@ function activateCodeConsole(
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
               while (
-                lastLine < editor.lineCount &&
+                lastLine <= editor.lineCount &&
                 !srcLines[lastLine].replace(/\s/g, '').length
               ) {
                 lastLine += 1;

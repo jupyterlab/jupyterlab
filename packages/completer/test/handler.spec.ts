@@ -190,7 +190,7 @@ describe('@jupyterlab/completer', () => {
           expect.not.arrayContaining(['handleTextChange'])
         );
         editor.model.sharedModel.setSource('bar');
-        editor.setCursorPosition({ line: 0, column: 2 });
+        editor.setCursorPosition({ line: 1, column: 3 });
         // This signal is emitted (again) because the cursor position that
         // a natural user would create need to be recreated here.
         // (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' }); @todo remove?
@@ -239,8 +239,8 @@ describe('@jupyterlab/completer', () => {
         const editor = createEditorWidget().editor;
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
-        const line = 1;
-        const column = 5; // this sets the cursor after the "#" sign - not in the mid of the replaced word
+        const line = 2;
+        const column = 6; // this sets the cursor after the "#" sign - not in the mid of the replaced word
         const request: Completer.ITextState = {
           column,
           line,
@@ -271,8 +271,8 @@ describe('@jupyterlab/completer', () => {
         const editor = createEditorWidget().editor;
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
-        const line = 1;
-        const column = 5;
+        const line = 2;
+        const column = 6;
         const request: Completer.ITextState = {
           column,
           line,
@@ -320,8 +320,8 @@ describe('@jupyterlab/completer', () => {
       const editor = createEditorWidget().editor;
       const text = 'eggs\n  # comment\nbaz';
       const want = 'eggs\n foobar # comment\nbaz';
-      const line = 1;
-      const column = 1;
+      const line = 2;
+      const column = 2;
       const request: Completer.ITextState = {
         column: column,
         line,
