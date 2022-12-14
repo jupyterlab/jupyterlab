@@ -436,7 +436,13 @@ appropriate package folder:
 
    cd packages/notebook
    jlpm run build:test
-   jlpm test
+   jlpm test --runInBand
+
+.. note::
+
+    ``--runInBand`` option will run all tests serially in the current process.
+    We advice to use it as some tests are spinning a Jupyter Server that does not
+    like to be executed in parallel.
 
 We use ``jest`` for all tests, so standard ``jest`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an
