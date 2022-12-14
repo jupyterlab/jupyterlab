@@ -29,7 +29,7 @@ Features using external services
 Announcements plugin
 ^^^^^^^^^^^^^^^^^^^^
 
-The announcements plugin fetches a news feed from a GitHub page 
+The announcements plugin fetches a news feed from a GitHub page
 (https://jupyterlab.github.io/assets) and metadata of the JupyterLab Python
 package on PyPI.org (https://pypi.org/pypi/jupyterlab/json).
 
