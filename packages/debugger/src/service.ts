@@ -52,6 +52,13 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Get debugger config.
+   */
+  get config(): IDebugger.IConfig {
+    return this._config;
+  }
+
+  /**
    * Whether the debug service is disposed.
    */
   get isDisposed(): boolean {
@@ -66,20 +73,10 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Whether the current debugger is pausing on exceptions.
+   * A signal emitted when the pause on exception filter changes.
    */
-  get isPausingOnExceptions(): boolean {
-    const kernel = this.session?.connection?.kernel?.name ?? '';
-    if (kernel) {
-      const tmpFileParams = this._config.getTmpFileParams(kernel);
-      if (tmpFileParams) {
-        return (
-          this._session?.pausingOnExceptions.includes(tmpFileParams.prefix) ??
-          false
-        );
-      }
-    }
-    return false;
+  get pauseOnExceptionChanged(): Signal<IDebugger, void> {
+    return this._pauseOnExceptionChanged;
   }
 
   /**
@@ -121,6 +118,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       }
       this._eventMessage.emit(event);
     });
+
     this._sessionChanged.emit(session);
   }
 
@@ -427,6 +425,10 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._clearModel();
       this._clearSignals();
     }
+
+    if (this.session.currentExceptionFilter) {
+      this.pauseOnExceptions(this.session.currentExceptionFilter, true);
+    }
   }
 
   /**
@@ -557,7 +559,6 @@ export class DebuggerService implements IDebugger, IDisposable {
 
   /**
    * Determines if pausing on exceptions is supported by the kernel
-   *
    */
   pauseOnExceptionsIsValid(): boolean {
     if (this.isStarted) {
@@ -571,54 +572,34 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Enable or disable pausing on exceptions.
    *
-   * @param enable - Whether to enbale or disable pausing on exceptions.
+   * @param exceptionFilter - The filter to use (empty string will disable it).
+   * @param force - Send the request even if the current filter is the same (useful when restoring)
    */
-  async pauseOnExceptions(enable: boolean): Promise<void> {
+  async pauseOnExceptions(
+    exceptionFilter: string,
+    force: boolean = false
+  ): Promise<void> {
     if (!this.session?.isStarted) {
       return;
     }
-
-    const kernel = this.session?.connection?.kernel?.name ?? '';
-    if (!kernel) {
-      return;
-    }
-    const tmpFileParams = this._config.getTmpFileParams(kernel);
-    if (!tmpFileParams) {
-      return;
-    }
-    let prefix = tmpFileParams.prefix;
     const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
-    let pauseOnExceptionKernels = this.session.pausingOnExceptions;
-    if (enable) {
-      if (!this.session.pausingOnExceptions.includes(prefix)) {
-        pauseOnExceptionKernels.push(prefix);
-        this.session.pausingOnExceptions = pauseOnExceptionKernels;
+    let options: DebugProtocol.SetExceptionBreakpointsArguments;
+    if (this.session.currentExceptionFilter !== exceptionFilter || force) {
+      if (
+        exceptionBreakpointFilters?.map(e => e.filter).includes(exceptionFilter)
+      ) {
+        this.session.currentExceptionFilter = exceptionFilter;
+        options = { filters: [exceptionFilter] };
+      } else {
+        this.session.currentExceptionFilter = null;
+        options = { filters: [] };
       }
     } else {
-      let prefixIndex = this.session.pausingOnExceptions.indexOf(prefix);
-      if (prefixIndex > -1) {
-        this.session.pausingOnExceptions = pauseOnExceptionKernels.splice(
-          prefixIndex,
-          1
-        );
-        this.session.pausingOnExceptions = pauseOnExceptionKernels;
-      }
+      this.session.currentExceptionFilter = null;
+      options = { filters: [] };
     }
-    const filters: string[] = [];
-    const exceptionOptions: DebugProtocol.ExceptionOptions[] = [];
-    const breakMode = enable ? 'userUnhandled' : 'never';
-    for (let filterDict of exceptionBreakpointFilters ?? []) {
-      filters.push(filterDict.filter);
-      exceptionOptions.push({
-        path: [{ names: this.session.exceptionPaths }],
-        breakMode: breakMode
-      });
-    }
-    const options: DebugProtocol.SetExceptionBreakpointsArguments = {
-      filters: filters,
-      exceptionOptions: exceptionOptions
-    };
     await this.session.sendRequest('setExceptionBreakpoints', options);
+    this._pauseOnExceptionChanged.emit();
   }
 
   /**
@@ -983,6 +964,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   );
   private _specsManager: KernelSpec.IManager | null;
   private _trans: TranslationBundle;
+  private _pauseOnExceptionChanged = new Signal<IDebugger, void>(this);
 }
 
 /**

@@ -359,7 +359,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
     // update the active debug session
     if (!this._service.session) {
-      this._service.session = new Debugger.Session({ connection });
+      this._service.session = new Debugger.Session({
+        connection,
+        config: this._service.config
+      });
     } else {
       this._previousConnection = this._service.session!.connection?.kernel
         ? this._service.session.connection
