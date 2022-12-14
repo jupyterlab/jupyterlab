@@ -13,8 +13,7 @@
   background: var(--jp-layout-color2);
   min-height: var(--jp-statusbar-height);
   justify-content: space-between;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding: 0 10px;
 }
 
 .jp-StatusBar-Left {
@@ -36,14 +35,12 @@
 
 .jp-StatusBar-Item {
   max-height: var(--jp-statusbar-height);
-  margin-left: 2px;
-  margin-right: 2px;
+  margin: 0 2px;
   height: var(--jp-statusbar-height);
   white-space: nowrap;
   text-overflow: ellipsis;
   color: var(--jp-ui-font-color1);
-  padding-left: 10px;
-  padding-right: 10px;
+  padding: 0 6px;
 }
 
 .jp-mod-highlighted:hover {
