@@ -40,22 +40,14 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 
 describe('jupyter.services - Comm', () => {
   let server: JupyterServer;
+  let kernelManager: KernelManager;
+  let kernel: Kernel.IKernelConnection;
 
   jest.retryTimes(3);
 
   beforeAll(async () => {
     server = new JupyterServer();
     await server.start();
-  }, 30000);
-
-  afterAll(async () => {
-    await server.shutdown();
-  });
-
-  let kernelManager: KernelManager;
-  let kernel: Kernel.IKernelConnection;
-
-  beforeAll(async () => {
     kernelManager = new KernelManager();
     kernel = await kernelManager.startNew({ name: 'ipython' });
   }, 30000);
@@ -69,6 +61,7 @@ describe('jupyter.services - Comm', () => {
 
   afterAll(async () => {
     await kernel.shutdown();
+    await server.shutdown();
   });
 
   describe('Kernel', () => {
