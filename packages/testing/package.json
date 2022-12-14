@@ -25,8 +25,8 @@
     "build:all": "npm run build",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
-    "test": "jest",
-    "test:cov": "jest --collect-coverage",
+    "test": "jest -i",
+    "test:cov": "jest -i --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
