@@ -6,6 +6,11 @@
 Real Time Collaboration
 =======================
 
+.. note::
+
+    To activate Real-Time Collaboration in JupyterLab, is necessary to use Jupyter
+    Server v2.
+
 From JupyterLab 3.1, file documents and notebooks have collaborative
 editing using the `Yjs shared editing framework <https://github.com/yjs/yjs>`_.
 Editors are not collaborative by default; to activate it, start JupyterLab
