@@ -158,6 +158,60 @@ Extension Development Changes
 - In JupyterLab 3.x, the CSS for a _disabled_ prebuilt extensions would still be loaded on the page.
   This is no longer the case in JupyterLab 4.0.
 
+
+.. _extension_migration_3.5_3.6:
+
+JupyterLab 3.5 to 3.6
+---------------------
+
+Real-Time Collaboration
+^^^^^^^^^^^^^^^^^^^^^^^
+In JupyterLab v3.6, it is necessary to install Jupyter Server v2.0 to use real-time collaboration.
+This requirement was introduced to take advantage of the new identity API in Jupyter Server v2.0.
+
+On the other side, we also changed how JupyterLab loads documents (only in collaborative mode).
+Instead of using the content API, now the provider opens a WebSocket connection to the
+`YDocWebSocketHandler`, which is implemented in an external
+`jupyter server extension <https://github.com/jupyter-server/jupyter_server_ydoc>`__.
+
+In addition, the shared models' package was moved to an external package called `@jupyter/ydoc
+<https://github.com/jupyter-server/jupyter_ydoc>`__. All the extensions that depend on
+``@jupyterlab/shared-models`` will need to update to depend in ``@jupyter/ydoc@~0.2.2``; the API should
+be the same.
+
+**API Changes:**
+To be able to fix RTC and make it stable. It was necessary to change the API and make a few breaking changes.
+These changes should not affect the vast majority of extensions. They will only affect a couple
+of extensions focused on RTC.
+
+It was necessary to change the paradigm of how JupyterLab loads documents and replace the locking mechanism
+in the back-end. Instead of identifying the first client to open the document, it now centralizes
+the process by instantiating a YDoc client in the back-end. This client is the only one that loads
+the content of the document into memory and shares it with every other client connected.
+
+The involved packages are:
+
+- ``@jupyterlab/docprovider``:
+   * The interface ``IDocumentProvider``, now extends from ``IDisposable``.
+     Removed: ``acquireLock``, ``releaseLock``, ``setPath``, ``destroy``, ``requestInitialContent`` and ``putInitializedState``.
+     Added: ``ready`` and ``isDisposed``.
+
+   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument = ISharedDocument``.
+     And the ``ymodel`` attribute has been renamed ``model`` typed ``T`` (relaxing typing from ``YDocument`` to ``ISharedDocument``).
+
+   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+     It does not extend ``WebSocketProvider`` from ``y-websocket`` anymore.
+
+   * ``WebSocketProvider.IOptions`` has a new optional attribute, ``user``.
+
+- ``@jupyterlab/services``:
+   * The interface ``IManager`` has a new optional property, ``user`` that implement `User.IManager <../api/interfaces/services.User.IManager.html>`_.
+
+   * The ``ServiceManager`` class implements the optional property ``user`` from the ``IManager``.
+
+
+.. _extension_migration_3.0_3.1:
+
 JupyterLab 3.0 to 3.1
 ---------------------
 
