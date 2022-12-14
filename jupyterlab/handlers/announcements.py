@@ -85,7 +85,7 @@ class CheckForUpdate(CheckForUpdateABC):
         """Get the notification message if a new version is available.
 
         Returns:
-            None if there is not update.
+            None if there is no update.
             or the notification message
             or the notification message and a tuple(label, URL link) for the user to get more information
         """
