@@ -64,7 +64,6 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.16",
     "@jupyterlab/documentsearch": "^4.0.0-alpha.16",
     "@jupyterlab/nbformat": "^4.0.0-alpha.16",
-    "@jupyterlab/observables": "^5.0.0-alpha.16",
     "@jupyterlab/statusbar": "^4.0.0-alpha.16",
     "@jupyterlab/translation": "^4.0.0-alpha.16",
     "@jupyterlab/ui-components": "^4.0.0-alpha.31",
