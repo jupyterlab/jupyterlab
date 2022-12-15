@@ -14,6 +14,8 @@ const NOTIFICATION_TYPE = [
   'in-progress'
 ];
 
+const ACTION_DISPLAY_TYPE = ['default', 'accent', 'warn', 'link'];
+
 test.describe('Toast', () => {
   for (const type of NOTIFICATION_TYPE) {
     test(`should display a ${type} notification`, async ({ page }) => {
@@ -86,11 +88,48 @@ test.describe('Toast', () => {
     );
   });
 
-  test('should display a markdown notification', async ({ page }) => {
+  for (const displayType of ACTION_DISPLAY_TYPE) {
+    test(`should display a notification with action ${displayType}`, async ({
+      page
+    }) => {
+      await page.evaluate(displayType => {
+        return window.jupyterapp.commands.execute('apputils:notify', {
+          message: 'This is a test message',
+          options: {
+            autoClose: false,
+            actions: [
+              {
+                label: 'Button 1',
+                commandId: 'apputils:notify',
+                args: {
+                  message: 'Button 1 was clicked',
+                  type: 'success',
+                  options: { autoClose: false }
+                },
+                displayType
+              }
+            ]
+          }
+        });
+      }, displayType);
+
+      const handle = await page.waitForSelector('.Toastify__toast');
+
+      expect(
+        await handle.screenshot({ animations: 'disabled' })
+      ).toMatchSnapshot({
+        name: `notification-${displayType}-action.png`
+      });
+    });
+  }
+
+  test('should display as truncated text content the notification', async ({
+    page
+  }) => {
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute('apputils:notify', {
         message:
-          'This _is_ a **Markdown** [message](https://jupyter.org).\n\n- Item 1\n- Item 2',
+          '<style>.jp-dummy {\n  color: pink;\n}\n</style>\n<script>alert("I\'m in");</script>\n\n## Title\n\nThis _is_ a **Markdown** message.\n\n![logo](https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg)\n\n<p style="color:pink;">Pink text</p>\n\n- Item 1\n- Item 2',
         options: { autoClose: false }
       });
     });
@@ -98,12 +137,9 @@ test.describe('Toast', () => {
     await page.waitForSelector('.Toastify__toast');
 
     expect(
-      await page.locator('.Toastify__toast').screenshot({
-        // Ensure consistency
-        animations: 'disabled'
-      })
+      await page.locator('.Toastify__toast-body').innerHTML()
     ).toMatchSnapshot({
-      name: `notification-markdown.png`
+      name: 'text-content-notification.txt'
     });
   });
 
@@ -192,7 +228,7 @@ test.describe('Notification center', () => {
     );
   });
 
-  test('should be stop highlight once the center is closed', async ({
+  test('should stop the highlight once the center is closed', async ({
     page
   }) => {
     await page.evaluate(() => {
@@ -250,7 +286,7 @@ test.describe('Notification center', () => {
     for (const type of NOTIFICATION_TYPE) {
       await page.evaluate(kind => {
         return window.jupyterapp.commands.execute('apputils:notify', {
-          message: 'This is a _test_ [message](http://jupyter.org)',
+          message: 'This is a test message',
           type: kind
         });
       }, type);

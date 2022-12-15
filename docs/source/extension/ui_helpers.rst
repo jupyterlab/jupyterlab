@@ -177,7 +177,8 @@ A notification is described by the following element:
      /**
       * Notification message
       *
-      * It supports Markdown syntax.
+      * ### Notes
+      * Message can only be plain text with a maximum length of 140 characters.
       */
      message: string;
      /**
@@ -286,14 +287,25 @@ When using the API, an action is defined by:
     label: string;
     /**
      * Callback function to trigger
+     *
+     * ### Notes
+     * By default execution of the callback will close the toast
+     * and dismiss the notification. You can prevent this by calling
+     * `event.preventDefault()` in the callback.
      */
-    callback: () => void;
+    callback: (event: MouseEvent) => void;
     /**
      * The action caption.
      *
      * This can be a longer description of the action.
      */
     caption?: string;
+    /**
+     * The action display type.
+     *
+     * This will be used to modify the action button style.
+     */
+    displayType?: 'default' | 'accent' | 'warn' | 'link';
   }
 
 You can update a notification using:
@@ -372,6 +384,12 @@ An action is defined by:
      * This can be a longer description of the action.
      */
     caption?: string;
+    /**
+     * The action display type.
+     *
+     * This will be used to modify the action button style.
+     */
+    displayType?: 'default' | 'accent' | 'warn' | 'link';
   }
 
 ``'apputils:update-notification'`` to update a notification:

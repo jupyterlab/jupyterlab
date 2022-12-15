@@ -43,7 +43,6 @@
     "@jupyterlab/docregistry": "^4.0.0-alpha.16",
     "@jupyterlab/filebrowser": "^4.0.0-alpha.16",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.16",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.16",
     "@jupyterlab/services": "^7.0.0-alpha.16",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.16",
     "@jupyterlab/statedb": "^4.0.0-alpha.16",
@@ -56,13 +55,11 @@
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/polling": "^2.0.0-alpha.6",
     "@lumino/widgets": "^2.0.0-alpha.6",
-    "lodash.memoize": "^4.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-toastify": "^9.0.8"
   },
   "devDependencies": {
-    "@types/lodash.memoize": "^4.1.7",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
     "typescript": "~4.7.3"

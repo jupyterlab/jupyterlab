@@ -394,7 +394,7 @@ to work, this panel needs to fetch data from web services. Do you agree to
 activate this feature?`)}
           <br />
           <a
-            href="https://jupyterlab.readthedocs.io/en/latest/privacy_policies"
+            href="https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html"
             target="_blank"
             rel="noreferrer"
           >
