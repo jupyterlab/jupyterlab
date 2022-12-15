@@ -1,7 +1,7 @@
 .. _extension_tutorial:
 
-Extension Tutorial
-==================
+Extension TutorialYY1
+=====================
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
@@ -109,7 +109,7 @@ are using to fetch pictures).
     2 - server
     3 - theme
     Choose from 1, 2, 3 [1]: 1
-    author_name [My Name]: You Name
+    author_name [My Name]: Your Name
     author_email [me@test.com]: your@name.org
     labextension_name [myextension]: jupyterlab_apod
     python_name [jupyterlab_apod]: jupyterlab_apod
@@ -234,7 +234,8 @@ Fire up your favorite text editor and open the ``src/index.ts`` file in your
 extension project. Change the import at the top of the file to get a reference
 to the command palette interface and the `JupyterFrontEnd` instance.
 
-.. code:: typescript
+.. code-block:: typescript
+    :emphasize-lines: 6
 
     import {
       JupyterFrontEnd,
@@ -246,7 +247,8 @@ to the command palette interface and the `JupyterFrontEnd` instance.
 Locate the ``plugin`` object of type ``JupyterFrontEndPlugin``. Change the
 definition so that it reads like so:
 
-.. code:: typescript
+.. code-block:: typescript
+    :emphasize-lines: 5,7-8,10
 
     /**
      * Initialization data for the jupyterlab_apod extension.
@@ -313,9 +315,11 @@ activate the ``jupyterlab-ext`` environment, and run the ``jlpm run watch``
 command from your extension directory, which will automatically compile the
 TypeScript files as they are changed and saved.
 
-Now return to your editor. Modify the imports at the top of the file to add a few more imports:
+Now return to your editor. Modify the imports at the top of the file to add a
+few more imports:
 
-.. code:: typescript
+.. code-block:: typescript
+    :emphasize-lines: 1, 3
 
     import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 
@@ -329,11 +333,18 @@ Install this new dependency as well:
     jlpm add @lumino/widgets
 
 
-Then modify the ``activate`` function again so that it has the following
-code:
+Then modify the ``activate`` function inside the plugin object again so that
+it has the following code *(the highlighted lines show the activate function, you're
+only modifying the contents of that function, so make sure your braces match,
+and leave the ``export default plugin`` part lower down intact)*:
 
 .. code-block:: typescript
+    :emphasize-lines: 5-41
 
+    const plugin: JupyterFrontEndPlugin<void> = {
+      id: 'jupyterlab-apod',
+      autoStart: true,
+      requires: [ICommandPalette],
       activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_apod is activated!');
 
@@ -371,16 +382,20 @@ code:
         // Add the command to the palette.
         palette.addItem({ command, category: 'Tutorial' });
       }
+    };
 
-The first new block of code creates a ``MainAreaWidget`` instance with an
+    export default plugin;
+
+The first new block of code defines (and calls) a reusable widget creator
+function. That function returns a ``MainAreaWidget`` instance that has an
 empty content ``Widget`` as its child. It also assigns the main area widget a
 unique ID, gives it a label that will appear as its tab title, and makes the
 tab closable by the user. The second block of code adds a new command with id
 ``apod:open`` and label *Random Astronomy Picture* to JupyterLab. When the
-command executes, it attaches the widget to the main display area if it is not
-already present and then makes it the active tab. The last new line of code
-uses the command id to add the command to the command palette in a section
-called *Tutorial*.
+command executes, it checks that the widget isn't disposed, attaches the widget
+to the main display area if it is not already present and then makes it the
+active tab. The last new line of code uses the command id to add the command
+to the command palette in a section called *Tutorial*.
 
 Build your extension again using ``jlpm run build`` (unless you are using
 ``jlpm run watch`` already) and refresh the browser tab. Open the command
@@ -469,11 +484,11 @@ this definition just under the imports at the top of the file.
 Then we need to add ``async`` and ``await`` to a few places in our code since
 we're using ``await`` in our widget creator function.
 
-Update the ``activate`` method to be ``async``:
+First, update the ``activate`` method to be ``async``:
 
 .. code-block:: typescript
 
-        activate: async (app: JupyterFrontEnd, palette: ICommandPalette) =>
+        activate: async (app: JupyterFrontEnd, palette: ICommandPalette) => {
 
 Next, update the ``newWidget`` function to be ``async``:
 
@@ -481,10 +496,11 @@ Next, update the ``newWidget`` function to be ``async``:
 
         const newWidget = async () => {
 
-Finally, add ``await`` to both of the ``newWidget`` function calls:
+Finally, add ``await`` to both of the ``newWidget`` function calls, and
+``async`` to the execute function:
 
 .. code-block:: typescript
-      :emphasize-lines: 1,10
+      :emphasize-lines: 1,7,10
 
         let widget = await newWidget();
 
@@ -776,13 +792,11 @@ these changes:
         widget.id = 'apod-jupyterlab';
         widget.title.label = 'Astronomy Picture';
         widget.title.closable = true;
-        return {w: widget, c:content};
+        return widget;
       }
 
       // Create a single widget
       let result = newWidget();
-      let widget = result.w;
-      let content = result.c;
 
       // Add an application command
       const command: string = 'apod:open';
@@ -791,16 +805,14 @@ these changes:
         execute: () => {
           // Regenerate the widget if disposed
           if (widget.isDisposed) {
-            result = newWidget();
-            widget = result.w;
-            content = result.c;
+            widget = newWidget();
           }
           if (!widget.isAttached) {
             // Attach the widget to the main work area if it's not there
             app.shell.add(widget, 'main');
           }
           // Refresh the picture in the widget
-          content.update();
+          widget.content.update();
           // Activate the widget
           app.shell.activateById(widget.id);
         }
