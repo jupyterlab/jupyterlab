@@ -14,6 +14,7 @@ import {
 import {
   Clipboard,
   ICommandPalette,
+  InputDialog,
   IThemeManager,
   MainAreaWidget,
   sessionContextDialogs,
@@ -738,12 +739,37 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
-      label: args => (args.filter as string) || '',
+      label: args => (args.filter as string) || 'Breakpoints on exception',
       caption: args => args.description as string,
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
+      isEnabled: () => service.pauseOnExceptionsIsValid(),
       execute: async args => {
-        await service.pauseOnExceptions(args.filter as string);
+        let filter: string | undefined;
+        if (args?.filter) {
+          filter = args.filter as string;
+        } else {
+          let items: string[] = [];
+          items.push('None');
+          service.session?.exceptionBreakpointFilters?.forEach(
+            availableFilter => {
+              items.push(availableFilter.filter);
+            }
+          );
+          filter =
+            (
+              await InputDialog.getItem({
+                title: trans.__('Select a filter for breakpoints on exception'),
+                items: items,
+                current: service.session?.currentExceptionFilter || 'None',
+                editable: false
+              })
+            ).value ?? undefined;
+        }
+        if (!filter) {
+          return;
+        }
+        await service.pauseOnExceptions(filter as string);
       }
     });
 
