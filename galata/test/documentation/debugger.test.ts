@@ -163,6 +163,7 @@ test.describe('Debugger', () => {
     ).toMatchSnapshot('debugger_stop_on_unhandled_exception.png');
 
     await page.click('button[title^=Continue]');
+    await page.notebook.waitForRun(0);
 
     await page.locator('button.jp-PauseOnExceptions').click();
     expect(await menu.screenshot()).toMatchSnapshot(
