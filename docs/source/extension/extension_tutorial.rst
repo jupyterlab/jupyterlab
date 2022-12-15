@@ -802,7 +802,7 @@ these changes:
       }
 
       // Create a single widget
-      let result = newWidget();
+      let widget = newWidget();
 
       // Add an application command
       const command: string = 'apod:open';
