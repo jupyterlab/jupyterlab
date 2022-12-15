@@ -587,15 +587,17 @@ CSS classes, the copyright information, and error handling for the API response.
 The beginning of the function should read like the following:
 
 .. code-block:: typescript
-      :emphasize-lines: 7,17-18,28-51
+      :emphasize-lines: 9,19-20,30-53
 
       activate: async (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_apod is activated!');
 
+        // Define a widget creator function,
+        // then call it to make a new widget
         const newWidget = async () => {
           // Create a blank content widget inside of a MainAreaWidget
           const content = new Widget();
-          content.addClass('my-apodWidget'); // new line
+          content.addClass('my-apodWidget');
           const widget = new MainAreaWidget({ content });
           widget.id = 'apod-jupyterlab';
           widget.title.label = 'Astronomy Picture';
@@ -643,9 +645,13 @@ The beginning of the function should read like the following:
 
           return widget;
         }
+        // Keep all the remaining lines below the newWidget function
+        // definition the same as before from here down ...
 
-        // Keep all the remaining command lines the same
-        // as before from here down ...
+.. note::
+
+   If your image panel keeps showing an error message, you may need to update
+   your NASA API Key (too many image requests can max out your limit)
 
 Build your extension if necessary (``jlpm run build``) and refresh your
 JupyterLab browser tab. Invoke the *Random Astronomy Picture* command and
