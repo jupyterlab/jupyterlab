@@ -94,7 +94,7 @@ describe('DebuggerService', () => {
       path: UUID.uuid4()
     });
     await connection.changeKernel({ name: 'python3' });
-    session = new Debugger.Session({ connection });
+    session = new Debugger.Session({ connection, config });
     config = new Debugger.Config();
     service = new Debugger.Service({ specsManager, config });
   });

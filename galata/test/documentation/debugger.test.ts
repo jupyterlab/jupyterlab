@@ -117,7 +117,7 @@ test.describe('Debugger', () => {
     await page.click('button[title^=Continue]');
   });
 
-  test('Breakpoints on interruption', async ({ page, tmpPath }) => {
+  test('Breakpoints on exception', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
     await createNotebook(page);
