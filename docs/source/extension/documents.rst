@@ -33,12 +33,16 @@ representing the file. For example, a notebook can be opened with a notebook mod
 and with a text model. Different models for the same file path do not directly
 communicate with each other.
 
-Models contain an instance of `ISharedDocument <https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedDocument.html>`_
-that acts as data storage for the model's content. As of JupyterLab 4, the default data
-storage implementation is a `YDocument <https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YDocument.html>`_
-based on `Yjs <https://docs.yjs.dev>`_, a high-performance CRDT for building collaborative
-applications. Both the interface and the implementation are provided by the package
+Models contain an instance of `ModelDB <../api/classes/observables.modeldb-1.html>`__
+that acts as data storage for the model's content. In JupyterLab 3.1, we introduced
+the package ``@jupyterlab/shared-models`` to swap ``ModelDB`` as a data storage
+to make 'documents' collaborative. We implemented these shared models using
+`Yjs <https://docs.yjs.dev>`_, a high-performance CRDT for building collaborative applications
+that automatically sync.
+Starting with JupyterLab 3.6, the shared models have been extracted in the external package
 `@jupyter/ydoc <https://github.com/jupyter-server/jupyter_ydoc>`_.
+At the moment, models contain both a ``ModelDB`` and a ``Shared Model`` instance, so it is
+possible to access ``ModelDB`` yet. But starting with JupyterLab 4, the ``ModelDB`` storage will be removed.
 
 `Document widgets <../api/classes/docregistry.documentregistry-1.html>`__ represent
 a view of a document model. There can be multiple document widgets associated with
