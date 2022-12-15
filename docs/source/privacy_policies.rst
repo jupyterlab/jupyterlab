@@ -1,7 +1,7 @@
 Privacy policies
 ================
 
-Last modified: December 14, 2022
+Last modified: December 15, 2022
 
 Introduction
 ------------
@@ -33,7 +33,7 @@ The announcements plugin fetches a news feed from a GitHub page
 (https://jupyterlab.github.io/assets) and metadata of the JupyterLab Python
 package on PyPI.org (https://pypi.org/pypi/jupyterlab/json).
 
-The plugin will fetch this information only if the user clicks the *Agree*
+The plugin will fetch this information only if the user clicks the *Yes*
 button on the notification that asks if they want to be notified with JupyterLab news.
 That choice is stored as a user preference in *Notifications* ->
 *Fetch official Jupyter news*. The user can change their preference later.
@@ -50,7 +50,7 @@ Extension manager plugin
 The extensions manager plugin fetches Python packages' metadata from PyPI.org
 (https://pypi.org) and package author thumbnails from GitHub (https://github.com).
 
-The plugin will fetch this information only if the user clicks on the *Agree*
+The plugin will fetch this information only if the user clicks on the *Yes*
 button in the extensions manager side panel.
 That choice is stored as a user preference in *Extension Manager* ->
 *Disclaimed Status*. The user can change their preference later.
