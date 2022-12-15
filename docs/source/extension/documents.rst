@@ -49,6 +49,9 @@ a view of a document model. There can be multiple document widgets associated wi
 a single document model, and they naturally stay in sync with each other since they
 are views on the same underlying data model.
 
+`Shared Models <https://jupyter-ydoc.readthedocs.io/en/latest/api/index.html>`__ are models
+using Yjs’ shared types as a data structures instead of ``ModelDB``.
+
 The `Document Registry <../api/classes/docregistry.documentregistry-1.html>`__
 is where document types and factories are registered. Plugins can
 require a document registry instance and register their content types
