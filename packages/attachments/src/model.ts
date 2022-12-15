@@ -131,7 +131,7 @@ export class AttachmentsModel implements IAttachmentsModel {
    */
   constructor(options: IAttachmentsModel.IOptions) {
     this.contentFactory =
-      options.contentFactory || AttachmentsModel.defaultContentFactory;
+      options.contentFactory ?? AttachmentsModel.defaultContentFactory;
     if (options.values) {
       for (const key of Object.keys(options.values)) {
         if (options.values[key] !== undefined) {

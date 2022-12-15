@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 import { Context } from '@jupyterlab/docregistry';
 import {
   INotebookModel,
@@ -274,13 +277,17 @@ describe('@jupyterlab/notebook', () => {
 
     describe('NotebookTools.ActiveCellTool', () => {
       it('should create a new active cell tool', () => {
-        const tool = new NotebookTools.ActiveCellTool();
+        const tool = new NotebookTools.ActiveCellTool(
+          new EditorLanguageRegistry()
+        );
         notebookTools.addItem({ tool });
         expect(tool).toBeInstanceOf(NotebookTools.ActiveCellTool);
       });
 
       it('should handle a change to the active cell', () => {
-        const tool = new NotebookTools.ActiveCellTool();
+        const tool = new NotebookTools.ActiveCellTool(
+          new EditorLanguageRegistry()
+        );
         notebookTools.addItem({ tool });
         const widget = tracker.currentWidget!;
         widget.content.activeCellIndex++;

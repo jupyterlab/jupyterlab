@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import {
   Completer,
   CompleterModel,
@@ -27,6 +27,8 @@ const ACTIVE_CLASS = 'jp-mod-active';
 function createEditorWidget(): CodeEditorWrapper {
   const model = new CodeEditor.Model({ sharedModel: new YFile() });
   const factory = (options: CodeEditor.IOptions) => {
+    const m = options.model.sharedModel as any;
+    options.extensions = [...(options.extensions ?? []), ybinding(m.ysource)];
     return new CodeMirrorEditor(options);
   };
   return new CodeEditorWrapper({ factory, model });

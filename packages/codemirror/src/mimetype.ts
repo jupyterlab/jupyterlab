@@ -4,12 +4,13 @@
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { Mode } from './mode';
+import { IEditorLanguageRegistry } from './token';
 
 /**
  * The mime type service for CodeMirror.
  */
 export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
+  constructor(protected languages: IEditorLanguageRegistry) {}
   /**
    * Returns a mime type for the given language info.
    *
@@ -18,7 +19,7 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     const ext = info.file_extension || '';
-    const mode = Mode.findBest(
+    const mode = this.languages.findBest(
       (info.codemirror_mode as any) || {
         mimetype: info.mimetype,
         name: info.name,
@@ -43,9 +44,11 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     } else if (ext === '.md') {
       return 'text/x-ipythongfm';
     }
-    const mode = Mode.findByFileName(path) || Mode.findBest('');
+    const mode = this.languages.findByFileName(path);
     return mode
-      ? (mode.mime as string)
+      ? Array.isArray(mode.mime)
+        ? mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
+        : mode.mime
       : IEditorMimeTypeService.defaultMimeType;
   }
 }

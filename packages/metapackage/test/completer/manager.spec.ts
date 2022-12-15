@@ -188,6 +188,7 @@ describe('completer/manager', () => {
 
         await manager.updateCompleter(completerContext);
         const cell = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
           model: new TestCellModel({
             sharedModel: createStandaloneCell({ cell_type: 'code' })
           }),

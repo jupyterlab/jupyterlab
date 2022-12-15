@@ -3,7 +3,7 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import {
   Completer,
   CompleterModel,
@@ -16,6 +16,8 @@ import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 function createEditorWidget(): CodeEditorWrapper {
   const model = new CodeEditor.Model({ sharedModel: new YFile() });
   const factory = (options: CodeEditor.IOptions) => {
+    const m = options.model.sharedModel as any;
+    options.extensions = [...(options.extensions ?? []), ybinding(m.ysource)];
     return new CodeMirrorEditor(options);
   };
   return new CodeEditorWrapper({ factory, model });

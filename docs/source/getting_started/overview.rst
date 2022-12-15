@@ -48,8 +48,7 @@ Vega, Vega-Lite, etc.) and can also display rich kernel output in these formats.
 See :ref:`file-and-output-formats` for more information.
 
 To navigate the user interface, JupyterLab offers :ref:`customizable keyboard
-shortcuts <shortcuts>` and the ability to use :ref:`key maps <editor-keymaps>`
-from vim, emacs, and Sublime Text in the text editor.
+shortcuts <shortcuts>`.
 
 JupyterLab :ref:`extensions <user_extensions>` can customize or enhance any part
 of JupyterLab, including new themes, file editors, and custom components.

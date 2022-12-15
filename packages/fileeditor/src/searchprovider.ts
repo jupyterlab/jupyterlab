@@ -33,7 +33,7 @@ export class FileEditorSearchProvider
   }
 
   get isReadOnly(): boolean {
-    return this.editor.getOption('readOnly');
+    return this.editor.getOption('readOnly') as boolean;
   }
 
   /**

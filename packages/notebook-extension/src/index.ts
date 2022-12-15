@@ -37,6 +37,11 @@ import {
 } from '@jupyterlab/codeeditor';
 import { PageConfig } from '@jupyterlab/coreutils';
 
+import {
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
@@ -86,12 +91,12 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
-import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
@@ -322,7 +327,7 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory],
+  requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
   optional: [
     ICommandPalette,
     IDefaultFileBrowser,
@@ -332,7 +337,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     IRouter,
     ISettingRegistry,
     ISessionContextDialogs,
-    ITranslator
+    ITranslator,
+    IFormRendererRegistry
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -360,7 +366,13 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IStateDB, ITranslator],
+  requires: [
+    INotebookTracker,
+    IEditorServices,
+    IEditorLanguageRegistry,
+    IStateDB,
+    ITranslator
+  ],
   optional: [IPropertyInspectorProvider]
 };
 
@@ -870,6 +882,7 @@ function activateNotebookTools(
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
   editorServices: IEditorServices,
+  languages: IEditorLanguageRegistry,
   state: IStateDB,
   translator: ITranslator,
   inspectorProvider: IPropertyInspectorProvider | null
@@ -877,11 +890,12 @@ function activateNotebookTools(
   const trans = translator.load('jupyterlab');
   const id = 'notebook-tools';
   const notebookTools = new NotebookTools({ tracker, translator });
-  const activeCellTool = new NotebookTools.ActiveCellTool();
+  const activeCellTool = new NotebookTools.ActiveCellTool(languages);
   const editable = NotebookTools.createEditableToggle(translator);
   const slideShow = NotebookTools.createSlideShowSelector(translator);
   const tocBaseNumbering = NotebookTools.createToCBaseNumbering(translator);
-  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const editorFactory: CodeEditor.Factory = options =>
+    editorServices.factoryService.newInlineEditor(options);
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
     editorFactory,
     collapsed: false,
@@ -1405,6 +1419,7 @@ function activateCopyOutput(
 function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
+  extensions: IEditorExtensionRegistry,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1413,7 +1428,8 @@ function activateNotebookHandler(
   router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
   sessionDialogs: ISessionContextDialogs | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  formRegistry: IFormRendererRegistry | null
 ): INotebookTracker {
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab');
@@ -1478,7 +1494,9 @@ function activateNotebookHandler(
         label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
         isToggled: () =>
           ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
-            x => (settings.get(x).composite as JSONObject).autoClosingBrackets
+            x =>
+              ((settings.get(x).composite as JSONObject).autoClosingBrackets ??
+                extensions.baseConfiguration['autoClosingBrackets']) === true
           )
       });
       commands.addCommand(CommandIDs.setSideBySideRatio, {
@@ -1506,6 +1524,26 @@ function activateNotebookHandler(
         kernelShutdown: factory.shutdownOnClose
       });
     });
+
+  if (formRegistry) {
+    const CMRenderer = formRegistry.getRenderer(
+      '@jupyterlab/codemirror-extension:plugin.defaultConfig'
+    );
+    if (CMRenderer) {
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.codeCellConfig',
+        CMRenderer
+      );
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.markdownCellConfig',
+        CMRenderer
+      );
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.rawCellConfig',
+        CMRenderer
+      );
+    }
+  }
 
   // Handle state restoration.
   if (restorer) {
