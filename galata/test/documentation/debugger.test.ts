@@ -126,7 +126,7 @@ test.describe('Debugger', () => {
     await page.waitForCondition(() => page.debugger.isOpen());
     await setSidebarWidth(page, 251, 'right');
 
-    expect(page.locator('button.jp-PauseOnExceptions')).not.toHaveClass(
+    await expect(page.locator('button.jp-PauseOnExceptions')).not.toHaveClass(
       /lm-mod-toggled/
     );
     await page.locator('button.jp-PauseOnExceptions').click();
@@ -140,7 +140,7 @@ test.describe('Debugger', () => {
       .locator('li div.lm-Menu-itemLabel:text("userUnhandled")')
       .click();
 
-    expect(page.locator('button.jp-PauseOnExceptions')).toHaveClass(
+    await expect(page.locator('button.jp-PauseOnExceptions')).toHaveClass(
       /lm-mod-toggled/
     );
 
@@ -151,7 +151,7 @@ test.describe('Debugger', () => {
     await keyboard.press('Backspace');
     await keyboard.type('except:\n2/0\n', { delay: 100 });
 
-    page.notebook.runCell(0);
+    void page.notebook.runCell(0);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -172,6 +172,7 @@ test.describe('Debugger', () => {
     await menu.locator('li div.lm-Menu-itemLabel:text("raised")').click();
 
     void page.notebook.runCell(0);
+
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
     expect(

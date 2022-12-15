@@ -427,7 +427,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     if (this.session.currentExceptionFilter) {
-      this.pauseOnExceptions(this.session.currentExceptionFilter, true);
+      await this.pauseOnExceptions(this.session.currentExceptionFilter, true);
     }
   }
 
