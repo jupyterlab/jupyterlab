@@ -160,7 +160,7 @@ Jest has been updated to 29.2.0 (and *ts-jest* to 29.0.0). And therefore the jes
 - The unmaintained reporter ``jest-summary-reporter`` has been replaced by the new default ``github-actions`` reporter.
 - The helper ``flakyIt`` has been removed. You can use the new `jest.retryTimes <https://jestjs.io/docs/jest-object#jestretrytimesnumretries-options>`_ instead.
 
-With v4, we fixed circular dependencies due to the testutils package. So it is now only a facade to export
+With JupyterLab 4, we fixed circular dependencies due to the testutils package. So it is now only a facade to export
 helpers from various core packages. The exported helpers are the same as before expect for:
 
 - ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.
