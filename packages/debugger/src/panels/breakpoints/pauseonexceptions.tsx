@@ -30,7 +30,7 @@ export class PauseOnExceptionsWidget extends ToolbarButton {
     this._props = props;
     this._props.className = PAUSE_ON_EXCEPTION_BUTTON_CLASS;
     this._props.service.eventMessage.connect((_, event): void => {
-      if (event.event === 'initialized') {
+      if (event.event === 'initialized' || event.event === 'terminated') {
         this.onChange();
       }
     }, this);
@@ -44,9 +44,8 @@ export class PauseOnExceptionsWidget extends ToolbarButton {
   onChange() {
     const session = this._props.service.session;
     const exceptionBreakpointFilters = session?.exceptionBreakpointFilters;
-    if (exceptionBreakpointFilters) {
-      this._props.className = PAUSE_ON_EXCEPTION_BUTTON_CLASS;
-
+    this._props.className = PAUSE_ON_EXCEPTION_BUTTON_CLASS;
+    if (this._props.service.session?.isStarted && exceptionBreakpointFilters) {
       if (session.isPausingOnException()) {
         this._props.className += ' lm-mod-toggled';
       }
@@ -54,7 +53,6 @@ export class PauseOnExceptionsWidget extends ToolbarButton {
     } else {
       this._props.enabled = false;
     }
-
     this.update();
   }
 

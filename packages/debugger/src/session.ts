@@ -205,11 +205,11 @@ export class DebuggerSession implements IDebugger.ISession {
    * Stop the running debug session.
    */
   async stop(): Promise<void> {
+    this._isStarted = false;
     await this.sendRequest('disconnect', {
       restart: false,
       terminateDebuggee: false
     });
-    this._isStarted = false;
   }
 
   /**
