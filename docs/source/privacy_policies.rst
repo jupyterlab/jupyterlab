@@ -43,7 +43,7 @@ That choice is stored as a user settings in *Notifications* ->
 
 The plugin can also be disabled by executing:
 
-.. code::bash
+.. code-block:: bash
 
     jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 
@@ -61,7 +61,7 @@ That choice is stored as a user settings in *Extension Manager* ->
 
 The plugin can also be disabled by executing:
 
-.. code::bash
+.. code-block:: bash
 
     jupyter labextension disable "@jupyterlab/extensionmanager-extension:plugin"
 
