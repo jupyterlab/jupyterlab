@@ -756,15 +756,13 @@ const main: JupyterFrontEndPlugin<void> = {
               items.push(availableFilter.filter);
             }
           );
-          filter =
-            (
-              await InputDialog.getItem({
+          const result = await InputDialog.getItem({
                 title: trans.__('Select a filter for breakpoints on exception'),
                 items: items,
                 current: service.session?.currentExceptionFilter || 'None',
                 editable: false
-              })
-            ).value ?? undefined;
+              });
+          filter = result.button.accept ? result.value : null;
         }
         if (!filter) {
           return;
