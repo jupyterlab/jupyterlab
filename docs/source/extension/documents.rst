@@ -39,15 +39,17 @@ the package ``@jupyterlab/shared-models`` to swap ``ModelDB`` as a data storage
 to make 'documents' collaborative. We implemented these shared models using
 `Yjs <https://docs.yjs.dev>`_, a high-performance CRDT for building collaborative applications
 that automatically sync.
+Starting with JupyterLab 3.6, the shared models have been extracted in the external package
+`@jupyter/ydoc <https://github.com/jupyter-server/jupyter_ydoc>`_.
 At the moment, models contain both a ``ModelDB`` and a ``Shared Model`` instance, so it is
-possible to access ``ModelDB`` yet.
+possible to access ``ModelDB`` yet. But starting with JupyterLab 4, the ``ModelDB`` storage will be removed.
 
 `Document widgets <../api/classes/docregistry.documentregistry-1.html>`__ represent
 a view of a document model. There can be multiple document widgets associated with
 a single document model, and they naturally stay in sync with each other since they
 are views on the same underlying data model.
 
-`Shared Models <../api/interfaces/shared_models.ishareddocument.html>`__ are models
+`Shared Models <https://jupyter-ydoc.readthedocs.io/en/latest/api/index.html>`__ are models
 using Yjs’ shared types as a data structures instead of ``ModelDB``.
 
 The `Document Registry <../api/classes/docregistry.documentregistry-1.html>`__
@@ -138,10 +140,10 @@ between the document model and the wider application.
 Shared Models
 -------------
 
-The shared-models package contains an `ISharedNotebook
-<../api/interfaces/shared_models.isharednotebook.html>`_ and an `ISharedFile
-<../api/interfaces/shared_models.isharedfile.html>`_ which are the abstract
-interfaces to work against if you want to manipulate a notebook or a file.
+The `@jupyter/ydoc` package contains an `ISharedNotebook
+<https://jupyter-ydoc.readthedocs.io/en/latest/api/modules/ISharedNotebook.html>`_
+and an `ISharedFile <https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedFile.html>`_
+which are the abstract interfaces to work against if you want to manipulate a notebook or a text file.
 
 These models wrap a `Yjs document (Y.Doc) <https://docs.yjs.dev/api/y.doc>`_ which represents
 a shared document between clients and hold multiple shared objects. They enable you
@@ -151,7 +153,11 @@ types of collaborative applications.
 
 In addition, a shared model has an `Awareness <https://docs.yjs.dev/getting-started/adding-awareness>`_
 attribute. This attribute is linked to the *Y.Doc* which means there is one *Awareness* object per document and is
-used for sharing cursor locations and presence information.
+used for sharing cursor locations and presence information. The `Awareness` is an implementation detail of Yjs
+and is not part of the `ISharedDocument` interface.
+
+Please, check out the `@jupyter/ydoc documentation <https://jupyter-ydoc.readthedocs.io/en/latest>`_
+to know more about this package.
 
 Document Manager
 ----------------
