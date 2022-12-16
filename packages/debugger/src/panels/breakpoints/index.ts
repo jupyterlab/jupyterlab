@@ -35,7 +35,7 @@ export class Breakpoints extends PanelWithToolbar {
         service: service,
         commands: commands,
         icon: exceptionIcon,
-        tooltip: 'Pause on exception filter'
+        tooltip: trans.__('Pause on exception filter')
       })
     );
 
