@@ -39,8 +39,8 @@
     "@jupyterlab/translation": "^4.0.0-alpha.17",
     "@jupyterlab/translation-extension": "^4.0.0-alpha.17",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.17",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",

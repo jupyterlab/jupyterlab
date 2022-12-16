@@ -873,11 +873,11 @@ namespace Private {
     } as any;
 
     return t(
-      ({ closeToast }: { closeToast: () => void }) =>
+      ({ closeToast }: { closeToast?: () => void }) =>
         createContent(
           message,
           () => {
-            closeToast();
+            if (closeToast) closeToast();
             Notification.manager.dismiss(toastId);
           },
           actions
