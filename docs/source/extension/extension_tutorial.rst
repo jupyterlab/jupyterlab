@@ -798,7 +798,7 @@ these changes:
         label: 'Random Astronomy Picture',
         execute: () => {
           // Regenerate the widget if disposed
-          if (!widget.isDisposed) {
+          if (widget.isDisposed) {
             widget = newWidget();
           }
           if (!widget.isAttached) {
