@@ -1,7 +1,7 @@
 .. _extension_tutorial:
 
-Extension TutorialYY1
-=====================
+Extension Tutorial
+==================
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
@@ -336,7 +336,7 @@ Install this new dependency as well:
 Then modify the ``activate`` function inside the plugin object again so that
 it has the following code *(the highlighted lines show the activate function, you're
 only modifying the contents of that function, so make sure your braces match,
-and leave the ``export default plugin`` part lower down intact)*:
+and leave the* ``export default plugin`` *part lower down intact)*:
 
 .. code-block:: typescript
     :emphasize-lines: 5-41
