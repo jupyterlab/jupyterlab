@@ -210,6 +210,9 @@ bumped their major version (following semver convention). We want to point out p
    As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+- React 18.2.0 update
+  The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
+  Here is the documentation about the `migration to react 18 <https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html>`_.
 
 Testing with Jest
 ^^^^^^^^^^^^^^^^^
