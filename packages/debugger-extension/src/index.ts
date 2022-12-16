@@ -745,7 +745,7 @@ const main: JupyterFrontEndPlugin<void> = {
         service.session?.isPausingOnException(args.filter as string) || false,
       isEnabled: () => service.pauseOnExceptionsIsValid(),
       execute: async args => {
-        let filter: string | undefined;
+        let filter: string | null;
         if (args?.filter) {
           filter = args.filter as string;
         } else {
@@ -757,11 +757,11 @@ const main: JupyterFrontEndPlugin<void> = {
             }
           );
           const result = await InputDialog.getItem({
-                title: trans.__('Select a filter for breakpoints on exception'),
-                items: items,
-                current: service.session?.currentExceptionFilter || 'None',
-                editable: false
-              });
+            title: trans.__('Select a filter for breakpoints on exception'),
+            items: items,
+            current: service.session?.currentExceptionFilter || 'None',
+            editable: false
+          });
           filter = result.button.accept ? result.value : null;
         }
         if (!filter) {
