@@ -587,7 +587,7 @@ CSS classes, the copyright information, and error handling for the API response.
 The beginning of the function should read like the following:
 
 .. code-block:: typescript
-      :emphasize-lines: 9,19-20,30-53
+      :emphasize-lines: 9,19-20,32-53
 
       activate: async (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_apod is activated!');
