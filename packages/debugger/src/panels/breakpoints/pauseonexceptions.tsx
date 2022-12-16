@@ -14,10 +14,16 @@ const PAUSE_ON_EXCEPTION_CLASS = 'jp-debugger-pauseOnExceptions';
 const PAUSE_ON_EXCEPTION_BUTTON_CLASS = 'jp-PauseOnExceptions';
 const PAUSE_ON_EXCEPTION_MENU_CLASS = 'jp-PauseOnExceptions-menu';
 
+/**
+ * A button which display a menu on click, to select the filter.
+ */
 export class PauseOnExceptionsWidget extends ToolbarButton {
+  /**
+   * Constructor of the button.
+   */
   constructor(props: PauseOnExceptions.IProps) {
     super();
-    this.menu = new PauseOnExceptionsMenu({
+    this._menu = new PauseOnExceptionsMenu({
       service: props.service,
       commands: {
         registry: props.commands.registry,
@@ -60,7 +66,7 @@ export class PauseOnExceptionsWidget extends ToolbarButton {
    * open menu on click.
    */
   onclick = () => {
-    this.menu.open(
+    this._menu.open(
       this.node.getBoundingClientRect().left,
       this.node.getBoundingClientRect().bottom
     );
@@ -70,11 +76,17 @@ export class PauseOnExceptionsWidget extends ToolbarButton {
     return <ToolbarButtonComponent {...this._props} onClick={this.onclick} />;
   }
 
-  menu: PauseOnExceptionsMenu;
+  private _menu: PauseOnExceptionsMenu;
   private _props: PauseOnExceptions.IProps;
 }
 
+/**
+ * A menu with all the available filter from the debugger as entries.
+ */
 export class PauseOnExceptionsMenu extends MenuSvg {
+  /**
+   * The constructor of the menu.
+   */
   constructor(props: PauseOnExceptions.IProps) {
     super({ commands: props.commands.registry });
     this._service = props.service;
@@ -109,9 +121,21 @@ export class PauseOnExceptionsMenu extends MenuSvg {
   private _command: string;
 }
 
+/**
+ * A namespace for the widget.
+ */
 export namespace PauseOnExceptions {
+  /**
+   * The properties of the widget and menu.
+   */
   export interface IProps extends ToolbarButtonComponent.IProps {
+    /**
+     * The debugger service linked to the widget.
+     */
     service: IDebugger;
+    /**
+     * The commands registry and the command ID associated to the menu.
+     */
     commands: Breakpoints.ICommands;
   }
 }
