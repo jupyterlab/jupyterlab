@@ -880,7 +880,7 @@ definition. This addition passes the global ``LayoutRestorer`` as the
 third parameter of the ``activate`` function.
 
 .. code-block:: typescript
-    :emphasize-lines: 4
+    :emphasize-lines: 5
 
     const plugin: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab-apod',
