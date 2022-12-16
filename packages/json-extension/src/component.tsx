@@ -21,6 +21,11 @@ export interface IProps {
    * The application language translator.
    */
   translator?: ITranslator;
+
+  /**
+   * Function called after the component is rendered
+   */
+  callback?: () => void;
 }
 
 /**
@@ -63,13 +68,13 @@ export class Component extends React.Component<IProps, IState> {
     const translator = this.props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
-    const { data, metadata } = this.props;
+    const { data, metadata, callback } = this.props;
     const root = metadata && metadata.root ? (metadata.root as string) : 'root';
     const keyPaths = this.state.filter
       ? filterPaths(data, this.state.filter, [root])
       : [root];
     return (
-      <div className="container">
+      <div className="container" ref={callback}>
         <InputGroup
           className="filter"
           type="text"

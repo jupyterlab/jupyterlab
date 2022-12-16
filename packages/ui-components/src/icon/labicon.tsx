@@ -6,7 +6,7 @@ import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
@@ -920,19 +920,27 @@ namespace Private {
 
       const icon = this._icon;
 
-      ReactDOM.render(
+      if (this._rootDOM !== null) {
+        this._rootDOM.unmount();
+      }
+      this._rootDOM = createRoot(container);
+      this._rootDOM.render(
         <icon.react
           container={container}
           label={label}
           {...{ ...this._rendererOptions?.props, ...options?.props }}
-        />,
-        container
+        />
       );
     }
 
     unrender(container: HTMLElement): void {
-      ReactDOM.unmountComponentAtNode(container);
+      if (this._rootDOM !== null) {
+        this._rootDOM.unmount();
+        this._rootDOM = null;
+      }
     }
+
+    private _rootDOM: Root | null = null;
   }
 }
 

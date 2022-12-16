@@ -36,7 +36,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type {
   ClearWaitingQueueParams,
   CloseButtonProps,
@@ -724,8 +724,9 @@ namespace Private {
         document.createElement('div')
       );
       container.id = 'react-toastify-container';
+      const root = createRoot(container);
 
-      ReactDOM.render(
+      root.render(
         <toastify.ToastContainer
           draggable={false}
           closeOnClick={false}
@@ -737,8 +738,7 @@ namespace Private {
           className="jp-toastContainer"
           transition={toastify.Slide}
           closeButton={CloseButton}
-        ></toastify.ToastContainer>,
-        container
+        ></toastify.ToastContainer>
       );
     }
 
