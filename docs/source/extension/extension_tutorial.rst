@@ -683,20 +683,8 @@ parts:
    decide when the picture should refresh
 
 Start by refactoring the widget code into the new ``APODWidget`` class.
-Add the following additional import to the top of the file.
 
-.. code-block:: typescript
-
-    import { Message } from '@lumino/messaging';
-
-Install this dependency:
-
-.. code:: bash
-
-    jlpm add @lumino/messaging
-
-
-Then add the class just below the definition of ``APODResponse`` in the ``index.ts``
+Add the class just below the definition of ``APODResponse`` in the ``index.ts``
 file.
 
 .. code-block:: typescript
@@ -732,7 +720,7 @@ file.
       /**
       * Handle update requests for the widget.
       */
-      async onUpdateRequest(msg: Message): Promise<void> {
+      async updateAPODImage(): Promise<void> {
 
         const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${this.randomDate()}`);
 
@@ -810,7 +798,7 @@ these changes:
         label: 'Random Astronomy Picture',
         execute: () => {
           // Regenerate the widget if disposed
-          if (widget.isDisposed) {
+          if (!widget.isDisposed) {
             widget = newWidget();
           }
           if (!widget.isAttached) {
@@ -818,7 +806,7 @@ these changes:
             app.shell.add(widget, 'main');
           }
           // Refresh the picture in the widget
-          widget.content.update();
+          widget.content.updateAPODImage();
           // Activate the widget
           app.shell.activateById(widget.id);
         }
@@ -885,8 +873,6 @@ entire list of import statements looks like the following:
       WidgetTracker
     } from '@jupyterlab/apputils';
 
-    import { Message } from '@lumino/messaging';
-
     import { Widget } from '@lumino/widgets';
 
 Then add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
@@ -896,12 +882,23 @@ third parameter of the ``activate`` function.
 .. code-block:: typescript
     :emphasize-lines: 4
 
-    const extension: JupyterFrontEndPlugin<void> = {
-      id: 'jupyterlab_apod',
+    const plugin: JupyterFrontEndPlugin<void> = {
+      id: 'jupyterlab-apod',
       autoStart: true,
-      requires: [ICommandPalette, ILayoutRestorer],
+      requires: [ICommandPalette],
+      optional: [ILayoutRestorer],
       activate: activate
     };
+
+Here ``ILayoutRestorer`` is specified as an ``optional`` token, as the corresponding service might
+not be available in a customized JupyterLab distribution that does not provide layout restoration
+functionalities. Having it ``optional`` makes it a nice-to-have, and lets your extension be loaded
+in more applications.
+
+.. note::
+
+    You can learn more about ``requires`` and ``optional`` in the :ref:`tokens` section
+    of the Extension Developer Guide.
 
 Finally, rewrite the ``activate`` function so that it:
 
@@ -913,7 +910,7 @@ Finally, rewrite the ``activate`` function so that it:
 
 .. code-block:: typescript
 
-    function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer) {
+    function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer | null) {
       console.log('JupyterLab extension jupyterlab_apod is activated!');
 
       // Declare a widget variable
@@ -925,8 +922,6 @@ Finally, rewrite the ``activate`` function so that it:
         label: 'Random Astronomy Picture',
         execute: () => {
           if (!widget || widget.isDisposed) {
-            // Create a new widget if one does not exist
-            // or if the previous one was disposed after closing the panel
             const content = new APODWidget();
             widget = new MainAreaWidget({content});
             widget.id = 'apod-jupyterlab';
@@ -941,7 +936,7 @@ Finally, rewrite the ``activate`` function so that it:
             // Attach the widget to the main work area if it's not there
             app.shell.add(widget, 'main');
           }
-          widget.content.update();
+          widget.content.updateAPODImage();
 
           // Activate the widget
           app.shell.activateById(widget.id);
@@ -955,10 +950,12 @@ Finally, rewrite the ``activate`` function so that it:
       let tracker = new WidgetTracker<MainAreaWidget<APODWidget>>({
         namespace: 'apod'
       });
-      restorer.restore(tracker, {
-        command,
-        name: () => 'apod'
-      });
+      if (restorer) {
+        restorer.restore(tracker, {
+          command,
+          name: () => 'apod'
+        });
+      }
     }
 
 Rebuild your extension one last time and refresh your browser tab.
