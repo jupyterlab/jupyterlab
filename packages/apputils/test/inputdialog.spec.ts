@@ -169,7 +169,7 @@ describe('@jupyterlab/apputils', () => {
         expect(result.value).toStrictEqual([]);
       });
 
-      it('should accept option "currents"', async () => {
+      it('should accept option "defaults"', async () => {
         const dialog = InputDialog.getMultipleItems({
           label: 'list',
           items: ['item1', 'item2', 'item3'],
