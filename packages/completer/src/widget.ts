@@ -319,9 +319,6 @@ export class Completer extends Widget {
     let ul = document.createElement('ul');
     ul.className = 'jp-Completer-list';
     for (let item of items) {
-      if (!this._renderer.createCompletionItemNode) {
-        return null;
-      }
       let li = this._renderer.createCompletionItemNode(item, orderedTypes);
       ul.appendChild(li);
     }
@@ -400,7 +397,7 @@ export class Completer extends Widget {
           return;
         }
         // Autoinsert single completions on manual request (tab)
-        const items = model.completionItems && model.completionItems();
+        const items = model.completionItems();
         if (items && items.length === 1) {
           this._selected.emit(items[0].insertText || items[0].label);
           this.reset();
