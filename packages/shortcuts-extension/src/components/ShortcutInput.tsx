@@ -8,6 +8,7 @@ import * as React from 'react';
 import { ITranslator } from '@jupyterlab/translation';
 
 import { EN_US } from '@lumino/keyboard';
+import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
 
 export interface IShortcutInputProps {
   handleUpdate: Function;
@@ -478,7 +479,9 @@ export class ShortcutInput extends React.Component<
               }
             }
           }}
-        />
+        >
+          {this.state.isAvailable ? <checkIcon.react /> : <errorIcon.react />}
+        </button>
         {!this.state.isAvailable && (
           <button
             hidden

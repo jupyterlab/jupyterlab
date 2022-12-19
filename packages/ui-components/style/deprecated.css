@@ -44,6 +44,7 @@
   --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
+  --jp-icon-error: url('icons/error.svg');
   --jp-icon-expand-all: url('icons/toolbar/expand-all.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
   --jp-icon-fast-forward: url('icons/toolbar/fast-forward.svg');
@@ -237,6 +238,10 @@
 
 .jp-EllipsesIcon {
   background-image: var(--jp-icon-ellipses);
+}
+
+.jp-ErrorIcon {
+  background-image: var(--jp-icon-error);
 }
 
 .jp-ExpandAllIcon {

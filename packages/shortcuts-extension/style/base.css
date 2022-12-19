@@ -77,35 +77,35 @@
 }
 
 .jp-Shortcuts-Submit {
-  background: var(--jp-brand-color2);
+  background-color: var(--jp-brand-color2);
   border-radius: 0;
   border: none;
   color: var(--jp-layout-color0);
   font-family: var(--jp-ui-font-family);
   display: block;
   height: 27px;
-  background-image: var(--jp-icon-checkmark-white);
-  background-repeat: no-repeat;
   width: 26px;
+  cursor: pointer;
 }
 
 .jp-Shortcuts-Submit:focus {
   outline: none;
 }
 
-.jp-mod-defunc-Submit {
-  background: var(--jp-layout-color3);
-  background-image: var(--jp-icon-checkmark-white);
+.jp-Shortcuts-Submit .jp-icon3[fill] {
+  fill: var(--jp-layout-color1);
 }
 
-.jp-mod-conflict-Submit {
-  background: var(--jp-error-color1);
-  background-image: var(--jp-icon-error-white);
-  background-repeat: no-repeat;
-  background-size: 20px;
-  background-position-x: 2px;
-  background-position-y: 2px;
-  border: none;
+.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
+  background-color: var(--jp-layout-color3);
+}
+
+.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color1);
+}
+
+.jp-Shortcuts-Submit.jp-mod-conflict-Submit {
+  background-color: var(--jp-error-color1);
 }
 
 /* Shortcut Item Style */
@@ -285,12 +285,12 @@
 /* Shortcut Title Item Style */
 .jp-Shortcuts-Header {
   display: flex;
+  cursor: pointer;
 }
 
-.jp-Shortcuts-Header:hover .jp-ShortcutTitleItem-sortButton,
-.jp-Shortcuts-Header:focus .jp-ShortcutTitleItem-sortButton {
-  font-weight: 600;
-  color: var(--jp-ui-font-color0);
+.jp-Shortcuts-Header:hover .jp-ShortcutTitleItem-sortButton[fill],
+.jp-Shortcuts-Header:focus .jp-ShortcutTitleItem-sortButton[fill] {
+  fill: var(--jp-ui-font-color0);
 }
 
 .jp-Shortcuts-Header:active .jp-ShortcutTitleItem-sortButton {
@@ -300,15 +300,6 @@
 .jp-Shortcuts-CurrentHeader div {
   color: var(--jp-ui-font-color0);
   font-weight: bold;
-}
-
-.jp-Shortcuts-SortButton {
-  transform: rotate(180deg);
-  margin-left: 10px;
-  color: var(--jp-ui-font-color2);
-  border: none;
-  background-color: var(--jp-layout-color0);
-  font-size: var(--jp-ui-font-size1);
 }
 
 /* Shortcut UI Style */
@@ -346,26 +337,11 @@
 }
 
 .jp-Shortcuts-Search {
-  border: var(--jp-border-width) solid var(--jp-layout-color3);
   height: 30px;
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-ui-font-color0);
-  background-color: var(--jp-layout-color1);
-  background-image: var(--jp-icon-search);
-  background-size: 18px;
-  background-position-x: 98%;
-  background-position-y: 6px;
-  background-repeat: no-repeat;
-  outline: none;
 }
 
-.jp-Shortcuts-Search:focus {
-  border: var(--jp-border-width) solid var(--md-blue-500);
-  box-shadow: inset 0 0 4px var(--md-blue-300);
-}
-
-.jp-Shortcuts-Search::placeholder {
-  color: var(--jp-ui-font-color2);
+.jp-Shortcuts-Search input {
+  box-shadow: none;
 }
 
 .jp-Shortcuts-AdvancedOptionsSmall {

@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { caretDownEmptyThinIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 export interface IShortcutTitleItemProps {
@@ -23,11 +24,9 @@ export class ShortcutTitleItem extends React.Component<IShortcutTitleItemProps> 
         onClick={() => this.props.updateSort(this.props.title.toLowerCase())}
       >
         {this.props.title}
-        <div
+        <caretDownEmptyThinIcon.react
           className={'jp-Shortcuts-SortButton jp-ShortcutTitleItem-sortButton'}
-        >
-          ⌃
-        </div>
+        />
       </div>
     );
   }

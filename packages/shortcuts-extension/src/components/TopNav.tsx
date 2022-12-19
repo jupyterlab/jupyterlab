@@ -5,6 +5,7 @@
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
+import { InputGroup } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Menu } from '@lumino/widgets';
@@ -159,10 +160,12 @@ export class TopNav extends React.Component<ITopNavProps> {
       <div className="jp-Shortcuts-Top">
         <div className="jp-Shortcuts-TopNav">
           <Symbols />
-          <input
-            onChange={event => this.props.updateSearchQuery(event)}
+          <InputGroup
             className="jp-Shortcuts-Search"
-            placeholder={trans.__('Search')}
+            type="text"
+            onChange={event => this.props.updateSearchQuery(event)}
+            placeholder={trans.__('Search…')}
+            rightIcon="ui-components:search"
           />
           <AdvancedOptions
             toggleSelectors={this.props.toggleSelectors}
