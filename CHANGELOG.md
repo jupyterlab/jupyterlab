@@ -14,7 +14,7 @@
 
 ### Bugs fixed
 
-- use jupyter_config_dir instead of config_path[0] for workspaces, settings [#13589](https://github.com/jupyterlab/jupyterlab/pull/13589) ([@minrk](https://github.com/minrk))
+- use jupyter_config_dir instead of config_path\[0\] for workspaces, settings [#13589](https://github.com/jupyterlab/jupyterlab/pull/13589) ([@minrk](https://github.com/minrk))
 
 ### Maintenance and upkeep improvements
 
