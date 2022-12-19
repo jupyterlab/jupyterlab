@@ -6,7 +6,6 @@ import {
   CompleterModel,
   CompletionHandler
 } from '@jupyterlab/completer';
-import { JSONExt } from '@lumino/coreutils';
 
 function makeState(text: string): Completer.ITextState {
   return {
@@ -322,7 +321,7 @@ describe('completer/model', () => {
     describe('#dispose()', () => {
       it('should dispose of the model resources', () => {
         const model = new CompleterModel();
-        model.setOptions(['foo'], { foo: 'instance' });
+        model.setCompletionItems([{ label: 'foo' }]);
         expect(model.isDisposed).toBe(false);
         model.dispose();
         expect(model.isDisposed).toBe(true);
