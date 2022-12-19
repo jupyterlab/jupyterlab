@@ -2029,6 +2029,12 @@
     "shortcuts": []
   },
   {
+    "id": "terminal:copy",
+    "label": "Copy",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "terminal:create-new",
     "label": "Terminal",
     "caption": "Start a new terminal session",
@@ -2049,6 +2055,12 @@
   {
     "id": "terminal:open",
     "label": "Open a terminal by its `name`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:paste",
+    "label": "Paste",
     "caption": "",
     "shortcuts": []
   },
