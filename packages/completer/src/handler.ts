@@ -34,20 +34,7 @@ export class CompletionHandler implements IDisposable {
     this.completer = options.completer;
     this.completer.selected.connect(this.onCompletionSelected, this);
     this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
-    if (options.connector && options.reconciliator) {
-      console.warn(
-        'Both connector and reconciliator were passed; the connector will be ignored'
-      );
-    }
-    if (options.reconciliator) {
-      this._reconciliator = options.reconciliator;
-    } else if (options.connector) {
-      this._reconciliator = options.connector;
-    } else {
-      throw Error(
-        'At least one: connector or reconciliator needs to be provided'
-      );
-    }
+    this._reconciliator = options.reconciliator;
   }
 
   /**
@@ -57,13 +44,6 @@ export class CompletionHandler implements IDisposable {
 
   set reconciliator(reconciliator: IProviderReconciliator) {
     this._reconciliator = reconciliator;
-  }
-
-  /**
-   * @deprecated use `reconciliator` instead.
-   */
-  set connector(connector: CompletionHandler.ICompletionItemsConnector) {
-    this._reconciliator = connector;
   }
 
   /**
@@ -412,9 +392,7 @@ export class CompletionHandler implements IDisposable {
     return model;
   }
 
-  private _reconciliator:
-    | IProviderReconciliator
-    | CompletionHandler.ICompletionItemsConnector;
+  private _reconciliator: IProviderReconciliator;
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _enabled = false;
   private _isDisposed = false;
@@ -437,18 +415,7 @@ export namespace CompletionHandler {
     /**
      * The reconciliator that will fetch and merge completions from active providers.
      */
-    reconciliator?: IProviderReconciliator;
-
-    /**
-     * The data connector used to populate completion requests.
-     * #### Notes
-     * The only method of this connector that will ever be called is `fetch`, so
-     * it is acceptable for the other methods to be simple functions that return
-     * rejected promises.
-     *
-     * @deprecated use `reconciliator` instead.
-     */
-    connector?: CompletionHandler.ICompletionItemsConnector;
+    reconciliator: IProviderReconciliator;
   }
 
   /**
@@ -536,18 +503,6 @@ export namespace CompletionHandler {
      */
     items: Array<T>;
   }
-
-  /**
-   * @deprecated this is no longer required, use completion providers instead of custom connectors.
-   */
-  export interface ICompleterConnecterResponseType {
-    responseType: typeof ICompletionItemsResponseType;
-  }
-
-  /**
-   * @deprecated this is no longer required, use completion providers instead of custom connectors.
-   */
-  export const ICompletionItemsResponseType = 'ICompletionItemsReply' as const;
 
   /**
    * The details of a completion request.
