@@ -87,6 +87,8 @@ export async function main() {
     PageConfig.getOption('federated_extensions')
   );
 
+  var futureSkipStylesForDisabled = (PageConfig.getOption('futureSkipStylesForDisabled') || '').toLowerCase() === 'true';
+
   const queuedFederated = [];
 
   extensions.forEach(data => {
@@ -98,7 +100,8 @@ export async function main() {
       queuedFederated.push(data.name);
       federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
-    if (data.style) {
+
+    if (data.style && (!futureSkipStylesForDisabled || !PageConfig.Extension.isDisabled(data.name))) {
       federatedStylePromises.push(createModule(data.name, data.style));
     }
   });

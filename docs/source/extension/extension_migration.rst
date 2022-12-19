@@ -53,6 +53,13 @@ The involved packages are:
 
    * The ``ServiceManager`` class implements the optional property ``user`` from the ``IManager``.
 
+**Future changes:**
+Some of the behavior changes coming in JupyterLab 4.0 were made available behind a flag in JupyterLab 3.6:
+
+- In JupyterLab 3.x, the CSS for a _disabled_ prebuilt extensions is always loaded on the page.
+  This will no longer be the case in JupyterLab 4.0. To preview the impact of these changes on
+  your extension/theme start JupyterLab with ``--future-skip-styles-for-disabled`` flag.
+
 
 .. _extension_migration_3.0_3.1:
 
