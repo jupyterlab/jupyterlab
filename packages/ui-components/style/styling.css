@@ -90,7 +90,7 @@ select.jp-mod-styled {
 }
 
 select.jp-mod-styled:not([multiple]) {
-  height: 32;
+  height: 32px;
 }
 
 select.jp-mod-styled[multiple] {
