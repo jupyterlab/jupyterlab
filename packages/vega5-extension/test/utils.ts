@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { RenderedVega, VEGALITE4_MIME_TYPE } from '@jupyterlab/vega5-extension';
 import { JSONObject } from '@lumino/coreutils';
 
