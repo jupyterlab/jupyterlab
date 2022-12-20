@@ -2235,7 +2235,7 @@ export class Notebook extends StaticNotebook {
         button === 0 &&
         shiftKey &&
         !hasSelection &&
-        !['input', 'option'].includes(target.localName)
+        !['INPUT', 'OPTION'].includes(target.tagName)
       ) {
         // Prevent browser selecting text in prompt or output
         event.preventDefault();
