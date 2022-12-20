@@ -418,23 +418,21 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     if (this._inputHidden === value) {
       return;
     }
+    if (!this.placeholder) {
+      const layout = this._inputWrapper!.layout as PanelLayout;
+      if (value) {
+        this._input!.parent = null;
+        layout.addWidget(this._inputPlaceholder!);
+      } else {
+        this._inputPlaceholder!.parent = null;
+        layout.addWidget(this._input!);
+      }
+    }
     this._inputHidden = value;
     if (this.syncCollapse) {
       this.saveCollapseState();
     }
-    this.ready.then(() => {
-      if (!this.placeholder) {
-        const layout = this._inputWrapper!.layout as PanelLayout;
-        if (value) {
-          this._input!.parent = null;
-          layout.addWidget(this._inputPlaceholder!);
-        } else {
-          this._inputPlaceholder!.parent = null;
-          layout.addWidget(this._input!);
-        }
-      }
-      this.handleInputHidden(value);
-    });
+    this.handleInputHidden(value);
   }
 
   /**
