@@ -30,34 +30,31 @@ jobs:
         with:
           mode: fix
 
+      - name: List files changed
+        id: files-changed
+        shell: bash -l {0}
+        run: |
+          set -ex
+          export CHANGES=$(git status --porcelain | tee modified.log | wc -l)
+          cat modified.log
+          # Remove the log otherwise it will be committed
+          rm modified.log
+
+          echo "N_CHANGES=${CHANGES}" >> $GITHUB_OUTPUT
+
+          git diff
+
       - name: Commit any changes
+        if: steps.files-changed.outputs.N_CHANGES != '0'
         shell: bash -l {0}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git pull --no-tags
+
           git add *
-          git commit --allow-empty -m "Automatic application of license header"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get modified files
-        id: changed-files
-        uses: tj-actions/changed-files@v34.5.3
-        with:
-          base_sha: 'HEAD~1'
-          sha: 'HEAD'
-
-      - name: Push fixes
-        if: steps.changed-files.outputs.any_changed == 'true'
-        shell: bash -l {0}
-        run: |
-          echo "Changed files"
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "  $file"
-          done
-          git diff HEAD~1
+          git commit -m "Automatic application of license header"
 
           git config push.default upstream
           git push

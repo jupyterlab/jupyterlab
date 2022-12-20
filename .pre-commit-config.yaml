@@ -31,7 +31,7 @@ repos:
         args: ['--line-length', '100']
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.11.1
+    rev: v5.11.3
     hooks:
       - id: isort
         files: \.py$

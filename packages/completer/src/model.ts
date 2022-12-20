@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { map, StringExt } from '@lumino/algorithm';
+import { StringExt } from '@lumino/algorithm';
 import { JSONExt, ReadonlyPartialJSONArray } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CompletionHandler } from './handler';
@@ -161,7 +161,7 @@ export class CompleterModel implements Completer.IModel {
    * #### Notes
    * This is a read-only property.
    */
-  completionItems?(): CompletionHandler.ICompletionItems {
+  completionItems(): CompletionHandler.ICompletionItems {
     let query = this._query;
     if (query) {
       return this._markup(query);
@@ -173,7 +173,7 @@ export class CompleterModel implements Completer.IModel {
    * Set the list of visible items in the completer menu, and append any
    * new types to KNOWN_TYPES.
    */
-  setCompletionItems?(newValue: CompletionHandler.ICompletionItems): void {
+  setCompletionItems(newValue: CompletionHandler.ICompletionItems): void {
     if (
       JSONExt.deepEqual(
         newValue as unknown as ReadonlyPartialJSONArray,
@@ -187,24 +187,6 @@ export class CompleterModel implements Completer.IModel {
       this._completionItems
     );
     this._stateChanged.emit(undefined);
-  }
-
-  /**
-   * The list of visible items in the completer menu.
-   * @deprecated use `completionItems` instead
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  items(): IterableIterator<Completer.IItem> {
-    return this._filter();
-  }
-
-  /**
-   * The unfiltered list of all available options in a completer menu.
-   */
-  options(): IterableIterator<string> {
-    return this._options[Symbol.iterator]();
   }
 
   /**
@@ -236,31 +218,6 @@ export class CompleterModel implements Completer.IModel {
    */
   orderedTypes(): string[] {
     return this._orderedTypes;
-  }
-
-  /**
-   * Set the available options in the completer menu.
-   */
-  setOptions(newValue: Iterable<string>, typeMap?: Completer.TypeMap): void {
-    const values = Array.from(newValue || []);
-    const types = typeMap || {};
-
-    if (
-      JSONExt.deepEqual(values, this._options) &&
-      JSONExt.deepEqual(types, this._typeMap)
-    ) {
-      return;
-    }
-    if (values.length) {
-      this._options = values;
-      this._typeMap = types;
-      this._orderedTypes = Private.findOrderedTypes(types);
-    } else {
-      this._options = [];
-      this._typeMap = {};
-      this._orderedTypes = [];
-    }
-    this._stateChanged.emit(undefined);
   }
 
   /**
@@ -422,33 +379,6 @@ export class CompleterModel implements Completer.IModel {
   }
 
   /**
-   * Apply the query to the complete options list to return the matching subset.
-   */
-  private _filter(): IterableIterator<Completer.IItem> {
-    const options = this._options || [];
-    const query = this._query;
-    if (!query) {
-      return map(options, option => ({ raw: option, text: option }));
-    }
-    const results: Private.IMatch[] = [];
-    for (const option of options) {
-      const match = StringExt.matchSumOfSquares(option, query);
-      if (match) {
-        const marked = StringExt.highlight(option, match.indices, Private.mark);
-        results.push({
-          raw: option,
-          score: match.score,
-          text: marked.join('')
-        });
-      }
-    }
-    return map(results.sort(Private.scoreCmp), result => ({
-      text: result.text,
-      raw: result.raw
-    }));
-  }
-
-  /**
    * Lazy load missing data of item at `activeIndex`.
    * @param {number} activeIndex - index of item
    * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
@@ -509,7 +439,6 @@ export class CompleterModel implements Completer.IModel {
     this._current = null;
     this._cursor = null;
     this._completionItems = [];
-    this._options = [];
     this._original = null;
     this._query = '';
     this._subsetMatch = false;
@@ -521,7 +450,6 @@ export class CompleterModel implements Completer.IModel {
   private _cursor: Completer.ICursorSpan | null = null;
   private _isDisposed = false;
   private _completionItems: CompletionHandler.ICompletionItems = [];
-  private _options: string[] = [];
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
