@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { PartialJSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
