@@ -87,17 +87,17 @@ export abstract class ReactWidget extends Widget {
         this._rootDOM.render(vnode);
         // Resolves after the widget has been rendered.
         // https://github.com/reactwg/react-18/discussions/5#discussioncomment-798304
-        setTimeout(resolve, 0);
+        requestIdleCallback(() => resolve());
       } else if (vnode) {
         this._rootDOM.render(vnode);
         // Resolves after the widget has been rendered.
         // https://github.com/reactwg/react-18/discussions/5#discussioncomment-798304
-        setTimeout(resolve, 0);
+        requestIdleCallback(() => resolve());
       } else {
         // If the virtual node is null, unmount the node content
         this._rootDOM.unmount();
         this._rootDOM = null;
-        resolve();
+        requestIdleCallback(() => resolve());
       }
     });
   }

@@ -198,7 +198,7 @@ describe('@jupyterlab/notebook', () => {
         />
       );
       const htmlElement = ReactDOMServer.renderToString(element);
-      expect(htmlElement).toContain('<div data-reactroot=""></div>');
+      expect(htmlElement).toContain('<div></div>');
     });
     it('Should render a filled circle with 0/2 cell executed message', () => {
       defaultState.scheduledCellNumber = 2;

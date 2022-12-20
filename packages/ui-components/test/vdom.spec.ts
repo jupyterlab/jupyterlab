@@ -98,6 +98,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.model = model;
         model.value = 'foo';
         await framePromise();
+        await widget.renderPromise;
         const span = widget.node.firstChild as HTMLElement;
         expect(span.textContent).toBe('foo');
       });
@@ -108,6 +109,7 @@ describe('@jupyterlab/ui-components', () => {
         const widget = new TestWidgetNoModel();
         Widget.attach(widget, document.body);
         await framePromise();
+        await widget.renderPromise;
         const span = widget.node.firstChild as HTMLElement;
         expect(span.textContent).toBe('No model!');
       });
