@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { JSONExt } from '@lumino/coreutils';
 import { Context } from '@jupyterlab/docregistry';
 import {
