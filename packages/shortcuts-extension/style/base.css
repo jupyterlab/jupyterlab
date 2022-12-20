@@ -135,7 +135,7 @@
   background-color: var(--jp-layout-color0);
 }
 
-.jp-Shortcuts-Row:hover #shortcut-keys {
+.jp-Shortcuts-Row:hover .jp-Shortcuts-ShortcutKeys {
   border-color: var(--jp-border-color1);
   background: var(--jp-layout-color2);
 }
@@ -187,7 +187,7 @@
   flex-wrap: wrap;
 }
 
-.jp-Shortcuts-ShortcutContainer:hover #shortcut-keys {
+.jp-Shortcuts-ShortcutContainer:hover .jp-Shortcuts-ShortcutKeys {
   border-color: var(--jp-border-color3);
   background: var(--jp-layout-color3);
 }

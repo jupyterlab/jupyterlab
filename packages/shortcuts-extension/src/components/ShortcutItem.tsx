@@ -358,7 +358,7 @@ export class ShortcutItem extends React.Component<
     return this.props.shortcut.keys[key].map(
       (keyBinding: string, index: number) => (
         <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
-          <div className="jp-Shortcuts-ShortcutKeys" id={'shortcut-keys'}>
+          <div className="jp-Shortcuts-ShortcutKeys">
             {this.toSymbols(keyBinding)}
           </div>
           {index + 1 < this.props.shortcut.keys[key].length ? (
