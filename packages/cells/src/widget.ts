@@ -264,10 +264,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     return this._placeholder;
   }
   protected set placeholder(v: boolean) {
-    if (v === false) {
-      this._placeholder = v;
-
+    if (this._placeholder !== v && v === false) {
       this.initializeDOM();
+      this._placeholder = v;
       this._ready.resolve();
     }
   }
@@ -545,6 +544,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Create children widgets.
    */
   protected initializeDOM(): void {
+    if (!this.placeholder) {
+      return;
+    }
+
     const contentFactory = this.contentFactory;
     const model = this._model;
 
@@ -570,6 +573,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this._inputPlaceholder = new InputPlaceholder(() => {
       this.inputHidden = !this.inputHidden;
     });
+
+    if (this.inputHidden) {
+      input.parent = null;
+      (inputWrapper.layout as PanelLayout).addWidget(this._inputPlaceholder!);
+    }
 
     // Footer
     const footer = this.contentFactory.createCellFooter();
@@ -993,47 +1001,55 @@ export class CodeCell extends Cell<ICodeCellModel> {
    * Create children widgets.
    */
   protected initializeDOM(): void {
+    if (!this.placeholder) {
+      return;
+    }
+
     super.initializeDOM();
 
-    if (!this.placeholder) {
-      this.setPrompt(this.prompt);
+    this.setPrompt(this.prompt);
 
-      // Insert the output before the cell footer.
-      const outputWrapper = (this._outputWrapper = new Panel());
-      outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-      const outputCollapser = new OutputCollapser();
-      outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-      outputWrapper.addWidget(outputCollapser);
-      // Set a CSS if there are no outputs, and connect a signal for future
-      // changes to the number of outputs. This is for conditional styling
-      // if there are no outputs.
-      if (this.model.outputs.length === 0) {
-        this.addClass(NO_OUTPUTS_CLASS);
-      }
-      this._output.outputLengthChanged.connect(this._outputLengthHandler, this);
-      outputWrapper.addWidget(this._output);
-      const layout = this.layout as PanelLayout;
-      layout.insertWidget(
-        layout.widgets.length - 1,
-        new ResizeHandle(this.node)
-      );
-      layout.insertWidget(layout.widgets.length - 1, outputWrapper);
-
-      if (this.model.isDirty) {
-        this.addClass(DIRTY_CLASS);
-      }
-
-      this._outputPlaceholder = new OutputPlaceholder(() => {
-        this.outputHidden = !this.outputHidden;
-      });
-
-      const trans = this.translator.load('jupyterlab');
-      const ariaLabel =
-        this.model.outputs.length === 0
-          ? trans.__('Code Cell Content')
-          : trans.__('Code Cell Content with Output');
-      this.node.setAttribute('aria-label', ariaLabel);
+    // Insert the output before the cell footer.
+    const outputWrapper = (this._outputWrapper = new Panel());
+    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
+    const outputCollapser = new OutputCollapser();
+    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
+    outputWrapper.addWidget(outputCollapser);
+    // Set a CSS if there are no outputs, and connect a signal for future
+    // changes to the number of outputs. This is for conditional styling
+    // if there are no outputs.
+    if (this.model.outputs.length === 0) {
+      this.addClass(NO_OUTPUTS_CLASS);
     }
+    this._output.outputLengthChanged.connect(this._outputLengthHandler, this);
+    outputWrapper.addWidget(this._output);
+    const layout = this.layout as PanelLayout;
+    layout.insertWidget(layout.widgets.length - 1, new ResizeHandle(this.node));
+    layout.insertWidget(layout.widgets.length - 1, outputWrapper);
+
+    if (this.model.isDirty) {
+      this.addClass(DIRTY_CLASS);
+    }
+
+    this._outputPlaceholder = new OutputPlaceholder(() => {
+      this.outputHidden = !this.outputHidden;
+    });
+
+    const layoutWrapper = outputWrapper.layout as PanelLayout;
+    if (this.outputHidden) {
+      layoutWrapper.removeWidget(this._output);
+      layoutWrapper.addWidget(this._outputPlaceholder);
+      if (this.inputHidden && !outputWrapper.isHidden) {
+        this._outputWrapper!.hide();
+      }
+    }
+
+    const trans = this.translator.load('jupyterlab');
+    const ariaLabel =
+      this.model.outputs.length === 0
+        ? trans.__('Code Cell Content')
+        : trans.__('Code Cell Content with Output');
+    this.node.setAttribute('aria-label', ariaLabel);
   }
 
   /**
@@ -1966,6 +1982,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Create children widgets.
    */
   protected initializeDOM(): void {
+    if (!this.placeholder) {
+      return;
+    }
+
     super.initializeDOM();
 
     // Stop codemirror handling paste
