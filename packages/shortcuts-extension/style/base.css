@@ -288,8 +288,8 @@
   cursor: pointer;
 }
 
-.jp-Shortcuts-Header:hover .jp-ShortcutTitleItem-sortButton[fill],
-.jp-Shortcuts-Header:focus .jp-ShortcutTitleItem-sortButton[fill] {
+.jp-Shortcuts-Header:hover .jp-ShortcutTitleItem-sortButton .jp-icon3[fill],
+.jp-Shortcuts-Header:focus .jp-ShortcutTitleItem-sortButton .jp-icon3[fill] {
   fill: var(--jp-ui-font-color0);
 }
 
@@ -340,7 +340,7 @@
   height: 30px;
 }
 
-.jp-Shortcuts-Search input {
+.jp-Shortcuts-Search > input {
   box-shadow: none;
 }
 
