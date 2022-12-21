@@ -27,8 +27,13 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
     "docs": "typedoc src",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -40,7 +45,10 @@
     "vega-lite": "^5.1.0"
   },
   "devDependencies": {
+    "@jupyterlab/testutils": "^4.0.0-alpha.16",
+    "@types/jest": "^29.2.0",
     "@types/webpack-env": "^1.14.1",
+    "jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
     "typescript": "~4.7.3"
