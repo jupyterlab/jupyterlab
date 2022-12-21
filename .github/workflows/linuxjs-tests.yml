@@ -46,6 +46,7 @@ jobs:
             js-toc,
             js-translation,
             js-ui-components,
+            js-vega5-extension,
             js-testutils,
           ]
       fail-fast: false

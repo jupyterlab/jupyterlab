@@ -134,7 +134,10 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     }
 
     // Add png representation of vega chart to output
-    const imageURL = await this._result.view.toImageURL('png');
+    const imageURL = await this._result.view.toImageURL(
+      'png',
+      embedOptions.scaleFactor
+    );
     model.setData({
       data: { ...model.data, 'image/png': imageURL.split(',')[1] }
     });
