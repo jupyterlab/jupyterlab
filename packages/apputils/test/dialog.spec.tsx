@@ -2,7 +2,7 @@
 
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, ReactWidget, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
   acceptDialog,
   dismissDialog,
