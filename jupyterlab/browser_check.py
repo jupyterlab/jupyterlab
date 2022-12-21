@@ -92,7 +92,7 @@ async def run_test_async(app, func):
         # Starting with jupyter-server 2.0.2, the open files are not written
         # if open_browser = False
         if not app.open_browser:
-            app.serverapp.write_browser_open_files()
+            app.write_browser_open_files()
     else:
         url = app.display_url
 
