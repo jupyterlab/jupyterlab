@@ -2,7 +2,7 @@
 
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, ReactWidget, showDialog } from '@jupyterlab/apputils';
 import {
   acceptDialog,
   dismissDialog,
@@ -70,7 +70,6 @@ describe('@jupyterlab/apputils', () => {
         });
 
         expect(dialog).toBeInstanceOf(Dialog);
-        dialog.dispose();
       });
     });
 
@@ -290,13 +289,15 @@ describe('@jupyterlab/apputils', () => {
         expect(document.activeElement!.className).toContain('jp-mod-accept');
       });
 
-      it('should focus the primary element', () => {
+      it('should focus the primary element', async () => {
         const body = (
           <div>
             <input type={'text'} />
           </div>
         );
         const dialog = new TestDialog({ body, focusNodeSelector: 'input' });
+
+        await dialog.ready;
 
         Widget.attach(dialog, document.body);
         expect(document.activeElement!.localName).toBe('input');
@@ -366,22 +367,22 @@ describe('@jupyterlab/apputils', () => {
       };
 
       describe('#createHeader()', () => {
-        it('should create the header of the dialog', () => {
-          const widget = renderer.createHeader('foo');
+        it('should create the header of the dialog', async () => {
+          const widget = await renderer.createHeader('foo');
 
           expect(widget.hasClass('jp-Dialog-header')).toBe(true);
         });
       });
 
       describe('#createBody()', () => {
-        it('should create the body from a string', () => {
-          const widget = renderer.createBody('foo');
+        it('should create the body from a string', async () => {
+          const widget = await renderer.createBody('foo');
 
           expect(widget.hasClass('jp-Dialog-body')).toBe(true);
           expect(widget.node.firstChild!.textContent).toBe('foo');
         });
 
-        it('should create the body from a virtual node', () => {
+        it('should create the body from a virtual node', async () => {
           const vnode = (
             <div>
               <input type={'text'} />
@@ -391,7 +392,7 @@ describe('@jupyterlab/apputils', () => {
               <button />
             </div>
           );
-          const widget = renderer.createBody(vnode);
+          const widget = await renderer.createBody(vnode);
           const button = widget.node.querySelector('button')!;
           const input = widget.node.querySelector('input')!;
           const select = widget.node.querySelector('select')!;

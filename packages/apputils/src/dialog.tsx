@@ -122,22 +122,34 @@ export class Dialog<T> extends Widget {
 
     this._body = normalized.body;
 
-    const header = renderer.createHeader(
+    const headerPromise = renderer.createHeader(
       normalized.title,
       () => this.reject(),
       options
     );
-    const body = renderer.createBody(normalized.body);
+    const bodyPromise = renderer.createBody(normalized.body);
+
     const footer = renderer.createFooter(this._buttonNodes, this._checkboxNode);
-    content.addWidget(header);
-    content.addWidget(body);
-    content.addWidget(footer);
+
+    Promise.all([headerPromise, bodyPromise]).then(([header, body]) => {
+      content.addWidget(header);
+      content.addWidget(body);
+      content.addWidget(footer);
+      this._ready.resolve();
+    });
 
     this._primary = this._buttonNodes[this._defaultButton];
     this._focusNodeSelector = options.focusNodeSelector;
 
     // Add new dialogs to the tracker.
     void Dialog.tracker.add(this);
+  }
+
+  /**
+   * A promise that resolves when the Dialog is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -166,7 +178,8 @@ export class Dialog<T> extends Widget {
     const promise = (this._promise = new PromiseDelegate<Dialog.IResult<T>>());
     const promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
-    return promises.then(() => {
+    return promises.then(async () => {
+      await this.ready;
       // Do not show Dialog if it was disposed of before it was at the front of the launch queue
       if (!this._promise) {
         return Promise.resolve({
@@ -457,6 +470,7 @@ export class Dialog<T> extends Widget {
     });
   }
 
+  private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
   private _buttonNodes: ReadonlyArray<HTMLElement>;
   private _buttons: ReadonlyArray<Dialog.IButton>;
   private _checkboxNode: HTMLElement | null;
@@ -659,7 +673,7 @@ export namespace Dialog {
       title: Header,
       reject: () => void,
       options: Partial<Dialog.IOptions<T>>
-    ): Widget;
+    ): Promise<ReactWidget>;
 
     /**
      * Create the body of the dialog.
@@ -668,7 +682,7 @@ export namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(body: Body<any>): Widget;
+    createBody(body: Body<any>): Promise<Widget>;
 
     /**
      * Create the footer of the dialog.
@@ -796,14 +810,14 @@ export namespace Dialog {
      *
      * @returns A widget for the dialog header.
      */
-    createHeader<T>(
+    async createHeader<T>(
       title: Header,
       reject: () => void = () => {
         /* empty */
       },
       options: Partial<Dialog.IOptions<T>> = {}
-    ): Widget {
-      let header: Widget;
+    ): Promise<ReactWidget> {
+      let header: ReactWidget;
 
       const handleMouseDown = (event: React.MouseEvent) => {
         // Fire action only when left button is pressed.
@@ -846,6 +860,7 @@ export namespace Dialog {
       } else {
         header = ReactWidget.create(title);
       }
+      await header.renderPromise;
       header.addClass('jp-Dialog-header');
       Styling.styleNode(header.node);
       return header;
@@ -858,7 +873,7 @@ export namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(value: Body<any>): Widget {
+    async createBody(value: Body<any>): Promise<Widget> {
       let body: Widget;
       if (typeof value === 'string') {
         body = new Widget({ node: document.createElement('span') });
@@ -870,6 +885,7 @@ export namespace Dialog {
         // Immediately update the body even though it has not yet attached in
         // order to trigger a render of the DOM nodes from the React element.
         MessageLoop.sendMessage(body, Widget.Msg.UpdateRequest);
+        await (body as ReactWidget).renderPromise;
       }
       body.addClass('jp-Dialog-body');
       Styling.styleNode(body.node);
