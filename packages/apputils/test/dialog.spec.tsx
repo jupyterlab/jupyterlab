@@ -404,10 +404,10 @@ describe('@jupyterlab/apputils', () => {
           widget.dispose();
         });
 
-        it('should create the body from a widget', () => {
+        it('should create the body from a widget', async () => {
           const body = new Widget();
 
-          renderer.createBody(body);
+          await renderer.createBody(body);
           expect(body.hasClass('jp-Dialog-body')).toBe(true);
         });
       });

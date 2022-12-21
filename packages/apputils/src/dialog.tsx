@@ -131,12 +131,16 @@ export class Dialog<T> extends Widget {
 
     const footer = renderer.createFooter(this._buttonNodes, this._checkboxNode);
 
-    Promise.all([headerPromise, bodyPromise]).then(([header, body]) => {
-      content.addWidget(header);
-      content.addWidget(body);
-      content.addWidget(footer);
-      this._ready.resolve();
-    });
+    Promise.all([headerPromise, bodyPromise])
+      .then(([header, body]) => {
+        content.addWidget(header);
+        content.addWidget(body);
+        content.addWidget(footer);
+        this._ready.resolve();
+      })
+      .catch(() => {
+        console.error('Error while loading Dialog');
+      });
 
     this._primary = this._buttonNodes[this._defaultButton];
     this._focusNodeSelector = options.focusNodeSelector;
