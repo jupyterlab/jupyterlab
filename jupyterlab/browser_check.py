@@ -89,6 +89,10 @@ async def run_test_async(app, func):
     # since that uses a local HTML file to point the user at the app.
     if hasattr(app, "browser_open_file"):
         url = urljoin("file:", pathname2url(app.browser_open_file))
+        # Starting with jupyter-server 2.0.2, the open files are not written
+        # if open_browser = False
+        if not app.open_browser:
+            app.write_browser_open_files()
     else:
         url = app.display_url
 
