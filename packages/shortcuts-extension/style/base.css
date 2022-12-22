@@ -297,9 +297,8 @@
   outline: none;
 }
 
-.jp-Shortcuts-CurrentHeader div {
-  color: var(--jp-ui-font-color0);
-  font-weight: bold;
+.jp-Shortcuts-CurrentHeader .jp-icon3[fill] {
+  fill: var(--jp-ui-font-color0);
 }
 
 /* Shortcut UI Style */
