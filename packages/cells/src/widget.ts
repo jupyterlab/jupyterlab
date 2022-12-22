@@ -2213,7 +2213,6 @@ export namespace MarkdownCell {
      */
     showEditorForReadOnlyMarkdown?: boolean;
 
-    /** */
   }
 
   /**
