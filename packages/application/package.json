@@ -46,7 +46,7 @@
     "@jupyterlab/coreutils": "^6.0.0-alpha.16",
     "@jupyterlab/docregistry": "^4.0.0-alpha.16",
     "@jupyterlab/rendermime": "^4.0.0-alpha.16",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.16",
+    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.16",
     "@jupyterlab/services": "^7.0.0-alpha.16",
     "@jupyterlab/statedb": "^4.0.0-alpha.16",
     "@jupyterlab/translation": "^4.0.0-alpha.16",

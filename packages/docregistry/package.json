@@ -49,7 +49,7 @@
     "@jupyterlab/docprovider": "^4.0.0-alpha.16",
     "@jupyterlab/observables": "^5.0.0-alpha.16",
     "@jupyterlab/rendermime": "^4.0.0-alpha.16",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.16",
+    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.16",
     "@jupyterlab/services": "^7.0.0-alpha.16",
     "@jupyterlab/translation": "^4.0.0-alpha.16",
     "@jupyterlab/ui-components": "^4.0.0-alpha.31",

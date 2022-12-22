@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@jupyterlab/rendermime": "^4.0.0-alpha.16",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.16"
+    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.16"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

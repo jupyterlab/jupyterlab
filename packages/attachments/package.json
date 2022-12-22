@@ -40,7 +40,7 @@
     "@jupyterlab/nbformat": "^4.0.0-alpha.16",
     "@jupyterlab/observables": "^5.0.0-alpha.16",
     "@jupyterlab/rendermime": "^4.0.0-alpha.16",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.16",
+    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.16",
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6"
   },

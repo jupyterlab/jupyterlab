@@ -101,7 +101,7 @@
     "@jupyterlab/property-inspector": "^4.0.0-alpha.16",
     "@jupyterlab/rendermime": "^4.0.0-alpha.16",
     "@jupyterlab/rendermime-extension": "^4.0.0-alpha.16",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.16",
+    "@jupyterlab/rendermime-interfaces": "^4.0.0-alpha.16",
     "@jupyterlab/running": "^4.0.0-alpha.16",
     "@jupyterlab/running-extension": "^4.0.0-alpha.16",
     "@jupyterlab/services": "^7.0.0-alpha.16",
