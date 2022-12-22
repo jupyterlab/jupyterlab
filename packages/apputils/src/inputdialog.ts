@@ -509,12 +509,7 @@ class InputMultipleItemsDialog extends InputDialogBase<string> {
     let defaults = options.defaults || [];
 
     this._list = document.createElement('select');
-
-    // Add an hidden option, otherwise the first one is selected by default
-    let option = document.createElement('option');
-    option.value = '';
-    option.classList.add('hidden');
-    this._list.appendChild(option);
+    this._list.setAttribute('multiple', '');
 
     options.items.forEach(item => {
       const option = document.createElement('option');
@@ -525,7 +520,6 @@ class InputMultipleItemsDialog extends InputDialogBase<string> {
 
     // use the select
     this._input.remove();
-    this._list.setAttribute('multiple', '');
     this.node.appendChild(this._list);
 
     // select the current ones
@@ -534,6 +528,8 @@ class InputMultipleItemsDialog extends InputDialogBase<string> {
       const option = htmlOptions[i];
       if (defaults.includes(option.value)) {
         option.selected = true;
+      } else {
+        option.selected = false;
       }
     }
   }
