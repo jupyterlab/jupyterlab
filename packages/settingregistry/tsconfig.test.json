@@ -3,6 +3,9 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../statedb"
     },
     {

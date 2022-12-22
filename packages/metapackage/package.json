@@ -91,6 +91,8 @@
     "@jupyterlab/markedparser-extension": "^4.0.0-alpha.16",
     "@jupyterlab/mathjax2": "^4.0.0-alpha.16",
     "@jupyterlab/mathjax2-extension": "^4.0.0-alpha.16",
+    "@jupyterlab/metadataform": "^4.0.0-alpha.16",
+    "@jupyterlab/metadataform-extension": "^4.0.0-alpha.16",
     "@jupyterlab/nbconvert-css": "^4.0.0-alpha.16",
     "@jupyterlab/nbformat": "^4.0.0-alpha.16",
     "@jupyterlab/notebook": "^4.0.0-alpha.16",

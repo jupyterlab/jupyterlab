@@ -1,0 +1,74 @@
+{
+  "name": "@jupyterlab/metadataform",
+  "version": "4.0.0-alpha.16",
+  "description": "A helper to build form for metadata",
+  "keywords": [
+    "jupyter",
+    "jupyterlab"
+  ],
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/**/*"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:watch": "jest --runInBand --watch",
+    "watch": "tsc -w --listEmittedFiles"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^4.0.0-alpha.16",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.16",
+    "@jupyterlab/notebook": "^4.0.0-alpha.16",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.16",
+    "@jupyterlab/translation": "^4.0.0-alpha.16",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.31",
+    "@lumino/coreutils": "^2.0.0-alpha.6",
+    "@lumino/messaging": "^2.0.0-alpha.6",
+    "@lumino/widgets": "^2.0.0-alpha.6",
+    "@rjsf/core": "^4.2.0",
+    "json-schema": "^0.4.0",
+    "react": "^17.0.1"
+  },
+  "devDependencies": {
+    "@jupyterlab/testutils": "^4.0.0-alpha.16",
+    "@types/jest": "^29.2.0",
+    "@types/react": "^17.0.0",
+    "jest": "^29.2.0",
+    "rimraf": "~3.0.0",
+    "ts-jest": "^29.0.0",
+    "typedoc": "~0.22.10",
+    "typescript": "~4.7.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "styleModule": "style/index.js"
+}
