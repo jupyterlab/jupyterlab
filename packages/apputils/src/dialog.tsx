@@ -133,11 +133,19 @@ export class Dialog<T> extends Widget {
     content.addWidget(body);
     content.addWidget(footer);
 
+    this._bodyWidget = body;
     this._primary = this._buttonNodes[this._defaultButton];
     this._focusNodeSelector = options.focusNodeSelector;
 
     // Add new dialogs to the tracker.
     void Dialog.tracker.add(this);
+  }
+
+  /**
+   * A promise that resolves when the Dialog is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -249,7 +257,7 @@ export class Dialog<T> extends Widget {
   /**
    *  A message handler invoked on an `'after-attach'` message.
    */
-  protected onAfterAttach(msg: Message): void {
+  protected async onAfterAttach(msg: Message): Promise<void> {
     const node = this.node;
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
@@ -259,14 +267,17 @@ export class Dialog<T> extends Widget {
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
     if (this._focusNodeSelector) {
+      if (this._bodyWidget instanceof ReactWidget) {
+        await (this._bodyWidget as ReactWidget).renderPromise;
+      }
       const body = this.node.querySelector('.jp-Dialog-body');
       const el = body?.querySelector(this._focusNodeSelector);
-
       if (el) {
         this._primary = el as HTMLElement;
       }
     }
     this._primary?.focus();
+    this._ready.resolve();
   }
 
   /**
@@ -457,6 +468,7 @@ export class Dialog<T> extends Widget {
     });
   }
 
+  private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
   private _buttonNodes: ReadonlyArray<HTMLElement>;
   private _buttons: ReadonlyArray<Dialog.IButton>;
   private _checkboxNode: HTMLElement | null;
@@ -470,6 +482,7 @@ export class Dialog<T> extends Widget {
   private _body: Dialog.Body<T>;
   private _lastMouseDownInDialog: boolean;
   private _focusNodeSelector: string | undefined = '';
+  private _bodyWidget: Widget;
 }
 
 /**
@@ -865,14 +878,17 @@ export namespace Dialog {
         body.node.textContent = value;
       } else if (value instanceof Widget) {
         body = value;
+        Styling.styleNode(body.node);
       } else {
         body = ReactWidget.create(value);
         // Immediately update the body even though it has not yet attached in
         // order to trigger a render of the DOM nodes from the React element.
         MessageLoop.sendMessage(body, Widget.Msg.UpdateRequest);
+        (body as ReactWidget).renderPromise?.then(() => {
+          Styling.styleNode(body.node);
+        });
       }
       body.addClass('jp-Dialog-body');
-      Styling.styleNode(body.node);
       return body;
     }
 

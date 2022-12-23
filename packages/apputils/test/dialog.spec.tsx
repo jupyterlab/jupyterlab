@@ -2,7 +2,7 @@
 
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, ReactWidget, showDialog } from '@jupyterlab/apputils';
 import {
   acceptDialog,
   dismissDialog,
@@ -22,7 +22,7 @@ class TestDialog extends Dialog<any> {
     this.events.push(event.type);
   }
 
-  protected onAfterAttach(msg: Message): void {
+  protected async onAfterAttach(msg: Message): Promise<void> {
     super.onAfterAttach(msg);
     this.methods.push('onAfterAttach');
   }
@@ -70,7 +70,6 @@ describe('@jupyterlab/apputils', () => {
         });
 
         expect(dialog).toBeInstanceOf(Dialog);
-        dialog.dispose();
       });
     });
 
@@ -290,15 +289,16 @@ describe('@jupyterlab/apputils', () => {
         expect(document.activeElement!.className).toContain('jp-mod-accept');
       });
 
-      it('should focus the primary element', () => {
+      it('should focus the primary element', async () => {
         const body = (
           <div>
             <input type={'text'} />
           </div>
         );
-        const dialog = new TestDialog({ body, focusNodeSelector: 'input' });
 
+        const dialog = new TestDialog({ body, focusNodeSelector: 'input' });
         Widget.attach(dialog, document.body);
+        await dialog.ready;
         expect(document.activeElement!.localName).toBe('input');
         dialog.dispose();
       });
@@ -381,7 +381,7 @@ describe('@jupyterlab/apputils', () => {
           expect(widget.node.firstChild!.textContent).toBe('foo');
         });
 
-        it('should create the body from a virtual node', () => {
+        it('should create the body from a virtual node', async () => {
           const vnode = (
             <div>
               <input type={'text'} />
@@ -392,11 +392,13 @@ describe('@jupyterlab/apputils', () => {
             </div>
           );
           const widget = renderer.createBody(vnode);
+          Widget.attach(widget, document.body);
+          await (widget as ReactWidget).renderPromise;
+
           const button = widget.node.querySelector('button')!;
           const input = widget.node.querySelector('input')!;
           const select = widget.node.querySelector('select')!;
 
-          Widget.attach(widget, document.body);
           expect(button.className).toContain('jp-mod-styled');
           expect(input.className).toContain('jp-mod-styled');
           expect(select.className).toContain('jp-mod-styled');
