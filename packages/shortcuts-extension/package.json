@@ -51,8 +51,7 @@
     "@lumino/domutils": "^2.0.0-alpha.6",
     "@lumino/keyboard": "^2.0.0-alpha.6",
     "@lumino/widgets": "^2.0.0-alpha.6",
-    "react": "^17.0.1",
-    "typestyle": "^2.0.4"
+    "react": "^17.0.1"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.16",

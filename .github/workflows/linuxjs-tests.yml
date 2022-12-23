@@ -37,6 +37,7 @@ jobs:
             js-logconsole,
             js-lsp,
             js-mainmenu,
+            js-metadataform,
             js-nbformat,
             js-notebook,
             js-observables,
@@ -50,6 +51,7 @@ jobs:
             js-toc,
             js-translation,
             js-ui-components,
+            js-vega5-extension,
             js-testutils,
           ]
       fail-fast: false

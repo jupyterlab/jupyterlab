@@ -19,14 +19,19 @@ test('Announcements requires user agreement', async ({ page }) => {
 
   expect(notifications).toHaveLength(1);
   expect(notifications[0].message).toEqual(
-    'Do you want to receive official Jupyter news?\n\n<a href="https://jupyterlab.readthedocs.io/en/latest/privacy_policies" target="_blank" rel="noreferrer">Please read the privacy policy.</a>'
+    'Would you like to receive official Jupyter news?\nPlease read the privacy policy.'
+  );
+  console.log(notifications[0]);
+  expect(notifications[0].options.actions).toHaveLength(3);
+  expect(notifications[0].options.actions[0].label).toEqual(
+    'Open privacy policy'
   );
 });
 
 test.describe('Update available', () => {
   const id = 'update-id';
-  const message =
-    'A newer version (1000.0) of JupyterLab is available.\nSee the <a href="JUPYTERLAB_RELEASE_URL1000.0" target="_blank" rel="noreferrer">changelog</a> for more information.';
+  const message = 'A newer version (1000.0) of JupyterLab is available.';
+  const actionLabel = 'Changelog';
 
   test.use({
     autoGoto: false,
@@ -44,6 +49,7 @@ test.describe('Update available', () => {
               notification: {
                 createdAt: Date.now(),
                 modifiedAt: Date.now(),
+                link: [actionLabel, 'JUPYTERLAB_CHANGELOG_URL'],
                 message,
                 options: { data: { id, tags: ['update'] } }
               }
@@ -77,6 +83,7 @@ test.describe('Update available', () => {
     );
     expect(updates).toHaveLength(1);
     expect(updates[0].message).toEqual(message);
+    expect(updates[0].options.actions[1].label).toEqual(actionLabel);
   });
 
   test('Should not check', async ({ page }) => {
@@ -133,6 +140,7 @@ test.describe('Update available', () => {
 test.describe('Fetch news', () => {
   const id = 'news-id';
   const message = 'This is the content of a dummy news.';
+  const actionLabel = 'See full post';
 
   test.use({
     autoGoto: false,
@@ -151,12 +159,14 @@ test.describe('Fetch news', () => {
                 {
                   createdAt: Date.now(),
                   modifiedAt: Date.now(),
+                  link: [actionLabel, 'Post1_URL'],
                   message,
                   options: { data: { id, tags: ['news'] } }
                 },
                 {
                   createdAt: Date.now(),
                   modifiedAt: Date.now(),
+                  link: [actionLabel, 'Post2_URL'],
                   message: 'This is another dummy message',
                   options: { data: { id: `${id}-2`, tags: ['news'] } }
                 }
@@ -193,6 +203,9 @@ test.describe('Fetch news', () => {
     expect(news.filter(n => n.options.data.id === id)[0].message).toEqual(
       message
     );
+    expect(
+      news.filter(n => n.options.data.id === id)[0].options.actions[1].label
+    ).toEqual(actionLabel);
   });
 
   test('Should not fetch', async ({ page }) => {

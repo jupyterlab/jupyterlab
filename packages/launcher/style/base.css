@@ -6,13 +6,13 @@
 /* Private CSS variables */
 
 :root {
-  --jp-private-launcher-top-padding: 16px;
-  --jp-private-launcher-side-padding: 32px;
-  --jp-private-launcher-card-size: 100px;
-  --jp-private-launcher-card-label-height: 32px;
-  --jp-private-launcher-card-icon-height: 68px;
-  --jp-private-launcher-large-icon-size: 52px;
-  --jp-private-launcher-small-icon-size: 32px;
+  --jp-private-launcher-top-padding: 1.231em;
+  --jp-private-launcher-side-padding: 2.462em;
+  --jp-private-launcher-card-size: 7.692em;
+  --jp-private-launcher-card-label-height: 2.462em;
+  --jp-private-launcher-card-icon-height: 5.231em;
+  --jp-private-launcher-large-icon-size: 4em;
+  --jp-private-launcher-small-icon-size: 2.462em;
 }
 
 /* Launcher */
@@ -161,12 +161,12 @@
 }
 
 .jp-LauncherCard-label p {
-  height: 28px;
+  height: 2.154em;
   word-break: break-word;
   text-align: center;
-  color: var(--jp-ui-font-color0);
-  line-height: 14px;
-  font-size: 12px;
+  color: var(--jp-ui-font-color1);
+  line-height: 1.077em;
+  font-size: calc(var(--jp-ui-font-size1) * 0.923);
   overflow: hidden;
   margin: auto;
 }

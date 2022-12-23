@@ -126,6 +126,14 @@ test.describe('General', () => {
         clip: { y: 32, x: 997, width: 283, height: 400 }
       })
     ).toMatchSnapshot('interface_right.png');
+
+    await page.click('.jp-PropertyInspector >> text=Common Tools');
+
+    expect(
+      await page.screenshot({
+        clip: { y: 32, x: 997, width: 283, height: 400 }
+      })
+    ).toMatchSnapshot('interface_right_common.png');
   });
 
   test('Open tabs', async ({ page }) => {

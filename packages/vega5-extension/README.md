@@ -72,7 +72,7 @@ display({
         }
     }
 }, metadata={
-    "application/vnd.vegalite.v2+json": {
+    "application/vnd.vegalite.v3+json": {
         "embed_options": {
             "actions": False
         }

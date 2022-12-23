@@ -40,6 +40,7 @@ import downloadSvgstr from '../../style/icons/toolbar/download.svg';
 import duplicateSvgstr from '../../style/icons/toolbar/duplicate.svg';
 import editSvgstr from '../../style/icons/toolbar/edit.svg';
 import ellipsesSvgstr from '../../style/icons/toolbar/ellipses.svg';
+import errorSvgstr from '../../style/icons/error.svg';
 import expandAllSvgstr from '../../style/icons/toolbar/expand-all.svg';
 import extensionSvgstr from '../../style/icons/sidebar/extension.svg';
 import fastForwardSvgstr from '../../style/icons/toolbar/fast-forward.svg';
@@ -137,6 +138,7 @@ export const downloadIcon = new LabIcon({ name: 'ui-components:download', svgstr
 export const duplicateIcon = new LabIcon({ name: 'ui-components:duplicate', svgstr: duplicateSvgstr });
 export const editIcon = new LabIcon({ name: 'ui-components:edit', svgstr: editSvgstr });
 export const ellipsesIcon = new LabIcon({ name: 'ui-components:ellipses', svgstr: ellipsesSvgstr });
+export const errorIcon = new LabIcon({ name: 'ui-components:error', svgstr: errorSvgstr });
 export const expandAllIcon = new LabIcon({ name: 'ui-components:expand-all', svgstr: expandAllSvgstr });
 export const extensionIcon = new LabIcon({ name: 'ui-components:extension', svgstr: extensionSvgstr });
 export const fastForwardIcon = new LabIcon({ name: 'ui-components:fast-forward', svgstr: fastForwardSvgstr });

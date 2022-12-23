@@ -12,7 +12,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -545,8 +545,7 @@ export class StaticNotebook extends WindowedList {
     }
     this._updateMimetype();
     const cells = newValue.cells;
-    const collab =
-      (PageConfig.getOption('collaborative') ?? '').toLowerCase() === 'true';
+    const collab = newValue.collaborative ?? false;
     if (!collab && !cells.length) {
       newValue.sharedModel.insertCell(0, {
         cell_type: this.notebookConfig.defaultCell
@@ -2232,7 +2231,12 @@ export class Notebook extends StaticNotebook {
       // We don't want to prevent the default selection behavior
       // if there is currently text selected in an output.
       const hasSelection = (window.getSelection() ?? '').toString() !== '';
-      if (button === 0 && shiftKey && !hasSelection) {
+      if (
+        button === 0 &&
+        shiftKey &&
+        !hasSelection &&
+        !['INPUT', 'OPTION'].includes(target.tagName)
+      ) {
         // Prevent browser selecting text in prompt or output
         event.preventDefault();
 

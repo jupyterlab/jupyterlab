@@ -5,7 +5,7 @@ import { ISanitizer, Sanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { renderText } from '@jupyterlab/rendermime';
 import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
 import { Message } from '@lumino/messaging';
@@ -254,12 +254,9 @@ export class Completer extends Widget {
     }
 
     let node: HTMLElement | null = null;
-    let completionItemList = model.completionItems && model.completionItems();
-    if (completionItemList && completionItemList.length) {
-      node = this._createCompletionItemNode(model, completionItemList);
-    } else {
-      node = this._createIItemNode(model);
-    }
+    let completionItemList = model.completionItems();
+    node = this._createCompletionItemNode(model, completionItemList);
+
     if (!node) {
       return;
     }
@@ -322,58 +319,7 @@ export class Completer extends Widget {
     let ul = document.createElement('ul');
     ul.className = 'jp-Completer-list';
     for (let item of items) {
-      if (!this._renderer.createCompletionItemNode) {
-        return null;
-      }
       let li = this._renderer.createCompletionItemNode(item, orderedTypes);
-      ul.appendChild(li);
-    }
-    node.appendChild(ul);
-    return node;
-  }
-
-  private _createIItemNode(model: Completer.IModel): HTMLElement | null {
-    const items = Array.from(model.items());
-
-    // If there are no items, reset and bail.
-    if (!items || !items.length) {
-      this._resetFlag = true;
-      this.reset();
-      if (!this.isHidden) {
-        this.hide();
-        this._visibilityChanged.emit(undefined);
-      }
-      return null;
-    }
-
-    // If there is only one option, signal and bail.
-    // We don't test the filtered `items`, as that
-    // is too aggressive of completer behavior, it can
-    // lead to double typing of an option.
-    const options = Array.from(model.options());
-    if (options.length === 1) {
-      this._selected.emit(options[0]);
-      this.reset();
-      return null;
-    }
-
-    // Clear the node.
-    const node = this.node;
-    node.textContent = '';
-
-    // Compute an ordered list of all the types in the typeMap, this is computed
-    // once by the model each time new data arrives for efficiency.
-    const orderedTypes = model.orderedTypes();
-
-    // Populate the completer items.
-    let ul = document.createElement('ul');
-    ul.className = 'jp-Completer-list';
-    for (const item of items) {
-      const li = this._renderer.createItemNode(
-        item!,
-        model.typeMap(),
-        orderedTypes
-      );
       ul.appendChild(li);
     }
     node.appendChild(ul);
@@ -451,7 +397,7 @@ export class Completer extends Widget {
           return;
         }
         // Autoinsert single completions on manual request (tab)
-        const items = model.completionItems && model.completionItems();
+        const items = model.completionItems();
         if (items && items.length === 1) {
           this._selected.emit(items[0].insertText || items[0].label);
           this.reset();
@@ -802,17 +748,12 @@ export namespace Completer {
     /**
      * Get the list of visible CompletionItems in the completer menu.
      */
-    completionItems?(): CompletionHandler.ICompletionItems;
+    completionItems(): CompletionHandler.ICompletionItems;
 
     /**
      * Set the list of visible CompletionItems in the completer menu.
      */
-    setCompletionItems?(items: CompletionHandler.ICompletionItems): void;
-
-    /**
-     * Get the of visible items in the completer menu.
-     */
-    items(): IterableIterator<IItem>;
+    setCompletionItems(items: CompletionHandler.ICompletionItems): void;
 
     /**
      * Lazy load missing data of item at `activeIndex`.
@@ -826,11 +767,6 @@ export namespace Completer {
     ): Promise<CompletionHandler.ICompletionItem | null> | undefined;
 
     /**
-     * Get the unfiltered options in a completer menu.
-     */
-    options(): IterableIterator<string>;
-
-    /**
      * The map from identifiers (`a.b`) to their types (function, module, class,
      * instance, etc.).
      */
@@ -840,11 +776,6 @@ export namespace Completer {
      * An ordered list of types used for visual encoding.
      */
     orderedTypes(): string[];
-
-    /**
-     * Set the available options in the completer menu.
-     */
-    setOptions(options: Iterable<string>, typeMap?: JSONObject): void;
 
     /**
      * Handle a cursor change.
@@ -890,21 +821,6 @@ export namespace Completer {
   }
 
   /**
-   * A completer menu item.
-   */
-  export interface IItem {
-    /**
-     * The highlighted, marked up text of a visible completer item.
-     */
-    text: string;
-
-    /**
-     * The raw text of a visible completer item.
-     */
-    raw: string;
-  }
-
-  /**
    * A cursor span.
    */
   export interface ICursorSpan extends JSONObject {
@@ -926,19 +842,10 @@ export namespace Completer {
     T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
   > {
     /**
-     * Create an item node (an `li` element)  from a ICompletionItem
+     * Create an item node (an `li` element) from a ICompletionItem
      * for a text completer menu.
      */
-    createCompletionItemNode?(item: T, orderedTypes: string[]): HTMLLIElement;
-
-    /**
-     * Create an item node (an `li` element) for a text completer menu.
-     */
-    createItemNode(
-      item: IItem,
-      typeMap: TypeMap,
-      orderedTypes: string[]
-    ): HTMLLIElement;
+    createCompletionItemNode(item: T, orderedTypes: string[]): HTMLLIElement;
 
     /**
      * Create a documentation node (a `pre` element by default) for
@@ -976,23 +883,6 @@ export namespace Completer {
         item.type,
         orderedTypes,
         item.icon
-      );
-    }
-
-    /**
-     * Create an item node for a text completer menu.
-     */
-    createItemNode(
-      item: IItem,
-      typeMap: TypeMap,
-      orderedTypes: string[]
-    ): HTMLLIElement {
-      return this._constructNode(
-        this._createBaseNode(item.raw),
-        this._createMatchNode(item.text),
-        !JSONExt.deepEqual(typeMap, {}),
-        typeMap[item.raw] || '',
-        orderedTypes
       );
     }
 

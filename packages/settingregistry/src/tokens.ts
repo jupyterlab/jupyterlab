@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { CellType } from '@jupyterlab/nbformat';
 import { IDataConnector } from '@jupyterlab/statedb';
 import {
   PartialJSONObject,
@@ -439,6 +440,11 @@ export namespace ISettingRegistry {
     'jupyter.lab.shortcuts'?: IShortcut[];
 
     /**
+     * The JupyterLab metadata-form schema
+     */
+    'jupyter.lab.metadataforms'?: IMetadataForm[];
+
+    /**
      * The root schema is always an object.
      */
     type: 'object';
@@ -606,6 +612,115 @@ export namespace ISettingRegistry {
      * The CSS selector applicable to the shortcut.
      */
     selector: string;
+  }
+
+  /**
+   * An interface describing the metadata form.
+   */
+  export interface IMetadataForm extends PartialJSONObject {
+    /**
+     * The section unique ID.
+     */
+    id: string;
+
+    /**
+     * The metadata schema.
+     *
+     * ## Notes:
+     * To change to type @rjsf/utils -> RJSFSchema when upgrading rjsf to v5.
+     */
+    metadataSchema: IMetadataSchema;
+
+    /**
+     * The ui schema as used by react-JSON-schema-form.
+     *
+     * ## Notes:
+     * To change to type @rjsf/utils -> UiSchema when upgrading rjsf to v5.
+     */
+    uiSchema?: { [metadataKey: string]: PartialJSONObject };
+
+    /**
+     * The jupyter properties.
+     */
+    metadataOptions?: { [metadataKey: string]: IMetadataOptions };
+
+    /**
+     * The section label.
+     */
+    label?: string;
+
+    /**
+     * The section rank in notebooktools panel.
+     */
+    rank?: number;
+
+    /**
+     * Whether to show the modified field from default value.
+     */
+    showModified?: boolean;
+
+    /**
+     * Keep the plugin at origin of the metadata form.
+     */
+    _origin?: string;
+  }
+
+  /**
+   * The metadata schema as defined in JSON schema.
+   *
+   * ## Notes:
+   * To remove in favour of @rjsf/utils -> RJSFSchema when upgrading rjsf to v5.
+   */
+  export interface IMetadataSchema extends PartialJSONObject {
+    /**
+     * The type of data (should be object at first level).
+     */
+    type: string;
+
+    /**
+     * The properties as defined in JSON schema, and interpretable by react-JSON-schema-form.
+     */
+    properties: { [option: string]: any };
+
+    /**
+     * The required fields.
+     */
+    required?: string[];
+
+    /**
+     * Support for allOf feature of JSON schema (useful for if/then/else).
+     */
+    allOf?: Array<PartialJSONObject>;
+  }
+
+  /**
+   * Options to customize the widget, the field and the relevant metadata.
+   */
+  export interface IMetadataOptions extends PartialJSONObject {
+    /**
+     * Name of a custom react widget registered.
+     */
+    customWidget?: string;
+
+    /**
+     * Name of a custom react field registered.
+     */
+    customField?: string;
+
+    /**
+     * Metadata applied to notebook or cell.
+     */
+    metadataLevel?: 'cell' | 'notebook';
+
+    /**
+     * Cells which should have this metadata.
+     */
+    cellTypes?: CellType[];
+
+    /**
+     * Whether to avoid writing default value in metadata.
+     */
+    writeDefault?: boolean;
   }
 
   /**

@@ -5,12 +5,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import {
-  interactiveItem,
-  Popup,
-  showPopup,
-  TextItem
-} from '@jupyterlab/statusbar';
+import { Popup, showPopup, TextItem } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
@@ -67,7 +62,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
     this.translator = opts.translator || nullTranslator;
     const trans = this.translator.load('jupyterlab');
 
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
     this.title.caption = trans.__('Change text editor syntax highlighting');
   }
 

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Styling } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
@@ -442,7 +441,7 @@ class InputItemsDialog extends InputDialogBase<string> {
     } else {
       /* Use select directly */
       this._input.remove();
-      this.node.appendChild(Styling.wrapSelect(this._list));
+      this.node.appendChild(this._list);
     }
   }
 

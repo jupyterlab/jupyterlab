@@ -177,8 +177,51 @@
   margin-left: 3px;
   color: var(--jp-ui-font-color1);
   background-color: var(--jp-layout-color2);
+  border: none;
+}
+
+.jp-toast-button:focus {
+  outline: 1px solid var(--jp-reject-color-normal, var(--jp-layout-color2));
+  outline-offset: 1px;
+  -moz-outline-radius: 0;
+}
+
+.jp-toast-button:focus-visible {
+  border: none;
 }
 
 .jp-toast-button:hover {
   background-color: var(--jp-layout-color3);
+}
+
+.jp-toast-button.jp-mod-accept {
+  background: var(--jp-accept-color-normal, var(--jp-brand-color1));
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-toast-button.jp-mod-accept:focus {
+  outline-color: var(--jp-accept-color-normal, var(--jp-brand-color1));
+}
+
+.jp-toast-button.jp-mod-accept:hover {
+  background: var(--jp-accept-color-hover, var(--jp-brand-color0));
+}
+
+.jp-toast-button.jp-mod-warn {
+  background: var(--jp-warn-color-normal, var(--jp-warn-color1));
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-toast-button.jp-mod-warn:focus {
+  outline-color: var(--jp-warn-color-normal, var(--jp-warn-color1));
+}
+
+.jp-toast-button.jp-mod-warn:hover {
+  background: var(--jp-warn-color-hover, var(--jp-warn-color0));
+}
+
+.jp-toast-button.jp-mod-link {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+  text-decoration-color: var(--jp-content-link-color);
 }

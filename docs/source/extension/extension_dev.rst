@@ -22,6 +22,7 @@ See the sections below for more detailed information, or browse the rest of this
    virtualdom
    ui_helpers
    internationalization
+   identity
    extension_tutorial
    extension_migration
 

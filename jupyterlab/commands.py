@@ -26,7 +26,7 @@ from threading import Event
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
-from jupyter_core.paths import jupyter_config_path
+from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import (
     GREEN_ENABLED,
     GREEN_OK,
@@ -139,14 +139,14 @@ def pjoin(*args):
 def get_user_settings_dir():
     """Get the configured JupyterLab user settings directory."""
     settings_dir = os.environ.get("JUPYTERLAB_SETTINGS_DIR")
-    settings_dir = settings_dir or pjoin(jupyter_config_path()[0], "lab", "user-settings")
+    settings_dir = settings_dir or pjoin(jupyter_config_dir(), "lab", "user-settings")
     return osp.abspath(settings_dir)
 
 
 def get_workspaces_dir():
     """Get the configured JupyterLab workspaces directory."""
     workspaces_dir = os.environ.get("JUPYTERLAB_WORKSPACES_DIR")
-    workspaces_dir = workspaces_dir or pjoin(jupyter_config_path()[0], "lab", "workspaces")
+    workspaces_dir = workspaces_dir or pjoin(jupyter_config_dir(), "lab", "workspaces")
     return osp.abspath(workspaces_dir)
 
 
