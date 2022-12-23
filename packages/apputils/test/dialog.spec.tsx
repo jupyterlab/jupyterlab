@@ -23,7 +23,7 @@ class TestDialog extends Dialog<any> {
   }
 
   protected async onAfterAttach(msg: Message): Promise<void> {
-    super.onAfterAttach(msg);
+    await super.onAfterAttach(msg);
     this.methods.push('onAfterAttach');
   }
 

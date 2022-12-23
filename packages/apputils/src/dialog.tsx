@@ -884,9 +884,13 @@ export namespace Dialog {
         // Immediately update the body even though it has not yet attached in
         // order to trigger a render of the DOM nodes from the React element.
         MessageLoop.sendMessage(body, Widget.Msg.UpdateRequest);
-        (body as ReactWidget).renderPromise?.then(() => {
-          Styling.styleNode(body.node);
-        });
+        (body as ReactWidget).renderPromise
+          ?.then(() => {
+            Styling.styleNode(body.node);
+          })
+          .catch(() => {
+            console.error("Error while loading Dialog's body");
+          });
       }
       body.addClass('jp-Dialog-body');
       return body;
