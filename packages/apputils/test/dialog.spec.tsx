@@ -70,6 +70,7 @@ describe('@jupyterlab/apputils', () => {
         });
 
         expect(dialog).toBeInstanceOf(Dialog);
+        dialog.dispose();
       });
     });
 
@@ -289,15 +290,13 @@ describe('@jupyterlab/apputils', () => {
         expect(document.activeElement!.className).toContain('jp-mod-accept');
       });
 
-      it('should focus the primary element', async () => {
+      it('should focus the primary element', () => {
         const body = (
           <div>
             <input type={'text'} />
           </div>
         );
         const dialog = new TestDialog({ body, focusNodeSelector: 'input' });
-
-        await dialog.ready;
 
         Widget.attach(dialog, document.body);
         expect(document.activeElement!.localName).toBe('input');
@@ -367,22 +366,22 @@ describe('@jupyterlab/apputils', () => {
       };
 
       describe('#createHeader()', () => {
-        it('should create the header of the dialog', async () => {
-          const widget = await renderer.createHeader('foo');
+        it('should create the header of the dialog', () => {
+          const widget = renderer.createHeader('foo');
 
           expect(widget.hasClass('jp-Dialog-header')).toBe(true);
         });
       });
 
       describe('#createBody()', () => {
-        it('should create the body from a string', async () => {
-          const widget = await renderer.createBody('foo');
+        it('should create the body from a string', () => {
+          const widget = renderer.createBody('foo');
 
           expect(widget.hasClass('jp-Dialog-body')).toBe(true);
           expect(widget.node.firstChild!.textContent).toBe('foo');
         });
 
-        it('should create the body from a virtual node', async () => {
+        it('should create the body from a virtual node', () => {
           const vnode = (
             <div>
               <input type={'text'} />
@@ -392,7 +391,7 @@ describe('@jupyterlab/apputils', () => {
               <button />
             </div>
           );
-          const widget = await renderer.createBody(vnode);
+          const widget = renderer.createBody(vnode);
           const button = widget.node.querySelector('button')!;
           const input = widget.node.querySelector('input')!;
           const select = widget.node.querySelector('select')!;
@@ -404,10 +403,10 @@ describe('@jupyterlab/apputils', () => {
           widget.dispose();
         });
 
-        it('should create the body from a widget', async () => {
+        it('should create the body from a widget', () => {
           const body = new Widget();
 
-          await renderer.createBody(body);
+          renderer.createBody(body);
           expect(body.hasClass('jp-Dialog-body')).toBe(true);
         });
       });
