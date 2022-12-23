@@ -499,6 +499,7 @@ describe('CodeMirrorEditor', () => {
       model.sharedModel.setSource('');
       editor.replaceSelection('text');
       expect(model.sharedModel.source).toBe('text');
+      expect(editor.getSelection().end.column).toBe(4);
     });
 
     it('should replace from start to end of selection', () => {

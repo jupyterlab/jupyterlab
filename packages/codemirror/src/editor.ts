@@ -671,6 +671,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this.getOffsetAt(firstSelection.end),
       text
     );
+    const newPosition = this.getPositionAt(
+      this.getOffsetAt(firstSelection.start) + text.length
+    );
+    this.setSelection({ start: newPosition, end: newPosition });
   }
 
   /**
