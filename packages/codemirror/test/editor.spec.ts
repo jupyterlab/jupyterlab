@@ -493,4 +493,22 @@ describe('CodeMirrorEditor', () => {
       ]);
     });
   });
+
+  describe('#replaceSelection()', () => {
+    it('should set text in empty editor', () => {
+      model.sharedModel.setSource('');
+      editor.replaceSelection('text');
+      expect(model.sharedModel.source).toBe('text');
+      expect(editor.getSelection().end.column).toBe(4);
+    });
+
+    it('should replace from start to end of selection', () => {
+      model.sharedModel.setSource('axxc');
+      const start = { line: 0, column: 1 };
+      const end = { line: 0, column: 3 };
+      editor.setSelection({ start, end });
+      editor.replaceSelection('b');
+      expect(model.sharedModel.source).toBe('abc');
+    });
+  });
 });

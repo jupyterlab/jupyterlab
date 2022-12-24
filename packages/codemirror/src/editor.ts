@@ -660,10 +660,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Replaces the current selection with the given text.
    *
+   * Behaviour for multiple selections is undefined.
+   *
    * @param text The text to be inserted.
    */
   replaceSelection(text: string): void {
-    this.state.replaceSelection(text);
+    const firstSelection = this.getSelections()[0];
+    this.model.sharedModel.updateSource(
+      this.getOffsetAt(firstSelection.start),
+      this.getOffsetAt(firstSelection.end),
+      text
+    );
+    const newPosition = this.getPositionAt(
+      this.getOffsetAt(firstSelection.start) + text.length
+    );
+    this.setSelection({ start: newPosition, end: newPosition });
   }
 
   /**
