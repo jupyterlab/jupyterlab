@@ -114,6 +114,9 @@ test = [
 ]
 dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
 
+[tool.check-wheel-contents]
+package_omit = ["jupyterlab/tests/mock_packages/*"]
+
 [tool.hatch.version]
 path = "jupyterlab/_version.py"
 source = "code"
