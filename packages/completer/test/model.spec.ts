@@ -220,6 +220,31 @@ describe('completer/model', () => {
         model.reset();
         expect(model.completionItems()).toEqual(want);
       });
+
+      it('should escape HTML markup', () => {
+        let model = new CompleterModel();
+        let want: CompletionHandler.ICompletionItems = [
+          {
+            label: '&lt;foo&gt;&lt;/foo&gt;',
+            insertText: '<foo></foo>'
+          }
+        ];
+        model.setCompletionItems([{ label: '<foo></foo>' }]);
+        expect(model.completionItems()).toEqual(want);
+      });
+
+      it('should escape HTML with matches markup', () => {
+        let model = new CompleterModel();
+        let want: CompletionHandler.ICompletionItems = [
+          {
+            label: '&lt;foo&gt;<mark>smi</mark>le&lt;/foo&gt;',
+            insertText: '<foo>smile</foo>'
+          }
+        ];
+        model.setCompletionItems([{ label: '<foo>smile</foo>' }]);
+        model.query = 'smi';
+        expect(model.completionItems()).toEqual(want);
+      });
     });
 
     describe('#original', () => {
