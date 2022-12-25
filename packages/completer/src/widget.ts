@@ -353,7 +353,10 @@ export class Completer extends Widget {
     const renderedItems = [first];
 
     const firstItemSize = Private.measureSize(first, 'inline-grid');
-    const pageSize = Math.ceil(this._maxHeight / firstItemSize.height);
+    const pageSize = Math.max(
+      Math.ceil(this._maxHeight / firstItemSize.height),
+      5
+    );
     const toRenderImmediately = Math.min(pageSize + 1, items.length);
 
     const start = performance.now();
@@ -1275,8 +1278,7 @@ namespace Private {
     document.body.appendChild(element);
     const size = element.getBoundingClientRect();
     document.body.removeChild(element);
-    element.style.visibility = '';
-    element.style.display = '';
+    element.removeAttribute('style');
     return size;
   }
 }

@@ -74,6 +74,31 @@ class LogWidget extends Completer {
 
 describe('completer/widget', () => {
   describe('Completer', () => {
+    beforeAll(() => {
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .jp-Completer-list {
+          overflow-y: scroll;
+          overflow-x: auto;
+          max-height: 300px;
+          min-height: 20px;
+          width: 100%;
+        }
+        .jp-Completer-docpanel {
+          width: 400px;
+          overflow: scroll;
+        }
+        .jp-Completer-item {
+          box-sizing: border-box;
+          height: 20px;
+          min-width: 150px;
+          display: grid;
+          grid-template-columns: min-content 1fr min-content;
+        }
+        `;
+      document.head.appendChild(style);
+    });
+
     describe('#constructor()', () => {
       it('should create a completer widget', () => {
         const widget = new Completer({ editor: null });

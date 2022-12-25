@@ -415,7 +415,7 @@ export class CompleterModel implements Completer.IModel {
       return undefined;
     }
 
-    let completionItems = this.completionItems();
+    let completionItems = this._completionItems;
     if (!completionItems || !completionItems[activeIndex]) {
       return undefined;
     }
