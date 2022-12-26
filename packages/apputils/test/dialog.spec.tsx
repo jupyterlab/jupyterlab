@@ -275,8 +275,9 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#onAfterAttach()', () => {
-      it('should attach event listeners', () => {
+      it('should attach event listeners', async () => {
         Widget.attach(dialog, document.body);
+        await dialog.ready;
         expect(dialog.methods).toContain('onAfterAttach');
         ['keydown', 'contextmenu', 'click', 'focus'].forEach(event => {
           simulate(dialog.node, event);
