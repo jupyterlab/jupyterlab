@@ -38,7 +38,7 @@ export class CustomCellTag {
     const allTags = reduce(
       cells,
       (allTags: string[], cell) => {
-        const tags: string[] = (cell.metadata.get('tags') as string[]) ?? [];
+        const tags: string[] = (cell.getMetadata('tags') as string[]) ?? [];
         return [...allTags, ...tags];
       },
       []

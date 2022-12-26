@@ -3,6 +3,8 @@ import { FieldProps } from '@rjsf/core';
 import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { ObservableJSON } from '@jupyterlab/observables';
+import { JSONObject } from '@lumino/coreutils';
 
 namespace Private {
   /**
@@ -50,7 +52,10 @@ export class CustomCellMetadata extends NotebookTools.MetadataEditorTool {
   }
 
   render(props: FieldProps): JSX.Element {
-    this.editor.source = this._tracker.activeCell?.model?.metadata ?? null;
+    const cell = this._tracker.activeCell;
+    this.editor.source = cell
+      ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
+      : null;
     return (
       <div className="cell-metadata-editor">
         <div ref={ref => ref?.appendChild(this.node)}></div>
@@ -80,7 +85,10 @@ export class CustomNotebookMetadata extends NotebookTools.MetadataEditorTool {
   }
 
   render(props: FieldProps): JSX.Element {
-    this.editor.source = this._tracker.currentWidget?.model?.metadata ?? null;
+    const notebook = this._tracker.currentWidget;
+    this.editor.source = notebook
+      ? new ObservableJSON({ values: notebook.model?.metadata as JSONObject })
+      : null;
     return (
       <div className="cell-metadata-editor">
         <div ref={ref => ref?.appendChild(this.node)}></div>
