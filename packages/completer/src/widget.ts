@@ -638,7 +638,9 @@ export class Completer extends Widget {
     }
 
     const items = model.completionItems();
-    const subset = Private.commonSubset(items.map(item => item.label));
+    const subset = Private.commonSubset(
+      items.map(item => item.insertText || item.label)
+    );
     const { query } = model;
 
     // If a common subset exists and it is not the current query, highlight it.
