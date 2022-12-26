@@ -72,7 +72,6 @@
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
-  vertical-align: middle;
 }
 
 .jp-Completer-deprecated .jp-Completer-match {
@@ -88,8 +87,6 @@
 }
 
 .jp-Completer-item .jp-Completer-icon {
-  vertical-align: middle;
-
   /* Normal element size from LabIconStyle.ISheetOptions */
   height: 16px;
   width: 16px;
@@ -98,7 +95,7 @@
 .jp-Completer-item .jp-Completer-monogram {
   text-align: center;
   color: white;
-  max-width: var(--jp-private-completer-item-height);
+  width: var(--jp-private-completer-item-height);
   font-family: var(--jp-ui-font-family);
   font-size: var(--jp-ui-font-size1);
   line-height: calc(
@@ -109,7 +106,6 @@
 }
 
 .jp-Completer-item .jp-Completer-typeExtended {
-  display: table-cell;
   box-sizing: border-box;
   height: var(--jp-private-completer-item-height);
   text-align: right;
@@ -119,7 +115,6 @@
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
   padding-right: 8px;
-  vertical-align: middle;
 }
 
 .jp-Completer-item:hover {

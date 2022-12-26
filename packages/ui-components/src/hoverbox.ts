@@ -224,6 +224,7 @@ export namespace HoverBox {
     } else {
       node.style.contain = '';
       node.style.width = 'auto';
+      node.style.height = '';
     }
     let rect = node.getBoundingClientRect();
 
