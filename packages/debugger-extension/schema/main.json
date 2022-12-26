@@ -36,7 +36,7 @@
         "selector": ".jp-DebuggerVariables-body"
       },
       {
-        "command": "debugger:copy-variable",
+        "command": "debugger:copy-to-globals",
         "selector": ".jp-DebuggerVariables-body.jp-debuggerVariables-local"
       }
     ]

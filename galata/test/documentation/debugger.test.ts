@@ -276,7 +276,7 @@ test.describe('Debugger', () => {
 
     // Copy the local variable to globals scope
     await page.click(
-      '.lm-Menu-content li[data-command="debugger:copy-variable"]'
+      '.lm-Menu-content li[data-command="debugger:copy-to-globals"]'
     );
 
     // Expect the local variable to have been copied to global scope
