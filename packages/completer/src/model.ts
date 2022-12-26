@@ -28,6 +28,13 @@ export class CompleterModel implements Completer.IModel {
   }
 
   /**
+   * A signal emitted when query string changes (at invocation, or as user types).
+   */
+  get queryChanged(): ISignal<this, Completer.IQueryChange> {
+    return this._queryChanged;
+  }
+
+  /**
    * The original completion request details.
    */
   get original(): Completer.ITextState | null {
@@ -107,6 +114,7 @@ export class CompleterModel implements Completer.IModel {
     const ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
+    this._queryChanged.emit({ newValue: this._query, origin: 'editorUpdate' });
     this._stateChanged.emit(undefined);
   }
 
@@ -133,6 +141,7 @@ export class CompleterModel implements Completer.IModel {
   }
   set query(newValue: string) {
     this._query = newValue;
+    this._queryChanged.emit({ newValue: this._query, origin: 'setter' });
   }
 
   /**
@@ -465,6 +474,7 @@ export class CompleterModel implements Completer.IModel {
     this._subsetMatch = false;
     this._typeMap = {};
     this._orderedTypes = [];
+    this._queryChanged.emit({ newValue: this._query, origin: 'reset' });
   }
 
   private _current: Completer.ITextState | null = null;
@@ -477,6 +487,7 @@ export class CompleterModel implements Completer.IModel {
   private _typeMap: Completer.TypeMap = {};
   private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
+  private _queryChanged = new Signal<this, Completer.IQueryChange>(this);
 
   /**
    * A counter to cancel ongoing `resolveItem` call.

@@ -32,12 +32,37 @@ function createEditorWidget(): CodeEditorWrapper {
   return new CodeEditorWrapper({ factory, model });
 }
 
+/**
+ * jsdom mock for getBoundingClientRect returns zeros for all fields,
+ * see https://github.com/jsdom/jsdom/issues/653. We can do better,
+ * and need to do better to get meaningful tests for rendering.
+ */
+function betterGetBoundingClientRectMock() {
+  const style = window.getComputedStyle(this);
+  const top = parseFloat(style.top) || 0;
+  const left = parseFloat(style.left) || 0;
+  const dimensions = {
+    width: parseFloat(style.width) || parseFloat(style.minWidth) || 0,
+    height: parseFloat(style.height) || parseFloat(style.minHeight) || 0,
+    top,
+    left,
+    x: left,
+    y: top,
+    bottom: 0,
+    right: 0
+  };
+  return {
+    ...dimensions,
+    toJSON: () => dimensions
+  };
+}
+
 class CustomRenderer extends Completer.Renderer {
   createCompletionItemNode(
     item: CompletionHandler.ICompletionItem,
     orderedTypes: string[]
   ): HTMLLIElement {
-    let li = super.createCompletionItemNode!(item, orderedTypes);
+    let li = super.createCompletionItemNode(item, orderedTypes);
     li.classList.add(TEST_ITEM_CLASS);
     return li;
   }
@@ -45,7 +70,7 @@ class CustomRenderer extends Completer.Renderer {
   createDocumentationNode(
     item: CompletionHandler.ICompletionItem
   ): HTMLElement {
-    const element = super.createDocumentationNode!(item);
+    const element = super.createDocumentationNode(item);
     element.classList.add(TEST_DOC_CLASS);
     return element;
   }
@@ -69,6 +94,18 @@ class LogWidget extends Completer {
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
+  }
+
+  protected onModelQueryChanged(
+    model: Completer.IModel,
+    queryChange: Completer.IQueryChange
+  ): void {
+    super.onModelQueryChanged(model, queryChange);
+    this.methods.push(`onModelQueryChanged:${queryChange.origin}`);
+  }
+
+  public get sizeCache() {
+    return super.sizeCache;
   }
 }
 
@@ -270,8 +307,6 @@ describe('completer/widget', () => {
 
         let request: Completer.ITextState = {
           column: position.column,
-          lineHeight: editor.lineHeight,
-          charWidth: editor.charWidth,
           line: position.line,
           text: 'a'
         };
@@ -972,8 +1007,6 @@ describe('completer/widget', () => {
 
           const request: Completer.ITextState = {
             column: position.column,
-            lineHeight: editor.lineHeight,
-            charWidth: editor.charWidth,
             line: position.line,
             text: 'a'
           };
@@ -1017,19 +1050,10 @@ describe('completer/widget', () => {
       it('should un-hide widget if multiple items are available', () => {
         let anchor = createEditorWidget();
         let model = new CompleterModel();
-        let coords = { left: 0, right: 0, top: 100, bottom: 120 };
         let request: Completer.ITextState = {
           column: 0,
-          lineHeight: 0,
-          charWidth: 0,
           line: 0,
-          coords,
           text: 'f'
-        };
-
-        let options: Completer.IOptions = {
-          editor: anchor.editor,
-          model
         };
 
         Widget.attach(anchor, document.body);
@@ -1040,7 +1064,10 @@ describe('completer/widget', () => {
           { label: 'baz' }
         ]);
 
-        let widget = new Completer(options);
+        let widget = new Completer({
+          editor: anchor.editor,
+          model
+        });
         widget.hide();
         expect(widget.isHidden).toBe(true);
         Widget.attach(widget, document.body);
@@ -1048,6 +1075,161 @@ describe('completer/widget', () => {
         expect(widget.isVisible).toBe(true);
         widget.dispose();
         anchor.dispose();
+      });
+
+      it('should pre-compute and cache dimensions when items are many', () => {
+        window.HTMLElement.prototype.getBoundingClientRect =
+          betterGetBoundingClientRectMock;
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+
+        Widget.attach(anchor, document.body);
+        model.setCompletionItems(
+          Array.from({ length: 20 }, (_, i) => {
+            return { label: `candidate ${i}` };
+          })
+        );
+
+        let widget = new LogWidget({
+          editor: anchor.editor,
+          model
+        });
+        Widget.attach(widget, document.body);
+        expect(widget.sizeCache).toBe(undefined);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(widget.sizeCache).toEqual({
+          width: 150,
+          height: 300
+        });
+        widget.dispose();
+        expect(widget.sizeCache).toBe(undefined);
+        anchor.dispose();
+      });
+
+      it('should not fix nor cache dimensions when items are few', () => {
+        window.HTMLElement.prototype.getBoundingClientRect =
+          betterGetBoundingClientRectMock;
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+
+        Widget.attach(anchor, document.body);
+        model.setCompletionItems(
+          Array.from({ length: 3 }, (_, i) => {
+            return { label: `candidate ${i}` };
+          })
+        );
+
+        let widget = new LogWidget({
+          editor: anchor.editor,
+          model
+        });
+        Widget.attach(widget, document.body);
+        expect(widget.sizeCache).toBe(undefined);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(widget.sizeCache).toEqual(undefined);
+        widget.dispose();
+        anchor.dispose();
+      });
+    });
+
+    describe('#onModelQueryChanged()', () => {
+      let position: CodeEditor.IPosition;
+      let widget: LogWidget;
+      let model: CompleterModel;
+      let wrapper: CodeEditorWrapper;
+      const expectedSize = { width: 150, height: 300 };
+      beforeEach(() => {
+        window.HTMLElement.prototype.getBoundingClientRect =
+          betterGetBoundingClientRectMock;
+        wrapper = createEditorWidget();
+        model = new CompleterModel();
+        const editor = wrapper.editor;
+
+        editor.model.sharedModel.setSource('c');
+        position = editor.getPositionAt(1)!;
+
+        editor.setCursorPosition(position);
+
+        const original: Completer.ITextState = {
+          ...position,
+          text: 'c'
+        };
+        Widget.attach(wrapper, document.body);
+
+        model.original = original;
+        model.cursor = { start: 0, end: 1 };
+
+        model.setCompletionItems([
+          ...Array.from({ length: 20 }, (_, i) => {
+            return { label: `candidate ${i}` };
+          }),
+          ...Array.from({ length: 20 }, (_, i) => {
+            return { label: `candx ${i}` };
+          })
+        ]);
+
+        widget = new LogWidget({ editor, model });
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+      });
+
+      afterEach(() => {
+        widget.dispose();
+        wrapper.dispose();
+      });
+
+      it('should not invalidate size cache if query change keeps situation the same', () => {
+        expect(widget.sizeCache).toEqual(expectedSize);
+        // Filtering which does not change the matching items.
+        const current: Completer.ITextState = {
+          ...position,
+          text: 'cand'
+        };
+        expect(widget.methods).not.toContain(
+          'onModelQueryChanged:editorUpdate'
+        );
+        model.handleTextChange(current);
+        expect(widget.methods).toContain('onModelQueryChanged:editorUpdate');
+        expect(widget.sizeCache).toEqual(expectedSize);
+      });
+
+      it('should invalidate size cache if query change leads to change in number of items', () => {
+        expect(widget.sizeCache).toEqual(expectedSize);
+        // Filtering which reduces the matching items to single `candidate 3`
+        const current: Completer.ITextState = {
+          ...position,
+          text: 'c3'
+        };
+        expect(widget.methods).not.toContain(
+          'onModelQueryChanged:editorUpdate'
+        );
+        model.handleTextChange(current);
+        expect(widget.methods).toContain('onModelQueryChanged:editorUpdate');
+        expect(widget.sizeCache).toEqual(undefined);
+      });
+
+      it('should invalidate size cache if query change leads to change in the widest item', () => {
+        expect(widget.sizeCache).toEqual(expectedSize);
+        // First filter to 20 items with `candidate` prefix, this should invalidate
+        let current: Completer.ITextState = {
+          ...position,
+          text: 'candi'
+        };
+
+        model.handleTextChange(current);
+        expect(widget.sizeCache).toEqual(undefined);
+
+        // Establish new cache
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(widget.sizeCache).toEqual(expectedSize);
+
+        // Then filter to 20 items with `candx` prefix
+        current = {
+          ...position,
+          text: 'candx'
+        };
+        model.handleTextChange(current);
+        expect(widget.sizeCache).toEqual(undefined);
       });
     });
   });
