@@ -144,8 +144,6 @@ export class CompletionHandler implements IDisposable {
   ): Completer.ITextState {
     return {
       text: editor.model.sharedModel.getSource(),
-      lineHeight: editor.lineHeight,
-      charWidth: editor.charWidth,
       line: position.line,
       column: position.column
     };

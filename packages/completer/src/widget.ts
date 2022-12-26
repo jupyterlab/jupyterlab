@@ -876,16 +876,6 @@ export namespace Completer {
     readonly text: string;
 
     /**
-     * The height of a character in the editor.
-     */
-    readonly lineHeight: number;
-
-    /**
-     * The width of a character in the editor.
-     */
-    readonly charWidth: number;
-
-    /**
      * The line number of the editor cursor.
      */
     readonly line: number;
