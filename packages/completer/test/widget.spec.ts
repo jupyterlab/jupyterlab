@@ -202,8 +202,8 @@ describe('completer/widget', () => {
           value = selected;
         };
         options.model!.setCompletionItems([
-          { label: 'foo', insertText: 'bar' },
-          { label: 'baz' }
+          { label: 'bar label', insertText: 'bar' },
+          { label: 'foo label' }
         ]);
         Widget.attach(anchor, document.body);
 
