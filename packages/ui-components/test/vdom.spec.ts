@@ -79,7 +79,7 @@ describe('@jupyterlab/ui-components', () => {
     });
 
     describe('#modelChanged()', () => {
-      it('should fire the stateChanged signal on a change', () => {
+      it('should fire the stateChanged signal on a change', async () => {
         const model = new TestModel();
         const widget = new TestWidget(new TestModel());
         let changed = false;
@@ -95,6 +95,7 @@ describe('@jupyterlab/ui-components', () => {
       it('should render the contents after a model change', async () => {
         const widget = new TestWidget(new TestModel());
         const model = new TestModel();
+        Widget.attach(widget, document.body);
         widget.model = model;
         model.value = 'foo';
         await framePromise();
