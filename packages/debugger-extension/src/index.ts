@@ -487,7 +487,7 @@ const variables: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         const value = service.model.variables.selectedVariable!.value;
         if (value) {
-          navigator.clipboard.writeText(value);
+          await navigator.clipboard.writeText(value);
         }
       }
     });
