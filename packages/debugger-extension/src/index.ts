@@ -478,6 +478,19 @@ const variables: JupyterFrontEndPlugin<void> = {
         });
       }
     });
+
+    commands.addCommand(CommandIDs.copyToClipboard, {
+      label: 'Copy to Clipboard',
+      caption: trans.__('Copy value to clipboard'),
+      isEnabled: () => !!service.session?.isStarted,
+      isVisible: () => handler.activeWidget instanceof NotebookPanel,
+      execute: async () => {
+        const value = service.model.variables.selectedVariable!.value;
+        if (value) {
+          navigator.clipboard.writeText(value);
+        }
+      }
+    });
   }
 };
 
