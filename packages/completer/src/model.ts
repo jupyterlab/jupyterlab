@@ -428,7 +428,15 @@ export class CompleterModel implements Completer.IModel {
       .then(activeItem => {
         // Escape the label it in place
         this._escapeItemLabel(activeItem, true);
-        Object.assign(completionItem, activeItem);
+        (
+          Object.keys(activeItem) as Array<
+            keyof CompletionHandler.ICompletionItem
+          >
+        ).forEach(
+          <Key extends keyof CompletionHandler.ICompletionItem>(key: Key) => {
+            completionItem[key] = activeItem[key];
+          }
+        );
         completionItem.resolve = undefined;
         if (current !== this._resolvingItem) {
           return Promise.resolve(null);
