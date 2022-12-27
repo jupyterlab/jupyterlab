@@ -185,16 +185,7 @@ export class CompleterModel implements Completer.IModel {
       return this._markup(query);
     }
     return this._completionItems.map(item => {
-      const newItem = Object.assign({}, item);
-      const newLabel = escapeHTML(newItem.label);
-      if (newLabel != newItem.label) {
-        // preserve the old label for insertText if not defined
-        if (typeof newItem.insertText === 'undefined') {
-          newItem.insertText = newItem.label;
-        }
-        newItem.label = newLabel;
-      }
-      return newItem;
+      return this._escapeItemLabel(item);
     });
   }
 
@@ -385,34 +376,29 @@ export class CompleterModel implements Completer.IModel {
           match.indices,
           Private.mark
         );
+        // Use `Object.assign` to evaluate getters.
+        const highlightedItem = Object.assign({}, item);
+        highlightedItem.label = marked.join('');
+        highlightedItem.insertText = item.insertText ?? item.label;
         results.push({
-          ...item,
-          // Allow for lazily retrieved documentation (with a getter)
-          documentation: item.documentation,
-          label: marked.join(''),
-          // If no insertText is present, preserve original label value
-          // by setting it as the insertText.
-          insertText: item.insertText ? item.insertText : item.label,
+          item: highlightedItem,
           score: match.score
         });
       }
     }
-    results.sort(Private.scoreCmp2);
+    results.sort(Private.scoreCmp);
 
-    // Delete the extra score attribute to not leak implementation details
-    // to JavaScript callers.
-    results.forEach(x => {
-      delete (x as any).score;
-    });
-
-    return results;
+    // Extract only the item (dropping the extra score attribute to not leak
+    // implementation details to JavaScript callers.
+    return results.map(match => match.item);
   }
 
   /**
    * Lazy load missing data of item at `activeIndex`.
    * @param {number} activeIndex - index of item
    * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
-   * Return a promise of `null` if another `resolveItem` is called. Otherwise return the
+   * Return a promise of `null` if another `resolveItem` is called (but still updates the
+   * underlying completion item with resolved data). Otherwise return the
    * promise of resolved completion item.
    */
   resolveItem(
@@ -440,15 +426,9 @@ export class CompleterModel implements Completer.IModel {
     }
     return resolvedItem
       .then(activeItem => {
-        (
-          Object.keys(activeItem) as Array<
-            keyof CompletionHandler.ICompletionItem
-          >
-        ).forEach(
-          <Key extends keyof CompletionHandler.ICompletionItem>(key: Key) => {
-            completionItem[key] = activeItem[key];
-          }
-        );
+        // Escape the label it in place
+        this._escapeItemLabel(activeItem, true);
+        Object.assign(completionItem, activeItem);
         completionItem.resolve = undefined;
         if (current !== this._resolvingItem) {
           return Promise.resolve(null);
@@ -460,6 +440,25 @@ export class CompleterModel implements Completer.IModel {
         // Failed to resolve missing data, return the original item.
         return Promise.resolve(completionItem);
       });
+  }
+
+  /**
+   * Escape item label, storing the original label and adding `insertText` if needed.
+   * If escaping changes label creates a new item unless `inplace` is true.
+   */
+  private _escapeItemLabel(
+    item: CompletionHandler.ICompletionItem,
+    inplace: boolean = false
+  ): CompletionHandler.ICompletionItem {
+    const escapedLabel = escapeHTML(item.label);
+    // If there was no insert text, use the original (unescaped) label.
+    if (escapedLabel !== item.label) {
+      const newItem = inplace ? item : Object.assign({}, item);
+      newItem.insertText = item.insertText ?? item.label;
+      newItem.label = escapedLabel;
+      return newItem;
+    }
+    return item;
   }
 
   /**
@@ -542,24 +541,13 @@ namespace Private {
   }
 
   /**
-   * A sort comparison function for item match scores.
-   *
-   * #### Notes
-   * This orders the items first based on score (lower is better), then
-   * by locale order of the item text.
+   * A filtered completion matching result.
    */
-  export function scoreCmp(a: IMatch, b: IMatch): number {
-    const delta = a.score - b.score;
-    if (delta !== 0) {
-      return delta;
-    }
-    return a.raw.localeCompare(b.raw);
-  }
-
-  /**
-   * A filtered completion menu matching result.
-   */
-  export interface ICompletionMatch extends CompletionHandler.ICompletionItem {
+  export interface ICompletionMatch {
+    /**
+     * The completion item data.
+     */
+    item: CompletionHandler.ICompletionItem;
     /**
      * A score which indicates the strength of the match.
      *
@@ -575,12 +563,12 @@ namespace Private {
    * This orders the items first based on score (lower is better), then
    * by locale order of the item text.
    */
-  export function scoreCmp2(a: ICompletionMatch, b: ICompletionMatch): number {
+  export function scoreCmp(a: ICompletionMatch, b: ICompletionMatch): number {
     const delta = a.score - b.score;
     if (delta !== 0) {
       return delta;
     }
-    return a.insertText?.localeCompare(b.insertText ?? '') ?? 0;
+    return a.item.insertText?.localeCompare(b.item.insertText ?? '') ?? 0;
   }
 
   /**

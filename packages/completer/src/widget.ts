@@ -368,6 +368,8 @@ export class Completer extends Widget {
     model: Completer.IModel,
     items: CompletionHandler.ICompletionItems
   ): HTMLElement {
+    const current = ++this._renderCounter;
+
     // Clear the node.
     let node = this.node;
     node.textContent = '';
@@ -460,6 +462,10 @@ export class Completer extends Widget {
         previousChunkFinal.style.marginBottom = `${predictedMissingHeight}px`;
 
         requestAnimationFrame(() => {
+          if (current != this._renderCounter) {
+            // Bail if rendering afresh was requested in the meantime.
+            return;
+          }
           previousChunkFinal.style.marginBottom = '';
           const limit = Math.min(items.length, alreadyRendered + chunkSize);
           for (let i = alreadyRendered; i < limit; i++) {
@@ -763,8 +769,15 @@ export class Completer extends Widget {
         right: 'stick-outside'
       }
     });
+    const current = ++this._geometryCounter;
     if (!this._sizeCache) {
+      // If size was not pre-calculated using heuristics, save the actual
+      // size into cache once rendered.
       requestAnimationFrame(() => {
+        if (current != this._geometryCounter) {
+          // Do not set size to cache if it may already be outdated.
+          return;
+        }
         let rect = node.getBoundingClientRect();
         this._sizeCache = {
           width: rect.width,
@@ -870,7 +883,9 @@ export class Completer extends Widget {
   private _docPanelWidth: number;
   private _docPanel: HTMLElement | undefined;
   private _geometryLock = false;
+  private _geometryCounter: number = 0;
   private _docPanelExpanded = false;
+  private _renderCounter: number = 0;
 }
 
 export namespace Completer {

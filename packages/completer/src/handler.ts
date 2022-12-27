@@ -465,6 +465,9 @@ export namespace CompletionHandler {
      */
     deprecated?: boolean;
 
+    /**
+     * Method allowing to update fields asynchronously.
+     */
     resolve?: (
       patch?: Completer.IPatch
     ) => Promise<CompletionHandler.ICompletionItem>;

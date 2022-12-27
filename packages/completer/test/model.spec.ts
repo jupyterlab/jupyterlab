@@ -61,6 +61,17 @@ describe('completer/model', () => {
         model.setCompletionItems([]);
         model.setCompletionItems([]);
         expect(called).toBe(3);
+        const itemsWithResolve = [
+          {
+            label: 'foo',
+            resolve: async () => {
+              return { label: 'foo', documentation: 'Foo docs' };
+            }
+          }
+        ];
+        model.setCompletionItems(itemsWithResolve);
+        model.setCompletionItems(itemsWithResolve);
+        expect(called).toBe(4);
       });
 
       it('should signal when original request changes', () => {
@@ -458,6 +469,22 @@ describe('completer/model', () => {
         expect(resolved).toEqual({ label: 'foo', documentation: 'Foo docs' });
         expect(item).toEqual({
           label: 'foo',
+          documentation: 'Foo docs',
+          resolve: undefined
+        });
+      });
+      it('should escape HTML markup', async () => {
+        let model = new CompleterModel();
+        const item = {
+          label: '<foo></foo>',
+          resolve: () =>
+            Promise.resolve({ label: '<foo></foo>', documentation: 'Foo docs' })
+        };
+        model.setCompletionItems([item]);
+        const resolved = await model.resolveItem(0);
+        expect(resolved).toEqual({
+          label: '&lt;foo&gt;&lt;/foo&gt;',
+          insertText: '<foo></foo>',
           documentation: 'Foo docs',
           resolve: undefined
         });
