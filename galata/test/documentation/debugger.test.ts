@@ -160,11 +160,23 @@ test.describe('Debugger', () => {
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
 
+    // Wait for the locals variables to be displayed
+    await expect(
+      page.locator('.jp-DebuggerVariables-toolbar select')
+    ).toHaveValue('Locals');
+
     expect(
       await page.screenshot({
         clip: { y: 58, x: 998, width: 280, height: 138 }
       })
     ).toMatchSnapshot('debugger_variables.png');
+
+    // Copy value to clipboard
+    await page
+      .locator('.jp-DebuggerVariables-body :text("b")')
+      .click({ button: 'right' });
+    await page.locator('.lm-Menu-itemLabel:text("Copy to Clipboard")').click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('2');
 
     await page.click('button[title^=Continue]');
   });
