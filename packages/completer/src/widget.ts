@@ -424,7 +424,11 @@ export class Completer extends Widget {
               orderedTypes
             );
 
-      const widestItemSize = Private.measureSize(widestItem, 'inline-grid');
+      // The node needs to be cloned to avoid side-effect of detaching it.
+      const widestItemSize = Private.measureSize(
+        widestItem.cloneNode(true) as HTMLElement,
+        'inline-grid'
+      );
 
       this._sizeCache = {
         height: this._maxHeight,
@@ -1363,19 +1367,21 @@ namespace Private {
   /**
    * Measure size of provided HTML element without painting it.
    *
-   * Implementation aimed at high performance.
+   * #### Notes
+   * The provided element has to be detached (not connected to DOM),
+   * or a side-effect of detaching it will occur.
    */
   export function measureSize(element: HTMLElement, display: string): DOMRect {
+    if (element.isConnected) {
+      console.warn(
+        'Measuring connected elements with `measureSize` has side-effects'
+      );
+    }
     element.style.visibility = 'hidden';
     element.style.display = display;
-    const wasAttached = element.parentNode;
-    if (!wasAttached) {
-      document.body.appendChild(element);
-    }
+    document.body.appendChild(element);
     const size = element.getBoundingClientRect();
-    if (!wasAttached) {
-      document.body.removeChild(element);
-    }
+    document.body.removeChild(element);
     element.removeAttribute('style');
     return size;
   }
