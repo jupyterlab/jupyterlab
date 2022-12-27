@@ -393,6 +393,7 @@ export class Completer extends Widget {
       Math.ceil(this._maxHeight / firstItemSize.height),
       5
     );
+    // We add one item in case if height heuristic is inacurate.
     const toRenderImmediately = Math.min(pageSize + 1, items.length);
 
     const start = performance.now();
@@ -465,7 +466,7 @@ export class Completer extends Widget {
             ul.appendChild(li);
             previousChunkFinal = li;
           }
-          alreadyRendered += limit;
+          alreadyRendered = limit;
 
           renderChunk();
         });
@@ -1367,9 +1368,14 @@ namespace Private {
   export function measureSize(element: HTMLElement, display: string): DOMRect {
     element.style.visibility = 'hidden';
     element.style.display = display;
-    document.body.appendChild(element);
+    const wasAttached = element.parentNode;
+    if (!wasAttached) {
+      document.body.appendChild(element);
+    }
     const size = element.getBoundingClientRect();
-    document.body.removeChild(element);
+    if (!wasAttached) {
+      document.body.removeChild(element);
+    }
     element.removeAttribute('style');
     return size;
   }

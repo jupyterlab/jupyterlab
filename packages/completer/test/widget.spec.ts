@@ -1130,6 +1130,47 @@ describe('completer/widget', () => {
         widget.dispose();
         anchor.dispose();
       });
+
+      it('should render completions lazily in chunks', async () => {
+        window.HTMLElement.prototype.getBoundingClientRect =
+          betterGetBoundingClientRectMock;
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+
+        Widget.attach(anchor, document.body);
+        model.setCompletionItems(
+          Array.from({ length: 30 }, (_, i) => {
+            return { label: `candidate ${i}` };
+          })
+        );
+
+        let widget = new Completer({
+          editor: anchor.editor,
+          model
+        });
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+        // First "page":
+        //  - 300px/20px = 15 items at each "page",
+        //  - we add one item in case if height heuristic is inacurate.
+        let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
+        expect(items).toHaveLength(15 + 1);
+
+        // Second and consecutive pages will be rendered in chunks of size
+        // depending on performance, but not smaller than 5 at a time. This
+        // means we should get 30 items in no more than 3 frames.
+        let previousCount = 15 + 1;
+        for (let i = 0; i < 3; i++) {
+          await framePromise();
+          items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
+          expect(items.length).toBeGreaterThanOrEqual(
+            Math.min(previousCount + 5, 30)
+          );
+          previousCount = items.length;
+        }
+        expect(items).toHaveLength(30);
+      });
     });
 
     describe('#onModelQueryChanged()', () => {
@@ -1138,6 +1179,7 @@ describe('completer/widget', () => {
       let model: CompleterModel;
       let wrapper: CodeEditorWrapper;
       const expectedSize = { width: 150, height: 300 };
+
       beforeEach(() => {
         window.HTMLElement.prototype.getBoundingClientRect =
           betterGetBoundingClientRectMock;
