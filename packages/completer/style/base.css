@@ -31,7 +31,8 @@
 .jp-Completer-docpanel {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   width: 400px;
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: auto;
   padding: 8px;
   max-height: calc((10 * var(--jp-private-completer-item-height)) - 16px);
 }
