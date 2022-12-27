@@ -352,7 +352,7 @@ export class Completer extends Widget {
   }
 
   /**
-   * Get cached dimensions of the compelter box.
+   * Get cached dimensions of the completer box.
    */
   protected get sizeCache(): Completer.IDimensions | undefined {
     if (!this._sizeCache) {
@@ -1122,9 +1122,9 @@ export namespace Completer {
     createLoadingDocsIndicator?(): HTMLElement;
 
     /**
-     * Get a heuristic for width of an item.
+     * Get a heuristic for the width of an item.
      *
-     * As a pereformance optimization completer will infer the hover box width
+     * As a performance optimization completer will infer the hover box width
      * from the widest item node which will be rendered before all other nodes.
      * By default the widest item is selected based on label length heuristic;
      * renderers which customize item rendering can use this method to provide
@@ -1195,7 +1195,7 @@ export namespace Completer {
     }
 
     /**
-     * Get a heuristic for width of an item.
+     * Get a heuristic for the width of an item.
      */
     itemWidthHeuristic(item: CompletionHandler.ICompletionItem): number {
       return (
@@ -1204,7 +1204,7 @@ export namespace Completer {
     }
 
     /**
-     * Create a loading bar element for document panel.
+     * Create a loading bar for the documentation panel.
      */
     createLoadingDocsIndicator(): HTMLElement {
       const loadingContainer = document.createElement('div');
@@ -1216,7 +1216,7 @@ export namespace Completer {
     }
 
     /**
-     * Create base node with the value to be inserted
+     * Create base node with the value to be inserted.
      */
     private _createWrapperNode(value: string): HTMLLIElement {
       const li = document.createElement('li');
@@ -1315,7 +1315,7 @@ export namespace Completer {
    */
   export interface IDimensions {
     /**
-     * The total width including the documentaiton panel if visible.
+     * The total width including the documentation panel if visible.
      */
     width: number;
     /**
