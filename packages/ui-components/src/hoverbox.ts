@@ -192,6 +192,16 @@ export namespace HoverBox {
       return;
     }
 
+    if (options.size) {
+      node.style.width = `${options.size.width}px`;
+      node.style.height = `${options.size.height}px`;
+      node.style.contain = 'strict';
+    } else {
+      node.style.contain = '';
+      node.style.width = 'auto';
+      node.style.height = '';
+    }
+
     // Position the box vertically.
     const initialHeight = options.size
       ? options.size.height
@@ -217,15 +227,6 @@ export namespace HoverBox {
 
     node.style.left = `${Math.ceil(left)}px`;
 
-    if (options.size) {
-      node.style.width = `${options.size.width}px`;
-      node.style.height = `${options.size.height}px`;
-      node.style.contain = 'strict';
-    } else {
-      node.style.contain = '';
-      node.style.width = 'auto';
-      node.style.height = '';
-    }
     let rect = node.getBoundingClientRect();
 
     // Move left to fit in the window.
