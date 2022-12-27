@@ -66,10 +66,10 @@ bumped their major version (following semver convention). We want to point out p
       - The documentation panel now implements a loading indicator (a progress bar) customizable via
         optional ``createLoadingDocsIndicator`` renderer method.
       - ``createItemNode`` was removed in favour of ``createCompletionItemNode`` which is now required.
-      - ``createCompletionItemNode`` is no longer responsible for sanitization of label which is now a
+      - ``createCompletionItemNode`` is no longer responsible for sanitization of labels which is now a
         responsibility of the model (see below).
    * Model:
-      - In 3.x it was not possible to easily swap the renderer of JupyterLab-managed completers.
+      - In 3.x it was not possible to easily swap the model of JupyterLab-managed completers.
         In 4.x the model factory from the completion provider with highest rank is now used for
         JupyterLab-managed completers. This behaviour is subject to revision in the future (please leave feedback).
       - Old methods for updating and accessing the completion items: ``setOptions``, ``options``, and ``items`` were removed
