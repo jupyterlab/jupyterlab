@@ -966,9 +966,11 @@ class ToolbarPopupOpener extends ToolbarButton {
       icon: ellipsesIcon,
       onClick: () => {
         this.handleClick();
-      }
+      },
+      tooltip: 'More commands'
     });
     this.addClass('jp-Toolbar-responsive-opener');
+
     this.popup = new ToolbarPopup();
   }
 
