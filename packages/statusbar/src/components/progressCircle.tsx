@@ -13,6 +13,10 @@ export namespace ProgressCircle {
      * The current progress percentage, from 0 to 100
      */
     progress: number;
+    /**
+     * The aria-label for the widget
+     */
+    label?: string;
 
     width?: number;
 
@@ -42,6 +46,7 @@ export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
     <div
       className={'jp-Statusbar-ProgressCircle'}
       role="progressbar"
+      aria-label={props.label || 'Progress circle'}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={props.progress}

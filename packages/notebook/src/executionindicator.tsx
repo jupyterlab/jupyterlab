@@ -64,7 +64,12 @@ export function ExecutionIndicatorComponent(
   }
 
   const progressBar = (percentage: number) => (
-    <ProgressCircle progress={percentage} width={16} height={24} />
+    <ProgressCircle
+      progress={percentage}
+      width={16}
+      height={24}
+      label={'Kernel status'}
+    />
   );
   const titleFactory = (translatedStatus: string) =>
     trans.__('Kernel status: %1', translatedStatus);
