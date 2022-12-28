@@ -311,8 +311,8 @@ export class Completer extends Widget {
 
     // If there are no items, reset and bail.
     if (!items.length) {
-      this.reset();
       if (!this.isHidden) {
+        this.reset();
         this.hide();
         this._visibilityChanged.emit(undefined);
       }
@@ -751,6 +751,13 @@ export class Completer extends Widget {
       (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
       editor.host;
 
+    const items = model.completionItems();
+
+    // Fast cache invalidation (only checks for length rather than length + width)
+    if (this._sizeCache && this._sizeCache.items.length !== items.length) {
+      this._sizeCache = undefined;
+    }
+
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
       anchor,
@@ -782,7 +789,7 @@ export class Completer extends Widget {
         this._sizeCache = {
           width: rect.width,
           height: rect.height,
-          items: model.completionItems()
+          items: items
         };
       });
     }
@@ -849,8 +856,9 @@ export class Completer extends Widget {
       docPanel.style.display = 'none';
       this._docPanelExpanded = false;
     }
-    if (this._sizeCache) {
-      this._sizeCache.width += this._docPanelWidth * (show ? +1 : -1);
+    const sizeCache = this._sizeCache;
+    if (sizeCache) {
+      sizeCache.width += this._docPanelWidth * (show ? +1 : -1);
       if (!this._geometryLock) {
         this._setGeometry();
       }

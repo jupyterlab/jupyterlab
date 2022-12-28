@@ -114,6 +114,7 @@ export class CompleterModel implements Completer.IModel {
     const ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
+    this._processedItemsCache = null;
     this._queryChanged.emit({ newValue: this._query, origin: 'editorUpdate' });
     this._stateChanged.emit(undefined);
   }
@@ -141,6 +142,7 @@ export class CompleterModel implements Completer.IModel {
   }
   set query(newValue: string) {
     this._query = newValue;
+    this._processedItemsCache = null;
     this._queryChanged.emit({ newValue: this._query, origin: 'setter' });
   }
 
@@ -180,13 +182,17 @@ export class CompleterModel implements Completer.IModel {
    * This is a read-only property.
    */
   completionItems(): CompletionHandler.ICompletionItems {
-    let query = this._query;
-    if (query) {
-      return this._markup(query);
+    if (!this._processedItemsCache) {
+      let query = this._query;
+      if (query) {
+        this._processedItemsCache = this._markup(query);
+      } else {
+        this._processedItemsCache = this._completionItems.map(item => {
+          return this._escapeItemLabel(item);
+        });
+      }
     }
-    return this._completionItems.map(item => {
-      return this._escapeItemLabel(item);
-    });
+    return this._processedItemsCache;
   }
 
   /**
@@ -206,6 +212,7 @@ export class CompleterModel implements Completer.IModel {
     this._orderedTypes = Private.findOrderedCompletionItemTypes(
       this._completionItems
     );
+    this._processedItemsCache = undefined;
     this._stateChanged.emit(undefined);
   }
 
@@ -473,21 +480,27 @@ export class CompleterModel implements Completer.IModel {
    * Reset the state of the model.
    */
   private _reset(): void {
+    const hadQuery = this._query;
     this._current = null;
     this._cursor = null;
     this._completionItems = [];
     this._original = null;
     this._query = '';
+    this._processedItemsCache = null;
     this._subsetMatch = false;
     this._typeMap = {};
     this._orderedTypes = [];
-    this._queryChanged.emit({ newValue: this._query, origin: 'reset' });
+    if (hadQuery) {
+      this._queryChanged.emit({ newValue: this._query, origin: 'reset' });
+    }
   }
 
   private _current: Completer.ITextState | null = null;
   private _cursor: Completer.ICursorSpan | null = null;
   private _isDisposed = false;
   private _completionItems: CompletionHandler.ICompletionItems = [];
+  private _processedItemsCache: CompletionHandler.ICompletionItems | null =
+    null;
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
