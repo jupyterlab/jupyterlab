@@ -212,7 +212,7 @@ export class CompleterModel implements Completer.IModel {
     this._orderedTypes = Private.findOrderedCompletionItemTypes(
       this._completionItems
     );
-    this._processedItemsCache = undefined;
+    this._processedItemsCache = null;
     this._stateChanged.emit(undefined);
   }
 

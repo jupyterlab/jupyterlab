@@ -151,6 +151,95 @@ describe('completer/model', () => {
       });
     });
 
+    describe('#queryChanged', () => {
+      it('should signal when query is set via public setter', () => {
+        const model = new CompleterModel();
+        let called: Record<'setter' | 'editorUpdate' | 'reset', number> = {
+          setter: 0,
+          editorUpdate: 0,
+          reset: 0
+        };
+        const listener = (sender: any, args: Completer.IQueryChange) => {
+          called[args.origin]++;
+        };
+        model.queryChanged.connect(listener);
+        expect(called.setter).toBe(0);
+        model.query = 'foo';
+        expect(called.setter).toBe(1);
+        model.query = 'bar';
+        expect(called.setter).toBe(2);
+        expect(called.editorUpdate).toBe(0);
+      });
+
+      it('should signal when query gets reset', () => {
+        const model = new CompleterModel();
+        let called: Record<'setter' | 'editorUpdate' | 'reset', number> = {
+          setter: 0,
+          editorUpdate: 0,
+          reset: 0
+        };
+        const listener = (sender: any, args: Completer.IQueryChange) => {
+          called[args.origin]++;
+        };
+        model.queryChanged.connect(listener);
+        expect(called.reset).toBe(0);
+        model.query = 'foo';
+        expect(called.reset).toBe(0);
+        model.reset();
+        expect(called.reset).toBe(1);
+        // Should not call again (query does not change with second reset)
+        model.reset();
+        expect(called.reset).toBe(1);
+      });
+
+      it('should signal when current text changes', () => {
+        const model = new CompleterModel();
+        let called: Record<'setter' | 'editorUpdate' | 'reset', number> = {
+          setter: 0,
+          editorUpdate: 0,
+          reset: 0
+        };
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
+        const listener = (sender: any, args: Completer.IQueryChange) => {
+          called[args.origin]++;
+        };
+        model.queryChanged.connect(listener);
+        expect(called.editorUpdate).toBe(0);
+        model.original = request;
+        model.cursor = cursor;
+        model.current = change;
+        expect(called.editorUpdate).toBe(1);
+      });
+
+      it('should not signal when current text is unchanged', () => {
+        const model = new CompleterModel();
+        let called: Record<'setter' | 'editorUpdate' | 'reset', number> = {
+          setter: 0,
+          editorUpdate: 0,
+          reset: 0
+        };
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
+        const listener = (sender: any, args: Completer.IQueryChange) => {
+          called[args.origin]++;
+        };
+        model.queryChanged.connect(listener);
+        expect(called.editorUpdate).toBe(0);
+        model.original = request;
+        model.cursor = cursor;
+        model.current = change;
+        model.current = change;
+        expect(called.editorUpdate).toBe(1);
+      });
+    });
+
     describe('#completionItems()', () => {
       it('should default to { items: [] }', () => {
         let model = new CompleterModel();
