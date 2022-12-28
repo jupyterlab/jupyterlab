@@ -965,6 +965,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     const model = this.model;
     this.maxNumberOutputs = options.maxNumberOutputs;
 
+    this.node.setAttribute('role', 'textbox');
     // Note that modifying the below label warrants one to also modify
     // the same in this._outputLengthHandler. Ideally, this label must
     // have been a constant and used in both places but it is not done
@@ -1784,6 +1785,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     this.addClass(MARKDOWN_CELL_CLASS);
     this.model.contentChanged.connect(this.onContentChanged, this);
     const trans = this.translator.load('jupyterlab');
+    this.node.setAttribute('role', 'textbox');
     this.node.setAttribute('aria-label', trans.__('Markdown Cell Content'));
     // Ensure we can resolve attachments:
     this._rendermime = options.rendermime.clone({
