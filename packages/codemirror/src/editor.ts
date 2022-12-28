@@ -240,6 +240,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this._yeditorBinding,
       this._editorConfig,
       [
+        EditorView.contentAttributes.of({
+          tabIndex: '-1'
+        }),
         this._markField,
         Prec.high(domEventHandlers),
         updateListener,
