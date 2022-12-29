@@ -48,7 +48,7 @@
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   align-items: center;
   min-height: calc(
-    var(--jp-private-horizontal-tab-height) + var(--jp-border-width)
+    var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
   );
   min-width: 0;
   margin-left: calc(-1 * var(--jp-border-width));
