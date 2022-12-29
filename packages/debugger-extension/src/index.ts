@@ -12,6 +12,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  Clipboard,
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
@@ -481,13 +482,13 @@ const variables: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.copyToClipboard, {
       label: trans.__('Copy to Clipboard'),
-      caption: trans.__('Copy value to clipboard'),
+      caption: trans.__('Copy text representation of the value to clipboard'),
       isEnabled: () => !!service.session?.isStarted,
       isVisible: () => handler.activeWidget instanceof NotebookPanel,
       execute: async () => {
         const value = service.model.variables.selectedVariable!.value;
         if (value) {
-          await navigator.clipboard.writeText(value);
+          Clipboard.copyToSystem(value);
         }
       }
     });

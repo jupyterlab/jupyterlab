@@ -244,7 +244,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
         e.stopPropagation();
         onSelection(variable);
       }}
-      className={value ? '' : 'jp-DebuggerVariables-noCopy'}
+      className={value ? '' : 'jp-DebuggerVariables-emptyValue'}
     >
       <caretDownEmptyIcon.react
         visibility={expandable ? 'visible' : 'hidden'}
