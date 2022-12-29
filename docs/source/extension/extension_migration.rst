@@ -77,6 +77,9 @@ bumped their major version (following semver convention). We want to point out p
       - New signal ``queryChanged`` was added and has to be emitted by models.
       - Model is now responsible for sanitization of labels and preserving original label on ``insertText`` attribute
         (if not already defined); this change was required to properly handle escaping of HTML tags.
+- ``@jupyterlab/codeeditor`` from 3.x to 4.x
+   * Remove ``ISelectionStyle`` (and therefore ``defaultSelectionStyle`` and ``IEditor.selectionStyle``). This was envisaged
+     for real-time collaboration. But this is not used in the final implementation.
 - ``@jupyterlab/console`` from 3.x to 4.x
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
