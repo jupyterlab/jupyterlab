@@ -1977,6 +1977,13 @@ export namespace DirListing {
         const checkboxWrapper = this.createCheckboxWrapperNode({
           alwaysVisible: true
         });
+        const checkboxInput = checkboxWrapper.querySelector(
+          'input[type="checkbox"]'
+        );
+        checkboxInput?.setAttribute(
+          'aria-label',
+          'Select all files and directories'
+        );
         node.appendChild(checkboxWrapper);
       }
       node.appendChild(name);
@@ -2237,11 +2244,22 @@ export namespace DirListing {
         node.removeAttribute('data-is-dot');
       }
       // If an item is being edited currently, its text node is unavailable.
+      const indices = !model.indices ? [] : model.indices;
+      let highlightedName = StringExt.highlight(model.name, indices, h.mark);
       if (text) {
-        const indices = !model.indices ? [] : model.indices;
-        let highlightedName = StringExt.highlight(model.name, indices, h.mark);
         VirtualDOM.render(h.span(highlightedName), text);
       }
+
+      // Adds an aria-label to the checkbox element.
+      const checkboxInput = checkboxWrapper.querySelector(
+        'input[type="checkbox"]'
+      );
+      checkboxInput?.setAttribute(
+        'aria-label',
+        `Select ${
+          fileType.contentType === 'directory' ? 'directory' : 'file'
+        } '${highlightedName}'`
+      );
 
       let modText = '';
       let modTitle = '';
