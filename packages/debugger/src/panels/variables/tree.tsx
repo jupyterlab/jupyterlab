@@ -224,7 +224,6 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
 
   const trans = (translator ?? nullTranslator).load('jupyterlab');
 
-  const value = variable.value;
   const onVariableClicked = async (e: React.MouseEvent): Promise<void> => {
     if (!expandable) {
       return;
@@ -244,7 +243,6 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
         e.stopPropagation();
         onSelection(variable);
       }}
-      className={value ? '' : 'jp-DebuggerVariables-emptyValue'}
     >
       <caretDownEmptyIcon.react
         visibility={expandable ? 'visible' : 'hidden'}

@@ -178,6 +178,16 @@ test.describe('Debugger', () => {
     await page.locator('.lm-Menu-itemLabel:text("Copy to Clipboard")').click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('2');
 
+    // Copy value entry is disabled for variables with empty value
+    await page
+      .locator('.jp-DebuggerVariables-toolbar select')
+      .selectOption('Globals');
+    await page
+      .locator('.jp-DebuggerVariables-body :text("special variables")')
+      .click({ button: 'right' });
+    await expect(
+      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+    ).toHaveAttribute('aria-disabled', 'true');
     await page.click('button[title^=Continue]');
   });
 
