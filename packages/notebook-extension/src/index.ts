@@ -1771,7 +1771,7 @@ function activateNotebookHandler(
     }
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
-    factory.shutdownOnClose = settings.get('selectPreferredKernel')
+    factory.selectPreferredKernel = settings.get('selectPreferredKernel')
       .composite as boolean;
 
     modelFactory.disableDocumentWideUndoRedo = !settings.get(
