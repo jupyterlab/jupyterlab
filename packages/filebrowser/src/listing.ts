@@ -1982,7 +1982,7 @@ export namespace DirListing {
         );
         checkboxInput?.setAttribute(
           'aria-label',
-          'Select all files and directories'
+          trans.__('Select all files and directories')
         );
         node.appendChild(checkboxWrapper);
       }
@@ -2254,13 +2254,9 @@ export namespace DirListing {
       );
       checkboxInput?.setAttribute(
         'aria-label',
-        trans.__(
-          trans.gettext(
-            "Select %1 '%2'",
-            fileType.contentType === 'directory' ? 'directory' : 'file',
-            highlightedName
-          )
-        )
+        fileType.contentType === 'directory'
+          ? trans.__('Select directory "%1"', highlightedName)
+          : trans.__('Select file "%1"', highlightedName)
       );
 
       let modText = '';

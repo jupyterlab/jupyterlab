@@ -69,7 +69,6 @@ export function ExecutionIndicatorComponent(
       width={16}
       height={24}
       label={trans.__('Kernel status')}
-      translator={translator}
     />
   );
   const titleFactory = (translatedStatus: string) =>
