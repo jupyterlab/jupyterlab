@@ -1058,6 +1058,11 @@ export namespace DocumentRegistry {
     readonly shutdownOnClose?: boolean;
 
     /**
+     * Whether to automatically select the preferred kernel during a kernel start
+     */
+    readonly selectPreferredKernel?: boolean;
+
+    /**
      * A function producing toolbar widgets, overriding the default toolbar widgets.
      */
     readonly toolbarFactory?: (

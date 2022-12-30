@@ -279,6 +279,11 @@ export namespace ISessionContext {
      * found (default `true`).
      */
     readonly autoStartDefault?: boolean;
+
+    /**
+     * Automatically select the preferred kernel during a kernel start (default `false`).
+     */
+    readonly selectPreferredKernel?: boolean;
   }
 
   export type KernelDisplayStatus =
@@ -654,6 +659,11 @@ export class SessionContext implements ISessionContext {
 
   async startKernel(): Promise<boolean> {
     const preference = this.kernelPreference;
+
+    if (!preference.selectPreferredKernel) {
+      return true;
+    }
+
     let options: Partial<Kernel.IModel> | undefined;
     if (preference.id) {
       options = { id: preference.id };

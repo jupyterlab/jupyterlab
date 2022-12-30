@@ -688,6 +688,12 @@
       "type": "boolean",
       "default": false
     },
+    "selectPreferredKernel": {
+      "title": "Select Preferred Kernel",
+      "description": "Whether to automatically select the preferred kernel during a kernel start.",
+      "type": "boolean",
+      "default": false
+    },
     "markdownCellConfig": {
       "title": "Markdown Cell Configuration",
       "description": "The configuration for all markdown cells; it will override the CodeMirror default configuration.",

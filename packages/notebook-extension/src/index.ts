@@ -1629,7 +1629,8 @@ function activateNotebookHandler(
       updateTracker({
         editorConfig: factory.editorConfig,
         notebookConfig: factory.notebookConfig,
-        kernelShutdown: factory.shutdownOnClose
+        kernelShutdown: factory.shutdownOnClose,
+        selectPreferredKernel: factory.selectPreferredKernel
       });
     });
 
@@ -1770,6 +1771,8 @@ function activateNotebookHandler(
     }
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
+    factory.shutdownOnClose = settings.get('selectPreferredKernel')
+      .composite as boolean;
 
     modelFactory.disableDocumentWideUndoRedo = !settings.get(
       'documentWideUndoRedo'
@@ -1778,7 +1781,8 @@ function activateNotebookHandler(
     updateTracker({
       editorConfig: factory.editorConfig,
       notebookConfig: factory.notebookConfig,
-      kernelShutdown: factory.shutdownOnClose
+      kernelShutdown: factory.shutdownOnClose,
+      selectPreferredKernel: factory.selectPreferredKernel
     });
   }
 

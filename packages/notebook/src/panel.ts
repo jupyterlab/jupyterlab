@@ -273,6 +273,10 @@ export namespace NotebookPanel {
      * Whether to shut down the kernel when closing the panel or not
      */
     kernelShutdown: boolean;
+    /**
+     * Whether to automatically select the preferred kernel during a kernel start
+     */
+    selectPreferredKernel: boolean;
   }
 
   /**

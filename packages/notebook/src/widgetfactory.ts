@@ -164,5 +164,9 @@ export namespace NotebookWidgetFactory {
      * Whether the kernel should be shutdown when the widget is closed.
      */
     shutdownOnClose: boolean;
+    /**
+     * Whether to automatically select the preferred kernel during a kernel start
+     */
+    selectPreferredKernel: boolean;
   }
 }
