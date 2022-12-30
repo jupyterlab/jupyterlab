@@ -2165,8 +2165,6 @@ export namespace DirListing {
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>
     ): void {
-      translator = translator || nullTranslator;
-
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
       const { icon, iconClass, name } = fileType;
@@ -2256,9 +2254,13 @@ export namespace DirListing {
       );
       checkboxInput?.setAttribute(
         'aria-label',
-        `Select ${
-          fileType.contentType === 'directory' ? 'directory' : 'file'
-        } '${highlightedName}'`
+        trans.__(
+          trans.gettext(
+            "Select %1 '%2'",
+            fileType.contentType === 'directory' ? 'directory' : 'file',
+            highlightedName
+          )
+        )
       );
 
       let modText = '';
