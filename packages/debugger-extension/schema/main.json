@@ -33,7 +33,7 @@
       },
       {
         "command": "debugger:copy-to-clipboard",
-        "selector": ".jp-DebuggerVariables-body li:not(.jp-DebuggerVariables-emptyValue)"
+        "selector": ".jp-DebuggerVariables-body"
       }
     ]
   },

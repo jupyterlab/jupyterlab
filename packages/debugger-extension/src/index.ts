@@ -483,7 +483,21 @@ const variables: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.copyToClipboard, {
       label: trans.__('Copy to Clipboard'),
       caption: trans.__('Copy text representation of the value to clipboard'),
-      isEnabled: () => !!service.session?.isStarted,
+      isEnabled: () => {
+        const test = (node: HTMLElement) => {
+          const treeTest = !(
+            node
+              .closest('.jp-DebuggerVariables-body li')
+              ?.classList.contains('jp-DebuggerVariables-emptyValue') ?? true
+          );
+          const gridTest = !!node.closest(
+            '.jp-DebuggerVariables-body .jp-DebuggerVariables-grid canvas'
+          );
+          return treeTest || gridTest;
+        };
+        const node = app.contextMenuHitTest(test);
+        return !!service.session?.isStarted && !!node;
+      },
       isVisible: () => handler.activeWidget instanceof NotebookPanel,
       execute: async () => {
         const value = service.model.variables.selectedVariable!.value;
