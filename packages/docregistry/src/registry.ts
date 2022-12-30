@@ -649,7 +649,8 @@ export class DocumentRegistry implements IDisposable {
       language,
       shouldStart: widgetFactory.preferKernel,
       canStart: widgetFactory.canStartKernel,
-      shutdownOnDispose: widgetFactory.shutdownOnClose
+      shutdownOnDispose: widgetFactory.shutdownOnClose,
+      selectPreferredKernel: widgetFactory.selectPreferredKernel
     };
   }
 

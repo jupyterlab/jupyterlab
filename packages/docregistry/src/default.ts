@@ -460,7 +460,9 @@ export abstract class ABCWidgetFactory<
   get selectPreferredKernel(): boolean {
     return this._selectPreferredKernel;
   }
-
+  set selectPreferredKernel(value: boolean) {
+    this._selectPreferredKernel = value;
+  }
   /**
    * Create a new widget given a document model and a context.
    *
