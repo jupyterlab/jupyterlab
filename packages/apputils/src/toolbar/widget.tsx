@@ -108,6 +108,8 @@ export namespace Toolbar {
   /**
    * Create a kernel status indicator item.
    *
+   * @deprecated since v3.5
+   * This is dead code now.
    * #### Notes
    * It will show a busy status if the kernel status is busy.
    * It will show the current status in the node title.
