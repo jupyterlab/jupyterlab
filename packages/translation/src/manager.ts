@@ -26,9 +26,23 @@ export class TranslationManager implements ITranslator {
    * @param locale The language locale to use for translations.
    */
   async fetch(locale: string): Promise<void> {
-    this._currentLocale = locale;
     this._languageData = await this._connector.fetch({ language: locale });
-    this._domainData = this._languageData?.data || {};
+    if (this._languageData && locale === 'default') {
+      try {
+        for (const lang of Object.values(this._languageData.data ?? {})) {
+          this._currentLocale = (
+            (lang as any)['']['language'] as string
+          ).replace('_', '-');
+          break;
+        }
+      } catch (reason) {
+        this._currentLocale = 'en';
+      }
+    } else {
+      this._currentLocale = locale;
+    }
+
+    this._domainData = this._languageData?.data ?? {};
     const message: string = this._languageData?.message;
     if (message && locale !== 'en') {
       console.warn(message);
