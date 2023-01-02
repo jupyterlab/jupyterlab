@@ -466,7 +466,10 @@ export namespace ExecutionIndicator {
      */
     private _startTimer(nb: Notebook) {
       const state = this._notebookExecutionProgress.get(nb);
-      if (state) {
+      if (!state) {
+        return;
+      }
+      if (state.scheduledCell.size > 0) {
         if (state.executionStatus !== 'busy') {
           state.executionStatus = 'busy';
           clearTimeout(state.timeout);
@@ -475,6 +478,8 @@ export namespace ExecutionIndicator {
             this._tick(state);
           }, 1000);
         }
+      } else {
+        this._resetTime(state);
       }
     }
 
