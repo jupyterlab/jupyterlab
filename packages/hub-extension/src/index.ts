@@ -100,7 +100,7 @@ function activateHubExtension(
  */
 const hubExtension: JupyterFrontEndPlugin<void> = {
   activate: activateHubExtension,
-  id: 'jupyter.extensions.hub-extension',
+  id: '@jupyterlab/hub-extension:plugin',
   requires: [JupyterFrontEnd.IPaths, ITranslator],
   optional: [ICommandPalette],
   autoStart: true
@@ -111,7 +111,7 @@ const hubExtension: JupyterFrontEndPlugin<void> = {
  */
 const hubExtensionMenu: JupyterFrontEndPlugin<void> = {
   activate: () => void 0,
-  id: 'jupyter.extensions.hub-extension:plugin',
+  id: '@jupyterlab/hub-extension:menu',
   autoStart: true
 };
 

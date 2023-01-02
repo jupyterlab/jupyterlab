@@ -143,6 +143,9 @@ bumped their major version (following semver convention). We want to point out p
    need to switch to the Blueprint components as the interfaces of those components in JupyterLab
    do not match those of Blueprint JS.
    Remove ``Collapse`` React component.
+- ``jupyter.extensions.hub-extension`` from 3.x to 4.x
+   * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
+   * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
 - TypeScript 4.7 update
    As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
