@@ -3,6 +3,7 @@
 
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { signalToPromise } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
@@ -16,11 +17,7 @@ const createOptionsForConstructor: () => DirListing.IOptions = () => ({
   model: new FilterFileBrowserModel({
     manager: new DocumentManager({
       registry: new DocumentRegistry(),
-      opener: {
-        open: () => {
-          /* noop */
-        }
-      } as any,
+      opener: new DocumentWidgetOpenerMock(),
       manager: new ServiceManagerMock()
     })
   })
