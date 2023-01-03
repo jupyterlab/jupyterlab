@@ -69,12 +69,16 @@ export interface IDebugger {
   pauseOnExceptionsIsValid(): boolean;
 
   /**
-   * Handles enabling and disabling of Pause on Exception
+   * Add a filter to pauseOnExceptionsFilter.
+   *
+   * @param exceptionFilter - filter name.
    */
-  pauseOnExceptions(
-    exceptionFilter: string | null,
-    force?: boolean
-  ): Promise<void>;
+  pauseOnExceptionsFilter(exceptionFilter: string): Promise<void>;
+
+  /**
+   * Send the pauseOnExceptions' filters to the debugger.
+   */
+  pauseOnExceptions(exceptionFilter: string[]): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -374,7 +378,7 @@ export namespace IDebugger {
     /**
      * Get current exception filter.
      */
-    currentExceptionFilter: string | null;
+    currentExceptionFilters: string[];
 
     /**
      * Whether the debugger is pausing on exception.
@@ -697,7 +701,7 @@ export namespace IDebugger {
      * An interface for current exception filters.
      */
     export interface IExceptionFilter {
-      [kernels: string]: string;
+      [kernels: string]: string[];
     }
   }
 

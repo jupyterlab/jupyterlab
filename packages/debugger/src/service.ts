@@ -426,8 +426,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._clearSignals();
     }
 
-    if (this.session.currentExceptionFilter) {
-      await this.pauseOnExceptions(this.session.currentExceptionFilter, true);
+    // Send the currentExceptionFilters to debugger.
+    if (this.session.currentExceptionFilters) {
+      await this.pauseOnExceptions(this.session.currentExceptionFilters);
     }
   }
 
@@ -562,7 +563,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   pauseOnExceptionsIsValid(): boolean {
     if (this.isStarted) {
-      if (this.session?.exceptionBreakpointFilters) {
+      if (this.session?.exceptionBreakpointFilters?.length !== 0) {
         return true;
       }
     }
@@ -570,34 +571,44 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Enable or disable pausing on exceptions.
+   * Add or remove a filter from the current used filters.
    *
-   * @param exceptionFilter - The filter to use (empty string will disable it).
-   * @param force - Send the request even if the current filter is the same (useful when restoring)
+   * @param exceptionFilter - The filter to add or remove from current filters.
    */
-  async pauseOnExceptions(
-    exceptionFilter: string,
-    force: boolean = false
-  ): Promise<void> {
+  async pauseOnExceptionsFilter(exceptionFilter: string): Promise<void> {
     if (!this.session?.isStarted) {
       return;
     }
-    const exceptionBreakpointFilters = this.session.exceptionBreakpointFilters;
-    let options: DebugProtocol.SetExceptionBreakpointsArguments;
-    if (this.session.currentExceptionFilter !== exceptionFilter || force) {
-      if (
-        exceptionBreakpointFilters?.map(e => e.filter).includes(exceptionFilter)
-      ) {
-        this.session.currentExceptionFilter = exceptionFilter;
-        options = { filters: [exceptionFilter] };
-      } else {
-        this.session.currentExceptionFilter = null;
-        options = { filters: [] };
-      }
+    let exceptionFilters = this.session.currentExceptionFilters;
+    if (this.session.isPausingOnException(exceptionFilter)) {
+      const index = exceptionFilters.indexOf(exceptionFilter);
+      exceptionFilters.splice(index, 1);
     } else {
-      this.session.currentExceptionFilter = null;
-      options = { filters: [] };
+      exceptionFilters?.push(exceptionFilter);
     }
+    await this.pauseOnExceptions(exceptionFilters);
+  }
+
+  /**
+   * Enable or disable pausing on exceptions.
+   *
+   * @param exceptionFilters - The filters to use for the current debugging session.
+   */
+  async pauseOnExceptions(exceptionFilters: string[]): Promise<void> {
+    if (!this.session?.isStarted) {
+      return;
+    }
+    const exceptionBreakpointFilters =
+      this.session.exceptionBreakpointFilters?.map(e => e.filter) || [];
+    let options: DebugProtocol.SetExceptionBreakpointsArguments = {
+      filters: []
+    };
+    exceptionFilters.forEach(filter => {
+      if (exceptionBreakpointFilters.includes(filter)) {
+        options.filters.push(filter);
+      }
+    });
+    this.session.currentExceptionFilters = options.filters;
     await this.session.sendRequest('setExceptionBreakpoints', options);
     this._pauseOnExceptionChanged.emit();
   }

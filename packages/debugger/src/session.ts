@@ -115,26 +115,26 @@ export class DebuggerSession implements IDebugger.ISession {
   /**
    * Get current exception filters.
    */
-  get currentExceptionFilter(): string | null {
+  get currentExceptionFilters(): string[] {
     const kernel = this.connection?.kernel?.name ?? '';
     if (!kernel) {
-      return null;
+      return [];
     }
     const tmpFileParams = this._config.getTmpFileParams(kernel);
     if (!tmpFileParams) {
-      return null;
+      return [];
     }
     let prefix = tmpFileParams.prefix;
-    if (Object.keys(this._currentExceptionFilter).includes(prefix)) {
-      return this._currentExceptionFilter[prefix];
+    if (Object.keys(this._currentExceptionFilters).includes(prefix)) {
+      return this._currentExceptionFilters[prefix];
     }
-    return null;
+    return [];
   }
 
   /**
-   * Add current exception filters.
+   * Set current exception filters.
    */
-  set currentExceptionFilter(exceptionFilter: string | null) {
+  set currentExceptionFilters(exceptionFilters: string[] | null) {
     const kernel = this.connection?.kernel?.name ?? '';
     if (!kernel) {
       return;
@@ -144,12 +144,12 @@ export class DebuggerSession implements IDebugger.ISession {
       return;
     }
     let prefix = tmpFileParams.prefix;
-    if (exceptionFilter === null) {
-      if (Object.keys(this._currentExceptionFilter).includes(prefix)) {
-        delete this._currentExceptionFilter[prefix];
+    if (exceptionFilters === null) {
+      if (Object.keys(this._currentExceptionFilters).includes(prefix)) {
+        delete this._currentExceptionFilters[prefix];
       }
     } else {
-      this._currentExceptionFilter[prefix] = exceptionFilter;
+      this._currentExceptionFilters[prefix] = exceptionFilters;
     }
   }
 
@@ -229,9 +229,9 @@ export class DebuggerSession implements IDebugger.ISession {
    */
   isPausingOnException(filter?: string): boolean {
     if (filter) {
-      return this.currentExceptionFilter === filter;
+      return this.currentExceptionFilters?.includes(filter) ?? false;
     } else {
-      return this.currentExceptionFilter !== null;
+      return this.currentExceptionFilters.length > 0;
     }
   }
 
@@ -308,7 +308,7 @@ export class DebuggerSession implements IDebugger.ISession {
   private _exceptionBreakpointFilters:
     | DebugProtocol.ExceptionBreakpointsFilter[]
     | undefined = [];
-  private _currentExceptionFilter: IDebugger.ISession.IExceptionFilter = {};
+  private _currentExceptionFilters: IDebugger.ISession.IExceptionFilter = {};
   private _disposed = new Signal<this, void>(this);
   private _eventMessage = new Signal<
     IDebugger.ISession,
