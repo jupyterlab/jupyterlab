@@ -132,9 +132,8 @@ test.describe('Debugger', () => {
     await page.locator('button.jp-PauseOnExceptions').click();
     const menu = page.locator('.jp-PauseOnExceptions-menu');
     await expect(menu).toBeVisible();
-    expect(await menu.screenshot()).toMatchSnapshot(
-      'pause_on_exception_menu.png'
-    );
+    await expect(menu.locator('li.lm-Menu-item')).toHaveCount(3);
+    await expect(menu.locator('li.lm-Menu-item.lm-mod-toggled')).toHaveCount(0);
 
     await menu
       .locator('li div.lm-Menu-itemLabel:text("userUnhandled")')
@@ -155,7 +154,6 @@ test.describe('Debugger', () => {
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
-
     expect(
       await page.screenshot({
         clip: { y: 110, x: 300, width: 300, height: 80 }
@@ -166,9 +164,11 @@ test.describe('Debugger', () => {
     await page.notebook.waitForRun(0);
 
     await page.locator('button.jp-PauseOnExceptions').click();
-    expect(await menu.screenshot()).toMatchSnapshot(
-      'pause_on_exception_menu_unhandled.png'
-    );
+
+    await expect(menu.locator('li.lm-Menu-item.lm-mod-toggled')).toHaveCount(1);
+    await expect(
+      menu.locator('li:has(div.lm-Menu-itemLabel:text("userUnhandled"))')
+    ).toHaveClass(/lm-mod-toggled/);
 
     await menu.locator('li div.lm-Menu-itemLabel:text("raised")').click();
 
