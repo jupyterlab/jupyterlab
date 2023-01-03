@@ -813,9 +813,8 @@ export class DirListing extends Widget {
       checkAllCheckbox?.setAttribute(
         'aria-label',
         allSelected || someSelected
-            ? trans.__('Deselect all files and directories')
-            : trans.__('Select all files and directories')
-        )
+          ? trans.__('Deselect all files and directories')
+          : trans.__('Select all files and directories')
       );
     }
 
@@ -2258,20 +2257,17 @@ export namespace DirListing {
       ) as HTMLInputElement;
 
       if (checkbox) {
-        checkbox.setAttribute(
-          'aria-label',
-          fileType.contentType === 'directory'
-            ? trans.__(
-                '%1 directory "%2"',
-                selected ? 'Unselect' : 'Select',
-                highlightedName
-              )
-            : trans.__(
-                '%1 file "%2"',
-                selected ? 'Unselect' : 'Select',
-                highlightedName
-              )
-        );
+        let ariaLabel: string;
+        if (fileType.contentType === 'directory') {
+          ariaLabel = selected
+            ? trans.__('Unselect directory "%2"', highlightedName)
+            : trans.__('Select directory "%2"', highlightedName);
+        } else {
+          ariaLabel = selected
+            ? trans.__('Unselect file "%2"', highlightedName)
+            : trans.__('Select file "%2"', highlightedName);
+        }
+        checkbox.setAttribute('aria-label', ariaLabel);
         checkbox.checked = selected ?? false;
       }
 
