@@ -38,5 +38,6 @@ header:
     - 'typedoc-theme'
     - 'LICENSE'
     - 'yarn.lock'
+    - 'uffizzi/'
 
   comment: on-failure
