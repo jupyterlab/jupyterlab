@@ -808,6 +808,15 @@ export class DirListing extends Widget {
       // next value).
       checkAllCheckbox.dataset.checked = String(allSelected);
       checkAllCheckbox.dataset.indeterminate = String(someSelected);
+
+      const trans = this.translator.load('jupyterlab');
+      checkAllCheckbox?.setAttribute(
+        'aria-label',
+        trans.__(
+          '%1 all files and directories',
+          allSelected || someSelected ? 'Unselect' : 'Select'
+        )
+      );
     }
 
     // Add extra classes to item nodes based on widget state.
@@ -819,19 +828,15 @@ export class DirListing extends Widget {
         item,
         ft,
         this.translator,
-        this._hiddenColumns
+        this._hiddenColumns,
+        this.selection[item.path]
       );
-      if (this.selection[item.path]) {
-        node.classList.add(SELECTED_CLASS);
-
-        if (this._isCut && this._model.path === this._prevPath) {
-          node.classList.add(CUT_CLASS);
-        }
-
-        const checkbox = renderer.getCheckboxNode(node);
-        if (checkbox) {
-          checkbox.checked = true;
-        }
+      if (
+        this.selection[item.path] &&
+        this._isCut &&
+        this._model.path === this._prevPath
+      ) {
+        node.classList.add(CUT_CLASS);
       }
 
       // add metadata to the node
@@ -1889,7 +1894,8 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
-      hiddenColumns?: Set<DirListing.ToggleableColumn>
+      hiddenColumns?: Set<DirListing.ToggleableColumn>,
+      selected?: boolean
     ): void;
 
     /**
@@ -1977,13 +1983,6 @@ export namespace DirListing {
         const checkboxWrapper = this.createCheckboxWrapperNode({
           alwaysVisible: true
         });
-        const checkboxInput = checkboxWrapper.querySelector(
-          'input[type="checkbox"]'
-        );
-        checkboxInput?.setAttribute(
-          'aria-label',
-          trans.__('Select all files and directories')
-        );
         node.appendChild(checkboxWrapper);
       }
       node.appendChild(name);
@@ -2163,8 +2162,13 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
-      hiddenColumns?: Set<DirListing.ToggleableColumn>
+      hiddenColumns?: Set<DirListing.ToggleableColumn>,
+      selected?: boolean
     ): void {
+      if (selected) {
+        node.classList.add(SELECTED_CLASS);
+      }
+
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
       const { icon, iconClass, name } = fileType;
@@ -2249,15 +2253,27 @@ export namespace DirListing {
       }
 
       // Adds an aria-label to the checkbox element.
-      const checkboxInput = checkboxWrapper.querySelector(
+      const checkbox = checkboxWrapper?.querySelector(
         'input[type="checkbox"]'
-      );
-      checkboxInput?.setAttribute(
-        'aria-label',
-        fileType.contentType === 'directory'
-          ? trans.__('Select directory "%1"', highlightedName)
-          : trans.__('Select file "%1"', highlightedName)
-      );
+      ) as HTMLInputElement;
+
+      if (checkbox) {
+        checkbox.setAttribute(
+          'aria-label',
+          fileType.contentType === 'directory'
+            ? trans.__(
+                '%1 directory "%2"',
+                selected ? 'Unselect' : 'Select',
+                highlightedName
+              )
+            : trans.__(
+                '%1 file "%2"',
+                selected ? 'Unselect' : 'Select',
+                highlightedName
+              )
+        );
+        checkbox.checked = selected ?? false;
+      }
 
       let modText = '';
       let modTitle = '';
