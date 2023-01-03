@@ -183,6 +183,12 @@
       "path": "../mathjax2-extension"
     },
     {
+      "path": "../metadataform"
+    },
+    {
+      "path": "../metadataform-extension"
+    },
+    {
       "path": "../nbformat"
     },
     {
