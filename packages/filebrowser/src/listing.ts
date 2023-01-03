@@ -812,9 +812,9 @@ export class DirListing extends Widget {
       const trans = this.translator.load('jupyterlab');
       checkAllCheckbox?.setAttribute(
         'aria-label',
-        trans.__(
-          '%1 all files and directories',
-          allSelected || someSelected ? 'Unselect' : 'Select'
+        allSelected || someSelected
+            ? trans.__('Deselect all files and directories')
+            : trans.__('Select all files and directories')
         )
       );
     }
