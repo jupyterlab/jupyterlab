@@ -290,7 +290,7 @@ export class SessionConnection implements Session.ISessionConnection {
    * @returns - The promise fulfilled on a valid response from the server.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions), and validates the response.
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/sessions), and validates the response.
    * Disposes of the session and emits a [sessionDied] signal on success.
    */
   async shutdown(): Promise<void> {
