@@ -115,7 +115,20 @@ test = [
 dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
 
 [tool.check-wheel-contents]
-ignore = ["W004"]
+select = [
+    "W001",
+    "W003",
+    "W005",
+    "W006",
+    "W007",
+    "W008",
+    "W009",
+    "W010",
+    "W101",
+    "W102",
+    "W201",
+    "W202",
+]
 
 [tool.hatch.version]
 path = "jupyterlab/_version.py"
