@@ -2149,10 +2149,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Handle the rendered state.
    */
   private async _handleRendered(): Promise<void> {
-    if (this.placeholder) {
-      return Promise.resolve();
-    }
-
     if (!this._rendered) {
       this.showEditor();
     } else {
@@ -2167,6 +2163,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Update the rendered input.
    */
   private _updateRenderedInput(): Promise<void> {
+    if (this.placeholder) {
+      return Promise.resolve();
+    }
+
     const model = this.model;
     const text =
       (model && model.sharedModel.getSource()) || DEFAULT_MARKDOWN_TEXT;

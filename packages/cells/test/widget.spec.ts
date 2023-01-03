@@ -944,6 +944,7 @@ describe('cells/widget', () => {
         Widget.attach(widget, document.body);
         widget.rendered = false;
         await signalToPromise(widget.renderedChanged);
+        await framePromise();
         expect(widget.node.classList.contains(RENDERED_CLASS)).toEqual(false);
         widget.dispose();
       });
