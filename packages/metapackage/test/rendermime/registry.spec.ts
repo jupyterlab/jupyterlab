@@ -4,11 +4,6 @@
 import { SessionContext } from '@jupyterlab/apputils';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
-import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
-import { JSONObject, UUID } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
-import json2html from 'json-to-html';
 import {
   IRenderMime,
   MimeModel,
@@ -16,7 +11,12 @@ import {
   RenderedText,
   RenderMimeRegistry,
   standardRendererFactories
-} from '../src';
+} from '@jupyterlab/rendermime';
+import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { JSONObject, UUID } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
+import json2html from 'json-to-html';
 
 class JSONRenderer extends RenderedHTML {
   mimeType = 'text/html';
@@ -57,8 +57,10 @@ describe('rendermime/registry', () => {
   let RESOLVER: IRenderMime.IResolver;
 
   beforeAll(async () => {
-    const fileContext = await Mock.createFileContext(true);
-    RESOLVER = fileContext.urlResolver;
+    RESOLVER = new RenderMimeRegistry.UrlResolver({
+      contents: ServiceManagerMock().contents,
+      path: UUID.uuid4() + '.txt'
+    });
   });
 
   beforeEach(() => {
@@ -326,7 +328,7 @@ describe('rendermime/registry', () => {
       const path = pathParent + '/pr%25 ' + UUID.uuid4();
 
       beforeAll(async () => {
-        manager = new Mock.ServiceManagerMock();
+        manager = new ServiceManagerMock();
         const drive = new Drive({ name: 'extra' });
         contents = manager.contents;
         contents.addDrive(drive);

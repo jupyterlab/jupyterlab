@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { JupyterServer, testEmission } from '@jupyterlab/testutils';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import {
   Kernel,
@@ -13,24 +13,17 @@ import {
 } from '../../src';
 import { FakeKernelManager, handleRequest, KernelTester } from '../utils';
 
-const server = new JupyterServer();
-
-jest.retryTimes(3);
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('Kernel.IKernel', () => {
   let defaultKernel: Kernel.IKernelConnection;
   let specs: KernelSpec.ISpecModels;
   let kernelManager: KernelManager;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
 
   beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
     kernelManager = new FakeKernelManager();
     specs = await KernelSpecAPI.getSpecs();
   }, 30000);
@@ -47,6 +40,7 @@ describe('Kernel.IKernel', () => {
 
   afterAll(async () => {
     await kernelManager.shutdownAll();
+    await server.shutdown();
   });
 
   describe('#disposed', () => {
@@ -384,7 +378,7 @@ describe('Kernel.IKernel', () => {
       await expect(emission).resolves.not.toThrow();
       await kernel.requestKernelInfo();
       await kernel.shutdown();
-    });
+    }, 30000);
 
     it('should get a busy status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {

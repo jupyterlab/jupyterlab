@@ -3,6 +3,7 @@
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { Contents, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
@@ -10,8 +11,8 @@ import {
   framePromise,
   sleep,
   waitForDialog
-} from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+} from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import expect from 'expect';
 import { simulate } from 'simulate-event';
 import { FileBrowserModel, FileDialog, FilterFileBrowserModel } from '../src';
@@ -22,12 +23,12 @@ describe('@jupyterlab/filebrowser', () => {
   let registry: DocumentRegistry;
 
   beforeAll(async () => {
-    const opener = new Mock.DocumentWidgetOpenerMock();
+    const opener = new DocumentWidgetOpenerMock();
 
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new Mock.ServiceManagerMock();
+    serviceManager = new ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,

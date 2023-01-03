@@ -9,7 +9,7 @@ import {
   CompletionHandler
 } from '@jupyterlab/completer';
 import { YFile } from '@jupyter/ydoc';
-import { framePromise, sleep } from '@jupyterlab/testutils';
+import { framePromise, sleep } from '@jupyterlab/testing';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';

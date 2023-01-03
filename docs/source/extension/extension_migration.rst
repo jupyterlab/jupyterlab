@@ -151,6 +151,21 @@ bumped their major version (following semver convention). We want to point out p
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 
+Testing with Jest
+^^^^^^^^^^^^^^^^^
+
+Jest has been updated to 29.2.0 (and *ts-jest* to 29.0.0). And therefore the jest configuration provided by
+``@jupyterlab/testutils`` is compatible for that version. In particular:
+
+- The unmaintained reporter ``jest-summary-reporter`` has been replaced by the new default ``github-actions`` reporter.
+- The helper ``flakyIt`` has been removed. You can use the new `jest.retryTimes <https://jestjs.io/docs/jest-object#jestretrytimesnumretries-options>`_ instead.
+
+With JupyterLab 4, we fixed circular dependencies due to the testutils package. So it is now only a facade to export
+helpers from various core packages. The exported helpers are the same as before expect for:
+
+- ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.
+- ``NBTestUtils.DEFAULT_CONTENT_45``: Removed
+
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterServer, testEmission } from '@jupyterlab/testutils';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import {
   KernelManager,
@@ -25,26 +25,20 @@ async function startNew(
   return session;
 }
 
-const server = new JupyterServer();
-
-jest.retryTimes(3);
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('session/manager', () => {
+  let server: JupyterServer;
+  jest.setTimeout(20000);
+  jest.retryTimes(3);
+
   beforeAll(async () => {
-    jest.setTimeout(20000);
-  });
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
 
   afterAll(async () => {
     const sessions = await SessionAPI.listRunning();
     await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
+    await server.shutdown();
   });
 
   describe('SessionManager', () => {

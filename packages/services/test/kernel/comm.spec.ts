@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { isFulfilled, JupyterServer } from '@jupyterlab/testutils';
+import { isFulfilled, JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Kernel, KernelManager, KernelMessage } from '../../src';
 
@@ -38,23 +38,16 @@ def target_func(comm, msg):
 get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
-const server = new JupyterServer();
-
-jest.retryTimes(3);
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('jupyter.services - Comm', () => {
+  let server: JupyterServer;
   let kernelManager: KernelManager;
   let kernel: Kernel.IKernelConnection;
 
+  jest.retryTimes(3);
+
   beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
     kernelManager = new KernelManager();
     kernel = await kernelManager.startNew({ name: 'ipython' });
   }, 30000);
@@ -68,6 +61,7 @@ describe('jupyter.services - Comm', () => {
 
   afterAll(async () => {
     await kernel.shutdown();
+    await server.shutdown();
   });
 
   describe('Kernel', () => {

@@ -11,7 +11,7 @@ import {
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { ISharedText, SourceChange, YFile } from '@jupyter/ydoc';
-import { createSessionContext } from '@jupyterlab/testutils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
   const model = new CodeEditor.Model({ sharedModel: new YFile() });

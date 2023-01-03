@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
-import { framePromise } from '@jupyterlab/testutils';
+import { framePromise } from '@jupyterlab/testing';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 

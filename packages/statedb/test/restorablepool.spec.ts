@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { RestorablePool } from '@jupyterlab/statedb';
-import { signalToPromise } from '@jupyterlab/testutils';
+import { signalToPromise } from '@jupyterlab/testing';
 import { IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 

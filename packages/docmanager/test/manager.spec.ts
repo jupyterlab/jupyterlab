@@ -8,9 +8,10 @@ import {
   IDocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManager } from '@jupyterlab/services';
-import { dismissDialog } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { dismissDialog } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { DocumentManager } from '../src';
 
@@ -71,11 +72,11 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   beforeAll(() => {
-    services = new Mock.ServiceManagerMock();
+    services = new ServiceManagerMock();
   });
 
   beforeEach(() => {
-    const opener = new Mock.DocumentWidgetOpenerMock();
+    const opener = new DocumentWidgetOpenerMock();
     const registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
     registry.addWidgetFactory(widgetFactoryShared);
