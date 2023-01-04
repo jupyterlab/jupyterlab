@@ -240,9 +240,6 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension enable -h
     jupyter labextension disable -h
 
-    # Make sure we can run JupyterLab under classic notebook
-    python -m jupyterlab.browser_check --notebook
-
     # Make sure we can add and remove a sibling package.
     # jlpm run add:sibling jupyterlab/tests/mock_packages/extension
     # jlpm run build
@@ -274,6 +271,10 @@ if [[ $GROUP == usage ]]; then
     jlpm run remove:package foo
     jlpm run integrity
 
+    # Make sure we can run JupyterLab under classic notebook
+    # It is not possible to run JupyterLab under classic notebook with Jupyter Server v2 installed.
+    pip install -U "jupyter_server<2.0.0"
+    python -m jupyterlab.browser_check --notebook
 fi
 
 
