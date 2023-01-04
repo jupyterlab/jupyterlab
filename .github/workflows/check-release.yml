@@ -20,7 +20,7 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Check Release
-        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: next
