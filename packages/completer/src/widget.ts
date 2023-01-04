@@ -906,11 +906,6 @@ export namespace Completer {
     createDocumentationNode?(
       activeItem: CompletionHandler.ICompletionItem
     ): HTMLElement;
-
-    /**
-     * The sanitizer used to sanitize untrusted html inputs.
-     */
-    readonly sanitizer: ISanitizer;
   }
 
   /**
