@@ -36,7 +36,7 @@ bumped their major version (following semver convention). We want to point out p
    * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/cells`` from 3.x to 4.x
-   * ``MarkdownCell.toggleCollapsedSignal`` renamed ``MarkdownCell.headingCollapsedChanged``
+   * ``MarkdownCell.toggleCollapsedSignal`` has been renamed to ``MarkdownCell.headingCollapsedChanged``
    * To support notebook windowing, cell widget children (e.g. the editor or the output area) are not instantiated
    when the cell is attached to the notebook. You can test for ``isPlaceholder()`` to see if the cell has been
    fully instantiated or wait for the promise ``ready`` to be resolved. Additionally an attribute ``inViewport``
