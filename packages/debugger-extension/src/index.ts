@@ -12,6 +12,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  Clipboard,
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
@@ -476,6 +477,24 @@ const variables: JupyterFrontEndPlugin<void> = {
           activate: false,
           type: 'Debugger Variables'
         });
+      }
+    });
+
+    commands.addCommand(CommandIDs.copyToClipboard, {
+      label: trans.__('Copy to Clipboard'),
+      caption: trans.__('Copy text representation of the value to clipboard'),
+      isEnabled: () => {
+        return (
+          !!service.session?.isStarted &&
+          !!service.model.variables.selectedVariable?.value
+        );
+      },
+      isVisible: () => handler.activeWidget instanceof NotebookPanel,
+      execute: async () => {
+        const value = service.model.variables.selectedVariable!.value;
+        if (value) {
+          Clipboard.copyToSystem(value);
+        }
       }
     });
   }

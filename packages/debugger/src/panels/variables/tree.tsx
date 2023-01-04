@@ -239,7 +239,8 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
   return (
     <li
       onClick={(e): Promise<void> => onVariableClicked(e)}
-      onMouseDown={() => {
+      onMouseDown={e => {
+        e.stopPropagation();
         onSelection(variable);
       }}
     >
@@ -299,6 +300,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
           service={service}
           filter={filter}
           translator={translator}
+          handleSelectVariable={onSelect}
         />
       )}
     </li>

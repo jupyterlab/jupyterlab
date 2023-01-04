@@ -121,6 +121,8 @@ export namespace Debugger {
     export const restartDebug = 'debugger:restart-debug';
 
     export const pauseOnExceptions = 'debugger:pause-on-exceptions';
+
+    export const copyToClipboard = 'debugger:copy-to-clipboard';
   }
 
   /**

@@ -30,6 +30,10 @@
       {
         "command": "debugger:render-mime-variable",
         "selector": ".jp-DebuggerVariables-body"
+      },
+      {
+        "command": "debugger:copy-to-clipboard",
+        "selector": ".jp-DebuggerVariables-body"
       }
     ]
   },
