@@ -16,7 +16,7 @@
   min-height: 24px;
   overflow: auto;
 
-  /* For absolute positioning of jp-DebuggerVariables-buttons relative to jp-DebuggerVariables-branch. */
+  /* For absolute positioning of jp-DebuggerVariables-buttons. */
   position: relative;
 }
 
@@ -80,7 +80,7 @@
 }
 
 .jp-DebuggerVariables-detail {
-  /* detail contains value for primitive types of type otherwise */
+  /* detail contains value for primitive types or name of the type otherwise */
   color: var(--jp-mirror-editor-string-color);
 }
 
