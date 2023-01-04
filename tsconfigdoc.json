@@ -3,7 +3,8 @@
   "extends": "./tsconfigbase",
   "exclude": [
     "**/test/**",
-    "**/testutils/**"
+    "**/testutils/**",
+    "packages/testing/**"
   ],
   "compilerOptions": {
     "strictNullChecks": false,
@@ -200,6 +201,12 @@
     },
     {
       "path": "./packages/mathjax2-extension"
+    },
+    {
+      "path": "./packages/metadataform"
+    },
+    {
+      "path": "./packages/metadataform-extension"
     },
     {
       "path": "./packages/nbformat"

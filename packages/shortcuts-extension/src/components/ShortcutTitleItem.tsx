@@ -3,15 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { caretDownEmptyThinIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
-
-import { classes } from 'typestyle';
-
-import {
-  CurrentHeaderStyle,
-  HeaderStyle,
-  SortButtonStyle
-} from '../componentStyle/ShortcutTitleItemStyle';
 
 export interface IShortcutTitleItemProps {
   title: string;
@@ -25,15 +18,15 @@ export class ShortcutTitleItem extends React.Component<IShortcutTitleItemProps> 
       <div
         className={
           this.props.title.toLowerCase() === this.props.active
-            ? classes(HeaderStyle, CurrentHeaderStyle)
-            : HeaderStyle
+            ? 'jp-Shortcuts-Header jp-Shortcuts-CurrentHeader'
+            : 'jp-Shortcuts-Header'
         }
         onClick={() => this.props.updateSort(this.props.title.toLowerCase())}
       >
         {this.props.title}
-        <div className={`${SortButtonStyle} jp-ShortcutTitleItem-sortButton`}>
-          ⌃
-        </div>
+        <caretDownEmptyThinIcon.react
+          className={'jp-Shortcuts-SortButton jp-ShortcutTitleItem-sortButton'}
+        />
       </div>
     );
   }

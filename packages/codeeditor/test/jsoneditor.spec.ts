@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
+import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -42,8 +41,20 @@ class LogEditor extends JSONEditor {
 describe('codeeditor', () => {
   describe('JSONEditor', () => {
     let editor: LogEditor;
-    const editorServices = new CodeMirrorEditorFactory();
-    const editorFactory = editorServices.newInlineEditor.bind(editorServices);
+    const editorFactory: CodeEditor.Factory = ({ model }) => {
+      let _hasFocus = false;
+      return {
+        dispose: jest.fn(),
+        focus: () => {
+          _hasFocus = true;
+        },
+        hasFocus: () => _hasFocus,
+        model,
+        refresh: jest.fn(),
+        setCursorPosition: jest.fn(),
+        setOption: jest.fn()
+      } as any;
+    };
 
     beforeEach(() => {
       editor = new LogEditor({ editorFactory });

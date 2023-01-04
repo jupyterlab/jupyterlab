@@ -48,6 +48,8 @@ test.describe('Export Notebook', () => {
 
     await page.click('[title="Property Inspector"]');
 
+    await page.click('.jp-PropertyInspector >> text=Common Tools');
+
     await page.selectOption(
       '.jp-PropertyInspector >> text=Slide Type >> select',
       { label: 'Slide' }

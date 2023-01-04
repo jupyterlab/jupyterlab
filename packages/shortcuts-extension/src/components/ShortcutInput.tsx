@@ -5,24 +5,10 @@
 
 import * as React from 'react';
 
-import { classes } from 'typestyle';
+import { ITranslator } from '@jupyterlab/translation';
 
 import { EN_US } from '@lumino/keyboard';
-
-import {
-  InputBoxHiddenStyle,
-  InputBoxNewStyle,
-  InputBoxStyle,
-  InputSelectedTextStyle,
-  InputStyle,
-  InputTextStyle,
-  InputUnavailableStyle,
-  InputWaitingStyle,
-  SubmitConflictStyle,
-  SubmitNonFunctionalStyle,
-  SubmitStyle
-} from '../componentStyle/ShortcutInputStyle';
-import { ITranslator } from '@jupyterlab/translation';
+import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
 
 export interface IShortcutInputProps {
   handleUpdate: Function;
@@ -424,18 +410,18 @@ export class ShortcutInput extends React.Component<
 
   render() {
     const trans = this.props.translator.load('jupyterlab');
-    let inputClassName = InputStyle;
+    let inputClassName = 'jp-Shortcuts-Input';
     if (!this.state.isAvailable) {
-      inputClassName = classes(inputClassName, InputUnavailableStyle);
+      inputClassName += ' jp-mod-unavailable-Input';
     }
     return (
       <div
         className={
           this.props.displayInput
             ? this.props.newOrReplace === 'new'
-              ? classes(InputBoxStyle, InputBoxNewStyle)
-              : InputBoxStyle
-            : InputBoxHiddenStyle
+              ? 'jp-Shortcuts-InputBox jp-Shortcuts-InputBoxNew'
+              : 'jp-Shortcuts-InputBox'
+            : 'jp-mod-hidden'
         }
         onBlur={event => this.handleBlur(event)}
       >
@@ -449,10 +435,10 @@ export class ShortcutInput extends React.Component<
           <p
             className={
               this.state.selected && this.props.newOrReplace === 'replace'
-                ? classes(InputTextStyle, InputSelectedTextStyle)
+                ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
                 : this.state.value === ''
-                ? classes(InputTextStyle, InputWaitingStyle)
-                : InputTextStyle
+                ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
+                : 'jp-Shortcuts-InputText'
             }
           >
             {this.state.value === ''
@@ -463,10 +449,10 @@ export class ShortcutInput extends React.Component<
         <button
           className={
             !this.state.isFunctional
-              ? classes(SubmitStyle, SubmitNonFunctionalStyle)
+              ? 'jp-Shortcuts-Submit jp-mod-defunc-Submit'
               : !this.state.isAvailable
-              ? classes(SubmitStyle, SubmitConflictStyle)
-              : classes(SubmitStyle)
+              ? 'jp-Shortcuts-Submit jp-mod-conflict-Submit'
+              : 'jp-Shortcuts-Submit'
           }
           id={'no-blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}
@@ -493,7 +479,9 @@ export class ShortcutInput extends React.Component<
               }
             }
           }}
-        />
+        >
+          {this.state.isAvailable ? <checkIcon.react /> : <errorIcon.react />}
+        </button>
         {!this.state.isAvailable && (
           <button
             hidden

@@ -10,17 +10,21 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import { framePromise, signalToPromise, sleep } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { Widget } from '@lumino/widgets';
-import { generate, simulate } from 'simulate-event';
 import {
   INotebookModel,
   Notebook,
   NotebookModel,
   StaticNotebook
 } from '@jupyterlab/notebook';
+import {
+  framePromise,
+  JupyterServer,
+  signalToPromise,
+  sleep
+} from '@jupyterlab/testing';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import { generate, simulate } from 'simulate-event';
 import * as utils from './utils';
 
 const server = new JupyterServer();

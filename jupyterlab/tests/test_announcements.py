@@ -25,9 +25,13 @@ async def test_NewsHandler_get_success(mock_client, labserverapp, jp_fetch):
     assert payload["news"] == [
         {
             "createdAt": 1667397600000.0,
-            "message": 'Thanks for using JupyterLab\n\nBig thanks to you, beloved JupyterLab user.  \nSee <a href="https://jupyterlab.github.io/assets/posts/2022/11/02/demo.html" target="_blank" rel="noreferrer">full post</a> for more details.',
+            "message": "Thanks for using JupyterLab\nBig thanks to you, beloved JupyterLab user.",
             "modifiedAt": 1667397600000.0,
             "type": "info",
+            "link": [
+                "Open full post",
+                "https://jupyterlab.github.io/assets/posts/2022/11/02/demo.html",
+            ],
             "options": {
                 "data": {
                     "id": "https://jupyterlab.github.io/assets/posts/2022/11/02/demo",
@@ -53,10 +57,14 @@ async def test_CheckForUpdateHandler_get_pypi_success(mock_client, labserverapp,
 
     response = await jp_fetch("lab", "api", "update", method="GET")
 
-    message = 'A newer version (1000.0.0) of JupyterLab is available.\nSee the <a href="https://github.com/jupyterlab/jupyterlab/releases/tag/v1000.0.0" target="_blank" rel="noreferrer">changelog</a> for more information.'
+    message = "A newer version (1000.0.0) of JupyterLab is available."
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload["notification"]["message"] == message
+    assert payload["notification"]["link"] == [
+        "Open changelog",
+        "https://github.com/jupyterlab/jupyterlab/releases/tag/v1000.0.0",
+    ]
     assert payload["notification"]["options"] == {
         "data": {"id": hashlib.sha1(message.encode()).hexdigest(), "tags": ["update"]}
     }

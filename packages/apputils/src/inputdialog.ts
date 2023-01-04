@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Styling } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
@@ -160,6 +159,40 @@ export namespace InputDialog {
         Dialog.okButton({ label: options.okLabel })
       ],
       focusNodeSelector: options.editable ? 'input' : 'select'
+    });
+  }
+
+  /**
+   * Constructor options for item selection input dialogs
+   */
+  export interface IMultipleItemsOptions extends IOptions {
+    /**
+     * List of choices
+     */
+    items: Array<string>;
+    /**
+     * Default choices
+     */
+    defaults?: string[];
+  }
+
+  /**
+   * Create and show a input dialog for a choice.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted
+   */
+  export function getMultipleItems(
+    options: IMultipleItemsOptions
+  ): Promise<Dialog.IResult<string[]>> {
+    return showDialog({
+      ...options,
+      body: new InputMultipleItemsDialog(options),
+      buttons: [
+        Dialog.cancelButton({ label: options.cancelLabel }),
+        Dialog.okButton({ label: options.okLabel })
+      ]
     });
   }
 
@@ -442,7 +475,7 @@ class InputItemsDialog extends InputDialogBase<string> {
     } else {
       /* Use select directly */
       this._input.remove();
-      this.node.appendChild(Styling.wrapSelect(this._list));
+      this.node.appendChild(this._list);
     }
   }
 
@@ -459,4 +492,60 @@ class InputItemsDialog extends InputDialogBase<string> {
 
   private _list: HTMLSelectElement;
   private _editable: boolean;
+}
+
+/**
+ * Widget body for input list dialog
+ */
+class InputMultipleItemsDialog extends InputDialogBase<string> {
+  /**
+   * InputMultipleItemsDialog constructor
+   *
+   * @param options Constructor options
+   */
+  constructor(options: InputDialog.IMultipleItemsOptions) {
+    super(options.label);
+
+    let defaults = options.defaults || [];
+
+    this._list = document.createElement('select');
+    this._list.setAttribute('multiple', '');
+
+    options.items.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item;
+      option.textContent = item;
+      this._list.appendChild(option);
+    });
+
+    // use the select
+    this._input.remove();
+    this.node.appendChild(this._list);
+
+    // select the current ones
+    const htmlOptions = this._list.options;
+    for (let i: number = 0; i < htmlOptions.length; i++) {
+      const option = htmlOptions[i];
+      if (defaults.includes(option.value)) {
+        option.selected = true;
+      } else {
+        option.selected = false;
+      }
+    }
+  }
+
+  /**
+   * Get the user choices
+   */
+  getValue(): string[] {
+    let result = [];
+    for (let opt of this._list.options) {
+      if (opt.selected && !opt.classList.contains('hidden')) {
+        result.push(opt.value || opt.text);
+      }
+    }
+    return result;
+  }
+
+  private _list: HTMLSelectElement;
 }

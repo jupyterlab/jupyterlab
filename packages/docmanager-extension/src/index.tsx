@@ -24,7 +24,7 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   IDocumentManager,
@@ -809,13 +809,16 @@ function addCommands(
   });
 
   const caption = () => {
-    if (PageConfig.getOption('collaborative') == 'true') {
-      return trans.__(
-        'In collaborative mode, the document is saved automatically after every change'
-      );
-    } else {
-      return trans.__('Save and create checkpoint');
+    if (shell.currentWidget) {
+      const context = docManager.contextForWidget(shell.currentWidget);
+      if (context?.model.collaborative) {
+        return trans.__(
+          'In collaborative mode, the document is saved automatically after every change'
+        );
+      }
     }
+
+    return trans.__('Save and create checkpoint');
   };
 
   const saveInProgress = new WeakSet<DocumentRegistry.Context>();

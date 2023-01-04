@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
+import { acceptDialog } from '@jupyterlab/testing';
 import { NotebookModel } from '@jupyterlab/notebook';
-import { acceptDialog } from '@jupyterlab/testutils';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {

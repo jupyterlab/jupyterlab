@@ -2,13 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
-import { NBTestUtils } from '@jupyterlab/testutils';
+import { INotebookContent } from '@jupyterlab/nbformat';
 import {
   INotebookModel,
   Notebook,
   NotebookPanel,
   NotebookWidgetFactory
-} from '..';
+} from '@jupyterlab/notebook';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
+import * as defaultContent45 from './default-45.json';
+
+export { DEFAULT_CONTENT } from '@jupyterlab/notebook/lib/testutils';
+export const DEFAULT_CONTENT_45: INotebookContent = defaultContent45;
 
 /**
  * Local versions of the NBTestUtils that import from `src` instead of `lib`.
@@ -51,8 +56,6 @@ export function populateNotebook(notebook: Notebook): void {
   NBTestUtils.populateNotebook(notebook);
 }
 
-export const DEFAULT_CONTENT = NBTestUtils.DEFAULT_CONTENT;
-export const DEFAULT_CONTENT_45 = NBTestUtils.DEFAULT_CONTENT_45;
 export const editorFactory = NBTestUtils.editorFactory;
 export const mimeTypeService = NBTestUtils.mimeTypeService;
 export const defaultEditorConfig = NBTestUtils.defaultEditorConfig;

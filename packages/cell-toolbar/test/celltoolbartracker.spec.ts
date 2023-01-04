@@ -8,9 +8,9 @@ import {
 } from '@jupyterlab/apputils';
 import { CellBarExtension, CellToolbarTracker } from '@jupyterlab/cell-toolbar';
 import { NotebookPanel } from '@jupyterlab/notebook';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IDataConnector } from '@jupyterlab/statedb';
-import { NBTestUtils } from '@jupyterlab/testutils';
 import { ITranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';

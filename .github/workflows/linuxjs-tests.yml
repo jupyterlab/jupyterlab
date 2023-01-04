@@ -37,6 +37,8 @@ jobs:
             js-logconsole,
             js-lsp,
             js-mainmenu,
+            js-metadataform,
+            js-metapackage,
             js-nbformat,
             js-notebook,
             js-observables,
@@ -46,11 +48,12 @@ jobs:
             js-settingregistry,
             js-statedb,
             js-statusbar,
+            js-testing,
             js-terminal,
             js-toc,
             js-translation,
             js-ui-components,
-            js-testutils,
+            js-vega5-extension,
           ]
       fail-fast: false
     runs-on: ubuntu-20.04

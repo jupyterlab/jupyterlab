@@ -4,7 +4,7 @@
     "packages/**/src/**/*",
     "packages/**/test/**/*",
     "packages/**/style/**/*",
-    "testutils/src/*",
+    "testutils/**/*",
     "builder/**/*",
     "buildutils/**/*",
     "tests/**/*",
@@ -20,11 +20,11 @@
     "galata/style/**/*",
     "*",
     "packages/services/examples/**/*",
+    "packages/testing/**/*",
     "packages/**/*.config.js",
     "packages/metapackage/build-doc-index.js",
     "scripts/*",
     "jupyterlab/*",
-    "jupyterlab/staging/*",
-    "testutils/**/*"
+    "jupyterlab/staging/*"
   ]
 }

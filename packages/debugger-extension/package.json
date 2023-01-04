@@ -59,6 +59,8 @@
     "@jupyterlab/translation": "^4.0.0-alpha.16"
   },
   "devDependencies": {
+    "@jupyterlab/testing": "^4.0.0-alpha.16",
+    "@types/jest": "^29.2.0",
     "@types/react-dom": "^17.0.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",

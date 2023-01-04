@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { SessionContext } from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   CodeCell,
   CodeCellModel,
@@ -9,10 +10,10 @@ import {
   RawCellModel
 } from '@jupyterlab/cells';
 import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
-import { createSessionContext, NBTestUtils } from '@jupyterlab/testutils';
+import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
+import { CodeConsole } from '@jupyterlab/console';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { CodeConsole } from '../src';
 import {
   createConsoleFactory,
   editorFactory,

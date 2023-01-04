@@ -48,6 +48,9 @@ bumped their major version (following semver convention). We want to point out p
    of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
    for JupyterLab, users need to implement the interface ``ICompletionProvider`` and then register
    this provider with ``ICompletionProviderManager`` token.
+- ``@jupyterlab/codeeditor`` from 3.x to 4.x
+   * Remove ``ISelectionStyle`` (and therefore ``defaultSelectionStyle`` and ``IEditor.selectionStyle``). This was envisaged
+     for real-time collaboration. But this is not used in the final implementation.
 - ``@jupyterlab/console`` from 3.x to 4.x
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
@@ -140,10 +143,28 @@ bumped their major version (following semver convention). We want to point out p
    need to switch to the Blueprint components as the interfaces of those components in JupyterLab
    do not match those of Blueprint JS.
    Remove ``Collapse`` React component.
+- ``jupyter.extensions.hub-extension`` from 3.x to 4.x
+   * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
+   * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
 - TypeScript 4.7 update
    As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+
+Testing with Jest
+^^^^^^^^^^^^^^^^^
+
+Jest has been updated to 29.2.0 (and *ts-jest* to 29.0.0). And therefore the jest configuration provided by
+``@jupyterlab/testutils`` is compatible for that version. In particular:
+
+- The unmaintained reporter ``jest-summary-reporter`` has been replaced by the new default ``github-actions`` reporter.
+- The helper ``flakyIt`` has been removed. You can use the new `jest.retryTimes <https://jestjs.io/docs/jest-object#jestretrytimesnumretries-options>`_ instead.
+
+With JupyterLab 4, we fixed circular dependencies due to the testutils package. So it is now only a facade to export
+helpers from various core packages. The exported helpers are the same as before expect for:
+
+- ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.
+- ``NBTestUtils.DEFAULT_CONTENT_45``: Removed
 
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -157,6 +178,60 @@ Extension Development Changes
   This might affect third-party extensions if they were relying on specific behaviors from these loaders.
 - In JupyterLab 3.x, the CSS for a _disabled_ prebuilt extensions would still be loaded on the page.
   This is no longer the case in JupyterLab 4.0.
+
+
+.. _extension_migration_3.5_3.6:
+
+JupyterLab 3.5 to 3.6
+---------------------
+
+Real-Time Collaboration
+^^^^^^^^^^^^^^^^^^^^^^^
+In JupyterLab v3.6, it is necessary to install Jupyter Server v2.0 to use real-time collaboration.
+This requirement was introduced to take advantage of the new identity API in Jupyter Server v2.0.
+
+On the other side, we also changed how JupyterLab loads documents (only in collaborative mode).
+Instead of using the content API, now the provider opens a WebSocket connection to the
+`YDocWebSocketHandler`, which is implemented in an external
+`jupyter server extension <https://github.com/jupyter-server/jupyter_server_ydoc>`__.
+
+In addition, the shared models' package was moved to an external package called `@jupyter/ydoc
+<https://github.com/jupyter-server/jupyter_ydoc>`__. All the extensions that depend on
+``@jupyterlab/shared-models`` will need to update to depend in ``@jupyter/ydoc@~0.2.2``; the API should
+be the same.
+
+**API Changes:**
+To be able to fix RTC and make it stable. It was necessary to change the API and make a few breaking changes.
+These changes should not affect the vast majority of extensions. They will only affect a couple
+of extensions focused on RTC.
+
+It was necessary to change the paradigm of how JupyterLab loads documents and replace the locking mechanism
+in the back-end. Instead of identifying the first client to open the document, it now centralizes
+the process by instantiating a YDoc client in the back-end. This client is the only one that loads
+the content of the document into memory and shares it with every other client connected.
+
+The involved packages are:
+
+- ``@jupyterlab/docprovider``:
+   * The interface ``IDocumentProvider``, now extends from ``IDisposable``.
+     Removed: ``acquireLock``, ``releaseLock``, ``setPath``, ``destroy``, ``requestInitialContent`` and ``putInitializedState``.
+     Added: ``ready`` and ``isDisposed``.
+
+   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument = ISharedDocument``.
+     And the ``ymodel`` attribute has been renamed ``model`` typed ``T`` (relaxing typing from ``YDocument`` to ``ISharedDocument``).
+
+   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+     It does not extend ``WebSocketProvider`` from ``y-websocket`` anymore.
+
+   * ``WebSocketProvider.IOptions`` has a new optional attribute, ``user``.
+
+- ``@jupyterlab/services``:
+   * The interface ``IManager`` has a new optional property, ``user`` that implement `User.IManager <../api/interfaces/services.User.IManager.html>`_.
+
+   * The ``ServiceManager`` class implements the optional property ``user`` from the ``IManager``.
+
+
+.. _extension_migration_3.0_3.1:
 
 JupyterLab 3.0 to 3.1
 ---------------------

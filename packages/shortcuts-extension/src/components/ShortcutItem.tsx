@@ -6,33 +6,12 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
-import { classes } from 'typestyle';
-import {
-  CellStyle,
-  CommaStyle,
-  ConflictContainerStyle,
-  EmptyShortcutCellStyle,
-  ErrorButtonStyle,
-  ErrorMessageStyle,
-  OrStyle,
-  OrTwoStyle,
-  PlusStyle,
-  ResetStyle,
-  RowStyle,
-  ShortcutCellStyle,
-  ShortcutContainerStyle,
-  ShortcutKeysContainerStyle,
-  ShortcutKeysStyle,
-  SingleShortcutCellStyle,
-  SourceCellStyle
-} from '../componentStyle/ShortcutItemStyle';
 import {
   ErrorObject,
   ShortcutInput,
   ShortcutObject,
   TakenByObject
 } from './ShortcutInput';
-import { UISize } from './ShortcutUI';
 import { IShortcutUIexternal } from './TopNav';
 
 /** Props for ShortcutItem component */
@@ -45,7 +24,6 @@ export interface IShortcutItemProps {
   keyBindingsUsed: { [index: string]: TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
-  errorSize: UISize;
   contextMenu: Function;
   external: IShortcutUIexternal;
 }
@@ -232,21 +210,17 @@ export class ShortcutItem extends React.Component<
 
   getErrorRow(): JSX.Element {
     const trans = this.props.external.translator.load('jupyterlab');
+
     return (
-      <div className={classes(RowStyle)}>
-        <div
-          className={ConflictContainerStyle(
-            this.props.showSelectors,
-            this.props.errorSize
-          )}
-        >
-          <div className={ErrorMessageStyle}>
+      <div className="jp-Shortcuts-Row">
+        <div className="jp-Shortcuts-ConflictContainer">
+          <div className="jp-Shortcuts-ErrorMessage">
             {trans.__(
               'Shortcut already in use by %1. Overwrite it?',
               (this.props.shortcut as ErrorObject).takenBy.takenByLabel
             )}
           </div>
-          <div className={ErrorButtonStyle}>
+          <div className="jp-Shortcuts-ErrorButton">
             <button>{trans.__('Cancel')}</button>
             <button
               id="no-blur"
@@ -263,12 +237,14 @@ export class ShortcutItem extends React.Component<
   }
 
   getCategoryCell(): JSX.Element {
-    return <div className={CellStyle}>{this.props.shortcut.category}</div>;
+    return (
+      <div className="jp-Shortcuts-Cell">{this.props.shortcut.category}</div>
+    );
   }
 
   getLabelCell(): JSX.Element {
     return (
-      <div className={CellStyle}>
+      <div className="jp-Shortcuts-Cell">
         <div className="jp-label">{this.props.shortcut.label}</div>
       </div>
     );
@@ -278,7 +254,7 @@ export class ShortcutItem extends React.Component<
     const trans = this.props.external.translator.load('jupyterlab');
     return (
       <a
-        className={ResetStyle}
+        className="jp-Shortcuts-Reset"
         onClick={() => this.props.resetShortcut(this.props.shortcut)}
       >
         {trans.__('Reset')}
@@ -288,29 +264,34 @@ export class ShortcutItem extends React.Component<
 
   getSourceCell(): JSX.Element {
     return (
-      <div className={CellStyle}>
-        <div className={SourceCellStyle}>{this.props.shortcut.source}</div>
+      <div className="jp-Shortcuts-Cell">
+        <div className="jp-Shortcuts-SourceCell">
+          {this.props.shortcut.source}
+        </div>
         {this.props.shortcut.source === 'Custom' && this.getResetShortCutLink()}
       </div>
     );
   }
 
-  getOptionalSelectorCell(): JSX.Element {
+  getOptionalSelectorCell(): JSX.Element | null {
     return this.props.showSelectors ? (
-      <div className={CellStyle}>
+      <div className="jp-Shortcuts-Cell">
         <div className="jp-selector">{this.props.shortcut.selector}</div>
       </div>
-    ) : (
-      <div />
-    );
+    ) : null;
   }
 
   getClassNameForShortCuts(nonEmptyKeys: string[]): string {
-    return nonEmptyKeys.length === 0
-      ? classes(ShortcutCellStyle, EmptyShortcutCellStyle)
-      : nonEmptyKeys.length === 1
-      ? classes(ShortcutCellStyle, SingleShortcutCellStyle)
-      : ShortcutCellStyle;
+    const classes = ['jp-Shortcuts-ShortcutCell'];
+    switch (nonEmptyKeys.length) {
+      case 1:
+        classes.push('jp-Shortcuts-SingleCell');
+        break;
+      case 0:
+        classes.push('jp-Shortcuts-EmptyCell');
+        break;
+    }
+    return classes.join(' ');
   }
 
   getToggleInputReplaceMethod(location: ShortCutLocation): () => void {
@@ -337,8 +318,8 @@ export class ShortcutItem extends React.Component<
       <div
         className={
           nonEmptyKeys.length == 2 || this.state.displayNewInput
-            ? OrTwoStyle
-            : OrStyle
+            ? 'jp-Shortcuts-OrTwo'
+            : 'jp-Shortcuts-Or'
         }
         id={
           nonEmptyKeys.length == 2
@@ -376,12 +357,12 @@ export class ShortcutItem extends React.Component<
   getShortCutForDisplayOnly(key: string): JSX.Element[] {
     return this.props.shortcut.keys[key].map(
       (keyBinding: string, index: number) => (
-        <div className={ShortcutKeysContainerStyle} key={index}>
-          <div className={ShortcutKeysStyle} id={'shortcut-keys'}>
+        <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
+          <div className="jp-Shortcuts-ShortcutKeys">
             {this.toSymbols(keyBinding)}
           </div>
           {index + 1 < this.props.shortcut.keys[key].length ? (
-            <div className={CommaStyle}>,</div>
+            <div className="jp-Shortcuts-Comma">,</div>
           ) : null}
         </div>
       )
@@ -409,7 +390,7 @@ export class ShortcutItem extends React.Component<
     const location = this.getLocationFromIndex(index);
     return (
       <div
-        className={ShortcutContainerStyle}
+        className="jp-Shortcuts-ShortcutContainer"
         key={this.props.shortcut.id + '_' + index}
         onClick={this.getToggleInputReplaceMethod(location)}
       >
@@ -426,7 +407,7 @@ export class ShortcutItem extends React.Component<
     const trans = this.props.external.translator.load('jupyterlab');
     return (
       <a
-        className={!this.state.displayNewInput ? PlusStyle : ''}
+        className={!this.state.displayNewInput ? 'jp-Shortcuts-Plus' : ''}
         onClick={() => {
           this.toggleInputNew(), this.props.clearConflicts();
         }}
@@ -461,7 +442,7 @@ export class ShortcutItem extends React.Component<
 
   getShortCutsCell(nonEmptyKeys: string[]): JSX.Element {
     return (
-      <div className={CellStyle}>
+      <div className="jp-Shortcuts-Cell">
         <div className={this.getClassNameForShortCuts(nonEmptyKeys)}>
           {nonEmptyKeys.map((key, index) =>
             this.getDivForKey(index, key, nonEmptyKeys)
@@ -488,7 +469,7 @@ export class ShortcutItem extends React.Component<
     } else {
       return (
         <div
-          className={RowStyle}
+          className="jp-Shortcuts-Row"
           onContextMenu={e => {
             e.persist();
             this.handleRightClick(e);

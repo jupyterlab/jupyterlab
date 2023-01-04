@@ -2,13 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
-  clickedItem,
-  interactiveItem,
-  Popup,
-  showPopup,
-  TextItem
-} from '@jupyterlab/statusbar';
+import { Popup, showPopup, TextItem } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Menu } from '@lumino/widgets';
@@ -76,7 +70,7 @@ export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
     super(new TabSpaceStatus.Model());
     this._menu = options.menu;
     this.translator = options.translator || nullTranslator;
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
   }
 
   /**
@@ -116,7 +110,7 @@ export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
   }
 
   private _menuClosed(): void {
-    this.removeClass(clickedItem);
+    this.removeClass('jp-mod-clicked');
   }
 
   protected translator: ITranslator;
