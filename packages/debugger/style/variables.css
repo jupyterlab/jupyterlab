@@ -37,7 +37,7 @@
 }
 
 .jp-DebuggerVariables-branch li {
-  padding: 2.5px 0;
+  padding: 3px 0;
   cursor: pointer;
   color: var(--jp-content-font-color1);
   display: grid;
