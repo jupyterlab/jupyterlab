@@ -3,11 +3,9 @@
 
 import { Session } from '@jupyterlab/services';
 
-import {
-  createSession,
-  JupyterServer,
-  signalToPromises
-} from '@jupyterlab/testutils';
+import { createSession } from '@jupyterlab/docregistry/lib/testutils';
+
+import { JupyterServer, signalToPromises } from '@jupyterlab/testing';
 
 import { find } from '@lumino/algorithm';
 

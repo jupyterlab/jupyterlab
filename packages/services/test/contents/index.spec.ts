@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
+import { expectFailure, JupyterServer } from '@jupyterlab/testing';
 import { Contents, ContentsManager, Drive, ServerConnection } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 

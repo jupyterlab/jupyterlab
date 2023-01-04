@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { dismissDialog } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { createSimpleSessionContext } from '@jupyterlab/docregistry/lib/testutils';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
+import { dismissDialog } from '@jupyterlab/testing';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { CodeConsole, ConsolePanel } from '../src';
 import {
   createConsolePanelFactory,
   editorFactory,
@@ -31,7 +32,7 @@ const contentFactory = createConsolePanelFactory();
 
 describe('console/panel', () => {
   let panel: TestPanel;
-  const manager = new Mock.ServiceManagerMock();
+  const manager = new ServiceManagerMock();
 
   beforeAll(async () => {
     return await manager.ready;
@@ -43,7 +44,7 @@ describe('console/panel', () => {
       contentFactory,
       rendermime,
       mimeTypeService,
-      sessionContext: Mock.createSimpleSessionContext()
+      sessionContext: createSimpleSessionContext()
     });
   });
 

@@ -3,8 +3,8 @@
 
 const fetch = require('node-fetch');
 
-import { JupyterServer } from '../src';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { JupyterServer } from '@jupyterlab/testing';
 
 describe('JupyterServer', () => {
   it('should start the server', async () => {

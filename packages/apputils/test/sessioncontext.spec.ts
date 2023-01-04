@@ -18,22 +18,23 @@ import {
   dismissDialog,
   JupyterServer,
   testEmission
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
-jest.retryTimes(3);
-
 describe('@jupyterlab/apputils', () => {
+  let server: JupyterServer;
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
+  });
+
+  jest.retryTimes(3);
+
   describe('SessionContext', () => {
     let kernelManager: KernelManager;
     let sessionManager: SessionManager;

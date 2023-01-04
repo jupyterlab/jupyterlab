@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "jupyterlab"
 description = "JupyterLab computational environment"
 readme = "README.md"
-license = ""
+license = { file = "LICENSE" }
 requires-python = ">=3.7"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
@@ -113,6 +113,9 @@ test = [
     "virtualenv",
 ]
 dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
+
+[tool.check-wheel-contents]
+ignore = ["W002", "W004"]
 
 [tool.hatch.version]
 path = "jupyterlab/_version.py"
@@ -225,6 +228,3 @@ before-build-python = [
     "node buildutils/lib/local-repository fix-links --path jupyterlab/staging",
 ]
 after-publish-assets = "npm run after:publish:assets"
-
-[license]
-file = "LICENSE"

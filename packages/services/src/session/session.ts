@@ -367,7 +367,7 @@ export interface IManager extends IDisposable {
  * The session model returned by the server.
  *
  * #### Notes
- * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions).
+ * See the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/sessions).
  */
 export interface IModel {
   /**
@@ -388,7 +388,7 @@ export interface IModel {
  * parameter is not technically required, but is often assumed to be nonempty,
  * so we require it too.
  *
- * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions).
+ * See the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/sessions).
  */
 export type ISessionOptions = Pick<IModel, 'path' | 'type' | 'name'> & {
   kernel?: Partial<Pick<Kernel.IModel, 'name'>>;

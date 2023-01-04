@@ -3,11 +3,9 @@
 
 import { KernelSpec, KernelSpecManager, Session } from '@jupyterlab/services';
 
-import {
-  createSession,
-  JupyterServer,
-  signalToPromise
-} from '@jupyterlab/testutils';
+import { createSession } from '@jupyterlab/docregistry/lib/testutils';
+
+import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 
 import { JSONExt, UUID } from '@lumino/coreutils';
 

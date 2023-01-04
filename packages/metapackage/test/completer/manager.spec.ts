@@ -18,8 +18,8 @@ import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { createStandaloneCell } from '@jupyter/ydoc';
 
-import { createSessionContext } from '@jupyterlab/testutils';
-import { NBTestUtils } from '@jupyterlab/testutils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 
 const DEFAULT_PROVIDER_ID = 'CompletionProvider:context';
 const SAMPLE_PROVIDER_ID = 'CompletionProvider:sample';

@@ -27,13 +27,7 @@
       "path": "."
     },
     {
-      "path": "../markedparser-extension"
-    },
-    {
-      "path": "../mathjax2"
-    },
-    {
-      "path": "../../testutils"
+      "path": "../testing"
     }
   ]
 }

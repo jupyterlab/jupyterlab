@@ -81,7 +81,8 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       sessionContext: sessionContext,
       mimeTypeService,
       contentFactory,
-      modelFactory
+      modelFactory,
+      translator
     });
     this.content.addWidget(this.console);
 

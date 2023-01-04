@@ -1,29 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
 import { Kernel, KernelAPI, KernelManager, KernelMessage } from '../../src';
 import { KernelTester } from '../utils';
 
-const server = new JupyterServer();
-
-jest.retryTimes(3);
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('Kernel.IShellFuture', () => {
+  let server: JupyterServer;
   let tester: KernelTester;
   let kernelManager: KernelManager;
 
-  beforeAll(() => {
+  jest.retryTimes(3);
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
     kernelManager = new KernelManager();
-  });
+  }, 30000);
 
   afterEach(() => {
     if (tester) {
@@ -34,6 +27,7 @@ describe('Kernel.IShellFuture', () => {
   afterAll(async () => {
     const models = await KernelAPI.listRunning();
     await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
+    await server.shutdown();
   });
 
   it('should have a msg attribute', async () => {

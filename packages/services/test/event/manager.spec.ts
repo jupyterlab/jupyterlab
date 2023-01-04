@@ -1,21 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { EventManager, ServerConnection } from '../../src';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('setting', () => {
+  let server: JupyterServer;
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
+  });
+
   describe('EventManager', () => {
     let manager: EventManager;
 
@@ -93,15 +94,17 @@ describe('setting', () => {
           expect(received).toEqual(expected);
           delegate.resolve();
         });
-        void manager.emit({
-          // eslint-disable-next-line camelcase
-          schema_id:
-            'https://events.jupyter.org/jupyter_server/contents_service/v1',
-          data: { action: 'get', path: expected },
-          version: '1'
-        });
+        setTimeout(() => {
+          void manager.emit({
+            // eslint-disable-next-line camelcase
+            schema_id:
+              'https://events.jupyter.org/jupyter_server/contents_service/v1',
+            data: { action: 'get', path: expected },
+            version: '1'
+          });
+        }, 500);
         return delegate.promise;
-      }, 20000);
+      });
     });
 
     describe('#emit()', () => {

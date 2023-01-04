@@ -1,0 +1,303 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/**/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../application-extension"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../apputils-extension"
+    },
+    {
+      "path": "../attachments"
+    },
+    {
+      "path": "../cell-toolbar"
+    },
+    {
+      "path": "../cell-toolbar-extension"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../celltags"
+    },
+    {
+      "path": "../celltags-extension"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../codemirror-extension"
+    },
+    {
+      "path": "../collaboration"
+    },
+    {
+      "path": "../collaboration-extension"
+    },
+    {
+      "path": "../completer"
+    },
+    {
+      "path": "../completer-extension"
+    },
+    {
+      "path": "../console"
+    },
+    {
+      "path": "../console-extension"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../csvviewer"
+    },
+    {
+      "path": "../csvviewer-extension"
+    },
+    {
+      "path": "../debugger"
+    },
+    {
+      "path": "../debugger-extension"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../docmanager-extension"
+    },
+    {
+      "path": "../docprovider"
+    },
+    {
+      "path": "../docprovider-extension"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../documentsearch"
+    },
+    {
+      "path": "../documentsearch-extension"
+    },
+    {
+      "path": "../extensionmanager"
+    },
+    {
+      "path": "../extensionmanager-extension"
+    },
+    {
+      "path": "../filebrowser"
+    },
+    {
+      "path": "../filebrowser-extension"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../fileeditor-extension"
+    },
+    {
+      "path": "../help-extension"
+    },
+    {
+      "path": "../htmlviewer"
+    },
+    {
+      "path": "../htmlviewer-extension"
+    },
+    {
+      "path": "../hub-extension"
+    },
+    {
+      "path": "../imageviewer"
+    },
+    {
+      "path": "../imageviewer-extension"
+    },
+    {
+      "path": "../inspector"
+    },
+    {
+      "path": "../inspector-extension"
+    },
+    {
+      "path": "../javascript-extension"
+    },
+    {
+      "path": "../json-extension"
+    },
+    {
+      "path": "../launcher"
+    },
+    {
+      "path": "../launcher-extension"
+    },
+    {
+      "path": "../logconsole"
+    },
+    {
+      "path": "../logconsole-extension"
+    },
+    {
+      "path": "../lsp"
+    },
+    {
+      "path": "../lsp-extension"
+    },
+    {
+      "path": "../mainmenu"
+    },
+    {
+      "path": "../mainmenu-extension"
+    },
+    {
+      "path": "../markdownviewer"
+    },
+    {
+      "path": "../markdownviewer-extension"
+    },
+    {
+      "path": "../markedparser-extension"
+    },
+    {
+      "path": "../mathjax2"
+    },
+    {
+      "path": "../mathjax2-extension"
+    },
+    {
+      "path": "../metadataform"
+    },
+    {
+      "path": "../metadataform-extension"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../notebook-extension"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../outputarea"
+    },
+    {
+      "path": "../pdf-extension"
+    },
+    {
+      "path": "../property-inspector"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../rendermime-extension"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../running"
+    },
+    {
+      "path": "../running-extension"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../settingeditor"
+    },
+    {
+      "path": "../settingeditor-extension"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../shortcuts-extension"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "../statusbar"
+    },
+    {
+      "path": "../statusbar-extension"
+    },
+    {
+      "path": "../terminal"
+    },
+    {
+      "path": "../terminal-extension"
+    },
+    {
+      "path": "../theme-dark-extension"
+    },
+    {
+      "path": "../theme-light-extension"
+    },
+    {
+      "path": "../toc"
+    },
+    {
+      "path": "../toc-extension"
+    },
+    {
+      "path": "../tooltip"
+    },
+    {
+      "path": "../tooltip-extension"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../translation-extension"
+    },
+    {
+      "path": "../ui-components"
+    },
+    {
+      "path": "../ui-components-extension"
+    },
+    {
+      "path": "../vdom"
+    },
+    {
+      "path": "../vdom-extension"
+    },
+    {
+      "path": "../vega5-extension"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../testing"
+    }
+  ]
+}

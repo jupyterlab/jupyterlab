@@ -9,7 +9,7 @@ import {
   framePromise,
   signalToPromise,
   sleep
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -18,7 +18,7 @@ import {
   NotebookActions,
   NotebookPanel,
   ToolbarItems
-} from '..';
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';

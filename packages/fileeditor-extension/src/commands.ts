@@ -361,11 +361,7 @@ export namespace Commands {
     commands.addCommand(CommandIDs.changeTabs, {
       label: args => {
         if (args.insertSpaces) {
-          return trans._n(
-            'Spaces: %1',
-            'Spaces: %1',
-            (args.size as number) ?? 0
-          );
+          return trans.__('Spaces: %1', (args.size as number) ?? 0);
         } else {
           return trans.__('Indent with Tab');
         }
@@ -434,7 +430,7 @@ export namespace Commands {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
       },
-      label: trans.__('Auto Close Brackets for Text Editor'),
+      label: trans.__('Auto Close Brackets in Text Editor'),
       isToggled: () => config.autoClosingBrackets
     });
 
