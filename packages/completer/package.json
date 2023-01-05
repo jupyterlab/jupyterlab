@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer",
-  "version": "4.0.0-alpha.16",
+  "version": "4.0.0-alpha.17",
   "description": "JupyterLab - Completer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -45,13 +45,13 @@
   },
   "dependencies": {
     "@jupyter/ydoc": "~0.2.2",
-    "@jupyterlab/apputils": "^4.0.0-alpha.16",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.16",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.16",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.16",
-    "@jupyterlab/services": "^7.0.0-alpha.16",
-    "@jupyterlab/statedb": "^4.0.0-alpha.16",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.31",
+    "@jupyterlab/apputils": "^4.0.0-alpha.17",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.17",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.17",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.17",
+    "@jupyterlab/services": "^7.0.0-alpha.17",
+    "@jupyterlab/statedb": "^4.0.0-alpha.17",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.32",
     "@lumino/algorithm": "^2.0.0-alpha.6",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/disposable": "^2.0.0-alpha.6",
@@ -61,7 +61,7 @@
     "@lumino/widgets": "^2.0.0-alpha.6"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.16",
+    "@jupyterlab/testing": "^4.0.0-alpha.17",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",

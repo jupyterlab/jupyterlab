@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codeeditor",
-  "version": "4.0.0-alpha.16",
+  "version": "4.0.0-alpha.17",
   "description": "JupyterLab - Abstract Code Editor",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,12 +42,12 @@
   },
   "dependencies": {
     "@jupyter/ydoc": "~0.2.2",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.16",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.16",
-    "@jupyterlab/observables": "^5.0.0-alpha.16",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.16",
-    "@jupyterlab/translation": "^4.0.0-alpha.16",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.31",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.17",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.17",
+    "@jupyterlab/observables": "^5.0.0-alpha.17",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.17",
+    "@jupyterlab/translation": "^4.0.0-alpha.17",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.32",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/dragdrop": "^2.0.0-alpha.6",
@@ -57,7 +57,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.16",
+    "@jupyterlab/testing": "^4.0.0-alpha.17",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
