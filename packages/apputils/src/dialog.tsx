@@ -884,25 +884,37 @@ export namespace Dialog {
      * @returns A widget for the body.
      */
     createBody(value: Body<any>): Widget {
+      const styleReactWidget = (widget: ReactWidget) => {
+        if (widget.renderPromise !== undefined) {
+          widget.renderPromise
+            .then(() => {
+              Styling.styleNode(widget.node);
+            })
+            .catch(() => {
+              console.error("Error while loading Dialog's body");
+            });
+        } else {
+          Styling.styleNode(widget.node);
+        }
+      };
+
       let body: Widget;
       if (typeof value === 'string') {
         body = new Widget({ node: document.createElement('span') });
         body.node.textContent = value;
       } else if (value instanceof Widget) {
         body = value;
-        Styling.styleNode(body.node);
+        if (body instanceof ReactWidget) {
+          styleReactWidget(body);
+        } else {
+          Styling.styleNode(body.node);
+        }
       } else {
         body = ReactWidget.create(value);
         // Immediately update the body even though it has not yet attached in
         // order to trigger a render of the DOM nodes from the React element.
         MessageLoop.sendMessage(body, Widget.Msg.UpdateRequest);
-        (body as ReactWidget).renderPromise
-          ?.then(() => {
-            Styling.styleNode(body.node);
-          })
-          .catch(() => {
-            console.error("Error while loading Dialog's body");
-          });
+        styleReactWidget(body as ReactWidget);
       }
       body.addClass('jp-Dialog-body');
       return body;
