@@ -280,8 +280,11 @@ export class Dialog<T> extends Widget {
       this._ready.resolve();
     };
 
-    if (this._bodyWidget instanceof ReactWidget) {
-      (this._bodyWidget as ReactWidget).renderPromise?.then(() => {
+    if (
+      this._bodyWidget instanceof ReactWidget &&
+      (this._bodyWidget as ReactWidget).renderPromise !== undefined
+    ) {
+      (this._bodyWidget as ReactWidget).renderPromise!.then(() => {
         setFocus();
       });
     } else {
