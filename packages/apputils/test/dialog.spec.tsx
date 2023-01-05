@@ -22,8 +22,8 @@ class TestDialog extends Dialog<any> {
     this.events.push(event.type);
   }
 
-  protected async onAfterAttach(msg: Message): Promise<void> {
-    await super.onAfterAttach(msg);
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
     this.methods.push('onAfterAttach');
   }
 

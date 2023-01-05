@@ -142,7 +142,7 @@ export class Dialog<T> extends Widget {
   }
 
   /**
-   * A promise that resolves when the Dialog is ready.
+   * A promise that resolves when the Dialog first rendering is done.
    */
   get ready(): Promise<void> {
     return this._ready.promise;
@@ -257,7 +257,7 @@ export class Dialog<T> extends Widget {
   /**
    *  A message handler invoked on an `'after-attach'` message.
    */
-  protected async onAfterAttach(msg: Message): Promise<void> {
+  protected onAfterAttach(msg: Message): void {
     const node = this.node;
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
@@ -266,18 +266,27 @@ export class Dialog<T> extends Widget {
     document.addEventListener('focus', this, true);
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
-    if (this._focusNodeSelector) {
-      if (this._bodyWidget instanceof ReactWidget) {
-        await (this._bodyWidget as ReactWidget).renderPromise;
+
+    const setFocus = () => {
+      if (this._focusNodeSelector) {
+        const body = this.node.querySelector('.jp-Dialog-body');
+        const el = body?.querySelector(this._focusNodeSelector);
+
+        if (el) {
+          this._primary = el as HTMLElement;
+        }
       }
-      const body = this.node.querySelector('.jp-Dialog-body');
-      const el = body?.querySelector(this._focusNodeSelector);
-      if (el) {
-        this._primary = el as HTMLElement;
-      }
+      this._primary?.focus();
+      this._ready.resolve();
+    };
+
+    if (this._bodyWidget instanceof ReactWidget) {
+      (this._bodyWidget as ReactWidget).renderPromise?.then(() => {
+        setFocus();
+      });
+    } else {
+      setFocus();
     }
-    this._primary?.focus();
-    this._ready.resolve();
   }
 
   /**
