@@ -284,9 +284,13 @@ export class Dialog<T> extends Widget {
       this._bodyWidget instanceof ReactWidget &&
       (this._bodyWidget as ReactWidget).renderPromise !== undefined
     ) {
-      (this._bodyWidget as ReactWidget).renderPromise!.then(() => {
-        setFocus();
-      });
+      (this._bodyWidget as ReactWidget)
+        .renderPromise!.then(() => {
+          setFocus();
+        })
+        .catch(() => {
+          console.error("Error while loading Dialog's body");
+        });
     } else {
       setFocus();
     }
