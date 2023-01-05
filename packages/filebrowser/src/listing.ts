@@ -2260,11 +2260,11 @@ export namespace DirListing {
         let ariaLabel: string;
         if (fileType.contentType === 'directory') {
           ariaLabel = selected
-            ? trans.__('Unselect directory "%1"', highlightedName)
+            ? trans.__('Deselect directory "%1"', highlightedName)
             : trans.__('Select directory "%1"', highlightedName);
         } else {
           ariaLabel = selected
-            ? trans.__('Unselect file "%1"', highlightedName)
+            ? trans.__('Deselect file "%1"', highlightedName)
             : trans.__('Select file "%1"', highlightedName);
         }
         checkbox.setAttribute('aria-label', ariaLabel);
