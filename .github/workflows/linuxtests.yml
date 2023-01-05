@@ -61,7 +61,7 @@ jobs:
           - group: splice_source
             python-version: '3.7'
       fail-fast: false
-    timeout-minutes: 45
+    timeout-minutes: 60
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout

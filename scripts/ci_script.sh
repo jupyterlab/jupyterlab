@@ -274,6 +274,7 @@ if [[ $GROUP == usage ]]; then
     # Make sure we can run JupyterLab under classic notebook
     # It is not possible to run JupyterLab under classic notebook with Jupyter Server v2 installed.
     pip install -U "jupyter_server<2.0.0"
+    python -m jupyterlab.browser_check
     python -m jupyterlab.browser_check --notebook
 fi
 
