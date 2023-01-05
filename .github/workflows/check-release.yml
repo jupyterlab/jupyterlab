@@ -19,13 +19,8 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - shell: bash
-        run: |
-          # Install releaser prior to action - otherwise it uses an unwanted version
-          pip install -q git+https://github.com/jupyter-server/jupyter_releaser.git@v1.0.1
-
       - name: Check Release
-        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1.0.1
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: next
