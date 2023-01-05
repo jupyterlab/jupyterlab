@@ -183,7 +183,7 @@ const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
       const target = data.target;
       if (
         target &&
-        // Note: Element, not SVGElement to permit entering <svg> icon.
+        // Note: Element, not HTMLElement to permit entering <svg> icon.
         target instanceof Element &&
         target.closest(`.${BUTTONS_CLASS}`)
       ) {
@@ -192,10 +192,7 @@ const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
       }
       setVariable(null);
     } else {
-      // Handle mouse over
-      if (data.variable === null) {
-        console.log('target', data.target);
-      }
+      // Handle mouse over.
       setVariable(data.variable);
       requestAnimationFrame(() => {
         if (current !== stateRefreshLock || !data.target) {
