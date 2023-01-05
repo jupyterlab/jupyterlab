@@ -703,7 +703,7 @@ export function ToolbarButtonComponent(
  * Adds the toolbar button class to the toolbar widget.
  * @param w Toolbar button widget.
  */
-export function addToolbarButtonClass(w: ReactWidget): ReactWidget {
+export function addToolbarButtonClass<T extends Widget = Widget>(w: T): T {
   w.addClass('jp-ToolbarButton');
   return w;
 }

@@ -77,7 +77,7 @@ export namespace ToolbarItems {
       });
     }
 
-    return addToolbarButtonClass(
+    return addToolbarButtonClass<ReactWidget>(
       ReactWidget.create(
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
