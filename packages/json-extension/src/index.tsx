@@ -62,7 +62,7 @@ export class RenderedJSON
           data={data}
           metadata={metadata}
           translator={this.translator}
-          callback={() => resolve()}
+          forwardedRef={() => resolve()}
         />
       );
     });
