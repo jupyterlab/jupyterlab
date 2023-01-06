@@ -122,16 +122,20 @@ export class CellToolbarTracker implements IDisposable {
       }
 
       // Wait for all the buttons to be rendered before attaching the toolbar.
-      Promise.all(promises).then(() => {
-        toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
-        (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
+      Promise.all(promises)
+        .then(() => {
+          toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
+          (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
 
-        // For rendered markdown, watch for resize events.
-        cell.displayChanged.connect(this._resizeEventCallback, this);
+          // For rendered markdown, watch for resize events.
+          cell.displayChanged.connect(this._resizeEventCallback, this);
 
-        // Watch for changes in the cell's contents.
-        cell.model.contentChanged.connect(this._changedEventCallback, this);
-      });
+          // Watch for changes in the cell's contents.
+          cell.model.contentChanged.connect(this._changedEventCallback, this);
+        })
+        .catch(() => {
+          console.error('Error rendering buttons of the cell toolbar');
+        });
     }
   }
 
