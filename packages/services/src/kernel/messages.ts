@@ -12,6 +12,7 @@ export interface IOptions<T extends Message> {
   buffers?: (ArrayBuffer | ArrayBufferView)[];
   metadata?: JSONObject;
   msgId?: string;
+  shellId?: string | null;
   username?: string;
   parentHeader?: T['parent_header'];
 }
@@ -100,6 +101,20 @@ export function createMessage<T extends IUpdateDisplayDataMsg>(
 
 /**
  * @hidden
+ */
+export function createMessage<T extends ICreateSubshellRequestMsg>(
+  options: IOptions<T>
+): T;
+
+/**
+ * @hidden
+ */
+export function createMessage<T extends ICreateSubshellReplyMsg>(
+  options: IOptions<T>
+): T;
+
+/**
+ * @hidden
  * #### Notes
  * Debug messages are experimental messages that are not in the official
  * kernel message specification. As such, this function is *NOT* considered
@@ -139,6 +154,7 @@ export function createMessage<T extends Message>(options: IOptions<T>): T {
     header: {
       date: new Date().toISOString(),
       msg_id: options.msgId ?? UUID.uuid4(),
+      shell_id: options.shellId ?? null,
       msg_type: options.msgType,
       session: options.session,
       username: options.username ?? '',
@@ -183,7 +199,7 @@ export type ShellMessageType =
  * kernel message specification. As such, debug message types are *NOT*
  * considered part of the public API, and may change without notice.
  */
-export type ControlMessageType = 'debug_request' | 'debug_reply';
+export type ControlMessageType = 'debug_request' | 'debug_reply' | 'create_subshell_request' | 'create_subshell_reply';
 
 /**
  * IOPub message types.
@@ -244,6 +260,11 @@ export interface IHeader<T extends MessageType = MessageType> {
    * Message id, typically UUID, must be unique per message
    */
   msg_id: string;
+
+  /**
+   * Shell id, typically UUID, identifying a sub-shell if not in main shell
+   */
+  shell_id?: string;
 
   /**
    * Message type
@@ -385,7 +406,9 @@ export type Message =
   | IUpdateDisplayDataMsg
   | IDebugRequestMsg
   | IDebugReplyMsg
-  | IDebugEventMsg;
+  | IDebugEventMsg
+  | ICreateSubshellRequestMsg
+  | ICreateSubshellReplyMsg;
 
 // ////////////////////////////////////////////////
 // IOPub Messages
@@ -1132,6 +1155,16 @@ export interface ICommInfoReplyMsg extends IShellMessage<'comm_info_reply'> {
 // ///////////////////////////////////////////////
 
 /**
+ * An experimental `'create_subshell_request'` message on the `'control'` channel.
+ *
+ * @hidden
+ */
+export interface ICreateSubshellRequestMsg extends IControlMessage<'create_subshell_request'> {
+  content: {
+  }
+}
+
+/**
  * An experimental `'debug_request'` message on the `'control'` channel.
  *
  * @hidden
@@ -1162,6 +1195,17 @@ export interface IDebugRequestMsg extends IControlMessage<'debug_request'> {
  */
 export function isDebugRequestMsg(msg: IMessage): msg is IDebugRequestMsg {
   return msg.header.msg_type === 'debug_request';
+}
+
+/**
+ * An experimental `'create_subshell_reply'` message on the `'control'` channel.
+ *
+ * @hidden
+ */
+export interface ICreateSubshellReplyMsg extends IControlMessage<'create_subshell_reply'> {
+  content: {
+    shell_id: string;
+  };
 }
 
 /**

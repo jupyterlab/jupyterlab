@@ -1430,6 +1430,12 @@
     "shortcuts": []
   },
   {
+    "id": "notebook:create-sub-console",
+    "label": "New Sub-Console for Notebook",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:create-new",
     "label": "Notebook",
     "caption": "Create a new notebook",

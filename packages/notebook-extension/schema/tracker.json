@@ -356,6 +356,11 @@
         "rank": 41
       },
       {
+        "command": "notebook:create-sub-console",
+        "selector": ".jp-Notebook",
+        "rank": 42
+      },
+      {
         "command": "notebook:create-new",
         "selector": ".jp-DirListing-content",
         "rank": 52,
