@@ -261,52 +261,57 @@ export class FileBrowser extends SidePanel {
     return this.listing.paste();
   }
 
-  private _createNew(
-    future: Private.FutureNewDirectoryItem,
-    createOptions: Contents.ICreateOptions
+  private async _createNew(
+    options: Contents.ICreateOptions
   ): Promise<Contents.IModel> {
-    if (future.pending === true) {
-      return future.promise;
+    try {
+      const model = await this._manager.newUntitled(options);
+      await this.listing.selectItemByName(model.name, true);
+      await this.rename();
+      return model;
+    } catch (err) {
+      void showErrorMessage(this._trans.__('Error'), err);
+      throw err;
     }
-    const newItem = {
-      pending: true,
-      promise: this._manager.newUntitled(createOptions).then(async model => {
-        await this.listing.selectItemByName(model.name, true);
-        await this.rename();
-        return model;
-      })
-    };
-    Object.assign(future, newItem);
-    const { promise } = newItem;
-    promise
-      .catch(err => {
-        void showErrorMessage(this._trans.__('Error'), err);
-      })
-      .finally(() => {
-        future.pending = false;
-      });
-    return promise;
   }
 
   /**
    * Create a new directory
    */
-  createNewDirectory(): Promise<Contents.IModel> {
-    return this._createNew(this._futureNewDirectory, {
+  async createNewDirectory(): Promise<Contents.IModel> {
+    if (this._directoryPending) {
+      return this._directoryPending;
+    }
+    this._directoryPending = this._createNew({
       path: this.model.path,
       type: 'directory'
     });
+    try {
+      return await this._directoryPending;
+    } finally {
+      this._directoryPending = null;
+    }
   }
 
   /**
    * Create a new file
    */
-  createNewFile(options: FileBrowser.IFileOptions): Promise<Contents.IModel> {
-    return this._createNew(this._futureNewFile, {
+  async createNewFile(
+    options: FileBrowser.IFileOptions
+  ): Promise<Contents.IModel> {
+    if (this._filePending) {
+      return this._filePending;
+    }
+    this._filePending = this._createNew({
       path: this.model.path,
       type: 'file',
       ext: options.ext
     });
+    try {
+      return await this._filePending;
+    } finally {
+      this._filePending = null;
+    }
   }
 
   /**
@@ -416,14 +421,8 @@ export class FileBrowser extends SidePanel {
 
   private _filenameSearcher: ReactWidget;
   private _manager: IDocumentManager;
-  private _futureNewDirectory: Private.FutureNewDirectoryItem = {
-    pending: false,
-    promise: null
-  };
-  private _futureNewFile: Private.FutureNewDirectoryItem = {
-    pending: false,
-    promise: null
-  };
+  private _directoryPending: Promise<Contents.IModel> | null = null;
+  private _filePending: Promise<Contents.IModel> | null = null;
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
@@ -481,22 +480,4 @@ export namespace FileBrowser {
      */
     ext: string;
   }
-}
-
-namespace Private {
-  /**
-   * A special type with the following properties:
-   * - When `pending` is `true`, the `promise` field points to a promise for a
-   *   new directory or file.
-   * - When `pending` is `false`, the `promise` field has no guarantee.
-   */
-  export type FutureNewDirectoryItem =
-    | {
-        pending: true;
-        promise: Promise<Contents.IModel>;
-      }
-    | {
-        pending: false;
-        promise: any;
-      };
 }
