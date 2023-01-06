@@ -15,35 +15,35 @@ jobs:
       matrix:
         group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
         # This will be used by the base setup action
-        python-version: ["3.7", "3.11"]
+        python-version: ["3.8", "3.11"]
         include:
           - group: release_test
             upload-output: true
         exclude:
           - group: integrity
-            python-version: "3.7"
+            python-version: "3.8"
           - group: integrity2
-            python-version: "3.7"
+            python-version: "3.8"
           - group: integrity3
-            python-version: "3.7"
+            python-version: "3.8"
           - group: release_test
-            python-version: "3.7"
+            python-version: "3.8"
           - group: docs
-            python-version: "3.7"
+            python-version: "3.8"
           - group: usage
-            python-version: "3.7"
+            python-version: "3.8"
           - group: usage2
-            python-version: "3.7"
+            python-version: "3.8"
           - group: linkcheck
-            python-version: "3.7"
+            python-version: "3.8"
           - group: nonode
-            python-version: "3.7"
+            python-version: "3.8"
           - group: lint
-            python-version: "3.7"
+            python-version: "3.8"
           - group: examples
-            python-version: "3.7"
+            python-version: "3.8"
           - group: splice_source
-            python-version: "3.7"
+            python-version: "3.8"
       fail-fast: false
     timeout-minutes: 45
     runs-on: ubuntu-20.04
@@ -86,7 +86,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
-          python_version: "3.7"
+          python_version: "3.8"
       - name: Install minimum versions
         uses: jupyterlab/maintainer-tools/.github/actions/install-minimums@v1
       - name: Install dependencies
