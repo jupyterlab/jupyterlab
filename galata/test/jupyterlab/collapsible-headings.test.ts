@@ -163,6 +163,9 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowLeft');
+    await expect(
+      page.locator('.jp-Cell > .jp-cell-toolbar > .jp-Toolbar-item')
+    ).toHaveCount(6);
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('reexpand_headers_01.png');
