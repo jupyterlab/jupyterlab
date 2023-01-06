@@ -223,26 +223,12 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     if (existing) {
       return false;
     }
+    widget.addClass(TOOLBAR_ITEM_CLASS);
     const layout = this.layout as ToolbarLayout;
 
     const j = Math.max(0, Math.min(index, layout.widgets.length));
     layout.insertWidget(j, widget);
 
-    // Wait for the ReactWidget to be rendered before adding class its class.
-    if (
-      widget instanceof ReactWidget &&
-      (widget as ReactWidget).renderPromise !== undefined
-    ) {
-      (widget as ReactWidget)
-        .renderPromise!.then(() => {
-          widget.addClass(TOOLBAR_ITEM_CLASS);
-        })
-        .catch(() => {
-          console.error(`Error loading toolbar item ${name}`);
-        });
-    } else {
-      widget.addClass(TOOLBAR_ITEM_CLASS);
-    }
     Private.nameProperty.set(widget, name);
     return true;
   }
