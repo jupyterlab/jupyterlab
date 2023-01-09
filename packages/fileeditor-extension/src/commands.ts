@@ -110,6 +110,8 @@ export namespace CommandIDs {
 
   export const invokeCompleter = 'completer:invoke-file';
 
+  export const disposeCompleter = 'completer:dispose';
+
   export const selectCompleter = 'completer:select-file';
 
   export const openCodeViewer = 'code-viewer:open';
@@ -904,9 +906,26 @@ export namespace Commands {
       }
     });
 
+    commands.addCommand(CommandIDs.disposeCompleter, {
+      label: trans.__('Dispose the completion wideget.'),
+      execute: () => {
+        const id =
+          editorTracker.currentWidget && editorTracker.currentWidget.id;
+        if (id) {
+          return manager.dispose(id);
+        }
+      }
+    });
+
     commands.addKeyBinding({
       command: CommandIDs.selectCompleter,
       keys: ['Enter'],
+      selector: '.jp-FileEditor .jp-mod-completer-active'
+    });
+
+    commands.addKeyBinding({
+      command: CommandIDs.disposeCompleter,
+      keys: ['Escape'],
       selector: '.jp-FileEditor .jp-mod-completer-active'
     });
   }
