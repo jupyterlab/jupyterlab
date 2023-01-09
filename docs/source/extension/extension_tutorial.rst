@@ -548,7 +548,7 @@ of these problems in the upcoming sections.
 
 If you don't see a image at all, compare your code with the
 `02-show-an-image
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.0-02-show-an-image>`__
+tag <https://github.com/ericsnekbytes/apod_extension/tree/02-show-an-image>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
@@ -583,7 +583,8 @@ file in the ``package.json`` file ``style`` field.
 
 Return to the ``index.ts`` file. Modify the ``activate`` function to apply the
 CSS classes, the copyright information, and error handling for the API response.
-The beginning of the function should read like the following:
+You will be updating and replacing some lines, so the beginning of the function
+should read like the following:
 
 .. code-block:: typescript
       :emphasize-lines: 9,19-20,32-53
