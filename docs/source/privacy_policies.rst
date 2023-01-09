@@ -1,19 +1,16 @@
 Privacy policies
 ================
 
-Last modified: November 18th, 2022
+Last modified: December 14, 2022
 
 Introduction
 ------------
 
-JupyterLab development team avoids as much as possible the use of external
-web services. However to provide some features requests to those kind of
-services are required (see below for a full list). But those features are
-opt-in by default (aka you need to explicitly consent to activate them).
-
-The development team takes a proactive approach to user privacy and
-ensures the necessary steps are taken to protect the privacy of its users
-throughout their experience.
+As much as possible, the JupyterLab development team avoids the use of external
+web services. However, to provide some features, requests to external
+services are required (see below for a full list). These features are
+opt-in; you need to explicitly consent to activate them.
+The development team takes a proactive approach to user privacy.
 
 This policy sets out the different areas where user privacy is concerned
 and outlines the obligations and requirements of the JupyterLab
@@ -22,9 +19,9 @@ development team.
 What information do we collect?
 -------------------------------
 
-The external web services are collecting some information.
-However they are not accessible by the JupyterLab development team. And
-therefore we do not collect any information.
+The external web services collect some information, as described below.
+The JupyterLab development team cannot access and does not collect
+information that JupyterLab users provide to external web services.
 
 Features using external services
 --------------------------------
@@ -32,36 +29,36 @@ Features using external services
 Announcements plugin
 ^^^^^^^^^^^^^^^^^^^^
 
-The announcements plugin is fetching a news feed from a GitHub page website
+The announcements plugin fetches a news feed from a GitHub page
 (https://jupyterlab.github.io/assets) and metadata of the JupyterLab Python
 package on PyPI.org (https://pypi.org/pypi/jupyterlab/json).
 
-Fetching those information will only happen if the user clicks on the *Yes*
-button of the notification asking if they want to be notified by JupyterLab news.
-That choice is stored as a user settings in *Notifications* ->
-*Fetch official Jupyter news*. It can be reverted.
+The plugin will fetch this information only if the user clicks the *Yes*
+button on the notification that asks if they want to be notified with JupyterLab news.
+That choice is stored as a user preference in *Notifications* ->
+*Fetch official Jupyter news*. The user can change their preference later.
 
-The plugin can also be disabled by executing:
+Users can also disable the plugin by executing:
 
-.. code::bash
+.. code-block:: bash
 
     jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 
 Extension manager plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The extensions manager plugin is fetching extension packages metadata on npm public registry
+The extensions manager plugin fetches extension packages metadata on npm public registry
 (https://registry.npmjs.org/-/v1/) and on a Content Delivery Network (https://unpkg.com)
 and package author thumbnails on GitHub (https://github.com).
 
-Fetching those information will only happen if the user clicks on the *Enable*
+The plugin will fetch this information only if the user clicks on the *Enable*
 button in the extensions manager side panel.
-That choice is stored as a user settings in *Extension Manager* ->
-*Disclaimed Status*. It can be reverted.
+That choice is stored as a user preference in *Extension Manager* ->
+*Disclaimed Status*. The user can change their preference later.
 
-The plugin can also be disabled by executing:
+Users can also disable the plugin by executing:
 
-.. code::bash
+.. code-block:: bash
 
     jupyter labextension disable "@jupyterlab/extensionmanager-extension:plugin"
 
@@ -72,9 +69,9 @@ GitHub Pages
 ^^^^^^^^^^^^
 
 The service hosting the https://jupyterlab.github.io website stores access logs.
-That data is not accessible to and not readable for the JupyterLab development team.
+That data is not accessible to and not readable by the JupyterLab development team.
 
-The privacy policy of the hosting service GitHub can be found at https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement.
+GitHub's privacy policy can be found at https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement .
 
 npm
 ^^^
@@ -88,10 +85,10 @@ The privacy policy of the NPM public registry can be found at https://docs.npmjs
 PyPI.org
 ^^^^^^^^
 
-The service providing Python packages metadata website (https://pypi.org) stores access logs.
-That data is not accessible to and not readable for the JupyterLab development team.
+The service providing Python packages' metadata (https://pypi.org) stores access logs.
+That data is not accessible to and not readable by the JupyterLab development team.
 
-The privacy policy of the packages hosting service PyPI can be found at https://www.python.org/privacy/.
+PyPI's privacy policy can be found at https://www.python.org/privacy/.
 
 unpkg.com
 ^^^^^^^^^

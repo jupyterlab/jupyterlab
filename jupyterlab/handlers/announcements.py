@@ -9,7 +9,7 @@ import json
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Awaitable, Optional
+from typing import Awaitable, Optional, Tuple, Union
 
 from jupyter_server.base.handlers import APIHandler
 from jupyterlab_server.translation_utils import translator
@@ -28,8 +28,11 @@ class Notification:
     """Notification
 
     Attributes:
+        createdAt: Creation date
         message: Notification message
+        modifiedAt: Modification date
         type: Notification type — ["default", "error", "info", "success", "warning"]
+        link: Notification link button as a tuple (label, URL)
         options: Notification options
     """
 
@@ -37,6 +40,7 @@ class Notification:
     message: str
     modifiedAt: float
     type: str = "default"
+    link: Tuple[str, str] = field(default_factory=tuple)
     options: dict = field(default_factory=dict)
 
 
@@ -55,11 +59,13 @@ class CheckForUpdateABC(abc.ABC):
         self.version = version
 
     @abc.abstractmethod
-    async def __call__(self) -> Awaitable[Optional[str]]:
+    async def __call__(self) -> Awaitable[Union[None, str, Tuple[str, Tuple[str, str]]]]:
         """Get the notification message if a new version is available.
 
         Returns:
-            The notification message or None if there is not update.
+            None if there is not update.
+            or the notification message
+            or the notification message and a tuple(label, URL link) for the user to get more information
         """
         raise NotImplementedError("CheckForUpdateABC.__call__ is not implemented")
 
@@ -75,11 +81,13 @@ class CheckForUpdate(CheckForUpdateABC):
         logger - logging.Logger: Server logger
     """
 
-    async def __call__(self) -> Awaitable[Optional[str]]:
+    async def __call__(self) -> Awaitable[Tuple[str, Tuple[str, str]]]:
         """Get the notification message if a new version is available.
 
         Returns:
-            The notification message or None if there is no update.
+            None if there is no update.
+            or the notification message
+            or the notification message and a tuple(label, URL link) for the user to get more information
         """
         http_client = httpclient.AsyncHTTPClient()
         try:
@@ -95,10 +103,9 @@ class CheckForUpdate(CheckForUpdateABC):
         else:
             if parse(self.version) < parse(last_version):
                 trans = translator.load("jupyterlab")
-                return trans.__(
-                    f"A newer version ({last_version}) of JupyterLab is available.\n"
-                    f'See the <a href="{JUPYTERLAB_RELEASE_URL}{last_version}" target="_blank" rel="noreferrer">changelog</a>'
-                    " for more information."
+                return (
+                    trans.__(f"A newer version ({last_version}) of JupyterLab is available."),
+                    (trans.__("Open changelog"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
                 )
             else:
                 return None
@@ -118,11 +125,13 @@ class NeverCheckForUpdate(CheckForUpdateABC):
         logger - logging.Logger: Server logger
     """
 
-    async def __call__(self) -> Awaitable[Optional[str]]:
+    async def __call__(self) -> Awaitable[None]:
         """Get the notification message if a new version is available.
 
         Returns:
-            The notification message or None if there is not update.
+            None if there is no update.
+            or the notification message
+            or the notification message and a tuple(label, URL link) for the user to get more information
         """
         return None
 
@@ -153,8 +162,9 @@ class CheckForUpdateHandler(APIHandler):
             }
         """
         notification = None
-        message = await self.update_checker()
-        if message:
+        out = await self.update_checker()
+        if out:
+            message, link = (out, ()) if isinstance(out, str) else out
             now = datetime.now().timestamp() * 1000.0
             hash = hashlib.sha1(message.encode()).hexdigest()
             notification = Notification(
@@ -162,6 +172,7 @@ class CheckForUpdateHandler(APIHandler):
                 createdAt=now,
                 modifiedAt=now,
                 type="info",
+                link=link,
                 options={"data": {"id": hash, "tags": ["update"]}},
             )
 
@@ -199,6 +210,8 @@ class NewsHandler(APIHandler):
         http_client = httpclient.AsyncHTTPClient()
 
         if self.news_url is not None:
+            trans = translator.load("jupyterlab")
+
             # Those registrations are global, naming them to reduce chance of clashes
             xml_namespaces = {"atom": "http://www.w3.org/2005/Atom"}
             for key, spec in xml_namespaces.items():
@@ -214,18 +227,8 @@ class NewsHandler(APIHandler):
                 def build_entry(node):
                     return Notification(
                         message=node.find("atom:title", xml_namespaces).text
-                        # New paragraph
-                        + "\n\n" + node.find("atom:summary", xml_namespaces).text
-                        # Break line
-                        + "  \n"
-                        + "See {0}full post{1} for more details.".format(
-                            # Use HTML link syntax instead of Markdown otherwise
-                            # link will open in the same browser tab
-                            '<a href="{}" target="_blank" rel="noreferrer">'.format(
-                                node.find("atom:link", xml_namespaces).get("href")
-                            ),
-                            "</a>",
-                        ),
+                        + "\n"
+                        + node.find("atom:summary", xml_namespaces).text,
                         createdAt=datetime.fromisoformat(
                             node.find("atom:published", xml_namespaces).text
                         ).timestamp()
@@ -235,6 +238,10 @@ class NewsHandler(APIHandler):
                         ).timestamp()
                         * 1000,
                         type="info",
+                        link=(
+                            trans.__("Open full post"),
+                            node.find("atom:link", xml_namespaces).get("href"),
+                        ),
                         options={
                             "data": {
                                 "id": node.find("atom:id", xml_namespaces).text,

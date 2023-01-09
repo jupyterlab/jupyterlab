@@ -785,7 +785,7 @@ risks or contain malicious code that runs on your machine. Moreover in order
 to work, this panel needs to fetch data from web services.`)}
             <br />
             <a
-              href="https://jupyterlab.readthedocs.io/en/3.6.x/privacy_policies"
+              href="https://jupyterlab.readthedocs.io/en/3.6.x/privacy_policies.html"
               target="_blank"
               rel="noreferrer"
             >

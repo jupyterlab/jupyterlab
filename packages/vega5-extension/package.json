@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/vega5-extension",
-  "version": "3.6.0-alpha.5",
+  "version": "3.6.0-beta.0",
   "description": "JupyterLab - Vega 5 and Vega-Lite 3 Mime Renderer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -27,12 +27,17 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
     "docs": "typedoc src",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^3.6.0-alpha.5",
+    "@jupyterlab/rendermime-interfaces": "^3.6.0-beta.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/widgets": "^1.33.0",
     "vega": "^5.20.0",
@@ -40,7 +45,10 @@
     "vega-lite": "^5.1.0"
   },
   "devDependencies": {
+    "@jupyterlab/testutils": "^3.6.0-beta.0",
+    "@types/jest": "^26.0.10",
     "@types/webpack-env": "^1.14.1",
+    "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "typedoc": "~0.21.2",
     "typescript": "~4.1.3"

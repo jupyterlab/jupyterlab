@@ -474,6 +474,12 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         {"LabApp": {"collaborative": True}},
         "Whether to enable collaborative mode.",
     )
+    flags["future-skip-styles-for-disabled"] = (
+        {"LabApp": {"future_skip_styles_for_disabled": True}},
+        """Whether to skip loading styles for disabled prebuilt extensions.
+        This will be the default behavior starting with JupyterLab 4.0
+        (and this flag will be removed).""",
+    )
 
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -542,6 +548,14 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         False,
         config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab",
+    )
+
+    future_skip_styles_for_disabled = Bool(
+        False,
+        config=True,
+        help="""Whether to skip loading styles for disabled prebuilt extensions.
+        This will be the default behavior starting with JupyterLab 4.0
+        (and this flag will be removed).""",
     )
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
@@ -666,6 +680,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         page_config["quitButton"] = self.serverapp.quit_button
         page_config["collaborative"] = self.collaborative
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
+        page_config["futureSkipStylesForDisabled"] = self.future_skip_styles_for_disabled
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config["notebookVersion"] = json.dumps(jpserver_version_info)
