@@ -154,18 +154,32 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this._options[option] = value;
 
     switch (option) {
-      case 'shutdownOnClose': // Do not transmit to XTerm
-      case 'closeOnExit': // Do not transmit to XTerm
+      case 'fontFamily':
+        this._term.options.fontFamily = value as string | undefined;
+        break;
+      case 'fontSize':
+        this._term.options.fontSize = value as number | undefined;
+        break;
+      case 'lineHeight':
+        this._term.options.lineHeight = value as number | undefined;
+        break;
+      case 'screenReaderMode':
+        this._term.options.screenReaderMode = value as boolean | undefined;
+        break;
+      case 'scrollback':
+        this._term.options.scrollback = value as number | undefined;
         break;
       case 'theme':
-        this._term.setOption(
-          'theme',
-          Private.getXTermTheme(value as ITerminal.Theme)
-        );
+        this._term.options.theme = {
+          ...Private.getXTermTheme(value as ITerminal.Theme)
+        };
         this._setThemeAttribute(value as ITerminal.Theme);
         break;
+      case 'macOptionIsMeta':
+        this._term.options.macOptionIsMeta = value as boolean | undefined;
+        break;
       default:
-        this._term.setOption(option, value);
+        // Do not transmit options not listed above to XTerm
         break;
     }
 
