@@ -838,12 +838,12 @@ image.
 
 If anything is not working correctly, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.0-04-refactor-and-refresh>`__
+tag <https://github.com/ericsnekbytes/apod_extension/tree/04-refactor-and-refresh>`__
 to debug. Once it is working properly, commit it.
 
 .. code:: bash
 
-    git add package.json src/index.ts
+    git add src/index.ts
     git commit -m 'Refactor, refresh image'
 
 Restore panel state when the browser refreshes
