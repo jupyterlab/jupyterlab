@@ -583,8 +583,8 @@ file in the ``package.json`` file ``style`` field.
 
 Return to the ``index.ts`` file. Modify the ``activate`` function to apply the
 CSS classes, the copyright information, and error handling for the API response.
-You will be updating and replacing some lines, so the beginning of the function
-should read like the following:
+You will be updating and replacing/removing some lines, so the beginning of the
+function should read like the following:
 
 .. code-block:: typescript
       :emphasize-lines: 9,19-20,32-53
