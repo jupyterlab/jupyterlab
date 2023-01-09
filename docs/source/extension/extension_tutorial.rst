@@ -662,12 +662,12 @@ of the image.
 
 If anything is not working correctly, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.0-03-style-and-attribute>`__.
+tag <https://github.com/ericsnekbytes/apod_extension/tree/03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
 
-    git add style/index.css src/index.ts
+    git add style/base.css src/index.ts
     git commit -m 'Add styling, attribution, error handling'
 
 Show a new image on demand
