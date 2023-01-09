@@ -2747,13 +2747,13 @@
   dependencies:
     esquery "^1.0.1"
 
-"@playwright/test@^1.29.0":
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.29.0.tgz#c41155e6c43561653b235c32493aaeb0858df773"
-  integrity sha512-gp5PVBenxTJsm2bATWDNc2CCnrL5OaA/MXQdJwwkGQtqTjmY+ZOqAdLqo49O9MLTDh2vYh+tHWDnmFsILnWaeA==
+"@playwright/test@^1.27.0":
+  version "1.29.2"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.29.2.tgz#c48184721d0f0b7627a886e2ec42f1efb2be339d"
+  integrity sha512-+3/GPwOgcoF0xLz/opTnahel1/y42PdcgZ4hs+BZGIUjtmEFSXGg+nFoaH3NSmuc7a6GSFwXDJ5L7VXpqzigNg==
   dependencies:
     "@types/node" "*"
-    playwright-core "1.29.0"
+    playwright-core "1.29.2"
 
 "@polka/url@^1.0.0-next.20":
   version "1.0.0-next.21"
@@ -10165,10 +10165,10 @@ pkginfo@0.4.1:
   resolved "https://registry.npmjs.org/pkginfo/-/pkginfo-0.4.1.tgz"
   integrity sha512-8xCNE/aT/EXKenuMDZ+xTVwkT8gsoHN2z/Q29l80u0ppGEXVvsKRzNMbtKhg8LS8k1tJLAHHylf6p4VFmP6XUQ==
 
-playwright-core@1.29.0:
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.29.0.tgz#314653618395afef5031156d691c7aa0826e5d05"
-  integrity sha512-pboOm1m0RD6z1GtwAbEH60PYRfF87vKdzOSRw2RyO0Y0a7utrMyWN2Au1ojGvQr4umuBMODkKTv607YIRypDSQ==
+playwright-core@1.29.2:
+  version "1.29.2"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.29.2.tgz#2e8347e7e8522409f22b244e600e703b64022406"
+  integrity sha512-94QXm4PMgFoHAhlCuoWyaBYKb92yOcGVHdQLoxQ7Wjlc7Flg4aC/jbFW7xMR52OfXMVkWicue4WXE7QEegbIRA==
 
 portfinder@^1.0.25:
   version "1.0.28"
