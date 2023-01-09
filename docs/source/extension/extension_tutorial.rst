@@ -418,7 +418,7 @@ The single *Astronomy Picture* tab should come to the foreground.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.0-01-show-a-panel>`__.
+tag <https://github.com/ericsnekbytes/apod_extension/tree/01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -543,9 +543,8 @@ video).
    The in-progress extension, showing the `Astronomy Picture of the Day for 19 Jan 2014 <https://apod.nasa.gov/apod/ap140119.html>`__.
 
 Note that the image is not centered in the panel nor does the panel
-scroll if the image is larger than the panel area. Also note that the
-image does not update no matter how many times you close and reopen the
-panel. You'll address both of these problems in the upcoming sections.
+scroll if the image is larger than the panel area. You'll address both
+of these problems in the upcoming sections.
 
 If you don't see a image at all, compare your code with the
 `02-show-an-image
