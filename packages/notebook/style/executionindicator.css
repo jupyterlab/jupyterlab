@@ -23,8 +23,8 @@
 .jp-Notebook-ExecutionIndicator-tooltip {
   visibility: hidden;
   height: auto;
-  width: fit-content;
-  width: -moz-fit-content;
+  width: max-content;
+  width: -moz-max-content;
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color1);
   text-align: justify;
