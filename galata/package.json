@@ -21,8 +21,7 @@
     "lib/**/*.{js,ts,map}"
   ],
   "scripts": {
-    "build": "npm run clean && npm run build:extension && npm run build:galata",
-    "build:all": "npm run build",
+    "build": "npm run build:extension && npm run build:galata",
     "build:extension": "cd extension && npm run build && cd ..",
     "build:galata": "tsc -b",
     "clean": "npm run clean:extension && rimraf lib tsconfig.tsbuildinfo",
