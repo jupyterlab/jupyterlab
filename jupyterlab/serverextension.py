@@ -1,3 +1,5 @@
+import sys
+
 from jupyter_server.utils import url_path_join
 from tornado.web import RedirectHandler
 
@@ -9,6 +11,21 @@ def load_jupyter_server_extension(serverapp):
     old notebook server.
     """
     serverapp.log.warning("Loading JupyterLab as an old notebook extension.")
+    from jupyter_server._version import __version__
+    try:
+        from packaging.version import parse, Version
+        if parse(__version__) >= Version('2.0.0'):
+            serverapp.log.critical(
+                f"You must use Jupyter Server v1 to load JupyterLab as notebook extension. You have v{__version__} installed.\nYou can fix this by executing:\n    pip install -U \"jupyter-server<2.0.0\""
+            )
+            if serverapp.default_url == "/lab":
+                sys.exit(1)
+            else:
+                # Don't load JupyterLab when launching notebook
+                return
+    except Exception:
+        pass
+
     extension = LabApp()
     extension.serverapp = serverapp
     extension.load_config_file()

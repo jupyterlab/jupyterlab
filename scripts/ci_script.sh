@@ -171,6 +171,15 @@ if [[ $GROUP == usage ]]; then
     jupyter lab clean --debug
     jupyter lab build --debug
     jupyter lab path --debug
+
+
+    # Make sure we can run JupyterLab under classic notebook
+    # It is not possible to run JupyterLab under classic notebook with Jupyter Server v2 installed.
+    pip install -U "jupyter_server<2.0.0"
+    python -m jupyterlab.browser_check
+    python -m jupyterlab.browser_check --notebook
+    pip install -U "jupyter_server>=2.0.0"
+
     pushd jupyterlab/tests/mock_packages
     jupyter labextension link mimeextension --no-build --debug
     jupyter labextension unlink mimeextension --no-build --debug
@@ -270,12 +279,6 @@ if [[ $GROUP == usage ]]; then
     python -m jupyterlab.browser_check --dev-mode
     jlpm run remove:package foo
     jlpm run integrity
-
-    # Make sure we can run JupyterLab under classic notebook
-    # It is not possible to run JupyterLab under classic notebook with Jupyter Server v2 installed.
-    pip install -U "jupyter_server<2.0.0"
-    python -m jupyterlab.browser_check
-    python -m jupyterlab.browser_check --notebook
 fi
 
 
