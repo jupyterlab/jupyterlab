@@ -856,10 +856,11 @@ return to where you left them in the panel layout. You can make your
 extension behave this way too.
 
 Update the imports at the top of your ``index.ts`` file so that the
-entire list of import statements looks like the following:
+entire list of import statements looks like the following (Adding
+``ILayoutRestorer`` and ``WidgetTracker``):
 
 .. code-block:: typescript
-    :emphasize-lines: 2,10
+    :emphasize-lines: 2,7-11
 
     import {
       ILayoutRestorer,
@@ -973,7 +974,7 @@ after the refresh.
    The completed extension, showing the `Astronomy Picture of the Day for 24 Jul 2015 <https://apod.nasa.gov/apod/ap150724.html>`__.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.0-05-restore-panel-state>`__
+tag <https://github.com/ericsnekbytes/apod_extension/tree/05-restore-panel-state>`__
 if your extension is not working correctly. Make a commit when the state of your
 extension persists properly.
 
