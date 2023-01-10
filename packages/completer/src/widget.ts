@@ -83,7 +83,6 @@ export class Completer extends Widget {
     this._minHeight = parseInt(computedStyle.minHeight, 10);
     this._scrollbarWidth = tempNode.offsetWidth - tempNode.clientWidth;
     document.body.removeChild(tempNode);
-    tempNode.style.visibility = 'hidden';
     const tempDocPanel = document.createElement('div');
     tempDocPanel.classList.add(DOC_PANEL_CLASS);
     this._docPanelWidth = Private.measureSize(
@@ -826,9 +825,9 @@ export class Completer extends Widget {
           return;
         }
         if (activeItem.documentation) {
-          const node = this._renderer.createDocumentationNode
-            ? this._renderer.createDocumentationNode(activeItem)
-            : this._defaultRenderer.createDocumentationNode(activeItem);
+          const node =
+            this._renderer.createDocumentationNode?.(activeItem) ??
+            this._defaultRenderer.createDocumentationNode(activeItem);
           docPanel.textContent = '';
           docPanel.appendChild(node);
         } else {
@@ -891,7 +890,12 @@ export class Completer extends Widget {
   private _docPanelWidth: number;
   private _docPanel: HTMLElement | undefined;
   private _geometryLock = false;
+
+  /**
+   * Increasing this counter invalidates previous request to save geometry cache in animation callback.
+   */
   private _geometryCounter: number = 0;
+
   private _docPanelExpanded = false;
   private _renderCounter: number = 0;
 }

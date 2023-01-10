@@ -49,7 +49,7 @@ bumped their major version (following semver convention). We want to point out p
    * Adding custom completion suggestions (items):
       - In 3.x and earlier adding custom completion items required re-registering the completer connector for each file/cell
         using ``register`` method of old manager provided by ``ICompletionManager`` token; in 4.x this token and associated
-        ``ICompletableAttributes`` interface were removed and a proper method of registering a custom source of completions
+        ``ICompletableAttributes`` interface was removed and a proper method of registering a custom source of completions
         (a provider of completions) was added. To create a completer provider  for JupyterLab, users need to implement the
         ``ICompletionProvider`` interface and then register this provider with ``ICompletionProviderManager`` token.
       - In 3.x merging completions from different sources had to be performed by creating a connector internally merging
