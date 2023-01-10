@@ -55,7 +55,7 @@ repos:
           [mdformat-gfm, mdformat-frontmatter, mdformat-footnote]
 
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.19.2
+    rev: 0.20.0
     hooks:
       - id: check-jsonschema
         name: 'Check GitHub Workflows'

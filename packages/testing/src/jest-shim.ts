@@ -11,7 +11,7 @@ globalThis.DragEvent = class DragEvent {} as any;
 
 if (
   typeof globalThis.TextDecoder === 'undefined' ||
-  typeof globalThis.TextDecoder === 'undefined'
+  typeof globalThis.TextEncoder === 'undefined'
 ) {
   const util = require('util');
   globalThis.TextDecoder = util.TextDecoder;

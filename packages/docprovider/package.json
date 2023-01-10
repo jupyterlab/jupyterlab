@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docprovider",
-  "version": "4.0.0-alpha.16",
+  "version": "4.0.0-alpha.17",
   "description": "JupyterLab - Document Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -39,8 +39,8 @@
   },
   "dependencies": {
     "@jupyter/ydoc": "~0.2.2",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.16",
-    "@jupyterlab/services": "^7.0.0-alpha.16",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.17",
+    "@jupyterlab/services": "^7.0.0-alpha.17",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
@@ -49,7 +49,7 @@
     "yjs": "^13.5.40"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.16",
+    "@jupyterlab/testing": "^4.0.0-alpha.17",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typescript": "~4.7.3"

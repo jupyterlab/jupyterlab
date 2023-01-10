@@ -25,6 +25,7 @@ tasks:
       source /workspace/bin/activate-env.sh
       micromamba config append channels conda-forge
       micromamba install -n base -y python=3.10 nodejs=14 yarn
+      source /workspace/bin/activate-env.sh
       python -m pip install -e ".[dev,docs,test]" && jlpm install && jlpm run build
       gp sync-done setup
     command: |

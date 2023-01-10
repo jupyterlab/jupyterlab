@@ -852,11 +852,6 @@ export namespace Completer {
      * documentation panel.
      */
     createDocumentationNode?(activeItem: T): HTMLElement;
-
-    /**
-     * The sanitizer used to sanitize untrusted html inputs.
-     */
-    readonly sanitizer: ISanitizer;
   }
 
   /**
