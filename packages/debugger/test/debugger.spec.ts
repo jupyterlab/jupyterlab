@@ -75,7 +75,7 @@ describe('Debugger', () => {
     });
     await connection.changeKernel({ name: 'python3' });
 
-    session = new Debugger.Session({ connection });
+    session = new Debugger.Session({ connection, config });
     service.session = session;
 
     sidebar = new Debugger.Sidebar({
@@ -91,7 +91,7 @@ describe('Debugger', () => {
       },
       breakpointsCommands: {
         registry,
-        pause: ''
+        pauseOnExceptions: ''
       },
       editorServices: {
         factoryService,
