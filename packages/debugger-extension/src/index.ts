@@ -14,6 +14,7 @@ import {
 import {
   Clipboard,
   ICommandPalette,
+  InputDialog,
   IThemeManager,
   MainAreaWidget,
   sessionContextDialogs,
@@ -532,7 +533,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 
     const breakpointsCommands = {
       registry: commands,
-      pause: CommandIDs.pauseOnExceptions
+      pauseOnExceptions: CommandIDs.pauseOnExceptions
     };
 
     const sidebar = new Debugger.Sidebar({
@@ -738,24 +739,33 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
-      label: trans.__('Enable / Disable pausing on exceptions'),
-      caption: () =>
-        service.isStarted
-          ? service.pauseOnExceptionsIsValid()
-            ? service.isPausingOnExceptions
-              ? trans.__('Disable pausing on exceptions')
-              : trans.__('Enable pausing on exceptions')
-            : trans.__('Kernel does not support pausing on exceptions.')
-          : trans.__('Enable / Disable pausing on exceptions'),
-      className: 'jp-PauseOnExceptions',
-      icon: Debugger.Icons.pauseOnExceptionsIcon,
-      isToggled: () => {
-        return service.isPausingOnExceptions;
-      },
+      label: args => (args.filter as string) || 'Breakpoints on exception',
+      caption: args => args.description as string,
+      isToggled: args =>
+        service.session?.isPausingOnException(args.filter as string) || false,
       isEnabled: () => service.pauseOnExceptionsIsValid(),
-      execute: async () => {
-        await service.pauseOnExceptions(!service.isPausingOnExceptions);
-        commands.notifyCommandChanged();
+      execute: async args => {
+        if (args?.filter) {
+          let filter = args.filter as string;
+          await service.pauseOnExceptionsFilter(filter as string);
+        } else {
+          let items: string[] = [];
+          service.session?.exceptionBreakpointFilters?.forEach(
+            availableFilter => {
+              items.push(availableFilter.filter);
+            }
+          );
+          const result = await InputDialog.getMultipleItems({
+            title: trans.__('Select a filter for breakpoints on exception'),
+            items: items,
+            defaults: service.session?.currentExceptionFilters || []
+          });
+
+          let filters = result.button.accept ? result.value : null;
+          if (filters !== null) {
+            await service.pauseOnExceptions(filters);
+          }
+        }
       }
     });
 

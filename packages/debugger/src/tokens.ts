@@ -34,9 +34,14 @@ export interface IDebugger {
   readonly isStarted: boolean;
 
   /**
-   * Whether the session is pausing for exceptions.
+   * Get debugger config.
    */
-  readonly isPausingOnExceptions: boolean;
+  readonly config: IDebugger.IConfig;
+
+  /**
+   * A signal emitted when the pause on exception filter changes.
+   */
+  readonly pauseOnExceptionChanged: Signal<IDebugger, void>;
 
   /**
    * The debugger service's model.
@@ -64,9 +69,16 @@ export interface IDebugger {
   pauseOnExceptionsIsValid(): boolean;
 
   /**
-   * Handles enabling and disabling of Pause on Exception
+   * Add a filter to pauseOnExceptionsFilter.
+   *
+   * @param exceptionFilter - filter name.
    */
-  pauseOnExceptions(enable: boolean): Promise<void>;
+  pauseOnExceptionsFilter(exceptionFilter: string): Promise<void>;
+
+  /**
+   * Send the pauseOnExceptions' filters to the debugger.
+   */
+  pauseOnExceptions(exceptionFilter: string[]): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -334,19 +346,14 @@ export namespace IDebugger {
     connection: Session.ISessionConnection | null;
 
     /**
-     * Returns the initialize response .
+     * Returns the initialize response.
      */
     readonly capabilities: DebugProtocol.Capabilities | undefined;
 
     /**
-     * Whether the debug session is started
+     * Whether the debug session is started.
      */
     readonly isStarted: boolean;
-
-    /**
-     * Whether the debug session is pausing on exceptions.
-     */
-    pausingOnExceptions: string[];
 
     /**
      * Whether the debug session is pausing on exceptions.
@@ -367,6 +374,18 @@ export namespace IDebugger {
       IDebugger.ISession,
       IDebugger.ISession.Event
     >;
+
+    /**
+     * Get current exception filter.
+     */
+    currentExceptionFilters: string[];
+
+    /**
+     * Whether the debugger is pausing on exception.
+     *
+     * @param filter - Specify a filter
+     */
+    isPausingOnException(filter?: string): boolean;
 
     /**
      * Restore the state of a debug session.
@@ -676,6 +695,13 @@ export namespace IDebugger {
      */
     export interface IInfoReply extends KernelMessage.IInfoReply {
       debugger: boolean;
+    }
+
+    /**
+     * An interface for current exception filters.
+     */
+    export interface IExceptionFilter {
+      [kernels: string]: string[];
     }
   }
 
