@@ -1161,31 +1161,7 @@ export class DirListing extends Widget {
     // Shift key indicates multi-selection. Either the user is trying to grow
     // the selection, or shrink it.
     if (event.shiftKey) {
-      const nextItem = this._sortedItems[nextFocusIndex];
-      // If the next item is not selected, treat this as a normal multi-select action.
-      if (!this.selection[nextItem.path]) {
-        this._handleMultiSelect(nextFocusIndex);
-      } else {
-        // Else if the next item is selected and...
-        const item = this._sortedItems[focusIndex];
-        const prevItem = this._sortedItems[focusIndex - direction];
-        if (
-          // Currently focussed item is selected and...
-          this.selection[item.path] &&
-          // Previous item is boundary or unselected
-          (!prevItem || !this.selection[prevItem.path])
-        ) {
-          // In other words, if the situation looks like this going up (reverse
-          // for going down):
-          //
-          // - [next item] selected
-          // - [item currently focussed] selected
-          // - [previous item] unselected (or boundary)
-          //
-          // Then we unselect the currently focussed item.
-          delete this.selection[item.path];
-        }
-      }
+      this._handleMultiSelect(nextFocusIndex);
     } else if (!event.ctrlKey) {
       // If neither the shift nor ctrl keys were used with the up/down arrow,
       // then we treat it as a normal, unmodified key press and select the next
@@ -1728,17 +1704,35 @@ export class DirListing extends Widget {
   private _handleMultiSelect(index: number): void {
     const items = this._sortedItems;
     const fromIndex = this._focusIndex;
+    const target = items[index];
     let shouldAdd = true;
 
-    const target = items[index];
-    if (
-      this.selection[target.path] &&
-      this._allSelectedBetween(fromIndex, index)
-    ) {
-      shouldAdd = false;
+    if (index === fromIndex) {
+      this.selection[target.path] = true;
+      return;
     }
 
-    // Select (or unselect) the rows between chosen index and the last focussed.
+    // If the target and all items in-between are selected, then we assume that
+    // the user is trying to shrink rather than grow the group of selected
+    // items.
+    if (this.selection[target.path]) {
+      if (Math.abs(index - fromIndex) === 1) {
+        if (
+          this.selection[items[fromIndex].path] &&
+          !(
+            items[fromIndex + (fromIndex - index)] &&
+            this.selection[items[fromIndex + (fromIndex - index)].path]
+          )
+        ) {
+          shouldAdd = false;
+        }
+      } else if (this._allSelectedBetween(fromIndex, index)) {
+        shouldAdd = false;
+      }
+    }
+
+    // Select (or unselect) the rows between chosen index (target) and the last
+    // focussed.
     const step = fromIndex < index ? 1 : -1;
     for (let i = fromIndex; i !== index + step; i += step) {
       if (shouldAdd) {
