@@ -268,10 +268,15 @@
   user-select: none;
 }
 
-/* https://css-tricks.com/copy-the-browsers-native-focus-styles/ */
 .jp-DirListing-itemText:focus {
-  outline: 5px auto Highlight;
-  outline: 5px auto -webkit-focus-ring-color;
+  outline-width: 2px;
+  outline-color: var(--jp-inverse-layout-color1);
+  outline-style: solid;
+  outline-offset: 1px;
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
+  outline-color: var(--jp-layout-color1);
 }
 
 .jp-DirListing-itemModified {
