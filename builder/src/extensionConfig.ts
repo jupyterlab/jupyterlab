@@ -202,7 +202,9 @@ function generateConfig({
           _build.style = './style';
         }
         data.jupyterlab._build = _build;
-        fs.writeJSONSync(path.join(outputPath, 'package.json'), data);
+        fs.writeJSONSync(path.join(outputPath, 'package.json'), data, {
+          spaces: 2
+        });
       });
     }
   }
