@@ -3,9 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-// Copyright (c) Jupyter Development Team. Distributed under the terms of the
-// Modified BSD License.
-
 import expect from 'expect';
 import { simulate } from 'simulate-event';
 import { Signal } from '@lumino/signaling';
