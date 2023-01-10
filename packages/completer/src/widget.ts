@@ -355,7 +355,7 @@ export class Completer extends Widget {
    */
   protected get sizeCache(): Completer.IDimensions | undefined {
     if (!this._sizeCache) {
-      return this._sizeCache;
+      return;
     }
     return {
       width: this._sizeCache.width,
@@ -811,9 +811,9 @@ export class Completer extends Widget {
       return;
     }
     docPanel.textContent = '';
-    const loadingIndicator = this._renderer.createLoadingDocsIndicator
-      ? this._renderer.createLoadingDocsIndicator()
-      : this._defaultRenderer.createLoadingDocsIndicator();
+    const loadingIndicator =
+      this._renderer.createLoadingDocsIndicator?.() ??
+      this._defaultRenderer.createLoadingDocsIndicator();
     docPanel.appendChild(loadingIndicator);
 
     resolvedItem
