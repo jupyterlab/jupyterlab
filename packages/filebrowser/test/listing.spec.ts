@@ -137,12 +137,12 @@ describe('filebrowser/listing', () => {
     });
 
     describe('#_handleMultiSelect', () => {
-      it('should do nothing when to-index is same as from-index', () => {
+      it('should only select when to-index is same as from-index', () => {
         // to-index unselected
         dirListing['_focusItem'](1);
         expect(Object.keys(dirListing['selection'])).toHaveLength(0);
         dirListing['_handleMultiSelect'](1);
-        expect(Object.keys(dirListing['selection'])).toHaveLength(0);
+        expect(Object.keys(dirListing['selection'])).toHaveLength(1);
 
         // to-index selected
         dirListing['_selectItem'](1, false, true);

@@ -1708,6 +1708,10 @@ export class DirListing extends Widget {
     let shouldAdd = true;
 
     if (index === fromIndex) {
+      // This follows the convention in Ubuntu and Windows, which is to allow
+      // the focussed item to gain but not lose selected status on shift-click.
+      // (MacOS is irrelevant here because MacOS Finder has no notion of a
+      // focused-but-not-selected state.)
       this.selection[target.path] = true;
       return;
     }
@@ -1871,12 +1875,16 @@ export class DirListing extends Widget {
     if (
       !this.isDisposed &&
       Object.keys(this.selection).length === 1 &&
-      this.selection[finalFilename]
+      // We haven't updated the instance yet to reflect the rename, so unless
+      // the user or something else has updated the selection, the original file
+      // path and not the new file path will be in `this.selection`.
+      this.selection[item.path]
     ) {
       try {
         await this.selectItemByName(finalFilename, true);
       } catch {
         // do nothing
+        console.warn('After rename, failed to select file', finalFilename);
       }
     }
 
