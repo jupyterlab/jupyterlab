@@ -1812,7 +1812,11 @@ export class DirListing extends Widget {
     this._selectItem(index, false, true);
 
     // Wait for user input
-    const newName = await Private.doRename(nameNode, this._editNode, original);
+    const newName = await Private.userInputForRename(
+      nameNode,
+      this._editNode,
+      original
+    );
 
     // Check if the widget was disposed during the `await`.
     if (this.isDisposed) {
@@ -2587,7 +2591,7 @@ namespace Private {
    *
    * @returns Boolean indicating whether the name changed.
    */
-  export function doRename(
+  export function userInputForRename(
     text: HTMLElement,
     edit: HTMLInputElement,
     original: string
@@ -2619,6 +2623,9 @@ namespace Private {
             event.preventDefault();
             edit.value = original;
             edit.blur();
+            // Put focus back on the text node. That way the user can, for
+            // example, press the keyboard shortcut to go back into edit mode,
+            // and it will work.
             text.focus();
             break;
           default:
