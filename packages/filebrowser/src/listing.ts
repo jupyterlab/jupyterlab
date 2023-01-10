@@ -1720,15 +1720,28 @@ export class DirListing extends Widget {
     // the user is trying to shrink rather than grow the group of selected
     // items.
     if (this.selection[target.path]) {
+      // However, there is a special case when the distance between the from-
+      // and to- index is just one (for example, when the user is pressing the
+      // shift key plus arrow-up/down). If and only if the situation looks like
+      // the following when going down (or reverse when going up) ...
+      //
+      // - [ante-anchor / previous item] unselected (or boundary)
+      // - [anchor / currently focussed item / item at from-index] selected
+      // - [target / next item / item at to-index] selected
+      //
+      // ... then we shrink the selection / unselect the currently focussed
+      // item.
       if (Math.abs(index - fromIndex) === 1) {
+        const anchor = items[fromIndex];
+        const anteAnchor = items[fromIndex + (index < fromIndex ? 1 : -1)];
         if (
-          this.selection[items[fromIndex].path] &&
-          !(
-            items[fromIndex + (fromIndex - index)] &&
-            this.selection[items[fromIndex + (fromIndex - index)].path]
-          )
+          // Currently focussed item is selected
+          this.selection[anchor.path] &&
+          // Item on other side of focussed item (away from target) is either a
+          // boundary or unselected
+          (!anteAnchor || !this.selection[anteAnchor.path])
         ) {
-          shouldAdd = false;
+          delete this.selection[anchor.path];
         }
       } else if (this._allSelectedBetween(fromIndex, index)) {
         shouldAdd = false;
