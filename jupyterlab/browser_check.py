@@ -65,8 +65,6 @@ def run_test(app, func):
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
     in a thread, so asynchronous is preferred.
     """
-    app.log.info("Running test as callback")
-
     IOLoop.current().spawn_callback(run_test_async, app, func)
 
 
