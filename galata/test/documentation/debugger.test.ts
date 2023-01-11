@@ -117,6 +117,74 @@ test.describe('Debugger', () => {
     await page.click('button[title^=Continue]');
   });
 
+  test('Breakpoints on exception', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    await createNotebook(page);
+
+    await page.debugger.switchOn();
+    await page.waitForCondition(() => page.debugger.isOpen());
+    await setSidebarWidth(page, 251, 'right');
+
+    await expect(page.locator('button.jp-PauseOnExceptions')).not.toHaveClass(
+      /lm-mod-toggled/
+    );
+    await page.locator('button.jp-PauseOnExceptions').click();
+    const menu = page.locator('.jp-PauseOnExceptions-menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.locator('li.lm-Menu-item')).toHaveCount(3);
+    await expect(menu.locator('li.lm-Menu-item.lm-mod-toggled')).toHaveCount(0);
+
+    await menu
+      .locator('li div.lm-Menu-itemLabel:text("userUnhandled")')
+      .click();
+
+    await expect(page.locator('button.jp-PauseOnExceptions')).toHaveClass(
+      /lm-mod-toggled/
+    );
+
+    await page.notebook.enterCellEditingMode(0);
+    const keyboard = page.keyboard;
+    await keyboard.press('Control+A');
+    await keyboard.type('try:\n1/0\n', { delay: 100 });
+    await keyboard.press('Backspace');
+    await keyboard.type('except:\n2/0\n', { delay: 100 });
+
+    void page.notebook.runCell(0);
+
+    // Wait to be stopped on the breakpoint
+    await page.debugger.waitForCallStack();
+    expect(
+      await page.screenshot({
+        clip: { y: 110, x: 300, width: 300, height: 80 }
+      })
+    ).toMatchSnapshot('debugger_stop_on_unhandled_exception.png');
+
+    await page.click('button[title^=Continue]');
+    await page.notebook.waitForRun(0);
+
+    await page.locator('button.jp-PauseOnExceptions').click();
+
+    await expect(menu.locator('li.lm-Menu-item.lm-mod-toggled')).toHaveCount(1);
+    await expect(
+      menu.locator('li:has(div.lm-Menu-itemLabel:text("userUnhandled"))')
+    ).toHaveClass(/lm-mod-toggled/);
+
+    await menu.locator('li div.lm-Menu-itemLabel:text("raised")').click();
+
+    void page.notebook.runCell(0);
+
+    // Wait to be stopped on the breakpoint
+    await page.debugger.waitForCallStack();
+    expect(
+      await page.screenshot({
+        clip: { y: 110, x: 300, width: 300, height: 80 }
+      })
+    ).toMatchSnapshot('debugger_stop_on_raised_exception.png');
+    await page.click('button[title^=Continue]');
+    await page.click('button[title^=Continue]');
+  });
+
   test('Debugger sidebar', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
@@ -160,12 +228,34 @@ test.describe('Debugger', () => {
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
 
+    // Wait for the locals variables to be displayed
+    await expect(
+      page.locator('.jp-DebuggerVariables-toolbar select')
+    ).toHaveValue('Locals');
+
     expect(
       await page.screenshot({
         clip: { y: 58, x: 998, width: 280, height: 138 }
       })
     ).toMatchSnapshot('debugger_variables.png');
 
+    // Copy value to clipboard
+    await page
+      .locator('.jp-DebuggerVariables-body :text("b")')
+      .click({ button: 'right' });
+    await page.locator('.lm-Menu-itemLabel:text("Copy to Clipboard")').click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('2');
+
+    // Copy value entry is disabled for variables with empty value
+    await page
+      .locator('.jp-DebuggerVariables-toolbar select')
+      .selectOption('Globals');
+    await page
+      .locator('.jp-DebuggerVariables-body :text("special variables")')
+      .click({ button: 'right' });
+    await expect(
+      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+    ).toHaveAttribute('aria-disabled', 'true');
     await page.click('button[title^=Continue]');
   });
 

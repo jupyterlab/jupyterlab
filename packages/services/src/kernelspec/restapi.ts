@@ -21,7 +21,7 @@ const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
  * @returns A promise that resolves with the kernel specs.
  *
  * #### Notes
- * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
+ * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernelspecs).
  */
 export async function getSpecs(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
@@ -83,7 +83,7 @@ export interface ISpecModel extends PartialJSONObject {
  * The available kernelSpec models.
  *
  * #### Notes
- * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
+ * See the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernelspecs).
  */
 export interface ISpecModels extends PartialJSONObject {
   /**

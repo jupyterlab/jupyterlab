@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Context } from '@jupyterlab/docregistry';
-import { initNotebookContext } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
 import { Toolbar } from '@jupyterlab/ui-components';
-import { INotebookModel, Notebook, NotebookPanel } from '..';
+import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 /**

@@ -11,16 +11,18 @@ import {
   NotebookTools,
   NotebookTracker
 } from '@jupyterlab/notebook';
-import { initNotebookContext, NBTestUtils, sleep } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import {
+  initNotebookContext,
+  NBTestUtils
+} from '@jupyterlab/notebook/lib/testutils';
+import { JupyterServer, sleep } from '@jupyterlab/testing';
 import { MetadataForm, MetadataFormWidget } from '../src';
 
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

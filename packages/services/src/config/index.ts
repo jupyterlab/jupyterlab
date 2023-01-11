@@ -104,7 +104,7 @@ class DefaultConfigSection implements IConfigSection {
    * Load the initial data for this section.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/config).
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/config).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
@@ -125,7 +125,7 @@ class DefaultConfigSection implements IConfigSection {
    * Modify the stored config values.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/config).
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/config).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
@@ -181,7 +181,7 @@ export class ConfigWithDefaults {
    * Set a config value.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/config).
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/config).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *

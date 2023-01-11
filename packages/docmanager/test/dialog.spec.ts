@@ -5,9 +5,10 @@
 
 import { DocumentManager, renameFile } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManager } from '@jupyterlab/services';
-import { dismissDialog } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { dismissDialog } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 
 describe('docregistry/dialog', () => {
   let manager: DocumentManager;
@@ -16,8 +17,8 @@ describe('docregistry/dialog', () => {
 
   beforeAll(() => {
     const registry = new DocumentRegistry({});
-    services = new Mock.ServiceManagerMock();
-    const opener = new Mock.DocumentWidgetOpenerMock();
+    services = new ServiceManagerMock();
+    const opener = new DocumentWidgetOpenerMock();
     manager = new DocumentManager({
       registry,
       manager: services,

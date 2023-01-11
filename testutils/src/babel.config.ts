@@ -3,15 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-module.exports = {
-  presets: [
-    [
-      '@babel/preset-env',
-      {
-        targets: {
-          node: 'current'
-        }
-      }
-    ]
-  ]
-};
+import * as config from '@jupyterlab/testing/lib/babel-config';
+
+module.exports = config;

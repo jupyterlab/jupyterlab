@@ -20,13 +20,9 @@ fi
 
 if [[ $GROUP == js* ]]; then
 
-    if [[ $GROUP == "js-testutils" ]]; then
-        pushd testutils
-    else
-        # extract the group name
-        export PKG="${GROUP#*-}"
-        pushd packages/${PKG}
-    fi
+    # extract the group name
+    export PKG="${GROUP#*-}"
+    pushd packages/${PKG}
 
     jlpm run build:test; true
 

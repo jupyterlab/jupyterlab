@@ -7,7 +7,7 @@ import {
   IEditorHeading,
   PythonTableOfContentsModel
 } from '@jupyterlab/fileeditor';
-import { signalToPromise } from '@jupyterlab/testutils';
+import { signalToPromise } from '@jupyterlab/testing';
 
 describe('@jupyterlab/fileeditor', () => {
   describe('PythonTableOfContentsModel', () => {

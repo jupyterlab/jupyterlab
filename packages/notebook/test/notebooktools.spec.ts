@@ -3,19 +3,19 @@
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 import { Context } from '@jupyterlab/docregistry';
-import { ObservableJSON } from '@jupyterlab/observables';
-import { initNotebookContext, sleep } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { Message } from '@lumino/messaging';
-import { TabPanel, Widget } from '@lumino/widgets';
-import { simulate } from 'simulate-event';
 import {
   INotebookModel,
   NotebookActions,
   NotebookPanel,
   NotebookTools,
   NotebookTracker
-} from '..';
+} from '@jupyterlab/notebook';
+import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
+import { ObservableJSON } from '@jupyterlab/observables';
+import { JupyterServer, sleep } from '@jupyterlab/testing';
+import { Message } from '@lumino/messaging';
+import { TabPanel, Widget } from '@lumino/widgets';
+import { simulate } from 'simulate-event';
 import * as utils from './utils';
 
 class LogTool extends NotebookTools.Tool {

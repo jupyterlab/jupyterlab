@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { NBTestUtils } from '@jupyterlab/testutils';
-import { OutputModel } from '../src';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
+import { OutputModel } from '@jupyterlab/rendermime';
 
 const DEFAULT_EXECUTE: nbformat.IOutput = {
   output_type: 'execute_result',

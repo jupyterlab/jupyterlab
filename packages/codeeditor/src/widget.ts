@@ -41,8 +41,7 @@ export class CodeEditorWrapper extends Widget {
       host: this.node,
       model: options.model,
       uuid: options.uuid,
-      config: options.config,
-      selectionStyle: options.selectionStyle
+      config: options.config
     }));
     editor.model.selections.changed.connect(this._onSelectionsChanged, this);
   }
@@ -283,11 +282,6 @@ export namespace CodeEditorWrapper {
      * The configuration options for the editor.
      */
     config?: Partial<CodeEditor.IConfig>;
-
-    /**
-     * The default selection style for the editor.
-     */
-    selectionStyle?: CodeEditor.ISelectionStyle;
   }
 }
 

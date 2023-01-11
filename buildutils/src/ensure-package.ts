@@ -243,7 +243,7 @@ export async function ensurePackage(
       }
       const isTest = data.name.indexOf('test') !== -1;
       if (isTest) {
-        const testLibs = ['jest', 'ts-jest', '@jupyterlab/testutils'];
+        const testLibs = ['jest', 'ts-jest', '@jupyterlab/testing'];
         if (testLibs.indexOf(name) !== -1) {
           return;
         }

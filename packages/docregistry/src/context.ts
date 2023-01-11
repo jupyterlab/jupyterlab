@@ -1004,7 +1004,7 @@ namespace Private {
 
     const saveBtn = Dialog.okButton({ label: trans.__('Save'), accept: true });
     return showDialog({
-      title: trans.__('Save File As..'),
+      title: trans.__('Save File As…'),
       body: new SaveWidget(path),
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {

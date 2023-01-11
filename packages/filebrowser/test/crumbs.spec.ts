@@ -3,9 +3,10 @@
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManager } from '@jupyterlab/services';
-import { framePromise, signalToPromise } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -53,12 +54,12 @@ describe('filebrowser/model', () => {
   let path: string;
 
   beforeAll(async () => {
-    const opener = new Mock.DocumentWidgetOpenerMock();
+    const opener = new DocumentWidgetOpenerMock();
 
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new Mock.ServiceManagerMock();
+    serviceManager = new ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,

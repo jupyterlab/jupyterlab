@@ -15,9 +15,6 @@
       "path": "../nbformat"
     },
     {
-      "path": "../observables"
-    },
-    {
       "path": "../statusbar"
     },
     {
@@ -30,7 +27,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
+      "path": "../testing"
     }
   ]
 }

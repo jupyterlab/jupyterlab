@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect from 'expect';
-import { simulate } from 'simulate-event';
-import { Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { Mock, signalToPromise } from '@jupyterlab/testutils';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { signalToPromise } from '@jupyterlab/testing';
+import { Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import expect from 'expect';
+import { simulate } from 'simulate-event';
 import { DirListing, FilterFileBrowserModel } from '../src';
 
 // Returns the minimal args needed to create a new DirListing instance
@@ -15,8 +17,8 @@ const createOptionsForConstructor: () => DirListing.IOptions = () => ({
   model: new FilterFileBrowserModel({
     manager: new DocumentManager({
       registry: new DocumentRegistry(),
-      opener: new Mock.DocumentWidgetOpenerMock(),
-      manager: new Mock.ServiceManagerMock()
+      opener: new DocumentWidgetOpenerMock(),
+      manager: new ServiceManagerMock()
     })
   })
 });

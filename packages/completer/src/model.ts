@@ -8,6 +8,15 @@ import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 
 /**
+ * Escape HTML by native means of the browser.
+ */
+function escapeHTML(text: string) {
+  const node = document.createElement('span');
+  node.textContent = text;
+  return node.innerHTML;
+}
+
+/**
  * An implementation of a completer model.
  */
 export class CompleterModel implements Completer.IModel {
@@ -16,6 +25,13 @@ export class CompleterModel implements Completer.IModel {
    */
   get stateChanged(): ISignal<this, void> {
     return this._stateChanged;
+  }
+
+  /**
+   * A signal emitted when query string changes (at invocation, or as user types).
+   */
+  get queryChanged(): ISignal<this, Completer.IQueryChange> {
+    return this._queryChanged;
   }
 
   /**
@@ -98,6 +114,8 @@ export class CompleterModel implements Completer.IModel {
     const ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
+    this._processedItemsCache = null;
+    this._queryChanged.emit({ newValue: this._query, origin: 'editorUpdate' });
     this._stateChanged.emit(undefined);
   }
 
@@ -124,6 +142,8 @@ export class CompleterModel implements Completer.IModel {
   }
   set query(newValue: string) {
     this._query = newValue;
+    this._processedItemsCache = null;
+    this._queryChanged.emit({ newValue: this._query, origin: 'setter' });
   }
 
   /**
@@ -162,11 +182,17 @@ export class CompleterModel implements Completer.IModel {
    * This is a read-only property.
    */
   completionItems(): CompletionHandler.ICompletionItems {
-    let query = this._query;
-    if (query) {
-      return this._markup(query);
+    if (!this._processedItemsCache) {
+      let query = this._query;
+      if (query) {
+        this._processedItemsCache = this._markup(query);
+      } else {
+        this._processedItemsCache = this._completionItems.map(item => {
+          return this._escapeItemLabel(item);
+        });
+      }
     }
-    return this._completionItems;
+    return this._processedItemsCache;
   }
 
   /**
@@ -186,6 +212,7 @@ export class CompleterModel implements Completer.IModel {
     this._orderedTypes = Private.findOrderedCompletionItemTypes(
       this._completionItems
     );
+    this._processedItemsCache = null;
     this._stateChanged.emit(undefined);
   }
 
@@ -345,44 +372,40 @@ export class CompleterModel implements Completer.IModel {
       // e.g. Given label `foo(b, a, r)` and query `bar`,
       // don't count parameters, `b`, `a`, and `r` as matches.
       const index = item.label.indexOf('(');
-      const prefix = index > -1 ? item.label.substring(0, index) : item.label;
+      let prefix = index > -1 ? item.label.substring(0, index) : item.label;
+      prefix = escapeHTML(prefix);
       let match = StringExt.matchSumOfSquares(prefix, query);
       // Filter non-matching items.
       if (match) {
         // Highlight label text if there's a match
         let marked = StringExt.highlight(
-          item.label,
+          escapeHTML(item.label),
           match.indices,
           Private.mark
         );
+        // Use `Object.assign` to evaluate getters.
+        const highlightedItem = Object.assign({}, item);
+        highlightedItem.label = marked.join('');
+        highlightedItem.insertText = item.insertText ?? item.label;
         results.push({
-          ...item,
-          // Allow for lazily retrieved documentation (with a getter)
-          documentation: item.documentation,
-          label: marked.join(''),
-          // If no insertText is present, preserve original label value
-          // by setting it as the insertText.
-          insertText: item.insertText ? item.insertText : item.label,
+          item: highlightedItem,
           score: match.score
         });
       }
     }
-    results.sort(Private.scoreCmp2);
+    results.sort(Private.scoreCmp);
 
-    // Delete the extra score attribute to not leak implementation details
-    // to JavaScript callers.
-    results.forEach(x => {
-      delete (x as any).score;
-    });
-
-    return results;
+    // Extract only the item (dropping the extra score attribute to not leak
+    // implementation details to JavaScript callers.
+    return results.map(match => match.item);
   }
 
   /**
    * Lazy load missing data of item at `activeIndex`.
    * @param {number} activeIndex - index of item
    * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
-   * Return a promise of `null` if another `resolveItem` is called. Otherwise return the
+   * Return a promise of `null` if another `resolveItem` is called (but still updates the
+   * underlying completion item with resolved data). Otherwise return the
    * promise of resolved completion item.
    */
   resolveItem(
@@ -394,7 +417,7 @@ export class CompleterModel implements Completer.IModel {
       return undefined;
     }
 
-    let completionItems = this.completionItems();
+    let completionItems = this._completionItems;
     if (!completionItems || !completionItems[activeIndex]) {
       return undefined;
     }
@@ -410,6 +433,8 @@ export class CompleterModel implements Completer.IModel {
     }
     return resolvedItem
       .then(activeItem => {
+        // Escape the label it in place
+        this._escapeItemLabel(activeItem, true);
         (
           Object.keys(activeItem) as Array<
             keyof CompletionHandler.ICompletionItem
@@ -433,29 +458,56 @@ export class CompleterModel implements Completer.IModel {
   }
 
   /**
+   * Escape item label, storing the original label and adding `insertText` if needed.
+   * If escaping changes label creates a new item unless `inplace` is true.
+   */
+  private _escapeItemLabel(
+    item: CompletionHandler.ICompletionItem,
+    inplace: boolean = false
+  ): CompletionHandler.ICompletionItem {
+    const escapedLabel = escapeHTML(item.label);
+    // If there was no insert text, use the original (unescaped) label.
+    if (escapedLabel !== item.label) {
+      const newItem = inplace ? item : Object.assign({}, item);
+      newItem.insertText = item.insertText ?? item.label;
+      newItem.label = escapedLabel;
+      return newItem;
+    }
+    return item;
+  }
+
+  /**
    * Reset the state of the model.
    */
   private _reset(): void {
+    const hadQuery = this._query;
     this._current = null;
     this._cursor = null;
     this._completionItems = [];
     this._original = null;
     this._query = '';
+    this._processedItemsCache = null;
     this._subsetMatch = false;
     this._typeMap = {};
     this._orderedTypes = [];
+    if (hadQuery) {
+      this._queryChanged.emit({ newValue: this._query, origin: 'reset' });
+    }
   }
 
   private _current: Completer.ITextState | null = null;
   private _cursor: Completer.ICursorSpan | null = null;
   private _isDisposed = false;
   private _completionItems: CompletionHandler.ICompletionItems = [];
+  private _processedItemsCache: CompletionHandler.ICompletionItems | null =
+    null;
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
   private _typeMap: Completer.TypeMap = {};
   private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
+  private _queryChanged = new Signal<this, Completer.IQueryChange>(this);
 
   /**
    * A counter to cancel ongoing `resolveItem` call.
@@ -510,24 +562,13 @@ namespace Private {
   }
 
   /**
-   * A sort comparison function for item match scores.
-   *
-   * #### Notes
-   * This orders the items first based on score (lower is better), then
-   * by locale order of the item text.
+   * A filtered completion matching result.
    */
-  export function scoreCmp(a: IMatch, b: IMatch): number {
-    const delta = a.score - b.score;
-    if (delta !== 0) {
-      return delta;
-    }
-    return a.raw.localeCompare(b.raw);
-  }
-
-  /**
-   * A filtered completion menu matching result.
-   */
-  export interface ICompletionMatch extends CompletionHandler.ICompletionItem {
+  export interface ICompletionMatch {
+    /**
+     * The completion item data.
+     */
+    item: CompletionHandler.ICompletionItem;
     /**
      * A score which indicates the strength of the match.
      *
@@ -543,12 +584,12 @@ namespace Private {
    * This orders the items first based on score (lower is better), then
    * by locale order of the item text.
    */
-  export function scoreCmp2(a: ICompletionMatch, b: ICompletionMatch): number {
+  export function scoreCmp(a: ICompletionMatch, b: ICompletionMatch): number {
     const delta = a.score - b.score;
     if (delta !== 0) {
       return delta;
     }
-    return a.insertText?.localeCompare(b.insertText ?? '') ?? 0;
+    return a.item.insertText?.localeCompare(b.item.insertText ?? '') ?? 0;
   }
 
   /**

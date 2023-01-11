@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   Cell,
   CellFooter,
@@ -16,22 +17,22 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
+import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
+import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
+import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
 import { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
-import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
 import {
-  createSessionContext,
   framePromise,
   JupyterServer,
-  NBTestUtils,
   signalToPromise
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
-const rendermime = NBTestUtils.defaultRenderMime();
+const rendermime = defaultRenderMime();
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -943,6 +944,7 @@ describe('cells/widget', () => {
         Widget.attach(widget, document.body);
         widget.rendered = false;
         await signalToPromise(widget.renderedChanged);
+        await framePromise();
         expect(widget.node.classList.contains(RENDERED_CLASS)).toEqual(false);
         widget.dispose();
       });

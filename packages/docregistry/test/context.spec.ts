@@ -12,11 +12,9 @@ import { Contents, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
-  initNotebookContext,
-  NBTestUtils,
   waitForDialog
-} from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+} from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
@@ -25,7 +23,7 @@ describe('docregistry/context', () => {
   const factory = new TextModelFactory();
 
   beforeAll(() => {
-    manager = new Mock.ServiceManagerMock();
+    manager = new ServiceManagerMock();
     return manager.ready;
   });
 
@@ -183,29 +181,6 @@ describe('docregistry/context', () => {
         });
         await context.initialize(false);
         await expect(context.ready).resolves.not.toThrow();
-      });
-
-      it('should initialize the model when the file is saved for the first time', async () => {
-        const context = await initNotebookContext({ manager });
-        context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
-        expect(context.model.sharedModel.canUndo()).toBe(true);
-        await context.initialize(true);
-        await context.ready;
-        expect(context.model.sharedModel.canUndo()).toBe(false);
-      });
-
-      it('should initialize the model when the file is reverted for the first time', async () => {
-        const context = await initNotebookContext({ manager });
-        await manager.contents.save(context.path, {
-          type: 'notebook',
-          format: 'json',
-          content: NBTestUtils.DEFAULT_CONTENT
-        });
-        context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
-        expect(context.model.sharedModel.canUndo()).toBe(true);
-        await context.initialize(false);
-        await context.ready;
-        expect(context.model.sharedModel.canUndo()).toBe(false);
       });
     });
 
