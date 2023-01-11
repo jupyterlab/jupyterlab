@@ -33,7 +33,7 @@
     },
     "autoCompletion": {
       "title": "Enable autocompletion.",
-      "description": "Autocompletion  setting.",
+      "description": "Autocompletion setting.",
       "type": "boolean",
       "default": false
     }

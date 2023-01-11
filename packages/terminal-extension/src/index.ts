@@ -289,20 +289,6 @@ function addRunningSessionManager(
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.terminals;
 
-  managers.add({
-    name: trans.__('Terminals'),
-    running: () =>
-      Array.from(manager.running()).map(model => new RunningTerminal(model)),
-    shutdownAll: () => manager.shutdownAll(),
-    refreshRunning: () => manager.refreshRunning(),
-    runningChanged: manager.runningChanged,
-    shutdownLabel: trans.__('Shut Down'),
-    shutdownAllLabel: trans.__('Shut Down All'),
-    shutdownAllConfirmationText: trans.__(
-      'Are you sure you want to permanently shut down all running terminals?'
-    )
-  });
-
   class RunningTerminal implements IRunningSessions.IRunningItem {
     constructor(model: Terminal.IModel) {
       this._model = model;
@@ -322,6 +308,20 @@ function addRunningSessionManager(
 
     private _model: Terminal.IModel;
   }
+
+  managers.add({
+    name: trans.__('Terminals'),
+    running: () =>
+      Array.from(manager.running()).map(model => new RunningTerminal(model)),
+    shutdownAll: () => manager.shutdownAll(),
+    refreshRunning: () => manager.refreshRunning(),
+    runningChanged: manager.runningChanged,
+    shutdownLabel: trans.__('Shut Down'),
+    shutdownAllLabel: trans.__('Shut Down All'),
+    shutdownAllConfirmationText: trans.__(
+      'Are you sure you want to permanently shut down all running terminals?'
+    )
+  });
 }
 
 /**

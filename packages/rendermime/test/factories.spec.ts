@@ -2,21 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import * as marked from '@jupyterlab/markedparser-extension';
-import { JSONObject, JSONValue } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
-import { IMarkdownParser } from '../lib';
 import {
   htmlRendererFactory,
   imageRendererFactory,
+  IMarkdownParser,
   IRenderMime,
   latexRendererFactory,
   markdownRendererFactory,
   MimeModel,
   svgRendererFactory,
   textRendererFactory
-} from '../src';
-import * as fs from 'fs-extra';
+} from '@jupyterlab/rendermime';
+import { JSONObject, JSONValue } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 
 function createModel(
   mimeType: string,
@@ -271,9 +269,9 @@ describe('rendermime/factories', () => {
       let markdownParser: IMarkdownParser;
 
       beforeAll(() => {
-        markdownParser = marked.default.activate(
-          jest.fn() as any
-        ) as IMarkdownParser;
+        markdownParser = {
+          render: (content: string): Promise<string> => Promise.resolve(content)
+        };
       });
 
       it('should set the inner html with no parser', async () => {
@@ -318,16 +316,13 @@ describe('rendermime/factories', () => {
       it('should add header anchors', async () => {
         const f = markdownRendererFactory;
         const mimeType = 'text/markdown';
-        const sampleData = fs.readFileSync(
-          '../../examples/filebrowser/sample.md',
-          { encoding: 'utf-8' }
-        );
+        const sampleData = '### Title third level';
 
         const model = createModel(mimeType, sampleData);
         const w = f.createRenderer({
           mimeType,
           ...defaultOptions,
-          markdownParser
+          markdownParser: { render: content => '<h3>Title third level</h3>' }
         });
         await w.renderModel(model);
         Widget.attach(w, document.body);

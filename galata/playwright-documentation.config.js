@@ -18,6 +18,9 @@ module.exports = {
     launchOptions: {
       // Force slow motion
       slowMo: 30
+    },
+    contextOptions: {
+      permissions: ['clipboard-read', 'clipboard-write']
     }
   },
   // Switch to 'always' to keep raw assets for all tests

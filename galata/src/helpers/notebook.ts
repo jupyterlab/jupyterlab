@@ -902,6 +902,10 @@ export class NotebookHelper {
     }
 
     const panel = await this.activity.getPanel();
+    await panel!.waitForSelector(
+      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement',
+      { state: 'attached' }
+    );
     const gutters = await panel!.$$(
       '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
     );

@@ -4,6 +4,7 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { Contents, ServiceManager } from '@jupyterlab/services';
 import { StateDB } from '@jupyterlab/statedb';
 import {
@@ -11,8 +12,11 @@ import {
   dismissDialog,
   signalToPromises,
   sleep
-} from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+} from '@jupyterlab/testing';
+import {
+  ContentsManagerMock,
+  ServiceManagerMock
+} from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import expect from 'expect';
 import { CHUNK_SIZE, FileBrowserModel, LARGE_FILE_SIZE } from '../src';
@@ -21,7 +25,7 @@ import { CHUNK_SIZE, FileBrowserModel, LARGE_FILE_SIZE } from '../src';
  * A contents manager that delays requests by less each time it is called
  * in order to simulate out-of-order responses from the server.
  */
-class DelayedContentsManager extends Mock.ContentsManagerMock {
+class DelayedContentsManager extends ContentsManagerMock {
   get(
     path: string,
     options?: Contents.IFetchOptions
@@ -49,13 +53,13 @@ describe('filebrowser/model', () => {
   let subDir: string;
   let subSubDir: string;
   let state: StateDB;
-  const opener = new Mock.DocumentWidgetOpenerMock();
+  const opener = new DocumentWidgetOpenerMock();
 
   beforeAll(() => {
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new Mock.ServiceManagerMock();
+    serviceManager = new ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,
@@ -259,7 +263,7 @@ describe('filebrowser/model', () => {
       });
 
       it('should be resilient to a slow initial fetch', async () => {
-        const delayedServiceManager = new Mock.ServiceManagerMock();
+        const delayedServiceManager = new ServiceManagerMock();
         (delayedServiceManager as any).contents = new DelayedContentsManager();
         const contents = await delayedServiceManager.contents.newUntitled({
           type: 'directory'

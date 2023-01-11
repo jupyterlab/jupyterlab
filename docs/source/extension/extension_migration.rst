@@ -44,10 +44,42 @@ bumped their major version (following semver convention). We want to point out p
    If you instantiate standalone cells outside of a notebook, you will probably need to set the constructor option
    ``placeholder`` to ``false`` to ensure direct rendering of the cell.
 - ``@jupyterlab/completer`` from 3.x to 4.x
-   Major version bumped following the removal of ``ICompletionManager`` token and the replacement
-   of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
-   for JupyterLab, users need to implement the interface ``ICompletionProvider`` and then register
-   this provider with ``ICompletionProviderManager`` token.
+   Major version was bumped following major refactor aimed at performance improvements and enabling easier third-party integration.
+
+   * Adding custom completion suggestions (items):
+      - In 3.x and earlier adding custom completion items required re-registering the completer connector for each file/cell
+        using ``register`` method of old manager provided by ``ICompletionManager`` token; in 4.x this token and associated
+        ``ICompletableAttributes`` interface was removed and a proper method of registering a custom source of completions
+        (a provider of completions) was added. To create a completer provider  for JupyterLab, users need to implement the
+        ``ICompletionProvider`` interface and then register this provider with ``ICompletionProviderManager`` token.
+      - In 3.x merging completions from different sources had to be performed by creating a connector internally merging
+        results from other connectors. in 4.x ``IProviderReconciliator`` is used to merge completions from multiple providers,
+        and can be customised in constructor for custom completion handlers (``CompletionHandler``); customizing reconciliator
+        in JupyterLab-managed completers is not yet possible.
+   * Rendering with ``Completer.IRenderer``:
+      - In 3.x it was not possible to easily swap the renderer of JupyterLab-managed completers.
+        In 4.x the renderer from the completion provider with highest rank is now used for all
+        JupyterLab-managed completers. This behaviour is subject to revision in the future (please leave feedback).
+      - Completer box is now using delayed rendering for off-screen content to improve time to first paint
+        for top suggestions. To position the completer without rendering all items we search for the widest
+        item using heuristic which can be adjusted in custom renderers (``itemWidthHeuristic``).
+      - The documentation panel now implements a loading indicator (a progress bar) customizable via
+        optional ``createLoadingDocsIndicator`` renderer method.
+      - ``createItemNode`` was removed in favour of ``createCompletionItemNode`` which is now required.
+      - ``createCompletionItemNode`` is no longer responsible for sanitization of labels which is now a
+        responsibility of the model (see below).
+   * Model:
+      - In 3.x it was not possible to easily swap the model of JupyterLab-managed completers.
+        In 4.x the model factory from the completion provider with highest rank is now used for
+        JupyterLab-managed completers. This behaviour is subject to revision in the future (please leave feedback).
+      - Old methods for updating and accessing the completion items: ``setOptions``, ``options``, and ``items`` were removed
+        in favour of ``completionItems`` and ``setCompletionItems`` which are now required members of ``Completer.IModel``.
+      - New signal ``queryChanged`` was added and has to be emitted by models.
+      - Model is now responsible for sanitization of labels and preserving original label on ``insertText`` attribute
+        (if not already defined); this change was required to properly handle escaping of HTML tags.
+- ``@jupyterlab/codeeditor`` from 3.x to 4.x
+   * Remove ``ISelectionStyle`` (and therefore ``defaultSelectionStyle`` and ``IEditor.selectionStyle``). This was envisaged
+     for real-time collaboration. But this is not used in the final implementation.
 - ``@jupyterlab/console`` from 3.x to 4.x
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
@@ -140,10 +172,28 @@ bumped their major version (following semver convention). We want to point out p
    need to switch to the Blueprint components as the interfaces of those components in JupyterLab
    do not match those of Blueprint JS.
    Remove ``Collapse`` React component.
+- ``jupyter.extensions.hub-extension`` from 3.x to 4.x
+   * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
+   * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
 - TypeScript 4.7 update
    As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+
+Testing with Jest
+^^^^^^^^^^^^^^^^^
+
+Jest has been updated to 29.2.0 (and *ts-jest* to 29.0.0). And therefore the jest configuration provided by
+``@jupyterlab/testutils`` is compatible for that version. In particular:
+
+- The unmaintained reporter ``jest-summary-reporter`` has been replaced by the new default ``github-actions`` reporter.
+- The helper ``flakyIt`` has been removed. You can use the new `jest.retryTimes <https://jestjs.io/docs/jest-object#jestretrytimesnumretries-options>`_ instead.
+
+With JupyterLab 4, we fixed circular dependencies due to the testutils package. So it is now only a facade to export
+helpers from various core packages. The exported helpers are the same as before expect for:
+
+- ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.
+- ``NBTestUtils.DEFAULT_CONTENT_45``: Removed
 
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

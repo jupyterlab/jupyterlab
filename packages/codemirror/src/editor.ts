@@ -5,7 +5,6 @@
 // / <reference types="codemirror/searchcursor"/>
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ICollaborator, IObservableMap } from '@jupyterlab/observables';
 import { IYText } from '@jupyter/ydoc';
 import {
   ITranslator,
@@ -28,22 +27,11 @@ import {
   EditorState,
   Extension,
   Prec,
-  Range,
   StateCommand,
-  StateEffect,
-  StateEffectType,
-  StateField,
   Text,
   Transaction
 } from '@codemirror/state';
-import {
-  Command,
-  Decoration,
-  DecorationSet,
-  EditorView,
-  ViewUpdate,
-  WidgetType
-} from '@codemirror/view';
+import { Command, EditorView, ViewUpdate } from '@codemirror/view';
 import { SyntaxNodeRef } from '@lezer/common';
 import { yCollab } from 'y-codemirror.next';
 import { Awareness } from 'y-protocols/awareness';
@@ -64,16 +52,6 @@ const EDITOR_CLASS = 'jp-CodeMirrorEditor';
 const READ_ONLY_CLASS = 'jp-mod-readOnly';
 
 /**
- * The class name for the hover box for collaborator cursors.
- */
-const COLLABORATOR_CURSOR_CLASS = 'jp-CollaboratorCursor';
-
-/**
- * The class name for the hover box for collaborator cursors.
- */
-const COLLABORATOR_HOVER_CLASS = 'jp-CollaboratorCursor-hover';
-
-/**
  * The key code for the up arrow key.
  */
 const UP_ARROW = 38;
@@ -82,11 +60,6 @@ const UP_ARROW = 38;
  * The key code for the down arrow key.
  */
 const DOWN_ARROW = 40;
-
-/**
- * The time that a collaborator name hover persists.
- */
-const HOVER_TIMEOUT = 1000;
 
 interface IYCodeMirrorBinding {
   text: Y.Text;
@@ -114,53 +87,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     host.addEventListener('scroll', this, true);
 
     this._uuid = options.uuid || UUID.uuid4();
-
-    // State and effects for handling the selection marks
-    this._addMark = StateEffect.define<Private.ICollabSelectionText>();
-    this._removeMark = StateEffect.define<Private.ICollabDecorationSet>();
-
-    this._markField = StateField.define<DecorationSet>({
-      create: () => {
-        return Decoration.none;
-      },
-      update: (marks, transaction) => {
-        marks = marks.map(transaction.changes);
-        for (let ef of transaction.effects) {
-          if (ef.is(this._addMark)) {
-            let e = ef as StateEffect<Private.ICollabSelectionText>;
-            const decorations = this._buildMarkDecoration(
-              e.value.uuid,
-              e.value.selections
-            );
-            marks = marks.update({ add: decorations });
-            this._selectionMarkers[e.value.uuid] = decorations;
-          } else if (ef.is(this._removeMark)) {
-            let e = ef as StateEffect<Private.ICollabDecorationSet>;
-            for (let rd of ef.value.decorations) {
-              marks = marks.update({
-                filter: (from, to, value) => {
-                  return !(
-                    from === rd.from &&
-                    to === rd.to &&
-                    value === rd.value
-                  );
-                }
-              });
-            }
-            delete this._selectionMarkers[e.value.uuid];
-          }
-        }
-        return marks;
-      },
-      provide: f => EditorView.decorations.from(f)
-    });
-
-    // Handle selection style.
-    const style = options.selectionStyle || {};
-    this._selectionStyle = {
-      ...CodeEditor.defaultSelectionStyle,
-      ...(style as CodeEditor.ISelectionStyle)
-    };
 
     const model = (this._model = options.model);
     const config = options.config || {};
@@ -239,19 +165,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       fullConfig,
       this._yeditorBinding,
       this._editorConfig,
-      [
-        this._markField,
-        Prec.high(domEventHandlers),
-        updateListener,
-        translation
-      ]
+      [Prec.high(domEventHandlers), updateListener, translation]
     );
 
     this._onMimeTypeChanged();
     this._onCursorActivity();
 
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-    model.selections.changed.connect(this._onSelectionsChanged, this);
   }
 
   /**
@@ -286,16 +206,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
   set uuid(value: string) {
     this._uuid = value;
-  }
-
-  /**
-   * The selection style of this editor.
-   */
-  get selectionStyle(): CodeEditor.ISelectionStyle {
-    return this._selectionStyle;
-  }
-  set selectionStyle(value: CodeEditor.ISelectionStyle) {
-    this._selectionStyle = value;
   }
 
   /**
@@ -660,10 +570,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Replaces the current selection with the given text.
    *
+   * Behaviour for multiple selections is undefined.
+   *
    * @param text The text to be inserted.
    */
   replaceSelection(text: string): void {
-    this.state.replaceSelection(text);
+    const firstSelection = this.getSelections()[0];
+    this.model.sharedModel.updateSource(
+      this.getOffsetAt(firstSelection.start),
+      this.getOffsetAt(firstSelection.end),
+      text
+    );
+    const newPosition = this.getPositionAt(
+      this.getOffsetAt(firstSelection.start) + text.length
+    );
+    this.setSelection({ start: newPosition, end: newPosition });
   }
 
   /**
@@ -804,129 +725,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Handles a selections change.
-   */
-  private _onSelectionsChanged(
-    selections: IObservableMap<CodeEditor.ITextSelection[]>,
-    args: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
-  ): void {
-    const uuid = args.key;
-    if (uuid !== this.uuid) {
-      this._cleanSelections(uuid);
-      if (args.type !== 'remove' && args.newValue) {
-        this._markSelections(uuid, args.newValue);
-      }
-    }
-  }
-
-  /**
-   * Clean selections for the given uuid.
-   */
-  private _cleanSelections(uuid: string) {
-    this.editor.dispatch({
-      effects: this._removeMark.of({
-        uuid: uuid,
-        decorations: this._selectionMarkers[uuid]
-      })
-    });
-  }
-
-  private _buildMarkDecoration(
-    uuid: string,
-    selections: Private.ISelectionText[]
-  ) {
-    const decorations: Range<Decoration>[] = [];
-
-    // If we are marking selections corresponding to an active hover,
-    // remove it.
-    if (uuid === this._hoverId) {
-      this._clearHover();
-    }
-    // If we can id the selection to a specific collaborator,
-    // use that information.
-    let collaborator: ICollaborator | undefined;
-
-    // Style each selection for the uuid.
-    selections.forEach(selection => {
-      const from = selection.from;
-      const to = selection.to;
-      // Only render selections if the start is not equal to the end.
-      // In that case, we don't need to render the cursor.
-      if (from !== to) {
-        const style = collaborator
-          ? { ...selection.style, color: collaborator.color }
-          : selection.style;
-        const decoration = Decoration.mark({
-          attributes: this._toMarkSpec(style)
-        });
-        decorations.push(
-          from > to ? decoration.range(to, from) : decoration.range(to, from)
-        );
-      } else if (collaborator) {
-        const caret = Decoration.widget({
-          widget: this._getCaret(collaborator)
-        });
-        decorations.push(caret.range(from));
-      }
-    });
-
-    return decorations;
-  }
-
-  /**
-   * Converts the selection style to a text marker options.
-   */
-  private _toMarkSpec(style: CodeEditor.ISelectionStyle) {
-    const r = parseInt(style.color.slice(1, 3), 16);
-    const g = parseInt(style.color.slice(3, 5), 16);
-    const b = parseInt(style.color.slice(5, 7), 16);
-    const css = `background-color: rgba( ${r}, ${g}, ${b}, 0.15)`;
-    return {
-      className: style.className,
-      title: style.displayName,
-      css
-    };
-  }
-
-  /**
-   * Construct a caret element representing the position
-   * of a collaborator's cursor.
-   */
-  private _getCaret(collaborator: ICollaborator): Private.CaretWidget {
-    return new Private.CaretWidget(collaborator, {
-      setHoverId: (sessionId: string) => {
-        this._clearHover();
-        this._hoverId = sessionId;
-      },
-      setHoverTimeout: () => {
-        this._hoverTimeout = window.setTimeout(() => {
-          this._clearHover();
-        }, HOVER_TIMEOUT);
-      },
-      clearHoverTimeout: () => {
-        window.clearTimeout(this._hoverTimeout);
-      }
-    });
-  }
-
-  /**
-   * Marks selections.
-   */
-  private _markSelections(
-    uuid: string,
-    selections: CodeEditor.ITextSelection[]
-  ) {
-    const sel = selections.map(selection => ({
-      from: this.getOffsetAt(selection.start),
-      to: this.getOffsetAt(selection.end),
-      style: selection.style
-    }));
-    this.editor.dispatch({
-      effects: this._addMark.of({ uuid: uuid, selections: sel })
-    });
-  }
-
-  /**
    * Handles a cursor activity event.
    */
   private _onCursorActivity(): void {
@@ -948,8 +746,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     return {
       uuid: this.uuid,
       start: this._toPosition(selection.anchor),
-      end: this._toPosition(selection.head),
-      style: this.selectionStyle
+      end: this._toPosition(selection.head)
     };
   }
 
@@ -1052,22 +849,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
   private _editor: EditorView;
-  private _selectionMarkers: {
-    [key: string]: Range<Decoration>[];
-  } = {};
   private _caretHover: HTMLElement | null;
   private _config: CodeMirrorEditor.IConfig;
   private _hoverTimeout: number;
-  private _hoverId: string;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
-  private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
   private _isDisposed = false;
   private _yeditorBinding: IYCodeMirrorBinding | null;
   private _editorConfig: Configuration.EditorConfiguration;
-  private _addMark: StateEffectType<Private.ICollabSelectionText>;
-  private _removeMark: StateEffectType<Private.ICollabDecorationSet>;
-  private _markField: StateField<DecorationSet>;
 }
 
 /**
@@ -1175,78 +964,5 @@ namespace Private {
     }
 
     return view;
-  }
-
-  export interface ISelectionText {
-    from: number;
-    to: number;
-    style: CodeEditor.ISelectionStyle;
-  }
-
-  export interface ICollabSelectionText {
-    uuid: string;
-    selections: ISelectionText[];
-  }
-
-  export interface ICollabDecorationSet {
-    uuid: string;
-    decorations: Range<Decoration>[];
-  }
-
-  export interface ICaretWidgetCallbacks {
-    setHoverId: (sessionId: string) => void;
-    setHoverTimeout: () => void;
-    clearHoverTimeout: () => void;
-  }
-
-  export class CaretWidget extends WidgetType {
-    constructor(
-      readonly collaborator: ICollaborator,
-      readonly callbacks: ICaretWidgetCallbacks
-    ) {
-      super();
-    }
-
-    eq(other: CaretWidget) {
-      return this.collaborator.sessionId == other.collaborator.sessionId;
-    }
-
-    toDOM() {
-      const caret: HTMLElement = document.createElement('span');
-      caret.className = COLLABORATOR_CURSOR_CLASS;
-      caret.style.borderBottomColor = this.collaborator.color;
-
-      // TODO: check if this should be replaced with
-      // a global event handler
-      caret.onmouseenter = () => {
-        this.callbacks.setHoverId(this.collaborator.sessionId);
-        const rect = caret.getBoundingClientRect();
-        // Construct and place the hover box.
-        const hover = document.createElement('div');
-        hover.className = COLLABORATOR_HOVER_CLASS;
-        hover.style.left = `${rect.left}px`;
-        hover.style.top = `${rect.bottom}px`;
-        hover.textContent = this.collaborator.displayName;
-        hover.style.backgroundColor = this.collaborator.color;
-
-        // If the user mouses over the hover, take over the timer.
-        hover.onmouseenter = () => {
-          this.callbacks.clearHoverTimeout();
-        };
-        hover.onmouseleave = () => {
-          this.callbacks.setHoverTimeout();
-        };
-      };
-
-      caret.onmouseleave = () => {
-        this.callbacks.setHoverTimeout();
-      };
-
-      return caret;
-    }
-
-    ignoreEvent() {
-      return false;
-    }
   }
 }

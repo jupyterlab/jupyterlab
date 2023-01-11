@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
 import { JSONExt } from '@lumino/coreutils';
 import { KernelSpec, KernelSpecManager } from '../../src';
 import {

@@ -20,7 +20,6 @@
 
 .lm-DockPanel-tabBar,
 .lm-TabPanel-tabBar {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
@@ -49,7 +48,7 @@
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   align-items: center;
   min-height: calc(
-    var(--jp-private-horizontal-tab-height) + var(--jp-border-width)
+    var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
   );
   min-width: 0;
   margin-left: calc(-1 * var(--jp-border-width));
@@ -67,6 +66,16 @@
   color: var(--jp-ui-font-color1);
 }
 
+.lm-DockPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current)::after,
+.lm-DockPanel-tabBar .lm-TabBar-addButton::after {
+  position: absolute;
+  content: '';
+  bottom: 0;
+  left: calc(-1 * var(--jp-border-width));
+  width: calc(100% + 2 * var(--jp-border-width));
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
 .lm-DockPanel-tabBar .lm-TabBar-tab:first-child,
 .lm-TabPanel-tabBar .lm-TabBar-tab:first-child {
   margin-left: 0;
@@ -76,10 +85,6 @@
 .lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current {
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
-  min-height: calc(
-    var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
-  );
-  transform: translateY(var(--jp-border-width));
 }
 
 .lm-TabPanel-tabBar .lm-TabBar-tab.lm-mod-current {
@@ -100,11 +105,6 @@
 
 /* This is the left tab bar current tab: only 1 exists. */
 .lm-TabBar-tab.lm-mod-current {
-  background: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color1);
-}
-
-.lm-TabBar-tab.lm-mod-current:hover {
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
 }
@@ -147,11 +147,6 @@
   background-repeat: no-repeat;
   background-size: 14px;
   margin-right: 4px;
-}
-
-.lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabIcon,
-.lm-TabPanel-tabBar .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabIcon {
-  margin-bottom: var(--jp-border-width);
 }
 
 .lm-TabBar-tab.lm-mod-drag-image {

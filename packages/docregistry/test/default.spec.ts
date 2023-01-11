@@ -11,9 +11,10 @@ import {
   IDocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
+import { createFileContextWithMockedServices } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManager } from '@jupyterlab/services';
-import { sleep } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { sleep } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
@@ -185,7 +186,7 @@ describe('docregistry/default', () => {
             }
           ]
         });
-        const context = await Mock.createFileContext();
+        const context = await createFileContextWithMockedServices();
         const widget = factory.createNew(context);
         const widget2 = factory.createNew(context);
         expect(Array.from(widget.toolbar.names())).toEqual([
@@ -230,14 +231,14 @@ describe('docregistry/default', () => {
     describe('#createNew()', () => {
       it('should create a new widget given a document model and a context', async () => {
         const factory = createFactory();
-        const context = await Mock.createFileContext();
+        const context = await createFileContextWithMockedServices();
         const widget = factory.createNew(context);
         expect(widget).toBeInstanceOf(Widget);
       });
 
       it('should take an optional source widget for cloning', async () => {
         const factory = createFactory();
-        const context = await Mock.createFileContext();
+        const context = await createFileContextWithMockedServices();
         const widget = factory.createNew(context);
         const clonedWidget: IDocumentWidget = factory.createNew(
           context,
@@ -552,13 +553,16 @@ describe('docregistry/default', () => {
     let widget: DocumentWidget;
 
     const setup = async () => {
-      context = await Mock.createFileContext(false, manager);
+      context = (await createFileContextWithMockedServices(
+        false,
+        manager
+      )) as any;
       content = new Widget();
       widget = new DocumentWidget({ context, content });
     };
 
     beforeAll(async () => {
-      manager = new Mock.ServiceManagerMock();
+      manager = new ServiceManagerMock();
       await manager.ready;
     });
 
