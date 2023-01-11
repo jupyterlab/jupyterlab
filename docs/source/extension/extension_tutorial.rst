@@ -232,7 +232,7 @@ tab panel when invoked.
 
 Fire up your favorite text editor and open the ``src/index.ts`` file in your
 extension project. Change the import at the top of the file to get a reference
-to the command palette interface and the `JupyterFrontEnd` instance.
+to the command palette interface and the ``JupyterFrontEnd`` instance.
 
 .. code-block:: typescript
     :emphasize-lines: 6
