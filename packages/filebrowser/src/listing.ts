@@ -1139,6 +1139,21 @@ export class DirListing extends Widget {
       return;
     }
 
+    // If folder is empty, there's nothing to do with the up/down key.
+    if (!this._items.length) {
+      return;
+    }
+
+    // Don't handle the arrow key press if it's not on directory item. This
+    // avoids a confusing user experience that can result from when the user
+    // moves the selection and focus index apart (via ctrl + up/down). The last
+    // selected item remains highlighted but the last focussed item loses its
+    // focus ring if it's not actively focussed.  This forces the user to
+    // visibly reveal the last focussed item before moving the focus.
+    if (!(event.target as HTMLElement).classList.contains(ITEM_TEXT_CLASS)) {
+      return;
+    }
+
     event.stopPropagation();
     event.preventDefault();
 
@@ -1152,7 +1167,6 @@ export class DirListing extends Widget {
       direction > 0 &&
       focusIndex === 0 &&
       !event.ctrlKey &&
-      !event.shiftKey &&
       Object.keys(this.selection).length === 0
     ) {
       nextFocusIndex = 0;
@@ -1164,8 +1178,8 @@ export class DirListing extends Widget {
       this._handleMultiSelect(nextFocusIndex);
     } else if (!event.ctrlKey) {
       // If neither the shift nor ctrl keys were used with the up/down arrow,
-      // then we treat it as a normal, unmodified key press and select the next
-      // item.
+      // then we treat it as a normal, unmodified key press and select the
+      // next item.
       this._selectItem(
         nextFocusIndex,
         event.shiftKey,

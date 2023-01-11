@@ -12,6 +12,8 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Mock, signalToPromise } from '@jupyterlab/testutils';
 import { DirListing, FilterFileBrowserModel } from '../src';
 
+const ITEM_TEXT_CLASS = 'jp-DirListing-itemText';
+
 // Returns the minimal args needed to create a new DirListing instance
 const createOptionsForConstructor: () => DirListing.IOptions = () => ({
   model: new FilterFileBrowserModel({
@@ -365,10 +367,14 @@ describe('filebrowser/listing', () => {
       });
 
       it('should select first item when nothing is selected', async () => {
-        simulate(dirListing.node, 'keydown', {
-          key: 'ArrowDown',
-          keyCode: 40
-        });
+        simulate(
+          dirListing.node.querySelector(`.${ITEM_TEXT_CLASS}`)!,
+          'keydown',
+          {
+            key: 'ArrowDown',
+            keyCode: 40
+          }
+        );
         await signalToPromise(dirListing.updated);
         const sortedItems = [...dirListing.sortedItems()];
         const selectedItems = [...dirListing.selectedItems()];
@@ -378,10 +384,14 @@ describe('filebrowser/listing', () => {
 
       it('should select second item once first item is selected', async () => {
         dirListing['_selectItem'](0, false);
-        simulate(dirListing.node, 'keydown', {
-          key: 'ArrowDown',
-          keyCode: 40
-        });
+        simulate(
+          dirListing.node.querySelector(`.${ITEM_TEXT_CLASS}`)!,
+          'keydown',
+          {
+            key: 'ArrowDown',
+            keyCode: 40
+          }
+        );
         await signalToPromise(dirListing.updated);
         const sortedItems = [...dirListing.sortedItems()];
         const selectedItems = [...dirListing.selectedItems()];
@@ -398,11 +408,15 @@ describe('filebrowser/listing', () => {
           // - selected, focussed
           // - selected
           await signalToPromise(dirListing.updated);
-          simulate(dirListing.node, 'keydown', {
-            key: 'ArrowDown',
-            keyCode: 40,
-            shiftKey: true
-          });
+          simulate(
+            dirListing.node.querySelector(`.${ITEM_TEXT_CLASS}`)!,
+            'keydown',
+            {
+              key: 'ArrowDown',
+              keyCode: 40,
+              shiftKey: true
+            }
+          );
           await signalToPromise(dirListing.updated);
           // Now it should be:
           // - unselected
