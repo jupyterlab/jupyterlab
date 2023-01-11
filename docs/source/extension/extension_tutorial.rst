@@ -102,7 +102,7 @@ When prompted, enter values like the following for all of the cookiecutter
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
 are using to fetch pictures).
 
-::
+.. code:: bash
 
     Select kind:
     1 - frontend
