@@ -341,7 +341,7 @@ rm -rf initial
 
 #### Publishing extension tutorial changes
 
-- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, replacing `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`) 
+- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, replacing `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`)
 
   ```bash
   git tag BRANCH-01-show-a-panel HEAD~4
