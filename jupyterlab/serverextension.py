@@ -10,7 +10,7 @@ def load_jupyter_server_extension(serverapp):
     """Temporary server extension shim when using
     old notebook server.
     """
-    serverapp.log.warning("Loading JupyterLab as an old notebook extension.")
+    serverapp.log.warning("Loading JupyterLab as a classic notebook (v6) extension.")
     from jupyter_server._version import __version__
     try:
         from packaging.version import parse, Version
@@ -23,7 +23,7 @@ def load_jupyter_server_extension(serverapp):
             else:
                 # Don't load JupyterLab when launching notebook
                 return
-    except Exception:
+    except Exception: # noqa
         pass
 
     extension = LabApp()
