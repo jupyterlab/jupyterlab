@@ -166,9 +166,8 @@ function activate(
         void commands.execute(CommandIDs.openJSON);
       } else {
         void registry.load(plugin.id).then(settings => {
-          args.settingEditorType ??
           (settings.get('settingEditorType').composite as SettingEditorType) ===
-            'json'
+          'json'
             ? void commands.execute(CommandIDs.openJSON)
             : void openUi({ query: args.query ?? '' });
         });
