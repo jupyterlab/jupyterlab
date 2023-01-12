@@ -12,6 +12,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { Terminal as Xterm } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
+import { WebLinksAddon } from 'xterm-addon-web-links';
 import { ITerminal } from '.';
 
 /**
@@ -63,7 +64,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     // Create the xterm.
     this._term = new Xterm(xtermOptions);
     this._fitAddon = new FitAddon();
+    this._webLinksAddon = new WebLinksAddon();
     this._term.loadAddon(this._fitAddon);
+    this._term.loadAddon(this._webLinksAddon);
 
     this._initializeTerm();
 
@@ -401,6 +404,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
   private readonly _term: Xterm;
   private readonly _fitAddon: FitAddon;
+  private readonly _webLinksAddon: WebLinksAddon;
   private _trans: TranslationBundle;
   private _needsResize = true;
   private _termOpened = false;
