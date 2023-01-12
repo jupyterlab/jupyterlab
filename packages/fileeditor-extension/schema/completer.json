@@ -8,7 +8,7 @@
       "selector": ".jp-FileEditor .jp-mod-completer-enabled"
     },
     {
-      "command": "completer:dispose",
+      "command": "completer:dismiss-widget",
       "keys": ["Escape"],
       "selector": ".jp-FileEditor .jp-mod-completer-enabled"
     }
