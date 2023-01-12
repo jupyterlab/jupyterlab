@@ -160,13 +160,19 @@ function activate(
       query?: string;
       settingEditorType?: SettingEditorType;
     }) => {
-      void registry.load(plugin.id).then(settings => {
-        args.settingEditorType ??
-        (settings.get('settingEditorType').composite as SettingEditorType) ===
-          'json'
-          ? void commands.execute(CommandIDs.openJSON)
-          : void openUi({ query: args.query ?? '' });
-      });
+      if (args.settingEditorType === 'ui') {
+        void commands.execute(CommandIDs.open);
+      } else if (args.settingEditorType === 'json') {
+        void commands.execute(CommandIDs.openJSON);
+      } else {
+        void registry.load(plugin.id).then(settings => {
+          args.settingEditorType ??
+          (settings.get('settingEditorType').composite as SettingEditorType) ===
+            'json'
+            ? void commands.execute(CommandIDs.openJSON)
+            : void openUi({ query: args.query ?? '' });
+        });
+      }
     },
     label: args => {
       if (args.label) {
