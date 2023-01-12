@@ -292,6 +292,14 @@
     ]
   },
   {
+    "id": "completer:dismiss-widget",
+    "label": "Dismisses the completion widget.",
+    "caption": "",
+    "shortcuts": [
+      "Escape"
+    ]
+  },
+  {
     "id": "completer:select-notebook",
     "label": "Select the completion suggestion.",
     "caption": "",

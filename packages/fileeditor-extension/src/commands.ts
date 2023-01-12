@@ -110,7 +110,7 @@ export namespace CommandIDs {
 
   export const invokeCompleter = 'completer:invoke-file';
 
-  export const disposeCompleter = 'completer:dispose';
+  export const dismissCompleter = 'completer:dismiss-widget';
 
   export const selectCompleter = 'completer:select-file';
 
@@ -906,13 +906,13 @@ export namespace Commands {
       }
     });
 
-    commands.addCommand(CommandIDs.disposeCompleter, {
-      label: trans.__('Dispose the completion wideget.'),
+    commands.addCommand(CommandIDs.dismissCompleter, {
+      label: trans.__('Dismisses the completion wideget.'),
       execute: () => {
         const id =
           editorTracker.currentWidget && editorTracker.currentWidget.id;
         if (id) {
-          return manager.dispose(id);
+          return manager.dismiss(id);
         }
       }
     });
@@ -924,7 +924,7 @@ export namespace Commands {
     });
 
     commands.addKeyBinding({
-      command: CommandIDs.disposeCompleter,
+      command: CommandIDs.dismissCompleter,
       keys: ['Escape'],
       selector: '.jp-FileEditor .jp-mod-completer-active'
     });

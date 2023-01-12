@@ -152,14 +152,14 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Dispose the completer in the widget with provided id.
+   * Dismiss the completer in the widget with provided id.
    *
    * @param id - the id of notebook panel, console panel or code editor.
    */
-  dispose(id: string): void {
+  dismiss(id: string): void {
     const handler = this._panelHandlers.get(id);
     if (handler) {
-      handler.completer.dispose();
+      // handler.completer.dispose();
       handler.dispose();
     }
   }
