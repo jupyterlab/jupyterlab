@@ -177,7 +177,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
               }}
               filteredValues={filtered}
               settings={pluginSettings}
-              renderers={editorRegistry.renderers}
+              components={editorRegistry.components}
               hasError={(error: boolean) => {
                 hasError(pluginSettings.id, error);
               }}

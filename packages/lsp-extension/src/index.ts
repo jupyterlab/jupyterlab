@@ -27,6 +27,7 @@ import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import {
+  IFormComponent,
   IFormComponentRegistry,
   LabIcon,
   pythonIcon
@@ -183,12 +184,12 @@ function activate(
   }
 
   if (settingRendererRegistry) {
-    settingRendererRegistry.addRenderer(
-      LANGUAGE_SERVERS,
-      (props: FieldProps) => {
+    const component: IFormComponent = {
+      fieldRenderer: (props: FieldProps) => {
         return renderServerSetting(props, translator);
       }
-    );
+    };
+    settingRendererRegistry.addComponent(LANGUAGE_SERVERS, component);
   }
 
   return connectionManager;

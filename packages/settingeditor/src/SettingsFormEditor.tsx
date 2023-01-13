@@ -7,6 +7,7 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import {
   caretDownIcon,
   caretRightIcon,
+  IFormComponent,
   RJSFTemplatesFactory
 } from '@jupyterlab/ui-components';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
@@ -47,7 +48,7 @@ export namespace SettingsFormEditor {
     /**
      * Dictionary used for custom field renderers in the form.
      */
-    renderers: { [id: string]: Field };
+    components: { [id: string]: IFormComponent };
 
     /**
      * Whether the form is collapsed or not.
@@ -161,7 +162,7 @@ export class SettingsFormEditor extends React.Component<
   }
 
   componentDidUpdate(prevProps: SettingsFormEditor.IProps): void {
-    this._setUiSchema(prevProps.renderers);
+    this._setUiSchema(prevProps.components);
     this._setFilteredSchema(prevProps.filteredValues);
 
     if (prevProps.translator !== this.props.translator) {
@@ -225,6 +226,11 @@ export class SettingsFormEditor extends React.Component<
     const trans = this.props.translator.load('jupyterlab');
     const icon = this.props.isCollapsed ? caretRightIcon : caretDownIcon;
 
+    const renderers: { [id: string]: Field } = {};
+    for (let id in this.props.components) {
+      renderers[id] = this.props.components[id].fieldRenderer!;
+    }
+
     return (
       <div>
         <div
@@ -259,7 +265,7 @@ export class SettingsFormEditor extends React.Component<
             ArrayFieldTemplate={this.state.arrayFieldTemplate}
             ObjectFieldTemplate={this.state.objectFieldTemplate}
             uiSchema={this.state.uiSchema}
-            fields={this.props.renderers}
+            fields={renderers}
             formContext={this.state.formContext}
             liveValidate
             idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
@@ -291,19 +297,19 @@ export class SettingsFormEditor extends React.Component<
     this.props.onSelect(this.props.settings.id);
   };
 
-  private _setUiSchema(prevRenderers?: { [id: string]: Field }) {
+  private _setUiSchema(prevComponents?: { [id: string]: IFormComponent }) {
     if (
-      !prevRenderers ||
+      !prevComponents ||
       !JSONExt.deepEqual(
-        Object.keys(prevRenderers).sort(),
-        Object.keys(this.props.renderers).sort()
+        Object.keys(prevComponents).sort(),
+        Object.keys(this.props.components).sort()
       )
     ) {
       /**
        * Construct uiSchema to pass any custom renderers to the form editor.
        */
       const uiSchema: UiSchema = {};
-      for (const id in this.props.renderers) {
+      for (const id in this.props.components) {
         if (
           Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
         ) {

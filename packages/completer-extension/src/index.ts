@@ -16,7 +16,10 @@ import {
   KernelCompleterProvider
 } from '@jupyterlab/completer';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
+import {
+  IFormComponent,
+  IFormComponentRegistry
+} from '@jupyterlab/ui-components';
 import type { FieldProps } from '@rjsf/core';
 
 import { renderAvailableProviders } from './renderer';
@@ -98,9 +101,12 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
       .catch(console.error);
 
     if (editorRegistry) {
-      editorRegistry.addRenderer('availableProviders', (props: FieldProps) => {
-        return renderAvailableProviders(props);
-      });
+      const component: IFormComponent = {
+        fieldRenderer: (props: FieldProps) => {
+          return renderAvailableProviders(props);
+        }
+      };
+      editorRegistry.addComponent('availableProviders', component);
     }
 
     return manager;
