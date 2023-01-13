@@ -22,7 +22,7 @@ import {
  */
 export class GalataInpage implements IGalataInpage {
   constructor() {
-    this._app = window.jupyterlab ?? window.jupyterapp;
+    this._app = window.jupyterapp;
   }
 
   /**
