@@ -9,7 +9,9 @@ import { Widget } from '@lumino/widgets';
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
-import { Mock, signalToPromise } from '@jupyterlab/testutils';
+import { signalToPromise } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { simulate } from 'simulate-event';
 import { FileBrowser, FilterFileBrowserModel } from '../src';
 
@@ -33,12 +35,12 @@ describe('filebrowser/browser', () => {
   let model: FilterFileBrowserModel;
 
   beforeAll(async () => {
-    const opener = new Mock.DocumentWidgetOpenerMock();
+    const opener = new DocumentWidgetOpenerMock();
 
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new Mock.ServiceManagerMock();
+    serviceManager = new ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,
