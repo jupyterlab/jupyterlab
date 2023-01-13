@@ -341,20 +341,21 @@ rm -rf initial
 
 #### Publishing extension tutorial changes
 
-- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, replacing `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`)
+- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, setting `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`)
 
   ```bash
-  git tag BRANCH-01-show-a-panel HEAD~4
-  git tag BRANCH-02-show-an-image HEAD~3
-  git tag BRANCH-03-style-and-attribute HEAD~2
-  git tag BRANCH-04-refactor-and-refresh HEAD~1
-  git tag BRANCH-05-restore-panel-state HEAD
+  export BRANCH=<branch-name>
+  git tag ${BRANCH}-01-show-a-panel HEAD~4
+  git tag ${BRANCH}-02-show-an-image HEAD~3
+  git tag ${BRANCH}-03-style-and-attribute HEAD~2
+  git tag ${BRANCH}-04-refactor-and-refresh HEAD~1
+  git tag ${BRANCH}-05-restore-panel-state HEAD
   ```
 
 - Push the branch with the new tags
 
   ```bash
-  git push origin BRANCH --tags
+  git push origin ${BRANCH} --tags
   ```
 
   Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_apod/settings/branches`).
@@ -369,10 +370,10 @@ rm -rf initial
   ```
 
 If you make a mistake and need to start over, clear the tags using the
-following pattern (replacing `BRANCH` with the branch name):
+following pattern:
 
 ```bash
-git tag | grep BRANCH | xargs git tag -d
+git tag | grep ${BRANCH} | xargs git tag -d
 ```
 
 ### Publishing to conda-forge
@@ -387,7 +388,7 @@ shasum -a 256 dist/*.tar.gz
 
 - Fork https://github.com/conda-forge/jupyterlab-feedstock
 - Create a PR with the version bump
-- Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
+- Update `recipe/meta.yaml` with the new version and sha256 and reset the build number to 0.
 
 ## Updating API Docs
 
