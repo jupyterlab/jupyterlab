@@ -251,6 +251,16 @@ function generateConfig({
     filename += '?v=[contenthash]';
   }
 
+  const rules: any = [{ test: /\.html$/, type: 'asset/resource' }];
+
+  if (mode === 'development') {
+    rules.push({
+      test: /\.js$/,
+      enforce: 'pre',
+      use: ['source-map-loader']
+    });
+  }
+
   const config = [
     merge(
       baseConfig,
@@ -268,7 +278,7 @@ function generateConfig({
       webpackConfig,
       {
         module: {
-          rules: [{ test: /\.html$/, type: 'asset/resource' }]
+          rules
         }
       }
     )

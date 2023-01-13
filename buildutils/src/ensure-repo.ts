@@ -77,7 +77,8 @@ const UNUSED: Dict<string[]> = {
     'style-loader',
     'terser-webpack-plugin',
     'webpack-cli',
-    'worker-loader'
+    'worker-loader',
+    'source-map-loader'
   ],
   '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/codemirror': [
