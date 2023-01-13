@@ -161,7 +161,7 @@ function activate(
       settingEditorType?: SettingEditorType;
     }) => {
       if (args.settingEditorType === 'ui') {
-        void commands.execute(CommandIDs.open, {query});
+        void openUi({ query: args.query ?? '' });
       } else if (args.settingEditorType === 'json') {
         void commands.execute(CommandIDs.openJSON);
       } else {
