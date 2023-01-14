@@ -6,9 +6,5 @@
     "module": "commonjs"
   },
   "include": ["src/*"],
-  "references": [
-    {
-      "path": "../buildutils"
-    }
-  ]
+  "references": []
 }

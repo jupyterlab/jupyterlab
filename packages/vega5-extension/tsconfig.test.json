@@ -10,6 +10,9 @@
     },
     {
       "path": "../../testutils"
+    },
+    {
+      "path": "../rendermime-interfaces"
     }
   ]
 }
