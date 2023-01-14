@@ -16,7 +16,7 @@
     "watch": "webpack --watch"
   },
   "resolutions": {
-    "@jupyter/ydoc": "~0.2.0",
+    "@jupyter/ydoc": "~0.2.2",
     "@jupyterlab/application": "~4.0.0-alpha.17",
     "@jupyterlab/application-extension": "~4.0.0-alpha.17",
     "@jupyterlab/apputils": "~4.0.0-alpha.17",

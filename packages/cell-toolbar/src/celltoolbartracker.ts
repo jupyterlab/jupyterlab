@@ -63,7 +63,8 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   _onActiveCellChanged(notebook: Notebook): void {
-    if (this._previousActiveCell?.model) {
+    if (this._previousActiveCell && !this._previousActiveCell.isDisposed) {
+      // Disposed cells do not have model anymore.
       this._removeToolbar(this._previousActiveCell.model);
     }
 

@@ -7,9 +7,9 @@
 const HOVERBOX_CLASS = 'jp-HoverBox';
 
 /**
- * The class name added to a hovering node that is scrolled out of view.
+ * The z-index used to hide hovering node that is scrolled out of view.
  */
-const OUTOFVIEW_CLASS = 'jp-mod-outofview';
+const OUTOFVIEW_Z_INDEX = '-1000';
 
 type OutOfViewDisplay =
   | 'hidden-inside'
@@ -112,6 +112,15 @@ export namespace HoverBox {
       left?: OutOfViewDisplay;
       right?: OutOfViewDisplay;
     };
+
+    /**
+     * Exact size of the hover box. Pass it for faster rendering (allowing the
+     * positioning algorithm to to place it immediately at requested position).
+     */
+    size?: {
+      width: number;
+      height: number;
+    };
   }
 
   /**
@@ -122,11 +131,20 @@ export namespace HoverBox {
   export function setGeometry(options: IOptions): void {
     const { anchor, host, node, privilege, outOfViewDisplay } = options;
 
-    // Add hover box class if it does not exist.
-    node.classList.add(HOVERBOX_CLASS);
+    const hostRect = host.getBoundingClientRect();
 
-    // Make sure the node is visible so that its dimensions can be queried.
-    node.classList.remove(OUTOFVIEW_CLASS);
+    // Add hover box class if it does not exist.
+    if (!node.classList.contains(HOVERBOX_CLASS)) {
+      node.classList.add(HOVERBOX_CLASS);
+    }
+
+    // Start with the node displayed as if it was in view.
+    if (node.style.visibility) {
+      node.style.visibility = '';
+    }
+    if (node.style.zIndex === '') {
+      node.style.zIndex = '';
+    }
 
     // Clear any previously set max-height.
     node.style.maxHeight = '';
@@ -135,9 +153,9 @@ export namespace HoverBox {
     node.style.marginTop = '';
 
     const style = options.style || window.getComputedStyle(node);
-    const innerHeight = window.innerHeight;
-    const spaceAbove = anchor.top;
-    const spaceBelow = innerHeight - anchor.bottom;
+    const spaceAbove = anchor.top - hostRect.top;
+    const spaceBelow = hostRect.bottom - anchor.bottom;
+
     const marginTop = parseInt(style.marginTop!, 10) || 0;
     const marginLeft = parseInt(style.marginLeft!, 10) || 0;
     const minHeight = parseInt(style.minHeight!, 10) || options.minHeight;
@@ -169,11 +187,25 @@ export namespace HoverBox {
       (spaceBelow >= minHeight || spaceAbove >= minHeight);
 
     if (!withinBounds) {
-      node.classList.add(OUTOFVIEW_CLASS);
+      node.style.zIndex = OUTOFVIEW_Z_INDEX;
+      node.style.visibility = 'hidden';
       return;
     }
 
+    if (options.size) {
+      node.style.width = `${options.size.width}px`;
+      node.style.height = `${options.size.height}px`;
+      node.style.contain = 'strict';
+    } else {
+      node.style.contain = '';
+      node.style.width = 'auto';
+      node.style.height = '';
+    }
+
     // Position the box vertically.
+    const initialHeight = options.size
+      ? options.size.height
+      : node.getBoundingClientRect().height;
     const offsetAbove =
       (options.offset &&
         options.offset.vertical &&
@@ -185,8 +217,8 @@ export namespace HoverBox {
         options.offset.vertical.below) ||
       0;
     let top = renderBelow
-      ? innerHeight - spaceBelow + offsetBelow
-      : spaceAbove - node.getBoundingClientRect().height + offsetAbove;
+      ? hostRect.bottom - spaceBelow + offsetBelow
+      : hostRect.top + spaceAbove - initialHeight + offsetAbove;
     node.style.top = `${Math.floor(top)}px`;
 
     // Position the box horizontally.
@@ -194,17 +226,10 @@ export namespace HoverBox {
     let left = anchor.left + offsetHorizontal;
 
     node.style.left = `${Math.ceil(left)}px`;
-    node.style.width = 'auto';
 
-    // Expand the menu width by the scrollbar size, if present.
-    if (node.scrollHeight >= maxHeight) {
-      node.style.width = `${2 * node.offsetWidth - node.clientWidth}`;
-      node.scrollTop = 0;
-    }
+    let rect = node.getBoundingClientRect();
 
     // Move left to fit in the window.
-    const rect = node.getBoundingClientRect();
-    const hostRect = host.getBoundingClientRect(); // Query together to avoid extra layout recalculation
     const right = rect.right;
     if (right > window.innerWidth) {
       left -= right - window.innerWidth;
@@ -218,7 +243,8 @@ export namespace HoverBox {
     }
 
     // Hide the hover box before querying the DOM for the anchor coordinates.
-    node.classList.add(OUTOFVIEW_CLASS);
+    // Using z-index set directly for performance.
+    node.style.zIndex = '-1000';
 
     const bottom = rect.bottom;
 
@@ -232,6 +258,8 @@ export namespace HoverBox {
     const includesLeftBottom = host.contains(
       document.elementFromPoint(left, bottom)
     );
+
+    node.style.zIndex = '';
 
     const topEdgeInside = includesLeftTop || includesRightTop;
     const bottomEdgeInside = includesLeftBottom || includesRightBottom;
@@ -358,8 +386,9 @@ export namespace HoverBox {
       }
     }
 
-    if (!hide) {
-      node.classList.remove(OUTOFVIEW_CLASS);
+    if (hide) {
+      node.style.zIndex = OUTOFVIEW_Z_INDEX;
+      node.style.visibility = 'hidden';
     }
 
     if (leftChanged) {
