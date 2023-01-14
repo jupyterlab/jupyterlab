@@ -1,14 +1,9 @@
 {
   "extends": "../tsconfigbase",
   "compilerOptions": {
-    "baseUrl": ".",
     "outDir": "lib",
     "rootDir": "src",
-    "module": "commonjs",
-    "paths": {
-      "@jupyterlab/*": ["../jupyterlab/packages/*"],
-      "*": ["node_modules/*"]
-    }
+    "module": "commonjs"
   },
   "include": ["src/*"],
   "references": []
