@@ -18,4 +18,16 @@ test('Open the settings editor with a specific search query', async ({
   ).toEqual('Command Palette');
 
   await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
+
+  const pluginList = page.locator('.jp-PluginList');
+
+  expect(await pluginList.screenshot()).toMatchSnapshot(
+    'settings-plugin-list.png'
+  );
+
+  const settingsPanel = page.locator('.jp-SettingsPanel');
+
+  expect(await settingsPanel.screenshot()).toMatchSnapshot(
+    'settings-panel.png'
+  );
 });

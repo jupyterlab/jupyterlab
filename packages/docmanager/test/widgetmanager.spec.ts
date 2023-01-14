@@ -10,12 +10,8 @@ import {
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
-import {
-  acceptDialog,
-  dangerDialog,
-  dismissDialog
-} from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { acceptDialog, dangerDialog, dismissDialog } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -67,7 +63,7 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   beforeAll(() => {
-    services = new Mock.ServiceManagerMock();
+    services = new ServiceManagerMock();
   });
 
   beforeEach(() => {

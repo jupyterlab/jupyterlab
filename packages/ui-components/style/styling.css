@@ -53,9 +53,12 @@ input.jp-mod-styled:focus {
   flex-direction: column;
   padding: 1px;
   background-color: var(--jp-layout-color1);
-  height: 28px;
   box-sizing: border-box;
   margin-bottom: 12px;
+}
+
+.jp-select-wrapper:not(.multiple) {
+  height: 28px;
 }
 
 .jp-select-wrapper.jp-mod-focused select.jp-mod-styled {
@@ -73,7 +76,6 @@ select.jp-mod-styled:hover {
 
 select.jp-mod-styled {
   flex: 1 1 auto;
-  height: 32px;
   width: 100%;
   font-size: var(--jp-ui-font-size2);
   background: var(--jp-input-background);
@@ -85,4 +87,13 @@ select.jp-mod-styled {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+select.jp-mod-styled:not([multiple]) {
+  height: 32px;
+}
+
+select.jp-mod-styled[multiple] {
+  max-height: 200px;
+  overflow-y: auto;
 }

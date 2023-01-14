@@ -422,6 +422,12 @@
     ]
   },
   {
+    "id": "debugger:copy-to-clipboard",
+    "label": "Copy to Clipboard",
+    "caption": "Copy text representation of the value to clipboard",
+    "shortcuts": []
+  },
+  {
     "id": "debugger:evaluate",
     "label": "Evaluate Code",
     "caption": "Evaluate Code",
@@ -965,7 +971,7 @@
   },
   {
     "id": "fileeditor:toggle-autoclosing-brackets",
-    "label": "Auto Close Brackets for Text Editor",
+    "label": "Auto Close Brackets in Text Editor",
     "caption": "",
     "shortcuts": []
   },

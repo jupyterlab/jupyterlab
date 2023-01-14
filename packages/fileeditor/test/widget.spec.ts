@@ -13,8 +13,8 @@ import {
 } from '@jupyterlab/docregistry';
 import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
 import { ServiceManager } from '@jupyterlab/services';
-import { framePromise } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { framePromise } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -54,7 +54,7 @@ describe('fileeditorcodewrapper', () => {
   let manager: ServiceManager.IManager;
 
   beforeAll(() => {
-    manager = new Mock.ServiceManagerMock();
+    manager = new ServiceManagerMock();
     return manager.ready;
   });
 

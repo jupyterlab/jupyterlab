@@ -2,12 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext } from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { ConsoleHistory } from '@jupyterlab/console';
 import { KernelMessage } from '@jupyterlab/services';
 import { createStandaloneCell } from '@jupyter/ydoc';
-import { createSessionContext, signalToPromise } from '@jupyterlab/testutils';
-import { ConsoleHistory } from '../src';
+import { signalToPromise } from '@jupyterlab/testing';
 
 const mockHistory = {
   header: null,

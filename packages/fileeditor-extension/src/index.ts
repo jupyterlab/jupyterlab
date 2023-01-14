@@ -124,7 +124,7 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
       const args: JSONObject = {
         insertSpaces: true,
         size,
-        name: trans._n('Spaces: %1', 'Spaces: %1', size)
+        name: trans.__('Spaces: %1', size)
       };
       menu.addItem({ command, args });
     }

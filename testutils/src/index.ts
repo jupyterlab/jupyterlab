@@ -1,33 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-export { NBTestUtils } from './notebook-utils';
-
-export { defaultRenderMime } from './rendermime';
-
-export { FakeUserManager } from './user';
-
-export { JupyterServer } from './start_jupyter_server';
-
+export { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 export {
-  testEmission,
-  expectFailure,
-  signalToPromises,
-  signalToPromise,
-  isFulfilled,
-  framePromise,
-  sleep,
-  createSessionContext,
-  createSession,
   createFileContext,
   createFileContextWithKernel,
+  createSession,
+  DocumentWidgetOpenerMock
+} from '@jupyterlab/docregistry/lib/testutils';
+export {
   initNotebookContext,
-  waitForDialog,
+  NBTestUtils
+} from '@jupyterlab/notebook/lib/testutils';
+export { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
+export * as Mock from './mock';
+export { FakeUserManager } from '@jupyterlab/services/lib/testutils';
+export {
   acceptDialog,
   dangerDialog,
-  dismissDialog
-} from './common';
-
-import * as Mock from './mock';
-
-export { Mock };
+  dismissDialog,
+  expectFailure,
+  framePromise,
+  isFulfilled,
+  JupyterServer,
+  signalToPromise,
+  signalToPromises,
+  sleep,
+  testEmission,
+  waitForDialog
+} from '@jupyterlab/testing';

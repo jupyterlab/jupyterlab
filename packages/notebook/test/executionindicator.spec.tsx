@@ -2,6 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { JupyterServer } from '@jupyterlab/testing';
 import {
   ExecutionIndicator,
   ExecutionIndicatorComponent,
@@ -9,8 +12,6 @@ import {
   NotebookActions,
   NotebookModel
 } from '@jupyterlab/notebook';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { createSessionContext, JupyterServer } from '@jupyterlab/testutils';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import * as utils from './utils';

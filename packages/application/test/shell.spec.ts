@@ -3,7 +3,7 @@
 
 import { LabShell, LayoutRestorer } from '@jupyterlab/application';
 import { StateDB } from '@jupyterlab/statedb';
-import { framePromise } from '@jupyterlab/testutils';
+import { framePromise } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { DockPanel, Widget } from '@lumino/widgets';

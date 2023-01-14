@@ -12,11 +12,9 @@ import {
 
 import { KernelSpecManager, Session } from '@jupyterlab/services';
 
-import {
-  createSession,
-  JupyterServer,
-  signalToPromise
-} from '@jupyterlab/testutils';
+import { createSession } from '@jupyterlab/docregistry/lib/testutils';
+
+import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -77,7 +75,7 @@ describe('Debugger', () => {
     });
     await connection.changeKernel({ name: 'python3' });
 
-    session = new Debugger.Session({ connection });
+    session = new Debugger.Session({ connection, config });
     service.session = session;
 
     sidebar = new Debugger.Sidebar({
@@ -93,7 +91,7 @@ describe('Debugger', () => {
       },
       breakpointsCommands: {
         registry,
-        pause: ''
+        pauseOnExceptions: ''
       },
       editorServices: {
         factoryService,

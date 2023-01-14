@@ -18,7 +18,7 @@
 [![Gitter](https://img.shields.io/badge/social_chat-gitter-blue.svg)](https://gitter.im/jupyterlab/jupyterlab)
 [![Gitpod](https://img.shields.io/badge/gitpod_editor-open-blue.svg)](https://gitpod.io/#https://github.com/jupyterlab/jupyterlab)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/7390762294552deb550b486928646705bbb24333?urlpath=lab/tree/demo)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/75ab1750f37b27db8e135c2c4f2139da6b641609?urlpath=lab/tree/demo)
 
 An extensible environment for interactive and reproducible computing, based on the
 Jupyter Notebook and Architecture.

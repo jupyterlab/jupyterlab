@@ -5,7 +5,7 @@ import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
-import { interactiveItem, ProgressCircle } from '@jupyterlab/statusbar';
+import { ProgressCircle } from '@jupyterlab/statusbar';
 
 import {
   circleIcon,
@@ -186,7 +186,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
   constructor(translator?: ITranslator, showProgress: boolean = true) {
     super(new ExecutionIndicator.Model());
     this.translator = translator || nullTranslator;
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
   }
 
   /**
@@ -466,7 +466,10 @@ export namespace ExecutionIndicator {
      */
     private _startTimer(nb: Notebook) {
       const state = this._notebookExecutionProgress.get(nb);
-      if (state) {
+      if (!state) {
+        return;
+      }
+      if (state.scheduledCell.size > 0) {
         if (state.executionStatus !== 'busy') {
           state.executionStatus = 'busy';
           clearTimeout(state.timeout);
@@ -475,6 +478,8 @@ export namespace ExecutionIndicator {
             this._tick(state);
           }, 1000);
         }
+      } else {
+        this._resetTime(state);
       }
     }
 

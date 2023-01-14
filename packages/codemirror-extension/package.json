@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "4.0.0-alpha.16",
+  "version": "4.0.0-alpha.17",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,15 +38,15 @@
   },
   "dependencies": {
     "@codemirror/search": "^6.0.0",
-    "@jupyterlab/application": "^4.0.0-alpha.16",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.16",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.16",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.16",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.16",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.16",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.16",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.16",
-    "@jupyterlab/translation": "^4.0.0-alpha.16",
+    "@jupyterlab/application": "^4.0.0-alpha.17",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.17",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.17",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.17",
+    "@jupyterlab/fileeditor": "^4.0.0-alpha.17",
+    "@jupyterlab/mainmenu": "^4.0.0-alpha.17",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.17",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.17",
+    "@jupyterlab/translation": "^4.0.0-alpha.17",
     "@lumino/widgets": "^2.0.0-alpha.6"
   },
   "devDependencies": {
