@@ -17,7 +17,7 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { DebugProtocol } from '@vscode/debugprotocol';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { convertType } from '.';
 
@@ -173,7 +173,8 @@ const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
 
   let stateRefreshLock = 0;
 
-  const handleHover = (_: VariablesBodyTree, data: IHoverData) => {
+  // Empty dependency array is to only register once per lifetime.
+  const handleHover = useCallback((_: VariablesBodyTree, data: IHoverData) => {
     const current = ++stateRefreshLock;
     if (!data.variable) {
       // Handle mouse leave.
@@ -201,15 +202,14 @@ const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
         setButtonsTop(data.target.offsetTop);
       });
     }
-  };
+  }, []);
 
-  // Empty dependency array is required to only register once per lifetime.
   useEffect(() => {
     props.hoverChanged.connect(handleHover);
     return () => {
       props.hoverChanged.disconnect(handleHover);
     };
-  }, []);
+  }, [handleHover]);
 
   return (
     <div
