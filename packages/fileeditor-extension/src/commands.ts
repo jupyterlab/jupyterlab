@@ -922,12 +922,6 @@ export namespace Commands {
       keys: ['Enter'],
       selector: '.jp-FileEditor .jp-mod-completer-active'
     });
-
-    commands.addKeyBinding({
-      command: CommandIDs.dismissCompleter,
-      keys: ['Escape'],
-      selector: '.jp-FileEditor .jp-mod-completer-active'
-    });
   }
 
   /**
