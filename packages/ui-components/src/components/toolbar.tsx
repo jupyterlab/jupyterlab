@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
@@ -961,14 +961,17 @@ class ToolbarPopupOpener extends ToolbarButton {
   /**
    *  Create a new popup opener
    */
-  constructor() {
+  constructor(props: ToolbarButtonComponent.IProps = {}) {
+    const trans = (props.translator || nullTranslator).load('jupyterlab');
     super({
       icon: ellipsesIcon,
       onClick: () => {
         this.handleClick();
-      }
+      },
+      tooltip: trans.__('More commands')
     });
     this.addClass('jp-Toolbar-responsive-opener');
+
     this.popup = new ToolbarPopup();
   }
 
