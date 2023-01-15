@@ -907,7 +907,7 @@ export namespace Commands {
     });
 
     commands.addCommand(CommandIDs.dismissCompleter, {
-      label: trans.__('Dismisses the completion wideget.'),
+      label: trans.__('Dismisses the completion widget.'),
       execute: () => {
         const id =
           editorTracker.currentWidget && editorTracker.currentWidget.id;
