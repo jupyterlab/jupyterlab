@@ -228,7 +228,10 @@ export class SettingsFormEditor extends React.Component<
 
     const renderers: { [id: string]: Field } = {};
     for (let id in this.props.components) {
-      renderers[id] = this.props.components[id].fieldRenderer!;
+      const renderer = this.props.components[id].fieldRenderer;
+      if (renderer) {
+        renderers[id] = renderer;
+      }
     }
 
     return (
