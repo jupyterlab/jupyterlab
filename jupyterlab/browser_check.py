@@ -196,6 +196,7 @@ def _jupyter_server_extension_points():
 # TODO: remove handling of --notebook arg and the following two
 # functions in JupyterLab 4.0
 def load_jupyter_server_extension(serverapp):
+    serverapp.log.info("Loading BrowserApp as a classic notebook (v6) extension.")
     extension = BrowserApp()
     extension.serverapp = serverapp
     extension.load_config_file()
