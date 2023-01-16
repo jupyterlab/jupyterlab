@@ -101,6 +101,7 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
+    this.standaloneModel = typeof options.sharedModel === 'undefined';
     this.sharedModel =
       options.sharedModel ??
       YNotebook.create({
@@ -116,6 +117,7 @@ export class NotebookModel implements INotebookModel {
     this.sharedModel.changed.connect(this._onStateChanged, this);
     this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
   }
+
   /**
    * A signal emitted when the document content changes.
    */
@@ -248,7 +250,9 @@ export class NotebookModel implements INotebookModel {
     const cells = this.cells;
     this._cells = null!;
     cells.dispose();
-    this.sharedModel.dispose();
+    if (this.standaloneModel) {
+      this.sharedModel.dispose();
+    }
     Signal.clearData(this);
   }
 
@@ -469,6 +473,11 @@ close the notebook without saving it.`,
    * The shared notebook model.
    */
   readonly sharedModel: ISharedNotebook;
+
+  /**
+   * Whether the model should disposed the shared model on disposal or not.
+   */
+  protected standaloneModel = false;
 
   private _dirty = false;
   private _readOnly = false;

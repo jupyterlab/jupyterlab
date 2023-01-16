@@ -55,20 +55,23 @@ export class Context<
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     // Get shared model from IDrive.sharedModelFactory
-    const sharedFactory = this._manager.contents.getSharedModelFactory(
-      this._path
-    );
-    const sharedModel = sharedFactory?.createNew({
-      path: this._path,
-      format: this._factory.fileFormat!,
-      contentType: this._factory.contentType,
-      collaborative: this._factory.collaborative
-    });
+    const collaborative = PageConfig.getOption('collaborative') === 'true';
+    if (collaborative && this._factory.collaborative) {
+      const sharedFactory = this._manager.contents.getSharedModelFactory(
+        this._path
+      );
+      this._sharedModel = sharedFactory?.createNew({
+        path: localPath,
+        format: this._factory.fileFormat!,
+        contentType: this._factory.contentType,
+        collaborative: this._factory.collaborative
+      });
+    }
 
     this._model = this._factory.createNew(
       lang,
-      sharedModel == null ? undefined : sharedModel,
-      PageConfig.getOption('collaborative') === 'true'
+      this._sharedModel,
+      collaborative
     );
 
     this._readyPromise = manager.ready.then(() => {
@@ -203,6 +206,9 @@ export class Context<
     this._model.dispose();
     this._model.sharedModel.dispose();
     this._disposed.emit(void 0);
+    if (this._sharedModel) {
+      this._sharedModel.dispose();
+    }
     Signal.clearData(this);
   }
 
@@ -897,22 +903,26 @@ or load the version on disk (revert)?`,
   }
 
   protected translator: ITranslator;
+
+  private _isReady = false;
+  private _isDisposed = false;
+  private _isPopulated = false;
   private _trans: TranslationBundle;
   private _manager: ServiceManager.IManager;
   private _opener: (
     widget: Widget,
     options?: DocumentRegistry.IOpenOptions
   ) => void;
+
   private _model: T;
   private _path = '';
+  private _sharedModel: ISharedDocument | undefined;
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
+
   private _readyPromise: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
-  private _isPopulated = false;
-  private _isReady = false;
-  private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);

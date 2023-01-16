@@ -30,13 +30,14 @@ export class YDrive extends Drive {
    */
   constructor(user: User.IManager) {
     super({ name: 'YDrive' });
-    this._providers = new Map<ISharedDocument, WebSocketProvider>();
+    this._providers = new Map<string, WebSocketProvider>();
     this._sharedPaths = new Set<string>();
 
     this.sharedModelFactory = new SharedModelFactory(
       user,
       this.serverSettings,
-      this._providers
+      this._providers,
+      this._sharedPaths
     );
   }
 
@@ -86,8 +87,16 @@ export class YDrive extends Drive {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    // In collaborative mode we never load the content.
-    return super.get(localPath, { ...options, content: false });
+    if (options && options?.format && options?.type !== 'directory') {
+      const model = super.get(localPath, { ...options, content: false });
+
+      const key = `${options.type}:${options.format}:${localPath}`;
+      await this._providers.get(key)?.ready;
+
+      return model;
+    } else {
+      return super.get(localPath, options);
+    }
   }
 
   /**
@@ -143,7 +152,7 @@ export class YDrive extends Drive {
   }
 
   private _sharedPaths: Set<string>;
-  private _providers: Map<ISharedDocument, WebSocketProvider>;
+  private _providers: Map<string, WebSocketProvider>;
 }
 
 /**
@@ -152,22 +161,24 @@ export class YDrive extends Drive {
 export class SharedModelFactory implements IFactory {
   private _user: User.IManager;
   private _sharedPaths: Set<string>;
-  private _providers: Map<ISharedDocument, WebSocketProvider>;
+  private _providers: Map<string, WebSocketProvider>;
 
   constructor(
     user: User.IManager,
     serverSettings: ServerConnection.ISettings,
-    providers: Map<ISharedDocument, WebSocketProvider>
+    providers: Map<string, WebSocketProvider>,
+    sharedPaths: Set<string>
   ) {
     this._user = user;
     this._providers = providers;
+    this._sharedPaths = sharedPaths;
 
     this.serverSettings = serverSettings;
   }
 
   readonly serverSettings: ServerConnection.ISettings;
 
-  createNew(options: IFactory.IOptions): ISharedDocument {
+  createNew(options: IFactory.IOptions): ISharedDocument | undefined {
     if (
       typeof options?.format !== 'string' ||
       typeof options?.contentType !== 'string'
@@ -175,7 +186,7 @@ export class SharedModelFactory implements IFactory {
       throw new Error('Format and content type must be provided.');
     }
 
-    let sharedModel: YDocument<DocumentChange>;
+    let sharedModel: YDocument<DocumentChange> | undefined;
     switch (options?.contentType) {
       case 'file':
         sharedModel = new YFile();
@@ -183,8 +194,12 @@ export class SharedModelFactory implements IFactory {
       case 'notebook':
         sharedModel = new YNotebook();
         break;
-      //case 'directory':
-      //default:
+      case 'directory':
+      default:
+    }
+
+    if (!sharedModel) {
+      return;
     }
 
     try {
@@ -193,18 +208,19 @@ export class SharedModelFactory implements IFactory {
         path: options.path,
         format: options.format,
         contentType: options.contentType,
-        collaborative: true,
-        model: sharedModel!,
+        collaborative: options.collaborative,
+        model: sharedModel,
         user: this._user
       });
 
-      this._providers.set(sharedModel!, provider);
+      const key = `${options.contentType}:${options.format}:${options.path}`;
+      this._providers.set(key, provider);
       // FIXME
-      sharedModel!.disposed.connect(() => {
-        const provider = this._providers.get(sharedModel!);
+      sharedModel.disposed.connect(() => {
+        const provider = this._providers.get(key);
         if (provider) {
           provider.dispose();
-          this._providers.delete(sharedModel!);
+          this._providers.delete(key);
         }
       });
 
@@ -217,6 +233,6 @@ export class SharedModelFactory implements IFactory {
       );
     }
 
-    return sharedModel!;
+    return sharedModel;
   }
 }
