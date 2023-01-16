@@ -146,6 +146,9 @@ interface ITreeButtonsProps {
    * The commands registry.
    */
   commands: CommandRegistry;
+  /**
+   * The debugger service.
+   */
   service: IDebugger;
   /**
    * The application language translator
