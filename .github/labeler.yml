@@ -115,8 +115,6 @@ pkg:docmanager:
 pkg:docprovider:
   - packages/docprovider/**/*
   - packages/docprovider/*
-  - packages/docprovider-extension/**/*
-  - packages/docprovider-extension/*
 
 pkg:docregistry:
   - packages/docregistry/**/*

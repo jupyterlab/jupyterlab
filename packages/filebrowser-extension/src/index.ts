@@ -36,6 +36,7 @@ import {
   Uploader
 } from '@jupyterlab/filebrowser';
 import { Contents } from '@jupyterlab/services';
+import { YDrive } from '@jupyterlab/docprovider';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -253,7 +254,12 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     labShell: ILabShell | null
   ): Promise<IFileBrowserFactory> => {
     const { commands } = app;
+
+    const drive = new YDrive(app.serviceManager.user);
+    app.serviceManager.contents.addDrive(drive);
+
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
+
     const createFileBrowser = (
       id: string,
       options: IFileBrowserFactory.IOptions = {}
@@ -284,10 +290,14 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       return widget;
     };
 
+    const driveName =
+      PageConfig.getOption('collaborative') === 'true' ? 'YDrive' : '';
+
     // Manually restore and load the default file browser.
     const defaultBrowser = createFileBrowser('filebrowser', {
       auto: false,
-      restore: false
+      restore: false,
+      driveName
     });
     void Private.restoreBrowser(
       defaultBrowser,

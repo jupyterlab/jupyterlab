@@ -289,7 +289,7 @@ export namespace Contents {
      * relevant backend. Returns `null` if the backend
      * does not provide one.
      */
-    getSharedModelFactory(options: IFactory.IOptions): IFactory | null;
+    getSharedModelFactory(path: string): IFactory | null;
 
     /**
      * Get a file or directory.
@@ -623,8 +623,8 @@ export class ContentsManager implements Contents.IManager {
    * relevant backend. Returns `null` if the backend
    * does not provide one.
    */
-  getSharedModelFactory(options: IFactory.IOptions): IFactory | null {
-    const [drive] = this._driveForPath(options.path);
+  getSharedModelFactory(path: string): IFactory | null {
+    const [drive] = this._driveForPath(path);
     return drive?.sharedModelFactory ?? null;
   }
 

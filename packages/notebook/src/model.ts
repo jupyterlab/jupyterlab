@@ -101,9 +101,12 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    this.sharedModel = YNotebook.create({
-      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
-    });
+    this.sharedModel =
+      options.sharedModel ??
+      YNotebook.create({
+        disableDocumentWideUndoRedo:
+          options.disableDocumentWideUndoRedo ?? false
+      });
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._deletedCells = [];
@@ -492,6 +495,11 @@ export namespace NotebookModel {
      * The language preference for the model.
      */
     languagePreference?: string;
+
+    /**
+     * The shared model that contains the data.
+     */
+    sharedModel?: ISharedNotebook;
 
     /**
      * Default cell type.
