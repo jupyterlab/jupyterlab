@@ -166,12 +166,17 @@ bumped their major version (following semver convention). We want to point out p
    a ``level`` and optionally a ``prefix``, a ``collapsed`` state and a ``dataset`` (data
    DOM attributes dictionary).
 - ``@jupyterlab/ui-components`` from 3.x to 4.x
-   Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
-   components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly
-   from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
-   need to switch to the Blueprint components as the interfaces of those components in JupyterLab
-   do not match those of Blueprint JS.
-   Remove ``Collapse`` React component.
+   * Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
+     components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly
+     from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
+     need to switch to the Blueprint components as the interfaces of those components in JupyterLab
+     do not match those of Blueprint JS.
+   * Remove ``Collapse`` React component.
+   * Change the ``IFormComponentRegistry`` token, from ``@jupyterlab/ui-components:ISettingEditorRegistry`` to
+     ``@jupyterlab/ui-components:IFormComponentRegistry``.
+   * The ``FormComponentRegistry`` registers ``FormComponent`` instead of field renderers.
+     A ``FoemComponant`` defines a ``fieldRenderer`` or a ``widgetRenderer``.
+
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
    * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
