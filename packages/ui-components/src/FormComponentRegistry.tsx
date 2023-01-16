@@ -24,7 +24,7 @@ export class FormComponentRegistry implements IFormComponentRegistry {
     }
     if (!component.fieldRenderer && !component.widgetRenderer) {
       console.warn(
-        "A component to register must define a 'fieldRenderer' or a 'widgetRenderer'."
+        `The component for '${id}' cannot be registered as it does not define 'fieldRenderer' nor 'widgetRenderer'.`
       );
       return false;
     }
