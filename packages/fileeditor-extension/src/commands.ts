@@ -108,9 +108,11 @@ export namespace CommandIDs {
 
   export const selectAll = 'fileeditor:select-all';
 
+  export const overrideEsc = 'fileeditor:override-esc';
+
   export const invokeCompleter = 'completer:invoke-file';
 
-  export const dismissCompleter = 'completer:dismiss-widget';
+  export const dismissCompleter = 'completer:dismiss-file';
 
   export const selectCompleter = 'completer:select-file';
 
@@ -874,6 +876,15 @@ export namespace Commands {
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       label: trans.__('Select All')
     });
+
+    /**
+     * Override Esc that causes documentsearch:end, doing nothing
+     */
+    commands.addCommand(CommandIDs.overrideEsc, {
+      execute: () => {
+        return;
+      }
+    });
   }
 
   export function addCompleterCommands(
@@ -907,7 +918,7 @@ export namespace Commands {
     });
 
     commands.addCommand(CommandIDs.dismissCompleter, {
-      label: trans.__('Dismisses the completion wideget.'),
+      label: trans.__('Dismisses the completion widget.'),
       execute: () => {
         const id =
           editorTracker.currentWidget && editorTracker.currentWidget.id;

@@ -159,8 +159,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   dismiss(id: string): void {
     const handler = this._panelHandlers.get(id);
     if (handler) {
-      // handler.completer.dispose();
-      handler.dispose();
+      handler.completer.reset();
     }
   }
 
