@@ -9,6 +9,8 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { IFactory } from '@jupyter/ydoc';
+
 import { ServerConnection } from '..';
 
 import * as validate from './validate';
@@ -283,6 +285,13 @@ export namespace Contents {
     driveName(path: string): string;
 
     /**
+     * Given a path, get a shared model IFactory from the
+     * relevant backend. Returns `null` if the backend
+     * does not provide one.
+     */
+    getSharedModelFactory(options: IFactory.IOptions): IFactory | null;
+
+    /**
      * Get a file or directory.
      *
      * @param path: The path to the file.
@@ -417,6 +426,12 @@ export namespace Contents {
      * The server settings of the manager.
      */
     readonly serverSettings: ServerConnection.ISettings;
+
+    /**
+     * An optional shared model IFactory instance for the
+     * drive.
+     */
+    readonly sharedModelFactory?: IFactory;
 
     /**
      * A signal emitted when a file operation takes place.
@@ -601,6 +616,16 @@ export class ContentsManager implements Contents.IManager {
   addDrive(drive: Contents.IDrive): void {
     this._additionalDrives.set(drive.name, drive);
     drive.fileChanged.connect(this._onFileChanged, this);
+  }
+
+  /**
+   * Given a path, get a shared model IFactory from the
+   * relevant backend. Returns `null` if the backend
+   * does not provide one.
+   */
+  getSharedModelFactory(options: IFactory.IOptions): IFactory | null {
+    const [drive] = this._driveForPath(options.path);
+    return drive?.sharedModelFactory ?? null;
   }
 
   /**
