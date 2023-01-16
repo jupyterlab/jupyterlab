@@ -101,24 +101,17 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    const sharedModel = (this.sharedModel = new YNotebook({
+    this.sharedModel = YNotebook.create({
       disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
-    }));
+    });
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._deletedCells = [];
     this._collaborationEnabled = !!options?.collaborationEnabled;
 
-    // Initialize the notebook
-    // In collaboration mode, this will be overridden by the initialization coming
-    // from the document provider.
-    sharedModel.nbformat_minor = nbformat.MINOR_VERSION;
-    sharedModel.nbformat = nbformat.MAJOR_VERSION;
-    this._ensureMetadata(options.languagePreference ?? '');
-
-    this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
     this._cells.changed.connect(this._onCellsChanged, this);
     this.sharedModel.changed.connect(this._onStateChanged, this);
+    this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
   }
   /**
    * A signal emitted when the document content changes.
@@ -370,7 +363,6 @@ close the notebook without saving it.`,
     if ((copy.cells?.length ?? 0) === 0) {
       copy['cells'] = [{ cell_type: 'code', source: '', metadata: {} }];
     }
-
     this.sharedModel.fromJSON(copy);
 
     this._ensureMetadata();

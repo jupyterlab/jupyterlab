@@ -1464,10 +1464,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@jupyter/ydoc@~0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@jupyter/ydoc/-/ydoc-0.2.2.tgz#a2be83d2a0e076cef7ed77302e69153a0a4d6c16"
-  integrity sha512-UtU7ZxpL0k+QF9So4wtGxaS2C+nno58dig7sQUaBn48wlQDiuypzKgUmF7I37srpu6f/ywon3JBuEjxuL1CIBQ==
+"@jupyter/ydoc@^0.3.0-a4", "@jupyter/ydoc@~0.3.0-a4":
+  version "0.3.0-a4"
+  resolved "https://registry.yarnpkg.com/@jupyter/ydoc/-/ydoc-0.3.0-a4.tgz#81f6997292750ff0650efa4b81c488df5761fe9c"
+  integrity sha512-oni0j9Cm97SaUTToo+Fs8UMBKrMm+sTtdIFtNpLR12bY0KNdzazbfqGBtUTcQxCRX3OZUBZpjM2wfMA2KJowcQ==
   dependencies:
     "@jupyterlab/nbformat" "^3.0.0 || ^4.0.0-alpha.15"
     "@lumino/coreutils" "^1.11.0 || ^2.0.0-alpha.6"
@@ -13332,9 +13332,9 @@ yarn@1.22.19:
   integrity sha512-/0V5q0WbslqnwP91tirOvldvYISzaqhClxzyUKXYxs07yUILIs5jx/k6CFe8bvKSkds5w+eiOqta39Wk3WxdcQ==
 
 yjs@^13.5.40:
-  version "13.5.41"
-  resolved "https://registry.npmjs.org/yjs/-/yjs-13.5.41.tgz"
-  integrity sha512-4eSTrrs8OeI0heXKKioRY4ag7V5Bk85Z4MeniUyown3o3y0G7G4JpAZWrZWfTp7pzw2b53GkAQWKqHsHi9j9JA==
+  version "13.5.42"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.42.tgz#949f7d091ded6e2621a5798982a9631b79e1b62c"
+  integrity sha512-3aYBPeUSBUCs/vCOYolbyzhsQ6IDm1DeJgfhHVbW+6kq8YhWjkk2SUhYtBxd3lZPNsqmJGzYH9shKINhSVbEzw==
   dependencies:
     lib0 "^0.2.49"
 

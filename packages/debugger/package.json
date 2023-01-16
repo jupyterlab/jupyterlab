@@ -50,7 +50,7 @@
   "dependencies": {
     "@codemirror/state": "^6.0.0",
     "@codemirror/view": "^6.0.0",
-    "@jupyter/ydoc": "~0.2.2",
+    "@jupyter/ydoc": "^0.3.0-a5",
     "@jupyterlab/application": "^4.0.0-alpha.17",
     "@jupyterlab/apputils": "^4.0.0-alpha.17",
     "@jupyterlab/cells": "^4.0.0-alpha.17",

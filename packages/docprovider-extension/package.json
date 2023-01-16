@@ -34,7 +34,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyter/ydoc": "~0.2.2",
+    "@jupyter/ydoc": "^0.3.0-a5",
     "@jupyterlab/application": "^4.0.0-alpha.17",
     "@jupyterlab/coreutils": "^6.0.0-alpha.17",
     "@jupyterlab/docprovider": "^4.0.0-alpha.17",
