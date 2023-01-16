@@ -140,8 +140,9 @@ export class MetadataFormWidget
    * the whole root object must be updated.
    * This function build an object with all the root object to update
    * in metadata before performing update.
+   * It uses an arrow function to allow using 'this' properly when called from a custom field.
    */
-  updateMetadata(formData: ReadonlyPartialJSONObject, reload?: boolean) {
+  updateMetadata = (formData: ReadonlyPartialJSONObject, reload?: boolean) => {
     if (this.notebookTools == undefined) return;
 
     const notebook = this.notebookTools.activeNotebookPanel;
@@ -284,7 +285,7 @@ export class MetadataFormWidget
     if (reload) {
       this._update();
     }
-  }
+  };
 
   /**
    * Set the content of the widget.
