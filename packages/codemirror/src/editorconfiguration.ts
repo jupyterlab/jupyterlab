@@ -365,7 +365,7 @@ export namespace Configuration {
   /**
    * Editor configuration: provides APIs to get and reconfigure CodeMirror 6
    * extensions from option names. Also allows to register new themes and
-   * inject ne extensions in already configured editor instances.
+   * inject new extensions in already configured editor instances.
    */
   export class EditorConfiguration {
     constructor() {
@@ -389,7 +389,18 @@ export namespace Configuration {
           )
         ],
         ['language', createForwarderBuilder<LanguageSupport>()],
-        ['theme', createThemeBuilder()]
+        ['theme', createThemeBuilder()],
+        [
+          'tabFocusable',
+          createConditionalBuilder(
+            EditorView.contentAttributes.of({
+              tabIndex: '0'
+            }),
+            EditorView.contentAttributes.of({
+              tabIndex: '-1'
+            })
+          )
+        ]
       ]);
       this._themeOverloaderSpec = { '&': {}, '.cm-line': {} };
       this._themeOverloader = new Compartment();

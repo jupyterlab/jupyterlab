@@ -1019,19 +1019,22 @@ export namespace StaticNotebook {
       ...CodeEditor.defaultConfig,
       lineWrap: 'off',
       matchBrackets: true,
-      autoClosingBrackets: false
+      autoClosingBrackets: false,
+      tabFocusable: false
     },
     markdown: {
       ...CodeEditor.defaultConfig,
       lineWrap: 'on',
       matchBrackets: false,
-      autoClosingBrackets: false
+      autoClosingBrackets: false,
+      tabFocusable: false
     },
     raw: {
       ...CodeEditor.defaultConfig,
       lineWrap: 'on',
       matchBrackets: false,
-      autoClosingBrackets: false
+      autoClosingBrackets: false,
+      tabFocusable: false
     }
   };
 

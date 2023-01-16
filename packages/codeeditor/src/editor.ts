@@ -588,6 +588,12 @@ export namespace CodeEditor {
      * Whether to highlight trailing whitespace
      */
     showTrailingSpace: boolean;
+
+    /**
+     * Whether to allow users to tab into the editor input box, meaning they can
+     * press the tab key to focus (and enter) the editor.
+     */
+    tabFocusable: boolean;
   }
 
   /**
@@ -610,7 +616,8 @@ export namespace CodeEditor {
     rulers: [],
     showTrailingSpace: false,
     wordWrapColumn: 80,
-    codeFolding: false
+    codeFolding: false,
+    tabFocusable: true
   };
 
   /**

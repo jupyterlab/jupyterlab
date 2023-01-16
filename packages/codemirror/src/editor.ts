@@ -165,14 +165,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       fullConfig,
       this._yeditorBinding,
       this._editorConfig,
-      [
-        EditorView.contentAttributes.of({
-          tabIndex: '-1'
-        }),
-        Prec.high(domEventHandlers),
-        updateListener,
-        translation
-      ]
+      [Prec.high(domEventHandlers), updateListener, translation]
     );
 
     this._onMimeTypeChanged();
