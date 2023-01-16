@@ -205,14 +205,6 @@
   color: var(--jp-error-color0);
 }
 
-.jp-DocumentSearch-replace-entry {
-  border: var(--jp-border-width) solid var(--jp-border-color0);
-  display: flex;
-  background-color: var(--jp-layout-color0);
-  font-size: var(--jp-ui-font-size1);
-  margin: 2px;
-}
-
 .jp-DocumentSearch-replace-button-wrapper {
   overflow: hidden;
   display: inline-block;
@@ -221,7 +213,6 @@
   margin: 2px;
 }
 
-.jp-DocumentSearch-replace-entry:focus,
 .jp-DocumentSearch-replace-button-wrapper:focus {
   border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
 }

@@ -23,7 +23,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
 import { SearchDocumentModel } from './searchmodel';
-import { IFilter, IFilters } from './tokens';
+import { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
@@ -41,7 +41,6 @@ const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_OPTIONS_DISABLED_CLASS =
   'jp-DocumentSearch-search-options-disabled';
-const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
@@ -127,10 +126,13 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
 }
 
 interface IReplaceEntryProps {
+  onPreserveCaseToggled: () => void;
   onReplaceCurrent: () => void;
   onReplaceAll: () => void;
   onReplaceKeydown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  preserveCase: boolean;
+  replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
   translator?: ITranslator;
 }
@@ -138,17 +140,37 @@ interface IReplaceEntryProps {
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
   const trans = (props.translator ?? nullTranslator).load('jupyterlab');
 
+  const preserveCaseButtonToggleClass = classes(
+    props.preserveCase ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
+    BUTTON_CONTENT_CLASS
+  );
+
   return (
     <div className={REPLACE_WRAPPER_CLASS}>
-      <input
-        placeholder={trans.__('Replace')}
-        className={REPLACE_ENTRY_CLASS}
-        value={props.replaceText ?? ''}
-        onKeyDown={e => props.onReplaceKeydown(e)}
-        onChange={e => props.onChange(e)}
-        tabIndex={0}
-        title={trans.__('Replace')}
-      />
+      <div className={INPUT_WRAPPER_CLASS}>
+        <input
+          placeholder={trans.__('Replace')}
+          className={INPUT_CLASS}
+          value={props.replaceText ?? ''}
+          onKeyDown={e => props.onReplaceKeydown(e)}
+          onChange={e => props.onChange(e)}
+          tabIndex={0}
+          title={trans.__('Replace')}
+        />
+        {props.replaceOptionsSupport?.preserveCase ? (
+          <button
+            className={BUTTON_WRAPPER_CLASS}
+            onClick={() => props.onPreserveCaseToggled()}
+            tabIndex={0}
+            title={trans.__('Preserve Case')}
+          >
+            <caseSensitiveIcon.react
+              className={preserveCaseButtonToggleClass}
+              tag="span"
+            />
+          </button>
+        ) : null}
+      </div>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
@@ -323,9 +345,17 @@ interface ISearchOverlayProps {
    */
   isReadOnly: boolean;
   /**
+   * Whether to preserve case when replacing.
+   */
+  preserveCase: boolean;
+  /**
    * Whether or not the replace entry row is visible
    */
   replaceEntryVisible: boolean;
+  /**
+   * Support for replace options
+   */
+  replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   /**
    * Replacement expression
    */
@@ -377,7 +407,11 @@ interface ISearchOverlayProps {
    */
   onClose: () => void;
   /**
-   * Callback on use regular expression toggled
+   * Callback on preserve case in replace toggled.
+   */
+  onPreserveCaseToggled: () => void;
+  /**
+   * Callback on use regular expression toggled.
    */
   onRegexToggled: () => void;
   /**
@@ -580,6 +614,7 @@ class SearchOverlay extends React.Component<
           {showReplace ? (
             <>
               <ReplaceEntry
+                onPreserveCaseToggled={this.props.onPreserveCaseToggled}
                 onReplaceKeydown={(e: React.KeyboardEvent) =>
                   this._onReplaceKeydown(e)
                 }
@@ -590,7 +625,9 @@ class SearchOverlay extends React.Component<
                 }
                 onReplaceCurrent={() => this.props.onReplaceCurrent()}
                 onReplaceAll={() => this.props.onReplaceAll()}
+                replaceOptionsSupport={this.props.replaceOptionsSupport}
                 replaceText={this.props.replaceText}
+                preserveCase={this.props.preserveCase}
                 translator={this.translator}
               />
               <div className={SPACER_CLASS}></div>
@@ -694,7 +731,9 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         errorMessage={this.model.parsingError}
         filters={this.model.filters}
         filtersDefinition={this.model.filtersDefinition}
+        preserveCase={this.model.preserveCase}
         replaceEntryVisible={this._showReplace}
+        replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
         searchText={this.model.searchExpression}
         searchInputRef={this._searchInput}
@@ -719,6 +758,9 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         }}
         onHighlightPrevious={() => {
           void this.model.highlightPrevious();
+        }}
+        onPreserveCaseToggled={() => {
+          this.model.preserveCase = !this.model.preserveCase;
         }}
         onSearchChanged={(q: string) => {
           this.model.searchExpression = q;

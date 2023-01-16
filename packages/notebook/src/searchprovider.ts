@@ -13,6 +13,8 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
   IFilter,
   IFilters,
+  IReplaceOptions,
+  IReplaceOptionsSupport,
   ISearchMatch,
   ISearchProvider,
   SearchProvider
@@ -110,11 +112,17 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
   /**
    * Set to true if the widget under search is read-only, false
-   * if it is editable.  Will be used to determine whether to show
+   * if it is editable. Will be used to determine whether to show
    * the replace option.
    */
   get isReadOnly(): boolean {
     return this.widget?.content.model?.readOnly ?? false;
+  }
+
+  get replaceOptionsSupport(): IReplaceOptionsSupport {
+    return {
+      preserveCase: true
+    };
   }
 
   /**
@@ -317,7 +325,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  async replaceCurrentMatch(newText: string, loop = true): Promise<boolean> {
+  async replaceCurrentMatch(
+    newText: string,
+    loop = true,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     let replaceOccurred = false;
 
     const unrenderMarkdownCell = async (
@@ -340,7 +352,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       await unrenderMarkdownCell();
 
       const searchEngine = this._searchProviders[this._currentProviderIndex];
-      replaceOccurred = await searchEngine.replaceCurrentMatch(newText);
+      replaceOccurred = await searchEngine.replaceCurrentMatch(
+        newText,
+        false,
+        options
+      );
     }
 
     await this.highlightNext(loop);
@@ -356,10 +372,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  async replaceAllMatches(newText: string): Promise<boolean> {
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     const replacementOccurred = await Promise.all(
       this._searchProviders.map(provider => {
-        return provider.replaceAllMatches(newText);
+        return provider.replaceAllMatches(newText, options);
       })
     );
     return replacementOccurred.includes(true);
