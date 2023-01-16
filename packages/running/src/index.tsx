@@ -232,7 +232,8 @@ class Section extends PanelWithToolbar {
       });
     }
 
-    const enabled = options.manager.running().length > 0;
+    const runningItems = options.manager.running();
+    const enabled = runningItems.length > 0;
     this._button = new ToolbarButton({
       label: shutdownAllLabel,
       className: `${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled ${
@@ -252,7 +253,7 @@ class Section extends PanelWithToolbar {
             return (
               <div className={CONTAINER_CLASS}>
                 <List
-                  runningItems={options.manager.running()}
+                  runningItems={runningItems}
                   shutdownLabel={options.manager.shutdownLabel}
                   shutdownAllLabel={shutdownAllLabel}
                   shutdownItemIcon={options.manager.shutdownItemIcon}
