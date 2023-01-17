@@ -222,7 +222,7 @@
   text-align: center;
   cursor: pointer;
   box-sizing: border-box;
-  color: var(--jp-font-color1);
+  color: var(--jp-ui-font-color1);
   width: 100%;
   height: 100%;
 }
