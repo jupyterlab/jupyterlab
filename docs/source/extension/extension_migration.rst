@@ -175,7 +175,8 @@ bumped their major version (following semver convention). We want to point out p
    * Change the ``IFormComponentRegistry`` token, from ``@jupyterlab/ui-components:ISettingEditorRegistry`` to
      ``@jupyterlab/ui-components:IFormComponentRegistry``.
    * The ``FormComponentRegistry`` registers ``FormComponent`` instead of field renderers.
-     A ``FoemComponant`` defines a ``fieldRenderer`` or a ``widgetRenderer``.
+     The methods have been renamed from ``...renderer``  to ``...component``. For example, ``addRenderer`` is now ``addComponent``.
+     A ``FormComponent`` defines a ``fieldRenderer`` or a ``widgetRenderer``.
 
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
