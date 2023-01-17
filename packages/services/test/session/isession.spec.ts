@@ -17,9 +17,7 @@ import {
   Session,
   SessionManager
 } from '../../src';
-import { handleRequest, init, SessionTester } from '../utils';
-
-init();
+import { handleRequest, SessionTester } from '../utils';
 
 let kernelManager: KernelManager;
 let sessionManager: SessionManager;

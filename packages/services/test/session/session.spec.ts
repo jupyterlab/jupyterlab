@@ -9,14 +9,7 @@ import {
 import { toArray } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import { Session, SessionAPI } from '../../src';
-import {
-  createSessionModel,
-  getRequestHandler,
-  init,
-  makeSettings
-} from '../utils';
-
-init();
+import { createSessionModel, getRequestHandler, makeSettings } from '../utils';
 
 const server = new JupyterServer();
 
