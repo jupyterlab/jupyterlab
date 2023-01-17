@@ -10,7 +10,7 @@ import {
   YNotebook
 } from '@jupyter/ydoc';
 import { URLExt } from '@jupyterlab/coreutils';
-import { Contents, Drive, ServerConnection, User } from '@jupyterlab/services';
+import { Contents, Drive, User } from '@jupyterlab/services';
 import { WebSocketProvider } from './yprovider';
 
 /**
@@ -30,17 +30,16 @@ export class YDrive extends Drive {
    */
   constructor(user: User.IManager) {
     super({ name: 'YDrive' });
-    this._providers = new Map<string, WebSocketProvider>();
+    this._user = user;
     this._sharedPaths = new Set<string>();
+    this._providers = new Map<string, WebSocketProvider>();
 
-    this.sharedModelFactory = new SharedModelFactory(
-      user,
-      this.serverSettings,
-      this._providers,
-      this._sharedPaths
-    );
+    this.sharedModelFactory = new SharedModelFactory(this._onCreate);
   }
 
+  /**
+   * SharedModel factory for the YDrive.
+   */
   readonly sharedModelFactory: IFactory;
 
   /**
@@ -87,16 +86,19 @@ export class YDrive extends Drive {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    if (options && options?.format && options?.type !== 'directory') {
-      const model = super.get(localPath, { ...options, content: false });
-
+    if (options && options.format && options.type) {
       const key = `${options.type}:${options.format}:${localPath}`;
-      await this._providers.get(key)?.ready;
+      const provider = this._providers.get(key);
 
-      return model;
-    } else {
-      return super.get(localPath, options);
+      if (provider) {
+        this._sharedPaths.add(localPath);
+        const model = super.get(localPath, { ...options, content: false });
+        await provider.ready;
+        return model;
+      }
     }
+
+    return super.get(localPath, options);
   }
 
   /**
@@ -151,64 +153,16 @@ export class YDrive extends Drive {
     }
   }
 
-  private _sharedPaths: Set<string>;
-  private _providers: Map<string, WebSocketProvider>;
-}
-
-/**
- *
- */
-export class SharedModelFactory implements IFactory {
-  private _user: User.IManager;
-  private _sharedPaths: Set<string>;
-  private _providers: Map<string, WebSocketProvider>;
-
-  constructor(
-    user: User.IManager,
-    serverSettings: ServerConnection.ISettings,
-    providers: Map<string, WebSocketProvider>,
-    sharedPaths: Set<string>
-  ) {
-    this._user = user;
-    this._providers = providers;
-    this._sharedPaths = sharedPaths;
-
-    this.serverSettings = serverSettings;
-  }
-
-  readonly serverSettings: ServerConnection.ISettings;
-
-  createNew(options: IFactory.IOptions): ISharedDocument | undefined {
-    if (
-      typeof options?.format !== 'string' ||
-      typeof options?.contentType !== 'string'
-    ) {
-      throw new Error('Format and content type must be provided.');
-    }
-
-    let sharedModel: YDocument<DocumentChange> | undefined;
-    switch (options?.contentType) {
-      case 'file':
-        sharedModel = new YFile();
-        break;
-      case 'notebook':
-        sharedModel = new YNotebook();
-        break;
-      case 'directory':
-      default:
-    }
-
-    if (!sharedModel) {
-      return;
-    }
-
+  private _onCreate = (
+    options: IFactory.IOptions,
+    sharedModel: YDocument<DocumentChange>
+  ) => {
     try {
       const provider = new WebSocketProvider({
         url: URLExt.join(this.serverSettings.wsUrl, Y_DOCUMENT_PROVIDER_URL),
         path: options.path,
         format: options.format,
         contentType: options.contentType,
-        collaborative: options.collaborative,
         model: sharedModel,
         user: this._user
       });
@@ -223,8 +177,6 @@ export class SharedModelFactory implements IFactory {
           this._providers.delete(key);
         }
       });
-
-      this._sharedPaths.add(options.path);
     } catch (error) {
       // Falling back to the contents API if opening the websocket failed
       //  This may happen if the shared document is not a YDocument.
@@ -232,6 +184,50 @@ export class SharedModelFactory implements IFactory {
         `Failed to open websocket connection for ${options.path}.\n:${error}`
       );
     }
+  };
+
+  private _user: User.IManager;
+  private _sharedPaths: Set<string>;
+  private _providers: Map<string, WebSocketProvider>;
+}
+
+/**
+ *
+ */
+export class SharedModelFactory implements IFactory {
+  constructor(
+    private _onCreate: (
+      options: IFactory.IOptions,
+      sharedModel: YDocument<DocumentChange>
+    ) => void
+  ) {}
+
+  createNew(options: IFactory.IOptions): ISharedDocument | undefined {
+    if (
+      typeof options?.format !== 'string' ||
+      typeof options?.contentType !== 'string'
+    ) {
+      throw new Error('Format and content type must be provided.');
+    }
+
+    if (options.collaborative !== true) {
+      return;
+    }
+
+    let sharedModel: YDocument<DocumentChange> | undefined;
+    switch (options?.contentType) {
+      case 'file':
+        sharedModel = new YFile();
+        break;
+      case 'notebook':
+        sharedModel = new YNotebook();
+        break;
+      case 'directory':
+      default:
+        return;
+    }
+
+    this._onCreate(options, sharedModel);
 
     return sharedModel;
   }

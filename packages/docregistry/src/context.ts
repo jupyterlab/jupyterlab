@@ -60,19 +60,17 @@ export class Context<
       const sharedFactory = this._manager.contents.getSharedModelFactory(
         this._path
       );
-      this._sharedModel = sharedFactory?.createNew({
+      const sharedModel = sharedFactory?.createNew({
         path: localPath,
         format: this._factory.fileFormat!,
         contentType: this._factory.contentType,
         collaborative: this._factory.collaborative
       });
-    }
 
-    this._model = this._factory.createNew(
-      lang,
-      this._sharedModel,
-      collaborative
-    );
+      this._model = this._factory.createNew(lang, sharedModel, collaborative);
+    } else {
+      this._model = this._factory.createNew(lang, undefined, collaborative);
+    }
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -206,9 +204,6 @@ export class Context<
     this._model.dispose();
     this._model.sharedModel.dispose();
     this._disposed.emit(void 0);
-    if (this._sharedModel) {
-      this._sharedModel.dispose();
-    }
     Signal.clearData(this);
   }
 
@@ -916,7 +911,6 @@ or load the version on disk (revert)?`,
 
   private _model: T;
   private _path = '';
-  private _sharedModel: ISharedDocument | undefined;
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;

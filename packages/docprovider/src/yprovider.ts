@@ -11,7 +11,7 @@ import { Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
 import type { Doc } from 'yjs';
-import { IDocumentProvider, IDocumentProviderFactory } from './tokens';
+import { IDocumentProvider } from './tokens';
 
 /**
  * Room Id endpoint provided by `jupyter-server-ydoc`
@@ -128,12 +128,31 @@ export namespace WebSocketProvider {
   /**
    * The instantiation options for a WebSocketProvider.
    */
-  export interface IOptions
-    extends IDocumentProviderFactory.IOptions<YDocument<DocumentChange>> {
+  export interface IOptions {
     /**
      * The server URL
      */
     url: string;
+
+    /**
+     * The document file path
+     */
+    path: string;
+
+    /**
+     * Content type
+     */
+    contentType: string;
+
+    /**
+     * The source format
+     */
+    format: string;
+
+    /**
+     * The shared model
+     */
+    model: YDocument<DocumentChange>;
 
     /**
      * The user data
