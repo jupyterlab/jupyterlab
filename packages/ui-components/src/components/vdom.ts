@@ -196,7 +196,7 @@ export interface IUseSignalState<SENDER, ARGS> {
 }
 
 /**
- * UseSignal provides a way to hook up a Phosphor signal to a React element,
+ * UseSignal provides a way to hook up a Lumino signal to a React element,
  * so that the element is re-rendered every time the signal fires.
  *
  * It is implemented through the "render props" technique, using the `children`
@@ -210,7 +210,7 @@ export interface IUseSignalState<SENDER, ARGS> {
  * ```
  * function LiveButton(isActiveSignal: ISignal<any, boolean>) {
  *  return (
- *    <UseSignal signal={isActiveSignal} initialArgs={True}>
+ *    <UseSignal signal={isActiveSignal} initialArgs={true}>
  *     {(_, isActive) => <Button isActive={isActive}>}
  *    </UseSignal>
  *  )
@@ -224,7 +224,7 @@ export interface IUseSignalState<SENDER, ARGS> {
  *  return (
  *    <UseSignal
  *      signal={isActiveSignal}
- *      initialArgs={True}
+ *      initialArgs={true}
  *      children={(_, isActive) => <Button isActive={isActive}>}
  *    />
  *  )
