@@ -82,7 +82,9 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:dev:prod:release
 
     # Make sure the storybooks build.
-    jlpm run build:storybook
+    # Storybook is drop in JLab 4 as unused by active maintainers
+    # As NodeJS 18 is breaking storybook configuration, this test is removed from the CI.
+    # jlpm run build:storybook
 
     jlpm config set prefix ~/.yarn
 
