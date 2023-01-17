@@ -189,7 +189,8 @@ module.exports = [
         type: 'var',
         name: ['_JUPYTERLAB', 'CORE_OUTPUT']
       },
-      filename: 'bundle.js'
+      filename: 'bundle.js',
+      hashFunction: 'sha256'
     },
     optimization: {
       splitChunks: {
