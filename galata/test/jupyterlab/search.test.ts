@@ -27,9 +27,9 @@ test('Search with a text', async ({ page }) => {
     });
   }, searchText);
 
-  expect(
-    await page.locator('input.jp-DocumentSearch-input').inputValue()
-  ).toEqual(searchText);
+  expect(await page.locator('[placeholder="Find"]').inputValue()).toEqual(
+    searchText
+  );
 });
 
 test('Search with a text and replacement', async ({ page }) => {
@@ -54,10 +54,10 @@ test('Search with a text and replacement', async ({ page }) => {
     [searchText, replaceText]
   );
 
-  expect(
-    await page.locator('input.jp-DocumentSearch-input').inputValue()
-  ).toEqual(searchText);
-  expect(
-    await page.locator('input.jp-DocumentSearch-replace-entry').inputValue()
-  ).toEqual(replaceText);
+  expect(await page.locator('[placeholder="Find"]').inputValue()).toEqual(
+    searchText
+  );
+  expect(await page.locator('[placeholder="Replace"]').inputValue()).toEqual(
+    replaceText
+  );
 });
