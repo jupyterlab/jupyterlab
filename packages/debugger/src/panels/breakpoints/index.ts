@@ -3,17 +3,15 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  CommandToolbarButton,
-  PanelWithToolbar,
-  ToolbarButton
-} from '@jupyterlab/ui-components';
+import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
-import { closeAllIcon } from '../../icons';
+import { closeAllIcon, exceptionIcon } from '../../icons';
 import { IDebugger } from '../../tokens';
 import { BreakpointsBody } from './body';
+import { PauseOnExceptionsWidget } from './pauseonexceptions';
+
 /**
  * A Panel to show a list of breakpoints.
  */
@@ -32,11 +30,12 @@ export class Breakpoints extends PanelWithToolbar {
     const body = new BreakpointsBody(model);
 
     this.toolbar.addItem(
-      'pause',
-      new CommandToolbarButton({
-        commands: commands.registry,
-        id: commands.pause,
-        label: ''
+      'pauseOnException',
+      new PauseOnExceptionsWidget({
+        service: service,
+        commands: commands,
+        icon: exceptionIcon,
+        tooltip: trans.__('Pause on exception filter')
       })
     );
 
@@ -86,9 +85,9 @@ export namespace Breakpoints {
     registry: CommandRegistry;
 
     /**
-     * The pause command ID.
+     * The pause on exceptions command ID.
      */
-    pause: string;
+    pauseOnExceptions: string;
   }
   /**
    * Instantiation options for `Breakpoints`.

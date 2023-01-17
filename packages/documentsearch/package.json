@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/documentsearch",
-  "version": "4.0.0-alpha.16",
+  "version": "4.0.0-alpha.17",
   "description": "JupyterLab - Document Search",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,8 +37,8 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/translation": "^4.0.0-alpha.16",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.31",
+    "@jupyterlab/translation": "^4.0.0-alpha.17",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.32",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/messaging": "^2.0.0-alpha.6",
@@ -48,7 +48,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.16",
+    "@jupyterlab/testing": "^4.0.0-alpha.17",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typescript": "~4.7.3"

@@ -61,6 +61,17 @@ describe('completer/model', () => {
         model.setCompletionItems([]);
         model.setCompletionItems([]);
         expect(called).toBe(3);
+        const itemsWithResolve = [
+          {
+            label: 'foo',
+            resolve: async () => {
+              return { label: 'foo', documentation: 'Foo docs' };
+            }
+          }
+        ];
+        model.setCompletionItems(itemsWithResolve);
+        model.setCompletionItems(itemsWithResolve);
+        expect(called).toBe(4);
       });
 
       it('should signal when original request changes', () => {
@@ -137,6 +148,95 @@ describe('completer/model', () => {
         model.current = null;
         model.current = null;
         expect(called).toBe(3);
+      });
+    });
+
+    describe('#queryChanged', () => {
+      it('should signal when query is set via public setter', () => {
+        const model = new CompleterModel();
+        let called: Record<'setter' | 'editorUpdate' | 'reset', number> = {
+          setter: 0,
+          editorUpdate: 0,
+          reset: 0
+        };
+        const listener = (sender: any, args: Completer.IQueryChange) => {
+          called[args.origin]++;
+        };
+        model.queryChanged.connect(listener);
+        expect(called.setter).toBe(0);
+        model.query = 'foo';
+        expect(called.setter).toBe(1);
+        model.query = 'bar';
+        expect(called.setter).toBe(2);
+        expect(called.editorUpdate).toBe(0);
+      });
+
+      it('should signal when query gets reset', () => {
+        const model = new CompleterModel();
+        let called: Record<'setter' | 'editorUpdate' | 'reset', number> = {
+          setter: 0,
+          editorUpdate: 0,
+          reset: 0
+        };
+        const listener = (sender: any, args: Completer.IQueryChange) => {
+          called[args.origin]++;
+        };
+        model.queryChanged.connect(listener);
+        expect(called.reset).toBe(0);
+        model.query = 'foo';
+        expect(called.reset).toBe(0);
+        model.reset();
+        expect(called.reset).toBe(1);
+        // Should not call again (query does not change with second reset)
+        model.reset();
+        expect(called.reset).toBe(1);
+      });
+
+      it('should signal when current text changes', () => {
+        const model = new CompleterModel();
+        let called: Record<'setter' | 'editorUpdate' | 'reset', number> = {
+          setter: 0,
+          editorUpdate: 0,
+          reset: 0
+        };
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
+        const listener = (sender: any, args: Completer.IQueryChange) => {
+          called[args.origin]++;
+        };
+        model.queryChanged.connect(listener);
+        expect(called.editorUpdate).toBe(0);
+        model.original = request;
+        model.cursor = cursor;
+        model.current = change;
+        expect(called.editorUpdate).toBe(1);
+      });
+
+      it('should not signal when current text is unchanged', () => {
+        const model = new CompleterModel();
+        let called: Record<'setter' | 'editorUpdate' | 'reset', number> = {
+          setter: 0,
+          editorUpdate: 0,
+          reset: 0
+        };
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
+        const listener = (sender: any, args: Completer.IQueryChange) => {
+          called[args.origin]++;
+        };
+        model.queryChanged.connect(listener);
+        expect(called.editorUpdate).toBe(0);
+        model.original = request;
+        model.cursor = cursor;
+        model.current = change;
+        model.current = change;
+        expect(called.editorUpdate).toBe(1);
       });
     });
 
@@ -218,6 +318,31 @@ describe('completer/model', () => {
           { label: 'baz' }
         ]);
         model.reset();
+        expect(model.completionItems()).toEqual(want);
+      });
+
+      it('should escape HTML markup', () => {
+        let model = new CompleterModel();
+        let want: CompletionHandler.ICompletionItems = [
+          {
+            label: '&lt;foo&gt;&lt;/foo&gt;',
+            insertText: '<foo></foo>'
+          }
+        ];
+        model.setCompletionItems([{ label: '<foo></foo>' }]);
+        expect(model.completionItems()).toEqual(want);
+      });
+
+      it('should escape HTML with matches markup', () => {
+        let model = new CompleterModel();
+        let want: CompletionHandler.ICompletionItems = [
+          {
+            label: '&lt;foo&gt;<mark>smi</mark>le&lt;/foo&gt;',
+            insertText: '<foo>smile</foo>'
+          }
+        ];
+        model.setCompletionItems([{ label: '<foo>smile</foo>' }]);
+        model.query = 'smi';
         expect(model.completionItems()).toEqual(want);
       });
     });
@@ -433,6 +558,22 @@ describe('completer/model', () => {
         expect(resolved).toEqual({ label: 'foo', documentation: 'Foo docs' });
         expect(item).toEqual({
           label: 'foo',
+          documentation: 'Foo docs',
+          resolve: undefined
+        });
+      });
+      it('should escape HTML markup', async () => {
+        let model = new CompleterModel();
+        const item = {
+          label: '<foo></foo>',
+          resolve: () =>
+            Promise.resolve({ label: '<foo></foo>', documentation: 'Foo docs' })
+        };
+        model.setCompletionItems([item]);
+        const resolved = await model.resolveItem(0);
+        expect(resolved).toEqual({
+          label: '&lt;foo&gt;&lt;/foo&gt;',
+          insertText: '<foo></foo>',
           documentation: 'Foo docs',
           resolve: undefined
         });

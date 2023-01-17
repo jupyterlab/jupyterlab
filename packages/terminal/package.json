@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal",
-  "version": "4.0.0-alpha.16",
+  "version": "4.0.0-alpha.17",
   "description": "JupyterLab - Terminal Emulator Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,9 +41,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.16",
-    "@jupyterlab/services": "^7.0.0-alpha.16",
-    "@jupyterlab/translation": "^4.0.0-alpha.16",
+    "@jupyterlab/apputils": "^4.0.0-alpha.17",
+    "@jupyterlab/services": "^7.0.0-alpha.17",
+    "@jupyterlab/translation": "^4.0.0-alpha.17",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/domutils": "^2.0.0-alpha.6",
     "@lumino/messaging": "^2.0.0-alpha.6",
@@ -53,7 +53,7 @@
     "xterm-addon-web-links": "~0.6.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.16",
+    "@jupyterlab/testing": "^4.0.0-alpha.17",
     "@types/jest": "^29.2.0",
     "canvas": "^2.9.1",
     "rimraf": "~3.0.0",

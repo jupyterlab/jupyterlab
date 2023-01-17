@@ -64,7 +64,12 @@ export function ExecutionIndicatorComponent(
   }
 
   const progressBar = (percentage: number) => (
-    <ProgressCircle progress={percentage} width={16} height={24} />
+    <ProgressCircle
+      progress={percentage}
+      width={16}
+      height={24}
+      label={trans.__('Kernel status')}
+    />
   );
   const titleFactory = (translatedStatus: string) =>
     trans.__('Kernel status: %1', translatedStatus);
@@ -466,7 +471,10 @@ export namespace ExecutionIndicator {
      */
     private _startTimer(nb: Notebook) {
       const state = this._notebookExecutionProgress.get(nb);
-      if (state) {
+      if (!state) {
+        return;
+      }
+      if (state.scheduledCell.size > 0) {
         if (state.executionStatus !== 'busy') {
           state.executionStatus = 'busy';
           clearTimeout(state.timeout);
@@ -475,6 +483,8 @@ export namespace ExecutionIndicator {
             this._tick(state);
           }, 1000);
         }
+      } else {
+        this._resetTime(state);
       }
     }
 
