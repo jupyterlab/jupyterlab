@@ -1464,10 +1464,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@jupyter/ydoc@^0.3.0-a4", "@jupyter/ydoc@~0.3.0-a4":
-  version "0.3.0-a4"
-  resolved "https://registry.yarnpkg.com/@jupyter/ydoc/-/ydoc-0.3.0-a4.tgz#81f6997292750ff0650efa4b81c488df5761fe9c"
-  integrity sha512-oni0j9Cm97SaUTToo+Fs8UMBKrMm+sTtdIFtNpLR12bY0KNdzazbfqGBtUTcQxCRX3OZUBZpjM2wfMA2KJowcQ==
+"@jupyter/ydoc@^0.3.0-a5", "@jupyter/ydoc@~0.3.0-a5":
+  version "0.3.0-a5"
+  resolved "https://registry.yarnpkg.com/@jupyter/ydoc/-/ydoc-0.3.0-a5.tgz#9c8f3c7ea3ed59b35837037450eec9eff3eb911b"
+  integrity sha512-X3aWGME80wPFf62NiTX7F+0q/tyQRXuqkVLG/wrDg79eme6lQ4DDnkU5IhPOA4Gce0F/q1zNczyWumkiQ+LlRw==
   dependencies:
     "@jupyterlab/nbformat" "^3.0.0 || ^4.0.0-alpha.15"
     "@lumino/coreutils" "^1.11.0 || ^2.0.0-alpha.6"
