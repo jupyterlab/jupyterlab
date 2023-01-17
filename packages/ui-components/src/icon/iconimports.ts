@@ -103,6 +103,7 @@ import undoSvgstr from '../../style/icons/toolbar/undo.svg';
 import userSvgstr from '../../style/icons/sidebar/user.svg';
 import usersSvgstr from '../../style/icons/sidebar/users.svg';
 import vegaSvgstr from '../../style/icons/filetype/vega.svg';
+import wordSvgstr from '../../style/icons/search/word.svg';
 import yamlSvgstr from '../../style/icons/filetype/yaml.svg';
 
 // LabIcon instance construction
@@ -201,4 +202,5 @@ export const undoIcon = new LabIcon({ name: 'ui-components:undo', svgstr: undoSv
 export const userIcon = new LabIcon({ name: 'ui-components:user', svgstr: userSvgstr });
 export const usersIcon = new LabIcon({ name: 'ui-components:users', svgstr: usersSvgstr });
 export const vegaIcon = new LabIcon({ name: 'ui-components:vega', svgstr: vegaSvgstr });
+export const wordIcon = new LabIcon({ name: 'ui-components:word', svgstr: wordSvgstr });
 export const yamlIcon = new LabIcon({ name: 'ui-components:yaml', svgstr: yamlSvgstr });
