@@ -8,10 +8,6 @@ import {
 } from '@jupyterlab/testutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Kernel, KernelManager, KernelMessage } from '../../src';
-import { init } from '../utils';
-
-// Initialize fetch override.
-init();
 
 const BLIP = `
 from ipykernel.comm import Comm
