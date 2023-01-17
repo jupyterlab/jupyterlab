@@ -43,7 +43,11 @@ def main():
         name = __name__
         open_browser = False
 
-        serverapp_config = {"base_url": "/foo/", "root_dir": osp.abspath(example_dir)}
+        serverapp_config = {
+            "base_url": "/foo/",
+            "root_dir": osp.abspath(example_dir),
+            "preferred_dir": osp.abspath(example_dir),
+        }
         ip = "127.0.0.1"
 
         def initialize_settings(self):
