@@ -2,6 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 var data = require('./package.json');
 var Build = require('@jupyterlab/builder').Build;
+const crypto = require('crypto');
+
+// Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
+const cryptoOrigCreateHash = crypto.createHash;
+crypto.createHash = algorithm =>
+  cryptoOrigCreateHash(algorithm == 'md4' ? 'sha256' : algorithm);
 
 var names = Object.keys(data.dependencies).filter(function (name) {
   var packageData = require(name + '/package.json');
@@ -18,7 +24,8 @@ module.exports = [
     entry: ['whatwg-fetch', './index.js'],
     output: {
       path: __dirname + '/build',
-      filename: 'bundle.js'
+      filename: 'bundle.js',
+      hashFunction: 'sha256'
     },
     // node: {
     //   fs: 'empty'

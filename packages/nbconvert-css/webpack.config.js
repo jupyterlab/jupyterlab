@@ -1,11 +1,18 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
+const crypto = require('crypto');
+
+// Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
+const cryptoOrigCreateHash = crypto.createHash;
+crypto.createHash = algorithm =>
+  cryptoOrigCreateHash(algorithm == 'md4' ? 'sha256' : algorithm);
 
 module.exports = {
   entry: './raw.js',
   output: {
     filename: 'index.js',
-    path: path.resolve(__dirname, 'style')
+    path: path.resolve(__dirname, 'style'),
+    hashFunction: 'sha256'
   },
   plugins: [
     new MiniCssExtractPlugin({
