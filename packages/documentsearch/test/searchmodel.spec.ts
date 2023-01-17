@@ -9,6 +9,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 class LogSearchProvider extends GenericSearchProvider {
   private _queryReceived: PromiseDelegate<RegExp | null>;
+  private _initialQuery: string = 'unset';
 
   constructor(widget: Widget) {
     super(widget);
@@ -21,6 +22,14 @@ class LogSearchProvider extends GenericSearchProvider {
   async startQuery(query: RegExp | null, filters = {}): Promise<void> {
     this._queryReceived.resolve(query);
     this._queryReceived = new PromiseDelegate();
+  }
+
+  set initialQuery(query: string) {
+    this._initialQuery = query;
+  }
+
+  getInitialQuery() {
+    return this._initialQuery;
   }
 }
 
@@ -49,6 +58,24 @@ describe('documentsearch/searchmodel', () => {
         query.lastIndex = 0;
         expect(query.test('test')).toEqual(false);
         query.lastIndex = 0;
+      });
+    });
+
+    describe('#initialQuery', () => {
+      it('should get query from search expression or provider', () => {
+        provider.initialQuery = 'provider-set-query';
+        expect(model.initialQuery).toEqual('provider-set-query');
+        model.searchExpression = 'query';
+        expect(model.initialQuery).toEqual('query');
+        model.searchExpression = '';
+        expect(model.initialQuery).toEqual('provider-set-query');
+      });
+      it('should remember last query', async () => {
+        provider.initialQuery = 'provider-set-query';
+        model.searchExpression = 'query';
+        expect(model.initialQuery).toEqual('query');
+        await model.endQuery();
+        expect(model.initialQuery).toEqual('query');
       });
     });
 
