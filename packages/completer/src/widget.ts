@@ -25,14 +25,14 @@ const ITEM_CLASS = 'jp-Completer-item';
 const ACTIVE_CLASS = 'jp-mod-active';
 
 /**
- * The minimum height of a completer widget.
+ * The class used by item listing which determines the height of the completer.
  */
-const MIN_HEIGHT = 20;
+const LIST_CLASS = 'jp-Completer-list';
 
 /**
- * The maximum height of a completer widget.
+ * Class of the documentation panel.
  */
-const MAX_HEIGHT = 300;
+const DOC_PANEL_CLASS = 'jp-Completer-docpanel';
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.
@@ -61,15 +61,38 @@ export class Completer extends Widget {
   constructor(options: Completer.IOptions) {
     super({ node: document.createElement('div') });
     this.sanitizer = options.sanitizer ?? new Sanitizer();
-    this._renderer =
-      options.renderer ?? Completer.getDefaultRenderer(this.sanitizer);
+    this._defaultRenderer = Completer.getDefaultRenderer(this.sanitizer);
+    this._renderer = options.renderer ?? this._defaultRenderer;
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass('jp-Completer');
+    this._updateConstraints();
   }
 
   /**
-   * The sanitizer used to sanitize untrusted html inputs.
+   * Cache style constraints from CSS.
+   */
+  _updateConstraints() {
+    const tempNode = document.createElement('div');
+    tempNode.classList.add(LIST_CLASS);
+    tempNode.style.visibility = 'hidden';
+    tempNode.style.overflowY = 'scroll';
+    document.body.appendChild(tempNode);
+    const computedStyle = window.getComputedStyle(tempNode);
+    this._maxHeight = parseInt(computedStyle.maxHeight, 10);
+    this._minHeight = parseInt(computedStyle.minHeight, 10);
+    this._scrollbarWidth = tempNode.offsetWidth - tempNode.clientWidth;
+    document.body.removeChild(tempNode);
+    const tempDocPanel = document.createElement('div');
+    tempDocPanel.classList.add(DOC_PANEL_CLASS);
+    this._docPanelWidth = Private.measureSize(
+      tempDocPanel,
+      'inline-block'
+    ).width;
+  }
+
+  /**
+   * The sanitizer used to sanitize untrusted HTML inputs.
    */
   readonly sanitizer: ISanitizer;
 
@@ -127,10 +150,12 @@ export class Completer extends Widget {
     }
     if (this._model) {
       this._model.stateChanged.disconnect(this.onModelStateChanged, this);
+      this._model.queryChanged.disconnect(this.onModelQueryChanged, this);
     }
     this._model = model;
     if (this._model) {
       this._model.stateChanged.connect(this.onModelStateChanged, this);
+      this._model.queryChanged.connect(this.onModelQueryChanged, this);
     }
   }
 
@@ -149,6 +174,7 @@ export class Completer extends Widget {
    * Dispose of the resources held by the completer widget.
    */
   dispose(): void {
+    this._sizeCache = undefined;
     this._model = null;
     super.dispose();
   }
@@ -191,6 +217,9 @@ export class Completer extends Widget {
     if (this._model) {
       this._model.reset(true);
     }
+    // Clear size cache.
+    this._sizeCache = undefined;
+    this.node.scrollTop = 0;
   }
 
   /**
@@ -236,6 +265,32 @@ export class Completer extends Widget {
   }
 
   /**
+   * Handle model query changes.
+   */
+  protected onModelQueryChanged(
+    model: Completer.IModel,
+    queryChange: Completer.IQueryChange
+  ): void {
+    // If query was changed by the user typing, the filtered down items
+    // may no longer reach/exceed the maxHeight of the completer widget,
+    // hence size needs to be recalculated.
+    if (this._sizeCache && queryChange.origin === 'editorUpdate') {
+      const newItems = model.completionItems();
+      const oldItems = this._sizeCache.items;
+      // Only reset size if the number of items changed, or the longest item changed.
+      const oldWidest = oldItems[this._findWidestItemIndex(oldItems)];
+      const newWidest = newItems[this._findWidestItemIndex(newItems)];
+      const heuristic = this._getPreferredItemWidthHeuristic();
+      if (
+        newItems.length !== this._sizeCache.items.length ||
+        heuristic(oldWidest) !== heuristic(newWidest)
+      ) {
+        this._sizeCache = undefined;
+      }
+    }
+  }
+
+  /**
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -244,22 +299,32 @@ export class Completer extends Widget {
       return;
     }
 
-    if (this._resetFlag) {
-      this._resetFlag = false;
+    // If this is the first time the current completer session has loaded,
+    // populate any initial subset match. This is being done before node
+    // gets rendered to avoid rendering it twice.
+    if (!model.query) {
+      this._populateSubset();
+    }
+
+    let items = model.completionItems();
+
+    // If there are no items, reset and bail.
+    if (!items.length) {
       if (!this.isHidden) {
+        this.reset();
         this.hide();
         this._visibilityChanged.emit(undefined);
       }
       return;
     }
 
-    let node: HTMLElement | null = null;
-    let completionItemList = model.completionItems();
-    node = this._createCompletionItemNode(model, completionItemList);
+    // Update constraints before any DOM modifications
+    this._updateConstraints();
 
-    if (!node) {
-      return;
-    }
+    // Do not trigger any geometry updates from async code when in lock.
+    this._geometryLock = true;
+
+    const node = this._createCompleterNode(model, items);
 
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
@@ -267,21 +332,13 @@ export class Completer extends Widget {
     // Add the documentation panel
     if (this._showDoc) {
       let docPanel = document.createElement('div');
-      docPanel.className = 'jp-Completer-docpanel';
+      docPanel.className = DOC_PANEL_CLASS;
+      this._docPanel = docPanel;
       node.appendChild(docPanel);
+      this._docPanelExpanded = false;
     }
     const resolvedItem = this.model?.resolveItem(this._activeIndex);
     this._updateDocPanel(resolvedItem);
-
-    // If this is the first time the current completer session has loaded,
-    // populate any initial subset match.
-    if (!model.query) {
-      const populated = this._populateSubset();
-      if (populated) {
-        this.update();
-        return;
-      }
-    }
 
     if (this.isHidden) {
       this.show();
@@ -290,22 +347,27 @@ export class Completer extends Widget {
     } else {
       this._setGeometry();
     }
+    this._geometryLock = false;
   }
 
-  private _createCompletionItemNode(
+  /**
+   * Get cached dimensions of the completer box.
+   */
+  protected get sizeCache(): Completer.IDimensions | undefined {
+    if (!this._sizeCache) {
+      return;
+    }
+    return {
+      width: this._sizeCache.width,
+      height: this._sizeCache.height
+    };
+  }
+
+  private _createCompleterNode(
     model: Completer.IModel,
     items: CompletionHandler.ICompletionItems
-  ): HTMLElement | null {
-    // If there are no items, reset and bail.
-    if (!items.length) {
-      this._resetFlag = true;
-      this.reset();
-      if (!this.isHidden) {
-        this.hide();
-        this._visibilityChanged.emit(undefined);
-      }
-      return null;
-    }
+  ): HTMLElement {
+    const current = ++this._renderCounter;
 
     // Clear the node.
     let node = this.node;
@@ -317,13 +379,136 @@ export class Completer extends Widget {
 
     // Populate the completer items.
     let ul = document.createElement('ul');
-    ul.className = 'jp-Completer-list';
-    for (let item of items) {
-      let li = this._renderer.createCompletionItemNode(item, orderedTypes);
+    ul.className = LIST_CLASS;
+
+    // Add first N items to fill the first "page" assuming that the completer
+    // would reach its maximum allowed height.
+    const first = this._renderer.createCompletionItemNode(
+      items[0],
+      orderedTypes
+    );
+    const renderedItems = [first];
+
+    const firstItemSize = Private.measureSize(first, 'inline-grid');
+    const pageSize = Math.max(
+      Math.ceil(this._maxHeight / firstItemSize.height),
+      5
+    );
+    // We add one item in case if height heuristic is inacurate.
+    const toRenderImmediately = Math.min(pageSize + 1, items.length);
+
+    const start = performance.now();
+    for (let i = 1; i < toRenderImmediately; i++) {
+      const li = this._renderer.createCompletionItemNode(
+        items[i],
+        orderedTypes
+      );
+      renderedItems.push(li);
+    }
+
+    for (const li of renderedItems) {
       ul.appendChild(li);
     }
+
+    if (pageSize < items.length) {
+      // If the first "page" is completely filled, we can pre-calculate size:
+      //  - height will equal maximum allowed height,
+      //  - width will be estimated from the widest item.
+      // If the page size is larger than the number of items, then there are
+      // few items and the benefit from pre-computing the size is negligible.
+      const widestItemIndex = this._findWidestItemIndex(items);
+      const widestItem =
+        widestItemIndex < renderedItems.length
+          ? renderedItems[widestItemIndex]
+          : this._renderer.createCompletionItemNode(
+              items[widestItemIndex],
+              orderedTypes
+            );
+
+      // The node needs to be cloned to avoid side-effect of detaching it.
+      const widestItemSize = Private.measureSize(
+        widestItem.cloneNode(true) as HTMLElement,
+        'inline-grid'
+      );
+
+      this._sizeCache = {
+        height: this._maxHeight,
+        width: widestItemSize.width + this._scrollbarWidth,
+        items: items
+      };
+    }
+
+    if (toRenderImmediately < items.length) {
+      // Render remaining items on idle in subsequent animation frames,
+      // in chunks of size such that each frame would take about 16ms
+      // allowing for 4ms of overhead, but keep the chunks no smaller
+      // than 5 items at a time.
+      const timePerItem = (performance.now() - start) / toRenderImmediately;
+
+      const chunkSize = Math.max(5, Math.floor(12 / timePerItem));
+
+      let alreadyRendered = toRenderImmediately;
+      let previousChunkFinal = renderedItems[renderedItems.length - 1];
+
+      const renderChunk = () => {
+        if (alreadyRendered >= items.length) {
+          return;
+        }
+        // Add a filler so that the list with partially rendered items has the total
+        // height equal to the (predicted) final height to avoid scrollbar jitter.
+        const predictedMissingHeight =
+          firstItemSize.height * (items.length - alreadyRendered);
+        previousChunkFinal.style.marginBottom = `${predictedMissingHeight}px`;
+
+        requestAnimationFrame(() => {
+          if (current != this._renderCounter) {
+            // Bail if rendering afresh was requested in the meantime.
+            return;
+          }
+          previousChunkFinal.style.marginBottom = '';
+          const limit = Math.min(items.length, alreadyRendered + chunkSize);
+          for (let i = alreadyRendered; i < limit; i++) {
+            const li = this._renderer.createCompletionItemNode(
+              items[i],
+              orderedTypes
+            );
+            ul.appendChild(li);
+            previousChunkFinal = li;
+          }
+          alreadyRendered = limit;
+
+          renderChunk();
+        });
+      };
+      renderChunk();
+    }
+
     node.appendChild(ul);
     return node;
+  }
+
+  /**
+   * Use preferred heuristic to find the index of the widest item.
+   */
+  private _findWidestItemIndex(
+    items: CompletionHandler.ICompletionItems
+  ): number {
+    const widthHeuristic = this._getPreferredItemWidthHeuristic();
+
+    const widthHeuristics = items.map(widthHeuristic);
+    return widthHeuristics.indexOf(Math.max(...widthHeuristics));
+  }
+
+  /**
+   * Get item width heuristic function from renderer if available,
+   * or the default one otherwise.
+   */
+  private _getPreferredItemWidthHeuristic(): (
+    item: CompletionHandler.ICompletionItem
+  ) => number {
+    return this._renderer.itemWidthHeuristic
+      ? this._renderer.itemWidthHeuristic.bind(this._renderer)
+      : this._defaultRenderer.itemWidthHeuristic.bind(this._defaultRenderer);
   }
 
   /**
@@ -365,9 +550,7 @@ export class Completer extends Widget {
 
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
-    let completionList = this.node.querySelector(
-      '.jp-Completer-list'
-    ) as Element;
+    let completionList = this.node.querySelector(`.${LIST_CLASS}`) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);
 
@@ -519,8 +702,10 @@ export class Completer extends Widget {
       return false;
     }
 
-    const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
-    const subset = Private.commonSubset(Private.itemValues(items));
+    const items = model.completionItems();
+    const subset = Private.commonSubset(
+      items.map(item => item.insertText || item.label)
+    );
     const { query } = model;
 
     // If a common subset exists and it is not the current query, highlight it.
@@ -551,6 +736,7 @@ export class Completer extends Widget {
     const start = model.cursor.start;
     const position = editor.getPositionAt(start) as CodeEditor.IPosition;
     const anchor = editor.getCoordinateForPosition(position) as DOMRect;
+
     const style = window.getComputedStyle(node);
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
@@ -564,85 +750,154 @@ export class Completer extends Widget {
       (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
       editor.host;
 
+    const items = model.completionItems();
+
+    // Fast cache invalidation (only checks for length rather than length + width)
+    if (this._sizeCache && this._sizeCache.items.length !== items.length) {
+      this._sizeCache = undefined;
+    }
+
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
       anchor,
       host: host,
-      maxHeight: MAX_HEIGHT,
-      minHeight: MIN_HEIGHT,
+      maxHeight: this._maxHeight,
+      minHeight: this._minHeight,
       node: node,
+      size: this._sizeCache,
       offset: { horizontal: borderLeft + paddingLeft },
       privilege: 'below',
       style: style,
       outOfViewDisplay: {
-        top: 'hidden-inside',
-        bottom: 'hidden-inside',
+        top: 'stick-inside',
+        bottom: 'stick-inside',
         left: 'stick-inside',
         right: 'stick-outside'
       }
     });
+    const current = ++this._geometryCounter;
+    if (!this._sizeCache) {
+      // If size was not pre-calculated using heuristics, save the actual
+      // size into cache once rendered.
+      requestAnimationFrame(() => {
+        if (current != this._geometryCounter) {
+          // Do not set size to cache if it may already be outdated.
+          return;
+        }
+        let rect = node.getBoundingClientRect();
+        this._sizeCache = {
+          width: rect.width,
+          height: rect.height,
+          items: items
+        };
+      });
+    }
   }
 
-  /**
-   * Create a loading bar element for document panel.
-   */
-  private _createLoadingBar(): HTMLElement {
-    const loadingContainer = document.createElement('div');
-    loadingContainer.classList.add('jp-Completer-loading-bar-container');
-    const loadingBar = document.createElement('div');
-    loadingBar.classList.add('jp-Completer-loading-bar');
-    loadingContainer.append(loadingBar);
-    return loadingContainer;
-  }
   /**
    * Update the display-state and contents of the documentation panel
    */
   private _updateDocPanel(
     resolvedItem: Promise<CompletionHandler.ICompletionItem | null> | undefined
   ): void {
-    let docPanel = this.node.querySelector('.jp-Completer-docpanel');
+    let docPanel = this._docPanel;
     if (!docPanel) {
       return;
     }
+    this._toggleDocPanel(true);
 
     if (!resolvedItem) {
-      docPanel.setAttribute('style', 'display:none');
+      this._toggleDocPanel(false);
       return;
     }
     docPanel.textContent = '';
-    docPanel.appendChild(this._createLoadingBar());
+    const loadingIndicator =
+      this._renderer.createLoadingDocsIndicator?.() ??
+      this._defaultRenderer.createLoadingDocsIndicator();
+    docPanel.appendChild(loadingIndicator);
+
     resolvedItem
       .then(activeItem => {
         if (!activeItem) {
           return;
         }
+        if (!docPanel) {
+          return;
+        }
         if (activeItem.documentation) {
-          let node: HTMLElement;
-          const nodeRenderer =
-            this._renderer.createDocumentationNode ??
-            Completer.getDefaultRenderer(this.sanitizer)
-              .createDocumentationNode;
-          node = nodeRenderer(activeItem);
-          docPanel!.textContent = '';
-          docPanel!.appendChild(node);
-          docPanel!.setAttribute('style', '');
+          const node =
+            this._renderer.createDocumentationNode?.(activeItem) ??
+            this._defaultRenderer.createDocumentationNode(activeItem);
+          docPanel.textContent = '';
+          docPanel.appendChild(node);
         } else {
-          docPanel!.setAttribute('style', 'display:none');
+          this._toggleDocPanel(false);
         }
       })
       .catch(e => console.error(e));
+  }
+
+  private _toggleDocPanel(show: boolean): void {
+    let docPanel = this._docPanel;
+    if (!docPanel) {
+      return;
+    }
+    if (show) {
+      if (this._docPanelExpanded) {
+        return;
+      }
+      docPanel.style.display = '';
+      this._docPanelExpanded = true;
+    } else {
+      if (!this._docPanelExpanded) {
+        return;
+      }
+      docPanel.style.display = 'none';
+      this._docPanelExpanded = false;
+    }
+    const sizeCache = this._sizeCache;
+    if (sizeCache) {
+      sizeCache.width += this._docPanelWidth * (show ? +1 : -1);
+      if (!this._geometryLock) {
+        this._setGeometry();
+      }
+    }
   }
 
   private _activeIndex = 0;
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _model: Completer.IModel | null = null;
   private _renderer: Completer.IRenderer;
-  private _resetFlag = false;
+  private _defaultRenderer: Completer.Renderer;
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
   private _indexChanged = new Signal<this, number>(this);
   private _lastSubsetMatch: string = '';
   private _showDoc: boolean;
+  private _sizeCache: Private.IDimensionsCache | undefined;
+
+  /**
+   * The maximum height of a completer widget.
+   */
+  private _maxHeight: number;
+
+  /**
+   * The minimum height of a completer widget.
+   */
+  private _minHeight: number;
+
+  private _scrollbarWidth: number;
+  private _docPanelWidth: number;
+  private _docPanel: HTMLElement | undefined;
+  private _geometryLock = false;
+
+  /**
+   * Increasing this counter invalidates previous request to save geometry cache in animation callback.
+   */
+  private _geometryCounter: number = 0;
+
+  private _docPanelExpanded = false;
+  private _renderCounter: number = 0;
 }
 
 export namespace Completer {
@@ -691,16 +946,6 @@ export namespace Completer {
     readonly text: string;
 
     /**
-     * The height of a character in the editor.
-     */
-    readonly lineHeight: number;
-
-    /**
-     * The width of a character in the editor.
-     */
-    readonly charWidth: number;
-
-    /**
      * The line number of the editor cursor.
      */
     readonly line: number;
@@ -712,13 +957,35 @@ export namespace Completer {
   }
 
   /**
+   * Information about the query string change.
+   */
+  export interface IQueryChange {
+    /**
+     * The new value of the query.
+     */
+    newValue: string;
+    /**
+     * The event which caused the query to change, one of:
+     * - `editorUpdate`: as a result of editor change, e.g. user typing code,
+     * - `setter`: programatically, e.g. by the logic in the widget,
+     * - `reset`: due to completer model being reset.
+     */
+    origin: 'setter' | 'editorUpdate' | 'reset';
+  }
+
+  /**
    * The data model backing a code completer widget.
    */
   export interface IModel extends IDisposable {
     /**
-     * A signal emitted when state of the completer menu changes.
+     * A signal emitted when state of the completer model changes.
      */
     readonly stateChanged: ISignal<IModel, void>;
+
+    /**
+     * A signal emitted when query string changes (at invocation, or as user types).
+     */
+    readonly queryChanged: ISignal<IModel, IQueryChange>;
 
     /**
      * The current text state details.
@@ -844,6 +1111,14 @@ export namespace Completer {
     /**
      * Create an item node (an `li` element) from a ICompletionItem
      * for a text completer menu.
+     *
+     * #### Notes
+     * The item provided to renderer is already pre-processed by the model:
+     * - the `label` is escaped to ensure that no user-generated HTML is included;
+     *   if `insertText` was not originally provided, it is set to raw `label`
+     *   (prior to escaping) if needed,
+     * - if there were any matches against the query the `label` has them
+     *    highlighted with `<mark>`s.
      */
     createCompletionItemNode(item: T, orderedTypes: string[]): HTMLLIElement;
 
@@ -852,13 +1127,48 @@ export namespace Completer {
      * documentation panel.
      */
     createDocumentationNode?(activeItem: T): HTMLElement;
+
+    /**
+     * Create a loading indicator element for document panel.
+     */
+    createLoadingDocsIndicator?(): HTMLElement;
+
+    /**
+     * Get a heuristic for the width of an item.
+     *
+     * As a performance optimization completer will infer the hover box width
+     * from the widest item node which will be rendered before all other nodes.
+     * By default the widest item is selected based on label length heuristic;
+     * renderers which customize item rendering can use this method to provide
+     * a custom heuristic.
+     */
+    itemWidthHeuristic?(a: T): number;
+  }
+
+  /**
+   * A namespace for the default renderer.
+   */
+  export namespace Renderer {
+    export interface IOptions {
+      /**
+       * The sanitizer used to sanitize untrusted HTML inputs.
+       */
+      sanitizer?: ISanitizer;
+    }
   }
 
   /**
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
-    constructor(readonly sanitizer: ISanitizer = new Sanitizer()) {}
+    constructor(options?: Renderer.IOptions) {
+      this.sanitizer = options?.sanitizer || new Sanitizer();
+    }
+
+    /**
+     * The sanitizer used to sanitize untrusted HTML inputs.
+     */
+    readonly sanitizer: ISanitizer;
 
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
@@ -867,13 +1177,13 @@ export namespace Completer {
       item: CompletionHandler.ICompletionItem,
       orderedTypes: string[]
     ): HTMLLIElement {
-      let baseNode = this._createBaseNode(item.insertText || item.label);
+      let wrapperNode = this._createWrapperNode(item.insertText || item.label);
       if (item.deprecated) {
-        baseNode.classList.add('jp-Completer-deprecated');
+        wrapperNode.classList.add('jp-Completer-deprecated');
       }
       return this._constructNode(
-        baseNode,
-        this._createMatchNode(item.label),
+        wrapperNode,
+        this._createLabelNode(item.label),
         !!item.type,
         item.type,
         orderedTypes,
@@ -889,7 +1199,7 @@ export namespace Completer {
     ): HTMLElement {
       const host = document.createElement('div');
       host.classList.add('jp-RenderedText');
-      const sanitizer = { sanitize: (dirty: string) => dirty };
+      const sanitizer = { sanitize: this.sanitizer.sanitize };
       const source = activeItem.documentation || '';
 
       renderText({ host, sanitizer, source }).catch(console.error);
@@ -897,9 +1207,30 @@ export namespace Completer {
     }
 
     /**
-     * Create base node with the value to be inserted
+     * Get a heuristic for the width of an item.
      */
-    private _createBaseNode(value: string): HTMLLIElement {
+    itemWidthHeuristic(item: CompletionHandler.ICompletionItem): number {
+      return (
+        item.label.replace(/<\?mark>/g, '').length + (item.type?.length || 0)
+      );
+    }
+
+    /**
+     * Create a loading bar for the documentation panel.
+     */
+    createLoadingDocsIndicator(): HTMLElement {
+      const loadingContainer = document.createElement('div');
+      loadingContainer.classList.add('jp-Completer-loading-bar-container');
+      const loadingBar = document.createElement('div');
+      loadingBar.classList.add('jp-Completer-loading-bar');
+      loadingContainer.append(loadingBar);
+      return loadingContainer;
+    }
+
+    /**
+     * Create base node with the value to be inserted.
+     */
+    private _createWrapperNode(value: string): HTMLLIElement {
       const li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.
@@ -910,13 +1241,11 @@ export namespace Completer {
     /**
      * Create match node to highlight potential prefix match within result.
      */
-    private _createMatchNode(result: string): HTMLElement {
+    private _createLabelNode(result: string): HTMLElement {
       const matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = this.sanitizer.sanitize(result, {
-        allowedTags: ['mark']
-      });
+      matchNode.innerHTML = result;
       return matchNode;
     }
 
@@ -988,9 +1317,23 @@ export namespace Completer {
       !_defaultRenderer ||
       (sanitizer && _defaultRenderer.sanitizer !== sanitizer)
     ) {
-      _defaultRenderer = new Renderer(sanitizer);
+      _defaultRenderer = new Renderer({ sanitizer: sanitizer });
     }
     return _defaultRenderer;
+  }
+
+  /**
+   * Pre-calculated dimensions of the completer widget box.
+   */
+  export interface IDimensions {
+    /**
+     * The total width including the documentation panel if visible.
+     */
+    width: number;
+    /**
+     * The total height of the visible part of the completer.
+     */
+    height: number;
   }
 }
 
@@ -1036,20 +1379,6 @@ namespace Private {
   }
 
   /**
-   * Returns the list of raw item values currently in the DOM.
-   */
-  export function itemValues(items: NodeList): string[] {
-    const values: string[] = [];
-    for (let i = 0, len = items.length; i < len; i++) {
-      const attr = (items[i] as HTMLElement).getAttribute('data-value');
-      if (attr) {
-        values.push(attr);
-      }
-    }
-    return values;
-  }
-
-  /**
    * Returns true for any modified click event (i.e., not a left-click).
    */
   export function nonstandardClick(event: MouseEvent): boolean {
@@ -1060,5 +1389,34 @@ namespace Private {
       event.shiftKey ||
       event.metaKey
     );
+  }
+
+  /**
+   * Measure size of provided HTML element without painting it.
+   *
+   * #### Notes
+   * The provided element has to be detached (not connected to DOM),
+   * or a side-effect of detaching it will occur.
+   */
+  export function measureSize(element: HTMLElement, display: string): DOMRect {
+    if (element.isConnected) {
+      console.warn(
+        'Measuring connected elements with `measureSize` has side-effects'
+      );
+    }
+    element.style.visibility = 'hidden';
+    element.style.display = display;
+    document.body.appendChild(element);
+    const size = element.getBoundingClientRect();
+    document.body.removeChild(element);
+    element.removeAttribute('style');
+    return size;
+  }
+
+  export interface IDimensionsCache extends Completer.IDimensions {
+    /**
+     * The items for which the cache was most originally computed.
+     */
+    items: CompletionHandler.ICompletionItems;
   }
 }

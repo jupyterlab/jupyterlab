@@ -10,7 +10,6 @@ import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';
-import { readJSONFile } from '@jupyterlab/buildutils';
 
 /**
  *  A namespace for JupyterLab build utilities.
@@ -138,7 +137,7 @@ export namespace Build {
         path.join(packagePath, 'package.json')
       );
       const packageDir = path.dirname(packageDataPath);
-      const data = readJSONFile(packageDataPath);
+      const data = fs.readJSONSync(packageDataPath);
       const name = data.name;
       const extension = normalizeExtension(data);
 
@@ -163,7 +162,7 @@ export namespace Build {
         if (fs.existsSync(destination)) {
           try {
             const oldPackagePath = path.join(destination, 'package.json.orig');
-            const oldPackageData = readJSONFile(oldPackagePath);
+            const oldPackageData = fs.readJSONSync(oldPackagePath);
             if (oldPackageData.version === data.version) {
               fs.removeSync(destination);
             }

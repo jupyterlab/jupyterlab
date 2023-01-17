@@ -144,8 +144,6 @@ export class CompletionHandler implements IDisposable {
   ): Completer.ITextState {
     return {
       text: editor.model.sharedModel.getSource(),
-      lineHeight: editor.lineHeight,
-      charWidth: editor.charWidth,
       line: position.line,
       column: position.column
     };
@@ -467,6 +465,9 @@ export namespace CompletionHandler {
      */
     deprecated?: boolean;
 
+    /**
+     * Method allowing to update fields asynchronously.
+     */
     resolve?: (
       patch?: Completer.IPatch
     ) => Promise<CompletionHandler.ICompletionItem>;
