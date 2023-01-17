@@ -232,7 +232,8 @@ class Section extends PanelWithToolbar {
       });
     }
 
-    const runningItems = options.manager.running();
+    let runningItems = options.manager.running();
+    let cached = true;
     const enabled = runningItems.length > 0;
     this._button = new ToolbarButton({
       label: shutdownAllLabel,
@@ -250,6 +251,13 @@ class Section extends PanelWithToolbar {
       ReactWidget.create(
         <UseSignal signal={options.manager.runningChanged}>
           {() => {
+            // Cache the running items for the intial load and request from
+            // the service every subsequent load.
+            if (cached) {
+              cached = false;
+            } else {
+              runningItems = options.manager.running();
+            }
             return (
               <div className={CONTAINER_CLASS}>
                 <List
@@ -279,15 +287,12 @@ class Section extends PanelWithToolbar {
   }
 
   private _updateButton(): void {
-    this._button.enabled = this._manager.running().length > 0;
-    if (this._button.enabled) {
-      this._button.node
-        .querySelector('button')
-        ?.classList.remove('jp-mod-disabled');
+    const button = this._button;
+    button.enabled = this._manager.running().length > 0;
+    if (button.enabled) {
+      button.node.querySelector('button')?.classList.remove('jp-mod-disabled');
     } else {
-      this._button.node
-        .querySelector('button')
-        ?.classList.add('jp-mod-disabled');
+      button.node.querySelector('button')?.classList.add('jp-mod-disabled');
     }
   }
 
