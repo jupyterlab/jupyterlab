@@ -883,7 +883,8 @@ export namespace Commands {
     commands.addCommand(CommandIDs.overrideEsc, {
       execute: () => {
         return;
-      }
+      },
+      label: trans.__('Override Esc')
     });
   }
 
