@@ -3,12 +3,19 @@
 const data = require('./package.json');
 const webpack = require('webpack');
 const Build = require('@jupyterlab/builder').Build;
+const crypto = require('crypto');
+
+// Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
+const cryptoOrigCreateHash = crypto.createHash;
+crypto.createHash = algorithm =>
+  cryptoOrigCreateHash(algorithm == 'md4' ? 'sha256' : algorithm);
 
 // Generate webpack config to copy extension assets to the build directory,
 // such as setting schema files, theme assets, etc.
 const extensionAssetConfig = Build.ensureAssets({
   packageNames: data.jupyterlab.extensions,
-  output: './build'
+  output: './build',
+  hashFunction: 'sha256'
 });
 
 module.exports = [
