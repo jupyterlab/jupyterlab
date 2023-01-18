@@ -123,7 +123,7 @@
     "stylelint-prettier": "^2.0.0"
   },
   "devDependencies": {
-    "lerna": "^6.2.0",
+    "lerna": "^6.4.1",
     "typedoc": "~0.22.10",
     "yarn": "1.22.19"
   }
