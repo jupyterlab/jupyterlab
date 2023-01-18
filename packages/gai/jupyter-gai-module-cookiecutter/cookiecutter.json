@@ -1,0 +1,11 @@
+{
+  "author_name": "My Name",
+  "author_email": "me@test.com",
+  "labextension_name": "myextension",
+  "python_name": "{{ cookiecutter.labextension_name | replace('-', '_') }}",
+  "project_short_description": "A JupyterLab extension.",
+  "has_settings": "n",
+  "has_binder": "n",
+  "test": "y",
+  "repository": "https://github.com/github_username/{{ cookiecutter.labextension_name }}"
+}

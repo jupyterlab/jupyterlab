@@ -1,0 +1,77 @@
+name: Tests validation
+
+on:
+  push:
+    branches: ["*.0"]
+  pull_request:
+    branches: ["*"]
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: python -m pip install -U cookiecutter jupyterlab~=3.1
+
+      - name: Create the extension
+        run: |
+          set -eux
+          python -m cookiecutter --no-input .
+          cat myextension/pyproject.toml
+
+      - name: Test the extension
+        working-directory: myextension
+        run: |
+          set -eux
+          jlpm
+          jlpm test
+
+      - name: Install the extension
+        working-directory: myextension
+        run: |
+          set -eux
+          python -m pip install -v .
+          cat myextension/labextension/package.json
+
+      - name: List extensions
+        run: |
+          jupyter labextension list
+
+      - name: Install dependencies
+        working-directory: myextension/ui-tests
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+        run: jlpm install
+        
+      - name: Set up browser cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('myextension/ui-tests/yarn.lock') }}
+          
+      - name: Install browser
+        run: jlpm playwright install chromium
+        working-directory: myextension/ui-tests
+
+      - name: Execute integration tests
+        working-directory: myextension/ui-tests
+        run: |
+          jlpm playwright test
+
+      - name: Upload Playwright Test report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: myextension-playwright-tests
+          path: |
+            myextension/ui-tests/test-results
+            myextension/ui-tests/playwright-report

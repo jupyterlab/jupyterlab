@@ -1,0 +1,13 @@
+{
+  "name": "jupyter_gai-ui-tests",
+  "version": "1.0.0",
+  "description": "JupyterLab jupyter_gai Integration Tests",
+  "private": true,
+  "scripts": {
+    "start": "jupyter lab --config jupyter_server_test_config.py",
+    "test": "jlpm playwright test"
+  },
+  "devDependencies": {
+    "@jupyterlab/galata": "^4.3.0"
+  }
+}

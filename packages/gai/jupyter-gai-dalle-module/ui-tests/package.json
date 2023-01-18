@@ -1,0 +1,14 @@
+{
+  "name": "jupyter_gai_dalle-ui-tests",
+  "version": "1.0.0",
+  "description": "JupyterLab jupyter_gai_dalle Integration Tests",
+  "private": true,
+  "scripts": {
+    "start": "jupyter lab --config jupyter_server_test_config.py",
+    "test": "jlpm playwright test",
+    "test:update": "jlpm playwright test --update-snapshots"
+  },
+  "devDependencies": {
+    "@jupyterlab/galata": "^4.3.0"
+  }
+}

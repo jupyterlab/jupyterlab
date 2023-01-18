@@ -1,0 +1,335 @@
+name: CI
+
+on:
+  push:
+    branches: ["*.0"]
+  pull_request:
+    branches: ["*"]
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  names:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: "my_extension"
+            pyname: "my_extension"
+          - name: "myextension"
+            pyname: "myextension"
+          - name: "my-extension"
+            pyname: "my_extension"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install cookiecutter
+
+      - name: Create pure frontend extension
+        env:
+          NAME: ${{ matrix.name }}
+          PYNAME: ${{ matrix.pyname }}
+        run: |
+          set -eux
+          # Trick to use custom parameters
+          python -c "from cookiecutter.main import cookiecutter; import json, os; f=open('cookiecutter.json'); d=json.load(f); f.close(); d['kind']=d['kind'][0]; d['labextension_name']=os.getenv('NAME'); cookiecutter('.', extra_context=d, no_input=True)"
+          pushd ${PYNAME}
+          python -m pip install jupyterlab
+          jlpm
+          jlpm stylelint-config-prettier-check
+          jlpm lint:check
+          python -m pip install -e .
+          jupyter labextension develop . --overwrite
+          jupyter labextension list
+          jupyter labextension list 2>&1 | grep -ie "${NAME}.*OK"
+          python -m jupyterlab.browser_check
+
+          jupyter labextension uninstall ${NAME}
+          python -m pip uninstall -y ${NAME} jupyterlab
+
+          popd
+          rm -rf ${NAME}
+
+  no-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # This will be used by the base setup action
+        python-version: ["3.11"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install cookiecutter
+
+      - name: Create pure frontend extension
+        run: |
+          set -eux
+          # Trick to use custom parameters
+          python -c "from cookiecutter.main import cookiecutter; import json; f=open('cookiecutter.json'); d=json.load(f); f.close(); d['kind']=d['kind'][0]; d['test']='n'; cookiecutter('.', extra_context=d, no_input=True)"
+          pushd myextension
+          pip install jupyterlab
+          jlpm
+          jlpm lint:check
+          pip install -e .
+          jupyter labextension develop . --overwrite
+          jupyter labextension list
+          jupyter labextension list 2>&1 | grep -ie "myextension.*OK"
+          python -m jupyterlab.browser_check
+
+          jupyter labextension uninstall myextension
+          pip uninstall -y myextension jupyterlab
+
+          popd
+          rm -rf myextension
+
+  settings:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # This will be used by the base setup action
+        python-version: ["3.7", "3.11"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install cookiecutter
+
+      - name: Create pure frontend extension
+        run: |
+          set -eux
+          # Trick to use custom parameters
+          python -c "from cookiecutter.main import cookiecutter; import json; f=open('cookiecutter.json'); d=json.load(f); f.close(); d['kind']=d['kind'][0]; d['has_settings']='y'; cookiecutter('.', extra_context=d, no_input=True)"
+          pushd myextension
+          pip install jupyterlab
+          jlpm
+          # It is not easily possible to get this version compatible with linter rules
+          jlpm lint
+          jlpm lint:check
+          pip install -e .
+          jupyter labextension develop . --overwrite
+          jupyter labextension list
+          jupyter labextension list 2>&1 | grep -ie "myextension.*OK"
+          python -m jupyterlab.browser_check
+
+          jupyter labextension uninstall myextension
+          pip uninstall -y myextension jupyterlab
+
+          popd
+          rm -rf myextension
+
+  server:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # This will be used by the base setup action
+        python-version: ["3.7", "3.11"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install cookiecutter build
+
+      - name: Create server extension pip install
+        run: |
+          # Trick to use custom parameters
+          python -c "from cookiecutter.main import cookiecutter; import json; f=open('cookiecutter.json'); d=json.load(f); f.close(); d['kind']='server'; cookiecutter('.', extra_context=d, no_input=True)"
+          cd myextension
+          cat pyproject.toml
+          pip install .
+          pip install jupyterlab
+          jlpm
+          jlpm lint:check
+
+      - name: Check pip install method
+        run: |
+          set -eux
+          jupyter server extension list
+          jupyter server extension list 2>&1 | grep -ie "myextension.*OK"
+          jupyter labextension list
+          jupyter labextension list 2>&1 | grep -ie "myextension.*OK"
+
+          # This test should be made outside the extension folder
+          python -m jupyterlab.browser_check
+
+          pip uninstall -y myextension jupyterlab
+          rm -rf myextension
+        shell: bash
+
+      - name: Create server extension pip develop
+        run: |
+          # Trick to use custom parameters
+          python -c "from cookiecutter.main import cookiecutter; import json; f=open('cookiecutter.json'); d=json.load(f); f.close(); d['kind']='server'; cookiecutter('.', extra_context=d, no_input=True)"
+          cd myextension
+          python -m pip install -e .[test]
+          python -m pip install jupyterlab
+          jupyter labextension develop . --overwrite
+          jupyter server extension enable myextension
+
+          # Check unit tests are passing
+          python -m pytest -vv -r ap --cov myextension
+
+      - name: Check pip develop method
+        run: |
+          set -eux
+          jupyter server extension list
+          jupyter server extension list 2>&1 | grep -ie "myextension.*OK"
+          jupyter labextension list
+          jupyter labextension list 2>&1 | grep -ie "myextension.*OK"
+
+          # This test should be made outside the extension folder
+          python -m jupyterlab.browser_check
+        shell: bash
+
+      - name: Build server extension in develop mode
+        run: |
+          jupyter labextension develop ./myextension --overwrite
+          jupyter labextension build ./myextension
+
+          jupyter labextension uninstall myextension
+          python -m pip uninstall -y myextension jupyterlab
+
+          python -c "import shutil; shutil.rmtree('myextension')"
+
+      - name: Install server extension from a tarball
+        run: |
+          # Trick to use custom parameters
+          python -c "from cookiecutter.main import cookiecutter; import json; f=open('cookiecutter.json'); d=json.load(f); f.close(); d['kind']='server'; cookiecutter('.', extra_context=d, no_input=True)"
+          cd myextension
+          python -m pip install jupyterlab
+          jupyter lab clean --all
+          python -m build
+          cd dist
+          python -m pip install myextension-0.1.0.tar.gz
+
+      - name: Check install tarball method
+        run: |
+          set -eux
+          jupyter labextension list
+          jupyter labextension list 2>&1 | grep -ie "myextension.*OK"
+          jupyter server extension list
+          jupyter server extension list 2>&1 | grep -ie "myextension.*OK"
+
+          jupyter lab build --dev-build --no-minimize
+
+          python -m jupyterlab.browser_check
+
+          cp myextension/dist/*.tar.gz myextension.tar.gz
+          cp myextension/dist/*.whl myextension.whl
+          python -m pip uninstall -y myextension jupyterlab
+          rm -rf myextension
+        shell: bash
+
+      - uses: actions/upload-artifact@v2
+        if: startsWith(runner.os, 'Linux')
+        with:
+          name: myextension-sdist
+          path: |
+            myextension.tar.gz
+            myextension.whl
+
+  test_isolated:
+    needs: server
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.11"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+      - name: Setup pip cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: pip-3.7-${{ hashFiles('package.json') }}
+          restore-keys: |
+            pip-3.7-
+            pip-
+      - uses: actions/download-artifact@v2
+        with:
+          name: myextension-sdist
+      - name: Install and Test
+        run: |
+          set -eux
+          # Remove NodeJS, twice to take care of system and locally installed node versions.
+          sudo rm -rf $(which node)
+          sudo rm -rf $(which node)
+
+          python -m pip install myextension.tar.gz
+          python -m pip install jupyterlab
+          jupyter labextension list 2>&1 | grep -ie "myextension.*OK"
+          jupyter server extension list
+          jupyter server extension list 2>&1 | grep -ie "myextension.*OK"
+          python -m jupyterlab.browser_check --no-chrome-test
+
+  theme:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # This will be used by the base setup action
+        python-version: ["3.7", "3.11"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install cookiecutter build
+
+      - name: Create pure frontend extension
+        run: |
+          set -eux
+          # Trick to use custom parameters
+          python -c "from cookiecutter.main import cookiecutter; import json; f=open('cookiecutter.json'); d=json.load(f); f.close(); d['kind']='theme'; cookiecutter('.', extra_context=d, no_input=True)"
+          pushd mytheme
+          python -m pip install jupyterlab
+          jlpm
+          jlpm lint:check
+          python -m pip install -e .
+          jupyter labextension develop . --overwrite
+          jupyter labextension list
+          jupyter labextension list 2>&1 | grep -ie "mytheme.*OK"
+          python -m jupyterlab.browser_check
+
+          jupyter labextension uninstall mytheme
+          python -m pip uninstall -y mytheme jupyterlab
+
+          popd
+          rm -rf mytheme

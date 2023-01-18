@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+**/*.d.ts
+tests
+
+**/__tests__
+ui-tests

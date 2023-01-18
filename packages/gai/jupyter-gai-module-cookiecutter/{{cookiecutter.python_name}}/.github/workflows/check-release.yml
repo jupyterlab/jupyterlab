@@ -1,0 +1,29 @@
+name: Check Release
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  check_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Install Dependencies
+        run: |
+          pip install -e .
+      - name: Check Release
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
+        with:
+{% raw %}
+          token: ${{ secrets.GITHUB_TOKEN }}
+{% endraw %}
+      - name: Upload Distributions
+        uses: actions/upload-artifact@v3
+        with:
+          name: {{ cookiecutter.python_name }}-releaser-dist-${{ '{{ github.run_number }}' }}
+          path: .jupyter_releaser_checkout/dist

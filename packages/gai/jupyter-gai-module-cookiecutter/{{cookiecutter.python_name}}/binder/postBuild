@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+""" perform a development install of {{ cookiecutter.python_name }}
+
+    On Binder, this will run _after_ the environment has been fully created from
+    the environment.yml in this directory.
+
+    This script should also run locally on Linux/MacOS/Windows:
+
+        python3 binder/postBuild
+"""
+import subprocess
+import sys
+from pathlib import Path
+
+
+ROOT = Path.cwd()
+
+def _(*args, **kwargs):
+    """ Run a command, echoing the args
+
+        fails hard if something goes wrong
+    """
+    print("\n\t", " ".join(args), "\n")
+    return_code = subprocess.call(args, **kwargs)
+    if return_code != 0:
+        print("\nERROR", return_code, " ".join(args))
+        sys.exit(return_code)
+
+# verify the environment is self-consistent before even starting
+_(sys.executable, "-m", "pip", "check")
+
+# install the labextension
+_(sys.executable, "-m", "pip", "install", "-e", ".")
+_(sys.executable, "-m", "jupyter", "labextension", "develop", "--overwrite", ".")
+
+# verify the environment the extension didn't break anything
+_(sys.executable, "-m", "pip", "check")
+
+# list the extensions
+_("jupyter", "server", "extension", "list")
+
+# initially list installed extensions to determine if there are any surprises
+_("jupyter", "labextension", "list")
+
+
+print("JupyterLab with {{ cookiecutter.python_name }} is ready to run with:\n")
+print("\tjupyter lab\n")

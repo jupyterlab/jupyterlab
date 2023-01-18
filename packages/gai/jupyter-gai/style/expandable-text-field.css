@@ -1,0 +1,21 @@
+.jp-gai-ExpandableTextField-label {
+  font-size: var(--jp-ui-font-size0);
+}
+
+.jp-gai-ExpandableTextField-value {
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-gai-ExpandableTextField-value-collapsed {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+.jp-gai-ExpandableTextField-value-expanded {
+  text-overflow: none;
+  overflow: visible;
+  height: auto;
+}

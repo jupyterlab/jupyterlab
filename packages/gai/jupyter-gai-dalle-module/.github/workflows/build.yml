@@ -1,0 +1,149 @@
+name: Build
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Base Setup
+      uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+    - name: Install dependencies
+      run: python -m pip install -U jupyterlab~=3.1
+
+    - name: Lint the extension
+      run: |
+        set -eux
+        jlpm
+        jlpm run lint:check
+    
+    - name: Test the extension
+      run: |
+        set -eux
+        jlpm run test
+
+    - name: Build the extension
+      run: |
+        set -eux
+        python -m pip install .[test]
+
+        jupyter labextension list
+        jupyter labextension list 2>&1 | grep -ie "jupyter_gai_dalle.*OK"
+        python -m jupyterlab.browser_check
+
+    - name: Package the extension
+      run: |
+        set -eux
+
+        pip install build
+        python -m build
+        pip uninstall -y "jupyter_gai_dalle" jupyterlab
+
+    - name: Upload extension packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: extension-artifacts
+        path: dist/jupyter_gai_dalle*
+        if-no-files-found: error
+
+  test_isolated:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        architecture: 'x64'
+    - uses: actions/download-artifact@v3
+      with:
+        name: extension-artifacts
+    - name: Install and Test
+      run: |
+        set -eux
+        # Remove NodeJS, twice to take care of system and locally installed node versions.
+        sudo rm -rf $(which node)
+        sudo rm -rf $(which node)
+
+        pip install "jupyterlab~=3.1" jupyter_gai_dalle*.whl
+
+        jupyter labextension list
+        jupyter labextension list 2>&1 | grep -ie "jupyter_gai_dalle.*OK"
+        python -m jupyterlab.browser_check --no-chrome-test
+
+  integration-tests:
+    name: Integration tests
+    needs: build
+    runs-on: ubuntu-latest
+
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Base Setup
+      uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+    - name: Download extension package
+      uses: actions/download-artifact@v3
+      with:
+        name: extension-artifacts
+        
+    - name: Install the extension
+      run: |
+        set -eux
+        python -m pip install "jupyterlab~=3.1" jupyter_gai_dalle*.whl
+
+    - name: Install dependencies
+      working-directory: ui-tests
+      env:
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      run: jlpm install
+
+    - name: Set up browser cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ github.workspace }}/pw-browsers
+        key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+
+    - name: Install browser
+      run: jlpm playwright install chromium
+      working-directory: ui-tests
+
+    - name: Execute integration tests
+      working-directory: ui-tests
+      run: |
+        jlpm playwright test
+
+    - name: Upload Playwright Test report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: jupyter_gai_dalle-playwright-tests
+        path: |
+          ui-tests/test-results
+          ui-tests/playwright-report
+
+  check_links:
+    name: Check Links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
