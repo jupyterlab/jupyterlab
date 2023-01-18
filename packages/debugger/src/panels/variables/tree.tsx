@@ -293,6 +293,9 @@ interface IVariablesBranchProps {
    * Callback on mouseOver/mouseLeave event.
    */
   onHoverChanged?: (data: IHoverData) => void;
+  /**
+   * Collapser icon component
+   */
   collapserIcon: JSX.Element;
 }
 
@@ -379,6 +382,9 @@ interface IVariableComponentProps {
    * Callback on mouseOver/mouseLeave event.
    */
   onHoverChanged?: (data: IHoverData) => void;
+  /**
+   * Collapser icon component
+   */
   collapserIcon: JSX.Element;
 }
 
