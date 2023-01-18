@@ -672,11 +672,7 @@ export class JupyterLabPage implements IJupyterLabPage {
   protected waitForAppStarted = async (): Promise<void> => {
     return this.waitForCondition(() =>
       this.page.evaluate(async () => {
-        if (typeof window.jupyterlab === 'object') {
-          // Wait for plugins to be loaded
-          await window.jupyterlab.started;
-          return true;
-        } else if (typeof window.jupyterapp === 'object') {
+        if (typeof window.jupyterapp === 'object') {
           // Wait for plugins to be loaded
           await window.jupyterapp.started;
           return true;

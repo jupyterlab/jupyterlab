@@ -207,7 +207,8 @@ Extension Development Changes
   This might affect third-party extensions if they were relying on specific behaviors from these loaders.
 - In JupyterLab 3.x, the CSS for a _disabled_ prebuilt extensions would still be loaded on the page.
   This is no longer the case in JupyterLab 4.0.
-
+- ``window.jupyterlab`` is not exposed anymore when starting JupyterLab with the ``--expose-app-in-browser`` flag.
+  Use ``window.jupyterapp`` instead.
 
 .. _extension_migration_3.5_3.6:
 
