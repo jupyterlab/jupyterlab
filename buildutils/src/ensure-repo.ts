@@ -97,14 +97,13 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
-  '@jupyterlab/galata': ['node-fetch', 'http-server'],
-  '@jupyterlab/services': ['node-fetch', 'ws'],
+  '@jupyterlab/galata': ['http-server'],
+  '@jupyterlab/services': ['ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testing': [
     '@babel/core',
     '@babel/preset-env',
     'fs-extra',
-    'node-fetch',
     'identity-obj-proxy',
     'jest-environment-jsdom',
     'jest-junit'

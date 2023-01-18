@@ -19,7 +19,6 @@
   "author": "Project Jupyter",
   "main": "lib/index.js",
   "browser": {
-    "node-fetch": false,
     "ws": "./lib/shim/ws.js"
   },
   "typings": "lib/index.d.ts",
@@ -55,13 +54,11 @@
     "@lumino/polling": "^2.0.0-alpha.6",
     "@lumino/properties": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
-    "node-fetch": "^3.3.0",
     "ws": "^8.11.0"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-alpha.17",
     "@types/jest": "^29.2.0",
-    "@types/node-fetch": "^2.6.2",
     "@types/ws": "^8.5.3",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
