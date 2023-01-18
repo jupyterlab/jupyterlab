@@ -13,7 +13,7 @@ type ReactRenderElement =
   | React.ReactElement<any>;
 
 /**
- * An abstract class for a Phosphor widget which renders a React component.
+ * An abstract class for a Lumino widget which renders a React component.
  */
 export abstract class ReactWidget extends Widget {
   /**
