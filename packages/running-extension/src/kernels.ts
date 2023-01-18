@@ -46,6 +46,7 @@ export async function addKernelRunningSessionManager(
             commands,
             icon: jupyterIcon,
             kernel,
+            kernels,
             sessions,
             spec: kernelspecs.specs?.kernelspecs[kernel.name],
             trans
@@ -66,6 +67,7 @@ namespace Private {
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
       this.kernel = options.kernel;
+      this.kernels = options.kernels;
       this.sessions = options.sessions;
       this.spec = options.spec || null;
       this.trans = options.trans;
@@ -73,6 +75,8 @@ namespace Private {
     }
 
     readonly kernel: Kernel.IModel;
+
+    readonly kernels: Kernel.IManager;
 
     readonly sessions: Session.IManager;
 
@@ -91,8 +95,7 @@ namespace Private {
     }
 
     shutdown() {
-      console.log(`shutdown() is not implemented`);
-      // return sessions.shutdown(this._model.id);
+      return this.kernels.shutdown(this.kernel.id);
     }
 
     icon() {
@@ -124,6 +127,7 @@ namespace Private {
       commands: CommandRegistry;
       icon?: LabIcon;
       kernel: Kernel.IModel;
+      kernels: Kernel.IManager;
       sessions: Session.IManager;
       spec?: KernelSpec.ISpecModel;
       trans: IRenderMime.TranslationBundle;
