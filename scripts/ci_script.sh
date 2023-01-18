@@ -82,7 +82,9 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:dev:prod:release
 
     # Make sure the storybooks build.
-    jlpm run build:storybook
+    # Storybook is drop in JLab 4 as unused by active maintainers
+    # As NodeJS 18 is breaking storybook configuration, this test is removed from the CI.
+    # jlpm run build:storybook
 
     jlpm config set prefix ~/.yarn
 
@@ -239,10 +241,6 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension list -h
     jupyter labextension enable -h
     jupyter labextension disable -h
-
-    # Make sure we can run JupyterLab under classic notebook
-    python -m jupyterlab.browser_check --notebook
-
     # Make sure we can add and remove a sibling package.
     # jlpm run add:sibling jupyterlab/tests/mock_packages/extension
     # jlpm run build
@@ -274,6 +272,15 @@ if [[ $GROUP == usage ]]; then
     jlpm run remove:package foo
     jlpm run integrity
 
+
+    # Make sure we can run JupyterLab under classic notebook
+    # It is not possible to run JupyterLab under classic notebook with Jupyter Server v2 installed.
+    pip install -U "jupyter_server<2.0.0"
+    python -m jupyterlab.browser_check
+    # For unknown reason, enabling manually the BrowserApp is needed lately
+    jupyter serverextension enable --sys-prefix --py jupyterlab.browser_check
+    jupyter serverextension list
+    python -m jupyterlab.browser_check --notebook
 fi
 
 

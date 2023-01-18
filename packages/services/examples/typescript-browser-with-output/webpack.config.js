@@ -1,12 +1,19 @@
 const path = require('path');
 const webpack = require('webpack');
+const crypto = require('crypto');
+
+// Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
+const cryptoOrigCreateHash = crypto.createHash;
+crypto.createHash = algorithm =>
+  cryptoOrigCreateHash(algorithm == 'md4' ? 'sha256' : algorithm);
 
 module.exports = {
   entry: ['./build/index.js'],
   mode: 'development',
   output: {
     path: path.join(__dirname, 'build'),
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    hashFunction: 'sha256'
   },
   module: {
     rules: [
