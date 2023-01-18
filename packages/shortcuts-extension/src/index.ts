@@ -11,7 +11,10 @@ import {
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
+import {
+  IFormComponent,
+  IFormComponentRegistry
+} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
@@ -91,12 +94,15 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     if (editorRegistry) {
-      editorRegistry.addRenderer('shortcuts', (props: any) => {
-        return renderShortCut({
-          external: getExternalForJupyterLab(registry, app, translator_),
-          ...props
-        });
-      });
+      const component: IFormComponent = {
+        fieldRenderer: (props: any) => {
+          return renderShortCut({
+            external: getExternalForJupyterLab(registry, app, translator_),
+            ...props
+          });
+        }
+      };
+      editorRegistry.addComponent('shortcuts', component);
     }
 
     /**

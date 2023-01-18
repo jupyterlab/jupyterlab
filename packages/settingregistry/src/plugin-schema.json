@@ -363,10 +363,7 @@
     },
     "metadataOptions": {
       "properties": {
-        "customWidget": {
-          "type": "string"
-        },
-        "customField": {
+        "customComponent": {
           "type": "string"
         },
         "metadataLevel": {
