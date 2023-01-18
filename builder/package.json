@@ -58,6 +58,7 @@
     "process": "^0.11.10",
     "raw-loader": "~4.0.0",
     "style-loader": "~2.0.0",
+    "source-map-loader": "~1.0.2",
     "supports-color": "^7.2.0",
     "svg-url-loader": "~6.0.0",
     "terser-webpack-plugin": "^4.1.0",
