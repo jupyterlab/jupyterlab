@@ -5,11 +5,12 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 // import { PathExt } from '@jupyterlab/coreutils';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Kernel, Session } from '@jupyterlab/services';
+import { Kernel, KernelSpec, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   // consoleIcon,
-  jupyterIcon
+  jupyterIcon,
+  LabIcon
   // notebookIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
@@ -19,20 +20,22 @@ import { Signal } from '@lumino/signaling';
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
  */
-export function addKernelRunningSessionManager(
+export async function addKernelRunningSessionManager(
   managers: IRunningSessionManagers,
   translator: ITranslator,
   app: JupyterFrontEnd
-): void {
+): Promise<void> {
   const { commands } = app;
   const trans = translator.load('jupyterlab');
+  const { kernels, kernelspecs, sessions } = app.serviceManager;
+  const { runningChanged } = Private;
+  const emitter = new Debouncer(() => runningChanged.emit(undefined), 50);
 
   // Debounce signal emissions from the kernel and session managers.
-  const { kernels, sessions } = app.serviceManager;
-  const { runningChanged } = Private;
-  const emission = new Debouncer(() => runningChanged.emit(undefined), 50);
-  kernels.runningChanged.connect(() => void emission.invoke());
-  sessions.runningChanged.connect(() => void emission.invoke());
+  kernels.runningChanged.connect(() => void emitter.invoke());
+  sessions.runningChanged.connect(() => void emitter.invoke());
+
+  await kernelspecs.ready;
 
   managers.add({
     name: trans.__('Kernels'),
@@ -41,8 +44,10 @@ export function addKernelRunningSessionManager(
         kernel =>
           new Private.RunningKernel({
             commands,
+            icon: jupyterIcon,
             kernel,
             sessions,
+            spec: kernelspecs.specs?.kernelspecs[kernel.name],
             trans
           })
       ),
@@ -60,14 +65,18 @@ export function addKernelRunningSessionManager(
 namespace Private {
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
-      this.model = options.kernel;
+      this.kernel = options.kernel;
       this.sessions = options.sessions;
+      this.spec = options.spec || null;
       this.trans = options.trans;
+      this._icon = options.icon || jupyterIcon;
     }
 
-    readonly model: Kernel.IModel;
+    readonly kernel: Kernel.IModel;
 
     readonly sessions: Session.IManager;
+
+    readonly spec: KernelSpec.ISpecModel | null;
 
     readonly trans: IRenderMime.TranslationBundle;
 
@@ -87,20 +96,12 @@ namespace Private {
     }
 
     icon() {
-      console.log(`icon() is not implemented`);
-      // const { name, path, type } = this._model;
-      // if ((name || PathExt.basename(path)).indexOf('.ipynb') !== -1) {
-      //   return notebookIcon;
-      // } else if (type.toLowerCase() === 'console') {
-      //   return consoleIcon;
-      // }
-      return jupyterIcon;
+      // TODO: Use the icons in this.spec instead.
+      return this._icon;
     }
 
     label() {
-      console.log(`label() is not implemented`);
-      return 'unimplemented label';
-      // return this._model.name || PathExt.basename(this._model.path);
+      return this.spec?.display_name || this.kernel.name;
     }
 
     labelTitle() {
@@ -112,15 +113,19 @@ namespace Private {
       //   kernelName = spec ? spec.display_name : 'unknown';
       // }
       // return trans.__('Path: %1\nKernel: %2', path, kernelName);
-      return 'unimplemented label title';
+      return this.kernel.id;
     }
+
+    private _icon: LabIcon;
   }
 
   export namespace RunningKernel {
     export interface IOptions {
       commands: CommandRegistry;
+      icon?: LabIcon;
       kernel: Kernel.IModel;
       sessions: Session.IManager;
+      spec?: KernelSpec.ISpecModel;
       trans: IRenderMime.TranslationBundle;
     }
   }

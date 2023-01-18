@@ -16,13 +16,13 @@
       "path": "../docregistry"
     },
     {
+      "path": "../rendermime-interfaces"
+    },
+    {
       "path": "../running"
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../rendermime-interfaces"
     },
     {
       "path": "../translation"
