@@ -104,6 +104,7 @@ const UNUSED: Dict<string[]> = {
     '@babel/core',
     '@babel/preset-env',
     'fs-extra',
+    'node-fetch',
     'identity-obj-proxy',
     'jest-environment-jsdom',
     'jest-junit'
