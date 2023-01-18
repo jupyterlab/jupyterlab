@@ -37,11 +37,15 @@ export class FormWidget extends ReactWidget {
    * @returns - The rendered form
    */
   render(): JSX.Element {
+    const formContext = {
+      settings: this._props.settings,
+      updateMetadata: this._props.metadataFormWidget.updateMetadata
+    };
     return (
       <Form
         schema={this._props.properties as JSONSchema7}
         formData={this._props.formData}
-        formContext={this._props}
+        formContext={formContext}
         FieldTemplate={this._templateFactory.fieldTemplate}
         ArrayFieldTemplate={this._templateFactory.arrayTemplate}
         ObjectFieldTemplate={this._templateFactory.objectTemplate}
