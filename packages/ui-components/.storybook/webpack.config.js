@@ -1,6 +1,12 @@
 const path = require('path');
 const SRC_PATH = path.join(__dirname, '../src');
 const STORIES_PATH = path.join(__dirname, '../stories');
+const crypto = require('crypto');
+
+// Workaround for loaders using "md4" by default, which is not supported in FIPS-compliant OpenSSL
+const cryptoOrigCreateHash = crypto.createHash;
+crypto.createHash = algorithm =>
+  cryptoOrigCreateHash(algorithm == 'md4' ? 'sha256' : algorithm);
 
 module.exports = ({ config }) => {
   // don't use storybook's default svg configuration
