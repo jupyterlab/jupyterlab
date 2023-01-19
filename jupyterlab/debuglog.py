@@ -1,4 +1,3 @@
-# coding: utf-8
 """A mixin for adding a debug log file.
 
 """
@@ -12,6 +11,7 @@ import os
 import sys
 import tempfile
 import traceback
+import warnings
 
 from traitlets import Unicode
 from traitlets.config import Configurable
@@ -51,11 +51,11 @@ class DebugLogFileMixin(Configurable):
             for line in msg:
                 self.log.debug(line)
             if isinstance(ex, SystemExit):
-                print("An error occurred. See the log file for details: ", log_path)
+                warnings.warn("An error occurred. See the log file for details: ", log_path)
                 raise
-            print("An error occurred.")
-            print(msg[-1].strip())
-            print("See the log file for details: ", log_path)
+            warnings.warn("An error occurred.")
+            warnings.warn(msg[-1].strip())
+            warnings.warn("See the log file for details: ", log_path)
             self.exit(1)
         else:
             log.removeHandler(_debug_handler)

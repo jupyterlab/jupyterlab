@@ -1,4 +1,3 @@
-# coding: utf-8
 """JupyterLab command handler"""
 
 # Copyright (c) Jupyter Development Team.
@@ -27,12 +26,7 @@ from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
 from jupyter_core.paths import jupyter_config_dir
-from jupyter_server.extension.serverextension import (
-    GREEN_ENABLED,
-    GREEN_OK,
-    RED_DISABLED,
-    RED_X,
-)
+from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
     get_federated_extensions,
     get_package_url,
@@ -329,7 +323,7 @@ class AppOptions(HasTraits):
         if "app_dir" in kwargs and not kwargs["app_dir"]:
             kwargs.pop("app_dir")
 
-        super(AppOptions, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     app_dir = Unicode(help="The application directory")
 
@@ -470,8 +464,8 @@ def clean(app_options=None):
         logger.info("Removing everything in %s...", app_dir)
         _rmtree_star(app_dir, logger)
     else:
-        possibleTargets = ["extensions", "settings", "staging", "static"]
-        targets = [t for t in possibleTargets if getattr(app_options, t)]
+        possible_targets = ["extensions", "settings", "staging", "static"]
+        targets = [t for t in possible_targets if getattr(app_options, t)]
 
         for name in targets:
             target = pjoin(app_dir, name)
@@ -603,7 +597,7 @@ def read_package(target):
 # ----------------------------------------------------------------------
 
 
-class _AppHandler(object):
+class _AppHandler:
     def __init__(self, options):
         """Create a new _AppHandler object"""
         options = _ensure_options(options)
@@ -1734,7 +1728,7 @@ class _AppHandler(object):
                 try:
                     version = self._latest_compatible_package_version(name)
                 except URLError:
-                    raise ValueError(msg)
+                    raise ValueError(msg) from None
             else:
                 raise ValueError(msg)
 
@@ -1748,7 +1742,7 @@ class _AppHandler(object):
                     version = self._latest_compatible_package_version(name)
                 except URLError:
                     # We cannot add any additional information to error message
-                    raise ValueError(msg)
+                    raise ValueError(msg) from None
 
                 if version and name:
                     self.logger.debug("Incompatible extension:\n%s", name)
@@ -1980,7 +1974,7 @@ def _node_check(logger):
             "Please install nodejs %s before continuing. nodejs may be installed using conda or directly from the nodejs website."
             % ver
         )
-        raise ValueError(msg)
+        raise ValueError(msg) from None
 
 
 def _yarn_config(logger):
@@ -2078,8 +2072,8 @@ def _validate_extension(data):
         return ["The `jupyterlab` key must be a JSON object"]
     extension = jlab.get("extension", False)
     mime_extension = jlab.get("mimeExtension", False)
-    themePath = jlab.get("themePath", "")
-    schemaDir = jlab.get("schemaDir", "")
+    theme_path = jlab.get("themePath", "")
+    schema_dir = jlab.get("schemaDir", "")
 
     messages = []
     if not extension and not mime_extension:
@@ -2110,11 +2104,11 @@ def _validate_extension(data):
     if mime_extension and mime_extension not in files:
         messages.append('Missing mimeExtension module "%s"' % mime_extension)
 
-    if themePath and not any(f.startswith(str(Path(themePath))) for f in files):
-        messages.append('themePath is empty: "%s"' % themePath)
+    if theme_path and not any(f.startswith(str(Path(theme_path))) for f in files):
+        messages.append('themePath is empty: "%s"' % theme_path)
 
-    if schemaDir and not any(f.startswith(str(Path(schemaDir))) for f in files):
-        messages.append('schemaDir is empty: "%s"' % schemaDir)
+    if schema_dir and not any(f.startswith(str(Path(schema_dir))) for f in files):
+        messages.append('schemaDir is empty: "%s"' % schema_dir)
 
     return messages
 
@@ -2329,9 +2323,9 @@ def _log_multiple_compat_errors(logger, errors_map):
     if outdated:
         logger.warning(
             "\n        ".join(
-                ["\n   The following extension are outdated:"]  # noqa
-                + outdated  # noqa
-                + [  # noqa
+                ["\n   The following extension are outdated:"]
+                + outdated
+                + [
                     '\n   Consider running "jupyter labextension update --all" '
                     "to check for updates.\n"
                 ]

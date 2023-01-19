@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
@@ -36,14 +35,10 @@ logger = logging.getLogger(__name__)
 
 SEMVER_SPEC_VERSION = "2.0.0"
 
-# Python 2/3 compatibility
-try:
-    string_type = basestring
-except NameError:
-    string_type = str
+string_type = str
 
 
-class _R(object):
+class _R:
     def __init__(self, i):
         self.i = i
 
@@ -379,7 +374,7 @@ def semver(version, loose):
 make_semver = semver
 
 
-class SemVer(object):
+class SemVer:
     def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
@@ -397,7 +392,7 @@ class SemVer(object):
                 self.prerelease = []
             else:
                 self.prerelease = [
-                    (int(id) if NUMERIC.search(id) else id) for id in m.group(3).split(".")
+                    (int(id_) if NUMERIC.search(id_) else id_) for id_ in m.group(3).split(".")
                 ]
         else:
             #  these are actually numbers
@@ -410,7 +405,7 @@ class SemVer(object):
             else:
 
                 self.prerelease = [
-                    (int(id) if NUMERIC.search(id) else id) for id in m.group(4).split(".")
+                    (int(id_) if NUMERIC.search(id_) else id_) for id_ in m.group(4).split(".")
                 ]
             if m.group(5):
                 self.build = m.group(5).split(".")
@@ -419,7 +414,7 @@ class SemVer(object):
 
         self.format()  # xxx:
 
-    def format(self):
+    def format(self):  # noqa
         self.version = "{}.{}.{}".format(self.major, self.minor, self.patch)
         if len(self.prerelease) > 0:
             self.version += "-{}".format(".".join(str(v) for v in self.prerelease))
@@ -628,16 +623,16 @@ loose_key_function = make_key_function(True)
 full_key_function = make_key_function(True)
 
 
-def sort(list, loose):
+def sort(list_, loose):
     keyf = loose_key_function if loose else full_key_function
-    list.sort(key=keyf)
-    return list
+    list_.sort(key=keyf)
+    return list_
 
 
-def rsort(list, loose):
+def rsort(list_, loose):
     keyf = loose_key_function if loose else full_key_function
-    list.sort(key=keyf, reverse=True)
-    return list
+    list_.sort(key=keyf, reverse=True)
+    return list_
 
 
 def gt(a, b, loose):
@@ -703,7 +698,7 @@ make_comparator = comparator
 ANY = object()
 
 
-class Comparator(object):
+class Comparator:
     semver = None
 
     def __init__(self, comp, loose):
@@ -757,7 +752,7 @@ def make_range(range_, loose):
     return Range(range_, loose)
 
 
-class Range(object):
+class Range:
     def __init__(self, range_, loose):
         self.loose = loose
         #  First, split based on boolean or ||
@@ -773,7 +768,7 @@ class Range(object):
     def __repr__(self):
         return '<SemVer Range "{}">'.format(self.range)
 
-    def format(self):
+    def format(self):  # noqa
         self.range = "||".join(
             [" ".join(c.value for c in comps).strip() for comps in self.set]
         ).strip()
@@ -865,8 +860,8 @@ def parse_comparator(comp, loose):
     return comp
 
 
-def is_x(id):
-    return id is None or id == "" or id.lower() == "x" or id == "*"
+def is_x(id_):
+    return id_ is None or id_ == "" or id_.lower() == "x" or id_ == "*"
 
 
 #  ~, ~> --> * (any, kinda silly)

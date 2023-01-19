@@ -8,12 +8,7 @@ from typing import Dict, Optional, Tuple
 
 from jupyterlab_server.translation_utils import translator
 
-from .manager import (
-    ActionResult,
-    ExtensionManager,
-    ExtensionManagerMetadata,
-    ExtensionPackage,
-)
+from .manager import ActionResult, ExtensionManager, ExtensionManagerMetadata, ExtensionPackage
 
 
 class ReadOnlyExtensionManager(ExtensionManager):

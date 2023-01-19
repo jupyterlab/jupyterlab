@@ -1,4 +1,3 @@
-# coding: utf-8
 """A tornado based Jupyter lab server."""
 
 # Copyright (c) Jupyter Development Team.
@@ -54,10 +53,7 @@ from .handlers.announcements import (
 )
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
-from .handlers.extension_manager_handler import (
-    ExtensionHandler,
-    extensions_handler_path,
-)
+from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -103,7 +99,7 @@ app_version = get_app_version()
 if version != app_version:
     version = "%s (dev), %s (app)" % (__version__, app_version)
 
-buildFailureMsg = """Build failed.
+build_failure_msg = """Build failed.
 Troubleshooting: If the build failed due to an out-of-memory error, you
 may be able to fix it by disabling the `dev_build` and/or `minimize` options.
 
@@ -205,7 +201,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                     minimize=self.minimize,
                 )
             except Exception as e:
-                print(buildFailureMsg)
+                self.log.error(build_failure_msg)
                 raise e
 
 
@@ -238,7 +234,7 @@ class LabCleanAppOptions(AppOptions):
     settings = Bool(False)
     staging = Bool(True)
     static = Bool(False)
-    all = Bool(False)
+    all = Bool(False)  # noqa
 
 
 class LabCleanApp(JupyterApp):
@@ -266,7 +262,7 @@ class LabCleanApp(JupyterApp):
 
     static = Bool(False, config=True, help="Also delete <app-dir>/static")
 
-    all = Bool(
+    all = Bool(  # noqa
         False,
         config=True,
         help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
@@ -301,9 +297,9 @@ class LabPathApp(JupyterApp):
     """
 
     def start(self):
-        print("Application directory:   %s" % get_app_dir())
-        print("User Settings directory: %s" % get_user_settings_dir())
-        print("Workspaces directory: %s" % get_workspaces_dir())
+        print("Application directory:   %s" % get_app_dir())  # noqa
+        print("User Settings directory: %s" % get_user_settings_dir())  # noqa
+        print("Workspaces directory: %s" % get_workspaces_dir())  # noqa
 
 
 class LabWorkspaceExportApp(WorkspaceExportApp):
@@ -355,7 +351,7 @@ class LabWorkspaceApp(JupyterApp):
     def start(self):
         try:
             super().start()
-            print("One of `export`, `import` or `list` must be specified.")
+            self.log.error("One of `export`, `import` or `list` must be specified.")
             self.exit(1)
         except NoStart:
             pass
@@ -823,7 +819,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             # $JUPYTERHUB_API_TOKEN identifies the server, not the client
             # but at least make sure we don't use the token
             # if the serverapp set one
-            page_config["token"] = ""
+            page_config["token"] = ""  # noqa
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config

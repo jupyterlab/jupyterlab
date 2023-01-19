@@ -335,7 +335,7 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
 
 
 async def test_PyPiExtensionManager_custom_server_url():
-    BASE_URL = "https://mylocal.pypi.server/pypi"
+    BASE_URL = "https://mylocal.pypi.server/pypi"  # noqa
 
     parent = Configurable(config=Config({"PyPIExtensionManager": {"base_url": BASE_URL}}))
 

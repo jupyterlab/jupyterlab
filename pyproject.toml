@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.2.0"]
+requires = ["hatchling>=1.5.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -111,7 +111,7 @@ test = [
     "requests_cache",
     "virtualenv",
 ]
-dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version"]
+dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version", "ruff==0.0.177", "black[jupyter]==22.12.0"]
 
 [tool.check-wheel-contents]
 ignore = ["W002", "W004"]
@@ -227,3 +227,40 @@ before-build-python = [
     "node buildutils/lib/local-repository fix-links --path jupyterlab/staging",
 ]
 after-publish-assets = "npm run after:publish:assets"
+
+[tool.black]
+line-length = 100
+target-version = ["py37"]
+skip-string-normalization = true
+
+[tool.ruff]
+target-version = "py37"
+line-length = 100
+select = [
+  "A", "B", "E", "F", "FBT", "I", "N", "Q", "RUF", "S", "T",
+  "UP", "W", "YTT",
+]
+ignore = [
+# Q000 Single quotes found but double quotes preferred
+"Q000",
+# FBT001 Boolean positional arg in function definition
+"FBT001", "FBT002", "FBT003",
+# E501 Line too long (158 > 100 characters)
+"E501",
+]
+
+[tool.ruff.per-file-ignores]
+# F821 Undefined name `c`
+"binder/jupyter_notebook_config.py" = ["F821"]
+# F821 Undefined name `c`
+# S104 Possible binding to all interfaces
+# S105 Possible hardcoded password: `""`
+"galata/jupyter_server_test_config.py" = ["F821", "S104", "S105"]
+# S101 Use of `assert` detected
+# N802 Function name `foo` should be lowercase
+"jupyterlab/tests/*" = ["S101", "N802", "E501"]
+# T201 `print` found
+"scripts/milestone_check.py" = ["T201"]
+# N806 Variable `tM` in function should be lowercase
+# N816 Variable `comparatorTrimReplace` in global scope should not be mixedCase
+"jupyterlab/semver.py" = ["N806", "N816"]
