@@ -82,7 +82,8 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IEditorLanguageRegistry,
     IEditorThemeRegistry,
     IDefaultFileBrowser,
-    ISettingRegistry
+    ISettingRegistry,
+    ISessionContextDialogs
   ],
   optional: [
     IConsoleTracker,
@@ -90,7 +91,6 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILauncher,
     IMainMenu,
     ILayoutRestorer,
-    ISessionContextDialogs,
     ITableOfContentsRegistry,
     IToolbarWidgetRegistry,
     ITranslator,
@@ -259,12 +259,12 @@ function activate(
   themes: IEditorThemeRegistry,
   fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
+  sessionDialogs: ISessionContextDialogs,
   consoleTracker: IConsoleTracker | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null,
   translator: ITranslator | null,
@@ -482,8 +482,7 @@ function activate(
     languages,
     themes,
     consoleTracker,
-    sessionDialogs,
-    menu
+    sessionDialogs
   );
 
   const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(

@@ -1366,9 +1366,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
 
     const result = await dialog.launch();
 
-    if (result.isChecked) {
-      this._settings?.set('selectPreferredKernel', result.isChecked);
-    }
+    this._settings?.set('selectPreferredKernel', result.isChecked);
 
     if (sessionContext.isDisposed || !result.button.accept) {
       return;

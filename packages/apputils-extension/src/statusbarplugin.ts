@@ -13,8 +13,7 @@ import {
   ISessionContext,
   ISessionContextDialogs,
   KernelStatus,
-  RunningSessions,
-  sessionContextDialogs
+  RunningSessions
 } from '@jupyterlab/apputils';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
@@ -26,14 +25,14 @@ import { Title, Widget } from '@lumino/widgets';
 export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
   id: '@jupyterlab/apputils-extension:kernel-status',
   autoStart: true,
-  requires: [IStatusBar, ITranslator],
+  requires: [IStatusBar, ISessionContextDialogs, ITranslator],
   provides: IKernelStatusModel,
-  optional: [ISessionContextDialogs, ILabShell],
+  optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
+    sessionDialogs: ISessionContextDialogs,
     translator: ITranslator,
-    sessionDialogs: ISessionContextDialogs | null,
     labShell: ILabShell | null
   ): IKernelStatusModel => {
     // When the status item is clicked, launch the kernel
@@ -42,10 +41,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       if (!item.model.sessionContext) {
         return;
       }
-      await (sessionDialogs ?? sessionContextDialogs).selectKernel(
-        item.model.sessionContext,
-        translator
-      );
+      await sessionDialogs.selectKernel(item.model.sessionContext, translator);
     };
 
     // Create the status item.

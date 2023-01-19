@@ -162,14 +162,14 @@ const contextsPlugin: JupyterFrontEndPlugin<void> = {
 const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   id: '@jupyterlab/docmanager-extension:manager',
   provides: IDocumentManager,
-  requires: [IDocumentWidgetOpener],
-  optional: [ITranslator, ILabStatus, ISessionContextDialogs, JupyterLab.IInfo],
+  requires: [IDocumentWidgetOpener, ISessionContextDialogs],
+  optional: [ITranslator, ILabStatus, JupyterLab.IInfo],
   activate: (
     app: JupyterFrontEnd,
     widgetOpener: IDocumentWidgetOpener,
+    sessionDialogs: ISessionContextDialogs,
     translator: ITranslator | null,
     status: ILabStatus | null,
-    sessionDialogs: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
@@ -181,7 +181,7 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
       opener: widgetOpener,
       when,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
-      sessionDialogs: sessionDialogs || undefined,
+      sessionDialogs: sessionDialogs,
       translator: translator ?? nullTranslator,
       isConnectedCallback: () => {
         if (info) {

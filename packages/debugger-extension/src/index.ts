@@ -15,9 +15,9 @@ import {
   Clipboard,
   ICommandPalette,
   InputDialog,
+  ISessionContextDialogs,
   IThemeManager,
   MainAreaWidget,
-  sessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { CodeCell } from '@jupyterlab/cells';
@@ -180,13 +180,14 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
   id: '@jupyterlab/debugger-extension:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker, ITranslator],
+  requires: [IDebugger, INotebookTracker, ISessionContextDialogs, ITranslator],
   optional: [ILabShell, ICommandPalette],
   provides: IDebuggerHandler,
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
+    sessionDialogs: ISessionContextDialogs,
     translator: ITranslator,
     labShell: ILabShell | null,
     palette: ICommandPalette | null
@@ -212,7 +213,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionContextDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext);
         if (!restarted) {
           return;
         }
