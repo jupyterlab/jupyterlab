@@ -280,7 +280,7 @@ Now do the actual final release:
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Update the API [docs](#updating-api-docs)
 - [ ] Merge the PRs on the other repos and set the default branch of the
-  xckd repo
+      xckd repo
 - [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for

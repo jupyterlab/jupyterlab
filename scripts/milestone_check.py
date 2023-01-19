@@ -158,7 +158,7 @@ for prnumber in large_prs:
     while True:
         r = requests.post(url=url, json=prjson, headers=headers)
         pr = r.json()["data"]["repository"]["pullRequest"]
-        assert pr["number"] == prnumber
+        assert pr["number"] == prnumber  # noqa
         total_commits = pr["commits"]["totalCount"]
         pr_commits.update(i["commit"]["oid"] for i in pr["commits"]["nodes"])
         has_next_page = results["pageInfo"]["hasNextPage"]
@@ -177,7 +177,7 @@ for prnumber in large_prs:
 
 
 # Check we got all PRs
-assert len(prs) == total_prs
+assert len(prs) == total_prs  # noqa
 
 # Reverse dictionary
 commits_to_prs = {}
