@@ -47,7 +47,6 @@ export namespace Time {
    */
   export function format(value: string | Date): string {
     const lang = document.documentElement.lang || 'en';
-    console.log('lang:', lang);
     const formatter = new Intl.DateTimeFormat(lang, {
       dateStyle: 'short',
       timeStyle: 'short'
