@@ -449,8 +449,7 @@
   },
   {
     "id": "debugger:pause-on-exceptions",
-    "label": "Enable / Disable pausing on exceptions",
-    "caption": "Enable / Disable pausing on exceptions",
+    "label": "Breakpoints on exception",
     "shortcuts": []
   },
   {
