@@ -8,7 +8,7 @@ import { showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IFormComponentRegistry, ReactWidget } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry, ReactWidget } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
@@ -168,7 +168,7 @@ export namespace SettingsEditor {
     /**
      * Form component registry
      */
-    editorRegistry: IFormComponentRegistry;
+    editorRegistry: IFormRendererRegistry;
 
     /**
      * The state database key for the editor's state management.

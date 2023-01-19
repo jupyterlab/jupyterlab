@@ -13,6 +13,8 @@ import {
 } from '@jupyterlab/translation';
 import {
   JSONExt,
+  JSONObject,
+  JSONValue,
   PartialJSONObject,
   PartialJSONValue,
   ReadonlyPartialJSONObject,
@@ -365,7 +367,7 @@ export class MetadataFormWidget
       this._metadataSchema
     );
 
-    const formData = {} as PartialJSONObject;
+    const formData = {} as JSONObject;
 
     for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
       // Do not display the field if it's Notebook metadata and the notebook model is null.
@@ -416,7 +418,7 @@ export class MetadataFormWidget
       }
 
       // Fill the formData with the current metadata value.
-      if (hasValue) formData[metadataKey] = workingObject as PartialJSONValue;
+      if (hasValue) formData[metadataKey] = workingObject as JSONValue;
     }
 
     this.buildWidget({
@@ -432,7 +434,7 @@ export class MetadataFormWidget
   }
 
   protected translator: ITranslator;
-  private _form: FormWidget | undefined = undefined;
+  private _form: FormWidget | undefined;
   private _metadataSchema: MetadataForm.IMetadataSchema;
   private _metaInformation: MetadataForm.IMetaInformation;
   private _uiSchema: MetadataForm.IUiSchema;

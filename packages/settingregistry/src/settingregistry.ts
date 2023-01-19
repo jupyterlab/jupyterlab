@@ -743,6 +743,9 @@ export class Settings implements ISettingRegistry.ISettings {
     return true;
   }
 
+  /**
+   * Whether the settings have been modified by the user or not.
+   */
   get isModified(): boolean {
     return !this.isDefault(this.user);
   }
@@ -1374,9 +1377,10 @@ namespace Private {
    */
   export function reifyDefault(
     schema: ISettingRegistry.IProperty,
-    root?: string
+    root?: string,
+    definitions?: PartialJSONObject
   ): PartialJSONValue | undefined {
-    const definitions = schema.definitions as PartialJSONObject;
+    definitions = definitions ?? (schema.definitions as PartialJSONObject);
     // If the property is at the root level, traverse its schema.
     schema = (root ? schema.properties?.[root] : schema) || {};
 
@@ -1387,7 +1391,11 @@ namespace Private {
       // Iterate through and populate each child property.
       const props = schema.properties || {};
       for (const property in props) {
-        result[property] = reifyDefault(props[property]);
+        result[property] = reifyDefault(
+          props[property],
+          undefined,
+          definitions
+        );
       }
 
       return result;
@@ -1408,7 +1416,9 @@ namespace Private {
       // Iterate through the items in the array and fill in defaults
       for (const item in result) {
         // Use the values that are hard-coded in the default array over the defaults for each field.
-        const reified = (reifyDefault(props) as PartialJSONObject) || {};
+        const reified =
+          (reifyDefault(props, undefined, definitions) as PartialJSONObject) ??
+          {};
         for (const prop in reified) {
           if ((result[item] as PartialJSONObject)?.[prop]) {
             reified[prop] = (result[item] as PartialJSONObject)[prop];

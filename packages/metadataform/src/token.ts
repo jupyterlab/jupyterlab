@@ -12,7 +12,7 @@ import { ITranslator } from '@jupyterlab/translation';
 import {
   PartialJSONObject,
   PartialJSONValue,
-  ReadonlyPartialJSONObject,
+  ReadonlyJSONObject,
   Token
 } from '@lumino/coreutils';
 import { MetadataFormWidget } from './metadataform';
@@ -137,7 +137,7 @@ export namespace MetadataForm {
     /**
      * Current data of the form.
      */
-    formData: ReadonlyPartialJSONObject | null;
+    formData: ReadonlyJSONObject;
 
     /**
      * Translator object.
@@ -205,7 +205,7 @@ export namespace MetadataForm {
      * This function build an object with all the root object to update
      * in metadata before performing update.
      */
-    updateMetadata(formData: ReadonlyPartialJSONObject, reload?: boolean): void;
+    updateMetadata(formData: ReadonlyJSONObject, reload?: boolean): void;
   }
 }
 
